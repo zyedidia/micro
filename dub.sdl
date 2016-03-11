@@ -1,0 +1,5 @@
+name "micro"
+description "A minimal D application."
+copyright "Copyright © 2016, zachary"
+authors "zachary"
+dependency "termbox" version="0.0.3"
