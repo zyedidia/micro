@@ -1,9 +1,9 @@
 import std.math;
 import std.stdio;
-import std.utf;
+import std.utf: count;
 import std.string;
 import std.conv: to;
-import std.algorithm;
+import std.algorithm: min, max;
 
 class Buffer {
     private string value = null;
@@ -13,7 +13,7 @@ class Buffer {
     string name = "";
     string savedText;
 
-    ulong length;
+    ulong count;
 
     int splitLength = 1000;
     int joinLength = 500;
@@ -23,7 +23,7 @@ class Buffer {
 
     this(string str, string name = "") {
         this.value = str;
-        this.length = str.length;
+        this.count = str.count;
         this.name = name;
         this.savedText = str;
 
@@ -59,13 +59,13 @@ class Buffer {
 
     void adjust() {
         if (value !is null) {
-            if (length > splitLength) {
-                auto divide = cast(int) floor(length / 2.0);
+            if (count > splitLength) {
+                auto divide = cast(int) floor(count / 2.0);
                 left = new Buffer(value[0 .. divide]);
                 right = new Buffer(value[divide .. $]);
             }
         } else {
-            if (length < joinLength) {
+            if (count < joinLength) {
                 value = left.toString() ~ right.toString();
             }
         }
@@ -82,20 +82,20 @@ class Buffer {
 
     void remove(ulong start, ulong end) {
         if (value !is null) {
-            value = value[0 .. start] ~ value[end .. $];
-            length = value.length;
+            value = to!string(value.to!dstring[0 .. start] ~ value.to!dstring[end .. $]);
+            count = value.count;
         } else {
-            auto leftStart = min(start, left.length);
-            auto leftEnd = min(end, left.length);
-            auto rightStart = max(0, min(start - left.length, right.length));
-            auto rightEnd = max(0, min(end - left.length, right.length));
-            if (leftStart < left.length) {
+            auto leftStart = min(start, left.count);
+            auto leftEnd = min(end, left.count);
+            auto rightStart = max(0, min(start - left.count, right.count));
+            auto rightEnd = max(0, min(end - left.count, right.count));
+            if (leftStart < left.count) {
                 left.remove(leftStart, leftEnd);
             }
             if (rightEnd > 0) {
                 right.remove(rightStart, rightEnd);
             }
-            length = left.length + right.length;
+            count = left.count + right.count;
         }
 
         adjust();
@@ -103,14 +103,14 @@ class Buffer {
 
     void insert(ulong position, string value) {
         if (this.value !is null) {
-            this.value = this.value[0 .. position] ~ value ~ this.value[position .. $];
-            length = this.value.length;
+            this.value = to!string(this.value.to!dstring[0 .. position] ~ value.to!dstring ~ this.value.to!dstring[position .. $]);
+            count = this.value.count;
         } else {
-            if (position < left.length) {
+            if (position < left.count) {
                 left.insert(position, value);
-                length = left.length + right.length;
+                count = left.count + right.count;
             } else {
-                right.insert(position - left.length, value);
+                right.insert(position - left.count, value);
             }
         }
 
@@ -126,8 +126,8 @@ class Buffer {
 
     void rebalance() {
         if (value is null) {
-            if (left.length / right.length > rebalanceRatio ||
-                right.length / left.length > rebalanceRatio) {
+            if (left.count / right.count > rebalanceRatio ||
+                right.count / left.count > rebalanceRatio) {
                 rebuild();
             } else {
                 left.rebalance();
@@ -136,14 +136,14 @@ class Buffer {
         }
     }
 
-    string substring(ulong start, ulong end = length) {
+    string substring(ulong start, ulong end = count) {
         if (value !is null) {
             return value[start .. end];
         } else {
-            auto leftStart = min(start, left.length);
-            auto leftEnd = min(end, left.length);
-            auto rightStart = max(0, min(start - left.length, right.length));
-            auto rightEnd = max(0, min(end - left.length, right.length));
+            auto leftStart = min(start, left.count);
+            auto leftEnd = min(end, left.count);
+            auto rightStart = max(0, min(start - left.count, right.count));
+            auto rightEnd = max(0, min(end - left.count, right.count));
 
             if (leftStart != leftEnd) {
                 if (rightStart != rightEnd) {

@@ -38,7 +38,6 @@ void main(string[] args) {
             sl.display();
 
             flush();
-
             pollEvent(&e);
             v.update(e);
         }

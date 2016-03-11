@@ -136,12 +136,12 @@ class View {
             foreach (_; 0 .. maxLength - lineNum.length) {
                 setCell(cast(int) x++, cast(int) y, ' ', Color.default_, Color.black);
             }
-            foreach (ch; lineNum) {
+            foreach (dchar ch; lineNum) {
                 setCell(cast(int) x++, cast(int) y, ch, Color.default_, Color.black);
             }
             setCell(cast(int) x++, cast(int) y, ' ', Color.default_ | Attribute.bold, Color.black);
 
-            foreach (ch; line) {
+            foreach (dchar ch; line) {
                 setCell(cast(int) x++, cast(int) y, ch, Color.default_, Color.default_);
             }
             y++;
