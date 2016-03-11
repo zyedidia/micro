@@ -95,7 +95,7 @@ class View {
                 }
             } else {
                 if (e.ch != 0) {
-                    buf.insert(cursor.loc, to!string(to!char(e.ch)));
+                    buf.insert(cursor.loc, to!string(to!dchar(e.ch)));
                     cursorRight();
                 } else if (e.key == Key.space) {
                     buf.insert(cursor.loc, " ");
