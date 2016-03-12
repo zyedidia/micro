@@ -182,12 +182,12 @@ class View {
             // Write the line number
             string lineNum = to!string(i + topline + 1);
             foreach (_; 0 .. maxLength - lineNum.length) {
-                setCell(cast(int) x++, cast(int) y, ' ', Color.basic, Color.black);
+                setCell(cast(int) x++, cast(int) y, ' ', Color.basic, Color.basic);
             }
             foreach (dchar ch; lineNum) {
-                setCell(cast(int) x++, cast(int) y, ch, Color.basic, Color.black);
+                setCell(cast(int) x++, cast(int) y, ch, Color.basic, Color.basic);
             }
-            setCell(cast(int) x++, cast(int) y, ' ', Color.basic | Attribute.bold, Color.black);
+            setCell(cast(int) x++, cast(int) y, ' ', Color.basic, Color.basic);
 
             // Write the line
             foreach (dchar ch; line) {

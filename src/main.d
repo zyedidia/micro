@@ -12,10 +12,7 @@ void main(string[] args) {
 
     if (args.length > 1) {
         filename = args[1];
-        if (!exists(filename)) {
-            File file = File(filename, "w");
-            file.close();
-        } else {
+        if (exists(filename)) {
             if (isDir(filename)) {
                 writeln(filename, " is a directory");
                 return;
