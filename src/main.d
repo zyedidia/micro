@@ -25,6 +25,12 @@ void main(string[] args) {
                 fileTxt = "";
             }
         }
+    } else {
+        if (stdin.size != 0) {
+            foreach (line; stdin.byLine()) {
+                fileTxt ~= line ~ "\n";
+            }
+        }
     }
 
     Buffer buf = new Buffer(fileTxt, filename);
@@ -41,7 +47,6 @@ void main(string[] args) {
             clear();
 
             v.display();
-            cursor.display();
 
             flush();
             pollEvent(&e);

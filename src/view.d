@@ -2,6 +2,7 @@ import termbox;
 import buffer;
 import clipboard;
 import cursor;
+import statusline;
 
 import std.conv: to;
 import std.utf: count;
@@ -14,6 +15,7 @@ class View {
 
     Buffer buf;
     Cursor cursor;
+    StatusLine sl;
 
     this(Buffer buf, Cursor cursor, uint topline = 0, uint width = termbox.width(), uint height = termbox.height() - 2) {
         this.topline = topline;
@@ -22,6 +24,7 @@ class View {
 
         this.buf = buf;
         this.cursor = cursor;
+        this.sl = new StatusLine(this);
     }
 
     uint toCharNumber(int x, int y) {
@@ -111,7 +114,13 @@ class View {
                 cursorLeft();
             } else if (e.key == Key.mouseLeft) {
                 cursor.x = e.x;
-                cursor.y = e.y;
+                cursor.y = e.y + topline;
+                if (cursor.y - topline > height-1) {
+                    cursor.y = height + topline-1;
+                }
+                if (cursor.y > buf.lines.length) {
+                    cursor.y = cast(int) buf.lines.length-1;
+                }
                 cursor.lastX = cursor.x;
                 if (cursor.x > buf.lines[cursor.y].length) {
                     cursor.x = cast(int) buf.lines[cursor.y].length;
@@ -155,7 +164,7 @@ class View {
         }
     }
 
-    void display() {
+    void display(bool drawCursor = true) {
         uint x, y;
 
         string[] lines;
@@ -172,5 +181,15 @@ class View {
             y++;
             x = 0;
         }
+
+        if (drawCursor) {
+            if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
+                hideCursor();
+            } else {
+                setCursor(cursor.x, cursor.y - topline);
+            }
+        }
+
+        sl.display();
     }
 }

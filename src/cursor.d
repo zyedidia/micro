@@ -14,8 +14,4 @@ class Cursor {
     void hide() {
         x = y = -1;
     }
-
-    void display() {
-        setCursor(x, y);
-    }
 }

@@ -14,6 +14,7 @@ class Buffer {
 
     this(string txt, string path) {
         text = new Rope(txt);
+        savedText = txt;
         this.path = path;
         update();
     }
