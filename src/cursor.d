@@ -13,7 +13,7 @@ class Cursor {
     @property int loc() {
         int loc;
         foreach (i; 0 .. y) {
-            loc += buf.lines[i].length + 1;
+            loc += buf.lines[i].count + 1;
         }
         loc += x;
         return loc;
@@ -22,12 +22,12 @@ class Cursor {
     @property void loc(int value) {
         int loc;
         foreach (y, l; buf.lines) {
-            if (loc + l.length+1 > value) {
+            if (loc + l.count+1 > value) {
                 this.y = cast(int) y;
                 x = value - loc;
                 return;
             } else {
-                loc += l.length+1;
+                loc += l.count+1;
             }
         }
     }

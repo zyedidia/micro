@@ -3,6 +3,8 @@ import cursor;
 import buffer;
 import clipboard;
 
+import std.array: join;
+import std.regex;
 import std.conv: to;
 import std.stdio;
 
@@ -103,10 +105,12 @@ class View {
                 } else if (e.key == Key.enter) {
                     buf.insert(cursor.loc, "\n");
                     cursor.loc = cursor.loc + 1;
+                    cursor.lastX = cursor.x;
                 } else if (e.key == Key.backspace2) {
                     if (cursor.loc != 0) {
                         cursor.loc = cursor.loc - 1;
                         buf.remove(cursor.loc, cursor.loc + 1);
+                        cursor.lastX = cursor.x;
                     }
                 }
             }
@@ -123,6 +127,7 @@ class View {
 
     void display() {
         int x, y;
+
         string[] lines;
         if (topline + height > buf.lines.length) {
             lines = buf.lines[topline .. $];
@@ -131,6 +136,16 @@ class View {
         }
         ulong maxLength = to!string(buf.lines.length).length;
         xOffset = cast(int) maxLength + 1;
+
+        int charNum;
+        string bufSrc = lines.join("\n");
+        auto r = regex("\".*?\"");
+        auto matches = bufSrc.matchAll(r);
+        Color[ulong] colors;
+        foreach (m; matches) {
+            colors[m.pre.length] = Color.blue;
+            colors[m.pre.length + m.hit.length] = Color.default_;
+        }
         foreach (i, line; lines) {
             string lineNum = to!string(i + topline + 1);
             foreach (_; 0 .. maxLength - lineNum.length) {
@@ -141,14 +156,20 @@ class View {
             }
             setCell(cast(int) x++, cast(int) y, ' ', Color.default_ | Attribute.bold, Color.black);
 
+            Color c;
             foreach (dchar ch; line) {
-                setCell(cast(int) x++, cast(int) y, ch, Color.default_, Color.default_);
+                if (charNum in colors) {
+                    c = colors[charNum];
+                }
+                setCell(cast(int) x++, cast(int) y, ch, c, Color.default_);
+                charNum += to!string(ch).length;
             }
+            charNum++;
             y++;
             x = 0;
         }
 
-        if (cursor.y - topline < 0 || cursor.y - topline > height) {
+        if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
             hideCursor();
         } else {
             setCursor(cursor.x + xOffset, cursor.y - topline);
