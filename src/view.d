@@ -101,7 +101,7 @@ class View {
             if (topline > 0)
                 topline--;
         } else if (e.key == Key.mouseWheelDown) {
-            if (topline < buf.lines.length - height)
+            if (buf.lines.length > height && topline < buf.lines.length - height)
                 topline++;
         } else {
             if (e.key == Key.arrowUp) {
