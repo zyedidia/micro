@@ -12,12 +12,24 @@ void main(string[] args) {
 
     if (args.length > 1) {
         filename = args[1];
-        fileTxt = readText(filename);
+        if (!exists(filename)) {
+            File file = File(filename, "w");
+            file.close();
+        } else {
+            if (isDir(filename)) {
+                writeln(filename, " is a directory");
+                return;
+            }
+            fileTxt = readText(filename);
+            if (fileTxt is null) {
+                fileTxt = "";
+            }
+        }
     }
 
+    Buffer buf = new Buffer(fileTxt, filename);
     init();
 
-    Buffer buf = new Buffer(fileTxt, filename);
     Cursor cursor = new Cursor();
     View v = new View(buf, cursor);
 

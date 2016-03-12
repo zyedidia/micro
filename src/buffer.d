@@ -50,18 +50,23 @@ class Buffer {
 
     void remove(ulong start, ulong end) {
         text.remove(start, end);
+        update();
     }
     void insert(ulong position, string value) {
         text.insert(position, value);
+        update();
     }
     string substring(ulong start, ulong end = -1) {
         if (end == -1) {
+            update();
             return text.substring(start, text.length);
         } else {
+            update();
             return text.substring(start, end);
         }
     }
     char charAt(ulong pos) {
+        update();
         return text.charAt(pos);
     }
 }

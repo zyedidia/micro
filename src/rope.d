@@ -51,6 +51,9 @@ class Rope {
     void remove(ulong start, ulong end) {
         if (value !is null) {
             value = to!string(value.to!dstring[0 .. start] ~ value.to!dstring[end .. $]);
+            if (value is null) {
+                value = "";
+            }
             length = value.count;
         } else {
             auto leftStart = min(start, left.length);

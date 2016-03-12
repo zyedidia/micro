@@ -152,7 +152,6 @@ class View {
             if (cursor.y > topline + height-1) {
                 topline = cursor.y - height-1;
             }
-            buf.update();
         }
     }
 
