@@ -9,6 +9,7 @@ import std.utf: count;
 
 class View {
     uint topline;
+    uint xOffset;
 
     uint width;
     uint height;
@@ -113,7 +114,7 @@ class View {
             } else if (e.key == Key.arrowLeft) {
                 cursorLeft();
             } else if (e.key == Key.mouseLeft) {
-                cursor.x = e.x;
+                cursor.x = e.x - xOffset;
                 cursor.y = e.y + topline;
                 if (cursor.y - topline > height-1) {
                     cursor.y = height + topline-1;
@@ -164,7 +165,7 @@ class View {
         }
     }
 
-    void display(bool drawCursor = true) {
+    void display() {
         uint x, y;
 
         string[] lines;
@@ -174,7 +175,21 @@ class View {
             lines = buf.lines[topline .. topline + height];
         }
 
+        ulong maxLength = to!string(buf.lines.length).length;
+        xOffset = cast(int) maxLength + 1;
+
         foreach (i, line; lines) {
+            // Write the line number
+            string lineNum = to!string(i + topline + 1);
+            foreach (_; 0 .. maxLength - lineNum.length) {
+                setCell(cast(int) x++, cast(int) y, ' ', Color.basic, Color.black);
+            }
+            foreach (dchar ch; lineNum) {
+                setCell(cast(int) x++, cast(int) y, ch, Color.basic, Color.black);
+            }
+            setCell(cast(int) x++, cast(int) y, ' ', Color.basic | Attribute.bold, Color.black);
+
+            // Write the line
             foreach (dchar ch; line) {
                 setCell(x++, y, ch, Color.basic, Color.basic);
             }
@@ -182,12 +197,10 @@ class View {
             x = 0;
         }
 
-        if (drawCursor) {
-            if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
-                hideCursor();
-            } else {
-                setCursor(cursor.x, cursor.y - topline);
-            }
+        if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
+            hideCursor();
+        } else {
+            setCursor(cursor.x + xOffset, cursor.y - topline);
         }
 
         sl.display();
