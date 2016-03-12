@@ -2,6 +2,7 @@ import termbox;
 import buffer;
 import cursor;
 import view;
+import clipboard;
 
 import std.stdio;
 import std.file;
@@ -29,6 +30,7 @@ void main(string[] args) {
             }
         }
     }
+    Clipboard.init();
 
     Buffer buf = new Buffer(fileTxt, filename);
     init();
