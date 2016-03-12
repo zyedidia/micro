@@ -1,34 +1,21 @@
-import buffer;
+import termbox;
 
 class Cursor {
-    Buffer buf;
     int x, y;
-
     int lastX;
 
-    this(Buffer buf) {
-        this.buf = buf;
+    this() {}
+
+    this(int x, int y) {
+        this.x = x;
+        this.y = y;
     }
 
-    @property int loc() {
-        int loc;
-        foreach (i; 0 .. y) {
-            loc += buf.lines[i].count + 1;
-        }
-        loc += x;
-        return loc;
+    void hide() {
+        x = y = -1;
     }
 
-    @property void loc(int value) {
-        int loc;
-        foreach (y, l; buf.lines) {
-            if (loc + l.count+1 > value) {
-                this.y = cast(int) y;
-                x = value - loc;
-                return;
-            } else {
-                loc += l.count+1;
-            }
-        }
+    void display() {
+        setCursor(x, y);
     }
 }

@@ -1,44 +1,39 @@
 import termbox;
-import view;
 import buffer;
 import cursor;
-import statusline;
+import view;
 
-import std.regex;
-import core.exception;
-import std.conv;
-import std.file;
-import std.range;
-import std.string;
 import std.stdio;
+import std.file;
 
 void main(string[] args) {
-    if (args.length < 2) {
-        return;
-    }
-    string filename = args[1];
+    string filename = "";
+    string fileTxt = "";
 
-    string fileSrc = readText(filename);
+    if (args.length > 1) {
+        filename = args[1];
+        fileTxt = readText(filename);
+    }
 
     init();
 
-    Buffer buffer = new Buffer(fileSrc, filename);
-    View v = new View(buffer);
-    StatusLine sl = new StatusLine();
-    sl.view = v;
+    Buffer buf = new Buffer(fileTxt, filename);
+    Cursor cursor = new Cursor();
+    View v = new View(buf, cursor);
 
     setInputMode(InputMode.mouse);
 
     Event e;
     try {
-        while (e.key != Key.esc) {
+        while (e.key != Key.ctrlQ) {
             clear();
 
             v.display();
-            sl.display();
+            cursor.display();
 
             flush();
             pollEvent(&e);
+
             v.update(e);
         }
     } catch (object.Error e) {
