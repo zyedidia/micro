@@ -1,6 +1,7 @@
 import rope;
 
-import std.string, std.stdio;
+import std.string: split;
+import std.stdio;
 
 class Buffer {
     private Rope text;

@@ -5,7 +5,7 @@ import view;
 import clipboard;
 
 import std.stdio;
-import std.file;
+import std.file: readText, exists, isDir;
 
 void main(string[] args) {
     string filename = "";

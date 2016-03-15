@@ -3,9 +3,13 @@ import buffer;
 import clipboard;
 import cursor;
 import statusline;
+import util;
 
+import std.regex: regex, replaceAll;
 import std.conv: to;
 import std.utf: count;
+
+enum tabSize = 4;
 
 class View {
     uint topline;
@@ -84,14 +88,24 @@ class View {
 
     void cursorRight() {
         if (cursor.x < buf.lines[cursor.y].length) {
-            cursor.x++;
+            if (buf.lines[cursor.y][cursor.x] == '\t') {
+                cursor.x++;
+                cursor.offset += tabSize-1;
+            } else {
+                cursor.x++;
+            }
             cursor.lastX = cursor.x;
         }
     }
 
     void cursorLeft() {
         if (cursor.x > 0) {
-            cursor.x--;
+            if (buf.lines[cursor.y][cursor.x-1] == '\t') {
+                cursor.x--;
+                cursor.offset -= tabSize-1;
+            } else {
+                cursor.x--;
+            }
             cursor.lastX = cursor.x;
         }
     }
@@ -146,8 +160,14 @@ class View {
                     cursorDown();
                     cursor.x = 0;
                     cursor.lastX = cursor.x;
+                } else if (e.key == Key.tab) {
+                    buf.insert(cloc, "\t");
+                    cursorRight();
                 } else if (e.key == Key.backspace2) {
                     if (cloc > 0) {
+                        if (buf.lines[cursor.y][cursor.x-1] == '\t') {
+                            cursor.offset -= tabSize-1;
+                        }
                         buf.remove(cloc-1, cloc);
                         setCursorLoc(cloc - 1);
                         cursor.lastX = cursor.x;
@@ -190,7 +210,7 @@ class View {
             setCell(cast(int) x++, cast(int) y, ' ', Color.basic, Color.basic);
 
             // Write the line
-            foreach (dchar ch; line) {
+            foreach (dchar ch; line.replaceAll(regex("\t"), emptyString(tabSize))) {
                 setCell(x++, y, ch, Color.basic, Color.basic);
             }
             y++;
@@ -200,7 +220,7 @@ class View {
         if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
             hideCursor();
         } else {
-            setCursor(cursor.x + xOffset, cursor.y - topline);
+            setCursor(cursor.x + xOffset + cursor.offset, cursor.y - topline);
         }
 
         sl.display();
