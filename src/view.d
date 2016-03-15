@@ -90,7 +90,6 @@ class View {
         if (cursor.x < buf.lines[cursor.y].length) {
             if (buf.lines[cursor.y][cursor.x] == '\t') {
                 cursor.x++;
-                cursor.offset += tabSize-1;
             } else {
                 cursor.x++;
             }
@@ -102,7 +101,6 @@ class View {
         if (cursor.x > 0) {
             if (buf.lines[cursor.y][cursor.x-1] == '\t') {
                 cursor.x--;
-                cursor.offset -= tabSize-1;
             } else {
                 cursor.x--;
             }
@@ -128,8 +126,10 @@ class View {
             } else if (e.key == Key.arrowLeft) {
                 cursorLeft();
             } else if (e.key == Key.mouseLeft) {
-                cursor.x = e.x - xOffset;
+                auto eventX = e.x;
                 cursor.y = e.y + topline;
+                eventX -= buf.lines[cursor.y][0 .. cursor.x].numOccurences('\t') * (tabSize-1);
+                cursor.x = eventX - xOffset;
                 if (cursor.y - topline > height-1) {
                     cursor.y = height + topline-1;
                 }
@@ -165,9 +165,6 @@ class View {
                     cursorRight();
                 } else if (e.key == Key.backspace2) {
                     if (cloc > 0) {
-                        if (buf.lines[cursor.y][cursor.x-1] == '\t') {
-                            cursor.offset -= tabSize-1;
-                        }
                         buf.remove(cloc-1, cloc);
                         setCursorLoc(cloc - 1);
                         cursor.lastX = cursor.x;
@@ -182,6 +179,8 @@ class View {
             if (cursor.y > topline + height-1) {
                 topline = cursor.y - height+1;
             }
+
+            cursor.offset = buf.lines[cursor.y][0 .. cursor.x].numOccurences('\t') * (tabSize-1);
         }
     }
 

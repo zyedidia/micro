@@ -5,3 +5,13 @@ string emptyString(int size) {
     }
     return str;
 }
+
+int numOccurences(string str, char c) {
+    int n;
+    foreach (letter; str) {
+        if (letter == c) {
+            n++;
+        }
+    }
+    return n;
+}
