@@ -67,11 +67,12 @@ class View {
     }
 
     int getCharPosition(int lineNum, int visualPosition) {
-        int numTabs = numOccurences(buf.lines[lineNum].replaceAll(regex("\t"), "\t" ~ emptyString(tabSize-1))[0 .. visualPosition], '\t');
-        foreach (i; 0 .. numTabs) {
-            visualPosition -= tabSize-1;
+        string visualLine = buf.lines[lineNum].replaceAll(regex("\t"), "\t" ~ emptyString(tabSize-1));
+        if (visualPosition > visualLine.length) {
+            visualPosition = cast(int) visualLine.length;
         }
-        return visualPosition;
+        int numTabs = numOccurences(visualLine[0 .. visualPosition], '\t');
+        return visualPosition - (tabSize-1) * numTabs;
     }
 
     void cursorUp() {
@@ -135,17 +136,14 @@ class View {
                 cursorLeft();
             } else if (e.key == Key.mouseLeft) {
                 cursor.y = e.y + topline;
-                cursor.x = getCharPosition(cursor.y, e.x) - xOffset;
                 if (cursor.y - topline > height-1) {
                     cursor.y = height + topline-1;
                 }
                 if (cursor.y > buf.lines.length) {
                     cursor.y = cast(int) buf.lines.length-1;
                 }
+                cursor.x = getCharPosition(cursor.y, e.x - xOffset);
                 cursor.lastX = cursor.x;
-                if (cursor.x > buf.lines[cursor.y].length) {
-                    cursor.x = cast(int) buf.lines[cursor.y].length;
-                }
             } else if (e.key == Key.ctrlS) {
                 if (buf.path != "") {
                     buf.save();

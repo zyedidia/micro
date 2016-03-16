@@ -20,8 +20,8 @@ class Clipboard {
 
     version(linux) {
         import std.exception: collectException;
-        string[] copyCmd;
-        string[] pasteCmd;
+        static string[] copyCmd;
+        static string[] pasteCmd;
 
         static bool init() {
             if (collectException(execute(["xsel", "-h"]))) {
