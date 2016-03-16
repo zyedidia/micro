@@ -66,6 +66,14 @@ class View {
         cursor.y = xy[1];
     }
 
+    int getCharPosition(int lineNum, int visualPosition) {
+        int numTabs = numOccurences(buf.lines[lineNum].replaceAll(regex("\t"), "\t" ~ emptyString(tabSize-1))[0 .. visualPosition], '\t');
+        foreach (i; 0 .. numTabs) {
+            visualPosition -= tabSize-1;
+        }
+        return visualPosition;
+    }
+
     void cursorUp() {
         if (cursor.y > 0) {
             cursor.y--;
@@ -126,10 +134,8 @@ class View {
             } else if (e.key == Key.arrowLeft) {
                 cursorLeft();
             } else if (e.key == Key.mouseLeft) {
-                auto eventX = e.x;
                 cursor.y = e.y + topline;
-                eventX -= buf.lines[cursor.y][0 .. cursor.x].numOccurences('\t') * (tabSize-1);
-                cursor.x = eventX - xOffset;
+                cursor.x = getCharPosition(cursor.y, e.x) - xOffset;
                 if (cursor.y - topline > height-1) {
                     cursor.y = height + topline-1;
                 }
@@ -180,7 +186,6 @@ class View {
                 topline = cursor.y - height+1;
             }
 
-            cursor.offset = buf.lines[cursor.y][0 .. cursor.x].numOccurences('\t') * (tabSize-1);
         }
     }
 
@@ -219,7 +224,8 @@ class View {
         if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
             hideCursor();
         } else {
-            setCursor(cursor.x + xOffset + cursor.offset, cursor.y - topline);
+            auto voffset = buf.lines[cursor.y][0 .. cursor.x].numOccurences('\t') * (tabSize-1);
+            setCursor(cursor.x + xOffset + voffset, cursor.y - topline);
         }
 
         sl.display();

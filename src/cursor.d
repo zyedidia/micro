@@ -4,8 +4,6 @@ class Cursor {
     int x, y;
     int lastX;
 
-    int offset;
-
     this() {}
 
     this(int x, int y) {

@@ -7,6 +7,8 @@ import clipboard;
 import std.stdio;
 import std.file: readText, exists, isDir;
 
+extern(C) int isatty(int);
+
 void main(string[] args) {
     string filename = "";
     string fileTxt = "";
@@ -24,7 +26,7 @@ void main(string[] args) {
             }
         }
     } else {
-        if (stdin.size != 0) {
+        if (!isatty(0)) {
             foreach (line; stdin.byLine()) {
                 fileTxt ~= line ~ "\n";
             }
