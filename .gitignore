@@ -1,10 +1,1 @@
-.dub
-docs.json
-__dummy.html
-*.o
-*.obj
-
-dub.selections.json
 micro
-
-.DS_STORE
