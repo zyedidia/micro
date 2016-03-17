@@ -4,6 +4,9 @@ class Cursor {
     int x, y;
     int lastX;
 
+    uint selectionStart;
+    uint selectionEnd;
+
     this() {}
 
     this(int x, int y) {

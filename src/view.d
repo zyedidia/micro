@@ -144,6 +144,21 @@ class View {
                 }
                 cursor.x = getCharPosition(cursor.y, e.x - xOffset);
                 cursor.lastX = cursor.x;
+
+                cursor.selectionStart = 0;
+                cursor.selectionEnd = 0;
+            } else if (e.key == Key.mouseRelease) {
+                auto y = e.y + topline;
+                if (y - topline > height-1) {
+                    y = height + topline-1;
+                }
+                if (y > buf.lines.length) {
+                    y = cast(int) buf.lines.length-1;
+                }
+                auto x = getCharPosition(y, e.x - xOffset);
+
+                cursor.selectionStart = toCharNumber(cursor.x, cursor.y);
+                cursor.selectionEnd = toCharNumber(x, y);
             } else if (e.key == Key.ctrlS) {
                 if (buf.path != "") {
                     buf.save();
@@ -200,6 +215,7 @@ class View {
         ulong maxLength = to!string(buf.lines.length).length;
         xOffset = cast(int) maxLength + 1;
 
+        int chNum;
         foreach (i, line; lines) {
             // Write the line number
             string lineNum = to!string(i + topline + 1);
@@ -213,10 +229,16 @@ class View {
 
             // Write the line
             foreach (dchar ch; line.replaceAll(regex("\t"), emptyString(tabSize))) {
-                setCell(x++, y, ch, Color.basic, Color.basic);
+                auto color = Color.basic;
+                if (chNum > cursor.selectionStart && chNum < cursor.selectionEnd) {
+                    color = cast(Color) (Color.basic | Attribute.reverse);
+                }
+                setCell(x++, y, ch, color, color);
+                chNum++;
             }
             y++;
             x = 0;
+            chNum++;
         }
 
         if (cursor.y - topline < 0 || cursor.y - topline > height-1) {
