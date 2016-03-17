@@ -19,12 +19,14 @@ func main() {
 
 	if len(os.Args) > 1 {
 		filename = os.Args[1]
-		var err error
-		input, err = ioutil.ReadFile(filename)
+		if _, err := os.Stat(filename); err == nil {
+			var err error
+			input, err = ioutil.ReadFile(filename)
 
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		bytes, err := ioutil.ReadAll(os.Stdin)
@@ -44,9 +46,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
+
+	defStyle := tcell.StyleDefault.
+		Background(tcell.ColorDefault).
+		Foreground(tcell.ColorDefault)
+
+	s.SetStyle(defStyle)
 	s.EnableMouse()
 
-	v := newViewFromBuffer(newBuffer(string(input), filename), s)
+	v := newView(newBuffer(string(input), filename), s)
 
 	// Initially everything needs to be drawn
 	redraw := 2
@@ -55,9 +63,11 @@ func main() {
 			s.Clear()
 			v.display()
 			v.cursor.display()
+			v.sl.display()
 			s.Show()
 		} else if redraw == 1 {
 			v.cursor.display()
+			v.sl.display()
 			s.Show()
 		}
 

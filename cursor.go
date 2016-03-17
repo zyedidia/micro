@@ -95,6 +95,10 @@ func (c *Cursor) getCharPos(lineNum, visualPos int) int {
 	return visualPos - (tabSize-1)*numTabs
 }
 
+func (c *Cursor) getVisualX() int {
+	return c.x + numOccurences(c.v.buf.lines[c.y][:c.x], '\t')*(tabSize-1)
+}
+
 func (c *Cursor) distance(x, y int) int {
 	// Same line
 	if y == c.y {
@@ -138,7 +142,7 @@ func (c *Cursor) distance(x, y int) int {
 }
 
 func (c *Cursor) display() {
-	if c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.linesN-1 {
+	if c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1 {
 		c.v.s.HideCursor()
 	} else {
 		voffset := numOccurences(c.v.buf.lines[c.y][:c.x], '\t') * (tabSize - 1)

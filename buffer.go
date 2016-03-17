@@ -42,6 +42,7 @@ func (b *Buffer) save() error {
 }
 
 func (b *Buffer) saveAs(filename string) error {
+	b.savedText = b.text
 	err := ioutil.WriteFile(filename, []byte(b.text), 0644)
 	return err
 }
