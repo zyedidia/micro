@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gdamore/tcell"
-	"strings"
 )
 
 type View struct {
@@ -45,6 +44,24 @@ func newViewWidthHeight(buf *Buffer, s tcell.Screen, w, h int) *View {
 	}
 
 	return v
+}
+
+func (v *View) scrollUp(n int) {
+	// Try to scroll by n but if it would overflow, scroll by 1
+	if v.topline-n >= 0 {
+		v.topline -= n
+	} else if v.topline > 0 {
+		v.topline--
+	}
+}
+
+func (v *View) scrollDown(n int) {
+	// Try to scroll by n but if it would overflow, scroll by 1
+	if v.topline+n <= len(v.buf.lines)-v.height {
+		v.topline += n
+	} else if v.topline < len(v.buf.lines)-v.height {
+		v.topline++
+	}
 }
 
 // Returns an int describing how the screen needs to be redrawn
@@ -110,16 +127,17 @@ func (v *View) handleEvent(event tcell.Event) int {
 		switch button {
 		case tcell.Button1:
 			if y-v.topline > v.height-1 {
+				v.scrollDown(1)
 				y = v.height + v.topline - 1
 			}
 			if y > len(v.buf.lines) {
-				y = len(v.buf.lines) - 1
+				y = len(v.buf.lines) - 2
 			}
+
+			x = v.cursor.getCharPosInLine(y, x)
 			if x > count(v.buf.lines[y]) {
 				x = count(v.buf.lines[y])
 			}
-
-			x = v.cursor.getCharPos(y, x)
 			d := v.cursor.distance(x, y)
 			v.cursor.loc += d
 			v.cursor.x = x
@@ -130,23 +148,16 @@ func (v *View) handleEvent(event tcell.Event) int {
 			}
 			v.cursor.selectionEnd = v.cursor.loc
 			v.mouseReleased = false
-			ret = 2
+			return 2
 		case tcell.ButtonNone:
 			v.mouseReleased = true
+			return 0
 		case tcell.WheelUp:
-			if v.topline > 0 {
-				v.topline--
-				return 2
-			} else {
-				return 0
-			}
+			v.scrollUp(2)
+			return 2
 		case tcell.WheelDown:
-			if v.topline < len(v.buf.lines)-v.height {
-				v.topline++
-				return 2
-			} else {
-				return 0
-			}
+			v.scrollDown(2)
+			return 2
 		}
 	}
 
@@ -169,14 +180,23 @@ func (v *View) display() {
 		if lineN+v.topline >= len(v.buf.lines) {
 			break
 		}
-		line := strings.Replace(v.buf.lines[lineN+v.topline], "\t", emptyString(tabSize), -1)
+		// line := strings.Replace(v.buf.lines[lineN+v.topline], "\t", emptyString(tabSize), -1)
+		line := v.buf.lines[lineN+v.topline]
+		var tabchars int
 		for colN, ch := range line {
 			st := tcell.StyleDefault
 			if v.cursor.hasSelection() && charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd {
 				st = st.Reverse(true)
 			}
 
-			v.s.SetContent(colN, lineN, ch, nil, st)
+			if ch == '\t' {
+				for i := 0; i < tabSize-1; i++ {
+					v.s.SetContent(colN+tabchars, lineN, ' ', nil, st)
+					tabchars++
+				}
+			} else {
+				v.s.SetContent(colN+tabchars, lineN, ch, nil, st)
+			}
 			charNum++
 		}
 		charNum++

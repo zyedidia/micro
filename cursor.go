@@ -1,6 +1,7 @@
 package main
 
 import (
+	// "github.com/gdamore/tcell"
 	"strings"
 )
 
@@ -22,11 +23,19 @@ func (c *Cursor) resetSelection() {
 }
 
 func (c *Cursor) hasSelection() bool {
-	return (c.selectionEnd - c.selectionStart) > 0
+	return (c.selectionEnd - c.selectionStart) != 0
 }
 
 func (c *Cursor) deleteSelected() {
 	// TODO: Implement this
+}
+
+func (c *Cursor) runeUnder() rune {
+	line := c.v.buf.lines[c.y]
+	if c.x >= count(line) {
+		return ' '
+	}
+	return []rune(line)[c.x]
 }
 
 func (c *Cursor) up() {
@@ -86,7 +95,7 @@ func (c *Cursor) start() {
 	c.x = 0
 }
 
-func (c *Cursor) getCharPos(lineNum, visualPos int) int {
+func (c *Cursor) getCharPosInLine(lineNum, visualPos int) int {
 	visualLine := strings.Replace(c.v.buf.lines[lineNum], "\t", "\t"+emptyString(tabSize-1), -1)
 	if visualPos > count(visualLine) {
 		visualPos = count(visualLine)
@@ -135,7 +144,7 @@ func (c *Cursor) distance(x, y int) int {
 		distance--
 		i++
 	}
-	if x > 0 {
+	if x >= 0 {
 		distance -= count(c.v.buf.lines[y][x:])
 	}
 	return distance
@@ -147,5 +156,7 @@ func (c *Cursor) display() {
 	} else {
 		voffset := numOccurences(c.v.buf.lines[c.y][:c.x], '\t') * (tabSize - 1)
 		c.v.s.ShowCursor(c.x+voffset, c.y-c.v.topline)
+		// cursorStyle := tcell.StyleDefault.Reverse(true)
+		// c.v.s.SetContent(c.x+voffset, c.y-c.v.topline, c.runeUnder(), nil, cursorStyle)
 	}
 }
