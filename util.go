@@ -4,11 +4,13 @@ import (
 	"unicode/utf8"
 )
 
-func count(s string) int {
+// Count returns the length of a string in runes
+func Count(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
-func numOccurences(s string, c byte) int {
+// NumOccurences counts the number of occurences of a byte in a string
+func NumOccurences(s string, c byte) int {
 	var n int
 	for i := 0; i < len(s); i++ {
 		if s[i] == c {
@@ -18,7 +20,8 @@ func numOccurences(s string, c byte) int {
 	return n
 }
 
-func emptyString(n int) string {
+// EmptyString returns an empty string n spaces long
+func EmptyString(n int) string {
 	var str string
 	for i := 0; i < n; i++ {
 		str += " "

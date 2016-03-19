@@ -54,20 +54,20 @@ func main() {
 	s.SetStyle(defStyle)
 	s.EnableMouse()
 
-	v := newView(newBuffer(string(input), filename), s)
+	v := NewView(NewBuffer(string(input), filename), s)
 
 	// Initially everything needs to be drawn
 	redraw := 2
 	for {
 		if redraw == 2 {
 			s.Clear()
-			v.display()
-			v.cursor.display()
-			v.sl.display()
+			v.Display()
+			v.cursor.Display()
+			v.sl.Display()
 			s.Show()
 		} else if redraw == 1 {
-			v.cursor.display()
-			v.sl.display()
+			v.cursor.Display()
+			v.sl.Display()
 			s.Show()
 		}
 
@@ -81,6 +81,6 @@ func main() {
 			}
 		}
 
-		redraw = v.handleEvent(event)
+		redraw = v.HandleEvent(event)
 	}
 }
