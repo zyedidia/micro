@@ -20,7 +20,7 @@ type Buffer struct {
 	// This is the text stored everytime the buffer is saved to check if the buffer is modified
 	savedText string
 
-	// Provide efficient and easy access to text and lines so the rope toString does not
+	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
 	// These variables are updated in the update() function
 	text  string
@@ -30,7 +30,7 @@ type Buffer struct {
 // NewBuffer creates a new buffer from `txt` with path and name `path`
 func NewBuffer(txt, path string) *Buffer {
 	b := new(Buffer)
-	b.r = newRope(txt)
+	b.r = NewRope(txt)
 	b.path = path
 	b.name = path
 	b.savedText = txt
@@ -42,7 +42,7 @@ func NewBuffer(txt, path string) *Buffer {
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
-	b.text = b.r.toString()
+	b.text = b.r.String()
 	b.lines = strings.Split(b.text, "\n")
 }
 
@@ -60,13 +60,13 @@ func (b *Buffer) SaveAs(filename string) error {
 
 // Insert a string into the rope
 func (b *Buffer) Insert(idx int, value string) {
-	b.r.insert(idx, value)
+	b.r.Insert(idx, value)
 	b.Update()
 }
 
 // Remove a slice of the rope from start to end (exclusive)
 func (b *Buffer) Remove(start, end int) {
-	b.r.remove(start, end)
+	b.r.Remove(start, end)
 	b.Update()
 }
 
