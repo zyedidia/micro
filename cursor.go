@@ -13,8 +13,10 @@ type Cursor struct {
 	y   int
 	loc int
 
-	selectionStart int
-	selectionEnd   int
+	selectionStart  int
+	selectionStartX int
+	selectionStartY int
+	selectionEnd    int
 }
 
 func (c *Cursor) resetSelection() {
@@ -23,11 +25,19 @@ func (c *Cursor) resetSelection() {
 }
 
 func (c *Cursor) hasSelection() bool {
-	return (c.selectionEnd - c.selectionStart) != 0
+	return c.selectionEnd != c.selectionStart
 }
 
 func (c *Cursor) deleteSelected() {
-	// TODO: Implement this
+	if c.selectionStart > c.selectionEnd {
+		c.v.buf.remove(c.selectionEnd, c.selectionStart+1)
+		// Since the cursor is already at the selection start we don't need to move
+	} else {
+		c.v.buf.remove(c.selectionStart, c.selectionEnd+1)
+		c.loc -= c.selectionEnd - c.selectionStart
+		c.x = c.selectionStartX
+		c.y = c.selectionStartY
+	}
 }
 
 func (c *Cursor) runeUnder() rune {
@@ -101,7 +111,11 @@ func (c *Cursor) getCharPosInLine(lineNum, visualPos int) int {
 		visualPos = count(visualLine)
 	}
 	numTabs := numOccurences(visualLine[:visualPos], '\t')
-	return visualPos - (tabSize-1)*numTabs
+	if visualPos >= (tabSize-1)*numTabs {
+		return visualPos - (tabSize-1)*numTabs
+	} else {
+		return visualPos / tabSize
+	}
 }
 
 func (c *Cursor) getVisualX() int {

@@ -94,7 +94,11 @@ func (v *View) handleEvent(event tcell.Event) int {
 			v.cursor.right()
 			ret = 2
 		case tcell.KeyBackspace2:
-			if v.cursor.loc > 0 {
+			if v.cursor.hasSelection() {
+				v.cursor.deleteSelected()
+				v.cursor.resetSelection()
+				ret = 2
+			} else if v.cursor.loc > 0 {
 				v.cursor.left()
 				v.buf.remove(v.cursor.loc, v.cursor.loc+1)
 				ret = 2
@@ -111,6 +115,10 @@ func (v *View) handleEvent(event tcell.Event) int {
 			// Need to redraw the status line
 			ret = 1
 		case tcell.KeyRune:
+			if v.cursor.hasSelection() {
+				v.cursor.deleteSelected()
+				v.cursor.resetSelection()
+			}
 			v.buf.insert(v.cursor.loc, string(e.Rune()))
 			v.cursor.right()
 			ret = 2
@@ -145,6 +153,8 @@ func (v *View) handleEvent(event tcell.Event) int {
 
 			if v.mouseReleased {
 				v.cursor.selectionStart = v.cursor.loc
+				v.cursor.selectionStartX = v.cursor.x
+				v.cursor.selectionStartY = v.cursor.y
 			}
 			v.cursor.selectionEnd = v.cursor.loc
 			v.mouseReleased = false
@@ -175,24 +185,27 @@ func (v *View) handleEvent(event tcell.Event) int {
 }
 
 func (v *View) display() {
-	var charNum int
+	charNum := v.cursor.loc + v.cursor.distance(0, v.topline)
 	for lineN := 0; lineN < v.height; lineN++ {
 		if lineN+v.topline >= len(v.buf.lines) {
 			break
 		}
 		// line := strings.Replace(v.buf.lines[lineN+v.topline], "\t", emptyString(tabSize), -1)
 		line := v.buf.lines[lineN+v.topline]
-		var tabchars int
+		tabchars := 0
 		for colN, ch := range line {
 			st := tcell.StyleDefault
-			if v.cursor.hasSelection() && charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd {
+			if v.cursor.hasSelection() &&
+				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
+					charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
 				st = st.Reverse(true)
 			}
 
 			if ch == '\t' {
+				v.s.SetContent(colN+tabchars, lineN, ' ', nil, st)
 				for i := 0; i < tabSize-1; i++ {
-					v.s.SetContent(colN+tabchars, lineN, ' ', nil, st)
 					tabchars++
+					v.s.SetContent(colN+tabchars, lineN, ' ', nil, st)
 				}
 			} else {
 				v.s.SetContent(colN+tabchars, lineN, ch, nil, st)
