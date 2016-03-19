@@ -1,3 +1,5 @@
+- [ ] Readme
+
 - [x] Line numbers
 
 - [ ] Optimization
