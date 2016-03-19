@@ -42,10 +42,10 @@ func (c *Cursor) HasSelection() bool {
 // DeleteSelected deletes the currently selected text
 func (c *Cursor) DeleteSelected() {
 	if c.selectionStart > c.selectionEnd {
-		c.v.buf.Remove(c.selectionEnd, c.selectionStart+1)
+		c.v.eh.Remove(c.selectionEnd, c.selectionStart+1)
 		// Since the cursor is already at the selection start we don't need to move
 	} else {
-		c.v.buf.Remove(c.selectionStart, c.selectionEnd+1)
+		c.v.eh.Remove(c.selectionStart, c.selectionEnd+1)
 		c.loc -= c.selectionEnd - c.selectionStart
 		c.x = c.selectionStartX
 		c.y = c.selectionStartY

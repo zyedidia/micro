@@ -15,6 +15,8 @@ type View struct {
 	width         int
 	lineNumOffset int
 
+	eh *EventHandler
+
 	buf *Buffer
 	sl  Statusline
 
@@ -45,6 +47,8 @@ func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h int) *View {
 		loc: 0,
 		v:   v,
 	}
+
+	v.eh = NewEventHandler(v)
 
 	v.sl = Statusline{
 		v: v,
@@ -132,11 +136,11 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			v.cursor.Right()
 			ret = 1
 		case tcell.KeyEnter:
-			v.buf.Insert(v.cursor.loc, "\n")
+			v.eh.Insert(v.cursor.loc, "\n")
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeySpace:
-			v.buf.Insert(v.cursor.loc, " ")
+			v.eh.Insert(v.cursor.loc, " ")
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeyBackspace2:
@@ -145,12 +149,20 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				v.cursor.ResetSelection()
 				ret = 2
 			} else if v.cursor.loc > 0 {
+				// We have to do something a bit hacky here because we want to
+				// delete the line by first moving left and then deleting backwards
+				// but the undo redo would place the cursor in the wrong place
+				// So instead we move left, save the position, move back, delete
+				// and restore the position
 				v.cursor.Left()
-				v.buf.Remove(v.cursor.loc, v.cursor.loc+1)
+				cx, cy, cloc := v.cursor.x, v.cursor.y, v.cursor.loc
+				v.cursor.Right()
+				v.eh.Remove(v.cursor.loc-1, v.cursor.loc)
+				v.cursor.x, v.cursor.y, v.cursor.loc = cx, cy, cloc
 				ret = 2
 			}
 		case tcell.KeyTab:
-			v.buf.Insert(v.cursor.loc, "\t")
+			v.eh.Insert(v.cursor.loc, "\t")
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeyCtrlS:
@@ -160,6 +172,12 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			}
 			// Need to redraw the status line
 			ret = 1
+		case tcell.KeyCtrlZ:
+			v.eh.Undo()
+			ret = 2
+		case tcell.KeyCtrlY:
+			v.eh.Redo()
+			ret = 2
 		case tcell.KeyPgUp:
 			v.PageUp()
 			return 2
@@ -177,7 +195,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				v.cursor.DeleteSelected()
 				v.cursor.ResetSelection()
 			}
-			v.buf.Insert(v.cursor.loc, string(e.Rune()))
+			v.eh.Insert(v.cursor.loc, string(e.Rune()))
 			v.cursor.Right()
 			ret = 2
 		}

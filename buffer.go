@@ -65,9 +65,12 @@ func (b *Buffer) Insert(idx int, value string) {
 }
 
 // Remove a slice of the rope from start to end (exclusive)
-func (b *Buffer) Remove(start, end int) {
+// Returns the string that was removed
+func (b *Buffer) Remove(start, end int) string {
+	removed := b.text[start:end]
 	b.r.Remove(start, end)
 	b.Update()
+	return removed
 }
 
 // Len gives the length of the buffer

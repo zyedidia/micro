@@ -22,7 +22,7 @@
     - [ ] Opened with Ctrl-h
 
 - [ ] Undo/redo
-    - [ ] Undo/redo stack
+    - [x] Undo/redo stack
     - [ ] Functionality similar to nano
 
 - [ ] Command execution
