@@ -71,6 +71,42 @@ func (v *View) ScrollDown(n int) {
 	}
 }
 
+// PageUp scrolls the view up a page
+func (v *View) PageUp() {
+	if v.topline > v.height {
+		v.ScrollUp(v.height)
+	} else {
+		v.topline = 0
+	}
+}
+
+// PageDown scrolls the view down a page
+func (v *View) PageDown() {
+	if len(v.buf.lines)-(v.topline+v.height) > v.height {
+		v.ScrollDown(v.height)
+	} else {
+		v.topline = len(v.buf.lines) - v.height
+	}
+}
+
+// HalfPageUp scrolls the view up half a page
+func (v *View) HalfPageUp() {
+	if v.topline > v.height/2 {
+		v.ScrollUp(v.height / 2)
+	} else {
+		v.topline = 0
+	}
+}
+
+// HalfPageDown scrolls the view down half a page
+func (v *View) HalfPageDown() {
+	if len(v.buf.lines)-(v.topline+v.height) > v.height/2 {
+		v.ScrollDown(v.height / 2)
+	} else {
+		v.topline = len(v.buf.lines) - v.height
+	}
+}
+
 // HandleEvent handles an event passed by the main loop
 // It returns an int describing how the screen needs to be redrawn
 // 0: Screen does not need to be redrawn
@@ -122,6 +158,18 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			}
 			// Need to redraw the status line
 			ret = 1
+		case tcell.KeyPgUp:
+			v.PageUp()
+			return 2
+		case tcell.KeyPgDn:
+			v.PageDown()
+			return 2
+		case tcell.KeyCtrlU:
+			v.HalfPageUp()
+			return 2
+		case tcell.KeyCtrlD:
+			v.HalfPageDown()
+			return 2
 		case tcell.KeyRune:
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelected()
