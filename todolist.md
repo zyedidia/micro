@@ -1,4 +1,4 @@
-- [ ] Line numbers
+- [x] Line numbers
 
 - [ ] Optimization
 

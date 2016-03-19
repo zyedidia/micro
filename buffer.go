@@ -17,7 +17,7 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	name string
 
-	// This is the text stored everytime the buffer is saved to check if the buffer is modified
+	// This is the text stored every time the buffer is saved to check if the buffer is modified
 	savedText string
 
 	// Provide efficient and easy access to text and lines so the rope String does not

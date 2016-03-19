@@ -2,16 +2,18 @@ package main
 
 import (
 	"github.com/gdamore/tcell"
+	"strconv"
 )
 
 // The View struct stores information about a view into a buffer.
 // It has a value for the cursor, and the window that the user sees
 // the buffer from.
 type View struct {
-	cursor  Cursor
-	topline int
-	height  int
-	width   int
+	cursor        Cursor
+	topline       int
+	height        int
+	width         int
+	lineNumOffset int
 
 	buf *Buffer
 	sl  Statusline
@@ -181,6 +183,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
+		x -= v.lineNumOffset
 		y += v.topline
 		// Position always seems to be off by one
 		x--
@@ -196,6 +199,9 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			}
 			if y > len(v.buf.lines) {
 				y = len(v.buf.lines) - 2
+			}
+			if x < 0 {
+				x = 0
 			}
 
 			x = v.cursor.GetCharPosInLine(y, x)
@@ -242,14 +248,42 @@ func (v *View) HandleEvent(event tcell.Event) int {
 
 // Display renders the view to the screen
 func (v *View) Display() {
+	var x int
+
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
+
+	// Convert the length of buffer to a string, and get the length of the string
+	// We are going to have to offset by that amount
+	maxLineLength := len(strconv.Itoa(len(v.buf.lines)))
+	// + 1 for the little space after the line number
+	v.lineNumOffset = maxLineLength + 1
+
 	for lineN := 0; lineN < v.height; lineN++ {
 		if lineN+v.topline >= len(v.buf.lines) {
 			break
 		}
 		line := v.buf.lines[lineN+v.topline]
+
+		// Write the line number
+		lineNumStyle := tcell.StyleDefault
+		// Write the spaces before the line number if necessary
+		lineNum := strconv.Itoa(lineN + v.topline + 1)
+		for i := 0; i < maxLineLength-len(lineNum); i++ {
+			v.s.SetContent(x, lineN, ' ', nil, lineNumStyle)
+			x++
+		}
+		// Write the actual line number
+		for _, ch := range lineNum {
+			v.s.SetContent(x, lineN, ch, nil, lineNumStyle)
+			x++
+		}
+		// Write the extra space
+		v.s.SetContent(x, lineN, ' ', nil, lineNumStyle)
+		x++
+
+		// Write the line
 		tabchars := 0
-		for colN, ch := range line {
+		for _, ch := range line {
 			st := tcell.StyleDefault
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
@@ -258,16 +292,18 @@ func (v *View) Display() {
 			}
 
 			if ch == '\t' {
-				v.s.SetContent(colN+tabchars, lineN, ' ', nil, st)
+				v.s.SetContent(x+tabchars, lineN, ' ', nil, st)
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
-					v.s.SetContent(colN+tabchars, lineN, ' ', nil, st)
+					v.s.SetContent(x+tabchars, lineN, ' ', nil, st)
 				}
 			} else {
-				v.s.SetContent(colN+tabchars, lineN, ch, nil, st)
+				v.s.SetContent(x+tabchars, lineN, ch, nil, st)
 			}
 			charNum++
+			x++
 		}
+		x = 0
 		charNum++
 	}
 }
