@@ -39,8 +39,8 @@ func (c *Cursor) HasSelection() bool {
 	return c.selectionEnd != c.selectionStart
 }
 
-// DeleteSelected deletes the currently selected text
-func (c *Cursor) DeleteSelected() {
+// DeleteSelection deletes the currently selected text
+func (c *Cursor) DeleteSelection() {
 	if c.selectionStart > c.selectionEnd {
 		c.v.eh.Remove(c.selectionEnd, c.selectionStart+1)
 		// Since the cursor is already at the selection start we don't need to move
@@ -50,6 +50,14 @@ func (c *Cursor) DeleteSelected() {
 		c.x = c.selectionStartX
 		c.y = c.selectionStartY
 	}
+}
+
+// GetSelection returns the cursor's selection
+func (c *Cursor) GetSelection() string {
+	if c.selectionStart > c.selectionEnd {
+		return string([]rune(c.v.buf.text)[c.selectionEnd : c.selectionStart+1])
+	}
+	return string([]rune(c.v.buf.text)[c.selectionStart : c.selectionEnd+1])
 }
 
 // RuneUnder returns the rune under the cursor

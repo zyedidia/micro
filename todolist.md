@@ -25,6 +25,9 @@
     - [x] Undo/redo stack
     - [ ] Functionality similar to nano
 
+- [x] Clipboard support
+    - [x] Ctrl-v, Ctrl-c, and Ctrl-x
+
 - [ ] Command execution
     - [ ] Allow executing simple commands at the bottom of the editor 
       (like vim or emacs)

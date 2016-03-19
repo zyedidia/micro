@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"strconv"
 )
@@ -145,7 +146,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			ret = 2
 		case tcell.KeyBackspace2:
 			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelected()
+				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 				ret = 2
 			} else if v.cursor.loc > 0 {
@@ -178,6 +179,36 @@ func (v *View) HandleEvent(event tcell.Event) int {
 		case tcell.KeyCtrlY:
 			v.eh.Redo()
 			ret = 2
+		case tcell.KeyCtrlC:
+			if v.cursor.HasSelection() {
+				if !clipboard.Unsupported {
+					clipboard.WriteAll(v.cursor.GetSelection())
+					ret = 2
+				}
+			}
+		case tcell.KeyCtrlX:
+			if v.cursor.HasSelection() {
+				if !clipboard.Unsupported {
+					clipboard.WriteAll(v.cursor.GetSelection())
+					v.cursor.DeleteSelection()
+					v.cursor.ResetSelection()
+					ret = 2
+				}
+			}
+		case tcell.KeyCtrlV:
+			if !clipboard.Unsupported {
+				if v.cursor.HasSelection() {
+					v.cursor.DeleteSelection()
+					v.cursor.ResetSelection()
+				}
+				clip, _ := clipboard.ReadAll()
+				v.eh.Insert(v.cursor.loc, clip)
+				// This is a bit weird... Not sure if there's a better way
+				for i := 0; i < Count(clip); i++ {
+					v.cursor.Right()
+				}
+				ret = 2
+			}
 		case tcell.KeyPgUp:
 			v.PageUp()
 			return 2
@@ -192,7 +223,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			return 2
 		case tcell.KeyRune:
 			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelected()
+				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 			}
 			v.eh.Insert(v.cursor.loc, string(e.Rune()))
