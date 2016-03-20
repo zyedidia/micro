@@ -39,8 +39,6 @@ func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h int) *View {
 	v.buf = buf
 	v.s = s
 
-	v.buf.rules, v.buf.filetype = GetRules(v.buf.path)
-
 	v.topline = 0
 	v.height = h - 1
 	v.width = w

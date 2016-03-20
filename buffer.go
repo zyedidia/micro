@@ -40,9 +40,9 @@ func NewBuffer(txt, path string) *Buffer {
 	b.name = path
 	b.savedText = txt
 
-	b.rules, b.filetype = GetRules(path)
-
 	b.Update()
+
+	b.rules, b.filetype = GetRules(b)
 
 	return b
 }

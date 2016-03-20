@@ -10,16 +10,21 @@ import (
 	"strings"
 )
 
-var syntaxFiles map[*regexp.Regexp][2]string
+var syntaxFiles map[[2]*regexp.Regexp][2]string
 
+// LoadSyntaxFiles loads the syntax files from the default directory ~/.micro
 func LoadSyntaxFiles() {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
 	LoadSyntaxFilesFromDir(dir + "/.micro")
 }
 
+// LoadSyntaxFilesFromDir loads the syntax files from a specified directory
+// To load the syntax files, we must fill the `syntaxFiles` map
+// This involves finding the regex for syntax and if it exists, the regex
+// for the header. Then we must get the text for the file and the filetype.
 func LoadSyntaxFilesFromDir(dir string) {
-	syntaxFiles = make(map[*regexp.Regexp][2]string)
+	syntaxFiles = make(map[[2]*regexp.Regexp][2]string)
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".micro" {
@@ -30,25 +35,40 @@ func LoadSyntaxFilesFromDir(dir string) {
 				continue
 			}
 			lines := strings.Split(string(text), "\n")
-			parser, _ := regexp.Compile(`syntax "(.*?)"\s+"(.*)"`)
-			matches := parser.FindSubmatch([]byte(lines[0]))
+			syntaxParser, _ := regexp.Compile(`syntax "(.*?)"\s+"(.*)"`)
+			headerParser, _ := regexp.Compile(`header "(.*)"`)
+			syntaxMatches := syntaxParser.FindSubmatch([]byte(lines[0]))
 
-			fileExtRegex, err := regexp.Compile(string(matches[2]))
+			var headerRegex *regexp.Regexp
+			if strings.HasPrefix(lines[1], "header") {
+				headerMatches := headerParser.FindSubmatch([]byte(lines[1]))
+				headerRegex, err = regexp.Compile(string(headerMatches[1]))
+
+				if err != nil {
+					// Error with the regex!
+					continue
+				}
+			}
+
+			syntaxRegex, err := regexp.Compile(string(syntaxMatches[2]))
 			if err != nil {
 				// Error with the regex!
 				continue
 			}
 
-			syntaxFiles[fileExtRegex] = [2]string{string(text), string(matches[1])}
+			regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
+			syntaxFiles[regexes] = [2]string{string(text), string(syntaxMatches[1])}
 		}
 	}
 }
 
 // GetRules finds the syntax rules that should be used for the buffer
 // and returns them. It also returns the filetype of the file
-func GetRules(filename string) (string, string) {
+func GetRules(buf *Buffer) (string, string) {
 	for r := range syntaxFiles {
-		if r.MatchString(filename) {
+		if r[0].MatchString(buf.path) {
+			return syntaxFiles[r][0], syntaxFiles[r][1]
+		} else if r[1] != nil && r[1].MatchString(buf.lines[0]) {
 			return syntaxFiles[r][0], syntaxFiles[r][1]
 		}
 	}
@@ -66,7 +86,10 @@ func Match(rules string, buf *Buffer) map[int]tcell.Style {
 	m := make(map[int]tcell.Style)
 	parser, _ := regexp.Compile(`color (.*?)\s+"(.*)"`)
 	for _, line := range lines {
-		if strings.TrimSpace(line) == "" || strings.TrimSpace(line)[0] == '#' || strings.HasPrefix(line, "syntax") {
+		if strings.TrimSpace(line) == "" ||
+			strings.TrimSpace(line)[0] == '#' ||
+			strings.HasPrefix(line, "syntax") ||
+			strings.HasPrefix(line, "header") {
 			// Ignore this line
 			continue
 		}
