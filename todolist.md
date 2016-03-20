@@ -14,8 +14,8 @@
     - [x] Use pageup and pagedown keys
     - [ ] Much more (copy sublime text or standard system applications)
 
-- [ ] Syntax highlighting
-    - [ ] Use nano-like syntax files (https://github.com/scopatz/nanorc)
+- [x] Syntax highlighting
+    - [x] Use nano-like syntax files (https://github.com/scopatz/nanorc)
 
 - [ ] Colorschemes
     - [ ] Support for 256 color and true color

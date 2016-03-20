@@ -24,7 +24,7 @@ func (sl *Statusline) Display() {
 	}
 	file += " (" + strconv.Itoa(sl.v.cursor.y+1) + "," + strconv.Itoa(sl.v.cursor.GetVisualX()+1) + ")"
 
-	statusLineStyle := tcell.StyleDefault.Background(tcell.ColorNavy).Foreground(tcell.ColorBlack)
+	statusLineStyle := tcell.StyleDefault.Reverse(true)
 
 	for x := 0; x < sl.v.width; x++ {
 		if x < Count(file) {

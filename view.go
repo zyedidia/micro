@@ -301,11 +301,15 @@ func (v *View) Display() {
 
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
+	matches := Match(v.buf.text)
+
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount
 	maxLineLength := len(strconv.Itoa(len(v.buf.lines)))
 	// + 1 for the little space after the line number
 	v.lineNumOffset = maxLineLength + 1
+
+	var lineStyle tcell.Style
 
 	for lineN := 0; lineN < v.height; lineN++ {
 		if lineN+v.topline >= len(v.buf.lines) {
@@ -333,26 +337,34 @@ func (v *View) Display() {
 		// Write the line
 		tabchars := 0
 		for _, ch := range line {
-			st := tcell.StyleDefault
+			st, ok := matches[charNum]
+			if ok {
+				lineStyle = st
+			}
+
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
 					charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
-				st = st.Reverse(true)
+				lineStyle = lineStyle.Reverse(true)
 			}
 
 			if ch == '\t' {
-				v.s.SetContent(x+tabchars, lineN, ' ', nil, st)
+				v.s.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
-					v.s.SetContent(x+tabchars, lineN, ' ', nil, st)
+					v.s.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
 				}
 			} else {
-				v.s.SetContent(x+tabchars, lineN, ch, nil, st)
+				v.s.SetContent(x+tabchars, lineN, ch, nil, lineStyle)
 			}
 			charNum++
 			x++
 		}
 		x = 0
+		st, ok := matches[charNum]
+		if ok {
+			lineStyle = st
+		}
 		charNum++
 	}
 }
