@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
+	"github.com/gdamore/tcell"
+	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
 	"io/ioutil"
 	"os"
-
-	"github.com/gdamore/tcell"
 )
 
 const (
@@ -46,6 +46,15 @@ func main() {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
 	}
+
+	defer func() {
+		if err := recover(); err != nil {
+			s.Fini()
+			fmt.Println("Micro encountered an error:", err)
+			fmt.Print(errors.Wrap(err, 2).ErrorStack())
+			os.Exit(1)
+		}
+	}()
 
 	defStyle := tcell.StyleDefault.
 		Background(tcell.ColorDefault).

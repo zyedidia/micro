@@ -309,7 +309,7 @@ func (v *View) Display() {
 	// + 1 for the little space after the line number
 	v.lineNumOffset = maxLineLength + 1
 
-	var lineStyle tcell.Style
+	var highlightStyle tcell.Style
 
 	for lineN := 0; lineN < v.height; lineN++ {
 		if lineN+v.topline >= len(v.buf.lines) {
@@ -337,15 +337,19 @@ func (v *View) Display() {
 		// Write the line
 		tabchars := 0
 		for _, ch := range line {
+			var lineStyle tcell.Style
 			st, ok := matches[charNum]
 			if ok {
-				lineStyle = st
+				highlightStyle = st
 			}
 
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
 					charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
+				lineStyle = tcell.StyleDefault
 				lineStyle = lineStyle.Reverse(true)
+			} else {
+				lineStyle = highlightStyle
 			}
 
 			if ch == '\t' {
@@ -363,7 +367,7 @@ func (v *View) Display() {
 		x = 0
 		st, ok := matches[charNum]
 		if ok {
-			lineStyle = st
+			highlightStyle = st
 		}
 		charNum++
 	}

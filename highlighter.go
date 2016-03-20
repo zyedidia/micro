@@ -1,40 +1,35 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gdamore/tcell"
+	"io/ioutil"
 	"regexp"
 	"strings"
 )
 
+var syntaxRules string
+
+func GetRules() string {
+	file, err := ioutil.ReadFile("syntax.micro")
+	if err != nil {
+		return ""
+	}
+	return string(file)
+}
+
 // Match ...
 func Match(str string) map[int]tcell.Style {
-	rules := `color blue "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
-color blue "\b(append|cap|close|complex|copy|delete|imag|len)\b"
-color blue "\b(make|new|panic|print|println|protect|real|recover)\b"
-color green     "\b(u?int(8|16|32|64)?|float(32|64)|complex(64|128))\b"
-color green     "\b(uintptr|byte|rune|string|interface|bool|map|chan|error)\b"
-color cyan  "\b(package|import|const|var|type|struct|func|go|defer|nil|iota)\b"
-color cyan  "\b(for|range|if|else|case|default|switch|return)\b"
-color red     "\b(go|goto|break|continue)\b"
-color cyan "\b(true|false)\b"
-color red "[-+/*=<>!~%&|^]|:="
-color blue   "\b([0-9]+|0x[0-9a-fA-F]*)\b|'.'"
-color magenta   "\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
-color yellow   "` + "`" + `[^` + "`" + `]*` + "`" + `"
-color green "(^|[[:space:]])//.*"
-color brightwhite,cyan "TODO:?"
-color ,green "[[:space:]]+$"
-color ,red "	+ +| +	+"`
+	rules := strings.TrimSpace(GetRules())
 
 	lines := strings.Split(rules, "\n")
 	m := make(map[int]tcell.Style)
+	parser, _ := regexp.Compile(`color (.*?)\s+"(.*)"`)
 	for _, line := range lines {
-		split := strings.Split(line, "\"")
-		color := strings.Split(split[0], " ")[1]
-		regex, err := regexp.Compile(split[1])
+		submatch := parser.FindSubmatch([]byte(line))
+		color := string(submatch[1])
+		regex, err := regexp.Compile(string(submatch[2]))
 		if err != nil {
-			fmt.Println("\a")
+			continue
 			// Error with the regex!
 		}
 		st := StringToStyle(color)
@@ -48,7 +43,9 @@ color ,red "	+ +| +	+"`
 					}
 				}
 				m[value[0]] = st
-				m[value[1]] = tcell.StyleDefault
+				if _, exists := m[value[1]]; !exists {
+					m[value[1]] = tcell.StyleDefault
+				}
 			}
 		}
 	}
