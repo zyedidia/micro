@@ -207,8 +207,7 @@ func (c *Cursor) Display() {
 	if c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1 {
 		c.v.s.HideCursor()
 	} else {
-		voffset := NumOccurences(c.v.buf.lines[c.y][:c.x], '\t') * (tabSize - 1)
-		c.v.s.ShowCursor(c.x+voffset+c.v.lineNumOffset, c.y-c.v.topline)
+		c.v.s.ShowCursor(c.GetVisualX()+c.v.lineNumOffset, c.y-c.v.topline)
 		// cursorStyle := tcell.StyleDefault.Reverse(true)
 		// c.v.s.SetContent(c.x+voffset, c.y-c.v.topline, c.runeUnder(), nil, cursorStyle)
 	}

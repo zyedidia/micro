@@ -61,7 +61,7 @@ func (eh *EventHandler) Insert(start int, text string) {
 		eventType: TextEventInsert,
 		text:      text,
 		start:     start,
-		end:       start + len(text),
+		end:       start + Count(text),
 		buf:       eh.v.buf,
 		time:      time.Now(),
 	}
@@ -83,6 +83,9 @@ func (eh *EventHandler) Remove(start, end int) {
 
 // Execute a textevent and add it to the undo stack
 func (eh *EventHandler) Execute(t *TextEvent) {
+	if eh.redo.Len() > 0 {
+		eh.redo = new(Stack)
+	}
 	eh.undo.Push(t)
 	ExecuteTextEvent(t)
 }
@@ -97,9 +100,12 @@ func (eh *EventHandler) Undo() {
 	te := t.(*TextEvent)
 	// Modifies the text event
 	UndoTextEvent(te)
-	eh.redo.Push(t)
 
-	eh.v.cursor = te.c
+	teCursor := te.c
+	te.c = eh.v.cursor
+	eh.v.cursor = teCursor
+
+	eh.redo.Push(te)
 }
 
 // Redo the first event in the redo stack
@@ -112,6 +118,10 @@ func (eh *EventHandler) Redo() {
 	te := t.(*TextEvent)
 	// Modifies the text event
 	UndoTextEvent(te)
-	eh.undo.Push(t)
-	eh.v.cursor = te.c
+
+	teCursor := te.c
+	te.c = eh.v.cursor
+	eh.v.cursor = teCursor
+
+	eh.undo.Push(te)
 }

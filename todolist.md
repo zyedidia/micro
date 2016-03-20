@@ -21,9 +21,8 @@
     - [ ] Help screen which lists keybindings and commands
     - [ ] Opened with Ctrl-h
 
-- [ ] Undo/redo
+- [x] Undo/redo
     - [x] Undo/redo stack
-    - [ ] Functionality similar to nano
 
 - [x] Clipboard support
     - [x] Ctrl-v, Ctrl-c, and Ctrl-x
