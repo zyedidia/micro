@@ -1,4 +1,4 @@
-- [ ] Readme
+- [x] Readme
 
 - [x] Line numbers
 
@@ -36,4 +36,3 @@
 
 - [ ] Options
     - [ ] Add options such as tab size, use tabs or use spaces, etc...
-
