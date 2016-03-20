@@ -2,7 +2,9 @@
 
 - [x] Line numbers
 
-- [ ] Optimization
+- [ ] Proper error handling
+
+- [ ] Optimization/Cleanup
 
 - [ ] Better selection
     - [ ] Double click selects current word
@@ -14,8 +16,9 @@
 
 - [ ] Syntax highlighting
     - [ ] Use nano-like syntax files (https://github.com/scopatz/nanorc)
-    - [ ] Allow additional colors and colorschemes
-        - [ ] Support for 256 color and true color
+
+- [ ] Colorschemes
+    - [ ] Support for 256 color and true color
 
 - [ ] Help screen
     - [ ] Help screen which lists keybindings and commands
