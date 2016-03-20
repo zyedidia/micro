@@ -1,6 +1,6 @@
 # Micro
 
-[![Go Report Card](https:///badge/github.com/zyedidia/micro)](https:///report/github.com/zyedidia/micro)
+[![Go Report Card](http://goreportcard.com/badge/zyedidia/micro)](http://goreportcard.com/report/zyedidia/micro)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/gdamore/tcell/blob/master/LICENSE)
 
 > Micro is a work in progress, not suitable for use yet.
