@@ -39,6 +39,8 @@ func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h int) *View {
 	v.buf = buf
 	v.s = s
 
+	v.buf.rules, v.buf.filetype = GetRules(v.buf.path)
+
 	v.topline = 0
 	v.height = h - 1
 	v.width = w
@@ -301,7 +303,7 @@ func (v *View) Display() {
 
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
-	matches := Match(v.buf.text)
+	matches := Match(v.buf.rules, v.buf)
 
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount

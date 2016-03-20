@@ -25,6 +25,11 @@ type Buffer struct {
 	// These variables are updated in the update() function
 	text  string
 	lines []string
+
+	// Syntax highlighting rules
+	rules string
+	// File type of the buffer
+	filetype string
 }
 
 // NewBuffer creates a new buffer from `txt` with path and name `path`
@@ -34,6 +39,8 @@ func NewBuffer(txt, path string) *Buffer {
 	b.path = path
 	b.name = path
 	b.savedText = txt
+
+	b.rules, b.filetype = GetRules(path)
 
 	b.Update()
 

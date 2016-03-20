@@ -37,6 +37,8 @@ func main() {
 		input = bytes
 	}
 
+	LoadSyntaxFiles()
+
 	s, e := tcell.NewScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
