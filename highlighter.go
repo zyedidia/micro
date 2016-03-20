@@ -35,8 +35,8 @@ func LoadSyntaxFilesFromDir(dir string) {
 				continue
 			}
 			lines := strings.Split(string(text), "\n")
-			syntaxParser, _ := regexp.Compile(`syntax "(.*?)"\s+"(.*)"`)
-			headerParser, _ := regexp.Compile(`header "(.*)"`)
+			syntaxParser := regexp.MustCompile(`syntax "(.*?)"\s+"(.*)"`)
+			headerParser := regexp.MustCompile(`header "(.*)"`)
 			syntaxMatches := syntaxParser.FindSubmatch([]byte(lines[0]))
 
 			var headerRegex *regexp.Regexp
@@ -84,7 +84,7 @@ func Match(rules string, buf *Buffer) map[int]tcell.Style {
 
 	lines := strings.Split(rules, "\n")
 	m := make(map[int]tcell.Style)
-	parser, _ := regexp.Compile(`color (.*?)\s+"(.*)"`)
+	parser := regexp.MustCompile(`color (.*?)\s+"(.*)"`)
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" ||
 			strings.TrimSpace(line)[0] == '#' ||
