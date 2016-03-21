@@ -33,7 +33,7 @@ color red ""[^"]*""
 # Comments
 color green "//.*"
 color brightgreen "///.*"
-color green "(?s)/\*\*.*?\*/"
+color green (s) "/\*\*.*?\*/"
 color green "[/**]"
 
 # Trailing whitespace

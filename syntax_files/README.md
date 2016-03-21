@@ -6,5 +6,5 @@ put them all in `~/.micro/syntax`.
 They are taken from Nano, specifically from [this repository](https://github.com/scopatz/nanorc).
 Micro syntax files are almost identical to Nano's, except for some key differences:
 
-* Micro does not use `icolor`. Instead use the case insensitive flag (`(?i)`) in the regular expression
-* Micro does not support `start="..." end="..."`, instead use the multiline match flag (`(?s)`) and put `.*?` in the middle
+* Micro does not use `. Instead (i) use the case insensitive flag (`(i)`) in the regular expression
+* Micro does not support `start="..." end="..."`, instead use the multiline match flag (`(s)`) and put `.*?` in the middle

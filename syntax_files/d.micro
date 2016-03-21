@@ -69,7 +69,7 @@ color magenta "\\s *#\\s *"
 color yellow ""(\\.|[^"])*""
  
 ### WysiwygString
-color yellow "(?s)r".*?""
+color yellow (s) "r".*?""
 color yellow "`[^`]*`"
 
 ### HexString
@@ -80,20 +80,20 @@ color yellow "q"\(.*\)""
 color yellow "q"\{.*\}""
 color yellow "q"\[.*\]""
 color yellow "q"<.*>""
-color yellow "(?s)q"[^({[<"][^"]*$.*?^[^"]+""
+color yellow (s) "q"[^({[<"][^"]*$.*?^[^"]+""
 color yellow "q"([^({[<"]).*\1""
 
 ### TokenString
 ### True token strings require nesting, so, again, they can't be implemented accurately here.
 ### At the same time, the intended purpose of token strings makes it questionable to highlight them as strings at all.
-## color ,magenta "(?s)q\{.*?\}"
+## color ,magenta (s) "q\{.*?\}"
 
 ## Comments
 ## NB: true nested comments are impossible to implement with plain regex
 color brightblack "//.*"
-color brightblack "(?s)/\*.*?\*/"
-color brightblack "(?s)/\+.*?\+/"
+color brightblack (s) "/\*.*?\*/"
+color brightblack (s) "/\+.*?\+/"
 
 ## Trailing whitespace
-color ,green "[[:space:]]+$"
+color ,green "^[[:space:]]+$"
 

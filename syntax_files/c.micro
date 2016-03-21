@@ -29,11 +29,11 @@ color magenta "[(){}]" "\[" "\]"
 color cyan ""(\\.|[^"])*""
 ##
 ## This string is VERY resource intensive!
-#color cyan "(?s)"(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
+#color cyan (s) ""(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
 
 ## Comment highlighting
 color brightblue "//.*"
-color brightblue "(?s)/\*.*?\*/"
+color brightblue (s) "/\*.*?\*/"
 
 ## Trailing whitespace
 #color ,green "[[:space:]]+$"

@@ -2,7 +2,8 @@
 ##
 syntax "TeX" "\.tex$" "bib" "\.bib$" "cls" "\.cls$"
 color yellow "\$[^$]*\$"
-icolor green "\\.|\\[A-Z]*"
+green (i) "\\.|\\[A-Z]*"
 color magenta "[{}]"
 color blue "%.*"
-color blue "(?s)\\begin\{comment\}.*?\\end\{comment\}"
+color blue (s) "\\begin\{comment\}.*?\\end\{comment\}"
+

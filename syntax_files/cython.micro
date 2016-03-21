@@ -1,9 +1,9 @@
 ## Cython nanorc, based off of Python nanorc.
 ##
 syntax "Cython" "\.pyx$" "\.pxd$" "\.pyi$"
-icolor brightred "def [ 0-9A-Z_]+"
-icolor brightred "cpdef [0-9A-Z_]+\(.*\):"
-icolor brightred "cdef cppclass [ 0-9A-Z_]+\(.*\):"
+brightred (i) "def [ 0-9A-Z_]+"
+brightred (i) "cpdef [0-9A-Z_]+\(.*\):"
+brightred (i) "cdef cppclass [ 0-9A-Z_]+\(.*\):"
 
 
 
@@ -24,7 +24,7 @@ color magenta "[(){}]" "\[" "\]"
 #String Color
 color cyan "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
 color cyan "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
-color cyan "(?s)"""[^"].*?"""" "(?s)'''[^'].*?'''"
+color cyan (s) """"[^"].*?"""" (s) "'''[^'].*?'''"
 
 # Comment Color
 color brightblue "#.*$"

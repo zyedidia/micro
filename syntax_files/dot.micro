@@ -5,4 +5,5 @@ color magenta "\b(arrowhead|arrowsize|arrowtail|bgcolor|center|color|constraint|
 color red  "=|->|--"
 color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color brightblack "(^|[[:space:]])//.*"
-color brightblack "(?s)/\*.*?\*/"
+color brightblack (s) "/\*.*?\*/"
+

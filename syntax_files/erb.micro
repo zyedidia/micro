@@ -5,12 +5,12 @@
 ## https://github.com/geomic/ERB-And-More-Code-Highlighting-for-nano
 
 syntax "ERB" "\.erb$" "\.rhtml$"
-color blue "(?s)<.*?>"
-color white "(?s)<%.*?%>"
+color blue (s) "<.*?>"
+color white (s) "<%.*?%>"
 color red "&[^;[[:space:]]]*;"
 color yellow "\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\?|do|else|elsif|end|ensure|false|for|if|in|module|next|nil|not|or|redo|rescue|retry|return|self|super|then|true|undef|unless|until|when|while|yield)\b"
 color brightblue "(\$|@|@@)?\b[A-Z]+[0-9A-Z_a-z]*"
-icolor magenta "([  ]|^):[0-9A-Z_]+\b"
+magenta (i) "([  ]|^):[0-9A-Z_]+\b"
 color brightyellow "\b(__FILE__|__LINE__)\b"
 color brightmagenta "!/([^/]|(\\/))*/[iomx]*" "%r\{([^}]|(\\}))*\}[iomx]*"
 color brightblue "`[^`]*`" "%x\{[^}]*\}"
@@ -19,6 +19,7 @@ color brightgreen "#\{[^}]*\}"
 color green "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>" "%[qw]\[[^]]*\]" "%[qw]\$[^$]*\$" "%[qw]\^[^^]*\^" "%[qw]![^!]*!"
 color cyan "#[^{].*$" "#$"
 color brightcyan "##[^{].*$" "##$"
-color green "(?s)<<-?'?EOT'?.*?^EOT"
+color green (s) "<<-?'?EOT'?.*?^EOT"
 color brightcyan "(XXX|TODO|FIXME|\?\?\?)"
+
 

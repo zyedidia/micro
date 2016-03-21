@@ -41,7 +41,8 @@ color magenta "!\[[^][]*\](\([^)]+\)|\[[^]]+\])"
 color brightyellow "https?://[^ )>]+"
 
 # code
-color yellow   "`[^`]*`|^ {4}[^-+*].*"
+color yellow   "`.*?`|^ {4}[^-+*].*"
 # code blocks
-color yellow "(?s)^```[^$].*?^```$"
+# color yellow (s) "^```[^$].*?^```$"
 color yellow "^```$"
+

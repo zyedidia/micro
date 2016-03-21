@@ -137,7 +137,7 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 
 	lines := strings.Split(rules, "\n")
 	m := make(map[int]tcell.Style)
-	parser := regexp.MustCompile(`color (.*?)\s+"(.*)"`)
+	parser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?"(.*)"`)
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" {
 			// Ignore this line
@@ -145,7 +145,13 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 		}
 		submatch := parser.FindSubmatch([]byte(line))
 		color := string(submatch[1])
-		regex, err := regexp.Compile(string(submatch[2]))
+		var regexStr string
+		if len(submatch) == 4 {
+			regexStr = "(?m" + string(submatch[2]) + ")" + string(submatch[3])
+		} else if len(submatch) == 3 {
+			regexStr = "(?m)" + string(submatch[2])
+		}
+		regex, err := regexp.Compile(regexStr)
 		if err != nil {
 			// Error with the regex!
 			continue
@@ -157,22 +163,9 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 			for _, value := range indicies {
 				value[0] += startNum
 				value[1] += startNum
-				for i := value[0] + 1; i < value[1]; i++ {
-					if _, exists := m[i]; exists {
-						delete(m, i)
-					}
-				}
-
-				if value[0] < toplineNum && value[1] > toplineNum {
-					m[toplineNum] = st
-				}
-
-				if value[0] >= toplineNum {
-					m[value[0]] = st
-				}
-				if value[1] >= toplineNum {
-					if _, exists := m[value[1]]; !exists {
-						m[value[1]] = tcell.StyleDefault
+				for i := value[0]; i < value[1]; i++ {
+					if i >= toplineNum {
+						m[i] = st
 					}
 				}
 			}

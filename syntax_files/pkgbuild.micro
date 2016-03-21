@@ -1,7 +1,7 @@
 ## Arch PKGBUILD files
 ##
 syntax "PKGBUILD" "^.*PKGBUILD$"
-color green "(?s)^..*?$"
+color green (s) "^..*?$"
 color cyan "^.*(pkgbase|pkgname|pkgver|pkgrel|pkgdesc|arch|url|license).*=.*$"
 color brightcyan "\b(pkgbase|pkgname|pkgver|pkgrel|pkgdesc|arch|url|license)\b"
 color brightcyan "(\$|\$\{|\$\()(pkgbase|pkgname|pkgver|pkgrel|pkgdesc|arch|url|license)(\}|\))"

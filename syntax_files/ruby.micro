@@ -8,7 +8,7 @@ color yellow "\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\?|do|els
 ## Constants
 color brightblue "(\$|@|@@)?\b[A-Z]+[0-9A-Z_a-z]*"
 ## Ruby "symbols"
-icolor magenta "([ 	]|^):[0-9A-Z_]+\b"
+magenta (i) "([ 	]|^):[0-9A-Z_]+\b"
 ## Some unique things we want to stand out
 color brightyellow "\b(__FILE__|__LINE__)\b"
 ## Regular expressions
@@ -27,6 +27,7 @@ color green "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>" "
 color cyan "#[^{].*$" "#$"
 color brightcyan "##[^{].*$" "##$"
 ## "Here" docs
-color green "(?s)<<-?'?EOT'?.*?^EOT"
+color green (s) "<<-?'?EOT'?.*?^EOT"
 ## Some common markers
 color brightcyan "(XXX|TODO|FIXME|\?\?\?)"
+

@@ -8,9 +8,10 @@ color brightblue "\b(continue|else|elsif|do|for|foreach|if|unless|until|while|eq
 
 # Perl 6 words
 color brightcyan "\b(has|is|class|role|given|when|BUILD|multi|returns|method|submethod|slurp|say|sub)\b"
-color brightmagenta "(?s)[$@%].*?( |\\W|-)"
+color brightmagenta (s) "[$@%].*?( |\\W|-)"
 color brightred "".*"|qq\|.*\|"
 color white "[sm]/.*/"
-color brightblue "(?s)(^use| = new).*?;"
+color brightblue (s) "(^use| = new).*?;"
 color brightgreen "#.*"
-color brightred "(?s)<<EOSQL.*?EOSQL"
+color brightred (s) "<<EOSQL.*?EOSQL"
+

@@ -11,8 +11,8 @@ import (
 
 const (
 	tabSize      = 4
-	synLinesUp   = 100
-	synLinesDown = 100
+	synLinesUp   = 75
+	synLinesDown = 75
 )
 
 func main() {

@@ -20,6 +20,7 @@ color green "\b(include|inherit|initializer)\b"
 #expr modifiers
 color yellow "\b(new|ref|mutable|lazy|assert|raise)\b"
 #comments
-color white "(?s)\(\*.*?\*\)"
+color white (s) "\(\*.*?\*\)"
 #strings (no multiline handling yet)
 color brightblack ""[^\"]*""
+

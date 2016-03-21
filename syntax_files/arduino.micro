@@ -35,22 +35,22 @@ color brightred "\b[A-Z_][0-9A-Z_]+\b"
 color green "\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\b"
 
 ## Constants
-icolor green "\b(HIGH|LOW|INPUT|OUTPUT)\b"
+green (i) "\b(HIGH|LOW|INPUT|OUTPUT)\b"
 
 ## Serial Print
-icolor red "\b(DEC|BIN|HEX|OCT|BYTE)\b"
+red (i) "\b(DEC|BIN|HEX|OCT|BYTE)\b"
 
 ## PI Constants
-icolor green "\b(PI|HALF_PI|TWO_PI)\b"
+green (i) "\b(PI|HALF_PI|TWO_PI)\b"
 
 ## ShiftOut
-icolor green "\b(LSBFIRST|MSBFIRST)\b"
+green (i) "\b(LSBFIRST|MSBFIRST)\b"
 
 ## Attach Interrupt
-icolor green "\b(CHANGE|FALLING|RISING)\b"
+green (i) "\b(CHANGE|FALLING|RISING)\b"
 
 ## Analog Reference
-icolor green "\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\b"
+green (i) "\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\b"
 
 ## === FUNCTIONS === ##
 
@@ -106,11 +106,11 @@ color cyan "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidd
 color brightyellow "<[^=    ]*>" ""(\\.|[^"])*""
 
 ## This string is VERY resource intensive!
-color brightyellow "(?s)"(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
+color brightyellow (s) ""(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
 
 ## Comments
 color brightblue "//.*"
-color brightblue "(?s)/\*.*?\*/"
+color brightblue (s) "/\*.*?\*/"
 
 ## Trailing whitespace
 color ,green "[[:space:]]+$"

@@ -342,6 +342,8 @@ func (v *View) Display() {
 			st, ok := v.matches[charNum]
 			if ok {
 				highlightStyle = st
+			} else {
+				highlightStyle = tcell.StyleDefault
 			}
 
 			if v.cursor.HasSelection() &&

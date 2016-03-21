@@ -3,8 +3,9 @@
 
 syntax "CSS" "\.(css|scss)$"
 color brightred     "."
-color brightyellow  "(?s)\{.*?\}"
-color brightwhite   "(?s):.*?[;^\{]"
+color brightyellow  (s) "\{.*?\}"
+color brightwhite   (s) ":.*?[;^\{]"
 color brightblue    ":active|:focus|:hover|:link|:visited|:link|:after|:before|$"
-color brightblue    "(?s)\/\*.*?\*\/"
+color brightblue    (s) "\/\*.*?\*\/"
 color green         ";|:|\{|\}"
+

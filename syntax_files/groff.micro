@@ -9,16 +9,17 @@ color brightmagenta "\\."
 color brightmagenta "\\f." "\\f\(.." "\\s(\+|\-)?[0-9]"
 ## Newlines
 color cyan "(\\|\\\\)n(.|\(..)"
-color cyan "(?s)(\\|\\\\)n\[.*?]"
+color cyan (s) "(\\|\\\\)n\[.*?]"
 ## Requests
 color brightgreen "^\.[[:space:]]*[^[[:space:]]]*"
 ## Comments
 color yellow "^\.\\".*$"
 ## Strings
 color green "(\\|\\\\)\*(.|\(..)"
-color green "(?s)(\\|\\\\)\*\[.*?]"
+color green (s) "(\\|\\\\)\*\[.*?]"
 ## Characters
 color brightred "\\\(.."
-color brightred "(?s)\\\[.*?]"
+color brightred (s) "\\\[.*?]"
 ## Macro arguments
 color brightcyan "\\\\\$[1-9]"
+

@@ -21,16 +21,16 @@ color magenta "[A-Z][a-z]+"
 
 # Strings
 color green "\".*\""
-color green "(?s)\".*\\$.*?.*\""
+color green (s) "\".*\\$.*?.*\""
 # NOTE: This isn't accurate but matching "#{0,} for the end of the string is too liberal
-color green "(?s)r#+\".*?\"#+"
+color green (s) "r#+\".*?\"#+"
 
 # Comments
 color blue "//.*"
-color blue "(?s)/\*.*?\*/"
+color blue (s) "/\*.*?\*/"
 
 # Attributes
-color magenta "(?s)#!\[.*?\]"
+color magenta (s) "#!\[.*?\]"
 
 # Some common markers
 color brightcyan "(XXX|TODO|FIXME|\?\?\?)"

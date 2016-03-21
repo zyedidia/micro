@@ -12,4 +12,5 @@ color green "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
 color brightmagenta "\b(union|group|subgroup)\b"
 ## Comment highlighting
 color brightblue "//.*"
-color brightblue "(?s)/\*.*?\*/"
+color brightblue (s) "/\*.*?\*/"
+
