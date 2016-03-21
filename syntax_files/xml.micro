@@ -1,0 +1,11 @@
+## Here is an example for xml files.
+##
+
+syntax "XML" ".*\.([jrs]?html?|xml|sgml?|rng)$"
+color white "^.+$"
+color green  "(?s)<.*?>"
+color cyan   "<[^> ]+"
+color cyan   ">"
+color yellow "(?s)<!DOCTYPE.*?[/]?>"
+color yellow "(?s)<!--.*?-->"
+color red    "&[^;]*;"

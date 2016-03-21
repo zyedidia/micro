@@ -16,7 +16,7 @@ var syntaxFiles map[[2]*regexp.Regexp][2]string
 func LoadSyntaxFiles() {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
-	LoadSyntaxFilesFromDir(dir + "/.micro")
+	LoadSyntaxFilesFromDir(dir + "/.micro/syntax")
 }
 
 // JoinRule takes a syntax rule (which can be multiple regular expressions)

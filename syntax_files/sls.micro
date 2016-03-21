@@ -1,0 +1,26 @@
+## SaltStack files (*.sls)
+##
+
+syntax "Salt" "\.sls$"
+
+# Anything ending in a colon (:), including things that start with a dash (-)
+color blue "^[^ -].*:$"
+color blue ".*:"
+# Except for salt:// URLs
+color white "salt:"
+
+# Numbers, etc
+color red "/*[0-9]/*"
+color red "\b(True|False)\b"
+
+# Anything between two single quotes
+color green ""(\\.|[^"])*"|'(\\.|[^'])*'"
+
+# Matching keywords
+color yellow "\b(grain|grains|compound|pcre|grain_pcre|list|pillar)\b"
+
+# Comments
+color brightblack "^#.*"
+
+# Logic keywords
+color magenta "\b(if|elif|else|or|not|and|endif|end)\b"

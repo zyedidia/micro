@@ -1,0 +1,7 @@
+## Here is a short improved example for HTML.
+##
+syntax "HTML" "\.htm[l]?$"
+color brightblue "(?s)<.*?>"
+color red "&[^;[[:space:]]]*;"
+color yellow ""[^"]*"|qq\|.*\|"
+color red "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="

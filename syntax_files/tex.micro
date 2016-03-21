@@ -1,0 +1,8 @@
+## Here is a short example for TeX files.
+##
+syntax "TeX" "\.tex$" "bib" "\.bib$" "cls" "\.cls$"
+color yellow "\$[^$]*\$"
+icolor green "\\.|\\[A-Z]*"
+color magenta "[{}]"
+color blue "%.*"
+color blue "(?s)\\begin\{comment\}.*?\\end\{comment\}"

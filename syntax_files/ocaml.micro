@@ -1,0 +1,25 @@
+syntax "OCaml" "\.mli?$"
+#uid
+color red "\b[A-Z][0-9a-z_]{2,}\b"
+#declarations
+color green "\b(let|val|method|in|and|rec|private|virtual|constraint)\b"
+#structure items
+color red "\b(type|open|class|module|exception|external)\b"
+#patterns
+color blue "\b(fun|function|functor|match|try|with)\b"
+#patterns-modifiers
+color yellow "\b(as|when|of)\b" 
+#conditions
+color cyan "\b(if|then|else)\b"
+#blocs
+color magenta "\b(begin|end|object|struct|sig|for|while|do|done|to|downto)\b"
+#constantes
+color green "\b(true|false)\b"
+#modules/classes
+color green "\b(include|inherit|initializer)\b"
+#expr modifiers
+color yellow "\b(new|ref|mutable|lazy|assert|raise)\b"
+#comments
+color white "(?s)\(\*.*?\*\)"
+#strings (no multiline handling yet)
+color brightblack ""[^\"]*""

@@ -1,0 +1,11 @@
+syntax "JSON" "\.json$"
+header "^\{$"
+
+color blue   "\b[-]?[1-9][0-9]*([Ee][+-]?[0-9]+)?\b"  "\b[-]?[0](\.[0-9]+)?\b"
+color cyan  "\bnull\b"
+color brightcyan "\b(true|false)\b"
+color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color brightyellow "\"(\\"|[^"])*\"[[:space:]]*:"  "'(\'|[^'])*'[[:space:]]*:"
+color magenta   "\\u[0-9a-fA-F]{4}|\\[bfnrt'"/\\]"
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"

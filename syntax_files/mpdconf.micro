@@ -1,0 +1,9 @@
+syntax "MPD" "mpd\.conf$"
+
+color cyan "\b(user|group|bind_to_address|host|port|plugin|name|type)\b"
+color cyan "\b((music|playlist)_directory|(db|log|state|pid|sticker)_file)\b"
+color brightmagenta "^(input|audio_output|decoder)[[:space:]]*\{|\}"
+color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color brightblack "(^|[[:space:]])#([^{].*)?$"
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"

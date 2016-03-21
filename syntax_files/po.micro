@@ -1,0 +1,8 @@
+syntax "PO" "\.pot?$"
+
+color cyan  "\b(msgid|msgstr)\b"
+color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color magenta   "\\.?"
+color brightblack "(^|[[:space:]])#([^{].*)?$"
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"

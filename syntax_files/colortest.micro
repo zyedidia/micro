@@ -1,0 +1,17 @@
+syntax "colorTest" "ColorTest$"
+
+color black "\bPLAIN\b"
+
+color red "\bred\b"
+color green "\bgreen\b"
+color yellow "\byellow\b"
+color blue "\bblue\b"
+color magenta "\bmagenta\b"
+color cyan "\bcyan\b"
+
+color brightred "\bbrightred\b"
+color brightgreen "\bbrightgreen\b"
+color brightyellow "\bbrightyellow\b"
+color brightblue "\bbrightblue\b"
+color brightmagenta "\bbrightmagenta\b"
+color brightcyan "\bbrightcyan\b"

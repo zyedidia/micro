@@ -1,0 +1,11 @@
+syntax "INI" "\.(ini|desktop|lfl|override)$" "(mimeapps\.list|pinforc|setup\.cfg)$" "weechat/.+\.conf$"
+header "^\[[A-Za-z]+\]$"
+
+color brightcyan "\b(true|false)\b"
+color cyan "^[[:space:]]*[^=]*="
+color brightmagenta "^[[:space:]]*\[.*\]$"
+color red "[=;]"
+color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color brightblack "(^|[[:space:]])#([^{].*)?$"
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"

@@ -1,0 +1,13 @@
+syntax "Lisp" "(emacs|zile)$" "\.(el|li?sp|scm|ss)$"
+
+color brightblue "\([a-z-]+"
+color red "\(([-+*/<>]|<=|>=)|'"
+color blue   "\b[0-9]+\b"
+icolor cyan "\bnil\b"
+color brightcyan  "\b[tT]\b"
+color yellow   "\"(\\.|[^"])*\""
+color magenta   "'[A-Za-z][A-Za-z0-9_-]+"
+color magenta   "\\.?"
+color brightblack  "(^|[[:space:]]);.*"
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"

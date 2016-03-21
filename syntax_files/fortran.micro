@@ -1,0 +1,50 @@
+## Here is an example for Fortran 90/95
+
+syntax "Fortran" "\.([Ff]|[Ff]90|[Ff]95|[Ff][Oo][Rr])$"
+
+#color red "\b[A-Z_]a[0-9A-Z_]+\b" 
+color red "\b[0-9]+\b" 
+
+icolor green "\b(action|advance|all|allocatable|allocated|any|apostrophe)\b"
+icolor green "\b(append|asis|assign|assignment|associated|character|common)\b"
+icolor green "\b(complex|data|default|delim|dimension|double precision)\b"
+icolor green "\b(elemental|epsilon|external|file|fmt|form|format|huge)\b"
+icolor green "\b(implicit|include|index|inquire|integer|intent|interface)\b"
+icolor green "\b(intrinsic|iostat|kind|logical|module|none|null|only)\b"
+icolor green "\b(operator|optional|pack|parameter|pointer|position|private)\b"
+icolor green "\b(program|public|real|recl|recursive|selected_int_kind)\b"
+icolor green "\b(selected_real_kind|subroutine|status)\b"
+
+icolor cyan "\b(abs|achar|adjustl|adjustr|allocate|bit_size|call|char)\b" 
+icolor cyan "\b(close|contains|count|cpu_time|cshift|date_and_time)\b" 
+icolor cyan "\b(deallocate|digits|dot_product|eor|eoshift|function|iachar)\b" 
+icolor cyan "\b(iand|ibclr|ibits|ibset|ichar|ieor|iolength|ior|ishft|ishftc)\b" 
+icolor cyan "\b(lbound|len|len_trim|matmul|maxexponent|maxloc|maxval|merge)\b" 
+icolor cyan "\b(minexponent|minloc|minval|mvbits|namelist|nearest|nullify)\b" 
+icolor cyan "\b(open|pad|present|print|product|pure|quote|radix)\b" 
+icolor cyan "\b(random_number|random_seed|range|read|readwrite|replace)\b" 
+icolor cyan "\b(reshape|rewind|save|scan|sequence|shape|sign|size|spacing)\b" 
+icolor cyan "\b(spread|sum|system_clock|target|transfer|transpose|trim)\b" 
+icolor cyan "\b(ubound|unpack|verify|write|tiny|type|use|yes)\b"
+
+icolor yellow "\b(.and.|case|do|else|else?if|else?where|end|end?do|end?if)\b"
+icolor yellow "\b(end?select|.eqv.|forall|if|lge|lgt|lle|llt|.neqv.|.not.)\b"
+icolor yellow "\b(.or.|repeat|select case|then|where|while)\b"
+
+icolor magenta "\b(continue|cycle|exit|go?to|result|return)\b"
+
+#Operator Color
+color yellow "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
+
+#Parenthetical Color
+color magenta "[(){}]" "\[" "\]"
+
+# Add preprocessor commands.
+color brightcyan "^[[:space:]]*#[[:space:]]*(define|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
+
+## String highlighting.  
+icolor cyan "<[^=     ]*>" ""(\\.|[^"])*""
+icolor cyan "<[^=     ]*>" "'(\\.|[^"])*'"
+
+## Comment highlighting
+icolor brightred "!.*$" "(^[Cc]| [Cc]) .*$"

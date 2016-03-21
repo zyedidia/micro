@@ -1,0 +1,14 @@
+## Here is an example for Fish shell scripts.
+##
+syntax "Fish" "\.fish$"
+icolor brightgreen "^[0-9A-Z_]+\(\)"
+color green "\b(alias|begin|break|case|continue|contains|else|end|for|function|if|math|return|set|switch|test|while)\b"
+color green "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
+color green "\b(and|isatty|not|or|in)\b"
+color yellow "--[a-z-]+"
+color brightmagenta "\ -[a-z]+"
+color brightblue "\b(bg|bind|block|breakpoint|builtin|cd|command|commandline|complete|dirh|dirs|echo|emit|eval|exec|exit|fg|fish|fish_config|fish_ident|fish_pager|fish_prompt|fish_right_prompt|fish_update_completions|fishd|funced|funcsave|functions|help|history|jobs|mimedb|nextd|open|popd|prevd|psub|pushd|pwd|random|read|set_color|status|trap|type|ulimit|umask|vared)\b"
+icolor brightred "\$\{?[0-9A-Z_!@#$*?-]+\}?"
+color cyan "(^|[[:space:]])#.*$"
+color brightyellow ""(\\.|[^"])*"" "'(\\.|[^'])*'"
+color ,green "[[:space:]]+$"
