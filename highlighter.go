@@ -121,18 +121,25 @@ func GetRules(buf *Buffer) (string, string) {
 // Match takes a buffer and returns a map specifying how it should be syntax highlighted
 // The map is from character numbers to styles, so map[3] represents the style change
 // at the third character in the buffer
-func Match(rules string, buf *Buffer) map[int]tcell.Style {
-	// rules := strings.TrimSpace(GetRules(buf))
-	str := buf.text
+// Note that this map only stores changes in styles, not each character's style
+func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
+	start := v.topline - synLinesUp
+	end := v.topline + v.height + synLinesDown
+	if start < 0 {
+		start = 0
+	}
+	if end > len(buf.lines) {
+		end = len(buf.lines)
+	}
+	str := strings.Join(buf.lines[start:end], "\n")
+	startNum := v.cursor.loc + v.cursor.Distance(0, start)
+	toplineNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
 	lines := strings.Split(rules, "\n")
 	m := make(map[int]tcell.Style)
 	parser := regexp.MustCompile(`color (.*?)\s+"(.*)"`)
 	for _, line := range lines {
-		if strings.TrimSpace(line) == "" ||
-			strings.TrimSpace(line)[0] == '#' ||
-			strings.HasPrefix(line, "syntax") ||
-			strings.HasPrefix(line, "header") {
+		if strings.TrimSpace(line) == "" {
 			// Ignore this line
 			continue
 		}
@@ -148,14 +155,25 @@ func Match(rules string, buf *Buffer) map[int]tcell.Style {
 		if regex.MatchString(str) {
 			indicies := regex.FindAllStringIndex(str, -1)
 			for _, value := range indicies {
+				value[0] += startNum
+				value[1] += startNum
 				for i := value[0] + 1; i < value[1]; i++ {
 					if _, exists := m[i]; exists {
 						delete(m, i)
 					}
 				}
-				m[value[0]] = st
-				if _, exists := m[value[1]]; !exists {
-					m[value[1]] = tcell.StyleDefault
+
+				if value[0] < toplineNum && value[1] > toplineNum {
+					m[toplineNum] = st
+				}
+
+				if value[0] >= toplineNum {
+					m[value[0]] = st
+				}
+				if value[1] >= toplineNum {
+					if _, exists := m[value[1]]; !exists {
+						m[value[1]] = tcell.StyleDefault
+					}
 				}
 			}
 		}

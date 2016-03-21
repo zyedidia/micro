@@ -10,7 +10,9 @@ import (
 )
 
 const (
-	tabSize = 4
+	tabSize      = 4
+	synLinesUp   = 100
+	synLinesDown = 100
 )
 
 func main() {
@@ -71,6 +73,7 @@ func main() {
 	redraw := 2
 	for {
 		if redraw == 2 {
+			v.matches = Match(v.buf.rules, v.buf, v)
 			s.Clear()
 			v.Display()
 			v.cursor.Display()

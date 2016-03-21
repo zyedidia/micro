@@ -23,6 +23,9 @@ type View struct {
 
 	mouseReleased bool
 
+	// Syntax highlighting matches
+	matches map[int]tcell.Style
+
 	s tcell.Screen
 }
 
@@ -301,8 +304,6 @@ func (v *View) Display() {
 
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
-	matches := Match(v.buf.rules, v.buf)
-
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount
 	maxLineLength := len(strconv.Itoa(len(v.buf.lines)))
@@ -338,7 +339,7 @@ func (v *View) Display() {
 		tabchars := 0
 		for _, ch := range line {
 			var lineStyle tcell.Style
-			st, ok := matches[charNum]
+			st, ok := v.matches[charNum]
 			if ok {
 				highlightStyle = st
 			}
@@ -365,7 +366,7 @@ func (v *View) Display() {
 			x++
 		}
 		x = 0
-		st, ok := matches[charNum]
+		st, ok := v.matches[charNum]
 		if ok {
 			highlightStyle = st
 		}
