@@ -339,6 +339,9 @@ func (v *View) Display() {
 
 		// Write the line number
 		lineNumStyle := tcell.StyleDefault
+		if _, ok := colorscheme["line-number"]; ok {
+			lineNumStyle = colorscheme["line-number"]
+		}
 		// Write the spaces before the line number if necessary
 		lineNum := strconv.Itoa(lineN + v.topline + 1)
 		for i := 0; i < maxLineLength-len(lineNum); i++ {

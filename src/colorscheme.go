@@ -1,20 +1,56 @@
 package main
 
 import (
+	"fmt"
 	"github.com/zyedidia/tcell"
+	"io/ioutil"
+	"os/user"
+	"regexp"
 	"strings"
 )
 
-// The current colorscheme
-var colorscheme map[string]tcell.Style
+const colorschemeName = "solarized"
 
+// Colorscheme is a map from string to style -- it represents a colorscheme
+type Colorscheme map[string]tcell.Style
+
+// The current colorscheme
+var colorscheme Colorscheme
+
+// InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
-	colorscheme = DefaultColorscheme()
+	LoadColorscheme()
+	// LoadColorscheme may not have found any colorschemes
+	if colorscheme == nil {
+		colorscheme = DefaultColorscheme()
+	}
+}
+
+// LoadColorscheme loads the colorscheme from ~/.micro/colorschemes
+func LoadColorscheme() {
+	usr, _ := user.Current()
+	dir := usr.HomeDir
+	LoadColorschemeFromDir(dir + "/.micro/colorschemes")
+}
+
+// LoadColorschemeFromDir loads the colorscheme from a directory
+func LoadColorschemeFromDir(dir string) {
+	files, _ := ioutil.ReadDir(dir)
+	for _, f := range files {
+		if f.Name() == colorschemeName+".micro" {
+			text, err := ioutil.ReadFile(dir + "/" + f.Name())
+			if err != nil {
+				fmt.Println("Error loading colorscheme:", err)
+				continue
+			}
+			colorscheme = ParseColorscheme(string(text))
+		}
+	}
 }
 
 // DefaultColorscheme returns the default colorscheme
-func DefaultColorscheme() map[string]tcell.Style {
-	c := make(map[string]tcell.Style)
+func DefaultColorscheme() Colorscheme {
+	c := make(Colorscheme)
 	c["comment"] = StringToStyle("brightgreen")
 	c["constant"] = StringToStyle("cyan")
 	c["identifier"] = StringToStyle("blue")
@@ -23,9 +59,38 @@ func DefaultColorscheme() map[string]tcell.Style {
 	c["type"] = StringToStyle("yellow")
 	c["special"] = StringToStyle("red")
 	c["underlined"] = StringToStyle("brightmagenta")
-	c["ignore"] = StringToStyle("")
+	c["ignore"] = StringToStyle("default")
 	c["error"] = StringToStyle("bold brightred")
 	c["todo"] = StringToStyle("bold brightmagenta")
+	return c
+}
+
+// ParseColorscheme parses the text definition for a colorscheme and returns the corresponding object
+func ParseColorscheme(text string) Colorscheme {
+	parser := regexp.MustCompile(`color-link\s+(\S*)\s+"(.*)"`)
+
+	lines := strings.Split(text, "\n")
+
+	c := make(Colorscheme)
+
+	for _, line := range lines {
+		if strings.TrimSpace(line) == "" ||
+			strings.TrimSpace(line)[0] == '#' {
+			// Ignore this line
+			continue
+		}
+
+		matches := parser.FindSubmatch([]byte(line))
+		if len(matches) == 3 {
+			link := string(matches[1])
+			colors := string(matches[2])
+
+			c[link] = StringToStyle(colors)
+		} else {
+			fmt.Println("Color-link statement is not valid:", line)
+		}
+	}
+
 	return c
 }
 
@@ -43,9 +108,6 @@ func StringToStyle(str string) tcell.Style {
 	style := tcell.StyleDefault.Foreground(StringToColor(fg)).Background(StringToColor(bg))
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
-	}
-	if strings.Contains(str, "blink") {
-		style = style.Blink(true)
 	}
 	if strings.Contains(str, "reverse") {
 		style = style.Reverse(true)
@@ -91,7 +153,9 @@ func StringToColor(str string) tcell.Color {
 		return tcell.ColorAqua
 	case "brightwhite":
 		return tcell.ColorWhite
-	default:
+	case "default":
 		return tcell.ColorDefault
+	default:
+		return tcell.GetColor(str)
 	}
 }

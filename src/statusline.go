@@ -27,6 +27,9 @@ func (sl *Statusline) Display() {
 	file += " " + filetype
 
 	statusLineStyle := tcell.StyleDefault.Reverse(true)
+	if _, ok := colorscheme["statusline"]; ok {
+		statusLineStyle = colorscheme["statusline"]
+	}
 
 	for x := 0; x < sl.v.width; x++ {
 		if x < Count(file) {
