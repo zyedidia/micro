@@ -2,14 +2,14 @@
 ##
 syntax "CMake" "(CMakeLists\.txt|\.cmake)$"
 
-green (i) "^[[:space:]]*[A-Z0-9_]+"
-brightyellow (i) "^[[:space:]]*(include|include_directories|include_external_msproject)\b"
+color green (i) "^[[:space:]]*[A-Z0-9_]+"
+color brightyellow (i) "^[[:space:]]*(include|include_directories|include_external_msproject)\b"
 
-brightgreen (i) "^[[:space:]]*\b((else|end)?if|else|(end)?while|(end)?foreach|break)\b"
+color brightgreen (i) "^[[:space:]]*\b((else|end)?if|else|(end)?while|(end)?foreach|break)\b"
 color brightgreen "\b(COPY|NOT|COMMAND|PROPERTY|POLICY|TARGET|EXISTS|IS_(DIRECTORY|ABSOLUTE)|DEFINED)\b[[:space:]]"
 color brightgreen "[[:space:]]\b(OR|AND|IS_NEWER_THAN|MATCHES|(STR|VERSION_)?(LESS|GREATER|EQUAL))\b[[:space:]]"
 
-brightred (i) "^[[:space:]]*\b((end)?(function|macro)|return)"
+color brightred (i) "^[[:space:]]*\b((end)?(function|macro)|return)"
 
 #String Color
 color cyan "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
@@ -18,6 +18,7 @@ color cyan "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
 brightred (is) "\$(\{|ENV\{).*?\}"
 color magenta "\b(APPLE|UNIX|WIN32|CYGWIN|BORLAND|MINGW|MSVC(_IDE|60|71|80|90)?)\b"
 
-brightblue (i) "^([[:space:]]*)?#.*"
-brightblue (i) "[[:space:]]#.*"
+color brightblue (i) "^([[:space:]]*)?#.*"
+color brightblue (i) "[[:space:]]#.*"
+
 

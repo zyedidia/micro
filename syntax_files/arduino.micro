@@ -35,22 +35,22 @@ color brightred "\b[A-Z_][0-9A-Z_]+\b"
 color green "\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\b"
 
 ## Constants
-green (i) "\b(HIGH|LOW|INPUT|OUTPUT)\b"
+color green (i) "\b(HIGH|LOW|INPUT|OUTPUT)\b"
 
 ## Serial Print
-red (i) "\b(DEC|BIN|HEX|OCT|BYTE)\b"
+color red (i) "\b(DEC|BIN|HEX|OCT|BYTE)\b"
 
 ## PI Constants
-green (i) "\b(PI|HALF_PI|TWO_PI)\b"
+color green (i) "\b(PI|HALF_PI|TWO_PI)\b"
 
 ## ShiftOut
-green (i) "\b(LSBFIRST|MSBFIRST)\b"
+color green (i) "\b(LSBFIRST|MSBFIRST)\b"
 
 ## Attach Interrupt
-green (i) "\b(CHANGE|FALLING|RISING)\b"
+color green (i) "\b(CHANGE|FALLING|RISING)\b"
 
 ## Analog Reference
-green (i) "\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\b"
+color green (i) "\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\b"
 
 ## === FUNCTIONS === ##
 
@@ -100,7 +100,7 @@ color brightmagenta "'([^'\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\
 ## GCC builtins
 color cyan "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
 
-## String highlighting.  You will in general want your comments and
+## String highlighting.  You will in general want your brightblacks and
 ## strings to come last, because syntax highlighting rules will be
 ## applied in the order they are read in.
 color brightyellow "<[^=    ]*>" ""(\\.|[^"])*""

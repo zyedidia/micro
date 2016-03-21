@@ -36,6 +36,6 @@ color red "(<\?(php)?|\?>)"
 color red (s) "\?>.*?<\?(php|=)?"
 # trailing whitespace
 color ,green "[^[:space:]]{1}[[:space:]]+$"
-# multi-line comments
+# multi-line brightblacks
 color brightyellow (s) "/\*.*?\*/"
 

@@ -33,6 +33,8 @@ func JoinRule(rule string) string {
 // This involves finding the regex for syntax and if it exists, the regex
 // for the header. Then we must get the text for the file and the filetype.
 func LoadSyntaxFilesFromDir(dir string) {
+	InitColorscheme()
+
 	syntaxFiles = make(map[[2]*regexp.Regexp][2]string)
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
@@ -156,7 +158,12 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 			// Error with the regex!
 			continue
 		}
-		st := StringToStyle(color)
+		st := tcell.StyleDefault
+		if _, ok := colorscheme[color]; ok {
+			st = colorscheme[color]
+		} else {
+			st = StringToStyle(color)
+		}
 
 		if regex.MatchString(str) {
 			indicies := regex.FindAllStringIndex(str, -1)
@@ -173,58 +180,4 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 	}
 
 	return m
-}
-
-// StringToStyle returns a style from a string
-func StringToStyle(str string) tcell.Style {
-	var fg string
-	var bg string
-	split := strings.Split(str, ",")
-	if len(split) > 1 {
-		fg, bg = split[0], split[1]
-	} else {
-		fg = split[0]
-	}
-
-	return tcell.StyleDefault.Foreground(StringToColor(fg)).Background(StringToColor(bg))
-}
-
-// StringToColor returns a tcell color from a string representation of a color
-func StringToColor(str string) tcell.Color {
-	switch str {
-	case "black":
-		return tcell.ColorBlack
-	case "red":
-		return tcell.ColorMaroon
-	case "green":
-		return tcell.ColorGreen
-	case "yellow":
-		return tcell.ColorOlive
-	case "blue":
-		return tcell.ColorNavy
-	case "magenta":
-		return tcell.ColorPurple
-	case "cyan":
-		return tcell.ColorTeal
-	case "white":
-		return tcell.ColorSilver
-	case "brightblack":
-		return tcell.ColorGray
-	case "brightred":
-		return tcell.ColorRed
-	case "brightgreen":
-		return tcell.ColorLime
-	case "brightyellow":
-		return tcell.ColorYellow
-	case "brightblue":
-		return tcell.ColorBlue
-	case "brightmagenta":
-		return tcell.ColorFuchsia
-	case "brightcyan":
-		return tcell.ColorAqua
-	case "brightwhite":
-		return tcell.ColorWhite
-	default:
-		return tcell.ColorDefault
-	}
 }

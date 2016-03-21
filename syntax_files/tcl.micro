@@ -17,7 +17,7 @@ color brightyellow "\b[0-9]+(\.[0-9]+)?\b"
 ## Strings
 color yellow ""(\\.|[^"])*"" "'(\\.|[^'])*'"
 ## Variables
-brightred (i) "\$\{?[0-9A-Z_!@#$*?-]+\}?"
+color brightred (i) "\$\{?[0-9A-Z_!@#$*?-]+\}?"
 ## Comments
 color magenta "(^|;)[[:space:]]*#.*"
 ## Trailing whitespace

@@ -22,7 +22,7 @@ color brightblue "prepall(docs|info|man|strip)" "prep(info|lib|lib\.(so|a)|man|s
 color brightblue "\b(doc|ins|exe)into\b" "\bf(owners|perms)\b" "\b(exe|ins|dir)opts\b"
 ## Highlight common commands used in ebuilds
 color blue "\bmake\b" "\b(cat|cd|chmod|chown|cp|echo|env|export|grep|let|ln|mkdir|mv|rm|sed|set|tar|touch|unset)\b"
-## Highlight comments (doesnt work that well)
+## Highlight brightblacks (doesnt work that well)
 color yellow "#.*$"
 ## Highlight strings (doesnt work that well)
 color brightyellow ""(\\.|[^\"])*"" "'(\\.|[^'])*'"

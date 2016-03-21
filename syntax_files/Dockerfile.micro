@@ -2,7 +2,7 @@
 syntax "Dockerfile" "Dockerfile[^/]*$" "\.dockerfile$"
 
 ## Keywords
-red (i) "^(FROM|MAINTAINER|RUN|CMD|LABEL|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ONBUILD)[[:space:]]"
+color red (i) "^(FROM|MAINTAINER|RUN|CMD|LABEL|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ONBUILD)[[:space:]]"
 
 ## Brackets & parenthesis
 color brightgreen "(\(|\)|\[|\])"
@@ -11,7 +11,7 @@ color brightgreen "(\(|\)|\[|\])"
 color brightmagenta "&&"
 
 ## Comments
-cyan (i) "^[[:space:]]*#.*$"
+color cyan (i) "^[[:space:]]*#.*$"
 
 ## Blank space at EOL
 color ,green "[[:space:]]+$"

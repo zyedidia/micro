@@ -4,37 +4,31 @@
 
 syntax "Swift" "\.swift$"
 
-# Default
-color white ".+"
-
 # Operators
-color yellow "[.:;,+*|=!?\%]" "<" ">" "/" "-" "&"
+color statement "[.:;,+*|=!?\%]" "<" ">" "/" "-" "&"
 
 # Statements
-color magenta  "(class|import|let|var|struct|enum|func|if|else|switch|case|default|for|in|internal|external|unowned|private|public|throws)\ "
-color magenta  "(prefix|postfix|operator|extension|lazy|get|set|self|willSet|didSet|override|super|convenience|weak|strong|mutating|return|guard)\ "
+color statement  "(class|import|let|var|struct|enum|func|if|else|switch|case|default|for|in|internal|external|unowned|private|public|throws)\ "
+color statement  "(prefix|postfix|operator|extension|lazy|get|set|self|willSet|didSet|override|super|convenience|weak|strong|mutating|return|guard)\ "
 
 # Keywords
-color cyan "(print)"
-color magenta "(init)"
+color statement "(print)"
+color statement "(init)"
 
 # Numbers
-color blue "([0-9]+)"
+color constant "([0-9]+)"
 
 # Standard Types
-color brightmagenta "\ ((U)?Int(8|16|32|64))"
-color brightmagenta "(true|false|nil)"
-color brightmagenta "\ (Double|String|Float|Boolean|Dictionary|Array|Int)"
-color magenta "\ (AnyObject)"
+color type "\ ((U)?Int(8|16|32|64))"
+color constant "(true|false|nil)"
+color type "\ (Double|String|Float|Boolean|Dictionary|Array|Int)"
+color type "\ (AnyObject)"
 
 # Text
-color red ""[^"]*""
+color constant ""[^"]*""
 
 # Comments
-color green "//.*"
-color brightgreen "///.*"
-color green (s) "/\*\*.*?\*/"
-color green "[/**]"
-
-# Trailing whitespace
-color ,green "[[:space:]]+$"
+color comment "//.*"
+color comment "///.*"
+color comment (s) "/\*\*.*?\*/"
+color comment "[/**]"

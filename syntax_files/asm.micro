@@ -5,12 +5,12 @@ color red "\b[A-Z_]{2,}\b"
 color brightgreen "\.(data|subsection|text)"
 color green "\.(align|file|globl|global|hidden|section|size|type|weak)"
 color brightyellow "\.(ascii|asciz|byte|double|float|hword|int|long|short|single|struct|word)"
-brightred (i) "^[[:space:]]*[.0-9A-Z_]*:"
+color brightred (i) "^[[:space:]]*[.0-9A-Z_]*:"
 color brightcyan "^[[:space:]]*#[[:space:]]*(define|undef|include|ifn?def|endif|elif|else|if|warning|error)"
 ## Highlight strings (note: VERY resource intensive)
 color brightyellow "<[^= 	]*>" ""(\\.|[^"])*""
 color brightyellow (s) ""(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
-## Highlight comments
+## Highlight brightblacks
 color brightblue "//.*"
 color brightblue (s) "/\*.*?\*/"
 ## Highlight trailing whitespace

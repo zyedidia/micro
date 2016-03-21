@@ -5,32 +5,32 @@
 syntax "Rust" "\.rs"
 
 # function definition
-color magenta "fn [a-z0-9_]+"
+color identifier "fn [a-z0-9_]+"
 
 # Reserved words
-color yellow "\b(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\b"
+color statement "\b(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\b"
 
 # macros
-color red "[a-z_]+!"
+color special "[a-z_]+!"
 
 # Constants
-color magenta "[A-Z][A-Z_]+"
+color constant "[A-Z][A-Z_]+"
 
 # Traits/Enums/Structs/Types/etc.
-color magenta "[A-Z][a-z]+"
+color type "[A-Z][a-z]+"
 
 # Strings
-color green "\".*\""
-color green (s) "\".*\\$.*?.*\""
+color constant "\".*\""
+color constant (s) "\".*?\""
 # NOTE: This isn't accurate but matching "#{0,} for the end of the string is too liberal
-color green (s) "r#+\".*?\"#+"
+color constant (s) "r#+\".*?\"#+"
 
 # Comments
-color blue "//.*"
-color blue (s) "/\*.*?\*/"
+color comment "//.*"
+color comment (s) "/\*.*?\*/"
 
 # Attributes
-color magenta (s) "#!\[.*?\]"
+color special (s) "#!\[.*?\]"
 
 # Some common markers
-color brightcyan "(XXX|TODO|FIXME|\?\?\?)"
+color todo "(XXX|TODO|FIXME|\?\?\?)"

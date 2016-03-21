@@ -14,61 +14,58 @@
 # Automatically use for '.lua' files
 syntax "Lua" ".*\.lua$"
 
-# General
-color brightwhite ".+"
-
 # Operators
-color brightyellow ":|\*\*|\*|/|%|\+|-|\^|>|>=|<|<=|~=|=|\.\.|\b(not|and|or)\b"
+color statement ":|\*\*|\*|/|%|\+|-|\^|>|>=|<|<=|~=|=|\.\.|\b(not|and|or)\b"
 
 # Statements
-color brightblue "\b(do|end|while|repeat|until|if|elseif|then|else|for|in|function|local|return)\b"
+color statement "\b(do|end|while|repeat|until|if|elseif|then|else|for|in|function|local|return)\b"
 
 # Keywords
-color brightyellow "\b(debug|string|math|table|io|coroutine|os|utf8|bit32)\b\."
-color brightyellow "\b(_ENV|_G|_VERSION|assert|collectgarbage|dofile|error|getfenv|getmetatable|ipairs|load|loadfile|module|next|pairs|pcall|print|rawequal|rawget|rawlen|rawset|require|select|setfenv|setmetatable|tonumber|tostring|type|unpack|xpcall)\s*\("
+color statement "\b(debug|string|math|table|io|coroutine|os|utf8|bit32)\b\."
+color statement "\b(_ENV|_G|_VERSION|assert|collectgarbage|dofile|error|getfenv|getmetatable|ipairs|load|loadfile|module|next|pairs|pcall|print|rawequal|rawget|rawlen|rawset|require|select|setfenv|setmetatable|tonumber|tostring|type|unpack|xpcall)\s*\("
 
 # Standard library
-color brightyellow "io\.\b(close|flush|input|lines|open|output|popen|read|tmpfile|type|write)\b"
-color brightyellow "math\.\b(abs|acos|asin|atan2|atan|ceil|cosh|cos|deg|exp|floor|fmod|frexp|huge|ldexp|log10|log|max|maxinteger|min|mininteger|modf|pi|pow|rad|random|randomseed|sinh|sqrt|tan|tointeger|type|ult)\b"
-color brightyellow "os\.\b(clock|date|difftime|execute|exit|getenv|remove|rename|setlocale|time|tmpname)\b"
-color brightyellow "package\.\b(config|cpath|loaded|loadlib|path|preload|seeall|searchers|searchpath)\b"
-color brightyellow "string\.\b(byte|char|dump|find|format|gmatch|gsub|len|lower|match|pack|packsize|rep|reverse|sub|unpack|upper)\b"
-color brightyellow "table\.\b(concat|insert|maxn|move|pack|remove|sort|unpack)\b"
-color brightyellow "utf8\.\b(char|charpattern|codes|codepoint|len|offset)\b"
-color brightyellow "coroutine\.\b(create|isyieldable|resume|running|status|wrap|yield)\b"
-color brightyellow "debug\.\b(debug|getfenv|gethook|getinfo|getlocal|getmetatable|getregistry|getupvalue|getuservalue|setfenv|sethook|setlocal|setmetatable|setupvalue|setuservalue|traceback|upvalueid|upvaluejoin)\b"
-color brightyellow "bit32\.\b(arshift|band|bnot|bor|btest|bxor|extract|replace|lrotate|lshift|rrotate|rshift)\b"
+color identifier "io\.\b(close|flush|input|lines|open|output|popen|read|tmpfile|type|write)\b"
+color identifier "math\.\b(abs|acos|asin|atan2|atan|ceil|cosh|cos|deg|exp|floor|fmod|frexp|huge|ldexp|log10|log|max|maxinteger|min|mininteger|modf|pi|pow|rad|random|randomseed|sinh|sqrt|tan|tointeger|type|ult)\b"
+color identifier "os\.\b(clock|date|difftime|execute|exit|getenv|remove|rename|setlocale|time|tmpname)\b"
+color identifier "package\.\b(config|cpath|loaded|loadlib|path|preload|seeall|searchers|searchpath)\b"
+color identifier "string\.\b(byte|char|dump|find|format|gmatch|gsub|len|lower|match|pack|packsize|rep|reverse|sub|unpack|upper)\b"
+color identifier "table\.\b(concat|insert|maxn|move|pack|remove|sort|unpack)\b"
+color identifier "utf8\.\b(char|charpattern|codes|codepoint|len|offset)\b"
+color identifier "coroutine\.\b(create|isyieldable|resume|running|status|wrap|yield)\b"
+color identifier "debug\.\b(debug|getfenv|gethook|getinfo|getlocal|getmetatable|getregistry|getupvalue|getuservalue|setfenv|sethook|setlocal|setmetatable|setupvalue|setuservalue|traceback|upvalueid|upvaluejoin)\b"
+color identifier "bit32\.\b(arshift|band|bnot|bor|btest|bxor|extract|replace|lrotate|lshift|rrotate|rshift)\b"
 
 # File handle methods
-color brightyellow "\:\b(close|flush|lines|read|seek|setvbuf|write)\b"
+color identifier "\:\b(close|flush|lines|read|seek|setvbuf|write)\b"
 
 # false, nil, true
-color brightmagenta "\b(false|nil|true)\b"
+color constant "\b(false|nil|true)\b"
 
 # External files
-color brightgreen "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"
+color statement "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"
 
 # Numbers
-color red "\b([0-9]+)\b"
+color constant "\b([0-9]+)\b"
 
 # Symbols
-color brightmagenta "(\(|\)|\[|\]|\{|\})"
+color statement "(\(|\)|\[|\]|\{|\})"
 
 # Strings
-color red "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
+color constant "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
 
 # Multiline strings
-color red (s) "\s*\[\[.*?\]\]"
+color constant (s) "\s*\[\[.*?\]\]"
 
 # Escapes
-color red "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
+color special "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
 
 # Shebang
-color brightcyan "^#!.*"
+color comment "^#!.*"
 
-# Simple comments
-color green "\-\-.*$"
+# Simple brightblacks
+color comment "\-\-.*$"
 
-# Multiline comments
-color green (s) "\s*\-\-\s*\[\[.*?\]\]"
+# Multiline brightblacks
+color comment (s) "\s*\-\-\s*\[\[.*?\]\]"
 
