@@ -24,9 +24,17 @@ Not all of this is implemented yet -- see [progress](#progress)
 
 Installation is simple. For now you must build from source, although in the future binaries will be provided.
 
+Make sure your `GOPATH` is set.
+
 ```
-go get -u github.com/zyedidia/micro
+$ git clone https://github.com/zyedidia/micro
+$ cd micro
+$ make
 ```
+
+This will build micro and put the binary in the current directory. It will also install syntax highlighting files to `~/.micro/syntax`.
+
+Alternatively you can use `make install` instead of `make` if you want the binary to be added to you `GOBIN` (make sure that it is set).
 
 # Progress
 
