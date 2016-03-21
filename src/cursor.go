@@ -72,32 +72,36 @@ func (c *Cursor) RuneUnder() rune {
 // Up moves the cursor up one line (if possible)
 func (c *Cursor) Up() {
 	if c.y > 0 {
-		c.loc -= Count(c.v.buf.lines[c.y][:c.x])
+		runes := []rune(c.v.buf.lines[c.y])
+		c.loc -= len(runes[:c.x])
 		// Count the newline
 		c.loc--
 		c.y--
+		runes = []rune(c.v.buf.lines[c.y])
 
-		if c.x > Count(c.v.buf.lines[c.y]) {
-			c.x = Count(c.v.buf.lines[c.y])
+		if c.x > len(runes) {
+			c.x = len(runes)
 		}
 
-		c.loc -= Count(c.v.buf.lines[c.y][c.x:])
+		c.loc -= len(runes[c.x:])
 	}
 }
 
 // Down moves the cursor down one line (if possible)
 func (c *Cursor) Down() {
 	if c.y < len(c.v.buf.lines)-1 {
-		c.loc += Count(c.v.buf.lines[c.y][c.x:])
+		runes := []rune(c.v.buf.lines[c.y])
+		c.loc += len(runes[c.x:])
 		// Count the newline
 		c.loc++
 		c.y++
+		runes = []rune(c.v.buf.lines[c.y])
 
-		if c.x > Count(c.v.buf.lines[c.y]) {
-			c.x = Count(c.v.buf.lines[c.y])
+		if c.x > len(runes) {
+			c.x = len(runes)
 		}
 
-		c.loc += Count(c.v.buf.lines[c.y][:c.x])
+		c.loc += len(runes[:c.x])
 	}
 }
 
@@ -131,13 +135,15 @@ func (c *Cursor) Right() {
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
-	c.loc += Count(c.v.buf.lines[c.y][c.x:])
-	c.x = Count(c.v.buf.lines[c.y])
+	runes := []rune(c.v.buf.lines[c.y])
+	c.loc += len(runes[c.x:])
+	c.x = len(runes)
 }
 
 // Start moves the cursor to the start of the line it is on
 func (c *Cursor) Start() {
-	c.loc -= Count(c.v.buf.lines[c.y][:c.x])
+	runes := []rune(c.v.buf.lines[c.y])
+	c.loc -= len(runes[:c.x])
 	c.x = 0
 }
 
@@ -156,7 +162,8 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
-	return c.x + NumOccurences(c.v.buf.lines[c.y][:c.x], '\t')*(tabSize-1)
+	runes := []rune(c.v.buf.lines[c.y])
+	return c.x + NumOccurences(string(runes[:c.x]), '\t')*(tabSize-1)
 }
 
 // Distance returns the distance between the cursor and x, y in runes
@@ -167,8 +174,9 @@ func (c *Cursor) Distance(x, y int) int {
 	}
 
 	var distance int
+	runes := []rune(c.v.buf.lines[c.y])
 	if y > c.y {
-		distance += Count(c.v.buf.lines[c.y][c.x:])
+		distance += len(runes[c.x:])
 		// Newline
 		distance++
 		i := 1
@@ -179,14 +187,14 @@ func (c *Cursor) Distance(x, y int) int {
 			i++
 		}
 		if x < Count(c.v.buf.lines[y]) {
-			distance += Count(c.v.buf.lines[y][:x])
+			distance += len([]rune(c.v.buf.lines[y])[:x])
 		} else {
 			distance += Count(c.v.buf.lines[y])
 		}
 		return distance
 	}
 
-	distance -= Count(c.v.buf.lines[c.y][:c.x])
+	distance -= len(runes[:c.x])
 	// Newline
 	distance--
 	i := 1
@@ -197,7 +205,7 @@ func (c *Cursor) Distance(x, y int) int {
 		i++
 	}
 	if x >= 0 {
-		distance -= Count(c.v.buf.lines[y][x:])
+		distance -= len([]rune(c.v.buf.lines[y])[x:])
 	}
 	return distance
 }
