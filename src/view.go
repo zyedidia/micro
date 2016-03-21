@@ -10,10 +10,18 @@ import (
 // It has a value for the cursor, and the window that the user sees
 // the buffer from.
 type View struct {
-	cursor        Cursor
-	topline       int
+	cursor  Cursor
+	topline int
+	// Leftmost column. Used for horizontal scrolling
+	leftCol int
+
+	// Percentage of the terminal window that this view takes up
+	heightPercent float32
+	widthPercent  float32
 	height        int
 	width         int
+
+	// How much to offset because of line numbers
 	lineNumOffset int
 
 	eh *EventHandler
@@ -31,20 +39,21 @@ type View struct {
 
 // NewView returns a new view with fullscreen width and height
 func NewView(buf *Buffer, s tcell.Screen) *View {
-	w, h := s.Size()
-	return NewViewWidthHeight(buf, s, w, h-1)
+	return NewViewWidthHeight(buf, s, 1, 1)
 }
 
-// NewViewWidthHeight returns a new view with the specified width and height
-func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h int) *View {
+// NewViewWidthHeight returns a new view with the specified width and height percentages
+func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h float32) *View {
 	v := new(View)
 
 	v.buf = buf
 	v.s = s
 
+	v.widthPercent = w
+	v.heightPercent = h
+	v.Resize(s.Size())
+
 	v.topline = 0
-	v.height = h - 1
-	v.width = w
 	v.cursor = Cursor{
 		x:   0,
 		y:   0,
@@ -59,6 +68,13 @@ func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h int) *View {
 	}
 
 	return v
+}
+
+// Resize recalculates the width and height of the view based on the width and height percentages
+func (v *View) Resize(w, h int) {
+	h--
+	v.height = int(float32(h)*v.heightPercent) - 1
+	v.width = int(float32(w) * v.widthPercent)
 }
 
 // ScrollUp scrolls the view up n lines (if possible)
@@ -125,6 +141,9 @@ func (v *View) HalfPageDown() {
 func (v *View) HandleEvent(event tcell.Event) int {
 	var ret int
 	switch e := event.(type) {
+	case *tcell.EventResize:
+		v.Resize(e.Size())
+		ret = 2
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyUp:
