@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"github.com/gdamore/tcell"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
+	"github.com/zyedidia/tcell"
 	"io/ioutil"
 	"os"
 )

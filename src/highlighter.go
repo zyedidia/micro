@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	"io/ioutil"
 	"os/user"
 	"path/filepath"
