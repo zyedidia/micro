@@ -250,7 +250,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				y = v.height + v.topline - 1
 			}
 			if y > len(v.buf.lines) {
-				y = len(v.buf.lines) - 2
+				y = len(v.buf.lines) - 1
 			}
 			if x < 0 {
 				x = 0
