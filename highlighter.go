@@ -19,6 +19,15 @@ func LoadSyntaxFiles() {
 	LoadSyntaxFilesFromDir(dir + "/.micro")
 }
 
+// JoinRule takes a syntax rule (which can be multiple regular expressions)
+// and joins it into one regular expression by ORing everything together
+func JoinRule(rule string) string {
+	split := strings.Split(rule, `" "`)
+	joined := strings.Join(split, ")|(")
+	joined = "(" + joined + ")"
+	return joined
+}
+
 // LoadSyntaxFilesFromDir loads the syntax files from a specified directory
 // To load the syntax files, we must fill the `syntaxFiles` map
 // This involves finding the regex for syntax and if it exists, the regex
@@ -35,29 +44,63 @@ func LoadSyntaxFilesFromDir(dir string) {
 				continue
 			}
 			lines := strings.Split(string(text), "\n")
-			syntaxParser := regexp.MustCompile(`syntax "(.*?)"\s+"(.*)"`)
+
+			syntaxParser := regexp.MustCompile(`syntax "(.*?)"\s+"(.*)"+`)
 			headerParser := regexp.MustCompile(`header "(.*)"`)
-			syntaxMatches := syntaxParser.FindSubmatch([]byte(lines[0]))
 
+			var syntaxRegex *regexp.Regexp
 			var headerRegex *regexp.Regexp
-			if strings.HasPrefix(lines[1], "header") {
-				headerMatches := headerParser.FindSubmatch([]byte(lines[1]))
-				headerRegex, err = regexp.Compile(string(headerMatches[1]))
-
-				if err != nil {
-					// Error with the regex!
+			var filetype string
+			var rules string
+			for _, line := range lines {
+				if strings.TrimSpace(line) == "" ||
+					strings.TrimSpace(line)[0] == '#' {
+					// Ignore this line
 					continue
 				}
-			}
 
-			syntaxRegex, err := regexp.Compile(string(syntaxMatches[2]))
-			if err != nil {
-				// Error with the regex!
-				continue
-			}
+				if strings.HasPrefix(line, "syntax") {
+					syntaxMatches := syntaxParser.FindSubmatch([]byte(line))
+					if len(syntaxMatches) == 3 {
+						if syntaxRegex != nil {
+							regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
+							syntaxFiles[regexes] = [2]string{rules, filetype}
+						}
 
-			regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
-			syntaxFiles[regexes] = [2]string{string(text), string(syntaxMatches[1])}
+						filetype = string(syntaxMatches[1])
+						extensions := JoinRule(string(syntaxMatches[2]))
+
+						syntaxRegex, err = regexp.Compile(extensions)
+						if err != nil {
+							fmt.Println("Regex error:", err)
+							continue
+						}
+					} else {
+						fmt.Println("Syntax statement is not valid:", line)
+						continue
+					}
+				} else if strings.HasPrefix(line, "header") {
+					headerMatches := headerParser.FindSubmatch([]byte(line))
+					if len(headerMatches) == 2 {
+						header := JoinRule(string(headerMatches[1]))
+
+						headerRegex, err = regexp.Compile(header)
+						if err != nil {
+							fmt.Println("Regex error:", err)
+							continue
+						}
+					} else {
+						fmt.Println("Header statement is not valid:", line)
+						continue
+					}
+				} else {
+					rules += line + "\n"
+				}
+			}
+			if syntaxRegex != nil {
+				regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
+				syntaxFiles[regexes] = [2]string{rules, filetype}
+			}
 		}
 	}
 }
@@ -66,7 +109,7 @@ func LoadSyntaxFilesFromDir(dir string) {
 // and returns them. It also returns the filetype of the file
 func GetRules(buf *Buffer) (string, string) {
 	for r := range syntaxFiles {
-		if r[0].MatchString(buf.path) {
+		if r[0] != nil && r[0].MatchString(buf.path) {
 			return syntaxFiles[r][0], syntaxFiles[r][1]
 		} else if r[1] != nil && r[1].MatchString(buf.lines[0]) {
 			return syntaxFiles[r][0], syntaxFiles[r][1]
