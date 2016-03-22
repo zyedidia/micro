@@ -1,3 +1,5 @@
+cd ..
+
 mkdir -p binaries
 mkdir -p micro/bin
 cp -r runtime micro/
