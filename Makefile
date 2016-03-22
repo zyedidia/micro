@@ -7,4 +7,4 @@ install: syn-files build
 
 syn-files:
 	mkdir -p ~/.micro/syntax
-	cp syntax_files/* ~/.micro/syntax
+	cp -r runtime ~/.micro
