@@ -1,7 +1,7 @@
 # Micro syntax highlighting files
 
 These are the syntax highlighting files for micro. To install them, just
-put them all in `~/.micro/syntax`.
+run `./install.sh` one directory up (`runtime/`) which will simply put all the syntax files in `~/.micro/syntax`.
 
 They are taken from Nano, specifically from [this repository](https://github.com/scopatz/nanorc).
 Micro syntax files are almost identical to Nano's, except for some key differences:

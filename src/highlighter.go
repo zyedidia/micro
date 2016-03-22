@@ -149,9 +149,9 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 		color := string(submatch[1])
 		var regexStr string
 		if len(submatch) == 4 {
-			regexStr = "(?m" + string(submatch[2]) + ")" + string(submatch[3])
+			regexStr = "(?m" + string(submatch[2]) + ")" + JoinRule(string(submatch[3]))
 		} else if len(submatch) == 3 {
-			regexStr = "(?m)" + string(submatch[2])
+			regexStr = "(?m)" + JoinRule(string(submatch[2]))
 		}
 		regex, err := regexp.Compile(regexStr)
 		if err != nil {

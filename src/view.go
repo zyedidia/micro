@@ -268,7 +268,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				v.ScrollDown(1)
 				y = v.height + v.topline - 1
 			}
-			if y > len(v.buf.lines) {
+			if y >= len(v.buf.lines) {
 				y = len(v.buf.lines) - 1
 			}
 			if x < 0 {
