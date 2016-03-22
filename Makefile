@@ -1,9 +1,9 @@
 build: syn-files
-	make build -C src
-	mv src/micro .
+	go get -d ./src
+	go build -o micro ./src
 
-install: syn-files
-	make install -C src
+install: syn-files build
+	mv micro $(GOBIN)
 
 syn-files:
 	mkdir -p ~/.micro/syntax
