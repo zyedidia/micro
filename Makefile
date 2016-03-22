@@ -7,4 +7,4 @@ install: syn-files
 
 syn-files:
 	mkdir -p ~/.micro/syntax
-	./runtime/install.sh
+	cp -r runtime ~/.micro
