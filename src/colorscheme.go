@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const colorschemeName = "solarized"
+const colorschemeName = "default"
 
 // Colorscheme is a map from string to style -- it represents a colorscheme
 type Colorscheme map[string]tcell.Style

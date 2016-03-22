@@ -41,7 +41,14 @@ func main() {
 
 	LoadSyntaxFiles()
 
-	s, e := tcell.NewScreen()
+	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
+
+	oldTerm := os.Getenv("TERM")
+	if truecolor {
+		os.Setenv("TERM", "xterm-truecolor")
+	}
+
+	s, e := tcell.NewTerminfoScreen()
 	if e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
@@ -49,6 +56,10 @@ func main() {
 	if e := s.Init(); e != nil {
 		fmt.Fprintf(os.Stderr, "%v\n", e)
 		os.Exit(1)
+	}
+
+	if truecolor {
+		os.Setenv("TERM", oldTerm)
 	}
 
 	defer func() {
@@ -63,6 +74,10 @@ func main() {
 	defStyle := tcell.StyleDefault.
 		Background(tcell.ColorDefault).
 		Foreground(tcell.ColorDefault)
+
+	if _, ok := colorscheme["default"]; ok {
+		defStyle = colorscheme["default"]
+	}
 
 	s.SetStyle(defStyle)
 	s.EnableMouse()
