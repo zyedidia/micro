@@ -27,7 +27,7 @@ type Buffer struct {
 	lines []string
 
 	// Syntax highlighting rules
-	rules string
+	rules []SyntaxRule
 	// File type of the buffer
 	filetype string
 }

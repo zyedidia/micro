@@ -77,7 +77,7 @@ color constant "q"\{.*\}""
 color constant "q"\[.*\]""
 color constant "q"<.*>""
 color constant (s) "q"[^({[<"][^"]*$.*?^[^"]+""
-color constant "q"([^({[<"]).*\1""
+color constant "q"([^({[<"]).*""
 
 ### TokenString
 ### True token strings require nesting, so, again, they can't be implemented accurately here.

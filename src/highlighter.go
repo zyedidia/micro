@@ -10,7 +10,17 @@ import (
 	"strings"
 )
 
-var syntaxFiles map[[2]*regexp.Regexp][2]string
+type FileTypeRules struct {
+	filetype string
+	rules    []SyntaxRule
+}
+
+type SyntaxRule struct {
+	regex *regexp.Regexp
+	style tcell.Style
+}
+
+var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
 // LoadSyntaxFiles loads the syntax files from the default directory ~/.micro
 func LoadSyntaxFiles() {
@@ -35,7 +45,7 @@ func JoinRule(rule string) string {
 func LoadSyntaxFilesFromDir(dir string) {
 	InitColorscheme()
 
-	syntaxFiles = make(map[[2]*regexp.Regexp][2]string)
+	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".micro" {
@@ -49,12 +59,13 @@ func LoadSyntaxFilesFromDir(dir string) {
 
 			syntaxParser := regexp.MustCompile(`syntax "(.*?)"\s+"(.*)"+`)
 			headerParser := regexp.MustCompile(`header "(.*)"`)
+			ruleParser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?"(.*)"`)
 
 			var syntaxRegex *regexp.Regexp
 			var headerRegex *regexp.Regexp
 			var filetype string
-			var rules string
-			for _, line := range lines {
+			var rules []SyntaxRule
+			for lineNum, line := range lines {
 				if strings.TrimSpace(line) == "" ||
 					strings.TrimSpace(line)[0] == '#' {
 					// Ignore this line
@@ -66,8 +77,9 @@ func LoadSyntaxFilesFromDir(dir string) {
 					if len(syntaxMatches) == 3 {
 						if syntaxRegex != nil {
 							regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
-							syntaxFiles[regexes] = [2]string{rules, filetype}
+							syntaxFiles[regexes] = FileTypeRules{filetype, rules}
 						}
+						rules = rules[:0]
 
 						filetype = string(syntaxMatches[1])
 						extensions := JoinRule(string(syntaxMatches[2]))
@@ -96,12 +108,34 @@ func LoadSyntaxFilesFromDir(dir string) {
 						continue
 					}
 				} else {
-					rules += line + "\n"
+					if ruleParser.MatchString(line) {
+						submatch := ruleParser.FindSubmatch([]byte(line))
+						color := string(submatch[1])
+						var regexStr string
+						if len(submatch) == 4 {
+							regexStr = "(?m" + string(submatch[2]) + ")" + JoinRule(string(submatch[3]))
+						} else if len(submatch) == 3 {
+							regexStr = "(?m)" + JoinRule(string(submatch[2]))
+						}
+						regex, err := regexp.Compile(regexStr)
+						if err != nil {
+							fmt.Println(f.Name(), lineNum, err)
+							continue
+						}
+
+						st := tcell.StyleDefault
+						if _, ok := colorscheme[color]; ok {
+							st = colorscheme[color]
+						} else {
+							st = StringToStyle(color)
+						}
+						rules = append(rules, SyntaxRule{regex, st})
+					}
 				}
 			}
 			if syntaxRegex != nil {
 				regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
-				syntaxFiles[regexes] = [2]string{rules, filetype}
+				syntaxFiles[regexes] = FileTypeRules{filetype, rules}
 			}
 		}
 	}
@@ -109,22 +143,22 @@ func LoadSyntaxFilesFromDir(dir string) {
 
 // GetRules finds the syntax rules that should be used for the buffer
 // and returns them. It also returns the filetype of the file
-func GetRules(buf *Buffer) (string, string) {
+func GetRules(buf *Buffer) ([]SyntaxRule, string) {
 	for r := range syntaxFiles {
 		if r[0] != nil && r[0].MatchString(buf.path) {
-			return syntaxFiles[r][0], syntaxFiles[r][1]
+			return syntaxFiles[r].rules, syntaxFiles[r].filetype
 		} else if r[1] != nil && r[1].MatchString(buf.lines[0]) {
-			return syntaxFiles[r][0], syntaxFiles[r][1]
+			return syntaxFiles[r].rules, syntaxFiles[r].filetype
 		}
 	}
-	return "", "Unknown"
+	return nil, "Unknown"
 }
 
 // Match takes a buffer and returns a map specifying how it should be syntax highlighted
 // The map is from character numbers to styles, so map[3] represents the style change
 // at the third character in the buffer
 // Note that this map only stores changes in styles, not each character's style
-func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
+func Match(rules []SyntaxRule, buf *Buffer, v *View) map[int]tcell.Style {
 	start := v.topline - synLinesUp
 	end := v.topline + v.height + synLinesDown
 	if start < 0 {
@@ -137,42 +171,16 @@ func Match(rules string, buf *Buffer, v *View) map[int]tcell.Style {
 	startNum := v.cursor.loc + v.cursor.Distance(0, start)
 	toplineNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
-	lines := strings.Split(rules, "\n")
 	m := make(map[int]tcell.Style)
-	parser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?"(.*)"`)
-	for _, line := range lines {
-		if strings.TrimSpace(line) == "" {
-			// Ignore this line
-			continue
-		}
-		submatch := parser.FindSubmatch([]byte(line))
-		color := string(submatch[1])
-		var regexStr string
-		if len(submatch) == 4 {
-			regexStr = "(?m" + string(submatch[2]) + ")" + JoinRule(string(submatch[3]))
-		} else if len(submatch) == 3 {
-			regexStr = "(?m)" + JoinRule(string(submatch[2]))
-		}
-		regex, err := regexp.Compile(regexStr)
-		if err != nil {
-			// Error with the regex!
-			continue
-		}
-		st := tcell.StyleDefault
-		if _, ok := colorscheme[color]; ok {
-			st = colorscheme[color]
-		} else {
-			st = StringToStyle(color)
-		}
-
-		if regex.MatchString(str) {
-			indicies := regex.FindAllStringIndex(str, -1)
+	for _, rule := range rules {
+		if rule.regex.MatchString(str) {
+			indicies := rule.regex.FindAllStringIndex(str, -1)
 			for _, value := range indicies {
 				value[0] += startNum
 				value[1] += startNum
 				for i := value[0]; i < value[1]; i++ {
 					if i >= toplineNum {
-						m[i] = st
+						m[i] = rule.style
 					}
 				}
 			}

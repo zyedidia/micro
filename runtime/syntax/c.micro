@@ -9,7 +9,7 @@ color statement "\b(for|if|while|do|else|case|default|switch)\b"
 color statement "\b(try|throw|catch|operator|new|delete)\b"
 color statement "\b(goto|continue|break|return)\b"
 color preproc "^[[:space:]]*#[[:space:]]*(define|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
-color brightmagenta "'([^'\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
+color constant "'([^'\\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
 
 ##
 ## GCC builtins
