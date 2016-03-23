@@ -20,6 +20,10 @@
     - [ ] Help screen which lists keybindings and commands
     - [ ] Opened with Ctrl-h
 
+- [ ] Messages/Prompts
+    - [ ] Messages at the bottom of the screen
+    - [ ] Prompts at the bottom of the screen
+
 - [ ] Command execution
     - [ ] Allow executing simple commands at the bottom of the editor 
       (like vim or emacs)
