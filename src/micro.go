@@ -84,18 +84,22 @@ func main() {
 
 	v := NewView(NewBuffer(string(input), filename), s)
 
+	Message("welcome to micro")
+
 	// Initially everything needs to be drawn
 	redraw := 2
 	for {
 		if redraw == 2 {
 			v.matches = Match(v.buf.rules, v.buf, v)
 			s.Clear()
+			DisplayMessage(s)
 			v.Display()
 			v.cursor.Display()
 			v.sl.Display()
 			s.Show()
 		} else if redraw == 1 {
 			v.cursor.Display()
+			DisplayMessage(s)
 			v.sl.Display()
 			s.Show()
 		}
