@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 	"strconv"
 )
 

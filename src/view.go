@@ -2,7 +2,7 @@ package main
 
 import (
 	"github.com/atotto/clipboard"
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 	"os"
 	"strconv"
 	"strings"

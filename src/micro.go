@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 	"io/ioutil"
 	"os"
 )

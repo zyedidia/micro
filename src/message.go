@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 )
 
 // Messenger is an object that can send messages to the user and get input from the user (with a prompt)
