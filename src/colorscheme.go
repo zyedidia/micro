@@ -9,7 +9,7 @@ import (
 	"strings"
 )
 
-const colorschemeName = "default"
+const defaultColorscheme = "default"
 
 // Colorscheme is a map from string to style -- it represents a colorscheme
 type Colorscheme map[string]tcell.Style
@@ -19,22 +19,18 @@ var colorscheme Colorscheme
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
-	LoadColorscheme()
-	// LoadColorscheme may not have found any colorschemes
-	if colorscheme == nil {
-		colorscheme = DefaultColorscheme()
-	}
+	LoadDefaultColorscheme()
 }
 
-// LoadColorscheme loads the colorscheme from ~/.micro/colorschemes
-func LoadColorscheme() {
+// LoadDefaultColorscheme loads the default colorscheme from ~/.micro/colorschemes
+func LoadDefaultColorscheme() {
 	usr, _ := user.Current()
 	dir := usr.HomeDir
-	LoadColorschemeFromDir(dir + "/.micro/colorschemes")
+	LoadColorscheme(defaultColorscheme, dir+"/.micro/colorschemes")
 }
 
-// LoadColorschemeFromDir loads the colorscheme from a directory
-func LoadColorschemeFromDir(dir string) {
+// LoadColorscheme loads the given colorscheme from a directory
+func LoadColorscheme(colorschemeName, dir string) {
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
 		if f.Name() == colorschemeName+".micro" {
@@ -46,23 +42,6 @@ func LoadColorschemeFromDir(dir string) {
 			colorscheme = ParseColorscheme(string(text))
 		}
 	}
-}
-
-// DefaultColorscheme returns the default colorscheme
-func DefaultColorscheme() Colorscheme {
-	c := make(Colorscheme)
-	c["comment"] = StringToStyle("brightgreen")
-	c["constant"] = StringToStyle("cyan")
-	c["identifier"] = StringToStyle("blue")
-	c["statement"] = StringToStyle("green")
-	c["preproc"] = StringToStyle("brightred")
-	c["type"] = StringToStyle("yellow")
-	c["special"] = StringToStyle("red")
-	c["underlined"] = StringToStyle("brightmagenta")
-	c["ignore"] = StringToStyle("default")
-	c["error"] = StringToStyle("bold brightred")
-	c["todo"] = StringToStyle("bold brightmagenta")
-	return c
 }
 
 // ParseColorscheme parses the text definition for a colorscheme and returns the corresponding object
