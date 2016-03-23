@@ -2,8 +2,6 @@
 
 ### Not done
 
-- [ ] Simple auto-completion
-
 - [ ] Tests
 
 - [ ] Proper error handling
@@ -17,9 +15,6 @@
 - [ ] More keybindings
     - [x] Use pageup and pagedown keys
     - [ ] Much more (copy sublime text or standard system applications)
-
-- [ ] Colorschemes
-    - [ ] Support for 256 color and true color
 
 - [ ] Help screen
     - [ ] Help screen which lists keybindings and commands
@@ -46,3 +41,6 @@
 
 - [x] Clipboard support
     - [x] Ctrl-v, Ctrl-c, and Ctrl-x
+
+- [x] Colorschemes
+    - [x] Support for 256 color and true color
