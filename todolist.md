@@ -21,7 +21,7 @@
     - [ ] Opened with Ctrl-h
 
 - [ ] Messages/Prompts
-    - [ ] Messages at the bottom of the screen
+    - [x] Messages at the bottom of the screen
     - [ ] Prompts at the bottom of the screen
 
 - [ ] Command execution
