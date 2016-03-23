@@ -4,7 +4,7 @@ mkdir -p binaries
 mkdir -p micro/bin
 cp -r runtime micro/
 
-echo 'mv runtime ~/.micro' >> micro/install.sh
+echo 'cp -r runtime/* ~/.micro' >> micro/install.sh
 chmod +x micro/install.sh
 
 # Mac
@@ -27,20 +27,17 @@ GOOS=linux GOARCH=arm go build -o micro/bin/micro ./src
 tar -czf micro-linux-arm.tar.gz micro
 mv micro-linux-arm.tar.gz binaries
 
-rm micro/bin/micro
-rm micro/install.sh
-
-echo 'move runtime %HOMEPATH%\.micro' >> micro/install.bat
-chmod +x micro/install.bat
-
-# Windows
-echo "Windows 64"
-GOOS=windows GOARCH=amd64 go build -o micro/bin/micro.exe ./src
-zip -r -q -T micro-win64.zip micro
-mv micro-win64.zip binaries
-echo "Windows 32"
-GOOS=windows GOARCH=386 go build -o micro/bin/micro.exe ./src
-zip -r -q -T micro-win32.zip micro
-mv micro-win32.zip binaries
-
 rm -rf micro
+
+# No windows building right now
+# echo 'move runtime %HOMEPATH%\.micro' >> micro/install.bat
+# chmod +x micro/install.bat
+# Windows
+# echo "Windows 64"
+# GOOS=windows GOARCH=amd64 go build -o micro/bin/micro.exe ./src
+# zip -r -q -T micro-win64.zip micro
+# mv micro-win64.zip binaries
+# echo "Windows 32"
+# GOOS=windows GOARCH=386 go build -o micro/bin/micro.exe ./src
+# zip -r -q -T micro-win32.zip micro
+# mv micro-win32.zip binaries
