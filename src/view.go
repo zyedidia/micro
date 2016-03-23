@@ -424,6 +424,18 @@ func (v *View) Display() {
 			charNum++
 			x++
 		}
+		if v.cursor.HasSelection() &&
+			(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
+				charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
+
+			selectStyle := tcell.StyleDefault.Reverse(true)
+
+			if _, ok := colorscheme["selection"]; ok {
+				selectStyle = colorscheme["selection"]
+			}
+			v.s.SetContent(x+tabchars, lineN, ' ', nil, selectStyle)
+		}
+
 		x = 0
 		st, ok := v.matches[charNum]
 		if ok {
