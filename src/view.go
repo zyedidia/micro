@@ -402,8 +402,12 @@ func (v *View) Display() {
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
 					charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
-				lineStyle = tcell.StyleDefault
-				lineStyle = lineStyle.Reverse(true)
+
+				lineStyle = tcell.StyleDefault.Reverse(true)
+
+				if _, ok := colorscheme["selection"]; ok {
+					lineStyle = colorscheme["selection"]
+				}
 			} else {
 				lineStyle = highlightStyle
 			}
