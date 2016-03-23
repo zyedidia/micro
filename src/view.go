@@ -3,7 +3,9 @@ package main
 import (
 	"github.com/atotto/clipboard"
 	"github.com/zyedidia/tcell"
+	"os"
 	"strconv"
+	"strings"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -34,20 +36,23 @@ type View struct {
 	// Syntax highlighting matches
 	matches map[int]tcell.Style
 
+	m *Messenger
+
 	s tcell.Screen
 }
 
 // NewView returns a new view with fullscreen width and height
-func NewView(buf *Buffer, s tcell.Screen) *View {
-	return NewViewWidthHeight(buf, s, 1, 1)
+func NewView(buf *Buffer, m *Messenger, s tcell.Screen) *View {
+	return NewViewWidthHeight(buf, m, s, 1, 1)
 }
 
 // NewViewWidthHeight returns a new view with the specified width and height percentages
-func NewViewWidthHeight(buf *Buffer, s tcell.Screen, w, h float32) *View {
+func NewViewWidthHeight(buf *Buffer, m *Messenger, s tcell.Screen, w, h float32) *View {
 	v := new(View)
 
 	v.buf = buf
 	v.s = s
+	v.m = m
 
 	v.widthPercent = w
 	v.heightPercent = h
@@ -146,6 +151,23 @@ func (v *View) HandleEvent(event tcell.Event) int {
 		ret = 2
 	case *tcell.EventKey:
 		switch e.Key() {
+		case tcell.KeyCtrlQ:
+			if v.buf.IsDirty() {
+				quit, canceled := v.m.Prompt("You have unsaved changes. Quit anyway? ")
+				if !canceled {
+					if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
+						v.s.Fini()
+						os.Exit(0)
+					} else {
+						return 2
+					}
+				} else {
+					return 2
+				}
+			} else {
+				v.s.Fini()
+				os.Exit(0)
+			}
 		case tcell.KeyUp:
 			v.cursor.Up()
 			ret = 1
@@ -189,9 +211,18 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeyCtrlS:
+			if v.buf.path == "" {
+				filename, canceled := v.m.Prompt("Filename: ")
+				if !canceled {
+					v.buf.path = filename
+					v.buf.name = filename
+				} else {
+					return 2
+				}
+			}
 			err := v.buf.Save()
 			if err != nil {
-				Error(err.Error())
+				v.m.Error(err.Error())
 			}
 			// Need to redraw the status line
 			ret = 1

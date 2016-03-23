@@ -67,6 +67,11 @@ func (b *Buffer) SaveAs(filename string) error {
 	return err
 }
 
+// IsDirty returns whether or not the buffer has been modified compared to the one on disk
+func (b *Buffer) IsDirty() bool {
+	return b.savedText != b.text
+}
+
 // Insert a string into the rope
 func (b *Buffer) Insert(idx int, value string) {
 	b.r.Insert(idx, value)

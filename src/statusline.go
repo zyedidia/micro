@@ -19,7 +19,7 @@ func (sl *Statusline) Display() {
 	if file == "" {
 		file = "Untitled"
 	}
-	if sl.v.buf.text != sl.v.buf.savedText {
+	if sl.v.buf.IsDirty() {
 		file += " +"
 	}
 	file += " (" + strconv.Itoa(sl.v.cursor.y+1) + "," + strconv.Itoa(sl.v.cursor.GetVisualX()+1) + ")"

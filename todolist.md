@@ -20,10 +20,6 @@
     - [ ] Help screen which lists keybindings and commands
     - [ ] Opened with Ctrl-h
 
-- [ ] Messages/Prompts
-    - [x] Messages at the bottom of the screen
-    - [ ] Prompts at the bottom of the screen
-
 - [ ] Command execution
     - [ ] Allow executing simple commands at the bottom of the editor 
       (like vim or emacs)
@@ -48,3 +44,7 @@
 
 - [x] Colorschemes
     - [x] Support for 256 color and true color
+
+- [x] Messages/Prompts
+    - [x] Messages at the bottom of the screen
+    - [x] Prompts at the bottom of the screen

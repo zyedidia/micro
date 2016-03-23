@@ -82,9 +82,8 @@ func main() {
 	s.SetStyle(defStyle)
 	s.EnableMouse()
 
-	v := NewView(NewBuffer(string(input), filename), s)
-
-	Message("welcome to micro")
+	m := NewMessenger(s)
+	v := NewView(NewBuffer(string(input), filename), m, s)
 
 	// Initially everything needs to be drawn
 	redraw := 2
@@ -92,28 +91,19 @@ func main() {
 		if redraw == 2 {
 			v.matches = Match(v.buf.rules, v.buf, v)
 			s.Clear()
-			DisplayMessage(s)
 			v.Display()
 			v.cursor.Display()
 			v.sl.Display()
+			m.Display()
 			s.Show()
 		} else if redraw == 1 {
 			v.cursor.Display()
-			DisplayMessage(s)
 			v.sl.Display()
+			m.Display()
 			s.Show()
 		}
 
 		event := s.PollEvent()
-
-		switch e := event.(type) {
-		case *tcell.EventKey:
-			if e.Key() == tcell.KeyCtrlQ {
-				s.Fini()
-				os.Exit(0)
-			}
-		}
-
 		redraw = v.HandleEvent(event)
 	}
 }
