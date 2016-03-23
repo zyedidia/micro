@@ -191,7 +191,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 		case tcell.KeyCtrlS:
 			err := v.buf.Save()
 			if err != nil {
-				// Error!
+				Error(err.Error())
 			}
 			// Need to redraw the status line
 			ret = 1
