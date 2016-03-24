@@ -147,11 +147,13 @@ func (v *View) HandleEvent(event tcell.Event) int {
 	var ret int
 	switch e := event.(type) {
 	case *tcell.EventResize:
+		// Window resized
 		v.Resize(e.Size())
 		ret = 2
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyCtrlQ:
+			// Quit
 			if v.buf.IsDirty() {
 				quit, canceled := v.m.Prompt("You have unsaved changes. Quit anyway? ")
 				if !canceled {
@@ -169,26 +171,33 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				os.Exit(0)
 			}
 		case tcell.KeyUp:
+			// Cursor up
 			v.cursor.Up()
 			ret = 1
 		case tcell.KeyDown:
+			// Cursor down
 			v.cursor.Down()
 			ret = 1
 		case tcell.KeyLeft:
+			// Cursor left
 			v.cursor.Left()
 			ret = 1
 		case tcell.KeyRight:
+			// Cursor right
 			v.cursor.Right()
 			ret = 1
 		case tcell.KeyEnter:
+			// Insert a newline
 			v.eh.Insert(v.cursor.loc, "\n")
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeySpace:
+			// Insert a space
 			v.eh.Insert(v.cursor.loc, " ")
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeyBackspace2:
+			// Delete a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
@@ -207,10 +216,12 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				ret = 2
 			}
 		case tcell.KeyTab:
+			// Insert a tab
 			v.eh.Insert(v.cursor.loc, "\t")
 			v.cursor.Right()
 			ret = 2
 		case tcell.KeyCtrlS:
+			// Save
 			if v.buf.path == "" {
 				filename, canceled := v.m.Prompt("Filename: ")
 				if !canceled {
@@ -227,12 +238,15 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			// Need to redraw the status line
 			ret = 1
 		case tcell.KeyCtrlZ:
+			// Undo
 			v.eh.Undo()
 			ret = 2
 		case tcell.KeyCtrlY:
+			// Redo
 			v.eh.Redo()
 			ret = 2
 		case tcell.KeyCtrlC:
+			// Copy
 			if v.cursor.HasSelection() {
 				if !clipboard.Unsupported {
 					clipboard.WriteAll(v.cursor.GetSelection())
@@ -240,6 +254,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				}
 			}
 		case tcell.KeyCtrlX:
+			// Cut
 			if v.cursor.HasSelection() {
 				if !clipboard.Unsupported {
 					clipboard.WriteAll(v.cursor.GetSelection())
@@ -249,6 +264,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				}
 			}
 		case tcell.KeyCtrlV:
+			// Paste
 			if !clipboard.Unsupported {
 				if v.cursor.HasSelection() {
 					v.cursor.DeleteSelection()
@@ -262,19 +278,32 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				}
 				ret = 2
 			}
+		case tcell.KeyCtrlA:
+			// Select all
+			v.cursor.selectionEnd = 0
+			v.cursor.selectionStart = v.buf.Len()
+			v.cursor.x = 0
+			v.cursor.y = 0
+			v.cursor.loc = 0
+			ret = 2
 		case tcell.KeyPgUp:
+			// Page up
 			v.PageUp()
 			return 2
 		case tcell.KeyPgDn:
+			// Page down
 			v.PageDown()
 			return 2
 		case tcell.KeyCtrlU:
+			// Half page up
 			v.HalfPageUp()
 			return 2
 		case tcell.KeyCtrlD:
+			// Half page down
 			v.HalfPageDown()
 			return 2
 		case tcell.KeyRune:
+			// Insert a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
@@ -295,6 +324,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 
 		switch button {
 		case tcell.Button1:
+			// Left click
 			if y-v.topline > v.height-1 {
 				v.ScrollDown(1)
 				y = v.height + v.topline - 1
@@ -324,17 +354,24 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			v.mouseReleased = false
 			return 2
 		case tcell.ButtonNone:
+			// Mouse event with no click
 			v.mouseReleased = true
+			// We need to directly return here because otherwise the view will
+			// be readjusted to put the cursor in it, but there may be mouse events
+			// where the cursor is not (and should not be) be involved
 			return 0
 		case tcell.WheelUp:
+			// Scroll up two lines
 			v.ScrollUp(2)
 			return 2
 		case tcell.WheelDown:
+			// Scroll down two lines
 			v.ScrollDown(2)
 			return 2
 		}
 	}
 
+	// Reset the view so the cursor is in view
 	cy := v.cursor.y
 	if cy < v.topline {
 		v.topline = cy
