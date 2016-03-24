@@ -8,13 +8,19 @@
 
 - [ ] Optimization/Cleanup
 
+- [ ] Search and replace
+
 - [ ] Better selection
     - [ ] Double click selects current word
     - [ ] Triple click enables line selection
 
 - [ ] More keybindings
-    - [x] Use pageup and pagedown keys
-    - [ ] Much more (copy sublime text or standard system applications)
+    - [x] Page up and page down
+    - [x] CtrlA for select all
+    - [x] CtrlO for open file
+    - [ ] CtrlF for find
+    - [x] CtrlZ for undo
+    - [x] CtrlY for redo
 
 - [ ] Help screen
     - [ ] Help screen which lists keybindings and commands
@@ -40,7 +46,7 @@
     - [x] Undo/redo stack
 
 - [x] Clipboard support
-    - [x] Ctrl-v, Ctrl-c, and Ctrl-x
+    - [x] CtrlV, CtrlC, and CtrlX
 
 - [x] Colorschemes
     - [x] Support for 256 color and true color
