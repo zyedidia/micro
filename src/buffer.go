@@ -81,6 +81,12 @@ func (b *Buffer) Insert(idx int, value string) {
 // Remove a slice of the rope from start to end (exclusive)
 // Returns the string that was removed
 func (b *Buffer) Remove(start, end int) string {
+	if start < 0 {
+		start = 0
+	}
+	if end > b.Len() {
+		end = b.Len()
+	}
 	removed := b.text[start:end]
 	b.r.Remove(start, end)
 	b.Update()
