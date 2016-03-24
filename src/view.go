@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -286,6 +287,22 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			v.cursor.y = 0
 			v.cursor.loc = 0
 			ret = 2
+		case tcell.KeyCtrlO:
+			// Open file
+			if v.buf.IsDirty() {
+				quit, canceled := v.m.Prompt("You have unsaved changes. Continue? ")
+				if !canceled {
+					if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
+						return v.OpenFile()
+					} else {
+						return 2
+					}
+				} else {
+					return 2
+				}
+			} else {
+				return v.OpenFile()
+			}
 		case tcell.KeyPgUp:
 			// Page up
 			v.PageUp()
@@ -383,6 +400,22 @@ func (v *View) HandleEvent(event tcell.Event) int {
 	}
 
 	return ret
+}
+
+// OpenFile Prompts the user for a filename and opens the file in the current buffer
+func (v *View) OpenFile() int {
+	filename, canceled := v.m.Prompt("File to open: ")
+	if canceled {
+		return 2
+	}
+	file, err := ioutil.ReadFile(filename)
+
+	if err != nil {
+		v.m.Error(err.Error())
+		return 2
+	}
+	v.buf = NewBuffer(string(file), filename)
+	return 2
 }
 
 // Display renders the view to the screen
