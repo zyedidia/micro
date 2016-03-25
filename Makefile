@@ -10,6 +10,7 @@ syn-files:
 	cp -r runtime/* ~/.micro
 
 test:
+	go get -d ./src
 	go test ./src
 
 clean:
