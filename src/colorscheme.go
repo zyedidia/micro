@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gdamore/tcell"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"os/user"
 	"regexp"
@@ -25,8 +26,11 @@ func InitColorscheme() {
 
 // LoadDefaultColorscheme loads the default colorscheme from ~/.micro/colorschemes
 func LoadDefaultColorscheme() {
-	usr, _ := user.Current()
-	dir := usr.HomeDir
+	dir, err := homedir.Dir()
+	if err != nil {
+		TermMessage("Error finding your home directory\nCan't load runtime files")
+		return
+	}
 	LoadColorscheme(defaultColorscheme, dir+"/.micro/colorschemes")
 }
 
