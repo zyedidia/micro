@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gdamore/tcell"
 	"os"
+	"strconv"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -19,6 +20,12 @@ func TermMessage(msg string) {
 
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
+}
+
+// TermError sends an error to the user in the terminal. Like TermMessage except formatted
+// as an error
+func TermError(filename string, lineNum int, err string) {
+	TermMessage(filename + ", " + strconv.Itoa(lineNum) + ": " + err)
 }
 
 // Messenger is an object that makes it easy to send messages to the user

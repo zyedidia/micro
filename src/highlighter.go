@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
 	"os/user"
@@ -20,6 +19,10 @@ type FileTypeRules struct {
 type SyntaxRule struct {
 	// What to highlight
 	regex *regexp.Regexp
+	// Any flags
+	flags string
+	// Whether this regex is a start=... end=... regex
+	startend bool
 	// How to highlight it
 	style tcell.Style
 }
@@ -54,16 +57,19 @@ func LoadSyntaxFilesFromDir(dir string) {
 	for _, f := range files {
 		if filepath.Ext(f.Name()) == ".micro" {
 			text, err := ioutil.ReadFile(dir + "/" + f.Name())
+			filename := dir + "/" + f.Name()
 
 			if err != nil {
-				fmt.Println("Error loading syntax files:", err)
+				TermMessage("Error loading syntax files: " + err.Error())
 				continue
 			}
 			lines := strings.Split(string(text), "\n")
 
 			syntaxParser := regexp.MustCompile(`syntax "(.*?)"\s+"(.*)"+`)
 			headerParser := regexp.MustCompile(`header "(.*)"`)
+
 			ruleParser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?"(.*)"`)
+			ruleStartEndParser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?start="(.*?)"\s+end="(.*?)"`)
 
 			var syntaxRegex *regexp.Regexp
 			var headerRegex *regexp.Regexp
@@ -90,11 +96,11 @@ func LoadSyntaxFilesFromDir(dir string) {
 
 						syntaxRegex, err = regexp.Compile(extensions)
 						if err != nil {
-							fmt.Println("Regex error:", err)
+							TermError(filename, lineNum, err.Error())
 							continue
 						}
 					} else {
-						fmt.Println("Syntax statement is not valid:", line)
+						TermError(filename, lineNum, "Syntax statement is not valid: "+line)
 						continue
 					}
 				} else if strings.HasPrefix(line, "header") {
@@ -104,26 +110,32 @@ func LoadSyntaxFilesFromDir(dir string) {
 
 						headerRegex, err = regexp.Compile(header)
 						if err != nil {
-							fmt.Println("Regex error:", err)
+							TermError(filename, lineNum, "Regex error: "+err.Error())
 							continue
 						}
 					} else {
-						fmt.Println("Header statement is not valid:", line)
+						TermError(filename, lineNum, "Header statement is not valid: "+line)
 						continue
 					}
 				} else {
 					if ruleParser.MatchString(line) {
 						submatch := ruleParser.FindSubmatch([]byte(line))
-						color := string(submatch[1])
+						var color string
 						var regexStr string
+						var flags string
 						if len(submatch) == 4 {
-							regexStr = "(?m" + string(submatch[2]) + ")" + JoinRule(string(submatch[3]))
+							color = string(submatch[1])
+							flags = string(submatch[2])
+							regexStr = "(?" + flags + ")" + JoinRule(string(submatch[3]))
 						} else if len(submatch) == 3 {
-							regexStr = "(?m)" + JoinRule(string(submatch[2]))
+							color = string(submatch[1])
+							regexStr = JoinRule(string(submatch[2]))
+						} else {
+							TermError(filename, lineNum, "Invalid statement: "+line)
 						}
 						regex, err := regexp.Compile(regexStr)
 						if err != nil {
-							fmt.Println(f.Name(), lineNum, err)
+							TermError(filename, lineNum, err.Error())
 							continue
 						}
 
@@ -133,7 +145,40 @@ func LoadSyntaxFilesFromDir(dir string) {
 						} else {
 							st = StringToStyle(color)
 						}
-						rules = append(rules, SyntaxRule{regex, st})
+						rules = append(rules, SyntaxRule{regex, flags, false, st})
+					} else if ruleStartEndParser.MatchString(line) {
+						submatch := ruleStartEndParser.FindSubmatch([]byte(line))
+						var color string
+						var start string
+						var end string
+						// Use m and s flags by default
+						flags := "ms"
+						if len(submatch) == 5 {
+							color = string(submatch[1])
+							flags = string(submatch[2])
+							start = string(submatch[3])
+							end = string(submatch[4])
+						} else if len(submatch) == 4 {
+							color = string(submatch[1])
+							start = string(submatch[2])
+							end = string(submatch[3])
+						} else {
+							TermError(filename, lineNum, "Invalid statement: "+line)
+						}
+
+						regex, err := regexp.Compile("(?" + flags + ")" + "(" + start + ").*?(" + end + ")")
+						if err != nil {
+							TermError(filename, lineNum, err.Error())
+							continue
+						}
+
+						st := tcell.StyleDefault
+						if _, ok := colorscheme[color]; ok {
+							st = colorscheme[color]
+						} else {
+							st = StringToStyle(color)
+						}
+						rules = append(rules, SyntaxRule{regex, flags, true, st})
 					}
 				}
 			}
@@ -164,21 +209,34 @@ type SyntaxMatches map[int]tcell.Style
 
 // Match takes a buffer and returns the syntax matches a map specifying how it should be syntax highlighted
 func Match(rules []SyntaxRule, buf *Buffer, v *View) SyntaxMatches {
-	start := v.topline - synLinesUp
-	end := v.topline + v.height + synLinesDown
-	if start < 0 {
-		start = 0
-	}
-	if end > len(buf.lines) {
-		end = len(buf.lines)
-	}
-	str := strings.Join(buf.lines[start:end], "\n")
-	startNum := v.cursor.loc + v.cursor.Distance(0, start)
-	toplineNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
+	m := make(SyntaxMatches)
 
-	m := make(map[int]tcell.Style)
+	lineStart := v.updateLines[0]
+	lineEnd := v.updateLines[1] + 1
+	if lineStart < 0 {
+		// Don't need to update syntax highlighting
+		return m
+	}
+
+	totalStart := v.topline - synLinesUp
+	totalEnd := v.topline + v.height + synLinesDown
+	if totalStart < 0 {
+		totalStart = 0
+	}
+	if totalEnd > len(buf.lines) {
+		totalEnd = len(buf.lines)
+	}
+
+	if lineEnd > len(buf.lines) {
+		lineEnd = len(buf.lines)
+	}
+
+	lines := buf.lines[lineStart:lineEnd]
+	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")
+	startNum := v.cursor.loc + v.cursor.Distance(0, totalStart)
+	toplineNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 	for _, rule := range rules {
-		if rule.regex.MatchString(str) {
+		if rule.startend && rule.regex.MatchString(str) {
 			indicies := rule.regex.FindAllStringIndex(str, -1)
 			for _, value := range indicies {
 				value[0] += startNum
@@ -186,6 +244,19 @@ func Match(rules []SyntaxRule, buf *Buffer, v *View) SyntaxMatches {
 				for i := value[0]; i < value[1]; i++ {
 					if i >= toplineNum {
 						m[i] = rule.style
+					}
+				}
+			}
+		} else {
+			for _, line := range lines {
+				if rule.regex.MatchString(line) {
+					indicies := rule.regex.FindAllStringIndex(str, -1)
+					for _, value := range indicies {
+						value[0] += toplineNum
+						value[1] += toplineNum
+						for i := value[0]; i < value[1]; i++ {
+							m[i] = rule.style
+						}
 					}
 				}
 			}

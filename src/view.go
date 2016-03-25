@@ -46,6 +46,11 @@ type View struct {
 
 	// Syntax higlighting matches
 	matches SyntaxMatches
+	// The matches from the last frame
+	lastMatches SyntaxMatches
+
+	// This is the range of lines that should have their syntax highlighting updated
+	updateLines [2]int
 
 	// The messenger so we can send messages to the user and get input from them
 	m *Messenger
@@ -84,11 +89,21 @@ func NewViewWidthHeight(buf *Buffer, m *Messenger, w, h int) *View {
 		view: v,
 	}
 
+	// Update the syntax highlighting for the entire buffer at the start
+	v.UpdateLines(v.topline, v.topline+v.height)
+	// v.matches = Match(v.buf.rules, v.buf, v)
+
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
 	v.mouseReleased = true
 
 	return v
+}
+
+// UpdateLines sets the values for v.updateLines
+func (v *View) UpdateLines(start, end int) {
+	v.updateLines[0] = start
+	v.updateLines[1] = end
 }
 
 // Resize recalculates the actual width and height of the view from the width and height
@@ -307,6 +322,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
+	// By default we don't update and syntax highlighting
+	v.UpdateLines(-2, 0)
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
@@ -329,15 +346,19 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Insert a newline
 			v.eh.Insert(v.cursor.loc, "\n")
 			v.cursor.Right()
+			v.UpdateLines(v.cursor.y-1, v.cursor.y)
 		case tcell.KeySpace:
 			// Insert a space
 			v.eh.Insert(v.cursor.loc, " ")
 			v.cursor.Right()
+			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyBackspace2:
 			// Delete a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
+				// Rehighlight the entire buffer
+				v.UpdateLines(v.topline, v.topline+v.height)
 			} else if v.cursor.loc > 0 {
 				// We have to do something a bit hacky here because we want to
 				// delete the line by first moving left and then deleting backwards
@@ -349,27 +370,41 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.Right()
 				v.eh.Remove(v.cursor.loc-1, v.cursor.loc)
 				v.cursor.x, v.cursor.y, v.cursor.loc = cx, cy, cloc
+				v.UpdateLines(v.cursor.y, v.cursor.y+1)
 			}
 		case tcell.KeyTab:
 			// Insert a tab
 			v.eh.Insert(v.cursor.loc, "\t")
 			v.cursor.Right()
+			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyCtrlS:
 			v.Save()
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlY:
 			v.eh.Redo()
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlC:
 			v.Copy()
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlX:
 			v.Cut()
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlV:
 			v.Paste()
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlA:
 			v.SelectAll()
 		case tcell.KeyCtrlO:
 			v.OpenFile()
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyPgUp:
 			v.PageUp()
 		case tcell.KeyPgDn:
@@ -386,6 +421,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 			v.eh.Insert(v.cursor.loc, string(e.Rune()))
 			v.cursor.Right()
+			v.UpdateLines(v.cursor.y, v.cursor.y)
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
@@ -442,10 +478,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
+
+	// v.matches = Match(v.buf.rules, v.buf, v)
 }
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+	matches := make(SyntaxMatches)
+
 	// The character number of the character in the top left of the screen
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
@@ -468,8 +508,8 @@ func (v *View) DisplayView() {
 
 		// Write the line number
 		lineNumStyle := tcell.StyleDefault
-		if _, ok := colorscheme["line-number"]; ok {
-			lineNumStyle = colorscheme["line-number"]
+		if style, ok := colorscheme["line-number"]; ok {
+			lineNumStyle = style
 		}
 		// Write the spaces before the line number if necessary
 		lineNum := strconv.Itoa(lineN + v.topline + 1)
@@ -491,12 +531,14 @@ func (v *View) DisplayView() {
 		for _, ch := range line {
 			var lineStyle tcell.Style
 			// Does the current character need to be syntax highlighted?
-			st, ok := v.matches[charNum]
-			if ok {
+			if st, ok := v.matches[charNum]; ok {
+				highlightStyle = st
+			} else if st, ok := v.lastMatches[charNum]; ok {
 				highlightStyle = st
 			} else {
 				highlightStyle = tcell.StyleDefault
 			}
+			matches[charNum] = highlightStyle
 
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
@@ -504,8 +546,8 @@ func (v *View) DisplayView() {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
-				if _, ok := colorscheme["selection"]; ok {
-					lineStyle = colorscheme["selection"]
+				if style, ok := colorscheme["selection"]; ok {
+					lineStyle = style
 				}
 			} else {
 				lineStyle = highlightStyle
@@ -533,8 +575,8 @@ func (v *View) DisplayView() {
 
 			selectStyle := tcell.StyleDefault.Reverse(true)
 
-			if _, ok := colorscheme["selection"]; ok {
-				selectStyle = colorscheme["selection"]
+			if style, ok := colorscheme["selection"]; ok {
+				selectStyle = style
 			}
 			screen.SetContent(x+tabchars, lineN, ' ', nil, selectStyle)
 		}
@@ -542,6 +584,8 @@ func (v *View) DisplayView() {
 		x = 0
 		charNum++
 	}
+
+	v.lastMatches = matches
 }
 
 // Display renders the view, the cursor, and statusline

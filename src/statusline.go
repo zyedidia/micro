@@ -42,6 +42,9 @@ func (sline *Statusline) Display() {
 	file += " " + sline.view.buf.filetype
 
 	statusLineStyle := tcell.StyleDefault.Reverse(true)
+	if style, ok := colorscheme["statusline"]; ok {
+		statusLineStyle = style
+	}
 
 	// Maybe there is a unicode filename?
 	fileRunes := []rune(file)

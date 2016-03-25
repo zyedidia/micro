@@ -71,6 +71,9 @@ func main() {
 		os.Setenv("TERM", "xterm-truecolor")
 	}
 
+	// Load the syntax files, including the colorscheme
+	LoadSyntaxFiles()
+
 	// Initilize tcell
 	screen, err = tcell.NewScreen()
 	if err != nil {
