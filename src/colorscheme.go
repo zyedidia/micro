@@ -5,7 +5,6 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
-	"os/user"
 	"regexp"
 	"strconv"
 	"strings"
