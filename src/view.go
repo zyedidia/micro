@@ -84,6 +84,10 @@ func NewViewWidthHeight(buf *Buffer, m *Messenger, w, h int) *View {
 		view: v,
 	}
 
+	// Set mouseReleased to true because we assume the mouse is not being pressed when
+	// the editor is opened
+	v.mouseReleased = true
+
 	return v
 }
 

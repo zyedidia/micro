@@ -8,3 +8,9 @@ install: syn-files build
 syn-files:
 	mkdir -p ~/.micro/syntax
 	cp -r runtime/* ~/.micro
+
+test:
+	go test ./src
+
+clean:
+	rm -f micro
