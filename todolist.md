@@ -2,11 +2,7 @@
 
 ### Not done
 
-- [ ] Tests
-
-- [ ] Proper error handling
-
-- [ ] Optimization/Cleanup
+- [ ] Optimization
 
 - [ ] Search and replace
 
@@ -38,6 +34,12 @@
 - [x] Readme
 
 - [x] Line numbers
+
+- [x] Tests
+
+- [x] Proper error handling
+
+- [x] Cleanup
 
 - [x] Syntax highlighting
     - [x] Use nano-like syntax files (https://github.com/scopatz/nanorc)
