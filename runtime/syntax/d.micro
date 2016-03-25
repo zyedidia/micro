@@ -65,7 +65,7 @@ color constant "\b(__DATE__|__EOF__|__TIME__|__TIMESTAMP__|__VENDOR__|__VERSION_
 color constant ""(\\.|[^"])*""
  
 ### WysiwygString
-color constant (s) "r".*?""
+color constant start="r"" end="""
 color constant "`[^`]*`"
 
 ### HexString
@@ -76,16 +76,16 @@ color constant "q"\(.*\)""
 color constant "q"\{.*\}""
 color constant "q"\[.*\]""
 color constant "q"<.*>""
-color constant (s) "q"[^({[<"][^"]*$.*?^[^"]+""
+color constant start="q"[^({[<"][^"]*$" end="^[^"]+""
 color constant "q"([^({[<"]).*""
 
 ### TokenString
 ### True token strings require nesting, so, again, they can't be implemented accurately here.
 ### At the same time, the intended purpose of token strings makes it questionable to highlight them as strings at all.
-## color ,magenta (s) "q\{.*?\}"
+## color ,magenta start="q\{" end="\}"
 
 ## Comments
 ## NB: true nested brightblacks are impossible to implement with plain regex
 color comment "//.*"
-color comment (s) "/\*.*?\*/"
-color comment (s) "/\+.*?\+/"
+color comment start="/\*" end="\*/"
+color comment start="/\+" end="\+/"

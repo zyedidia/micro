@@ -26,7 +26,6 @@ color yellow ""[^\"]*""
 
 ## Comments
 color green "--.*"
-color green (s) "\{-.*?-\}"
+color green start="\{-" end="-\}"
 
 color brightred "undefined"
-

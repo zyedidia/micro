@@ -72,7 +72,7 @@ func LoadSyntaxFilesFromDir(dir string) {
 			headerParser := regexp.MustCompile(`header "(.*)"`)
 
 			ruleParser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?"(.*)"`)
-			ruleStartEndParser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?start="(.*?)"\s+end="(.*?)"`)
+			ruleStartEndParser := regexp.MustCompile(`color (.*?)\s+(?:\((.*?)\)\s+)?start="(.*)"\s+end="(.*)"`)
 
 			var syntaxRegex *regexp.Regexp
 			var headerRegex *regexp.Regexp
@@ -158,7 +158,7 @@ func LoadSyntaxFilesFromDir(dir string) {
 						flags := "ms"
 						if len(submatch) == 5 {
 							color = string(submatch[1])
-							flags = string(submatch[2])
+							flags += string(submatch[2])
 							start = string(submatch[3])
 							end = string(submatch[4])
 						} else if len(submatch) == 4 {

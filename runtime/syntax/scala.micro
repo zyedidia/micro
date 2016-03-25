@@ -1,13 +1,12 @@
 ## Here is an example for Scala.
 ##
 syntax "Scala" "\.scala$"
-color green "\b(boolean|byte|char|double|float|int|long|new|short|this|transient|void)\b"
-color red "\b(match|val|var|break|case|catch|continue|default|do|else|finally|for|if|return|switch|throw|try|while)\b"
-color cyan "\b(def|object|case|trait|lazy|implicit|abstract|class|extends|final|implements|import|instanceof|interface|native|package|private|protected|public|static|strictfp|super|synchronized|throws|volatile|sealed)\b"
+color green "\<(boolean|byte|char|double|float|int|long|new|short|this|transient|void)\>"
+color red "\<(match|val|var|break|case|catch|continue|default|do|else|finally|for|if|return|switch|throw|try|while)\>"
+color cyan "\<(def|object|case|trait|lazy|implicit|abstract|class|extends|final|implements|import|instanceof|interface|native|package|private|protected|public|static|strictfp|super|synchronized|throws|volatile|sealed)\>"
 color red ""[^"]*""
-color yellow "\b(true|false|null)\b"
+color yellow "\<(true|false|null)\>"
 color blue "//.*"
-color blue (s) "/\*.*?\*/"
-color brightblue (s) "/\*\*.*?\*/"
+color blue start="/\*" end="\*/"
+color brightblue start="/\*\*" end="\*/"
 color ,green "[[:space:]]+$"
-

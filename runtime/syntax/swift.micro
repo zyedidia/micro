@@ -30,5 +30,5 @@ color constant ""[^"]*""
 # Comments
 color comment "//.*"
 color comment "///.*"
-color comment (s) "/\*\*.*?\*/"
+color comment start="/\*\*" end="\*/"
 color comment "[/**]"

@@ -2,15 +2,14 @@
 ##
 syntax "POV" "\.(pov|POV|povray|POVRAY)$"
 color brightcyan "^[[:space:]]*#[[:space:]]*(declare)"
-color brightyellow "\b(sphere|cylinder|translate|matrix|rotate|scale)\b"
-color brightyellow "\b(orthographic|location|up|right|direction|clipped_by)\b"
-color brightyellow "\b(fog_type|fog_offset|fog_alt|rgb|distance|transform)\b"
-color brightred "^\b(texture)\b"
-color brightred "\b(light_source|background)\b"
-color brightred "\b(fog|object|camera)\b"
+color brightyellow "\<(sphere|cylinder|translate|matrix|rotate|scale)\>"
+color brightyellow "\<(orthographic|location|up|right|direction|clipped_by)\>"
+color brightyellow "\<(fog_type|fog_offset|fog_alt|rgb|distance|transform)\>"
+color brightred "^\<(texture)\>"
+color brightred "\<(light_source|background)\>"
+color brightred "\<(fog|object|camera)\>"
 color green "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
-color brightmagenta "\b(union|group|subgroup)\b"
+color brightmagenta "\<(union|group|subgroup)\>"
 ## Comment highlighting
 color brightblue "//.*"
-color brightblue (s) "/\*.*?\*/"
-
+color brightblue start="/\*" end="\*/"

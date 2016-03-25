@@ -27,7 +27,7 @@ color constant "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>
 color comment "#[^{].*$" "#$"
 color comment "##[^{].*$" "##$"
 ## "Here" docs
-color constant (s) "<<-?'?EOT'?.*?^EOT"
+color constant start="<<-?'?EOT'?" end="^EOT"
 ## Some common markers
 color todo "(XXX|TODO|FIXME|\?\?\?)"
 

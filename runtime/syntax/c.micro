@@ -29,11 +29,11 @@ color statement "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
 color constant ""(\\.|[^"])*""
 ##
 ## This string is VERY resource intensive!
-#color cyan (s) ""(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
+#color cyan start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
 
 ## Comment highlighting
 color comment "//.*"
-color comment (s) "/\*.*?\*/"
+color comment start="/\*" end="\*/"
 
 ## Trailing whitespace
 #color ,green "[[:space:]]+$"

@@ -2,9 +2,9 @@ syntax "Haml" "\.haml$"
 
 color cyan   "-|="
 color white "->|=>"
-color cyan (i) "([  ]|^)%[0-9A-Z_]+\b"
-color magenta (i) ":[0-9A-Z_]+\b"
-color yellow (i) "\.[A-Z_]+\b"
+cyan (i) "([  ]|^)%[0-9A-Z_]+\>"
+magenta (i) ":[0-9A-Z_]+\>"
+yellow (i) "\.[A-Z_]+\>"
 ## Double quote & single quote
 color green ""([^"]|(\\"))*"" "%[QW]?\{[^}]*\}" "%[QW]?\([^)]*\)" "%[QW]?<[^>]*>" "%[QW]?\$[^$]*\$" "%[QW]?\^[^^]*\^" "%[QW]?![^!]*!"
 color green "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>" "%[qw]\[[^]]*\]" "%[qw]\$[^$]*\$" "%[qw]\^[^^]*\^" "%[qw]![^!]*!"

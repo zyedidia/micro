@@ -1,26 +1,25 @@
 syntax "OCaml" "\.mli?$"
 #uid
-color red "\b[A-Z][0-9a-z_]{2,}\b"
+color red "\<[A-Z][0-9a-z_]{2,}\>"
 #declarations
-color green "\b(let|val|method|in|and|rec|private|virtual|constraint)\b"
+color green "\<(let|val|method|in|and|rec|private|virtual|constraint)\>"
 #structure items
-color red "\b(type|open|class|module|exception|external)\b"
+color red "\<(type|open|class|module|exception|external)\>"
 #patterns
-color blue "\b(fun|function|functor|match|try|with)\b"
+color blue "\<(fun|function|functor|match|try|with)\>"
 #patterns-modifiers
-color yellow "\b(as|when|of)\b" 
+color yellow "\<(as|when|of)\>" 
 #conditions
-color cyan "\b(if|then|else)\b"
+color cyan "\<(if|then|else)\>"
 #blocs
-color magenta "\b(begin|end|object|struct|sig|for|while|do|done|to|downto)\b"
+color magenta "\<(begin|end|object|struct|sig|for|while|do|done|to|downto)\>"
 #constantes
-color green "\b(true|false)\b"
+color green "\<(true|false)\>"
 #modules/classes
-color green "\b(include|inherit|initializer)\b"
+color green "\<(include|inherit|initializer)\>"
 #expr modifiers
-color yellow "\b(new|ref|mutable|lazy|assert|raise)\b"
-#brightblacks
-color white (s) "\(\*.*?\*\)"
+color yellow "\<(new|ref|mutable|lazy|assert|raise)\>"
+#comments
+color white start="\(\*" end="\*\)"
 #strings (no multiline handling yet)
 color brightblack ""[^\"]*""
-

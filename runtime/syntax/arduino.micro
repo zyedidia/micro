@@ -29,88 +29,88 @@
 syntax "INO"  "\.?ino$"
 
 ## 
-color brightred "\b[A-Z_][0-9A-Z_]+\b" 
+color brightred "\<[A-Z_][0-9A-Z_]+\>" 
 
 ## 
-color green "\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\b"
+color green "\<((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\>"
 
 ## Constants
-color green (i) "\b(HIGH|LOW|INPUT|OUTPUT)\b"
+green (i) "\<(HIGH|LOW|INPUT|OUTPUT)\>"
 
 ## Serial Print
-color red (i) "\b(DEC|BIN|HEX|OCT|BYTE)\b"
+red (i) "\<(DEC|BIN|HEX|OCT|BYTE)\>"
 
 ## PI Constants
-color green (i) "\b(PI|HALF_PI|TWO_PI)\b"
+green (i) "\<(PI|HALF_PI|TWO_PI)\>"
 
 ## ShiftOut
-color green (i) "\b(LSBFIRST|MSBFIRST)\b"
+green (i) "\<(LSBFIRST|MSBFIRST)\>"
 
 ## Attach Interrupt
-color green (i) "\b(CHANGE|FALLING|RISING)\b"
+green (i) "\<(CHANGE|FALLING|RISING)\>"
 
 ## Analog Reference
-color green (i) "\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\b"
+green (i) "\<(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\>"
 
 ## === FUNCTIONS === ##
 
 ## Data Types
-color green "\b(boolean|byte|char|float|int|long|word)\b"
+color green "\<(boolean|byte|char|float|int|long|word)\>"
 
 ## Control Structions
-color brightyellow "\b(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\b" 
-color magenta "\b(goto|continue|break|return)\b"
+color brightyellow "\<(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\>" 
+color magenta "\<(goto|continue|break|return)\>"
 
 ## Math
-color brightyellow "\b(abs|acos|asin|atan|atan2|ceil|constrain|cos|degrees|exp|floor|log|map|max|min|radians|random|randomSeed|round|sin|sq|sqrt|tan)\b"
+color brightyellow "\<(abs|acos|asin|atan|atan2|ceil|constrain|cos|degrees|exp|floor|log|map|max|min|radians|random|randomSeed|round|sin|sq|sqrt|tan)\>"
 
 ## Bits & Bytes
-color brightyellow "\b(bitRead|bitWrite|bitSet|bitClear|bit|highByte|lowByte)\b"
+color brightyellow "\<(bitRead|bitWrite|bitSet|bitClear|bit|highByte|lowByte)\>"
 
 ## Analog I/O
-color brightyellow "\b(analogReference|analogRead|analogWrite)\b"
+color brightyellow "\<(analogReference|analogRead|analogWrite)\>"
 
 ## External Interrupts
-color brightyellow "\b(attachInterrupt|detachInterrupt)\b"
+color brightyellow "\<(attachInterrupt|detachInterrupt)\>"
 
 ## Time
-color brightyellow "\b(delay|delayMicroseconds|millis|micros)\b"
+color brightyellow "\<(delay|delayMicroseconds|millis|micros)\>"
 
 ## Digital I/O
-color brightyellow "\b(pinMode|digitalWrite|digitalRead)\b"
+color brightyellow "\<(pinMode|digitalWrite|digitalRead)\>"
 
 ## Interrupts
-color brightyellow "\b(interrupts|noInterrupts)\b"
+color brightyellow "\<(interrupts|noInterrupts)\>"
 
 ## Advanced I/O
-color brightyellow "\b(noTone|pulseIn|shiftIn|shiftOut|tone)\b"
+color brightyellow "\<(noTone|pulseIn|shiftIn|shiftOut|tone)\>"
 
 ## Serial
-color magenta "\b(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\b"
+color magenta "\<(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\>"
 
 ## Structure
-color brightyellow "\b(setup|loop)\b"
+color brightyellow "\<(setup|loop)\>"
 
 ## 
 color brightcyan "^[[:space:]]*#[[:space:]]*(define|include(_next)?|(un|ifn?)def|endif|el(if|se)|if|warning|error|pragma)"
 
 ## 
-color brightmagenta "'([^'\\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
+color brightmagenta "'([^']|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
 
 ## GCC builtins
 color cyan "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
 
-## String highlighting.  You will in general want your brightblacks and
+## String highlighting.  You will in general want your comments and
 ## strings to come last, because syntax highlighting rules will be
 ## applied in the order they are read in.
 color brightyellow "<[^=    ]*>" ""(\\.|[^"])*""
 
 ## This string is VERY resource intensive!
-color brightyellow (s) ""(\\.|[^"])*\\[[:space:]]*$.*?^(\\.|[^"])*""
+color brightyellow start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
 
 ## Comments
 color brightblue "//.*"
-color brightblue (s) "/\*.*?\*/"
+color brightblue start="/\*" end="\*/"
 
 ## Trailing whitespace
 color ,green "[[:space:]]+$"

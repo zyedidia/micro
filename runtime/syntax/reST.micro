@@ -10,7 +10,7 @@ color brightred "::"
 color blue "`[^`]+`_{1,2}"
 # code
 color yellow "``[^`]+``"
-# directives or brightblacks
+# directives or comments
 color cyan "^\.\. .*$"
 # anon link targets
 color cyan "^__ .*$"

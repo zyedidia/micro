@@ -55,7 +55,7 @@ color statement "(\(|\)|\[|\]|\{|\})"
 color constant "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
 
 # Multiline strings
-color constant (s) "\s*\[\[.*?\]\]"
+color constant start="\s*\[\[" end="\]\]"
 
 # Escapes
 color special "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
@@ -67,5 +67,5 @@ color comment "^#!.*"
 color comment "\-\-.*$"
 
 # Multiline brightblacks
-color comment (s) "\s*\-\-\s*\[\[.*?\]\]"
+color comment start="\s*\-\-\s*\[\[" end="\]\]"
 

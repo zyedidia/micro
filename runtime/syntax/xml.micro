@@ -3,10 +3,9 @@
 
 syntax "XML" ".*\.([jrs]?html?|xml|sgml?|rng)$"
 color white "^.+$"
-color green  (s) "<.*?>"
+color green  start="<" end=">"
 color cyan   "<[^> ]+"
 color cyan   ">"
-color yellow (s) "<!DOCTYPE.*?[/]?>"
-color yellow (s) "<!--.*?-->"
+color yellow start="<!DOCTYPE" end="[/]?>"
+color yellow start="<!--" end="-->"
 color red    "&[^;]*;"
-

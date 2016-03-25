@@ -1,19 +1,19 @@
 ## Cython nanorc, based off of Python nanorc.
 ##
 syntax "Cython" "\.pyx$" "\.pxd$" "\.pyi$"
-color brightred (i) "def [ 0-9A-Z_]+"
-color brightred (i) "cpdef [0-9A-Z_]+\(.*\):"
-color brightred (i) "cdef cppclass [ 0-9A-Z_]+\(.*\):"
+brightred (i) "def [ 0-9A-Z_]+"
+brightred (i) "cpdef [0-9A-Z_]+\(.*\):"
+brightred (i) "cdef cppclass [ 0-9A-Z_]+\(.*\):"
 
 
 
 # Python Keyword Color
-color green "\b(and|as|assert|class|def|DEF|del|elif|ELIF|else|ELSE|except|exec|finally|for|from|global|if|IF|import|in|is|lambda|map|not|or|pass|print|raise|try|while|with|yield)\b"
-color brightmagenta "\b(continue|break|return)\b"
+color green "\<(and|as|assert|class|def|DEF|del|elif|ELIF|else|ELSE|except|exec|finally|for|from|global|if|IF|import|in|is|lambda|map|not|or|pass|print|raise|try|while|with|yield)\>"
+color brightmagenta "\<(continue|break|return)\>"
 
 # Cython Keyword Color
-color green "\b(cdef|cimport|cpdef|cppclass|ctypedef|extern|include|namespace|property|struct)\b"
-color red "\b(bint|char|double|int|public|void|unsigned)\b"
+color green "\<(cdef|cimport|cpdef|cppclass|ctypedef|extern|include|namespace|property|struct)\>"
+color red "\<(bint|char|double|int|public|void|unsigned)\>"
 
 #Operator Color
 color yellow "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
@@ -24,7 +24,7 @@ color magenta "[(){}]" "\[" "\]"
 #String Color
 color cyan "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
 color cyan "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
-color cyan (s) """"[^"].*?"""" (s) "'''[^'].*?'''"
+color cyan start=""""[^"]" end=""""" start="'''[^']" end="'''"
 
 # Comment Color
 color brightblue "#.*$"

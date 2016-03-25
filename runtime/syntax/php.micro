@@ -1,6 +1,6 @@
 ## PHP Syntax Highlighting
 syntax "PHP" "\.php[2345s~]?$"
-color white (s) "<\?(php|=)?.*?\?>"
+color white start="<\?(php|=)?" end="\?>"
 # Functions
 color brightblue "([a-zA-Z0-9_-]*)\("
 # Constructs
@@ -33,9 +33,8 @@ color white "\{\$[^}]*\}"
 # PHP Tags
 color red "(<\?(php)?|\?>)"
 # General HTML
-color red (s) "\?>.*?<\?(php|=)?"
+color red start="\?>" end="<\?(php|=)?"
 # trailing whitespace
 color ,green "[^[:space:]]{1}[[:space:]]+$"
-# multi-line brightblacks
-color brightyellow (s) "/\*.*?\*/"
-
+# multi-line comments
+color brightyellow start="/\*" end="\*/"

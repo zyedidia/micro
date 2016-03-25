@@ -40,6 +40,5 @@ color underlined "https?://[^ )>]+"
 # code
 color special   "`.*?`|^ {4}[^-+*].*"
 # code blocks
-# color yellow (s) "^```[^$].*?^```$"
 color special "^```$"
 

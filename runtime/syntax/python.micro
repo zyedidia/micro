@@ -40,10 +40,5 @@ color constant "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
 color comment "#.*$"
 
 ## block brightblacks
-color comment (s) """"([^"]|$).*?"""" (s) "'''([^']|$).*?'''"
-#color cyan (s) """"[^"].*?"""" (s) "'''[^'].*?'''"
-#color cyan (s) "([[:space:]]"""|^""").*?"""" (s) "'''[^'].*?'''"
-#color cyan (s) """".*?"""" (s) "'''.*?'''"
-#color cyan (s) "("""[^"]|[^"]""").*?("""[^"]|[^"]""")" (s) "'''[^'].*?'''"
-#color cyan (s) "\"\"\".*?\"\"\""
-
+color comment start=""""([^"]|$)" end="""""
+color comment start="'''([^']|$)" end="'''"

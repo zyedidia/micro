@@ -7,5 +7,5 @@ color type "\b(abstract|class|extends|final|implements|import|instanceof|interfa
 color constant ""[^"]*""
 color constant "\b(true|false|null)\b"
 color comment "//.*"
-color comment (s) "/\*.*?\*/"
-color comment (s) "/\*\*.*?\*/"
+color comment start="/\*" end="\*/"
+color comment start="/\*\*" end="\*/"

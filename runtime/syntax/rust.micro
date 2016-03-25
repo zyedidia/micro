@@ -21,16 +21,16 @@ color type "[A-Z][a-z]+"
 
 # Strings
 color constant "\".*\""
-color constant (s) "\".*?\""
+color constant start="\".*\\$" end=".*\""
 # NOTE: This isn't accurate but matching "#{0,} for the end of the string is too liberal
-color constant (s) "r#+\".*?\"#+"
+color green start="r#+\"" end="\"#+"
 
 # Comments
 color comment "//.*"
-color comment (s) "/\*.*?\*/"
+color comment start="/\*" end="\*/"
 
 # Attributes
-color special (s) "#!\[.*?\]"
+color special start="#!\[" end="\]"
 
 # Some common markers
 color todo "(XXX|TODO|FIXME|\?\?\?)"

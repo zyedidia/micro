@@ -1,8 +1,8 @@
 syntax "Makefile" "([Mm]akefile|\.ma?k)$"
 header "^#!.*/(env +)?[bg]?make( |$)"
 
-color cyan  "\b(ifeq|ifdef|ifneq|ifndef|else|endif)\b"
-color cyan  "^(export|include|override)\b"
+color cyan  "\<(ifeq|ifdef|ifneq|ifndef|else|endif)\>"
+color cyan  "^(export|include|override)\>"
 color brightmagenta  "^[^:=	]+:"
 color red "[=,%]" "\+=|\?=|:=|&&|\|\|"
 color brightblue "\$\((abspath|addprefix|addsuffix|and|basename|call|dir)[[:space:]]"

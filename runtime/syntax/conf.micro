@@ -3,9 +3,8 @@
 syntax "Conf" "\.c[o]?nf$"
 ## Possible errors and parameters
 ## Strings
-color white (i) ""(\\.|[^"])*""
+white (i) ""(\\.|[^"])*""
 ## Comments
-color brightblue (i) "^[[:space:]]*#.*$"
-color cyan (i) "^[[:space:]]*##.*$"
-
+brightblue (i) "^[[:space:]]*#.*$"
+cyan (i) "^[[:space:]]*##.*$"
 
