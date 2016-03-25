@@ -4,7 +4,7 @@ mkdir -p binaries
 mkdir -p micro/bin
 cp -r runtime micro/
 
-echo 'cp -r runtime/* ~/.micro' >> micro/install.sh
+echo 'mkdir -p ~/.micro && cp -r runtime/* ~/.micro' >> micro/install.sh
 chmod +x micro/install.sh
 
 # Mac
