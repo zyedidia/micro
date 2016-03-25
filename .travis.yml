@@ -1,2 +1,2 @@
 language: go
-script: go test ./...
+script: make test
