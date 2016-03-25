@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -208,17 +209,24 @@ func GetRules(buf *Buffer) ([]SyntaxRule, string) {
 
 // SyntaxMatches is an alias to a map from character numbers to styles,
 // so map[3] represents the style of the third character
-type SyntaxMatches map[int]tcell.Style
+type SyntaxMatches [][]tcell.Style
 
 // Match takes a buffer and returns the syntax matches a map specifying how it should be syntax highlighted
-func Match(rules []SyntaxRule, buf *Buffer, v *View) SyntaxMatches {
-	m := make(SyntaxMatches)
+func Match(v *View) SyntaxMatches {
+	buf := v.buf
+	rules := v.buf.rules
 
-	lineStart := v.updateLines[0]
-	lineEnd := v.updateLines[1] + 1
-	if lineStart < 0 {
-		// Don't need to update syntax highlighting
-		return m
+	viewStart := v.topline
+	viewEnd := v.topline + v.height
+	if viewEnd > len(buf.lines) {
+		viewEnd = len(buf.lines)
+	}
+
+	lines := buf.lines[viewStart:viewEnd]
+	matches := make(SyntaxMatches, len(lines))
+
+	for i, line := range lines {
+		matches[i] = make([]tcell.Style, len(line))
 	}
 
 	totalStart := v.topline - synLinesUp
@@ -230,35 +238,35 @@ func Match(rules []SyntaxRule, buf *Buffer, v *View) SyntaxMatches {
 		totalEnd = len(buf.lines)
 	}
 
-	if lineEnd > len(buf.lines) {
-		lineEnd = len(buf.lines)
-	}
-
-	lines := buf.lines[lineStart:lineEnd]
 	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")
 	startNum := v.cursor.loc + v.cursor.Distance(0, totalStart)
 	toplineNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
+
 	for _, rule := range rules {
-		if rule.startend && rule.regex.MatchString(str) {
-			indicies := rule.regex.FindAllStringIndex(str, -1)
-			for _, value := range indicies {
-				value[0] += startNum
-				value[1] += startNum
-				for i := value[0]; i < value[1]; i++ {
-					if i >= toplineNum {
-						m[i] = rule.style
+		if rule.startend {
+			if rule.regex.MatchString(str) {
+				indicies := rule.regex.FindAllStringIndex(str, -1)
+				for _, value := range indicies {
+					value[0] += startNum
+					value[1] += startNum
+					for i := value[0]; i < value[1]; i++ {
+						colNum, lineNum := GetPos(i, buf)
+						v.m.Message(strconv.Itoa(lineNum) + ", " + strconv.Itoa(colNum))
+						if i >= toplineNum {
+							if lineNum != -1 && colNum != -1 {
+								matches[lineNum][colNum] = rule.style
+							}
+						}
 					}
 				}
 			}
 		} else {
-			for _, line := range lines {
+			for lineN, line := range lines {
 				if rule.regex.MatchString(line) {
-					indicies := rule.regex.FindAllStringIndex(str, -1)
+					indicies := rule.regex.FindAllStringIndex(line, -1)
 					for _, value := range indicies {
-						value[0] += toplineNum
-						value[1] += toplineNum
 						for i := value[0]; i < value[1]; i++ {
-							m[i] = rule.style
+							matches[lineN][i] = rule.style
 						}
 					}
 				}
@@ -266,5 +274,22 @@ func Match(rules []SyntaxRule, buf *Buffer, v *View) SyntaxMatches {
 		}
 	}
 
-	return m
+	return matches
+}
+
+// GetPos returns an x, y position given a character location in the buffer
+func GetPos(loc int, buf *Buffer) (int, int) {
+	charNum := 0
+	x, y := 0, 0
+
+	for i, line := range buf.lines {
+		if charNum+Count(line) > loc {
+			y = i
+			x = loc - charNum
+			return x, y
+		}
+		charNum += Count(line) + 1
+	}
+
+	return -1, -1
 }

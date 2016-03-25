@@ -91,7 +91,7 @@ func NewViewWidthHeight(buf *Buffer, m *Messenger, w, h int) *View {
 
 	// Update the syntax highlighting for the entire buffer at the start
 	v.UpdateLines(v.topline, v.topline+v.height)
-	// v.matches = Match(v.buf.rules, v.buf, v)
+	v.matches = Match(v)
 
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
@@ -407,12 +407,16 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyPgUp:
 			v.PageUp()
+			relocate = false
 		case tcell.KeyPgDn:
 			v.PageDown()
+			relocate = false
 		case tcell.KeyCtrlU:
 			v.HalfPageUp()
+			relocate = false
 		case tcell.KeyCtrlD:
 			v.HalfPageDown()
+			relocate = false
 		case tcell.KeyRune:
 			// Insert a character
 			if v.cursor.HasSelection() {
@@ -479,12 +483,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 		v.Relocate()
 	}
 
-	// v.matches = Match(v.buf.rules, v.buf, v)
+	v.matches = Match(v)
 }
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
-	matches := make(SyntaxMatches)
+	matches := make(SyntaxMatches, len(v.matches))
 
 	// The character number of the character in the top left of the screen
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
@@ -528,17 +532,10 @@ func (v *View) DisplayView() {
 
 		// Write the line
 		tabchars := 0
-		for _, ch := range line {
+		for colN, ch := range line {
 			var lineStyle tcell.Style
 			// Does the current character need to be syntax highlighted?
-			if st, ok := v.matches[charNum]; ok {
-				highlightStyle = st
-			} else if st, ok := v.lastMatches[charNum]; ok {
-				highlightStyle = st
-			} else {
-				highlightStyle = tcell.StyleDefault
-			}
-			matches[charNum] = highlightStyle
+			highlightStyle = v.matches[lineN][colN]
 
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
