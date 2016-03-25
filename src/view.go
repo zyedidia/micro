@@ -44,7 +44,7 @@ type View struct {
 	// mouse release events
 	mouseReleased bool
 
-	// Syntax higlighting matches
+	// Syntax highlighting matches
 	matches SyntaxMatches
 	// The matches from the last frame
 	lastMatches SyntaxMatches
@@ -460,7 +460,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.mouseReleased = true
 			}
 			// We don't want to relocate because otherwise the view will be relocated
-			// everytime the user moves the cursor
+			// every time the user moves the cursor
 			relocate = false
 		case tcell.WheelUp:
 			// Scroll up two lines
@@ -581,7 +581,6 @@ func (v *View) DisplayView() {
 			screen.SetContent(x+tabchars, lineN, ' ', nil, selectStyle)
 		}
 
-		x = 0
 		charNum++
 	}
 

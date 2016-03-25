@@ -40,7 +40,7 @@ func LoadInput() (string, []byte, error) {
 		// Option 1
 		filename = os.Args[1]
 		// Check that the file exists
-		if _, err := os.Stat(filename); err == nil {
+		if _, e := os.Stat(filename); e == nil {
 			input, err = ioutil.ReadFile(filename)
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
