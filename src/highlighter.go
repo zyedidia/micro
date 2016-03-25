@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/gdamore/tcell"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
-	"os/user"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -31,8 +31,11 @@ var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
 // LoadSyntaxFiles loads the syntax files from the default directory ~/.micro
 func LoadSyntaxFiles() {
-	usr, _ := user.Current()
-	dir := usr.HomeDir
+	dir, err := homedir.Dir()
+	if err != nil {
+		TermMessage("Error finding your home directory\nCan't load runtime files")
+		return
+	}
 	LoadSyntaxFilesFromDir(dir + "/.micro/syntax")
 }
 
