@@ -1,28 +1,43 @@
 package main
 
 import (
+	"bufio"
+	"fmt"
 	"github.com/gdamore/tcell"
+	"os"
 )
 
-// Messenger is an object that can send messages to the user and get input from the user (with a prompt)
-type Messenger struct {
-	hasPrompt  bool
-	hasMessage bool
+// TermMessage sends a message to the user in the terminal. This usually occurs before
+// micro has been fully initialized -- ie if there is an error in the syntax highlighting
+// regular expressions
+// The function must be called when the screen is not initialized
+// This will write the message, and wait for the user
+// to press and key to continue
+func TermMessage(msg string) {
+	fmt.Println(msg)
+	fmt.Print("\nPress enter to continue")
 
-	message  string
-	response string
-	style    tcell.Style
-
-	cursorx int
-
-	s tcell.Screen
+	reader := bufio.NewReader(os.Stdin)
+	reader.ReadString('\n')
 }
 
-// NewMessenger returns a new Messenger struct
-func NewMessenger(s tcell.Screen) *Messenger {
-	m := new(Messenger)
-	m.s = s
-	return m
+// Messenger is an object that makes it easy to send messages to the user
+// and get input from the user
+type Messenger struct {
+	// Are we currently prompting the user?
+	hasPrompt bool
+	// Is there a message to print
+	hasMessage bool
+
+	// Message to print
+	message string
+	// The user's response to a prompt
+	response string
+	// style to use when drawing the message
+	style tcell.Style
+
+	// We have to keep track of the cursor for prompting
+	cursorx int
 }
 
 // Message sends a message to the user
@@ -61,7 +76,7 @@ func (m *Messenger) Prompt(prompt string) (string, bool) {
 		m.Clear()
 		m.Display()
 
-		event := m.s.PollEvent()
+		event := screen.PollEvent()
 
 		switch e := event.(type) {
 		case *tcell.EventKey:
@@ -124,23 +139,23 @@ func (m *Messenger) Reset() {
 
 // Clear clears the line at the bottom of the editor
 func (m *Messenger) Clear() {
-	w, h := m.s.Size()
+	w, h := screen.Size()
 	for x := 0; x < w; x++ {
-		m.s.SetContent(x, h-1, ' ', nil, tcell.StyleDefault)
+		screen.SetContent(x, h-1, ' ', nil, tcell.StyleDefault)
 	}
 }
 
-// Display displays and messages or prompts
+// Display displays messages or prompts
 func (m *Messenger) Display() {
-	_, h := m.s.Size()
+	_, h := screen.Size()
 	if m.hasMessage {
 		runes := []rune(m.message + m.response)
 		for x := 0; x < len(runes); x++ {
-			m.s.SetContent(x, h-1, runes[x], nil, m.style)
+			screen.SetContent(x, h-1, runes[x], nil, m.style)
 		}
 	}
 	if m.hasPrompt {
-		m.s.ShowCursor(Count(m.message)+m.cursorx, h-1)
-		m.s.Show()
+		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
+		screen.Show()
 	}
 }

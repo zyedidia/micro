@@ -5,6 +5,8 @@ import (
 )
 
 const (
+	// Opposite and undoing events must have opposite values
+
 	// TextEventInsert repreasents an insertion event
 	TextEventInsert = 1
 	// TextEventRemove represents a deletion event

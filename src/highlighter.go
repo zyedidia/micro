@@ -10,13 +10,17 @@ import (
 	"strings"
 )
 
+// FileTypeRules represents a complete set of syntax rules for a filetype
 type FileTypeRules struct {
 	filetype string
 	rules    []SyntaxRule
 }
 
+// SyntaxRule represents a regex to highlight in a certain style
 type SyntaxRule struct {
+	// What to highlight
 	regex *regexp.Regexp
+	// How to highlight it
 	style tcell.Style
 }
 
@@ -154,11 +158,12 @@ func GetRules(buf *Buffer) ([]SyntaxRule, string) {
 	return nil, "Unknown"
 }
 
-// Match takes a buffer and returns a map specifying how it should be syntax highlighted
-// The map is from character numbers to styles, so map[3] represents the style change
-// at the third character in the buffer
-// Note that this map only stores changes in styles, not each character's style
-func Match(rules []SyntaxRule, buf *Buffer, v *View) map[int]tcell.Style {
+// SyntaxMatches is an alias to a map from character numbers to styles,
+// so map[3] represents the style of the third character
+type SyntaxMatches map[int]tcell.Style
+
+// Match takes a buffer and returns the syntax matches a map specifying how it should be syntax highlighted
+func Match(rules []SyntaxRule, buf *Buffer, v *View) SyntaxMatches {
 	start := v.topline - synLinesUp
 	end := v.topline + v.height + synLinesDown
 	if start < 0 {

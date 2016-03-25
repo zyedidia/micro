@@ -2,7 +2,6 @@ package main
 
 import (
 	"math"
-	"unicode/utf8"
 )
 
 const (
@@ -12,22 +11,6 @@ const (
 	RopeJoinLength = 500
 	// RopeRebalanceRatio = 1.2
 )
-
-// Min takes the min of two ints
-func Min(a, b int) int {
-	if a > b {
-		return b
-	}
-	return a
-}
-
-// Max takes the max of two ints
-func Max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
 
 // A Rope is a data structure for efficiently manipulating large strings
 type Rope struct {
@@ -44,7 +27,7 @@ func NewRope(str string) *Rope {
 	r := new(Rope)
 	r.value = str
 	r.valueNil = false
-	r.len = utf8.RuneCountInString(r.value)
+	r.len = Count(r.value)
 
 	r.Adjust()
 
@@ -83,7 +66,7 @@ func (r *Rope) Remove(start, end int) {
 	if !r.valueNil {
 		r.value = string(append([]rune(r.value)[:start], []rune(r.value)[end:]...))
 		r.valueNil = false
-		r.len = utf8.RuneCountInString(r.value)
+		r.len = Count(r.value)
 	} else {
 		leftStart := Min(start, r.left.len)
 		leftEnd := Min(end, r.left.len)
@@ -107,7 +90,7 @@ func (r *Rope) Insert(pos int, value string) {
 		first := append([]rune(r.value)[:pos], []rune(value)...)
 		r.value = string(append(first, []rune(r.value)[pos:]...))
 		r.valueNil = false
-		r.len = utf8.RuneCountInString(r.value)
+		r.len = Count(r.value)
 	} else {
 		if pos < r.left.len {
 			r.left.Insert(pos, value)

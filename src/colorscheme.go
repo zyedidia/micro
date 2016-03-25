@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os/user"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -45,6 +46,9 @@ func LoadColorscheme(colorschemeName, dir string) {
 }
 
 // ParseColorscheme parses the text definition for a colorscheme and returns the corresponding object
+// Colorschemes are made up of color-link statements linking a color group to a list of colors
+// For example, color-link keyword (blue,red) makes all keywords have a blue foreground and
+// red background
 func ParseColorscheme(text string) Colorscheme {
 	parser := regexp.MustCompile(`color-link\s+(\S*)\s+"(.*)"`)
 
@@ -74,6 +78,8 @@ func ParseColorscheme(text string) Colorscheme {
 }
 
 // StringToStyle returns a style from a string
+// The strings must be in the format "extra foregroundcolor,backgroundcolor"
+// The 'extra' can be bold, reverse, or underline
 func StringToStyle(str string) tcell.Style {
 	var fg string
 	var bg string
@@ -83,6 +89,8 @@ func StringToStyle(str string) tcell.Style {
 	} else {
 		fg = split[0]
 	}
+	fg = strings.TrimSpace(fg)
+	bg = strings.TrimSpace(bg)
 
 	style := tcell.StyleDefault.Foreground(StringToColor(fg)).Background(StringToColor(bg))
 	if strings.Contains(str, "bold") {
@@ -98,6 +106,7 @@ func StringToStyle(str string) tcell.Style {
 }
 
 // StringToColor returns a tcell color from a string representation of a color
+// We accept either bright... or light... to mean the brighter version of a color
 func StringToColor(str string) tcell.Color {
 	switch str {
 	case "black":
@@ -116,25 +125,46 @@ func StringToColor(str string) tcell.Color {
 		return tcell.ColorTeal
 	case "white":
 		return tcell.ColorSilver
-	case "brightblack":
+	case "brightblack", "lightblack":
 		return tcell.ColorGray
-	case "brightred":
+	case "brightred", "lightred":
 		return tcell.ColorRed
-	case "brightgreen":
+	case "brightgreen", "lightgreen":
 		return tcell.ColorLime
-	case "brightyellow":
+	case "brightyellow", "lightyellow":
 		return tcell.ColorYellow
-	case "brightblue":
+	case "brightblue", "lightblue":
 		return tcell.ColorBlue
-	case "brightmagenta":
+	case "brightmagenta", "lightmagenta":
 		return tcell.ColorFuchsia
-	case "brightcyan":
+	case "brightcyan", "lightcyan":
 		return tcell.ColorAqua
-	case "brightwhite":
+	case "brightwhite", "lightwhite":
 		return tcell.ColorWhite
 	case "default":
 		return tcell.ColorDefault
 	default:
+		// Check if this is a 256 color
+		if num, err := strconv.Atoi(str); err == nil {
+			return GetColor256(num)
+		}
+		// Probably a truecolor hex value
 		return tcell.GetColor(str)
 	}
+}
+
+// GetColor256 returns the tcell color for a number between 0 and 255
+func GetColor256(color int) tcell.Color {
+	ansiColors := []tcell.Color{tcell.ColorBlack, tcell.ColorMaroon, tcell.ColorGreen,
+		tcell.ColorOlive, tcell.ColorNavy, tcell.ColorPurple,
+		tcell.ColorTeal, tcell.ColorSilver, tcell.ColorGray,
+		tcell.ColorRed, tcell.ColorLime, tcell.ColorYellow,
+		tcell.ColorBlue, tcell.ColorFuchsia, tcell.ColorAqua,
+		tcell.ColorWhite}
+
+	if color >= 0 && color <= 15 {
+		return ansiColors[color]
+	}
+
+	return tcell.GetColor("Color" + strconv.Itoa(color))
 }

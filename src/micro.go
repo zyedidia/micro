@@ -10,100 +10,136 @@ import (
 )
 
 const (
-	tabSize      = 4
-	synLinesUp   = 75
-	synLinesDown = 75
+	tabSize      = 4  // This should be configurable
+	synLinesUp   = 75 // How many lines up to look to do syntax highlighting
+	synLinesDown = 75 // How many lines down to look to do syntax highlighting
 )
 
-func main() {
-	var input []byte
+// The main screen
+var screen tcell.Screen
+
+// LoadInput loads the file input for the editor
+func LoadInput() (string, []byte, error) {
+	// There are a number of ways micro should start given its input
+	// 1. If it is given a file in os.Args, it should open that
+
+	// 2. If there is no input file and the input is not a terminal, that means
+	// something is being piped in and the stdin should be opened in an
+	// empty buffer
+
+	// 3. If there is no input file and the input is a terminal, an empty buffer
+	// should be opened
+
+	// These are empty by default so if we get to option 3, we can just returns the
+	// default values
 	var filename string
+	var input []byte
+	var err error
 
 	if len(os.Args) > 1 {
+		// Option 1
 		filename = os.Args[1]
+		// Check that the file exists
 		if _, err := os.Stat(filename); err == nil {
-			var err error
 			input, err = ioutil.ReadFile(filename)
-
-			if err != nil {
-				fmt.Println(err)
-				os.Exit(1)
-			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
-		bytes, err := ioutil.ReadAll(os.Stdin)
-		if err != nil {
-			fmt.Println("Error reading stdin")
-			os.Exit(1)
-		}
-		input = bytes
+		// Option 2
+		// The input is not a terminal, so something is being piped in
+		// and we should read from stdin
+		input, err = ioutil.ReadAll(os.Stdin)
 	}
 
-	LoadSyntaxFiles()
+	// Option 3, or just return whatever we got
+	return filename, input, err
+}
 
+func main() {
+	filename, input, err := LoadInput()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
 
+	// In order to enable true color, we have to set the TERM to `xterm-truecolor` when
+	// initializing tcell, but after that, we can set the TERM back to whatever it was
 	oldTerm := os.Getenv("TERM")
 	if truecolor {
 		os.Setenv("TERM", "xterm-truecolor")
 	}
 
-	s, e := tcell.NewTerminfoScreen()
-	if e != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", e)
+	// Initilize tcell
+	screen, err = tcell.NewScreen()
+	if err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
-	if e := s.Init(); e != nil {
-		fmt.Fprintf(os.Stderr, "%v\n", e)
+	if err = screen.Init(); err != nil {
+		fmt.Println(err)
 		os.Exit(1)
 	}
 
+	// Now we can put the TERM back to what it was before
 	if truecolor {
 		os.Setenv("TERM", oldTerm)
 	}
 
+	// This is just so if we have an error, we can exit cleanly and not completely
+	// mess up the terminal being worked in
 	defer func() {
 		if err := recover(); err != nil {
-			s.Fini()
+			screen.Fini()
 			fmt.Println("Micro encountered an error:", err)
+			// Print the stack trace too
 			fmt.Print(errors.Wrap(err, 2).ErrorStack())
 			os.Exit(1)
 		}
 	}()
 
+	// Default style
 	defStyle := tcell.StyleDefault.
-		Background(tcell.ColorDefault).
-		Foreground(tcell.ColorDefault)
+		Foreground(tcell.ColorDefault).
+		Background(tcell.ColorDefault)
 
-	if _, ok := colorscheme["default"]; ok {
-		defStyle = colorscheme["default"]
+	// There may be another default style defined in the colorscheme
+	if style, ok := colorscheme["default"]; ok {
+		defStyle = style
 	}
 
-	s.SetStyle(defStyle)
-	s.EnableMouse()
+	screen.SetStyle(defStyle)
+	screen.EnableMouse()
 
-	m := NewMessenger(s)
-	v := NewView(NewBuffer(string(input), filename), m, s)
+	messenger := new(Messenger)
+	view := NewView(NewBuffer(string(input), filename), messenger)
 
-	// Initially everything needs to be drawn
-	redraw := 2
 	for {
-		if redraw == 2 {
-			v.matches = Match(v.buf.rules, v.buf, v)
-			s.Clear()
-			v.Display()
-			v.cursor.Display()
-			v.sl.Display()
-			m.Display()
-			s.Show()
-		} else if redraw == 1 {
-			v.cursor.Display()
-			v.sl.Display()
-			m.Display()
-			s.Show()
+		// Display everything
+		screen.Clear()
+
+		view.Display()
+		messenger.Display()
+
+		screen.Show()
+
+		// Wait for the user's action
+		event := screen.PollEvent()
+
+		// Check if we should quit
+		switch e := event.(type) {
+		case *tcell.EventKey:
+			if e.Key() == tcell.KeyCtrlQ {
+				// Make sure not to quit if there are unsaved changes
+				if view.CanClose("Quit anyway? ") {
+					screen.Fini()
+					os.Exit(0)
+				}
+			}
 		}
 
-		event := s.PollEvent()
-		redraw = v.HandleEvent(event)
+		// Send it to the view
+		view.HandleEvent(event)
 	}
 }

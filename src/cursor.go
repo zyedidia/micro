@@ -149,7 +149,7 @@ func (c *Cursor) Start() {
 
 // GetCharPosInLine gets the char position of a visual x y coordinate (this is necessary because tabs are 1 char but 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
-	visualLine := strings.Replace(c.v.buf.lines[lineNum], "\t", "\t"+EmptyString(tabSize-1), -1)
+	visualLine := strings.Replace(c.v.buf.lines[lineNum], "\t", "\t"+Spaces(tabSize-1), -1)
 	if visualPos > Count(visualLine) {
 		visualPos = Count(visualLine)
 	}
@@ -213,10 +213,8 @@ func (c *Cursor) Distance(x, y int) int {
 // Display draws the cursor to the screen at the correct position
 func (c *Cursor) Display() {
 	if c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1 {
-		c.v.s.HideCursor()
+		screen.HideCursor()
 	} else {
-		c.v.s.ShowCursor(c.GetVisualX()+c.v.lineNumOffset, c.y-c.v.topline)
-		// cursorStyle := tcell.StyleDefault.Reverse(true)
-		// c.v.s.SetContent(c.x+voffset, c.y-c.v.topline, c.runeUnder(), nil, cursorStyle)
+		screen.ShowCursor(c.GetVisualX()+c.v.lineNumOffset, c.y-c.v.topline)
 	}
 }

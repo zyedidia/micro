@@ -33,11 +33,3 @@ func (s *Stack) Pop() (value interface{}) {
 	}
 	return nil
 }
-
-// Peek lets you see and edit the top value of the stack without popping it
-func (s *Stack) Peek() *interface{} {
-	if s.size > 0 {
-		return &s.top.value
-	}
-	return nil
-}

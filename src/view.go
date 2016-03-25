@@ -4,7 +4,6 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
-	"os"
 	"strconv"
 	"strings"
 )
@@ -13,53 +12,65 @@ import (
 // It has a value for the cursor, and the window that the user sees
 // the buffer from.
 type View struct {
-	cursor  Cursor
+	cursor Cursor
+
+	// The topmost line, used for vertical scrolling
 	topline int
-	// Leftmost column. Used for horizontal scrolling
+	// The leftmost column, used for horizontal scrolling
 	leftCol int
 
-	// Percentage of the terminal window that this view takes up
-	heightPercent float32
-	widthPercent  float32
-	height        int
-	width         int
+	// Percentage of the terminal window that this view takes up (from 0 to 100)
+	widthPercent  int
+	heightPercent int
+
+	// Actual with and height
+	width  int
+	height int
 
 	// How much to offset because of line numbers
 	lineNumOffset int
 
+	// The eventhandler for undo/redo
 	eh *EventHandler
 
+	// The buffer
 	buf *Buffer
-	sl  Statusline
+	// The statusline
+	sline Statusline
 
+	// Since tcell doesn't differentiate between a mouse release event
+	// and a mouse move event with no keys pressed, we need to keep
+	// track of whether or not the mouse was pressed (or not released) last event to determine
+	// mouse release events
 	mouseReleased bool
 
-	// Syntax highlighting matches
-	matches map[int]tcell.Style
+	// Syntax higlighting matches
+	matches SyntaxMatches
 
+	// The messenger so we can send messages to the user and get input from them
 	m *Messenger
-
-	s tcell.Screen
 }
 
-// NewView returns a new view with fullscreen width and height
-func NewView(buf *Buffer, m *Messenger, s tcell.Screen) *View {
-	return NewViewWidthHeight(buf, m, s, 1, 1)
+// NewView returns a new fullscreen view
+func NewView(buf *Buffer, m *Messenger) *View {
+	return NewViewWidthHeight(buf, m, 100, 100)
 }
 
 // NewViewWidthHeight returns a new view with the specified width and height percentages
-func NewViewWidthHeight(buf *Buffer, m *Messenger, s tcell.Screen, w, h float32) *View {
+// Note that w and h are percentages not actual values
+func NewViewWidthHeight(buf *Buffer, m *Messenger, w, h int) *View {
 	v := new(View)
 
 	v.buf = buf
-	v.s = s
+	// Messenger
 	v.m = m
 
 	v.widthPercent = w
 	v.heightPercent = h
-	v.Resize(s.Size())
+	v.Resize(screen.Size())
 
 	v.topline = 0
+	// Put the cursor at the first spot
 	v.cursor = Cursor{
 		x:   0,
 		y:   0,
@@ -69,18 +80,23 @@ func NewViewWidthHeight(buf *Buffer, m *Messenger, s tcell.Screen, w, h float32)
 
 	v.eh = NewEventHandler(v)
 
-	v.sl = Statusline{
-		v: v,
+	v.sline = Statusline{
+		view: v,
 	}
 
 	return v
 }
 
-// Resize recalculates the width and height of the view based on the width and height percentages
+// Resize recalculates the actual width and height of the view from the width and height
+// percentages
+// This is usually called when the window is resized, or when a split has been added and
+// the percentages have changed
 func (v *View) Resize(w, h int) {
+	// Always include 1 line for the command line at the bottom
 	h--
-	v.height = int(float32(h)*v.heightPercent) - 1
-	v.width = int(float32(w) * v.widthPercent)
+	v.width = int(float32(w) * float32(v.widthPercent) / 100)
+	// We subtract 1 for the statusline
+	v.height = int(float32(h)*float32(v.heightPercent)/100) - 1
 }
 
 // ScrollUp scrolls the view up n lines (if possible)
@@ -139,70 +155,185 @@ func (v *View) HalfPageDown() {
 	}
 }
 
+// CanClose returns whether or not the view can be closed
+// If there are unsaved changes, the user will be asked if the view can be closed
+// causing them to lose the unsaved changes
+// The message is what to print after saying "You have unsaved changes. "
+func (v *View) CanClose(msg string) bool {
+	if v.buf.IsDirty() {
+		quit, canceled := v.m.Prompt("You have unsaved changes. " + msg)
+		if !canceled {
+			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
+				return true
+			}
+		}
+	} else {
+		return true
+	}
+	return false
+}
+
+// Save the buffer to disk
+func (v *View) Save() {
+	// If this is an empty buffer, ask for a filename
+	if v.buf.path == "" {
+		filename, canceled := v.m.Prompt("Filename: ")
+		if !canceled {
+			v.buf.path = filename
+			v.buf.name = filename
+		} else {
+			return
+		}
+	}
+	err := v.buf.Save()
+	if err != nil {
+		v.m.Error(err.Error())
+	}
+}
+
+// Copy the selection to the system clipboard
+func (v *View) Copy() {
+	if v.cursor.HasSelection() {
+		if !clipboard.Unsupported {
+			clipboard.WriteAll(v.cursor.GetSelection())
+		} else {
+			v.m.Error("Clipboard is not supported on your system")
+		}
+	}
+}
+
+// Cut the selection to the system clipboard
+func (v *View) Cut() {
+	if v.cursor.HasSelection() {
+		if !clipboard.Unsupported {
+			clipboard.WriteAll(v.cursor.GetSelection())
+			v.cursor.DeleteSelection()
+			v.cursor.ResetSelection()
+		} else {
+			v.m.Error("Clipboard is not supported on your system")
+		}
+	}
+}
+
+// Paste whatever is in the system clipboard into the buffer
+// Delete and paste if the user has a selection
+func (v *View) Paste() {
+	if !clipboard.Unsupported {
+		if v.cursor.HasSelection() {
+			v.cursor.DeleteSelection()
+			v.cursor.ResetSelection()
+		}
+		clip, _ := clipboard.ReadAll()
+		v.eh.Insert(v.cursor.loc, clip)
+		// This is a bit weird... Not sure if there's a better way
+		for i := 0; i < Count(clip); i++ {
+			v.cursor.Right()
+		}
+	} else {
+		v.m.Error("Clipboard is not supported on your system")
+	}
+}
+
+// SelectAll selects the entire buffer
+func (v *View) SelectAll() {
+	v.cursor.selectionEnd = 0
+	v.cursor.selectionStart = v.buf.Len()
+	// Put the cursor at the beginning
+	v.cursor.x = 0
+	v.cursor.y = 0
+	v.cursor.loc = 0
+}
+
+// OpenFile opens a new file in the current view
+// It makes sure that the current buffer can be closed first (unsaved changes)
+func (v *View) OpenFile() {
+	if v.CanClose("Continue? ") {
+		filename, canceled := v.m.Prompt("File to open: ")
+		if canceled {
+			return
+		}
+		file, err := ioutil.ReadFile(filename)
+
+		if err != nil {
+			v.m.Error(err.Error())
+			return
+		}
+		v.buf = NewBuffer(string(file), filename)
+	}
+}
+
+// Relocate moves the view window so that the cursor is in view
+// This is useful if the user has scrolled far away, and then starts typing
+func (v *View) Relocate() {
+	cy := v.cursor.y
+	if cy < v.topline {
+		v.topline = cy
+	}
+	if cy > v.topline+v.height-1 {
+		v.topline = cy - v.height + 1
+	}
+}
+
+// MoveToMouseClick moves the cursor to location x, y assuming x, y were given
+// by a mouse click
+func (v *View) MoveToMouseClick(x, y int) {
+	if y-v.topline > v.height-1 {
+		v.ScrollDown(1)
+		y = v.height + v.topline - 1
+	}
+	if y >= len(v.buf.lines) {
+		y = len(v.buf.lines) - 1
+	}
+	if x < 0 {
+		x = 0
+	}
+
+	x = v.cursor.GetCharPosInLine(y, x)
+	if x > Count(v.buf.lines[y]) {
+		x = Count(v.buf.lines[y])
+	}
+	d := v.cursor.Distance(x, y)
+	v.cursor.loc += d
+	v.cursor.x = x
+	v.cursor.y = y
+}
+
 // HandleEvent handles an event passed by the main loop
-// It returns an int describing how the screen needs to be redrawn
-// 0: Screen does not need to be redrawn
-// 1: Only the cursor/statusline needs to be redrawn
-// 2: Everything needs to be redrawn
-func (v *View) HandleEvent(event tcell.Event) int {
-	var ret int
+func (v *View) HandleEvent(event tcell.Event) {
+	// This bool determines whether the view is relocated at the end of the function
+	// By default it's true because most events should cause a relocate
+	relocate := true
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
 		v.Resize(e.Size())
-		ret = 2
 	case *tcell.EventKey:
 		switch e.Key() {
-		case tcell.KeyCtrlQ:
-			// Quit
-			if v.buf.IsDirty() {
-				quit, canceled := v.m.Prompt("You have unsaved changes. Quit anyway? ")
-				if !canceled {
-					if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
-						v.s.Fini()
-						os.Exit(0)
-					} else {
-						return 2
-					}
-				} else {
-					return 2
-				}
-			} else {
-				v.s.Fini()
-				os.Exit(0)
-			}
 		case tcell.KeyUp:
 			// Cursor up
 			v.cursor.Up()
-			ret = 1
 		case tcell.KeyDown:
 			// Cursor down
 			v.cursor.Down()
-			ret = 1
 		case tcell.KeyLeft:
 			// Cursor left
 			v.cursor.Left()
-			ret = 1
 		case tcell.KeyRight:
 			// Cursor right
 			v.cursor.Right()
-			ret = 1
 		case tcell.KeyEnter:
 			// Insert a newline
 			v.eh.Insert(v.cursor.loc, "\n")
 			v.cursor.Right()
-			ret = 2
 		case tcell.KeySpace:
 			// Insert a space
 			v.eh.Insert(v.cursor.loc, " ")
 			v.cursor.Right()
-			ret = 2
 		case tcell.KeyBackspace2:
 			// Delete a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
-				ret = 2
 			} else if v.cursor.loc > 0 {
 				// We have to do something a bit hacky here because we want to
 				// delete the line by first moving left and then deleting backwards
@@ -214,111 +345,35 @@ func (v *View) HandleEvent(event tcell.Event) int {
 				v.cursor.Right()
 				v.eh.Remove(v.cursor.loc-1, v.cursor.loc)
 				v.cursor.x, v.cursor.y, v.cursor.loc = cx, cy, cloc
-				ret = 2
 			}
 		case tcell.KeyTab:
 			// Insert a tab
 			v.eh.Insert(v.cursor.loc, "\t")
 			v.cursor.Right()
-			ret = 2
 		case tcell.KeyCtrlS:
-			// Save
-			if v.buf.path == "" {
-				filename, canceled := v.m.Prompt("Filename: ")
-				if !canceled {
-					v.buf.path = filename
-					v.buf.name = filename
-				} else {
-					return 2
-				}
-			}
-			err := v.buf.Save()
-			if err != nil {
-				v.m.Error(err.Error())
-			}
-			// Need to redraw the status line
-			ret = 1
+			v.Save()
 		case tcell.KeyCtrlZ:
-			// Undo
 			v.eh.Undo()
-			ret = 2
 		case tcell.KeyCtrlY:
-			// Redo
 			v.eh.Redo()
-			ret = 2
 		case tcell.KeyCtrlC:
-			// Copy
-			if v.cursor.HasSelection() {
-				if !clipboard.Unsupported {
-					clipboard.WriteAll(v.cursor.GetSelection())
-					ret = 2
-				}
-			}
+			v.Copy()
 		case tcell.KeyCtrlX:
-			// Cut
-			if v.cursor.HasSelection() {
-				if !clipboard.Unsupported {
-					clipboard.WriteAll(v.cursor.GetSelection())
-					v.cursor.DeleteSelection()
-					v.cursor.ResetSelection()
-					ret = 2
-				}
-			}
+			v.Cut()
 		case tcell.KeyCtrlV:
-			// Paste
-			if !clipboard.Unsupported {
-				if v.cursor.HasSelection() {
-					v.cursor.DeleteSelection()
-					v.cursor.ResetSelection()
-				}
-				clip, _ := clipboard.ReadAll()
-				v.eh.Insert(v.cursor.loc, clip)
-				// This is a bit weird... Not sure if there's a better way
-				for i := 0; i < Count(clip); i++ {
-					v.cursor.Right()
-				}
-				ret = 2
-			}
+			v.Paste()
 		case tcell.KeyCtrlA:
-			// Select all
-			v.cursor.selectionEnd = 0
-			v.cursor.selectionStart = v.buf.Len()
-			v.cursor.x = 0
-			v.cursor.y = 0
-			v.cursor.loc = 0
-			ret = 2
+			v.SelectAll()
 		case tcell.KeyCtrlO:
-			// Open file
-			if v.buf.IsDirty() {
-				quit, canceled := v.m.Prompt("You have unsaved changes. Continue? ")
-				if !canceled {
-					if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
-						return v.OpenFile()
-					} else {
-						return 2
-					}
-				} else {
-					return 2
-				}
-			} else {
-				return v.OpenFile()
-			}
+			v.OpenFile()
 		case tcell.KeyPgUp:
-			// Page up
 			v.PageUp()
-			return 2
 		case tcell.KeyPgDn:
-			// Page down
 			v.PageDown()
-			return 2
 		case tcell.KeyCtrlU:
-			// Half page up
 			v.HalfPageUp()
-			return 2
 		case tcell.KeyCtrlD:
-			// Half page down
 			v.HalfPageDown()
-			return 2
 		case tcell.KeyRune:
 			// Insert a character
 			if v.cursor.HasSelection() {
@@ -327,7 +382,6 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			}
 			v.eh.Insert(v.cursor.loc, string(e.Rune()))
 			v.cursor.Right()
-			ret = 2
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
@@ -342,25 +396,7 @@ func (v *View) HandleEvent(event tcell.Event) int {
 		switch button {
 		case tcell.Button1:
 			// Left click
-			if y-v.topline > v.height-1 {
-				v.ScrollDown(1)
-				y = v.height + v.topline - 1
-			}
-			if y >= len(v.buf.lines) {
-				y = len(v.buf.lines) - 1
-			}
-			if x < 0 {
-				x = 0
-			}
-
-			x = v.cursor.GetCharPosInLine(y, x)
-			if x > Count(v.buf.lines[y]) {
-				x = Count(v.buf.lines[y])
-			}
-			d := v.cursor.Distance(x, y)
-			v.cursor.loc += d
-			v.cursor.x = x
-			v.cursor.y = y
+			v.MoveToMouseClick(x, y)
 
 			if v.mouseReleased {
 				v.cursor.selectionStart = v.cursor.loc
@@ -369,59 +405,44 @@ func (v *View) HandleEvent(event tcell.Event) int {
 			}
 			v.cursor.selectionEnd = v.cursor.loc
 			v.mouseReleased = false
-			return 2
 		case tcell.ButtonNone:
 			// Mouse event with no click
-			v.mouseReleased = true
-			// We need to directly return here because otherwise the view will
-			// be readjusted to put the cursor in it, but there may be mouse events
-			// where the cursor is not (and should not be) be involved
-			return 0
+			if !v.mouseReleased {
+				// Mouse was just released
+
+				// Relocating here isn't really necessary because the cursor will
+				// be in the right place from the last mouse event
+				// However, if we are running in a terminal that doesn't support mouse motion
+				// events, this still allows the user to make selections, except only after they
+				// release the mouse
+				v.MoveToMouseClick(x, y)
+				v.cursor.selectionEnd = v.cursor.loc
+				v.mouseReleased = true
+			}
+			// We don't want to relocate because otherwise the view will be relocated
+			// everytime the user moves the cursor
+			relocate = false
 		case tcell.WheelUp:
 			// Scroll up two lines
 			v.ScrollUp(2)
-			return 2
+			// We don't want to relocate if the user is scrolling
+			relocate = false
 		case tcell.WheelDown:
 			// Scroll down two lines
 			v.ScrollDown(2)
-			return 2
+			// We don't want to relocate if the user is scrolling
+			relocate = false
 		}
 	}
 
-	// Reset the view so the cursor is in view
-	cy := v.cursor.y
-	if cy < v.topline {
-		v.topline = cy
-		ret = 2
+	if relocate {
+		v.Relocate()
 	}
-	if cy > v.topline+v.height-1 {
-		v.topline = cy - v.height + 1
-		ret = 2
-	}
-
-	return ret
 }
 
-// OpenFile Prompts the user for a filename and opens the file in the current buffer
-func (v *View) OpenFile() int {
-	filename, canceled := v.m.Prompt("File to open: ")
-	if canceled {
-		return 2
-	}
-	file, err := ioutil.ReadFile(filename)
-
-	if err != nil {
-		v.m.Error(err.Error())
-		return 2
-	}
-	v.buf = NewBuffer(string(file), filename)
-	return 2
-}
-
-// Display renders the view to the screen
-func (v *View) Display() {
-	var x int
-
+// DisplayView renders the view to the screen
+func (v *View) DisplayView() {
+	// The character number of the character in the top left of the screen
 	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
 	// Convert the length of buffer to a string, and get the length of the string
@@ -433,6 +454,9 @@ func (v *View) Display() {
 	var highlightStyle tcell.Style
 
 	for lineN := 0; lineN < v.height; lineN++ {
+		var x int
+		// If the buffer is smaller than the view height
+		// and we went too far, break
 		if lineN+v.topline >= len(v.buf.lines) {
 			break
 		}
@@ -446,22 +470,23 @@ func (v *View) Display() {
 		// Write the spaces before the line number if necessary
 		lineNum := strconv.Itoa(lineN + v.topline + 1)
 		for i := 0; i < maxLineLength-len(lineNum); i++ {
-			v.s.SetContent(x, lineN, ' ', nil, lineNumStyle)
+			screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
 			x++
 		}
 		// Write the actual line number
 		for _, ch := range lineNum {
-			v.s.SetContent(x, lineN, ch, nil, lineNumStyle)
+			screen.SetContent(x, lineN, ch, nil, lineNumStyle)
 			x++
 		}
 		// Write the extra space
-		v.s.SetContent(x, lineN, ' ', nil, lineNumStyle)
+		screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
 		x++
 
 		// Write the line
 		tabchars := 0
 		for _, ch := range line {
 			var lineStyle tcell.Style
+			// Does the current character need to be syntax highlighted?
 			st, ok := v.matches[charNum]
 			if ok {
 				highlightStyle = st
@@ -483,17 +508,21 @@ func (v *View) Display() {
 			}
 
 			if ch == '\t' {
-				v.s.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
+				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
-					v.s.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
+					screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
 				}
 			} else {
-				v.s.SetContent(x+tabchars, lineN, ch, nil, lineStyle)
+				screen.SetContent(x+tabchars, lineN, ch, nil, lineStyle)
 			}
 			charNum++
 			x++
 		}
+		// Here we are at a newline
+
+		// The newline may be selected, in which case we should draw the selection style
+		// with a space to represent it
 		if v.cursor.HasSelection() &&
 			(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
 				charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
@@ -503,14 +532,17 @@ func (v *View) Display() {
 			if _, ok := colorscheme["selection"]; ok {
 				selectStyle = colorscheme["selection"]
 			}
-			v.s.SetContent(x+tabchars, lineN, ' ', nil, selectStyle)
+			screen.SetContent(x+tabchars, lineN, ' ', nil, selectStyle)
 		}
 
 		x = 0
-		st, ok := v.matches[charNum]
-		if ok {
-			highlightStyle = st
-		}
 		charNum++
 	}
+}
+
+// Display renders the view, the cursor, and statusline
+func (v *View) Display() {
+	v.DisplayView()
+	v.cursor.Display()
+	v.sline.Display()
 }
