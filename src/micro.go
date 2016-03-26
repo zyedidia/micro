@@ -10,8 +10,9 @@ import (
 )
 
 const (
-	synLinesUp   = 75 // How many lines up to look to do syntax highlighting
-	synLinesDown = 75 // How many lines down to look to do syntax highlighting
+	synLinesUp           = 75  // How many lines up to look to do syntax highlighting
+	synLinesDown         = 75  // How many lines down to look to do syntax highlighting
+	doubleClickThreshold = 400 // How many milliseconds to wait before a second click is not a double click
 )
 
 // The main screen

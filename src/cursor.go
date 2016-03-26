@@ -90,6 +90,25 @@ func (c *Cursor) GetSelection() string {
 	return string([]rune(c.v.buf.text)[c.selectionStart : c.selectionEnd+1])
 }
 
+// SelectLine selects the current line
+func (c *Cursor) SelectLine() {
+	c.Start()
+	c.selectionStart = c.Loc()
+	c.End()
+	c.selectionEnd = c.Loc()
+}
+
+// AddLineToSelection adds the current line to the selection
+func (c *Cursor) AddLineToSelection() {
+	if c.loc < c.selectionStart {
+		c.Start()
+		c.selectionStart = c.Loc()
+	} else if c.loc > c.selectionEnd {
+		c.End()
+		c.selectionEnd = c.Loc()
+	}
+}
+
 // RuneUnder returns the rune under the cursor
 func (c *Cursor) RuneUnder() rune {
 	line := c.v.buf.lines[c.y]

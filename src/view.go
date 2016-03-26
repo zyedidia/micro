@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -43,6 +44,17 @@ type View struct {
 	// track of whether or not the mouse was pressed (or not released) last event to determine
 	// mouse release events
 	mouseReleased bool
+
+	// This stores when the last click was
+	// This is useful for detecting double and triple clicks
+	lastClickTime time.Time
+
+	// Was the last mouse event actually a double click?
+	// Useful for detecting triple clicks -- if a double click is detected
+	// but the last mouse event was actually a double click, it's a triple click
+	doubleClick bool
+	// Same here, just to keep track for mouse move events
+	tripleClick bool
 
 	// Syntax highlighting matches
 	matches SyntaxMatches
@@ -90,6 +102,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
 	v.mouseReleased = true
+	v.lastClickTime = time.Time{}
 
 	return v
 }
@@ -432,14 +445,47 @@ func (v *View) HandleEvent(event tcell.Event) {
 		switch button {
 		case tcell.Button1:
 			// Left click
+			origX, origY := v.cursor.x, v.cursor.y
 			v.MoveToMouseClick(x, y)
 
-			loc := v.cursor.Loc()
 			if v.mouseReleased {
-				v.cursor.selectionStart = loc
+				if (time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold) &&
+					(origX == v.cursor.x && origY == v.cursor.y) {
+					if v.doubleClick {
+						// Triple click
+						v.lastClickTime = time.Now()
+						v.tripleClick = true
+						v.doubleClick = false
+						messenger.Error("Triple click")
+						v.cursor.SelectLine()
+					} else {
+						// Double click
+						v.doubleClick = true
+						v.tripleClick = false
+						v.lastClickTime = time.Now()
+						messenger.Error("Double click")
+					}
+				} else {
+					messenger.Error("Single click")
+					v.doubleClick = false
+					v.tripleClick = false
+					v.lastClickTime = time.Now()
+
+					loc := v.cursor.Loc()
+					v.cursor.selectionStart = loc
+					v.cursor.selectionEnd = loc
+				}
+			} else {
+				if v.tripleClick {
+					v.cursor.AddLineToSelection()
+				} else if v.doubleClick {
+
+				} else {
+					v.cursor.selectionEnd = v.cursor.Loc()
+				}
 			}
-			v.cursor.selectionEnd = loc
 			v.mouseReleased = false
+
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
