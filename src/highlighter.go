@@ -240,7 +240,6 @@ func Match(v *View) SyntaxMatches {
 
 	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")
 	startNum := v.cursor.loc + v.cursor.Distance(0, totalStart)
-	toplineNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
 
 	for _, rule := range rules {
 		if rule.startend {
@@ -251,11 +250,17 @@ func Match(v *View) SyntaxMatches {
 					value[1] += startNum
 					for i := value[0]; i < value[1]; i++ {
 						colNum, lineNum := GetPos(i, buf)
-						v.m.Message(strconv.Itoa(lineNum) + ", " + strconv.Itoa(colNum))
-						if i >= toplineNum {
-							if lineNum != -1 && colNum != -1 {
-								matches[lineNum][colNum] = rule.style
+						if lineNum == -1 || colNum == -1 {
+							continue
+						}
+						lineNum -= viewStart
+						if lineNum >= 0 && lineNum < v.height {
+							if lineNum >= len(matches) {
+								v.m.Error("Line " + strconv.Itoa(lineNum))
+							} else if colNum >= len(matches[lineNum]) {
+								v.m.Error("Line " + strconv.Itoa(lineNum) + " Col " + strconv.Itoa(colNum) + " " + strconv.Itoa(len(matches[lineNum])))
 							}
+							matches[lineNum][colNum] = rule.style
 						}
 					}
 				}
