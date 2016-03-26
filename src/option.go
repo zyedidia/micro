@@ -8,12 +8,14 @@ import (
 // The options that the user can set
 var options map[string]interface{}
 
+// InitOptions initializes the options map and sets all options to their default values
 func InitOptions() {
 	options = make(map[string]interface{})
 	options["tabsize"] = 4
 	options["colorscheme"] = "default"
 }
 
+// SetOption prompts the user to set an option and checks that the response is valid
 func SetOption(view *View) {
 	choice, canceled := messenger.Prompt("Option: ")
 	if !canceled {
