@@ -249,7 +249,7 @@ func Match(v *View) SyntaxMatches {
 					value[0] += startNum
 					value[1] += startNum
 					for i := value[0]; i < value[1]; i++ {
-						colNum, lineNum := GetPos(i, buf)
+						colNum, lineNum := GetPos(startNum, totalStart, i, buf)
 						if lineNum == -1 || colNum == -1 {
 							continue
 						}
@@ -283,9 +283,9 @@ func Match(v *View) SyntaxMatches {
 }
 
 // GetPos returns an x, y position given a character location in the buffer
-func GetPos(loc int, buf *Buffer) (int, int) {
-	charNum := 0
-	x, y := 0, 0
+func GetPos(startLoc, startLine, loc int, buf *Buffer) (int, int) {
+	charNum := startLoc
+	x, y := 0, startLine
 
 	for i, line := range buf.lines {
 		if charNum+Count(line) > loc {
