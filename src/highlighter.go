@@ -256,9 +256,9 @@ func Match(v *View) SyntaxMatches {
 						lineNum -= viewStart
 						if lineNum >= 0 && lineNum < v.height {
 							if lineNum >= len(matches) {
-								v.m.Error("Line " + strconv.Itoa(lineNum))
+								messenger.Error("Line " + strconv.Itoa(lineNum))
 							} else if colNum >= len(matches[lineNum]) {
-								v.m.Error("Line " + strconv.Itoa(lineNum) + " Col " + strconv.Itoa(colNum) + " " + strconv.Itoa(len(matches[lineNum])))
+								messenger.Error("Line " + strconv.Itoa(lineNum) + " Col " + strconv.Itoa(colNum) + " " + strconv.Itoa(len(matches[lineNum])))
 							}
 							matches[lineNum][colNum] = rule.style
 						}

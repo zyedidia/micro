@@ -51,24 +51,19 @@ type View struct {
 
 	// This is the range of lines that should have their syntax highlighting updated
 	updateLines [2]int
-
-	// The messenger so we can send messages to the user and get input from them
-	m *Messenger
 }
 
 // NewView returns a new fullscreen view
-func NewView(buf *Buffer, m *Messenger) *View {
-	return NewViewWidthHeight(buf, m, 100, 100)
+func NewView(buf *Buffer) *View {
+	return NewViewWidthHeight(buf, 100, 100)
 }
 
 // NewViewWidthHeight returns a new view with the specified width and height percentages
 // Note that w and h are percentages not actual values
-func NewViewWidthHeight(buf *Buffer, m *Messenger, w, h int) *View {
+func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v := new(View)
 
 	v.buf = buf
-	// Messenger
-	v.m = m
 
 	v.widthPercent = w
 	v.heightPercent = h
@@ -180,7 +175,7 @@ func (v *View) HalfPageDown() {
 // The message is what to print after saying "You have unsaved changes. "
 func (v *View) CanClose(msg string) bool {
 	if v.buf.IsDirty() {
-		quit, canceled := v.m.Prompt("You have unsaved changes. " + msg)
+		quit, canceled := messenger.Prompt("You have unsaved changes. " + msg)
 		if !canceled {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
 				return true
@@ -196,7 +191,7 @@ func (v *View) CanClose(msg string) bool {
 func (v *View) Save() {
 	// If this is an empty buffer, ask for a filename
 	if v.buf.path == "" {
-		filename, canceled := v.m.Prompt("Filename: ")
+		filename, canceled := messenger.Prompt("Filename: ")
 		if !canceled {
 			v.buf.path = filename
 			v.buf.name = filename
@@ -206,7 +201,7 @@ func (v *View) Save() {
 	}
 	err := v.buf.Save()
 	if err != nil {
-		v.m.Error(err.Error())
+		messenger.Error(err.Error())
 	}
 }
 
@@ -216,7 +211,7 @@ func (v *View) Copy() {
 		if !clipboard.Unsupported {
 			clipboard.WriteAll(v.cursor.GetSelection())
 		} else {
-			v.m.Error("Clipboard is not supported on your system")
+			messenger.Error("Clipboard is not supported on your system")
 		}
 	}
 }
@@ -229,7 +224,7 @@ func (v *View) Cut() {
 			v.cursor.DeleteSelection()
 			v.cursor.ResetSelection()
 		} else {
-			v.m.Error("Clipboard is not supported on your system")
+			messenger.Error("Clipboard is not supported on your system")
 		}
 	}
 }
@@ -249,7 +244,7 @@ func (v *View) Paste() {
 			v.cursor.Right()
 		}
 	} else {
-		v.m.Error("Clipboard is not supported on your system")
+		messenger.Error("Clipboard is not supported on your system")
 	}
 }
 
@@ -267,14 +262,14 @@ func (v *View) SelectAll() {
 // It makes sure that the current buffer can be closed first (unsaved changes)
 func (v *View) OpenFile() {
 	if v.CanClose("Continue? ") {
-		filename, canceled := v.m.Prompt("File to open: ")
+		filename, canceled := messenger.Prompt("File to open: ")
 		if canceled {
 			return
 		}
 		file, err := ioutil.ReadFile(filename)
 
 		if err != nil {
-			v.m.Error(err.Error())
+			messenger.Error(err.Error())
 			return
 		}
 		v.buf = NewBuffer(string(file), filename)
@@ -552,6 +547,7 @@ func (v *View) DisplayView() {
 
 			if ch == '\t' {
 				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
+				tabSize := options["tabsize"].(int)
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
 					screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)

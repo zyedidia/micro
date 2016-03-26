@@ -41,10 +41,15 @@ func NewBuffer(txt, path string) *Buffer {
 	b.savedText = txt
 
 	b.Update()
-
-	b.rules, b.filetype = GetRules(b)
+	b.UpdateRules()
 
 	return b
+}
+
+// UpdateRules updates the syntax rules and filetype for this buffer
+// This is called when the colorscheme changes
+func (b *Buffer) UpdateRules() {
+	b.rules, b.filetype = GetRules(b)
 }
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer

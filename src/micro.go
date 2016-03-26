@@ -10,13 +10,15 @@ import (
 )
 
 const (
-	tabSize      = 4  // This should be configurable
 	synLinesUp   = 75 // How many lines up to look to do syntax highlighting
 	synLinesDown = 75 // How many lines down to look to do syntax highlighting
 )
 
 // The main screen
 var screen tcell.Screen
+
+// Object to send messages and prompts to the user
+var messenger *Messenger
 
 // LoadInput loads the file input for the editor
 func LoadInput() (string, []byte, error) {
@@ -60,6 +62,8 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	InitOptions()
 
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
@@ -115,8 +119,8 @@ func main() {
 	screen.SetStyle(defStyle)
 	screen.EnableMouse()
 
-	messenger := new(Messenger)
-	view := NewView(NewBuffer(string(input), filename), messenger)
+	messenger = new(Messenger)
+	view := NewView(NewBuffer(string(input), filename))
 
 	for {
 		// Display everything
@@ -133,12 +137,15 @@ func main() {
 		// Check if we should quit
 		switch e := event.(type) {
 		case *tcell.EventKey:
-			if e.Key() == tcell.KeyCtrlQ {
+			switch e.Key() {
+			case tcell.KeyCtrlQ:
 				// Make sure not to quit if there are unsaved changes
 				if view.CanClose("Quit anyway? ") {
 					screen.Fini()
 					os.Exit(0)
 				}
+			case tcell.KeyCtrlE:
+				SetOption(view)
 			}
 		}
 

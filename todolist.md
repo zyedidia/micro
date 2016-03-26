@@ -4,6 +4,8 @@
 
 - [ ] Optimization
 
+- [ ] Documentation
+
 - [ ] Search and replace
 
 - [ ] Better selection
@@ -26,20 +28,20 @@
     - [ ] Allow executing simple commands at the bottom of the editor 
       (like vim or emacs)
 
-- [ ] Options
-    - [ ] Add options such as tab size, use tabs or use spaces, etc...
-
 ### Done
-
-- [x] Readme
 
 - [x] Line numbers
 
-- [x] Tests
+- [x] Simple tests
 
 - [x] Proper error handling
 
 - [x] Cleanup
+
+- [x] Options
+    - [x] Colorscheme
+    - [x] tab size
+    - [ ] tabs or spaces
 
 - [x] Syntax highlighting
     - [x] Use nano-like syntax files (https://github.com/scopatz/nanorc)

@@ -10,8 +10,6 @@ import (
 	"strings"
 )
 
-const defaultColorscheme = "default"
-
 // Colorscheme is a map from string to style -- it represents a colorscheme
 type Colorscheme map[string]tcell.Style
 
@@ -30,7 +28,7 @@ func LoadDefaultColorscheme() {
 		TermMessage("Error finding your home directory\nCan't load runtime files")
 		return
 	}
-	LoadColorscheme(defaultColorscheme, dir+"/.micro/colorschemes")
+	LoadColorscheme(options["colorscheme"].(string), dir+"/.micro/colorschemes")
 }
 
 // LoadColorscheme loads the given colorscheme from a directory
