@@ -42,8 +42,8 @@ type Cursor struct {
 	x int
 	y int
 
-	selectionStart int
-	selectionEnd   int
+	curSelection  [2]int
+	origSelection [2]int
 }
 
 // SetLoc sets the location of the cursor in terms of character number
@@ -62,50 +62,68 @@ func (c *Cursor) Loc() int {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.selectionStart = 0
-	c.selectionEnd = 0
+	c.curSelection[0] = 0
+	c.curSelection[1] = 0
 }
 
 // HasSelection returns whether or not the user has selected anything
 func (c *Cursor) HasSelection() bool {
-	return c.selectionEnd != c.selectionStart
+	return c.curSelection[1] != c.curSelection[0]
 }
 
 // DeleteSelection deletes the currently selected text
 func (c *Cursor) DeleteSelection() {
-	if c.selectionStart > c.selectionEnd {
-		c.v.eh.Remove(c.selectionEnd, c.selectionStart+1)
-		c.SetLoc(c.selectionEnd)
+	if c.curSelection[0] > c.curSelection[1] {
+		c.v.eh.Remove(c.curSelection[1], c.curSelection[0]+1)
+		c.SetLoc(c.curSelection[1])
 	} else {
-		c.v.eh.Remove(c.selectionStart, c.selectionEnd+1)
-		c.SetLoc(c.selectionStart)
+		c.v.eh.Remove(c.curSelection[0], c.curSelection[1]+1)
+		c.SetLoc(c.curSelection[0])
 	}
 }
 
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() string {
-	if c.selectionStart > c.selectionEnd {
-		return string([]rune(c.v.buf.text)[c.selectionEnd : c.selectionStart+1])
+	if c.curSelection[0] > c.curSelection[1] {
+		return string([]rune(c.v.buf.text)[c.curSelection[1] : c.curSelection[0]+1])
 	}
-	return string([]rune(c.v.buf.text)[c.selectionStart : c.selectionEnd+1])
+	return string([]rune(c.v.buf.text)[c.curSelection[0] : c.curSelection[1]+1])
 }
 
 // SelectLine selects the current line
 func (c *Cursor) SelectLine() {
 	c.Start()
-	c.selectionStart = c.Loc()
+	c.curSelection[0] = c.Loc()
 	c.End()
-	c.selectionEnd = c.Loc()
+	c.curSelection[1] = c.Loc()
+
+	c.origSelection[0] = c.curSelection[0]
+	c.origSelection[1] = c.curSelection[1]
 }
 
 // AddLineToSelection adds the current line to the selection
 func (c *Cursor) AddLineToSelection() {
-	if c.Loc() < c.selectionStart {
+	loc := c.Loc()
+
+	if loc > c.origSelection[0] && loc < c.origSelection[1] {
+		c.curSelection = c.origSelection
+		return
+	}
+
+	if loc < c.origSelection[0] {
 		c.Start()
-		c.selectionStart = c.Loc()
-	} else if c.Loc() > c.selectionEnd {
+		c.curSelection[0] = c.Loc()
+	} else if loc > c.origSelection[1] {
 		c.End()
-		c.selectionEnd = c.Loc()
+		c.curSelection[1] = c.Loc()
+	}
+
+	if loc < c.curSelection[0] {
+		c.Start()
+		c.curSelection[0] = c.Loc()
+	} else if loc > c.curSelection[1] {
+		c.End()
+		c.curSelection[1] = c.Loc()
 	}
 }
 

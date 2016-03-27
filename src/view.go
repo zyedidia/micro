@@ -262,8 +262,8 @@ func (v *View) Paste() {
 
 // SelectAll selects the entire buffer
 func (v *View) SelectAll() {
-	v.cursor.selectionEnd = 0
-	v.cursor.selectionStart = v.buf.Len()
+	v.cursor.curSelection[1] = 0
+	v.cursor.curSelection[0] = v.buf.Len()
 	// Put the cursor at the beginning
 	v.cursor.x = 0
 	v.cursor.y = 0
@@ -456,24 +456,21 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.lastClickTime = time.Now()
 						v.tripleClick = true
 						v.doubleClick = false
-						messenger.Error("Triple click")
 						v.cursor.SelectLine()
 					} else {
 						// Double click
 						v.doubleClick = true
 						v.tripleClick = false
 						v.lastClickTime = time.Now()
-						messenger.Error("Double click")
 					}
 				} else {
-					messenger.Error("Single click")
 					v.doubleClick = false
 					v.tripleClick = false
 					v.lastClickTime = time.Now()
 
 					loc := v.cursor.Loc()
-					v.cursor.selectionStart = loc
-					v.cursor.selectionEnd = loc
+					v.cursor.curSelection[0] = loc
+					v.cursor.curSelection[1] = loc
 				}
 			} else {
 				if v.tripleClick {
@@ -481,7 +478,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 
 				} else {
-					v.cursor.selectionEnd = v.cursor.Loc()
+					v.cursor.curSelection[1] = v.cursor.Loc()
 				}
 			}
 			v.mouseReleased = false
@@ -496,8 +493,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 				// However, if we are running in a terminal that doesn't support mouse motion
 				// events, this still allows the user to make selections, except only after they
 				// release the mouse
-				v.MoveToMouseClick(x, y)
-				v.cursor.selectionEnd = v.cursor.Loc()
+
+				if !v.doubleClick && !v.tripleClick {
+					v.MoveToMouseClick(x, y)
+					v.cursor.curSelection[1] = v.cursor.Loc()
+				}
 				v.mouseReleased = true
 			}
 			// We don't want to relocate because otherwise the view will be relocated
@@ -575,8 +575,8 @@ func (v *View) DisplayView() {
 			highlightStyle = v.matches[lineN][colN]
 
 			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
-					charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
+				(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
+					charNum <= v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
@@ -605,8 +605,8 @@ func (v *View) DisplayView() {
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
 		if v.cursor.HasSelection() &&
-			(charNum >= v.cursor.selectionStart && charNum <= v.cursor.selectionEnd ||
-				charNum <= v.cursor.selectionStart && charNum >= v.cursor.selectionEnd) {
+			(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
+				charNum <= v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
 			selectStyle := tcell.StyleDefault.Reverse(true)
 
