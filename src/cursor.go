@@ -100,10 +100,10 @@ func (c *Cursor) SelectLine() {
 
 // AddLineToSelection adds the current line to the selection
 func (c *Cursor) AddLineToSelection() {
-	if c.loc < c.selectionStart {
+	if c.Loc() < c.selectionStart {
 		c.Start()
 		c.selectionStart = c.Loc()
-	} else if c.loc > c.selectionEnd {
+	} else if c.Loc() > c.selectionEnd {
 		c.End()
 		c.selectionEnd = c.Loc()
 	}
