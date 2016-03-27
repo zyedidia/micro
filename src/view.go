@@ -72,10 +72,9 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v.topline = 0
 	// Put the cursor at the first spot
 	v.cursor = Cursor{
-		x:   0,
-		y:   0,
-		loc: 0,
-		v:   v,
+		x: 0,
+		y: 0,
+		v: v,
 	}
 
 	v.eh = NewEventHandler(v)
@@ -238,7 +237,7 @@ func (v *View) Paste() {
 			v.cursor.ResetSelection()
 		}
 		clip, _ := clipboard.ReadAll()
-		v.eh.Insert(v.cursor.loc, clip)
+		v.eh.Insert(v.cursor.Loc(), clip)
 		// This is a bit weird... Not sure if there's a better way
 		for i := 0; i < Count(clip); i++ {
 			v.cursor.Right()
@@ -255,7 +254,6 @@ func (v *View) SelectAll() {
 	// Put the cursor at the beginning
 	v.cursor.x = 0
 	v.cursor.y = 0
-	v.cursor.loc = 0
 }
 
 // OpenFile opens a new file in the current view
@@ -306,8 +304,6 @@ func (v *View) MoveToMouseClick(x, y int) {
 	if x > Count(v.buf.lines[y]) {
 		x = Count(v.buf.lines[y])
 	}
-	d := v.cursor.Distance(x, y)
-	v.cursor.loc += d
 	v.cursor.x = x
 	v.cursor.y = y
 }
@@ -339,12 +335,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.cursor.Right()
 		case tcell.KeyEnter:
 			// Insert a newline
-			v.eh.Insert(v.cursor.loc, "\n")
+			v.eh.Insert(v.cursor.Loc(), "\n")
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y-1, v.cursor.y)
 		case tcell.KeySpace:
 			// Insert a space
-			v.eh.Insert(v.cursor.loc, " ")
+			v.eh.Insert(v.cursor.Loc(), " ")
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyBackspace2:
@@ -354,22 +350,23 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.ResetSelection()
 				// Rehighlight the entire buffer
 				v.UpdateLines(v.topline, v.topline+v.height)
-			} else if v.cursor.loc > 0 {
+			} else if v.cursor.Loc() > 0 {
 				// We have to do something a bit hacky here because we want to
 				// delete the line by first moving left and then deleting backwards
 				// but the undo redo would place the cursor in the wrong place
 				// So instead we move left, save the position, move back, delete
 				// and restore the position
 				v.cursor.Left()
-				cx, cy, cloc := v.cursor.x, v.cursor.y, v.cursor.loc
+				cx, cy := v.cursor.x, v.cursor.y
 				v.cursor.Right()
-				v.eh.Remove(v.cursor.loc-1, v.cursor.loc)
-				v.cursor.x, v.cursor.y, v.cursor.loc = cx, cy, cloc
+				loc := v.cursor.Loc()
+				v.eh.Remove(loc-1, loc)
+				v.cursor.x, v.cursor.y = cx, cy
 				v.UpdateLines(v.cursor.y, v.cursor.y+1)
 			}
 		case tcell.KeyTab:
 			// Insert a tab
-			v.eh.Insert(v.cursor.loc, "\t")
+			v.eh.Insert(v.cursor.Loc(), "\t")
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyCtrlS:
@@ -418,7 +415,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 			}
-			v.eh.Insert(v.cursor.loc, string(e.Rune()))
+			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y, v.cursor.y)
 		}
@@ -437,12 +434,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Left click
 			v.MoveToMouseClick(x, y)
 
+			loc := v.cursor.Loc()
 			if v.mouseReleased {
-				v.cursor.selectionStart = v.cursor.loc
-				v.cursor.selectionStartX = v.cursor.x
-				v.cursor.selectionStartY = v.cursor.y
+				v.cursor.selectionStart = loc
 			}
-			v.cursor.selectionEnd = v.cursor.loc
+			v.cursor.selectionEnd = loc
 			v.mouseReleased = false
 		case tcell.ButtonNone:
 			// Mouse event with no click
@@ -455,7 +451,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				// events, this still allows the user to make selections, except only after they
 				// release the mouse
 				v.MoveToMouseClick(x, y)
-				v.cursor.selectionEnd = v.cursor.loc
+				v.cursor.selectionEnd = v.cursor.Loc()
 				v.mouseReleased = true
 			}
 			// We don't want to relocate because otherwise the view will be relocated
@@ -486,7 +482,7 @@ func (v *View) DisplayView() {
 	matches := make(SyntaxMatches, len(v.matches))
 
 	// The character number of the character in the top left of the screen
-	charNum := v.cursor.loc + v.cursor.Distance(0, v.topline)
+	charNum := ToCharPos(0, v.topline, v.buf)
 
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount

@@ -5,9 +5,9 @@ import (
 )
 
 const (
-	// RopeSplitLength defines how large can a string be before it is split into two nodes
-	RopeSplitLength = 1000
-	// RopeJoinLength defines how short can a string be before it is joined
+	// RopeSplitLength is the threshold used to split a leaf node into two child nodes.
+	RopeSplitLength = 1000000000
+	// RopeJoinLength is the threshold used to join two child nodes into one leaf node.
 	RopeJoinLength = 500
 	// RopeRebalanceRatio = 1.2
 )
@@ -39,8 +39,9 @@ func (r *Rope) Adjust() {
 	if !r.valueNil {
 		if r.len > RopeSplitLength {
 			divide := int(math.Floor(float64(r.len) / 2))
-			r.left = NewRope(r.value[:divide])
-			r.right = NewRope(r.value[divide:])
+			runes := []rune(r.value)
+			r.left = NewRope(string(runes[:divide]))
+			r.right = NewRope(string(runes[divide:]))
 			r.valueNil = true
 		}
 	} else {

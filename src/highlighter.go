@@ -239,7 +239,7 @@ func Match(v *View) SyntaxMatches {
 	}
 
 	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")
-	startNum := v.cursor.loc + v.cursor.Distance(0, totalStart)
+	startNum := ToCharPos(0, totalStart, v.buf)
 
 	for _, rule := range rules {
 		if rule.startend {

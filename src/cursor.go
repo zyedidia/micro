@@ -1,31 +1,65 @@
 package main
 
 import (
+	"io/ioutil"
+	"strconv"
 	"strings"
 )
 
+// FromCharPos converts from a character position to an x, y position
+func FromCharPos(loc int, buf *Buffer) (int, int) {
+	charNum := 0
+	x, y := 0, 0
+
+	for charNum+Count(buf.lines[y])+1 <= loc {
+		charNum += Count(buf.lines[y]) + 1
+		y++
+	}
+	x = loc - charNum
+
+	return x, y
+}
+
+// ToCharPos converts from an x, y position to a character position
+func ToCharPos(x, y int, buf *Buffer) int {
+	loc := 0
+	for i := 0; i < y; i++ {
+		// + 1 for the newline
+		loc += Count(buf.lines[i]) + 1
+	}
+	loc += x
+	return loc
+}
+
 // The Cursor struct stores the location of the cursor in the view
+// The complicated part about the cursor is storing its location.
+// The cursor must be displayed at an x, y location, but since the buffer
+// uses a rope to store text, to insert text we must have an index. It
+// is also simpler to use character indicies for other tasks such as
+// selection.
 type Cursor struct {
 	v *View
 
-	// We need three variables here because we insert text at loc but
-	// display the cursor at x, y
-	x   int
-	y   int
-	loc int
+	// The cursor display location
+	x int
+	y int
 
-	// Start of the selection in charNum
 	selectionStart int
+	selectionEnd   int
+}
 
-	// We store the x, y of the start because when the user deletes the selection
-	// the cursor needs to go back to the start, and this is the simplest way
-	selectionStartX int
-	selectionStartY int
+// SetLoc sets the location of the cursor in terms of character number
+// and not x, y location
+// It's just a simple wrapper of FromCharPos
+func (c *Cursor) SetLoc(loc int) {
+	c.x, c.y = FromCharPos(loc, c.v.buf)
+}
 
-	// End of the selection in charNum
-	// We don't need to store the x, y here because when if the user is selecting backwards
-	// and they delete the selection, the cursor is already in the right place
-	selectionEnd int
+// Loc gets the cursor location in terms of character number instead
+// of x, y location
+// It's just a simple wrapper of ToCharPos
+func (c *Cursor) Loc() int {
+	return ToCharPos(c.x, c.y, c.v.buf)
 }
 
 // ResetSelection resets the user's selection
@@ -43,12 +77,10 @@ func (c *Cursor) HasSelection() bool {
 func (c *Cursor) DeleteSelection() {
 	if c.selectionStart > c.selectionEnd {
 		c.v.eh.Remove(c.selectionEnd, c.selectionStart+1)
-		// Since the cursor is already at the selection start we don't need to move
+		c.SetLoc(c.selectionEnd)
 	} else {
 		c.v.eh.Remove(c.selectionStart, c.selectionEnd+1)
-		c.loc -= c.selectionEnd - c.selectionStart
-		c.x = c.selectionStartX
-		c.y = c.selectionStartY
+		c.SetLoc(c.selectionStart)
 	}
 }
 
@@ -72,46 +104,33 @@ func (c *Cursor) RuneUnder() rune {
 // Up moves the cursor up one line (if possible)
 func (c *Cursor) Up() {
 	if c.y > 0 {
-		runes := []rune(c.v.buf.lines[c.y])
-		c.loc -= len(runes[:c.x])
-		// Count the newline
-		c.loc--
 		c.y--
-		runes = []rune(c.v.buf.lines[c.y])
 
+		runes := []rune(c.v.buf.lines[c.y])
 		if c.x > len(runes) {
 			c.x = len(runes)
 		}
-
-		c.loc -= len(runes[c.x:])
 	}
 }
 
 // Down moves the cursor down one line (if possible)
 func (c *Cursor) Down() {
 	if c.y < len(c.v.buf.lines)-1 {
-		runes := []rune(c.v.buf.lines[c.y])
-		c.loc += len(runes[c.x:])
-		// Count the newline
-		c.loc++
 		c.y++
-		runes = []rune(c.v.buf.lines[c.y])
 
+		runes := []rune(c.v.buf.lines[c.y])
 		if c.x > len(runes) {
 			c.x = len(runes)
 		}
-
-		c.loc += len(runes[:c.x])
 	}
 }
 
 // Left moves the cursor left one cell (if possible) or to the last line if it is at the beginning
 func (c *Cursor) Left() {
-	if c.loc == 0 {
+	if c.Loc() == 0 {
 		return
 	}
 	if c.x > 0 {
-		c.loc--
 		c.x--
 	} else {
 		c.Up()
@@ -121,11 +140,10 @@ func (c *Cursor) Left() {
 
 // Right moves the cursor right one cell (if possible) or to the next line if it is at the end
 func (c *Cursor) Right() {
-	if c.loc == c.v.buf.Len() {
+	if c.Loc() == c.v.buf.Len() {
 		return
 	}
 	if c.x < Count(c.v.buf.lines[c.y]) {
-		c.loc++
 		c.x++
 	} else {
 		c.Down()
@@ -135,21 +153,19 @@ func (c *Cursor) Right() {
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
-	runes := []rune(c.v.buf.lines[c.y])
-	c.loc += len(runes[c.x:])
-	c.x = len(runes)
+	c.x = Count(c.v.buf.lines[c.y])
 }
 
 // Start moves the cursor to the start of the line it is on
 func (c *Cursor) Start() {
-	runes := []rune(c.v.buf.lines[c.y])
-	c.loc -= len(runes[:c.x])
 	c.x = 0
 }
 
 // GetCharPosInLine gets the char position of a visual x y coordinate (this is necessary because tabs are 1 char but 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
+	// Get the tab size
 	tabSize := options["tabsize"].(int)
+	// This is the visual line -- every \t replaced with the correct number of spaces
 	visualLine := strings.Replace(c.v.buf.lines[lineNum], "\t", "\t"+Spaces(tabSize-1), -1)
 	if visualPos > Count(visualLine) {
 		visualPos = Count(visualLine)
@@ -166,50 +182,6 @@ func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.v.buf.lines[c.y])
 	tabSize := options["tabsize"].(int)
 	return c.x + NumOccurences(string(runes[:c.x]), '\t')*(tabSize-1)
-}
-
-// Distance returns the distance between the cursor and x, y in runes
-func (c *Cursor) Distance(x, y int) int {
-	// Same line
-	if y == c.y {
-		return x - c.x
-	}
-
-	var distance int
-	runes := []rune(c.v.buf.lines[c.y])
-	if y > c.y {
-		distance += len(runes[c.x:])
-		// Newline
-		distance++
-		i := 1
-		for y != c.y+i {
-			distance += Count(c.v.buf.lines[c.y+i])
-			// Newline
-			distance++
-			i++
-		}
-		if x < Count(c.v.buf.lines[y]) {
-			distance += len([]rune(c.v.buf.lines[y])[:x])
-		} else {
-			distance += Count(c.v.buf.lines[y])
-		}
-		return distance
-	}
-
-	distance -= len(runes[:c.x])
-	// Newline
-	distance--
-	i := 1
-	for y != c.y-i {
-		distance -= Count(c.v.buf.lines[c.y-i])
-		// Newline
-		distance--
-		i++
-	}
-	if x >= 0 {
-		distance -= len([]rune(c.v.buf.lines[y])[x:])
-	}
-	return distance
 }
 
 // Display draws the cursor to the screen at the correct position
