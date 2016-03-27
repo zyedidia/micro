@@ -10,7 +10,7 @@
 
 - [ ] Better selection
     - [ ] Double click selects current word
-    - [ ] Triple click enables line selection
+    - [x] Triple click enables line selection
 
 - [ ] More keybindings
     - [x] Page up and page down
