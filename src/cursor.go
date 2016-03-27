@@ -1,6 +1,8 @@
 package main
 
 import (
+	"io/ioutil"
+	"strconv"
 	"strings"
 )
 
@@ -9,14 +11,11 @@ func FromCharPos(loc int, buf *Buffer) (int, int) {
 	charNum := 0
 	x, y := 0, 0
 
-	for charNum+Count(buf.lines[y])+1 < loc {
+	for charNum+Count(buf.lines[y])+1 <= loc {
 		charNum += Count(buf.lines[y]) + 1
 		y++
 	}
-
-	for charNum+x < loc {
-		x++
-	}
+	x = loc - charNum
 
 	return x, y
 }
