@@ -1,8 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
-	"strconv"
 	"strings"
 )
 
