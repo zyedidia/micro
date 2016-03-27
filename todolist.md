@@ -20,10 +20,6 @@
     - [x] CtrlZ for undo
     - [x] CtrlY for redo
 
-- [ ] Help screen
-    - [ ] Help screen which lists keybindings and commands
-    - [ ] Opened with Ctrl-h
-
 - [ ] Command execution
     - [ ] Allow executing simple commands at the bottom of the editor 
       (like vim or emacs)
@@ -37,6 +33,12 @@
 - [x] Proper error handling
 
 - [x] Cleanup
+
+- [x] Unicode support
+
+- [x] Help screen
+    - [x] Help screen which lists keybindings and commands
+    - [x] Opened with Ctrl-h
 
 - [x] Options
     - [x] Colorscheme
