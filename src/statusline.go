@@ -41,6 +41,8 @@ func (sline *Statusline) Display() {
 	// Add the filetype
 	file += " " + sline.view.buf.filetype
 
+	centerText := "Press Ctrl-h for help"
+
 	statusLineStyle := tcell.StyleDefault.Reverse(true)
 	if style, ok := colorscheme["statusline"]; ok {
 		statusLineStyle = style
@@ -51,6 +53,8 @@ func (sline *Statusline) Display() {
 	for x := 0; x < sline.view.width; x++ {
 		if x < len(fileRunes) {
 			screen.SetContent(x, y, fileRunes[x], nil, statusLineStyle)
+		} else if x >= sline.view.width/2-len(centerText)/2 && x < len(centerText)+sline.view.width/2-len(centerText)/2 {
+			screen.SetContent(x, y, []rune(centerText)[x-sline.view.width/2+len(centerText)/2], nil, statusLineStyle)
 		} else {
 			screen.SetContent(x, y, ' ', nil, statusLineStyle)
 		}
