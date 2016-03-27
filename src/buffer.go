@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/vinzmay/go-rope"
 	"io/ioutil"
 	"strings"
 )
@@ -10,7 +11,7 @@ import (
 // simple functions for saving and wrapper functions for modifying the rope
 type Buffer struct {
 	// Stores the text of the buffer
-	r *Rope
+	r *rope.Rope
 
 	// Path to the file on disk
 	path string
@@ -35,7 +36,11 @@ type Buffer struct {
 // NewBuffer creates a new buffer from `txt` with path and name `path`
 func NewBuffer(txt, path string) *Buffer {
 	b := new(Buffer)
-	b.r = NewRope(txt)
+	if txt == "" {
+		b.r = new(rope.Rope)
+	} else {
+		b.r = rope.New(txt)
+	}
 	b.path = path
 	b.name = path
 	b.savedText = txt
@@ -54,7 +59,11 @@ func (b *Buffer) UpdateRules() {
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
-	b.text = b.r.String()
+	if b.r.Len() == 0 {
+		b.text = ""
+	} else {
+		b.text = b.r.String()
+	}
 	b.lines = strings.Split(b.text, "\n")
 }
 
@@ -79,7 +88,7 @@ func (b *Buffer) IsDirty() bool {
 
 // Insert a string into the rope
 func (b *Buffer) Insert(idx int, value string) {
-	b.r.Insert(idx, value)
+	b.r = b.r.Insert(idx, value)
 	b.Update()
 }
 
@@ -93,12 +102,15 @@ func (b *Buffer) Remove(start, end int) string {
 		end = b.Len()
 	}
 	removed := b.text[start:end]
-	b.r.Remove(start, end)
+	// The rope implenentation I am using wants indicies starting at 1 instead of 0
+	start++
+	end++
+	b.r = b.r.Delete(start, end-start)
 	b.Update()
 	return removed
 }
 
 // Len gives the length of the buffer
 func (b *Buffer) Len() int {
-	return b.r.len
+	return b.r.Len()
 }
