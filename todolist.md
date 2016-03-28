@@ -47,6 +47,7 @@
 
 - [x] Syntax highlighting
     - [x] Use nano-like syntax files (https://github.com/scopatz/nanorc)
+    - [ ] Optimization
 
 - [x] Undo/redo
     - [x] Undo/redo stack

@@ -110,7 +110,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 // UpdateLines sets the values for v.updateLines
 func (v *View) UpdateLines(start, end int) {
 	v.updateLines[0] = start
-	v.updateLines[1] = end
+	v.updateLines[1] = end + 1
 }
 
 // Resize recalculates the actual width and height of the view from the width and height
@@ -352,7 +352,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Insert a newline
 			v.eh.Insert(v.cursor.Loc(), "\n")
 			v.cursor.Right()
-			v.UpdateLines(v.cursor.y-1, v.cursor.y)
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
+			// v.UpdateLines(v.cursor.y-1, v.cursor.y)
 		case tcell.KeySpace:
 			// Insert a space
 			v.eh.Insert(v.cursor.Loc(), " ")
@@ -377,7 +379,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 				loc := v.cursor.Loc()
 				v.eh.Remove(loc-1, loc)
 				v.cursor.x, v.cursor.y = cx, cy
-				v.UpdateLines(v.cursor.y, v.cursor.y+1)
+				// Rehighlight the entire buffer
+				v.UpdateLines(v.topline, v.topline+v.height)
+				// v.UpdateLines(v.cursor.y, v.cursor.y+1)
 			}
 		case tcell.KeyTab:
 			// Insert a tab
@@ -429,10 +433,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
+				// Rehighlight the entire buffer
+				v.UpdateLines(v.topline, v.topline+v.height)
+			} else {
+				v.UpdateLines(v.cursor.y, v.cursor.y)
 			}
 			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
 			v.cursor.Right()
-			v.UpdateLines(v.cursor.y, v.cursor.y)
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
@@ -515,11 +522,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.ScrollUp(2)
 			// We don't want to relocate if the user is scrolling
 			relocate = false
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.WheelDown:
 			// Scroll down two lines
 			v.ScrollDown(2)
 			// We don't want to relocate if the user is scrolling
 			relocate = false
+			// Rehighlight the entire buffer
+			v.UpdateLines(v.topline, v.topline+v.height)
 		}
 	}
 
@@ -532,7 +543,18 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
-	matches := make(SyntaxMatches, len(v.matches))
+	// matches := make(SyntaxMatches, len(v.buf.lines))
+	//
+	// viewStart := v.topline
+	// viewEnd := v.topline + v.height
+	// if viewEnd > len(v.buf.lines) {
+	// 	viewEnd = len(v.buf.lines)
+	// }
+	//
+	// lines := v.buf.lines[viewStart:viewEnd]
+	// for i, line := range lines {
+	// 	matches[i] = make([]tcell.Style, len(line))
+	// }
 
 	// The character number of the character in the top left of the screen
 	charNum := ToCharPos(0, v.topline, v.buf)
@@ -579,7 +601,14 @@ func (v *View) DisplayView() {
 		for colN, ch := range line {
 			var lineStyle tcell.Style
 			// Does the current character need to be syntax highlighted?
+
+			// if lineN >= v.updateLines[0] && lineN < v.updateLines[1] {
 			highlightStyle = v.matches[lineN][colN]
+			// } else if lineN < len(v.lastMatches) && colN < len(v.lastMatches[lineN]) {
+			// highlightStyle = v.lastMatches[lineN][colN]
+			// } else {
+			// highlightStyle = tcell.StyleDefault
+			// }
 
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
@@ -593,6 +622,7 @@ func (v *View) DisplayView() {
 			} else {
 				lineStyle = highlightStyle
 			}
+			// matches[lineN][colN] = highlightStyle
 
 			if ch == '\t' {
 				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
@@ -625,8 +655,7 @@ func (v *View) DisplayView() {
 
 		charNum++
 	}
-
-	v.lastMatches = matches
+	// v.lastMatches = matches
 }
 
 // Display renders the view, the cursor, and statusline

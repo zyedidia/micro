@@ -275,7 +275,8 @@ func (c *Cursor) GetVisualX() int {
 
 // Display draws the cursor to the screen at the correct position
 func (c *Cursor) Display() {
-	if c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1 {
+	// Don't draw the cursor if it is out of the viewport or if it has a selection
+	if (c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1) || c.HasSelection() {
 		screen.HideCursor()
 	} else {
 		screen.ShowCursor(c.GetVisualX()+c.v.lineNumOffset, c.y-c.v.topline)
