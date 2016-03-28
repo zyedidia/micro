@@ -48,3 +48,15 @@ func Max(a, b int) int {
 	}
 	return b
 }
+
+// IsWordChar returns whether or not the string is a 'word character'
+// If it is a unicode character, then it does not match
+// Word characters are defined as [A-Za-z0-9_]
+func IsWordChar(str string) bool {
+	if len(str) > 1 {
+		// Unicode
+		return false
+	}
+	c := str[0]
+	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')
+}

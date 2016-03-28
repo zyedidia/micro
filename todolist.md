@@ -8,10 +8,6 @@
 
 - [ ] Search and replace
 
-- [ ] Better selection
-    - [ ] Double click selects current word
-    - [x] Triple click enables line selection
-
 - [ ] More keybindings
     - [x] Page up and page down
     - [x] CtrlA for select all
@@ -39,6 +35,10 @@
 - [x] Help screen
     - [x] Help screen which lists keybindings and commands
     - [x] Opened with Ctrl-h
+
+- [x] Better selection
+    - [x] Double click selects current word
+    - [x] Triple click enables line selection
 
 - [x] Options
     - [x] Colorscheme

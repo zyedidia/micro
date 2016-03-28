@@ -33,3 +33,33 @@ func TestSpaces(t *testing.T) {
 		}
 	}
 }
+
+func TestIsWordChar(t *testing.T) {
+	if IsWordChar("t") == false {
+		t.Errorf("IsWordChar(t) = false")
+	}
+	if IsWordChar("T") == false {
+		t.Errorf("IsWordChar(T) = false")
+	}
+	if IsWordChar("5") == false {
+		t.Errorf("IsWordChar(5) = false")
+	}
+	if IsWordChar("_") == false {
+		t.Errorf("IsWordChar(_) = false")
+	}
+	if IsWordChar("~") == true {
+		t.Errorf("IsWordChar(~) = true")
+	}
+	if IsWordChar(" ") == true {
+		t.Errorf("IsWordChar( ) = true")
+	}
+	if IsWordChar("ß") == true {
+		t.Errorf("IsWordChar(ß) = true")
+	}
+	if IsWordChar(")") == true {
+		t.Errorf("IsWordChar()) = true")
+	}
+	if IsWordChar("\n") == true {
+		t.Errorf("IsWordChar(\n)) = true")
+	}
+}

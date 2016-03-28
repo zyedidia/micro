@@ -42,7 +42,11 @@ type Cursor struct {
 	x int
 	y int
 
-	curSelection  [2]int
+	// The current selection as a range of character numbers (inclusive)
+	curSelection [2]int
+	// The original selection as a range of character numbers
+	// This is used for line and word selection where it is necessary
+	// to know what the original selection was
 	origSelection [2]int
 }
 
@@ -97,12 +101,54 @@ func (c *Cursor) SelectLine() {
 	c.End()
 	c.curSelection[1] = c.Loc()
 
-	c.origSelection[0] = c.curSelection[0]
-	c.origSelection[1] = c.curSelection[1]
+	c.origSelection = c.curSelection
 }
 
 // AddLineToSelection adds the current line to the selection
 func (c *Cursor) AddLineToSelection() {
+	loc := c.Loc()
+
+	if loc < c.origSelection[0] {
+		c.Start()
+		c.curSelection[0] = c.Loc()
+		c.curSelection[1] = c.origSelection[1]
+	}
+	if loc > c.origSelection[1] {
+		c.End()
+		c.curSelection[1] = c.Loc()
+		c.curSelection[0] = c.origSelection[0]
+	}
+
+	if loc < c.origSelection[1] && loc > c.origSelection[0] {
+		c.curSelection = c.origSelection
+	}
+}
+
+// SelectWord selects the word the cursor is currently on
+func (c *Cursor) SelectWord() {
+	if !IsWordChar(string(c.RuneUnder(c.x))) {
+		return
+	}
+
+	forward, backward := c.x, c.x
+
+	for backward > 0 && IsWordChar(string(c.RuneUnder(backward-1))) {
+		backward--
+	}
+
+	c.curSelection[0] = ToCharPos(backward, c.y, c.v.buf)
+	c.origSelection[0] = c.curSelection[0]
+
+	for forward < Count(c.v.buf.lines[c.y])-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
+		forward++
+	}
+
+	c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf)
+	c.origSelection[1] = c.curSelection[1]
+}
+
+// AddWordToSelection adds the word the cursor is currently on to the selection
+func (c *Cursor) AddWordToSelection() {
 	loc := c.Loc()
 
 	if loc > c.origSelection[0] && loc < c.origSelection[1] {
@@ -111,29 +157,37 @@ func (c *Cursor) AddLineToSelection() {
 	}
 
 	if loc < c.origSelection[0] {
-		c.Start()
-		c.curSelection[0] = c.Loc()
-	} else if loc > c.origSelection[1] {
-		c.End()
-		c.curSelection[1] = c.Loc()
+		backward := c.x
+
+		for backward > 0 && IsWordChar(string(c.RuneUnder(backward-1))) {
+			backward--
+		}
+
+		c.curSelection[0] = ToCharPos(backward, c.y, c.v.buf)
+		c.curSelection[1] = c.origSelection[1]
 	}
 
-	if loc < c.curSelection[0] {
-		c.Start()
-		c.curSelection[0] = c.Loc()
-	} else if loc > c.curSelection[1] {
-		c.End()
-		c.curSelection[1] = c.Loc()
+	if loc > c.origSelection[1] {
+		forward := c.x
+
+		for forward < Count(c.v.buf.lines[c.y])-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
+			forward++
+		}
+
+		c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf)
+		c.curSelection[0] = c.origSelection[0]
 	}
 }
 
-// RuneUnder returns the rune under the cursor
-func (c *Cursor) RuneUnder() rune {
-	line := c.v.buf.lines[c.y]
-	if c.x >= Count(line) {
-		return ' '
+// RuneUnder returns the rune under the given x position
+func (c *Cursor) RuneUnder(x int) rune {
+	line := []rune(c.v.buf.lines[c.y])
+	if x >= len(line) {
+		x = len(line) - 1
+	} else if x < 0 {
+		x = 0
 	}
-	return []rune(line)[c.x]
+	return line[x]
 }
 
 // Up moves the cursor up one line (if possible)

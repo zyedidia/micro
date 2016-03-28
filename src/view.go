@@ -456,14 +456,19 @@ func (v *View) HandleEvent(event tcell.Event) {
 					if v.doubleClick {
 						// Triple click
 						v.lastClickTime = time.Now()
+
 						v.tripleClick = true
 						v.doubleClick = false
+
 						v.cursor.SelectLine()
 					} else {
 						// Double click
+						v.lastClickTime = time.Now()
+
 						v.doubleClick = true
 						v.tripleClick = false
-						v.lastClickTime = time.Now()
+
+						v.cursor.SelectWord()
 					}
 				} else {
 					v.doubleClick = false
@@ -478,7 +483,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				if v.tripleClick {
 					v.cursor.AddLineToSelection()
 				} else if v.doubleClick {
-
+					v.cursor.AddWordToSelection()
 				} else {
 					v.cursor.curSelection[1] = v.cursor.Loc()
 				}
