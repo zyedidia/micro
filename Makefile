@@ -6,7 +6,7 @@ install: syn-files build
 	mv micro $(GOBIN)
 
 syn-files:
-	mkdir -p ~/.micro/syntax
+	mkdir -p ~/.micro
 	cp -r runtime/* ~/.micro
 
 test:
