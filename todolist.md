@@ -8,6 +8,8 @@
 
 - [ ] Search and replace
 
+- [ ] Splits
+
 - [ ] More keybindings
     - [x] Page up and page down
     - [x] CtrlA for select all
