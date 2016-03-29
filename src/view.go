@@ -626,7 +626,7 @@ func (v *View) DisplayView() {
 
 			if ch == '\t' {
 				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
-				tabSize := options["tabsize"].(int)
+				tabSize := settings.TabSize
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
 					screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)

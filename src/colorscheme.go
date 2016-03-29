@@ -28,7 +28,7 @@ func LoadDefaultColorscheme() {
 		TermMessage("Error finding your home directory\nCan't load runtime files")
 		return
 	}
-	LoadColorscheme(options["colorscheme"].(string), dir+"/.micro/colorschemes")
+	LoadColorscheme(settings.Colorscheme, dir+"/.micro/colorschemes")
 }
 
 // LoadColorscheme loads the given colorscheme from a directory

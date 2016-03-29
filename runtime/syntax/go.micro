@@ -1,6 +1,5 @@
 syntax "Go" "\.go$"
 
-color identifier "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
 color statement "\b(append|cap|close|complex|copy|delete|imag|len)\b"
 color statement "\b(make|new|panic|print|println|protect|real|recover)\b"
 color type     "\b(u?int(8|16|32|64)?|float(32|64)|complex(64|128))\b"

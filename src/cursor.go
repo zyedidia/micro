@@ -257,7 +257,7 @@ func (c *Cursor) Start() {
 // GetCharPosInLine gets the char position of a visual x y coordinate (this is necessary because tabs are 1 char but 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
-	tabSize := options["tabsize"].(int)
+	tabSize := settings.TabSize
 	// This is the visual line -- every \t replaced with the correct number of spaces
 	visualLine := strings.Replace(c.v.buf.lines[lineNum], "\t", "\t"+Spaces(tabSize-1), -1)
 	if visualPos > Count(visualLine) {
@@ -273,7 +273,7 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.v.buf.lines[c.y])
-	tabSize := options["tabsize"].(int)
+	tabSize := settings.TabSize
 	return c.x + NumOccurences(string(runes[:c.x]), '\t')*(tabSize-1)
 }
 

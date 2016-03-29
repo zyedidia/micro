@@ -31,12 +31,12 @@ var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
 // LoadSyntaxFiles loads the syntax files from the default directory ~/.micro
 func LoadSyntaxFiles() {
-	dir, err := homedir.Dir()
+	home, err := homedir.Dir()
 	if err != nil {
-		TermMessage("Error finding your home directory\nCan't load runtime files")
+		TermMessage("Error finding your home directory\nCan't load syntax files")
 		return
 	}
-	LoadSyntaxFilesFromDir(dir + "/.micro/syntax")
+	LoadSyntaxFilesFromDir(home + "/.micro/syntax")
 }
 
 // JoinRule takes a syntax rule (which can be multiple regular expressions)

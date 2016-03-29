@@ -64,7 +64,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	InitOptions()
+	InitSettings()
 
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"

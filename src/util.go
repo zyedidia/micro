@@ -60,3 +60,13 @@ func IsWordChar(str string) bool {
 	c := str[0]
 	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')
 }
+
+// Contains returns whether or not a string array contains a given string
+func Contains(list []string, a string) bool {
+	for _, b := range list {
+		if b == a {
+			return true
+		}
+	}
+	return false
+}
