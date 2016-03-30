@@ -18,10 +18,6 @@
     - [x] CtrlZ for undo
     - [x] CtrlY for redo
 
-- [ ] Command execution
-    - [ ] Allow executing simple commands at the bottom of the editor 
-      (like vim or emacs)
-
 ### Done
 
 - [x] Line numbers
@@ -33,6 +29,10 @@
 - [x] Cleanup
 
 - [x] Unicode support
+
+- [x] Command execution
+    - [x] Allow executing simple commands at the bottom of the editor 
+      (like vim or emacs)
 
 - [x] Help screen
     - [x] Help screen which lists keybindings and commands
