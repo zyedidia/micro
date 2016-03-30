@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"strings"
 )
 
@@ -8,7 +9,15 @@ import (
 func HandleCommand(input string, view *View) {
 	cmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
-	if cmd == "set" {
+	switch cmd {
+	case "set":
 		SetOption(view, args)
+	case "quit":
+		if view.CanClose("Quit anyway? ") {
+			screen.Fini()
+			os.Exit(0)
+		}
+	case "save":
+		view.Save()
 	}
 }
