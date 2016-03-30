@@ -104,6 +104,11 @@ func (m *Messenger) Prompt(prompt string) (string, bool) {
 		}
 
 		m.HandleEvent(event)
+
+		if m.cursorx < 0 {
+			// Cancel
+			m.hasPrompt = false
+		}
 	}
 
 	m.Reset()
@@ -116,14 +121,18 @@ func (m *Messenger) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		switch e.Key() {
 		case tcell.KeyLeft:
-			m.cursorx--
+			if m.cursorx > 0 {
+				m.cursorx--
+			}
 		case tcell.KeyRight:
-			m.cursorx++
+			if m.cursorx < Count(m.response) {
+				m.cursorx++
+			}
 		case tcell.KeyBackspace2:
 			if m.cursorx > 0 {
 				m.response = string([]rune(m.response)[:Count(m.response)-1])
-				m.cursorx--
 			}
+			m.cursorx--
 		case tcell.KeySpace:
 			m.response += " "
 			m.cursorx++
@@ -131,9 +140,6 @@ func (m *Messenger) HandleEvent(event tcell.Event) {
 			m.response += string(e.Rune())
 			m.cursorx++
 		}
-	}
-	if m.cursorx < 0 {
-		m.cursorx = 0
 	}
 }
 

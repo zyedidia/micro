@@ -146,7 +146,10 @@ func main() {
 					os.Exit(0)
 				}
 			case tcell.KeyCtrlE:
-				SetOption(view)
+				input, canceled := messenger.Prompt("> ")
+				if !canceled {
+					HandleCommand(input, view)
+				}
 			case tcell.KeyCtrlH:
 				DisplayHelp()
 				// Make sure to resize the view if the user resized the terminal while looking at the help text

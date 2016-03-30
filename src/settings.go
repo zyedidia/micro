@@ -65,46 +65,39 @@ func DefaultSettings() Settings {
 }
 
 // SetOption prompts the user to set an option and checks that the response is valid
-func SetOption(view *View) {
-	choice, canceled := messenger.Prompt("Option: ")
-
+func SetOption(view *View, args []string) {
 	home, err := homedir.Dir()
 	if err != nil {
 		messenger.Error("Error finding your home directory\nCan't load settings file")
-		return
 	}
 
 	filename := home + "/.micro/settings.json"
+	if len(args) == 2 {
+		option := strings.TrimSpace(args[0])
+		value := strings.TrimSpace(args[1])
 
-	if !canceled {
-		split := strings.Split(choice, " ")
-		if len(split) == 2 {
-			option := strings.TrimSpace(split[0])
-			value := strings.TrimSpace(split[1])
-
-			if Contains(possibleSettings, option) {
-				if option == "tabsize" {
-					tsize, err := strconv.Atoi(value)
-					if err != nil {
-						messenger.Error("Invalid value for " + option)
-						return
-					}
-					settings.TabSize = tsize
-				} else if option == "colorscheme" {
-					settings.Colorscheme = value
-					LoadSyntaxFiles()
-					view.buf.UpdateRules()
-				}
-				err := WriteSettings(filename)
+		if Contains(possibleSettings, option) {
+			if option == "tabsize" {
+				tsize, err := strconv.Atoi(value)
 				if err != nil {
-					messenger.Error("Error writing to settings.json: " + err.Error())
+					messenger.Error("Invalid value for " + option)
 					return
 				}
-			} else {
-				messenger.Error("Option " + option + " does not exist")
+				settings.TabSize = tsize
+			} else if option == "colorscheme" {
+				settings.Colorscheme = value
+				LoadSyntaxFiles()
+				view.buf.UpdateRules()
+			}
+			err := WriteSettings(filename)
+			if err != nil {
+				messenger.Error("Error writing to settings.json: " + err.Error())
+				return
 			}
 		} else {
-			messenger.Error("Invalid option, please use option value")
+			messenger.Error("Option " + option + " does not exist")
 		}
+	} else {
+		messenger.Error("Invalid option, please use option value")
 	}
 }
