@@ -29,7 +29,13 @@ Ctrl-d:   Half page down
 PageUp:   Page up
 PageDown: Page down
 
-Ctrl-e:   Set option
+Ctrl-e:   Execute a command
+
+Possible commands:
+
+'quit': Quits micro
+'save': saves the current buffer
+'set option value': sets the option to value. Please see the next section for a list of options you can set
 
 Micro options:
 
