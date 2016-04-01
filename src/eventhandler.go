@@ -94,24 +94,85 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 
 // Undo the first event in the undo stack
 func (eh *EventHandler) Undo() {
+	t := eh.undo.Peek()
+	if t == nil {
+		return
+	}
+
+	te := t.(*TextEvent)
+	startTime := t.(*TextEvent).time.UnixNano() / int64(time.Millisecond)
+
+	eh.UndoOneEvent()
+
+	for {
+		t = eh.undo.Peek()
+		if t == nil {
+			return
+		}
+
+		te = t.(*TextEvent)
+
+		if startTime-(te.time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
+			return
+		}
+
+		eh.UndoOneEvent()
+	}
+}
+
+// UndoOneEvent undoes one event
+func (eh *EventHandler) UndoOneEvent() {
+	// This event should be undone
+	// Pop it off the stack
 	t := eh.undo.Pop()
 	if t == nil {
 		return
 	}
 
 	te := t.(*TextEvent)
+	// Undo it
 	// Modifies the text event
 	UndoTextEvent(te)
 
+	// Set the cursor in the right place
 	teCursor := te.c
 	te.c = eh.v.cursor
 	eh.v.cursor = teCursor
 
+	// Push it to the redo stack
 	eh.redo.Push(te)
 }
 
 // Redo the first event in the redo stack
 func (eh *EventHandler) Redo() {
+	t := eh.redo.Peek()
+	if t == nil {
+		return
+	}
+
+	te := t.(*TextEvent)
+	startTime := t.(*TextEvent).time.UnixNano() / int64(time.Millisecond)
+
+	eh.RedoOneEvent()
+
+	for {
+		t = eh.redo.Peek()
+		if t == nil {
+			return
+		}
+
+		te = t.(*TextEvent)
+
+		if (te.time.UnixNano()/int64(time.Millisecond))-startTime > undoThreshold {
+			return
+		}
+
+		eh.RedoOneEvent()
+	}
+}
+
+// RedoOneEvent redoes one event
+func (eh *EventHandler) RedoOneEvent() {
 	t := eh.redo.Pop()
 	if t == nil {
 		return

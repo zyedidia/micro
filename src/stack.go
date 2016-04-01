@@ -33,3 +33,11 @@ func (s *Stack) Pop() (value interface{}) {
 	}
 	return nil
 }
+
+// Peek returns the top element of the stack without removing it
+func (s *Stack) Peek() interface{} {
+	if s.size > 0 {
+		return s.top.value
+	}
+	return nil
+}
