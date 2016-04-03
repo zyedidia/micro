@@ -71,6 +71,29 @@ func (m *Messenger) Error(msg string) {
 	m.hasMessage = true
 }
 
+// YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
+func (m *Messenger) YesNoPrompt(prompt string) bool {
+	m.Message(prompt)
+
+	for {
+		m.Clear()
+		m.Display()
+		screen.Show()
+		event := screen.PollEvent()
+
+		switch e := event.(type) {
+		case *tcell.EventKey:
+			if e.Key() == tcell.KeyRune {
+				if e.Rune() == 'y' {
+					return true
+				} else if e.Rune() == 'n' {
+					return false
+				}
+			}
+		}
+	}
+}
+
 // Prompt sends the user a message and waits for a response to be typed in
 // This function blocks the main loop while waiting for input
 func (m *Messenger) Prompt(prompt string) (string, bool) {
