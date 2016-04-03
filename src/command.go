@@ -7,9 +7,25 @@ import (
 
 // HandleCommand handles input from the user
 func HandleCommand(input string, view *View) {
-	cmd := strings.Split(input, " ")[0]
+	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
-	switch cmd {
+
+	commands := []string{"set", "quit", "save"}
+
+	i := 0
+	cmd := inputCmd
+
+	for _, c := range commands {
+		if strings.HasPrefix(c, inputCmd) {
+			i++
+			cmd = c
+		}
+	}
+	if i == 1 {
+		inputCmd = cmd
+	}
+
+	switch inputCmd {
 	case "set":
 		SetOption(view, args)
 	case "quit":
