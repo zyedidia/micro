@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -35,5 +36,43 @@ func HandleCommand(input string, view *View) {
 		}
 	case "save":
 		view.Save()
+	case "replace":
+		r := regexp.MustCompile(`"[^"\\]*(?:\\.[^"\\]*)*"|[^\s]*`)
+		replaceCmd := r.FindAllString(strings.Join(args, " "), -1)
+		if len(replaceCmd) != 2 {
+			messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
+			return
+		}
+
+		search := string(replaceCmd[0])
+		replace := string(replaceCmd[1])
+
+		if strings.HasPrefix(search, `"`) && strings.HasSuffix(search, `"`) {
+			search = search[1 : len(search)-1]
+		}
+		if strings.HasPrefix(replace, `"`) && strings.HasSuffix(replace, `"`) {
+			replace = replace[1 : len(replace)-1]
+		}
+
+		search = strings.Replace(search, `\"`, `"`, -1)
+		replace = strings.Replace(replace, `\"`, `"`, -1)
+
+		messenger.Error(search + " -> " + replace)
+
+		regex, err := regexp.Compile(search)
+		if err != nil {
+			messenger.Error(err.Error())
+			return
+		}
+
+		for {
+			match := regex.FindStringIndex(view.buf.text)
+			if match == nil {
+				break
+			}
+			view.eh.Replace(match[0], match[1], replace)
+		}
+	default:
+		messenger.Error("Unknown command: " + cmd)
 	}
 }

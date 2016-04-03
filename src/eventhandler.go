@@ -83,6 +83,12 @@ func (eh *EventHandler) Remove(start, end int) {
 	eh.Execute(e)
 }
 
+// Replace deletes from start to end and replaces it with the given string
+func (eh *EventHandler) Replace(start, end int, replace string) {
+	eh.Remove(start, end)
+	eh.Insert(start, replace)
+}
+
 // Execute a textevent and add it to the undo stack
 func (eh *EventHandler) Execute(t *TextEvent) {
 	if eh.redo.Len() > 0 {
