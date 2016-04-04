@@ -453,7 +453,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		x -= v.lineNumOffset + v.leftCol
+		x -= v.lineNumOffset - v.leftCol
 		y += v.topline
 		// Position always seems to be off by one
 		x--

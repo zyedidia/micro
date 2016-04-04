@@ -11,7 +11,7 @@ func HandleCommand(input string, view *View) {
 	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
 
-	commands := []string{"set", "quit", "save"}
+	commands := []string{"set", "quit", "save", "replace"}
 
 	i := 0
 	cmd := inputCmd
@@ -92,6 +92,6 @@ func HandleCommand(input string, view *View) {
 			messenger.Message("Nothing matched " + search)
 		}
 	default:
-		messenger.Error("Unknown command: " + cmd)
+		messenger.Error("Unknown command: " + inputCmd)
 	}
 }

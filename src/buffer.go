@@ -75,6 +75,7 @@ func (b *Buffer) Save() error {
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
+	b.UpdateRules()
 	err := ioutil.WriteFile(filename, []byte(b.text), 0644)
 	if err == nil {
 		b.savedText = b.text
