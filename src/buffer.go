@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/vinzmay/go-rope"
 	"io/ioutil"
+	"regexp"
 	"strings"
 )
 
@@ -108,6 +109,21 @@ func (b *Buffer) Remove(start, end int) string {
 	b.r = b.r.Delete(start, end-start)
 	b.Update()
 	return removed
+}
+
+func (b *Buffer) Replace(search, replace string) error {
+	re, err := regexp.Compile(search)
+	if err != nil {
+		return err
+	}
+	text := re.ReplaceAllString(b.text, replace)
+	if text == "" {
+		b.r = new(rope.Rope)
+	} else {
+		b.r = rope.New(text)
+	}
+	b.Update()
+	return nil
 }
 
 // Len gives the length of the buffer
