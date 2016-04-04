@@ -283,6 +283,6 @@ func (c *Cursor) Display() {
 	if (c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1) || c.HasSelection() {
 		screen.HideCursor()
 	} else {
-		screen.ShowCursor(c.GetVisualX()+c.v.lineNumOffset, c.y-c.v.topline)
+		screen.ShowCursor(c.GetVisualX()+c.v.lineNumOffset-c.v.leftCol, c.y-c.v.topline)
 	}
 }

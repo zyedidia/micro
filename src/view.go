@@ -299,6 +299,14 @@ func (v *View) Relocate() {
 	if cy > v.topline+v.height-1 {
 		v.topline = cy - v.height + 1
 	}
+
+	cx := v.cursor.GetVisualX()
+	if cx < v.leftCol {
+		v.leftCol = cx
+	}
+	if cx+v.lineNumOffset+1 > v.leftCol+v.width {
+		v.leftCol = cx - v.width + v.lineNumOffset + 1
+	}
 }
 
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
@@ -443,7 +451,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		x -= v.lineNumOffset
+		x -= v.lineNumOffset + v.leftCol
 		y += v.topline
 		// Position always seems to be off by one
 		x--
@@ -629,10 +637,14 @@ func (v *View) DisplayView() {
 				tabSize := settings.TabSize
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
-					screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
+					if x-v.leftCol+tabchars >= v.lineNumOffset {
+						screen.SetContent(x-v.leftCol+tabchars, lineN, ' ', nil, lineStyle)
+					}
 				}
 			} else {
-				screen.SetContent(x+tabchars, lineN, ch, nil, lineStyle)
+				if x-v.leftCol+tabchars >= v.lineNumOffset {
+					screen.SetContent(x-v.leftCol+tabchars, lineN, ch, nil, lineStyle)
+				}
 			}
 			charNum++
 			x++
@@ -650,7 +662,7 @@ func (v *View) DisplayView() {
 			if style, ok := colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			screen.SetContent(x+tabchars, lineN, ' ', nil, selectStyle)
+			screen.SetContent(x-v.leftCol+tabchars, lineN, ' ', nil, selectStyle)
 		}
 
 		charNum++
