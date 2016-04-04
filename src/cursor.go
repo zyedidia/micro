@@ -126,6 +126,10 @@ func (c *Cursor) AddLineToSelection() {
 
 // SelectWord selects the word the cursor is currently on
 func (c *Cursor) SelectWord() {
+	if len(c.v.buf.lines[c.y]) == 0 {
+		return
+	}
+
 	if !IsWordChar(string(c.RuneUnder(c.x))) {
 		loc := c.Loc()
 		c.curSelection[0] = loc
