@@ -42,6 +42,9 @@ type Cursor struct {
 	x int
 	y int
 
+	// Last cursor x position
+	lastVisualX int
+
 	// The current selection as a range of character numbers (inclusive)
 	curSelection [2]int
 	// The original selection as a range of character numbers
@@ -200,6 +203,7 @@ func (c *Cursor) Up() {
 		c.y--
 
 		runes := []rune(c.v.buf.lines[c.y])
+		c.x = c.GetCharPosInLine(c.y, c.lastVisualX)
 		if c.x > len(runes) {
 			c.x = len(runes)
 		}
@@ -212,6 +216,7 @@ func (c *Cursor) Down() {
 		c.y++
 
 		runes := []rune(c.v.buf.lines[c.y])
+		c.x = c.GetCharPosInLine(c.y, c.lastVisualX)
 		if c.x > len(runes) {
 			c.x = len(runes)
 		}
@@ -229,6 +234,7 @@ func (c *Cursor) Left() {
 		c.Up()
 		c.End()
 	}
+	c.lastVisualX = c.GetVisualX()
 }
 
 // Right moves the cursor right one cell (if possible) or to the next line if it is at the end
@@ -242,16 +248,19 @@ func (c *Cursor) Right() {
 		c.Down()
 		c.Start()
 	}
+	c.lastVisualX = c.GetVisualX()
 }
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
 	c.x = Count(c.v.buf.lines[c.y])
+	c.lastVisualX = c.GetVisualX()
 }
 
 // Start moves the cursor to the start of the line it is on
 func (c *Cursor) Start() {
 	c.x = 0
+	c.lastVisualX = c.GetVisualX()
 }
 
 // GetCharPosInLine gets the char position of a visual x y coordinate (this is necessary because tabs are 1 char but 4 visual spaces)

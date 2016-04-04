@@ -330,6 +330,7 @@ func (v *View) MoveToMouseClick(x, y int) {
 	}
 	v.cursor.x = x
 	v.cursor.y = y
+	v.cursor.lastVisualX = v.cursor.GetVisualX()
 }
 
 // HandleEvent handles an event passed by the main loop
