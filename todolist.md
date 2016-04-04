@@ -7,8 +7,12 @@
 - [ ] Documentation
 
 - [ ] Search and replace
+    - [ ] Search
+    - [x] Replace
 
-- [ ] Splits
+- [ ] Multiple views
+    - [ ] Horizontal splits
+    - [ ] Vertical splits
 
 - [ ] More keybindings
     - [x] Page up and page down
@@ -18,11 +22,15 @@
     - [x] CtrlZ for undo
     - [x] CtrlY for redo
 
+- [ ] Custom bindings
+
 ### Done
 
 - [x] Line numbers
 
 - [x] Simple tests
+    - [x] Stack test
+    - [x] Util test
 
 - [x] Proper error handling
 
@@ -43,6 +51,7 @@
     - [x] Triple click enables line selection
 
 - [x] Options
+    - [x] Saved between sessions
     - [x] Colorscheme
     - [x] tab size
     - [ ] tabs or spaces
@@ -53,13 +62,18 @@
 
 - [x] Undo/redo
     - [x] Undo/redo stack
+    - [ ] Persistent undo/redo (saved between open and closing micro)
 
 - [x] Clipboard support
-    - [x] CtrlV, CtrlC, and CtrlX
+    - [x] Paste
+    - [x] Copy
+    - [x] Cut
 
 - [x] Colorschemes
-    - [x] Support for 256 color and true color
+    - [x] 256 color support
+    - [x] True color support
 
 - [x] Messages/Prompts
-    - [x] Messages at the bottom of the screen
-    - [x] Prompts at the bottom of the screen
+    - [x] Messages
+    - [x] Prompts
+    - [x] Yes or no prompts
