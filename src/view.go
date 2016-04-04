@@ -217,6 +217,7 @@ func (v *View) Save() {
 	if err != nil {
 		messenger.Error(err.Error())
 	}
+	messenger.Message("Saved " + v.buf.path)
 }
 
 // Copy the selection to the system clipboard
