@@ -280,7 +280,7 @@ func Match(v *View) SyntaxMatches {
 	matches := make(SyntaxMatches, len(lines))
 
 	for i, line := range lines {
-		matches[i] = make([]tcell.Style, len(line))
+		matches[i] = make([]tcell.Style, len(line)+1)
 	}
 
 	// We don't actually check the entire buffer, just from synLinesUp to synLinesDown
