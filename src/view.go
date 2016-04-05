@@ -179,7 +179,9 @@ func (v *View) HalfPageDown() {
 	if len(v.buf.lines)-(v.topline+v.height) > v.height/2 {
 		v.ScrollDown(v.height / 2)
 	} else {
-		v.topline = len(v.buf.lines) - v.height
+		if len(v.buf.lines) >= v.height {
+			v.topline = len(v.buf.lines) - v.height
+		}
 	}
 }
 
