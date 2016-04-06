@@ -340,7 +340,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	relocate := true
 	// By default we don't update and syntax highlighting
 	v.UpdateLines(-2, 0)
-	rematch := true
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
@@ -350,19 +349,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.KeyUp:
 			// Cursor up
 			v.cursor.Up()
-			rematch = false
 		case tcell.KeyDown:
 			// Cursor down
 			v.cursor.Down()
-			rematch = false
 		case tcell.KeyLeft:
 			// Cursor left
 			v.cursor.Left()
-			rematch = false
 		case tcell.KeyRight:
 			// Cursor right
 			v.cursor.Right()
-			rematch = false
 		case tcell.KeyEnter:
 			// Insert a newline
 			v.eh.Insert(v.cursor.Loc(), "\n")
@@ -419,7 +414,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Copy()
 			// Rehighlight the entire buffer
 			v.UpdateLines(v.topline, v.topline+v.height)
-			rematch = false
 		case tcell.KeyCtrlX:
 			v.Cut()
 			// Rehighlight the entire buffer
@@ -514,8 +508,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 			}
 			v.mouseReleased = false
-			rematch = false
-
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -536,7 +528,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// We don't want to relocate because otherwise the view will be relocated
 			// every time the user moves the cursor
 			relocate = false
-			rematch = false
 		case tcell.WheelUp:
 			// Scroll up two lines
 			v.ScrollUp(2)
@@ -557,10 +548,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
-
-	if rematch {
-		v.matches = Match(v)
-	}
+	v.matches = Match(v)
 }
 
 // DisplayView renders the view to the screen
