@@ -22,6 +22,8 @@ var screen tcell.Screen
 // Object to send messages and prompts to the user
 var messenger *Messenger
 
+var redrawStatus int
+
 // LoadInput loads the file input for the editor
 func LoadInput() (string, []byte, error) {
 	// There are a number of ways micro should start given its input

@@ -296,15 +296,20 @@ func Match(v *View) SyntaxMatches {
 	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")
 	startNum := ToCharPos(0, totalStart, v.buf)
 
+	toplineNum := ToCharPos(0, v.topline, v.buf)
+	bottomlineNum := ToCharPos(0, v.topline+v.height, v.buf)
+
 	for _, rule := range rules {
 		if rule.startend {
-			if rule.regex.MatchString(str) {
-				indicies := rule.regex.FindAllStringIndex(str, -1)
+			if indicies := rule.regex.FindAllStringIndex(str, -1); indicies != nil {
 				for _, value := range indicies {
 					value[0] += startNum
 					value[1] += startNum
 					for i := value[0]; i < value[1]; i++ {
-						colNum, lineNum := FromCharPos(i, buf)
+						if i < toplineNum || i > bottomlineNum {
+							continue
+						}
+						colNum, lineNum := FromCharPosStart(toplineNum, 0, v.topline, i, buf)
 						if lineNum == -1 || colNum == -1 {
 							continue
 						}
@@ -317,8 +322,7 @@ func Match(v *View) SyntaxMatches {
 			}
 		} else {
 			for lineN, line := range lines {
-				if rule.regex.MatchString(line) {
-					indicies := rule.regex.FindAllStringIndex(line, -1)
+				if indicies := rule.regex.FindAllStringIndex(line, -1); indicies != nil {
 					for _, value := range indicies {
 						for i := value[0]; i < value[1]; i++ {
 							// matches[lineN+updateStart][i] = rule.style

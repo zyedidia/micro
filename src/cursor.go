@@ -6,12 +6,19 @@ import (
 
 // FromCharPos converts from a character position to an x, y position
 func FromCharPos(loc int, buf *Buffer) (int, int) {
-	charNum := 0
-	x, y := 0, 0
+	return FromCharPosStart(0, 0, 0, loc, buf)
+}
 
-	for charNum+Count(buf.lines[y])+1 <= loc {
-		charNum += Count(buf.lines[y]) + 1
+// FromCharPosStart converts from a character position to an x, y position, starting at the specified character location
+func FromCharPosStart(startLoc, startX, startY, loc int, buf *Buffer) (int, int) {
+	charNum := startLoc
+	x, y := startX, startY
+
+	lineLen := Count(buf.lines[y]) + 1
+	for charNum+lineLen <= loc {
+		charNum += lineLen
 		y++
+		lineLen = Count(buf.lines[y]) + 1
 	}
 	x = loc - charNum
 

@@ -257,10 +257,7 @@ func (v *View) Paste() {
 		}
 		clip, _ := clipboard.ReadAll()
 		v.eh.Insert(v.cursor.Loc(), clip)
-		// This is a bit weird... Not sure if there's a better way
-		for i := 0; i < Count(clip); i++ {
-			v.cursor.Right()
-		}
+		v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
 	} else {
 		messenger.Error("Clipboard is not supported on your system")
 	}
@@ -343,6 +340,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	relocate := true
 	// By default we don't update and syntax highlighting
 	v.UpdateLines(-2, 0)
+	rematch := true
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
@@ -352,21 +350,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.KeyUp:
 			// Cursor up
 			v.cursor.Up()
+			rematch = false
 		case tcell.KeyDown:
 			// Cursor down
 			v.cursor.Down()
+			rematch = false
 		case tcell.KeyLeft:
 			// Cursor left
 			v.cursor.Left()
+			rematch = false
 		case tcell.KeyRight:
 			// Cursor right
 			v.cursor.Right()
+			rematch = false
 		case tcell.KeyEnter:
 			// Insert a newline
 			v.eh.Insert(v.cursor.Loc(), "\n")
 			v.cursor.Right()
 			// Rehighlight the entire buffer
 			v.UpdateLines(v.topline, v.topline+v.height)
+			v.cursor.lastVisualX = v.cursor.GetVisualX()
 			// v.UpdateLines(v.cursor.y-1, v.cursor.y)
 		case tcell.KeySpace:
 			// Insert a space
@@ -396,6 +399,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.UpdateLines(v.topline, v.topline+v.height)
 				// v.UpdateLines(v.cursor.y, v.cursor.y+1)
 			}
+			v.cursor.lastVisualX = v.cursor.GetVisualX()
 		case tcell.KeyTab:
 			// Insert a tab
 			v.eh.Insert(v.cursor.Loc(), "\t")
@@ -415,6 +419,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Copy()
 			// Rehighlight the entire buffer
 			v.UpdateLines(v.topline, v.topline+v.height)
+			rematch = false
 		case tcell.KeyCtrlX:
 			v.Cut()
 			// Rehighlight the entire buffer
@@ -509,6 +514,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 			}
 			v.mouseReleased = false
+			rematch = false
 
 		case tcell.ButtonNone:
 			// Mouse event with no click
@@ -530,6 +536,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// We don't want to relocate because otherwise the view will be relocated
 			// every time the user moves the cursor
 			relocate = false
+			rematch = false
 		case tcell.WheelUp:
 			// Scroll up two lines
 			v.ScrollUp(2)
@@ -551,7 +558,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 		v.Relocate()
 	}
 
-	v.matches = Match(v)
+	if rematch {
+		v.matches = Match(v)
+	}
 }
 
 // DisplayView renders the view to the screen
