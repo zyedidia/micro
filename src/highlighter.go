@@ -297,7 +297,6 @@ func Match(v *View) SyntaxMatches {
 	startNum := ToCharPos(0, totalStart, v.buf)
 
 	toplineNum := ToCharPos(0, v.topline, v.buf)
-	bottomlineNum := ToCharPos(0, v.topline+v.height, v.buf)
 
 	for _, rule := range rules {
 		if rule.startend {
@@ -306,7 +305,7 @@ func Match(v *View) SyntaxMatches {
 					value[0] += startNum
 					value[1] += startNum
 					for i := value[0]; i < value[1]; i++ {
-						if i < toplineNum || i > bottomlineNum {
+						if i < toplineNum {
 							continue
 						}
 						colNum, lineNum := FromCharPosStart(toplineNum, 0, v.topline, i, buf)
