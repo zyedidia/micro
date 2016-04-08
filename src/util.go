@@ -70,3 +70,8 @@ func Contains(list []string, a string) bool {
 	}
 	return false
 }
+
+// Insert makes a simple insert into a string at the given position
+func Insert(str string, pos int, value string) string {
+	return string([]rune(str)[:pos]) + value + string([]rune(str)[pos:])
+}
