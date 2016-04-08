@@ -17,7 +17,7 @@ of modern terminals.
 * True color support
 * Cross platform
 * Fast and efficient
-* Syntax highlighting (in over 75 languages!)
+* Syntax highlighting (in over [75 languages](runtime/syntax)!)
 
 Not all of this is implemented yet -- see [progress](#progress)
 
