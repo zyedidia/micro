@@ -10,3 +10,31 @@ Micro syntax files are almost identical to Nano's, except for some key differenc
     * For example, `icolor green ".*"` would become `color green (i) ".*"`
 * Micro does not support `start="..." end="..."`. Instead use the `s` flag to match newlines and put `.*?` in the middle
     * For example `color green start="hello" end="world"` would become `color green (s) "hello.*?world"`
+
+# Using with colorschemes
+
+Not all of these files have been converted to use micro's colorscheme feature. Most of them just hardcode the colors, which
+can be problematic depending on the colorscheme you use.
+
+Here is a list of the files that have been converted to properly use colorschemes:
+
+* vi
+* go
+* c
+* d
+* markdown
+* html
+* lua
+* swift
+* rust
+* java
+* javascript
+* python
+* ruby
+* sh
+* git
+
+# License
+
+Because the nano syntax files I have modified are distributed under the GNU GPLv3 license, these files are also distributed
+under that license. See [LICENSE](runtime/syntax/LICENSE).

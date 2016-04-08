@@ -1,12 +1,10 @@
 syntax "git-config" "git(config|modules)$|\.git/config$"
 
-color brightcyan "\<(true|false)\>"
-color cyan "^[[:space:]]*[^=]*="
-color brightmagenta "^[[:space:]]*\[.*\]$"
-color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color brightblack "(^|[[:space:]])#([^{].*)?$"
-color ,green "[[:space:]]+$"
-color ,red "	+"
+color constant "\<(true|false)\>"
+color keyword "^[[:space:]]*[^=]*="
+color constant "^[[:space:]]*\[.*\]$"
+color constant ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color comment "(^|[[:space:]])#([^{].*)?$"
 
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
@@ -19,62 +17,62 @@ color ,red "	+"
 syntax "git-commit" "COMMIT_EDITMSG|TAG_EDITMSG"
 
 # Commit message
-color yellow ".*"
+color ignore ".*"
 
 # Comments
-color brightblack "^#.*"
+color comment "^#.*"
 
 # Files changes
-color white       "#[[:space:]](deleted|modified|new file|renamed):[[:space:]].*"
-color red         "#[[:space:]]deleted:"
-color green       "#[[:space:]]modified:"
-color brightgreen "#[[:space:]]new file:"
-color brightblue  "#[[:space:]]renamed:"
+color keyword       "#[[:space:]](deleted|modified|new file|renamed):[[:space:]].*"
+color keyword         "#[[:space:]]deleted:"
+color keyword       "#[[:space:]]modified:"
+color keyword "#[[:space:]]new file:"
+color keyword  "#[[:space:]]renamed:"
 
 # Untracked filenames
-color black "^#	[^/?*:;{}\\]+\.[^/?*:;{}\\]+$"
+color error "^#	[^/?*:;{}\\]+\.[^/?*:;{}\\]+$"
 
-color brightmagenta "^#[[:space:]]Changes.*[:]"
-color brightred "^#[[:space:]]Your branch and '[^']+"
-color brightblack "^#[[:space:]]Your branch and '"
-color brightwhite "^#[[:space:]]On branch [^ ]+"
-color brightblack "^#[[:space:]]On branch"
-
-# Recolor hash symbols
+color keyword "^#[[:space:]]Changes.*[:]"
+color keyword "^#[[:space:]]Your branch and '[^']+"
+color keyword "^#[[:space:]]Your branch and '"
+color keyword "^#[[:space:]]On branch [^ ]+"
+color keyword "^#[[:space:]]On branch"
 
 # Recolor hash symbols
-color brightblack "#"
+
+# Recolor hash symbols
+color special "#"
 
 # Trailing spaces (+LINT is not ok, git uses tabs)
-color ,red "[[:space:]]+$"
+color ,error "[[:space:]]+$"
 
 
 # This syntax format is used for interactive rebasing
 syntax "git-rebase-todo" "git-rebase-todo"
 
 # Default
-color yellow ".*"
+color ignore ".*"
 
 # Comments
-color brightblack "^#.*"
+color comment "^#.*"
 
 # Rebase commands
-color green       "^(e|edit) [0-9a-f]{7,40}"
-color green       "^#  (e, edit)"
-color brightgreen "^(f|fixup) [0-9a-f]{7,40}"
-color brightgreen "^#  (f, fixup)"
-color brightwhite "^(p|pick) [0-9a-f]{7,40}"
-color brightwhite "^#  (p, pick)"
-color blue        "^(r|reword) [0-9a-f]{7,40}"
-color blue        "^#  (r, reword)"
-color brightred   "^(s|squash) [0-9a-f]{7,40}"
-color brightred   "^#  (s, squash)"
-color yellow      "^(x|exec) [^ ]+ [0-9a-f]{7,40}"
-color yellow      "^#  (x, exec)"
+color keyword       "^(e|edit) [0-9a-f]{7,40}"
+color keyword       "^#  (e, edit)"
+color keyword "^(f|fixup) [0-9a-f]{7,40}"
+color keyword "^#  (f, fixup)"
+color keyword "^(p|pick) [0-9a-f]{7,40}"
+color keyword "^#  (p, pick)"
+color keyword        "^(r|reword) [0-9a-f]{7,40}"
+color keyword        "^#  (r, reword)"
+color keyword   "^(s|squash) [0-9a-f]{7,40}"
+color keyword   "^#  (s, squash)"
+color keyword      "^(x|exec) [^ ]+ [0-9a-f]{7,40}"
+color keyword      "^#  (x, exec)"
 
 # Recolor hash symbols
-color brightblack "#"
+color special "#"
 
 # Commit IDs
-color brightblue "[0-9a-f]{7,40}"
+color identifier "[0-9a-f]{7,40}"
 
