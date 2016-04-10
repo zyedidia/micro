@@ -548,7 +548,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
-	v.matches = Match(v)
+	if settings.Syntax {
+		v.matches = Match(v)
+	}
 }
 
 // DisplayView renders the view to the screen
@@ -608,12 +610,19 @@ func (v *View) DisplayView() {
 
 		// Write the line
 		tabchars := 0
-		for colN, ch := range line {
+		runes := []rune(line)
+		for colN := v.leftCol; colN < v.leftCol+v.width; colN++ {
+			if colN >= len(runes) {
+				break
+			}
+			ch := runes[colN]
 			var lineStyle tcell.Style
 			// Does the current character need to be syntax highlighted?
 
 			// if lineN >= v.updateLines[0] && lineN < v.updateLines[1] {
-			highlightStyle = v.matches[lineN][colN]
+			if settings.Syntax {
+				highlightStyle = v.matches[lineN][colN]
+			}
 			// } else if lineN < len(v.lastMatches) && colN < len(v.lastMatches[lineN]) {
 			// highlightStyle = v.lastMatches[lineN][colN]
 			// } else {

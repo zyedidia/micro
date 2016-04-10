@@ -44,6 +44,9 @@ colorscheme: loads the colorscheme stored in ~/.micro/colorschemes/'option'.micr
 
 tabsize: sets the tab size to 'option'
 	default value: '4'
+
+syntax: turns syntax on or off
+	default value: 'on'
 `
 
 // DisplayHelp displays the help txt

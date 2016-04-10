@@ -13,13 +13,14 @@ import (
 var settings Settings
 
 // All the possible settings
-var possibleSettings = []string{"colorscheme", "tabsize", "autoindent"}
+var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax"}
 
 // The Settings struct contains the settings for micro
 type Settings struct {
 	Colorscheme string `json:"colorscheme"`
 	TabSize     int    `json:"tabsize"`
 	AutoIndent  bool   `json:"autoindent"`
+	Syntax      bool   `json:"syntax"`
 }
 
 // InitSettings initializes the options map and sets all options to their default values
@@ -61,6 +62,7 @@ func DefaultSettings() Settings {
 		Colorscheme: "default",
 		TabSize:     4,
 		AutoIndent:  true,
+		Syntax:      true,
 	}
 }
 
@@ -86,6 +88,17 @@ func SetOption(view *View, args []string) {
 				settings.TabSize = tsize
 			} else if option == "colorscheme" {
 				settings.Colorscheme = value
+				LoadSyntaxFiles()
+				view.buf.UpdateRules()
+			} else if option == "syntax" {
+				if value == "on" {
+					settings.Syntax = true
+				} else if value == "off" {
+					settings.Syntax = false
+				} else {
+					messenger.Error("Invalid value for " + option)
+					return
+				}
 				LoadSyntaxFiles()
 				view.buf.UpdateRules()
 			}
