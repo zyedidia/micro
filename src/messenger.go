@@ -43,6 +43,8 @@ type Messenger struct {
 	// style to use when drawing the message
 	style tcell.Style
 
+	realtimePrompt bool
+
 	// We have to keep track of the cursor for prompting
 	cursorx int
 }

@@ -138,25 +138,69 @@ func main() {
 		// Wait for the user's action
 		event := screen.PollEvent()
 
-		// Check if we should quit
-		switch e := event.(type) {
-		case *tcell.EventKey:
-			switch e.Key() {
-			case tcell.KeyCtrlQ:
-				// Make sure not to quit if there are unsaved changes
-				if view.CanClose("Quit anyway? ") {
-					screen.Fini()
-					os.Exit(0)
+		if messenger.realtimePrompt {
+			switch e := event.(type) {
+			case *tcell.EventKey:
+				if e.Key() == tcell.KeyEscape {
+					// Cancel
+					messenger.hasPrompt = false
+					messenger.realtimePrompt = false
+					messenger.Clear()
+					messenger.Reset()
+					continue
+				} else if e.Key() == tcell.KeyCtrlC {
+					// Cancel
+					messenger.hasPrompt = false
+					messenger.realtimePrompt = false
+					messenger.Clear()
+					messenger.Reset()
+					continue
+				} else if e.Key() == tcell.KeyCtrlQ {
+					// Cancel
+					messenger.hasPrompt = false
+					messenger.realtimePrompt = false
+					messenger.Clear()
+					messenger.Reset()
+					continue
+				} else if e.Key() == tcell.KeyEnter {
+					// User is done entering their response
+					messenger.hasPrompt = false
+					messenger.realtimePrompt = false
+					messenger.Clear()
+					messenger.Reset()
+					continue
 				}
-			case tcell.KeyCtrlE:
-				input, canceled := messenger.Prompt("> ")
-				if !canceled {
-					HandleCommand(input, view)
+			}
+			if messenger.cursorx < 0 {
+				// Cancel
+				messenger.realtimePrompt = false
+				messenger.hasPrompt = false
+				messenger.Clear()
+				messenger.Reset()
+				continue
+			}
+			messenger.HandleEvent(event)
+		} else {
+			// Check if we should quit
+			switch e := event.(type) {
+			case *tcell.EventKey:
+				switch e.Key() {
+				case tcell.KeyCtrlQ:
+					// Make sure not to quit if there are unsaved changes
+					if view.CanClose("Quit anyway? ") {
+						screen.Fini()
+						os.Exit(0)
+					}
+				case tcell.KeyCtrlE:
+					input, canceled := messenger.Prompt("> ")
+					if !canceled {
+						HandleCommand(input, view)
+					}
+				case tcell.KeyCtrlH:
+					DisplayHelp()
+					// Make sure to resize the view if the user resized the terminal while looking at the help text
+					view.Resize(screen.Size())
 				}
-			case tcell.KeyCtrlH:
-				DisplayHelp()
-				// Make sure to resize the view if the user resized the terminal while looking at the help text
-				view.Resize(screen.Size())
 			}
 		}
 

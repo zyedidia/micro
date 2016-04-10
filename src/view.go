@@ -4,6 +4,7 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -338,6 +339,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
+
+	if messenger.realtimePrompt {
+		str := strings.Join(v.buf.lines[v.cursor.y:], "\n")
+		charPos := ToCharPos(0, v.cursor.y, v.buf)
+		r, err := regexp.Compile(messenger.response)
+		if err != nil {
+			return
+		}
+		match := r.FindStringIndex(str)
+		if match == nil {
+			v.cursor.ResetSelection()
+			return
+		}
+		v.cursor.curSelection[0] = charPos + match[0]
+		v.cursor.curSelection[1] = charPos + match[1] - 1
+		v.cursor.x, v.cursor.y = FromCharPos(charPos+match[1]-1, v.buf)
+		v.Relocate()
+		return
+	}
+
 	// By default we don't update and syntax highlighting
 	v.UpdateLines(-2, 0)
 	switch e := event.(type) {
@@ -402,6 +423,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyCtrlS:
 			v.Save()
+		case tcell.KeyCtrlF:
+			messenger.realtimePrompt = true
+			messenger.hasPrompt = true
+			messenger.Message("Find: ")
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
 			// Rehighlight the entire buffer
@@ -504,7 +529,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.cursor.AddWordToSelection()
 				} else {
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.cursor.curSelection[1] = v.cursor.Loc() - 1
 				}
 			}
 			v.mouseReleased = false
@@ -569,6 +594,7 @@ func (v *View) DisplayView() {
 	// }
 
 	// The character number of the character in the top left of the screen
+
 	charNum := ToCharPos(0, v.topline, v.buf)
 
 	// Convert the length of buffer to a string, and get the length of the string

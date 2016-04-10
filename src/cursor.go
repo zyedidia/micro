@@ -76,13 +76,13 @@ func (c *Cursor) Loc() int {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.curSelection[0] = 0
-	c.curSelection[1] = 0
+	c.curSelection[0] = -1
+	c.curSelection[1] = -1
 }
 
 // HasSelection returns whether or not the user has selected anything
 func (c *Cursor) HasSelection() bool {
-	return c.curSelection[1] != c.curSelection[0]
+	return c.curSelection[1] != -1 || c.curSelection[0] != -1
 }
 
 // DeleteSelection deletes the currently selected text
