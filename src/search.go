@@ -6,12 +6,14 @@ import (
 	"strings"
 )
 
+// BeginSearch starts a search
 func BeginSearch() {
 	searching = true
 	messenger.hasPrompt = true
 	messenger.Message("Find: ")
 }
 
+// EndSearch stops the current search
 func EndSearch() {
 	searching = false
 	messenger.hasPrompt = false
@@ -19,6 +21,8 @@ func EndSearch() {
 	messenger.Reset()
 }
 
+// HandleSearchEvent takes an event and a view and will do a real time match from the messenger's output
+// to the current buffer. It searches down the buffer.
 func HandleSearchEvent(event tcell.Event, v *View) {
 	switch e := event.(type) {
 	case *tcell.EventKey:

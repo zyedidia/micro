@@ -6,10 +6,6 @@
 
 - [ ] Documentation
 
-- [ ] Search and replace
-    - [ ] Search
-    - [x] Replace
-
 - [ ] Multiple views
     - [ ] Horizontal splits
     - [ ] Vertical splits
@@ -27,6 +23,10 @@
 ### Done
 
 - [x] Line numbers
+
+- [x] Search and replace
+    - [x] Search
+    - [x] Replace
 
 - [x] Simple tests
     - [x] Stack test
