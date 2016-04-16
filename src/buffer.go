@@ -29,7 +29,7 @@ type Buffer struct {
 
 	// Syntax highlighting rules
 	rules []SyntaxRule
-	// File type of the buffer
+	// The buffer's filetype
 	filetype string
 }
 

@@ -83,7 +83,7 @@ func ParseColorscheme(text string) Colorscheme {
 // The 'extra' can be bold, reverse, or underline
 func StringToStyle(str string) tcell.Style {
 	var fg string
-	var bg string
+	bg := "default"
 	split := strings.Split(str, ",")
 	if len(split) > 1 {
 		fg, bg = split[0], split[1]

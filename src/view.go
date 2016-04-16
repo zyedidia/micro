@@ -10,8 +10,8 @@ import (
 )
 
 // The View struct stores information about a view into a buffer.
-// It has a value for the cursor, and the window that the user sees
-// the buffer from.
+// It has a stores information about the cursor, and the viewport
+// that the user sees the buffer from.
 type View struct {
 	cursor Cursor
 
@@ -356,18 +356,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 		switch e.Key() {
 		case tcell.KeyUp:
 			// Cursor up
+			v.cursor.ResetSelection()
 			v.cursor.Up()
 		case tcell.KeyDown:
 			// Cursor down
+			v.cursor.ResetSelection()
 			v.cursor.Down()
 		case tcell.KeyLeft:
 			// Cursor left
+			v.cursor.ResetSelection()
 			v.cursor.Left()
 		case tcell.KeyRight:
 			// Cursor right
+			v.cursor.ResetSelection()
 			v.cursor.Right()
 		case tcell.KeyEnter:
 			// Insert a newline
+			if v.cursor.HasSelection() {
+				v.cursor.DeleteSelection()
+				v.cursor.ResetSelection()
+			}
 			v.eh.Insert(v.cursor.Loc(), "\n")
 			v.cursor.Right()
 			// Rehighlight the entire buffer
@@ -376,6 +384,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// v.UpdateLines(v.cursor.y-1, v.cursor.y)
 		case tcell.KeySpace:
 			// Insert a space
+			if v.cursor.HasSelection() {
+				v.cursor.DeleteSelection()
+				v.cursor.ResetSelection()
+			}
 			v.eh.Insert(v.cursor.Loc(), " ")
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y, v.cursor.y)
@@ -405,6 +417,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.cursor.lastVisualX = v.cursor.GetVisualX()
 		case tcell.KeyTab:
 			// Insert a tab
+			if v.cursor.HasSelection() {
+				v.cursor.DeleteSelection()
+				v.cursor.ResetSelection()
+			}
 			v.eh.Insert(v.cursor.Loc(), "\t")
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y, v.cursor.y)
@@ -600,7 +616,7 @@ func (v *View) DisplayView() {
 		line := v.buf.lines[lineN+v.topline]
 
 		// Write the line number
-		lineNumStyle := tcell.StyleDefault
+		lineNumStyle := defStyle
 		if style, ok := colorscheme["line-number"]; ok {
 			lineNumStyle = style
 		}
@@ -637,14 +653,14 @@ func (v *View) DisplayView() {
 			// } else if lineN < len(v.lastMatches) && colN < len(v.lastMatches[lineN]) {
 			// highlightStyle = v.lastMatches[lineN][colN]
 			// } else {
-			// highlightStyle = tcell.StyleDefault
+			// highlightStyle = defStyle
 			// }
 
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
 					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
-				lineStyle = tcell.StyleDefault.Reverse(true)
+				lineStyle = defStyle.Reverse(true)
 
 				if style, ok := colorscheme["selection"]; ok {
 					lineStyle = style
@@ -679,7 +695,7 @@ func (v *View) DisplayView() {
 			(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
 				charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
-			selectStyle := tcell.StyleDefault.Reverse(true)
+			selectStyle := defStyle.Reverse(true)
 
 			if style, ok := colorscheme["selection"]; ok {
 				selectStyle = style

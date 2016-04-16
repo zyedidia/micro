@@ -156,7 +156,7 @@ func LoadSyntaxFile(filename string) {
 				// The user could give us a "color" that is really a part of the colorscheme
 				// in which case we should look that up in the colorscheme
 				// They can also just give us a straight up color
-				st := tcell.StyleDefault
+				st := defStyle
 				if _, ok := colorscheme[color]; ok {
 					st = colorscheme[color]
 				} else {
@@ -201,7 +201,7 @@ func LoadSyntaxFile(filename string) {
 				// The user could give us a "color" that is really a part of the colorscheme
 				// in which case we should look that up in the colorscheme
 				// They can also just give us a straight up color
-				st := tcell.StyleDefault
+				st := defStyle
 				if _, ok := colorscheme[color]; ok {
 					st = colorscheme[color]
 				} else {

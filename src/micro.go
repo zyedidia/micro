@@ -23,8 +23,11 @@ var (
 	// Object to send messages and prompts to the user
 	messenger *Messenger
 
-	redrawStatus int
-	searching    bool
+	// Is there currently a search in progress
+	searching bool
+
+	// The default style
+	defStyle tcell.Style
 )
 
 // LoadInput loads the file input for the editor
@@ -72,6 +75,9 @@ func main() {
 
 	InitSettings()
 
+	// Load the syntax files, including the colorscheme
+	LoadSyntaxFiles()
+
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
 
@@ -81,9 +87,6 @@ func main() {
 	if truecolor {
 		os.Setenv("TERM", "xterm-truecolor")
 	}
-
-	// Load the syntax files, including the colorscheme
-	LoadSyntaxFiles()
 
 	// Initilize tcell
 	screen, err = tcell.NewScreen()
@@ -114,7 +117,7 @@ func main() {
 	}()
 
 	// Default style
-	defStyle := tcell.StyleDefault.
+	defStyle = tcell.StyleDefault.
 		Foreground(tcell.ColorDefault).
 		Background(tcell.ColorDefault)
 

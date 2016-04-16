@@ -16,6 +16,8 @@ Ctrl-o:   Open file
 Ctrl-z:   Undo
 Ctrl-y:   Redo
 
+Ctrl-f:   Find
+
 Ctrl-a:   Select all
 
 Ctrl-c:   Copy
@@ -35,6 +37,11 @@ Possible commands:
 
 'quit': Quits micro
 'save': saves the current buffer
+
+'replace "search" "value"': This will replace 'search' with 'value'.
+Note that 'search' must be a valid regex.  If one of the arguments
+does not have any spaces in it, you may omit the quotes.
+
 'set option value': sets the option to value. Please see the next section for a list of options you can set
 
 Micro options:
@@ -66,7 +73,7 @@ func DisplayHelp() {
 		lines := totalLines[topline:lineEnd]
 		for y, line := range lines {
 			for x, ch := range line {
-				st := tcell.StyleDefault
+				st := defStyle
 				screen.SetContent(x, y, ch, nil, st)
 			}
 		}

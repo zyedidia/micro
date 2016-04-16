@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/gdamore/tcell"
 	"strconv"
 )
 
@@ -43,7 +42,7 @@ func (sline *Statusline) Display() {
 
 	centerText := "Press Ctrl-h for help"
 
-	statusLineStyle := tcell.StyleDefault.Reverse(true)
+	statusLineStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["statusline"]; ok {
 		statusLineStyle = style
 	}

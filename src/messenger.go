@@ -50,7 +50,7 @@ type Messenger struct {
 // Message sends a message to the user
 func (m *Messenger) Message(msg string) {
 	m.message = msg
-	m.style = tcell.StyleDefault
+	m.style = defStyle
 
 	if _, ok := colorscheme["message"]; ok {
 		m.style = colorscheme["message"]
@@ -61,7 +61,7 @@ func (m *Messenger) Message(msg string) {
 // Error sends an error message to the user
 func (m *Messenger) Error(msg string) {
 	m.message = msg
-	m.style = tcell.StyleDefault.
+	m.style = defStyle.
 		Foreground(tcell.ColorBlack).
 		Background(tcell.ColorMaroon)
 
@@ -172,7 +172,7 @@ func (m *Messenger) Reset() {
 func (m *Messenger) Clear() {
 	w, h := screen.Size()
 	for x := 0; x < w; x++ {
-		screen.SetContent(x, h-1, ' ', nil, tcell.StyleDefault)
+		screen.SetContent(x, h-1, ' ', nil, defStyle)
 	}
 }
 
