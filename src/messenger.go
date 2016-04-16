@@ -43,8 +43,6 @@ type Messenger struct {
 	// style to use when drawing the message
 	style tcell.Style
 
-	realtimePrompt bool
-
 	// We have to keep track of the cursor for prompting
 	cursorx int
 }
@@ -112,16 +110,11 @@ func (m *Messenger) Prompt(prompt string) (string, bool) {
 
 		switch e := event.(type) {
 		case *tcell.EventKey:
-			if e.Key() == tcell.KeyEscape {
+			switch e.Key() {
+			case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEscape:
 				// Cancel
 				m.hasPrompt = false
-			} else if e.Key() == tcell.KeyCtrlC {
-				// Cancel
-				m.hasPrompt = false
-			} else if e.Key() == tcell.KeyCtrlQ {
-				// Cancel
-				m.hasPrompt = false
-			} else if e.Key() == tcell.KeyEnter {
+			case tcell.KeyEnter:
 				// User is done entering their response
 				m.hasPrompt = false
 				response, canceled = m.response, false

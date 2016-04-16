@@ -76,22 +76,22 @@ func (c *Cursor) Loc() int {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.curSelection[0] = -1
-	c.curSelection[1] = -1
+	c.curSelection[0] = 0
+	c.curSelection[1] = 0
 }
 
 // HasSelection returns whether or not the user has selected anything
 func (c *Cursor) HasSelection() bool {
-	return c.curSelection[1] != -1 || c.curSelection[0] != -1
+	return c.curSelection[0] != c.curSelection[1]
 }
 
 // DeleteSelection deletes the currently selected text
 func (c *Cursor) DeleteSelection() {
 	if c.curSelection[0] > c.curSelection[1] {
-		c.v.eh.Remove(c.curSelection[1], c.curSelection[0]+1)
+		c.v.eh.Remove(c.curSelection[1], c.curSelection[0])
 		c.SetLoc(c.curSelection[1])
 	} else {
-		c.v.eh.Remove(c.curSelection[0], c.curSelection[1]+1)
+		c.v.eh.Remove(c.curSelection[0], c.curSelection[1])
 		c.SetLoc(c.curSelection[0])
 	}
 }
@@ -99,9 +99,9 @@ func (c *Cursor) DeleteSelection() {
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() string {
 	if c.curSelection[0] > c.curSelection[1] {
-		return string([]rune(c.v.buf.text)[c.curSelection[1] : c.curSelection[0]+1])
+		return string([]rune(c.v.buf.text)[c.curSelection[1]:c.curSelection[0]])
 	}
-	return string([]rune(c.v.buf.text)[c.curSelection[0] : c.curSelection[1]+1])
+	return string([]rune(c.v.buf.text)[c.curSelection[0]:c.curSelection[1]])
 }
 
 // SelectLine selects the current line
@@ -143,7 +143,7 @@ func (c *Cursor) SelectWord() {
 	if !IsWordChar(string(c.RuneUnder(c.x))) {
 		loc := c.Loc()
 		c.curSelection[0] = loc
-		c.curSelection[1] = loc
+		c.curSelection[1] = loc + 1
 		c.origSelection = c.curSelection
 		return
 	}
@@ -161,7 +161,7 @@ func (c *Cursor) SelectWord() {
 		forward++
 	}
 
-	c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf)
+	c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf) + 1
 	c.origSelection[1] = c.curSelection[1]
 }
 
@@ -192,7 +192,7 @@ func (c *Cursor) AddWordToSelection() {
 			forward++
 		}
 
-		c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf)
+		c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf) + 1
 		c.curSelection[0] = c.origSelection[0]
 	}
 }

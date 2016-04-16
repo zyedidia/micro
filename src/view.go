@@ -4,7 +4,6 @@ import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"io/ioutil"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -89,6 +88,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		y: 0,
 		v: v,
 	}
+	v.cursor.ResetSelection()
 
 	v.eh = NewEventHandler(v)
 
@@ -293,22 +293,28 @@ func (v *View) OpenFile() {
 
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
-func (v *View) Relocate() {
+func (v *View) Relocate() bool {
+	ret := false
 	cy := v.cursor.y
 	if cy < v.topline {
 		v.topline = cy
+		ret = true
 	}
 	if cy > v.topline+v.height-1 {
 		v.topline = cy - v.height + 1
+		ret = true
 	}
 
 	cx := v.cursor.GetVisualX()
 	if cx < v.leftCol {
 		v.leftCol = cx
+		ret = true
 	}
 	if cx+v.lineNumOffset+1 > v.leftCol+v.width {
 		v.leftCol = cx - v.width + v.lineNumOffset + 1
+		ret = true
 	}
+	return ret
 }
 
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
@@ -339,25 +345,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
-
-	if messenger.realtimePrompt {
-		str := strings.Join(v.buf.lines[v.cursor.y:], "\n")
-		charPos := ToCharPos(0, v.cursor.y, v.buf)
-		r, err := regexp.Compile(messenger.response)
-		if err != nil {
-			return
-		}
-		match := r.FindStringIndex(str)
-		if match == nil {
-			v.cursor.ResetSelection()
-			return
-		}
-		v.cursor.curSelection[0] = charPos + match[0]
-		v.cursor.curSelection[1] = charPos + match[1] - 1
-		v.cursor.x, v.cursor.y = FromCharPos(charPos+match[1]-1, v.buf)
-		v.Relocate()
-		return
-	}
 
 	// By default we don't update and syntax highlighting
 	v.UpdateLines(-2, 0)
@@ -424,9 +411,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.KeyCtrlS:
 			v.Save()
 		case tcell.KeyCtrlF:
-			messenger.realtimePrompt = true
-			messenger.hasPrompt = true
-			messenger.Message("Find: ")
+			BeginSearch()
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
 			// Rehighlight the entire buffer
@@ -529,7 +514,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.cursor.AddWordToSelection()
 				} else {
-					v.cursor.curSelection[1] = v.cursor.Loc() - 1
+					v.cursor.curSelection[1] = v.cursor.Loc()
 				}
 			}
 			v.mouseReleased = false
@@ -656,8 +641,8 @@ func (v *View) DisplayView() {
 			// }
 
 			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
-					charNum <= v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
+					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
@@ -691,8 +676,8 @@ func (v *View) DisplayView() {
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
 		if v.cursor.HasSelection() &&
-			(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
-				charNum <= v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+			(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
+				charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
 			selectStyle := tcell.StyleDefault.Reverse(true)
 

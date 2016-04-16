@@ -16,13 +16,16 @@ const (
 	undoThreshold        = 500 // If two events are less than n milliseconds apart, undo both of them
 )
 
-// The main screen
-var screen tcell.Screen
+var (
+	// The main screen
+	screen tcell.Screen
 
-// Object to send messages and prompts to the user
-var messenger *Messenger
+	// Object to send messages and prompts to the user
+	messenger *Messenger
 
-var redrawStatus int
+	redrawStatus int
+	searching    bool
+)
 
 // LoadInput loads the file input for the editor
 func LoadInput() (string, []byte, error) {
@@ -138,48 +141,8 @@ func main() {
 		// Wait for the user's action
 		event := screen.PollEvent()
 
-		if messenger.realtimePrompt {
-			switch e := event.(type) {
-			case *tcell.EventKey:
-				if e.Key() == tcell.KeyEscape {
-					// Cancel
-					messenger.hasPrompt = false
-					messenger.realtimePrompt = false
-					messenger.Clear()
-					messenger.Reset()
-					continue
-				} else if e.Key() == tcell.KeyCtrlC {
-					// Cancel
-					messenger.hasPrompt = false
-					messenger.realtimePrompt = false
-					messenger.Clear()
-					messenger.Reset()
-					continue
-				} else if e.Key() == tcell.KeyCtrlQ {
-					// Cancel
-					messenger.hasPrompt = false
-					messenger.realtimePrompt = false
-					messenger.Clear()
-					messenger.Reset()
-					continue
-				} else if e.Key() == tcell.KeyEnter {
-					// User is done entering their response
-					messenger.hasPrompt = false
-					messenger.realtimePrompt = false
-					messenger.Clear()
-					messenger.Reset()
-					continue
-				}
-			}
-			if messenger.cursorx < 0 {
-				// Cancel
-				messenger.realtimePrompt = false
-				messenger.hasPrompt = false
-				messenger.Clear()
-				messenger.Reset()
-				continue
-			}
-			messenger.HandleEvent(event)
+		if searching {
+			HandleSearchEvent(event, view)
 		} else {
 			// Check if we should quit
 			switch e := event.(type) {
@@ -202,9 +165,9 @@ func main() {
 					view.Resize(screen.Size())
 				}
 			}
-		}
 
-		// Send it to the view
-		view.HandleEvent(event)
+			// Send it to the view
+			view.HandleEvent(event)
+		}
 	}
 }
