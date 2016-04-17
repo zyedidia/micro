@@ -24,6 +24,7 @@ Here is a picture of micro editing its source code.
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
 * Search and replace
 * Undo and redo
+* Unicode support
 * Small and simple
 * Configurable
 
