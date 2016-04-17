@@ -17,6 +17,8 @@ Ctrl-z:   Undo
 Ctrl-y:   Redo
 
 Ctrl-f:   Find
+Ctrl-n:   Find next
+Ctrl-p:   Find previous
 
 Ctrl-a:   Select all
 

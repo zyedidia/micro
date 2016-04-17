@@ -23,9 +23,6 @@ var (
 	// Object to send messages and prompts to the user
 	messenger *Messenger
 
-	// Is there currently a search in progress
-	searching bool
-
 	// The default style
 	defStyle tcell.Style
 )

@@ -439,8 +439,16 @@ func (v *View) HandleEvent(event tcell.Event) {
 			} else {
 				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
 			}
-			messenger.Message("Search for " + lastSearch)
-			Search(lastSearch, v)
+			messenger.Message("Find: " + lastSearch)
+			Search(lastSearch, v, true)
+		case tcell.KeyCtrlP:
+			if v.cursor.HasSelection() {
+				searchStart = v.cursor.curSelection[0]
+			} else {
+				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+			}
+			messenger.Message("Find: " + lastSearch)
+			Search(lastSearch, v, false)
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
 			// Rehighlight the entire buffer

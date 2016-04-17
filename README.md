@@ -80,6 +80,8 @@ You can move the cursor around with the arrow keys and mouse.
 * Ctrl-z:   Undo
 * Ctrl-y:   Redo
 * Ctrl-f:   Find
+* Ctrl-n:   Find next
+* Ctrl-p:   Find previous
 * Ctrl-a:   Select all
 * Ctrl-c:   Copy
 * Ctrl-x:   Cut
