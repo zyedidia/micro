@@ -427,8 +427,19 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.KeyCtrlS:
 			v.Save()
 		case tcell.KeyCtrlF:
+			if v.cursor.HasSelection() {
+				searchStart = v.cursor.curSelection[1]
+			} else {
+				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+			}
 			BeginSearch()
 		case tcell.KeyCtrlN:
+			if v.cursor.HasSelection() {
+				searchStart = v.cursor.curSelection[1]
+			} else {
+				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+			}
+			messenger.Message("Search for " + lastSearch)
 			Search(lastSearch, v)
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()

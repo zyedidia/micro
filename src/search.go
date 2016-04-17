@@ -3,10 +3,10 @@ package main
 import (
 	"github.com/gdamore/tcell"
 	"regexp"
-	"strings"
 )
 
 var lastSearch string
+var searchStart int
 
 // BeginSearch starts a search
 func BeginSearch() {
@@ -55,39 +55,25 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 	return
 }
 
-// Search searches for a given regular expression inside a view
-// It also moves the cursor and highlights the search result
 func Search(searchStr string, v *View) {
-	lines := v.buf.lines[v.cursor.y:]
-	var charPos int
-	if v.cursor.HasSelection() {
-		x, y := FromCharPos(v.cursor.curSelection[1]-1, v.buf)
-		lines = v.buf.lines[y:]
-		lines[0] = lines[0][x:]
-		charPos = ToCharPos(x, y, v.buf)
-	} else {
-		lines[0] = lines[0][v.cursor.x:]
-		charPos = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
-	}
-	str := strings.Join(lines, "\n")
+	str := v.buf.text[searchStart:]
 	r, err := regexp.Compile(searchStr)
 	if err != nil {
 		return
 	}
 	match := r.FindStringIndex(str)
 	if match == nil {
-		// FIXME
-		str = strings.Join(v.buf.lines[:v.cursor.y], "\n")
-		match = r.FindStringIndex(str)
-		charPos = 0
+		// Search the entire buffer now
+		match = r.FindStringIndex(v.buf.text)
+		searchStart = 0
 		if match == nil {
 			v.cursor.ResetSelection()
 			return
 		}
 	}
-	v.cursor.curSelection[0] = charPos + match[0]
-	v.cursor.curSelection[1] = charPos + match[1]
-	v.cursor.x, v.cursor.y = FromCharPos(charPos+match[1]-1, v.buf)
+	v.cursor.curSelection[0] = searchStart + match[0]
+	v.cursor.curSelection[1] = searchStart + match[1]
+	v.cursor.x, v.cursor.y = FromCharPos(searchStart+match[1]-1, v.buf)
 	if v.Relocate() {
 		v.matches = Match(v)
 	}
