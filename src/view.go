@@ -428,6 +428,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Save()
 		case tcell.KeyCtrlF:
 			BeginSearch()
+		case tcell.KeyCtrlN:
+			Search(lastSearch, v)
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
 			// Rehighlight the entire buffer
