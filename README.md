@@ -60,24 +60,22 @@ To run the micro binary just run `./bin/micro` (you may want to place the binary
 
 ### Building from source
 
-Micro is made in Go so you must have Go installed on your system to build it, and make sure your `GOPATH` is set.
+Micro is made in Go so you must have Go installed on your system to build it.
+
+You can simply `go get` it, although if you want syntax highlighting and colors, you need to also install the runtime
+files to `~/.micro`.
 
 ```
-$ git clone https://github.com/zyedidia/micro
-$ cd micro
-$ make
+go get -v -u github.com/zyedidia/micro/cmd/micro
+mkdir $HOME/.micro && cp -r $GOPATH/src/github.com/zyedidia/micro/runtime/* $HOME/.micro/
 ```
-
-This will build micro and put the binary in the current directory. It will also install syntax highlighting files to `~/.micro/syntax`.
-
-Alternatively you can use `make install` instead of `make` if you want the binary to be added to you `GOBIN` (make sure that it is set).
 
 ### Clipboard support
 
-Linux, Unix requires 'xclip' or 'xsel' command to be installed. For Ubuntu:
+On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed. For Ubuntu:
 
 ```
-$ sudo aptitude install xclip
+$ sudo apt-get install xclip
 ```
 
 # Usage
