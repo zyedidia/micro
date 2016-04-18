@@ -12,14 +12,15 @@ import (
 var settings Settings
 
 // All the possible settings
-var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax"}
+var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax", "tabsToSpaces"}
 
 // The Settings struct contains the settings for micro
 type Settings struct {
-	Colorscheme string `json:"colorscheme"`
-	TabSize     int    `json:"tabsize"`
-	AutoIndent  bool   `json:"autoindent"`
-	Syntax      bool   `json:"syntax"`
+	Colorscheme  string `json:"colorscheme"`
+	TabSize      int    `json:"tabsize"`
+	AutoIndent   bool   `json:"autoindent"`
+	Syntax       bool   `json:"syntax"`
+	TabsToSpaces bool   `json:"tabsToSpaces"`
 }
 
 // InitSettings initializes the options map and sets all options to their default values
@@ -55,10 +56,11 @@ func WriteSettings(filename string) error {
 // DefaultSettings returns the default settings for micro
 func DefaultSettings() Settings {
 	return Settings{
-		Colorscheme: "default",
-		TabSize:     4,
-		AutoIndent:  true,
-		Syntax:      true,
+		Colorscheme:  "default",
+		TabSize:      4,
+		AutoIndent:   true,
+		Syntax:       true,
+		TabsToSpaces: false,
 	}
 }
 
@@ -92,6 +94,15 @@ func SetOption(view *View, args []string) {
 				}
 				LoadSyntaxFiles()
 				view.buf.UpdateRules()
+			} else if option == "tabsToSpaces" {
+				if value == "on" {
+					settings.TabsToSpaces = true
+				} else if value == "off" {
+					settings.TabsToSpaces = false
+				} else {
+					messenger.Error("Invalid value for " + option)
+					return
+				}
 			}
 			err := WriteSettings(filename)
 			if err != nil {

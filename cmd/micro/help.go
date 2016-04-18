@@ -63,6 +63,9 @@ tabsize: sets the tab size to 'option'
 
 syntax: turns syntax on or off
 	default value: 'on'
+
+tabsToSpaces: use spaces instead of tabs
+	default value: 'off'
 `
 
 // DisplayHelp displays the help txt

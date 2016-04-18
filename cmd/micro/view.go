@@ -424,8 +424,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 			}
-			v.eh.Insert(v.cursor.Loc(), "\t")
-			v.cursor.Right()
+			if settings.TabsToSpaces {
+				v.eh.Insert(v.cursor.Loc(), Spaces(settings.TabSize))
+				for i := 0; i < settings.TabSize; i++ {
+					v.cursor.Right()
+				}
+			} else {
+				v.eh.Insert(v.cursor.Loc(), "\t")
+				v.cursor.Right()
+			}
 			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyCtrlS:
 			v.Save()

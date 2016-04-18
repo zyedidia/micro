@@ -122,10 +122,13 @@ Micro has a few options which you can set:
 * colorscheme
 * tabsize
 * syntax
+* tabsToSpaces
 
-To set an option run Ctrl-e to execute a command, and type `set option value`, so to set the tabsize to 8 it would be `set tabsize 8`.
+To set an option run Ctrl-e to execute a command, and type `set option value`, so to set the tabsize to 8 it would be `set tabsize 8`. The default is 4.
 
-The syntax option can simply be on or off, so for example to turn syntax highlighting off, run `set syntax off`.
+The syntax option can simply be on or off, so for example to turn syntax highlighting off, run `set syntax off`. The default is on.
+
+The tabsToSpaces option is on or off. It specifies whether to use spaces instead of tabs or not. The default is off.
 
 The colorscheme can be selected from all the files in the `ConfigDir/colorschemes/` directory. Micro comes by default with three colorschemes:
 
