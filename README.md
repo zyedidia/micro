@@ -119,6 +119,14 @@ Micro has a few options which you can set:
 
 To set an option run Ctrl-e to execute a command, and type `set option value`, so to set the tabsize to 8 it would be `set tabsize 8`.
 
+The syntax option can simply be on or off, so for example to turn syntax highlighting off, run `set syntax off`.
+
+The colorscheme can be selected from all the files in the `~/.micro/colorschemes/` directory. Micro comes by default with three colorschemes:
+
+* default: this is the default colorscheme
+* solarized: this is the solarized colorscheme (used in the screenshot). You should have the solarized color palette in your terminal to use it
+* solarized-tc: this is the solarized colorscheme for true color, just make sure your terminal supports true color before using it and that the `MICRO_TRUECOLOR` environment variable is set to 1 before starting micro.
+
 Any option you set in the editor will be saved to the file `~/.micro/settings.json` so, in effect, your configuration file will be created
 for you. If you'd like to take your configuration with you to another machine, simply copy the `settings.json` to the other machine.
 
