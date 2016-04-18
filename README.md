@@ -53,21 +53,16 @@ Micro is devel-only for now because there is no released version.
 | [32 bit Linux](http://zbyedidia.webfactional.com/micro/binaries/micro-linux32.tar.gz) |
 | [Arm Linux](http://zbyedidia.webfactional.com/micro/binaries/micro-linux-arm.tar.gz) |
 
-Once you have downloaded the file, you can install the runtime files by running `./install.sh`
-in the directory you downloaded. This will place all the runtime files in `~/.micro`.
-
 To run the micro binary just run `./bin/micro` (you may want to place the binary on your path for ease of use).
 
 ### Building from source
 
 Micro is made in Go so you must have Go installed on your system to build it.
 
-You can simply `go get` it, although if you want syntax highlighting and colors, you need to also install the runtime
-files to `~/.micro`.
+You can simply `go get` it.
 
 ```
-go get -v -u github.com/zyedidia/micro/cmd/micro
-mkdir $HOME/.micro && cp -r $GOPATH/src/github.com/zyedidia/micro/runtime/* $HOME/.micro/
+go get -u github.com/zyedidia/micro/cmd/micro
 ```
 
 ### Clipboard support
@@ -129,9 +124,11 @@ The syntax option can simply be on or off, so for example to turn syntax highlig
 
 The colorscheme can be selected from all the files in the `~/.micro/colorschemes/` directory. Micro comes by default with three colorschemes:
 
-* default: this is the default colorscheme
-* solarized: this is the solarized colorscheme (used in the screenshot). You should have the solarized color palette in your terminal to use it
+* default: this is the default colorscheme.
+* solarized: this is the solarized colorscheme (used in the screenshot). You should have the solarized color palette in your terminal to use it.
 * solarized-tc: this is the solarized colorscheme for true color, just make sure your terminal supports true color before using it and that the `MICRO_TRUECOLOR` environment variable is set to 1 before starting micro.
+
+These are embedded in the Go binary, but to see their source code, look [here](./runtime/colorschemes)
 
 Any option you set in the editor will be saved to the file `~/.micro/settings.json` so, in effect, your configuration file will be created
 for you. If you'd like to take your configuration with you to another machine, simply copy the `settings.json` to the other machine.

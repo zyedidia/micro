@@ -29,6 +29,86 @@ type SyntaxRule struct {
 
 var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
+var preInstalledSynFiles = []string{
+	"Dockerfile",
+	"apacheconf",
+	"arduino",
+	"asciidoc",
+	"asm",
+	"awk",
+	"c",
+	"cmake",
+	"coffeescript",
+	"colortest",
+	"conf",
+	"conky",
+	"csharp",
+	"css",
+	"cython",
+	"d",
+	"dot",
+	"erb",
+	"fish",
+	"fortran",
+	"gentoo",
+	"git",
+	"glsl",
+	"go",
+	"groff",
+	"haml",
+	"haskell",
+	"html",
+	"ini",
+	"inputrc",
+	"java",
+	"javascript",
+	"json",
+	"keymap",
+	"kickstart",
+	"ledger",
+	"lisp",
+	"lua",
+	"makefile",
+	"man",
+	"markdown",
+	"mpdconf",
+	"nanorc",
+	"nginx",
+	"ocaml",
+	"patch",
+	"peg",
+	"perl",
+	"perl6",
+	"php",
+	"pkg-config",
+	"pkgbuild",
+	"po",
+	"pov",
+	"privoxy",
+	"puppet",
+	"python",
+	"reST",
+	"rpmspec",
+	"ruby",
+	"rust",
+	"scala",
+	"sed",
+	"sh",
+	"sls",
+	"sql",
+	"swift",
+	"systemd",
+	"tcl",
+	"tex",
+	"vala",
+	"vi",
+	"xml",
+	"xresources",
+	"yaml",
+	"yum",
+	"zsh",
+}
+
 // LoadSyntaxFiles loads the syntax files from the default directory ~/.micro
 func LoadSyntaxFiles() {
 	home, err := homedir.Dir()
@@ -37,6 +117,39 @@ func LoadSyntaxFiles() {
 		return
 	}
 	LoadSyntaxFilesFromDir(home + "/.micro/syntax")
+
+	for _, filetype := range preInstalledSynFiles {
+		data, err := Asset("runtime/syntax/" + filetype + ".micro")
+		if err != nil {
+			TermMessage("Unable to load pre-installed syntax file " + filetype)
+			continue
+		}
+
+		LoadSyntaxFile(string(data), filetype+".micro")
+	}
+}
+
+// LoadSyntaxFilesFromDir loads the syntax files from a specified directory
+// To load the syntax files, we must fill the `syntaxFiles` map
+// This involves finding the regex for syntax and if it exists, the regex
+// for the header. Then we must get the text for the file and the filetype.
+func LoadSyntaxFilesFromDir(dir string) {
+	InitColorscheme()
+
+	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
+	files, _ := ioutil.ReadDir(dir)
+	for _, f := range files {
+		if filepath.Ext(f.Name()) == ".micro" {
+			filename := dir + "/" + f.Name()
+			text, err := ioutil.ReadFile(filename)
+
+			if err != nil {
+				TermMessage("Error loading syntax file " + filename + ": " + err.Error())
+				return
+			}
+			LoadSyntaxFile(string(text), filename)
+		}
+	}
 }
 
 // JoinRule takes a syntax rule (which can be multiple regular expressions)
@@ -54,13 +167,8 @@ func JoinRule(rule string) string {
 // Example: color comment "//.*"
 // This would color all strings that match the regex "//.*" in the comment color defined
 // by the colorscheme
-func LoadSyntaxFile(filename string) {
-	text, err := ioutil.ReadFile(filename)
-
-	if err != nil {
-		TermMessage("Error loading syntax file " + filename + ": " + err.Error())
-		return
-	}
+func LoadSyntaxFile(text, filename string) {
+	var err error
 	lines := strings.Split(string(text), "\n")
 
 	// Regex for parsing syntax statements
@@ -217,22 +325,6 @@ func LoadSyntaxFile(filename string) {
 		// Add the current rules to the syntaxFiles variable
 		regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
 		syntaxFiles[regexes] = FileTypeRules{filetype, rules}
-	}
-}
-
-// LoadSyntaxFilesFromDir loads the syntax files from a specified directory
-// To load the syntax files, we must fill the `syntaxFiles` map
-// This involves finding the regex for syntax and if it exists, the regex
-// for the header. Then we must get the text for the file and the filetype.
-func LoadSyntaxFilesFromDir(dir string) {
-	InitColorscheme()
-
-	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
-	files, _ := ioutil.ReadDir(dir)
-	for _, f := range files {
-		if filepath.Ext(f.Name()) == ".micro" {
-			LoadSyntaxFile(dir + "/" + f.Name())
-		}
 	}
 }
 

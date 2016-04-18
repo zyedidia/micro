@@ -16,6 +16,8 @@ type Colorscheme map[string]tcell.Style
 // The current colorscheme
 var colorscheme Colorscheme
 
+var preInstalledColors = [3]string{"default", "solarized", "solarized-tc"}
+
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
 	LoadDefaultColorscheme()
@@ -42,6 +44,16 @@ func LoadColorscheme(colorschemeName, dir string) {
 				continue
 			}
 			colorscheme = ParseColorscheme(string(text))
+		}
+	}
+
+	for _, name := range preInstalledColors {
+		if name == colorschemeName {
+			data, err := Asset("runtime/colorschemes/" + name + ".micro")
+			if err != nil {
+				TermMessage("Unable to load pre-installed colorscheme " + name)
+			}
+			colorscheme = ParseColorscheme(string(data))
 		}
 	}
 }
