@@ -79,6 +79,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	err := ioutil.WriteFile(filename, []byte(b.text), 0644)
 	if err == nil {
 		b.savedText = b.text
+		b.netInsertions = 0
 	}
 	return err
 }
