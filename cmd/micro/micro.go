@@ -80,9 +80,15 @@ func InitConfigDir() {
 			TermMessage("Error finding your home directory\nCan't load syntax files")
 			return
 		}
-		configDir = home + "/.config/micro"
-	} else {
-		configDir = xdgHome + "/micro"
+		xdgHome = home + "/.config"
+	}
+	configDir = xdgHome + "/micro"
+
+	if _, err := os.Stat(xdgHome); os.IsNotExist(err) {
+		err = os.Mkdir(xdgHome, os.ModePerm)
+		if err != nil {
+			TermMessage("Error creating XDG_CONFIG_HOME directory: " + err.Error())
+		}
 	}
 
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
