@@ -6,7 +6,7 @@
 
 > Micro is very much a work in progress
 
-Micro is a command line text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
+Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
 of modern terminals.
 
 Here is a picture of micro editing its source code.
