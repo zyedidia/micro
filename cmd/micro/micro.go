@@ -106,10 +106,10 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
-
+	// Load the user's settings
 	InitSettings()
-
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
 

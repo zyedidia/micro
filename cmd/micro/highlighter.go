@@ -29,6 +29,7 @@ type SyntaxRule struct {
 
 var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
+// These syntax files are pre installed and embedded in the resulting binary by go-bindata
 var preInstalledSynFiles = []string{
 	"Dockerfile",
 	"apacheconf",
@@ -116,8 +117,10 @@ var preInstalledSynFiles = []string{
 
 // LoadSyntaxFiles loads the syntax files from the default directory (configDir)
 func LoadSyntaxFiles() {
+	// Load the user's custom syntax files, if there are any
 	LoadSyntaxFilesFromDir(configDir + "/syntax")
 
+	// Load the pre-installed syntax files from inside the binary
 	for _, filetype := range preInstalledSynFiles {
 		data, err := Asset("runtime/syntax/" + filetype + ".micro")
 		if err != nil {
@@ -161,12 +164,10 @@ func JoinRule(rule string) string {
 	return joined
 }
 
-// LoadSyntaxFile loads the specified syntax file
-// A syntax file is a list of syntax rules, explaining how to color certain
-// regular expressions
-// Example: color comment "//.*"
-// This would color all strings that match the regex "//.*" in the comment color defined
-// by the colorscheme
+// LoadSyntaxFile simply gets the filetype of a the syntax file and the source for the
+// file and creates FileTypeRules out of it. If this filetype is the one opened by the user
+// the rules will be loaded and compiled later
+// In this function we are only concerned with loading the syntax and header regexes
 func LoadSyntaxFile(text, filename string) {
 	var err error
 	lines := strings.Split(string(text), "\n")
@@ -176,10 +177,20 @@ func LoadSyntaxFile(text, filename string) {
 	// Regex for parsing header statements
 	headerParser := regexp.MustCompile(`header "(.*)"`)
 
+	// Is there a syntax definition in this file?
+	hasSyntax := syntaxParser.MatchString(text)
+	// Is there a header definition in this file?
+	hasHeader := headerParser.MatchString(text)
+
 	var syntaxRegex *regexp.Regexp
 	var headerRegex *regexp.Regexp
 	var filetype string
 	for lineNum, line := range lines {
+		if (hasSyntax == (syntaxRegex != nil)) && (hasHeader == (headerRegex != nil)) {
+			// We found what we we're supposed to find
+			break
+		}
+
 		if strings.TrimSpace(line) == "" ||
 			strings.TrimSpace(line)[0] == '#' {
 			// Ignore this line
@@ -230,6 +241,13 @@ func LoadSyntaxFile(text, filename string) {
 	}
 }
 
+// LoadRulesFromFile loads just the syntax rules from a given file
+// Only the necessary rules are loaded when the buffer is opened.
+// If we load all the rules for every filetype when micro starts, there's a bit of lag
+// A rule just explains how to color certain regular expressions
+// Example: color comment "//.*"
+// This would color all strings that match the regex "//.*" in the comment color defined
+// by the colorscheme
 func LoadRulesFromFile(text, filename string) []SyntaxRule {
 	lines := strings.Split(string(text), "\n")
 
