@@ -52,6 +52,7 @@ func LoadColorscheme(colorschemeName, dir string) {
 			data, err := Asset("runtime/colorschemes/" + name + ".micro")
 			if err != nil {
 				TermMessage("Unable to load pre-installed colorscheme " + name)
+				continue
 			}
 			colorscheme = ParseColorscheme(string(data))
 		}

@@ -46,6 +46,8 @@ func InitSettings() {
 		if err != nil {
 			TermMessage("Error writing settings.json file: " + err.Error())
 		}
+
+		os.Mkdir(home+"/.micro", 755)
 	}
 }
 

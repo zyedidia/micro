@@ -1,29 +1,25 @@
 cd ..
 
 mkdir -p binaries
-mkdir -p micro/bin
-cp -r runtime micro/
-
-echo 'mkdir -p ~/.micro' >> micro/install.sh
-chmod +x micro/install.sh
+mkdir -p micro
 
 # Mac
 echo "OSX 64"
-GOOS=darwin GOARCH=amd64 go build -o micro/bin/micro ./src
+GOOS=darwin GOARCH=amd64 go build -o micro/micro ./src
 tar -czf micro-osx.tar.gz micro
 mv micro-osx.tar.gz binaries
 
 # Linux
 echo "Linux 64"
-GOOS=linux GOARCH=amd64 go build -o micro/bin/micro ./src
+GOOS=linux GOARCH=amd64 go build -o micro/micro ./src
 tar -czf micro-linux64.tar.gz micro
 mv micro-linux64.tar.gz binaries
 echo "Linux 32"
-GOOS=linux GOARCH=386 go build -o micro/bin/micro ./src
+GOOS=linux GOARCH=386 go build -o micro/micro ./src
 tar -czf micro-linux32.tar.gz micro
 mv micro-linux32.tar.gz binaries
 echo "Linux arm"
-GOOS=linux GOARCH=arm go build -o micro/bin/micro ./src
+GOOS=linux GOARCH=arm go build -o micro/micro ./src
 tar -czf micro-linux-arm.tar.gz micro
 mv micro-linux-arm.tar.gz binaries
 
