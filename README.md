@@ -32,6 +32,17 @@ If you'd like to see what has been implemented, and what I plan on implementing 
 
 # Installation
 
+### Homebrew
+
+If you are on Mac, you can install micro using Homebrew:
+
+```
+brew tap zyedidia/micro
+brew install --devel micro
+```
+
+Micro is devel-only for now because there is no released version.
+
 ### Prebuilt binaries
 
 | Download |
