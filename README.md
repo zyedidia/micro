@@ -132,7 +132,7 @@ The syntax option can simply be on or off, so for example to turn syntax highlig
 
 The tabsToSpaces option is on or off. It specifies whether to use spaces instead of tabs or not. The default is off.
 
-The colorscheme can be selected from all the files in the `ConfigDir/colorschemes/` directory. Micro comes by default with three colorschemes:
+The colorscheme can be selected from all the files in the `~/.config/micro/colorschemes/` directory. Micro comes by default with three colorschemes:
 
 * default: this is the default colorscheme.
 * solarized: this is the solarized colorscheme (used in the screenshot). You should have the solarized color palette in your terminal to use it.
@@ -140,7 +140,7 @@ The colorscheme can be selected from all the files in the `ConfigDir/colorscheme
 
 These are embedded in the Go binary, but to see their source code, look [here](./runtime/colorschemes)
 
-Any option you set in the editor will be saved to the file `ConfigDir/settings.json` so, in effect, your configuration file will be created
+Any option you set in the editor will be saved to the file `~/.config/micro/settings.json` so, in effect, your configuration file will be created
 for you. If you'd like to take your configuration with you to another machine, simply copy the `settings.json` to the other machine.
 
 # Contributing
