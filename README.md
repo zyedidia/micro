@@ -72,6 +72,14 @@ This will build micro and put the binary in the current directory. It will also 
 
 Alternatively you can use `make install` instead of `make` if you want the binary to be added to you `GOBIN` (make sure that it is set).
 
+### Clipboard support
+
+Linux, Unix requires 'xclip' or 'xsel' command to be installed. For Ubuntu:
+
+```
+$ sudo aptitude install xclip
+```
+
 # Usage
 
 Once you have built the editor, simply start it by running `micro path/to/file.txt` or simply `micro` to open an empty buffer.
