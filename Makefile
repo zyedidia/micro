@@ -1,13 +1,15 @@
-build:
+.PHONY: runtime
+
+build: runtime
 	go get -d ./cmd/micro
 	go build -o micro ./cmd/micro
 
-install: build
+install: build runtime
 	mv micro $(GOPATH)/bin
 
 runtime:
 	go get -u github.com/jteeuwen/go-bindata/...
-	go-bindata -o runtime.go data/
+	go-bindata -o runtime.go runtime/...
 	mv runtime.go cmd/micro
 
 test:

@@ -1,16 +1,7 @@
-syntax "git-config" "git(config|modules)$|\.git/config$"
-
-color constant "\<(true|false)\>"
-color keyword "^[[:space:]]*[^=]*="
-color constant "^[[:space:]]*\[.*\]$"
-color constant ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color comment "(^|[[:space:]])#([^{].*)?$"
-
 # This code is free software; you can redistribute it and/or modify it under
 # the terms of the new BSD License.
 #
 # Copyright (c) 2010, Sebastian Staudt
-
 # A nano configuration file to enable syntax highlighting of some Git specific
 # files with the GNU nano text editor (http://www.nano-editor.org)
 #
@@ -45,34 +36,3 @@ color special "#"
 
 # Trailing spaces (+LINT is not ok, git uses tabs)
 color ,error "[[:space:]]+$"
-
-
-# This syntax format is used for interactive rebasing
-syntax "git-rebase-todo" "git-rebase-todo"
-
-# Default
-color ignore ".*"
-
-# Comments
-color comment "^#.*"
-
-# Rebase commands
-color keyword       "^(e|edit) [0-9a-f]{7,40}"
-color keyword       "^#  (e, edit)"
-color keyword "^(f|fixup) [0-9a-f]{7,40}"
-color keyword "^#  (f, fixup)"
-color keyword "^(p|pick) [0-9a-f]{7,40}"
-color keyword "^#  (p, pick)"
-color keyword        "^(r|reword) [0-9a-f]{7,40}"
-color keyword        "^#  (r, reword)"
-color keyword   "^(s|squash) [0-9a-f]{7,40}"
-color keyword   "^#  (s, squash)"
-color keyword      "^(x|exec) [^ ]+ [0-9a-f]{7,40}"
-color keyword      "^#  (x, exec)"
-
-# Recolor hash symbols
-color special "#"
-
-# Commit IDs
-color identifier "[0-9a-f]{7,40}"
-

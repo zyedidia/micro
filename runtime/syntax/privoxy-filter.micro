@@ -1,0 +1,8 @@
+syntax "Privoxy-filter" "\.filter$"
+
+color cyan  "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER): [a-z-]+"
+color brightblue "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER):"
+color magenta   "\\.?"
+color brightblack "(^|[[:space:]])#([^{].*)?$"
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"
