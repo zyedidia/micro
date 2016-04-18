@@ -51,8 +51,15 @@ func InitSettings() {
 
 // WriteSettings writes the settings to the specified filename as JSON
 func WriteSettings(filename string) error {
-	txt, _ := json.MarshalIndent(settings, "", "    ")
-	err := ioutil.WriteFile(filename, txt, 0644)
+	var err error
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+	if _, e := os.Stat(home + "/.micro"); e == nil {
+		txt, _ := json.MarshalIndent(settings, "", "    ")
+		err = ioutil.WriteFile(filename, txt, 0644)
+	}
 	return err
 }
 
