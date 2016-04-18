@@ -327,6 +327,9 @@ func (v *View) MoveToMouseClick(x, y int) {
 	if y >= len(v.buf.lines) {
 		y = len(v.buf.lines) - 1
 	}
+	if y < 0 {
+		y = 0
+	}
 	if x < 0 {
 		x = 0
 	}
