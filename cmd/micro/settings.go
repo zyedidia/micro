@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"os"
 	"strconv"
@@ -25,13 +24,7 @@ type Settings struct {
 
 // InitSettings initializes the options map and sets all options to their default values
 func InitSettings() {
-	home, err := homedir.Dir()
-	if err != nil {
-		TermMessage("Error finding your home directory\nCan't load settings file")
-		return
-	}
-
-	filename := home + "/.micro/settings.json"
+	filename := configDir + "/settings.json"
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -46,19 +39,13 @@ func InitSettings() {
 		if err != nil {
 			TermMessage("Error writing settings.json file: " + err.Error())
 		}
-
-		os.Mkdir(home+"/.micro", 755)
 	}
 }
 
 // WriteSettings writes the settings to the specified filename as JSON
 func WriteSettings(filename string) error {
 	var err error
-	home, err := homedir.Dir()
-	if err != nil {
-		return err
-	}
-	if _, e := os.Stat(home + "/.micro"); e == nil {
+	if _, e := os.Stat(configDir); e == nil {
 		txt, _ := json.MarshalIndent(settings, "", "    ")
 		err = ioutil.WriteFile(filename, txt, 0644)
 	}
@@ -77,12 +64,7 @@ func DefaultSettings() Settings {
 
 // SetOption prompts the user to set an option and checks that the response is valid
 func SetOption(view *View, args []string) {
-	home, err := homedir.Dir()
-	if err != nil {
-		messenger.Error("Error finding your home directory\nCan't load settings file")
-	}
-
-	filename := home + "/.micro/settings.json"
+	filename := configDir + "/settings.json"
 	if len(args) == 2 {
 		option := strings.TrimSpace(args[0])
 		value := strings.TrimSpace(args[1])

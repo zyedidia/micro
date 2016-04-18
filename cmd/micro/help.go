@@ -48,8 +48,15 @@ does not have any spaces in it, you may omit the quotes.
 
 Micro options:
 
-colorscheme: loads the colorscheme stored in ~/.micro/colorschemes/'option'.micro
+Configuration directory:
+
+Micro uses the $XDG_CONFIG_HOME/micro as the configuration directory. As per the XDG spec,
+if $XDG_CONFIG_HOME is not set, ~/.config/micro is used as the config directory.
+
+colorscheme: loads the colorscheme stored in $(configDir)/colorschemes/'option'.micro
 	default value: 'default'
+	Note that the default colorschemes (default, solarized, and solarized-tc) are not located in configDir,
+	because they are embedded in the micro binary
 
 tabsize: sets the tab size to 'option'
 	default value: '4'

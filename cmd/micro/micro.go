@@ -5,6 +5,7 @@ import (
 	"github.com/gdamore/tcell"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"os"
 )
@@ -25,6 +26,11 @@ var (
 
 	// The default style
 	defStyle tcell.Style
+
+	// Where the user's configuration is
+	// This should be $XDG_CONFIG_HOME/micro
+	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
+	configDir string
 )
 
 // LoadInput loads the file input for the editor
@@ -63,12 +69,38 @@ func LoadInput() (string, []byte, error) {
 	return filename, input, err
 }
 
+// InitConfigDir finds the configuration directory for micro according to the
+// XDG spec.
+// If no directory is found, it creates one.
+func InitConfigDir() {
+	xdgHome := os.Getenv("XDG_CONFIG_HOME")
+	if xdgHome == "" {
+		home, err := homedir.Dir()
+		if err != nil {
+			TermMessage("Error finding your home directory\nCan't load syntax files")
+			return
+		}
+		configDir = home + "/.config/micro"
+	} else {
+		configDir = xdgHome + "/micro"
+	}
+
+	if _, err := os.Stat(configDir); os.IsNotExist(err) {
+		err = os.Mkdir(configDir, os.ModePerm)
+		if err != nil {
+			TermMessage("Error creating configuration directory: " + err.Error())
+		}
+	}
+}
+
 func main() {
 	filename, input, err := LoadInput()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	InitConfigDir()
 
 	InitSettings()
 

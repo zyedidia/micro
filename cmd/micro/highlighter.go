@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/gdamore/tcell"
-	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
@@ -109,14 +108,9 @@ var preInstalledSynFiles = []string{
 	"zsh",
 }
 
-// LoadSyntaxFiles loads the syntax files from the default directory ~/.micro
+// LoadSyntaxFiles loads the syntax files from the default directory (configDir)
 func LoadSyntaxFiles() {
-	home, err := homedir.Dir()
-	if err != nil {
-		TermMessage("Error finding your home directory\nCan't load syntax files")
-		return
-	}
-	LoadSyntaxFilesFromDir(home + "/.micro/syntax")
+	LoadSyntaxFilesFromDir(configDir + "/syntax")
 
 	for _, filetype := range preInstalledSynFiles {
 		data, err := Asset("runtime/syntax/" + filetype + ".micro")
