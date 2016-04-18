@@ -67,6 +67,9 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 // specifies whether it should search down from the searchStart position
 // or up from there
 func Search(searchStr string, v *View, down bool) {
+	if searchStr == "" {
+		return
+	}
 	var str string
 	var charPos int
 	if down {
