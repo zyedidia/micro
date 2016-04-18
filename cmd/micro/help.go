@@ -26,7 +26,7 @@ Ctrl-c:   Copy
 Ctrl-x:   Cut
 Ctrl-v:   Paste
 
-Ctrl-h:   Open help
+Ctrl-g:   Open this help screen
 
 Ctrl-u:   Half page up
 Ctrl-d:   Half page down

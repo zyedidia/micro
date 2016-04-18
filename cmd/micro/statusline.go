@@ -40,7 +40,7 @@ func (sline *Statusline) Display() {
 	// Add the filetype
 	file += " " + sline.view.buf.filetype
 
-	centerText := "Press Ctrl-h for help"
+	centerText := "Press Ctrl-g for help"
 
 	statusLineStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["statusline"]; ok {

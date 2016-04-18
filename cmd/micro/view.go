@@ -394,7 +394,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.eh.Insert(v.cursor.Loc(), " ")
 			v.cursor.Right()
 			v.UpdateLines(v.cursor.y, v.cursor.y)
-		case tcell.KeyBackspace2:
+		case tcell.KeyBackspace2, tcell.KeyBackspace:
 			// Delete a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()

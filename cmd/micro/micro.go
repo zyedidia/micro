@@ -197,7 +197,7 @@ func main() {
 					if !canceled {
 						HandleCommand(input, view)
 					}
-				case tcell.KeyCtrlH:
+				case tcell.KeyCtrlG:
 					DisplayHelp()
 					// Make sure to resize the view if the user resized the terminal while looking at the help text
 					view.Resize(screen.Size())
