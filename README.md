@@ -25,6 +25,7 @@ Here is a picture of micro editing its source code.
 * Search and replace
 * Undo and redo
 * Unicode support
+* Copy and paste with the system clipboard
 * Small and simple
 * Configurable
 
