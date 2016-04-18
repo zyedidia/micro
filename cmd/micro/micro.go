@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/gdamore/tcell"
+	"github.com/gdamore/tcell/encoding"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
@@ -105,6 +106,8 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
+
+	encoding.Register()
 
 	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
