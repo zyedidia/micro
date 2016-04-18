@@ -2,9 +2,8 @@ build:
 	go get -d ./cmd/micro
 	go build -o micro ./cmd/micro
 
-install:
-	go get -d ./cmd/micro
-	go install -o micro ./cmd/micro
+install: build
+	mv micro $(GOPATH)/bin
 
 runtime:
 	go get -u github.com/jteeuwen/go-bindata/...
