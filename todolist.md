@@ -55,7 +55,7 @@
 
 - [x] Help screen
     - [x] Help screen which lists keybindings and commands
-    - [x] Opened with Ctrl-h
+    - [x] Opened with Ctrl-g
 
 - [x] Better selection
     - [x] Double click selects current word

@@ -99,7 +99,7 @@ You can move the cursor around with the arrow keys and mouse.
 * Ctrl-c:   Copy
 * Ctrl-x:   Cut
 * Ctrl-v:   Paste
-* Ctrl-h:   Open help
+* Ctrl-g:   Open help
 * Ctrl-u:   Half page up
 * Ctrl-d:   Half page down
 * PageUp:   Page up
