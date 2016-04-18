@@ -104,6 +104,8 @@ You can move the cursor around with the arrow keys and mouse.
 * Ctrl-d:   Half page down
 * PageUp:   Page up
 * PageDown: Page down
+* Home:     Go to beginning
+* End:      Go to end
 * Ctrl-e:   Execute a command
 
 You can also use the mouse to manipulate the text. Simply clicking and dragging will select text. You can also double click

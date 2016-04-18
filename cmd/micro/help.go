@@ -33,6 +33,9 @@ Ctrl-d:   Half page down
 PageUp:   Page up
 PageDown: Page down
 
+Home:     Go to beginning
+End:      Go to end
+
 Ctrl-e:   Execute a command
 
 Possible commands:

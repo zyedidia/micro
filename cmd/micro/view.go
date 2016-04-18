@@ -485,6 +485,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.OpenFile()
 			// Rehighlight the entire buffer
 			v.UpdateLines(v.topline, v.topline+v.height)
+		case tcell.KeyHome:
+			v.topline = 0
+			relocate = false
+		case tcell.KeyEnd:
+			v.topline = len(v.buf.lines) - 1 - v.height
+			relocate = false
 		case tcell.KeyPgUp:
 			v.PageUp()
 			relocate = false
