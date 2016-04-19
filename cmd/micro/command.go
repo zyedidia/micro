@@ -2,9 +2,27 @@ package main
 
 import (
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 )
+
+func HandleShellCommand(input string, view *View) {
+	inputCmd := strings.Split(input, " ")[0]
+	args := strings.Split(input, " ")[1:]
+
+	// Execute Command
+	cmdout := exec.Command(inputCmd, args...)
+	output, err := cmdout.Output()
+	if err != nil {
+		messenger.Error("Error: " + err.Error())
+		return
+	}
+
+	// Display last line of output
+	messenger.Message(string(output))
+
+}
 
 // HandleCommand handles input from the user
 func HandleCommand(input string, view *View) {

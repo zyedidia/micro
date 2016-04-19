@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
+	"os"
+
 	"github.com/gdamore/tcell"
 	"github.com/gdamore/tcell/encoding"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
-	"io/ioutil"
-	"os"
 )
 
 const (
@@ -199,6 +200,11 @@ func main() {
 					input, canceled := messenger.Prompt("> ")
 					if !canceled {
 						HandleCommand(input, view)
+					}
+				case tcell.KeyCtrlB:
+					input, canceled := messenger.Prompt("$ ")
+					if !canceled {
+						HandleShellCommand(input, view)
 					}
 				case tcell.KeyCtrlG:
 					DisplayHelp()
