@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"os/exec"
 	"regexp"
@@ -9,19 +10,26 @@ import (
 	"github.com/gdamore/tcell"
 )
 
+// HandleShellCommand runs the shell command and outputs to DisplayBlock
 func HandleShellCommand(input string, view *View) {
 	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
 
 	// Execute Command
-	cmdout := exec.Command(inputCmd, args...)
-	output, _ := cmdout.CombinedOutput()
-	outstring := string(output)
+	cmd := exec.Command(inputCmd, args...)
+	outputBytes := &bytes.Buffer{}
+
+	cmd.Stdout = outputBytes // send output to buffer
+	cmd.Start()
+	cmd.Wait() // wait for command to finish
+	outstring := outputBytes.String()
 	totalLines := strings.Split(outstring, "\n")
-	if len(totalLines) == 2 {
+
+	if len(totalLines) < 3 {
 		messenger.Message(outstring)
 		return
 	}
+
 	if outstring != "" {
 		// Display nonblank output
 		DisplayBlock(outstring)
@@ -58,6 +66,16 @@ func DisplayBlock(text string) {
 			_, height = e.Size()
 		case *tcell.EventKey:
 			switch e.Key() {
+			case tcell.KeyPgUp:
+				if topline > height {
+					topline = topline - height
+				} else {
+					topline = 0
+				}
+			case tcell.KeyPgDn:
+				if topline < len(totalLines)-height {
+					topline = topline + height
+				}
 			case tcell.KeyUp:
 				if topline > 0 {
 					topline--
@@ -67,6 +85,8 @@ func DisplayBlock(text string) {
 					topline++
 				}
 			case tcell.KeyCtrlQ, tcell.KeyCtrlW, tcell.KeyEscape, tcell.KeyCtrlC:
+				return
+			default:
 				return
 			}
 		}
