@@ -111,6 +111,10 @@ You can move the cursor around with the arrow keys and mouse.
 You can also use the mouse to manipulate the text. Simply clicking and dragging will select text. You can also double click
 to enable word selection, and triple click to enable line selection.
 
+You can also run `$ micro -version` to get the version number. Since there is no release, this just gives you the
+commit hash. The version is unknown if you built with `go get`, instead use `make install` or `make` to get a binary
+with a version number defined.
+
 # Configuration
 
 Configuration directory:

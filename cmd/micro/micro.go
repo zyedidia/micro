@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -33,6 +34,10 @@ var (
 	// This should be $XDG_CONFIG_HOME/micro
 	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
 	configDir string
+
+	// Version is the version number.
+	// This should be set by the linker
+	Version = "Unknown"
 )
 
 // LoadInput loads the file input for the editor
@@ -101,7 +106,15 @@ func InitConfigDir() {
 	}
 }
 
+var flagVersion = flag.Bool("version", false, "Show version number")
+
 func main() {
+	flag.Parse()
+	if *flagVersion {
+		fmt.Println("Micro version:", Version)
+		os.Exit(0)
+	}
+
 	filename, input, err := LoadInput()
 	if err != nil {
 		fmt.Println(err)
