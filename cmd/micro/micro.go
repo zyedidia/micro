@@ -211,7 +211,7 @@ func main() {
 				case tcell.KeyCtrlQ:
 					// Make sure not to quit if there are unsaved changes
 					if helpOpen {
-						view.buf = buf
+						view.OpenBuffer(buf)
 						helpOpen = false
 					} else {
 						if view.CanClose("Quit anyway? (yes, no, save) ") {
@@ -234,9 +234,9 @@ func main() {
 						helpBuffer := NewBuffer(helpTxt, "")
 						helpBuffer.name = "Help"
 						helpOpen = true
-						view.buf = helpBuffer
+						view.OpenBuffer(helpBuffer)
 					} else {
-						view.buf = buf
+						view.OpenBuffer(buf)
 						helpOpen = false
 					}
 				}
