@@ -143,6 +143,10 @@ These are embedded in the Go binary, but to see their source code, look [here](.
 Any option you set in the editor will be saved to the file `~/.config/micro/settings.json` so, in effect, your configuration file will be created
 for you. If you'd like to take your configuration with you to another machine, simply copy the `settings.json` to the other machine.
 
+# License 
+
+To know more about the [LICENSE](LICENSE). 
+
 # Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
