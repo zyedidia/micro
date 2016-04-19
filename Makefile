@@ -1,3 +1,6 @@
+NAME=micro
+RELEASE:=$(shell git rev-parse --verify --short HEAD)
+
 .PHONY: runtime
 
 build: runtime
@@ -18,3 +21,18 @@ test:
 
 clean:
 	rm -f micro
+
+cross:
+	mkdir bin || true
+	GOOS=windows GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-WIN32.exe ./cmd/micro
+	GOOS=windows GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-WIN64.exe ./cmd/micro
+	GOOS=darwin GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-OSX-x86 ./cmd/micro
+	GOOS=darwin GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-OSX-amd64 ./cmd/micro
+	GOOS=linux GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-linux-amd64 ./cmd/micro
+	GOOS=linux GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-linux-x86 ./cmd/micro
+	GOOS=freebsd GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-freebsd-amd64 ./cmd/micro
+	GOOS=freebsd GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-freebsd-x86 ./cmd/micro
+	GOOS=openbsd GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-openbsd-amd64 ./cmd/micro
+	GOOS=openbsd GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-openbsd-x86 ./cmd/micro
+	GOOS=netbsd GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-netbsd-amd64 ./cmd/micro
+	GOOS=netbsd GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-netbsd-x86	./cmd/micro
