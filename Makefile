@@ -45,6 +45,9 @@ cross:
 	GOOS=linux GOARCH=386 $(GOPATH)/bin/go-bindata -o runtime.go runtime/...
 	mv runtime.go cmd/micro
 	GOOS=linux GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-linux-x86 ./cmd/micro
+	GOOS=linux GOARCH=arm $(GOPATH)/bin/go-bindata -o runtime.go runtime/...
+	mv runtime.go cmd/micro
+	GOOS=linux GOARCH=arm go build -v -o binaries/${NAME}-${RELEASE}-linux-arm ./cmd/micro
 	GOOS=freebsd GOARCH=amd64 $(GOPATH)/bin/go-bindata -o runtime.go runtime/...
 	mv runtime.go cmd/micro
 	GOOS=freebsd GOARCH=amd64 go build -v -o binaries/${NAME}-${RELEASE}-freebsd-amd64 ./cmd/micro
