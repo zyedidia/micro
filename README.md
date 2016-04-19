@@ -45,13 +45,9 @@ brew install --devel micro
 Micro is devel-only for now because there is no released version.
 
 ### Prebuilt binaries
-
-| Nightly Binaries |
-| --- |
-| [Mac OS X](http://zbyedidia.webfactional.com/micro/binaries/micro-osx.tar.gz) |
-| [64 bit Linux](http://zbyedidia.webfactional.com/micro/binaries/micro-linux64.tar.gz) |
-| [32 bit Linux](http://zbyedidia.webfactional.com/micro/binaries/micro-linux32.tar.gz) |
-| [Arm Linux](http://zbyedidia.webfactional.com/micro/binaries/micro-linux-arm.tar.gz) |
+| Version | Mac | Linux 64 | Linux 32 | Linux Arm | Windows 64 | Windows 32 |
+| ------- | --- |---|---|---|---|---|
+| Nightly Binaries | [Mac OS X](http://zbyedidia.webfactional.com/micro/binaries/micro-osx.tar.gz) | [Linux 64](http://zbyedidia.webfactional.com/micro/binaries/micro-linux64.tar.gz) | [Linux 32](http://zbyedidia.webfactional.com/micro/binaries/micro-linux32.tar.gz) | [Linux Arm](http://zbyedidia.webfactional.com/micro/binaries/micro-linux-arm.tar.gz) | [Windows 64](http://zbyedidia.webfactional.com/micro/binaries/micro-win64.tar.gz) | [Windows 32](http://zbyedidia.webfactional.com/micro/binaries/micro-win32.tar.gz)
 
 To run the micro binary just run `./bin/micro` (you may want to place the binary on your path for ease of use).
 
