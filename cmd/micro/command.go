@@ -5,6 +5,8 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
+
+	"github.com/gdamore/tcell"
 )
 
 func HandleShellCommand(input string, view *View) {
@@ -18,10 +20,60 @@ func HandleShellCommand(input string, view *View) {
 		messenger.Error("Error: " + err.Error())
 		return
 	}
+	outstring := string(output)
 
-	// Display last line of output
-	messenger.Message(string(output))
+	// Display last line of output if not empty
+	if outstring != "" {
+		DisplayBlock(outstring)
+		// } else {
+		// 	 messenger.Message("No errors.")
+	}
 
+}
+
+// DisplayBlock displays txt
+// It blocks the main loop
+func DisplayBlock(text string) {
+	topline := 0
+	_, height := screen.Size()
+	screen.HideCursor()
+	totalLines := strings.Split(text, "\n")
+	for {
+		screen.Clear()
+
+		lineEnd := topline + height
+		if lineEnd > len(totalLines) {
+			lineEnd = len(totalLines)
+		}
+		lines := totalLines[topline:lineEnd]
+		for y, line := range lines {
+			for x, ch := range line {
+				st := defStyle
+				screen.SetContent(x, y, ch, nil, st)
+			}
+		}
+
+		screen.Show()
+
+		event := screen.PollEvent()
+		switch e := event.(type) {
+		case *tcell.EventResize:
+			_, height = e.Size()
+		case *tcell.EventKey:
+			switch e.Key() {
+			case tcell.KeyUp:
+				if topline > 0 {
+					topline--
+				}
+			case tcell.KeyDown:
+				if topline < len(totalLines)-height {
+					topline++
+				}
+			case tcell.KeyCtrlQ, tcell.KeyCtrlW, tcell.KeyEscape, tcell.KeyCtrlC:
+				return
+			}
+		}
+	}
 }
 
 // HandleCommand handles input from the user
