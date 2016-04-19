@@ -24,6 +24,7 @@ clean:
 
 cross:
 	echo "This will take a while."
+	date
 	go get -u github.com/jteeuwen/go-bindata/...
 	mkdir bin || true
 	GOOS=windows GOARCH=386 $(GOPATH)/bin/go-bindata -o runtime.go runtime/...
@@ -62,6 +63,8 @@ cross:
 	GOOS=netbsd GOARCH=386 $(GOPATH)/bin/go-bindata -o runtime.go runtime/...
 	mv runtime.go cmd/micro
 	GOOS=netbsd GOARCH=386 go build -v -o binaries/${NAME}-${RELEASE}-netbsd-x86	./cmd/micro
+	date
+	echo "Now run: make pkg"
+pkg:
 	mkdir pkg-bin || true
-	for i in $(ls binaries); do mkdir micro; mv binaries/$i micro/; cp README.md micro/; cp LICENSE micro/;zip -r pkg-bin/$i.zip micro; rm -Rf micro/; done
-	echo "Releases are in ./pkg-bin/ directory."
+	for i in $(shell ls binaries); do echo $$i; mkdir micro-${RELEASE};cp binaries/$$i micro-${RELEASE}; cp README.md micro-${RELEASE}; cp LICENSE micro-${RELEASE}; zip -r pkg-bin/$$i.zip micro-${RELEASE}; rm -Rf micro-${RELEASE}; done;
