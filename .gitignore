@@ -2,4 +2,4 @@ micro
 !cmd/micro
 binaries/
 cmd/micro/micro
-
+pkg-bin/
