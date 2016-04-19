@@ -14,15 +14,27 @@ import (
 func HandleShellCommand(input string, view *View) {
 	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
-
-	// Execute Command
+	if inputCmd == "exit" {
+		messenger.Message("Ctrl+Q to exit")
+		return
+	}
+	if inputCmd == "help" {
+		DisplayHelp()
+		return
+	}
 	cmd := exec.Command(inputCmd, args...)
-	outputBytes := &bytes.Buffer{}
+	var stdout bytes.Buffer
+	var stderr bytes.Buffer
+	cmd.Stdout = &stdout // send output to buffer
+	cmd.Stderr = &stderr // send error to a different buffer
+	// Execute Command
+	err := cmd.Run()
+	if err != nil {
+		messenger.Message(err.Error() + "... " + stderr.String())
+		return
+	}
 
-	cmd.Stdout = outputBytes // send output to buffer
-	cmd.Start()
-	cmd.Wait() // wait for command to finish
-	outstring := outputBytes.String()
+	outstring := stdout.String()
 	totalLines := strings.Split(outstring, "\n")
 
 	if len(totalLines) < 3 {
@@ -31,7 +43,6 @@ func HandleShellCommand(input string, view *View) {
 	}
 
 	if outstring != "" {
-		// Display nonblank output
 		DisplayBlock(outstring)
 	}
 }
