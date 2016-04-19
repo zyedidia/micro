@@ -3,9 +3,10 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/gdamore/tcell"
 	"os"
 	"strconv"
+
+	"github.com/gdamore/tcell"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
