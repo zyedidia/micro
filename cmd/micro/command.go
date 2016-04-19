@@ -15,23 +15,29 @@ func HandleShellCommand(input string, view *View) {
 	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
 
-	// Execute Command
+	if input == "" {
+		return
+	}
 	cmd := exec.Command(inputCmd, args...)
 	outputBytes := &bytes.Buffer{}
-
 	cmd.Stdout = outputBytes // send output to buffer
+	cmd.Stderr = outputBytes // send error to buffer too
 	cmd.Start()
 	cmd.Wait() // wait for command to finish
 	outstring := outputBytes.String()
 	totalLines := strings.Split(outstring, "\n")
 
 	if len(totalLines) < 3 {
-		messenger.Message(outstring)
+		msg := strings.TrimSpace(strings.Join(totalLines, " "))
+		if msg == "" {
+			messenger.Message(input + " had no output.")
+			return
+		}
+		messenger.Message(msg)
 		return
 	}
 
 	if outstring != "" {
-		// Display nonblank output
 		DisplayBlock(outstring)
 	}
 }

@@ -227,7 +227,7 @@ func main() {
 				case tcell.KeyCtrlB:
 					input, canceled := messenger.Prompt("$ ")
 					if !canceled {
-						HandleShellCommand(input, view)
+						go HandleShellCommand(input, view)
 					}
 				case tcell.KeyCtrlG:
 					if !helpOpen {
