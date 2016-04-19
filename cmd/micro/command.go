@@ -117,7 +117,7 @@ func HandleCommand(input string, view *View) {
 	case "set":
 		SetOption(view, args)
 	case "quit":
-		if view.CanClose("Quit anyway? ") {
+		if view.CanClose("Quit anyway? (yes, no, save) ") {
 			screen.Fini()
 			os.Exit(0)
 		}

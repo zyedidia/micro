@@ -192,7 +192,7 @@ func main() {
 				switch e.Key() {
 				case tcell.KeyCtrlQ:
 					// Make sure not to quit if there are unsaved changes
-					if view.CanClose("Quit anyway? ") {
+					if view.CanClose("Quit anyway? (yes, no, save) ") {
 						screen.Fini()
 						os.Exit(0)
 					}

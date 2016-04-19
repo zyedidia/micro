@@ -196,6 +196,9 @@ func (v *View) CanClose(msg string) bool {
 		if !canceled {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
 				return true
+			} else if strings.ToLower(quit) == "save" || strings.ToLower(quit) == "s" {
+				v.Save()
+				return true
 			}
 		}
 	} else {
@@ -276,7 +279,7 @@ func (v *View) SelectAll() {
 // OpenFile opens a new file in the current view
 // It makes sure that the current buffer can be closed first (unsaved changes)
 func (v *View) OpenFile() {
-	if v.CanClose("Continue? ") {
+	if v.CanClose("Continue? (yes, no, save) ") {
 		filename, canceled := messenger.Prompt("File to open: ")
 		if canceled {
 			return
