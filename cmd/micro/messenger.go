@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"github.com/gdamore/tcell"
 	"os"
@@ -68,6 +69,15 @@ func (m *Messenger) Error(msg string) {
 	if _, ok := colorscheme["error-message"]; ok {
 		m.style = colorscheme["error-message"]
 	}
+	m.hasMessage = true
+}
+
+// Print prints a message to the status bar. Use it for "printf" debugging
+func (m *Messenger) Print(msg ...interface{}) {
+	buf := new(bytes.Buffer)
+	fmt.Fprint(buf, msg)
+	m.message = buf.String()
+	m.style = defStyle
 	m.hasMessage = true
 }
 
