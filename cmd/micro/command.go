@@ -15,20 +15,17 @@ func HandleShellCommand(input string, view *View) {
 
 	// Execute Command
 	cmdout := exec.Command(inputCmd, args...)
-	output, err := cmdout.Output()
-	if err != nil {
-		messenger.Error("Error: " + err.Error())
+	output, _ := cmdout.CombinedOutput()
+	outstring := string(output)
+	totalLines := strings.Split(outstring, "\n")
+	if len(totalLines) == 2 {
+		messenger.Message(outstring)
 		return
 	}
-	outstring := string(output)
-
-	// Display last line of output if not empty
 	if outstring != "" {
+		// Display nonblank output
 		DisplayBlock(outstring)
-		// } else {
-		// 	 messenger.Message("No errors.")
 	}
-
 }
 
 // DisplayBlock displays txt
