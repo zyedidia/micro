@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"fmt"
 	"os"
 	"strconv"
@@ -15,8 +16,8 @@ import (
 // The function must be called when the screen is not initialized
 // This will write the message, and wait for the user
 // to press and key to continue
-func TermMessage(msg string) {
-	fmt.Println(msg)
+func TermMessage(msg ...interface{}) {
+	fmt.Println(msg...)
 	fmt.Print("\nPress enter to continue")
 
 	reader := bufio.NewReader(os.Stdin)
@@ -49,8 +50,10 @@ type Messenger struct {
 }
 
 // Message sends a message to the user
-func (m *Messenger) Message(msg string) {
-	m.message = msg
+func (m *Messenger) Message(msg ...interface{}) {
+	buf := new(bytes.Buffer)
+	fmt.Fprint(buf, msg...)
+	m.message = buf.String()
 	m.style = defStyle
 
 	if _, ok := colorscheme["message"]; ok {
@@ -60,8 +63,10 @@ func (m *Messenger) Message(msg string) {
 }
 
 // Error sends an error message to the user
-func (m *Messenger) Error(msg string) {
-	m.message = msg
+func (m *Messenger) Error(msg ...interface{}) {
+	buf := new(bytes.Buffer)
+	fmt.Fprint(buf, msg...)
+	m.message = buf.String()
 	m.style = defStyle.
 		Foreground(tcell.ColorBlack).
 		Background(tcell.ColorMaroon)
