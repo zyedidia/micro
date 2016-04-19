@@ -46,7 +46,7 @@ Micro is devel-only for now because there is no released version.
 
 ### Prebuilt binaries
 
-| Download |
+| Nightly Binaries |
 | --- |
 | [Mac OS X](http://zbyedidia.webfactional.com/micro/binaries/micro-osx.tar.gz) |
 | [64 bit Linux](http://zbyedidia.webfactional.com/micro/binaries/micro-linux64.tar.gz) |

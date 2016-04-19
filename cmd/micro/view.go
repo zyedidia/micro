@@ -489,7 +489,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.topline = 0
 			relocate = false
 		case tcell.KeyEnd:
-			v.topline = len(v.buf.lines) - 1 - v.height
+			if v.height > len(v.buf.lines) {
+				v.topline = 0
+			} else {
+				v.topline = len(v.buf.lines) - v.height
+			}
 			relocate = false
 		case tcell.KeyPgUp:
 			v.PageUp()
