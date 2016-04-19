@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-const helpTxt = `Press Ctrl-q to quit help
+const helpTxt = `Press Ctrl-g to close help
 
 Micro keybindings:
 

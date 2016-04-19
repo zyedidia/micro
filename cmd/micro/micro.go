@@ -38,6 +38,9 @@ var (
 	// Version is the version number.
 	// This should be set by the linker
 	Version = "Unknown"
+
+	// Is the help screen open
+	helpOpen = false
 )
 
 // LoadInput loads the file input for the editor
@@ -130,6 +133,8 @@ func main() {
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
 
+	buf := NewBuffer(string(input), filename)
+
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
 
@@ -182,7 +187,7 @@ func main() {
 	screen.EnableMouse()
 
 	messenger = new(Messenger)
-	view := NewView(NewBuffer(string(input), filename))
+	view := NewView(buf)
 
 	for {
 		// Display everything
@@ -205,9 +210,14 @@ func main() {
 				switch e.Key() {
 				case tcell.KeyCtrlQ:
 					// Make sure not to quit if there are unsaved changes
-					if view.CanClose("Quit anyway? (yes, no, save) ") {
-						screen.Fini()
-						os.Exit(0)
+					if helpOpen {
+						view.buf = buf
+						helpOpen = false
+					} else {
+						if view.CanClose("Quit anyway? (yes, no, save) ") {
+							screen.Fini()
+							os.Exit(0)
+						}
 					}
 				case tcell.KeyCtrlE:
 					input, canceled := messenger.Prompt("> ")
@@ -220,9 +230,15 @@ func main() {
 						HandleShellCommand(input, view)
 					}
 				case tcell.KeyCtrlG:
-					DisplayHelp()
-					// Make sure to resize the view if the user resized the terminal while looking at the help text
-					view.Resize(screen.Size())
+					if !helpOpen {
+						helpBuffer := NewBuffer(helpTxt, "")
+						helpBuffer.name = "Help"
+						helpOpen = true
+						view.buf = helpBuffer
+					} else {
+						view.buf = buf
+						helpOpen = false
+					}
 				}
 			}
 
