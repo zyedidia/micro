@@ -527,9 +527,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol
 		y += v.topline
-		// Position always seems to be off by one
-		x--
-		y--
 
 		button := e.Buttons()
 
