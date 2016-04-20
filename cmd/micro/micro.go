@@ -109,6 +109,57 @@ func InitConfigDir() {
 	}
 }
 
+// InitScreen creates and initializes the tcell screen
+func InitScreen() {
+	// Should we enable true color?
+	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
+
+	// In order to enable true color, we have to set the TERM to `xterm-truecolor` when
+	// initializing tcell, but after that, we can set the TERM back to whatever it was
+	oldTerm := os.Getenv("TERM")
+	if truecolor {
+		os.Setenv("TERM", "xterm-truecolor")
+	}
+
+	// Initilize tcell
+	var err error
+	screen, err = tcell.NewScreen()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	if err = screen.Init(); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+
+	// Now we can put the TERM back to what it was before
+	if truecolor {
+		os.Setenv("TERM", oldTerm)
+	}
+
+	// Default style
+	defStyle = tcell.StyleDefault.
+		Foreground(tcell.ColorDefault).
+		Background(tcell.ColorDefault)
+
+	// There may be another default style defined in the colorscheme
+	if style, ok := colorscheme["default"]; ok {
+		defStyle = style
+	}
+
+	screen.SetStyle(defStyle)
+	screen.EnableMouse()
+}
+
+// Redraw redraws the screen and the given view
+func Redraw(view *View) {
+	screen.Clear()
+	view.Display()
+	messenger.Display()
+	screen.Show()
+}
+
 var flagVersion = flag.Bool("version", false, "Show version number")
 
 func main() {
@@ -135,31 +186,7 @@ func main() {
 
 	buf := NewBuffer(string(input), filename)
 
-	// Should we enable true color?
-	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
-
-	// In order to enable true color, we have to set the TERM to `xterm-truecolor` when
-	// initializing tcell, but after that, we can set the TERM back to whatever it was
-	oldTerm := os.Getenv("TERM")
-	if truecolor {
-		os.Setenv("TERM", "xterm-truecolor")
-	}
-
-	// Initilize tcell
-	screen, err = tcell.NewScreen()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-	if err = screen.Init(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// Now we can put the TERM back to what it was before
-	if truecolor {
-		os.Setenv("TERM", oldTerm)
-	}
+	InitScreen()
 
 	// This is just so if we have an error, we can exit cleanly and not completely
 	// mess up the terminal being worked in
@@ -173,30 +200,12 @@ func main() {
 		}
 	}()
 
-	// Default style
-	defStyle = tcell.StyleDefault.
-		Foreground(tcell.ColorDefault).
-		Background(tcell.ColorDefault)
-
-	// There may be another default style defined in the colorscheme
-	if style, ok := colorscheme["default"]; ok {
-		defStyle = style
-	}
-
-	screen.SetStyle(defStyle)
-	screen.EnableMouse()
-
 	messenger = new(Messenger)
 	view := NewView(buf)
 
 	for {
 		// Display everything
-		screen.Clear()
-
-		view.Display()
-		messenger.Display()
-
-		screen.Show()
+		Redraw(view)
 
 		// Wait for the user's action
 		event := screen.PollEvent()
@@ -227,7 +236,7 @@ func main() {
 				case tcell.KeyCtrlB:
 					input, canceled := messenger.Prompt("$ ")
 					if !canceled {
-						HandleShellCommand(input, view)
+						HandleShellCommand(input, view, true)
 					}
 				case tcell.KeyCtrlG:
 					if !helpOpen {
