@@ -16,8 +16,8 @@ func RunShellCommand(input string) (string, error) {
 
 	cmd := exec.Command(inputCmd, args...)
 	outputBytes := &bytes.Buffer{}
-
-	cmd.Stdout = outputBytes // send output to buffer
+	cmd.Stdout = outputBytes
+	cmd.Stderr = outputBytes
 	cmd.Start()
 	err := cmd.Wait() // wait for command to finish
 	outstring := outputBytes.String()
@@ -37,7 +37,7 @@ func HandleShellCommand(input string, view *View, openTerm bool) {
 				if err == nil {
 					messenger.Message(inputCmd, " exited without error")
 				} else {
-					messenger.Message(inputCmd, " exited with error: ", err)
+					messenger.Message(inputCmd, " exited with error: ", err, ": ", output)
 				}
 			} else {
 				messenger.Message(output)
