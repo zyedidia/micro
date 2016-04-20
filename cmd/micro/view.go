@@ -60,9 +60,6 @@ type View struct {
 	matches SyntaxMatches
 	// The matches from the last frame
 	lastMatches SyntaxMatches
-
-	// This is the range of lines that should have their syntax highlighting updated
-	updateLines [2]int
 }
 
 // NewView returns a new fullscreen view
@@ -75,20 +72,11 @@ func NewView(buf *Buffer) *View {
 func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v := new(View)
 
-	v.buf = buf
-
 	v.widthPercent = w
 	v.heightPercent = h
 	v.Resize(screen.Size())
 
-	v.topline = 0
-	// Put the cursor at the first spot
-	v.cursor = Cursor{
-		x: 0,
-		y: 0,
-		v: v,
-	}
-	v.cursor.ResetSelection()
+	v.OpenBuffer(buf)
 
 	v.eh = NewEventHandler(v)
 
@@ -96,22 +84,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		view: v,
 	}
 
-	// Update the syntax highlighting for the entire buffer at the start
-	v.UpdateLines(v.topline, v.topline+v.height)
-	v.matches = Match(v)
-
-	// Set mouseReleased to true because we assume the mouse is not being pressed when
-	// the editor is opened
-	v.mouseReleased = true
-	v.lastClickTime = time.Time{}
-
 	return v
-}
-
-// UpdateLines sets the values for v.updateLines
-func (v *View) UpdateLines(start, end int) {
-	v.updateLines[0] = start
-	v.updateLines[1] = end + 1
 }
 
 // Resize recalculates the actual width and height of the view from the width and height
@@ -281,6 +254,7 @@ func (v *View) SelectAll() {
 func (v *View) OpenBuffer(buf *Buffer) {
 	v.buf = buf
 	v.topline = 0
+	v.leftCol = 0
 	// Put the cursor at the first spot
 	v.cursor = Cursor{
 		x: 0,
@@ -290,7 +264,6 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.cursor.ResetSelection()
 
 	v.eh = NewEventHandler(v)
-
 	v.matches = Match(v)
 
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
@@ -375,8 +348,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// By default it's true because most events should cause a relocate
 	relocate := true
 
-	// By default we don't update and syntax highlighting
-	v.UpdateLines(-2, 0)
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
@@ -407,10 +378,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 			v.eh.Insert(v.cursor.Loc(), "\n")
 			v.cursor.Right()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 			v.cursor.lastVisualX = v.cursor.GetVisualX()
-			// v.UpdateLines(v.cursor.y-1, v.cursor.y)
 		case tcell.KeySpace:
 			// Insert a space
 			if v.cursor.HasSelection() {
@@ -419,14 +387,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 			v.eh.Insert(v.cursor.Loc(), " ")
 			v.cursor.Right()
-			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyBackspace2, tcell.KeyBackspace:
 			// Delete a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
-				// Rehighlight the entire buffer
-				v.UpdateLines(v.topline, v.topline+v.height)
 			} else if v.cursor.Loc() > 0 {
 				// We have to do something a bit hacky here because we want to
 				// delete the line by first moving left and then deleting backwards
@@ -439,9 +404,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 				loc := v.cursor.Loc()
 				v.eh.Remove(loc-1, loc)
 				v.cursor.x, v.cursor.y = cx, cy
-				// Rehighlight the entire buffer
-				v.UpdateLines(v.topline, v.topline+v.height)
-				// v.UpdateLines(v.cursor.y, v.cursor.y+1)
 			}
 			v.cursor.lastVisualX = v.cursor.GetVisualX()
 		case tcell.KeyTab:
@@ -459,7 +421,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.eh.Insert(v.cursor.Loc(), "\t")
 				v.cursor.Right()
 			}
-			v.UpdateLines(v.cursor.y, v.cursor.y)
 		case tcell.KeyCtrlS:
 			v.Save()
 		case tcell.KeyCtrlF:
@@ -487,30 +448,18 @@ func (v *View) HandleEvent(event tcell.Event) {
 			Search(lastSearch, v, false)
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlY:
 			v.eh.Redo()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlC:
 			v.Copy()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlX:
 			v.Cut()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlV:
 			v.Paste()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyCtrlA:
 			v.SelectAll()
 		case tcell.KeyCtrlO:
 			v.OpenFile()
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.KeyHome:
 			v.topline = 0
 			relocate = false
@@ -538,10 +487,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
-				// Rehighlight the entire buffer
-				v.UpdateLines(v.topline, v.topline+v.height)
-			} else {
-				v.UpdateLines(v.cursor.y, v.cursor.y)
 			}
 			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
 			v.cursor.Right()
@@ -623,15 +568,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.ScrollUp(2)
 			// We don't want to relocate if the user is scrolling
 			relocate = false
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		case tcell.WheelDown:
 			// Scroll down two lines
 			v.ScrollDown(2)
 			// We don't want to relocate if the user is scrolling
 			relocate = false
-			// Rehighlight the entire buffer
-			v.UpdateLines(v.topline, v.topline+v.height)
 		}
 	}
 
@@ -645,21 +586,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
-	// matches := make(SyntaxMatches, len(v.buf.lines))
-	//
-	// viewStart := v.topline
-	// viewEnd := v.topline + v.height
-	// if viewEnd > len(v.buf.lines) {
-	// 	viewEnd = len(v.buf.lines)
-	// }
-	//
-	// lines := v.buf.lines[viewStart:viewEnd]
-	// for i, line := range lines {
-	// 	matches[i] = make([]tcell.Style, len(line))
-	// }
-
 	// The character number of the character in the top left of the screen
-
 	charNum := ToCharPos(0, v.topline, v.buf)
 
 	// Convert the length of buffer to a string, and get the length of the string
@@ -708,17 +635,10 @@ func (v *View) DisplayView() {
 			}
 			ch := runes[colN]
 			var lineStyle tcell.Style
-			// Does the current character need to be syntax highlighted?
-
-			// if lineN >= v.updateLines[0] && lineN < v.updateLines[1] {
 			if settings.Syntax {
+				// Syntax highlighting is enabled
 				highlightStyle = v.matches[lineN][colN]
 			}
-			// } else if lineN < len(v.lastMatches) && colN < len(v.lastMatches[lineN]) {
-			// highlightStyle = v.lastMatches[lineN][colN]
-			// } else {
-			// highlightStyle = defStyle
-			// }
 
 			if v.cursor.HasSelection() &&
 				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
@@ -732,7 +652,6 @@ func (v *View) DisplayView() {
 			} else {
 				lineStyle = highlightStyle
 			}
-			// matches[lineN][colN] = highlightStyle
 
 			if ch == '\t' {
 				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)

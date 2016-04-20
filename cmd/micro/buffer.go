@@ -19,8 +19,9 @@ type Buffer struct {
 	name string
 
 	// This is the text stored every time the buffer is saved to check if the buffer is modified
-	savedText     string
-	netInsertions int
+	savedText           string
+	netInsertions       int
+	dirtySinceLastCheck bool
 
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
@@ -86,14 +87,20 @@ func (b *Buffer) SaveAs(filename string) error {
 
 // IsDirty returns whether or not the buffer has been modified compared to the one on disk
 func (b *Buffer) IsDirty() bool {
+	if !b.dirtySinceLastCheck {
+		return false
+	}
 	if b.netInsertions == 0 {
-		return b.savedText != b.text
+		isDirty := b.savedText != b.text
+		b.dirtySinceLastCheck = isDirty
+		return isDirty
 	}
 	return true
 }
 
 // Insert a string into the rope
 func (b *Buffer) Insert(idx int, value string) {
+	b.dirtySinceLastCheck = true
 	b.netInsertions += len(value)
 	b.r = b.r.Insert(idx, value)
 	b.Update()
@@ -102,6 +109,7 @@ func (b *Buffer) Insert(idx int, value string) {
 // Remove a slice of the rope from start to end (exclusive)
 // Returns the string that was removed
 func (b *Buffer) Remove(start, end int) string {
+	b.dirtySinceLastCheck = true
 	b.netInsertions -= end - start
 	if start < 0 {
 		start = 0

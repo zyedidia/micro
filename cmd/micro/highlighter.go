@@ -377,9 +377,8 @@ func GetRules(buf *Buffer) ([]SyntaxRule, string) {
 // so map[3] represents the style of the third character
 type SyntaxMatches [][]tcell.Style
 
-// Match takes a buffer and returns the syntax matches a map specifying how it should be syntax highlighted
-// We need to check the start-end regexes for the entire buffer every time Match is called, but for the
-// non start-end rules, we only have to update the updateLines provided by the view
+// Match takes a buffer and returns the syntax matches: a 2d array specifying how it should be syntax highlighted
+// We match the rules from up `synLinesUp` lines and down `synLinesDown` lines
 func Match(v *View) SyntaxMatches {
 	buf := v.buf
 	rules := v.buf.rules
@@ -390,17 +389,7 @@ func Match(v *View) SyntaxMatches {
 		viewEnd = len(buf.lines)
 	}
 
-	// updateStart := v.updateLines[0]
-	// updateEnd := v.updateLines[1]
-	//
-	// if updateEnd > len(buf.lines) {
-	// 	updateEnd = len(buf.lines)
-	// }
-	// if updateStart < 0 {
-	// 	updateStart = 0
-	// }
 	lines := buf.lines[viewStart:viewEnd]
-	// updateLines := buf.lines[updateStart:updateEnd]
 	matches := make(SyntaxMatches, len(lines))
 
 	for i, line := range lines {
@@ -448,7 +437,6 @@ func Match(v *View) SyntaxMatches {
 				if indicies := rule.regex.FindAllStringIndex(line, -1); indicies != nil {
 					for _, value := range indicies {
 						for i := value[0]; i < value[1]; i++ {
-							// matches[lineN+updateStart][i] = rule.style
 							matches[lineN][i] = rule.style
 						}
 					}
