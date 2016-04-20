@@ -176,6 +176,7 @@ func main() {
 	}
 
 	encoding.Register()
+	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
 	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
