@@ -4,92 +4,70 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"os/signal"
 	"regexp"
 	"strings"
-
-	"github.com/gdamore/tcell"
 )
 
-// HandleShellCommand runs the shell command and outputs to DisplayBlock
-func HandleShellCommand(input string, view *View) {
+// RunShellCommand executes a shell command and returns the output/error
+func RunShellCommand(input string) (string, error) {
 	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
 
-	// Execute Command
 	cmd := exec.Command(inputCmd, args...)
 	outputBytes := &bytes.Buffer{}
-
-	cmd.Stdout = outputBytes // send output to buffer
+	cmd.Stdout = outputBytes
+	cmd.Stderr = outputBytes
 	cmd.Start()
-	cmd.Wait() // wait for command to finish
+	err := cmd.Wait() // wait for command to finish
 	outstring := outputBytes.String()
-	totalLines := strings.Split(outstring, "\n")
-
-	if len(totalLines) < 3 {
-		messenger.Message(outstring)
-		return
-	}
-
-	if outstring != "" {
-		// Display nonblank output
-		DisplayBlock(outstring)
-	}
+	return outstring, err
 }
 
-// DisplayBlock displays txt
-// It blocks the main loop
-func DisplayBlock(text string) {
-	topline := 0
-	_, height := screen.Size()
-	screen.HideCursor()
-	totalLines := strings.Split(text, "\n")
-	for {
-		screen.Clear()
+// HandleShellCommand runs the shell command and outputs to DisplayBlock
+func HandleShellCommand(input string, view *View, openTerm bool) {
+	inputCmd := strings.Split(input, " ")[0]
+	if !openTerm {
+		messenger.Message("Running...")
+		go func() {
+			output, err := RunShellCommand(input)
+			totalLines := strings.Split(output, "\n")
 
-		lineEnd := topline + height
-		if lineEnd > len(totalLines) {
-			lineEnd = len(totalLines)
-		}
-		lines := totalLines[topline:lineEnd]
-		for y, line := range lines {
-			for x, ch := range line {
-				st := defStyle
-				screen.SetContent(x, y, ch, nil, st)
-			}
-		}
-
-		screen.Show()
-
-		event := screen.PollEvent()
-		switch e := event.(type) {
-		case *tcell.EventResize:
-			_, height = e.Size()
-		case *tcell.EventKey:
-			switch e.Key() {
-			case tcell.KeyPgUp:
-				if topline > height {
-					topline = topline - height
+			if len(totalLines) < 3 {
+				if err == nil {
+					messenger.Message(inputCmd, " exited without error")
 				} else {
-					topline = 0
+					messenger.Message(inputCmd, " exited with error: ", err, ": ", output)
 				}
-			case tcell.KeyPgDn:
-				if topline < len(totalLines)-height {
-					topline = topline + height
-				}
-			case tcell.KeyUp:
-				if topline > 0 {
-					topline--
-				}
-			case tcell.KeyDown:
-				if topline < len(totalLines)-height {
-					topline++
-				}
-			case tcell.KeyCtrlQ, tcell.KeyCtrlW, tcell.KeyEscape, tcell.KeyCtrlC:
-				return
-			default:
-				return
+			} else {
+				messenger.Message(output)
 			}
-		}
+			Redraw(view)
+		}()
+	} else {
+		screen.Fini()
+
+		args := strings.Split(input, " ")[1:]
+
+		cmd := exec.Command(inputCmd, args...)
+		cmd.Stdin = os.Stdin
+		cmd.Stdout = os.Stdout
+		cmd.Stderr = os.Stderr
+
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		go func() {
+			for range c {
+				cmd.Process.Kill()
+			}
+		}()
+
+		cmd.Start()
+		cmd.Wait()
+
+		TermMessage("")
+
+		InitScreen()
 	}
 }
 
@@ -98,7 +76,7 @@ func HandleCommand(input string, view *View) {
 	inputCmd := strings.Split(input, " ")[0]
 	args := strings.Split(input, " ")[1:]
 
-	commands := []string{"set", "quit", "save", "replace"}
+	commands := []string{"set", "quit", "save", "replace", "run"}
 
 	i := 0
 	cmd := inputCmd
@@ -116,6 +94,8 @@ func HandleCommand(input string, view *View) {
 	switch inputCmd {
 	case "set":
 		SetOption(view, args)
+	case "run":
+		HandleShellCommand(strings.Join(args, " "), view, false)
 	case "quit":
 		if view.CanClose("Quit anyway? (yes, no, save) ") {
 			screen.Fini()

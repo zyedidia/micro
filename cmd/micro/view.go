@@ -276,6 +276,29 @@ func (v *View) SelectAll() {
 	v.cursor.y = 0
 }
 
+// OpenBuffer opens a new buffer in this view.
+// This resets the topline, event handler and cursor.
+func (v *View) OpenBuffer(buf *Buffer) {
+	v.buf = buf
+	v.topline = 0
+	// Put the cursor at the first spot
+	v.cursor = Cursor{
+		x: 0,
+		y: 0,
+		v: v,
+	}
+	v.cursor.ResetSelection()
+
+	v.eh = NewEventHandler(v)
+
+	v.matches = Match(v)
+
+	// Set mouseReleased to true because we assume the mouse is not being pressed when
+	// the editor is opened
+	v.mouseReleased = true
+	v.lastClickTime = time.Time{}
+}
+
 // OpenFile opens a new file in the current view
 // It makes sure that the current buffer can be closed first (unsaved changes)
 func (v *View) OpenFile() {
