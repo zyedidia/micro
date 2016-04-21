@@ -286,7 +286,8 @@ func (v *View) OpenFile() {
 			messenger.Error(err.Error())
 			return
 		}
-		v.buf = NewBuffer(string(file), filename)
+		buf := NewBuffer(string(file), filename)
+		v.OpenBuffer(buf)
 	}
 }
 

@@ -65,6 +65,7 @@ type Cursor struct {
 // It's just a simple wrapper of FromCharPos
 func (c *Cursor) SetLoc(loc int) {
 	c.x, c.y = FromCharPos(loc, c.v.buf)
+	c.lastVisualX = c.GetVisualX()
 }
 
 // Loc gets the cursor location in terms of character number instead
