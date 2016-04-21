@@ -110,7 +110,7 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.curSelection[0] = c.Loc()
 	c.End()
-	c.curSelection[1] = c.Loc()
+	c.curSelection[1] = c.Loc() + 1
 
 	c.origSelection = c.curSelection
 }
