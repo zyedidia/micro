@@ -408,12 +408,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 				// but the undo redo would place the cursor in the wrong place
 				// So instead we move left, save the position, move back, delete
 				// and restore the position
-				v.cursor.Left()
-				cx, cy := v.cursor.x, v.cursor.y
-				v.cursor.Right()
-				loc := v.cursor.Loc()
-				v.eh.Remove(loc-1, loc)
-				v.cursor.x, v.cursor.y = cx, cy
+
+				// If the user is using spaces instead of tabs and they are deleting
+				// whitespace at the start of the line, we should delete as if its a
+				// tab (tabSize number of spaces)
+				lineStart := v.buf.lines[v.cursor.y][:v.cursor.x]
+				if settings.TabsToSpaces && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%settings.TabSize == 0 {
+					loc := v.cursor.Loc()
+					v.cursor.SetLoc(loc - settings.TabSize)
+					cx, cy := v.cursor.x, v.cursor.y
+					v.cursor.SetLoc(loc)
+					v.eh.Remove(loc-settings.TabSize, loc)
+					v.cursor.x, v.cursor.y = cx, cy
+				} else {
+					v.cursor.Left()
+					cx, cy := v.cursor.x, v.cursor.y
+					v.cursor.Right()
+					loc := v.cursor.Loc()
+					v.eh.Remove(loc-1, loc)
+					v.cursor.x, v.cursor.y = cx, cy
+				}
 			}
 			v.cursor.lastVisualX = v.cursor.GetVisualX()
 		case tcell.KeyTab:

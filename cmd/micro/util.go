@@ -88,3 +88,14 @@ func GetLeadingWhitespace(str string) string {
 	}
 	return ws
 }
+
+// IsSpaces checks if a given string is only spaces
+func IsSpaces(str string) bool {
+	for _, c := range str {
+		if c != ' ' {
+			return false
+		}
+	}
+
+	return true
+}
