@@ -377,8 +377,17 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 			}
+
 			v.eh.Insert(v.cursor.Loc(), "\n")
+			ws := GetLeadingWhitespace(v.buf.lines[v.cursor.y])
 			v.cursor.Right()
+
+			if settings.AutoIndent {
+				v.eh.Insert(v.cursor.Loc(), ws)
+				for i := 0; i < len(ws); i++ {
+					v.cursor.Right()
+				}
+			}
 			v.cursor.lastVisualX = v.cursor.GetVisualX()
 		case tcell.KeySpace:
 			// Insert a space

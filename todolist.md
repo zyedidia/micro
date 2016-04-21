@@ -14,13 +14,13 @@
 
 - [ ] Persistent undo/redo (saved between open and closing micro)
 
-- [ ] Auto indent
-
 - [ ] More options
     - [ ] Tabs to spaces
     - [ ] Wrap lines
 
 ### Done
+
+- [x] Auto indent
 
 - [x] Line numbers
 

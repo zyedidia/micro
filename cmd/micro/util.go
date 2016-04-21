@@ -75,3 +75,16 @@ func Contains(list []string, a string) bool {
 func Insert(str string, pos int, value string) string {
 	return string([]rune(str)[:pos]) + value + string([]rune(str)[pos:])
 }
+
+// GetLeadingWhitespace returns the leading whitespace of the given string
+func GetLeadingWhitespace(str string) string {
+	ws := ""
+	for _, c := range str {
+		if c == ' ' || c == '\t' {
+			ws += string(c)
+		} else {
+			break
+		}
+	}
+	return ws
+}
