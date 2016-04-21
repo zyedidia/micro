@@ -2,8 +2,10 @@
 
 VERSION = "$(shell git rev-parse --short HEAD)"
 
-build: runtime tcell
+deps:
 	go get -d ./cmd/micro
+
+build: deps runtime tcell
 	go build -ldflags "-X main.Version=$(VERSION)" -o micro ./cmd/micro
 
 install: build
