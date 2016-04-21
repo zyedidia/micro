@@ -1,9 +1,8 @@
 # Micro
 
-[![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 [![Go Report Card](http://goreportcard.com/badge/zyedidia/micro)](http://goreportcard.com/report/zyedidia/micro)
+[![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 
 > Micro is very much a work in progress
@@ -25,6 +24,7 @@ Here is a picture of micro editing its source code.
 * Colorscheme support
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
 * Search and replace
+* Sane defaults
 * Undo and redo
 * Unicode support
 * Copy and paste with the system clipboard
