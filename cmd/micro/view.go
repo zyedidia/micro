@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/atotto/clipboard"
-	"github.com/gdamore/tcell"
-	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/atotto/clipboard"
+	"github.com/gdamore/tcell"
+	"github.com/mitchellh/go-homedir"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -509,6 +510,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.KeyCtrlD:
 			v.HalfPageDown()
 			relocate = false
+		case tcell.KeyCtrlR:
+			if settings.Ruler == false {
+				settings.Ruler = true
+			} else {
+				settings.Ruler = false
+			}
 		case tcell.KeyRune:
 			// Insert a character
 			if v.cursor.HasSelection() {
@@ -620,8 +627,11 @@ func (v *View) DisplayView() {
 	// We are going to have to offset by that amount
 	maxLineLength := len(strconv.Itoa(len(v.buf.lines)))
 	// + 1 for the little space after the line number
-	v.lineNumOffset = maxLineLength + 1
-
+	if settings.Ruler == true {
+		v.lineNumOffset = maxLineLength + 1
+	} else {
+		v.lineNumOffset = 0
+	}
 	var highlightStyle tcell.Style
 
 	for lineN := 0; lineN < v.height; lineN++ {
@@ -639,20 +649,25 @@ func (v *View) DisplayView() {
 			lineNumStyle = style
 		}
 		// Write the spaces before the line number if necessary
-		lineNum := strconv.Itoa(lineN + v.topline + 1)
-		for i := 0; i < maxLineLength-len(lineNum); i++ {
-			screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
-			x++
-		}
-		// Write the actual line number
-		for _, ch := range lineNum {
-			screen.SetContent(x, lineN, ch, nil, lineNumStyle)
-			x++
-		}
-		// Write the extra space
-		screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
-		x++
+		var lineNum string
+		if settings.Ruler == true {
+			lineNum = strconv.Itoa(lineN + v.topline + 1)
+			for i := 0; i < maxLineLength-len(lineNum); i++ {
+				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
+				x++
+			}
+			// Write the actual line number
+			for _, ch := range lineNum {
+				screen.SetContent(x, lineN, ch, nil, lineNumStyle)
+				x++
+			}
 
+			if settings.Ruler == true {
+				// Write the extra space
+				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
+				x++
+			}
+		}
 		// Write the line
 		tabchars := 0
 		runes := []rune(line)
