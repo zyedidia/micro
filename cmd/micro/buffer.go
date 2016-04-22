@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/gob"
 	"github.com/vinzmay/go-rope"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -50,7 +52,20 @@ func NewBuffer(txt, path string) *Buffer {
 	b.name = path
 	b.savedText = txt
 
-	b.eh = NewEventHandler(b)
+	file, err := os.Open(configDir + "/undo/" + path)
+	if err == nil {
+		var eh EventHandler
+		decoder := gob.NewDecoder(file)
+		err = decoder.Decode(&eh)
+		if err != nil {
+			TermMessage(err.Error())
+		}
+		b.eh = &eh
+		b.eh.buf = b
+	} else {
+		b.eh = NewEventHandler(b)
+	}
+	file.Close()
 
 	b.Update()
 	b.UpdateRules()
@@ -90,6 +105,16 @@ func (b *Buffer) SaveAs(filename string) error {
 	if err == nil {
 		b.savedText = b.text
 		b.netInsertions = 0
+
+		file, err := os.Create(configDir + "/undo/" + b.name)
+		if err == nil {
+			enc := gob.NewEncoder(file)
+			err := enc.Encode(b.eh)
+			if err != nil {
+				messenger.Error("Error:", err.Error())
+			}
+		}
+		file.Close()
 	}
 	return err
 }

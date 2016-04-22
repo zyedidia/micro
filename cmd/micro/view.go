@@ -75,7 +75,6 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v.Resize(screen.Size())
 
 	v.OpenBuffer(buf)
-	buf.setCursor(v.cursor)
 
 	v.sline = Statusline{
 		view: v,
@@ -239,11 +238,11 @@ func (v *View) Paste() {
 
 // SelectAll selects the entire buffer
 func (v *View) SelectAll() {
-	v.cursor.curSelection[1] = 0
-	v.cursor.curSelection[0] = v.buf.Len()
+	v.cursor.CurSelection[1] = 0
+	v.cursor.CurSelection[0] = v.buf.Len()
 	// Put the cursor at the beginning
-	v.cursor.x = 0
-	v.cursor.y = 0
+	v.cursor.X = 0
+	v.cursor.Y = 0
 }
 
 // OpenBuffer opens a new buffer in this view.
@@ -254,8 +253,8 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.leftCol = 0
 	// Put the cursor at the first spot
 	v.cursor = &Cursor{
-		x: 0,
-		y: 0,
+		X: 0,
+		Y: 0,
 		v: v,
 	}
 	v.cursor.ResetSelection()
@@ -294,7 +293,7 @@ func (v *View) OpenFile() {
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	ret := false
-	cy := v.cursor.y
+	cy := v.cursor.Y
 	if cy < v.topline {
 		v.topline = cy
 		ret = true
@@ -337,9 +336,9 @@ func (v *View) MoveToMouseClick(x, y int) {
 	if x > Count(v.buf.lines[y]) {
 		x = Count(v.buf.lines[y])
 	}
-	v.cursor.x = x
-	v.cursor.y = y
-	v.cursor.lastVisualX = v.cursor.GetVisualX()
+	v.cursor.X = x
+	v.cursor.Y = y
+	v.cursor.LastVisualX = v.cursor.GetVisualX()
 }
 
 // HandleEvent handles an event passed by the main loop
@@ -378,7 +377,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 
 			v.buf.eh.Insert(v.cursor.Loc(), "\n")
-			ws := GetLeadingWhitespace(v.buf.lines[v.cursor.y])
+			ws := GetLeadingWhitespace(v.buf.lines[v.cursor.Y])
 			v.cursor.Right()
 
 			if settings.AutoIndent {
@@ -387,7 +386,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.cursor.Right()
 				}
 			}
-			v.cursor.lastVisualX = v.cursor.GetVisualX()
+			v.cursor.LastVisualX = v.cursor.GetVisualX()
 		case tcell.KeySpace:
 			// Insert a space
 			if v.cursor.HasSelection() {
@@ -411,24 +410,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 				// If the user is using spaces instead of tabs and they are deleting
 				// whitespace at the start of the line, we should delete as if its a
 				// tab (tabSize number of spaces)
-				lineStart := v.buf.lines[v.cursor.y][:v.cursor.x]
+				lineStart := v.buf.lines[v.cursor.Y][:v.cursor.X]
 				if settings.TabsToSpaces && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%settings.TabSize == 0 {
 					loc := v.cursor.Loc()
 					v.cursor.SetLoc(loc - settings.TabSize)
-					cx, cy := v.cursor.x, v.cursor.y
+					cx, cy := v.cursor.X, v.cursor.Y
 					v.cursor.SetLoc(loc)
 					v.buf.eh.Remove(loc-settings.TabSize, loc)
-					v.cursor.x, v.cursor.y = cx, cy
+					v.cursor.X, v.cursor.Y = cx, cy
 				} else {
 					v.cursor.Left()
-					cx, cy := v.cursor.x, v.cursor.y
+					cx, cy := v.cursor.X, v.cursor.Y
 					v.cursor.Right()
 					loc := v.cursor.Loc()
 					v.buf.eh.Remove(loc-1, loc)
-					v.cursor.x, v.cursor.y = cx, cy
+					v.cursor.X, v.cursor.Y = cx, cy
 				}
 			}
-			v.cursor.lastVisualX = v.cursor.GetVisualX()
+			v.cursor.LastVisualX = v.cursor.GetVisualX()
 		case tcell.KeyTab:
 			// Insert a tab
 			if v.cursor.HasSelection() {
@@ -448,24 +447,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Save()
 		case tcell.KeyCtrlF:
 			if v.cursor.HasSelection() {
-				searchStart = v.cursor.curSelection[1]
+				searchStart = v.cursor.CurSelection[1]
 			} else {
-				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+				searchStart = ToCharPos(v.cursor.X, v.cursor.Y, v.buf)
 			}
 			BeginSearch()
 		case tcell.KeyCtrlN:
 			if v.cursor.HasSelection() {
-				searchStart = v.cursor.curSelection[1]
+				searchStart = v.cursor.CurSelection[1]
 			} else {
-				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+				searchStart = ToCharPos(v.cursor.X, v.cursor.Y, v.buf)
 			}
 			messenger.Message("Find: " + lastSearch)
 			Search(lastSearch, v, true)
 		case tcell.KeyCtrlP:
 			if v.cursor.HasSelection() {
-				searchStart = v.cursor.curSelection[0]
+				searchStart = v.cursor.CurSelection[0]
 			} else {
-				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+				searchStart = ToCharPos(v.cursor.X, v.cursor.Y, v.buf)
 			}
 			messenger.Message("Find: " + lastSearch)
 			Search(lastSearch, v, false)
@@ -524,12 +523,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 		switch button {
 		case tcell.Button1:
 			// Left click
-			origX, origY := v.cursor.x, v.cursor.y
+			origX, origY := v.cursor.X, v.cursor.Y
 			v.MoveToMouseClick(x, y)
 
 			if v.mouseReleased {
 				if (time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold) &&
-					(origX == v.cursor.x && origY == v.cursor.y) {
+					(origX == v.cursor.X && origY == v.cursor.Y) {
 					if v.doubleClick {
 						// Triple click
 						v.lastClickTime = time.Now()
@@ -553,8 +552,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.lastClickTime = time.Now()
 
 					loc := v.cursor.Loc()
-					v.cursor.curSelection[0] = loc
-					v.cursor.curSelection[1] = loc
+					v.cursor.CurSelection[0] = loc
+					v.cursor.CurSelection[1] = loc
 				}
 			} else {
 				if v.tripleClick {
@@ -562,7 +561,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.cursor.AddWordToSelection()
 				} else {
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.cursor.CurSelection[1] = v.cursor.Loc()
 				}
 			}
 			v.mouseReleased = false
@@ -579,7 +578,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.cursor.CurSelection[1] = v.cursor.Loc()
 				}
 				v.mouseReleased = true
 			}
@@ -664,8 +663,8 @@ func (v *View) DisplayView() {
 			}
 
 			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+				(charNum >= v.cursor.CurSelection[0] && charNum < v.cursor.CurSelection[1] ||
+					charNum < v.cursor.CurSelection[0] && charNum >= v.cursor.CurSelection[1]) {
 
 				lineStyle = defStyle.Reverse(true)
 
@@ -698,8 +697,8 @@ func (v *View) DisplayView() {
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
 		if v.cursor.HasSelection() &&
-			(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-				charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+			(charNum >= v.cursor.CurSelection[0] && charNum < v.cursor.CurSelection[1] ||
+				charNum < v.cursor.CurSelection[0] && charNum >= v.cursor.CurSelection[1]) {
 
 			selectStyle := defStyle.Reverse(true)
 
