@@ -12,7 +12,7 @@ import (
 var settings Settings
 
 // All the possible settings
-var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax", "tabsToSpaces"}
+var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax", "tabsToSpaces", "ruler"}
 
 // The Settings struct contains the settings for micro
 type Settings struct {
