@@ -42,29 +42,30 @@ func UndoTextEvent(t *TextEvent) {
 
 // EventHandler executes text manipulations and allows undoing and redoing
 type EventHandler struct {
-	v    *View
-	undo *Stack
-	redo *Stack
+	cursor *Cursor
+	buf    *Buffer
+	undo   *Stack
+	redo   *Stack
 }
 
 // NewEventHandler returns a new EventHandler
-func NewEventHandler(v *View) *EventHandler {
+func NewEventHandler(buf *Buffer) *EventHandler {
 	eh := new(EventHandler)
 	eh.undo = new(Stack)
 	eh.redo = new(Stack)
-	eh.v = v
+	eh.buf = buf
 	return eh
 }
 
 // Insert creates an insert text event and executes it
 func (eh *EventHandler) Insert(start int, text string) {
 	e := &TextEvent{
-		c:         eh.v.cursor,
+		c:         *eh.cursor,
 		eventType: TextEventInsert,
 		text:      text,
 		start:     start,
 		end:       start + Count(text),
-		buf:       eh.v.buf,
+		buf:       eh.buf,
 		time:      time.Now(),
 	}
 	eh.Execute(e)
@@ -73,11 +74,11 @@ func (eh *EventHandler) Insert(start int, text string) {
 // Remove creates a remove text event and executes it
 func (eh *EventHandler) Remove(start, end int) {
 	e := &TextEvent{
-		c:         eh.v.cursor,
+		c:         *eh.cursor,
 		eventType: TextEventRemove,
 		start:     start,
 		end:       end,
-		buf:       eh.v.buf,
+		buf:       eh.buf,
 		time:      time.Now(),
 	}
 	eh.Execute(e)
@@ -142,8 +143,13 @@ func (eh *EventHandler) UndoOneEvent() {
 
 	// Set the cursor in the right place
 	teCursor := te.c
-	te.c = eh.v.cursor
-	eh.v.cursor = teCursor
+	te.c = *eh.cursor
+
+	eh.cursor.x = teCursor.x
+	eh.cursor.y = teCursor.y
+	eh.cursor.lastVisualX = teCursor.lastVisualX
+	eh.cursor.curSelection = teCursor.curSelection
+	eh.cursor.origSelection = teCursor.origSelection
 
 	// Push it to the redo stack
 	eh.redo.Push(te)
@@ -189,8 +195,13 @@ func (eh *EventHandler) RedoOneEvent() {
 	UndoTextEvent(te)
 
 	teCursor := te.c
-	te.c = eh.v.cursor
-	eh.v.cursor = teCursor
+	te.c = *eh.cursor
+
+	eh.cursor.x = teCursor.x
+	eh.cursor.y = teCursor.y
+	eh.cursor.lastVisualX = teCursor.lastVisualX
+	eh.cursor.curSelection = teCursor.curSelection
+	eh.cursor.origSelection = teCursor.origSelection
 
 	eh.undo.Push(te)
 }

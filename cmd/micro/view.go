@@ -14,7 +14,7 @@ import (
 // It has a stores information about the cursor, and the viewport
 // that the user sees the buffer from.
 type View struct {
-	cursor Cursor
+	cursor *Cursor
 
 	// The topmost line, used for vertical scrolling
 	topline int
@@ -31,9 +31,6 @@ type View struct {
 
 	// How much to offset because of line numbers
 	lineNumOffset int
-
-	// The eventhandler for undo/redo
-	eh *EventHandler
 
 	// The buffer
 	buf *Buffer
@@ -78,8 +75,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v.Resize(screen.Size())
 
 	v.OpenBuffer(buf)
-
-	v.eh = NewEventHandler(v)
+	buf.setCursor(v.cursor)
 
 	v.sline = Statusline{
 		view: v,
@@ -234,7 +230,7 @@ func (v *View) Paste() {
 			v.cursor.ResetSelection()
 		}
 		clip, _ := clipboard.ReadAll()
-		v.eh.Insert(v.cursor.Loc(), clip)
+		v.buf.eh.Insert(v.cursor.Loc(), clip)
 		v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
 	} else {
 		messenger.Error("Clipboard is not supported on your system")
@@ -257,14 +253,14 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.topline = 0
 	v.leftCol = 0
 	// Put the cursor at the first spot
-	v.cursor = Cursor{
+	v.cursor = &Cursor{
 		x: 0,
 		y: 0,
 		v: v,
 	}
 	v.cursor.ResetSelection()
+	v.buf.setCursor(v.cursor)
 
-	v.eh = NewEventHandler(v)
 	v.matches = Match(v)
 
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
@@ -381,12 +377,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.ResetSelection()
 			}
 
-			v.eh.Insert(v.cursor.Loc(), "\n")
+			v.buf.eh.Insert(v.cursor.Loc(), "\n")
 			ws := GetLeadingWhitespace(v.buf.lines[v.cursor.y])
 			v.cursor.Right()
 
 			if settings.AutoIndent {
-				v.eh.Insert(v.cursor.Loc(), ws)
+				v.buf.eh.Insert(v.cursor.Loc(), ws)
 				for i := 0; i < len(ws); i++ {
 					v.cursor.Right()
 				}
@@ -398,7 +394,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 			}
-			v.eh.Insert(v.cursor.Loc(), " ")
+			v.buf.eh.Insert(v.cursor.Loc(), " ")
 			v.cursor.Right()
 		case tcell.KeyBackspace2, tcell.KeyBackspace:
 			// Delete a character
@@ -421,14 +417,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.cursor.SetLoc(loc - settings.TabSize)
 					cx, cy := v.cursor.x, v.cursor.y
 					v.cursor.SetLoc(loc)
-					v.eh.Remove(loc-settings.TabSize, loc)
+					v.buf.eh.Remove(loc-settings.TabSize, loc)
 					v.cursor.x, v.cursor.y = cx, cy
 				} else {
 					v.cursor.Left()
 					cx, cy := v.cursor.x, v.cursor.y
 					v.cursor.Right()
 					loc := v.cursor.Loc()
-					v.eh.Remove(loc-1, loc)
+					v.buf.eh.Remove(loc-1, loc)
 					v.cursor.x, v.cursor.y = cx, cy
 				}
 			}
@@ -440,12 +436,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.ResetSelection()
 			}
 			if settings.TabsToSpaces {
-				v.eh.Insert(v.cursor.Loc(), Spaces(settings.TabSize))
+				v.buf.eh.Insert(v.cursor.Loc(), Spaces(settings.TabSize))
 				for i := 0; i < settings.TabSize; i++ {
 					v.cursor.Right()
 				}
 			} else {
-				v.eh.Insert(v.cursor.Loc(), "\t")
+				v.buf.eh.Insert(v.cursor.Loc(), "\t")
 				v.cursor.Right()
 			}
 		case tcell.KeyCtrlS:
@@ -474,9 +470,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 			messenger.Message("Find: " + lastSearch)
 			Search(lastSearch, v, false)
 		case tcell.KeyCtrlZ:
-			v.eh.Undo()
+			v.buf.eh.Undo()
 		case tcell.KeyCtrlY:
-			v.eh.Redo()
+			v.buf.eh.Redo()
 		case tcell.KeyCtrlC:
 			v.Copy()
 		case tcell.KeyCtrlX:
@@ -515,7 +511,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.cursor.DeleteSelection()
 				v.cursor.ResetSelection()
 			}
-			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
+			v.buf.eh.Insert(v.cursor.Loc(), string(e.Rune()))
 			v.cursor.Right()
 		}
 	case *tcell.EventMouse:

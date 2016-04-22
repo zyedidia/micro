@@ -18,6 +18,9 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	name string
 
+	// Handles undo and redo
+	eh *EventHandler
+
 	// This is the text stored every time the buffer is saved to check if the buffer is modified
 	savedText           string
 	netInsertions       int
@@ -47,10 +50,16 @@ func NewBuffer(txt, path string) *Buffer {
 	b.name = path
 	b.savedText = txt
 
+	b.eh = NewEventHandler(b)
+
 	b.Update()
 	b.UpdateRules()
 
 	return b
+}
+
+func (b *Buffer) setCursor(c *Cursor) {
+	b.eh.cursor = c
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
