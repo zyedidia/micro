@@ -670,23 +670,19 @@ func (v *View) DisplayView() {
 		}
 		// Write the line
 		tabchars := 0
-		runes := []rune(line)
-		for colN := v.leftCol; colN < v.leftCol+v.width; colN++ {
-			if colN >= len(runes) {
-				break
-			}
-			ch := runes[colN]
+		for colN, ch := range line {
 			var lineStyle tcell.Style
+
 			if settings.Syntax {
 				// Syntax highlighting is enabled
 				highlightStyle = v.matches[lineN][colN]
 			}
 
 			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+				(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
+					charNum <= v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
-				lineStyle = defStyle.Reverse(true)
+				lineStyle = tcell.StyleDefault.Reverse(true)
 
 				if style, ok := colorscheme["selection"]; ok {
 					lineStyle = style
@@ -730,7 +726,6 @@ func (v *View) DisplayView() {
 
 		charNum++
 	}
-	// v.lastMatches = matches
 }
 
 // Display renders the view, the cursor, and statusline
