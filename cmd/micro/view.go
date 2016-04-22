@@ -679,8 +679,8 @@ func (v *View) DisplayView() {
 			}
 
 			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.curSelection[0] && charNum <= v.cursor.curSelection[1] ||
-					charNum <= v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
+					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
