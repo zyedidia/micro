@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
+	"github.com/mitchellh/go-homedir"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -280,6 +281,8 @@ func (v *View) OpenFile() {
 		if canceled {
 			return
 		}
+		home, _ := homedir.Dir()
+		filename = strings.Replace(filename, "~", home, 1)
 		file, err := ioutil.ReadFile(filename)
 
 		if err != nil {
