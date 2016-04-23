@@ -1,8 +1,10 @@
 package main
 
 import (
+	"encoding/gob"
 	"github.com/vinzmay/go-rope"
 	"io/ioutil"
+	"os"
 	"strings"
 )
 
@@ -17,6 +19,9 @@ type Buffer struct {
 	path string
 	// Name of the buffer on the status line
 	name string
+
+	// Handles undo and redo
+	eh *EventHandler
 
 	// This is the text stored every time the buffer is saved to check if the buffer is modified
 	savedText           string
@@ -47,10 +52,29 @@ func NewBuffer(txt, path string) *Buffer {
 	b.name = path
 	b.savedText = txt
 
+	file, err := os.Open(configDir + "/undo/" + path)
+	if err == nil {
+		var eh EventHandler
+		decoder := gob.NewDecoder(file)
+		err = decoder.Decode(&eh)
+		if err != nil {
+			TermMessage(err.Error())
+		}
+		b.eh = &eh
+		b.eh.buf = b
+	} else {
+		b.eh = NewEventHandler(b)
+	}
+	file.Close()
+
 	b.Update()
 	b.UpdateRules()
 
 	return b
+}
+
+func (b *Buffer) setCursor(c *Cursor) {
+	b.eh.cursor = c
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
@@ -81,6 +105,16 @@ func (b *Buffer) SaveAs(filename string) error {
 	if err == nil {
 		b.savedText = b.text
 		b.netInsertions = 0
+
+		file, err := os.Create(configDir + "/undo/" + b.name)
+		if err == nil {
+			enc := gob.NewEncoder(file)
+			err := enc.Encode(b.eh)
+			if err != nil {
+				messenger.Error("Error:", err.Error())
+			}
+		}
+		file.Close()
 	}
 	return err
 }

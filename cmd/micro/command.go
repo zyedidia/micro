@@ -153,7 +153,7 @@ func HandleCommand(input string, view *View) {
 				// 		continue
 				// 	}
 			}
-			view.eh.Replace(match[0], match[1], replace)
+			view.buf.eh.Replace(match[0], match[1], replace)
 		}
 		if !found {
 			messenger.Message("Nothing matched " + search)
