@@ -200,13 +200,16 @@ func (v *View) Save() {
 	} else {
 		messenger.Message("Saved " + v.buf.path)
 		if v.buf.filetype == "Go" {
-			messenger.Message("Running gofmt...")
-			err := gofmt(v.buf.path)
-			if err != nil {
-				messenger.Error("Syntax Error")
+			if settings.Gofmt == true {
+				messenger.Message("Running gofmt...")
+				err := gofmt(v.buf.path)
+				if err != nil {
+					messenger.Error(err)
+				} else {
+					messenger.Message("gofmt complete")
+				}
+				v.reOpen()
 			}
-			v.reOpen()
-
 		}
 	}
 }

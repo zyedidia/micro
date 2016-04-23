@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -30,7 +31,7 @@ func gofmt(file string) error {
 	cmd.Start()
 	err := cmd.Wait()
 	if err != nil {
-		return err
+		return errors.New("Check syntax ") //TODO: highlight or display locations
 	}
 	return nil
 }
