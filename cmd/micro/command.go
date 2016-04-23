@@ -36,6 +36,17 @@ func gofmt(file string) error {
 	return nil
 }
 
+// goimports runs goimports on a file
+func goimports(file string) error {
+	cmd := exec.Command("goimports", "-w", file)
+	cmd.Start()
+	err := cmd.Wait()
+	if err != nil {
+		return errors.New("Check syntax ") //TODO: highlight or display locations
+	}
+	return nil
+}
+
 // HandleShellCommand runs the shell command and outputs to DisplayBlock
 func HandleShellCommand(input string, view *View, openTerm bool) {
 	inputCmd := strings.Split(input, " ")[0]

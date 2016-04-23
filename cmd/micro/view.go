@@ -200,18 +200,36 @@ func (v *View) Save() {
 	} else {
 		messenger.Message("Saved " + v.buf.path)
 		if v.buf.filetype == "Go" {
-			if settings.Gofmt == true {
-				messenger.Message("Running gofmt...")
-				err := gofmt(v.buf.path)
-				if err != nil {
-					messenger.Error(err)
-				} else {
-					messenger.Message("gofmt complete")
-				}
-				v.reOpen()
-			}
+			v.goSave()
 		}
 	}
+}
+
+// goSave() runs after saving .go files
+func (v *View) goSave() {
+	if settings.Gofmt == true {
+		messenger.Message("Running gofmt...")
+		err := gofmt(v.buf.path)
+		if err != nil {
+			messenger.Error(err)
+		} else {
+			messenger.Message("Saved " + v.buf.path)
+		}
+		v.reOpen()
+		return
+	}
+
+	if settings.Goimports == true {
+		messenger.Message("Running goimports...")
+		err := goimports(v.buf.path)
+		if err != nil {
+			messenger.Error(err)
+		} else {
+			messenger.Message("Saved " + v.buf.path)
+		}
+		v.reOpen()
+	}
+	return
 }
 
 // Close and Re-open the current file.
