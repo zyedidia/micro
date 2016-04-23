@@ -51,6 +51,13 @@ type View struct {
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
 
+	// lastCutTime stores when the last ctrl+k was issued.
+	// It is used for clearing the clipboard to replace it with fresh cut lines.
+	lastCutTime time.Time
+
+	// freshClip returns true if the clipboard has never been pasted.
+	freshClip bool
+
 	// Was the last mouse event actually a double click?
 	// Useful for detecting triple clicks -- if a double click is detected
 	// but the last mouse event was actually a double click, it's a triple click
@@ -207,6 +214,25 @@ func (v *View) Copy() {
 	if v.cursor.HasSelection() {
 		if !clipboard.Unsupported {
 			clipboard.WriteAll(v.cursor.GetSelection())
+		} else {
+			messenger.Error("Clipboard is not supported on your system")
+		}
+		// Or there is no selection. Clear the clipboard.
+	} else {
+		clipboard.WriteAll("")
+	}
+}
+
+// AddCopy appends to the clipboard
+func (v *View) AddCopy() {
+	if v.cursor.HasSelection() {
+		if !clipboard.Unsupported {
+			if clip, err := clipboard.ReadAll(); err != nil {
+				messenger.Error(err)
+			} else {
+				clipboard.WriteAll(clip + v.cursor.GetSelection())
+			}
+
 		} else {
 			messenger.Error("Clipboard is not supported on your system")
 		}
@@ -480,10 +506,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.eh.Redo()
 		case tcell.KeyCtrlC:
 			v.Copy()
+			v.freshClip = true
 		case tcell.KeyCtrlX:
 			v.Cut()
 		case tcell.KeyCtrlV:
+			v.freshClip = false
 			v.Paste()
+
 		case tcell.KeyCtrlA:
 			v.SelectAll()
 		case tcell.KeyCtrlO:
@@ -510,6 +539,20 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.KeyCtrlD:
 			v.HalfPageDown()
 			relocate = false
+		case tcell.KeyCtrlK:
+			v.cursor.SelectLine()
+			if v.freshClip == true {
+				v.AddCopy()
+			} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
+				v.Copy()
+			} else {
+				return
+			}
+			v.freshClip = true
+			v.lastCutTime = time.Now()
+			v.cursor.DeleteSelection()
+			v.cursor.ResetSelection()
+			relocate = true
 		case tcell.KeyCtrlR:
 			if settings.Ruler == false {
 				settings.Ruler = true
