@@ -12,7 +12,7 @@ import (
 var settings Settings
 
 // All the possible settings
-var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax", "tabsToSpaces", "ruler"}
+var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax", "tabsToSpaces", "ruler", "gofmt"}
 
 // The Settings struct contains the settings for micro
 type Settings struct {
@@ -22,6 +22,7 @@ type Settings struct {
 	Syntax       bool   `json:"syntax"`
 	TabsToSpaces bool   `json:"tabsToSpaces"`
 	Ruler        bool   `json:"ruler"`
+	Gofmt        bool   `json:"gofmt"`
 }
 
 // InitSettings initializes the options map and sets all options to their default values
@@ -119,6 +120,15 @@ func SetOption(view *View, args []string) {
 					settings.Ruler = true
 				} else if value == "off" {
 					settings.Ruler = false
+				} else {
+					messenger.Error("Invalid value for " + option)
+					return
+				}
+			} else if option == "gofmt" {
+				if value == "on" {
+					settings.Gofmt = true
+				} else if value == "off" {
+					settings.Gofmt = false
 				} else {
 					messenger.Error("Invalid value for " + option)
 					return
