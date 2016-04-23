@@ -1,6 +1,8 @@
 package main
 
 import (
+	"path/filepath"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -98,4 +100,10 @@ func IsSpaces(str string) bool {
 	}
 
 	return true
+}
+
+// EscapePath replaces every path separator in a given path with a %
+func EscapePath(path string) string {
+	path = filepath.ToSlash(path)
+	return strings.Replace(path, "/", "%", -1)
 }

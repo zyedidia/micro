@@ -5,6 +5,7 @@ import (
 	"github.com/vinzmay/go-rope"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -52,7 +53,8 @@ func NewBuffer(txt, path string) *Buffer {
 	b.name = path
 	b.savedText = txt
 
-	file, err := os.Open(configDir + "/undo/" + path)
+	absPath, _ := filepath.Abs(path)
+	file, err := os.Open(configDir + "/undo/" + EscapePath(absPath))
 	if err == nil {
 		var eh EventHandler
 		decoder := gob.NewDecoder(file)
@@ -106,7 +108,8 @@ func (b *Buffer) SaveAs(filename string) error {
 		b.savedText = b.text
 		b.netInsertions = 0
 
-		file, err := os.Create(configDir + "/undo/" + b.name)
+		absPath, _ := filepath.Abs(b.path)
+		file, err := os.Create(configDir + "/undo/" + EscapePath(absPath))
 		if err == nil {
 			enc := gob.NewEncoder(file)
 			err := enc.Encode(b.eh)

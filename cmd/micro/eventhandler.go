@@ -103,7 +103,6 @@ func (eh *EventHandler) Undo() {
 		return
 	}
 
-	te := t
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
 
 	eh.UndoOneEvent()
@@ -114,9 +113,7 @@ func (eh *EventHandler) Undo() {
 			return
 		}
 
-		te = t
-
-		if startTime-(te.Time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
+		if startTime-(t.Time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
 			return
 		}
 
@@ -133,19 +130,18 @@ func (eh *EventHandler) UndoOneEvent() {
 		return
 	}
 
-	te := t
 	// Undo it
 	// Modifies the text event
-	UndoTextEvent(te, eh.buf)
+	UndoTextEvent(t, eh.buf)
 
-	eh.cursor.X = te.Cursor.X
-	eh.cursor.Y = te.Cursor.Y
-	eh.cursor.LastVisualX = te.Cursor.LastVisualX
-	eh.cursor.CurSelection = te.Cursor.CurSelection
-	eh.cursor.OrigSelection = te.Cursor.OrigSelection
+	eh.cursor.X = t.Cursor.X
+	eh.cursor.Y = t.Cursor.Y
+	eh.cursor.LastVisualX = t.Cursor.LastVisualX
+	eh.cursor.CurSelection = t.Cursor.CurSelection
+	eh.cursor.OrigSelection = t.Cursor.OrigSelection
 
 	// Push it to the redo stack
-	eh.RedoStack.Push(te)
+	eh.RedoStack.Push(t)
 }
 
 // Redo the first event in the redo stack
@@ -155,7 +151,6 @@ func (eh *EventHandler) Redo() {
 		return
 	}
 
-	te := t
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
 
 	eh.RedoOneEvent()
@@ -166,9 +161,7 @@ func (eh *EventHandler) Redo() {
 			return
 		}
 
-		te = t
-
-		if (te.Time.UnixNano()/int64(time.Millisecond))-startTime > undoThreshold {
+		if (t.Time.UnixNano()/int64(time.Millisecond))-startTime > undoThreshold {
 			return
 		}
 
@@ -183,15 +176,14 @@ func (eh *EventHandler) RedoOneEvent() {
 		return
 	}
 
-	te := t
 	// Modifies the text event
-	UndoTextEvent(te, eh.buf)
+	UndoTextEvent(t, eh.buf)
 
-	eh.cursor.X = te.Cursor.X + 1
-	eh.cursor.Y = te.Cursor.Y
-	eh.cursor.LastVisualX = te.Cursor.LastVisualX
-	eh.cursor.CurSelection = te.Cursor.CurSelection
-	eh.cursor.OrigSelection = te.Cursor.OrigSelection
+	eh.cursor.X = t.Cursor.X + 1
+	eh.cursor.Y = t.Cursor.Y
+	eh.cursor.LastVisualX = t.Cursor.LastVisualX
+	eh.cursor.CurSelection = t.Cursor.CurSelection
+	eh.cursor.OrigSelection = t.Cursor.OrigSelection
 
-	eh.UndoStack.Push(te)
+	eh.UndoStack.Push(t)
 }
