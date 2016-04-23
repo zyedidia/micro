@@ -24,6 +24,17 @@ func RunShellCommand(input string) (string, error) {
 	return outstring, err
 }
 
+// gofmt runs gofmt on a file
+func gofmt(file string) error {
+	cmd := exec.Command("gofmt", "-w", file)
+	cmd.Start()
+	err := cmd.Wait()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 // HandleShellCommand runs the shell command and outputs to DisplayBlock
 func HandleShellCommand(input string, view *View, openTerm bool) {
 	inputCmd := strings.Split(input, " ")[0]

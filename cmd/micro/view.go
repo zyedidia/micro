@@ -199,6 +199,30 @@ func (v *View) Save() {
 		messenger.Error(err.Error())
 	} else {
 		messenger.Message("Saved " + v.buf.path)
+		if v.buf.filetype == "Go" {
+			messenger.Message("Running gofmt...")
+			err := gofmt(v.buf.path)
+			if err != nil {
+				messenger.Error("Syntax Error")
+			}
+			v.reOpen()
+
+		}
+	}
+}
+
+// Close and Re-open the current file.
+func (v *View) reOpen() {
+	if v.CanClose("Continue? (yes, no, save) ") {
+		file, err := ioutil.ReadFile(v.buf.path)
+		filename := v.buf.name
+
+		if err != nil {
+			messenger.Error(err.Error())
+			return
+		}
+		buf := NewBuffer(string(file), filename)
+		v.OpenBuffer(buf)
 	}
 }
 
