@@ -25,6 +25,7 @@ func InitBindings() {
 		"InsertEnter":  InsertEnter,
 		"InsertSpace":  InsertSpace,
 		"Backspace":    Backspace,
+		"Delete":       Delete,
 		"InsertTab":    InsertTab,
 		"Save":         Save,
 		"Find":         Find,
@@ -231,6 +232,7 @@ func DefaultBindings() map[string]string {
 		"CtrlU":      "HalfPageUp",
 		"CtrlD":      "HalfPageDown",
 		"CtrlR":      "ToggleRuler",
+		"Delete":     "Delete",
 	}
 }
 
@@ -330,6 +332,20 @@ func Backspace(v *View) bool {
 		}
 	}
 	v.cursor.lastVisualX = v.cursor.GetVisualX()
+	return true
+}
+
+// Delete deletes the next character
+func Delete(v *View) bool {
+	if v.cursor.HasSelection() {
+		v.cursor.DeleteSelection()
+		v.cursor.ResetSelection()
+	} else {
+		loc := v.cursor.Loc()
+		if loc < len(v.buf.text) {
+			v.eh.Remove(loc, loc+1)
+		}
+	}
 	return true
 }
 
