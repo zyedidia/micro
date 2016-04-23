@@ -12,8 +12,7 @@ install: build
 	mv micro $(GOPATH)/bin
 
 tcell:
-	cd $(GOPATH)/src/github.com/gdamore/tcell
-	git pull
+	git -C $(GOPATH)/src/github.com/gdamore/tcell pull
 
 runtime:
 	go get -u github.com/jteeuwen/go-bindata/...
