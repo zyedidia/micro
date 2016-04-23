@@ -176,6 +176,7 @@ func InitBindings() {
 	}
 
 	var parsed map[string]string
+	defaults := DefaultBindings()
 
 	filename := configDir + "/bindings.json"
 	if _, e := os.Stat(filename); e == nil {
@@ -186,17 +187,11 @@ func InitBindings() {
 		}
 
 		json.Unmarshal(input, &parsed)
-	} else {
-		parsed = DefaultBindings()
-		if _, e := os.Stat(configDir); e == nil {
-			txt, _ := json.MarshalIndent(parsed, "", "    ")
-			err := ioutil.WriteFile(filename, txt, 0644)
-			if err != nil {
-				TermMessage("Error writing bindings.json file: " + err.Error())
-			}
-		}
 	}
 
+	for k, v := range defaults {
+		bindings[keys[k]] = actions[v]
+	}
 	for k, v := range parsed {
 		bindings[keys[k]] = actions[v]
 	}
@@ -577,5 +572,10 @@ func ToggleRuler(v *View) bool {
 	} else {
 		settings.Ruler = false
 	}
+	return false
+}
+
+// None is no action
+func None() bool {
 	return false
 }
