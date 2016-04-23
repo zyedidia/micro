@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/atotto/clipboard"
@@ -172,33 +174,64 @@ func InitBindings() {
 		"Backspace2":     tcell.KeyBackspace2,
 	}
 
-	bindings[keys["Up"]] = actions["CursorUp"]
-	bindings[keys["Down"]] = actions["CursorDown"]
-	bindings[keys["Right"]] = actions["CursorRight"]
-	bindings[keys["Left"]] = actions["CursorLeft"]
-	bindings[keys["Enter"]] = actions["InsertEnter"]
-	bindings[keys["Space"]] = actions["InsertSpace"]
-	bindings[keys["Backspace"]] = actions["Backspace"]
-	bindings[keys["Backspace2"]] = actions["Backspace"]
-	bindings[keys["Tab"]] = actions["InsertTab"]
-	bindings[keys["CtrlO"]] = actions["OpenFile"]
-	bindings[keys["CtrlS"]] = actions["Save"]
-	bindings[keys["CtrlF"]] = actions["Find"]
-	bindings[keys["CtrlN"]] = actions["FindNext"]
-	bindings[keys["CtrlP"]] = actions["FindPrevious"]
-	bindings[keys["CtrlZ"]] = actions["Undo"]
-	bindings[keys["CtrlY"]] = actions["Redo"]
-	bindings[keys["CtrlC"]] = actions["Copy"]
-	bindings[keys["CtrlX"]] = actions["Cut"]
-	bindings[keys["CtrlV"]] = actions["Paste"]
-	bindings[keys["CtrlA"]] = actions["SelectAll"]
-	bindings[keys["Home"]] = actions["Beginning"]
-	bindings[keys["End"]] = actions["End"]
-	bindings[keys["PageUp"]] = actions["PageUp"]
-	bindings[keys["PageDown"]] = actions["PageDown"]
-	bindings[keys["CtrlU"]] = actions["HalfPageUp"]
-	bindings[keys["CtrlD"]] = actions["HalfPageDown"]
-	bindings[keys["CtrlR"]] = actions["ToggleRuler"]
+	var parsed map[string]string
+
+	filename := configDir + "/bindings.json"
+	if _, e := os.Stat(filename); e == nil {
+		input, err := ioutil.ReadFile(filename)
+		if err != nil {
+			TermMessage("Error reading settings.json file: " + err.Error())
+			return
+		}
+
+		json.Unmarshal(input, &parsed)
+	} else {
+		parsed = DefaultBindings()
+		if _, e := os.Stat(configDir); e == nil {
+			txt, _ := json.MarshalIndent(parsed, "", "    ")
+			err := ioutil.WriteFile(filename, txt, 0644)
+			if err != nil {
+				TermMessage("Error writing bindings.json file: " + err.Error())
+			}
+		}
+	}
+
+	for k, v := range parsed {
+		bindings[keys[k]] = actions[v]
+	}
+}
+
+// DefaultBindings returns a map containing micro's default keybindings
+func DefaultBindings() map[string]string {
+	return map[string]string{
+		"Up":         "CursorUp",
+		"Down":       "CursorDown",
+		"Right":      "CursorRight",
+		"Left":       "CursorLeft",
+		"Enter":      "InsertEnter",
+		"Space":      "InsertSpace",
+		"Backspace":  "Backspace",
+		"Backspace2": "Backspace",
+		"Tab":        "InsertTab",
+		"CtrlO":      "OpenFile",
+		"CtrlS":      "Save",
+		"CtrlF":      "Find",
+		"CtrlN":      "FindNext",
+		"CtrlP":      "FindPrevious",
+		"CtrlZ":      "Undo",
+		"CtrlY":      "Redo",
+		"CtrlC":      "Copy",
+		"CtrlX":      "Cut",
+		"CtrlV":      "Paste",
+		"CtrlA":      "SelectAll",
+		"Home":       "Beginning",
+		"End":        "End",
+		"PageUp":     "PageUp",
+		"PageDown":   "PageDown",
+		"CtrlU":      "HalfPageUp",
+		"CtrlD":      "HalfPageDown",
+		"CtrlR":      "ToggleRuler",
+	}
 }
 
 // CursorUp moves the cursor up
