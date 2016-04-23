@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -22,6 +23,28 @@ func RunShellCommand(input string) (string, error) {
 	err := cmd.Wait() // wait for command to finish
 	outstring := outputBytes.String()
 	return outstring, err
+}
+
+// gofmt runs gofmt on a file
+func gofmt(file string) error {
+	cmd := exec.Command("gofmt", "-w", file)
+	cmd.Start()
+	err := cmd.Wait()
+	if err != nil {
+		return errors.New("Check syntax ") //TODO: highlight or display locations
+	}
+	return nil
+}
+
+// goimports runs goimports on a file
+func goimports(file string) error {
+	cmd := exec.Command("goimports", "-w", file)
+	cmd.Start()
+	err := cmd.Wait()
+	if err != nil {
+		return errors.New("Check syntax ") //TODO: highlight or display locations
+	}
+	return nil
 }
 
 // HandleShellCommand runs the shell command and outputs to DisplayBlock
