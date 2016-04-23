@@ -182,6 +182,7 @@ func main() {
 	InitConfigDir()
 	// Load the user's settings
 	InitSettings()
+	InitBindings()
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
 
