@@ -105,6 +105,15 @@ func SetOption(view *View, args []string) {
 					messenger.Error("Invalid value for " + option)
 					return
 				}
+			} else if option == "autoindent" {
+				if value == "on" {
+					settings.AutoIndent = true
+				} else if value == "off" {
+					settings.AutoIndent = false
+				} else {
+					messenger.Error("Invalid value for " + option)
+					return
+				}
 			} else if option == "ruler" {
 				if value == "on" {
 					settings.Ruler = true

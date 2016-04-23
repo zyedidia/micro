@@ -110,7 +110,11 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.curSelection[0] = c.Loc()
 	c.End()
-	c.curSelection[1] = c.Loc() + 1
+	if len(c.v.buf.lines)-1 > c.y {
+		c.curSelection[1] = c.Loc() + 1
+	} else {
+		c.curSelection[1] = c.Loc()
+	}
 
 	c.origSelection = c.curSelection
 }
