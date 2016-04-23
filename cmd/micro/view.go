@@ -202,6 +202,21 @@ func (v *View) Save() {
 	}
 }
 
+// ToggleSelection uses the cursor.origSelection and cursor.curSelection to decide on what is selected
+func (v *View) ToggleSelection() {
+	// Toggle text selection
+	if v.cursor.origSelection[0] == 0 {
+		// Start selection on first Ctrl-Space
+		v.cursor.origSelection[0] = v.cursor.Loc()
+	} else if v.cursor.origSelection[1] == 0 {
+		// Update selection on second Ctrl-Space
+		v.cursor.origSelection[1] = v.cursor.Loc() + 1
+		v.cursor.curSelection = v.cursor.origSelection
+		// Now reset the original selection for the next time
+		v.cursor.origSelection = [2]int{0, 0}
+	}
+}
+
 // Copy the selection to the system clipboard
 func (v *View) Copy() {
 	if v.cursor.HasSelection() {
@@ -474,6 +489,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 			messenger.Message("Find: " + lastSearch)
 			Search(lastSearch, v, false)
+		case tcell.KeyCtrlSpace:
+			v.ToggleSelection()
 		case tcell.KeyCtrlZ:
 			v.eh.Undo()
 		case tcell.KeyCtrlY:
