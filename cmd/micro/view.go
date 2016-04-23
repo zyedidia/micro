@@ -1,14 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
-	"github.com/mitchellh/go-homedir"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -121,46 +118,6 @@ func (v *View) ScrollDown(n int) {
 	}
 }
 
-// PageUp scrolls the view up a page
-func (v *View) PageUp() {
-	if v.topline > v.height {
-		v.ScrollUp(v.height)
-	} else {
-		v.topline = 0
-	}
-}
-
-// PageDown scrolls the view down a page
-func (v *View) PageDown() {
-	if len(v.buf.lines)-(v.topline+v.height) > v.height {
-		v.ScrollDown(v.height)
-	} else {
-		if len(v.buf.lines) >= v.height {
-			v.topline = len(v.buf.lines) - v.height
-		}
-	}
-}
-
-// HalfPageUp scrolls the view up half a page
-func (v *View) HalfPageUp() {
-	if v.topline > v.height/2 {
-		v.ScrollUp(v.height / 2)
-	} else {
-		v.topline = 0
-	}
-}
-
-// HalfPageDown scrolls the view down half a page
-func (v *View) HalfPageDown() {
-	if len(v.buf.lines)-(v.topline+v.height) > v.height/2 {
-		v.ScrollDown(v.height / 2)
-	} else {
-		if len(v.buf.lines) >= v.height {
-			v.topline = len(v.buf.lines) - v.height
-		}
-	}
-}
-
 // CanClose returns whether or not the view can be closed
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
@@ -172,7 +129,7 @@ func (v *View) CanClose(msg string) bool {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
 				return true
 			} else if strings.ToLower(quit) == "save" || strings.ToLower(quit) == "s" {
-				v.Save()
+				Save(v)
 				return true
 			}
 		}
@@ -180,75 +137,6 @@ func (v *View) CanClose(msg string) bool {
 		return true
 	}
 	return false
-}
-
-// Save the buffer to disk
-func (v *View) Save() {
-	// If this is an empty buffer, ask for a filename
-	if v.buf.path == "" {
-		filename, canceled := messenger.Prompt("Filename: ")
-		if !canceled {
-			v.buf.path = filename
-			v.buf.name = filename
-		} else {
-			return
-		}
-	}
-	err := v.buf.Save()
-	if err != nil {
-		messenger.Error(err.Error())
-	} else {
-		messenger.Message("Saved " + v.buf.path)
-	}
-}
-
-// Copy the selection to the system clipboard
-func (v *View) Copy() {
-	if v.cursor.HasSelection() {
-		if !clipboard.Unsupported {
-			clipboard.WriteAll(v.cursor.GetSelection())
-		} else {
-			messenger.Error("Clipboard is not supported on your system")
-		}
-	}
-}
-
-// Cut the selection to the system clipboard
-func (v *View) Cut() {
-	if v.cursor.HasSelection() {
-		if !clipboard.Unsupported {
-			clipboard.WriteAll(v.cursor.GetSelection())
-			v.cursor.DeleteSelection()
-			v.cursor.ResetSelection()
-		} else {
-			messenger.Error("Clipboard is not supported on your system")
-		}
-	}
-}
-
-// Paste whatever is in the system clipboard into the buffer
-// Delete and paste if the user has a selection
-func (v *View) Paste() {
-	if !clipboard.Unsupported {
-		if v.cursor.HasSelection() {
-			v.cursor.DeleteSelection()
-			v.cursor.ResetSelection()
-		}
-		clip, _ := clipboard.ReadAll()
-		v.eh.Insert(v.cursor.Loc(), clip)
-		v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
-	} else {
-		messenger.Error("Clipboard is not supported on your system")
-	}
-}
-
-// SelectAll selects the entire buffer
-func (v *View) SelectAll() {
-	v.cursor.curSelection[1] = 0
-	v.cursor.curSelection[0] = v.buf.Len()
-	// Put the cursor at the beginning
-	v.cursor.x = 0
-	v.cursor.y = 0
 }
 
 // OpenBuffer opens a new buffer in this view.
@@ -277,22 +165,6 @@ func (v *View) OpenBuffer(buf *Buffer) {
 // OpenFile opens a new file in the current view
 // It makes sure that the current buffer can be closed first (unsaved changes)
 func (v *View) OpenFile() {
-	if v.CanClose("Continue? (yes, no, save) ") {
-		filename, canceled := messenger.Prompt("File to open: ")
-		if canceled {
-			return
-		}
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
-
-		if err != nil {
-			messenger.Error(err.Error())
-			return
-		}
-		buf := NewBuffer(string(file), filename)
-		v.OpenBuffer(buf)
-	}
 }
 
 // Relocate moves the view window so that the cursor is in view
@@ -358,165 +230,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// Window resized
 		v.Resize(e.Size())
 	case *tcell.EventKey:
-		switch e.Key() {
-		case tcell.KeyUp:
-			// Cursor up
-			v.cursor.ResetSelection()
-			v.cursor.Up()
-		case tcell.KeyDown:
-			// Cursor down
-			v.cursor.ResetSelection()
-			v.cursor.Down()
-		case tcell.KeyLeft:
-			// Cursor left
-			v.cursor.ResetSelection()
-			v.cursor.Left()
-		case tcell.KeyRight:
-			// Cursor right
-			v.cursor.ResetSelection()
-			v.cursor.Right()
-		case tcell.KeyEnter:
-			// Insert a newline
-			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelection()
-				v.cursor.ResetSelection()
-			}
-
-			v.eh.Insert(v.cursor.Loc(), "\n")
-			ws := GetLeadingWhitespace(v.buf.lines[v.cursor.y])
-			v.cursor.Right()
-
-			if settings.AutoIndent {
-				v.eh.Insert(v.cursor.Loc(), ws)
-				for i := 0; i < len(ws); i++ {
-					v.cursor.Right()
-				}
-			}
-			v.cursor.lastVisualX = v.cursor.GetVisualX()
-		case tcell.KeySpace:
-			// Insert a space
-			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelection()
-				v.cursor.ResetSelection()
-			}
-			v.eh.Insert(v.cursor.Loc(), " ")
-			v.cursor.Right()
-		case tcell.KeyBackspace2, tcell.KeyBackspace:
-			// Delete a character
-			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelection()
-				v.cursor.ResetSelection()
-			} else if v.cursor.Loc() > 0 {
-				// We have to do something a bit hacky here because we want to
-				// delete the line by first moving left and then deleting backwards
-				// but the undo redo would place the cursor in the wrong place
-				// So instead we move left, save the position, move back, delete
-				// and restore the position
-
-				// If the user is using spaces instead of tabs and they are deleting
-				// whitespace at the start of the line, we should delete as if its a
-				// tab (tabSize number of spaces)
-				lineStart := v.buf.lines[v.cursor.y][:v.cursor.x]
-				if settings.TabsToSpaces && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%settings.TabSize == 0 {
-					loc := v.cursor.Loc()
-					v.cursor.SetLoc(loc - settings.TabSize)
-					cx, cy := v.cursor.x, v.cursor.y
-					v.cursor.SetLoc(loc)
-					v.eh.Remove(loc-settings.TabSize, loc)
-					v.cursor.x, v.cursor.y = cx, cy
-				} else {
-					v.cursor.Left()
-					cx, cy := v.cursor.x, v.cursor.y
-					v.cursor.Right()
-					loc := v.cursor.Loc()
-					v.eh.Remove(loc-1, loc)
-					v.cursor.x, v.cursor.y = cx, cy
-				}
-			}
-			v.cursor.lastVisualX = v.cursor.GetVisualX()
-		case tcell.KeyTab:
-			// Insert a tab
-			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelection()
-				v.cursor.ResetSelection()
-			}
-			if settings.TabsToSpaces {
-				v.eh.Insert(v.cursor.Loc(), Spaces(settings.TabSize))
-				for i := 0; i < settings.TabSize; i++ {
-					v.cursor.Right()
-				}
-			} else {
-				v.eh.Insert(v.cursor.Loc(), "\t")
-				v.cursor.Right()
-			}
-		case tcell.KeyCtrlS:
-			v.Save()
-		case tcell.KeyCtrlF:
-			if v.cursor.HasSelection() {
-				searchStart = v.cursor.curSelection[1]
-			} else {
-				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
-			}
-			BeginSearch()
-		case tcell.KeyCtrlN:
-			if v.cursor.HasSelection() {
-				searchStart = v.cursor.curSelection[1]
-			} else {
-				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
-			}
-			messenger.Message("Find: " + lastSearch)
-			Search(lastSearch, v, true)
-		case tcell.KeyCtrlP:
-			if v.cursor.HasSelection() {
-				searchStart = v.cursor.curSelection[0]
-			} else {
-				searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
-			}
-			messenger.Message("Find: " + lastSearch)
-			Search(lastSearch, v, false)
-		case tcell.KeyCtrlZ:
-			v.eh.Undo()
-		case tcell.KeyCtrlY:
-			v.eh.Redo()
-		case tcell.KeyCtrlC:
-			v.Copy()
-		case tcell.KeyCtrlX:
-			v.Cut()
-		case tcell.KeyCtrlV:
-			v.Paste()
-		case tcell.KeyCtrlA:
-			v.SelectAll()
-		case tcell.KeyCtrlO:
-			v.OpenFile()
-		case tcell.KeyHome:
-			v.topline = 0
-			relocate = false
-		case tcell.KeyEnd:
-			if v.height > len(v.buf.lines) {
-				v.topline = 0
-			} else {
-				v.topline = len(v.buf.lines) - v.height
-			}
-			relocate = false
-		case tcell.KeyPgUp:
-			v.PageUp()
-			relocate = false
-		case tcell.KeyPgDn:
-			v.PageDown()
-			relocate = false
-		case tcell.KeyCtrlU:
-			v.HalfPageUp()
-			relocate = false
-		case tcell.KeyCtrlD:
-			v.HalfPageDown()
-			relocate = false
-		case tcell.KeyCtrlR:
-			if settings.Ruler == false {
-				settings.Ruler = true
-			} else {
-				settings.Ruler = false
-			}
-		case tcell.KeyRune:
+		if e.Key() == tcell.KeyRune {
 			// Insert a character
 			if v.cursor.HasSelection() {
 				v.cursor.DeleteSelection()
@@ -524,6 +238,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
 			v.cursor.Right()
+		} else {
+			for key, action := range bindings {
+				if e.Key() == key {
+					relocate = action(v)
+				}
+			}
 		}
 	case *tcell.EventMouse:
 		x, y := e.Position()
