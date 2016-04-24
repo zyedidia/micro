@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 )
@@ -619,6 +620,14 @@ func (v *View) Save() bool {
 			v.GoSave()
 		}
 	}
+	if err := L.CallByParam(lua.P{
+		Fn:      L.GetGlobal("onSave"),
+		NRet:    1,
+		Protect: true,
+	}); err != nil {
+		// The function isn't defined by this plugin
+		return true
+	}
 	return true
 }
 
@@ -633,7 +642,7 @@ func (v *View) GoSave() {
 		} else {
 			messenger.Message("Saved " + v.buf.path)
 		}
-		v.reOpen()
+		v.ReOpen()
 	} else if settings["gofmt"] == true {
 		messenger.Message("Running gofmt...")
 		err := gofmt(v.buf.path)
@@ -642,7 +651,7 @@ func (v *View) GoSave() {
 		} else {
 			messenger.Message("Saved " + v.buf.path)
 		}
-		v.reOpen()
+		v.ReOpen()
 		return
 	}
 

@@ -172,8 +172,8 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 }
 
-// Close and Re-open the current file.
-func (v *View) reOpen() {
+// ReOpen reloads the current buffer
+func (v *View) ReOpen() {
 	if v.CanClose("Continue? (yes, no, save) ") {
 		file, err := ioutil.ReadFile(v.buf.path)
 		filename := v.buf.name
