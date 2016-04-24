@@ -91,6 +91,8 @@ func (c *Cursor) DeleteSelection() {
 	if c.curSelection[0] > c.curSelection[1] {
 		c.v.eh.Remove(c.curSelection[1], c.curSelection[0])
 		c.SetLoc(c.curSelection[1])
+	} else if c.GetSelection() == "" {
+		return
 	} else {
 		c.v.eh.Remove(c.curSelection[0], c.curSelection[1])
 		c.SetLoc(c.curSelection[0])
