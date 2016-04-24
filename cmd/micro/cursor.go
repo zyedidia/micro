@@ -304,6 +304,22 @@ func (c *Cursor) GetVisualX() int {
 	return c.x + NumOccurences(string(runes[:c.x]), '\t')*(tabSize-1)
 }
 
+// Relocate makes sure that the cursor is inside the bounds of the buffer
+// If it isn't, it moves it to be within the buffer's lines
+func (c *Cursor) Relocate() {
+	if c.y < 0 {
+		c.y = 0
+	} else if c.y >= len(c.v.buf.lines) {
+		c.y = len(c.v.buf.lines) - 1
+	}
+
+	if c.x < 0 {
+		c.x = 0
+	} else if c.x > Count(c.v.buf.lines[c.y]) {
+		c.x = Count(c.v.buf.lines[c.y])
+	}
+}
+
 // Display draws the cursor to the screen at the correct position
 func (c *Cursor) Display() {
 	// Don't draw the cursor if it is out of the viewport or if it has a selection

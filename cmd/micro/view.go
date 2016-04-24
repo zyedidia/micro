@@ -183,13 +183,9 @@ func (v *View) reOpen() {
 		buf := NewBuffer(string(file), filename)
 		v.buf = buf
 		v.matches = Match(v)
+		v.cursor.Relocate()
 		v.Relocate()
 	}
-}
-
-// OpenFile opens a new file in the current view
-// It makes sure that the current buffer can be closed first (unsaved changes)
-func (v *View) OpenFile() {
 }
 
 // Relocate moves the view window so that the cursor is in view
