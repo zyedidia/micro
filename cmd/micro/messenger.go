@@ -87,7 +87,7 @@ func (m *Messenger) Error(msg ...interface{}) {
 }
 
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
-func (m *Messenger) YesNoPrompt(prompt string) bool {
+func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	m.Message(prompt)
 
 	for {
@@ -98,12 +98,15 @@ func (m *Messenger) YesNoPrompt(prompt string) bool {
 
 		switch e := event.(type) {
 		case *tcell.EventKey:
-			if e.Key() == tcell.KeyRune {
+			switch e.Key() {
+			case tcell.KeyRune:
 				if e.Rune() == 'y' {
-					return true
+					return true, false
 				} else if e.Rune() == 'n' {
-					return false
+					return false, false
 				}
+			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				return false, true
 			}
 		}
 	}

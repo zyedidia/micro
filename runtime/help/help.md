@@ -67,10 +67,12 @@ Here are the possible commands that you can use.
 * `quit`: Quits micro.
 * `save`: Saves the current buffer.
 
-* `replace "search" "value"`: This will replace `search` with `value`.
+* `replace "search" "value" flags`: This will replace `search` with `value`. The `flags` are optional.
+   At this point, there is only one flag: `c`, which enables `check` mode which asks if you'd like
+   to perform the replacement each time
 
-    Note that `search` must be a valid regex.  If one of the arguments
-    does not have any spaces in it, you may omit the quotes.
+   Note that `search` must be a valid regex.  If one of the arguments
+   does not have any spaces in it, you may omit the quotes.
 
 * `set option value`: sets the option to value. Please see the next section for a list of options you can set.
 

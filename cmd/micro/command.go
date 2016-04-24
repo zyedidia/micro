@@ -147,14 +147,35 @@ func HandleCommand(input string, view *View) {
 			}
 			found = true
 			if strings.Contains(flags, "c") {
-				// 	// The 'check' flag was used
-				// 	if messenger.YesNoPrompt("Perform replacement?") {
-				// 		view.eh.Replace(match[0], match[1], replace)
-				// 	} else {
-				// 		continue
-				// 	}
+				// The 'check' flag was used
+				Search(search, view, true)
+				view.Relocate()
+				Redraw(view)
+				choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
+				if canceled {
+					if view.cursor.HasSelection() {
+						view.cursor.SetLoc(view.cursor.curSelection[0])
+						view.cursor.ResetSelection()
+					}
+					messenger.Reset()
+					return
+				}
+				if choice {
+					view.cursor.DeleteSelection()
+					view.eh.Insert(match[0], replace)
+					view.cursor.ResetSelection()
+					messenger.Reset()
+				} else {
+					if view.cursor.HasSelection() {
+						searchStart = view.cursor.curSelection[1]
+					} else {
+						searchStart = ToCharPos(view.cursor.x, view.cursor.y, view.buf)
+					}
+					continue
+				}
+			} else {
+				view.eh.Replace(match[0], match[1], replace)
 			}
-			view.eh.Replace(match[0], match[1], replace)
 		}
 		if !found {
 			messenger.Message("Nothing matched " + search)
