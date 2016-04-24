@@ -57,6 +57,8 @@ To run the micro binary just run `./bin/micro` (you may want to place the binary
 
 Micro is made in Go so you must have Go installed on your system to build it.
 
+Make sure that you have Go version 1.4 or greater.
+
 You can simply `go get` it.
 
 ```
@@ -70,6 +72,8 @@ On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed. 
 ```
 $ sudo apt-get install xclip
 ```
+
+If you don't have xclip or xsel, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
 
 # Usage
 
