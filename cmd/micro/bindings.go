@@ -434,11 +434,7 @@ func Redo(v *View) bool {
 // Copy the selection to the system clipboard
 func Copy(v *View) bool {
 	if v.cursor.HasSelection() {
-		if !clipboard.Unsupported {
-			clipboard.WriteAll(v.cursor.GetSelection())
-		} else {
-			messenger.Error("Clipboard is not supported on your system")
-		}
+		clipboard.WriteAll(v.cursor.GetSelection())
 	}
 	return true
 }
@@ -446,13 +442,9 @@ func Copy(v *View) bool {
 // Cut the selection to the system clipboard
 func Cut(v *View) bool {
 	if v.cursor.HasSelection() {
-		if !clipboard.Unsupported {
-			clipboard.WriteAll(v.cursor.GetSelection())
-			v.cursor.DeleteSelection()
-			v.cursor.ResetSelection()
-		} else {
-			messenger.Error("Clipboard is not supported on your system")
-		}
+		clipboard.WriteAll(v.cursor.GetSelection())
+		v.cursor.DeleteSelection()
+		v.cursor.ResetSelection()
 	}
 	return true
 }
@@ -460,17 +452,13 @@ func Cut(v *View) bool {
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
 func Paste(v *View) bool {
-	if !clipboard.Unsupported {
-		if v.cursor.HasSelection() {
-			v.cursor.DeleteSelection()
-			v.cursor.ResetSelection()
-		}
-		clip, _ := clipboard.ReadAll()
-		v.eh.Insert(v.cursor.Loc(), clip)
-		v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
-	} else {
-		messenger.Error("Clipboard is not supported on your system")
+	if v.cursor.HasSelection() {
+		v.cursor.DeleteSelection()
+		v.cursor.ResetSelection()
 	}
+	clip, _ := clipboard.ReadAll()
+	v.eh.Insert(v.cursor.Loc(), clip)
+	v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
 	return true
 }
 
