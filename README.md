@@ -87,35 +87,17 @@ $ ifconfig | micro
 
 You can move the cursor around with the arrow keys and mouse.
 
-#### Keybindings
-
-* Ctrl-q:   Quit
-* Ctrl-s:   Save
-* Ctrl-o:   Open file
-* Ctrl-z:   Undo
-* Ctrl-y:   Redo
-* Ctrl-f:   Find
-* Ctrl-n:   Find next
-* Ctrl-p:   Find previous
-* Ctrl-a:   Select all
-* Ctrl-c:   Copy
-* Ctrl-x:   Cut
-* Ctrl-v:   Paste
-* Ctrl-g:   Open help
-* Ctrl-u:   Half page up
-* Ctrl-d:   Half page down
-* PageUp:   Page up
-* PageDown: Page down
-* Home:     Go to beginning
-* End:      Go to end
-* Ctrl-e:   Execute a command
-
 You can also use the mouse to manipulate the text. Simply clicking and dragging will select text. You can also double click
 to enable word selection, and triple click to enable line selection.
 
-You can also run `$ micro -version` to get the version number. Since there is no release, this just gives you the
+You can run `$ micro -version` to get the version number. Since there is no release, this just gives you the
 commit hash. The version is unknown if you built with `go get`, instead use `make install` or `make` to get a binary
 with a version number defined.
+
+#### Help text
+
+See the [help text](./runtime/help/help.md) for information about keybindings, editor commands, colorschemes and
+configuration options.
 
 # Configuration
 
