@@ -6,9 +6,9 @@ import (
 	"os"
 	"strings"
 
-	"github.com/atotto/clipboard"
 	"github.com/gdamore/tcell"
 	"github.com/mitchellh/go-homedir"
+	"github.com/zyedidia/clipboard"
 )
 
 var bindings map[tcell.Key]func(*View) bool
