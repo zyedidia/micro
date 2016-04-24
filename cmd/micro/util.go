@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strconv"
 	"unicode/utf8"
 )
 
@@ -98,4 +99,16 @@ func IsSpaces(str string) bool {
 	}
 
 	return true
+}
+
+// ParseBool is almost exactly like strconv.ParseBool, except it also accepts 'on' and 'off'
+// as 'true' and 'false' respectively
+func ParseBool(str string) (bool, error) {
+	if str == "on" {
+		return true, nil
+	}
+	if str == "off" {
+		return false, nil
+	}
+	return strconv.ParseBool(str)
 }

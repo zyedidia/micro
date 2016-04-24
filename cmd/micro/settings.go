@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -12,7 +13,18 @@ import (
 var settings Settings
 
 // All the possible settings
-var possibleSettings = []string{"colorscheme", "tabsize", "autoindent", "syntax", "tabsToSpaces", "ruler", "gofmt", "goimports"}
+// This map maps the name of the setting in the Settings struct
+// to the name that the user will actually use (the one in the json file)
+var possibleSettings = map[string]string{
+	"colorscheme":  "Colorscheme",
+	"tabsize":      "TabSize",
+	"autoindent":   "AutoIndent",
+	"syntax":       "Syntax",
+	"tabsToSpaces": "TabsToSpaces",
+	"ruler":        "Ruler",
+	"gofmt":        "GoFmt",
+	"goimports":    "GoImports",
+}
 
 // The Settings struct contains the settings for micro
 type Settings struct {
@@ -80,86 +92,42 @@ func SetOption(view *View, args []string) {
 		option := strings.TrimSpace(args[0])
 		value := strings.TrimSpace(args[1])
 
-		if Contains(possibleSettings, option) {
-			if option == "tabsize" {
-				tsize, err := strconv.Atoi(value)
-				if err != nil {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-				settings.TabSize = tsize
-			} else if option == "colorscheme" {
-				settings.Colorscheme = value
-				LoadSyntaxFiles()
-				view.buf.UpdateRules()
-			} else if option == "syntax" {
-				if value == "on" {
-					settings.Syntax = true
-				} else if value == "off" {
-					settings.Syntax = false
-				} else {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-				LoadSyntaxFiles()
-				view.buf.UpdateRules()
-			} else if option == "tabsToSpaces" {
-				if value == "on" {
-					settings.TabsToSpaces = true
-				} else if value == "off" {
-					settings.TabsToSpaces = false
-				} else {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-			} else if option == "autoindent" {
-				if value == "on" {
-					settings.AutoIndent = true
-				} else if value == "off" {
-					settings.AutoIndent = false
-				} else {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-			} else if option == "ruler" {
-				if value == "on" {
-					settings.Ruler = true
-				} else if value == "off" {
-					settings.Ruler = false
-				} else {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-			} else if option == "gofmt" {
-				if value == "on" {
-					settings.GoFmt = true
-				} else if value == "off" {
-					settings.GoFmt = false
-				} else {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-			} else if option == "goimports" {
-				if value == "on" {
-					settings.GoFmt = false // goimports does gofmt
-					settings.GoImports = true
-				} else if value == "off" {
-					settings.GoFmt = false
-				} else {
-					messenger.Error("Invalid value for " + option)
-					return
-				}
-			}
-
-			err := WriteSettings(filename)
+		mutable := reflect.ValueOf(&settings).Elem()
+		field := mutable.FieldByName(possibleSettings[option])
+		if !field.IsValid() {
+			messenger.Error(option + " is not a valid option")
+			return
+		}
+		kind := field.Type().Kind()
+		if kind == reflect.Bool {
+			b, err := ParseBool(value)
 			if err != nil {
-				messenger.Error("Error writing to settings.json: " + err.Error())
+				messenger.Error("Invalid value for " + option)
 				return
 			}
-		} else {
-			messenger.Error("Option " + option + " does not exist")
+			field.SetBool(b)
+		} else if kind == reflect.String {
+			field.SetString(value)
+		} else if kind == reflect.Int {
+			i, err := strconv.Atoi(value)
+			if err != nil {
+				messenger.Error("Invalid value for " + option)
+				return
+			}
+			field.SetInt(int64(i))
+		}
+
+		if option == "colorscheme" {
+			LoadSyntaxFiles()
+			view.buf.UpdateRules()
+		}
+
+		err := WriteSettings(filename)
+		if err != nil {
+			messenger.Error("Error writing to settings.json: " + err.Error())
+			return
 		}
 	} else {
-		messenger.Error("Invalid option, please use option value")
+		messenger.Error("No value given")
 	}
 }
