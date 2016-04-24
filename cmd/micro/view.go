@@ -48,6 +48,13 @@ type View struct {
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
 
+	// lastCutTime stores when the last ctrl+k was issued.
+	// It is used for clearing the clipboard to replace it with fresh cut lines.
+	lastCutTime time.Time
+
+	// freshClip returns true if the clipboard has never been pasted.
+	freshClip bool
+
 	// Was the last mouse event actually a double click?
 	// Useful for detecting triple clicks -- if a double click is detected
 	// but the last mouse event was actually a double click, it's a triple click

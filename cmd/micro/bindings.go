@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/gdamore/tcell"
 	"github.com/mitchellh/go-homedir"
@@ -35,6 +36,7 @@ func InitBindings() {
 		"Redo":         Redo,
 		"Copy":         Copy,
 		"Cut":          Cut,
+		"CutLine":      CutLine,
 		"Paste":        Paste,
 		"SelectAll":    SelectAll,
 		"OpenFile":     OpenFile,
@@ -218,6 +220,7 @@ func DefaultBindings() map[string]string {
 		"CtrlY":      "Redo",
 		"CtrlC":      "Copy",
 		"CtrlX":      "Cut",
+		"CtrlK":      "CutLine",
 		"CtrlV":      "Paste",
 		"CtrlA":      "SelectAll",
 		"Home":       "Beginning",
@@ -435,7 +438,30 @@ func Redo(v *View) bool {
 func Copy(v *View) bool {
 	if v.cursor.HasSelection() {
 		clipboard.WriteAll(v.cursor.GetSelection())
+		v.freshClip = true
 	}
+	return true
+}
+
+// AddCopy appends to the clipboard
+func CutLine(v *View) bool {
+	v.cursor.SelectLine()
+	if v.freshClip == true {
+
+		if v.cursor.HasSelection() {
+			if clip, err := clipboard.ReadAll(); err != nil {
+				messenger.Error(err)
+			} else {
+				clipboard.WriteAll(clip + v.cursor.GetSelection())
+			}
+		}
+	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
+		Copy(v)
+	}
+	v.freshClip = true
+	v.lastCutTime = time.Now()
+	v.cursor.DeleteSelection()
+	v.cursor.ResetSelection()
 	return true
 }
 
@@ -445,6 +471,7 @@ func Cut(v *View) bool {
 		clipboard.WriteAll(v.cursor.GetSelection())
 		v.cursor.DeleteSelection()
 		v.cursor.ResetSelection()
+		v.freshClip = true
 	}
 	return true
 }
@@ -459,6 +486,7 @@ func Paste(v *View) bool {
 	clip, _ := clipboard.ReadAll()
 	v.eh.Insert(v.cursor.Loc(), clip)
 	v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
+	v.freshClip = false
 	return true
 }
 
