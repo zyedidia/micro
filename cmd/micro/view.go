@@ -243,7 +243,9 @@ func (v *View) reOpen() {
 			return
 		}
 		buf := NewBuffer(string(file), filename)
-		v.OpenBuffer(buf)
+		v.buf = buf
+		v.matches = Match(v)
+		v.Relocate()
 	}
 }
 
