@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"strings"
 	"time"
 
@@ -383,8 +385,37 @@ func Save(v *View) bool {
 		messenger.Error(err.Error())
 	} else {
 		messenger.Message("Saved " + v.buf.path)
+		switch v.buf.filetype {
+		case "Go":
+			GoSave(v)
+		}
 	}
 	return true
+}
+
+func GoSave(v *View) {
+	if settings.GoImports == true {
+		messenger.Message("Running goimports...")
+		err := goimports(v.buf.path)
+		if err != nil {
+			messenger.Error(err)
+		} else {
+			messenger.Message("Saved " + v.buf.path)
+		}
+		v.reOpen()
+	} else if settings.GoFmt == true {
+		messenger.Message("Running gofmt...")
+		err := gofmt(v.buf.path)
+		if err != nil {
+			messenger.Error(err)
+		} else {
+			messenger.Message("Saved " + v.buf.path)
+		}
+		v.reOpen()
+		return
+	}
+
+	return
 }
 
 // Find opens a prompt and searches forward for the input
@@ -594,4 +625,26 @@ func ToggleRuler(v *View) bool {
 // None is no action
 func None() bool {
 	return false
+}
+
+// gofmt runs gofmt on a file
+func gofmt(file string) error {
+	cmd := exec.Command("gofmt", "-w", file)
+	cmd.Start()
+	err := cmd.Wait()
+	if err != nil {
+		return errors.New("Check syntax ") //TODO: highlight or display locations
+	}
+	return nil
+}
+
+// goimports runs goimports on a file
+func goimports(file string) error {
+	cmd := exec.Command("goimports", "-w", file)
+	cmd.Start()
+	err := cmd.Wait()
+	if err != nil {
+		return errors.New("Check syntax ") //TODO: highlight or display locations
+	}
+	return nil
 }

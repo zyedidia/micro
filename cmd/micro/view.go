@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
@@ -167,6 +168,23 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// the editor is opened
 	v.mouseReleased = true
 	v.lastClickTime = time.Time{}
+}
+
+// Close and Re-open the current file.
+func (v *View) reOpen() {
+	if v.CanClose("Continue? (yes, no, save) ") {
+		file, err := ioutil.ReadFile(v.buf.path)
+		filename := v.buf.name
+
+		if err != nil {
+			messenger.Error(err.Error())
+			return
+		}
+		buf := NewBuffer(string(file), filename)
+		v.buf = buf
+		v.matches = Match(v)
+		v.Relocate()
+	}
 }
 
 // OpenFile opens a new file in the current view
