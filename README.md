@@ -99,38 +99,6 @@ with a version number defined.
 See the [help text](./runtime/help/help.md) for information about keybindings, editor commands, colorschemes and
 configuration options.
 
-# Configuration
-
-Configuration directory:
-
-Micro uses the `$XDG_CONFIG_HOME/micro` as the configuration directory. As per the XDG spec,
-if `$XDG_CONFIG_HOME` is not set, `~/.config/micro` is used as the config directory.
-
-At this point, there isn't much you can configure.
-Micro has a few options which you can set:
-
-* colorscheme
-* tabsize
-* syntax
-* tabsToSpaces
-
-To set an option run Ctrl-e to execute a command, and type `set option value`, so to set the tabsize to 8 it would be `set tabsize 8`. The default is 4.
-
-The syntax option can simply be on or off, so for example to turn syntax highlighting off, run `set syntax off`. The default is on.
-
-The tabsToSpaces option is on or off. It specifies whether to use spaces instead of tabs or not. The default is off.
-
-The colorscheme can be selected from all the files in the `~/.config/micro/colorschemes/` directory. Micro comes by default with three colorschemes:
-
-* default: this is the default colorscheme.
-* solarized: this is the solarized colorscheme (used in the screenshot). You should have the solarized color palette in your terminal to use it.
-* solarized-tc: this is the solarized colorscheme for true color, just make sure your terminal supports true color before using it and that the `MICRO_TRUECOLOR` environment variable is set to 1 before starting micro.
-
-These are embedded in the Go binary, but to see their source code, look [here](./runtime/colorschemes)
-
-Any option you set in the editor will be saved to the file `~/.config/micro/settings.json` so, in effect, your configuration file will be created
-for you. If you'd like to take your configuration with you to another machine, simply copy the `settings.json` to the other machine.
-
 # Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
