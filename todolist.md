@@ -10,17 +10,15 @@
     - [ ] Horizontal splits
     - [ ] Vertical splits
 
-- [ ] Custom bindings
-
 - [ ] Persistent undo/redo (saved between open and closing micro)
 
-- [ ] More options
-    - [ ] Tabs to spaces
-    - [ ] Wrap lines
+- [ ] Wrap lines
 
 ### Done
 
 - [x] Auto indent
+
+- [x] Custom bindings
 
 - [x] Line numbers
 
@@ -64,6 +62,7 @@
 - [x] Options
     - [x] Saved between sessions
     - [x] Colorscheme
+    - [x] Tabs to spaces
     - [x] tab size
 
 - [x] Undo/redo
