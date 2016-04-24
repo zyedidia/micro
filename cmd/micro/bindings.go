@@ -21,36 +21,36 @@ func InitBindings() {
 	bindings = make(map[tcell.Key]func(*View) bool)
 
 	actions := map[string]func(*View) bool{
-		"CursorUp":     CursorUp,
-		"CursorDown":   CursorDown,
-		"CursorLeft":   CursorLeft,
-		"CursorRight":  CursorRight,
-		"InsertEnter":  InsertEnter,
-		"InsertSpace":  InsertSpace,
-		"Backspace":    Backspace,
-		"Delete":       Delete,
-		"InsertTab":    InsertTab,
-		"Save":         Save,
-		"Find":         Find,
-		"FindNext":     FindNext,
-		"FindPrevious": FindPrevious,
-		"Undo":         Undo,
-		"Redo":         Redo,
-		"Copy":         Copy,
-		"Cut":          Cut,
-		"CutLine":      CutLine,
-		"Paste":        Paste,
-		"SelectAll":    SelectAll,
-		"OpenFile":     OpenFile,
-		"Beginning":    Beginning,
-		"End":          End,
-		"PageUp":       PageUp,
-		"PageDown":     PageDown,
-		"HalfPageUp":   HalfPageUp,
-		"HalfPageDown": HalfPageDown,
-		"StartOfLine":  StartOfLine,
-		"EndOfLine":    EndOfLine,
-		"ToggleRuler":  ToggleRuler,
+		"CursorUp":     (*View).CursorUp,
+		"CursorDown":   (*View).CursorDown,
+		"CursorLeft":   (*View).CursorLeft,
+		"CursorRight":  (*View).CursorRight,
+		"InsertEnter":  (*View).InsertEnter,
+		"InsertSpace":  (*View).InsertSpace,
+		"Backspace":    (*View).Backspace,
+		"Delete":       (*View).Delete,
+		"InsertTab":    (*View).InsertTab,
+		"Save":         (*View).Save,
+		"Find":         (*View).Find,
+		"FindNext":     (*View).FindNext,
+		"FindPrevious": (*View).FindPrevious,
+		"Undo":         (*View).Undo,
+		"Redo":         (*View).Redo,
+		"Copy":         (*View).Copy,
+		"Cut":          (*View).Cut,
+		"CutLine":      (*View).CutLine,
+		"Paste":        (*View).Paste,
+		"SelectAll":    (*View).SelectAll,
+		"OpenFile":     (*View).OpenFile,
+		"Beginning":    (*View).Beginning,
+		"End":          (*View).End,
+		"PageUp":       (*View).PageUp,
+		"PageDown":     (*View).PageDown,
+		"HalfPageUp":   (*View).HalfPageUp,
+		"HalfPageDown": (*View).HalfPageDown,
+		"StartOfLine":  (*View).StartOfLine,
+		"EndOfLine":    (*View).EndOfLine,
+		"ToggleRuler":  (*View).ToggleRuler,
 	}
 
 	keys := map[string]tcell.Key{
@@ -242,35 +242,35 @@ func DefaultBindings() map[string]string {
 }
 
 // CursorUp moves the cursor up
-func CursorUp(v *View) bool {
+func (v *View) CursorUp() bool {
 	v.cursor.ResetSelection()
 	v.cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
-func CursorDown(v *View) bool {
+func (v *View) CursorDown() bool {
 	v.cursor.ResetSelection()
 	v.cursor.Down()
 	return true
 }
 
 // CursorLeft moves the cursor left
-func CursorLeft(v *View) bool {
+func (v *View) CursorLeft() bool {
 	v.cursor.ResetSelection()
 	v.cursor.Left()
 	return true
 }
 
 // CursorRight moves the cursor right
-func CursorRight(v *View) bool {
+func (v *View) CursorRight() bool {
 	v.cursor.ResetSelection()
 	v.cursor.Right()
 	return true
 }
 
 // InsertSpace inserts a space
-func InsertSpace(v *View) bool {
+func (v *View) InsertSpace() bool {
 	// Insert a space
 	if v.cursor.HasSelection() {
 		v.cursor.DeleteSelection()
@@ -282,7 +282,7 @@ func InsertSpace(v *View) bool {
 }
 
 // InsertEnter inserts a newline plus possible some whitespace if autoindent is on
-func InsertEnter(v *View) bool {
+func (v *View) InsertEnter() bool {
 	// Insert a newline
 	if v.cursor.HasSelection() {
 		v.cursor.DeleteSelection()
@@ -304,7 +304,7 @@ func InsertEnter(v *View) bool {
 }
 
 // Backspace deletes the previous character
-func Backspace(v *View) bool {
+func (v *View) Backspace() bool {
 	// Delete a character
 	if v.cursor.HasSelection() {
 		v.cursor.DeleteSelection()
@@ -341,7 +341,7 @@ func Backspace(v *View) bool {
 }
 
 // Delete deletes the next character
-func Delete(v *View) bool {
+func (v *View) Delete() bool {
 	if v.cursor.HasSelection() {
 		v.cursor.DeleteSelection()
 		v.cursor.ResetSelection()
@@ -355,7 +355,7 @@ func Delete(v *View) bool {
 }
 
 // InsertTab inserts a tab or spaces
-func InsertTab(v *View) bool {
+func (v *View) InsertTab() bool {
 	// Insert a tab
 	if v.cursor.HasSelection() {
 		v.cursor.DeleteSelection()
@@ -374,7 +374,7 @@ func InsertTab(v *View) bool {
 }
 
 // Save the buffer to disk
-func Save(v *View) bool {
+func (v *View) Save() bool {
 	// If this is an empty buffer, ask for a filename
 	if v.buf.path == "" {
 		filename, canceled := messenger.Prompt("Filename: ")
@@ -392,7 +392,7 @@ func Save(v *View) bool {
 		messenger.Message("Saved " + v.buf.path)
 		switch v.buf.filetype {
 		case "Go":
-			GoSave(v)
+			v.GoSave()
 		}
 	}
 	return true
@@ -400,7 +400,7 @@ func Save(v *View) bool {
 
 // GoSave saves the current file (must be a go file) and runs goimports or gofmt
 // depending on the user's configuration
-func GoSave(v *View) {
+func (v *View) GoSave() {
 	if settings.GoImports == true {
 		messenger.Message("Running goimports...")
 		err := goimports(v.buf.path)
@@ -426,7 +426,7 @@ func GoSave(v *View) {
 }
 
 // Find opens a prompt and searches forward for the input
-func Find(v *View) bool {
+func (v *View) Find() bool {
 	if v.cursor.HasSelection() {
 		searchStart = v.cursor.curSelection[1]
 	} else {
@@ -437,7 +437,7 @@ func Find(v *View) bool {
 }
 
 // FindNext searches forwards for the last used search term
-func FindNext(v *View) bool {
+func (v *View) FindNext() bool {
 	if v.cursor.HasSelection() {
 		searchStart = v.cursor.curSelection[1]
 	} else {
@@ -449,7 +449,7 @@ func FindNext(v *View) bool {
 }
 
 // FindPrevious searches backwards for the last used search term
-func FindPrevious(v *View) bool {
+func (v *View) FindPrevious() bool {
 	if v.cursor.HasSelection() {
 		searchStart = v.cursor.curSelection[0]
 	} else {
@@ -461,19 +461,19 @@ func FindPrevious(v *View) bool {
 }
 
 // Undo undoes the last action
-func Undo(v *View) bool {
+func (v *View) Undo() bool {
 	v.eh.Undo()
 	return true
 }
 
 // Redo redoes the last action
-func Redo(v *View) bool {
+func (v *View) Redo() bool {
 	v.eh.Redo()
 	return true
 }
 
 // Copy the selection to the system clipboard
-func Copy(v *View) bool {
+func (v *View) Copy() bool {
 	if v.cursor.HasSelection() {
 		clipboard.WriteAll(v.cursor.GetSelection())
 		v.freshClip = true
@@ -482,7 +482,7 @@ func Copy(v *View) bool {
 }
 
 // CutLine cuts the current line to the clipboard
-func CutLine(v *View) bool {
+func (v *View) CutLine() bool {
 	v.cursor.SelectLine()
 	if v.freshClip == true {
 
@@ -494,7 +494,7 @@ func CutLine(v *View) bool {
 			}
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
-		Copy(v)
+		v.Copy()
 	}
 	v.freshClip = true
 	v.lastCutTime = time.Now()
@@ -504,7 +504,7 @@ func CutLine(v *View) bool {
 }
 
 // Cut the selection to the system clipboard
-func Cut(v *View) bool {
+func (v *View) Cut() bool {
 	if v.cursor.HasSelection() {
 		clipboard.WriteAll(v.cursor.GetSelection())
 		v.cursor.DeleteSelection()
@@ -516,7 +516,7 @@ func Cut(v *View) bool {
 
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
-func Paste(v *View) bool {
+func (v *View) Paste() bool {
 	if v.cursor.HasSelection() {
 		v.cursor.DeleteSelection()
 		v.cursor.ResetSelection()
@@ -529,7 +529,7 @@ func Paste(v *View) bool {
 }
 
 // SelectAll selects the entire buffer
-func SelectAll(v *View) bool {
+func (v *View) SelectAll() bool {
 	v.cursor.curSelection[1] = 0
 	v.cursor.curSelection[0] = v.buf.Len()
 	// Put the cursor at the beginning
@@ -539,7 +539,7 @@ func SelectAll(v *View) bool {
 }
 
 // OpenFile opens a new file in the buffer
-func OpenFile(v *View) bool {
+func (v *View) OpenFile() bool {
 	if v.CanClose("Continue? (yes, no, save) ") {
 		filename, canceled := messenger.Prompt("File to open: ")
 		if canceled {
@@ -560,13 +560,13 @@ func OpenFile(v *View) bool {
 }
 
 // Beginning moves the viewport to the start of the buffer
-func Beginning(v *View) bool {
+func (v *View) Beginning() bool {
 	v.topline = 0
 	return false
 }
 
 // End moves the viewport to the end of the buffer
-func End(v *View) bool {
+func (v *View) End() bool {
 	if v.height > len(v.buf.lines) {
 		v.topline = 0
 	} else {
@@ -576,7 +576,7 @@ func End(v *View) bool {
 }
 
 // PageUp scrolls the view up a page
-func PageUp(v *View) bool {
+func (v *View) PageUp() bool {
 	if v.topline > v.height {
 		v.ScrollUp(v.height)
 	} else {
@@ -586,7 +586,7 @@ func PageUp(v *View) bool {
 }
 
 // PageDown scrolls the view down a page
-func PageDown(v *View) bool {
+func (v *View) PageDown() bool {
 	if len(v.buf.lines)-(v.topline+v.height) > v.height {
 		v.ScrollDown(v.height)
 	} else if len(v.buf.lines) >= v.height {
@@ -596,7 +596,7 @@ func PageDown(v *View) bool {
 }
 
 // HalfPageUp scrolls the view up half a page
-func HalfPageUp(v *View) bool {
+func (v *View) HalfPageUp() bool {
 	if v.topline > v.height/2 {
 		v.ScrollUp(v.height / 2)
 	} else {
@@ -606,7 +606,7 @@ func HalfPageUp(v *View) bool {
 }
 
 // HalfPageDown scrolls the view down half a page
-func HalfPageDown(v *View) bool {
+func (v *View) HalfPageDown() bool {
 	if len(v.buf.lines)-(v.topline+v.height) > v.height/2 {
 		v.ScrollDown(v.height / 2)
 	} else {
@@ -618,7 +618,7 @@ func HalfPageDown(v *View) bool {
 }
 
 // ToggleRuler turns line numbers off and on
-func ToggleRuler(v *View) bool {
+func (v *View) ToggleRuler() bool {
 	if settings.Ruler == false {
 		settings.Ruler = true
 	} else {
@@ -628,13 +628,13 @@ func ToggleRuler(v *View) bool {
 }
 
 // StartOfLine moves the cursor to the start of the line
-func StartOfLine(v *View) bool {
+func (v *View) StartOfLine() bool {
 	v.cursor.Start()
 	return true
 }
 
 // EndOfLine moves the cursor to the end of the line
-func EndOfLine(v *View) bool {
+func (v *View) EndOfLine() bool {
 	v.cursor.End()
 	return true
 }

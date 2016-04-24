@@ -137,7 +137,7 @@ func (v *View) CanClose(msg string) bool {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
 				return true
 			} else if strings.ToLower(quit) == "save" || strings.ToLower(quit) == "s" {
-				Save(v)
+				v.Save()
 				return true
 			}
 		}

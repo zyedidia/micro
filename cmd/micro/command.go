@@ -103,7 +103,7 @@ func HandleCommand(input string, view *View) {
 			os.Exit(0)
 		}
 	case "save":
-		Save(view)
+		view.Save()
 	case "replace":
 		r := regexp.MustCompile(`"[^"\\]*(?:\\.[^"\\]*)*"|[^\s]*`)
 		replaceCmd := r.FindAllString(strings.Join(args, " "), -1)
