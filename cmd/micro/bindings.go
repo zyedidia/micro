@@ -232,8 +232,8 @@ func DefaultBindings() map[string]string {
 		"CtrlA":      "SelectAll",
 		"Home":       "Beginning",
 		"End":        "End",
-		"PageUp":     "PageUp",
-		"PageDown":   "PageDown",
+		"PgUp":       "PageUp",
+		"PgDn":       "PageDown",
 		"CtrlU":      "HalfPageUp",
 		"CtrlD":      "HalfPageDown",
 		"CtrlR":      "ToggleRuler",
@@ -589,10 +589,8 @@ func PageUp(v *View) bool {
 func PageDown(v *View) bool {
 	if len(v.buf.lines)-(v.topline+v.height) > v.height {
 		v.ScrollDown(v.height)
-	} else {
-		if len(v.buf.lines) >= v.height {
-			v.topline = len(v.buf.lines) - v.height
-		}
+	} else if len(v.buf.lines) >= v.height {
+		v.topline = len(v.buf.lines) - v.height
 	}
 	return false
 }
