@@ -17,11 +17,20 @@ import (
 // This will write the message, and wait for the user
 // to press and key to continue
 func TermMessage(msg ...interface{}) {
+	screenWasNil := screen == nil
+	if !screenWasNil {
+		screen.Fini()
+	}
+
 	fmt.Println(msg...)
 	fmt.Print("\nPress enter to continue")
 
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
+
+	if !screenWasNil {
+		InitScreen()
+	}
 }
 
 // TermError sends an error to the user in the terminal. Like TermMessage except formatted

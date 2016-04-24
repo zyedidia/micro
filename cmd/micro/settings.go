@@ -36,7 +36,10 @@ func InitSettings() {
 			return
 		}
 
-		json.Unmarshal(input, &settings)
+		err = json.Unmarshal(input, &settings)
+		if err != nil {
+			TermMessage("Error reading settings.json:", err.Error())
+		}
 	} else {
 		settings = DefaultSettings()
 		err := WriteSettings(filename)

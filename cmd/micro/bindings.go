@@ -48,6 +48,8 @@ func InitBindings() {
 		"PageDown":     PageDown,
 		"HalfPageUp":   HalfPageUp,
 		"HalfPageDown": HalfPageDown,
+		"StartOfLine":  StartOfLine,
+		"EndOfLine":    EndOfLine,
 		"ToggleRuler":  ToggleRuler,
 	}
 
@@ -186,11 +188,14 @@ func InitBindings() {
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
-			TermMessage("Error reading settings.json file: " + err.Error())
+			TermMessage("Error reading bindings.json file: " + err.Error())
 			return
 		}
 
-		json.Unmarshal(input, &parsed)
+		err = json.Unmarshal(input, &parsed)
+		if err != nil {
+			TermMessage("Error reading bindings.json:", err.Error())
+		}
 	}
 
 	for k, v := range defaults {
@@ -393,6 +398,8 @@ func Save(v *View) bool {
 	return true
 }
 
+// GoSave saves the current file (must be a go file) and runs goimports or gofmt
+// depending on the user's configuration
 func GoSave(v *View) {
 	if settings.GoImports == true {
 		messenger.Message("Running goimports...")
@@ -474,7 +481,7 @@ func Copy(v *View) bool {
 	return true
 }
 
-// AddCopy appends to the clipboard
+// CutLine cuts the current line to the clipboard
 func CutLine(v *View) bool {
 	v.cursor.SelectLine()
 	if v.freshClip == true {
@@ -620,6 +627,18 @@ func ToggleRuler(v *View) bool {
 		settings.Ruler = false
 	}
 	return false
+}
+
+// StartOfLine moves the cursor to the start of the line
+func StartOfLine(v *View) bool {
+	v.cursor.Start()
+	return true
+}
+
+// EndOfLine moves the cursor to the end of the line
+func EndOfLine(v *View) bool {
+	v.cursor.End()
+	return true
 }
 
 // None is no action
