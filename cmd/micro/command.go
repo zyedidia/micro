@@ -46,6 +46,7 @@ func HandleShellCommand(input string, view *View, openTerm bool) {
 		}()
 	} else {
 		screen.Fini()
+		screen = nil
 
 		args := strings.Split(input, " ")[1:]
 
