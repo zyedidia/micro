@@ -185,6 +185,8 @@ func main() {
 	InitBindings()
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
+	// Load the help files
+	LoadHelp()
 
 	buf := NewBuffer(string(input), filename)
 
@@ -242,7 +244,7 @@ func main() {
 					}
 				case tcell.KeyCtrlG:
 					if !helpOpen {
-						helpBuffer := NewBuffer(helpTxt, "")
+						helpBuffer := NewBuffer(helpTxt, "help.md")
 						helpBuffer.name = "Help"
 						helpOpen = true
 						view.OpenBuffer(helpBuffer)
