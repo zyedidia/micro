@@ -44,8 +44,8 @@ These are the default keybindings, along with their actions.
 * Ctrl-d:   Half page down
 * PageUp:   Page up
 * PageDown: Page down
-* Home:     Go to beginning of file
-* End:      Go to end of file
+* Home:     Go to beginning of line
+* End:      Go to end of line
 * Ctrl-r:   Toggle line numbers
 
 The buffer bindings may be rebound using the `~/.config/micro/bindings.json` file. Each key is bound to an action.
