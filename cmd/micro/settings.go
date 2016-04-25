@@ -102,7 +102,7 @@ func SetOption(view *View, args []string) {
 
 		if option == "colorscheme" {
 			LoadSyntaxFiles()
-			view.buf.UpdateRules()
+			view.Buf.UpdateRules()
 		}
 
 		err := WriteSettings(filename)

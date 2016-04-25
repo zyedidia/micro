@@ -297,242 +297,242 @@ func DefaultBindings() map[string]string {
 
 // CursorUp moves the cursor up
 func (v *View) CursorUp() bool {
-	if v.cursor.HasSelection() {
-		v.cursor.SetLoc(v.cursor.curSelection[0])
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.SetLoc(v.Cursor.curSelection[0])
+		v.Cursor.ResetSelection()
 	}
-	v.cursor.Up()
+	v.Cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
 func (v *View) CursorDown() bool {
-	if v.cursor.HasSelection() {
-		v.cursor.SetLoc(v.cursor.curSelection[1])
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.SetLoc(v.Cursor.curSelection[1])
+		v.Cursor.ResetSelection()
 	}
-	v.cursor.Down()
+	v.Cursor.Down()
 	return true
 }
 
 // CursorLeft moves the cursor left
 func (v *View) CursorLeft() bool {
-	if v.cursor.HasSelection() {
-		v.cursor.SetLoc(v.cursor.curSelection[0])
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.SetLoc(v.Cursor.curSelection[0])
+		v.Cursor.ResetSelection()
 	} else {
-		v.cursor.Left()
+		v.Cursor.Left()
 	}
 	return true
 }
 
 // CursorRight moves the cursor right
 func (v *View) CursorRight() bool {
-	if v.cursor.HasSelection() {
-		v.cursor.SetLoc(v.cursor.curSelection[1] - 1)
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.SetLoc(v.Cursor.curSelection[1] - 1)
+		v.Cursor.ResetSelection()
 	} else {
-		v.cursor.Right()
+		v.Cursor.Right()
 	}
 	return true
 }
 
 // WordRight moves the cursor one word to the right
 func (v *View) WordRight() bool {
-	v.cursor.WordRight()
+	v.Cursor.WordRight()
 	return true
 }
 
 // WordLeft moves the cursor one word to the left
 func (v *View) WordLeft() bool {
-	v.cursor.WordLeft()
+	v.Cursor.WordLeft()
 	return true
 }
 
 // SelectUp selects up one line
 func (v *View) SelectUp() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.Up()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.Up()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // SelectDown selects down one line
 func (v *View) SelectDown() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.Down()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.Down()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // SelectLeft selects the character to the left of the cursor
 func (v *View) SelectLeft() bool {
-	loc := v.cursor.Loc()
-	count := v.buf.Len() - 1
+	loc := v.Cursor.Loc()
+	count := v.Buf.Len() - 1
 	if loc > count {
 		loc = count
 	}
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.Left()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.Left()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // SelectRight selects the character to the right of the cursor
 func (v *View) SelectRight() bool {
-	loc := v.cursor.Loc()
-	count := v.buf.Len() - 1
+	loc := v.Cursor.Loc()
+	count := v.Buf.Len() - 1
 	if loc > count {
 		loc = count
 	}
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.Right()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.Right()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // SelectWordRight selects the word to the right of the cursor
 func (v *View) SelectWordRight() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.WordRight()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.WordRight()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // SelectWordLeft selects the word to the left of the cursor
 func (v *View) SelectWordLeft() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.WordLeft()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.WordLeft()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // StartOfLine moves the cursor to the start of the line
 func (v *View) StartOfLine() bool {
-	v.cursor.Start()
+	v.Cursor.Start()
 	return true
 }
 
 // EndOfLine moves the cursor to the end of the line
 func (v *View) EndOfLine() bool {
-	v.cursor.End()
+	v.Cursor.End()
 	return true
 }
 
 // SelectToStartOfLine selects to the start of the current line
 func (v *View) SelectToStartOfLine() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.Start()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.Start()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // SelectToEndOfLine selects to the end of the current line
 func (v *View) SelectToEndOfLine() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
-	v.cursor.End()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.Cursor.End()
+	v.Cursor.SelectTo(v.Cursor.Loc())
 	return true
 }
 
 // CursorStart moves the cursor to the start of the buffer
 func (v *View) CursorStart() bool {
-	v.cursor.x = 0
-	v.cursor.y = 0
+	v.Cursor.x = 0
+	v.Cursor.y = 0
 	return true
 }
 
 // CursorEnd moves the cursor to the end of the buffer
 func (v *View) CursorEnd() bool {
-	v.cursor.SetLoc(v.buf.Len())
+	v.Cursor.SetLoc(v.Buf.Len())
 	return true
 }
 
 // SelectToStart selects the text from the cursor to the start of the buffer
 func (v *View) SelectToStart() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
 	v.CursorStart()
-	v.cursor.SelectTo(0)
+	v.Cursor.SelectTo(0)
 	return true
 }
 
 // SelectToEnd selects the text from the cursor to the end of the buffer
 func (v *View) SelectToEnd() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
+	loc := v.Cursor.Loc()
+	if !v.Cursor.HasSelection() {
+		v.Cursor.origSelection[0] = loc
 	}
 	v.CursorEnd()
-	v.cursor.SelectTo(v.buf.Len())
+	v.Cursor.SelectTo(v.Buf.Len())
 	return true
 }
 
 // InsertSpace inserts a space
 func (v *View) InsertSpace() bool {
 	// Insert a space
-	if v.cursor.HasSelection() {
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
 	}
-	v.eh.Insert(v.cursor.Loc(), " ")
-	v.cursor.Right()
+	v.eh.Insert(v.Cursor.Loc(), " ")
+	v.Cursor.Right()
 	return true
 }
 
 // InsertEnter inserts a newline plus possible some whitespace if autoindent is on
 func (v *View) InsertEnter() bool {
 	// Insert a newline
-	if v.cursor.HasSelection() {
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
 	}
 
-	v.eh.Insert(v.cursor.Loc(), "\n")
-	ws := GetLeadingWhitespace(v.buf.lines[v.cursor.y])
-	v.cursor.Right()
+	v.eh.Insert(v.Cursor.Loc(), "\n")
+	ws := GetLeadingWhitespace(v.Buf.Lines[v.Cursor.y])
+	v.Cursor.Right()
 
 	if settings["autoindent"].(bool) {
-		v.eh.Insert(v.cursor.Loc(), ws)
+		v.eh.Insert(v.Cursor.Loc(), ws)
 		for i := 0; i < len(ws); i++ {
-			v.cursor.Right()
+			v.Cursor.Right()
 		}
 	}
-	v.cursor.lastVisualX = v.cursor.GetVisualX()
+	v.Cursor.lastVisualX = v.Cursor.GetVisualX()
 	return true
 }
 
 // Backspace deletes the previous character
 func (v *View) Backspace() bool {
 	// Delete a character
-	if v.cursor.HasSelection() {
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
-	} else if v.cursor.Loc() > 0 {
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
+	} else if v.Cursor.Loc() > 0 {
 		// We have to do something a bit hacky here because we want to
 		// delete the line by first moving left and then deleting backwards
 		// but the undo redo would place the cursor in the wrong place
@@ -542,36 +542,36 @@ func (v *View) Backspace() bool {
 		// If the user is using spaces instead of tabs and they are deleting
 		// whitespace at the start of the line, we should delete as if its a
 		// tab (tabSize number of spaces)
-		lineStart := v.buf.lines[v.cursor.y][:v.cursor.x]
+		lineStart := v.Buf.Lines[v.Cursor.y][:v.Cursor.x]
 		tabSize := int(settings["tabsize"].(float64))
 		if settings["tabsToSpaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
-			loc := v.cursor.Loc()
-			v.cursor.SetLoc(loc - tabSize)
-			cx, cy := v.cursor.x, v.cursor.y
-			v.cursor.SetLoc(loc)
+			loc := v.Cursor.Loc()
+			v.Cursor.SetLoc(loc - tabSize)
+			cx, cy := v.Cursor.x, v.Cursor.y
+			v.Cursor.SetLoc(loc)
 			v.eh.Remove(loc-tabSize, loc)
-			v.cursor.x, v.cursor.y = cx, cy
+			v.Cursor.x, v.Cursor.y = cx, cy
 		} else {
-			v.cursor.Left()
-			cx, cy := v.cursor.x, v.cursor.y
-			v.cursor.Right()
-			loc := v.cursor.Loc()
+			v.Cursor.Left()
+			cx, cy := v.Cursor.x, v.Cursor.y
+			v.Cursor.Right()
+			loc := v.Cursor.Loc()
 			v.eh.Remove(loc-1, loc)
-			v.cursor.x, v.cursor.y = cx, cy
+			v.Cursor.x, v.Cursor.y = cx, cy
 		}
 	}
-	v.cursor.lastVisualX = v.cursor.GetVisualX()
+	v.Cursor.lastVisualX = v.Cursor.GetVisualX()
 	return true
 }
 
 // Delete deletes the next character
 func (v *View) Delete() bool {
-	if v.cursor.HasSelection() {
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
 	} else {
-		loc := v.cursor.Loc()
-		if loc < v.buf.Len() {
+		loc := v.Cursor.Loc()
+		if loc < v.Buf.Len() {
 			v.eh.Remove(loc, loc+1)
 		}
 	}
@@ -581,19 +581,19 @@ func (v *View) Delete() bool {
 // InsertTab inserts a tab or spaces
 func (v *View) InsertTab() bool {
 	// Insert a tab
-	if v.cursor.HasSelection() {
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
 	}
 	if settings["tabsToSpaces"].(bool) {
 		tabSize := int(settings["tabsize"].(float64))
-		v.eh.Insert(v.cursor.Loc(), Spaces(tabSize))
+		v.eh.Insert(v.Cursor.Loc(), Spaces(tabSize))
 		for i := 0; i < tabSize; i++ {
-			v.cursor.Right()
+			v.Cursor.Right()
 		}
 	} else {
-		v.eh.Insert(v.cursor.Loc(), "\t")
-		v.cursor.Right()
+		v.eh.Insert(v.Cursor.Loc(), "\t")
+		v.Cursor.Right()
 	}
 	return true
 }
@@ -601,31 +601,32 @@ func (v *View) InsertTab() bool {
 // Save the buffer to disk
 func (v *View) Save() bool {
 	// If this is an empty buffer, ask for a filename
-	if v.buf.path == "" {
+	if v.Buf.Path == "" {
 		filename, canceled := messenger.Prompt("Filename: ")
 		if !canceled {
-			v.buf.path = filename
-			v.buf.name = filename
+			v.Buf.Path = filename
+			v.Buf.Name = filename
 		} else {
 			return true
 		}
 	}
-	err := v.buf.Save()
+	err := v.Buf.Save()
 	if err != nil {
 		messenger.Error(err.Error())
 	} else {
-		messenger.Message("Saved " + v.buf.path)
-		switch v.buf.filetype {
+		messenger.Message("Saved " + v.Buf.Path)
+		switch v.Buf.Filetype {
 		case "Go":
 			v.GoSave()
 		}
 	}
 	if err := L.CallByParam(lua.P{
 		Fn:      L.GetGlobal("onSave"),
-		NRet:    1,
+		NRet:    0,
 		Protect: true,
 	}); err != nil {
 		// The function isn't defined by this plugin
+		messenger.Error(err)
 		return true
 	}
 	return true
@@ -636,20 +637,20 @@ func (v *View) Save() bool {
 func (v *View) GoSave() {
 	if settings["goimports"] == true {
 		messenger.Message("Running goimports...")
-		err := goimports(v.buf.path)
+		err := goimports(v.Buf.Path)
 		if err != nil {
 			messenger.Error(err)
 		} else {
-			messenger.Message("Saved " + v.buf.path)
+			messenger.Message("Saved " + v.Buf.Path)
 		}
 		v.ReOpen()
 	} else if settings["gofmt"] == true {
 		messenger.Message("Running gofmt...")
-		err := gofmt(v.buf.path)
+		err := gofmt(v.Buf.Path)
 		if err != nil {
 			messenger.Error(err)
 		} else {
-			messenger.Message("Saved " + v.buf.path)
+			messenger.Message("Saved " + v.Buf.Path)
 		}
 		v.ReOpen()
 		return
@@ -660,10 +661,10 @@ func (v *View) GoSave() {
 
 // Find opens a prompt and searches forward for the input
 func (v *View) Find() bool {
-	if v.cursor.HasSelection() {
-		searchStart = v.cursor.curSelection[1]
+	if v.Cursor.HasSelection() {
+		searchStart = v.Cursor.curSelection[1]
 	} else {
-		searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+		searchStart = ToCharPos(v.Cursor.x, v.Cursor.y, v.Buf)
 	}
 	BeginSearch()
 	return true
@@ -671,10 +672,10 @@ func (v *View) Find() bool {
 
 // FindNext searches forwards for the last used search term
 func (v *View) FindNext() bool {
-	if v.cursor.HasSelection() {
-		searchStart = v.cursor.curSelection[1]
+	if v.Cursor.HasSelection() {
+		searchStart = v.Cursor.curSelection[1]
 	} else {
-		searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+		searchStart = ToCharPos(v.Cursor.x, v.Cursor.y, v.Buf)
 	}
 	messenger.Message("Find: " + lastSearch)
 	Search(lastSearch, v, true)
@@ -683,10 +684,10 @@ func (v *View) FindNext() bool {
 
 // FindPrevious searches backwards for the last used search term
 func (v *View) FindPrevious() bool {
-	if v.cursor.HasSelection() {
-		searchStart = v.cursor.curSelection[0]
+	if v.Cursor.HasSelection() {
+		searchStart = v.Cursor.curSelection[0]
 	} else {
-		searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
+		searchStart = ToCharPos(v.Cursor.x, v.Cursor.y, v.Buf)
 	}
 	messenger.Message("Find: " + lastSearch)
 	Search(lastSearch, v, false)
@@ -707,8 +708,8 @@ func (v *View) Redo() bool {
 
 // Copy the selection to the system clipboard
 func (v *View) Copy() bool {
-	if v.cursor.HasSelection() {
-		clipboard.WriteAll(v.cursor.GetSelection())
+	if v.Cursor.HasSelection() {
+		clipboard.WriteAll(v.Cursor.GetSelection())
 		v.freshClip = true
 	}
 	return true
@@ -716,14 +717,14 @@ func (v *View) Copy() bool {
 
 // CutLine cuts the current line to the clipboard
 func (v *View) CutLine() bool {
-	v.cursor.SelectLine()
+	v.Cursor.SelectLine()
 	if v.freshClip == true {
 
-		if v.cursor.HasSelection() {
+		if v.Cursor.HasSelection() {
 			if clip, err := clipboard.ReadAll(); err != nil {
 				messenger.Error(err)
 			} else {
-				clipboard.WriteAll(clip + v.cursor.GetSelection())
+				clipboard.WriteAll(clip + v.Cursor.GetSelection())
 			}
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
@@ -731,17 +732,17 @@ func (v *View) CutLine() bool {
 	}
 	v.freshClip = true
 	v.lastCutTime = time.Now()
-	v.cursor.DeleteSelection()
-	v.cursor.ResetSelection()
+	v.Cursor.DeleteSelection()
+	v.Cursor.ResetSelection()
 	return true
 }
 
 // Cut the selection to the system clipboard
 func (v *View) Cut() bool {
-	if v.cursor.HasSelection() {
-		clipboard.WriteAll(v.cursor.GetSelection())
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		clipboard.WriteAll(v.Cursor.GetSelection())
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
 		v.freshClip = true
 	}
 	return true
@@ -750,24 +751,24 @@ func (v *View) Cut() bool {
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
 func (v *View) Paste() bool {
-	if v.cursor.HasSelection() {
-		v.cursor.DeleteSelection()
-		v.cursor.ResetSelection()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
 	}
 	clip, _ := clipboard.ReadAll()
-	v.eh.Insert(v.cursor.Loc(), clip)
-	v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
+	v.eh.Insert(v.Cursor.Loc(), clip)
+	v.Cursor.SetLoc(v.Cursor.Loc() + Count(clip))
 	v.freshClip = false
 	return true
 }
 
 // SelectAll selects the entire buffer
 func (v *View) SelectAll() bool {
-	v.cursor.curSelection[1] = 0
-	v.cursor.curSelection[0] = v.buf.Len()
+	v.Cursor.curSelection[1] = 0
+	v.Cursor.curSelection[0] = v.Buf.Len()
 	// Put the cursor at the beginning
-	v.cursor.x = 0
-	v.cursor.y = 0
+	v.Cursor.x = 0
+	v.Cursor.y = 0
 	return true
 }
 
@@ -794,57 +795,57 @@ func (v *View) OpenFile() bool {
 
 // Start moves the viewport to the start of the buffer
 func (v *View) Start() bool {
-	v.topline = 0
+	v.Topline = 0
 	return false
 }
 
 // End moves the viewport to the end of the buffer
 func (v *View) End() bool {
-	if v.height > v.buf.numLines {
-		v.topline = 0
+	if v.height > v.Buf.NumLines {
+		v.Topline = 0
 	} else {
-		v.topline = v.buf.numLines - v.height
+		v.Topline = v.Buf.NumLines - v.height
 	}
 	return false
 }
 
 // PageUp scrolls the view up a page
 func (v *View) PageUp() bool {
-	if v.topline > v.height {
+	if v.Topline > v.height {
 		v.ScrollUp(v.height)
 	} else {
-		v.topline = 0
+		v.Topline = 0
 	}
 	return false
 }
 
 // PageDown scrolls the view down a page
 func (v *View) PageDown() bool {
-	if v.buf.numLines-(v.topline+v.height) > v.height {
+	if v.Buf.NumLines-(v.Topline+v.height) > v.height {
 		v.ScrollDown(v.height)
-	} else if v.buf.numLines >= v.height {
-		v.topline = v.buf.numLines - v.height
+	} else if v.Buf.NumLines >= v.height {
+		v.Topline = v.Buf.NumLines - v.height
 	}
 	return false
 }
 
 // HalfPageUp scrolls the view up half a page
 func (v *View) HalfPageUp() bool {
-	if v.topline > v.height/2 {
+	if v.Topline > v.height/2 {
 		v.ScrollUp(v.height / 2)
 	} else {
-		v.topline = 0
+		v.Topline = 0
 	}
 	return false
 }
 
 // HalfPageDown scrolls the view down half a page
 func (v *View) HalfPageDown() bool {
-	if v.buf.numLines-(v.topline+v.height) > v.height/2 {
+	if v.Buf.NumLines-(v.Topline+v.height) > v.height/2 {
 		v.ScrollDown(v.height / 2)
 	} else {
-		if v.buf.numLines >= v.height {
-			v.topline = v.buf.numLines - v.height
+		if v.Buf.NumLines >= v.height {
+			v.Topline = v.Buf.NumLines - v.height
 		}
 	}
 	return false
@@ -874,12 +875,12 @@ func (v *View) JumpLine() bool {
 		return false
 	}
 	// Move cursor and view if possible.
-	if lineint < v.buf.numLines {
-		v.cursor.x = 0
-		v.cursor.y = lineint
+	if lineint < v.Buf.NumLines {
+		v.Cursor.x = 0
+		v.Cursor.y = lineint
 		return true
 	}
-	messenger.Error("Only ", v.buf.numLines, " lines to jump")
+	messenger.Error("Only ", v.Buf.NumLines, " lines to jump")
 	return false
 }
 

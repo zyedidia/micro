@@ -261,7 +261,7 @@ func main() {
 				case tcell.KeyCtrlG:
 					if !helpOpen {
 						helpBuffer := NewBuffer(helpTxt, "help.md")
-						helpBuffer.name = "Help"
+						helpBuffer.Name = "Help"
 						helpOpen = true
 						view.OpenBuffer(helpBuffer)
 					} else {

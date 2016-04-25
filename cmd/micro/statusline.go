@@ -17,14 +17,14 @@ func (sline *Statusline) Display() {
 	// We'll draw the line at the lowest line in the view
 	y := sline.view.height
 
-	file := sline.view.buf.name
+	file := sline.view.Buf.Name
 	// If the name is empty, use 'No name'
 	if file == "" {
 		file = "No name"
 	}
 
 	// If the buffer is dirty (has been modified) write a little '+'
-	if sline.view.buf.IsDirty() {
+	if sline.view.Buf.IsDirty() {
 		file += " +"
 	}
 
@@ -32,13 +32,13 @@ func (sline *Statusline) Display() {
 	// but users will be used to (1,1) (first line,first column)
 	// We use GetVisualX() here because otherwise we get the column number in runes
 	// so a '\t' is only 1, when it should be tabSize
-	columnNum := strconv.Itoa(sline.view.cursor.GetVisualX() + 1)
-	lineNum := strconv.Itoa(sline.view.cursor.y + 1)
+	columnNum := strconv.Itoa(sline.view.Cursor.GetVisualX() + 1)
+	lineNum := strconv.Itoa(sline.view.Cursor.y + 1)
 
 	file += " (" + lineNum + "," + columnNum + ")"
 
 	// Add the filetype
-	file += " " + sline.view.buf.filetype
+	file += " " + sline.view.Buf.Filetype
 
 	rightText := "Ctrl-g for help "
 	if helpOpen {
