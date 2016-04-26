@@ -207,7 +207,7 @@ func (c *Cursor) AddWordToSelection() {
 func (c *Cursor) SelectTo(loc int) {
 	if loc > c.origSelection[0] {
 		c.curSelection[0] = c.origSelection[0]
-		c.curSelection[1] = loc + 1
+		c.curSelection[1] = loc
 	} else {
 		c.curSelection[0] = loc
 		c.curSelection[1] = c.origSelection[0] + 1
@@ -242,7 +242,7 @@ func (c *Cursor) RuneUnder(x int) rune {
 		return '\n'
 	}
 	if x >= len(line) {
-		x = len(line) - 1
+		return '\n'
 	} else if x < 0 {
 		x = 0
 	}
