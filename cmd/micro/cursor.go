@@ -204,9 +204,36 @@ func (c *Cursor) AddWordToSelection() {
 	}
 }
 
+func (c *Cursor) SelectTo(loc int) {
+	if loc > c.origSelection[0] {
+		c.curSelection[0] = c.origSelection[0]
+		c.curSelection[1] = loc + 1
+	} else {
+		c.curSelection[0] = loc
+		c.curSelection[1] = c.origSelection[0] + 1
+	}
+}
+
+func (c *Cursor) WordRight() {
+	for IsWordChar(string(c.RuneUnder(c.x))) {
+		c.Right()
+	}
+	c.Right()
+}
+
+func (c *Cursor) WordLeft() {
+	for IsWordChar(string(c.RuneUnder(c.x))) {
+		c.Left()
+	}
+	c.Left()
+}
+
 // RuneUnder returns the rune under the given x position
 func (c *Cursor) RuneUnder(x int) rune {
 	line := []rune(c.v.buf.lines[c.y])
+	if len(line) == 0 {
+		return '\n'
+	}
 	if x >= len(line) {
 		x = len(line) - 1
 	} else if x < 0 {

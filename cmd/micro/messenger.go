@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before

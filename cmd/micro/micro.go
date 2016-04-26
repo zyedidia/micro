@@ -6,8 +6,8 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/gdamore/tcell"
-	"github.com/gdamore/tcell/encoding"
+	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/tcell/encoding"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
