@@ -620,14 +620,15 @@ func (v *View) Save() bool {
 			v.GoSave()
 		}
 	}
-	if err := L.CallByParam(lua.P{
-		Fn:      L.GetGlobal("onSave"),
-		NRet:    0,
-		Protect: true,
-	}); err != nil {
-		// The function isn't defined by this plugin
-		messenger.Error(err)
-		return true
+	for _, pl := range loadedPlugins {
+		if err := L.CallByParam(lua.P{
+			Fn:      L.GetGlobal(pl + "_onSave"),
+			NRet:    0,
+			Protect: true,
+		}); err != nil {
+			// The function isn't defined by this plugin
+			messenger.Error(err)
+		}
 	}
 	return true
 }

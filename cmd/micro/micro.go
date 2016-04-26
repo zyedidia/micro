@@ -183,10 +183,6 @@ func main() {
 	L = lua.NewState()
 	defer L.Close()
 
-	if err := L.DoFile("plugin.lua"); err != nil {
-		panic(err)
-	}
-
 	encoding.Register()
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
@@ -199,6 +195,7 @@ func main() {
 	LoadSyntaxFiles()
 	// Load the help files
 	LoadHelp()
+	LoadPlugins()
 
 	buf := NewBuffer(string(input), filename)
 
