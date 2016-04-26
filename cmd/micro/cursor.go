@@ -215,17 +215,24 @@ func (c *Cursor) SelectTo(loc int) {
 }
 
 func (c *Cursor) WordRight() {
+	c.Right()
+	for !IsWordChar(string(c.RuneUnder(c.x))) {
+		c.Right()
+	}
 	for IsWordChar(string(c.RuneUnder(c.x))) {
 		c.Right()
 	}
-	c.Right()
 }
 
 func (c *Cursor) WordLeft() {
+	c.Left()
+	for !IsWordChar(string(c.RuneUnder(c.x))) {
+		c.Left()
+	}
 	for IsWordChar(string(c.RuneUnder(c.x))) {
 		c.Left()
 	}
-	c.Left()
+	c.Right()
 }
 
 // RuneUnder returns the rune under the given x position

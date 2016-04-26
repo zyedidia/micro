@@ -289,8 +289,12 @@ func (v *View) CursorDown() bool {
 
 // CursorLeft moves the cursor left
 func (v *View) CursorLeft() bool {
-	v.cursor.ResetSelection()
-	v.cursor.Left()
+	if v.cursor.HasSelection() {
+		v.cursor.SetLoc(v.cursor.curSelection[0])
+		v.cursor.ResetSelection()
+	} else {
+		v.cursor.Left()
+	}
 	return true
 }
 
@@ -330,7 +334,7 @@ func (v *View) SelectWordRight() bool {
 		v.cursor.origSelection[0] = loc
 	}
 	v.cursor.WordRight()
-	v.cursor.SelectTo(v.cursor.Loc())
+	v.cursor.SelectTo(v.cursor.Loc() - 1)
 	return true
 }
 
@@ -346,8 +350,12 @@ func (v *View) SelectWordLeft() bool {
 
 // CursorRight moves the cursor right
 func (v *View) CursorRight() bool {
-	v.cursor.ResetSelection()
-	v.cursor.Right()
+	if v.cursor.HasSelection() {
+		v.cursor.SetLoc(v.cursor.curSelection[1] - 1)
+		v.cursor.ResetSelection()
+	} else {
+		v.cursor.Right()
+	}
 	return true
 }
 
