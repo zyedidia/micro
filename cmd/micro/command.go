@@ -153,23 +153,23 @@ func HandleCommand(input string, view *View) {
 				Redraw(view)
 				choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 				if canceled {
-					if view.cursor.HasSelection() {
-						view.cursor.SetLoc(view.cursor.curSelection[0])
-						view.cursor.ResetSelection()
+					if view.cursor[0].HasSelection() {
+						view.cursor[0].SetLoc(view.cursor[0].curSelection[0])
+						view.cursor[0].ResetSelection()
 					}
 					messenger.Reset()
 					return
 				}
 				if choice {
-					view.cursor.DeleteSelection()
+					view.cursor[0].DeleteSelection()
 					view.eh.Insert(match[0], replace)
-					view.cursor.ResetSelection()
+					view.cursor[0].ResetSelection()
 					messenger.Reset()
 				} else {
-					if view.cursor.HasSelection() {
-						searchStart = view.cursor.curSelection[1]
+					if view.cursor[0].HasSelection() {
+						searchStart = view.cursor[0].curSelection[1]
 					} else {
-						searchStart = ToCharPos(view.cursor.x, view.cursor.y, view.buf)
+						searchStart = ToCharPos(view.cursor[0].x, view.cursor[0].y, view.buf)
 					}
 					continue
 				}

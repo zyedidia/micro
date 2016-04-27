@@ -53,7 +53,8 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 	}
 
 	if messenger.response == "" {
-		v.cursor.ResetSelection()
+		v.exitMultiCursorMode()
+		v.cursor[0].ResetSelection()
 		// We don't end the search though
 		return
 	}
@@ -89,7 +90,7 @@ func Search(searchStr string, v *View, down bool) {
 		matches = r.FindAllStringIndex(v.buf.text, -1)
 		charPos = 0
 		if matches == nil {
-			v.cursor.ResetSelection()
+			v.cursor[0].ResetSelection()
 			return
 		}
 
@@ -106,11 +107,30 @@ func Search(searchStr string, v *View, down bool) {
 		match = matches[0]
 	}
 
-	v.cursor.curSelection[0] = charPos + match[0]
-	v.cursor.curSelection[1] = charPos + match[1]
-	v.cursor.x, v.cursor.y = FromCharPos(charPos+match[1]-1, v.buf)
+	// If we're not searching, enter multicursor mode
+	if !searching {
+		if len(v.cursor) == 1 {
+			v.cursor = append(v.cursor, v.cursor[0])
+		} else {
+			v.cursor = addCursor(v.cursor, v.cursor[0])
+		}
+	}
+
+	v.cursor[0].curSelection[0] = charPos + match[0]
+	v.cursor[0].curSelection[1] = charPos + match[1]
+
+	v.cursor[0].x, v.cursor[0].y = FromCharPos(charPos+match[1]-1, v.buf)
 	if v.Relocate() {
 		v.matches = Match(v)
 	}
+
 	lastSearch = searchStr
+}
+
+func addCursor(original []Cursor, newCursor Cursor) []Cursor {
+	newCursors := make([]Cursor, len(original)+1)
+	copy(newCursors, original[:1])
+	newCursors[1] = newCursor
+	copy(newCursors[2:], original[1:])
+	return newCursors
 }

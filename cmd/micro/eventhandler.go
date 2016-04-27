@@ -15,7 +15,7 @@ const (
 
 // TextEvent holds data for a manipulation on some text that can be undone
 type TextEvent struct {
-	c Cursor
+	c []Cursor
 
 	eventType int
 	text      string

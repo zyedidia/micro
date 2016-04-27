@@ -32,8 +32,8 @@ func (sline *Statusline) Display() {
 	// but users will be used to (1,1) (first line,first column)
 	// We use GetVisualX() here because otherwise we get the column number in runes
 	// so a '\t' is only 1, when it should be tabSize
-	columnNum := strconv.Itoa(sline.view.cursor.GetVisualX() + 1)
-	lineNum := strconv.Itoa(sline.view.cursor.y + 1)
+	columnNum := strconv.Itoa(sline.view.cursor[0].GetVisualX() + 1)
+	lineNum := strconv.Itoa(sline.view.cursor[0].y + 1)
 
 	file += " (" + lineNum + "," + columnNum + ")"
 
