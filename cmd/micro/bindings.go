@@ -54,7 +54,7 @@ func InitBindings() {
 		"Paste":               (*View).Paste,
 		"SelectAll":           (*View).SelectAll,
 		"OpenFile":            (*View).OpenFile,
-		"Beginning":           (*View).Beginning,
+		"Start":               (*View).Start,
 		"End":                 (*View).End,
 		"PageUp":              (*View).PageUp,
 		"PageDown":            (*View).PageDown,
@@ -276,7 +276,7 @@ func DefaultBindings() map[string]string {
 		"CtrlK":          "CutLine",
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
-		"Home":           "Beginning",
+		"Home":           "Start",
 		"End":            "End",
 		"PgUp":           "PageUp",
 		"PgDn":           "PageDown",
@@ -323,16 +323,19 @@ func (v *View) CursorRight() bool {
 	return true
 }
 
+// WordRight moves the cursor one word to the right
 func (v *View) WordRight() bool {
 	v.cursor.WordRight()
 	return true
 }
 
+// WordLeft moves the cursor one word to the left
 func (v *View) WordLeft() bool {
 	v.cursor.WordLeft()
 	return true
 }
 
+// SelectLeft selects the character to the left of the cursor
 func (v *View) SelectLeft() bool {
 	loc := v.cursor.Loc()
 	if !v.cursor.HasSelection() {
@@ -343,6 +346,7 @@ func (v *View) SelectLeft() bool {
 	return true
 }
 
+// SelectRight selects the character to the right of the cursor
 func (v *View) SelectRight() bool {
 	loc := v.cursor.Loc()
 	if !v.cursor.HasSelection() {
@@ -353,6 +357,7 @@ func (v *View) SelectRight() bool {
 	return true
 }
 
+// SelectWordRight selects the word to the right of the cursor
 func (v *View) SelectWordRight() bool {
 	loc := v.cursor.Loc()
 	if !v.cursor.HasSelection() {
@@ -363,6 +368,7 @@ func (v *View) SelectWordRight() bool {
 	return true
 }
 
+// SelectWordLeft selects the word to the left of the cursor
 func (v *View) SelectWordLeft() bool {
 	loc := v.cursor.Loc()
 	if !v.cursor.HasSelection() {
@@ -370,6 +376,75 @@ func (v *View) SelectWordLeft() bool {
 	}
 	v.cursor.WordLeft()
 	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// StartOfLine moves the cursor to the start of the line
+func (v *View) StartOfLine() bool {
+	v.cursor.Start()
+	return true
+}
+
+// EndOfLine moves the cursor to the end of the line
+func (v *View) EndOfLine() bool {
+	v.cursor.End()
+	return true
+}
+
+// SelectToStartOfLine selects to the start of the current line
+func (v *View) SelectToStartOfLine() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.Start()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// SelectToEndOfLine selects to the end of the current line
+func (v *View) SelectToEndOfLine() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.End()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// CursorStart moves the cursor to the start of the buffer
+func (v *View) CursorStart() bool {
+	v.cursor.x = 0
+	v.cursor.y = 0
+	return true
+}
+
+// CursorEnd moves the cursor to the end of the buffer
+func (v *View) CursorEnd() bool {
+	v.cursor.SetLoc(len(v.buf.text))
+	return true
+}
+
+// SelectToStart selects the text from the cursor to the start of the buffer
+func (v *View) SelectToStart() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.CursorStart()
+	v.cursor.SelectTo(0)
+	return true
+}
+
+// SelectToEnd selects the text from the cursor to the end of the buffer
+func (v *View) SelectToEnd() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.CursorEnd()
+	v.cursor.SelectTo(len(v.buf.text))
 	return true
 }
 
@@ -663,8 +738,8 @@ func (v *View) OpenFile() bool {
 	return true
 }
 
-// Beginning moves the viewport to the start of the buffer
-func (v *View) Beginning() bool {
+// Start moves the viewport to the start of the buffer
+func (v *View) Start() bool {
 	v.topline = 0
 	return false
 }
@@ -729,69 +804,6 @@ func (v *View) ToggleRuler() bool {
 		settings.Ruler = false
 	}
 	return false
-}
-
-// StartOfLine moves the cursor to the start of the line
-func (v *View) StartOfLine() bool {
-	v.cursor.Start()
-	return true
-}
-
-// EndOfLine moves the cursor to the end of the line
-func (v *View) EndOfLine() bool {
-	v.cursor.End()
-	return true
-}
-
-func (v *View) SelectToStartOfLine() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
-	}
-	v.cursor.Start()
-	v.cursor.SelectTo(v.cursor.Loc())
-	return true
-}
-
-func (v *View) SelectToEndOfLine() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
-	}
-	v.cursor.End()
-	v.cursor.SelectTo(v.cursor.Loc())
-	return true
-}
-
-func (v *View) CursorStart() bool {
-	v.cursor.x = 0
-	v.cursor.y = 0
-	return true
-}
-
-func (v *View) CursorEnd() bool {
-	v.cursor.SetLoc(len(v.buf.text))
-	return true
-}
-
-func (v *View) SelectToStart() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
-	}
-	v.CursorStart()
-	v.cursor.SelectTo(0)
-	return true
-}
-
-func (v *View) SelectToEnd() bool {
-	loc := v.cursor.Loc()
-	if !v.cursor.HasSelection() {
-		v.cursor.origSelection[0] = loc
-	}
-	v.CursorEnd()
-	v.cursor.SelectTo(len(v.buf.text))
-	return true
 }
 
 // None is no action

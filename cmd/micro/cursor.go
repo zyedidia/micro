@@ -204,6 +204,7 @@ func (c *Cursor) AddWordToSelection() {
 	}
 }
 
+// SelectTo selects from the current cursor location to the given location
 func (c *Cursor) SelectTo(loc int) {
 	if loc > c.origSelection[0] {
 		c.curSelection[0] = c.origSelection[0]
@@ -214,6 +215,7 @@ func (c *Cursor) SelectTo(loc int) {
 	}
 }
 
+// WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
 	c.Right()
 	for !IsWordChar(string(c.RuneUnder(c.x))) {
@@ -224,6 +226,7 @@ func (c *Cursor) WordRight() {
 	}
 }
 
+// WordLeft moves the cursor one word to the left
 func (c *Cursor) WordLeft() {
 	c.Left()
 	for !IsWordChar(string(c.RuneUnder(c.x))) {
