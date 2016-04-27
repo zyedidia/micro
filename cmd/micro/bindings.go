@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 )
@@ -613,16 +612,6 @@ func (v *View) Save() bool {
 		messenger.Error(err.Error())
 	} else {
 		messenger.Message("Saved " + v.Buf.Path)
-	}
-	for _, pl := range loadedPlugins {
-		if err := L.CallByParam(lua.P{
-			Fn:      L.GetGlobal(pl + "_onSave"),
-			NRet:    0,
-			Protect: true,
-		}); err != nil {
-			// The function isn't defined by this plugin
-			messenger.Error(err)
-		}
 	}
 	return true
 }

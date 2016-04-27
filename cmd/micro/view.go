@@ -2,6 +2,8 @@ package main
 
 import (
 	"io/ioutil"
+	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -266,6 +268,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 			for key, action := range bindings {
 				if e.Key() == key {
 					relocate = action(v)
+					for _, pl := range loadedPlugins {
+						funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
+						err := Call(pl + "_on" + funcName[len(funcName)-1])
+						if err != nil {
+							TermMessage(err)
+						}
+					}
 				}
 			}
 		}
