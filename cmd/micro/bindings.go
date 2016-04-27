@@ -21,42 +21,48 @@ func InitBindings() {
 	bindings = make(map[tcell.Key]func(*View) bool)
 
 	actions := map[string]func(*View) bool{
-		"CursorUp":        (*View).CursorUp,
-		"CursorDown":      (*View).CursorDown,
-		"CursorLeft":      (*View).CursorLeft,
-		"CursorRight":     (*View).CursorRight,
-		"SelectLeft":      (*View).SelectLeft,
-		"SelectRight":     (*View).SelectRight,
-		"WordRight":       (*View).WordRight,
-		"WordLeft":        (*View).WordLeft,
-		"SelectWordRight": (*View).SelectWordRight,
-		"SelectWordLeft":  (*View).SelectWordLeft,
-		"InsertEnter":     (*View).InsertEnter,
-		"InsertSpace":     (*View).InsertSpace,
-		"Backspace":       (*View).Backspace,
-		"Delete":          (*View).Delete,
-		"InsertTab":       (*View).InsertTab,
-		"Save":            (*View).Save,
-		"Find":            (*View).Find,
-		"FindNext":        (*View).FindNext,
-		"FindPrevious":    (*View).FindPrevious,
-		"Undo":            (*View).Undo,
-		"Redo":            (*View).Redo,
-		"Copy":            (*View).Copy,
-		"Cut":             (*View).Cut,
-		"CutLine":         (*View).CutLine,
-		"Paste":           (*View).Paste,
-		"SelectAll":       (*View).SelectAll,
-		"OpenFile":        (*View).OpenFile,
-		"Beginning":       (*View).Beginning,
-		"End":             (*View).End,
-		"PageUp":          (*View).PageUp,
-		"PageDown":        (*View).PageDown,
-		"HalfPageUp":      (*View).HalfPageUp,
-		"HalfPageDown":    (*View).HalfPageDown,
-		"StartOfLine":     (*View).StartOfLine,
-		"EndOfLine":       (*View).EndOfLine,
-		"ToggleRuler":     (*View).ToggleRuler,
+		"CursorUp":            (*View).CursorUp,
+		"CursorDown":          (*View).CursorDown,
+		"CursorLeft":          (*View).CursorLeft,
+		"CursorRight":         (*View).CursorRight,
+		"CursorStart":         (*View).CursorStart,
+		"CursorEnd":           (*View).CursorEnd,
+		"SelectToStart":       (*View).SelectToStart,
+		"SelectToEnd":         (*View).SelectToEnd,
+		"SelectLeft":          (*View).SelectLeft,
+		"SelectRight":         (*View).SelectRight,
+		"WordRight":           (*View).WordRight,
+		"WordLeft":            (*View).WordLeft,
+		"SelectWordRight":     (*View).SelectWordRight,
+		"SelectWordLeft":      (*View).SelectWordLeft,
+		"SelectToStartOfLine": (*View).SelectToStartOfLine,
+		"SelectToEndOfLine":   (*View).SelectToEndOfLine,
+		"InsertEnter":         (*View).InsertEnter,
+		"InsertSpace":         (*View).InsertSpace,
+		"Backspace":           (*View).Backspace,
+		"Delete":              (*View).Delete,
+		"InsertTab":           (*View).InsertTab,
+		"Save":                (*View).Save,
+		"Find":                (*View).Find,
+		"FindNext":            (*View).FindNext,
+		"FindPrevious":        (*View).FindPrevious,
+		"Undo":                (*View).Undo,
+		"Redo":                (*View).Redo,
+		"Copy":                (*View).Copy,
+		"Cut":                 (*View).Cut,
+		"CutLine":             (*View).CutLine,
+		"Paste":               (*View).Paste,
+		"SelectAll":           (*View).SelectAll,
+		"OpenFile":            (*View).OpenFile,
+		"Beginning":           (*View).Beginning,
+		"End":                 (*View).End,
+		"PageUp":              (*View).PageUp,
+		"PageDown":            (*View).PageDown,
+		"HalfPageUp":          (*View).HalfPageUp,
+		"HalfPageDown":        (*View).HalfPageDown,
+		"StartOfLine":         (*View).StartOfLine,
+		"EndOfLine":           (*View).EndOfLine,
+		"ToggleRuler":         (*View).ToggleRuler,
 	}
 
 	keys := map[string]tcell.Key{
@@ -235,41 +241,49 @@ func InitBindings() {
 // DefaultBindings returns a map containing micro's default keybindings
 func DefaultBindings() map[string]string {
 	return map[string]string{
-		"Up":            "CursorUp",
-		"Down":          "CursorDown",
-		"Right":         "CursorRight",
-		"Left":          "CursorLeft",
-		"ShiftLeft":     "SelectLeft",
-		"ShiftRight":    "SelectRight",
-		"AltLeft":       "WordLeft",
-		"AltRight":      "WordRight",
-		"AltShiftRight": "SelectWordRight",
-		"AltShiftLeft":  "SelectWordLeft",
-		"Enter":         "InsertEnter",
-		"Space":         "InsertSpace",
-		"Backspace":     "Backspace",
-		"Backspace2":    "Backspace",
-		"Tab":           "InsertTab",
-		"CtrlO":         "OpenFile",
-		"CtrlS":         "Save",
-		"CtrlF":         "Find",
-		"CtrlN":         "FindNext",
-		"CtrlP":         "FindPrevious",
-		"CtrlZ":         "Undo",
-		"CtrlY":         "Redo",
-		"CtrlC":         "Copy",
-		"CtrlX":         "Cut",
-		"CtrlK":         "CutLine",
-		"CtrlV":         "Paste",
-		"CtrlA":         "SelectAll",
-		"Home":          "Beginning",
-		"End":           "End",
-		"PgUp":          "PageUp",
-		"PgDn":          "PageDown",
-		"CtrlU":         "HalfPageUp",
-		"CtrlD":         "HalfPageDown",
-		"CtrlR":         "ToggleRuler",
-		"Delete":        "Delete",
+		"Up":             "CursorUp",
+		"Down":           "CursorDown",
+		"Right":          "CursorRight",
+		"Left":           "CursorLeft",
+		"ShiftLeft":      "SelectLeft",
+		"ShiftRight":     "SelectRight",
+		"AltLeft":        "WordLeft",
+		"AltRight":       "WordRight",
+		"AltShiftRight":  "SelectWordRight",
+		"AltShiftLeft":   "SelectWordLeft",
+		"CtrlLeft":       "StartOfLine",
+		"CtrlRight":      "EndOfLine",
+		"CtrlShiftLeft":  "SelectToStartOfLine",
+		"CtrlShiftRight": "SelectToEndOfLine",
+		"CtrlUp":         "CursorStart",
+		"CtrlDown":       "CursorEnd",
+		"CtrlShiftUp":    "SelectToStart",
+		"CtrlShiftDown":  "SelectToEnd",
+		"Enter":          "InsertEnter",
+		"Space":          "InsertSpace",
+		"Backspace":      "Backspace",
+		"Backspace2":     "Backspace",
+		"Tab":            "InsertTab",
+		"CtrlO":          "OpenFile",
+		"CtrlS":          "Save",
+		"CtrlF":          "Find",
+		"CtrlN":          "FindNext",
+		"CtrlP":          "FindPrevious",
+		"CtrlZ":          "Undo",
+		"CtrlY":          "Redo",
+		"CtrlC":          "Copy",
+		"CtrlX":          "Cut",
+		"CtrlK":          "CutLine",
+		"CtrlV":          "Paste",
+		"CtrlA":          "SelectAll",
+		"Home":           "Beginning",
+		"End":            "End",
+		"PgUp":           "PageUp",
+		"PgDn":           "PageDown",
+		"CtrlU":          "HalfPageUp",
+		"CtrlD":          "HalfPageDown",
+		"CtrlR":          "ToggleRuler",
+		"Delete":         "Delete",
 	}
 }
 
@@ -726,6 +740,57 @@ func (v *View) StartOfLine() bool {
 // EndOfLine moves the cursor to the end of the line
 func (v *View) EndOfLine() bool {
 	v.cursor.End()
+	return true
+}
+
+func (v *View) SelectToStartOfLine() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.Start()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+func (v *View) SelectToEndOfLine() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.End()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+func (v *View) CursorStart() bool {
+	v.cursor.x = 0
+	v.cursor.y = 0
+	return true
+}
+
+func (v *View) CursorEnd() bool {
+	v.cursor.SetLoc(len(v.buf.text))
+	return true
+}
+
+func (v *View) SelectToStart() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.CursorStart()
+	v.cursor.SelectTo(0)
+	return true
+}
+
+func (v *View) SelectToEnd() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.CursorEnd()
+	v.cursor.SelectTo(len(v.buf.text))
 	return true
 }
 
