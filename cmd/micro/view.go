@@ -277,9 +277,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.Button1:
 			// Left click
 			origX, origY := v.cursor.x, v.cursor.y
-			v.MoveToMouseClick(x, y)
 
-			if v.mouseReleased {
+			if v.mouseReleased && !e.HasMotion() {
+				v.MoveToMouseClick(x, y)
 				if (time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold) &&
 					(origX == v.cursor.x && origY == v.cursor.y) {
 					if v.doubleClick {
@@ -308,7 +308,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.cursor.curSelection[0] = loc
 					v.cursor.curSelection[1] = loc
 				}
-			} else {
+				v.mouseReleased = false
+			} else if !v.mouseReleased {
+				v.MoveToMouseClick(x, y)
 				if v.tripleClick {
 					v.cursor.AddLineToSelection()
 				} else if v.doubleClick {
@@ -317,7 +319,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.cursor.curSelection[1] = v.cursor.Loc()
 				}
 			}
-			v.mouseReleased = false
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
