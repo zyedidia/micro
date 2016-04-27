@@ -54,6 +54,7 @@ func InitBindings() {
 		"Paste":               (*View).Paste,
 		"SelectAll":           (*View).SelectAll,
 		"OpenFile":            (*View).OpenFile,
+		"Start":               (*View).Start,
 		"End":                 (*View).End,
 		"PageUp":              (*View).PageUp,
 		"PageDown":            (*View).PageDown,
