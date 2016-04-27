@@ -9,9 +9,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
 	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/tcell"
 )
 
 var bindings map[tcell.Key]func(*View) bool
@@ -21,36 +21,48 @@ func InitBindings() {
 	bindings = make(map[tcell.Key]func(*View) bool)
 
 	actions := map[string]func(*View) bool{
-		"CursorUp":     (*View).CursorUp,
-		"CursorDown":   (*View).CursorDown,
-		"CursorLeft":   (*View).CursorLeft,
-		"CursorRight":  (*View).CursorRight,
-		"InsertEnter":  (*View).InsertEnter,
-		"InsertSpace":  (*View).InsertSpace,
-		"Backspace":    (*View).Backspace,
-		"Delete":       (*View).Delete,
-		"InsertTab":    (*View).InsertTab,
-		"Save":         (*View).Save,
-		"Find":         (*View).Find,
-		"FindNext":     (*View).FindNext,
-		"FindPrevious": (*View).FindPrevious,
-		"Undo":         (*View).Undo,
-		"Redo":         (*View).Redo,
-		"Copy":         (*View).Copy,
-		"Cut":          (*View).Cut,
-		"CutLine":      (*View).CutLine,
-		"Paste":        (*View).Paste,
-		"SelectAll":    (*View).SelectAll,
-		"OpenFile":     (*View).OpenFile,
-		"Beginning":    (*View).Beginning,
-		"End":          (*View).End,
-		"PageUp":       (*View).PageUp,
-		"PageDown":     (*View).PageDown,
-		"HalfPageUp":   (*View).HalfPageUp,
-		"HalfPageDown": (*View).HalfPageDown,
-		"StartOfLine":  (*View).StartOfLine,
-		"EndOfLine":    (*View).EndOfLine,
-		"ToggleRuler":  (*View).ToggleRuler,
+		"CursorUp":            (*View).CursorUp,
+		"CursorDown":          (*View).CursorDown,
+		"CursorLeft":          (*View).CursorLeft,
+		"CursorRight":         (*View).CursorRight,
+		"CursorStart":         (*View).CursorStart,
+		"CursorEnd":           (*View).CursorEnd,
+		"SelectToStart":       (*View).SelectToStart,
+		"SelectToEnd":         (*View).SelectToEnd,
+		"SelectLeft":          (*View).SelectLeft,
+		"SelectRight":         (*View).SelectRight,
+		"WordRight":           (*View).WordRight,
+		"WordLeft":            (*View).WordLeft,
+		"SelectWordRight":     (*View).SelectWordRight,
+		"SelectWordLeft":      (*View).SelectWordLeft,
+		"SelectToStartOfLine": (*View).SelectToStartOfLine,
+		"SelectToEndOfLine":   (*View).SelectToEndOfLine,
+		"InsertEnter":         (*View).InsertEnter,
+		"InsertSpace":         (*View).InsertSpace,
+		"Backspace":           (*View).Backspace,
+		"Delete":              (*View).Delete,
+		"InsertTab":           (*View).InsertTab,
+		"Save":                (*View).Save,
+		"Find":                (*View).Find,
+		"FindNext":            (*View).FindNext,
+		"FindPrevious":        (*View).FindPrevious,
+		"Undo":                (*View).Undo,
+		"Redo":                (*View).Redo,
+		"Copy":                (*View).Copy,
+		"Cut":                 (*View).Cut,
+		"CutLine":             (*View).CutLine,
+		"Paste":               (*View).Paste,
+		"SelectAll":           (*View).SelectAll,
+		"OpenFile":            (*View).OpenFile,
+		"Start":               (*View).Start,
+		"End":                 (*View).End,
+		"PageUp":              (*View).PageUp,
+		"PageDown":            (*View).PageDown,
+		"HalfPageUp":          (*View).HalfPageUp,
+		"HalfPageDown":        (*View).HalfPageDown,
+		"StartOfLine":         (*View).StartOfLine,
+		"EndOfLine":           (*View).EndOfLine,
+		"ToggleRuler":         (*View).ToggleRuler,
 	}
 
 	keys := map[string]tcell.Key{
@@ -58,6 +70,26 @@ func InitBindings() {
 		"Down":           tcell.KeyDown,
 		"Right":          tcell.KeyRight,
 		"Left":           tcell.KeyLeft,
+		"AltUp":          tcell.KeyAltUp,
+		"AltDown":        tcell.KeyAltDown,
+		"AltLeft":        tcell.KeyAltLeft,
+		"AltRight":       tcell.KeyAltRight,
+		"CtrlUp":         tcell.KeyCtrlUp,
+		"CtrlDown":       tcell.KeyCtrlDown,
+		"CtrlLeft":       tcell.KeyCtrlLeft,
+		"CtrlRight":      tcell.KeyCtrlRight,
+		"ShiftUp":        tcell.KeyShiftUp,
+		"ShiftDown":      tcell.KeyShiftDown,
+		"ShiftLeft":      tcell.KeyShiftLeft,
+		"ShiftRight":     tcell.KeyShiftRight,
+		"AltShiftUp":     tcell.KeyAltShiftUp,
+		"AltShiftDown":   tcell.KeyAltShiftDown,
+		"AltShiftLeft":   tcell.KeyAltShiftLeft,
+		"AltShiftRight":  tcell.KeyAltShiftRight,
+		"CtrlShiftUp":    tcell.KeyCtrlShiftUp,
+		"CtrlShiftDown":  tcell.KeyCtrlShiftDown,
+		"CtrlShiftLeft":  tcell.KeyCtrlShiftLeft,
+		"CtrlShiftRight": tcell.KeyCtrlShiftRight,
 		"UpLeft":         tcell.KeyUpLeft,
 		"UpRight":        tcell.KeyUpRight,
 		"DownLeft":       tcell.KeyDownLeft,
@@ -209,35 +241,49 @@ func InitBindings() {
 // DefaultBindings returns a map containing micro's default keybindings
 func DefaultBindings() map[string]string {
 	return map[string]string{
-		"Up":         "CursorUp",
-		"Down":       "CursorDown",
-		"Right":      "CursorRight",
-		"Left":       "CursorLeft",
-		"Enter":      "InsertEnter",
-		"Space":      "InsertSpace",
-		"Backspace":  "Backspace",
-		"Backspace2": "Backspace",
-		"Tab":        "InsertTab",
-		"CtrlO":      "OpenFile",
-		"CtrlS":      "Save",
-		"CtrlF":      "Find",
-		"CtrlN":      "FindNext",
-		"CtrlP":      "FindPrevious",
-		"CtrlZ":      "Undo",
-		"CtrlY":      "Redo",
-		"CtrlC":      "Copy",
-		"CtrlX":      "Cut",
-		"CtrlK":      "CutLine",
-		"CtrlV":      "Paste",
-		"CtrlA":      "SelectAll",
-		"Home":       "StartOfLine",
-		"End":        "EndOfLine",
-		"PgUp":       "PageUp",
-		"PgDn":       "PageDown",
-		"CtrlU":      "HalfPageUp",
-		"CtrlD":      "HalfPageDown",
-		"CtrlR":      "ToggleRuler",
-		"Delete":     "Delete",
+		"Up":             "CursorUp",
+		"Down":           "CursorDown",
+		"Right":          "CursorRight",
+		"Left":           "CursorLeft",
+		"ShiftLeft":      "SelectLeft",
+		"ShiftRight":     "SelectRight",
+		"AltLeft":        "WordLeft",
+		"AltRight":       "WordRight",
+		"AltShiftRight":  "SelectWordRight",
+		"AltShiftLeft":   "SelectWordLeft",
+		"CtrlLeft":       "StartOfLine",
+		"CtrlRight":      "EndOfLine",
+		"CtrlShiftLeft":  "SelectToStartOfLine",
+		"CtrlShiftRight": "SelectToEndOfLine",
+		"CtrlUp":         "CursorStart",
+		"CtrlDown":       "CursorEnd",
+		"CtrlShiftUp":    "SelectToStart",
+		"CtrlShiftDown":  "SelectToEnd",
+		"Enter":          "InsertEnter",
+		"Space":          "InsertSpace",
+		"Backspace":      "Backspace",
+		"Backspace2":     "Backspace",
+		"Tab":            "InsertTab",
+		"CtrlO":          "OpenFile",
+		"CtrlS":          "Save",
+		"CtrlF":          "Find",
+		"CtrlN":          "FindNext",
+		"CtrlP":          "FindPrevious",
+		"CtrlZ":          "Undo",
+		"CtrlY":          "Redo",
+		"CtrlC":          "Copy",
+		"CtrlX":          "Cut",
+		"CtrlK":          "CutLine",
+		"CtrlV":          "Paste",
+		"CtrlA":          "SelectAll",
+		"Home":           "Start",
+		"End":            "End",
+		"PgUp":           "PageUp",
+		"PgDn":           "PageDown",
+		"CtrlU":          "HalfPageUp",
+		"CtrlD":          "HalfPageDown",
+		"CtrlR":          "ToggleRuler",
+		"Delete":         "Delete",
 	}
 }
 
@@ -257,15 +303,148 @@ func (v *View) CursorDown() bool {
 
 // CursorLeft moves the cursor left
 func (v *View) CursorLeft() bool {
-	v.cursor.ResetSelection()
-	v.cursor.Left()
+	if v.cursor.HasSelection() {
+		v.cursor.SetLoc(v.cursor.curSelection[0])
+		v.cursor.ResetSelection()
+	} else {
+		v.cursor.Left()
+	}
 	return true
 }
 
 // CursorRight moves the cursor right
 func (v *View) CursorRight() bool {
-	v.cursor.ResetSelection()
+	if v.cursor.HasSelection() {
+		v.cursor.SetLoc(v.cursor.curSelection[1] - 1)
+		v.cursor.ResetSelection()
+	} else {
+		v.cursor.Right()
+	}
+	return true
+}
+
+// WordRight moves the cursor one word to the right
+func (v *View) WordRight() bool {
+	v.cursor.WordRight()
+	return true
+}
+
+// WordLeft moves the cursor one word to the left
+func (v *View) WordLeft() bool {
+	v.cursor.WordLeft()
+	return true
+}
+
+// SelectLeft selects the character to the left of the cursor
+func (v *View) SelectLeft() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.SelectTo(loc - 1)
+	v.cursor.Left()
+	return true
+}
+
+// SelectRight selects the character to the right of the cursor
+func (v *View) SelectRight() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.SelectTo(loc + 1)
 	v.cursor.Right()
+	return true
+}
+
+// SelectWordRight selects the word to the right of the cursor
+func (v *View) SelectWordRight() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.WordRight()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// SelectWordLeft selects the word to the left of the cursor
+func (v *View) SelectWordLeft() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.WordLeft()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// StartOfLine moves the cursor to the start of the line
+func (v *View) StartOfLine() bool {
+	v.cursor.Start()
+	return true
+}
+
+// EndOfLine moves the cursor to the end of the line
+func (v *View) EndOfLine() bool {
+	v.cursor.End()
+	return true
+}
+
+// SelectToStartOfLine selects to the start of the current line
+func (v *View) SelectToStartOfLine() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.Start()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// SelectToEndOfLine selects to the end of the current line
+func (v *View) SelectToEndOfLine() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.End()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// CursorStart moves the cursor to the start of the buffer
+func (v *View) CursorStart() bool {
+	v.cursor.x = 0
+	v.cursor.y = 0
+	return true
+}
+
+// CursorEnd moves the cursor to the end of the buffer
+func (v *View) CursorEnd() bool {
+	v.cursor.SetLoc(len(v.buf.text))
+	return true
+}
+
+// SelectToStart selects the text from the cursor to the start of the buffer
+func (v *View) SelectToStart() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.CursorStart()
+	v.cursor.SelectTo(0)
+	return true
+}
+
+// SelectToEnd selects the text from the cursor to the end of the buffer
+func (v *View) SelectToEnd() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.CursorEnd()
+	v.cursor.SelectTo(len(v.buf.text))
 	return true
 }
 
@@ -559,8 +738,8 @@ func (v *View) OpenFile() bool {
 	return true
 }
 
-// Beginning moves the viewport to the start of the buffer
-func (v *View) Beginning() bool {
+// Start moves the viewport to the start of the buffer
+func (v *View) Start() bool {
 	v.topline = 0
 	return false
 }
@@ -625,18 +804,6 @@ func (v *View) ToggleRuler() bool {
 		settings.Ruler = false
 	}
 	return false
-}
-
-// StartOfLine moves the cursor to the start of the line
-func (v *View) StartOfLine() bool {
-	v.cursor.Start()
-	return true
-}
-
-// EndOfLine moves the cursor to the end of the line
-func (v *View) EndOfLine() bool {
-	v.cursor.End()
-	return true
 }
 
 // None is no action

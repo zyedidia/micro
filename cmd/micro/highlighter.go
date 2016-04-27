@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"

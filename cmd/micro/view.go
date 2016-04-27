@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 // The View struct stores information about a view into a buffer.
