@@ -361,6 +361,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 }
 
+// GutterMessage creates a message in this view's gutter
 func (v *View) GutterMessage(lineN int, msg string, kind int) {
 	gutterMsg := GutterMessage{
 		lineNum: lineN,
@@ -409,12 +410,28 @@ func (v *View) DisplayView() {
 			for _, msg := range v.messages {
 				if msg.lineNum == lineN+v.topline {
 					msgOnLine = true
-					screen.SetContent(x, lineN, '>', nil, tcell.StyleDefault)
+					gutterStyle := tcell.StyleDefault
+					switch msg.kind {
+					case GutterInfo:
+						if style, ok := colorscheme["gutter-info"]; ok {
+							gutterStyle = style
+						}
+					case GutterWarning:
+						if style, ok := colorscheme["gutter-warning"]; ok {
+							gutterStyle = style
+						}
+					case GutterError:
+						if style, ok := colorscheme["gutter-error"]; ok {
+							gutterStyle = style
+						}
+					}
+					screen.SetContent(x, lineN, '>', nil, gutterStyle)
 					x++
-					screen.SetContent(x, lineN, '>', nil, tcell.StyleDefault)
+					screen.SetContent(x, lineN, '>', nil, gutterStyle)
 					x++
 					if v.cursor.y == lineN {
 						messenger.Message(msg.msg)
+						messenger.gutterMessage = true
 					}
 				}
 			}
@@ -423,8 +440,9 @@ func (v *View) DisplayView() {
 				x++
 				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
 				x++
-				if v.cursor.y == lineN {
+				if v.cursor.y == lineN && messenger.gutterMessage {
 					messenger.Reset()
+					messenger.gutterMessage = false
 				}
 			}
 		}
