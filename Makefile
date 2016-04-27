@@ -2,9 +2,6 @@
 
 VERSION = "$(shell git rev-parse --short HEAD)"
 
-deps:
-	go get -d ./cmd/micro
-
 build: deps runtime tcell
 	go build -ldflags "-X main.Version=$(VERSION)" -o micro ./cmd/micro
 
@@ -12,7 +9,10 @@ install: build
 	mv micro $(GOPATH)/bin
 
 tcell:
-	git -C $(GOPATH)/src/github.com/gdamore/tcell pull
+	git -C $(GOPATH)/src/github.com/zyedidia/tcell pull
+
+deps:
+	go get -d ./cmd/micro
 
 runtime:
 	go get -u github.com/jteeuwen/go-bindata/...

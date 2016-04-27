@@ -204,11 +204,48 @@ func (c *Cursor) AddWordToSelection() {
 	}
 }
 
+// SelectTo selects from the current cursor location to the given location
+func (c *Cursor) SelectTo(loc int) {
+	if loc > c.origSelection[0] {
+		c.curSelection[0] = c.origSelection[0]
+		c.curSelection[1] = loc
+	} else {
+		c.curSelection[0] = loc
+		c.curSelection[1] = c.origSelection[0] + 1
+	}
+}
+
+// WordRight moves the cursor one word to the right
+func (c *Cursor) WordRight() {
+	c.Right()
+	for IsWhitespace(c.RuneUnder(c.x)) {
+		c.Right()
+	}
+	for !IsWhitespace(c.RuneUnder(c.x)) {
+		c.Right()
+	}
+}
+
+// WordLeft moves the cursor one word to the left
+func (c *Cursor) WordLeft() {
+	c.Left()
+	for IsWhitespace(c.RuneUnder(c.x)) {
+		c.Left()
+	}
+	for !IsWhitespace(c.RuneUnder(c.x)) {
+		c.Left()
+	}
+	c.Right()
+}
+
 // RuneUnder returns the rune under the given x position
 func (c *Cursor) RuneUnder(x int) rune {
 	line := []rune(c.v.buf.lines[c.y])
+	if len(line) == 0 {
+		return '\n'
+	}
 	if x >= len(line) {
-		x = len(line) - 1
+		return '\n'
 	} else if x < 0 {
 		x = 0
 	}

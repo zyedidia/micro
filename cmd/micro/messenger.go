@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -56,6 +56,9 @@ type Messenger struct {
 
 	// We have to keep track of the cursor for prompting
 	cursorx int
+
+	// Is the current message a message from the gutter
+	gutterMessage bool
 }
 
 // Message sends a message to the user
@@ -164,7 +167,7 @@ func (m *Messenger) HandleEvent(event tcell.Event) {
 			if m.cursorx < Count(m.response) {
 				m.cursorx++
 			}
-		case tcell.KeyBackspace2:
+		case tcell.KeyBackspace2, tcell.KeyBackspace:
 			if m.cursorx > 0 {
 				m.response = string([]rune(m.response)[:m.cursorx-1]) + string(m.response[m.cursorx:])
 			}
@@ -208,3 +211,20 @@ func (m *Messenger) Display() {
 		screen.Show()
 	}
 }
+
+// A GutterMessage is a message displayed on the side of the editor
+type GutterMessage struct {
+	lineNum int
+	msg     string
+	kind    int
+}
+
+// These are the different types of messages
+const (
+	// GutterInfo represents a simple info message
+	GutterInfo = iota
+	// GutterWarning represents a compiler warning
+	GutterWarning
+	// GutterError represents a compiler error
+	GutterError
+)

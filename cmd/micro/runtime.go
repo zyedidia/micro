@@ -171,12 +171,12 @@ func runtimeReadmeMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/README.md", size: 305, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/README.md", size: 305, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _runtimeColorschemesDefaultMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x6c\xcf\xc1\x0a\xc3\x20\x0c\xc6\xf1\xfb\x9e\x42\x3c\xaf\x0f\x65\xf5\xab\x0b\x8b\x46\xb2\x94\xe1\xdb\xcf\xb2\x31\xb0\xf4\xe2\xe5\xe7\x3f\x24\x51\x58\x74\x61\xaa\x4f\x17\xa5\x14\x54\x73\x7e\xe5\x1d\xfe\x36\x49\x7d\x59\x38\x48\x91\x26\xa1\x34\x0a\xda\x08\xea\x7c\xec\xa1\x4e\x38\x1a\xc3\x77\x64\x07\xb3\xbc\x27\x6d\x8a\xa6\x12\x9d\x2f\x21\x8f\x3f\x61\x42\xeb\x0d\xce\x67\x05\x4e\x23\x1b\x22\x05\xbe\x8e\x28\x57\xd1\x91\x25\x6c\x61\x67\x9b\x0c\xaa\x32\x76\xbc\xaf\x4a\xf9\x61\xe7\x33\x4c\x92\xfc\xf1\x62\xd7\xf1\x60\xa9\x7b\x59\x8f\x3b\x7f\xfe\x09\x00\x00\xff\xff\x9b\x69\xb6\x36\x3a\x01\x00\x00")
+var _runtimeColorschemesDefaultMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x6c\xd0\x41\x6e\xc4\x20\x0c\x05\xd0\x7d\x4f\x81\x58\x37\x87\x22\xf0\x43\xad\x82\x8d\x5c\xa3\x28\xb7\x2f\xd1\x64\x46\x22\xca\x86\xcd\xe3\x7f\x6c\xa2\x14\xd1\xa5\x10\xff\xba\x28\xb5\x82\xcd\xf9\xb5\x74\xf8\xaf\x49\xf8\xcf\xc2\x49\x8a\x34\x09\xa5\x91\xa0\x8d\xa0\xce\xc7\x23\xf0\x84\x23\x63\x78\x55\x1e\x28\x45\xf6\x49\x9b\xa2\xa9\x44\xe7\x6b\xc8\xe3\x4e\x98\xd0\x8e\x06\xe7\xb3\x02\xb7\xca\x86\x48\xa1\x3c\x87\x28\xb3\xe8\x88\x25\x6c\xa1\x17\x9b\x0c\xaa\x32\x66\xfc\x5e\x95\xf2\x8f\xdd\xd7\x30\x49\xf2\xc1\x87\x59\xc7\x81\x85\x7b\x5d\xcf\x3d\x1f\x3c\x77\x33\xe8\xf2\x7e\xe4\x5e\x7f\xf1\x1e\x94\x89\xf3\xf5\x8b\xff\x01\x00\x00\xff\xff\x01\xa4\x3c\xf9\x7a\x01\x00\x00")
 
 func runtimeColorschemesDefaultMicroBytes() ([]byte, error) {
 	return bindataRead(
@@ -191,12 +191,12 @@ func runtimeColorschemesDefaultMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/colorschemes/default.micro", size: 314, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/colorschemes/default.micro", size: 378, mode: os.FileMode(420), modTime: time.Unix(1461774781, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _runtimeColorschemesSolarizedTcMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x7c\xd1\xc1\x6e\xc3\x20\x0c\x06\xe0\x7b\x9f\x22\x4a\xaf\xad\x44\x20\x64\xe6\xd8\xb4\xdb\x7b\xa4\xc1\x95\xd0\x08\x8e\x08\x1c\xf6\xf6\x33\x55\xa7\x6d\x12\xed\x2d\x87\x2f\xbf\x8d\xff\x99\x3c\xc5\xa3\x77\xe1\xb3\xb1\x78\x9b\xb2\x4f\x4d\xbb\x07\x65\x7a\x33\x1c\xf6\x42\x48\x50\xaa\xdd\xfd\x41\x33\x2d\x0b\x86\x82\x34\x0c\xef\x6f\xba\x8a\x9c\x65\xe2\x6e\x0e\x23\x3b\x39\xc0\x78\x91\x4f\xc2\xc2\x96\xa6\x7b\x9a\x3c\x9d\x3a\x03\x55\xc5\x24\xe1\x63\x28\x68\x63\x84\xa8\xb2\x35\xe2\x1a\x69\x66\x74\x1e\xfb\xb1\xab\xaf\x9f\xbe\x56\x64\x31\x6a\x78\x16\xb3\xad\x38\xbb\xc9\x33\xba\x9c\x95\x94\x1f\x55\x94\x83\xc5\xc8\x5f\x68\x8b\x53\x6a\x80\xfa\x03\x31\x46\xe2\x1b\x5c\xc9\xdb\xe6\xe5\x5a\x64\xe9\x87\xbd\x88\x2b\x97\xc8\x5b\x99\xcb\x63\x85\x50\xba\xef\x0e\x8f\xb2\xfe\xb9\x22\x8e\x21\x2f\xd7\x7b\x01\xbf\x45\x95\x1f\xda\xdd\x77\x00\x00\x00\xff\xff\xa3\xfd\xbd\x12\xf3\x01\x00\x00")
+var _runtimeColorschemesSolarizedTcMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x7c\xd1\xc1\x6e\xc3\x20\x0c\x06\xe0\xfb\x9e\x22\x6a\xaf\x8d\x44\x20\x64\x70\x6c\xda\xed\x3d\xd2\xe0\x56\x68\x04\x22\x07\x34\xed\xed\x67\xba\x6c\x6b\x25\xda\x5b\x0e\x5f\x7e\xff\xd8\x63\x70\x01\x6b\x67\xfd\x47\x65\xe0\x3c\x24\x17\xab\xcd\x56\x09\xdd\xea\x6e\xb7\x65\x8c\x2b\x21\x36\x2f\x37\x68\x0c\xd3\x04\x3e\x23\xa9\xba\xb7\x57\x59\x44\xd6\x10\xb1\x67\x0b\x48\x8e\x77\xaa\x3f\xf2\x07\x61\x7e\x89\xc3\x35\x8d\xef\xf7\x8d\x56\x45\x45\x24\xc2\x3a\x54\x49\xad\x19\x2b\xb2\x19\x61\xc6\x30\x12\x3a\xf4\x6d\xdf\x94\xeb\xc7\xaf\x19\x48\xf4\x52\x3d\x8a\x59\x66\x18\xed\xe0\x08\x1d\x0f\x82\xf3\xf7\x22\x4a\xde\x00\xd2\x17\x98\xec\x84\xe8\x54\xf9\x81\x80\x18\x68\x07\xa7\xe0\x4c\xf5\xb4\x56\x30\xe1\x97\x3d\x89\xcb\x9b\x48\x4b\x9e\x4b\x63\x19\x13\xb2\x6d\x76\xeb\xb1\xee\x5c\x16\xb5\x4f\xd3\xe9\x7a\x80\xff\x43\xe5\x1f\xee\xe0\x25\xc5\x08\x58\xaf\x35\xff\x22\x7f\x9a\x96\xe4\xe7\x80\xde\xfa\x4b\x61\xc9\xdf\x01\x00\x00\xff\xff\x27\x76\x20\xf2\x49\x02\x00\x00")
 
 func runtimeColorschemesSolarizedTcMicroBytes() ([]byte, error) {
 	return bindataRead(
@@ -211,12 +211,12 @@ func runtimeColorschemesSolarizedTcMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/colorschemes/solarized-tc.micro", size: 499, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/colorschemes/solarized-tc.micro", size: 585, mode: os.FileMode(420), modTime: time.Unix(1461774743, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _runtimeColorschemesSolarizedMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x74\x90\x51\x0e\x83\x20\x10\x44\xff\x3d\x05\xe1\x5b\x0f\x85\x30\xb5\xc4\x85\x25\x2b\xa4\xf1\xf6\x05\x6d\xd3\x50\xdb\x3f\x92\x99\x79\xc3\xac\x65\x62\x99\xc8\xc7\x55\x59\x0e\x01\x31\x2b\x3d\x8b\x5f\xee\x79\x11\x20\xea\xa1\x33\xc4\x2d\x9b\xe6\xb0\xbb\xe9\x25\xef\x6a\xd2\xdf\x3c\xa4\xc6\xa9\xa0\x13\x6b\x28\xe3\x44\x5f\xa1\x49\x90\x84\xed\xbb\x55\xe0\x3a\x39\xef\x09\x4a\xef\x20\xe2\x47\x0f\x4d\xb0\xde\x90\xd2\xdf\x89\x12\x1d\xa4\xbe\xe0\x94\x0e\x66\xa9\xb5\xa6\xd3\x21\xc2\xed\x97\x4c\x4e\xfd\xe9\x64\xc7\x2f\xc3\x2f\x40\x9b\x53\xb6\xd6\xd0\xb6\x1a\xbb\x8e\x27\xe6\xb2\xbb\x59\xa6\x58\xc2\x7c\x5c\xe5\x73\xd4\xf1\x48\xe9\xe1\x19\x00\x00\xff\xff\x70\xff\xe7\x9f\x7c\x01\x00\x00")
+var _runtimeColorschemesSolarizedMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x74\x90\x5d\x8e\x03\x21\x0c\x83\xdf\x7b\x0a\xc4\xf3\xcc\xa1\x28\xb8\x2c\x6a\x26\x41\x69\x50\x35\xb7\x5f\xe8\x8f\xb6\xb4\xdb\xb7\x48\xb6\x3f\x27\x89\x42\xa2\x2b\x15\x3e\xbb\x28\xdb\x06\x36\xe7\x8f\x5a\xf2\x8f\x65\x05\xd8\x1f\x26\x03\x5f\x2c\x0c\x47\xdc\xc3\x2c\x95\xd4\x93\xe5\x54\xa0\x3d\x4e\x0d\x93\xd8\x43\x86\x3b\xfa\x13\x5a\x15\x55\x25\x3e\x5b\x15\x69\x92\x6d\xaf\x70\x7e\x07\x91\x5c\x67\x68\x45\x2c\x81\x9c\x7f\x4f\x34\x4e\xd0\x3e\x21\x39\xbf\x85\xdc\x6b\xc3\xa4\x43\x55\xc6\x96\x42\xc9\x7d\xe9\x94\x24\x0f\xc3\x7f\x80\x71\x4e\xbb\x8c\x86\x71\x6b\x88\xe7\xe5\x8e\xf9\xb8\x7b\x58\x56\x6e\xdb\xf1\xf6\x95\xbf\xa7\x2e\xb7\xd4\x64\xcd\xcd\x0c\xba\x3e\x77\x7b\xa1\xbe\x2f\xf7\x70\x5e\x83\x72\xe1\xfc\xf2\xb6\x25\xe1\x14\x1a\x99\x3f\xfc\x06\x00\x00\xff\xff\x8b\xe4\x03\x6c\xd4\x01\x00\x00")
 
 func runtimeColorschemesSolarizedMicroBytes() ([]byte, error) {
 	return bindataRead(
@@ -231,12 +231,12 @@ func runtimeColorschemesSolarizedMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/colorschemes/solarized.micro", size: 380, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/colorschemes/solarized.micro", size: 468, mode: os.FileMode(420), modTime: time.Unix(1461774743, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
 
-var _runtimeHelpHelpMd = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xb4\x58\x5b\x8f\xdb\xba\x11\x7e\x8e\x7e\xc5\x60\x37\xc0\x49\x02\x47\x8b\x02\x7d\xf2\x5b\xba\xd9\x5c\xd0\xe6\x6c\x9a\xb3\x01\x7a\xfa\x12\xd1\x12\x65\x33\x96\x44\x85\xa4\xec\x75\x7a\xf9\xed\xfd\x66\x48\xca\xf6\x6e\x52\xf4\xa5\x6f\xd6\x70\x38\xd7\x6f\x2e\xf4\x25\x7d\x30\xb5\xb3\xb4\xd1\xdd\x48\x41\xdf\x87\xa2\x88\x04\xe3\x49\x81\xe0\x7a\x33\xa8\xee\xe5\x4a\x79\xdd\xc8\x39\xe9\xc6\x04\xeb\x28\x6c\x54\x20\x65\x7a\x4f\xc1\xd2\x4a\x93\x56\xfe\xc0\x3f\x27\xaf\x49\x0d\x0d\x99\x21\x4c\x26\x98\x9d\x5e\x50\xb1\xdf\x98\x0e\xd4\xce\x5b\x0a\x6a\x6b\x86\x35\xa9\x66\xa7\x86\xa0\xd6\x9a\x6c\x0b\x51\x9a\xda\xa9\xeb\xa8\x56\xa3\x5a\x99\x0e\xd7\xb4\xe7\x83\xde\x36\xda\x0d\xb3\x15\xbe\x2c\x8a\xcb\xcb\x4b\xfa\xec\x71\xb1\x28\x6e\x87\x5a\xd3\xc1\x4e\xb4\x51\x3b\x4d\xab\xc9\x74\x41\x44\x45\x03\x17\xe4\x4d\x3f\x76\x07\xf2\x41\xb9\x40\x26\xd0\xea\x40\x6e\x1a\x06\x56\x5f\xf5\xe2\xe3\xa8\xc2\xe6\x2a\xd8\xab\x16\xe6\x95\xe1\x3e\x54\x04\xc7\xd2\xb5\xc8\x52\xb1\x4b\x76\xd4\x03\x7c\x22\xdd\x8f\xe1\x00\x45\x6d\xab\x5d\x99\xe3\x24\x5e\xf9\x69\x1c\xad\x0b\x9e\x6a\xa7\x55\x60\x0d\x91\xcb\x53\xeb\x6c\x0f\x13\x1a\x33\x2c\x8b\xa2\xaa\xaa\xe2\x29\x99\xb6\xb6\x43\x6b\xd6\xf4\x4f\x12\x1d\x42\x2e\x7e\x87\x23\x35\x94\xf4\x16\xce\xb0\x1b\xf5\xe4\x3c\xcc\x51\xce\x4e\x08\xe7\xde\x84\x8d\x90\x95\x73\x76\x4f\x5b\x7d\xf0\x12\xe6\xde\x22\xe0\x29\x2e\x7f\xd6\x87\x95\x19\xa0\x6a\xed\x8b\xe2\x6e\xa3\x39\x13\x2e\x0a\x6b\x74\xab\x26\xc4\x67\x7b\x64\x59\xc0\x74\x0b\x4b\xb3\x64\x03\x5d\x75\x30\x76\x48\x61\xbe\xa4\x9b\x98\xe9\xa3\xcc\x17\x74\x1d\x5c\xf7\xf2\xdb\x92\x88\xfe\x8a\xec\x66\x82\x66\xc2\xcd\xbd\xae\xa7\x00\x95\x54\xdb\xbe\x87\x6d\xf9\x74\xcd\xa7\x77\x76\xbd\x06\x06\x8e\x30\x4b\x87\x2b\x3e\xfc\x34\x21\xbe\xe4\x71\xd8\xcd\x97\xa3\x09\x7f\x92\x30\x3e\x36\xc1\xf3\xb5\xdf\x90\xf7\x4c\xb0\x4c\xb8\xe5\x44\x71\x32\x33\xf5\x3b\x53\x3f\x0f\x8d\xcd\x84\x83\xa8\xd3\x47\x42\xcb\x84\x37\xe6\x68\xed\x90\x09\x34\x9c\x98\x39\xce\xd4\xd1\xe9\x9d\x41\xd0\xf3\x89\x12\x4b\x74\xa7\x6b\x94\x43\xd7\x65\x72\xcd\xe4\x6b\x3b\x1e\x32\xe1\x5e\x08\xd3\x2c\x71\x9b\xbe\xa9\x33\xc3\x6c\xef\x8e\x89\x1f\x95\x0f\x33\x65\x62\xca\x3b\xd5\xb5\x00\x2b\xaa\x65\x1a\xf3\x41\x73\x7e\xd0\xd8\xfd\x80\xa3\x8f\xf8\xfd\x79\x8c\x52\x32\x3b\xff\x7a\x8d\xe3\x65\xa4\x25\xce\x77\xb6\x97\xb4\x11\xbd\xb5\xb1\x84\xd7\x26\x16\x07\x0a\x2f\xc5\xf0\x66\x68\x22\x4b\xe2\xd1\xf0\xff\x78\x2a\x66\xb8\x93\xe4\xb2\x27\x34\x4c\xfd\x0a\xc0\x17\x00\xa6\x2a\x98\xd3\x47\xbd\x3a\x70\xaf\x70\x7a\x25\xa0\x9e\x3c\xeb\x63\x7c\x56\xff\xbe\x2a\x63\x55\x5c\x49\x4d\x5c\xe5\x2b\xe5\x57\x6f\x87\x4a\x54\x96\x74\xa3\xea\x0d\x43\x98\x9b\x53\x94\x00\xa3\x50\x33\x11\xb7\x80\xed\x1b\xc0\x55\xdf\x2b\x14\x30\xda\x0e\x3b\xc5\x19\xab\x62\xe6\xa5\x94\x71\xc7\x4a\xdd\x44\xe2\x77\x21\x3a\xe0\x61\x21\x9d\xa4\xb6\x53\x87\x14\x4f\xb1\x91\xb4\xb6\xeb\xec\x9e\x4d\x34\x43\xb4\xf2\x47\x56\x49\x59\xf3\x77\xf1\x8f\x82\x43\x75\xc1\x92\x7f\xbf\x58\xd2\x05\x03\xef\x62\x71\x24\xfe\x9d\x89\x0c\xbe\x8b\xe2\x5f\xb1\xe8\x19\xe2\x1f\xad\xf7\x66\x85\xf0\x25\xe4\xfb\x63\x2f\xd0\xb9\xa4\x86\xdc\x75\x13\x0f\xf7\x32\x00\xd1\x4b\xfc\xa2\x2b\xba\x4a\xf6\x6a\x39\x95\x0e\x12\x99\xcb\xe2\x9d\x76\xc7\x56\x30\x3e\xd4\x17\x5b\xf9\x21\xe9\x8c\xed\xe4\x05\x55\xdf\x50\xe0\xd5\x52\xea\xdc\xc7\x46\x55\x32\xd9\xa3\xe8\x40\xe6\xda\xf3\xb9\x4f\x39\x3d\x84\x63\x5f\x04\x93\xd3\x63\xa7\xd0\x9d\x2f\xbc\x56\xae\xde\x5c\xd0\xc5\x4e\x75\x93\xbe\xa0\xb6\x53\x6b\x8f\xeb\x77\x1b\xa4\x70\x6f\x50\xef\x99\xb5\x8a\xac\x55\xec\x47\x95\xf0\x57\x25\x31\x8a\xaa\x78\x4b\x3c\xb0\x23\xa7\x5a\x75\x25\x87\xf5\x15\xe7\x09\x82\x46\x8b\x69\xb3\x60\x6b\xc0\x81\x6f\x3b\xa0\x81\x5b\x80\x91\x2f\x2e\xa9\xaa\xab\x05\x61\x06\x01\x3c\x7a\x50\x70\xdd\x83\xb4\xd1\xf5\xb6\x92\x09\x93\x8e\x94\xdf\x7a\xf4\x66\x0e\xc4\x2f\x0d\xb0\xbc\xd5\xac\x02\xf0\x18\xb5\x6b\xad\xeb\xc5\xd9\x64\x6d\xcf\x0e\x6b\x46\x63\x30\x3d\x46\x11\x18\x7f\xb5\x41\xc7\x48\xce\x9e\xf4\x93\x0f\x0c\x77\x45\xf0\xc6\x34\xb8\xbc\xd6\xf7\x25\xd1\xfb\x56\x8c\x4b\x93\x4f\xb9\xf5\xc4\xf2\x3c\x4b\x69\x2c\x8c\x1b\x6c\x88\x33\x4d\x0d\x18\x5f\x23\xf4\x79\x46\xa0\x09\x11\xa4\x5c\x44\xb6\x37\x11\xa3\xdf\x26\xe8\xf5\x31\xea\x5e\x87\x14\x1f\x8a\xe1\x5b\x12\x48\x31\x4b\x89\x0e\x77\xe4\xa8\xa4\x8f\x1d\x26\xb6\x06\x43\x44\x05\x37\x3b\x7c\x48\x21\x01\x48\x98\x05\x08\x01\xcc\x87\x91\xf1\xaa\x9f\x11\x02\x99\x29\xcb\x68\xdb\x7e\xf3\x32\xe1\x08\xda\x40\x88\xda\xd6\x98\xfb\xc3\x79\x43\xcf\x35\xb4\x52\xf5\x76\x2d\x33\x2d\x26\x37\x1d\xff\x82\xac\x4d\x81\x2b\x4f\x50\x81\xa8\x35\xc6\x23\xd6\x07\xdd\x14\xb8\xc9\xf1\x92\xf6\xb2\xdf\x68\x8e\x04\x4a\x6f\x30\x90\xef\xf3\x48\x4f\x23\xf0\x36\xda\x9a\x87\xb3\x47\xcd\x80\x07\x7d\x39\x47\x1b\xf0\xe6\x2a\xe2\x4e\x33\x39\x25\xde\x4a\x68\xfd\x03\x62\x63\x1c\x82\x61\xdd\x61\x1e\xf4\xb8\x19\x9d\xab\x9e\xfe\xed\xf5\xdb\x2f\xd7\xb7\xbf\xbe\x79\xff\xf6\xcb\xbb\xdb\x0f\x37\x57\x69\x55\x50\xa9\x20\x7e\x22\x88\x5e\x79\xc6\x92\xf0\x40\x02\x32\xab\xeb\x45\x01\xc4\x3d\x12\x58\x31\x88\x19\x05\x08\xf5\xe2\x51\x6f\x94\xd3\x89\xf7\xb1\x33\x85\x67\x26\x9f\x55\x7c\x4e\xe0\x59\x9d\x43\xf4\x52\xb2\x58\xdb\xce\x3a\x8f\x7a\xe8\x19\x30\x9d\x55\x4d\x96\x3a\xd3\x63\x1c\x25\x85\x4f\x9f\x45\x6d\xaf\x8d\x7b\x7e\x75\xc2\xe2\xaf\xaa\xa8\xa6\x2a\xe3\x52\x53\x3c\xc9\x3b\x87\x00\x0e\x55\x98\xbe\xab\xe2\xc9\xb1\x56\x4e\x77\x93\x53\x69\xf4\x2c\x51\xb1\xc6\xd9\x4e\x39\xf3\x5d\x37\x0b\x69\xdc\xf3\xe7\xcb\x50\x3f\x17\x17\x39\x50\x9d\xad\x55\x88\x16\xce\xf6\x2d\x8a\x27\x2b\x5d\x2b\x5e\x48\xa1\xe6\x20\xbc\x1a\xc3\xa9\x69\xf4\x8c\xc6\xb8\x07\xa2\xad\x2b\x77\x90\x32\x4e\x98\x3c\xba\xce\xb1\x5a\x71\x9d\xf0\x84\xc7\x45\x59\xe8\x18\x50\x32\x21\x4c\x17\x6b\x93\x3f\x1e\x8e\xb0\xb3\xe8\x9c\xe2\x20\xe2\x09\xc0\xc7\x5d\xb4\xea\xec\x7f\x5a\xc4\x9c\x3e\x33\xc0\x2f\xa3\x5d\x2f\x32\xdf\x32\xf6\x3c\xe3\x7f\x16\xbc\x32\xf1\xcf\x91\x3a\xbf\x31\x93\xcf\xdc\x7c\x26\x80\x4a\x9e\x78\xac\xb1\x7a\xf0\x1b\x1b\x9e\x97\xc4\xc3\x08\x3f\x79\x30\x4a\x53\x62\x86\x22\x6e\x05\x0f\x44\x61\x13\xe9\x74\x40\x6a\x21\x06\x30\x73\xf3\xe2\x9e\xdf\x05\x26\x3c\xb2\x0d\x59\xfc\x5f\xcc\xe3\x8e\x14\xdc\x94\x22\xb3\xa0\xaf\xdc\x5a\x7b\xb5\x05\xff\xe4\x66\x7b\xce\x95\xce\x4b\xf9\xf1\x22\x32\x09\x49\x3a\x2d\x1e\x68\x23\x8c\xa8\x19\x88\x1f\xde\x5f\x7f\xba\xfd\x72\xf7\xe9\xf3\xcd\xf5\xed\x5f\x6e\x3f\x61\x58\xec\x8c\xb3\x03\x37\xe7\xa4\x60\x07\xd3\x78\x80\xb0\xb1\xdc\x6d\xe1\xd7\x1f\xb2\x4c\x79\x67\xb0\xd8\x34\x2b\xa5\xb8\x82\x5a\x79\x38\x73\xda\x89\x41\x22\xa6\xf1\xe5\x5c\x33\x3f\xa8\x96\x3f\x56\xb1\xa7\x1f\xf0\x4c\xba\xc7\xfd\x30\x39\x94\x70\xfc\x44\x3b\xe4\x97\x8a\x6d\xdb\x1f\x5c\x14\x71\x49\xf5\x9d\xfd\x4d\xc6\x07\xee\x73\xfc\xe7\x59\x82\x05\x53\xc9\x2a\xc7\x4c\x3f\x92\xd1\xb6\x51\x88\x9a\x02\x66\x6b\x83\x08\x40\x84\xf4\xde\xf9\x85\xa3\x30\x33\xf6\xb1\x29\xa7\x12\x23\xaf\x7a\x4e\x3e\xb3\xc7\xe6\x97\x1a\x54\xde\x99\xe3\xae\x2b\xb1\xfc\x99\xd5\x6e\xea\xb4\x83\xae\xd4\xfd\x1f\xec\x94\xff\xed\xe6\xda\xb6\x3d\x5b\xc9\x8f\x89\xf4\x21\x16\xeb\x5d\xea\xb9\x5c\xac\x92\x38\xa0\xb8\xa1\x67\x02\x3a\xd9\x14\xd4\x38\x76\xfc\xe2\xe4\x84\x94\x6b\x1b\xf7\x3a\xff\xfc\x27\xea\x72\x68\xd6\x16\x0f\x45\xc6\x57\x1c\x7c\xa7\x84\xff\x9f\xde\x57\xd8\x08\xd2\x28\xe7\x46\xce\x18\x4c\x35\x9b\x16\xc4\x3c\x3d\xa3\x32\x48\x9e\x2d\x78\xd8\x9e\x70\x37\xcc\xbb\x2c\xca\x0e\xef\x74\x88\xd2\x58\xe2\xea\xb8\x68\x3c\x9c\x93\x22\x25\xcb\x17\x18\x70\x3b\x84\x4e\xf0\x96\xbc\xd4\x1c\x37\x27\x51\xcc\xd5\xf9\x58\x4c\x21\x6d\x8e\x8d\x97\xdd\xdd\xf2\xd2\x86\x4a\xae\x37\x48\xf4\xfc\x66\xaf\xf1\x70\x8a\x88\x3a\x33\x32\xb9\x73\x76\x07\x85\xf6\x7e\x48\x7f\x21\xa0\x46\xf4\x22\xce\xe8\x04\x00\x59\xf5\x4f\x13\x93\xcc\x77\x88\x6e\x1d\x87\x5a\xec\x05\x8a\xc6\x6e\xc2\x0b\x08\x15\x86\xe2\xe8\x4b\xbc\x8f\xf6\x9c\xc1\x45\x91\xf6\xdb\xee\x10\xa7\xc8\xb1\xf3\x18\x5e\x01\xbd\xe1\x2c\x63\x49\x74\x76\xed\x54\x9f\x06\x0a\xe4\xa4\x2e\xf0\x9f\x00\x00\x00\xff\xff\xfd\x47\x84\x27\x60\x11\x00\x00")
+var _runtimeHelpHelpMd = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xb4\x58\x5b\x8f\xdb\xba\x11\x7e\x8e\x7e\xc5\x60\x37\xc0\x49\x02\x47\x8b\x02\x7d\xf2\x5b\xba\xd9\x5c\xd0\xe6\x6c\x9a\xb3\x01\x7a\xfa\x12\xd1\x12\x65\x33\x96\x44\x85\xa4\xec\x75\x7a\xf9\xed\xfd\x66\x48\xca\xf6\x6e\x52\xf4\xa5\x6f\xd6\x70\x38\xd7\x6f\x2e\xf4\x25\x7d\x30\xb5\xb3\xb4\xd1\xdd\x48\x41\xdf\x87\xa2\x88\x04\xe3\x49\x81\xe0\x7a\x33\xa8\xee\xe5\x4a\x79\xdd\xc8\x39\xe9\xc6\x04\xeb\x28\x6c\x54\x20\x65\x7a\x4f\xc1\xd2\x4a\x93\x56\xfe\xc0\x3f\x27\xaf\x49\x0d\x0d\x99\x21\x4c\x26\x98\x9d\x5e\x50\xb1\xdf\x98\x0e\xd4\xce\x5b\x0a\x6a\x6b\x86\x35\xa9\x66\xa7\x86\xa0\xd6\x9a\x6c\x0b\x51\x9a\xda\xa9\xeb\xa8\x56\xa3\x5a\x99\x0e\xd7\xb4\xe7\x83\xde\x36\xda\x0d\xb3\x15\xbe\x2c\x8a\xcb\xcb\x4b\xfa\xec\x71\xb1\x28\x6e\x87\x5a\xd3\xc1\x4e\xb4\x51\x3b\x4d\xab\xc9\x74\x41\x44\x45\x03\x17\xe4\x4d\x3f\x76\x07\xf2\x41\xb9\x40\x26\xd0\xea\x40\x6e\x1a\x06\x56\x5f\xf5\xe2\xe3\xa8\xc2\xe6\x2a\xd8\xab\x16\xe6\x95\xe1\x3e\x54\x04\xc7\xd2\xb5\xc8\x52\xb1\x4b\x76\xd4\x03\x7c\x22\xdd\x8f\xe1\x00\x45\x6d\xab\x5d\x99\xe3\x24\x5e\xf9\x69\x1c\xad\x0b\x9e\x6a\xa7\x55\x60\x0d\x91\xcb\x53\xeb\x6c\x0f\x13\x1a\x33\x2c\x8b\xa2\xaa\xaa\xe2\x29\x99\xb6\xb6\x43\x6b\xd6\xf4\x4f\x12\x1d\x42\x2e\x7e\x87\x23\x35\x94\xf4\x16\xce\xb0\x1b\xf5\xe4\x3c\xcc\x51\xce\x4e\x08\xe7\xde\x84\x8d\x90\x95\x73\x76\x4f\x5b\x7d\xf0\x12\xe6\xde\x22\xe0\x29\x2e\x7f\xd6\x87\x95\x19\xa0\x6a\xed\x8b\xe2\x6e\xa3\x39\x13\x2e\x0a\x6b\x74\xab\x26\xc4\x67\x7b\x64\x59\xc0\x74\x0b\x4b\xb3\x64\x03\x5d\x75\x30\x76\x48\x61\xbe\xa4\x9b\x98\xe9\xa3\xcc\x17\x74\x1d\x5c\xf7\xf2\xdb\x92\x88\xfe\x8a\xec\x66\x82\x66\xc2\xcd\xbd\xae\xa7\x00\x95\x54\xdb\xbe\x87\x6d\xf9\x74\xcd\xa7\x77\x76\xbd\x06\x06\x8e\x30\x4b\x87\x2b\x3e\xfc\x34\x21\xbe\xe4\x71\xd8\xcd\x97\xa3\x09\x7f\x92\x30\x3e\x36\xc1\xf3\xb5\xdf\x90\xf7\x4c\xb0\x4c\xb8\xe5\x44\x71\x32\x33\xf5\x3b\x53\x3f\x0f\x8d\xcd\x84\x83\xa8\xd3\x47\x42\xcb\x84\x37\xe6\x68\xed\x90\x09\x34\x9c\x98\x39\xce\xd4\xd1\xe9\x9d\x41\xd0\xf3\x89\x12\x4b\x74\xa7\x6b\x94\x43\xd7\x65\x72\xcd\xe4\x6b\x3b\x1e\x32\xe1\x5e\x08\xd3\x2c\x71\x9b\xbe\xa9\x33\xc3\x6c\xef\x8e\x89\x1f\x95\x0f\x33\x65\x62\xca\x3b\xd5\xb5\x00\x2b\xaa\x65\x1a\xf3\x41\x73\x7e\xd0\xd8\xfd\x80\xa3\x8f\xf8\xfd\x79\x8c\x52\x32\x3b\xff\x7a\x8d\xe3\x65\xa4\x25\xce\x77\xb6\x97\xb4\x11\xbd\xb5\xb1\x84\xd7\x26\x16\x07\x0a\x2f\xd9\x74\x33\x34\x91\x25\xf1\x68\xf8\x7f\x3c\x15\x33\xdc\x49\x72\x99\x4e\xc3\xd4\xaf\x00\x7c\x01\x60\xaa\x82\x39\x7d\xd4\xab\x03\xf7\x0a\xa7\x57\x02\xea\xc9\xb3\x3e\xc6\x67\xf5\xef\xab\x32\x56\xc5\x95\xd4\xc4\x55\xbe\x52\x7e\xf5\x76\xa8\x24\xa9\x25\xdd\xa8\x7a\xc3\x10\xe6\xe6\x14\x25\xc0\x28\xd4\x4c\xc4\x2d\x60\xfb\x06\x70\xd5\xf7\x0a\x05\x8c\xb6\xc3\x4e\x71\xc6\xaa\x98\x79\x29\x65\xdc\xb1\x52\x37\x91\xf8\x5d\x88\x0e\x78\x58\x48\x27\xa9\xed\xd4\x21\xc5\x53\x6c\x24\xad\xed\x3a\xbb\x67\x13\xcd\x10\xad\xfc\x91\x55\x52\xd6\xfc\x5d\xfc\xa3\xe0\x50\x5d\xb0\xe4\xdf\x2f\x96\x74\xc1\xc0\xbb\x58\x1c\x89\x7f\x67\x22\x83\xef\xa2\xf8\x57\x2c\x7a\x86\xf8\x47\xeb\xbd\x59\x21\x7c\x09\xf9\xfe\xd8\x0b\x74\x2e\xa9\x21\x77\xdd\xc4\xc3\xbd\x0c\x40\xf4\x12\xbf\xe8\x8a\xae\x92\xbd\x5a\x4e\xa5\x83\x44\xe6\xb2\x78\xa7\xdd\xb1\x15\x8c\x0f\xf5\xc5\x56\x7e\x48\x3a\x63\x3b\x79\x41\xd5\x37\x14\x78\xb5\x94\x3a\xf7\xb1\x51\x95\x4c\xf6\x28\x3a\x90\xb9\xf6\x7c\xee\x53\x4e\x0f\xe1\xd8\x17\xc1\xe4\xf4\xd8\x29\x74\xe7\x0b\xaf\x95\xab\x37\x17\x74\xb1\x53\xdd\xa4\x2f\xa8\xed\xd4\xda\xe3\xfa\xdd\x06\x29\xdc\x1b\xd4\x7b\x66\xad\x22\x6b\x15\xfb\x51\x25\xfc\x55\x49\x8c\xa2\x2a\xde\x12\x0f\xec\xc8\xa9\x56\x5d\xc9\x61\x7d\xc5\x79\x82\xa0\xd1\x62\xda\x2c\xd8\x1a\x70\xe0\xdb\x0e\x68\xe0\x16\x60\xe4\x8b\x4b\xaa\xea\x6a\x41\x98\x41\x00\x8f\x1e\x14\x5c\xf7\x20\x6d\x74\xbd\xad\x64\xc2\xa4\x23\xe5\xb7\x1e\xbd\x99\x03\xf1\x4b\x03\x2c\x6f\x35\xab\x00\x3c\x46\xed\x5a\xeb\x7a\x71\x36\x59\xdb\xb3\xc3\x9a\xd1\x18\x4c\x8f\x51\x04\xc6\x5f\x6d\xd0\x31\x92\xb3\x27\xfd\xe4\x03\xc3\x5d\x11\xbc\x31\x0d\x2e\xaf\xf5\x7d\x49\xf4\xbe\x15\xe3\xd2\xe4\x53\x6e\x3d\xb1\x3c\xcf\x52\x1a\x0b\xe3\x06\x1b\xe2\x4c\x53\x03\xc6\xd7\x08\x7d\x9e\x11\x68\x42\x04\x29\x17\x91\xed\x4d\xc4\xe8\xb7\x09\x7a\x7d\x8c\xba\xd7\x21\xc5\x87\x62\xf8\x96\x04\x52\xcc\x52\xa2\xc3\x1d\x39\x2a\xe9\x63\x87\x89\xad\xc1\x10\x51\xc1\xcd\x0e\x1f\x52\x48\x00\x12\x66\x01\x42\x00\xf3\x61\x64\xbc\xea\x67\x84\x40\x66\xca\x32\xda\xb6\xdf\xbc\x4c\x38\x82\x36\x10\xa2\xb6\x35\xe6\xfe\x70\xde\xd0\x73\x0d\xad\x54\xbd\x5d\xcb\x4c\x8b\xc9\x4d\xc7\xbf\x20\x6b\x53\xe0\xca\x13\x54\x20\x6a\x8d\xf1\x88\xf5\x41\x37\x05\x6e\x72\xbc\xa4\xbd\xec\x37\x9a\x23\x81\xd2\x1b\x0c\xe4\xfb\x3c\xd2\xd3\x08\xbc\x8d\xb6\xe6\xe1\xec\x51\x33\xe0\x41\x5f\xce\xd1\x06\xbc\xb9\x8a\xb8\xd3\x4c\x4e\x89\xb7\x12\x5a\xff\x80\xd8\x18\x87\x60\x58\x77\x98\x07\x3d\x6e\x46\xe7\xaa\xa7\x7f\x7b\xfd\xf6\xcb\xf5\xed\xaf\x6f\xde\xbf\xfd\xf2\xee\xf6\xc3\xcd\x55\x5a\x15\x54\x2a\x88\x9f\x08\xa2\x57\x9e\xb1\x24\x3c\x90\x80\xcc\xea\x7a\x51\x00\x71\x8f\x04\x56\x0c\x62\x46\x01\x42\xbd\x78\xd4\x1b\xe5\x74\xe2\x7d\xec\x4c\xe1\x99\xc9\x67\x15\x9f\x13\x78\x56\xe7\x10\xbd\x94\x2c\xd6\xb6\xb3\xce\xa3\x1e\x7a\x06\x4c\x67\x55\x93\xa5\xce\xf4\x18\x47\x49\xe1\xd3\x67\x51\xdb\x6b\xe3\x9e\x5f\x9d\xb0\xf8\xab\x2a\xaa\xa9\xca\xb8\xd4\x14\x4f\xf2\xce\x21\x80\x43\x15\xa6\xef\xaa\x78\x72\xac\x95\xd3\xdd\xe4\x54\x1a\x3d\x4b\x54\xac\x71\xb6\x53\xce\x7c\xd7\xcd\x42\x1a\xf7\xfc\xf9\x32\xd4\xcf\xc5\x45\x0e\x54\x67\x6b\x15\xa2\x85\xb3\x7d\x8b\xe2\xc9\x4a\xd7\x8a\x17\x52\xa8\x39\x08\xaf\xc6\x70\x6a\x1a\x3d\xa3\x31\xee\x81\x68\xeb\xca\x1d\xa4\x8c\x13\x26\x8f\xae\x73\xac\x56\x5c\x27\x3c\xe1\x71\x51\x16\x3a\x06\x94\x4c\x08\xd3\xc5\xda\xe4\x8f\x87\x23\xec\x2c\x3a\xa7\x38\x88\x78\x02\xf0\x71\x17\xad\x3a\xfb\x9f\x16\x31\xa7\xcf\x0c\xf0\xcb\x68\xd7\x8b\xcc\xb7\x8c\x3d\xcf\xf8\x9f\x05\xaf\x4c\xfc\x73\xa4\xce\x6f\xcc\xe4\x33\x37\x9f\x09\xa0\x92\x27\x1e\x6b\xac\x1e\xfc\xc6\x86\xe7\x25\xf1\x30\xc2\x4f\x1e\x8c\xd2\x94\x98\xa1\x88\x5b\xc1\x03\x51\xd8\x44\x3a\x1d\x90\x5a\x88\x01\xcc\xdc\xbc\xb8\xe7\x77\x81\x09\x8f\x6c\x43\x16\xff\x17\xf3\xb8\x23\x05\x37\xa5\xc8\x2c\xe8\x2b\xb7\xd6\x5e\x6d\xc1\x3f\xb9\xd9\x9e\x73\xa5\xf3\x52\x7e\xbc\x88\x4c\x42\x92\x4e\x8b\x07\xda\x08\x23\x6a\x06\xe2\x87\xf7\xd7\x9f\x6e\xbf\xdc\x7d\xfa\x7c\x73\x7d\xfb\x97\xdb\x4f\x18\x16\x3b\xe3\xec\xc0\xcd\x39\x29\xd8\xc1\x34\x1e\x20\x6c\x2c\x77\x5b\xf8\xf5\x87\x2c\x53\xde\x19\x2c\x36\xcd\x4a\x29\xae\xa0\x56\x1e\xce\x9c\x76\x62\x90\x88\x69\x7c\x39\xd7\xcc\x0f\xaa\xe5\x8f\x55\xec\xe9\x07\x3c\x93\xee\x71\x3f\x4c\x0e\x25\x1c\x3f\xd1\x0e\xf9\xa5\x62\xdb\xf6\x07\x17\x45\x5c\x52\x7d\x67\x7f\x93\xf1\x81\xfb\x1c\xff\x79\x96\x60\xc1\x54\xb2\xca\x31\xd3\x8f\x64\xb4\x6d\x14\xa2\xa6\x80\xd9\xda\x20\x02\x10\x21\xbd\x77\x7e\xe1\x28\xcc\x8c\x7d\x6c\xca\xa9\xc4\xc8\xab\x9e\x93\xcf\xec\xb1\xf9\xa5\x06\x95\x77\xe6\xb8\x39\x4a\x2c\x7f\x66\xb5\x9b\x3a\xed\xa0\x2b\x75\xff\x07\x3b\xe5\x7f\xbb\xb9\xb6\x6d\xcf\x56\xf2\x63\x22\x7d\x88\xc5\x7a\x97\x7a\x2e\x17\xab\x24\x0e\x28\x6e\xe8\x99\x80\x4e\x36\x05\x35\x8e\x1d\xbf\x38\x39\x21\xe5\xda\xc6\xbd\xce\x3f\xff\x89\xba\x1c\x9a\xb5\xc5\x43\x91\xf1\x15\x07\xdf\x29\xe1\xff\xa7\xf7\x15\x36\x82\x34\xca\xb9\x91\x33\x06\x53\xcd\xa6\x05\x31\x4f\xcf\xa8\x0c\x92\x67\x0b\x1e\xb6\x27\xdc\x0d\xf3\x2e\x8b\xb2\xc3\x3b\x1d\xa2\x34\x96\xb8\x3a\x2e\x1a\x0f\xe7\xa4\x48\xc9\xf2\x05\x06\xdc\x0e\xa1\x13\xbc\x25\x2f\x35\xc7\xcd\x49\x14\x73\x75\x3e\x16\x53\x48\x9b\x63\xe3\x65\x77\xb7\xbc\xb4\xa1\x92\xeb\x0d\x12\x3d\xbf\xd9\x6b\x3c\x9c\x22\xa2\xce\x8c\x4c\xee\x9c\xdd\x41\xa1\xbd\x1f\xd2\x5f\x08\xa8\x11\xbd\x88\x33\x3a\x01\x40\x56\xfd\xd3\xc4\x24\xf3\x1d\xa2\x5b\xc7\xa1\x16\x7b\x81\xa2\xb1\x9b\xf0\x02\x42\x85\xa1\x38\xfa\x12\xef\xa3\x3d\x67\x70\x51\xa4\xfd\xb6\x3b\xc4\x29\x72\xec\x3c\x86\x57\x40\x6f\x38\xcb\x58\x12\x9d\x5d\x3b\xd5\xa7\x81\x02\x39\xa9\x0b\xfc\x27\x00\x00\xff\xff\x45\x00\x01\xfe\x60\x11\x00\x00")
 
 func runtimeHelpHelpMdBytes() ([]byte, error) {
 	return bindataRead(
@@ -251,7 +251,7 @@ func runtimeHelpHelpMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/help/help.md", size: 4448, mode: os.FileMode(420), modTime: time.Unix(1461532100, 0)}
+	info := bindataFileInfo{name: "runtime/help/help.md", size: 4448, mode: os.FileMode(420), modTime: time.Unix(1461770592, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -271,7 +271,7 @@ func runtimeSyntaxDockerfileMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/Dockerfile.micro", size: 841, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/Dockerfile.micro", size: 841, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -291,7 +291,7 @@ func runtimeSyntaxLicense() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/LICENSE", size: 723, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/LICENSE", size: 723, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -311,7 +311,7 @@ func runtimeSyntaxReadmeMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/README.md", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/README.md", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -331,7 +331,7 @@ func runtimeSyntaxApacheconfMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/apacheconf.micro", size: 6276, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/apacheconf.micro", size: 6276, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -351,7 +351,7 @@ func runtimeSyntaxArduinoMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/arduino.micro", size: 3654, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/arduino.micro", size: 3654, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -371,7 +371,7 @@ func runtimeSyntaxAsciidocMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/asciidoc.micro", size: 984, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/asciidoc.micro", size: 984, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -391,7 +391,7 @@ func runtimeSyntaxAsmMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/asm.micro", size: 780, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/asm.micro", size: 780, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -411,7 +411,7 @@ func runtimeSyntaxAwkMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/awk.micro", size: 1213, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/awk.micro", size: 1213, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -431,7 +431,7 @@ func runtimeSyntaxCMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/c.micro", size: 1613, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/c.micro", size: 1613, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -451,7 +451,7 @@ func runtimeSyntaxCmakeMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/cmake.micro", size: 917, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/cmake.micro", size: 917, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -471,7 +471,7 @@ func runtimeSyntaxCoffeescriptMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/coffeescript.micro", size: 719, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/coffeescript.micro", size: 719, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -491,7 +491,7 @@ func runtimeSyntaxColortestMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/colortest.micro", size: 415, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/colortest.micro", size: 415, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -511,7 +511,7 @@ func runtimeSyntaxConfMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/conf.micro", size: 219, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/conf.micro", size: 219, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -531,7 +531,7 @@ func runtimeSyntaxConkyMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/conky.micro", size: 6330, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/conky.micro", size: 6330, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -551,7 +551,7 @@ func runtimeSyntaxCsharpMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/csharp.micro", size: 1437, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/csharp.micro", size: 1437, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -571,7 +571,7 @@ func runtimeSyntaxCssMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/css.micro", size: 335, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/css.micro", size: 335, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -591,7 +591,7 @@ func runtimeSyntaxCythonMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/cython.micro", size: 998, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/cython.micro", size: 998, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -611,7 +611,7 @@ func runtimeSyntaxDMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/d.micro", size: 3620, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/d.micro", size: 3620, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -631,7 +631,7 @@ func runtimeSyntaxDotMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/dot.micro", size: 729, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/dot.micro", size: 729, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -651,7 +651,7 @@ func runtimeSyntaxErbMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/erb.micro", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/erb.micro", size: 1357, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -671,7 +671,7 @@ func runtimeSyntaxFishMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/fish.micro", size: 911, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/fish.micro", size: 911, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -691,7 +691,7 @@ func runtimeSyntaxFortranMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/fortran.micro", size: 2302, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/fortran.micro", size: 2302, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -711,7 +711,7 @@ func runtimeSyntaxGentooEbuildMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/gentoo-ebuild.micro", size: 1950, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/gentoo-ebuild.micro", size: 1950, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -731,7 +731,7 @@ func runtimeSyntaxGentooEtcPortageMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/gentoo-etc-portage.micro", size: 623, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/gentoo-etc-portage.micro", size: 623, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -751,7 +751,7 @@ func runtimeSyntaxGitCommitMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/git-commit.micro", size: 1129, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/git-commit.micro", size: 1129, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -771,7 +771,7 @@ func runtimeSyntaxGitConfigMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/git-config.micro", size: 254, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/git-config.micro", size: 254, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -791,7 +791,7 @@ func runtimeSyntaxGitRebaseTodoMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/git-rebase-todo.micro", size: 750, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/git-rebase-todo.micro", size: 750, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -811,7 +811,7 @@ func runtimeSyntaxGlslMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/glsl.micro", size: 882, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/glsl.micro", size: 882, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -831,7 +831,7 @@ func runtimeSyntaxGoMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/go.micro", size: 922, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/go.micro", size: 922, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -851,7 +851,7 @@ func runtimeSyntaxGroffMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/groff.micro", size: 723, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/groff.micro", size: 723, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -871,7 +871,7 @@ func runtimeSyntaxHamlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/haml.micro", size: 585, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/haml.micro", size: 585, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -891,7 +891,7 @@ func runtimeSyntaxHaskellMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/haskell.micro", size: 1089, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/haskell.micro", size: 1089, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -911,7 +911,7 @@ func runtimeSyntaxHtmlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/html.micro", size: 324, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/html.micro", size: 324, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -931,7 +931,7 @@ func runtimeSyntaxIniMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/ini.micro", size: 401, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/ini.micro", size: 401, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -951,7 +951,7 @@ func runtimeSyntaxInputrcMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/inputrc.micro", size: 285, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/inputrc.micro", size: 285, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -971,7 +971,7 @@ func runtimeSyntaxJavaMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/java.micro", size: 596, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/java.micro", size: 596, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -991,7 +991,7 @@ func runtimeSyntaxJavascriptMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/javascript.micro", size: 1025, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/javascript.micro", size: 1025, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1011,7 +1011,7 @@ func runtimeSyntaxJsonMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/json.micro", size: 402, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/json.micro", size: 402, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1031,7 +1031,7 @@ func runtimeSyntaxKeymapMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/keymap.micro", size: 318, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/keymap.micro", size: 318, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1051,7 +1051,7 @@ func runtimeSyntaxKickstartMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/kickstart.micro", size: 607, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/kickstart.micro", size: 607, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1071,7 +1071,7 @@ func runtimeSyntaxLedgerMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/ledger.micro", size: 432, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/ledger.micro", size: 432, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1091,7 +1091,7 @@ func runtimeSyntaxLispMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/lisp.micro", size: 380, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/lisp.micro", size: 380, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1111,7 +1111,7 @@ func runtimeSyntaxLuaMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/lua.micro", size: 2923, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/lua.micro", size: 2923, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1131,7 +1131,7 @@ func runtimeSyntaxMakefileMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/makefile.micro", size: 999, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/makefile.micro", size: 999, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1151,7 +1151,7 @@ func runtimeSyntaxManMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/man.micro", size: 264, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/man.micro", size: 264, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1171,7 +1171,7 @@ func runtimeSyntaxMarkdownMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/markdown.micro", size: 893, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/markdown.micro", size: 893, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1191,7 +1191,7 @@ func runtimeSyntaxMpdconfMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/mpdconf.micro", size: 389, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/mpdconf.micro", size: 389, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1211,7 +1211,7 @@ func runtimeSyntaxNanorcMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/nanorc.micro", size: 1042, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/nanorc.micro", size: 1042, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1231,7 +1231,7 @@ func runtimeSyntaxNginxMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/nginx.micro", size: 4846, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/nginx.micro", size: 4846, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1251,7 +1251,7 @@ func runtimeSyntaxOcamlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/ocaml.micro", size: 767, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/ocaml.micro", size: 767, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1271,7 +1271,7 @@ func runtimeSyntaxPatchMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/patch.micro", size: 242, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/patch.micro", size: 242, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1291,7 +1291,7 @@ func runtimeSyntaxPegMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/peg.micro", size: 395, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/peg.micro", size: 395, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1311,7 +1311,7 @@ func runtimeSyntaxPerlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/perl.micro", size: 1440, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/perl.micro", size: 1440, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1331,7 +1331,7 @@ func runtimeSyntaxPerl6Micro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/perl6.micro", size: 1649, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/perl6.micro", size: 1649, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1351,7 +1351,7 @@ func runtimeSyntaxPhpMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/php.micro", size: 1431, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/php.micro", size: 1431, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1371,7 +1371,7 @@ func runtimeSyntaxPkgConfigMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/pkg-config.micro", size: 245, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/pkg-config.micro", size: 245, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1391,7 +1391,7 @@ func runtimeSyntaxPkgbuildMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/pkgbuild.micro", size: 1424, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/pkgbuild.micro", size: 1424, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1411,7 +1411,7 @@ func runtimeSyntaxPoMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/po.micro", size: 221, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/po.micro", size: 221, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1431,7 +1431,7 @@ func runtimeSyntaxPovMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/pov.micro", size: 682, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/pov.micro", size: 682, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1451,7 +1451,7 @@ func runtimeSyntaxPrivoxyActionMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/privoxy-action.micro", size: 1545, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/privoxy-action.micro", size: 1545, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1471,7 +1471,7 @@ func runtimeSyntaxPrivoxyConfigMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/privoxy-config.micro", size: 804, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/privoxy-config.micro", size: 804, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1491,7 +1491,7 @@ func runtimeSyntaxPrivoxyFilterMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/privoxy-filter.micro", size: 390, mode: os.FileMode(420), modTime: time.Unix(1461431515, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/privoxy-filter.micro", size: 390, mode: os.FileMode(420), modTime: time.Unix(1461341046, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1511,7 +1511,7 @@ func runtimeSyntaxPuppetMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/puppet.micro", size: 1969, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/puppet.micro", size: 1969, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1531,7 +1531,7 @@ func runtimeSyntaxPythonMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/python.micro", size: 3037, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/python.micro", size: 3037, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1551,7 +1551,7 @@ func runtimeSyntaxRestMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/reST.micro", size: 470, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/reST.micro", size: 470, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1571,7 +1571,7 @@ func runtimeSyntaxRpmspecMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/rpmspec.micro", size: 1626, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/rpmspec.micro", size: 1626, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1591,7 +1591,7 @@ func runtimeSyntaxRubyMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/ruby.micro", size: 1531, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/ruby.micro", size: 1531, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1611,7 +1611,7 @@ func runtimeSyntaxRustMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/rust.micro", size: 1077, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/rust.micro", size: 1077, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1631,7 +1631,7 @@ func runtimeSyntaxScalaMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/scala.micro", size: 670, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/scala.micro", size: 670, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1651,7 +1651,7 @@ func runtimeSyntaxSedMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/sed.micro", size: 240, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/sed.micro", size: 240, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1671,7 +1671,7 @@ func runtimeSyntaxShMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/sh.micro", size: 851, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/sh.micro", size: 851, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1691,7 +1691,7 @@ func runtimeSyntaxSlsMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/sls.micro", size: 570, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/sls.micro", size: 570, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1711,7 +1711,7 @@ func runtimeSyntaxSqlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/sql.micro", size: 1845, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/sql.micro", size: 1845, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1731,7 +1731,7 @@ func runtimeSyntaxSwiftMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/swift.micro", size: 1028, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/swift.micro", size: 1028, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1751,7 +1751,7 @@ func runtimeSyntaxSystemdMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/systemd.micro", size: 5103, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/systemd.micro", size: 5103, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1771,7 +1771,7 @@ func runtimeSyntaxTclMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/tcl.micro", size: 2273, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/tcl.micro", size: 2273, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1791,7 +1791,7 @@ func runtimeSyntaxTexMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/tex.micro", size: 246, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/tex.micro", size: 246, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1811,7 +1811,7 @@ func runtimeSyntaxValaMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/vala.micro", size: 789, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/vala.micro", size: 789, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1831,7 +1831,7 @@ func runtimeSyntaxViMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/vi.micro", size: 355, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/vi.micro", size: 355, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1851,7 +1851,7 @@ func runtimeSyntaxXmlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/xml.micro", size: 281, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/xml.micro", size: 281, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1871,7 +1871,7 @@ func runtimeSyntaxXresourcesMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/xresources.micro", size: 297, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/xresources.micro", size: 297, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1891,7 +1891,7 @@ func runtimeSyntaxYamlMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/yaml.micro", size: 542, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/yaml.micro", size: 542, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1911,7 +1911,7 @@ func runtimeSyntaxYumMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/yum.micro", size: 276, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/yum.micro", size: 276, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1931,7 +1931,7 @@ func runtimeSyntaxZshMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/zsh.micro", size: 1957, mode: os.FileMode(420), modTime: time.Unix(1461368172, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/zsh.micro", size: 1957, mode: os.FileMode(420), modTime: time.Unix(1459517318, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

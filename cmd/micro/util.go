@@ -62,6 +62,11 @@ func IsWordChar(str string) bool {
 	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')
 }
 
+// IsWhitespace returns true if the given rune is a space, tab, or newline
+func IsWhitespace(c rune) bool {
+	return c == ' ' || c == '\t' || c == '\n'
+}
+
 // Contains returns whether or not a string array contains a given string
 func Contains(list []string, a string) bool {
 	for _, b := range list {

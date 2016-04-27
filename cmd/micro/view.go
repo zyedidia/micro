@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -33,6 +33,8 @@ type View struct {
 
 	// The eventhandler for undo/redo
 	eh *EventHandler
+
+	messages []GutterMessage
 
 	// The buffer
 	buf *Buffer
@@ -293,9 +295,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 			// Left click
 			origX, origY := v.cursor[0].x, v.cursor[0].y
-			v.MoveToMouseClick(x, y)
-
-			if v.mouseReleased {
+			if v.mouseReleased && !e.HasMotion() {
+				v.MoveToMouseClick(x, y)
 				if (time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold) &&
 					(origX == v.cursor[0].x && origY == v.cursor[0].y) {
 					if v.doubleClick {
@@ -324,7 +325,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.cursor[0].curSelection[0] = loc
 					v.cursor[0].curSelection[1] = loc
 				}
-			} else {
+				v.mouseReleased = false
+			} else if !v.mouseReleased {
+				v.MoveToMouseClick(x, y)
 				if v.tripleClick {
 					v.cursor[0].AddLineToSelection()
 				} else if v.doubleClick {
@@ -333,7 +336,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.cursor[0].curSelection[1] = v.cursor[0].Loc()
 				}
 			}
-			v.mouseReleased = false
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -376,6 +378,21 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 }
 
+// GutterMessage creates a message in this view's gutter
+func (v *View) GutterMessage(lineN int, msg string, kind int) {
+	gutterMsg := GutterMessage{
+		lineNum: lineN,
+		msg:     msg,
+		kind:    kind,
+	}
+	for _, gmsg := range v.messages {
+		if gmsg.lineNum == lineN {
+			return
+		}
+	}
+	v.messages = append(v.messages, gutterMsg)
+}
+
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
 	// The character number of the character in the top left of the screen
@@ -392,6 +409,10 @@ func (v *View) DisplayView() {
 	}
 	var highlightStyle tcell.Style
 
+	if len(v.messages) > 0 {
+		v.lineNumOffset += 2
+	}
+
 	for lineN := 0; lineN < v.height; lineN++ {
 		var x int
 		// If the buffer is smaller than the view height
@@ -400,6 +421,48 @@ func (v *View) DisplayView() {
 			break
 		}
 		line := v.buf.lines[lineN+v.topline]
+
+		if len(v.messages) > 0 {
+			msgOnLine := false
+			for _, msg := range v.messages {
+				if msg.lineNum == lineN+v.topline {
+					msgOnLine = true
+					gutterStyle := tcell.StyleDefault
+					switch msg.kind {
+					case GutterInfo:
+						if style, ok := colorscheme["gutter-info"]; ok {
+							gutterStyle = style
+						}
+					case GutterWarning:
+						if style, ok := colorscheme["gutter-warning"]; ok {
+							gutterStyle = style
+						}
+					case GutterError:
+						if style, ok := colorscheme["gutter-error"]; ok {
+							gutterStyle = style
+						}
+					}
+					screen.SetContent(x, lineN, '>', nil, gutterStyle)
+					x++
+					screen.SetContent(x, lineN, '>', nil, gutterStyle)
+					x++
+					if v.cursor[0].y == lineN {
+						messenger.Message(msg.msg)
+						messenger.gutterMessage = true
+					}
+				}
+			}
+			if !msgOnLine {
+				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
+				x++
+				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
+				x++
+				if v.cursor[0].y == lineN && messenger.gutterMessage {
+					messenger.Reset()
+					messenger.gutterMessage = false
+				}
+			}
+		}
 
 		// Write the line number
 		lineNumStyle := defStyle
