@@ -372,6 +372,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 // GutterMessage creates a message in this view's gutter
 func (v *View) GutterMessage(lineN int, msg string, kind int) {
+	lineN--
 	gutterMsg := GutterMessage{
 		lineNum: lineN,
 		msg:     msg,

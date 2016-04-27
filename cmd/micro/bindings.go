@@ -2,10 +2,8 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"io/ioutil"
 	"os"
-	"os/exec"
 	"strconv"
 	"strings"
 	"time"
@@ -615,10 +613,6 @@ func (v *View) Save() bool {
 		messenger.Error(err.Error())
 	} else {
 		messenger.Message("Saved " + v.Buf.Path)
-		switch v.Buf.Filetype {
-		case "Go":
-			v.GoSave()
-		}
 	}
 	for _, pl := range loadedPlugins {
 		if err := L.CallByParam(lua.P{
@@ -631,33 +625,6 @@ func (v *View) Save() bool {
 		}
 	}
 	return true
-}
-
-// GoSave saves the current file (must be a go file) and runs goimports or gofmt
-// depending on the user's configuration
-func (v *View) GoSave() {
-	if settings["goimports"] == true {
-		messenger.Message("Running goimports...")
-		err := goimports(v.Buf.Path)
-		if err != nil {
-			messenger.Error(err)
-		} else {
-			messenger.Message("Saved " + v.Buf.Path)
-		}
-		v.ReOpen()
-	} else if settings["gofmt"] == true {
-		messenger.Message("Running gofmt...")
-		err := gofmt(v.Buf.Path)
-		if err != nil {
-			messenger.Error(err)
-		} else {
-			messenger.Message("Saved " + v.Buf.Path)
-		}
-		v.ReOpen()
-		return
-	}
-
-	return
 }
 
 // Find opens a prompt and searches forward for the input
@@ -888,26 +855,4 @@ func (v *View) JumpLine() bool {
 // None is no action
 func None() bool {
 	return false
-}
-
-// gofmt runs gofmt on a file
-func gofmt(file string) error {
-	cmd := exec.Command("gofmt", "-w", file)
-	cmd.Start()
-	err := cmd.Wait()
-	if err != nil {
-		return errors.New("Check syntax ") //TODO: highlight or display locations
-	}
-	return nil
-}
-
-// goimports runs goimports on a file
-func goimports(file string) error {
-	cmd := exec.Command("goimports", "-w", file)
-	cmd.Start()
-	err := cmd.Wait()
-	if err != nil {
-		return errors.New("Check syntax ") //TODO: highlight or display locations
-	}
-	return nil
 }
