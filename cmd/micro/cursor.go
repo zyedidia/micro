@@ -218,10 +218,10 @@ func (c *Cursor) SelectTo(loc int) {
 // WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
 	c.Right()
-	for !IsWordChar(string(c.RuneUnder(c.x))) {
+	for IsWhitespace(c.RuneUnder(c.x)) {
 		c.Right()
 	}
-	for IsWordChar(string(c.RuneUnder(c.x))) {
+	for !IsWhitespace(c.RuneUnder(c.x)) {
 		c.Right()
 	}
 }
@@ -229,10 +229,10 @@ func (c *Cursor) WordRight() {
 // WordLeft moves the cursor one word to the left
 func (c *Cursor) WordLeft() {
 	c.Left()
-	for !IsWordChar(string(c.RuneUnder(c.x))) {
+	for IsWhitespace(c.RuneUnder(c.x)) {
 		c.Left()
 	}
-	for IsWordChar(string(c.RuneUnder(c.x))) {
+	for !IsWhitespace(c.RuneUnder(c.x)) {
 		c.Left()
 	}
 	c.Right()
