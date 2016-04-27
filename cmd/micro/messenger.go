@@ -208,3 +208,15 @@ func (m *Messenger) Display() {
 		screen.Show()
 	}
 }
+
+const (
+	GutterInfo = iota
+	GutterWarning
+	GutterError
+)
+
+type GutterMessage struct {
+	lineNum int
+	msg     string
+	kind    int
+}

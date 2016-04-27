@@ -554,6 +554,7 @@ func (v *View) InsertTab() bool {
 
 // Save the buffer to disk
 func (v *View) Save() bool {
+	v.GutterMessage(4, "Hello", GutterInfo)
 	// If this is an empty buffer, ask for a filename
 	if v.buf.path == "" {
 		filename, canceled := messenger.Prompt("Filename: ")
