@@ -25,6 +25,18 @@ func InitBindings() {
 		"CursorDown":          (*View).CursorDown,
 		"CursorLeft":          (*View).CursorLeft,
 		"CursorRight":         (*View).CursorRight,
+		"CursorStart":         (*View).CursorStart,
+		"CursorEnd":           (*View).CursorEnd,
+		"SelectToStart":       (*View).SelectToStart,
+		"SelectToEnd":         (*View).SelectToEnd,
+		"SelectLeft":          (*View).SelectLeft,
+		"SelectRight":         (*View).SelectRight,
+		"WordRight":           (*View).WordRight,
+		"WordLeft":            (*View).WordLeft,
+		"SelectWordRight":     (*View).SelectWordRight,
+		"SelectWordLeft":      (*View).SelectWordLeft,
+		"SelectToStartOfLine": (*View).SelectToStartOfLine,
+		"SelectToEndOfLine":   (*View).SelectToEndOfLine,
 		"InsertEnter":         (*View).InsertEnter,
 		"InsertSpace":         (*View).InsertSpace,
 		"Backspace":           (*View).Backspace,
@@ -859,22 +871,6 @@ func (v *View) ToggleRuler() bool {
 	}
 	return false
 }
-
-// // StartOfLine moves the cursor to the start of the line
-// func (v *View) StartOfLine() bool {
-// 	for i := range v.cursor {
-// 		v.cursor[i].Start()
-// 	}
-// 	return true
-// }
-
-// // EndOfLine moves the cursor to the end of the line
-// func (v *View) EndOfLine() bool {
-// 	for i := range v.cursor {
-// 		v.cursor[i].End()
-// 	}
-// 	return true
-// }
 
 // ExitMultiCursorMode removes all cursors except for the default, putting
 // the editor back into single cursor mode.
