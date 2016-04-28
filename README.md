@@ -25,6 +25,7 @@ Here is a picture of micro editing its source code.
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
 * Search and replace
 * Sane defaults
+* Plugin system (plugins are written in Lua)
 * Undo and redo
 * Unicode support
 * Copy and paste with the system clipboard

@@ -48,6 +48,12 @@ These are the default keybindings, along with their actions.
 * End:      Go to end of line
 * Ctrl-r:   Toggle line numbers
 
+You can use the alt keys + arrows to move word by word.
+Ctrl left and right move the cursor to the start and end of the line, and
+ctrl up and down move the cursor the start and end of the buffer.
+
+You can hold shift with all of these movement actions to select while moving.
+
 The buffer bindings may be rebound using the `~/.config/micro/bindings.json` file. Each key is bound to an action.
 
 For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the following in the `bindings.json` file.
