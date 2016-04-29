@@ -29,6 +29,8 @@ func InitBindings() {
 		"CursorEnd":           (*View).CursorEnd,
 		"SelectToStart":       (*View).SelectToStart,
 		"SelectToEnd":         (*View).SelectToEnd,
+		"SelectUp":            (*View).SelectUp,
+		"SelectDown":          (*View).SelectDown,
 		"SelectLeft":          (*View).SelectLeft,
 		"SelectRight":         (*View).SelectRight,
 		"WordRight":           (*View).WordRight,
@@ -245,6 +247,8 @@ func DefaultBindings() map[string]string {
 		"Down":           "CursorDown",
 		"Right":          "CursorRight",
 		"Left":           "CursorLeft",
+		"ShiftUp":        "SelectUp",
+		"ShiftDown":      "SelectDown",
 		"ShiftLeft":      "SelectLeft",
 		"ShiftRight":     "SelectRight",
 		"AltLeft":        "WordLeft",
@@ -332,6 +336,28 @@ func (v *View) WordRight() bool {
 // WordLeft moves the cursor one word to the left
 func (v *View) WordLeft() bool {
 	v.cursor.WordLeft()
+	return true
+}
+
+// SelectUp selects up one line
+func (v *View) SelectUp() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.Up()
+	v.cursor.SelectTo(v.cursor.Loc())
+	return true
+}
+
+// SelectUp selects down one line
+func (v *View) SelectDown() bool {
+	loc := v.cursor.Loc()
+	if !v.cursor.HasSelection() {
+		v.cursor.origSelection[0] = loc
+	}
+	v.cursor.Down()
+	v.cursor.SelectTo(v.cursor.Loc())
 	return true
 }
 
