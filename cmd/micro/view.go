@@ -13,7 +13,7 @@ import (
 // It has a stores information about the cursor, and the viewport
 // that the user sees the buffer from.
 type View struct {
-	cursor Cursor
+	cursor []Cursor
 
 	// The topmost line, used for vertical scrolling
 	topline int
@@ -80,6 +80,15 @@ func NewView(buf *Buffer) *View {
 // Note that w and h are percentages not actual values
 func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v := new(View)
+
+	// Initialize first item in cursor array. This is our default cursor
+	v.cursor = []Cursor{
+		Cursor{
+			x: 0,
+			y: 0,
+			v: v,
+		},
+	}
 
 	v.widthPercent = w
 	v.heightPercent = h
@@ -155,13 +164,14 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.buf = buf
 	v.topline = 0
 	v.leftCol = 0
-	// Put the cursor at the first spot
-	v.cursor = Cursor{
+
+	// Put the default cursor at the first spot
+	v.cursor[0] = Cursor{
 		x: 0,
 		y: 0,
 		v: v,
 	}
-	v.cursor.ResetSelection()
+	v.cursor[0].ResetSelection()
 
 	v.eh = NewEventHandler(v)
 	v.matches = Match(v)
@@ -185,16 +195,17 @@ func (v *View) reOpen() {
 		buf := NewBuffer(string(file), filename)
 		v.buf = buf
 		v.matches = Match(v)
-		v.cursor.Relocate()
+		v.cursor[0].Relocate()
 		v.Relocate()
 	}
 }
 
 // Relocate moves the view window so that the cursor is in view
-// This is useful if the user has scrolled far away, and then starts typing
+// This is useful if the user has scrolled far away, and then starts typing.
+// In multi-cursor mode, we always use cursor[0], since it is the "leader".
 func (v *View) Relocate() bool {
 	ret := false
-	cy := v.cursor.y
+	cy := v.cursor[0].y
 	if cy < v.topline {
 		v.topline = cy
 		ret = true
@@ -204,7 +215,7 @@ func (v *View) Relocate() bool {
 		ret = true
 	}
 
-	cx := v.cursor.GetVisualX()
+	cx := v.cursor[0].GetVisualX()
 	if cx < v.leftCol {
 		v.leftCol = cx
 		ret = true
@@ -217,7 +228,7 @@ func (v *View) Relocate() bool {
 }
 
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
-// by a mouse click
+// by a mouse click. It will also cancel
 func (v *View) MoveToMouseClick(x, y int) {
 	if y-v.topline > v.height-1 {
 		v.ScrollDown(1)
@@ -233,13 +244,14 @@ func (v *View) MoveToMouseClick(x, y int) {
 		x = 0
 	}
 
-	x = v.cursor.GetCharPosInLine(y, x)
+	v.exitMultiCursorMode()
+	x = v.cursor[0].GetCharPosInLine(y, x)
 	if x > Count(v.buf.lines[y]) {
 		x = Count(v.buf.lines[y])
 	}
-	v.cursor.x = x
-	v.cursor.y = y
-	v.cursor.lastVisualX = v.cursor.GetVisualX()
+	v.cursor[0].x = x
+	v.cursor[0].y = y
+	v.cursor[0].lastVisualX = v.cursor[0].GetVisualX()
 }
 
 // HandleEvent handles an event passed by the main loop
@@ -254,13 +266,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 		v.Resize(e.Size())
 	case *tcell.EventKey:
 		if e.Key() == tcell.KeyRune {
-			// Insert a character
-			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelection()
-				v.cursor.ResetSelection()
+			for i := range v.cursor {
+				if v.cursor[i].HasSelection() {
+					v.cursor[i].DeleteSelection()
+					v.cursor[i].ResetSelection()
+				}
+				v.eh.Insert(v.cursor[i].Loc(), string(e.Rune()))
+				v.cursor[i].Right()
 			}
-			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
-			v.cursor.Right()
 		} else {
 			for key, action := range bindings {
 				if e.Key() == key {
@@ -277,13 +290,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 		switch button {
 		case tcell.Button1:
-			// Left click
-			origX, origY := v.cursor.x, v.cursor.y
+			// Clicking will exit multi-cursor mode
+			v.exitMultiCursorMode()
 
+			// Left click
+			origX, origY := v.cursor[0].x, v.cursor[0].y
 			if v.mouseReleased && !e.HasMotion() {
 				v.MoveToMouseClick(x, y)
 				if (time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold) &&
-					(origX == v.cursor.x && origY == v.cursor.y) {
+					(origX == v.cursor[0].x && origY == v.cursor[0].y) {
 					if v.doubleClick {
 						// Triple click
 						v.lastClickTime = time.Now()
@@ -291,7 +306,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.tripleClick = true
 						v.doubleClick = false
 
-						v.cursor.SelectLine()
+						v.cursor[0].SelectLine()
 					} else {
 						// Double click
 						v.lastClickTime = time.Now()
@@ -299,26 +314,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.doubleClick = true
 						v.tripleClick = false
 
-						v.cursor.SelectWord()
+						v.cursor[0].SelectWord()
 					}
 				} else {
 					v.doubleClick = false
 					v.tripleClick = false
 					v.lastClickTime = time.Now()
 
-					loc := v.cursor.Loc()
-					v.cursor.curSelection[0] = loc
-					v.cursor.curSelection[1] = loc
+					loc := v.cursor[0].Loc()
+					v.cursor[0].curSelection[0] = loc
+					v.cursor[0].curSelection[1] = loc
 				}
 				v.mouseReleased = false
 			} else if !v.mouseReleased {
 				v.MoveToMouseClick(x, y)
 				if v.tripleClick {
-					v.cursor.AddLineToSelection()
+					v.cursor[0].AddLineToSelection()
 				} else if v.doubleClick {
-					v.cursor.AddWordToSelection()
+					v.cursor[0].AddWordToSelection()
 				} else {
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.cursor[0].curSelection[1] = v.cursor[0].Loc()
 				}
 			}
 		case tcell.ButtonNone:
@@ -333,8 +348,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 				// release the mouse
 
 				if !v.doubleClick && !v.tripleClick {
+					v.exitMultiCursorMode()
 					v.MoveToMouseClick(x, y)
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.cursor[0].curSelection[1] = v.cursor[0].Loc()
 				}
 				v.mouseReleased = true
 			}
@@ -430,7 +446,7 @@ func (v *View) DisplayView() {
 					x++
 					screen.SetContent(x, lineN, '>', nil, gutterStyle)
 					x++
-					if v.cursor.y == lineN {
+					if v.cursor[0].y == lineN {
 						messenger.Message(msg.msg)
 						messenger.gutterMessage = true
 					}
@@ -441,7 +457,7 @@ func (v *View) DisplayView() {
 				x++
 				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
 				x++
-				if v.cursor.y == lineN && messenger.gutterMessage {
+				if v.cursor[0].y == lineN && messenger.gutterMessage {
 					messenger.Reset()
 					messenger.gutterMessage = false
 				}
@@ -483,9 +499,8 @@ func (v *View) DisplayView() {
 				highlightStyle = v.matches[lineN][colN]
 			}
 
-			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+			// I think I need to do something like, "if anything in the array is true" here
+			if selectionExistsInLine(v, charNum) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
@@ -517,9 +532,7 @@ func (v *View) DisplayView() {
 
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
-		if v.cursor.HasSelection() &&
-			(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-				charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+		if selectionExistsInLine(v, charNum) {
 
 			selectStyle := defStyle.Reverse(true)
 
@@ -536,6 +549,24 @@ func (v *View) DisplayView() {
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	v.cursor.Display()
+	v.cursor[0].Display()
 	v.sline.Display()
+}
+
+// exitMultiCursorMode removes all additonal cursors.
+func (v *View) exitMultiCursorMode() {
+	if len(v.cursor) > 1 {
+		v.cursor = v.cursor[:1]
+	}
+}
+
+func selectionExistsInLine(v *View, charNum int) bool {
+	for i := range v.cursor {
+		if v.cursor[i].HasSelection() &&
+			(charNum >= v.cursor[i].curSelection[0] && charNum < v.cursor[i].curSelection[1] ||
+				charNum < v.cursor[i].curSelection[0] && charNum >= v.cursor[i].curSelection[1]) {
+			return true
+		}
+	}
+	return false
 }

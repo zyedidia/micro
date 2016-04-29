@@ -24,6 +24,7 @@ var possibleSettings = map[string]string{
 	"ruler":        "Ruler",
 	"gofmt":        "GoFmt",
 	"goimports":    "GoImports",
+	"multicursor":  "MultiCursor",
 }
 
 // The Settings struct contains the settings for micro
@@ -36,6 +37,7 @@ type Settings struct {
 	Ruler        bool   `json:"ruler"`
 	GoFmt        bool   `json:"gofmt"`
 	GoImports    bool   `json:"goimports"`
+	MultiCursor  bool   `json:"multiCursor"`
 }
 
 // InitSettings initializes the options map and sets all options to their default values
@@ -82,6 +84,7 @@ func DefaultSettings() Settings {
 		Ruler:        true,
 		GoFmt:        false,
 		GoImports:    false,
+		MultiCursor:  false,
 	}
 }
 
