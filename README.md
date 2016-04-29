@@ -8,7 +8,7 @@
 > Micro is very much a work in progress
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
-of modern terminals.
+of modern terminals. It comes as one single, batteries-included, static binary with no dependencies, and you can download and use it right now.
 
 Here is a picture of micro editing its source code.
 
@@ -30,9 +30,7 @@ Here is a picture of micro editing its source code.
 * Unicode support
 * Copy and paste with the system clipboard
 * Small and simple
-* Configurable
-
-If you'd like to see what has been implemented, and what I plan on implementing soon-ish, see the [todo list](todolist.md)
+* Easily configurable
 
 # Installation
 
