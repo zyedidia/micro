@@ -37,7 +37,7 @@ type View struct {
 	eh *EventHandler
 
 	// Holds the list of gutter messages
-	messages []GutterMessage
+	messages map[string][]GutterMessage
 
 	// The buffer
 	Buf *Buffer
@@ -91,6 +91,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v.OpenBuffer(buf)
 
 	v.eh = NewEventHandler(v)
+
+	v.messages = make(map[string][]GutterMessage)
 
 	v.sline = Statusline{
 		view: v,
@@ -165,6 +167,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 		v: v,
 	}
 	v.Cursor.ResetSelection()
+	v.messages = make(map[string][]GutterMessage)
 
 	v.eh = NewEventHandler(v)
 	v.matches = Match(v)
@@ -380,19 +383,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 }
 
 // GutterMessage creates a message in this view's gutter
-func (v *View) GutterMessage(lineN int, msg string, kind int) {
+func (v *View) GutterMessage(section string, lineN int, msg string, kind int) {
 	lineN--
 	gutterMsg := GutterMessage{
 		lineNum: lineN,
 		msg:     msg,
 		kind:    kind,
 	}
-	for _, gmsg := range v.messages {
-		if gmsg.lineNum == lineN {
-			return
+	for _, v := range v.messages {
+		for _, gmsg := range v {
+			if gmsg.lineNum == lineN {
+				return
+			}
 		}
 	}
-	v.messages = append(v.messages, gutterMsg)
+	messages := v.messages[section]
+	v.messages[section] = append(messages, gutterMsg)
+}
+
+func (v *View) ClearGutterMessages(section string) {
+	v.messages[section] = []GutterMessage{}
 }
 
 // DisplayView renders the view to the screen
@@ -411,7 +421,13 @@ func (v *View) DisplayView() {
 	}
 	var highlightStyle tcell.Style
 
-	if len(v.messages) > 0 {
+	var hasGutterMessages bool
+	for _, v := range v.messages {
+		if len(v) > 0 {
+			hasGutterMessages = true
+		}
+	}
+	if hasGutterMessages {
 		v.lineNumOffset += 2
 	}
 
@@ -424,33 +440,35 @@ func (v *View) DisplayView() {
 		}
 		line := v.Buf.Lines[lineN+v.Topline]
 
-		if len(v.messages) > 0 {
+		if hasGutterMessages {
 			msgOnLine := false
-			for _, msg := range v.messages {
-				if msg.lineNum == lineN+v.Topline {
-					msgOnLine = true
-					gutterStyle := tcell.StyleDefault
-					switch msg.kind {
-					case GutterInfo:
-						if style, ok := colorscheme["gutter-info"]; ok {
-							gutterStyle = style
+			for k := range v.messages {
+				for _, msg := range v.messages[k] {
+					if msg.lineNum == lineN+v.Topline {
+						msgOnLine = true
+						gutterStyle := tcell.StyleDefault
+						switch msg.kind {
+						case GutterInfo:
+							if style, ok := colorscheme["gutter-info"]; ok {
+								gutterStyle = style
+							}
+						case GutterWarning:
+							if style, ok := colorscheme["gutter-warning"]; ok {
+								gutterStyle = style
+							}
+						case GutterError:
+							if style, ok := colorscheme["gutter-error"]; ok {
+								gutterStyle = style
+							}
 						}
-					case GutterWarning:
-						if style, ok := colorscheme["gutter-warning"]; ok {
-							gutterStyle = style
+						screen.SetContent(x, lineN, '>', nil, gutterStyle)
+						x++
+						screen.SetContent(x, lineN, '>', nil, gutterStyle)
+						x++
+						if v.Cursor.y == lineN {
+							messenger.Message(msg.msg)
+							messenger.gutterMessage = true
 						}
-					case GutterError:
-						if style, ok := colorscheme["gutter-error"]; ok {
-							gutterStyle = style
-						}
-					}
-					screen.SetContent(x, lineN, '>', nil, gutterStyle)
-					x++
-					screen.SetContent(x, lineN, '>', nil, gutterStyle)
-					x++
-					if v.Cursor.y == lineN {
-						messenger.Message(msg.msg)
-						messenger.gutterMessage = true
 					}
 				}
 			}
