@@ -12,8 +12,9 @@ function go_onSave()
         elseif GetOption("gofmt") then
             go_gofmt()
         end
-        go_build()
-        go_golint()
+
+        linter_lint("go build", "go build -o /dev/null 2>&1", "%f:%l: %m")
+        linter_lint("go lint", "golint " .. view.Buf.Path, "%f:%l:%d+: %m")
 
         view:ReOpen()
     end
@@ -23,38 +24,6 @@ function go_gofmt()
     local handle = io.popen("gofmt -w " .. view.Buf.Path)
     local result = handle:read("*a")
     handle:close()
-end
-
-function go_golint()
-    view:ClearGutterMessages("go-lint")
-
-    local handle = io.popen("golint " .. view.Buf.Path)
-    local lines = go_split(handle:read("*a"), "\n")
-    handle:close()
-
-    for _,line in ipairs(lines) do
-        local result = go_split(line, ":")
-        local line = tonumber(result[2])
-        local msg = result[4]
-
-        view:GutterMessage("go-lint", line, msg, 1)
-    end
-end
-
-function go_build()
-    view:ClearGutterMessages("go-build")
-
-    local handle = io.popen("go build -o /dev/null 2>&1")
-    local lines = go_split(handle:read("*a"), "\n")
-    handle:close()
-
-    messenger:Message(view.Buf.Path)
-    for _,line in ipairs(lines) do
-        if string.find(line, ".+:(%d+):(.+)") then
-            local line, msg = string.match(line, ".+:(%d+):(.+)")
-            view:GutterMessage("go-build", tonumber(line), msg, 2)
-        end
-    end
 end
 
 function go_goimports()
