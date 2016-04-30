@@ -20,6 +20,7 @@ You can move the cursor around with the arrow keys and mouse.
 
 These are the default keybindings, along with their actions.
 
+
 #### Editor bindings
 
 * Ctrl-q:   Quit
@@ -67,6 +68,60 @@ following in the `bindings.json` file.
     "CtrlZ": "Redo"
 }
 ```
+
+Here are the defaults:
+
+```json
+{
+		"Up":             "CursorDown",
+		"Down":           "CursorUp",
+		"Right":          "CursorRight",
+		"Left":           "CursorLeft",
+		"ShiftUp":        "SelectUp",
+		"ShiftDown":      "SelectDown",
+		"ShiftLeft":      "SelectLeft",
+		"ShiftRight":     "SelectRight",
+		"AltLeft":        "WordLeft",
+		"AltRight":       "WordRight",
+		"AltShiftRight":  "SelectWordRight",
+		"AltShiftLeft":   "SelectWordLeft",
+		"CtrlLeft":       "StartOfLine",
+		"CtrlRight":      "EndOfLine",
+		"CtrlShiftLeft":  "SelectToStartOfLine",
+		"CtrlShiftRight": "SelectToEndOfLine",
+		"CtrlUp":         "CursorStart",
+		"CtrlDown":       "CursorEnd",
+		"CtrlShiftUp":    "SelectToStart",
+		"CtrlShiftDown":  "SelectToEnd",
+		"Enter":          "InsertEnter",
+		"Space":          "InsertSpace",
+		"Backspace":      "Backspace",
+		"Backspace2":     "Backspace",
+		"Tab":            "InsertTab",
+		"CtrlO":          "OpenFile",
+		"CtrlS":          "Save",
+		"CtrlF":          "Find",
+		"CtrlN":          "FindNext",
+		"CtrlP":          "FindPrevious",
+		"CtrlZ":          "Undo",
+		"CtrlY":          "Redo",
+		"CtrlC":          "Copy",
+		"CtrlX":          "Cut",
+		"CtrlK":          "CutLine",
+		"CtrlV":          "Paste",
+		"CtrlA":          "SelectAll",
+		"Home":           "Start",
+		"End":            "End",
+		"PgUp":           "PageUp",
+		"PgDn":           "PageDown",
+		"CtrlU":          "HalfPageUp",
+		"CtrlD":          "HalfPageDown",
+		"CtrlR":          "ToggleRuler",
+		"Delete":         "Delete"
+}
+
+```
+
 
 ### Possible commands
 
