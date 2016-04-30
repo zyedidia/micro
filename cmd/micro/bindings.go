@@ -364,22 +364,30 @@ func (v *View) SelectDown() bool {
 // SelectLeft selects the character to the left of the cursor
 func (v *View) SelectLeft() bool {
 	loc := v.cursor.Loc()
+	count := Count(v.buf.text) - 1
+	if loc > count {
+		loc = count
+	}
 	if !v.cursor.HasSelection() {
 		v.cursor.origSelection[0] = loc
 	}
-	v.cursor.SelectTo(loc - 1)
 	v.cursor.Left()
+	v.cursor.SelectTo(v.cursor.Loc())
 	return true
 }
 
 // SelectRight selects the character to the right of the cursor
 func (v *View) SelectRight() bool {
 	loc := v.cursor.Loc()
+	count := Count(v.buf.text) - 1
+	if loc > count {
+		loc = count
+	}
 	if !v.cursor.HasSelection() {
 		v.cursor.origSelection[0] = loc
 	}
-	v.cursor.SelectTo(loc + 1)
 	v.cursor.Right()
+	v.cursor.SelectTo(v.cursor.Loc())
 	return true
 }
 

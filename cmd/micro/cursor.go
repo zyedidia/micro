@@ -219,9 +219,15 @@ func (c *Cursor) SelectTo(loc int) {
 func (c *Cursor) WordRight() {
 	c.Right()
 	for IsWhitespace(c.RuneUnder(c.x)) {
+		if c.x == Count(c.v.buf.lines[c.y]) {
+			return
+		}
 		c.Right()
 	}
 	for !IsWhitespace(c.RuneUnder(c.x)) {
+		if c.x == Count(c.v.buf.lines[c.y]) {
+			return
+		}
 		c.Right()
 	}
 }
@@ -230,9 +236,15 @@ func (c *Cursor) WordRight() {
 func (c *Cursor) WordLeft() {
 	c.Left()
 	for IsWhitespace(c.RuneUnder(c.x)) {
+		if c.x == 0 {
+			return
+		}
 		c.Left()
 	}
 	for !IsWhitespace(c.RuneUnder(c.x)) {
+		if c.x == 0 {
+			return
+		}
 		c.Left()
 	}
 	c.Right()
