@@ -278,12 +278,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 		switch button {
 		case tcell.Button1:
 			// Left click
-			origX, origY := v.cursor.x, v.cursor.y
-
 			if v.mouseReleased && !e.HasMotion() {
 				v.MoveToMouseClick(x, y)
-				if (time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold) &&
-					(origX == v.cursor.x && origY == v.cursor.y) {
+				if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
 					if v.doubleClick {
 						// Triple click
 						v.lastClickTime = time.Now()
