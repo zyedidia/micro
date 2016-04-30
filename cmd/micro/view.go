@@ -307,6 +307,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.lastClickTime = time.Now()
 
 					loc := v.cursor.Loc()
+					v.cursor.origSelection[0] = loc
 					v.cursor.curSelection[0] = loc
 					v.cursor.curSelection[1] = loc
 				}

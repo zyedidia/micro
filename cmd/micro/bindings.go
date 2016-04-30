@@ -293,14 +293,20 @@ func DefaultBindings() map[string]string {
 
 // CursorUp moves the cursor up
 func (v *View) CursorUp() bool {
-	v.cursor.ResetSelection()
+	if v.cursor.HasSelection() {
+		v.cursor.SetLoc(v.cursor.curSelection[0])
+		v.cursor.ResetSelection()
+	}
 	v.cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
 func (v *View) CursorDown() bool {
-	v.cursor.ResetSelection()
+	if v.cursor.HasSelection() {
+		v.cursor.SetLoc(v.cursor.curSelection[1])
+		v.cursor.ResetSelection()
+	}
 	v.cursor.Down()
 	return true
 }

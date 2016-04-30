@@ -170,6 +170,7 @@ func (c *Cursor) SelectWord() {
 
 	c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf) + 1
 	c.origSelection[1] = c.curSelection[1]
+	c.SetLoc(c.curSelection[1])
 }
 
 // AddWordToSelection adds the word the cursor is currently on to the selection
@@ -202,6 +203,8 @@ func (c *Cursor) AddWordToSelection() {
 		c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf) + 1
 		c.curSelection[0] = c.origSelection[0]
 	}
+
+	c.SetLoc(c.curSelection[1])
 }
 
 // SelectTo selects from the current cursor location to the given location
