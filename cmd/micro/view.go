@@ -465,7 +465,7 @@ func (v *View) DisplayView() {
 						x++
 						screen.SetContent(x, lineN, '>', nil, gutterStyle)
 						x++
-						if v.Cursor.y == lineN {
+						if v.Cursor.y == lineN+v.Topline {
 							messenger.Message(msg.msg)
 							messenger.gutterMessage = true
 						}
@@ -477,7 +477,7 @@ func (v *View) DisplayView() {
 				x++
 				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
 				x++
-				if v.Cursor.y == lineN && messenger.gutterMessage {
+				if v.Cursor.y == lineN+v.topline && messenger.gutterMessage {
 					messenger.Reset()
 					messenger.gutterMessage = false
 				}
