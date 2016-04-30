@@ -14,7 +14,9 @@ var settings map[string]interface{}
 
 // InitSettings initializes the options map and sets all options to their default values
 func InitSettings() {
-	settings = make(map[string]interface{})
+	defaults := DefaultSettings()
+	var parsed map[string]interface{}
+
 	filename := configDir + "/settings.json"
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
@@ -23,16 +25,23 @@ func InitSettings() {
 			return
 		}
 
-		err = json.Unmarshal(input, &settings)
+		err = json.Unmarshal(input, &parsed)
 		if err != nil {
 			TermMessage("Error reading settings.json:", err.Error())
 		}
-	} else {
-		settings = DefaultSettings()
-		err := WriteSettings(filename)
-		if err != nil {
-			TermMessage("Error writing settings.json file: " + err.Error())
-		}
+	}
+
+	settings = make(map[string]interface{})
+	for k, v := range defaults {
+		settings[k] = v
+	}
+	for k, v := range parsed {
+		settings[k] = v
+	}
+
+	err := WriteSettings(filename)
+	if err != nil {
+		TermMessage("Error writing settings.json file: " + err.Error())
 	}
 }
 

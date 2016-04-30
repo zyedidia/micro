@@ -211,7 +211,7 @@ func (c *Cursor) SelectTo(loc int) {
 		c.curSelection[1] = loc
 	} else {
 		c.curSelection[0] = loc
-		c.curSelection[1] = c.origSelection[0] + 1
+		c.curSelection[1] = c.origSelection[0]
 	}
 }
 
