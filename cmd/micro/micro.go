@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 
 	"github.com/go-errors/errors"
 	"github.com/layeh/gopher-luar"
@@ -215,6 +216,7 @@ func main() {
 	messenger = new(Messenger)
 	view := NewView(buf)
 
+	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
 	L.SetGlobal("view", luar.New(L, view))
 	L.SetGlobal("settings", luar.New(L, &settings))
 	L.SetGlobal("messenger", luar.New(L, messenger))
