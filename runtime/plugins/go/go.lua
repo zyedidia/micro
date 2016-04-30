@@ -37,21 +37,23 @@ function go_golint()
         local line = tonumber(result[2])
         local msg = result[4]
 
-        view:GutterMessage("go-lint", line, msg, 2)
+        view:GutterMessage("go-lint", line, msg, 1)
     end
 end
 
 function go_build()
     view:ClearGutterMessages("go-build")
 
-    local handle = io.popen("go build " .. view.Buf.Path .. " 2>&1")
+    local handle = io.popen("go build -o /dev/null 2>&1")
     local lines = go_split(handle:read("*a"), "\n")
     handle:close()
 
     messenger:Message(view.Buf.Path)
     for _,line in ipairs(lines) do
-        local line, msg = string.match(line, ".+:(%d+):(.+)")
-        view:GutterMessage("go-build", tonumber(line), msg, 2)
+        if string.find(line, ".+:(%d+):(.+)") then
+            local line, msg = string.match(line, ".+:(%d+):(.+)")
+            view:GutterMessage("go-build", tonumber(line), msg, 2)
+        end
     end
 end
 

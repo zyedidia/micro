@@ -401,6 +401,7 @@ func (v *View) GutterMessage(section string, lineN int, msg string, kind int) {
 	v.messages[section] = append(messages, gutterMsg)
 }
 
+// ClearGutterMessages clears all gutter messages from a given section
 func (v *View) ClearGutterMessages(section string) {
 	v.messages[section] = []GutterMessage{}
 }
