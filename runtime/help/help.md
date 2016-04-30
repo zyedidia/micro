@@ -5,7 +5,8 @@ while also taking advantage of the full capabilities of modern terminals.
 
 ### Usage
 
-Once you have built the editor, simply start it by running `micro path/to/file.txt` or simply `micro` to open an empty buffer.
+Once you have built the editor, simply start it by running 
+`micro path/to/file.txt` or simply `micro` to open an empty buffer.
 
 Micro also supports creating buffers from stdin:
 
@@ -54,9 +55,11 @@ ctrl up and down move the cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
-The buffer bindings may be rebound using the `~/.config/micro/bindings.json` file. Each key is bound to an action.
+The buffer bindings may be rebound using the `~/.config/micro/bindings.json` 
+file. Each key is bound to an action.
 
-For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the following in the `bindings.json` file.
+For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the 
+following in the `bindings.json` file.
 
 ```json
 {
@@ -73,41 +76,47 @@ Here are the possible commands that you can use.
 * `quit`: Quits micro.
 * `save`: Saves the current buffer.
 
-* `replace "search" "value" flags`: This will replace `search` with `value`. The `flags` are optional.
-   At this point, there is only one flag: `c`, which enables `check` mode which asks if you'd like
-   to perform the replacement each time
+* `replace "search" "value" flags`: This will replace `search` with `value`. 
+   The `flags` are optional.
+   At this point, there is only one flag: `c`, which enables `check` mode 
+   which asks if you'd like to perform the replacement each time
 
    Note that `search` must be a valid regex.  If one of the arguments
    does not have any spaces in it, you may omit the quotes.
 
-* `set option value`: sets the option to value. Please see the next section for a list of options you can set.
+* `set option value`: sets the option to value. Please see the next section for
+   a list of options you can set.
 
-* `run sh-command`: runs the given shell command in the background. The command's output will be displayed
-in one line when it finishes running.
+* `run sh-command`: runs the given shell command in the background. The 
+   command's output will be displayed in one line when it finishes running.
 
 ### Options
 
 Micro stores all of the user configuration in its configuration directory.
 
-Micro uses the `$XDG_CONFIG_HOME/micro` as the configuration directory. As per the XDG spec,
-if `$XDG_CONFIG_HOME` is not set, `~/.config/micro` is used as the config directory.
+Micro uses the `$XDG_CONFIG_HOME/micro` as the configuration directory. As per
+the XDG spec, if `$XDG_CONFIG_HOME` is not set, `~/.config/micro` is used as 
+the config directory.
 
 Here are the options that you can set:
 
-* `colorscheme`: loads the colorscheme stored in $(configDir)/colorschemes/`option`.micro
+* `colorscheme`: loads the colorscheme stored in 
+   $(configDir)/colorschemes/`option`.micro
 
 	default value: `default`
-	Note that the default colorschemes (default, solarized, and solarized-tc) are not located in configDir,
-	because they are embedded in the micro binary
+	Note that the default colorschemes (default, solarized, and solarized-tc)
+    are not located in configDir, because they are embedded in the micro binary
 
-    The colorscheme can be selected from all the files in the ~/.config/micro/colorschemes/ directory. Micro comes by default with three colorschemes:
+    The colorscheme can be selected from all the files in the 
+    ~/.config/micro/colorschemes/ directory. Micro comes by default with three
+    colorschemes:
 
     * default: this is the default colorscheme.
-    * solarized: this is the solarized colorscheme (used in the screenshot). You should have the 
-      solarized color palette in your terminal to use it.
-    * solarized-tc: this is the solarized colorscheme for true color, just make sure 
-      your terminal supports true color before using it and that the MICRO_TRUECOLOR environment
-      variable is set to 1 before starting micro.
+    * solarized: this is the solarized colorscheme (used in the screenshot). 
+      You should have the solarized color palette in your terminal to use it.
+    * solarized-tc: this is the solarized colorscheme for true color, just 
+      make sure your terminal supports true color before using it and that the 
+      MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
 
 
 * `tabsize`: sets the tab size to `option`
@@ -122,7 +131,8 @@ Here are the options that you can set:
 
 	default value: `off`
 
-* `autoindent`: when creating a new line use the same indentation as the previous line
+* `autoindent`: when creating a new line use the same indentation as the 
+   previous line
 
     default value: `on`
 
@@ -130,17 +140,20 @@ Here are the options that you can set:
 
     default value: `on`
 
-* `gofmt`: Run `gofmt` whenever the file is saved (this only applies to `.go` files)
+* `gofmt`: Run `gofmt` whenever the file is saved (this only applies to `.go` 
+   files)
 
     default value: `off`
 
-* `goimports`: run `goimports` whenever the file is saved (this only applies to `.go` files)
+* `goimports`: run `goimports` whenever the file is saved (this only applies 
+   to `.go` files)
 
     default value: `off`
 
-Any option you set in the editor will be saved to the file ~/.config/micro/settings.json so, 
-in effect, your configuration file will be created for you. If you'd like to take your configuration
-with you to another machine, simply copy the settings.json to the other machine.
+Any option you set in the editor will be saved to the file 
+~/.config/micro/settings.json so, in effect, your configuration file will be 
+created for you. If you'd like to take your configuration with you to another
+machine, simply copy the settings.json to the other machine.
 
-In the future, the `gofmt` and `goimports` will be refactored using a plugin system. However,
-currently they just make it easier to program micro in micro.
+In the future, the `gofmt` and `goimports` will be refactored using a plugin 
+system. However, currently they make it easier to program micro in micro.
