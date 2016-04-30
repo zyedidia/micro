@@ -350,7 +350,7 @@ func (v *View) SelectUp() bool {
 	return true
 }
 
-// SelectUp selects down one line
+// SelectDown selects down one line
 func (v *View) SelectDown() bool {
 	loc := v.cursor.Loc()
 	if !v.cursor.HasSelection() {
@@ -498,7 +498,7 @@ func (v *View) InsertEnter() bool {
 	ws := GetLeadingWhitespace(v.buf.lines[v.cursor.y])
 	v.cursor.Right()
 
-	if settings.AutoIndent {
+	if settings["autoindent"].(bool) {
 		v.eh.Insert(v.cursor.Loc(), ws)
 		for i := 0; i < len(ws); i++ {
 			v.cursor.Right()
@@ -525,12 +525,13 @@ func (v *View) Backspace() bool {
 		// whitespace at the start of the line, we should delete as if its a
 		// tab (tabSize number of spaces)
 		lineStart := v.buf.lines[v.cursor.y][:v.cursor.x]
-		if settings.TabsToSpaces && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%settings.TabSize == 0 {
+		tabSize := int(settings["tabsize"].(float64))
+		if settings["tabsToSpaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
 			loc := v.cursor.Loc()
-			v.cursor.SetLoc(loc - settings.TabSize)
+			v.cursor.SetLoc(loc - tabSize)
 			cx, cy := v.cursor.x, v.cursor.y
 			v.cursor.SetLoc(loc)
-			v.eh.Remove(loc-settings.TabSize, loc)
+			v.eh.Remove(loc-tabSize, loc)
 			v.cursor.x, v.cursor.y = cx, cy
 		} else {
 			v.cursor.Left()
@@ -566,9 +567,10 @@ func (v *View) InsertTab() bool {
 		v.cursor.DeleteSelection()
 		v.cursor.ResetSelection()
 	}
-	if settings.TabsToSpaces {
-		v.eh.Insert(v.cursor.Loc(), Spaces(settings.TabSize))
-		for i := 0; i < settings.TabSize; i++ {
+	if settings["tabsToSpaces"].(bool) {
+		tabSize := int(settings["tabsize"].(float64))
+		v.eh.Insert(v.cursor.Loc(), Spaces(tabSize))
+		for i := 0; i < tabSize; i++ {
 			v.cursor.Right()
 		}
 	} else {
@@ -606,7 +608,7 @@ func (v *View) Save() bool {
 // GoSave saves the current file (must be a go file) and runs goimports or gofmt
 // depending on the user's configuration
 func (v *View) GoSave() {
-	if settings.GoImports == true {
+	if settings["goimports"] == true {
 		messenger.Message("Running goimports...")
 		err := goimports(v.buf.path)
 		if err != nil {
@@ -615,7 +617,7 @@ func (v *View) GoSave() {
 			messenger.Message("Saved " + v.buf.path)
 		}
 		v.reOpen()
-	} else if settings.GoFmt == true {
+	} else if settings["gofmt"] == true {
 		messenger.Message("Running gofmt...")
 		err := gofmt(v.buf.path)
 		if err != nil {
@@ -824,10 +826,10 @@ func (v *View) HalfPageDown() bool {
 
 // ToggleRuler turns line numbers off and on
 func (v *View) ToggleRuler() bool {
-	if settings.Ruler == false {
-		settings.Ruler = true
+	if settings["ruler"] == false {
+		settings["ruler"] = true
 	} else {
-		settings.Ruler = false
+		settings["ruler"] = false
 	}
 	return false
 }

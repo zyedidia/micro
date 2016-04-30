@@ -10,36 +10,11 @@ import (
 )
 
 // The options that the user can set
-var settings Settings
-
-// All the possible settings
-// This map maps the name of the setting in the Settings struct
-// to the name that the user will actually use (the one in the json file)
-var possibleSettings = map[string]string{
-	"colorscheme":  "Colorscheme",
-	"tabsize":      "TabSize",
-	"autoindent":   "AutoIndent",
-	"syntax":       "Syntax",
-	"tabsToSpaces": "TabsToSpaces",
-	"ruler":        "Ruler",
-	"gofmt":        "GoFmt",
-	"goimports":    "GoImports",
-}
-
-// The Settings struct contains the settings for micro
-type Settings struct {
-	Colorscheme  string `json:"colorscheme"`
-	TabSize      int    `json:"tabsize"`
-	AutoIndent   bool   `json:"autoindent"`
-	Syntax       bool   `json:"syntax"`
-	TabsToSpaces bool   `json:"tabsToSpaces"`
-	Ruler        bool   `json:"ruler"`
-	GoFmt        bool   `json:"gofmt"`
-	GoImports    bool   `json:"goimports"`
-}
+var settings map[string]interface{}
 
 // InitSettings initializes the options map and sets all options to their default values
 func InitSettings() {
+	settings = make(map[string]interface{})
 	filename := configDir + "/settings.json"
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
@@ -72,16 +47,16 @@ func WriteSettings(filename string) error {
 }
 
 // DefaultSettings returns the default settings for micro
-func DefaultSettings() Settings {
-	return Settings{
-		Colorscheme:  "default",
-		TabSize:      4,
-		AutoIndent:   true,
-		Syntax:       true,
-		TabsToSpaces: false,
-		Ruler:        true,
-		GoFmt:        false,
-		GoImports:    false,
+func DefaultSettings() map[string]interface{} {
+	return map[string]interface{}{
+		"colorscheme":  "default",
+		"tabsize":      4,
+		"autoindent":   true,
+		"syntax":       true,
+		"tabsToSpaces": false,
+		"ruler":        true,
+		"gofmt":        false,
+		"goimports":    false,
 	}
 }
 
@@ -92,29 +67,28 @@ func SetOption(view *View, args []string) {
 		option := strings.TrimSpace(args[0])
 		value := strings.TrimSpace(args[1])
 
-		mutable := reflect.ValueOf(&settings).Elem()
-		field := mutable.FieldByName(possibleSettings[option])
-		if !field.IsValid() {
+		if _, ok := settings[option]; !ok {
 			messenger.Error(option + " is not a valid option")
 			return
 		}
-		kind := field.Type().Kind()
+
+		kind := reflect.TypeOf(settings[option]).Kind()
 		if kind == reflect.Bool {
 			b, err := ParseBool(value)
 			if err != nil {
 				messenger.Error("Invalid value for " + option)
 				return
 			}
-			field.SetBool(b)
+			settings[option] = b
 		} else if kind == reflect.String {
-			field.SetString(value)
-		} else if kind == reflect.Int {
+			settings[option] = value
+		} else if kind == reflect.Float64 {
 			i, err := strconv.Atoi(value)
 			if err != nil {
 				messenger.Error("Invalid value for " + option)
 				return
 			}
-			field.SetInt(int64(i))
+			settings[option] = float64(i)
 		}
 
 		if option == "colorscheme" {

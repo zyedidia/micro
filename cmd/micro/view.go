@@ -357,7 +357,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
-	if settings.Syntax {
+	if settings["syntax"].(bool) {
 		v.matches = Match(v)
 	}
 }
@@ -386,7 +386,7 @@ func (v *View) DisplayView() {
 	// We are going to have to offset by that amount
 	maxLineLength := len(strconv.Itoa(len(v.buf.lines)))
 	// + 1 for the little space after the line number
-	if settings.Ruler == true {
+	if settings["ruler"] == true {
 		v.lineNumOffset = maxLineLength + 1
 	} else {
 		v.lineNumOffset = 0
@@ -455,7 +455,7 @@ func (v *View) DisplayView() {
 		}
 		// Write the spaces before the line number if necessary
 		var lineNum string
-		if settings.Ruler == true {
+		if settings["ruler"] == true {
 			lineNum = strconv.Itoa(lineN + v.topline + 1)
 			for i := 0; i < maxLineLength-len(lineNum); i++ {
 				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
@@ -467,7 +467,7 @@ func (v *View) DisplayView() {
 				x++
 			}
 
-			if settings.Ruler == true {
+			if settings["ruler"] == true {
 				// Write the extra space
 				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
 				x++
@@ -478,7 +478,7 @@ func (v *View) DisplayView() {
 		for colN, ch := range line {
 			var lineStyle tcell.Style
 
-			if settings.Syntax {
+			if settings["syntax"].(bool) {
 				// Syntax highlighting is enabled
 				highlightStyle = v.matches[lineN][colN]
 			}
@@ -498,7 +498,7 @@ func (v *View) DisplayView() {
 
 			if ch == '\t' {
 				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
-				tabSize := settings.TabSize
+				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
 					if x-v.leftCol+tabchars >= v.lineNumOffset {
