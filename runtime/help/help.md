@@ -195,20 +195,7 @@ Here are the options that you can set:
 
     default value: `on`
 
-* `gofmt`: Run `gofmt` whenever the file is saved (this only applies to `.go` 
-   files)
-
-    default value: `off`
-
-* `goimports`: run `goimports` whenever the file is saved (this only applies 
-   to `.go` files)
-
-    default value: `off`
-
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
-
-In the future, the `gofmt` and `goimports` will be refactored using a plugin 
-system. However, currently they make it easier to program micro in micro.

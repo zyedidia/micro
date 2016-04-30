@@ -195,7 +195,6 @@ func main() {
 	LoadSyntaxFiles()
 	// Load the help files
 	LoadHelp()
-	LoadPlugins()
 
 	buf := NewBuffer(string(input), filename)
 
@@ -219,6 +218,10 @@ func main() {
 	L.SetGlobal("view", luar.New(L, view))
 	L.SetGlobal("settings", luar.New(L, &settings))
 	L.SetGlobal("messenger", luar.New(L, messenger))
+	L.SetGlobal("GetOption", luar.New(L, GetOption))
+	L.SetGlobal("AddOption", luar.New(L, AddOption))
+
+	LoadPlugins()
 
 	for {
 		// Display everything

@@ -1,8 +1,15 @@
+if GetOption("goimports") == nil then
+    AddOption("goimports", false)
+end
+if GetOption("gofmt") == nil then
+    AddOption("gofmt", true)
+end
+
 function go_onSave()
     if view.Buf.Filetype == "Go" then
-        if settings.GoImports then
+        if GetOption("goimports") then
             go_goimports()
-        elseif settings.GoFmt then
+        elseif GetOption("gofmt") then
             go_gofmt()
         end
         go_build()

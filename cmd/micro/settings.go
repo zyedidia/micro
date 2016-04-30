@@ -55,6 +55,20 @@ func WriteSettings(filename string) error {
 	return err
 }
 
+// AddOption creates a new option. This is meant to be called by plugins to add options.
+func AddOption(name string, value interface{}) {
+	settings[name] = value
+	err := WriteSettings(configDir + "/settings.json")
+	if err != nil {
+		TermMessage("Error writing settings.json file: " + err.Error())
+	}
+}
+
+// GetOption returns the specified option. This is meant to be called by plugins to add options.
+func GetOption(name string) interface{} {
+	return settings[name]
+}
+
 // DefaultSettings returns the default settings for micro
 func DefaultSettings() map[string]interface{} {
 	return map[string]interface{}{
@@ -64,8 +78,6 @@ func DefaultSettings() map[string]interface{} {
 		"syntax":       true,
 		"tabsToSpaces": false,
 		"ruler":        true,
-		"gofmt":        false,
-		"goimports":    false,
 	}
 }
 
