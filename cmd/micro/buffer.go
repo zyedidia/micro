@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"github.com/vinzmay/go-rope"
 	"io/ioutil"
 	"strings"
@@ -19,7 +20,7 @@ type Buffer struct {
 	name string
 
 	// This is the text stored every time the buffer is saved to check if the buffer is modified
-	savedText           string
+	savedText           [16]byte
 	netInsertions       int
 	dirtySinceLastCheck bool
 
@@ -45,7 +46,7 @@ func NewBuffer(txt, path string) *Buffer {
 	}
 	b.path = path
 	b.name = path
-	b.savedText = txt
+	b.savedText = md5.Sum([]byte(txt))
 
 	b.Update()
 	b.UpdateRules()
@@ -77,9 +78,10 @@ func (b *Buffer) Save() error {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
-	err := ioutil.WriteFile(filename, []byte(b.text), 0644)
+	data := []byte(b.text)
+	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
-		b.savedText = b.text
+		b.savedText = md5.Sum(data)
 		b.netInsertions = 0
 	}
 	return err
@@ -91,11 +93,15 @@ func (b *Buffer) IsDirty() bool {
 		return false
 	}
 	if b.netInsertions == 0 {
-		isDirty := b.savedText != b.text
+		isDirty := b.savedText != md5.Sum([]byte(b.text))
 		b.dirtySinceLastCheck = isDirty
 		return isDirty
 	}
 	return true
+}
+
+func (b *Buffer) Lines() []string {
+	return strings.Split(b.text, "\n")
 }
 
 // Insert a string into the rope

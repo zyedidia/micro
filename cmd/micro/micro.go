@@ -6,11 +6,11 @@ import (
 	"io/ioutil"
 	"os"
 
-	"github.com/zyedidia/tcell"
-	"github.com/zyedidia/tcell/encoding"
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
+	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/tcell/encoding"
 )
 
 const (
