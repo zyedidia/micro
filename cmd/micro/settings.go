@@ -59,7 +59,7 @@ func WriteSettings(filename string) error {
 func DefaultSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"colorscheme":  "default",
-		"tabsize":      4,
+		"tabsize":      float64(4),
 		"autoindent":   true,
 		"syntax":       true,
 		"tabsToSpaces": false,
