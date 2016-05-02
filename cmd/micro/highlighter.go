@@ -93,6 +93,7 @@ var preInstalledSynFiles = []string{
 	"privoxy-filter",
 	"puppet",
 	"python",
+	"r",
 	"reST",
 	"rpmspec",
 	"ruby",
