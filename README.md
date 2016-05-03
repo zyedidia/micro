@@ -104,7 +104,7 @@ You can run `$ micro -version` to get the version number. Since there is no rele
 commit hash. The version is unknown if you built with `go get`, instead use `make install` or `make` to get a binary
 with a version number defined.
 
-#### Help text
+### Help text
 
 See the [help text](./runtime/help/help.md) for information about keybindings, editor commands, colorschemes and
 configuration options.
