@@ -373,7 +373,7 @@ func (v *View) SelectDown() bool {
 // SelectLeft selects the character to the left of the cursor
 func (v *View) SelectLeft() bool {
 	loc := v.cursor.Loc()
-	count := Count(v.buf.text) - 1
+	count := v.buf.Len() - 1
 	if loc > count {
 		loc = count
 	}
@@ -388,7 +388,7 @@ func (v *View) SelectLeft() bool {
 // SelectRight selects the character to the right of the cursor
 func (v *View) SelectRight() bool {
 	loc := v.cursor.Loc()
-	count := Count(v.buf.text) - 1
+	count := v.buf.Len() - 1
 	if loc > count {
 		loc = count
 	}
@@ -465,7 +465,7 @@ func (v *View) CursorStart() bool {
 
 // CursorEnd moves the cursor to the end of the buffer
 func (v *View) CursorEnd() bool {
-	v.cursor.SetLoc(len(v.buf.text))
+	v.cursor.SetLoc(v.buf.Len())
 	return true
 }
 
@@ -487,7 +487,7 @@ func (v *View) SelectToEnd() bool {
 		v.cursor.origSelection[0] = loc
 	}
 	v.CursorEnd()
-	v.cursor.SelectTo(len(v.buf.text))
+	v.cursor.SelectTo(v.buf.Len())
 	return true
 }
 
@@ -570,7 +570,7 @@ func (v *View) Delete() bool {
 		v.cursor.ResetSelection()
 	} else {
 		loc := v.cursor.Loc()
-		if loc < len(v.buf.text) {
+		if loc < v.buf.Len() {
 			v.eh.Remove(loc, loc+1)
 		}
 	}

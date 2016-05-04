@@ -72,11 +72,12 @@ func Search(searchStr string, v *View, down bool) {
 	}
 	var str string
 	var charPos int
+	text := v.buf.String()
 	if down {
-		str = v.buf.text[searchStart:]
+		str = text[searchStart:]
 		charPos = searchStart
 	} else {
-		str = v.buf.text[:searchStart]
+		str = text[:searchStart]
 	}
 	r, err := regexp.Compile(searchStr)
 	if err != nil {
@@ -86,7 +87,7 @@ func Search(searchStr string, v *View, down bool) {
 	var match []int
 	if matches == nil {
 		// Search the entire buffer now
-		matches = r.FindAllStringIndex(v.buf.text, -1)
+		matches = r.FindAllStringIndex(text, -1)
 		charPos = 0
 		if matches == nil {
 			v.cursor.ResetSelection()

@@ -27,7 +27,6 @@ type Buffer struct {
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
 	// These variables are updated in the update() function
-	text  string
 	lines []string
 
 	// Syntax highlighting rules
@@ -60,14 +59,17 @@ func (b *Buffer) UpdateRules() {
 	b.rules, b.filetype = GetRules(b)
 }
 
+func (b *Buffer) String() string {
+	text := ""
+	if b.r.Len() != 0 {
+		text = b.r.String()
+	}
+	return text
+}
+
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
-	if b.r.Len() == 0 {
-		b.text = ""
-	} else {
-		b.text = b.r.String()
-	}
-	b.lines = strings.Split(b.text, "\n")
+	b.lines = strings.Split(b.String(), "\n")
 }
 
 // Save saves the buffer to its default path
@@ -78,7 +80,7 @@ func (b *Buffer) Save() error {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
-	data := []byte(b.text)
+	data := []byte(b.String())
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.savedText = md5.Sum(data)
@@ -93,15 +95,11 @@ func (b *Buffer) IsDirty() bool {
 		return false
 	}
 	if b.netInsertions == 0 {
-		isDirty := b.savedText != md5.Sum([]byte(b.text))
+		isDirty := b.savedText != md5.Sum([]byte(b.String()))
 		b.dirtySinceLastCheck = isDirty
 		return isDirty
 	}
 	return true
-}
-
-func (b *Buffer) Lines() []string {
-	return strings.Split(b.text, "\n")
 }
 
 // Insert a string into the rope
@@ -123,7 +121,7 @@ func (b *Buffer) Remove(start, end int) string {
 	if end > b.Len() {
 		end = b.Len()
 	}
-	removed := b.text[start:end]
+	removed := b.r.Report(start+1, end-start)
 	// The rope implenentation I am using wants indicies starting at 1 instead of 0
 	start++
 	end++
