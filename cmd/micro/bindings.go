@@ -856,23 +856,22 @@ func (v *View) JumpLine() bool {
 	// Prompt for line number
 	linestring, canceled := messenger.Prompt("Jump to line # ")
 	if canceled {
-		return true
+		return false
 	}
 	lineint, err := strconv.Atoi(linestring)
 	lineint = lineint - 1 // fix offset
 	if err != nil {
 		messenger.Error(err) // return errors
-		return true
+		return false
 	}
 	// Move cursor and view if possible.
 	if lineint < len(v.buf.lines) {
 		v.cursor.x = 0
 		v.cursor.y = lineint
-		v.topline = lineint
-		return false
+		return true
 	}
 	messenger.Error("Only ", len(v.buf.lines), " lines to jump")
-	return true
+	return false
 }
 
 // None is no action
