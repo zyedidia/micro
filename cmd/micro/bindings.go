@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -65,6 +66,7 @@ func InitBindings() {
 		"StartOfLine":         (*View).StartOfLine,
 		"EndOfLine":           (*View).EndOfLine,
 		"ToggleRuler":         (*View).ToggleRuler,
+		"JumpLine":            (*View).JumpLine,
 	}
 
 	keys := map[string]tcell.Key{
@@ -287,6 +289,7 @@ func DefaultBindings() map[string]string {
 		"CtrlU":          "HalfPageUp",
 		"CtrlD":          "HalfPageDown",
 		"CtrlR":          "ToggleRuler",
+		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
 	}
 }
@@ -846,6 +849,30 @@ func (v *View) ToggleRuler() bool {
 		settings["ruler"] = false
 	}
 	return false
+}
+
+// JumpLine jumps to a line and moves the view accordingly.
+func (v *View) JumpLine() bool {
+	// Prompt for line number
+	linestring, canceled := messenger.Prompt("Jump to line # ")
+	if canceled {
+		return true
+	}
+	lineint, err := strconv.Atoi(linestring)
+	lineint = lineint - 1 // fix offset
+	if err != nil {
+		messenger.Error(err) // return errors
+		return true
+	}
+	// Move cursor and view if possible.
+	if lineint < len(v.buf.lines) {
+		v.cursor.x = 0
+		v.cursor.y = lineint
+		v.topline = lineint
+		return false
+	}
+	messenger.Error("Only ", len(v.buf.lines), " lines to jump")
+	return true
 }
 
 // None is no action
