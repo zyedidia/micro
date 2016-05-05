@@ -27,7 +27,8 @@ type Buffer struct {
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
 	// These variables are updated in the update() function
-	lines []string
+	lines    []string
+	numLines int
 
 	// Syntax highlighting rules
 	rules []SyntaxRule
@@ -70,6 +71,7 @@ func (b *Buffer) String() string {
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
 	b.lines = strings.Split(b.String(), "\n")
+	b.numLines = len(b.lines)
 }
 
 // Save saves the buffer to its default path

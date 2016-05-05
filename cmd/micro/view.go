@@ -121,9 +121,9 @@ func (v *View) ScrollUp(n int) {
 // ScrollDown scrolls the view down n lines (if possible)
 func (v *View) ScrollDown(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
-	if v.topline+n <= len(v.buf.lines)-v.height {
+	if v.topline+n <= v.buf.numLines-v.height {
 		v.topline += n
-	} else if v.topline < len(v.buf.lines)-v.height {
+	} else if v.topline < v.buf.numLines-v.height {
 		v.topline++
 	}
 }
@@ -223,8 +223,8 @@ func (v *View) MoveToMouseClick(x, y int) {
 		v.ScrollDown(1)
 		y = v.height + v.topline - 1
 	}
-	if y >= len(v.buf.lines) {
-		y = len(v.buf.lines) - 1
+	if y >= v.buf.numLines {
+		y = v.buf.numLines - 1
 	}
 	if y < 0 {
 		y = 0
@@ -391,7 +391,7 @@ func (v *View) DisplayView() {
 
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount
-	maxLineLength := len(strconv.Itoa(len(v.buf.lines)))
+	maxLineLength := len(strconv.Itoa(v.buf.numLines))
 	// + 1 for the little space after the line number
 	if settings["ruler"] == true {
 		v.lineNumOffset = maxLineLength + 1
@@ -408,7 +408,7 @@ func (v *View) DisplayView() {
 		var x int
 		// If the buffer is smaller than the view height
 		// and we went too far, break
-		if lineN+v.topline >= len(v.buf.lines) {
+		if lineN+v.topline >= v.buf.numLines {
 			break
 		}
 		line := v.buf.lines[lineN+v.topline]

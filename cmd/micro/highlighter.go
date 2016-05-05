@@ -386,8 +386,8 @@ func Match(v *View) SyntaxMatches {
 
 	viewStart := v.topline
 	viewEnd := v.topline + v.height
-	if viewEnd > len(buf.lines) {
-		viewEnd = len(buf.lines)
+	if viewEnd > buf.numLines {
+		viewEnd = buf.numLines
 	}
 
 	lines := buf.lines[viewStart:viewEnd]
@@ -403,8 +403,8 @@ func Match(v *View) SyntaxMatches {
 	if totalStart < 0 {
 		totalStart = 0
 	}
-	if totalEnd > len(buf.lines) {
-		totalEnd = len(buf.lines)
+	if totalEnd > buf.numLines {
+		totalEnd = buf.numLines
 	}
 
 	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")

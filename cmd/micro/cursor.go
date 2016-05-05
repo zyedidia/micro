@@ -112,7 +112,7 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.curSelection[0] = c.Loc()
 	c.End()
-	if len(c.v.buf.lines)-1 > c.y {
+	if c.v.buf.numLines-1 > c.y {
 		c.curSelection[1] = c.Loc() + 1
 	} else {
 		c.curSelection[1] = c.Loc()
@@ -282,7 +282,7 @@ func (c *Cursor) Up() {
 
 // Down moves the cursor down one line (if possible)
 func (c *Cursor) Down() {
-	if c.y < len(c.v.buf.lines)-1 {
+	if c.y < c.v.buf.numLines-1 {
 		c.y++
 
 		runes := []rune(c.v.buf.lines[c.y])
@@ -361,8 +361,8 @@ func (c *Cursor) GetVisualX() int {
 func (c *Cursor) Relocate() {
 	if c.y < 0 {
 		c.y = 0
-	} else if c.y >= len(c.v.buf.lines) {
-		c.y = len(c.v.buf.lines) - 1
+	} else if c.y >= c.v.buf.numLines {
+		c.y = c.v.buf.numLines - 1
 	}
 
 	if c.x < 0 {

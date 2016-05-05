@@ -791,10 +791,10 @@ func (v *View) Start() bool {
 
 // End moves the viewport to the end of the buffer
 func (v *View) End() bool {
-	if v.height > len(v.buf.lines) {
+	if v.height > v.buf.numLines {
 		v.topline = 0
 	} else {
-		v.topline = len(v.buf.lines) - v.height
+		v.topline = v.buf.numLines - v.height
 	}
 	return false
 }
@@ -811,10 +811,10 @@ func (v *View) PageUp() bool {
 
 // PageDown scrolls the view down a page
 func (v *View) PageDown() bool {
-	if len(v.buf.lines)-(v.topline+v.height) > v.height {
+	if v.buf.numLines-(v.topline+v.height) > v.height {
 		v.ScrollDown(v.height)
-	} else if len(v.buf.lines) >= v.height {
-		v.topline = len(v.buf.lines) - v.height
+	} else if v.buf.numLines >= v.height {
+		v.topline = v.buf.numLines - v.height
 	}
 	return false
 }
@@ -831,11 +831,11 @@ func (v *View) HalfPageUp() bool {
 
 // HalfPageDown scrolls the view down half a page
 func (v *View) HalfPageDown() bool {
-	if len(v.buf.lines)-(v.topline+v.height) > v.height/2 {
+	if v.buf.numLines-(v.topline+v.height) > v.height/2 {
 		v.ScrollDown(v.height / 2)
 	} else {
-		if len(v.buf.lines) >= v.height {
-			v.topline = len(v.buf.lines) - v.height
+		if v.buf.numLines >= v.height {
+			v.topline = v.buf.numLines - v.height
 		}
 	}
 	return false
@@ -865,12 +865,12 @@ func (v *View) JumpLine() bool {
 		return false
 	}
 	// Move cursor and view if possible.
-	if lineint < len(v.buf.lines) {
+	if lineint < v.buf.numLines {
 		v.cursor.x = 0
 		v.cursor.y = lineint
 		return true
 	}
-	messenger.Error("Only ", len(v.buf.lines), " lines to jump")
+	messenger.Error("Only ", v.buf.numLines, " lines to jump")
 	return false
 }
 
