@@ -195,6 +195,23 @@ Here are the options that you can set:
 
     default value: `on`
 
+---
+
+Default plugin options:
+
+* `linter`: lint languages on save (supported languages are C, D, Go, Java,
+   Javascript, Lua). Provided by the `linter` plugin.
+
+    default value: `on`
+
+* `goimports`: Run goimports on save. Provided by the `go` plugin.
+
+    default value: `off`
+
+* `gofmt`: Run gofmt on save. Provided by the `go` plugin.
+
+    default value: `on`
+
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
