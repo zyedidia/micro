@@ -13,9 +13,6 @@ function go_onSave()
             go_gofmt()
         end
 
-        linter_lint("go build", "go build -o /dev/null 2>&1", "%f:%l: %m")
-        linter_lint("go lint", "golint " .. view.Buf.Path, "%f:%l:%d+: %m")
-
         view:ReOpen()
     end
 end

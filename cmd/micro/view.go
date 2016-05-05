@@ -406,6 +406,13 @@ func (v *View) ClearGutterMessages(section string) {
 	v.messages[section] = []GutterMessage{}
 }
 
+// ClearAllGutterMessages clears all the gutter messages
+func (v *View) ClearAllGutterMessages() {
+	for k := range v.messages {
+		v.messages[k] = []GutterMessage{}
+	}
+}
+
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
 	// The character number of the character in the top left of the screen
