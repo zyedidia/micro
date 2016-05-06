@@ -141,7 +141,7 @@ func HandleCommand(input string, view *View) {
 
 		found := false
 		for {
-			match := regex.FindStringIndex(view.buf.String())
+			match := regex.FindStringIndex(view.Buf.String())
 			if match == nil {
 				break
 			}
@@ -153,23 +153,23 @@ func HandleCommand(input string, view *View) {
 				Redraw(view)
 				choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 				if canceled {
-					if view.cursor.HasSelection() {
-						view.cursor.SetLoc(view.cursor.curSelection[0])
-						view.cursor.ResetSelection()
+					if view.Cursor.HasSelection() {
+						view.Cursor.SetLoc(view.Cursor.curSelection[0])
+						view.Cursor.ResetSelection()
 					}
 					messenger.Reset()
 					return
 				}
 				if choice {
-					view.cursor.DeleteSelection()
+					view.Cursor.DeleteSelection()
 					view.eh.Insert(match[0], replace)
-					view.cursor.ResetSelection()
+					view.Cursor.ResetSelection()
 					messenger.Reset()
 				} else {
-					if view.cursor.HasSelection() {
-						searchStart = view.cursor.curSelection[1]
+					if view.Cursor.HasSelection() {
+						searchStart = view.Cursor.curSelection[1]
 					} else {
-						searchStart = ToCharPos(view.cursor.x, view.cursor.y, view.buf)
+						searchStart = ToCharPos(view.Cursor.x, view.Cursor.y, view.Buf)
 					}
 					continue
 				}

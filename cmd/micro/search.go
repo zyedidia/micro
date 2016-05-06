@@ -57,7 +57,7 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 	}
 
 	if messenger.response == "" {
-		v.cursor.ResetSelection()
+		v.Cursor.ResetSelection()
 		// We don't end the search though
 		return
 	}
@@ -76,7 +76,7 @@ func Search(searchStr string, v *View, down bool) {
 	}
 	var str string
 	var charPos int
-	text := v.buf.String()
+	text := v.Buf.String()
 	if down {
 		str = text[searchStart:]
 		charPos = searchStart
@@ -94,7 +94,7 @@ func Search(searchStr string, v *View, down bool) {
 		matches = r.FindAllStringIndex(text, -1)
 		charPos = 0
 		if matches == nil {
-			v.cursor.ResetSelection()
+			v.Cursor.ResetSelection()
 			return
 		}
 
@@ -111,9 +111,9 @@ func Search(searchStr string, v *View, down bool) {
 		match = matches[0]
 	}
 
-	v.cursor.curSelection[0] = charPos + match[0]
-	v.cursor.curSelection[1] = charPos + match[1]
-	v.cursor.x, v.cursor.y = FromCharPos(charPos+match[1]-1, v.buf)
+	v.Cursor.curSelection[0] = charPos + match[0]
+	v.Cursor.curSelection[1] = charPos + match[1]
+	v.Cursor.x, v.Cursor.y = FromCharPos(charPos+match[1]-1, v.Buf)
 	if v.Relocate() {
 		v.matches = Match(v)
 	}

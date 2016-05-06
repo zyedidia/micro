@@ -14,11 +14,11 @@ func FromCharPosStart(startLoc, startX, startY, loc int, buf *Buffer) (int, int)
 	charNum := startLoc
 	x, y := startX, startY
 
-	lineLen := Count(buf.lines[y]) + 1
+	lineLen := Count(buf.Lines[y]) + 1
 	for charNum+lineLen <= loc {
 		charNum += lineLen
 		y++
-		lineLen = Count(buf.lines[y]) + 1
+		lineLen = Count(buf.Lines[y]) + 1
 	}
 	x = loc - charNum
 
@@ -30,7 +30,7 @@ func ToCharPos(x, y int, buf *Buffer) int {
 	loc := 0
 	for i := 0; i < y; i++ {
 		// + 1 for the newline
-		loc += Count(buf.lines[i]) + 1
+		loc += Count(buf.Lines[i]) + 1
 	}
 	loc += x
 	return loc
@@ -64,7 +64,7 @@ type Cursor struct {
 // and not x, y location
 // It's just a simple wrapper of FromCharPos
 func (c *Cursor) SetLoc(loc int) {
-	c.x, c.y = FromCharPos(loc, c.v.buf)
+	c.x, c.y = FromCharPos(loc, c.v.Buf)
 	c.lastVisualX = c.GetVisualX()
 }
 
@@ -72,7 +72,7 @@ func (c *Cursor) SetLoc(loc int) {
 // of x, y location
 // It's just a simple wrapper of ToCharPos
 func (c *Cursor) Loc() int {
-	return ToCharPos(c.x, c.y, c.v.buf)
+	return ToCharPos(c.x, c.y, c.v.Buf)
 }
 
 // ResetSelection resets the user's selection
@@ -102,9 +102,9 @@ func (c *Cursor) DeleteSelection() {
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() string {
 	if c.curSelection[0] > c.curSelection[1] {
-		return c.v.buf.r.Report(c.curSelection[1]+1, c.curSelection[0]-c.curSelection[1])
+		return c.v.Buf.r.Report(c.curSelection[1]+1, c.curSelection[0]-c.curSelection[1])
 	}
-	return c.v.buf.r.Report(c.curSelection[0]+1, c.curSelection[1]-c.curSelection[0])
+	return c.v.Buf.r.Report(c.curSelection[0]+1, c.curSelection[1]-c.curSelection[0])
 }
 
 // SelectLine selects the current line
@@ -112,7 +112,7 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.curSelection[0] = c.Loc()
 	c.End()
-	if c.v.buf.numLines-1 > c.y {
+	if c.v.Buf.NumLines-1 > c.y {
 		c.curSelection[1] = c.Loc() + 1
 	} else {
 		c.curSelection[1] = c.Loc()
@@ -143,7 +143,7 @@ func (c *Cursor) AddLineToSelection() {
 
 // SelectWord selects the word the cursor is currently on
 func (c *Cursor) SelectWord() {
-	if len(c.v.buf.lines[c.y]) == 0 {
+	if len(c.v.Buf.Lines[c.y]) == 0 {
 		return
 	}
 
@@ -161,14 +161,14 @@ func (c *Cursor) SelectWord() {
 		backward--
 	}
 
-	c.curSelection[0] = ToCharPos(backward, c.y, c.v.buf)
+	c.curSelection[0] = ToCharPos(backward, c.y, c.v.Buf)
 	c.origSelection[0] = c.curSelection[0]
 
-	for forward < Count(c.v.buf.lines[c.y])-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
+	for forward < Count(c.v.Buf.Lines[c.y])-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
 		forward++
 	}
 
-	c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf) + 1
+	c.curSelection[1] = ToCharPos(forward, c.y, c.v.Buf) + 1
 	c.origSelection[1] = c.curSelection[1]
 	c.SetLoc(c.curSelection[1])
 }
@@ -189,18 +189,18 @@ func (c *Cursor) AddWordToSelection() {
 			backward--
 		}
 
-		c.curSelection[0] = ToCharPos(backward, c.y, c.v.buf)
+		c.curSelection[0] = ToCharPos(backward, c.y, c.v.Buf)
 		c.curSelection[1] = c.origSelection[1]
 	}
 
 	if loc > c.origSelection[1] {
 		forward := c.x
 
-		for forward < Count(c.v.buf.lines[c.y])-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
+		for forward < Count(c.v.Buf.Lines[c.y])-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
 			forward++
 		}
 
-		c.curSelection[1] = ToCharPos(forward, c.y, c.v.buf) + 1
+		c.curSelection[1] = ToCharPos(forward, c.y, c.v.Buf) + 1
 		c.curSelection[0] = c.origSelection[0]
 	}
 
@@ -222,13 +222,13 @@ func (c *Cursor) SelectTo(loc int) {
 func (c *Cursor) WordRight() {
 	c.Right()
 	for IsWhitespace(c.RuneUnder(c.x)) {
-		if c.x == Count(c.v.buf.lines[c.y]) {
+		if c.x == Count(c.v.Buf.Lines[c.y]) {
 			return
 		}
 		c.Right()
 	}
 	for !IsWhitespace(c.RuneUnder(c.x)) {
-		if c.x == Count(c.v.buf.lines[c.y]) {
+		if c.x == Count(c.v.Buf.Lines[c.y]) {
 			return
 		}
 		c.Right()
@@ -255,7 +255,7 @@ func (c *Cursor) WordLeft() {
 
 // RuneUnder returns the rune under the given x position
 func (c *Cursor) RuneUnder(x int) rune {
-	line := []rune(c.v.buf.lines[c.y])
+	line := []rune(c.v.Buf.Lines[c.y])
 	if len(line) == 0 {
 		return '\n'
 	}
@@ -272,7 +272,7 @@ func (c *Cursor) Up() {
 	if c.y > 0 {
 		c.y--
 
-		runes := []rune(c.v.buf.lines[c.y])
+		runes := []rune(c.v.Buf.Lines[c.y])
 		c.x = c.GetCharPosInLine(c.y, c.lastVisualX)
 		if c.x > len(runes) {
 			c.x = len(runes)
@@ -282,10 +282,10 @@ func (c *Cursor) Up() {
 
 // Down moves the cursor down one line (if possible)
 func (c *Cursor) Down() {
-	if c.y < c.v.buf.numLines-1 {
+	if c.y < c.v.Buf.NumLines-1 {
 		c.y++
 
-		runes := []rune(c.v.buf.lines[c.y])
+		runes := []rune(c.v.Buf.Lines[c.y])
 		c.x = c.GetCharPosInLine(c.y, c.lastVisualX)
 		if c.x > len(runes) {
 			c.x = len(runes)
@@ -309,10 +309,10 @@ func (c *Cursor) Left() {
 
 // Right moves the cursor right one cell (if possible) or to the next line if it is at the end
 func (c *Cursor) Right() {
-	if c.Loc() == c.v.buf.Len() {
+	if c.Loc() == c.v.Buf.Len() {
 		return
 	}
-	if c.x < Count(c.v.buf.lines[c.y]) {
+	if c.x < Count(c.v.Buf.Lines[c.y]) {
 		c.x++
 	} else {
 		c.Down()
@@ -323,7 +323,7 @@ func (c *Cursor) Right() {
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
-	c.x = Count(c.v.buf.lines[c.y])
+	c.x = Count(c.v.Buf.Lines[c.y])
 	c.lastVisualX = c.GetVisualX()
 }
 
@@ -338,7 +338,7 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
 	tabSize := int(settings["tabsize"].(float64))
 	// This is the visual line -- every \t replaced with the correct number of spaces
-	visualLine := strings.Replace(c.v.buf.lines[lineNum], "\t", "\t"+Spaces(tabSize-1), -1)
+	visualLine := strings.Replace(c.v.Buf.Lines[lineNum], "\t", "\t"+Spaces(tabSize-1), -1)
 	if visualPos > Count(visualLine) {
 		visualPos = Count(visualLine)
 	}
@@ -351,7 +351,7 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
-	runes := []rune(c.v.buf.lines[c.y])
+	runes := []rune(c.v.Buf.Lines[c.y])
 	tabSize := int(settings["tabsize"].(float64))
 	return c.x + NumOccurences(string(runes[:c.x]), '\t')*(tabSize-1)
 }
@@ -361,23 +361,23 @@ func (c *Cursor) GetVisualX() int {
 func (c *Cursor) Relocate() {
 	if c.y < 0 {
 		c.y = 0
-	} else if c.y >= c.v.buf.numLines {
-		c.y = c.v.buf.numLines - 1
+	} else if c.y >= c.v.Buf.NumLines {
+		c.y = c.v.Buf.NumLines - 1
 	}
 
 	if c.x < 0 {
 		c.x = 0
-	} else if c.x > Count(c.v.buf.lines[c.y]) {
-		c.x = Count(c.v.buf.lines[c.y])
+	} else if c.x > Count(c.v.Buf.Lines[c.y]) {
+		c.x = Count(c.v.Buf.Lines[c.y])
 	}
 }
 
 // Display draws the cursor to the screen at the correct position
 func (c *Cursor) Display() {
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (c.y-c.v.topline < 0 || c.y-c.v.topline > c.v.height-1) || c.HasSelection() {
+	if (c.y-c.v.Topline < 0 || c.y-c.v.Topline > c.v.height-1) || c.HasSelection() {
 		screen.HideCursor()
 	} else {
-		screen.ShowCursor(c.GetVisualX()+c.v.lineNumOffset-c.v.leftCol, c.y-c.v.topline)
+		screen.ShowCursor(c.GetVisualX()+c.v.lineNumOffset-c.v.leftCol, c.y-c.v.Topline)
 	}
 }

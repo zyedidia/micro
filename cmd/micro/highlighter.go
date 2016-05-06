@@ -363,10 +363,10 @@ func LoadRulesFromFile(text, filename string) []SyntaxRule {
 // and returns them. It also returns the filetype of the file
 func GetRules(buf *Buffer) ([]SyntaxRule, string) {
 	for r := range syntaxFiles {
-		if r[0] != nil && r[0].MatchString(buf.path) {
+		if r[0] != nil && r[0].MatchString(buf.Path) {
 			// Check if the syntax statement matches the extension
 			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename), syntaxFiles[r].filetype
-		} else if r[1] != nil && r[1].MatchString(buf.lines[0]) {
+		} else if r[1] != nil && r[1].MatchString(buf.Lines[0]) {
 			// Check if the header statement matches the first line
 			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename), syntaxFiles[r].filetype
 		}
@@ -381,16 +381,16 @@ type SyntaxMatches [][]tcell.Style
 // Match takes a buffer and returns the syntax matches: a 2d array specifying how it should be syntax highlighted
 // We match the rules from up `synLinesUp` lines and down `synLinesDown` lines
 func Match(v *View) SyntaxMatches {
-	buf := v.buf
-	rules := v.buf.rules
+	buf := v.Buf
+	rules := v.Buf.rules
 
-	viewStart := v.topline
-	viewEnd := v.topline + v.height
-	if viewEnd > buf.numLines {
-		viewEnd = buf.numLines
+	viewStart := v.Topline
+	viewEnd := v.Topline + v.height
+	if viewEnd > buf.NumLines {
+		viewEnd = buf.NumLines
 	}
 
-	lines := buf.lines[viewStart:viewEnd]
+	lines := buf.Lines[viewStart:viewEnd]
 	matches := make(SyntaxMatches, len(lines))
 
 	for i, line := range lines {
@@ -398,19 +398,19 @@ func Match(v *View) SyntaxMatches {
 	}
 
 	// We don't actually check the entire buffer, just from synLinesUp to synLinesDown
-	totalStart := v.topline - synLinesUp
-	totalEnd := v.topline + v.height + synLinesDown
+	totalStart := v.Topline - synLinesUp
+	totalEnd := v.Topline + v.height + synLinesDown
 	if totalStart < 0 {
 		totalStart = 0
 	}
-	if totalEnd > buf.numLines {
-		totalEnd = buf.numLines
+	if totalEnd > buf.NumLines {
+		totalEnd = buf.NumLines
 	}
 
-	str := strings.Join(buf.lines[totalStart:totalEnd], "\n")
-	startNum := ToCharPos(0, totalStart, v.buf)
+	str := strings.Join(buf.Lines[totalStart:totalEnd], "\n")
+	startNum := ToCharPos(0, totalStart, v.Buf)
 
-	toplineNum := ToCharPos(0, v.topline, v.buf)
+	toplineNum := ToCharPos(0, v.Topline, v.Buf)
 
 	for _, rule := range rules {
 		if rule.startend {
@@ -422,7 +422,7 @@ func Match(v *View) SyntaxMatches {
 						if i < toplineNum {
 							continue
 						}
-						colNum, lineNum := FromCharPosStart(toplineNum, 0, v.topline, i, buf)
+						colNum, lineNum := FromCharPosStart(toplineNum, 0, v.Topline, i, buf)
 						if lineNum == -1 || colNum == -1 {
 							continue
 						}

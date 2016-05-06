@@ -5,10 +5,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 
 	"github.com/go-errors/errors"
+	"github.com/layeh/gopher-luar"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
+	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
 )
@@ -41,6 +44,9 @@ var (
 
 	// Is the help screen open
 	helpOpen = false
+
+	// L is the lua state
+	L *lua.LState
 )
 
 // LoadInput loads the file input for the editor
@@ -175,6 +181,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	L = lua.NewState()
+	defer L.Close()
+
 	encoding.Register()
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
@@ -206,6 +215,14 @@ func main() {
 
 	messenger = new(Messenger)
 	view := NewView(buf)
+
+	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
+	L.SetGlobal("view", luar.New(L, view))
+	L.SetGlobal("messenger", luar.New(L, messenger))
+	L.SetGlobal("GetOption", luar.New(L, GetOption))
+	L.SetGlobal("AddOption", luar.New(L, AddOption))
+
+	LoadPlugins()
 
 	for {
 		// Display everything
@@ -245,7 +262,7 @@ func main() {
 				case tcell.KeyCtrlG:
 					if !helpOpen {
 						helpBuffer := NewBuffer(helpTxt, "help.md")
-						helpBuffer.name = "Help"
+						helpBuffer.Name = "Help"
 						helpOpen = true
 						view.OpenBuffer(helpBuffer)
 					} else {

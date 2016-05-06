@@ -15,9 +15,9 @@ type Buffer struct {
 	r *rope.Rope
 
 	// Path to the file on disk
-	path string
+	Path string
 	// Name of the buffer on the status line
-	name string
+	Name string
 
 	// This is the text stored every time the buffer is saved to check if the buffer is modified
 	savedText           [16]byte
@@ -27,13 +27,13 @@ type Buffer struct {
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
 	// These variables are updated in the update() function
-	lines    []string
-	numLines int
+	Lines    []string
+	NumLines int
 
 	// Syntax highlighting rules
 	rules []SyntaxRule
 	// The buffer's filetype
-	filetype string
+	Filetype string
 }
 
 // NewBuffer creates a new buffer from `txt` with path and name `path`
@@ -44,8 +44,8 @@ func NewBuffer(txt, path string) *Buffer {
 	} else {
 		b.r = rope.New(txt)
 	}
-	b.path = path
-	b.name = path
+	b.Path = path
+	b.Name = path
 	b.savedText = md5.Sum([]byte(txt))
 
 	b.Update()
@@ -57,7 +57,7 @@ func NewBuffer(txt, path string) *Buffer {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.rules, b.filetype = GetRules(b)
+	b.rules, b.Filetype = GetRules(b)
 }
 
 func (b *Buffer) String() string {
@@ -70,13 +70,13 @@ func (b *Buffer) String() string {
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
-	b.lines = strings.Split(b.String(), "\n")
-	b.numLines = len(b.lines)
+	b.Lines = strings.Split(b.String(), "\n")
+	b.NumLines = len(b.Lines)
 }
 
 // Save saves the buffer to its default path
 func (b *Buffer) Save() error {
-	return b.SaveAs(b.path)
+	return b.SaveAs(b.Path)
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist

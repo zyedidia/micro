@@ -2,6 +2,8 @@ package main
 
 import (
 	"io/ioutil"
+	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -13,10 +15,10 @@ import (
 // It stores information about the cursor, and the viewport
 // that the user sees the buffer from.
 type View struct {
-	cursor Cursor
+	Cursor Cursor
 
 	// The topmost line, used for vertical scrolling
-	topline int
+	Topline int
 	// The leftmost column, used for horizontal scrolling
 	leftCol int
 
@@ -34,10 +36,11 @@ type View struct {
 	// The eventhandler for undo/redo
 	eh *EventHandler
 
-	messages []GutterMessage
+	// Holds the list of gutter messages
+	messages map[string][]GutterMessage
 
 	// The buffer
-	buf *Buffer
+	Buf *Buffer
 	// The statusline
 	sline Statusline
 
@@ -89,6 +92,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.eh = NewEventHandler(v)
 
+	v.messages = make(map[string][]GutterMessage)
+
 	v.sline = Statusline{
 		view: v,
 	}
@@ -111,20 +116,20 @@ func (v *View) Resize(w, h int) {
 // ScrollUp scrolls the view up n lines (if possible)
 func (v *View) ScrollUp(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
-	if v.topline-n >= 0 {
-		v.topline -= n
-	} else if v.topline > 0 {
-		v.topline--
+	if v.Topline-n >= 0 {
+		v.Topline -= n
+	} else if v.Topline > 0 {
+		v.Topline--
 	}
 }
 
 // ScrollDown scrolls the view down n lines (if possible)
 func (v *View) ScrollDown(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
-	if v.topline+n <= v.buf.numLines-v.height {
-		v.topline += n
-	} else if v.topline < v.buf.numLines-v.height {
-		v.topline++
+	if v.Topline+n <= v.Buf.NumLines-v.height {
+		v.Topline += n
+	} else if v.Topline < v.Buf.NumLines-v.height {
+		v.Topline++
 	}
 }
 
@@ -133,7 +138,7 @@ func (v *View) ScrollDown(n int) {
 // causing them to lose the unsaved changes
 // The message is what to print after saying "You have unsaved changes. "
 func (v *View) CanClose(msg string) bool {
-	if v.buf.IsDirty() {
+	if v.Buf.IsDirty() {
 		quit, canceled := messenger.Prompt("You have unsaved changes. " + msg)
 		if !canceled {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
@@ -152,16 +157,17 @@ func (v *View) CanClose(msg string) bool {
 // OpenBuffer opens a new buffer in this view.
 // This resets the topline, event handler and cursor.
 func (v *View) OpenBuffer(buf *Buffer) {
-	v.buf = buf
-	v.topline = 0
+	v.Buf = buf
+	v.Topline = 0
 	v.leftCol = 0
 	// Put the cursor at the first spot
-	v.cursor = Cursor{
+	v.Cursor = Cursor{
 		x: 0,
 		y: 0,
 		v: v,
 	}
-	v.cursor.ResetSelection()
+	v.Cursor.ResetSelection()
+	v.messages = make(map[string][]GutterMessage)
 
 	v.eh = NewEventHandler(v)
 	v.matches = Match(v)
@@ -172,20 +178,20 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 }
 
-// Close and Re-open the current file.
-func (v *View) reOpen() {
+// ReOpen reloads the current buffer
+func (v *View) ReOpen() {
 	if v.CanClose("Continue? (yes, no, save) ") {
-		file, err := ioutil.ReadFile(v.buf.path)
-		filename := v.buf.name
+		file, err := ioutil.ReadFile(v.Buf.Path)
+		filename := v.Buf.Name
 
 		if err != nil {
 			messenger.Error(err.Error())
 			return
 		}
 		buf := NewBuffer(string(file), filename)
-		v.buf = buf
+		v.Buf = buf
 		v.matches = Match(v)
-		v.cursor.Relocate()
+		v.Cursor.Relocate()
 		v.Relocate()
 	}
 }
@@ -194,17 +200,17 @@ func (v *View) reOpen() {
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	ret := false
-	cy := v.cursor.y
-	if cy < v.topline {
-		v.topline = cy
+	cy := v.Cursor.y
+	if cy < v.Topline {
+		v.Topline = cy
 		ret = true
 	}
-	if cy > v.topline+v.height-1 {
-		v.topline = cy - v.height + 1
+	if cy > v.Topline+v.height-1 {
+		v.Topline = cy - v.height + 1
 		ret = true
 	}
 
-	cx := v.cursor.GetVisualX()
+	cx := v.Cursor.GetVisualX()
 	if cx < v.leftCol {
 		v.leftCol = cx
 		ret = true
@@ -219,12 +225,12 @@ func (v *View) Relocate() bool {
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
 // by a mouse click
 func (v *View) MoveToMouseClick(x, y int) {
-	if y-v.topline > v.height-1 {
+	if y-v.Topline > v.height-1 {
 		v.ScrollDown(1)
-		y = v.height + v.topline - 1
+		y = v.height + v.Topline - 1
 	}
-	if y >= v.buf.numLines {
-		y = v.buf.numLines - 1
+	if y >= v.Buf.NumLines {
+		y = v.Buf.NumLines - 1
 	}
 	if y < 0 {
 		y = 0
@@ -233,13 +239,13 @@ func (v *View) MoveToMouseClick(x, y int) {
 		x = 0
 	}
 
-	x = v.cursor.GetCharPosInLine(y, x)
-	if x > Count(v.buf.lines[y]) {
-		x = Count(v.buf.lines[y])
+	x = v.Cursor.GetCharPosInLine(y, x)
+	if x > Count(v.Buf.Lines[y]) {
+		x = Count(v.Buf.Lines[y])
 	}
-	v.cursor.x = x
-	v.cursor.y = y
-	v.cursor.lastVisualX = v.cursor.GetVisualX()
+	v.Cursor.x = x
+	v.Cursor.y = y
+	v.Cursor.lastVisualX = v.Cursor.GetVisualX()
 }
 
 // HandleEvent handles an event passed by the main loop
@@ -255,32 +261,39 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		if e.Key() == tcell.KeyRune {
 			// Insert a character
-			if v.cursor.HasSelection() {
-				v.cursor.DeleteSelection()
-				v.cursor.ResetSelection()
+			if v.Cursor.HasSelection() {
+				v.Cursor.DeleteSelection()
+				v.Cursor.ResetSelection()
 			}
-			v.eh.Insert(v.cursor.Loc(), string(e.Rune()))
-			v.cursor.Right()
+			v.eh.Insert(v.Cursor.Loc(), string(e.Rune()))
+			v.Cursor.Right()
 		} else {
 			for key, action := range bindings {
 				if e.Key() == key {
 					relocate = action(v)
+					for _, pl := range loadedPlugins {
+						funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
+						err := Call(pl + "_on" + funcName[len(funcName)-1])
+						if err != nil {
+							TermMessage(err)
+						}
+					}
 				}
 			}
 		}
 	case *tcell.EventPaste:
-		if v.cursor.HasSelection() {
-			v.cursor.DeleteSelection()
-			v.cursor.ResetSelection()
+		if v.Cursor.HasSelection() {
+			v.Cursor.DeleteSelection()
+			v.Cursor.ResetSelection()
 		}
 		clip := e.Text()
-		v.eh.Insert(v.cursor.Loc(), clip)
-		v.cursor.SetLoc(v.cursor.Loc() + Count(clip))
+		v.eh.Insert(v.Cursor.Loc(), clip)
+		v.Cursor.SetLoc(v.Cursor.Loc() + Count(clip))
 		v.freshClip = false
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol
-		y += v.topline
+		y += v.Topline
 
 		button := e.Buttons()
 
@@ -297,7 +310,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.tripleClick = true
 						v.doubleClick = false
 
-						v.cursor.SelectLine()
+						v.Cursor.SelectLine()
 					} else {
 						// Double click
 						v.lastClickTime = time.Now()
@@ -305,27 +318,27 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.doubleClick = true
 						v.tripleClick = false
 
-						v.cursor.SelectWord()
+						v.Cursor.SelectWord()
 					}
 				} else {
 					v.doubleClick = false
 					v.tripleClick = false
 					v.lastClickTime = time.Now()
 
-					loc := v.cursor.Loc()
-					v.cursor.origSelection[0] = loc
-					v.cursor.curSelection[0] = loc
-					v.cursor.curSelection[1] = loc
+					loc := v.Cursor.Loc()
+					v.Cursor.origSelection[0] = loc
+					v.Cursor.curSelection[0] = loc
+					v.Cursor.curSelection[1] = loc
 				}
 				v.mouseReleased = false
 			} else if !v.mouseReleased {
 				v.MoveToMouseClick(x, y)
 				if v.tripleClick {
-					v.cursor.AddLineToSelection()
+					v.Cursor.AddLineToSelection()
 				} else if v.doubleClick {
-					v.cursor.AddWordToSelection()
+					v.Cursor.AddWordToSelection()
 				} else {
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.Cursor.curSelection[1] = v.Cursor.Loc()
 				}
 			}
 		case tcell.ButtonNone:
@@ -341,7 +354,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.cursor.curSelection[1] = v.cursor.Loc()
+					v.Cursor.curSelection[1] = v.Cursor.Loc()
 				}
 				v.mouseReleased = true
 			}
@@ -370,28 +383,44 @@ func (v *View) HandleEvent(event tcell.Event) {
 }
 
 // GutterMessage creates a message in this view's gutter
-func (v *View) GutterMessage(lineN int, msg string, kind int) {
+func (v *View) GutterMessage(section string, lineN int, msg string, kind int) {
+	lineN--
 	gutterMsg := GutterMessage{
 		lineNum: lineN,
 		msg:     msg,
 		kind:    kind,
 	}
-	for _, gmsg := range v.messages {
-		if gmsg.lineNum == lineN {
-			return
+	for _, v := range v.messages {
+		for _, gmsg := range v {
+			if gmsg.lineNum == lineN {
+				return
+			}
 		}
 	}
-	v.messages = append(v.messages, gutterMsg)
+	messages := v.messages[section]
+	v.messages[section] = append(messages, gutterMsg)
+}
+
+// ClearGutterMessages clears all gutter messages from a given section
+func (v *View) ClearGutterMessages(section string) {
+	v.messages[section] = []GutterMessage{}
+}
+
+// ClearAllGutterMessages clears all the gutter messages
+func (v *View) ClearAllGutterMessages() {
+	for k := range v.messages {
+		v.messages[k] = []GutterMessage{}
+	}
 }
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
 	// The character number of the character in the top left of the screen
-	charNum := ToCharPos(0, v.topline, v.buf)
+	charNum := ToCharPos(0, v.Topline, v.Buf)
 
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount
-	maxLineLength := len(strconv.Itoa(v.buf.numLines))
+	maxLineLength := len(strconv.Itoa(v.Buf.NumLines))
 	// + 1 for the little space after the line number
 	if settings["ruler"] == true {
 		v.lineNumOffset = maxLineLength + 1
@@ -400,7 +429,13 @@ func (v *View) DisplayView() {
 	}
 	var highlightStyle tcell.Style
 
-	if len(v.messages) > 0 {
+	var hasGutterMessages bool
+	for _, v := range v.messages {
+		if len(v) > 0 {
+			hasGutterMessages = true
+		}
+	}
+	if hasGutterMessages {
 		v.lineNumOffset += 2
 	}
 
@@ -408,38 +443,40 @@ func (v *View) DisplayView() {
 		var x int
 		// If the buffer is smaller than the view height
 		// and we went too far, break
-		if lineN+v.topline >= v.buf.numLines {
+		if lineN+v.Topline >= v.Buf.NumLines {
 			break
 		}
-		line := v.buf.lines[lineN+v.topline]
+		line := v.Buf.Lines[lineN+v.Topline]
 
-		if len(v.messages) > 0 {
+		if hasGutterMessages {
 			msgOnLine := false
-			for _, msg := range v.messages {
-				if msg.lineNum == lineN+v.topline {
-					msgOnLine = true
-					gutterStyle := tcell.StyleDefault
-					switch msg.kind {
-					case GutterInfo:
-						if style, ok := colorscheme["gutter-info"]; ok {
-							gutterStyle = style
+			for k := range v.messages {
+				for _, msg := range v.messages[k] {
+					if msg.lineNum == lineN+v.Topline {
+						msgOnLine = true
+						gutterStyle := tcell.StyleDefault
+						switch msg.kind {
+						case GutterInfo:
+							if style, ok := colorscheme["gutter-info"]; ok {
+								gutterStyle = style
+							}
+						case GutterWarning:
+							if style, ok := colorscheme["gutter-warning"]; ok {
+								gutterStyle = style
+							}
+						case GutterError:
+							if style, ok := colorscheme["gutter-error"]; ok {
+								gutterStyle = style
+							}
 						}
-					case GutterWarning:
-						if style, ok := colorscheme["gutter-warning"]; ok {
-							gutterStyle = style
+						screen.SetContent(x, lineN, '>', nil, gutterStyle)
+						x++
+						screen.SetContent(x, lineN, '>', nil, gutterStyle)
+						x++
+						if v.Cursor.y == lineN+v.Topline {
+							messenger.Message(msg.msg)
+							messenger.gutterMessage = true
 						}
-					case GutterError:
-						if style, ok := colorscheme["gutter-error"]; ok {
-							gutterStyle = style
-						}
-					}
-					screen.SetContent(x, lineN, '>', nil, gutterStyle)
-					x++
-					screen.SetContent(x, lineN, '>', nil, gutterStyle)
-					x++
-					if v.cursor.y == lineN {
-						messenger.Message(msg.msg)
-						messenger.gutterMessage = true
 					}
 				}
 			}
@@ -448,7 +485,7 @@ func (v *View) DisplayView() {
 				x++
 				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
 				x++
-				if v.cursor.y == lineN && messenger.gutterMessage {
+				if v.Cursor.y == lineN+v.Topline && messenger.gutterMessage {
 					messenger.Reset()
 					messenger.gutterMessage = false
 				}
@@ -463,7 +500,7 @@ func (v *View) DisplayView() {
 		// Write the spaces before the line number if necessary
 		var lineNum string
 		if settings["ruler"] == true {
-			lineNum = strconv.Itoa(lineN + v.topline + 1)
+			lineNum = strconv.Itoa(lineN + v.Topline + 1)
 			for i := 0; i < maxLineLength-len(lineNum); i++ {
 				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
 				x++
@@ -490,9 +527,9 @@ func (v *View) DisplayView() {
 				highlightStyle = v.matches[lineN][colN]
 			}
 
-			if v.cursor.HasSelection() &&
-				(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-					charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+			if v.Cursor.HasSelection() &&
+				(charNum >= v.Cursor.curSelection[0] && charNum < v.Cursor.curSelection[1] ||
+					charNum < v.Cursor.curSelection[0] && charNum >= v.Cursor.curSelection[1]) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
@@ -524,9 +561,9 @@ func (v *View) DisplayView() {
 
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
-		if v.cursor.HasSelection() &&
-			(charNum >= v.cursor.curSelection[0] && charNum < v.cursor.curSelection[1] ||
-				charNum < v.cursor.curSelection[0] && charNum >= v.cursor.curSelection[1]) {
+		if v.Cursor.HasSelection() &&
+			(charNum >= v.Cursor.curSelection[0] && charNum < v.Cursor.curSelection[1] ||
+				charNum < v.Cursor.curSelection[0] && charNum >= v.Cursor.curSelection[1]) {
 
 			selectStyle := defStyle.Reverse(true)
 
@@ -543,6 +580,6 @@ func (v *View) DisplayView() {
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	v.cursor.Display()
+	v.Cursor.Display()
 	v.sline.Display()
 }
