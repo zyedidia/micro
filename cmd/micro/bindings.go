@@ -667,7 +667,7 @@ func (v *View) FindNext() bool {
 	} else {
 		searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
 	}
-	messenger.Message("Find: " + lastSearch)
+	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, true)
 	return true
 }
@@ -679,7 +679,7 @@ func (v *View) FindPrevious() bool {
 	} else {
 		searchStart = ToCharPos(v.cursor.x, v.cursor.y, v.buf)
 	}
-	messenger.Message("Find: " + lastSearch)
+	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, false)
 	return true
 }

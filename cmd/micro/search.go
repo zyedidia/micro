@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/zyedidia/tcell"
 	"regexp"
+
+	"github.com/zyedidia/tcell"
 )
 
 var (
@@ -29,6 +30,9 @@ func EndSearch() {
 	messenger.hasPrompt = false
 	messenger.Clear()
 	messenger.Reset()
+	if lastSearch != "" {
+		messenger.Message("^P Previous ^N Next")
+	}
 }
 
 // HandleSearchEvent takes an event and a view and will do a real time match from the messenger's output
