@@ -67,6 +67,8 @@ func InitBindings() {
 		"EndOfLine":           (*View).EndOfLine,
 		"ToggleRuler":         (*View).ToggleRuler,
 		"JumpLine":            (*View).JumpLine,
+		"Shell":               (*View).Shell,
+		"ClearStatus":         (*View).ClearStatus,
 	}
 
 	keys := map[string]tcell.Key{
@@ -291,6 +293,8 @@ func DefaultBindings() map[string]string {
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
+		"CtrlB":          "Shell",
+		"Esc":            "ClearStatus",
 	}
 }
 
@@ -848,6 +852,22 @@ func (v *View) ToggleRuler() bool {
 	} else {
 		settings["ruler"] = false
 	}
+	return false
+}
+
+// Shell launches a shell prompt
+func (v *View) Shell() bool {
+	input, canceled := messenger.Prompt("$ ")
+	if !canceled {
+		HandleShellCommand(input, v, true)
+	}
+	return false
+
+}
+
+// ClearStatus erases stale messages from the statusbar
+func (v *View) ClearStatus() bool {
+	messenger.Message("")
 	return false
 }
 
