@@ -76,7 +76,7 @@ func Search(searchStr string, v *View, down bool) {
 	}
 	var str string
 	var charPos int
-	text := v.Buf.String()
+	text := v.Buf.Text
 	if down {
 		str = text[searchStart:]
 		charPos = searchStart

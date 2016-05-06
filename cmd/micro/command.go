@@ -141,7 +141,7 @@ func HandleCommand(input string, view *View) {
 
 		found := false
 		for {
-			match := regex.FindStringIndex(view.Buf.String())
+			match := regex.FindStringIndex(view.Buf.Text)
 			if match == nil {
 				break
 			}
