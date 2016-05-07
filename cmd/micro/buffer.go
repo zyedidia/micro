@@ -27,7 +27,6 @@ type Buffer struct {
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
 	// These variables are updated in the update() function
-	Text     string
 	Lines    []string
 	NumLines int
 
@@ -62,17 +61,15 @@ func (b *Buffer) UpdateRules() {
 }
 
 func (b *Buffer) String() string {
-	return b.Text
+	if b.r.Len() != 0 {
+		return b.r.String()
+	}
+	return ""
 }
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
-	if b.r.Len() != 0 {
-		b.Text = b.r.String()
-	} else {
-		b.Text = ""
-	}
-	b.Lines = strings.Split(b.Text, "\n")
+	b.Lines = strings.Split(b.String(), "\n")
 	b.NumLines = len(b.Lines)
 }
 
@@ -125,13 +122,17 @@ func (b *Buffer) Remove(start, end int) string {
 	if end > b.Len() {
 		end = b.Len()
 	}
-	removed := b.Text[start:end]
+	removed := b.Substr(start, end)
 	// The rope implenentation I am using wants indicies starting at 1 instead of 0
 	start++
 	end++
 	b.r = b.r.Delete(start, end-start)
 	b.Update()
 	return removed
+}
+
+func (b *Buffer) Substr(start, end int) string {
+	return b.r.Substr(start+1, end-start).String()
 }
 
 // Len gives the length of the buffer

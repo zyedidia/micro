@@ -102,9 +102,9 @@ func (c *Cursor) DeleteSelection() {
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() string {
 	if c.curSelection[0] > c.curSelection[1] {
-		return string([]rune(c.v.Buf.Text)[c.curSelection[1]:c.curSelection[0]])
+		return c.v.Buf.Substr(c.curSelection[1], c.curSelection[0])
 	}
-	return string([]rune(c.v.Buf.Text)[c.curSelection[0]:c.curSelection[1]])
+	return c.v.Buf.Substr(c.curSelection[0], c.curSelection[1])
 }
 
 // SelectLine selects the current line
