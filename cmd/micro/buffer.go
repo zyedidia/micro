@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/md5"
 	"github.com/vinzmay/go-rope"
 	"io/ioutil"
 	"strings"
@@ -19,10 +18,7 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	Name string
 
-	// This is the text stored every time the buffer is saved to check if the buffer is modified
-	savedText           [16]byte
-	netInsertions       int
-	dirtySinceLastCheck bool
+	IsModified bool
 
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
@@ -33,7 +29,7 @@ type Buffer struct {
 	// Syntax highlighting rules
 	rules []SyntaxRule
 	// The buffer's filetype
-	Filetype string
+	FileType string
 }
 
 // NewBuffer creates a new buffer from `txt` with path and name `path`
@@ -46,7 +42,6 @@ func NewBuffer(txt, path string) *Buffer {
 	}
 	b.Path = path
 	b.Name = path
-	b.savedText = md5.Sum([]byte(txt))
 
 	b.Update()
 	b.UpdateRules()
@@ -57,7 +52,7 @@ func NewBuffer(txt, path string) *Buffer {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.rules, b.Filetype = GetRules(b)
+	b.rules, b.FileType = GetRules(b)
 }
 
 func (b *Buffer) String() string {
@@ -84,29 +79,14 @@ func (b *Buffer) SaveAs(filename string) error {
 	data := []byte(b.String())
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
-		b.savedText = md5.Sum(data)
-		b.netInsertions = 0
+		b.IsModified = true
 	}
 	return err
 }
 
-// IsDirty returns whether or not the buffer has been modified compared to the one on disk
-func (b *Buffer) IsDirty() bool {
-	if !b.dirtySinceLastCheck {
-		return false
-	}
-	if b.netInsertions == 0 {
-		isDirty := b.savedText != md5.Sum([]byte(b.String()))
-		b.dirtySinceLastCheck = isDirty
-		return isDirty
-	}
-	return true
-}
-
 // Insert a string into the rope
 func (b *Buffer) Insert(idx int, value string) {
-	b.dirtySinceLastCheck = true
-	b.netInsertions += len(value)
+	b.IsModified = true
 	b.r = b.r.Insert(idx, value)
 	b.Update()
 }
@@ -114,8 +94,7 @@ func (b *Buffer) Insert(idx int, value string) {
 // Remove a slice of the rope from start to end (exclusive)
 // Returns the string that was removed
 func (b *Buffer) Remove(start, end int) string {
-	b.dirtySinceLastCheck = true
-	b.netInsertions -= end - start
+	b.IsModified = true
 	if start < 0 {
 		start = 0
 	}

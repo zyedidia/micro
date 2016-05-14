@@ -6,7 +6,7 @@ if GetOption("gofmt") == nil then
 end
 
 function go_onSave()
-    if view.Buf.Filetype == "Go" then
+    if view.Buf.FileType == "Go" then
         if GetOption("goimports") then
             go_goimports()
         elseif GetOption("gofmt") then

@@ -24,7 +24,7 @@ func (sline *Statusline) Display() {
 	}
 
 	// If the buffer is dirty (has been modified) write a little '+'
-	if sline.view.Buf.IsDirty() {
+	if sline.view.Buf.IsModified {
 		file += " +"
 	}
 
@@ -38,7 +38,7 @@ func (sline *Statusline) Display() {
 	file += " (" + lineNum + "," + columnNum + ")"
 
 	// Add the filetype
-	file += " " + sline.view.Buf.Filetype
+	file += " " + sline.view.Buf.FileType
 
 	rightText := "Ctrl-g for help "
 	if helpOpen {

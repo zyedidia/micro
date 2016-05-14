@@ -4,7 +4,7 @@ end
 
 function linter_onSave()
     if GetOption("linter") then
-        local ft = view.Buf.Filetype
+        local ft = view.Buf.FileType
         local file = view.Buf.Path
         local devnull = "/dev/null"
         if OS == "windows" then
