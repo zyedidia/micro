@@ -73,8 +73,8 @@ Here are the defaults:
 
 ```json
 {
-		"Up":             "CursorDown",
-		"Down":           "CursorUp",
+		"Up":             "CursorUp",
+		"Down":           "CursorDown",
 		"Right":          "CursorRight",
 		"Left":           "CursorLeft",
 		"ShiftUp":        "SelectUp",
