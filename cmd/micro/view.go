@@ -110,7 +110,11 @@ func (v *View) Resize(w, h int) {
 	h--
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
-	v.height = int(float32(h)*float32(v.heightPercent)/100) - 1
+	v.height = int(float32(h) * float32(v.heightPercent) / 100)
+	if settings["statusline"].(bool) {
+		// Make room for the status line if it is enabled
+		v.height--
+	}
 }
 
 // ScrollUp scrolls the view up n lines (if possible)
@@ -581,5 +585,7 @@ func (v *View) DisplayView() {
 func (v *View) Display() {
 	v.DisplayView()
 	v.Cursor.Display()
-	v.sline.Display()
+	if settings["statusline"].(bool) {
+		v.sline.Display()
+	}
 }

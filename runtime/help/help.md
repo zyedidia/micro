@@ -195,6 +195,10 @@ Here are the options that you can set:
 
     default value: `on`
 
+* `statusline`: display the status line at the bottom of the screen
+
+    default value: `on`
+
 ---
 
 Default plugin options:

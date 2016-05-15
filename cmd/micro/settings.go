@@ -78,6 +78,7 @@ func DefaultSettings() map[string]interface{} {
 		"syntax":       true,
 		"tabsToSpaces": false,
 		"ruler":        true,
+		"statusline":   true,
 	}
 }
 
@@ -115,6 +116,10 @@ func SetOption(view *View, args []string) {
 		if option == "colorscheme" {
 			LoadSyntaxFiles()
 			view.Buf.UpdateRules()
+		}
+
+		if option == "statusline" {
+			view.Resize(screen.Size())
 		}
 
 		err := WriteSettings(filename)
