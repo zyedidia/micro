@@ -79,7 +79,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	data := []byte(b.String())
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
-		b.IsModified = true
+		b.IsModified = false
 	}
 	return err
 }
