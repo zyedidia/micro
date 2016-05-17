@@ -80,7 +80,7 @@ func DefaultSettings() map[string]interface{} {
 		"tabsToSpaces": false,
 		"ruler":        true,
 		"statusline":   true,
-		"scrollSpeed":  float64(2),
+		"scrollspeed":  float64(2),
 	}
 }
 
