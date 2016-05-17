@@ -546,7 +546,7 @@ func (v *View) DisplayView() {
 
 			if ch == '\t' {
 				lineIndentStyle := defStyle
-				if style, ok := colorscheme["indent-line"]; ok {
+				if style, ok := colorscheme["indent-char"]; ok {
 					lineIndentStyle = style
 				}
 				indentChar := []rune(settings["indentchar"].(string))

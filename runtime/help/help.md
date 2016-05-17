@@ -180,7 +180,7 @@ Here are the options that you can set:
 
 * `indentchar`: sets the indentation character
 
-	default value: `|`
+	default value: ` `
 
 * `syntax`: turns syntax on or off
 
