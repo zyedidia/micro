@@ -178,7 +178,7 @@ Here are the options that you can set:
 
 	default value: `4`
 
-* `indentchar`: sets the indention chacrater
+* `indentchar`: sets the indentation character
 
 	default value: `|`
 
