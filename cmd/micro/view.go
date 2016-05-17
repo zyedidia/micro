@@ -298,6 +298,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol
 		y += v.Topline
+		relocate = false
 
 		button := e.Buttons()
 
