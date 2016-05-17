@@ -545,7 +545,12 @@ func (v *View) DisplayView() {
 			}
 
 			if ch == '\t' {
-				screen.SetContent(x+tabchars, lineN, ' ', nil, lineStyle)
+				lineIndentStyle := defStyle
+				if style, ok := colorscheme["indent-line"]; ok {
+					lineIndentStyle = style
+				}
+				indentChar := []rune(settings["indentchar"].(string))
+				screen.SetContent(x+tabchars, lineN, indentChar[0], nil, lineIndentStyle)
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
