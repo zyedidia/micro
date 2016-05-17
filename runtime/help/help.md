@@ -199,6 +199,10 @@ Here are the options that you can set:
 
     default value: `on`
 
+* `scrollspeed`: amount of lines to scroll
+
+	default value: `2`
+
 ---
 
 Default plugin options:

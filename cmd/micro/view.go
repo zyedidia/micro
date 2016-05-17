@@ -366,13 +366,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// every time the user moves the cursor
 			relocate = false
 		case tcell.WheelUp:
-			// Scroll up two lines
-			v.ScrollUp(2)
+			// Scroll up
+			scrollSpeed := int(settings["scrollspeed"].(float64))
+			v.ScrollUp(scrollSpeed)
 			// We don't want to relocate if the user is scrolling
 			relocate = false
 		case tcell.WheelDown:
-			// Scroll down two lines
-			v.ScrollDown(2)
+			// Scroll down
+			scrollSpeed := int(settings["scrollspeed"].(float64))
+			v.ScrollDown(scrollSpeed)
 			// We don't want to relocate if the user is scrolling
 			relocate = false
 		}
