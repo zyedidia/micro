@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/zyedidia/tcell"
 )
@@ -205,6 +206,11 @@ func (m *Messenger) Display() {
 		for x := 0; x < len(runes); x++ {
 			screen.SetContent(x, h-1, runes[x], nil, m.style)
 		}
+		go func() {
+			time.Sleep(4 * time.Second)
+			messenger.Clear()
+			messenger.Reset()
+		}()
 	}
 	if m.hasPrompt {
 		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
