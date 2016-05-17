@@ -178,6 +178,10 @@ Here are the options that you can set:
 
 	default value: `4`
 
+* `indentchar`: sets the indentation character
+
+	default value: ` `
+
 * `syntax`: turns syntax on or off
 
 	default value: `on`
