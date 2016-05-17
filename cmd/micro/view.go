@@ -298,6 +298,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol
 		y += v.Topline
+		// Don't relocate for mouse events
 		relocate = false
 
 		button := e.Buttons()
@@ -363,21 +364,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 				v.mouseReleased = true
 			}
-			// We don't want to relocate because otherwise the view will be relocated
-			// every time the user moves the cursor
-			relocate = false
 		case tcell.WheelUp:
 			// Scroll up
 			scrollSpeed := int(settings["scrollSpeed"].(float64))
 			v.ScrollUp(scrollSpeed)
-			// We don't want to relocate if the user is scrolling
-			relocate = false
 		case tcell.WheelDown:
 			// Scroll down
 			scrollSpeed := int(settings["scrollSpeed"].(float64))
 			v.ScrollDown(scrollSpeed)
-			// We don't want to relocate if the user is scrolling
-			relocate = false
 		}
 	}
 
