@@ -668,6 +668,7 @@ func (v *View) Copy() bool {
 	if v.Cursor.HasSelection() {
 		clipboard.WriteAll(v.Cursor.GetSelection())
 		v.freshClip = true
+		messenger.Message("Copied selection to clipboard")
 	}
 	return true
 }
