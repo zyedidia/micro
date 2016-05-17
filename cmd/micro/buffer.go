@@ -101,6 +101,9 @@ func (b *Buffer) Remove(start, end int) string {
 	if end > b.Len() {
 		end = b.Len()
 	}
+	if start == end {
+		return ""
+	}
 	removed := b.Substr(start, end)
 	// The rope implenentation I am using wants indicies starting at 1 instead of 0
 	start++
@@ -110,6 +113,7 @@ func (b *Buffer) Remove(start, end int) string {
 	return removed
 }
 
+// Substr returns the substring of the rope from start to end
 func (b *Buffer) Substr(start, end int) string {
 	return b.r.Substr(start+1, end-start).String()
 }
