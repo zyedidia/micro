@@ -83,7 +83,7 @@ func Search(searchStr string, v *View, down bool) {
 	} else {
 		str = text[:searchStart]
 	}
-	r, err := regexp.Compile(searchStr)
+	r, err := regexp.Compile("(?i)" + searchStr)
 	if err != nil {
 		return
 	}
