@@ -254,11 +254,6 @@ func main() {
 					if !canceled {
 						HandleCommand(input, view)
 					}
-				case tcell.KeyCtrlB:
-					input, canceled := messenger.Prompt("$ ")
-					if !canceled {
-						HandleShellCommand(input, view, true)
-					}
 				case tcell.KeyCtrlG:
 					if !helpOpen {
 						helpBuffer := NewBuffer(helpTxt, "help.md")
