@@ -722,8 +722,8 @@ func (v *View) Paste() bool {
 
 // SelectAll selects the entire buffer
 func (v *View) SelectAll() bool {
-	v.Cursor.curSelection[1] = 0
-	v.Cursor.curSelection[0] = v.Buf.Len()
+	v.Cursor.curSelection[0] = 0
+	v.Cursor.curSelection[1] = v.Buf.Len()
 	// Put the cursor at the beginning
 	v.Cursor.x = 0
 	v.Cursor.y = 0
