@@ -75,6 +75,7 @@ func DefaultSettings() map[string]interface{} {
 		"colorscheme":  "default",
 		"tabsize":      float64(4),
 		"indentchar":   " ",
+		"ignorecase":   false,
 		"autoindent":   true,
 		"syntax":       true,
 		"tabsToSpaces": false,
