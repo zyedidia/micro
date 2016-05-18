@@ -546,8 +546,18 @@ func (v *View) DisplayView() {
 				if style, ok := colorscheme["indent-char"]; ok {
 					lineIndentStyle = style
 				}
+				if v.Cursor.HasSelection() &&
+					(charNum >= v.Cursor.curSelection[0] && charNum < v.Cursor.curSelection[1] ||
+						charNum < v.Cursor.curSelection[0] && charNum >= v.Cursor.curSelection[1]) {
+
+					lineIndentStyle = tcell.StyleDefault.Reverse(true)
+
+					if style, ok := colorscheme["selection"]; ok {
+						lineIndentStyle = style
+					}
+				}
 				indentChar := []rune(settings["indentchar"].(string))
-				screen.SetContent(x+tabchars, lineN, indentChar[0], nil, lineIndentStyle)
+				screen.SetContent(x-v.leftCol+tabchars, lineN, indentChar[0], nil, lineIndentStyle)
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					tabchars++
