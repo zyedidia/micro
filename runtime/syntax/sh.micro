@@ -1,6 +1,6 @@
 ## Here is an example for Bourne shell scripts.
 ##
-syntax "SH" "\.sh$" "\.bash" "\.bashrc" "bashrc" "\.bash_aliases" "bash_aliases" "\.bash_functions" "bash_functions" "\.bash_profile" "bash_profile"
+syntax "SH" "\.sh$" "\.bash" "\.bashrc" "bashrc" "\.bash_aliases" "bash_aliases" "\.bash_functions" "bash_functions" "\.bash_profile" "bash_profile" "Pkgfile" "PKGBUILD" ".ebuild\$" "APKBUILD"
 header "^#!.*/(env +)?(ba)?sh( |$)"
 
 color statement "\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while)\b"
