@@ -84,6 +84,9 @@ func Search(searchStr string, v *View, down bool) {
 		str = text[:searchStart]
 	}
 	r, err := regexp.Compile(searchStr)
+	if settings["ignorecase"].(bool) {
+		r, err = regexp.Compile("(?i)" + searchStr)
+	}
 	if err != nil {
 		return
 	}
