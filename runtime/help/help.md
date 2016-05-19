@@ -107,7 +107,7 @@ Here are the defaults:
 		"CtrlC":          "Copy",
 		"CtrlX":          "Cut",
 		"CtrlK":          "CutLine",
-		"CtrlD":          "DuplicateLine"
+		"CtrlD":          "DuplicateLine",
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
 		"Home":           "Start",
