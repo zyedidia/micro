@@ -52,6 +52,7 @@ func InitBindings() {
 		"Copy":                (*View).Copy,
 		"Cut":                 (*View).Cut,
 		"CutLine":             (*View).CutLine,
+		"DuplicateLine":       (*View).DuplicateLine,
 		"Paste":               (*View).Paste,
 		"SelectAll":           (*View).SelectAll,
 		"OpenFile":            (*View).OpenFile,
@@ -278,17 +279,19 @@ func DefaultBindings() map[string]string {
 		"CtrlC":          "Copy",
 		"CtrlX":          "Cut",
 		"CtrlK":          "CutLine",
+		"CtrlD":          "DuplicateLine",
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
 		"Home":           "Start",
 		"End":            "End",
 		"PgUp":           "PageUp",
 		"PgDn":           "PageDown",
-		"CtrlU":          "HalfPageUp",
-		"CtrlD":          "HalfPageDown",
-		"CtrlR":          "ToggleRuler",
-		"CtrlL":          "JumpLine",
-		"Delete":         "Delete",
+		// Find alternative key
+		// "CtrlU":          "HalfPageUp",
+		// "CtrlD":          "HalfPageDown",
+		"CtrlR":  "ToggleRuler",
+		"CtrlL":  "JumpLine",
+		"Delete": "Delete",
 	}
 }
 
@@ -654,12 +657,14 @@ func (v *View) FindPrevious() bool {
 // Undo undoes the last action
 func (v *View) Undo() bool {
 	v.eh.Undo()
+	messenger.Message("Undid action")
 	return true
 }
 
 // Redo redoes the last action
 func (v *View) Redo() bool {
 	v.eh.Redo()
+	messenger.Message("Redid action")
 	return true
 }
 
@@ -668,7 +673,7 @@ func (v *View) Copy() bool {
 	if v.Cursor.HasSelection() {
 		clipboard.WriteAll(v.Cursor.GetSelection())
 		v.freshClip = true
-		messenger.Message("Copied selection to clipboard")
+		messenger.Message("Copied selection")
 	}
 	return true
 }
@@ -677,7 +682,6 @@ func (v *View) Copy() bool {
 func (v *View) CutLine() bool {
 	v.Cursor.SelectLine()
 	if v.freshClip == true {
-
 		if v.Cursor.HasSelection() {
 			if clip, err := clipboard.ReadAll(); err != nil {
 				messenger.Error(err)
@@ -692,6 +696,7 @@ func (v *View) CutLine() bool {
 	v.lastCutTime = time.Now()
 	v.Cursor.DeleteSelection()
 	v.Cursor.ResetSelection()
+	messenger.Message("Cut line")
 	return true
 }
 
@@ -702,7 +707,20 @@ func (v *View) Cut() bool {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 		v.freshClip = true
+		messenger.Message("Cut selection")
 	}
+	return true
+}
+
+// Duplicate the current line
+func (v *View) DuplicateLine() bool {
+	v.Cursor.SelectLine()
+	line := v.Cursor.GetSelection()
+	v.Cursor.SetLoc(v.Cursor.curSelection[1])
+	v.eh.Insert(v.Cursor.Loc(), line)
+	v.Cursor.End()
+	v.Cursor.ResetSelection()
+	messenger.Message("Duplicated line")
 	return true
 }
 
@@ -717,6 +735,7 @@ func (v *View) Paste() bool {
 	v.eh.Insert(v.Cursor.Loc(), clip)
 	v.Cursor.SetLoc(v.Cursor.Loc() + Count(clip))
 	v.freshClip = false
+	messenger.Message("Pasted clipboard")
 	return true
 }
 
@@ -813,8 +832,10 @@ func (v *View) HalfPageDown() bool {
 func (v *View) ToggleRuler() bool {
 	if settings["ruler"] == false {
 		settings["ruler"] = true
+		messenger.Message("Enabled ruler")
 	} else {
 		settings["ruler"] = false
+		messenger.Message("Disabled ruler")
 	}
 	return false
 }

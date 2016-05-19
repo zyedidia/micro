@@ -41,9 +41,8 @@ These are the default keybindings, along with their actions.
 * Ctrl-c:   Copy
 * Ctrl-x:   Cut
 * Ctrl-k:   Cut line
+* Ctrl-d:   Duplicate line
 * Ctrl-v:   Paste
-* Ctrl-u:   Half page up
-* Ctrl-d:   Half page down
 * PageUp:   Page up
 * PageDown: Page down
 * Home:     Go to beginning of line
@@ -108,6 +107,7 @@ Here are the defaults:
 		"CtrlC":          "Copy",
 		"CtrlX":          "Cut",
 		"CtrlK":          "CutLine",
+		"CtrlD":          "DuplicateLine"
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
 		"Home":           "Start",
