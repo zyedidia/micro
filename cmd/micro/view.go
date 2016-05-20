@@ -260,7 +260,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
-	scrollmargin := int(settings["scrollmargin"].(float64))
 
 	switch e := event.(type) {
 	case *tcell.EventResize:
@@ -382,6 +381,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 
 	if relocate {
+		scrollmargin := int(settings["scrollmargin"].(float64))
 		v.Relocate(scrollmargin)
 	}
 	if settings["syntax"].(bool) {
