@@ -206,11 +206,11 @@ func (v *View) Relocate() bool {
 	ret := false
 	cy := v.Cursor.y
 	if cy < v.Topline {
-		v.Topline = cy
+		v.Topline = cy - 4
 		ret = true
 	}
 	if cy > v.Topline+v.height-1 {
-		v.Topline = cy - v.height + 1
+		v.Topline = cy - v.height + 5
 		ret = true
 	}
 
