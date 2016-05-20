@@ -205,11 +205,14 @@ func (v *View) ReOpen() {
 func (v *View) Relocate(x int) bool {
 	ret := false
 	cy := v.Cursor.y
-	if cy < v.Topline {
+	if cy < v.Topline+x && cy > x-1 {
 		v.Topline = cy - x
 		ret = true
+	} else if cy < v.Topline {
+		v.Topline = cy
+		ret = true
 	}
-	if cy > v.Topline+v.height-1 {
+	if cy > v.Topline+v.height-1-x {
 		v.Topline = cy - v.height + 1 + x
 		ret = true
 	}
@@ -257,6 +260,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
+	scrollmargin := int(settings["scrollmargin"].(float64))
 
 	switch e := event.(type) {
 	case *tcell.EventResize:
@@ -368,17 +372,17 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		case tcell.WheelUp:
 			// Scroll up
-			scrollSpeed := int(settings["scrollSpeed"].(float64))
-			v.ScrollUp(scrollSpeed)
+			scrollspeed := int(settings["scrollspeed"].(float64))
+			v.ScrollUp(scrollspeed)
 		case tcell.WheelDown:
 			// Scroll down
-			scrollSpeed := int(settings["scrollSpeed"].(float64))
-			v.ScrollDown(scrollSpeed)
+			scrollspeed := int(settings["scrollspeed"].(float64))
+			v.ScrollDown(scrollspeed)
 		}
 	}
 
 	if relocate {
-		v.Relocate(0)
+		v.Relocate(scrollmargin)
 	}
 	if settings["syntax"].(bool) {
 		v.matches = Match(v)

@@ -63,8 +63,8 @@ following in the `bindings.json` file.
 
 ```json
 {
-    "CtrlY": "Undo",
-    "CtrlZ": "Redo"
+	"CtrlY": "Undo",
+	"CtrlZ": "Redo"
 }
 ```
 
@@ -72,52 +72,52 @@ Here are the defaults:
 
 ```json
 {
-		"Up":             "CursorUp",
-		"Down":           "CursorDown",
-		"Right":          "CursorRight",
-		"Left":           "CursorLeft",
-		"ShiftUp":        "SelectUp",
-		"ShiftDown":      "SelectDown",
-		"ShiftLeft":      "SelectLeft",
-		"ShiftRight":     "SelectRight",
-		"AltLeft":        "WordLeft",
-		"AltRight":       "WordRight",
-		"AltShiftRight":  "SelectWordRight",
-		"AltShiftLeft":   "SelectWordLeft",
-		"CtrlLeft":       "StartOfLine",
-		"CtrlRight":      "EndOfLine",
-		"CtrlShiftLeft":  "SelectToStartOfLine",
-		"CtrlShiftRight": "SelectToEndOfLine",
-		"CtrlUp":         "CursorStart",
-		"CtrlDown":       "CursorEnd",
-		"CtrlShiftUp":    "SelectToStart",
-		"CtrlShiftDown":  "SelectToEnd",
-		"Enter":          "InsertEnter",
-		"Space":          "InsertSpace",
-		"Backspace":      "Backspace",
-		"Backspace2":     "Backspace",
-		"Tab":            "InsertTab",
-		"CtrlO":          "OpenFile",
-		"CtrlS":          "Save",
-		"CtrlF":          "Find",
-		"CtrlN":          "FindNext",
-		"CtrlP":          "FindPrevious",
-		"CtrlZ":          "Undo",
-		"CtrlY":          "Redo",
-		"CtrlC":          "Copy",
-		"CtrlX":          "Cut",
-		"CtrlK":          "CutLine",
-		"CtrlD":          "DuplicateLine",
-		"CtrlV":          "Paste",
-		"CtrlA":          "SelectAll",
-		"Home":           "Start",
-		"End":            "End",
-		"PgUp":           "PageUp",
-		"PgDn":           "PageDown",
-		"CtrlU":          "HalfPageUp",
-		"CtrlD":          "HalfPageDown",
-		"CtrlR":          "ToggleRuler",
-		"Delete":         "Delete"
+	"Up":             "CursorUp",
+	"Down":           "CursorDown",
+	"Right":          "CursorRight",
+	"Left":           "CursorLeft",
+	"ShiftUp":        "SelectUp",
+	"ShiftDown":      "SelectDown",
+	"ShiftLeft":      "SelectLeft",
+	"ShiftRight":     "SelectRight",
+	"AltLeft":        "WordLeft",
+	"AltRight":       "WordRight",
+	"AltShiftRight":  "SelectWordRight",
+	"AltShiftLeft":   "SelectWordLeft",
+	"CtrlLeft":       "StartOfLine",
+	"CtrlRight":      "EndOfLine",
+	"CtrlShiftLeft":  "SelectToStartOfLine",
+	"CtrlShiftRight": "SelectToEndOfLine",
+	"CtrlUp":         "CursorStart",
+	"CtrlDown":       "CursorEnd",
+	"CtrlShiftUp":    "SelectToStart",
+	"CtrlShiftDown":  "SelectToEnd",
+	"Enter":          "InsertEnter",
+	"Space":          "InsertSpace",
+	"Backspace":      "Backspace",
+	"Backspace2":     "Backspace",
+	"Tab":            "InsertTab",
+	"CtrlO":          "OpenFile",
+	"CtrlS":          "Save",
+	"CtrlF":          "Find",
+	"CtrlN":          "FindNext",
+	"CtrlP":          "FindPrevious",
+	"CtrlZ":          "Undo",
+	"CtrlY":          "Redo",
+	"CtrlC":          "Copy",
+	"CtrlX":          "Cut",
+	"CtrlK":          "CutLine",
+	"CtrlD":          "DuplicateLine",
+	"CtrlV":          "Paste",
+	"CtrlA":          "SelectAll",
+	"Home":           "Start",
+	"End":            "End",
+	"PgUp":           "PageUp",
+	"PgDn":           "PageDown",
+	"CtrlU":          "HalfPageUp",
+	"CtrlD":          "HalfPageDown",
+	"CtrlR":          "ToggleRuler",
+	"Delete":         "Delete"
 }
 
 ```
@@ -160,18 +160,18 @@ Here are the options that you can set:
 
 	default value: `default`
 	Note that the default colorschemes (default, solarized, and solarized-tc)
-    are not located in configDir, because they are embedded in the micro binary
+	are not located in configDir, because they are embedded in the micro binary
 
-    The colorscheme can be selected from all the files in the 
-    ~/.config/micro/colorschemes/ directory. Micro comes by default with three
-    colorschemes:
+	The colorscheme can be selected from all the files in the 
+	~/.config/micro/colorschemes/ directory. Micro comes by default with three
+	colorschemes:
 
-    * default: this is the default colorscheme.
-    * solarized: this is the solarized colorscheme (used in the screenshot). 
-      You should have the solarized color palette in your terminal to use it.
-    * solarized-tc: this is the solarized colorscheme for true color, just 
-      make sure your terminal supports true color before using it and that the 
-      MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
+	* default: this is the default colorscheme.
+	* solarized: this is the solarized colorscheme (used in the screenshot). 
+	  You should have the solarized color palette in your terminal to use it.
+	* solarized-tc: this is the solarized colorscheme for true color, just 
+	  make sure your terminal supports true color before using it and that the 
+	  MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
 
 
 * `tabsize`: sets the tab size to `option`
@@ -197,17 +197,21 @@ Here are the options that you can set:
 * `autoindent`: when creating a new line use the same indentation as the 
    previous line
 
-    default value: `on`
+	default value: `on`
 
 * `ruler`: display line numbers
 
-    default value: `on`
+	default value: `on`
 
 * `statusline`: display the status line at the bottom of the screen
 
-    default value: `on`
+	default value: `on`
 
-* `scrollSpeed`: amount of lines to scroll
+* `scrollmargin`: amount of lines you would like to see above and below the cursor
+
+	default value: `3`
+
+* `scrollspeed`: amount of lines to scroll
 
 	default value: `2`
 
@@ -218,15 +222,15 @@ Default plugin options:
 * `linter`: lint languages on save (supported languages are C, D, Go, Java,
    Javascript, Lua). Provided by the `linter` plugin.
 
-    default value: `on`
+	default value: `on`
 
 * `goimports`: Run goimports on save. Provided by the `go` plugin.
 
-    default value: `off`
+	default value: `off`
 
 * `gofmt`: Run gofmt on save. Provided by the `go` plugin.
 
-    default value: `on`
+	default value: `on`
 
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 

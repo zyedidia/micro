@@ -149,7 +149,8 @@ func HandleCommand(input string, view *View) {
 			if strings.Contains(flags, "c") {
 				// The 'check' flag was used
 				Search(search, view, true)
-				view.Relocate(0)
+				scrollmargin := int(settings["scrollmargin"].(float64))
+				view.Relocate(scrollmargin)
 				Redraw(view)
 				choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 				if canceled {
