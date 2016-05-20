@@ -172,9 +172,6 @@ func (m *Messenger) HandleEvent(event tcell.Event) {
 				m.response = string([]rune(m.response)[:m.cursorx-1]) + string(m.response[m.cursorx:])
 			}
 			m.cursorx--
-		case tcell.KeySpace:
-			m.response += " "
-			m.cursorx++
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++

@@ -273,13 +273,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Cursor.Right()
 		} else {
 			for key, action := range bindings {
-				if e.Key() == key {
-					relocate = action(v)
-					for _, pl := range loadedPlugins {
-						funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
-						err := Call(pl + "_on" + funcName[len(funcName)-1])
-						if err != nil {
-							TermMessage(err)
+				if e.Key() == key.keyCode {
+					if e.Modifiers() == key.modifiers {
+						relocate = action(v)
+						for _, pl := range loadedPlugins {
+							funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
+							err := Call(pl + "_on" + funcName[len(funcName)-1])
+							if err != nil {
+								TermMessage(err)
+							}
 						}
 					}
 				}
@@ -306,7 +308,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		switch button {
 		case tcell.Button1:
 			// Left click
-			if v.mouseReleased && !e.HasMotion() {
+			if v.mouseReleased {
 				v.MoveToMouseClick(x, y)
 				if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
 					if v.doubleClick {
