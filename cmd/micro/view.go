@@ -196,21 +196,21 @@ func (v *View) ReOpen() {
 		v.Buf = buf
 		v.matches = Match(v)
 		v.Cursor.Relocate()
-		v.Relocate()
+		v.Relocate(0)
 	}
 }
 
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
-func (v *View) Relocate() bool {
+func (v *View) Relocate(x int) bool {
 	ret := false
 	cy := v.Cursor.y
 	if cy < v.Topline {
-		v.Topline = cy - 4
+		v.Topline = cy - x
 		ret = true
 	}
 	if cy > v.Topline+v.height-1 {
-		v.Topline = cy - v.height + 5
+		v.Topline = cy - v.height + 1 + x
 		ret = true
 	}
 
@@ -378,7 +378,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 
 	if relocate {
-		v.Relocate()
+		v.Relocate(0)
 	}
 	if settings["syntax"].(bool) {
 		v.matches = Match(v)
