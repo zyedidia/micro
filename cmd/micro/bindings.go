@@ -71,6 +71,7 @@ func InitBindings() {
 		"EndOfLine":           (*View).EndOfLine,
 		"ToggleRuler":         (*View).ToggleRuler,
 		"JumpLine":            (*View).JumpLine,
+		"ClearStatus":         (*View).ClearStatus,
 	}
 
 	keys := map[string]Key{
@@ -294,6 +295,7 @@ func DefaultBindings() map[string]string {
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
+		"Esc":            "ClearStatus",
 	}
 }
 
@@ -844,6 +846,12 @@ func (v *View) JumpLine() bool {
 		return true
 	}
 	messenger.Error("Only ", v.Buf.NumLines, " lines to jump")
+	return false
+}
+
+// ClearStatus clears the messenger bar
+func (v *View) ClearStatus() bool {
+	messenger.Message("")
 	return false
 }
 
