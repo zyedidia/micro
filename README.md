@@ -98,10 +98,12 @@ go get -u github.com/zyedidia/micro/cmd/micro
 
 ### Clipboard support
 
-On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed. For Ubuntu:
+On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed.
+
+For Ubuntu:
 
 ```sh
-$ sudo apt-get install xclip
+sudo apt-get install xclip
 ```
 
 If you don't have xclip or xsel, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
