@@ -203,8 +203,11 @@ func (v *View) Relocate() bool {
 		v.Topline = cy
 		ret = true
 	}
-	if cy > v.Topline+v.height-1-scrollmargin {
+	if cy > v.Topline+v.height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
 		v.Topline = cy - v.height + 1 + scrollmargin
+		ret = true
+	} else if cy >= v.Buf.NumLines-scrollmargin {
+		v.Topline = v.Buf.NumLines - v.height
 		ret = true
 	}
 
