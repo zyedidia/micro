@@ -253,7 +253,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// Window resized
 		v.Resize(e.Size())
 	case *tcell.EventKey:
-		if e.Key() == tcell.KeyRune {
+		if e.Key() == tcell.KeyRune && e.Modifiers() == 0 {
 			// Insert a character
 			if v.Cursor.HasSelection() {
 				v.Cursor.DeleteSelection()
@@ -264,6 +264,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 		} else {
 			for key, action := range bindings {
 				if e.Key() == key.keyCode {
+					if e.Key() == tcell.KeyRune {
+						if e.Rune() != key.r {
+							continue
+						}
+					}
 					if e.Modifiers() == key.modifiers {
 						relocate = action(v)
 						for _, pl := range loadedPlugins {
