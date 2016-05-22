@@ -162,7 +162,7 @@ func HandleCommand(input string, view *View) {
 				}
 				if choice {
 					view.Cursor.DeleteSelection()
-					view.eh.Insert(match[0], replace)
+					view.Buf.Insert(match[0], replace)
 					view.Cursor.ResetSelection()
 					messenger.Reset()
 				} else {
@@ -174,7 +174,7 @@ func HandleCommand(input string, view *View) {
 					continue
 				}
 			} else {
-				view.eh.Replace(match[0], match[1], replace)
+				view.Buf.Replace(match[0], match[1], replace)
 			}
 		}
 		if !found {

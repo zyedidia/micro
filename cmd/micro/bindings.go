@@ -506,7 +506,7 @@ func (v *View) InsertSpace() bool {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
-	v.eh.Insert(v.Cursor.Loc(), " ")
+	v.Buf.Insert(v.Cursor.Loc(), " ")
 	v.Cursor.Right()
 	return true
 }
@@ -519,12 +519,12 @@ func (v *View) InsertEnter() bool {
 		v.Cursor.ResetSelection()
 	}
 
-	v.eh.Insert(v.Cursor.Loc(), "\n")
+	v.Buf.Insert(v.Cursor.Loc(), "\n")
 	ws := GetLeadingWhitespace(v.Buf.Lines[v.Cursor.y])
 	v.Cursor.Right()
 
 	if settings["autoindent"].(bool) {
-		v.eh.Insert(v.Cursor.Loc(), ws)
+		v.Buf.Insert(v.Cursor.Loc(), ws)
 		for i := 0; i < len(ws); i++ {
 			v.Cursor.Right()
 		}
@@ -556,14 +556,14 @@ func (v *View) Backspace() bool {
 			v.Cursor.SetLoc(loc - tabSize)
 			cx, cy := v.Cursor.x, v.Cursor.y
 			v.Cursor.SetLoc(loc)
-			v.eh.Remove(loc-tabSize, loc)
+			v.Buf.Remove(loc-tabSize, loc)
 			v.Cursor.x, v.Cursor.y = cx, cy
 		} else {
 			v.Cursor.Left()
 			cx, cy := v.Cursor.x, v.Cursor.y
 			v.Cursor.Right()
 			loc := v.Cursor.Loc()
-			v.eh.Remove(loc-1, loc)
+			v.Buf.Remove(loc-1, loc)
 			v.Cursor.x, v.Cursor.y = cx, cy
 		}
 	}
@@ -579,7 +579,7 @@ func (v *View) Delete() bool {
 	} else {
 		loc := v.Cursor.Loc()
 		if loc < v.Buf.Len() {
-			v.eh.Remove(loc, loc+1)
+			v.Buf.Remove(loc, loc+1)
 		}
 	}
 	return true
@@ -594,12 +594,12 @@ func (v *View) InsertTab() bool {
 	}
 	if settings["tabsToSpaces"].(bool) {
 		tabSize := int(settings["tabsize"].(float64))
-		v.eh.Insert(v.Cursor.Loc(), Spaces(tabSize))
+		v.Buf.Insert(v.Cursor.Loc(), Spaces(tabSize))
 		for i := 0; i < tabSize; i++ {
 			v.Cursor.Right()
 		}
 	} else {
-		v.eh.Insert(v.Cursor.Loc(), "\t")
+		v.Buf.Insert(v.Cursor.Loc(), "\t")
 		v.Cursor.Right()
 	}
 	return true
@@ -663,14 +663,14 @@ func (v *View) FindPrevious() bool {
 
 // Undo undoes the last action
 func (v *View) Undo() bool {
-	v.eh.Undo()
+	v.Buf.Undo()
 	messenger.Message("Undid action")
 	return true
 }
 
 // Redo redoes the last action
 func (v *View) Redo() bool {
-	v.eh.Redo()
+	v.Buf.Redo()
 	messenger.Message("Redid action")
 	return true
 }
@@ -722,7 +722,7 @@ func (v *View) Cut() bool {
 // DuplicateLine duplicates the current line
 func (v *View) DuplicateLine() bool {
 	v.Cursor.End()
-	v.eh.Insert(v.Cursor.Loc(), "\n"+v.Buf.Lines[v.Cursor.y])
+	v.Buf.Insert(v.Cursor.Loc(), "\n"+v.Buf.Lines[v.Cursor.y])
 	v.Cursor.Right()
 	messenger.Message("Duplicated line")
 	return true
@@ -736,7 +736,7 @@ func (v *View) Paste() bool {
 		v.Cursor.ResetSelection()
 	}
 	clip, _ := clipboard.ReadAll()
-	v.eh.Insert(v.Cursor.Loc(), clip)
+	v.Buf.Insert(v.Cursor.Loc(), clip)
 	v.Cursor.SetLoc(v.Cursor.Loc() + Count(clip))
 	v.freshClip = false
 	messenger.Message("Pasted clipboard")

@@ -10,8 +10,13 @@ import (
 // It uses a rope to efficiently store the string and contains some
 // simple functions for saving and wrapper functions for modifying the rope
 type Buffer struct {
+	// The eventhandler for undo/redo
+	*EventHandler
+
 	// Stores the text of the buffer
 	r *rope.Rope
+
+	Cursor Cursor
 
 	// Path to the file on disk
 	Path string
@@ -42,6 +47,15 @@ func NewBuffer(txt, path string) *Buffer {
 	}
 	b.Path = path
 	b.Name = path
+
+	// Put the cursor at the first spot
+	b.Cursor = Cursor{
+		x:   0,
+		y:   0,
+		Buf: b,
+	}
+
+	b.EventHandler = NewEventHandler(b)
 
 	b.Update()
 	b.UpdateRules()
@@ -84,8 +98,8 @@ func (b *Buffer) SaveAs(filename string) error {
 	return err
 }
 
-// Insert a string into the rope
-func (b *Buffer) Insert(idx int, value string) {
+// This directly inserts value at idx, bypassing all undo/redo
+func (b *Buffer) insert(idx int, value string) {
 	b.IsModified = true
 	b.r = b.r.Insert(idx, value)
 	b.Update()
@@ -93,7 +107,8 @@ func (b *Buffer) Insert(idx int, value string) {
 
 // Remove a slice of the rope from start to end (exclusive)
 // Returns the string that was removed
-func (b *Buffer) Remove(start, end int) string {
+// This directly removes from start to end from the buffer, bypassing all undo/redo
+func (b *Buffer) remove(start, end int) string {
 	b.IsModified = true
 	if start < 0 {
 		start = 0

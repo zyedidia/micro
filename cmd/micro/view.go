@@ -15,7 +15,8 @@ import (
 // It stores information about the cursor, and the viewport
 // that the user sees the buffer from.
 type View struct {
-	Cursor Cursor
+	// A pointer to the buffer's cursor for ease of access
+	Cursor *Cursor
 
 	// The topmost line, used for vertical scrolling
 	Topline int
@@ -32,9 +33,6 @@ type View struct {
 
 	// How much to offset because of line numbers
 	lineNumOffset int
-
-	// The eventhandler for undo/redo
-	eh *EventHandler
 
 	// Holds the list of gutter messages
 	messages map[string][]GutterMessage
@@ -89,8 +87,6 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v.Resize(screen.Size())
 
 	v.OpenBuffer(buf)
-
-	v.eh = NewEventHandler(v)
 
 	v.messages = make(map[string][]GutterMessage)
 
@@ -162,18 +158,12 @@ func (v *View) CanClose(msg string) bool {
 // This resets the topline, event handler and cursor.
 func (v *View) OpenBuffer(buf *Buffer) {
 	v.Buf = buf
+	v.Cursor = &buf.Cursor
 	v.Topline = 0
 	v.leftCol = 0
-	// Put the cursor at the first spot
-	v.Cursor = Cursor{
-		x: 0,
-		y: 0,
-		v: v,
-	}
 	v.Cursor.ResetSelection()
 	v.messages = make(map[string][]GutterMessage)
 
-	v.eh = NewEventHandler(v)
 	v.matches = Match(v)
 
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
@@ -269,7 +259,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.Cursor.DeleteSelection()
 				v.Cursor.ResetSelection()
 			}
-			v.eh.Insert(v.Cursor.Loc(), string(e.Rune()))
+			v.Buf.Insert(v.Cursor.Loc(), string(e.Rune()))
 			v.Cursor.Right()
 		} else {
 			for key, action := range bindings {
@@ -293,7 +283,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Cursor.ResetSelection()
 		}
 		clip := e.Text()
-		v.eh.Insert(v.Cursor.Loc(), clip)
+		v.Buf.Insert(v.Cursor.Loc(), clip)
 		v.Cursor.SetLoc(v.Cursor.Loc() + Count(clip))
 		v.freshClip = false
 	case *tcell.EventMouse:
@@ -595,10 +585,20 @@ func (v *View) DisplayView() {
 	}
 }
 
+// DisplayCursor draws the current buffer's cursor to the screen
+func (v *View) DisplayCursor() {
+	// Don't draw the cursor if it is out of the viewport or if it has a selection
+	if (v.Cursor.y-v.Topline < 0 || v.Cursor.y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
+		screen.HideCursor()
+	} else {
+		screen.ShowCursor(v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.y-v.Topline)
+	}
+}
+
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	v.Cursor.Display()
+	v.DisplayCursor()
 	if settings["statusline"].(bool) {
 		v.sline.Display()
 	}
