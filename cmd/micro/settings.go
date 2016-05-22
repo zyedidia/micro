@@ -78,7 +78,7 @@ func DefaultSettings() map[string]interface{} {
 		"ignorecase":   false,
 		"autoindent":   true,
 		"syntax":       true,
-		"tabsToSpaces": false,
+		"tabstospaces": false,
 		"ruler":        true,
 		"statusline":   true,
 		"scrollmargin": float64(3),
