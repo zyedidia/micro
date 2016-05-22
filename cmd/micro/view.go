@@ -195,12 +195,16 @@ func (v *View) ReOpen() {
 func (v *View) Relocate() bool {
 	ret := false
 	cy := v.Cursor.y
-	if cy < v.Topline {
+	scrollmargin := int(settings["scrollmargin"].(float64))
+	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
+		v.Topline = cy - scrollmargin
+		ret = true
+	} else if cy < v.Topline {
 		v.Topline = cy
 		ret = true
 	}
-	if cy > v.Topline+v.height-1 {
-		v.Topline = cy - v.height + 1
+	if cy > v.Topline+v.height-1-scrollmargin {
+		v.Topline = cy - v.height + 1 + scrollmargin
 		ret = true
 	}
 
@@ -363,12 +367,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		case tcell.WheelUp:
 			// Scroll up
-			scrollSpeed := int(settings["scrollSpeed"].(float64))
-			v.ScrollUp(scrollSpeed)
+			scrollspeed := int(settings["scrollspeed"].(float64))
+			v.ScrollUp(scrollspeed)
 		case tcell.WheelDown:
 			// Scroll down
-			scrollSpeed := int(settings["scrollSpeed"].(float64))
-			v.ScrollDown(scrollSpeed)
+			scrollspeed := int(settings["scrollspeed"].(float64))
+			v.ScrollDown(scrollspeed)
 		}
 	}
 
