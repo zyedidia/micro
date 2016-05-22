@@ -190,7 +190,7 @@ Here are the options that you can set:
 
 	default value: `on`
 
-* `tabsToSpaces`: use spaces instead of tabs
+* `tabstospaces`: use spaces instead of tabs
 
 	default value: `off`
 

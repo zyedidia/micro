@@ -569,7 +569,7 @@ func (v *View) Backspace() bool {
 		// tab (tabSize number of spaces)
 		lineStart := v.Buf.Lines[v.Cursor.y][:v.Cursor.x]
 		tabSize := int(settings["tabsize"].(float64))
-		if settings["tabsToSpaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
+		if settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc()
 			v.Cursor.SetLoc(loc - tabSize)
 			cx, cy := v.Cursor.x, v.Cursor.y
@@ -610,7 +610,7 @@ func (v *View) InsertTab() bool {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
-	if settings["tabsToSpaces"].(bool) {
+	if settings["tabstospaces"].(bool) {
 		tabSize := int(settings["tabsize"].(float64))
 		v.Buf.Insert(v.Cursor.Loc(), Spaces(tabSize))
 		for i := 0; i < tabSize; i++ {
