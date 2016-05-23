@@ -56,7 +56,7 @@ func InitBindings() {
 		"Undo":                (*View).Undo,
 		"Redo":                (*View).Redo,
 		"Copy":                (*View).Copy,
-		"Cut":                 (*View).Od,
+		"Cut":                 (*View).Cut,
 		"CutLine":             (*View).CutLine,
 		"DeleteLine":          (*View).DeleteLine,
 		"DuplicateLine":       (*View).DuplicateLine,
