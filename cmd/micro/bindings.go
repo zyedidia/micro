@@ -706,6 +706,9 @@ func (v *View) Copy() bool {
 // CutLine cuts the current line to the clipboard
 func (v *View) CutLine() bool {
 	v.Cursor.SelectLine()
+	if !v.Cursor.HasSelection() {
+		return false
+	}
 	if v.freshClip == true {
 		if v.Cursor.HasSelection() {
 			if clip, err := clipboard.ReadAll(); err != nil {
