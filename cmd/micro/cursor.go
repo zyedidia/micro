@@ -18,6 +18,9 @@ func FromCharPosStart(startLoc, startX, startY, loc int, buf *Buffer) (int, int)
 	for charNum+lineLen <= loc {
 		charNum += lineLen
 		y++
+		if y >= buf.NumLines {
+			return 0, 0
+		}
 		lineLen = Count(buf.Lines[y]) + 1
 	}
 	x = loc - charNum
