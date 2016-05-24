@@ -203,6 +203,10 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `undothreshold`: maximum time in milliseconds events can be apart to be counted as a single undo
+
+	default value: `500`
+
 * `statusline`: display the status line at the bottom of the screen
 
 	default value: `on`

@@ -72,17 +72,18 @@ func GetOption(name string) interface{} {
 // DefaultSettings returns the default settings for micro
 func DefaultSettings() map[string]interface{} {
 	return map[string]interface{}{
-		"colorscheme":  "default",
-		"tabsize":      float64(4),
-		"indentchar":   " ",
-		"ignorecase":   false,
-		"autoindent":   true,
-		"syntax":       true,
-		"tabstospaces": false,
-		"ruler":        true,
-		"statusline":   true,
-		"scrollmargin": float64(3),
-		"scrollspeed":  float64(2),
+		"autoindent":    true,
+		"colorscheme":   "default",
+		"ignorecase":    false,
+		"indentchar":    " ",
+		"ruler":         true,
+		"scrollspeed":   float64(2),
+		"scrollmargin":  float64(3),
+		"statusline":    true,
+		"syntax":        true,
+		"tabsize":       float64(4),
+		"tabstospaces":  false,
+		"undothreshold": float64(500),
 	}
 }
 
