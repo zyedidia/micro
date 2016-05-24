@@ -115,6 +115,7 @@ func (eh *EventHandler) Undo() {
 
 		te = t.(*TextEvent)
 
+		undoThreshold := int64(settings["undothreshold"].(float64))
 		if startTime-(te.time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
 			return
 		}
@@ -166,6 +167,7 @@ func (eh *EventHandler) Redo() {
 
 		te = t.(*TextEvent)
 
+		undoThreshold := int64(settings["undothreshold"].(float64))
 		if (te.time.UnixNano()/int64(time.Millisecond))-startTime > undoThreshold {
 			return
 		}
