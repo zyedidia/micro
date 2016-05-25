@@ -416,8 +416,8 @@ func Match(v *View) SyntaxMatches {
 		if rule.startend {
 			if indicies := rule.regex.FindAllStringIndex(str, -1); indicies != nil {
 				for _, value := range indicies {
-					value[0] += startNum
-					value[1] += startNum
+					value[0] = runePos(value[0], str) + startNum
+					value[1] = runePos(value[1], str) + startNum
 					for i := value[0]; i < value[1]; i++ {
 						if i < toplineNum {
 							continue
@@ -437,7 +437,9 @@ func Match(v *View) SyntaxMatches {
 			for lineN, line := range lines {
 				if indicies := rule.regex.FindAllStringIndex(line, -1); indicies != nil {
 					for _, value := range indicies {
-						for i := value[0]; i < value[1]; i++ {
+						start := runePos(value[0], line)
+						end := runePos(value[1], line)
+						for i := start; i < end; i++ {
 							matches[lineN][i] = rule.style
 						}
 					}

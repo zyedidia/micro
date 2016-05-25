@@ -117,3 +117,7 @@ func ParseBool(str string) (bool, error) {
 	}
 	return strconv.ParseBool(str)
 }
+
+func runePos(p int, str string) int {
+	return utf8.RuneCountInString(str[:p])
+}
