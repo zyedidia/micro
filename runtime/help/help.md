@@ -211,6 +211,10 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `stackundo`: reset undothreshold timer to zero if an action is taken before the timer runs out
+
+	default value: `off`
+
 * `scrollmargin`: amount of lines you would like to see above and below the cursor
 
 	default value: `3`

@@ -79,6 +79,7 @@ func DefaultSettings() map[string]interface{} {
 		"ruler":         true,
 		"scrollspeed":   float64(2),
 		"scrollmargin":  float64(3),
+		"stackundo":     false,
 		"statusline":    true,
 		"syntax":        true,
 		"tabsize":       float64(4),
