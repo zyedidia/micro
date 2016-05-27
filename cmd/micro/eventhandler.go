@@ -117,6 +117,8 @@ func (eh *EventHandler) Undo() {
 
 		if startTime-(te.time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
 			return
+		} else {
+			startTime = t.(*TextEvent).time.UnixNano() / int64(time.Millisecond)
 		}
 
 		eh.UndoOneEvent()
