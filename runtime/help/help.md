@@ -203,17 +203,9 @@ Here are the options that you can set:
 
 	default value: `on`
 
-* `undothreshold`: maximum time in milliseconds events can be apart to be counted as a single undo
-
-	default value: `500`
-
 * `statusline`: display the status line at the bottom of the screen
 
 	default value: `on`
-
-* `stackundo`: reset undothreshold timer to zero if an action is taken before the timer runs out
-
-	default value: `off`
 
 * `scrollmargin`: amount of lines you would like to see above and below the cursor
 

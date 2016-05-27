@@ -115,13 +115,10 @@ func (eh *EventHandler) Undo() {
 
 		te = t.(*TextEvent)
 
-		undoThreshold := int64(settings["undothreshold"].(float64))
 		if startTime-(te.time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
 			return
 		} else {
-			if settings["stackundo"] == true {
-				startTime = t.(*TextEvent).time.UnixNano() / int64(time.Millisecond)
-			}
+			startTime = t.(*TextEvent).time.UnixNano() / int64(time.Millisecond)
 		}
 
 		eh.UndoOneEvent()
@@ -171,7 +168,6 @@ func (eh *EventHandler) Redo() {
 
 		te = t.(*TextEvent)
 
-		undoThreshold := int64(settings["undothreshold"].(float64))
 		if (te.time.UnixNano()/int64(time.Millisecond))-startTime > undoThreshold {
 			return
 		}
