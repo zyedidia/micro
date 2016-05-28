@@ -162,6 +162,9 @@ func HandleCommand(input string) {
 				// The 'check' flag was used
 				Search(search, view, true)
 				view.Relocate()
+				if settings["syntax"].(bool) {
+					view.matches = Match(view)
+				}
 				RedrawAll()
 				choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 				if canceled {
