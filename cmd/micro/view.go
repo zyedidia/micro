@@ -166,6 +166,7 @@ func (v *View) CanClose(msg string) bool {
 // OpenBuffer opens a new buffer in this view.
 // This resets the topline, event handler and cursor.
 func (v *View) OpenBuffer(buf *Buffer) {
+	v.CloseBuffer()
 	v.Buf = buf
 	v.Cursor = &buf.Cursor
 	v.Topline = 0
@@ -179,6 +180,13 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// the editor is opened
 	v.mouseReleased = true
 	v.lastClickTime = time.Time{}
+}
+
+// CloseBuffer performs any closing functions on the buffer
+func (v *View) CloseBuffer() {
+	if v.Buf != nil {
+		v.Buf.Serialize()
+	}
 }
 
 // ReOpen reloads the current buffer
@@ -203,7 +211,7 @@ func (v *View) ReOpen() {
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	ret := false
-	cy := v.Cursor.y
+	cy := v.Cursor.Y
 	scrollmargin := int(settings["scrollmargin"].(float64))
 	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
 		v.Topline = cy - scrollmargin
@@ -253,9 +261,9 @@ func (v *View) MoveToMouseClick(x, y int) {
 	if x > Count(v.Buf.Lines[y]) {
 		x = Count(v.Buf.Lines[y])
 	}
-	v.Cursor.x = x
-	v.Cursor.y = y
-	v.Cursor.lastVisualX = v.Cursor.GetVisualX()
+	v.Cursor.X = x
+	v.Cursor.Y = y
+	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
 // HandleEvent handles an event passed by the main loop
@@ -345,9 +353,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.lastClickTime = time.Now()
 
 					loc := v.Cursor.Loc()
-					v.Cursor.origSelection[0] = loc
-					v.Cursor.curSelection[0] = loc
-					v.Cursor.curSelection[1] = loc
+					v.Cursor.OrigSelection[0] = loc
+					v.Cursor.CurSelection[0] = loc
+					v.Cursor.CurSelection[1] = loc
 				}
 				v.mouseReleased = false
 			} else if !v.mouseReleased {
@@ -357,7 +365,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
-					v.Cursor.curSelection[1] = v.Cursor.Loc()
+					v.Cursor.CurSelection[1] = v.Cursor.Loc()
 				}
 			}
 		case tcell.ButtonNone:
@@ -373,7 +381,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.Cursor.curSelection[1] = v.Cursor.Loc()
+					v.Cursor.CurSelection[1] = v.Cursor.Loc()
 				}
 				v.mouseReleased = true
 			}
@@ -487,7 +495,7 @@ func (v *View) DisplayView() {
 						x++
 						screen.SetContent(x, lineN, '>', nil, gutterStyle)
 						x++
-						if v.Cursor.y == lineN+v.Topline {
+						if v.Cursor.Y == lineN+v.Topline {
 							messenger.Message(msg.msg)
 							messenger.gutterMessage = true
 						}
@@ -499,7 +507,7 @@ func (v *View) DisplayView() {
 				x++
 				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
 				x++
-				if v.Cursor.y == lineN+v.Topline && messenger.gutterMessage {
+				if v.Cursor.Y == lineN+v.Topline && messenger.gutterMessage {
 					messenger.Reset()
 					messenger.gutterMessage = false
 				}
@@ -542,8 +550,8 @@ func (v *View) DisplayView() {
 			}
 
 			if v.Cursor.HasSelection() &&
-				(charNum >= v.Cursor.curSelection[0] && charNum < v.Cursor.curSelection[1] ||
-					charNum < v.Cursor.curSelection[0] && charNum >= v.Cursor.curSelection[1]) {
+				(charNum >= v.Cursor.CurSelection[0] && charNum < v.Cursor.CurSelection[1] ||
+					charNum < v.Cursor.CurSelection[0] && charNum >= v.Cursor.CurSelection[1]) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
@@ -560,8 +568,8 @@ func (v *View) DisplayView() {
 					lineIndentStyle = style
 				}
 				if v.Cursor.HasSelection() &&
-					(charNum >= v.Cursor.curSelection[0] && charNum < v.Cursor.curSelection[1] ||
-						charNum < v.Cursor.curSelection[0] && charNum >= v.Cursor.curSelection[1]) {
+					(charNum >= v.Cursor.CurSelection[0] && charNum < v.Cursor.CurSelection[1] ||
+						charNum < v.Cursor.CurSelection[0] && charNum >= v.Cursor.CurSelection[1]) {
 
 					lineIndentStyle = tcell.StyleDefault.Reverse(true)
 
@@ -591,8 +599,8 @@ func (v *View) DisplayView() {
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
 		if v.Cursor.HasSelection() &&
-			(charNum >= v.Cursor.curSelection[0] && charNum < v.Cursor.curSelection[1] ||
-				charNum < v.Cursor.curSelection[0] && charNum >= v.Cursor.curSelection[1]) {
+			(charNum >= v.Cursor.CurSelection[0] && charNum < v.Cursor.CurSelection[1] ||
+				charNum < v.Cursor.CurSelection[0] && charNum >= v.Cursor.CurSelection[1]) {
 
 			selectStyle := defStyle.Reverse(true)
 
@@ -609,10 +617,10 @@ func (v *View) DisplayView() {
 // DisplayCursor draws the current buffer's cursor to the screen
 func (v *View) DisplayCursor() {
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.y-v.Topline < 0 || v.Cursor.y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
+	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
 		screen.HideCursor()
 	} else {
-		screen.ShowCursor(v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.y-v.Topline)
+		screen.ShowCursor(v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.Y-v.Topline)
 	}
 }
 

@@ -214,6 +214,11 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `savecursor`: remember where the cursor was last time the file was opened and
+   put it there when you open the file again
+
+    default value: `off`
+
 * `scrollmargin`: amount of lines you would like to see above and below the cursor
 
 	default value: `3`

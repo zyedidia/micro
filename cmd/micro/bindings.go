@@ -336,7 +336,7 @@ func DefaultBindings() map[string]string {
 // CursorUp moves the cursor up
 func (v *View) CursorUp() bool {
 	if v.Cursor.HasSelection() {
-		v.Cursor.SetLoc(v.Cursor.curSelection[0])
+		v.Cursor.SetLoc(v.Cursor.CurSelection[0])
 		v.Cursor.ResetSelection()
 	}
 	v.Cursor.Up()
@@ -346,7 +346,7 @@ func (v *View) CursorUp() bool {
 // CursorDown moves the cursor down
 func (v *View) CursorDown() bool {
 	if v.Cursor.HasSelection() {
-		v.Cursor.SetLoc(v.Cursor.curSelection[1])
+		v.Cursor.SetLoc(v.Cursor.CurSelection[1])
 		v.Cursor.ResetSelection()
 	}
 	v.Cursor.Down()
@@ -356,7 +356,7 @@ func (v *View) CursorDown() bool {
 // CursorLeft moves the cursor left
 func (v *View) CursorLeft() bool {
 	if v.Cursor.HasSelection() {
-		v.Cursor.SetLoc(v.Cursor.curSelection[0])
+		v.Cursor.SetLoc(v.Cursor.CurSelection[0])
 		v.Cursor.ResetSelection()
 	} else {
 		v.Cursor.Left()
@@ -367,7 +367,7 @@ func (v *View) CursorLeft() bool {
 // CursorRight moves the cursor right
 func (v *View) CursorRight() bool {
 	if v.Cursor.HasSelection() {
-		v.Cursor.SetLoc(v.Cursor.curSelection[1] - 1)
+		v.Cursor.SetLoc(v.Cursor.CurSelection[1] - 1)
 		v.Cursor.ResetSelection()
 	} else {
 		v.Cursor.Right()
@@ -391,7 +391,7 @@ func (v *View) WordLeft() bool {
 func (v *View) SelectUp() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.Up()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -402,7 +402,7 @@ func (v *View) SelectUp() bool {
 func (v *View) SelectDown() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.Down()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -417,7 +417,7 @@ func (v *View) SelectLeft() bool {
 		loc = count
 	}
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.Left()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -432,7 +432,7 @@ func (v *View) SelectRight() bool {
 		loc = count
 	}
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.Right()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -443,7 +443,7 @@ func (v *View) SelectRight() bool {
 func (v *View) SelectWordRight() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.WordRight()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -454,7 +454,7 @@ func (v *View) SelectWordRight() bool {
 func (v *View) SelectWordLeft() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.WordLeft()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -477,7 +477,7 @@ func (v *View) EndOfLine() bool {
 func (v *View) SelectToStartOfLine() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.Start()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -488,7 +488,7 @@ func (v *View) SelectToStartOfLine() bool {
 func (v *View) SelectToEndOfLine() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.Cursor.End()
 	v.Cursor.SelectTo(v.Cursor.Loc())
@@ -497,8 +497,8 @@ func (v *View) SelectToEndOfLine() bool {
 
 // CursorStart moves the cursor to the start of the buffer
 func (v *View) CursorStart() bool {
-	v.Cursor.x = 0
-	v.Cursor.y = 0
+	v.Cursor.X = 0
+	v.Cursor.Y = 0
 	return true
 }
 
@@ -512,7 +512,7 @@ func (v *View) CursorEnd() bool {
 func (v *View) SelectToStart() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.CursorStart()
 	v.Cursor.SelectTo(0)
@@ -523,7 +523,7 @@ func (v *View) SelectToStart() bool {
 func (v *View) SelectToEnd() bool {
 	loc := v.Cursor.Loc()
 	if !v.Cursor.HasSelection() {
-		v.Cursor.origSelection[0] = loc
+		v.Cursor.OrigSelection[0] = loc
 	}
 	v.CursorEnd()
 	v.Cursor.SelectTo(v.Buf.Len())
@@ -550,7 +550,7 @@ func (v *View) InsertEnter() bool {
 	}
 
 	v.Buf.Insert(v.Cursor.Loc(), "\n")
-	ws := GetLeadingWhitespace(v.Buf.Lines[v.Cursor.y])
+	ws := GetLeadingWhitespace(v.Buf.Lines[v.Cursor.Y])
 	v.Cursor.Right()
 
 	if settings["autoindent"].(bool) {
@@ -559,7 +559,7 @@ func (v *View) InsertEnter() bool {
 			v.Cursor.Right()
 		}
 	}
-	v.Cursor.lastVisualX = v.Cursor.GetVisualX()
+	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 	return true
 }
 
@@ -579,25 +579,25 @@ func (v *View) Backspace() bool {
 		// If the user is using spaces instead of tabs and they are deleting
 		// whitespace at the start of the line, we should delete as if its a
 		// tab (tabSize number of spaces)
-		lineStart := v.Buf.Lines[v.Cursor.y][:v.Cursor.x]
+		lineStart := v.Buf.Lines[v.Cursor.Y][:v.Cursor.X]
 		tabSize := int(settings["tabsize"].(float64))
 		if settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc()
 			v.Cursor.SetLoc(loc - tabSize)
-			cx, cy := v.Cursor.x, v.Cursor.y
+			cx, cy := v.Cursor.X, v.Cursor.Y
 			v.Cursor.SetLoc(loc)
 			v.Buf.Remove(loc-tabSize, loc)
-			v.Cursor.x, v.Cursor.y = cx, cy
+			v.Cursor.X, v.Cursor.Y = cx, cy
 		} else {
 			v.Cursor.Left()
-			cx, cy := v.Cursor.x, v.Cursor.y
+			cx, cy := v.Cursor.X, v.Cursor.Y
 			v.Cursor.Right()
 			loc := v.Cursor.Loc()
 			v.Buf.Remove(loc-1, loc)
-			v.Cursor.x, v.Cursor.y = cx, cy
+			v.Cursor.X, v.Cursor.Y = cx, cy
 		}
 	}
-	v.Cursor.lastVisualX = v.Cursor.GetVisualX()
+	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 	return true
 }
 
@@ -663,9 +663,9 @@ func (v *View) Save() bool {
 // Find opens a prompt and searches forward for the input
 func (v *View) Find() bool {
 	if v.Cursor.HasSelection() {
-		searchStart = v.Cursor.curSelection[1]
+		searchStart = v.Cursor.CurSelection[1]
 	} else {
-		searchStart = ToCharPos(v.Cursor.x, v.Cursor.y, v.Buf)
+		searchStart = ToCharPos(v.Cursor.X, v.Cursor.Y, v.Buf)
 	}
 	BeginSearch()
 	return true
@@ -674,9 +674,9 @@ func (v *View) Find() bool {
 // FindNext searches forwards for the last used search term
 func (v *View) FindNext() bool {
 	if v.Cursor.HasSelection() {
-		searchStart = v.Cursor.curSelection[1]
+		searchStart = v.Cursor.CurSelection[1]
 	} else {
-		searchStart = ToCharPos(v.Cursor.x, v.Cursor.y, v.Buf)
+		searchStart = ToCharPos(v.Cursor.X, v.Cursor.Y, v.Buf)
 	}
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, true)
@@ -686,9 +686,9 @@ func (v *View) FindNext() bool {
 // FindPrevious searches backwards for the last used search term
 func (v *View) FindPrevious() bool {
 	if v.Cursor.HasSelection() {
-		searchStart = v.Cursor.curSelection[0]
+		searchStart = v.Cursor.CurSelection[0]
 	} else {
-		searchStart = ToCharPos(v.Cursor.x, v.Cursor.y, v.Buf)
+		searchStart = ToCharPos(v.Cursor.X, v.Cursor.Y, v.Buf)
 	}
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, false)
@@ -759,7 +759,7 @@ func (v *View) Cut() bool {
 // DuplicateLine duplicates the current line
 func (v *View) DuplicateLine() bool {
 	v.Cursor.End()
-	v.Buf.Insert(v.Cursor.Loc(), "\n"+v.Buf.Lines[v.Cursor.y])
+	v.Buf.Insert(v.Cursor.Loc(), "\n"+v.Buf.Lines[v.Cursor.Y])
 	v.Cursor.Right()
 	messenger.Message("Duplicated line")
 	return true
@@ -782,11 +782,11 @@ func (v *View) Paste() bool {
 
 // SelectAll selects the entire buffer
 func (v *View) SelectAll() bool {
-	v.Cursor.curSelection[0] = 0
-	v.Cursor.curSelection[1] = v.Buf.Len()
+	v.Cursor.CurSelection[0] = 0
+	v.Cursor.CurSelection[1] = v.Buf.Len()
 	// Put the cursor at the beginning
-	v.Cursor.x = 0
-	v.Cursor.y = 0
+	v.Cursor.X = 0
+	v.Cursor.Y = 0
 	return true
 }
 
@@ -896,8 +896,8 @@ func (v *View) JumpLine() bool {
 	}
 	// Move cursor and view if possible.
 	if lineint < v.Buf.NumLines {
-		v.Cursor.x = 0
-		v.Cursor.y = lineint
+		v.Cursor.X = 0
+		v.Cursor.Y = lineint
 		return true
 	}
 	messenger.Error("Only ", v.Buf.NumLines, " lines to jump")
@@ -954,6 +954,7 @@ func (v *View) Quit() bool {
 	}
 	// Make sure not to quit if there are unsaved changes
 	if views[mainView].CanClose("Quit anyway? (yes, no, save) ") {
+		views[mainView].CloseBuffer()
 		screen.Fini()
 		os.Exit(0)
 	}

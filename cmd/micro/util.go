@@ -1,7 +1,9 @@
 package main
 
 import (
+	"path/filepath"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -116,6 +118,12 @@ func ParseBool(str string) (bool, error) {
 		return false, nil
 	}
 	return strconv.ParseBool(str)
+}
+
+// EscapePath replaces every path separator in a given path with a %
+func EscapePath(path string) string {
+	path = filepath.ToSlash(path)
+	return strings.Replace(path, "/", "%", -1)
 }
 
 func runePos(p int, str string) int {

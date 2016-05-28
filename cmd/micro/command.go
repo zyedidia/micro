@@ -172,7 +172,7 @@ func HandleCommand(input string) {
 				choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 				if canceled {
 					if view.Cursor.HasSelection() {
-						view.Cursor.SetLoc(view.Cursor.curSelection[0])
+						view.Cursor.SetLoc(view.Cursor.CurSelection[0])
 						view.Cursor.ResetSelection()
 					}
 					messenger.Reset()
@@ -185,9 +185,9 @@ func HandleCommand(input string) {
 					messenger.Reset()
 				} else {
 					if view.Cursor.HasSelection() {
-						searchStart = view.Cursor.curSelection[1]
+						searchStart = view.Cursor.CurSelection[1]
 					} else {
-						searchStart = ToCharPos(view.Cursor.x, view.Cursor.y, view.Buf)
+						searchStart = ToCharPos(view.Cursor.X, view.Cursor.Y, view.Buf)
 					}
 					continue
 				}

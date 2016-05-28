@@ -1,9 +1,13 @@
 package main
 
 import (
-	"github.com/vinzmay/go-rope"
+	"encoding/gob"
 	"io/ioutil"
+	"os"
+	"path/filepath"
 	"strings"
+
+	"github.com/vinzmay/go-rope"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -48,17 +52,45 @@ func NewBuffer(txt, path string) *Buffer {
 	b.Path = path
 	b.Name = path
 
-	// Put the cursor at the first spot
-	b.Cursor = Cursor{
-		x:   0,
-		y:   0,
-		Buf: b,
-	}
-
 	b.EventHandler = NewEventHandler(b)
 
 	b.Update()
 	b.UpdateRules()
+
+	if _, err := os.Stat(configDir + "/buffers/"); os.IsNotExist(err) {
+		os.Mkdir(configDir+"/buffers/", os.ModePerm)
+	}
+
+	if settings["savecursor"].(bool) {
+		absPath, _ := filepath.Abs(b.Path)
+		file, err := os.Open(configDir + "/buffers/" + EscapePath(absPath))
+		if err == nil {
+			var cursor Cursor
+			decoder := gob.NewDecoder(file)
+			err = decoder.Decode(&cursor)
+			if err != nil {
+				TermMessage(err.Error())
+			}
+			b.Cursor = cursor
+			b.Cursor.buf = b
+			b.Cursor.Clamp()
+		} else {
+			// Put the cursor at the first spot
+			b.Cursor = Cursor{
+				X:   0,
+				Y:   0,
+				buf: b,
+			}
+		}
+		file.Close()
+	} else {
+		// Put the cursor at the first spot
+		b.Cursor = Cursor{
+			X:   0,
+			Y:   0,
+			buf: b,
+		}
+	}
 
 	return b
 }
@@ -87,6 +119,21 @@ func (b *Buffer) Save() error {
 	return b.SaveAs(b.Path)
 }
 
+// Serialize serializes the buffer to configDir/buffers
+func (b *Buffer) Serialize() error {
+	if settings["savecursor"].(bool) {
+		absPath, _ := filepath.Abs(b.Path)
+		file, err := os.Create(configDir + "/buffers/" + EscapePath(absPath))
+		if err == nil {
+			enc := gob.NewEncoder(file)
+			err = enc.Encode(b.Cursor)
+		}
+		file.Close()
+		return err
+	}
+	return nil
+}
+
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
@@ -94,6 +141,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.IsModified = false
+		err = b.Serialize()
 	}
 	return err
 }
