@@ -141,6 +141,9 @@ func HandleCommand(input string) {
 		// We replace all escaped double quotes to real double quotes
 		search = strings.Replace(search, `\"`, `"`, -1)
 		replace = strings.Replace(replace, `\"`, `"`, -1)
+		// Replace some things so users can actually insert newlines and tabs in replacements
+		replace = strings.Replace(replace, "\\n", "\n", -1)
+		replace = strings.Replace(replace, "\\t", "\t", -1)
 
 		regex, err := regexp.Compile(search)
 		if err != nil {
