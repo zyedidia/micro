@@ -14,6 +14,7 @@ import (
 )
 
 var bindings map[Key]func(*View) bool
+var helpBinding string
 
 // The Key struct holds the data for a keypress (keycode + modifiers)
 type Key struct {
@@ -251,13 +252,19 @@ func InitBindings() {
 		} else {
 			bindings[keys[k]] = actions[v]
 		}
+		if v == "ToggleHelp" {
+			helpBinding = k
+		}
 	}
 	for k, v := range parsed {
 		if strings.Contains(k, "Alt-") {
-			key := Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)])}
+			key := Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
 			bindings[key] = actions[v]
 		} else {
 			bindings[keys[k]] = actions[v]
+		}
+		if v == "ToggleHelp" {
+			helpBinding = k
 		}
 	}
 }

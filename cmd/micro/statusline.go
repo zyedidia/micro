@@ -40,9 +40,9 @@ func (sline *Statusline) Display() {
 	// Add the filetype
 	file += " " + sline.view.Buf.FileType
 
-	rightText := "Ctrl-g for help "
+	rightText := helpBinding + " for help "
 	if sline.view.helpOpen {
-		rightText = "Ctrl-g to close help "
+		rightText = helpBinding + " to close help "
 	}
 
 	statusLineStyle := defStyle.Reverse(true)
