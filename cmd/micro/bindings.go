@@ -949,6 +949,9 @@ func (v *View) CommandMode() bool {
 // is the last view
 // However, since micro only supports one view for now, it doesn't really matter
 func (v *View) Quit() bool {
+	if v.helpOpen {
+		return v.ToggleHelp()
+	}
 	// Make sure not to quit if there are unsaved changes
 	if views[mainView].CanClose("Quit anyway? (yes, no, save) ") {
 		screen.Fini()
