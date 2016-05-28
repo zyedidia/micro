@@ -57,6 +57,11 @@ type Messenger struct {
 	// We have to keep track of the cursor for prompting
 	cursorx int
 
+	// This map stores the history for all the different kinds of uses Prompt has
+	// It's a map of history type -> history array
+	history    map[string][]string
+	historyNum int
+
 	// Is the current message a message from the gutter
 	gutterMessage bool
 }
@@ -117,9 +122,15 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 
 // Prompt sends the user a message and waits for a response to be typed in
 // This function blocks the main loop while waiting for input
-func (m *Messenger) Prompt(prompt string) (string, bool) {
+func (m *Messenger) Prompt(prompt, historyType string) (string, bool) {
 	m.hasPrompt = true
 	m.Message(prompt)
+	if _, ok := m.history[historyType]; !ok {
+		m.history[historyType] = []string{""}
+	} else {
+		m.history[historyType] = append(m.history[historyType], "")
+	}
+	m.historyNum = len(m.history[historyType]) - 1
 
 	response, canceled := "", true
 
@@ -139,10 +150,11 @@ func (m *Messenger) Prompt(prompt string) (string, bool) {
 				// User is done entering their response
 				m.hasPrompt = false
 				response, canceled = m.response, false
+				m.history[historyType][len(m.history[historyType])-1] = response
 			}
 		}
 
-		m.HandleEvent(event)
+		m.HandleEvent(event, m.history[historyType])
 
 		if m.cursorx < 0 {
 			// Cancel
@@ -155,10 +167,22 @@ func (m *Messenger) Prompt(prompt string) (string, bool) {
 }
 
 // HandleEvent handles an event for the prompter
-func (m *Messenger) HandleEvent(event tcell.Event) {
+func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
 		switch e.Key() {
+		case tcell.KeyUp:
+			if m.historyNum > 0 {
+				m.historyNum--
+				m.response = history[m.historyNum]
+				m.cursorx = len(m.response)
+			}
+		case tcell.KeyDown:
+			if m.historyNum < len(history)-1 {
+				m.historyNum++
+				m.response = history[m.historyNum]
+				m.cursorx = len(m.response)
+			}
 		case tcell.KeyLeft:
 			if m.cursorx > 0 {
 				m.cursorx--
@@ -176,6 +200,7 @@ func (m *Messenger) HandleEvent(event tcell.Event) {
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++
 		}
+		history[m.historyNum] = m.response
 	}
 }
 

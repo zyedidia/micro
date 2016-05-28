@@ -643,7 +643,7 @@ func (v *View) Save() bool {
 	}
 	// If this is an empty buffer, ask for a filename
 	if v.Buf.Path == "" {
-		filename, canceled := messenger.Prompt("Filename: ")
+		filename, canceled := messenger.Prompt("Filename: ", "Save")
 		if !canceled {
 			v.Buf.Path = filename
 			v.Buf.Name = filename
@@ -793,7 +793,7 @@ func (v *View) SelectAll() bool {
 // OpenFile opens a new file in the buffer
 func (v *View) OpenFile() bool {
 	if v.CanClose("Continue? (yes, no, save) ") {
-		filename, canceled := messenger.Prompt("File to open: ")
+		filename, canceled := messenger.Prompt("File to open: ", "Open")
 		if canceled {
 			return true
 		}
@@ -884,7 +884,7 @@ func (v *View) ToggleRuler() bool {
 // JumpLine jumps to a line and moves the view accordingly.
 func (v *View) JumpLine() bool {
 	// Prompt for line number
-	linestring, canceled := messenger.Prompt("Jump to line # ")
+	linestring, canceled := messenger.Prompt("Jump to line # ", "LineNumber")
 	if canceled {
 		return false
 	}
@@ -927,7 +927,7 @@ func (v *View) ToggleHelp() bool {
 
 // ShellMode opens a terminal to run a shell command
 func (v *View) ShellMode() bool {
-	input, canceled := messenger.Prompt("$ ")
+	input, canceled := messenger.Prompt("$ ", "Shell")
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
 		HandleShellCommand(input, true)
@@ -937,7 +937,7 @@ func (v *View) ShellMode() bool {
 
 // CommandMode lets the user enter a command
 func (v *View) CommandMode() bool {
-	input, canceled := messenger.Prompt("> ")
+	input, canceled := messenger.Prompt("> ", "Command")
 	if !canceled {
 		HandleCommand(input)
 	}

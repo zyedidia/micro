@@ -227,6 +227,7 @@ func main() {
 	}()
 
 	messenger = new(Messenger)
+	messenger.history = make(map[string][]string)
 	views = make([]*View, 1)
 	views[0] = NewView(buf)
 

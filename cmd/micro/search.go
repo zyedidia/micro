@@ -15,10 +15,15 @@ var (
 
 	// Is there currently a search in progress
 	searching bool
+
+	// Stores the history for searching
+	searchHistory []string
 )
 
 // BeginSearch starts a search
 func BeginSearch() {
+	searchHistory = append(searchHistory, "")
+	messenger.historyNum = len(searchHistory) - 1
 	searching = true
 	messenger.hasPrompt = true
 	messenger.Message("Find: ")
@@ -26,6 +31,7 @@ func BeginSearch() {
 
 // EndSearch stops the current search
 func EndSearch() {
+	searchHistory[len(searchHistory)-1] = messenger.response
 	searching = false
 	messenger.hasPrompt = false
 	messenger.Clear()
@@ -48,7 +54,7 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 		}
 	}
 
-	messenger.HandleEvent(event)
+	messenger.HandleEvent(event, searchHistory)
 
 	if messenger.cursorx < 0 {
 		// Done

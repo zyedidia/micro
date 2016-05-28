@@ -148,7 +148,7 @@ func (v *View) ScrollDown(n int) {
 // The message is what to print after saying "You have unsaved changes. "
 func (v *View) CanClose(msg string) bool {
 	if v.Buf.IsModified {
-		quit, canceled := messenger.Prompt("You have unsaved changes. " + msg)
+		quit, canceled := messenger.Prompt("You have unsaved changes. "+msg, "Unsaved")
 		if !canceled {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
 				return true
