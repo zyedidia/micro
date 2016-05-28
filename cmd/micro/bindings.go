@@ -71,9 +71,13 @@ func InitBindings() {
 		"HalfPageDown":        (*View).HalfPageDown,
 		"StartOfLine":         (*View).StartOfLine,
 		"EndOfLine":           (*View).EndOfLine,
+		"ToggleHelp":          (*View).ToggleHelp,
 		"ToggleRuler":         (*View).ToggleRuler,
 		"JumpLine":            (*View).JumpLine,
 		"ClearStatus":         (*View).ClearStatus,
+		"ShellMode":           (*View).ShellMode,
+		"CommandMode":         (*View).CommandMode,
+		"Quit":                (*View).Quit,
 	}
 
 	keys := map[string]Key{
@@ -303,13 +307,14 @@ func DefaultBindings() map[string]string {
 		"End":            "End",
 		"PgUp":           "PageUp",
 		"PgDn":           "PageDown",
-		// Find alternative key
-		// "CtrlU":          "HalfPageUp",
-		// "CtrlD":          "HalfPageDown",
-		"CtrlR":  "ToggleRuler",
-		"CtrlL":  "JumpLine",
-		"Delete": "Delete",
-		"Esc":    "ClearStatus",
+		"CtrlG":          "ToggleHelp",
+		"CtrlR":          "ToggleRuler",
+		"CtrlL":          "JumpLine",
+		"Delete":         "Delete",
+		"Esc":            "ClearStatus",
+		"CtrlB":          "ShellMode",
+		"CtrlQ":          "Quit",
+		"CtrlE":          "CommandMode",
 
 		// Emacs-style keybindings
 		"Alt-f": "WordRight",
@@ -625,6 +630,10 @@ func (v *View) InsertTab() bool {
 
 // Save the buffer to disk
 func (v *View) Save() bool {
+	if v.helpOpen {
+		// We can't save the help text
+		return false
+	}
 	// If this is an empty buffer, ask for a filename
 	if v.Buf.Path == "" {
 		filename, canceled := messenger.Prompt("Filename: ")
@@ -891,6 +900,53 @@ func (v *View) JumpLine() bool {
 // ClearStatus clears the messenger bar
 func (v *View) ClearStatus() bool {
 	messenger.Message("")
+	return false
+}
+
+// ToggleHelp toggles the help screen
+func (v *View) ToggleHelp() bool {
+	if !v.helpOpen {
+		v.lastBuffer = v.Buf
+		helpBuffer := NewBuffer(helpTxt, "help.md")
+		helpBuffer.Name = "Help"
+		v.helpOpen = true
+		v.OpenBuffer(helpBuffer)
+	} else {
+		v.OpenBuffer(v.lastBuffer)
+		v.helpOpen = false
+	}
+	return true
+}
+
+// ShellMode opens a terminal to run a shell command
+func (v *View) ShellMode() bool {
+	input, canceled := messenger.Prompt("$ ")
+	if !canceled {
+		// The true here is for openTerm to make the command interactive
+		HandleShellCommand(input, true)
+	}
+	return false
+}
+
+// CommandMode lets the user enter a command
+func (v *View) CommandMode() bool {
+	input, canceled := messenger.Prompt("> ")
+	if !canceled {
+		HandleCommand(input)
+	}
+	return false
+}
+
+// Quit quits the editor
+// This behavior needs to be changed and should really only quit the editor if this
+// is the last view
+// However, since micro only supports one view for now, it doesn't really matter
+func (v *View) Quit() bool {
+	// Make sure not to quit if there are unsaved changes
+	if views[mainView].CanClose("Quit anyway? (yes, no, save) ") {
+		screen.Fini()
+		os.Exit(0)
+	}
 	return false
 }
 

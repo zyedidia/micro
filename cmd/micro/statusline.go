@@ -41,7 +41,7 @@ func (sline *Statusline) Display() {
 	file += " " + sline.view.Buf.FileType
 
 	rightText := "Ctrl-g for help "
-	if helpOpen {
+	if sline.view.helpOpen {
 		rightText = "Ctrl-g to close help "
 	}
 

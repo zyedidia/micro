@@ -21,15 +21,10 @@ You can move the cursor around with the arrow keys and mouse.
 These are the default keybindings, along with their actions.
 
 
-#### Editor bindings
-
 * Ctrl-q:   Quit
 * Ctrl-e:   Execute a command
 * Ctrl-g:   Toggle help text
 * Ctrl-b:   Run a shell command
-
-#### Buffer bindings
-
 * Ctrl-s:   Save
 * Ctrl-o:   Open file
 * Ctrl-z:   Undo
@@ -55,7 +50,7 @@ ctrl up and down move the cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
-The buffer bindings may be rebound using the `~/.config/micro/bindings.json` 
+The bindings may be rebound using the `~/.config/micro/bindings.json` 
 file. Each key is bound to an action.
 
 For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the 
@@ -72,52 +67,64 @@ Here are the defaults:
 
 ```json
 {
-	"Up":             "CursorUp",
-	"Down":           "CursorDown",
-	"Right":          "CursorRight",
-	"Left":           "CursorLeft",
-	"ShiftUp":        "SelectUp",
-	"ShiftDown":      "SelectDown",
-	"ShiftLeft":      "SelectLeft",
-	"ShiftRight":     "SelectRight",
-	"AltLeft":        "WordLeft",
-	"AltRight":       "WordRight",
-	"AltShiftRight":  "SelectWordRight",
-	"AltShiftLeft":   "SelectWordLeft",
-	"CtrlLeft":       "StartOfLine",
-	"CtrlRight":      "EndOfLine",
-	"CtrlShiftLeft":  "SelectToStartOfLine",
-	"CtrlShiftRight": "SelectToEndOfLine",
-	"CtrlUp":         "CursorStart",
-	"CtrlDown":       "CursorEnd",
-	"CtrlShiftUp":    "SelectToStart",
-	"CtrlShiftDown":  "SelectToEnd",
-	"Enter":          "InsertEnter",
-	"Space":          "InsertSpace",
-	"Backspace":      "Backspace",
-	"Backspace2":     "Backspace",
-	"Tab":            "InsertTab",
-	"CtrlO":          "OpenFile",
-	"CtrlS":          "Save",
-	"CtrlF":          "Find",
-	"CtrlN":          "FindNext",
-	"CtrlP":          "FindPrevious",
-	"CtrlZ":          "Undo",
-	"CtrlY":          "Redo",
-	"CtrlC":          "Copy",
-	"CtrlX":          "Cut",
-	"CtrlK":          "CutLine",
-	"CtrlD":          "DuplicateLine",
-	"CtrlV":          "Paste",
-	"CtrlA":          "SelectAll",
-	"Home":           "Start",
-	"End":            "End",
-	"PgUp":           "PageUp",
-	"PgDn":           "PageDown",
-	"CtrlU":          "HalfPageUp",
-	"CtrlD":          "HalfPageDown",
-	"CtrlR":          "ToggleRuler",
-	"Delete":         "Delete"
+    "Up":             "CursorUp",
+    "Down":           "CursorDown",
+    "Right":          "CursorRight",
+    "Left":           "CursorLeft",
+    "ShiftUp":        "SelectUp",
+    "ShiftDown":      "SelectDown",
+    "ShiftLeft":      "SelectLeft",
+    "ShiftRight":     "SelectRight",
+    "AltLeft":        "WordLeft",
+    "AltRight":       "WordRight",
+    "AltShiftRight":  "SelectWordRight",
+    "AltShiftLeft":   "SelectWordLeft",
+    "CtrlLeft":       "StartOfLine",
+    "CtrlRight":      "EndOfLine",
+    "CtrlShiftLeft":  "SelectToStartOfLine",
+    "CtrlShiftRight": "SelectToEndOfLine",
+    "CtrlUp":         "CursorStart",
+    "CtrlDown":       "CursorEnd",
+    "CtrlShiftUp":    "SelectToStart",
+    "CtrlShiftDown":  "SelectToEnd",
+    "Enter":          "InsertEnter",
+    "Space":          "InsertSpace",
+    "Backspace":      "Backspace",
+    "Backspace2":     "Backspace",
+    "Tab":            "InsertTab",
+    "CtrlO":          "OpenFile",
+    "CtrlS":          "Save",
+    "CtrlF":          "Find",
+    "CtrlN":          "FindNext",
+    "CtrlP":          "FindPrevious",
+    "CtrlZ":          "Undo",
+    "CtrlY":          "Redo",
+    "CtrlC":          "Copy",
+    "CtrlX":          "Cut",
+    "CtrlK":          "CutLine",
+    "CtrlD":          "DuplicateLine",
+    "CtrlV":          "Paste",
+    "CtrlA":          "SelectAll",
+    "Home":           "Start",
+    "End":            "End",
+    "PgUp":           "PageUp",
+    "PgDn":           "PageDown",
+    "CtrlG":          "ToggleHelp",
+    "CtrlR":          "ToggleRuler",
+    "CtrlL":          "JumpLine",
+    "Delete":         "Delete",
+    "Esc":            "ClearStatus",
+    "CtrlB":          "ShellMode",
+    "CtrlQ":          "Quit",
+    "CtrlE":          "CommandMode",
+
+    // Emacs-style keybindings
+    "Alt-f": "WordRight",
+    "Alt-b": "WordLeft",
+    "Alt-a": "StartOfLine",
+    "Alt-e": "EndOfLine",
+    "Alt-p": "CursorUp",
+    "Alt-n": "CursorDown",
 }
 
 ```
@@ -211,7 +218,7 @@ Here are the options that you can set:
 
 	default value: `3`
 
-* `scrollspeed`: amount of lines to scroll
+* `scrollspeed`: amount of lines to scroll for one scroll event
 
 	default value: `2`
 

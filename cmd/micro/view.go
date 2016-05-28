@@ -37,8 +37,17 @@ type View struct {
 	// Holds the list of gutter messages
 	messages map[string][]GutterMessage
 
+	// Is the help text opened in this view
+	helpOpen bool
+
+	// Is this view modifiable?
+	Modifiable bool
+
 	// The buffer
 	Buf *Buffer
+	// This is the buffer that was last opened
+	// This is used to open help, and then go back to the previously opened buffer
+	lastBuffer *Buffer
 	// The statusline
 	sline Statusline
 

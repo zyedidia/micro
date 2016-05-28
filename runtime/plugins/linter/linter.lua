@@ -4,15 +4,15 @@ end
 
 function linter_onSave()
     if GetOption("linter") then
-        local ft = view.Buf.FileType
-        local file = view.Buf.Path
+        local ft = views[mainView+1].Buf.FileType
+        local file = views[mainView+1].Buf.Path
         local devnull = "/dev/null"
         if OS == "windows" then
             devnull = "NUL"
         end
         if ft == "Go" then
             linter_lint("gobuild", "go build -o " .. devnull, "%f:%l: %m")
-            linter_lint("golint", "golint " .. view.Buf.Path, "%f:%l:%d+: %m")
+            linter_lint("golint", "golint " .. views[mainView+1].Buf.Path, "%f:%l:%d+: %m")
         elseif ft == "Lua" then
             linter_lint("luacheck", "luacheck --no-color " .. file, "%f:%l:%d+: %m")
         elseif ft == "Python" then
@@ -27,12 +27,12 @@ function linter_onSave()
             linter_lint("jshint", "jshint " .. file, "%f: line %l,.+, %m")
         end
     else
-        view:ClearAllGutterMessages()
+        views[mainView+1]:ClearAllGutterMessages()
     end
 end
 
 function linter_lint(linter, cmd, errorformat)
-    view:ClearGutterMessages(linter)
+    views[mainView+1]:ClearGutterMessages(linter)
 
     local handle = io.popen("(" .. cmd .. ")" .. " 2>&1")
     local lines = linter_split(handle:read("*a"), "\n")
@@ -44,8 +44,8 @@ function linter_lint(linter, cmd, errorformat)
         line = line:match("^%s*(.+)%s*$")
         if string.find(line, regex) then
             local file, line, msg = string.match(line, regex)
-            if linter_basename(view.Buf.Path) == linter_basename(file) then
-                view:GutterMessage(linter, tonumber(line), msg, 2)
+            if linter_basename(views[mainView+1].Buf.Path) == linter_basename(file) then
+                views[mainView+1]:GutterMessage(linter, tonumber(line), msg, 2)
             end
         end
     end
