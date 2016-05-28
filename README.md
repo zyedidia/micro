@@ -34,16 +34,37 @@ Here is a picture of micro editing its source code.
 
 # Installation
 
-### Homebrew
+Micro is devel-only for now because there is no released version.
 
-If you are on Mac, you can install micro using Homebrew:
+### OSX
 
-```
+If you are on OSX, you can install micro using Homebrew:
+
+```sh
 brew tap zyedidia/micro
 brew install --devel micro
 ```
 
-Micro is devel-only for now because there is no released version.
+### Arch Linux
+
+If you are on Arch Linux, you can install micro using the AUR:
+
+```sh
+wget https://aur.archlinux.org/cgit/aur.git/snapshot/micro-git.tar.gz
+cd micro-git
+makepkg -si
+```
+
+### CRUX
+
+If you are on CRUX, you can install micro using the 6c37-git repo:
+
+```sh
+git clone https://github.com/6c37/crux-ports-git
+cd crux-ports-git/micro
+# make sure you have go installed!
+pkgmk -i
+```
 
 ### Prebuilt binaries
 
@@ -71,16 +92,18 @@ Make sure that you have Go version 1.4 or greater.
 
 You can simply `go get` it.
 
-```
+```sh
 go get -u github.com/zyedidia/micro/cmd/micro
 ```
 
 ### Clipboard support
 
-On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed. For Ubuntu:
+On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed.
 
-```
-$ sudo apt-get install xclip
+For Ubuntu:
+
+```sh
+sudo apt-get install xclip
 ```
 
 If you don't have xclip or xsel, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
@@ -91,8 +114,8 @@ Once you have built the editor, simply start it by running `micro path/to/file.t
 
 Micro also supports creating buffers from `stdin`:
 
-```
-$ ifconfig | micro
+```sh
+ifconfig | micro
 ```
 
 You can move the cursor around with the arrow keys and mouse.
