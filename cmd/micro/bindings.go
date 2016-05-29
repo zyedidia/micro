@@ -44,6 +44,8 @@ func InitBindings() {
 		"WordLeft":            (*View).WordLeft,
 		"SelectWordRight":     (*View).SelectWordRight,
 		"SelectWordLeft":      (*View).SelectWordLeft,
+		"DeleteWordRight":     (*View).DeleteWordRight,
+		"DeleteWordLeft":      (*View).DeleteWordLeft,
 		"SelectToStartOfLine": (*View).SelectToStartOfLine,
 		"SelectToEndOfLine":   (*View).SelectToEndOfLine,
 		"InsertEnter":         (*View).InsertEnter,
@@ -247,7 +249,13 @@ func InitBindings() {
 
 	for k, v := range defaults {
 		if strings.Contains(k, "Alt-") {
-			key := Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
+			split := strings.Split(k, "-")
+			var key Key
+			if len(split[1]) > 1 {
+				key = Key{keys[split[1]].keyCode, keys[k].modifiers | tcell.ModAlt, 0}
+			} else {
+				key = Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
+			}
 			bindings[key] = actions[v]
 		} else {
 			bindings[keys[k]] = actions[v]
@@ -258,7 +266,13 @@ func InitBindings() {
 	}
 	for k, v := range parsed {
 		if strings.Contains(k, "Alt-") {
-			key := Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
+			split := strings.Split(k, "-")
+			var key Key
+			if len(split[1]) > 1 {
+				key = Key{keys[split[1]].keyCode, keys[k].modifiers | tcell.ModAlt, 0}
+			} else {
+				key = Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
+			}
 			bindings[key] = actions[v]
 		} else {
 			bindings[keys[k]] = actions[v]
@@ -296,6 +310,8 @@ func DefaultBindings() map[string]string {
 		"Space":          "InsertSpace",
 		"Backspace":      "Backspace",
 		"Backspace2":     "Backspace",
+		"Alt-Backspace":  "DeleteWordLeft",
+		"Alt-Backspace2": "DeleteWordLeft",
 		"Tab":            "InsertTab",
 		"CtrlO":          "OpenFile",
 		"CtrlS":          "Save",
@@ -598,6 +614,26 @@ func (v *View) Backspace() bool {
 		}
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
+	return true
+}
+
+// DeleteWordRight deletes the word to the right of the cursor
+func (v *View) DeleteWordRight() bool {
+	v.SelectWordRight()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
+	}
+	return true
+}
+
+// DeleteWordLeft deletes the word to the left of the cursor
+func (v *View) DeleteWordLeft() bool {
+	v.SelectWordLeft()
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
+	}
 	return true
 }
 
