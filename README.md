@@ -34,39 +34,18 @@ Here is a picture of micro editing its source code.
 
 # Installation
 
-Micro is devel-only for now because there is no released version.
+This section gives instructions for how to simply install micro using the prebuilt binaries, or building from source.
 
-### OSX
-
-If you are on OSX, you can install micro using Homebrew:
-
-```sh
-brew tap zyedidia/micro
-brew install --devel micro
-```
-
-### Arch Linux
-
-If you are on Arch Linux, you can install micro using the AUR:
-
-```sh
-wget https://aur.archlinux.org/cgit/aur.git/snapshot/micro-git.tar.gz
-cd micro-git
-makepkg -si
-```
-
-### CRUX
-
-If you are on CRUX, you can install micro using the 6c37-git repo:
-
-```sh
-git clone https://github.com/6c37/crux-ports-git
-cd crux-ports-git/micro
-# make sure you have go installed!
-pkgmk -i
-```
+You can also install micro with a few package managers (on OSX, Arch Linux, and CRUX). 
+See the [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details.
 
 ### Prebuilt binaries
+
+To easily install micro on any of the operating systems listed below, just download the tar file, 
+extract it, and run the binary inside. It's as simple as that!
+
+Micro has no released version, instead these binaries are compiled every night and you can find the
+commit it was compiled with by running `micro -version`.
 
 Nightly binaries:
 * [Mac OS X](http://zbyedidia.webfactional.com/micro/binaries/micro-osx.tar.gz)
@@ -82,15 +61,11 @@ Nightly binaries:
 * [Windows 64](http://zbyedidia.webfactional.com/micro/binaries/micro-win64.zip)
 * [Windows 32](http://zbyedidia.webfactional.com/micro/binaries/micro-win32.zip)
 
-To run the micro binary just run `./bin/micro` (you may want to place the binary on your path for ease of use).
+To run the micro binary just run `./bin/micro` (you probably want to place the binary on your `$PATH` for ease of use).
 
 ### Building from source
 
-Micro is made in Go so you must have Go installed on your system to build it.
-
 Make sure that you have Go version 1.4 or greater.
-
-You can simply `go get` it.
 
 ```sh
 go get -u github.com/zyedidia/micro/cmd/micro
