@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/vinzmay/go-rope"
 )
@@ -29,6 +30,9 @@ type Buffer struct {
 
 	IsModified bool
 
+	// Stores the last modification time of the file the buffer is pointing to
+	ModTime time.Time
+
 	// Provide efficient and easy access to text and lines so the rope String does not
 	// need to be constantly recalculated
 	// These variables are updated in the update() function
@@ -45,6 +49,7 @@ type Buffer struct {
 type SerializedBuffer struct {
 	EventHandler *EventHandler
 	Cursor       Cursor
+	ModTime      time.Time
 }
 
 // NewBuffer creates a new buffer from `txt` with path and name `path`
@@ -57,6 +62,8 @@ func NewBuffer(txt, path string) *Buffer {
 	}
 	b.Path = path
 	b.Name = path
+
+	b.ModTime, _ = GetModTime(b.Path)
 
 	b.EventHandler = NewEventHandler(b)
 
@@ -88,12 +95,15 @@ func NewBuffer(txt, path string) *Buffer {
 			if settings["savecursor"].(bool) {
 				b.Cursor = buffer.Cursor
 				b.Cursor.buf = b
-				b.Cursor.Clamp()
+				b.Cursor.Relocate()
 			}
 
 			if settings["saveundo"].(bool) {
-				b.EventHandler = buffer.EventHandler
-				b.EventHandler.buf = b
+				// We should only use last time's eventhandler if the file wasn't by someone else in the meantime
+				if b.ModTime == buffer.ModTime {
+					b.EventHandler = buffer.EventHandler
+					b.EventHandler.buf = b
+				}
 			}
 		}
 		file.Close()
@@ -113,6 +123,43 @@ func (b *Buffer) String() string {
 		return b.r.String()
 	}
 	return ""
+}
+
+// CheckModTime makes sure that the file this buffer points to hasn't been updated
+// by an external program since it was last read
+// If it has, we ask the user if they would like to reload the file
+func (b *Buffer) CheckModTime() {
+	modTime, ok := GetModTime(b.Path)
+	if ok {
+		if modTime != b.ModTime {
+			choice, canceled := messenger.YesNoPrompt("The file has changed since it was last read. Reload file? (y,n)")
+			messenger.Reset()
+			messenger.Clear()
+			if !choice || canceled {
+				// Don't load new changes -- do nothing
+				b.ModTime, _ = GetModTime(b.Path)
+			} else {
+				// Load new changes
+				data, err := ioutil.ReadFile(b.Path)
+				txt := string(data)
+
+				if err != nil {
+					messenger.Error(err.Error())
+					return
+				}
+				if txt == "" {
+					b.r = new(rope.Rope)
+				} else {
+					b.r = rope.New(txt)
+				}
+
+				b.ModTime, _ = GetModTime(b.Path)
+				b.Cursor.Relocate()
+				b.IsModified = false
+				b.Update()
+			}
+		}
+	}
 }
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
@@ -137,6 +184,7 @@ func (b *Buffer) Serialize() error {
 			err = enc.Encode(SerializedBuffer{
 				b.EventHandler,
 				b.Cursor,
+				b.ModTime,
 			})
 			// err = enc.Encode(b.Cursor)
 		}
@@ -149,10 +197,13 @@ func (b *Buffer) Serialize() error {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
+	b.Name = filename
+	b.Path = filename
 	data := []byte(b.String())
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.IsModified = false
+		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
 	}
 	return err

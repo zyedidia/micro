@@ -1,9 +1,11 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 	"unicode/utf8"
 )
 
@@ -124,6 +126,16 @@ func ParseBool(str string) (bool, error) {
 func EscapePath(path string) string {
 	path = filepath.ToSlash(path)
 	return strings.Replace(path, "/", "%", -1)
+}
+
+// GetModTime returns the last modification time for a given file
+// It also returns a boolean if there was a problem accessing the file
+func GetModTime(path string) (time.Time, bool) {
+	info, err := os.Stat(path)
+	if err != nil {
+		return time.Now(), false
+	}
+	return info.ModTime(), true
 }
 
 func runePos(p int, str string) int {

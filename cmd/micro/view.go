@@ -201,8 +201,10 @@ func (v *View) ReOpen() {
 		}
 		buf := NewBuffer(string(file), filename)
 		v.Buf = buf
-		v.matches = Match(v)
 		v.Cursor.Relocate()
+		buf.Cursor.Goto(*v.Cursor)
+		v.Cursor = &buf.Cursor
+		v.matches = Match(v)
 		v.Relocate()
 	}
 }
@@ -271,6 +273,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
+
+	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
 	case *tcell.EventResize:

@@ -63,17 +63,7 @@ type Cursor struct {
 	OrigSelection [2]int
 }
 
-// Clamp makes sure that the cursor is in the bounds of the buffer
-// It cannot be less than 0 or greater than the buffer length
-func (c *Cursor) Clamp() {
-	loc := c.Loc()
-	if loc < 0 {
-		c.SetLoc(0)
-	} else if loc > c.buf.Len() {
-		c.SetLoc(c.buf.Len())
-	}
-}
-
+// Goto puts the cursor at the given cursor's location and gives the current cursor its selection too
 func (c *Cursor) Goto(b Cursor) {
 	c.X, c.Y, c.LastVisualX = b.X, b.Y, b.LastVisualX
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
@@ -331,6 +321,7 @@ func (c *Cursor) Right() {
 	if c.Loc() == c.buf.Len() {
 		return
 	}
+	// TermMessage(Count(c.buf.Lines[c.Y]))
 	if c.X < Count(c.buf.Lines[c.Y]) {
 		c.X++
 	} else {

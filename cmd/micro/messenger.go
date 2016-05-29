@@ -98,9 +98,11 @@ func (m *Messenger) Error(msg ...interface{}) {
 func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	m.Message(prompt)
 
+	_, h := screen.Size()
 	for {
 		m.Clear()
 		m.Display()
+		screen.ShowCursor(Count(m.message), h-1)
 		screen.Show()
 		event := screen.PollEvent()
 
