@@ -10,11 +10,11 @@
     - [ ] Horizontal splits
     - [ ] Vertical splits
 
-- [ ] Persistent undo/redo (saved between open and closing micro)
-
 - [ ] Wrap lines
 
 ### Done
+
+- [x] Persistent undo/redo (saved between open and closing micro)
 
 - [x] Auto indent
 

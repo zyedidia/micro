@@ -41,6 +41,12 @@ type Buffer struct {
 	FileType string
 }
 
+// The SerializedBuffer holds the types that get serialized when a buffer is saved
+type SerializedBuffer struct {
+	EventHandler *EventHandler
+	Cursor       Cursor
+}
+
 // NewBuffer creates a new buffer from `txt` with path and name `path`
 func NewBuffer(txt, path string) *Buffer {
 	b := new(Buffer)
@@ -61,35 +67,36 @@ func NewBuffer(txt, path string) *Buffer {
 		os.Mkdir(configDir+"/buffers/", os.ModePerm)
 	}
 
-	if settings["savecursor"].(bool) {
+	// Put the cursor at the first spot
+	b.Cursor = Cursor{
+		X:   0,
+		Y:   0,
+		buf: b,
+	}
+
+	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
 		absPath, _ := filepath.Abs(b.Path)
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(absPath))
 		if err == nil {
-			var cursor Cursor
+			var buffer SerializedBuffer
 			decoder := gob.NewDecoder(file)
-			err = decoder.Decode(&cursor)
+			gob.Register(TextEvent{})
+			err = decoder.Decode(&buffer)
 			if err != nil {
 				TermMessage(err.Error())
 			}
-			b.Cursor = cursor
-			b.Cursor.buf = b
-			b.Cursor.Clamp()
-		} else {
-			// Put the cursor at the first spot
-			b.Cursor = Cursor{
-				X:   0,
-				Y:   0,
-				buf: b,
+			if settings["savecursor"].(bool) {
+				b.Cursor = buffer.Cursor
+				b.Cursor.buf = b
+				b.Cursor.Clamp()
+			}
+
+			if settings["saveundo"].(bool) {
+				b.EventHandler = buffer.EventHandler
+				b.EventHandler.buf = b
 			}
 		}
 		file.Close()
-	} else {
-		// Put the cursor at the first spot
-		b.Cursor = Cursor{
-			X:   0,
-			Y:   0,
-			buf: b,
-		}
 	}
 
 	return b
@@ -121,12 +128,17 @@ func (b *Buffer) Save() error {
 
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
-	if settings["savecursor"].(bool) {
+	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
 		absPath, _ := filepath.Abs(b.Path)
 		file, err := os.Create(configDir + "/buffers/" + EscapePath(absPath))
 		if err == nil {
 			enc := gob.NewEncoder(file)
-			err = enc.Encode(b.Cursor)
+			gob.Register(TextEvent{})
+			err = enc.Encode(SerializedBuffer{
+				b.EventHandler,
+				b.Cursor,
+			})
+			// err = enc.Encode(b.Cursor)
 		}
 		file.Close()
 		return err
@@ -141,7 +153,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.IsModified = false
-		err = b.Serialize()
+		return b.Serialize()
 	}
 	return err
 }

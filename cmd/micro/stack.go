@@ -1,43 +1,43 @@
 package main
 
-// Stack is a simple implementation of a LIFO stack
+// Stack is a simple implementation of a LIFO stack for text events
 type Stack struct {
-	top  *Element
-	size int
+	Top  *Element
+	Size int
 }
 
 // An Element which is stored in the Stack
 type Element struct {
-	value interface{} // All types satisfy the empty interface, so we can store anything here.
-	next  *Element
+	Value *TextEvent
+	Next  *Element
 }
 
 // Len returns the stack's length
 func (s *Stack) Len() int {
-	return s.size
+	return s.Size
 }
 
 // Push a new element onto the stack
-func (s *Stack) Push(value interface{}) {
-	s.top = &Element{value, s.top}
-	s.size++
+func (s *Stack) Push(value *TextEvent) {
+	s.Top = &Element{value, s.Top}
+	s.Size++
 }
 
 // Pop removes the top element from the stack and returns its value
 // If the stack is empty, return nil
-func (s *Stack) Pop() (value interface{}) {
-	if s.size > 0 {
-		value, s.top = s.top.value, s.top.next
-		s.size--
+func (s *Stack) Pop() (value *TextEvent) {
+	if s.Size > 0 {
+		value, s.Top = s.Top.Value, s.Top.Next
+		s.Size--
 		return
 	}
 	return nil
 }
 
 // Peek returns the top element of the stack without removing it
-func (s *Stack) Peek() interface{} {
-	if s.size > 0 {
-		return s.top.value
+func (s *Stack) Peek() *TextEvent {
+	if s.Size > 0 {
+		return s.Top.Value
 	}
 	return nil
 }

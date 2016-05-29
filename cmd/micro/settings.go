@@ -78,6 +78,7 @@ func DefaultSettings() map[string]interface{} {
 		"indentchar":   " ",
 		"ruler":        true,
 		"savecursor":   false,
+		"saveundo":     false,
 		"scrollspeed":  float64(2),
 		"scrollmargin": float64(3),
 		"statusline":   true,

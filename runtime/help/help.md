@@ -219,6 +219,11 @@ Here are the options that you can set:
 
     default value: `off`
 
+* `saveundo`: when this option is on, undo is saved even after you close a file
+   so if you close and reopen a file, you can keep undoing
+
+    default value: `off`
+
 * `scrollmargin`: amount of lines you would like to see above and below the cursor
 
 	default value: `3`

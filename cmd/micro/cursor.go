@@ -74,6 +74,11 @@ func (c *Cursor) Clamp() {
 	}
 }
 
+func (c *Cursor) Goto(b Cursor) {
+	c.X, c.Y, c.LastVisualX = b.X, b.Y, b.LastVisualX
+	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
+}
+
 // SetLoc sets the location of the cursor in terms of character number
 // and not x, y location
 // It's just a simple wrapper of FromCharPos
