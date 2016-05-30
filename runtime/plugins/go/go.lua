@@ -5,6 +5,9 @@ if GetOption("gofmt") == nil then
     AddOption("gofmt", true)
 end
 
+MakeCommand("goimports", "go_goimports")
+MakeCommand("gofmt", "go_gofmt")
+
 function go_onSave()
     if views[mainView+1].Buf.FileType == "Go" then
         if GetOption("goimports") then
@@ -12,21 +15,25 @@ function go_onSave()
         elseif GetOption("gofmt") then
             go_gofmt()
         end
-
-        views[mainView+1]:ReOpen()
     end
 end
 
 function go_gofmt()
+    views[mainView+1]:Save()
     local handle = io.popen("gofmt -w " .. views[mainView+1].Buf.Path)
     local result = handle:read("*a")
     handle:close()
+
+    views[mainView+1]:ReOpen()
 end
 
 function go_goimports()
+    views[mainView+1]:Save()
     local handle = io.popen("goimports -w " .. views[mainView+1].Buf.Path)
     local result = go_split(handle:read("*a"), ":")
     handle:close()
+
+    views[mainView+1]:ReOpen()
 end
 
 function go_split(str, sep)

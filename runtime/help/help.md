@@ -152,6 +152,9 @@ Here are the possible commands that you can use.
 * `run sh-command`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.
 
+* `bind key action`: creates a keybinding from key to action. See the sections on
+   keybindings above for more info about what keys and actions are available.
+
 ### Options
 
 Micro stores all of the user configuration in its configuration directory.

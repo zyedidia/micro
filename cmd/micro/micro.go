@@ -203,6 +203,7 @@ func main() {
 	InitConfigDir()
 	// Load the user's settings
 	InitSettings()
+	InitCommands()
 	InitBindings()
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
@@ -237,6 +238,8 @@ func main() {
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
 	L.SetGlobal("AddOption", luar.New(L, AddOption))
+	L.SetGlobal("BindKey", luar.New(L, BindKey))
+	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 
 	LoadPlugins()
 

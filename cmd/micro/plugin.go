@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 
+	"github.com/layeh/gopher-luar"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -17,16 +18,17 @@ var preInstalledPlugins = []string{
 // Call calls the lua function 'function'
 // If it does not exist nothing happens, if there is an error,
 // the error is returned
-func Call(function string) error {
+func Call(function string, args []string) error {
 	luaFunc := L.GetGlobal(function)
 	if luaFunc.String() == "nil" {
 		return errors.New("function does not exist: " + function)
 	}
+	luaArgs := luar.New(L, args)
 	err := L.CallByParam(lua.P{
 		Fn:      luaFunc,
 		NRet:    0,
 		Protect: true,
-	})
+	}, luaArgs)
 	return err
 }
 
@@ -36,7 +38,7 @@ func Call(function string) error {
 // to bind keys to lua functions
 func LuaFunctionBinding(function string) func(*View) bool {
 	return func(v *View) bool {
-		err := Call(function)
+		err := Call(function, nil)
 		if err != nil {
 			TermMessage(err)
 		}
@@ -46,9 +48,9 @@ func LuaFunctionBinding(function string) func(*View) bool {
 
 // LuaFunctionCommand is the same as LuaFunctionBinding except it returns a normal function
 // so that a command can be bound to a lua function
-func LuaFunctionCommand(function string) func() {
-	return func() {
-		err := Call(function)
+func LuaFunctionCommand(function string) func([]string) {
+	return func(args []string) {
+		err := Call(function, args)
 		if err != nil {
 			TermMessage(err)
 		}
