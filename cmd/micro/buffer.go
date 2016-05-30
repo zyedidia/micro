@@ -140,26 +140,31 @@ func (b *Buffer) CheckModTime() {
 				b.ModTime, _ = GetModTime(b.Path)
 			} else {
 				// Load new changes
-				data, err := ioutil.ReadFile(b.Path)
-				txt := string(data)
-
-				if err != nil {
-					messenger.Error(err.Error())
-					return
-				}
-				if txt == "" {
-					b.r = new(rope.Rope)
-				} else {
-					b.r = rope.New(txt)
-				}
-
-				b.ModTime, _ = GetModTime(b.Path)
-				b.Cursor.Relocate()
-				b.IsModified = false
-				b.Update()
+				b.ReOpen()
 			}
 		}
 	}
+}
+
+// ReOpen reloads the current buffer from disk
+func (b *Buffer) ReOpen() {
+	data, err := ioutil.ReadFile(b.Path)
+	txt := string(data)
+
+	if err != nil {
+		messenger.Error(err.Error())
+		return
+	}
+	if txt == "" {
+		b.r = new(rope.Rope)
+	} else {
+		b.r = rope.New(txt)
+	}
+
+	b.ModTime, _ = GetModTime(b.Path)
+	b.Cursor.Relocate()
+	b.IsModified = false
+	b.Update()
 }
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer

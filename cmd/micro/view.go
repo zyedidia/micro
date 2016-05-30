@@ -1,7 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
 	"reflect"
 	"runtime"
 	"strconv"
@@ -192,20 +191,7 @@ func (v *View) CloseBuffer() {
 // ReOpen reloads the current buffer
 func (v *View) ReOpen() {
 	if v.CanClose("Continue? (yes, no, save) ") {
-		file, err := ioutil.ReadFile(v.Buf.Path)
-		filename := v.Buf.Name
-
-		if err != nil {
-			messenger.Error(err.Error())
-			return
-		}
-		buf := NewBuffer(string(file), filename)
-		v.Buf = buf
-		v.Cursor.Relocate()
-		buf.Cursor.Goto(*v.Cursor)
-		v.Cursor = &buf.Cursor
-		v.matches = Match(v)
-		v.Relocate()
+		v.Buf.ReOpen()
 	}
 }
 
