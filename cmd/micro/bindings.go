@@ -247,36 +247,32 @@ func InitBindings() {
 		}
 	}
 
-	for k, v := range defaults {
+	parse(defaults, actions, keys)
+	parse(parsed, actions, keys)
+}
+
+func parse(userBindings map[string]string, actions map[string]func(*View) bool, keys map[string]Key) {
+	for k, v := range userBindings {
+		var key Key
 		if strings.Contains(k, "Alt-") {
 			split := strings.Split(k, "-")
-			var key Key
 			if len(split[1]) > 1 {
 				key = Key{keys[split[1]].keyCode, keys[k].modifiers | tcell.ModAlt, 0}
 			} else {
 				key = Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
 			}
-			bindings[key] = actions[v]
 		} else {
-			bindings[keys[k]] = actions[v]
+			key = keys[k]
 		}
-		if v == "ToggleHelp" {
-			helpBinding = k
+
+		action := actions[v]
+		if _, ok := actions[v]; !ok {
+			// If the user seems to be binding a function that doesn't exist
+			// We hope that it's a lua function that exists and bind it to that
+			action = LuaFunctionBinding(v)
 		}
-	}
-	for k, v := range parsed {
-		if strings.Contains(k, "Alt-") {
-			split := strings.Split(k, "-")
-			var key Key
-			if len(split[1]) > 1 {
-				key = Key{keys[split[1]].keyCode, keys[k].modifiers | tcell.ModAlt, 0}
-			} else {
-				key = Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
-			}
-			bindings[key] = actions[v]
-		} else {
-			bindings[keys[k]] = actions[v]
-		}
+
+		bindings[key] = action
 		if v == "ToggleHelp" {
 			helpBinding = k
 		}

@@ -275,7 +275,7 @@ func runtimePluginsGoGoLua() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/plugins/go/go.lua", size: 927, mode: os.FileMode(420), modTime: time.Unix(1464457319, 0)}
+	info := bindataFileInfo{name: "runtime/plugins/go/go.lua", size: 927, mode: os.FileMode(420), modTime: time.Unix(1464613212, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }

@@ -302,7 +302,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						for _, pl := range loadedPlugins {
 							funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
 							err := Call(pl + "_on" + funcName[len(funcName)-1])
-							if err != nil {
+							if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 								TermMessage(err)
 							}
 						}

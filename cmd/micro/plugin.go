@@ -1,8 +1,10 @@
 package main
 
 import (
-	"github.com/yuin/gopher-lua"
+	"errors"
 	"io/ioutil"
+
+	"github.com/yuin/gopher-lua"
 )
 
 var loadedPlugins []string
@@ -18,7 +20,7 @@ var preInstalledPlugins = []string{
 func Call(function string) error {
 	luaFunc := L.GetGlobal(function)
 	if luaFunc.String() == "nil" {
-		return nil
+		return errors.New("function does not exist: " + function)
 	}
 	err := L.CallByParam(lua.P{
 		Fn:      luaFunc,
@@ -26,6 +28,31 @@ func Call(function string) error {
 		Protect: true,
 	})
 	return err
+}
+
+// LuaFunctionBinding is a function generator which takes the name of a lua function
+// and creates a function that will call that lua function
+// Specifically it creates a function that can be called as a binding because this is used
+// to bind keys to lua functions
+func LuaFunctionBinding(function string) func(*View) bool {
+	return func(v *View) bool {
+		err := Call(function)
+		if err != nil {
+			TermMessage(err)
+		}
+		return false
+	}
+}
+
+// LuaFunctionCommand is the same as LuaFunctionBinding except it returns a normal function
+// so that a command can be bound to a lua function
+func LuaFunctionCommand(function string) func() {
+	return func() {
+		err := Call(function)
+		if err != nil {
+			TermMessage(err)
+		}
+	}
 }
 
 // LoadPlugins loads the pre-installed plugins and the plugins located in ~/.config/micro/plugins
