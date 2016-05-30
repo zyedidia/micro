@@ -192,6 +192,8 @@ func (v *View) CloseBuffer() {
 func (v *View) ReOpen() {
 	if v.CanClose("Continue? (yes, no, save) ") {
 		v.Buf.ReOpen()
+		v.Relocate()
+		v.matches = Match(v)
 	}
 }
 

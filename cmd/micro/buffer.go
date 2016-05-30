@@ -162,9 +162,9 @@ func (b *Buffer) ReOpen() {
 	}
 
 	b.ModTime, _ = GetModTime(b.Path)
-	b.Cursor.Relocate()
 	b.IsModified = false
 	b.Update()
+	b.Cursor.Relocate()
 }
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
