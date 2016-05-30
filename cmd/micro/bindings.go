@@ -62,6 +62,7 @@ func InitBindings() {
 		"Copy":                (*View).Copy,
 		"Cut":                 (*View).Cut,
 		"CutLine":             (*View).CutLine,
+		"DeleteLine":          (*View).DeleteLine,
 		"DuplicateLine":       (*View).DuplicateLine,
 		"Paste":               (*View).Paste,
 		"SelectAll":           (*View).SelectAll,
@@ -789,6 +790,15 @@ func (v *View) Cut() bool {
 		v.freshClip = true
 		messenger.Message("Cut selection")
 	}
+	return true
+}
+
+// DeleteLine deletes the current line
+func (v *View) DeleteLine() bool {
+	v.Cursor.SelectLine()
+	v.Cursor.DeleteSelection()
+	v.Cursor.ResetSelection()
+	messenger.Message("Deleted line")
 	return true
 }
 
