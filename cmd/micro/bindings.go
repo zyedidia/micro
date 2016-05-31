@@ -19,6 +19,8 @@ var helpBinding string
 var bindingActions = map[string]func(*View) bool{
 	"CursorUp":            (*View).CursorUp,
 	"CursorDown":          (*View).CursorDown,
+	"CursorPageUp":        (*View).CursorPageUp,
+	"CursorPageDown":      (*View).CursorPageDown,
 	"CursorLeft":          (*View).CursorLeft,
 	"CursorRight":         (*View).CursorRight,
 	"CursorStart":         (*View).CursorStart,
@@ -882,6 +884,26 @@ func (v *View) PageDown() bool {
 		v.Topline = v.Buf.NumLines - v.height
 	}
 	return false
+}
+
+// CursorPageUp places the cursor a page up
+func (v *View) CursorPageUp() bool {
+	if v.Cursor.HasSelection() {
+		v.Cursor.SetLoc(v.Cursor.CurSelection[0])
+		v.Cursor.ResetSelection()
+	}
+	v.Cursor.UpN(v.height)
+	return true
+}
+
+// CursorPageDown places the cursor a page up
+func (v *View) CursorPageDown() bool {
+	if v.Cursor.HasSelection() {
+		v.Cursor.SetLoc(v.Cursor.CurSelection[1])
+		v.Cursor.ResetSelection()
+	}
+	v.Cursor.DownN(v.height)
+	return true
 }
 
 // HalfPageUp scrolls the view up half a page

@@ -276,30 +276,39 @@ func (c *Cursor) RuneUnder(x int) rune {
 	return line[x]
 }
 
+// UpN moves the cursor up N lines (if possible)
+func (c *Cursor) UpN(amount int) {
+	proposedY := c.Y - amount
+	if proposedY < 0 {
+		proposedY = 0
+	} else if proposedY >= c.buf.NumLines {
+		proposedY = c.buf.NumLines - 1
+	}
+	if proposedY == c.Y {
+		return
+	}
+
+	c.Y = proposedY
+	runes := []rune(c.buf.Lines[c.Y])
+	c.X = c.GetCharPosInLine(c.Y, c.LastVisualX)
+	if c.X > len(runes) {
+		c.X = len(runes)
+	}
+}
+
+// DownN moves the cursor down N lines (if possible)
+func (c *Cursor) DownN(amount int) {
+	c.UpN(-amount)
+}
+
 // Up moves the cursor up one line (if possible)
 func (c *Cursor) Up() {
-	if c.Y > 0 {
-		c.Y--
-
-		runes := []rune(c.buf.Lines[c.Y])
-		c.X = c.GetCharPosInLine(c.Y, c.LastVisualX)
-		if c.X > len(runes) {
-			c.X = len(runes)
-		}
-	}
+	c.UpN(1)
 }
 
 // Down moves the cursor down one line (if possible)
 func (c *Cursor) Down() {
-	if c.Y < c.buf.NumLines-1 {
-		c.Y++
-
-		runes := []rune(c.buf.Lines[c.Y])
-		c.X = c.GetCharPosInLine(c.Y, c.LastVisualX)
-		if c.X > len(runes) {
-			c.X = len(runes)
-		}
-	}
+	c.DownN(1)
 }
 
 // Left moves the cursor left one cell (if possible) or to the last line if it is at the beginning
