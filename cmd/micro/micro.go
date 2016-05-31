@@ -169,7 +169,7 @@ func InitScreen() {
 
 // RedrawAll redraws everything -- all the views and the messenger
 func RedrawAll() {
-	screen.Clear()
+	messenger.Clear()
 	for _, v := range views {
 		v.Display()
 	}

@@ -532,7 +532,6 @@ func (v *View) DisplayView() {
 			}
 		}
 		// Write the line
-		tabchars := 0
 		for colN, ch := range line {
 			var lineStyle tcell.Style
 
@@ -570,17 +569,17 @@ func (v *View) DisplayView() {
 					}
 				}
 				indentChar := []rune(settings["indentchar"].(string))
-				screen.SetContent(x-v.leftCol+tabchars, lineN, indentChar[0], nil, lineIndentStyle)
+				screen.SetContent(x-v.leftCol, lineN, indentChar[0], nil, lineIndentStyle)
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
-					tabchars++
-					if x-v.leftCol+tabchars >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol+tabchars, lineN, ' ', nil, lineStyle)
+					x++
+					if x-v.leftCol >= v.lineNumOffset {
+						screen.SetContent(x-v.leftCol, lineN, ' ', nil, lineStyle)
 					}
 				}
 			} else {
-				if x-v.leftCol+tabchars >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol+tabchars, lineN, ch, nil, lineStyle)
+				if x-v.leftCol >= v.lineNumOffset {
+					screen.SetContent(x-v.leftCol, lineN, ch, nil, lineStyle)
 				}
 			}
 			charNum++
@@ -599,10 +598,14 @@ func (v *View) DisplayView() {
 			if style, ok := colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			screen.SetContent(x-v.leftCol+tabchars, lineN, ' ', nil, selectStyle)
+			screen.SetContent(x-v.leftCol, lineN, ' ', nil, selectStyle)
 		}
 
 		charNum++
+
+		for i := 0; i < v.width-x; i++ {
+			screen.SetContent(x+i, lineN, ' ', nil, defStyle)
+		}
 	}
 }
 
