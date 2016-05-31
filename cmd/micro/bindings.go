@@ -104,8 +104,8 @@ var bindingKeys = map[string]Key{
 	"DownLeft":       Key{tcell.KeyDownLeft, tcell.ModNone, 0},
 	"DownRight":      Key{tcell.KeyDownRight, tcell.ModNone, 0},
 	"Center":         Key{tcell.KeyCenter, tcell.ModNone, 0},
-	"PgUp":           Key{tcell.KeyPgUp, tcell.ModNone, 0},
-	"PgDn":           Key{tcell.KeyPgDn, tcell.ModNone, 0},
+	"PageUp":         Key{tcell.KeyPgUp, tcell.ModNone, 0},
+	"PageDown":       Key{tcell.KeyPgDn, tcell.ModNone, 0},
 	"Home":           Key{tcell.KeyHome, tcell.ModNone, 0},
 	"End":            Key{tcell.KeyEnd, tcell.ModNone, 0},
 	"Insert":         Key{tcell.KeyInsert, tcell.ModNone, 0},
@@ -219,6 +219,10 @@ var bindingKeys = map[string]Key{
 	"Escape":         Key{tcell.KeyEscape, tcell.ModNone, 0},
 	"Enter":          Key{tcell.KeyEnter, tcell.ModNone, 0},
 	"Backspace2":     Key{tcell.KeyBackspace2, tcell.ModNone, 0},
+
+	// I renamed these keys to PageUp and PageDown but I don't want to break someone's keybindings
+	"PgUp":   Key{tcell.KeyPgUp, tcell.ModNone, 0},
+	"PgDown": Key{tcell.KeyPgDn, tcell.ModNone, 0},
 }
 
 // The Key struct holds the data for a keypress (keycode + modifiers)
@@ -331,8 +335,8 @@ func DefaultBindings() map[string]string {
 		"CtrlA":          "SelectAll",
 		"Home":           "Start",
 		"End":            "End",
-		"PgUp":           "PageUp",
-		"PgDn":           "PageDown",
+		"PageUp":         "CursorPageUp",
+		"PageDown":       "CursorPageDown",
 		"CtrlG":          "ToggleHelp",
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",

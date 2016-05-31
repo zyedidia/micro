@@ -18,52 +18,8 @@ You can move the cursor around with the arrow keys and mouse.
 
 ### Keybindings
 
-These are the default keybindings, along with their actions.
-
-
-* Ctrl-q:   Quit
-* Ctrl-e:   Execute a command
-* Ctrl-g:   Toggle help text
-* Ctrl-b:   Run a shell command
-* Ctrl-s:   Save
-* Ctrl-o:   Open file
-* Ctrl-z:   Undo
-* Ctrl-y:   Redo
-* Ctrl-f:   Find
-* Ctrl-n:   Find next
-* Ctrl-p:   Find previous
-* Ctrl-a:   Select all
-* Ctrl-c:   Copy
-* Ctrl-x:   Cut
-* Ctrl-k:   Cut line
-* Ctrl-d:   Duplicate line
-* Ctrl-v:   Paste
-* PageUp:   Page up
-* PageDown: Page down
-* Home:     Go to beginning of line
-* End:      Go to end of line
-* Ctrl-r:   Toggle line numbers
-
-You can use the alt keys + arrows to move word by word.
-Ctrl left and right move the cursor to the start and end of the line, and
-ctrl up and down move the cursor the start and end of the buffer.
-
-You can hold shift with all of these movement actions to select while moving.
-
-The bindings may be rebound using the `~/.config/micro/bindings.json` 
-file. Each key is bound to an action.
-
-For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the 
-following in the `bindings.json` file.
-
-```json
-{
-	"CtrlY": "Undo",
-	"CtrlZ": "Redo"
-}
-```
-
-Here are the defaults:
+Here are the default keybindings in json form which is also how
+you can rebind them to your liking.
 
 ```json
 {
@@ -91,6 +47,8 @@ Here are the defaults:
     "Space":          "InsertSpace",
     "Backspace":      "Backspace",
     "Backspace2":     "Backspace",
+    "Alt-Backspace":  "DeleteWordLeft",
+    "Alt-Backspace2": "DeleteWordLeft",
     "Tab":            "InsertTab",
     "CtrlO":          "OpenFile",
     "CtrlS":          "Save",
@@ -107,8 +65,8 @@ Here are the defaults:
     "CtrlA":          "SelectAll",
     "Home":           "Start",
     "End":            "End",
-    "PgUp":           "PageUp",
-    "PgDn":           "PageDown",
+    "PageUp":         "CursorPageUp",
+    "PageDown":       "CursorPageDown",
     "CtrlG":          "ToggleHelp",
     "CtrlR":          "ToggleRuler",
     "CtrlL":          "JumpLine",
@@ -124,11 +82,28 @@ Here are the defaults:
     "Alt-a": "StartOfLine",
     "Alt-e": "EndOfLine",
     "Alt-p": "CursorUp",
-    "Alt-n": "CursorDown",
+    "Alt-n": "CursorDown"
 }
-
 ```
 
+You can use the alt keys + arrows to move word by word.
+Ctrl left and right move the cursor to the start and end of the line, and
+ctrl up and down move the cursor the start and end of the buffer.
+
+You can hold shift with all of these movement actions to select while moving.
+
+The bindings may be rebound using the `~/.config/micro/bindings.json`
+file. Each key is bound to an action.
+
+For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the
+following in the `bindings.json` file.
+
+```json
+{
+	"CtrlY": "Undo",
+	"CtrlZ": "Redo"
+}
+```
 
 ### Possible commands
 
