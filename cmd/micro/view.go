@@ -165,6 +165,7 @@ func (v *View) CanClose(msg string) bool {
 // OpenBuffer opens a new buffer in this view.
 // This resets the topline, event handler and cursor.
 func (v *View) OpenBuffer(buf *Buffer) {
+	screen.Clear()
 	v.CloseBuffer()
 	v.Buf = buf
 	v.Cursor = &buf.Cursor
@@ -191,6 +192,7 @@ func (v *View) CloseBuffer() {
 // ReOpen reloads the current buffer
 func (v *View) ReOpen() {
 	if v.CanClose("Continue? (yes, no, save) ") {
+		screen.Clear()
 		v.Buf.ReOpen()
 		v.Relocate()
 		v.matches = Match(v)
