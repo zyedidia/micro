@@ -155,11 +155,7 @@ func (b *Buffer) ReOpen() {
 		messenger.Error(err.Error())
 		return
 	}
-	if txt == "" {
-		b.r = new(rope.Rope)
-	} else {
-		b.r = rope.New(txt)
-	}
+	b.EventHandler.ApplyDiff(txt)
 
 	b.ModTime, _ = GetModTime(b.Path)
 	b.IsModified = false
