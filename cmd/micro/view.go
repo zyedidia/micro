@@ -458,9 +458,13 @@ func (v *View) DisplayView() {
 	for lineN := 0; lineN < v.height; lineN++ {
 		var x int
 		// If the buffer is smaller than the view height
-		// and we went too far, break
 		if lineN+v.Topline >= v.Buf.NumLines {
-			break
+			// We have to clear all this space
+			for i := 0; i < v.width; i++ {
+				screen.SetContent(i, lineN, ' ', nil, defStyle)
+			}
+
+			continue
 		}
 		line := v.Buf.Lines[lineN+v.Topline]
 
