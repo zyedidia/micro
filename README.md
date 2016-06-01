@@ -68,7 +68,7 @@ To run the micro binary just run `./bin/micro` (you probably want to place the b
 Make sure that you have Go version 1.4 or greater.
 
 ```sh
-go get -u github.com/zyedidia/micro/cmd/micro
+go get -u github.com/zyedidia/micro/...
 ```
 
 ### Clipboard support
