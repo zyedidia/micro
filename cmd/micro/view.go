@@ -559,6 +559,13 @@ func (v *View) DisplayView() {
 				lineStyle = highlightStyle
 			}
 
+			if settings["cursorline"].(bool) && v.Cursor.Y == lineN+v.Topline {
+				if style, ok := colorscheme["cursor-line"]; ok {
+					fg, _, _ := style.Decompose()
+					lineStyle = lineStyle.Background(fg)
+				}
+			}
+
 			if ch == '\t' {
 				lineIndentStyle := defStyle
 				if style, ok := colorscheme["indent-char"]; ok {
@@ -572,6 +579,12 @@ func (v *View) DisplayView() {
 
 					if style, ok := colorscheme["selection"]; ok {
 						lineIndentStyle = style
+					}
+				}
+				if settings["cursorline"].(bool) && v.Cursor.Y == lineN+v.Topline {
+					if style, ok := colorscheme["cursor-line"]; ok {
+						fg, _, _ := style.Decompose()
+						lineIndentStyle = lineIndentStyle.Background(fg)
 					}
 				}
 				indentChar := []rune(settings["indentchar"].(string))
@@ -610,7 +623,14 @@ func (v *View) DisplayView() {
 		charNum++
 
 		for i := 0; i < v.width-x; i++ {
-			screen.SetContent(x+i, lineN, ' ', nil, defStyle)
+			lineStyle := tcell.StyleDefault
+			if settings["cursorline"].(bool) && v.Cursor.Y == lineN+v.Topline {
+				if style, ok := colorscheme["cursor-line"]; ok {
+					fg, _, _ := style.Decompose()
+					lineStyle = lineStyle.Background(fg)
+				}
+			}
+			screen.SetContent(x+i, lineN, ' ', nil, lineStyle)
 		}
 	}
 }

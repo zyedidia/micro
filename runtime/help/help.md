@@ -184,6 +184,11 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `cursorline`: highlight the line that the cursor is on in a different color
+   (the color is defined by the colorscheme you are using)
+
+    default value: `off`
+
 * `ruler`: display line numbers
 
 	default value: `on`

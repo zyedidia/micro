@@ -74,6 +74,7 @@ func DefaultSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
 		"colorscheme":  "default",
+		"cursorline":   false,
 		"ignorecase":   false,
 		"indentchar":   " ",
 		"ruler":        true,
