@@ -618,6 +618,7 @@ func (v *View) DisplayView() {
 				selectStyle = style
 			}
 			screen.SetContent(x-v.leftCol, lineN, ' ', nil, selectStyle)
+			x++
 		}
 
 		charNum++

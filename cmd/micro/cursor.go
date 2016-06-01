@@ -141,7 +141,7 @@ func (c *Cursor) AddLineToSelection() {
 	}
 	if loc > c.OrigSelection[1] {
 		c.End()
-		c.CurSelection[1] = c.Loc()
+		c.CurSelection[1] = c.Loc() + 1
 		c.CurSelection[0] = c.OrigSelection[0]
 	}
 
