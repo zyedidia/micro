@@ -62,7 +62,6 @@ func NewEventHandler(buf *Buffer) *EventHandler {
 // This means that we can transform the buffer into any string and still preserve undo/redo
 // through insert and delete events
 func (eh *EventHandler) ApplyDiff(new string) {
-	messenger.Message("Applying diff")
 	differ := dmp.New()
 	diff := differ.DiffMain(eh.buf.String(), new, false)
 	var charNum int
