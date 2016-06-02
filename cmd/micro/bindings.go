@@ -13,7 +13,7 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-var bindings map[Key]func(*View) bool
+var bindings map[Key][]func(*View) bool
 var helpBinding string
 
 var bindingActions = map[string]func(*View) bool{
@@ -74,155 +74,135 @@ var bindingActions = map[string]func(*View) bool{
 	"Quit":                (*View).Quit,
 }
 
-var bindingKeys = map[string]Key{
-	"Up":             Key{tcell.KeyUp, tcell.ModNone, 0},
-	"Down":           Key{tcell.KeyDown, tcell.ModNone, 0},
-	"Right":          Key{tcell.KeyRight, tcell.ModNone, 0},
-	"Left":           Key{tcell.KeyLeft, tcell.ModNone, 0},
-	"AltUp":          Key{tcell.KeyUp, tcell.ModAlt, 0},
-	"AltDown":        Key{tcell.KeyDown, tcell.ModAlt, 0},
-	"AltLeft":        Key{tcell.KeyLeft, tcell.ModAlt, 0},
-	"AltRight":       Key{tcell.KeyRight, tcell.ModAlt, 0},
-	"CtrlUp":         Key{tcell.KeyUp, tcell.ModCtrl, 0},
-	"CtrlDown":       Key{tcell.KeyDown, tcell.ModCtrl, 0},
-	"CtrlLeft":       Key{tcell.KeyLeft, tcell.ModCtrl, 0},
-	"CtrlRight":      Key{tcell.KeyRight, tcell.ModCtrl, 0},
-	"ShiftUp":        Key{tcell.KeyUp, tcell.ModShift, 0},
-	"ShiftDown":      Key{tcell.KeyDown, tcell.ModShift, 0},
-	"ShiftLeft":      Key{tcell.KeyLeft, tcell.ModShift, 0},
-	"ShiftRight":     Key{tcell.KeyRight, tcell.ModShift, 0},
-	"AltShiftUp":     Key{tcell.KeyUp, tcell.ModShift | tcell.ModAlt, 0},
-	"AltShiftDown":   Key{tcell.KeyDown, tcell.ModShift | tcell.ModAlt, 0},
-	"AltShiftLeft":   Key{tcell.KeyLeft, tcell.ModShift | tcell.ModAlt, 0},
-	"AltShiftRight":  Key{tcell.KeyRight, tcell.ModShift | tcell.ModAlt, 0},
-	"CtrlShiftUp":    Key{tcell.KeyUp, tcell.ModShift | tcell.ModCtrl, 0},
-	"CtrlShiftDown":  Key{tcell.KeyDown, tcell.ModShift | tcell.ModCtrl, 0},
-	"CtrlShiftLeft":  Key{tcell.KeyLeft, tcell.ModShift | tcell.ModCtrl, 0},
-	"CtrlShiftRight": Key{tcell.KeyRight, tcell.ModShift | tcell.ModCtrl, 0},
-	"UpLeft":         Key{tcell.KeyUpLeft, tcell.ModNone, 0},
-	"UpRight":        Key{tcell.KeyUpRight, tcell.ModNone, 0},
-	"DownLeft":       Key{tcell.KeyDownLeft, tcell.ModNone, 0},
-	"DownRight":      Key{tcell.KeyDownRight, tcell.ModNone, 0},
-	"Center":         Key{tcell.KeyCenter, tcell.ModNone, 0},
-	"PageUp":         Key{tcell.KeyPgUp, tcell.ModNone, 0},
-	"PageDown":       Key{tcell.KeyPgDn, tcell.ModNone, 0},
-	"Home":           Key{tcell.KeyHome, tcell.ModNone, 0},
-	"End":            Key{tcell.KeyEnd, tcell.ModNone, 0},
-	"Insert":         Key{tcell.KeyInsert, tcell.ModNone, 0},
-	"Delete":         Key{tcell.KeyDelete, tcell.ModNone, 0},
-	"Help":           Key{tcell.KeyHelp, tcell.ModNone, 0},
-	"Exit":           Key{tcell.KeyExit, tcell.ModNone, 0},
-	"Clear":          Key{tcell.KeyClear, tcell.ModNone, 0},
-	"Cancel":         Key{tcell.KeyCancel, tcell.ModNone, 0},
-	"Print":          Key{tcell.KeyPrint, tcell.ModNone, 0},
-	"Pause":          Key{tcell.KeyPause, tcell.ModNone, 0},
-	"Backtab":        Key{tcell.KeyBacktab, tcell.ModNone, 0},
-	"F1":             Key{tcell.KeyF1, tcell.ModNone, 0},
-	"F2":             Key{tcell.KeyF2, tcell.ModNone, 0},
-	"F3":             Key{tcell.KeyF3, tcell.ModNone, 0},
-	"F4":             Key{tcell.KeyF4, tcell.ModNone, 0},
-	"F5":             Key{tcell.KeyF5, tcell.ModNone, 0},
-	"F6":             Key{tcell.KeyF6, tcell.ModNone, 0},
-	"F7":             Key{tcell.KeyF7, tcell.ModNone, 0},
-	"F8":             Key{tcell.KeyF8, tcell.ModNone, 0},
-	"F9":             Key{tcell.KeyF9, tcell.ModNone, 0},
-	"F10":            Key{tcell.KeyF10, tcell.ModNone, 0},
-	"F11":            Key{tcell.KeyF11, tcell.ModNone, 0},
-	"F12":            Key{tcell.KeyF12, tcell.ModNone, 0},
-	"F13":            Key{tcell.KeyF13, tcell.ModNone, 0},
-	"F14":            Key{tcell.KeyF14, tcell.ModNone, 0},
-	"F15":            Key{tcell.KeyF15, tcell.ModNone, 0},
-	"F16":            Key{tcell.KeyF16, tcell.ModNone, 0},
-	"F17":            Key{tcell.KeyF17, tcell.ModNone, 0},
-	"F18":            Key{tcell.KeyF18, tcell.ModNone, 0},
-	"F19":            Key{tcell.KeyF19, tcell.ModNone, 0},
-	"F20":            Key{tcell.KeyF20, tcell.ModNone, 0},
-	"F21":            Key{tcell.KeyF21, tcell.ModNone, 0},
-	"F22":            Key{tcell.KeyF22, tcell.ModNone, 0},
-	"F23":            Key{tcell.KeyF23, tcell.ModNone, 0},
-	"F24":            Key{tcell.KeyF24, tcell.ModNone, 0},
-	"F25":            Key{tcell.KeyF25, tcell.ModNone, 0},
-	"F26":            Key{tcell.KeyF26, tcell.ModNone, 0},
-	"F27":            Key{tcell.KeyF27, tcell.ModNone, 0},
-	"F28":            Key{tcell.KeyF28, tcell.ModNone, 0},
-	"F29":            Key{tcell.KeyF29, tcell.ModNone, 0},
-	"F30":            Key{tcell.KeyF30, tcell.ModNone, 0},
-	"F31":            Key{tcell.KeyF31, tcell.ModNone, 0},
-	"F32":            Key{tcell.KeyF32, tcell.ModNone, 0},
-	"F33":            Key{tcell.KeyF33, tcell.ModNone, 0},
-	"F34":            Key{tcell.KeyF34, tcell.ModNone, 0},
-	"F35":            Key{tcell.KeyF35, tcell.ModNone, 0},
-	"F36":            Key{tcell.KeyF36, tcell.ModNone, 0},
-	"F37":            Key{tcell.KeyF37, tcell.ModNone, 0},
-	"F38":            Key{tcell.KeyF38, tcell.ModNone, 0},
-	"F39":            Key{tcell.KeyF39, tcell.ModNone, 0},
-	"F40":            Key{tcell.KeyF40, tcell.ModNone, 0},
-	"F41":            Key{tcell.KeyF41, tcell.ModNone, 0},
-	"F42":            Key{tcell.KeyF42, tcell.ModNone, 0},
-	"F43":            Key{tcell.KeyF43, tcell.ModNone, 0},
-	"F44":            Key{tcell.KeyF44, tcell.ModNone, 0},
-	"F45":            Key{tcell.KeyF45, tcell.ModNone, 0},
-	"F46":            Key{tcell.KeyF46, tcell.ModNone, 0},
-	"F47":            Key{tcell.KeyF47, tcell.ModNone, 0},
-	"F48":            Key{tcell.KeyF48, tcell.ModNone, 0},
-	"F49":            Key{tcell.KeyF49, tcell.ModNone, 0},
-	"F50":            Key{tcell.KeyF50, tcell.ModNone, 0},
-	"F51":            Key{tcell.KeyF51, tcell.ModNone, 0},
-	"F52":            Key{tcell.KeyF52, tcell.ModNone, 0},
-	"F53":            Key{tcell.KeyF53, tcell.ModNone, 0},
-	"F54":            Key{tcell.KeyF54, tcell.ModNone, 0},
-	"F55":            Key{tcell.KeyF55, tcell.ModNone, 0},
-	"F56":            Key{tcell.KeyF56, tcell.ModNone, 0},
-	"F57":            Key{tcell.KeyF57, tcell.ModNone, 0},
-	"F58":            Key{tcell.KeyF58, tcell.ModNone, 0},
-	"F59":            Key{tcell.KeyF59, tcell.ModNone, 0},
-	"F60":            Key{tcell.KeyF60, tcell.ModNone, 0},
-	"F61":            Key{tcell.KeyF61, tcell.ModNone, 0},
-	"F62":            Key{tcell.KeyF62, tcell.ModNone, 0},
-	"F63":            Key{tcell.KeyF63, tcell.ModNone, 0},
-	"F64":            Key{tcell.KeyF64, tcell.ModNone, 0},
-	"CtrlSpace":      Key{tcell.KeyCtrlSpace, tcell.ModCtrl, 0},
-	"CtrlA":          Key{tcell.KeyCtrlA, tcell.ModCtrl, 0},
-	"CtrlB":          Key{tcell.KeyCtrlB, tcell.ModCtrl, 0},
-	"CtrlC":          Key{tcell.KeyCtrlC, tcell.ModCtrl, 0},
-	"CtrlD":          Key{tcell.KeyCtrlD, tcell.ModCtrl, 0},
-	"CtrlE":          Key{tcell.KeyCtrlE, tcell.ModCtrl, 0},
-	"CtrlF":          Key{tcell.KeyCtrlF, tcell.ModCtrl, 0},
-	"CtrlG":          Key{tcell.KeyCtrlG, tcell.ModCtrl, 0},
-	"CtrlH":          Key{tcell.KeyCtrlH, tcell.ModCtrl, 0},
-	"CtrlI":          Key{tcell.KeyCtrlI, tcell.ModCtrl, 0},
-	"CtrlJ":          Key{tcell.KeyCtrlJ, tcell.ModCtrl, 0},
-	"CtrlK":          Key{tcell.KeyCtrlK, tcell.ModCtrl, 0},
-	"CtrlL":          Key{tcell.KeyCtrlL, tcell.ModCtrl, 0},
-	"CtrlM":          Key{tcell.KeyCtrlM, tcell.ModCtrl, 0},
-	"CtrlN":          Key{tcell.KeyCtrlN, tcell.ModCtrl, 0},
-	"CtrlO":          Key{tcell.KeyCtrlO, tcell.ModCtrl, 0},
-	"CtrlP":          Key{tcell.KeyCtrlP, tcell.ModCtrl, 0},
-	"CtrlQ":          Key{tcell.KeyCtrlQ, tcell.ModCtrl, 0},
-	"CtrlR":          Key{tcell.KeyCtrlR, tcell.ModCtrl, 0},
-	"CtrlS":          Key{tcell.KeyCtrlS, tcell.ModCtrl, 0},
-	"CtrlT":          Key{tcell.KeyCtrlT, tcell.ModCtrl, 0},
-	"CtrlU":          Key{tcell.KeyCtrlU, tcell.ModCtrl, 0},
-	"CtrlV":          Key{tcell.KeyCtrlV, tcell.ModCtrl, 0},
-	"CtrlW":          Key{tcell.KeyCtrlW, tcell.ModCtrl, 0},
-	"CtrlX":          Key{tcell.KeyCtrlX, tcell.ModCtrl, 0},
-	"CtrlY":          Key{tcell.KeyCtrlY, tcell.ModCtrl, 0},
-	"CtrlZ":          Key{tcell.KeyCtrlZ, tcell.ModCtrl, 0},
-	"CtrlLeftSq":     Key{tcell.KeyCtrlLeftSq, tcell.ModCtrl, 0},
-	"CtrlBackslash":  Key{tcell.KeyCtrlBackslash, tcell.ModCtrl, 0},
-	"CtrlRightSq":    Key{tcell.KeyCtrlRightSq, tcell.ModCtrl, 0},
-	"CtrlCarat":      Key{tcell.KeyCtrlCarat, tcell.ModCtrl, 0},
-	"CtrlUnderscore": Key{tcell.KeyCtrlUnderscore, tcell.ModCtrl, 0},
-	"Backspace":      Key{tcell.KeyBackspace, tcell.ModNone, 0},
-	"Tab":            Key{tcell.KeyTab, tcell.ModNone, 0},
-	"Esc":            Key{tcell.KeyEsc, tcell.ModNone, 0},
-	"Escape":         Key{tcell.KeyEscape, tcell.ModNone, 0},
-	"Enter":          Key{tcell.KeyEnter, tcell.ModNone, 0},
-	"Backspace2":     Key{tcell.KeyBackspace2, tcell.ModNone, 0},
+var bindingKeys = map[string]tcell.Key{
+	"Up":             tcell.KeyUp,
+	"Down":           tcell.KeyDown,
+	"Right":          tcell.KeyRight,
+	"Left":           tcell.KeyLeft,
+	"UpLeft":         tcell.KeyUpLeft,
+	"UpRight":        tcell.KeyUpRight,
+	"DownLeft":       tcell.KeyDownLeft,
+	"DownRight":      tcell.KeyDownRight,
+	"Center":         tcell.KeyCenter,
+	"PageUp":         tcell.KeyPgUp,
+	"PageDown":       tcell.KeyPgDn,
+	"Home":           tcell.KeyHome,
+	"End":            tcell.KeyEnd,
+	"Insert":         tcell.KeyInsert,
+	"Delete":         tcell.KeyDelete,
+	"Help":           tcell.KeyHelp,
+	"Exit":           tcell.KeyExit,
+	"Clear":          tcell.KeyClear,
+	"Cancel":         tcell.KeyCancel,
+	"Print":          tcell.KeyPrint,
+	"Pause":          tcell.KeyPause,
+	"Backtab":        tcell.KeyBacktab,
+	"F1":             tcell.KeyF1,
+	"F2":             tcell.KeyF2,
+	"F3":             tcell.KeyF3,
+	"F4":             tcell.KeyF4,
+	"F5":             tcell.KeyF5,
+	"F6":             tcell.KeyF6,
+	"F7":             tcell.KeyF7,
+	"F8":             tcell.KeyF8,
+	"F9":             tcell.KeyF9,
+	"F10":            tcell.KeyF10,
+	"F11":            tcell.KeyF11,
+	"F12":            tcell.KeyF12,
+	"F13":            tcell.KeyF13,
+	"F14":            tcell.KeyF14,
+	"F15":            tcell.KeyF15,
+	"F16":            tcell.KeyF16,
+	"F17":            tcell.KeyF17,
+	"F18":            tcell.KeyF18,
+	"F19":            tcell.KeyF19,
+	"F20":            tcell.KeyF20,
+	"F21":            tcell.KeyF21,
+	"F22":            tcell.KeyF22,
+	"F23":            tcell.KeyF23,
+	"F24":            tcell.KeyF24,
+	"F25":            tcell.KeyF25,
+	"F26":            tcell.KeyF26,
+	"F27":            tcell.KeyF27,
+	"F28":            tcell.KeyF28,
+	"F29":            tcell.KeyF29,
+	"F30":            tcell.KeyF30,
+	"F31":            tcell.KeyF31,
+	"F32":            tcell.KeyF32,
+	"F33":            tcell.KeyF33,
+	"F34":            tcell.KeyF34,
+	"F35":            tcell.KeyF35,
+	"F36":            tcell.KeyF36,
+	"F37":            tcell.KeyF37,
+	"F38":            tcell.KeyF38,
+	"F39":            tcell.KeyF39,
+	"F40":            tcell.KeyF40,
+	"F41":            tcell.KeyF41,
+	"F42":            tcell.KeyF42,
+	"F43":            tcell.KeyF43,
+	"F44":            tcell.KeyF44,
+	"F45":            tcell.KeyF45,
+	"F46":            tcell.KeyF46,
+	"F47":            tcell.KeyF47,
+	"F48":            tcell.KeyF48,
+	"F49":            tcell.KeyF49,
+	"F50":            tcell.KeyF50,
+	"F51":            tcell.KeyF51,
+	"F52":            tcell.KeyF52,
+	"F53":            tcell.KeyF53,
+	"F54":            tcell.KeyF54,
+	"F55":            tcell.KeyF55,
+	"F56":            tcell.KeyF56,
+	"F57":            tcell.KeyF57,
+	"F58":            tcell.KeyF58,
+	"F59":            tcell.KeyF59,
+	"F60":            tcell.KeyF60,
+	"F61":            tcell.KeyF61,
+	"F62":            tcell.KeyF62,
+	"F63":            tcell.KeyF63,
+	"F64":            tcell.KeyF64,
+	"CtrlSpace":      tcell.KeyCtrlSpace,
+	"CtrlA":          tcell.KeyCtrlA,
+	"CtrlB":          tcell.KeyCtrlB,
+	"CtrlC":          tcell.KeyCtrlC,
+	"CtrlD":          tcell.KeyCtrlD,
+	"CtrlE":          tcell.KeyCtrlE,
+	"CtrlF":          tcell.KeyCtrlF,
+	"CtrlG":          tcell.KeyCtrlG,
+	"CtrlH":          tcell.KeyCtrlH,
+	"CtrlI":          tcell.KeyCtrlI,
+	"CtrlJ":          tcell.KeyCtrlJ,
+	"CtrlK":          tcell.KeyCtrlK,
+	"CtrlL":          tcell.KeyCtrlL,
+	"CtrlM":          tcell.KeyCtrlM,
+	"CtrlN":          tcell.KeyCtrlN,
+	"CtrlO":          tcell.KeyCtrlO,
+	"CtrlP":          tcell.KeyCtrlP,
+	"CtrlQ":          tcell.KeyCtrlQ,
+	"CtrlR":          tcell.KeyCtrlR,
+	"CtrlS":          tcell.KeyCtrlS,
+	"CtrlT":          tcell.KeyCtrlT,
+	"CtrlU":          tcell.KeyCtrlU,
+	"CtrlV":          tcell.KeyCtrlV,
+	"CtrlW":          tcell.KeyCtrlW,
+	"CtrlX":          tcell.KeyCtrlX,
+	"CtrlY":          tcell.KeyCtrlY,
+	"CtrlZ":          tcell.KeyCtrlZ,
+	"CtrlLeftSq":     tcell.KeyCtrlLeftSq,
+	"CtrlBackslash":  tcell.KeyCtrlBackslash,
+	"CtrlRightSq":    tcell.KeyCtrlRightSq,
+	"CtrlCarat":      tcell.KeyCtrlCarat,
+	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
+	"Backspace":      tcell.KeyBackspace,
+	"Tab":            tcell.KeyTab,
+	"Esc":            tcell.KeyEsc,
+	"Escape":         tcell.KeyEscape,
+	"Enter":          tcell.KeyEnter,
+	"Backspace2":     tcell.KeyBackspace2,
 
 	// I renamed these keys to PageUp and PageDown but I don't want to break someone's keybindings
-	"PgUp":   Key{tcell.KeyPgUp, tcell.ModNone, 0},
-	"PgDown": Key{tcell.KeyPgDn, tcell.ModNone, 0},
+	"PgUp":   tcell.KeyPgUp,
+	"PgDown": tcell.KeyPgDn,
 }
 
 // The Key struct holds the data for a keypress (keycode + modifiers)
@@ -234,7 +214,7 @@ type Key struct {
 
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
-	bindings = make(map[Key]func(*View) bool)
+	bindings = make(map[Key][]func(*View) bool)
 
 	var parsed map[string]string
 	defaults := DefaultBindings()
@@ -263,31 +243,97 @@ func parseBindings(userBindings map[string]string) {
 	}
 }
 
-// BindKey takes a key and an action and binds the two together
-func BindKey(k, v string) {
-	var key Key
-	if strings.Contains(k, "Alt-") {
-		split := strings.Split(k, "-")
-		if len(split[1]) > 1 {
-			key = Key{bindingKeys[split[1]].keyCode, bindingKeys[k].modifiers | tcell.ModAlt, 0}
-		} else {
-			key = Key{tcell.KeyRune, tcell.ModAlt, rune(k[len(k)-1])}
+// findKey will find binding Key 'b' using string 'k'
+func findKey(k string) (b Key, ok bool) {
+	modifiers := tcell.ModNone
+
+	// First, we'll strip off all the modifiers in the name and add them to the
+	// ModMask
+modSearch:
+	for {
+		switch {
+		case strings.HasPrefix(k, "-"):
+			// We optionally support dashes between modifiers
+			k = k[1:]
+		case strings.HasPrefix(k, "Ctrl"):
+			k = k[4:]
+			modifiers |= tcell.ModCtrl
+		case strings.HasPrefix(k, "Alt"):
+			k = k[3:]
+			modifiers |= tcell.ModAlt
+		case strings.HasPrefix(k, "Shift"):
+			k = k[5:]
+			modifiers |= tcell.ModShift
+		default:
+			break modSearch
 		}
-	} else {
-		key = bindingKeys[k]
 	}
 
-	action := bindingActions[v]
-	if _, ok := bindingActions[v]; !ok {
+	// Control is handled specially, since some character codes in bindingKeys
+	// are different when Control is depressed. We should check for Control keys
+	// first.
+	if modifiers&tcell.ModCtrl != 0 {
+		// see if the key is in bindingKeys with the Ctrl prefix.
+		if code, ok := bindingKeys["Ctrl"+k]; ok {
+			// It is, we're done.
+			return Key{
+				keyCode:   code,
+				modifiers: modifiers,
+				r:         0,
+			}, true
+		}
+	}
+
+	// See if we can find the key in bindingKeys
+	if code, ok := bindingKeys[k]; ok {
+		return Key{
+			keyCode:   code,
+			modifiers: modifiers,
+			r:         0,
+		}, true
+	}
+
+	// If we were given one character, then we've got a rune.
+	if len(k) == 1 {
+		return Key{
+			keyCode:   tcell.KeyRune,
+			modifiers: modifiers,
+			r:         rune(k[0]),
+		}, true
+	}
+
+	// We don't know what happened.
+	return Key{}, false
+}
+
+// findAction will find 'action' using string 'v'
+func findAction(v string) (action func(*View) bool) {
+	action, ok := bindingActions[v]
+	if !ok {
 		// If the user seems to be binding a function that doesn't exist
 		// We hope that it's a lua function that exists and bind it to that
 		action = LuaFunctionBinding(v)
 	}
+	return action
+}
 
-	bindings[key] = action
+// BindKey takes a key and an action and binds the two together
+func BindKey(k, v string) {
+	key, ok := findKey(k)
+	if !ok {
+		return
+	}
 	if v == "ToggleHelp" {
 		helpBinding = k
 	}
+
+	actionNames := strings.Split(v, ",")
+	actions := make([]func(*View) bool, 0, len(actionNames))
+	for _, actionName := range actionNames {
+		actions = append(actions, findAction(actionName))
+	}
+
+	bindings[key] = actions
 }
 
 // DefaultBindings returns a map containing micro's default keybindings
