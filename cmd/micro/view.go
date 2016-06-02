@@ -562,7 +562,7 @@ func (v *View) DisplayView() {
 				lineStyle = highlightStyle
 			}
 
-			if settings["cursorline"].(bool) && v.Cursor.Y == lineN+v.Topline {
+			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -584,7 +584,7 @@ func (v *View) DisplayView() {
 						lineIndentStyle = style
 					}
 				}
-				if settings["cursorline"].(bool) && v.Cursor.Y == lineN+v.Topline {
+				if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 					if style, ok := colorscheme["cursor-line"]; ok {
 						fg, _, _ := style.Decompose()
 						lineIndentStyle = lineIndentStyle.Background(fg)
@@ -628,7 +628,7 @@ func (v *View) DisplayView() {
 
 		for i := 0; i < v.width-x; i++ {
 			lineStyle := tcell.StyleDefault
-			if settings["cursorline"].(bool) && v.Cursor.Y == lineN+v.Topline {
+			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
