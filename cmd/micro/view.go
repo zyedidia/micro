@@ -126,6 +126,9 @@ func (v *View) ScrollUp(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
 	if v.Topline-n >= 0 {
 		v.Topline -= n
+		if settings["followview"] == true {
+			v.Cursor.UpN(n)
+		}
 	} else if v.Topline > 0 {
 		v.Topline--
 	}
@@ -136,6 +139,9 @@ func (v *View) ScrollDown(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
 	if v.Topline+n <= v.Buf.NumLines-v.height {
 		v.Topline += n
+		if settings["followview"] == true {
+			v.Cursor.DownN(n)
+		}
 	} else if v.Topline < v.Buf.NumLines-v.height {
 		v.Topline++
 	}
