@@ -280,7 +280,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Buf.Insert(v.Cursor.Loc(), string(e.Rune()))
 			v.Cursor.Right()
 		} else {
-			for key, action := range bindings {
+			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
 					if e.Key() == tcell.KeyRune {
 						if e.Rune() != key.r {
@@ -288,12 +288,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 						}
 					}
 					if e.Modifiers() == key.modifiers {
-						relocate = action(v)
-						for _, pl := range loadedPlugins {
-							funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
-							err := Call(pl+"_on"+funcName[len(funcName)-1], nil)
-							if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-								TermMessage(err)
+						relocate = false
+						for _, action := range actions {
+							relocate = action(v) || relocate
+							for _, pl := range loadedPlugins {
+								funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
+								err := Call(pl+"_on"+funcName[len(funcName)-1], nil)
+								if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+									TermMessage(err)
+								}
 							}
 						}
 					}
