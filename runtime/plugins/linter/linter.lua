@@ -11,7 +11,6 @@ function linter_onSave()
             devnull = "NUL"
         end
         if ft == "Go" then
-            linter_lint("gobuild", "go build -o " .. devnull, "%f:%l: %m")
             linter_lint("golint", "golint " .. views[mainView+1].Buf.Path, "%f:%l:%d+: %m")
         elseif ft == "Lua" then
             linter_lint("luacheck", "luacheck --no-color " .. file, "%f:%l:%d+: %m")
