@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"encoding/gob"
 	"io/ioutil"
 	"os"
+	"os/exec"
+	"os/signal"
 	"path/filepath"
 	"strings"
 	"time"
@@ -174,6 +177,11 @@ func (b *Buffer) Save() error {
 	return b.SaveAs(b.Path)
 }
 
+// SaveWithSudo saves the buffer to the default path with sudo
+func (b *Buffer) SaveWithSudo() error {
+	return b.SaveAsWithSudo(b.Path)
+}
+
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
 	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
@@ -206,6 +214,56 @@ func (b *Buffer) SaveAs(filename string) error {
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
+	}
+	return err
+}
+
+// SaveAsWithSudo is the same as SaveAs except it uses a neat trick
+// with tee to use sudo so the user doesn't have to reopen micro with sudo
+func (b *Buffer) SaveAsWithSudo(filename string) error {
+	b.UpdateRules()
+	b.Name = filename
+	b.Path = filename
+
+	// The user may have already used sudo in which case we won't need the password
+	// It's a bit nicer for them if they don't have to enter the password every time
+	_, err := RunShellCommand("sudo -v")
+	needPassword := err != nil
+
+	// If we need the password, we have to close the screen and ask using the shell
+	if needPassword {
+		// Shut down the screen because we're going to interact directly with the shell
+		screen.Fini()
+		screen = nil
+	}
+
+	// Set up everything for the command
+	cmd := exec.Command("sudo", "tee", filename)
+	cmd.Stdin = bytes.NewBufferString(b.String())
+
+	// This is a trap for Ctrl-C so that it doesn't kill micro
+	// Instead we trap Ctrl-C to kill the program we're running
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			cmd.Process.Kill()
+		}
+	}()
+
+	// Start the command
+	cmd.Start()
+	err = cmd.Wait()
+
+	// If we needed the password, we closed the screen, so we have to initialize it again
+	if needPassword {
+		// Start the screen back up
+		InitScreen()
+	}
+	if err == nil {
+		b.IsModified = false
+		b.ModTime, _ = GetModTime(filename)
+		b.Serialize()
 	}
 	return err
 }

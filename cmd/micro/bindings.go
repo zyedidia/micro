@@ -691,16 +691,29 @@ func (v *View) Save() bool {
 			v.Buf.Path = filename
 			v.Buf.Name = filename
 		} else {
-			return true
+			return false
 		}
 	}
 	err := v.Buf.Save()
 	if err != nil {
-		messenger.Error(err.Error())
+		if strings.HasSuffix(err.Error(), "permission denied") {
+			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
+			if choice {
+				err = v.Buf.SaveWithSudo()
+				if err != nil {
+					messenger.Error(err.Error())
+					return false
+				}
+			}
+			messenger.Reset()
+			messenger.Clear()
+		} else {
+			messenger.Error(err.Error())
+		}
 	} else {
 		messenger.Message("Saved " + v.Buf.Path)
 	}
-	return true
+	return false
 }
 
 // Find opens a prompt and searches forward for the input
