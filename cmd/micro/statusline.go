@@ -15,7 +15,7 @@ type Statusline struct {
 // Display draws the statusline to the screen
 func (sline *Statusline) Display() {
 	// We'll draw the line at the lowest line in the view
-	y := sline.view.height
+	y := sline.view.height + sline.view.y
 
 	file := sline.view.Buf.Name
 	// If the name is empty, use 'No name'

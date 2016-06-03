@@ -31,6 +31,9 @@ type View struct {
 	width  int
 	height int
 
+	// Where this view is located
+	x, y int
+
 	// How much to offset because of line numbers
 	lineNumOffset int
 
@@ -39,6 +42,9 @@ type View struct {
 
 	// Is the help text opened in this view
 	helpOpen bool
+
+	// This is the index of this view in the views array
+	Num int
 
 	// Is this view modifiable?
 	Modifiable bool
@@ -91,6 +97,8 @@ func NewView(buf *Buffer) *View {
 func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v := new(View)
 
+	v.x, v.y = 0, 1
+
 	v.widthPercent = w
 	v.heightPercent = h
 	v.Resize(screen.Size())
@@ -112,6 +120,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 // the percentages have changed
 func (v *View) Resize(w, h int) {
 	// Always include 1 line for the command line at the bottom
+	h--
+	// Include one line for the tab bar at the top
 	h--
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
@@ -173,6 +183,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.Topline = 0
 	v.leftCol = 0
 	v.Cursor.ResetSelection()
+	v.Relocate()
 	v.messages = make(map[string][]GutterMessage)
 
 	v.matches = Match(v)
@@ -459,12 +470,12 @@ func (v *View) DisplayView() {
 	}
 
 	for lineN := 0; lineN < v.height; lineN++ {
-		var x int
+		x := v.x
 		// If the buffer is smaller than the view height
 		if lineN+v.Topline >= v.Buf.NumLines {
 			// We have to clear all this space
 			for i := 0; i < v.width; i++ {
-				screen.SetContent(i, lineN, ' ', nil, defStyle)
+				screen.SetContent(i, lineN+v.y, ' ', nil, defStyle)
 			}
 
 			continue
@@ -492,9 +503,9 @@ func (v *View) DisplayView() {
 								gutterStyle = style
 							}
 						}
-						screen.SetContent(x, lineN, '>', nil, gutterStyle)
+						screen.SetContent(x, lineN+v.y, '>', nil, gutterStyle)
 						x++
-						screen.SetContent(x, lineN, '>', nil, gutterStyle)
+						screen.SetContent(x, lineN+v.y, '>', nil, gutterStyle)
 						x++
 						if v.Cursor.Y == lineN+v.Topline {
 							messenger.Message(msg.msg)
@@ -504,9 +515,9 @@ func (v *View) DisplayView() {
 				}
 			}
 			if !msgOnLine {
-				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
+				screen.SetContent(x, lineN+v.y, ' ', nil, tcell.StyleDefault)
 				x++
-				screen.SetContent(x, lineN, ' ', nil, tcell.StyleDefault)
+				screen.SetContent(x, lineN+v.y, ' ', nil, tcell.StyleDefault)
 				x++
 				if v.Cursor.Y == lineN+v.Topline && messenger.gutterMessage {
 					messenger.Reset()
@@ -525,18 +536,18 @@ func (v *View) DisplayView() {
 		if settings["ruler"] == true {
 			lineNum = strconv.Itoa(lineN + v.Topline + 1)
 			for i := 0; i < maxLineLength-len(lineNum); i++ {
-				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
+				screen.SetContent(x, lineN+v.y, ' ', nil, lineNumStyle)
 				x++
 			}
 			// Write the actual line number
 			for _, ch := range lineNum {
-				screen.SetContent(x, lineN, ch, nil, lineNumStyle)
+				screen.SetContent(x, lineN+v.y, ch, nil, lineNumStyle)
 				x++
 			}
 
 			if settings["ruler"] == true {
 				// Write the extra space
-				screen.SetContent(x, lineN, ' ', nil, lineNumStyle)
+				screen.SetContent(x, lineN+v.y, ' ', nil, lineNumStyle)
 				x++
 			}
 		}
@@ -594,11 +605,14 @@ func (v *View) DisplayView() {
 				if x-v.leftCol >= v.lineNumOffset {
 					screen.SetContent(x-v.leftCol, lineN, indentChar[0], nil, lineIndentStyle)
 				}
+				if x-v.leftCol >= v.lineNumOffset {
+					screen.SetContent(x-v.leftCol, lineN+v.y, indentChar[0], nil, lineIndentStyle)
+				}
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol, lineN, ' ', nil, lineStyle)
+						screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
 					}
 				}
 			} else if runewidth.RuneWidth(ch) > 1 {
@@ -613,7 +627,7 @@ func (v *View) DisplayView() {
 				}
 			} else {
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN, ch, nil, lineStyle)
+					screen.SetContent(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
 				}
 			}
 			charNum = charNum.Move(1, v.Buf)
@@ -632,7 +646,7 @@ func (v *View) DisplayView() {
 			if style, ok := colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			screen.SetContent(x-v.leftCol, lineN, ' ', nil, selectStyle)
+			screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, selectStyle)
 			x++
 		}
 
@@ -647,7 +661,7 @@ func (v *View) DisplayView() {
 				}
 			}
 			if !(x-v.leftCol < v.lineNumOffset) {
-				screen.SetContent(x-v.leftCol+i, lineN, ' ', nil, lineStyle)
+				screen.SetContent(x+i, lineN+v.y, ' ', nil, lineStyle)
 			}
 		}
 	}
@@ -659,7 +673,7 @@ func (v *View) DisplayCursor() {
 	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
 		screen.HideCursor()
 	} else {
-		screen.ShowCursor(v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.Y-v.Topline)
+		screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.Y-v.Topline+v.y)
 	}
 }
 

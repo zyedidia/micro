@@ -55,7 +55,7 @@ var (
 )
 
 // LoadInput loads the file input for the editor
-func LoadInput() (string, []byte, error) {
+func LoadInput() []*Buffer {
 	// There are a number of ways micro should start given its input
 
 	// 1. If it is given a file in os.Args, it should open that
@@ -72,23 +72,34 @@ func LoadInput() (string, []byte, error) {
 	var filename string
 	var input []byte
 	var err error
+	var buffers []*Buffer
 
 	if len(os.Args) > 1 {
 		// Option 1
-		filename = os.Args[1]
-		// Check that the file exists
-		if _, e := os.Stat(filename); e == nil {
-			input, err = ioutil.ReadFile(filename)
+		for i := 1; i < len(os.Args); i++ {
+			filename = os.Args[i]
+			// Check that the file exists
+			if _, e := os.Stat(filename); e == nil {
+				input, err = ioutil.ReadFile(filename)
+				if err != nil {
+					TermMessage(err)
+					continue
+				}
+			}
+			buffers = append(buffers, NewBuffer(input, filename))
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
 		input, err = ioutil.ReadAll(os.Stdin)
+		buffers = append(buffers, NewBuffer(input, filename))
+	} else {
+		// Option 3, just open an empty buffer
+		buffers = append(buffers, NewBuffer(input, filename))
 	}
 
-	// Option 3, or just return whatever we got
-	return filename, input, err
+	return buffers
 }
 
 // InitConfigDir finds the configuration directory for micro according to the XDG spec.
@@ -170,9 +181,10 @@ func InitScreen() {
 // RedrawAll redraws everything -- all the views and the messenger
 func RedrawAll() {
 	messenger.Clear()
-	for _, v := range views {
-		v.Display()
-	}
+	// for _, v := range views {
+	views[mainView].Display()
+	// }
+	DisplayTabBar()
 	messenger.Display()
 	screen.Show()
 }
@@ -184,12 +196,6 @@ func main() {
 	if *flagVersion {
 		fmt.Println("Micro version:", Version)
 		os.Exit(0)
-	}
-
-	filename, input, err := LoadInput()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	L = lua.NewState()
@@ -210,8 +216,6 @@ func main() {
 	// Load the help files
 	LoadHelp()
 
-	buf := NewBuffer(input, filename)
-
 	InitScreen()
 
 	// This is just so if we have an error, we can exit cleanly and not completely
@@ -229,8 +233,12 @@ func main() {
 
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
-	views = make([]*View, 1)
-	views[0] = NewView(buf)
+	// views = make([]*View, 1)
+	buffers := LoadInput()
+	for i, buf := range buffers {
+		views = append(views, NewView(buf))
+		views[i].Num = i
+	}
 
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
 	L.SetGlobal("views", luar.New(L, views))

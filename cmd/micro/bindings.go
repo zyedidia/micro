@@ -73,6 +73,8 @@ var bindingActions = map[string]func(*View) bool{
 	"ShellMode":           (*View).ShellMode,
 	"CommandMode":         (*View).CommandMode,
 	"Quit":                (*View).Quit,
+	"LastView":            (*View).LastView,
+	"NextView":            (*View).NextView,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -902,7 +904,7 @@ func (v *View) OpenFile() bool {
 	if v.CanClose("Continue? (yes, no, save) ") {
 		filename, canceled := messenger.Prompt("File to open: ", "Open")
 		if canceled {
-			return true
+			return false
 		}
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
@@ -910,12 +912,19 @@ func (v *View) OpenFile() bool {
 
 		if err != nil {
 			messenger.Error(err.Error())
-			return true
+			return false
 		}
 		buf := NewBuffer(file, filename)
 		v.OpenBuffer(buf)
+		return true
 	}
-	return true
+	return false
+}
+
+func (v *View) openInNewView(buf *Buffer) {
+	views = append(views, NewView(buf))
+	mainView++
+	views[mainView].Num = mainView
 }
 
 // Start moves the viewport to the start of the buffer
@@ -1082,10 +1091,36 @@ func (v *View) Quit() bool {
 	// Make sure not to quit if there are unsaved changes
 	if views[mainView].CanClose("Quit anyway? (yes, no, save) ") {
 		views[mainView].CloseBuffer()
-		screen.Fini()
-		os.Exit(0)
+		if len(views) > 1 {
+			views = views[:v.Num+copy(views[v.Num:], views[v.Num+1:])]
+			for i, v := range views {
+				v.Num = i
+			}
+			if v.Num <= mainView {
+				if !(v.Num == mainView && mainView == 0) {
+					mainView--
+				}
+			}
+		} else {
+			screen.Fini()
+			os.Exit(0)
+		}
 	}
 	return false
+}
+
+func (v *View) LastView() bool {
+	if mainView > 0 {
+		mainView--
+	}
+	return true
+}
+
+func (v *View) NextView() bool {
+	if mainView < len(views)-1 {
+		mainView++
+	}
+	return true
 }
 
 // None is no action
