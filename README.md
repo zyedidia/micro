@@ -16,21 +16,21 @@ Here is a picture of micro editing its source code.
 
 # Features
 
-* Easy to use
+* Easy to use and to install
+* No dependencies or external files are needed -- just the binary you can download further down the page
 * Common keybindings (ctrl-s, ctrl-c, ctrl-v, ctrl-z...)
+    * Keybindings can be rebound to your liking
 * Extremely good mouse support
-* Cross platform
-* Syntax highlighting (in over [75 languages](runtime/syntax)!)
+* Cross platform (It should work on all the platforms Go runs on)
+* Plugin system (plugins are written in Lua)
+* Syntax highlighting (for over [75 languages](runtime/syntax)!)
 * Colorscheme support
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
-* Search and replace
 * Sane defaults
-* Plugin system (plugins are written in Lua)
-* Undo and redo
-* Unicode support
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
+* Common editor things such as undo/redo, line numbers, unicode support...
 
 # Installation
 
@@ -61,7 +61,7 @@ Nightly binaries:
 * [Windows 64](http://zbyedidia.webfactional.com/micro/binaries/micro-win64.zip)
 * [Windows 32](http://zbyedidia.webfactional.com/micro/binaries/micro-win32.zip)
 
-To run the micro binary just run `./bin/micro` (you probably want to place the binary on your `$PATH` for ease of use).
+To run the micro binary just run `./micro` (you probably want to place the binary on your `$PATH` for ease of use).
 
 ### Building from source
 
