@@ -591,7 +591,9 @@ func (v *View) DisplayView() {
 					}
 				}
 				indentChar := []rune(settings["indentchar"].(string))
-				screen.SetContent(x-v.leftCol, lineN, indentChar[0], nil, lineIndentStyle)
+				if x-v.leftCol >= v.lineNumOffset {
+					screen.SetContent(x-v.leftCol, lineN, indentChar[0], nil, lineIndentStyle)
+				}
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					x++
@@ -626,7 +628,7 @@ func (v *View) DisplayView() {
 
 		charNum++
 
-		for i := 0; i < v.width-x; i++ {
+		for i := 0; i < v.width-(x-v.leftCol); i++ {
 			lineStyle := tcell.StyleDefault
 			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
@@ -634,7 +636,9 @@ func (v *View) DisplayView() {
 					lineStyle = lineStyle.Background(fg)
 				}
 			}
-			screen.SetContent(x+i, lineN, ' ', nil, lineStyle)
+			if !(x-v.leftCol < v.lineNumOffset) {
+				screen.SetContent(x-v.leftCol+i, lineN, ' ', nil, lineStyle)
+			}
 		}
 	}
 }
