@@ -7,6 +7,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/tcell"
 )
 
@@ -596,6 +597,16 @@ func (v *View) DisplayView() {
 				}
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
+					x++
+					if x-v.leftCol >= v.lineNumOffset {
+						screen.SetContent(x-v.leftCol, lineN, ' ', nil, lineStyle)
+					}
+				}
+			} else if runewidth.RuneWidth(ch) > 1 {
+				if x-v.leftCol >= v.lineNumOffset {
+					screen.SetContent(x-v.leftCol, lineN, ch, nil, lineStyle)
+				}
+				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
 						screen.SetContent(x-v.leftCol, lineN, ' ', nil, lineStyle)

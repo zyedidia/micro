@@ -1,9 +1,5 @@
 package main
 
-import (
-	"strings"
-)
-
 // FromCharPos converts from a character position to an x, y position
 func FromCharPos(loc int, buf *Buffer) (int, int) {
 	return FromCharPosStart(0, 0, 0, loc, buf)
@@ -357,13 +353,13 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
 	tabSize := int(settings["tabsize"].(float64))
 	// This is the visual line -- every \t replaced with the correct number of spaces
-	visualLine := strings.Replace(c.buf.Lines[lineNum], "\t", "\t"+Spaces(tabSize-1), -1)
-	if visualPos > Count(visualLine) {
-		visualPos = Count(visualLine)
+	visualLineLen := StringWidth(c.buf.Lines[lineNum])
+	if visualPos > visualLineLen {
+		visualPos = visualLineLen
 	}
-	numTabs := NumOccurences(visualLine[:visualPos], '\t')
-	if visualPos >= (tabSize-1)*numTabs {
-		return visualPos - (tabSize-1)*numTabs
+	width := WidthOfLargeRunes(c.buf.Lines[lineNum])
+	if visualPos >= width {
+		return visualPos - width
 	}
 	return visualPos / tabSize
 }
@@ -371,8 +367,7 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.buf.Lines[c.Y])
-	tabSize := int(settings["tabsize"].(float64))
-	return c.X + NumOccurences(string(runes[:c.X]), '\t')*(tabSize-1)
+	return StringWidth(string(runes[:c.X]))
 }
 
 // Relocate makes sure that the cursor is inside the bounds of the buffer

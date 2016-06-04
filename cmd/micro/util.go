@@ -7,6 +7,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/mattn/go-runewidth"
 )
 
 // Util.go is a collection of utility functions that are used throughout
@@ -136,6 +138,28 @@ func GetModTime(path string) (time.Time, bool) {
 		return time.Now(), false
 	}
 	return info.ModTime(), true
+}
+
+func StringWidth(str string) int {
+	sw := runewidth.StringWidth(str)
+	sw += NumOccurences(str, '\t') * (int(settings["tabsize"].(float64)) - 1)
+	return sw
+}
+
+func WidthOfLargeRunes(str string) int {
+	count := 0
+	for _, ch := range str {
+		var w int
+		if ch == '\t' {
+			w = int(settings["tabsize"].(float64))
+		} else {
+			w = runewidth.RuneWidth(ch)
+		}
+		if w > 1 {
+			count += (w - 1)
+		}
+	}
+	return count
 }
 
 func runePos(p int, str string) int {
