@@ -269,7 +269,7 @@ func (b *Buffer) Start() Loc {
 
 // End returns the location of the last character in the buffer
 func (b *Buffer) End() Loc {
-	return Loc{utf8.RuneCount(b.lines[len(b.lines)-1]), b.NumLines - 1}
+	return Loc{utf8.RuneCount(b.lines[b.NumLines-1]), b.NumLines - 1}
 }
 
 // Line returns a single line

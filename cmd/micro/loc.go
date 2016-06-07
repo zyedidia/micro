@@ -85,7 +85,7 @@ func (l Loc) LessEqual(b Loc) bool {
 
 func (l Loc) right(buf *Buffer) Loc {
 	if l == buf.End() {
-		return l
+		return Loc{l.X + 1, l.Y}
 	}
 	var res Loc
 	if l.X < Count(buf.Line(l.Y)) {
@@ -97,7 +97,7 @@ func (l Loc) right(buf *Buffer) Loc {
 }
 func (l Loc) left(buf *Buffer) Loc {
 	if l == buf.Start() {
-		return l
+		return Loc{l.X - 1, l.Y}
 	}
 	var res Loc
 	if l.X > 0 {
