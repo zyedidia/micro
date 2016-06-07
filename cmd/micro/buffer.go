@@ -83,7 +83,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 			gob.Register(TextEvent{})
 			err = decoder.Decode(&buffer)
 			if err != nil {
-				TermMessage(err.Error())
+				TermMessage(err.Error(), "\n", "You may want to remove the files in ~/.config/micro/buffers (these files store the information for the 'saveundo' and 'savecursor' options) if this problem persists.")
 			}
 			if settings["savecursor"].(bool) {
 				b.Cursor = buffer.Cursor
