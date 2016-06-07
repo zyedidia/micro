@@ -115,7 +115,7 @@ func (l Loc) Move(n int, buf *Buffer) Loc {
 		}
 		return l
 	}
-	for i := 0; i < n; i++ {
+	for i := 0; i < Abs(n); i++ {
 		return l.left(buf)
 	}
 	return l
