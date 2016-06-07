@@ -83,7 +83,7 @@ func (l Loc) LessEqual(b Loc) bool {
 	return false
 }
 
-func (l Loc) right(n int, buf *Buffer) Loc {
+func (l Loc) right(buf *Buffer) Loc {
 	if l == buf.End() {
 		return l
 	}
@@ -95,7 +95,7 @@ func (l Loc) right(n int, buf *Buffer) Loc {
 	}
 	return res
 }
-func (l Loc) left(n int, buf *Buffer) Loc {
+func (l Loc) left(buf *Buffer) Loc {
 	if l == buf.Start() {
 		return l
 	}
@@ -110,9 +110,15 @@ func (l Loc) left(n int, buf *Buffer) Loc {
 
 func (l Loc) Move(n int, buf *Buffer) Loc {
 	if n > 0 {
-		return l.right(n, buf)
+		for i := 0; i < n; i++ {
+			l = l.right(buf)
+		}
+		return l
 	}
-	return l.left(Abs(n), buf)
+	for i := 0; i < n; i++ {
+		return l.left(buf)
+	}
+	return l
 }
 
 // func (l Loc) DistanceTo(b Loc, buf *Buffer) int {
