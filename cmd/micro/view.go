@@ -251,8 +251,8 @@ func (v *View) MoveToMouseClick(x, y int) {
 	}
 
 	x = v.Cursor.GetCharPosInLine(y, x)
-	if x > Count(v.Buf.Lines[y]) {
-		x = Count(v.Buf.Lines[y])
+	if x > Count(v.Buf.Line(y)) {
+		x = Count(v.Buf.Line(y))
 	}
 	v.Cursor.X = x
 	v.Cursor.Y = y
@@ -278,7 +278,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				v.Cursor.DeleteSelection()
 				v.Cursor.ResetSelection()
 			}
-			v.Buf.Insert(v.Cursor.Loc(), string(e.Rune()))
+			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
 			v.Cursor.Right()
 		} else {
 			for key, actions := range bindings {
@@ -310,8 +310,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Cursor.ResetSelection()
 		}
 		clip := e.Text()
-		v.Buf.Insert(v.Cursor.Loc(), clip)
-		v.Cursor.SetLoc(v.Cursor.Loc() + Count(clip))
+		v.Buf.Insert(v.Cursor.Loc, clip)
+		v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
 		v.freshClip = false
 	case *tcell.EventMouse:
 		x, y := e.Position()
@@ -350,10 +350,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.tripleClick = false
 					v.lastClickTime = time.Now()
 
-					loc := v.Cursor.Loc()
-					v.Cursor.OrigSelection[0] = loc
-					v.Cursor.CurSelection[0] = loc
-					v.Cursor.CurSelection[1] = loc
+					v.Cursor.OrigSelection[0] = v.Cursor.Loc
+					v.Cursor.CurSelection[0] = v.Cursor.Loc
+					v.Cursor.CurSelection[1] = v.Cursor.Loc
 				}
 				v.mouseReleased = false
 			} else if !v.mouseReleased {
@@ -363,7 +362,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
-					v.Cursor.CurSelection[1] = v.Cursor.Loc()
+					v.Cursor.CurSelection[1] = v.Cursor.Loc
 				}
 			}
 		case tcell.ButtonNone:
@@ -379,7 +378,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.Cursor.CurSelection[1] = v.Cursor.Loc()
+					v.Cursor.CurSelection[1] = v.Cursor.Loc
 				}
 				v.mouseReleased = true
 			}
@@ -436,7 +435,7 @@ func (v *View) ClearAllGutterMessages() {
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
 	// The character number of the character in the top left of the screen
-	charNum := ToCharPos(0, v.Topline, v.Buf)
+	charNum := Loc{0, v.Topline}
 
 	// Convert the length of buffer to a string, and get the length of the string
 	// We are going to have to offset by that amount
@@ -470,7 +469,7 @@ func (v *View) DisplayView() {
 
 			continue
 		}
-		line := v.Buf.Lines[lineN+v.Topline]
+		line := v.Buf.Line(lineN + v.Topline)
 
 		if hasGutterMessages {
 			msgOnLine := false
@@ -551,8 +550,8 @@ func (v *View) DisplayView() {
 			}
 
 			if v.Cursor.HasSelection() &&
-				(charNum >= v.Cursor.CurSelection[0] && charNum < v.Cursor.CurSelection[1] ||
-					charNum < v.Cursor.CurSelection[0] && charNum >= v.Cursor.CurSelection[1]) {
+				(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
+					charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
 
 				lineStyle = tcell.StyleDefault.Reverse(true)
 
@@ -576,8 +575,8 @@ func (v *View) DisplayView() {
 					lineIndentStyle = style
 				}
 				if v.Cursor.HasSelection() &&
-					(charNum >= v.Cursor.CurSelection[0] && charNum < v.Cursor.CurSelection[1] ||
-						charNum < v.Cursor.CurSelection[0] && charNum >= v.Cursor.CurSelection[1]) {
+					(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
+						charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
 
 					lineIndentStyle = tcell.StyleDefault.Reverse(true)
 
@@ -617,7 +616,7 @@ func (v *View) DisplayView() {
 					screen.SetContent(x-v.leftCol, lineN, ch, nil, lineStyle)
 				}
 			}
-			charNum++
+			charNum = charNum.Move(1, v.Buf)
 			x++
 		}
 		// Here we are at a newline
@@ -625,8 +624,8 @@ func (v *View) DisplayView() {
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
 		if v.Cursor.HasSelection() &&
-			(charNum >= v.Cursor.CurSelection[0] && charNum < v.Cursor.CurSelection[1] ||
-				charNum < v.Cursor.CurSelection[0] && charNum >= v.Cursor.CurSelection[1]) {
+			(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
+				charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
 
 			selectStyle := defStyle.Reverse(true)
 
@@ -637,7 +636,7 @@ func (v *View) DisplayView() {
 			x++
 		}
 
-		charNum++
+		charNum = charNum.Move(1, v.Buf)
 
 		for i := 0; i < v.width-(x-v.leftCol); i++ {
 			lineStyle := tcell.StyleDefault

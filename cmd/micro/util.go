@@ -165,3 +165,11 @@ func WidthOfLargeRunes(str string) int {
 func runePos(p int, str string) int {
 	return utf8.RuneCountInString(str[:p])
 }
+
+// Abs is a simple absolute value function for ints
+func Abs(n int) int {
+	if n < 0 {
+		return -n
+	}
+	return n
+}

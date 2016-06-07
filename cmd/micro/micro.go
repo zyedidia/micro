@@ -210,7 +210,7 @@ func main() {
 	// Load the help files
 	LoadHelp()
 
-	buf := NewBuffer(string(input), filename)
+	buf := NewBuffer(input, filename)
 
 	InitScreen()
 

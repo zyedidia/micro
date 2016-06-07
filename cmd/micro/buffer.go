@@ -8,10 +8,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"time"
-
-	"github.com/vinzmay/go-rope"
+	"unicode/utf8"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -20,9 +18,7 @@ import (
 type Buffer struct {
 	// The eventhandler for undo/redo
 	*EventHandler
-
-	// Stores the text of the buffer
-	r *rope.Rope
+	*LineArray
 
 	Cursor Cursor
 
@@ -36,10 +32,6 @@ type Buffer struct {
 	// Stores the last modification time of the file the buffer is pointing to
 	ModTime time.Time
 
-	// Provide efficient and easy access to text and lines so the rope String does not
-	// need to be constantly recalculated
-	// These variables are updated in the update() function
-	Lines    []string
 	NumLines int
 
 	// Syntax highlighting rules
@@ -56,13 +48,9 @@ type SerializedBuffer struct {
 }
 
 // NewBuffer creates a new buffer from `txt` with path and name `path`
-func NewBuffer(txt, path string) *Buffer {
+func NewBuffer(txt []byte, path string) *Buffer {
 	b := new(Buffer)
-	if txt == "" {
-		b.r = new(rope.Rope)
-	} else {
-		b.r = rope.New(txt)
-	}
+	b.LineArray = NewLineArray(txt)
 	b.Path = path
 	b.Name = path
 
@@ -79,8 +67,10 @@ func NewBuffer(txt, path string) *Buffer {
 
 	// Put the cursor at the first spot
 	b.Cursor = Cursor{
-		X:   0,
-		Y:   0,
+		Loc: Loc{
+			X: 0,
+			Y: 0,
+		},
 		buf: b,
 	}
 
@@ -119,13 +109,6 @@ func NewBuffer(txt, path string) *Buffer {
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
 	b.rules, b.FileType = GetRules(b)
-}
-
-func (b *Buffer) String() string {
-	if b.r.Len() != 0 {
-		return b.r.String()
-	}
-	return ""
 }
 
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
@@ -168,8 +151,7 @@ func (b *Buffer) ReOpen() {
 
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
-	b.Lines = strings.Split(b.String(), "\n")
-	b.NumLines = len(b.Lines)
+	b.NumLines = len(b.lines)
 }
 
 // Save saves the buffer to its default path
@@ -268,42 +250,44 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	return err
 }
 
-// This directly inserts value at idx, bypassing all undo/redo
-func (b *Buffer) insert(idx int, value string) {
+func (b *Buffer) insert(pos Loc, value []byte) {
 	b.IsModified = true
-	b.r = b.r.Insert(idx, value)
+	b.LineArray.insert(pos, value)
 	b.Update()
 }
-
-// Remove a slice of the rope from start to end (exclusive)
-// Returns the string that was removed
-// This directly removes from start to end from the buffer, bypassing all undo/redo
-func (b *Buffer) remove(start, end int) string {
+func (b *Buffer) remove(start, end Loc) string {
 	b.IsModified = true
-	if start < 0 {
-		start = 0
-	}
-	if end > b.Len() {
-		end = b.Len()
-	}
-	if start == end {
-		return ""
-	}
-	removed := b.Substr(start, end)
-	// The rope implenentation I am using wants indicies starting at 1 instead of 0
-	start++
-	end++
-	b.r = b.r.Delete(start, end-start)
+	sub := b.LineArray.remove(start, end)
 	b.Update()
-	return removed
+	return sub
 }
 
-// Substr returns the substring of the rope from start to end
-func (b *Buffer) Substr(start, end int) string {
-	return b.r.Substr(start+1, end-start).String()
+// Start returns the location of the first character in the buffer
+func (b *Buffer) Start() Loc {
+	return Loc{0, 0}
+}
+
+// End returns the location of the last character in the buffer
+func (b *Buffer) End() Loc {
+	return Loc{utf8.RuneCount(b.lines[len(b.lines)-1]), b.NumLines - 1}
+}
+
+// Line returns a single line
+func (b *Buffer) Line(n int) string {
+	return string(b.lines[n])
+}
+
+// Lines returns an array of strings containing the lines from start to end
+func (b *Buffer) Lines(start, end int) []string {
+	lines := b.lines[start:end]
+	var slice []string
+	for _, line := range lines {
+		slice = append(slice, string(line))
+	}
+	return slice
 }
 
 // Len gives the length of the buffer
 func (b *Buffer) Len() int {
-	return b.r.Len()
+	return Count(b.String())
 }

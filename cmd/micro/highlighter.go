@@ -366,7 +366,7 @@ func GetRules(buf *Buffer) ([]SyntaxRule, string) {
 		if r[0] != nil && r[0].MatchString(buf.Path) {
 			// Check if the syntax statement matches the extension
 			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename), syntaxFiles[r].filetype
-		} else if r[1] != nil && r[1].MatchString(buf.Lines[0]) {
+		} else if r[1] != nil && r[1].MatchString(buf.Line(0)) {
 			// Check if the header statement matches the first line
 			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename), syntaxFiles[r].filetype
 		}
@@ -390,7 +390,7 @@ func Match(v *View) SyntaxMatches {
 		viewEnd = buf.NumLines
 	}
 
-	lines := buf.Lines[viewStart:viewEnd]
+	lines := buf.Lines(viewStart, viewEnd)
 	matches := make(SyntaxMatches, len(lines))
 
 	for i, line := range lines {
@@ -407,10 +407,10 @@ func Match(v *View) SyntaxMatches {
 		totalEnd = buf.NumLines
 	}
 
-	str := strings.Join(buf.Lines[totalStart:totalEnd], "\n")
-	startNum := ToCharPos(0, totalStart, v.Buf)
+	str := strings.Join(buf.Lines(totalStart, totalEnd), "\n")
+	startNum := ToCharPos(Loc{0, totalStart}, v.Buf)
 
-	toplineNum := ToCharPos(0, v.Topline, v.Buf)
+	toplineNum := ToCharPos(Loc{0, v.Topline}, v.Buf)
 
 	for _, rule := range rules {
 		if rule.startend {
@@ -422,7 +422,8 @@ func Match(v *View) SyntaxMatches {
 						if i < toplineNum {
 							continue
 						}
-						colNum, lineNum := FromCharPosStart(toplineNum, 0, v.Topline, i, buf)
+						loc := FromCharPos(i, buf)
+						colNum, lineNum := loc.X, loc.Y
 						if lineNum == -1 || colNum == -1 {
 							continue
 						}

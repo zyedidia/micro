@@ -21,15 +21,15 @@ type TextEvent struct {
 
 	EventType int
 	Text      string
-	Start     int
-	End       int
+	Start     Loc
+	End       Loc
 	Time      time.Time
 }
 
 // ExecuteTextEvent runs a text event
 func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
 	if t.EventType == TextEventInsert {
-		buf.insert(t.Start, t.Text)
+		buf.insert(t.Start, []byte(t.Text))
 	} else if t.EventType == TextEventRemove {
 		t.Text = buf.remove(t.Start, t.End)
 	}
@@ -64,32 +64,32 @@ func NewEventHandler(buf *Buffer) *EventHandler {
 func (eh *EventHandler) ApplyDiff(new string) {
 	differ := dmp.New()
 	diff := differ.DiffMain(eh.buf.String(), new, false)
-	var charNum int
+	loc := eh.buf.Start()
 	for _, d := range diff {
 		if d.Type == dmp.DiffInsert {
-			eh.Insert(charNum, d.Text)
+			eh.Insert(loc, d.Text)
 		} else if d.Type == dmp.DiffDelete {
-			eh.Remove(charNum, charNum+Count(d.Text))
+			eh.Remove(loc, loc.Move(Count(d.Text), eh.buf))
 		}
-		charNum += Count(d.Text)
+		loc = loc.Move(Count(d.Text), eh.buf)
 	}
 }
 
 // Insert creates an insert text event and executes it
-func (eh *EventHandler) Insert(start int, text string) {
+func (eh *EventHandler) Insert(start Loc, text string) {
 	e := &TextEvent{
 		C:         eh.buf.Cursor,
 		EventType: TextEventInsert,
 		Text:      text,
 		Start:     start,
-		End:       start + Count(text),
+		End:       start.Move(Count(text), eh.buf),
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
 }
 
 // Remove creates a remove text event and executes it
-func (eh *EventHandler) Remove(start, end int) {
+func (eh *EventHandler) Remove(start, end Loc) {
 	e := &TextEvent{
 		C:         eh.buf.Cursor,
 		EventType: TextEventRemove,
@@ -101,7 +101,7 @@ func (eh *EventHandler) Remove(start, end int) {
 }
 
 // Replace deletes from start to end and replaces it with the given string
-func (eh *EventHandler) Replace(start, end int, replace string) {
+func (eh *EventHandler) Replace(start, end Loc, replace string) {
 	eh.Remove(start, end)
 	eh.Insert(start, replace)
 }

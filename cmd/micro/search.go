@@ -125,9 +125,9 @@ func Search(searchStr string, v *View, down bool) {
 		return
 	}
 
-	v.Cursor.CurSelection[0] = charPos + runePos(match[0], str)
-	v.Cursor.CurSelection[1] = charPos + runePos(match[1], str)
-	v.Cursor.X, v.Cursor.Y = FromCharPos(charPos+match[1]-1, v.Buf)
+	v.Cursor.CurSelection[0] = FromCharPos(charPos+runePos(match[0], str), v.Buf)
+	v.Cursor.CurSelection[1] = FromCharPos(charPos+runePos(match[1], str), v.Buf)
+	v.Cursor.Loc = FromCharPos(charPos+match[1]-1, v.Buf)
 	if v.Relocate() {
 		v.matches = Match(v)
 	}
