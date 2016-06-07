@@ -82,10 +82,10 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 		EventType: TextEventInsert,
 		Text:      text,
 		Start:     start,
-		End:       start.Move(Count(text), eh.buf),
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
+	e.End = start.Move(Count(text), eh.buf)
 }
 
 // Remove creates a remove text event and executes it
