@@ -1096,6 +1096,10 @@ func (v *View) Quit() bool {
 				if curTab >= len(tabs) {
 					curTab--
 				}
+				if curTab == 0 {
+					tab := tabs[curTab]
+					tab.views[tab.curView].Resize(screen.Size())
+				}
 			}
 		} else {
 			screen.Fini()
