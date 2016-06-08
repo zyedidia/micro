@@ -99,7 +99,7 @@ func NewView(buf *Buffer) *View {
 func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v := new(View)
 
-	v.x, v.y = 0, 1
+	v.x, v.y = 0, 0
 
 	v.widthPercent = w
 	v.heightPercent = h
@@ -123,8 +123,11 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 func (v *View) Resize(w, h int) {
 	// Always include 1 line for the command line at the bottom
 	h--
-	// Include one line for the tab bar at the top
-	h--
+	if len(tabs) > 1 {
+		// Include one line for the tab bar at the top
+		h--
+		v.y = 1
+	}
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
 	v.height = int(float32(h) * float32(v.heightPercent) / 100)

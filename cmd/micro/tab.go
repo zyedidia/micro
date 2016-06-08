@@ -31,6 +31,9 @@ func CurView() *View {
 }
 
 func DisplayTabs() {
+	if len(tabs) <= 1 {
+		return
+	}
 	str := ""
 	for i, t := range tabs {
 		if i == curTab {

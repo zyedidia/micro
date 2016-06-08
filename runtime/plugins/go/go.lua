@@ -9,7 +9,7 @@ MakeCommand("goimports", "go_goimports")
 MakeCommand("gofmt", "go_gofmt")
 
 function go_onSave()
-    if views[mainView+1].Buf.FileType == "Go" then
+    if CurView().Buf.FileType == "Go" then
         if GetOption("goimports") then
             go_goimports()
         elseif GetOption("gofmt") then
@@ -19,21 +19,21 @@ function go_onSave()
 end
 
 function go_gofmt()
-    views[mainView+1]:Save()
-    local handle = io.popen("gofmt -w " .. views[mainView+1].Buf.Path)
+    CurView():Save()
+    local handle = io.popen("gofmt -w " .. CurView().Buf.Path)
     local result = handle:read("*a")
     handle:close()
 
-    views[mainView+1]:ReOpen()
+    CurView():ReOpen()
 end
 
 function go_goimports()
-    views[mainView+1]:Save()
-    local handle = io.popen("goimports -w " .. views[mainView+1].Buf.Path)
+    CurView():Save()
+    local handle = io.popen("goimports -w " .. CurView().Buf.Path)
     local result = go_split(handle:read("*a"), ":")
     handle:close()
 
-    views[mainView+1]:ReOpen()
+    CurView():ReOpen()
 end
 
 function go_split(str, sep)
