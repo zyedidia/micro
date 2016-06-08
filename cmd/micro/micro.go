@@ -236,7 +236,14 @@ func main() {
 
 	buffers := LoadInput()
 	for _, buf := range buffers {
-		tabs = append(tabs, NewTabFromView(NewView(buf)))
+		tab := NewTabFromView(NewView(buf))
+		tab.SetNum(len(tabs))
+		tabs = append(tabs, tab)
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.Resize(screen.Size())
+			}
+		}
 	}
 
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
