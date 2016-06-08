@@ -2,6 +2,7 @@ syntax "css" "\.(css|scss)$"
 
 # Classes and IDs
 color statement (i) "."
+color normal start="\{" end="\}"
 color identifier ":active|:focus|:hover|:link|:visited|:link|:after|:before|$"
 
 # css commands
