@@ -1097,8 +1097,8 @@ func (v *View) Quit() bool {
 					curTab--
 				}
 				if curTab == 0 {
-					tab := tabs[curTab]
-					tab.views[tab.curView].Resize(screen.Size())
+					CurView().Resize(screen.Size())
+					CurView().matches = Match(CurView())
 				}
 			}
 		} else {
@@ -1114,6 +1114,13 @@ func (v *View) AddTab() bool {
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
 	curTab++
+	if len(tabs) == 2 {
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.Resize(screen.Size())
+			}
+		}
+	}
 	return true
 }
 
@@ -1121,14 +1128,14 @@ func (v *View) LastTab() bool {
 	if curTab > 0 {
 		curTab--
 	}
-	return true
+	return false
 }
 
 func (v *View) NextTab() bool {
 	if curTab < len(tabs)-1 {
 		curTab++
 	}
-	return true
+	return false
 }
 
 // None is no action

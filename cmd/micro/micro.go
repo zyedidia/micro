@@ -257,6 +257,9 @@ func main() {
 
 		// Wait for the user's action
 		event := screen.PollEvent()
+		if TabbarHandleMouseEvent(event) {
+			continue
+		}
 
 		if searching {
 			// Since searching is done in real time, we need to redraw every time

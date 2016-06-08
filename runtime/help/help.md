@@ -63,6 +63,7 @@ you can rebind them to your liking.
     "CtrlD":          "DuplicateLine",
     "CtrlV":          "Paste",
     "CtrlA":          "SelectAll",
+    "CtrlT":          "AddTab"
     "Home":           "Start",
     "End":            "End",
     "PageUp":         "CursorPageUp",

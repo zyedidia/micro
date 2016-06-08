@@ -1,5 +1,11 @@
 package main
 
+import (
+	"sort"
+
+	"github.com/zyedidia/tcell"
+)
+
 type Tab struct {
 	// This contains all the views in this tab
 	// There is generally only one view per tab, but you can have
@@ -30,11 +36,10 @@ func CurView() *View {
 	return curTab.views[curTab.curView]
 }
 
-func DisplayTabs() {
-	if len(tabs) <= 1 {
-		return
-	}
+func TabbarString() (string, map[int]int) {
 	str := ""
+	indicies := make(map[int]int)
+	indicies[0] = 0
 	for i, t := range tabs {
 		if i == curTab {
 			str += "["
@@ -47,8 +52,55 @@ func DisplayTabs() {
 		} else {
 			str += " "
 		}
+		indicies[len(str)-1] = i + 1
 		str += " "
 	}
+	return str, indicies
+}
+
+func TabbarHandleMouseEvent(event tcell.Event) bool {
+	if len(tabs) <= 1 {
+		return false
+	}
+
+	switch e := event.(type) {
+	case *tcell.EventMouse:
+		button := e.Buttons()
+		if button == tcell.Button1 {
+			x, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			str, indicies := TabbarString()
+			if x >= len(str) {
+				return false
+			}
+			var tabnum int
+			var keys []int
+			for k := range indicies {
+				keys = append(keys, k)
+			}
+			sort.Ints(keys)
+			for _, k := range keys {
+				if x <= k {
+					tabnum = indicies[k] - 1
+					break
+				}
+			}
+			curTab = tabnum
+			return true
+		}
+	}
+
+	return false
+}
+
+func DisplayTabs() {
+	if len(tabs) <= 1 {
+		return
+	}
+
+	str, _ := TabbarString()
 
 	tabBarStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["tabbar"]; ok {
