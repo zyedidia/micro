@@ -51,8 +51,13 @@ type SerializedBuffer struct {
 func NewBuffer(txt []byte, path string) *Buffer {
 	b := new(Buffer)
 	b.LineArray = NewLineArray(txt)
+
 	b.Path = path
 	b.Name = path
+
+	if path == "" {
+		b.Name = "No name"
+	}
 
 	b.ModTime, _ = GetModTime(b.Path)
 

@@ -48,14 +48,14 @@ var (
 	L *lua.LState
 
 	// The list of views
-	views []*View
-	// This is the currently open view
-	// It's just an index to the view in the views array
-	mainView int
+	tabs []*Tab
+	// This is the currently open tab
+	// It's just an index to the tab in the tabs array
+	curTab int
 )
 
 // LoadInput loads the file input for the editor
-func LoadInput() (string, []byte, error) {
+func LoadInput() []*Buffer {
 	// There are a number of ways micro should start given its input
 
 	// 1. If it is given a file in os.Args, it should open that
@@ -72,23 +72,34 @@ func LoadInput() (string, []byte, error) {
 	var filename string
 	var input []byte
 	var err error
+	var buffers []*Buffer
 
 	if len(os.Args) > 1 {
 		// Option 1
-		filename = os.Args[1]
-		// Check that the file exists
-		if _, e := os.Stat(filename); e == nil {
-			input, err = ioutil.ReadFile(filename)
+		for i := 1; i < len(os.Args); i++ {
+			filename = os.Args[i]
+			// Check that the file exists
+			if _, e := os.Stat(filename); e == nil {
+				input, err = ioutil.ReadFile(filename)
+				if err != nil {
+					TermMessage(err)
+					continue
+				}
+			}
+			buffers = append(buffers, NewBuffer(input, filename))
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
 		input, err = ioutil.ReadAll(os.Stdin)
+		buffers = append(buffers, NewBuffer(input, filename))
+	} else {
+		// Option 3, just open an empty buffer
+		buffers = append(buffers, NewBuffer(input, filename))
 	}
 
-	// Option 3, or just return whatever we got
-	return filename, input, err
+	return buffers
 }
 
 // InitConfigDir finds the configuration directory for micro according to the XDG spec.
@@ -170,9 +181,10 @@ func InitScreen() {
 // RedrawAll redraws everything -- all the views and the messenger
 func RedrawAll() {
 	messenger.Clear()
-	for _, v := range views {
+	for _, v := range tabs[curTab].views {
 		v.Display()
 	}
+	DisplayTabs()
 	messenger.Display()
 	screen.Show()
 }
@@ -184,12 +196,6 @@ func main() {
 	if *flagVersion {
 		fmt.Println("Micro version:", Version)
 		os.Exit(0)
-	}
-
-	filename, input, err := LoadInput()
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
 	}
 
 	L = lua.NewState()
@@ -210,8 +216,6 @@ func main() {
 	// Load the help files
 	LoadHelp()
 
-	buf := NewBuffer(input, filename)
-
 	InitScreen()
 
 	// This is just so if we have an error, we can exit cleanly and not completely
@@ -229,17 +233,21 @@ func main() {
 
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
-	views = make([]*View, 1)
-	views[0] = NewView(buf)
+
+	buffers := LoadInput()
+	for _, buf := range buffers {
+		tabs = append(tabs, NewTabFromView(NewView(buf)))
+	}
 
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
-	L.SetGlobal("views", luar.New(L, views))
-	L.SetGlobal("mainView", luar.New(L, mainView))
+	L.SetGlobal("tabs", luar.New(L, tabs))
+	L.SetGlobal("curTab", luar.New(L, curTab))
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
 	L.SetGlobal("AddOption", luar.New(L, AddOption))
 	L.SetGlobal("BindKey", luar.New(L, BindKey))
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
+	L.SetGlobal("CurView", luar.New(L, CurView))
 
 	LoadPlugins()
 
@@ -249,14 +257,17 @@ func main() {
 
 		// Wait for the user's action
 		event := screen.PollEvent()
+		if TabbarHandleMouseEvent(event) {
+			continue
+		}
 
 		if searching {
 			// Since searching is done in real time, we need to redraw every time
 			// there is a new event in the search bar
-			HandleSearchEvent(event, views[mainView])
+			HandleSearchEvent(event, CurView())
 		} else {
 			// Send it to the view
-			views[mainView].HandleEvent(event)
+			CurView().HandleEvent(event)
 		}
 	}
 }

@@ -73,6 +73,9 @@ var bindingActions = map[string]func(*View) bool{
 	"ShellMode":           (*View).ShellMode,
 	"CommandMode":         (*View).CommandMode,
 	"Quit":                (*View).Quit,
+	"AddTab":              (*View).AddTab,
+	"PreviousTab":         (*View).PreviousTab,
+	"NextTab":             (*View).NextTab,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -380,6 +383,9 @@ func DefaultBindings() map[string]string {
 		"CtrlD":          "DuplicateLine",
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
+		"CtrlT":          "AddTab",
+		"CtrlRightSq":    "PreviousTab",
+		"CtrlBackslash":  "NextTab",
 		"Home":           "Start",
 		"End":            "End",
 		"PageUp":         "CursorPageUp",
@@ -902,7 +908,7 @@ func (v *View) OpenFile() bool {
 	if v.CanClose("Continue? (yes, no, save) ") {
 		filename, canceled := messenger.Prompt("File to open: ", "Open")
 		if canceled {
-			return true
+			return false
 		}
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
@@ -910,12 +916,13 @@ func (v *View) OpenFile() bool {
 
 		if err != nil {
 			messenger.Error(err.Error())
-			return true
+			return false
 		}
 		buf := NewBuffer(file, filename)
 		v.OpenBuffer(buf)
+		return true
 	}
-	return true
+	return false
 }
 
 // Start moves the viewport to the start of the buffer
@@ -1080,10 +1087,55 @@ func (v *View) Quit() bool {
 		return v.ToggleHelp()
 	}
 	// Make sure not to quit if there are unsaved changes
-	if views[mainView].CanClose("Quit anyway? (yes, no, save) ") {
-		views[mainView].CloseBuffer()
-		screen.Fini()
-		os.Exit(0)
+	if v.CanClose("Quit anyway? (yes, no, save) ") {
+		v.CloseBuffer()
+		if len(tabs) > 1 {
+			if len(tabs[v.TabNum].views) == 1 {
+				tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
+				for i, t := range tabs {
+					t.SetNum(i)
+				}
+				if curTab >= len(tabs) {
+					curTab--
+				}
+				if curTab == 0 {
+					CurView().Resize(screen.Size())
+					CurView().matches = Match(CurView())
+				}
+			}
+		} else {
+			screen.Fini()
+			os.Exit(0)
+		}
+	}
+	return false
+}
+
+func (v *View) AddTab() bool {
+	tab := NewTabFromView(NewView(NewBuffer([]byte{}, "")))
+	tab.SetNum(len(tabs))
+	tabs = append(tabs, tab)
+	curTab++
+	if len(tabs) == 2 {
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.Resize(screen.Size())
+			}
+		}
+	}
+	return true
+}
+
+func (v *View) PreviousTab() bool {
+	if curTab > 0 {
+		curTab--
+	}
+	return false
+}
+
+func (v *View) NextTab() bool {
+	if curTab < len(tabs)-1 {
+		curTab++
 	}
 	return false
 }
