@@ -92,7 +92,7 @@ func (la *LineArray) remove(start, end Loc) string {
 		la.lines[start.Y] = append(la.lines[start.Y][:startX], la.lines[start.Y][endX:]...)
 	} else {
 		for i := start.Y + 1; i <= end.Y-1; i++ {
-			la.DeleteLine(i)
+			la.DeleteLine(start.Y + 1)
 		}
 		la.DeleteToEnd(Loc{startX, start.Y})
 		la.DeleteFromStart(Loc{endX - 1, start.Y + 1})
