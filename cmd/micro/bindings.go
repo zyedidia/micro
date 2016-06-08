@@ -54,6 +54,7 @@ var bindingActions = map[string]func(*View) bool{
 	"Cut":                 (*View).Cut,
 	"CutLine":             (*View).CutLine,
 	"DuplicateLine":       (*View).DuplicateLine,
+	"DeleteLine":          (*View).DeleteLine,
 	"Paste":               (*View).Paste,
 	"SelectAll":           (*View).SelectAll,
 	"OpenFile":            (*View).OpenFile,
@@ -856,6 +857,18 @@ func (v *View) DuplicateLine() bool {
 	v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
 	v.Cursor.Right()
 	messenger.Message("Duplicated line")
+	return true
+}
+
+// DeleteLine deletes the current line
+func (v *View) DeleteLine() bool {
+	v.Cursor.SelectLine()
+	if !v.Cursor.HasSelection() {
+		return false
+	}
+	v.Cursor.DeleteSelection()
+	v.Cursor.ResetSelection()
+	messenger.Message("Deleted line")
 	return true
 }
 
