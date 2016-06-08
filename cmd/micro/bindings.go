@@ -74,7 +74,7 @@ var bindingActions = map[string]func(*View) bool{
 	"CommandMode":         (*View).CommandMode,
 	"Quit":                (*View).Quit,
 	"AddTab":              (*View).AddTab,
-	"LastTab":             (*View).LastTab,
+	"PreviousTab":         (*View).PreviousTab,
 	"NextTab":             (*View).NextTab,
 }
 
@@ -384,6 +384,8 @@ func DefaultBindings() map[string]string {
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
 		"CtrlT":          "AddTab",
+		"CtrlRightSq":    "PreviousTab",
+		"CtrlBackslash":  "NextTab",
 		"Home":           "Start",
 		"End":            "End",
 		"PageUp":         "CursorPageUp",
@@ -1124,7 +1126,7 @@ func (v *View) AddTab() bool {
 	return true
 }
 
-func (v *View) LastTab() bool {
+func (v *View) PreviousTab() bool {
 	if curTab > 0 {
 		curTab--
 	}

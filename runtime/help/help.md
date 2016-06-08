@@ -64,6 +64,8 @@ you can rebind them to your liking.
     "CtrlV":          "Paste",
     "CtrlA":          "SelectAll",
     "CtrlT":          "AddTab"
+    "CtrlRightSq":    "PreviousTab",
+    "CtrlBackslash":  "NextTab",
     "Home":           "Start",
     "End":            "End",
     "PageUp":         "CursorPageUp",
