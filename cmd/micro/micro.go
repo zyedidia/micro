@@ -48,10 +48,10 @@ var (
 	L *lua.LState
 
 	// The list of views
-	views []*View
-	// This is the currently open view
-	// It's just an index to the view in the views array
-	mainView int
+	tabs []*Tab
+	// This is the currently open tab
+	// It's just an index to the tab in the tabs array
+	curTab int
 )
 
 // LoadInput loads the file input for the editor
@@ -181,10 +181,10 @@ func InitScreen() {
 // RedrawAll redraws everything -- all the views and the messenger
 func RedrawAll() {
 	messenger.Clear()
-	// for _, v := range views {
-	views[mainView].Display()
-	// }
-	DisplayTabBar()
+	for _, v := range tabs[curTab].views {
+		v.Display()
+	}
+	DisplayTabs()
 	messenger.Display()
 	screen.Show()
 }
@@ -233,21 +233,21 @@ func main() {
 
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
-	// views = make([]*View, 1)
+
 	buffers := LoadInput()
-	for i, buf := range buffers {
-		views = append(views, NewView(buf))
-		views[i].Num = i
+	for _, buf := range buffers {
+		tabs = append(tabs, NewTabFromView(NewView(buf)))
 	}
 
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
-	L.SetGlobal("views", luar.New(L, views))
-	L.SetGlobal("mainView", luar.New(L, mainView))
+	L.SetGlobal("tabs", luar.New(L, tabs))
+	L.SetGlobal("curTab", luar.New(L, curTab))
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
 	L.SetGlobal("AddOption", luar.New(L, AddOption))
 	L.SetGlobal("BindKey", luar.New(L, BindKey))
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
+	L.SetGlobal("CurView", luar.New(L, CurView))
 
 	LoadPlugins()
 
@@ -261,10 +261,10 @@ func main() {
 		if searching {
 			// Since searching is done in real time, we need to redraw every time
 			// there is a new event in the search bar
-			HandleSearchEvent(event, views[mainView])
+			HandleSearchEvent(event, CurView())
 		} else {
 			// Send it to the view
-			views[mainView].HandleEvent(event)
+			CurView().HandleEvent(event)
 		}
 	}
 }

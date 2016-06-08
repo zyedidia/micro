@@ -73,8 +73,9 @@ var bindingActions = map[string]func(*View) bool{
 	"ShellMode":           (*View).ShellMode,
 	"CommandMode":         (*View).CommandMode,
 	"Quit":                (*View).Quit,
-	"LastView":            (*View).LastView,
-	"NextView":            (*View).NextView,
+	"AddTab":              (*View).AddTab,
+	"LastTab":             (*View).LastTab,
+	"NextTab":             (*View).NextTab,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -382,6 +383,7 @@ func DefaultBindings() map[string]string {
 		"CtrlD":          "DuplicateLine",
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
+		"CtrlT":          "AddTab",
 		"Home":           "Start",
 		"End":            "End",
 		"PageUp":         "CursorPageUp",
@@ -921,12 +923,6 @@ func (v *View) OpenFile() bool {
 	return false
 }
 
-func (v *View) openInNewView(buf *Buffer) {
-	views = append(views, NewView(buf))
-	mainView++
-	views[mainView].Num = mainView
-}
-
 // Start moves the viewport to the start of the buffer
 func (v *View) Start() bool {
 	v.Topline = 0
@@ -1089,16 +1085,16 @@ func (v *View) Quit() bool {
 		return v.ToggleHelp()
 	}
 	// Make sure not to quit if there are unsaved changes
-	if views[mainView].CanClose("Quit anyway? (yes, no, save) ") {
-		views[mainView].CloseBuffer()
-		if len(views) > 1 {
-			views = views[:v.Num+copy(views[v.Num:], views[v.Num+1:])]
-			for i, v := range views {
-				v.Num = i
-			}
-			if v.Num <= mainView {
-				if !(v.Num == mainView && mainView == 0) {
-					mainView--
+	if v.CanClose("Quit anyway? (yes, no, save) ") {
+		v.CloseBuffer()
+		if len(tabs) > 1 {
+			if len(tabs[v.TabNum].views) == 1 {
+				tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
+				for i, t := range tabs {
+					t.SetNum(i)
+				}
+				if curTab >= len(tabs) {
+					curTab--
 				}
 			}
 		} else {
@@ -1109,16 +1105,24 @@ func (v *View) Quit() bool {
 	return false
 }
 
-func (v *View) LastView() bool {
-	if mainView > 0 {
-		mainView--
+func (v *View) AddTab() bool {
+	tab := NewTabFromView(NewView(NewBuffer([]byte{}, "")))
+	tab.SetNum(len(tabs))
+	tabs = append(tabs, tab)
+	curTab++
+	return true
+}
+
+func (v *View) LastTab() bool {
+	if curTab > 0 {
+		curTab--
 	}
 	return true
 }
 
-func (v *View) NextView() bool {
-	if mainView < len(views)-1 {
-		mainView++
+func (v *View) NextTab() bool {
+	if curTab < len(tabs)-1 {
+		curTab++
 	}
 	return true
 }

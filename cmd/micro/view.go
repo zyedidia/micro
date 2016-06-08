@@ -45,6 +45,8 @@ type View struct {
 
 	// This is the index of this view in the views array
 	Num int
+	// What tab is this view stored in
+	TabNum int
 
 	// Is this view modifiable?
 	Modifiable bool
@@ -602,9 +604,6 @@ func (v *View) DisplayView() {
 					}
 				}
 				indentChar := []rune(settings["indentchar"].(string))
-				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN, indentChar[0], nil, lineIndentStyle)
-				}
 				if x-v.leftCol >= v.lineNumOffset {
 					screen.SetContent(x-v.leftCol, lineN+v.y, indentChar[0], nil, lineIndentStyle)
 				}

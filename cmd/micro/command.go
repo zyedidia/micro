@@ -62,8 +62,10 @@ func DefaultCommands() map[string]string {
 // Set sets an option
 func Set(args []string) {
 	// Set an option and we have to set it for every view
-	for _, view := range views {
-		SetOption(view, args)
+	for _, tab := range tabs {
+		for _, view := range tab.views {
+			SetOption(view, args)
+		}
 	}
 }
 
@@ -85,13 +87,13 @@ func Run(args []string) {
 // Quit closes the main view
 func Quit(args []string) {
 	// Close the main view
-	views[mainView].Quit()
+	CurView().Quit()
 }
 
 // Save saves the buffer in the main view
 func Save(args []string) {
 	// Save the main view
-	views[mainView].Save()
+	CurView().Save()
 }
 
 // Replace runs search and replace
@@ -138,7 +140,7 @@ func Replace(args []string) {
 		return
 	}
 
-	view := views[mainView]
+	view := CurView()
 
 	found := false
 	for {
