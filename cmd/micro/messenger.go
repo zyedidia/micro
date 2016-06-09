@@ -4,8 +4,10 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/zyedidia/tcell"
 )
@@ -122,9 +124,16 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	}
 }
 
+type Completion int
+
+const (
+	NoCompletion Completion = iota
+	FileCompletion
+)
+
 // Prompt sends the user a message and waits for a response to be typed in
 // This function blocks the main loop while waiting for input
-func (m *Messenger) Prompt(prompt, historyType string) (string, bool) {
+func (m *Messenger) Prompt(prompt, historyType string, completionType Completion) (string, bool) {
 	m.hasPrompt = true
 	m.Message(prompt)
 	if _, ok := m.history[historyType]; !ok {
@@ -153,6 +162,34 @@ func (m *Messenger) Prompt(prompt, historyType string) (string, bool) {
 				m.hasPrompt = false
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
+			case tcell.KeyTab:
+				if completionType == FileCompletion {
+					dirs := strings.Split(m.response, "/")
+					var files []os.FileInfo
+					var err error
+					if len(dirs) > 1 {
+						files, err = ioutil.ReadDir(strings.Join(dirs[:len(dirs)-1], "/"))
+					} else {
+						files, err = ioutil.ReadDir(".")
+					}
+					if err != nil {
+						continue
+					}
+					var suggestions []string
+					for _, f := range files {
+						name := f.Name()
+						if f.IsDir() {
+							name += "/"
+						}
+						if strings.HasPrefix(name, dirs[len(dirs)-1]) {
+							suggestions = append(suggestions, name)
+						}
+					}
+					if len(suggestions) == 1 {
+						m.response = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
+						m.cursorx = Count(m.response)
+					}
+				}
 			}
 		}
 
@@ -177,13 +214,13 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 			if m.historyNum > 0 {
 				m.historyNum--
 				m.response = history[m.historyNum]
-				m.cursorx = len(m.response)
+				m.cursorx = Count(m.response)
 			}
 		case tcell.KeyDown:
 			if m.historyNum < len(history)-1 {
 				m.historyNum++
 				m.response = history[m.historyNum]
-				m.cursorx = len(m.response)
+				m.cursorx = Count(m.response)
 			}
 		case tcell.KeyLeft:
 			if m.cursorx > 0 {
