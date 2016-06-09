@@ -39,7 +39,6 @@ func CurView() *View {
 func TabbarString() (string, map[int]int) {
 	str := ""
 	indicies := make(map[int]int)
-	indicies[0] = 0
 	for i, t := range tabs {
 		if i == curTab {
 			str += "["
