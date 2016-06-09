@@ -186,7 +186,11 @@ func (m *Messenger) Prompt(prompt, historyType string, completionType Completion
 						}
 					}
 					if len(suggestions) == 1 {
-						m.response = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
+						if len(dirs) > 1 {
+							m.response = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
+						} else {
+							m.response = suggestions[0]
+						}
 						m.cursorx = Count(m.response)
 					}
 				}
