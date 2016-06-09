@@ -464,7 +464,7 @@ func (v *View) DisplayView() {
 	} else {
 		v.lineNumOffset = 0
 	}
-	var highlightStyle tcell.Style
+	highlightStyle := defStyle
 
 	var hasGutterMessages bool
 	for _, v := range v.messages {
@@ -495,7 +495,7 @@ func (v *View) DisplayView() {
 				for _, msg := range v.messages[k] {
 					if msg.lineNum == lineN+v.Topline {
 						msgOnLine = true
-						gutterStyle := tcell.StyleDefault
+						gutterStyle := defStyle
 						switch msg.kind {
 						case GutterInfo:
 							if style, ok := colorscheme["gutter-info"]; ok {
@@ -522,9 +522,9 @@ func (v *View) DisplayView() {
 				}
 			}
 			if !msgOnLine {
-				screen.SetContent(x, lineN+v.y, ' ', nil, tcell.StyleDefault)
+				screen.SetContent(x, lineN+v.y, ' ', nil, defStyle)
 				x++
-				screen.SetContent(x, lineN+v.y, ' ', nil, tcell.StyleDefault)
+				screen.SetContent(x, lineN+v.y, ' ', nil, defStyle)
 				x++
 				if v.Cursor.Y == lineN+v.Topline && messenger.gutterMessage {
 					messenger.Reset()
@@ -560,7 +560,7 @@ func (v *View) DisplayView() {
 		}
 		// Write the line
 		for colN, ch := range line {
-			var lineStyle tcell.Style
+			lineStyle := defStyle
 
 			if settings["syntax"].(bool) {
 				// Syntax highlighting is enabled
@@ -571,7 +571,7 @@ func (v *View) DisplayView() {
 				(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
 					charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
 
-				lineStyle = tcell.StyleDefault.Reverse(true)
+				lineStyle = defStyle.Reverse(true)
 
 				if style, ok := colorscheme["selection"]; ok {
 					lineStyle = style
@@ -596,7 +596,7 @@ func (v *View) DisplayView() {
 					(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
 						charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
 
-					lineIndentStyle = tcell.StyleDefault.Reverse(true)
+					lineIndentStyle = defStyle.Reverse(true)
 
 					if style, ok := colorscheme["selection"]; ok {
 						lineIndentStyle = style
@@ -657,7 +657,7 @@ func (v *View) DisplayView() {
 		charNum = charNum.Move(1, v.Buf)
 
 		for i := 0; i < v.width-(x-v.leftCol); i++ {
-			lineStyle := tcell.StyleDefault
+			lineStyle := defStyle
 			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()

@@ -140,6 +140,17 @@ func LoadSyntaxFiles() {
 func LoadSyntaxFilesFromDir(dir string) {
 	InitColorscheme()
 
+	// Default style
+	defStyle = tcell.StyleDefault.
+		Foreground(tcell.ColorDefault).
+		Background(tcell.ColorDefault)
+
+	// There may be another default style defined in the colorscheme
+	// In that case we should use that one
+	if style, ok := colorscheme["default"]; ok {
+		defStyle = style
+	}
+
 	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
 	files, _ := ioutil.ReadDir(dir)
 	for _, f := range files {
@@ -395,6 +406,9 @@ func Match(v *View) SyntaxMatches {
 
 	for i, line := range lines {
 		matches[i] = make([]tcell.Style, len(line)+1)
+		for j, _ := range matches[i] {
+			matches[i][j] = defStyle
+		}
 	}
 
 	// We don't actually check the entire buffer, just from synLinesUp to synLinesDown

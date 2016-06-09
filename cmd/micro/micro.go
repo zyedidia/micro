@@ -163,17 +163,6 @@ func InitScreen() {
 		os.Setenv("TERM", oldTerm)
 	}
 
-	// Default style
-	defStyle = tcell.StyleDefault.
-		Foreground(tcell.ColorDefault).
-		Background(tcell.ColorDefault)
-
-	// There may be another default style defined in the colorscheme
-	// In that case we should use that one
-	if style, ok := colorscheme["default"]; ok {
-		defStyle = style
-	}
-
 	screen.SetStyle(defStyle)
 	screen.EnableMouse()
 }

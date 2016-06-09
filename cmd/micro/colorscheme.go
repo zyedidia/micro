@@ -100,7 +100,7 @@ func StringToStyle(str string) tcell.Style {
 	fg = strings.TrimSpace(fg)
 	bg = strings.TrimSpace(bg)
 
-	style := tcell.StyleDefault.Foreground(StringToColor(fg)).Background(StringToColor(bg))
+	style := defStyle.Foreground(StringToColor(fg)).Background(StringToColor(bg))
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
 	}
