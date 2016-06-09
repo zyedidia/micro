@@ -334,7 +334,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol
-		y += v.Topline
+		y += v.Topline - v.y
 		// Don't relocate for mouse events
 		relocate = false
 
