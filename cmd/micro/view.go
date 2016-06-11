@@ -290,7 +290,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// Window resized
 		v.Resize(e.Size())
 	case *tcell.EventKey:
-		if e.Key() == tcell.KeyRune && e.Modifiers() == 0 {
+		if e.Key() == tcell.KeyRune && (e.Modifiers() == 0 || e.Modifiers() == tcell.ModShift) {
 			// Insert a character
 			if v.Cursor.HasSelection() {
 				v.Cursor.DeleteSelection()
