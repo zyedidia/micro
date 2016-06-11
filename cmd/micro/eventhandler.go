@@ -66,12 +66,14 @@ func (eh *EventHandler) ApplyDiff(new string) {
 	diff := differ.DiffMain(eh.buf.String(), new, false)
 	loc := eh.buf.Start()
 	for _, d := range diff {
-		if d.Type == dmp.DiffInsert {
-			eh.Insert(loc, d.Text)
-		} else if d.Type == dmp.DiffDelete {
+		if d.Type == dmp.DiffDelete {
 			eh.Remove(loc, loc.Move(Count(d.Text), eh.buf))
+		} else {
+			if d.Type == dmp.DiffInsert {
+				eh.Insert(loc, d.Text)
+			}
+			loc = loc.Move(Count(d.Text), eh.buf)
 		}
-		loc = loc.Move(Count(d.Text), eh.buf)
 	}
 }
 
