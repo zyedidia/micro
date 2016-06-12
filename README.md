@@ -47,19 +47,7 @@ extract it, and run the binary inside. It's as simple as that!
 Micro has no released version, instead these binaries are compiled every night and you can find the
 commit it was compiled with by running `micro -version`.
 
-Nightly binaries:
-* [Mac OS X](http://zbyedidia.webfactional.com/micro/binaries/micro-osx.tar.gz)
-* [Linux 64](http://zbyedidia.webfactional.com/micro/binaries/micro-linux64.tar.gz)
-* [Linux 32](http://zbyedidia.webfactional.com/micro/binaries/micro-linux32.tar.gz)
-* [Linux Arm](http://zbyedidia.webfactional.com/micro/binaries/micro-linux-arm.tar.gz)
-* [FreeBSD 64](http://zbyedidia.webfactional.com/micro/binaries/micro-freebsd64.tar.gz)
-* [FreeBSD 32](http://zbyedidia.webfactional.com/micro/binaries/micro-freebsd32.tar.gz)
-* [OpenBSD 64](http://zbyedidia.webfactional.com/micro/binaries/micro-openbsd64.tar.gz)
-* [OpenBSD 32](http://zbyedidia.webfactional.com/micro/binaries/micro-openbsd32.tar.gz)
-* [NetBSD 64](http://zbyedidia.webfactional.com/micro/binaries/micro-netbsd64.tar.gz)
-* [NetBSD 32](http://zbyedidia.webfactional.com/micro/binaries/micro-netbsd32.tar.gz)
-* [Windows 64](http://zbyedidia.webfactional.com/micro/binaries/micro-win64.zip)
-* [Windows 32](http://zbyedidia.webfactional.com/micro/binaries/micro-win32.zip)
+[You can find the binaries in the nightly build release](https://github.com/zyedidia/micro/releases/tag/nightly)
 
 To run the micro binary just run `./micro` (you probably want to place the binary on your `$PATH` for ease of use).
 
