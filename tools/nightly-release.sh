@@ -108,7 +108,7 @@ github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-win64.tar.gz" \
+    --name "micro-win64.zip" \
     --file binaries/micro-win64.zip
 
 echo "Uploading Windows 32 binary"
@@ -116,5 +116,5 @@ github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-win32.tar.gz" \
+    --name "micro-win32.zip" \
     --file binaries/micro-win32.zip
