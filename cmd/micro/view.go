@@ -218,6 +218,20 @@ func (v *View) ReOpen() {
 	}
 }
 
+func (v *View) VSplit() bool {
+	v.widthPercent /= 2
+	v.Resize(screen.Size())
+
+	newView := NewViewWidthHeight(NewBuffer([]byte{}, ""), v.widthPercent, v.heightPercent)
+	newView.TabNum = v.TabNum
+	newView.x = v.x + v.width
+	tab := tabs[v.TabNum]
+	tab.curView++
+	newView.Num = len(tab.views)
+	tab.views = append(tab.views, newView)
+	return false
+}
+
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
@@ -340,7 +354,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		v.freshClip = false
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		x -= v.lineNumOffset - v.leftCol
+		x -= v.lineNumOffset - v.leftCol + v.x
 		y += v.Topline - v.y
 		// Don't relocate for mouse events
 		relocate = false
