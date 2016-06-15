@@ -23,12 +23,15 @@ func Call(function string, args []string) error {
 	if luaFunc.String() == "nil" {
 		return errors.New("function does not exist: " + function)
 	}
-	luaArgs := luar.New(L, args)
+	var luaArgs []lua.LValue
+	for _, v := range args {
+		luaArgs = append(luaArgs, luar.New(L, v))
+	}
 	err := L.CallByParam(lua.P{
 		Fn:      luaFunc,
 		NRet:    0,
 		Protect: true,
-	}, luaArgs)
+	}, luaArgs...)
 	return err
 }
 
@@ -51,6 +54,15 @@ func LuaFunctionBinding(function string) func(*View) bool {
 func LuaFunctionCommand(function string) func([]string) {
 	return func(args []string) {
 		err := Call(function, args)
+		if err != nil {
+			TermMessage(err)
+		}
+	}
+}
+
+func LuaFunctionJob(function string) func(string, ...string) {
+	return func(output string, args ...string) {
+		err := Call(function, append([]string{output}, args...))
 		if err != nil {
 			TermMessage(err)
 		}

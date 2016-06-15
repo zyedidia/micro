@@ -34,9 +34,11 @@ end
 function linter_lint(linter, cmd, errorformat)
     CurView():ClearGutterMessages(linter)
 
-    local handle = io.popen("(" .. cmd .. ")" .. " 2>&1")
-    local lines = linter_split(handle:read("*a"), "\n")
-    handle:close()
+    JobStart(cmd, "", "", "linter_onExit", linter, errorformat)
+end
+
+function linter_onExit(output, linter, errorformat)
+    local lines = linter_split(output, "\n")
 
     local regex = errorformat:gsub("%%f", "(.+)"):gsub("%%l", "(%d+)"):gsub("%%m", "(.+)")
     for _,line in ipairs(lines) do

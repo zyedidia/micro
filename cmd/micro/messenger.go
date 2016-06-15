@@ -106,7 +106,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 		m.Display()
 		screen.ShowCursor(Count(m.message), h-1)
 		screen.Show()
-		event := screen.PollEvent()
+		event := <-events
 
 		switch e := event.(type) {
 		case *tcell.EventKey:
@@ -149,7 +149,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionType Completion
 		m.Clear()
 		m.Display()
 
-		event := screen.PollEvent()
+		event := <-events
 
 		switch e := event.(type) {
 		case *tcell.EventKey:

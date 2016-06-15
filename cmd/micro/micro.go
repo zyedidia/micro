@@ -52,6 +52,9 @@ var (
 	// This is the currently open tab
 	// It's just an index to the tab in the tabs array
 	curTab int
+
+	jobs   chan JobFunction
+	events chan tcell.Event
 )
 
 // LoadInput loads the file input for the editor
@@ -245,14 +248,33 @@ func main() {
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 	L.SetGlobal("CurView", luar.New(L, CurView))
 
+	L.SetGlobal("JobStart", luar.New(L, JobStart))
+	L.SetGlobal("JobSend", luar.New(L, JobSend))
+	L.SetGlobal("JobStop", luar.New(L, JobStop))
+
 	LoadPlugins()
+
+	jobs = make(chan JobFunction, 100)
+	events = make(chan tcell.Event)
+
+	go func() {
+		for {
+			events <- screen.PollEvent()
+		}
+	}()
 
 	for {
 		// Display everything
 		RedrawAll()
 
-		// Wait for the user's action
-		event := screen.PollEvent()
+		var event tcell.Event
+		select {
+		case f := <-jobs:
+			f.function(f.output, f.args...)
+			continue
+		case event = <-events:
+		}
+
 		if TabbarHandleMouseEvent(event) {
 			continue
 		}
