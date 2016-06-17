@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 
+	"github.com/atotto/clipboard"
 	"github.com/go-errors/errors"
 	"github.com/layeh/gopher-luar"
 	"github.com/mattn/go-isatty"
@@ -273,6 +274,16 @@ func main() {
 			f.function(f.output, f.args...)
 			continue
 		case event = <-events:
+		}
+
+		switch e := event.(type) {
+		case *tcell.EventMouse:
+			_, h := screen.Size()
+			_, y := e.Position()
+			if y == h-1 {
+				clipboard.WriteAll(messenger.message)
+			}
+			continue
 		}
 
 		if TabbarHandleMouseEvent(event) {
