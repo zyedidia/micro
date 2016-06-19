@@ -280,10 +280,10 @@ func main() {
 		case *tcell.EventMouse:
 			_, h := screen.Size()
 			_, y := e.Position()
-			if y == h-1 {
+			if y == h-1 && messenger.message != "" {
 				clipboard.WriteAll(messenger.message)
+				continue
 			}
-			continue
 		}
 
 		if TabbarHandleMouseEvent(event) {
