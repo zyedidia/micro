@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"strings"
 
 	"github.com/layeh/gopher-luar"
 	"github.com/yuin/gopher-lua"
@@ -19,7 +20,17 @@ var preInstalledPlugins = []string{
 // If it does not exist nothing happens, if there is an error,
 // the error is returned
 func Call(function string, args []string) error {
-	luaFunc := L.GetGlobal(function)
+	var luaFunc lua.LValue
+	if strings.Contains(function, ".") {
+		plugin := L.GetGlobal(strings.Split(function, ".")[0])
+		if plugin.String() == "nil" {
+			return errors.New("function does not exist: " + function)
+		}
+		luaFunc = L.GetField(plugin, strings.Split(function, ".")[1])
+	} else {
+		luaFunc = L.GetGlobal(function)
+	}
+
 	if luaFunc.String() == "nil" {
 		return errors.New("function does not exist: " + function)
 	}
@@ -78,7 +89,10 @@ func LoadPlugins() {
 			files, _ := ioutil.ReadDir(configDir + "/plugins/" + pluginName)
 			for _, f := range files {
 				if f.Name() == pluginName+".lua" {
-					if err := L.DoFile(configDir + "/plugins/" + pluginName + "/" + f.Name()); err != nil {
+					data, _ := ioutil.ReadFile(configDir + "/plugins/" + pluginName + "/" + f.Name())
+					pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
+
+					if err := L.DoString(pluginDef + string(data)); err != nil {
 						TermMessage(err)
 						continue
 					}
@@ -95,7 +109,8 @@ func LoadPlugins() {
 			TermMessage("Error loading pre-installed plugin: " + pluginName)
 			continue
 		}
-		if err := L.DoString(string(data)); err != nil {
+		pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
+		if err := L.DoString(pluginDef + string(data)); err != nil {
 			TermMessage(err)
 			continue
 		}
