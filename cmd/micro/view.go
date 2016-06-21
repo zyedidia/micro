@@ -298,6 +298,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
 			v.Cursor.Right()
+
+			for _, pl := range loadedPlugins {
+				err := Call(pl+".onRune", []string{string(e.Rune())})
+				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+					TermMessage(err)
+				}
+			}
 		} else {
 			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
