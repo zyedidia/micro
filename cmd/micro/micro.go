@@ -278,11 +278,13 @@ func main() {
 
 		switch e := event.(type) {
 		case *tcell.EventMouse:
-			_, h := screen.Size()
-			_, y := e.Position()
-			if y == h-1 && messenger.message != "" {
-				clipboard.WriteAll(messenger.message)
-				continue
+			if e.Buttons() == tcell.Button1 {
+				_, h := screen.Size()
+				_, y := e.Position()
+				if y == h-1 && messenger.message != "" {
+					clipboard.WriteAll(messenger.message)
+					continue
+				}
 			}
 		}
 
