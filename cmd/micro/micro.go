@@ -248,6 +248,7 @@ func main() {
 	L.SetGlobal("BindKey", luar.New(L, BindKey))
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 	L.SetGlobal("CurView", luar.New(L, CurView))
+	L.SetGlobal("IsWordChar", luar.New(L, IsWordChar))
 
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
 	L.SetGlobal("JobSend", luar.New(L, JobSend))

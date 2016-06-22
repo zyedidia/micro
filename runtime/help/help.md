@@ -227,6 +227,10 @@ Default plugin options:
 
 	default value: `on`
 
+* `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the autoclose plugin
+
+    default value: `on`
+
 * `goimports`: Run goimports on save. Provided by the `go` plugin.
 
 	default value: `off`

@@ -14,6 +14,7 @@ var loadedPlugins []string
 var preInstalledPlugins = []string{
 	"go",
 	"linter",
+	"autoclose",
 }
 
 // Call calls the lua function 'function'
