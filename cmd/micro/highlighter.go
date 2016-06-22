@@ -312,8 +312,20 @@ func LoadRulesFromFile(text, filename string) []SyntaxRule {
 			// in which case we should look that up in the colorscheme
 			// They can also just give us a straight up color
 			st := defStyle
-			if _, ok := colorscheme[color]; ok {
-				st = colorscheme[color]
+			groups := strings.Split(color, ".")
+			if len(groups) > 1 {
+				curGroup := ""
+				for i, g := range groups {
+					if i != 0 {
+						curGroup += "."
+					}
+					curGroup += g
+					if style, ok := colorscheme[curGroup]; ok {
+						st = style
+					}
+				}
+			} else if style, ok := colorscheme[color]; ok {
+				st = style
 			} else {
 				st = StringToStyle(color)
 			}
