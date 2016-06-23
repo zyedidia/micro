@@ -23,69 +23,69 @@ you can rebind them to your liking.
 
 ```json
 {
-    "Up":             "CursorUp",
-    "Down":           "CursorDown",
-    "Right":          "CursorRight",
-    "Left":           "CursorLeft",
-    "ShiftUp":        "SelectUp",
-    "ShiftDown":      "SelectDown",
-    "ShiftLeft":      "SelectLeft",
-    "ShiftRight":     "SelectRight",
-    "AltLeft":        "WordLeft",
-    "AltRight":       "WordRight",
-    "AltShiftRight":  "SelectWordRight",
-    "AltShiftLeft":   "SelectWordLeft",
-    "CtrlLeft":       "StartOfLine",
-    "CtrlRight":      "EndOfLine",
-    "CtrlShiftLeft":  "SelectToStartOfLine",
-    "CtrlShiftRight": "SelectToEndOfLine",
-    "CtrlUp":         "CursorStart",
-    "CtrlDown":       "CursorEnd",
-    "CtrlShiftUp":    "SelectToStart",
-    "CtrlShiftDown":  "SelectToEnd",
-    "Enter":          "InsertEnter",
-    "Space":          "InsertSpace",
-    "Backspace":      "Backspace",
-    "Backspace2":     "Backspace",
-    "Alt-Backspace":  "DeleteWordLeft",
-    "Alt-Backspace2": "DeleteWordLeft",
-    "Tab":            "InsertTab",
-    "CtrlO":          "OpenFile",
-    "CtrlS":          "Save",
-    "CtrlF":          "Find",
-    "CtrlN":          "FindNext",
-    "CtrlP":          "FindPrevious",
-    "CtrlZ":          "Undo",
-    "CtrlY":          "Redo",
-    "CtrlC":          "Copy",
-    "CtrlX":          "Cut",
-    "CtrlK":          "CutLine",
-    "CtrlD":          "DuplicateLine",
-    "CtrlV":          "Paste",
-    "CtrlA":          "SelectAll",
-    "CtrlT":          "AddTab"
-    "CtrlRightSq":    "PreviousTab",
-    "CtrlBackslash":  "NextTab",
-    "Home":           "Start",
-    "End":            "End",
-    "PageUp":         "CursorPageUp",
-    "PageDown":       "CursorPageDown",
-    "CtrlG":          "ToggleHelp",
-    "CtrlR":          "ToggleRuler",
-    "CtrlL":          "JumpLine",
-    "Delete":         "Delete",
-    "Esc":            "ClearStatus",
-    "CtrlB":          "ShellMode",
-    "CtrlQ":          "Quit",
-    "CtrlE":          "CommandMode",
-
-    // Emacs-style keybindings
-    "Alt-f": "WordRight",
-    "Alt-b": "WordLeft",
-    "Alt-a": "StartOfLine",
-    "Alt-e": "EndOfLine",
-    "Alt-p": "CursorUp",
-    "Alt-n": "CursorDown"
+	"Up":             "CursorUp",
+	"Down":           "CursorDown",
+	"Right":          "CursorRight",
+	"Left":           "CursorLeft",
+	"ShiftUp":        "SelectUp",
+	"ShiftDown":      "SelectDown",
+	"ShiftLeft":      "SelectLeft",
+	"ShiftRight":     "SelectRight",
+	"AltLeft":        "WordLeft",
+	"AltRight":       "WordRight",
+	"AltShiftRight":  "SelectWordRight",
+	"AltShiftLeft":   "SelectWordLeft",
+	"CtrlLeft":       "StartOfLine",
+	"CtrlRight":      "EndOfLine",
+	"CtrlShiftLeft":  "SelectToStartOfLine",
+	"CtrlShiftRight": "SelectToEndOfLine",
+	"CtrlUp":         "CursorStart",
+	"CtrlDown":       "CursorEnd",
+	"CtrlShiftUp":    "SelectToStart",
+	"CtrlShiftDown":  "SelectToEnd",
+	"Enter":          "InsertEnter",
+	"Space":          "InsertSpace",
+	"Backspace":      "Backspace",
+	"Backspace2":     "Backspace",
+	"Alt-Backspace":  "DeleteWordLeft",
+	"Alt-Backspace2": "DeleteWordLeft",
+	"Tab":            "InsertTab",
+	"CtrlO":          "OpenFile",
+	"CtrlS":          "Save",
+	"CtrlF":          "Find",
+	"CtrlN":          "FindNext",
+	"CtrlP":          "FindPrevious",
+	"CtrlZ":          "Undo",
+	"CtrlY":          "Redo",
+	"CtrlC":          "Copy",
+	"CtrlX":          "Cut",
+	"CtrlK":          "CutLine",
+	"CtrlD":          "DuplicateLine",
+	"CtrlV":          "Paste",
+	"CtrlA":          "SelectAll",
+	"CtrlT":          "AddTab"
+	"CtrlRightSq":    "PreviousTab",
+	"CtrlBackslash":  "NextTab",
+	"Home":           "Start",
+	"End":            "End",
+	"PageUp":         "CursorPageUp",
+	"PageDown":       "CursorPageDown",
+	"CtrlG":          "ToggleHelp",
+	"CtrlR":          "ToggleRuler",
+	"CtrlL":          "JumpLine",
+	"Delete":         "Delete",
+	"Esc":            "ClearStatus",
+	"CtrlB":          "ShellMode",
+	"CtrlQ":          "Quit",
+	"CtrlE":          "CommandMode",
+	
+	// Emacs-style keybindings
+	"Alt-f": "WordRight",
+	"Alt-b": "WordLeft",
+	"Alt-a": "StartOfLine",
+	"Alt-e": "EndOfLine",
+	"Alt-p": "CursorUp",
+	"Alt-n": "CursorDown"
 }
 ```
 
@@ -155,11 +155,19 @@ Here are the options that you can set:
 	colorschemes:
 
 	* default: this is the default colorscheme.
+
 	* solarized: this is the solarized colorscheme (used in the screenshot). 
 	  You should have the solarized color palette in your terminal to use it.
+
 	* solarized-tc: this is the solarized colorscheme for true color, just 
 	  make sure your terminal supports true color before using it and that the 
 	  MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
+
+	* monokai-tc: this is the monokai colorscheme. It requires true color to
+	  look perfect, but the 256 color approximation looks good as well.
+
+	* atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
+	  It requires true color to look good.
 
 
 * `tabsize`: sets the tab size to `option`
@@ -190,7 +198,7 @@ Here are the options that you can set:
 * `cursorline`: highlight the line that the cursor is on in a different color
    (the color is defined by the colorscheme you are using)
 
-    default value: `off`
+	default value: `off`
 
 * `ruler`: display line numbers
 
@@ -203,12 +211,12 @@ Here are the options that you can set:
 * `savecursor`: remember where the cursor was last time the file was opened and
    put it there when you open the file again
 
-    default value: `off`
+	default value: `off`
 
 * `saveundo`: when this option is on, undo is saved even after you close a file
    so if you close and reopen a file, you can keep undoing
 
-    default value: `off`
+	default value: `off`
 
 * `scrollmargin`: amount of lines you would like to see above and below the cursor
 
@@ -229,7 +237,7 @@ Default plugin options:
 
 * `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the autoclose plugin
 
-    default value: `on`
+	default value: `on`
 
 * `goimports`: Run goimports on save. Provided by the `go` plugin.
 

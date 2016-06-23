@@ -51,6 +51,7 @@ var preInstalledSynFiles = []string{
 	"erb",
 	"fish",
 	"fortran",
+	"gdscript",
 	"gentoo-ebuild",
 	"gentoo-etc-portage",
 	"git-commit",
@@ -138,6 +139,7 @@ func LoadSyntaxFiles() {
 // This involves finding the regex for syntax and if it exists, the regex
 // for the header. Then we must get the text for the file and the filetype.
 func LoadSyntaxFilesFromDir(dir string) {
+	colorscheme = make(Colorscheme)
 	InitColorscheme()
 
 	// Default style
