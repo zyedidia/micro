@@ -752,6 +752,7 @@ func (v *View) Save() bool {
 			}
 			messenger.Reset()
 			messenger.Clear()
+			messenger.Message("Saved " + v.Buf.Path)
 		} else {
 			messenger.Error(err.Error())
 		}
