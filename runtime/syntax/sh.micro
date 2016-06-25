@@ -22,8 +22,8 @@ color statement "--[a-z-]+"
 color statement "\ -[a-z]+"
 
 # Strings
-color constant ""(\\.|[^"])*""
-color constant "'(\\.|[^'])*'"
+color constant.string ""(\\.|[^"])*""
+color constant.string "'(\\.|[^'])*'"
 color special """
 color special "'"
 

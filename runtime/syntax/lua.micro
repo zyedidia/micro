@@ -52,7 +52,7 @@ color constant "\b([0-9]+)\b"
 color statement "(\(|\)|\[|\]|\{|\})"
 
 # Strings
-color constant "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
+color constant.string "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"
 
 # Multiline strings
 color constant start="\s*\[\[" end="\]\]"

@@ -25,7 +25,7 @@ color type "\ (Double|String|Float|Boolean|Dictionary|Array|Int)"
 color type "\ (AnyObject)"
 
 # Text
-color constant ""[^"]*""
+color constant.string ""[^"]*""
 
 # Comments
 color comment "//.*"

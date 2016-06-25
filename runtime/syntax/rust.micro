@@ -20,8 +20,8 @@ color constant "[A-Z][A-Z_]+"
 color type "[A-Z][a-z]+"
 
 # Strings
-color constant "\".*\""
-color constant start="\".*\\$" end=".*\""
+color constant.string "\".*\""
+color constant.string start="\".*\\$" end=".*\""
 # NOTE: This isn't accurate but matching "#{0,} for the end of the string is too liberal
 color green start="r#+\"" end="\"#+"
 

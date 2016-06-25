@@ -62,22 +62,22 @@ color constant "\b(__DATE__|__EOF__|__TIME__|__TIMESTAMP__|__VENDOR__|__VERSION_
 ## String literals
 ## TODO: multiline backtick and doublequote string. (Unlikely possible at all with nano.)
 ### DoubleQuotedString
-color constant ""(\\.|[^"])*""
+color constant.string ""(\\.|[^"])*""
  
 ### WysiwygString
-color constant start="r"" end="""
-color constant "`[^`]*`"
+color constant.string start="r"" end="""
+color constant.string "`[^`]*`"
 
 ### HexString
-color ,constant "x"([[:space:]]*[[:xdigit:]][[:space:]]*[[:xdigit:]])*[[:space:]]*""
+color constant.string "x"([[:space:]]*[[:xdigit:]][[:space:]]*[[:xdigit:]])*[[:space:]]*""
 
 ### DelimitedString
-color constant "q"\(.*\)""
-color constant "q"\{.*\}""
-color constant "q"\[.*\]""
-color constant "q"<.*>""
-color constant start="q"[^({[<"][^"]*$" end="^[^"]+""
-color constant "q"([^({[<"]).*""
+color constant.string "q"\(.*\)""
+color constant.string "q"\{.*\}""
+color constant.string "q"\[.*\]""
+color constant.string "q"<.*>""
+color constant.string start="q"[^({[<"][^"]*$" end="^[^"]+""
+color constant.string "q"([^({[<"]).*""
 
 ### TokenString
 ### True token strings require nesting, so, again, they can't be implemented accurately here.

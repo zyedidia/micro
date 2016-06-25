@@ -33,8 +33,8 @@ color statement "[(){}]" "\[" "\]"
 color constant "\b[0-9]+\b"
 
 ## strings
-color constant "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
-color constant "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
+color constant.string "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
+color constant.string "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
 
 ## brightblacks
 color comment "#.*$"

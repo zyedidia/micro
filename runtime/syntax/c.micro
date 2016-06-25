@@ -26,7 +26,7 @@ color statement "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
 ## String highlighting.  You will in general want your brightblacks and
 ## strings to come last, because syntax highlighting rules will be
 ## applied in the order they are read in.
-color constant ""(\\.|[^"])*""
+color constant.string ""(\\.|[^"])*""
 ##
 ## This string is VERY resource intensive!
 #color cyan start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
