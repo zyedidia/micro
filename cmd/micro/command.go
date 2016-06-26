@@ -19,6 +19,7 @@ var commandActions = map[string]func([]string){
 	"Save":    Save,
 	"Replace": Replace,
 	"VSplit":  VSplit,
+	"HSplit":  HSplit,
 }
 
 // InitCommands initializes the default commands
@@ -58,11 +59,15 @@ func DefaultCommands() map[string]string {
 		"save":    "Save",
 		"replace": "Replace",
 		"vsplit":  "VSplit",
+		"hsplit":  "HSplit",
 	}
 }
 
 func VSplit(args []string) {
 	CurView().VSplit()
+}
+func HSplit(args []string) {
+	CurView().HSplit()
 }
 
 // Set sets an option

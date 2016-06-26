@@ -123,13 +123,13 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 func (v *View) Resize(w, h int) {
 	// Always include 1 line for the command line at the bottom
 	h--
-	if len(tabs) > 1 {
-		// Include one line for the tab bar at the top
-		h--
-		v.y = 1
-	} else {
-		v.y = 0
-	}
+	// if len(tabs) > 1 {
+	// 	// Include one line for the tab bar at the top
+	// 	h--
+	// 	v.y = 1
+	// } else {
+	// 	v.y = 0
+	// }
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
 	v.height = int(float32(h) * float32(v.heightPercent) / 100)
@@ -218,12 +218,28 @@ func (v *View) ReOpen() {
 	}
 }
 
+func (v *View) HSplit() bool {
+	v.heightPercent /= 2
+	v.Resize(screen.Size())
+
+	newView := NewViewWidthHeight(NewBuffer([]byte{}, ""), v.widthPercent, v.heightPercent)
+	newView.TabNum = v.TabNum
+	newView.y = v.y + v.height + 1
+	newView.x = v.x
+	tab := tabs[v.TabNum]
+	tab.curView++
+	newView.Num = len(tab.views)
+	tab.views = append(tab.views, newView)
+	return false
+}
+
 func (v *View) VSplit() bool {
 	v.widthPercent /= 2
 	v.Resize(screen.Size())
 
 	newView := NewViewWidthHeight(NewBuffer([]byte{}, ""), v.widthPercent, v.heightPercent)
 	newView.TabNum = v.TabNum
+	newView.y = v.y
 	newView.x = v.x + v.width
 	tab := tabs[v.TabNum]
 	tab.curView++
@@ -497,12 +513,22 @@ func (v *View) DisplayView() {
 		v.lineNumOffset += 2
 	}
 
+	if v.x != 0 {
+		// One space for the extra split divider
+		v.lineNumOffset++
+	}
+
 	for lineN := 0; lineN < v.height; lineN++ {
 		x := v.x
+		if v.x != 0 {
+			// Draw the split divider
+			screen.SetContent(x, lineN+v.y, ' ', nil, defStyle.Reverse(true))
+			x++
+		}
 		// If the buffer is smaller than the view height
 		if lineN+v.Topline >= v.Buf.NumLines {
 			// We have to clear all this space
-			for i := v.x; i < v.width; i++ {
+			for i := x; i < v.x+v.width; i++ {
 				screen.SetContent(i, lineN+v.y, ' ', nil, defStyle)
 			}
 
@@ -642,12 +668,12 @@ func (v *View) DisplayView() {
 				}
 			} else if runewidth.RuneWidth(ch) > 1 {
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN, ch, nil, lineStyle)
+					screen.SetContent(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
 				}
 				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol, lineN, ' ', nil, lineStyle)
+						screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
 					}
 				}
 			} else {
