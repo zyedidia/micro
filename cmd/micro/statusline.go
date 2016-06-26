@@ -48,13 +48,14 @@ func (sline *Statusline) Display() {
 
 	// Maybe there is a unicode filename?
 	fileRunes := []rune(file)
+	viewX := sline.view.x
 	for x := 0; x < sline.view.width; x++ {
 		if x < len(fileRunes) {
-			screen.SetContent(x, y, fileRunes[x], nil, statusLineStyle)
+			screen.SetContent(viewX+x, y, fileRunes[x], nil, statusLineStyle)
 		} else if x >= sline.view.width-len(rightText) && x < len(rightText)+sline.view.width-len(rightText) {
-			screen.SetContent(x, y, []rune(rightText)[x-sline.view.width+len(rightText)], nil, statusLineStyle)
+			screen.SetContent(viewX+x, y, []rune(rightText)[x-sline.view.width+len(rightText)], nil, statusLineStyle)
 		} else {
-			screen.SetContent(x, y, ' ', nil, statusLineStyle)
+			screen.SetContent(viewX+x, y, ' ', nil, statusLineStyle)
 		}
 	}
 }

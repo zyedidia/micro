@@ -502,7 +502,7 @@ func (v *View) DisplayView() {
 		// If the buffer is smaller than the view height
 		if lineN+v.Topline >= v.Buf.NumLines {
 			// We have to clear all this space
-			for i := 0; i < v.width; i++ {
+			for i := v.x; i < v.width; i++ {
 				screen.SetContent(i, lineN+v.y, ' ', nil, defStyle)
 			}
 
@@ -677,7 +677,7 @@ func (v *View) DisplayView() {
 
 		charNum = charNum.Move(1, v.Buf)
 
-		for i := 0; i < v.width-(x-v.leftCol); i++ {
+		for i := 0; i < v.width-((x-v.x)-v.leftCol); i++ {
 			lineStyle := defStyle
 			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
