@@ -49,6 +49,10 @@ func (sline *Statusline) Display() {
 	// Maybe there is a unicode filename?
 	fileRunes := []rune(file)
 	viewX := sline.view.x
+	if viewX != 0 {
+		screen.SetContent(viewX, y, ' ', nil, statusLineStyle)
+		viewX++
+	}
 	for x := 0; x < sline.view.width; x++ {
 		if x < len(fileRunes) {
 			screen.SetContent(viewX+x, y, fileRunes[x], nil, statusLineStyle)

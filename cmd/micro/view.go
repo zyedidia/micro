@@ -487,8 +487,15 @@ func (v *View) ClearAllGutterMessages() {
 	}
 }
 
+func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
+	if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
+		screen.SetContent(x, y, ch, combc, style)
+	}
+}
+
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+
 	// The character number of the character in the top left of the screen
 	charNum := Loc{0, v.Topline}
 
@@ -522,14 +529,14 @@ func (v *View) DisplayView() {
 		x := v.x
 		if v.x != 0 {
 			// Draw the split divider
-			screen.SetContent(x, lineN+v.y, ' ', nil, defStyle.Reverse(true))
+			v.drawCell(x, lineN+v.y, ' ', nil, defStyle.Reverse(true))
 			x++
 		}
 		// If the buffer is smaller than the view height
 		if lineN+v.Topline >= v.Buf.NumLines {
 			// We have to clear all this space
 			for i := x; i < v.x+v.width; i++ {
-				screen.SetContent(i, lineN+v.y, ' ', nil, defStyle)
+				v.drawCell(i, lineN+v.y, ' ', nil, defStyle)
 			}
 
 			continue
@@ -557,9 +564,9 @@ func (v *View) DisplayView() {
 								gutterStyle = style
 							}
 						}
-						screen.SetContent(x, lineN+v.y, '>', nil, gutterStyle)
+						v.drawCell(x, lineN+v.y, '>', nil, gutterStyle)
 						x++
-						screen.SetContent(x, lineN+v.y, '>', nil, gutterStyle)
+						v.drawCell(x, lineN+v.y, '>', nil, gutterStyle)
 						x++
 						if v.Cursor.Y == lineN+v.Topline {
 							messenger.Message(msg.msg)
@@ -569,9 +576,9 @@ func (v *View) DisplayView() {
 				}
 			}
 			if !msgOnLine {
-				screen.SetContent(x, lineN+v.y, ' ', nil, defStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, defStyle)
 				x++
-				screen.SetContent(x, lineN+v.y, ' ', nil, defStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, defStyle)
 				x++
 				if v.Cursor.Y == lineN+v.Topline && messenger.gutterMessage {
 					messenger.Reset()
@@ -590,18 +597,18 @@ func (v *View) DisplayView() {
 		if settings["ruler"] == true {
 			lineNum = strconv.Itoa(lineN + v.Topline + 1)
 			for i := 0; i < maxLineLength-len(lineNum); i++ {
-				screen.SetContent(x, lineN+v.y, ' ', nil, lineNumStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, lineNumStyle)
 				x++
 			}
 			// Write the actual line number
 			for _, ch := range lineNum {
-				screen.SetContent(x, lineN+v.y, ch, nil, lineNumStyle)
+				v.drawCell(x, lineN+v.y, ch, nil, lineNumStyle)
 				x++
 			}
 
 			if settings["ruler"] == true {
 				// Write the extra space
-				screen.SetContent(x, lineN+v.y, ' ', nil, lineNumStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, lineNumStyle)
 				x++
 			}
 		}
@@ -657,28 +664,28 @@ func (v *View) DisplayView() {
 				}
 				indentChar := []rune(settings["indentchar"].(string))
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN+v.y, indentChar[0], nil, lineIndentStyle)
+					v.drawCell(x-v.leftCol, lineN+v.y, indentChar[0], nil, lineIndentStyle)
 				}
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
+						v.drawCell(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
 					}
 				}
 			} else if runewidth.RuneWidth(ch) > 1 {
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
+					v.drawCell(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
 				}
 				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
+						v.drawCell(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
 					}
 				}
 			} else {
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
+					v.drawCell(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
 				}
 			}
 			charNum = charNum.Move(1, v.Buf)
@@ -697,7 +704,7 @@ func (v *View) DisplayView() {
 			if style, ok := colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, selectStyle)
+			v.drawCell(x-v.leftCol, lineN+v.y, ' ', nil, selectStyle)
 			x++
 		}
 
@@ -712,7 +719,7 @@ func (v *View) DisplayView() {
 				}
 			}
 			if !(x-v.leftCol < v.lineNumOffset) {
-				screen.SetContent(x+i, lineN+v.y, ' ', nil, lineStyle)
+				v.drawCell(x+i, lineN+v.y, ' ', nil, lineStyle)
 			}
 		}
 	}
