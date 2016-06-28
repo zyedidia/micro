@@ -143,15 +143,13 @@ func Replace(args []string) {
 
 	view := CurView()
 
-	found := false
-	count := 0
+	found := 0
 	for {
 		match := regex.FindStringIndex(view.Buf.String())
 		if match == nil {
 			break
 		}
-		found = true
-		count = count + 1
+		found = found + 1
 		if strings.Contains(flags, "c") {
 			// The 'check' flag was used
 			Search(search, view, true)
@@ -186,8 +184,10 @@ func Replace(args []string) {
 			view.Buf.Replace(FromCharPos(match[0], view.Buf), FromCharPos(match[1], view.Buf), replace)
 		}
 	}
-	if found {
-		messenger.Message("Replaced " + strconv.Itoa(count) + " occurences")
+	if found > 1 {
+		messenger.Message("Replaced " + strconv.Itoa(found) + " occurences of " + search)
+	} else if found == 1 {
+		messenger.Message("Replaced " + strconv.Itoa(found) + " occurence of " + search)
 	} else {
 		messenger.Message("Nothing matched " + search)
 	}
