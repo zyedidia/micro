@@ -7,7 +7,6 @@ import (
 	"os/signal"
 	"regexp"
 	"strings"
-	"strconv"
 )
 
 var commands map[string]func([]string)
@@ -149,7 +148,7 @@ func Replace(args []string) {
 		if match == nil {
 			break
 		}
-		found = found + 1
+		found++
 		if strings.Contains(flags, "c") {
 			// The 'check' flag was used
 			Search(search, view, true)
@@ -184,12 +183,14 @@ func Replace(args []string) {
 			view.Buf.Replace(FromCharPos(match[0], view.Buf), FromCharPos(match[1], view.Buf), replace)
 		}
 	}
+	view.Cursor.Relocate()
+
 	if found > 1 {
-		messenger.Message("Replaced " + strconv.Itoa(found) + " occurences of " + search)
+		messenger.Message("Replaced ", found, " occurences of ", search)
 	} else if found == 1 {
-		messenger.Message("Replaced " + strconv.Itoa(found) + " occurence of " + search)
+		messenger.Message("Replaced ", found, " occurence of ", search)
 	} else {
-		messenger.Message("Nothing matched " + search)
+		messenger.Message("Nothing matched ", search)
 	}
 }
 
