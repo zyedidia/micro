@@ -1030,7 +1030,7 @@ func (v *View) JumpLine() bool {
 		return false
 	}
 	// Move cursor and view if possible.
-	if lineint < v.Buf.NumLines {
+	if lineint < v.Buf.NumLines && lineint >= 0 {
 		v.Cursor.X = 0
 		v.Cursor.Y = lineint
 		return true
