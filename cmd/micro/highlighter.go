@@ -152,6 +152,9 @@ func LoadSyntaxFilesFromDir(dir string) {
 	if style, ok := colorscheme["default"]; ok {
 		defStyle = style
 	}
+	if screen != nil {
+		screen.SetStyle(defStyle)
+	}
 
 	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
 	files, _ := ioutil.ReadDir(dir)
