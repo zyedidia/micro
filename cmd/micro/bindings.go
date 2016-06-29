@@ -1112,6 +1112,7 @@ func (v *View) Quit() bool {
 	return false
 }
 
+// AddTab adds a new tab with an empty buffer
 func (v *View) AddTab() bool {
 	tab := NewTabFromView(NewView(NewBuffer([]byte{}, "")))
 	tab.SetNum(len(tabs))
@@ -1127,16 +1128,22 @@ func (v *View) AddTab() bool {
 	return true
 }
 
+// PreviousTab switches to the previous tab in the tab list
 func (v *View) PreviousTab() bool {
 	if curTab > 0 {
 		curTab--
+	} else if curTab == 0 {
+		curTab = len(tabs) - 1
 	}
 	return false
 }
 
+// NextTab switches to the next tab in the tab list
 func (v *View) NextTab() bool {
 	if curTab < len(tabs)-1 {
 		curTab++
+	} else if curTab == len(tabs)-1 {
+		curTab = 0
 	}
 	return false
 }
