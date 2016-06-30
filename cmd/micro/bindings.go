@@ -749,10 +749,10 @@ func (v *View) Save() bool {
 					messenger.Error(err.Error())
 					return false
 				}
+				messenger.Message("Saved " + v.Buf.Path)
 			}
 			messenger.Reset()
 			messenger.Clear()
-			messenger.Message("Saved " + v.Buf.Path)
 		} else {
 			messenger.Error(err.Error())
 		}
