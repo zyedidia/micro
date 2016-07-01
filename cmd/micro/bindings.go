@@ -915,11 +915,13 @@ func (v *View) OpenFile() bool {
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := ioutil.ReadFile(filename)
 
+		var buf *Buffer
 		if err != nil {
-			messenger.Error(err.Error())
-			return false
+			// File does not exist -- create an empty buffer with that name
+			buf = NewBuffer([]byte{}, filename)
+		} else {
+			buf = NewBuffer(file, filename)
 		}
-		buf := NewBuffer(file, filename)
 		v.OpenBuffer(buf)
 		return true
 	}
@@ -1090,7 +1092,27 @@ func (v *View) Quit() bool {
 	// Make sure not to quit if there are unsaved changes
 	if v.CanClose("Quit anyway? (yes, no, save) ") {
 		v.CloseBuffer()
-		if len(tabs) > 1 {
+		if len(tabs[curTab].views) > 1 {
+			var view *View
+			if v.splitChild != nil {
+				view = v.splitChild
+				view.splitParent = v.splitParent
+			} else if v.splitParent != nil {
+				view = v.splitParent
+				v.splitParent.splitChild = nil
+			}
+			view.x, view.y = view.splitOrigPos[0], view.splitOrigPos[1]
+			view.widthPercent, view.heightPercent = view.splitOrigDimensions[0], view.splitOrigDimensions[1]
+			view.Resize(screen.Size())
+			if settings["syntax"].(bool) {
+				view.matches = Match(view)
+			}
+			tabs[curTab].views = tabs[curTab].views[:v.Num+copy(tabs[curTab].views[v.Num:], tabs[curTab].views[v.Num+1:])]
+			for i, v := range tabs[curTab].views {
+				v.Num = i
+			}
+			tabs[curTab].curView = view.Num
+		} else if len(tabs) > 1 {
 			if len(tabs[v.TabNum].views) == 1 {
 				tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
 				for i, t := range tabs {

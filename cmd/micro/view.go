@@ -87,6 +87,11 @@ type View struct {
 	matches SyntaxMatches
 	// The matches from the last frame
 	lastMatches SyntaxMatches
+
+	splitParent         *View
+	splitChild          *View
+	splitOrigDimensions [2]int
+	splitOrigPos        [2]int
 }
 
 // NewView returns a new fullscreen view
@@ -222,32 +227,56 @@ func (v *View) ReOpen() {
 	}
 }
 
-func (v *View) HSplit() bool {
+// HSplit opens a horizontal split with the given buffer
+func (v *View) HSplit(buf *Buffer) bool {
+	origDimensions := [2]int{v.widthPercent, v.heightPercent}
+	origPos := [2]int{v.x, v.y}
+
 	v.heightPercent /= 2
 	v.Resize(screen.Size())
 
-	newView := NewViewWidthHeight(NewBuffer([]byte{}, ""), v.widthPercent, v.heightPercent)
+	newView := NewViewWidthHeight(buf, v.widthPercent, v.heightPercent)
+
+	v.splitOrigDimensions = origDimensions
+	v.splitOrigPos = origPos
+	newView.splitOrigDimensions = origDimensions
+	newView.splitOrigPos = origPos
+
 	newView.TabNum = v.TabNum
 	newView.y = v.y + v.height + 1
 	newView.x = v.x
 	tab := tabs[v.TabNum]
 	tab.curView++
 	newView.Num = len(tab.views)
+	newView.splitParent = v
+	v.splitChild = newView
 	tab.views = append(tab.views, newView)
 	return false
 }
 
-func (v *View) VSplit() bool {
+// VSplit opens a vertical split with the given buffer
+func (v *View) VSplit(buf *Buffer) bool {
+	origDimensions := [2]int{v.widthPercent, v.heightPercent}
+	origPos := [2]int{v.x, v.y}
+
 	v.widthPercent /= 2
 	v.Resize(screen.Size())
 
-	newView := NewViewWidthHeight(NewBuffer([]byte{}, ""), v.widthPercent, v.heightPercent)
+	newView := NewViewWidthHeight(buf, v.widthPercent, v.heightPercent)
+
+	v.splitOrigDimensions = origDimensions
+	v.splitOrigPos = origPos
+	newView.splitOrigDimensions = origDimensions
+	newView.splitOrigPos = origPos
+
 	newView.TabNum = v.TabNum
 	newView.y = v.y
 	newView.x = v.x + v.width
 	tab := tabs[v.TabNum]
 	tab.curView++
 	newView.Num = len(tab.views)
+	newView.splitParent = v
+	v.splitChild = newView
 	tab.views = append(tab.views, newView)
 	return false
 }
@@ -638,7 +667,7 @@ func (v *View) DisplayView() {
 				lineStyle = highlightStyle
 			}
 
-			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
+			if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -742,7 +771,9 @@ func (v *View) DisplayCursor() {
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	v.DisplayCursor()
+	if v.Num == tabs[curTab].curView {
+		v.DisplayCursor()
+	}
 	if settings["statusline"].(bool) {
 		v.sline.Display()
 	}

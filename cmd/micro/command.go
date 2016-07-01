@@ -2,11 +2,14 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
 	"regexp"
 	"strings"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 var commands map[string]func([]string)
@@ -63,11 +66,48 @@ func DefaultCommands() map[string]string {
 	}
 }
 
+// VSplit opens a vertical split with file given in the first argument
+// If no file is given, it opens an empty buffer in a new split
 func VSplit(args []string) {
-	CurView().VSplit()
+	if len(args) == 0 {
+		CurView().VSplit(NewBuffer([]byte{}, ""))
+	} else {
+		filename := args[0]
+		home, _ := homedir.Dir()
+		filename = strings.Replace(filename, "~", home, 1)
+		file, err := ioutil.ReadFile(filename)
+
+		var buf *Buffer
+		if err != nil {
+			// File does not exist -- create an empty buffer with that name
+			buf = NewBuffer([]byte{}, filename)
+		} else {
+			buf = NewBuffer(file, filename)
+		}
+		CurView().VSplit(buf)
+	}
 }
+
+// HSplit opens a horizontal split with file given in the first argument
+// If no file is given, it opens an empty buffer in a new split
 func HSplit(args []string) {
-	CurView().HSplit()
+	if len(args) == 0 {
+		CurView().HSplit(NewBuffer([]byte{}, ""))
+	} else {
+		filename := args[0]
+		home, _ := homedir.Dir()
+		filename = strings.Replace(filename, "~", home, 1)
+		file, err := ioutil.ReadFile(filename)
+
+		var buf *Buffer
+		if err != nil {
+			// File does not exist -- create an empty buffer with that name
+			buf = NewBuffer([]byte{}, filename)
+		} else {
+			buf = NewBuffer(file, filename)
+		}
+		CurView().HSplit(buf)
+	}
 }
 
 // Set sets an option
