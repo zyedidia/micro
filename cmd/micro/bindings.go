@@ -76,6 +76,8 @@ var bindingActions = map[string]func(*View) bool{
 	"AddTab":              (*View).AddTab,
 	"PreviousTab":         (*View).PreviousTab,
 	"NextTab":             (*View).NextTab,
+	"NextSplit":           (*View).NextSplit,
+	"PreviousSplit":       (*View).PreviousSplit,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -398,6 +400,7 @@ func DefaultBindings() map[string]string {
 		"CtrlB":          "ShellMode",
 		"CtrlQ":          "Quit",
 		"CtrlE":          "CommandMode",
+		"CtrlW":          "NextSplit",
 
 		// Emacs-style keybindings
 		"Alt-f": "WordRight",
@@ -1166,6 +1169,28 @@ func (v *View) NextTab() bool {
 		curTab++
 	} else if curTab == len(tabs)-1 {
 		curTab = 0
+	}
+	return false
+}
+
+// Changes the view to the next split
+func (v *View) NextSplit() bool {
+	tab := tabs[curTab]
+	if tab.curView < len(tab.views)-1 {
+		tab.curView++
+	} else {
+		tab.curView = 0
+	}
+	return false
+}
+
+// Changes the view to the previous split
+func (v *View) PreviousSplit() bool {
+	tab := tabs[curTab]
+	if tab.curView > 0 {
+		tab.curView--
+	} else {
+		tab.curView = len(tab.views) - 1
 	}
 	return false
 }

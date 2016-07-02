@@ -689,7 +689,7 @@ func (v *View) DisplayView() {
 						lineIndentStyle = style
 					}
 				}
-				if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
+				if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 					if style, ok := colorscheme["cursor-line"]; ok {
 						fg, _, _ := style.Decompose()
 						lineIndentStyle = lineIndentStyle.Background(fg)
@@ -745,7 +745,7 @@ func (v *View) DisplayView() {
 
 		for i := 0; i < v.width-((x-v.x)-v.leftCol); i++ {
 			lineStyle := defStyle
-			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
+			if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
