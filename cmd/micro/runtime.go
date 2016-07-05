@@ -3,7 +3,7 @@
 // runtime/README.md
 // runtime/colorschemes/atom-dark-tc.micro
 // runtime/colorschemes/default.micro
-// runtime/colorschemes/monokai-tc.micro
+// runtime/colorschemes/monokai.micro
 // runtime/colorschemes/solarized-tc.micro
 // runtime/colorschemes/solarized.micro
 // runtime/help/help.md
@@ -199,7 +199,7 @@ func runtimeColorschemesAtomDarkTcMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/colorschemes/atom-dark-tc.micro", size: 704, mode: os.FileMode(420), modTime: time.Unix(1466684972, 0)}
+	info := bindataFileInfo{name: "runtime/colorschemes/atom-dark-tc.micro", size: 704, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -224,22 +224,22 @@ func runtimeColorschemesDefaultMicro() (*asset, error) {
 	return a, nil
 }
 
-var _runtimeColorschemesMonokaiTcMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x84\x91\xc1\x6e\x83\x30\x10\x44\xef\xfd\x0a\x14\xae\x50\x15\x13\x0c\x39\x86\x02\xff\x41\xec\x4d\x6a\x15\x6c\xb4\xd8\xaa\xfa\xf7\xf5\x12\x22\x35\x92\xeb\xb2\x17\x4b\x3c\xcd\xce\xec\x08\x33\x19\xcc\x27\xa5\x3f\x13\x09\xd7\xd1\x4d\x36\x39\xa4\x43\xe3\x87\x65\x29\x6b\x68\x0e\x2f\xbf\x20\x61\xe6\x19\x34\x41\x75\x55\x17\x55\x1f\x84\x94\xf4\x88\xba\x2a\x40\xcf\x71\xde\x9d\xfa\xe1\x0f\x31\xbd\xda\x71\x53\x3b\xf7\x4d\x31\xc4\xa9\xd7\xd5\xa2\xd2\x37\x0f\xf7\xbc\x6b\xeb\x63\x10\xf6\xa4\x85\xdd\xe1\x70\x62\xbc\x0e\xc7\x58\x10\x16\x34\xc2\x43\xef\xed\xb1\x2d\x78\x10\xb2\xdf\x0b\xc4\x03\xac\x0b\x08\x35\x4e\xe4\x9f\xf7\x8c\x85\xaf\xe1\xb4\x04\xf4\x2f\x90\x9e\xeb\xca\x92\x37\x61\x4f\x80\x68\xfc\xc1\x2e\x66\x92\x49\xd4\x96\x91\xe6\x81\x45\xe4\xe8\x12\x6e\xa5\xbd\x7e\xed\xfd\x7f\xb6\x37\xfb\x5c\x96\xa6\xb6\x72\xf1\x31\x52\x5b\xd5\x1b\x4d\x50\x90\xa4\x72\xed\xe6\xcb\x56\xeb\x79\xfb\xb2\xb4\x64\x34\x4f\xe0\xcd\x59\x0b\x98\xef\x79\x62\x51\x76\xf2\x6b\x44\xfd\x6f\xb3\xc2\xe1\x7a\x7f\x53\xa0\xc7\xda\x9f\x00\x00\x00\xff\xff\xf8\x3a\xd6\xa5\xc0\x02\x00\x00")
+var _runtimeColorschemesMonokaiMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x84\x91\xc1\x6e\x83\x30\x10\x44\xef\xfd\x0a\x14\xae\x50\x15\x13\x0c\x39\x86\x02\xff\x41\xec\x4d\x6a\x15\x6c\xb4\xd8\xaa\xfa\xf7\xf5\x12\x22\x35\x92\xeb\xb2\x17\x4b\x3c\xcd\xce\xec\x08\x33\x19\xcc\x27\xa5\x3f\x13\x09\xd7\xd1\x4d\x36\x39\xa4\x43\xe3\x87\x65\x29\x6b\x68\x0e\x2f\xbf\x20\x61\xe6\x19\x34\x41\x75\x55\x17\x55\x1f\x84\x94\xf4\x88\xba\x2a\x40\xcf\x71\xde\x9d\xfa\xe1\x0f\x31\xbd\xda\x71\x53\x3b\xf7\x4d\x31\xc4\xa9\xd7\xd5\xa2\xd2\x37\x0f\xf7\xbc\x6b\xeb\x63\x10\xf6\xa4\x85\xdd\xe1\x70\x62\xbc\x0e\xc7\x58\x10\x16\x34\xc2\x43\xef\xed\xb1\x2d\x78\x10\xb2\xdf\x0b\xc4\x03\xac\x0b\x08\x35\x4e\xe4\x9f\xf7\x8c\x85\xaf\xe1\xb4\x04\xf4\x2f\x90\x9e\xeb\xca\x92\x37\x61\x4f\x80\x68\xfc\xc1\x2e\x66\x92\x49\xd4\x96\x91\xe6\x81\x45\xe4\xe8\x12\x6e\xa5\xbd\x7e\xed\xfd\x7f\xb6\x37\xfb\x5c\x96\xa6\xb6\x72\xf1\x31\x52\x5b\xd5\x1b\x4d\x50\x90\xa4\x72\xed\xe6\xcb\x56\xeb\x79\xfb\xb2\xb4\x64\x34\x4f\xe0\xcd\x59\x0b\x98\xef\x79\x62\x51\x76\xf2\x6b\x44\xfd\x6f\xb3\xc2\xe1\x7a\x7f\x53\xa0\xc7\xda\x9f\x00\x00\x00\xff\xff\xf8\x3a\xd6\xa5\xc0\x02\x00\x00")
 
-func runtimeColorschemesMonokaiTcMicroBytes() ([]byte, error) {
+func runtimeColorschemesMonokaiMicroBytes() ([]byte, error) {
 	return bindataRead(
-		_runtimeColorschemesMonokaiTcMicro,
-		"runtime/colorschemes/monokai-tc.micro",
+		_runtimeColorschemesMonokaiMicro,
+		"runtime/colorschemes/monokai.micro",
 	)
 }
 
-func runtimeColorschemesMonokaiTcMicro() (*asset, error) {
-	bytes, err := runtimeColorschemesMonokaiTcMicroBytes()
+func runtimeColorschemesMonokaiMicro() (*asset, error) {
+	bytes, err := runtimeColorschemesMonokaiMicroBytes()
 	if err != nil {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/colorschemes/monokai-tc.micro", size: 704, mode: os.FileMode(420), modTime: time.Unix(1466684972, 0)}
+	info := bindataFileInfo{name: "runtime/colorschemes/monokai.micro", size: 704, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -299,7 +299,7 @@ func runtimeHelpHelpMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/help/help.md", size: 7541, mode: os.FileMode(420), modTime: time.Unix(1466685543, 0)}
+	info := bindataFileInfo{name: "runtime/help/help.md", size: 7541, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -319,7 +319,7 @@ func runtimePluginsAutocloseAutocloseLua() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/plugins/autoclose/autoclose.lua", size: 2332, mode: os.FileMode(420), modTime: time.Unix(1466643775, 0)}
+	info := bindataFileInfo{name: "runtime/plugins/autoclose/autoclose.lua", size: 2332, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -339,7 +339,7 @@ func runtimePluginsGoGoLua() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/plugins/go/go.lua", size: 1011, mode: os.FileMode(420), modTime: time.Unix(1466545728, 0)}
+	info := bindataFileInfo{name: "runtime/plugins/go/go.lua", size: 1011, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -359,7 +359,7 @@ func runtimePluginsLinterLinterLua() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/plugins/linter/linter.lua", size: 2208, mode: os.FileMode(420), modTime: time.Unix(1466545278, 0)}
+	info := bindataFileInfo{name: "runtime/plugins/linter/linter.lua", size: 2208, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -559,7 +559,7 @@ func runtimeSyntaxCMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/c.micro", size: 1620, mode: os.FileMode(420), modTime: time.Unix(1466896629, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/c.micro", size: 1620, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -739,7 +739,7 @@ func runtimeSyntaxDMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/d.micro", size: 3689, mode: os.FileMode(420), modTime: time.Unix(1466896664, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/d.micro", size: 3689, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -839,7 +839,7 @@ func runtimeSyntaxGdscriptMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/gdscript.micro", size: 1693, mode: os.FileMode(420), modTime: time.Unix(1466684972, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/gdscript.micro", size: 1693, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -979,7 +979,7 @@ func runtimeSyntaxGoMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/go.micro", size: 967, mode: os.FileMode(420), modTime: time.Unix(1466636346, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/go.micro", size: 967, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1119,7 +1119,7 @@ func runtimeSyntaxJavaMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/java.micro", size: 603, mode: os.FileMode(420), modTime: time.Unix(1466896711, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/java.micro", size: 603, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1139,7 +1139,7 @@ func runtimeSyntaxJavascriptMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/javascript.micro", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1466896742, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/javascript.micro", size: 1032, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1259,7 +1259,7 @@ func runtimeSyntaxLuaMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/lua.micro", size: 2930, mode: os.FileMode(420), modTime: time.Unix(1466896678, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/lua.micro", size: 2930, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1679,7 +1679,7 @@ func runtimeSyntaxPythonMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/python.micro", size: 3051, mode: os.FileMode(420), modTime: time.Unix(1466896754, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/python.micro", size: 3051, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1779,7 +1779,7 @@ func runtimeSyntaxRustMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/rust.micro", size: 1091, mode: os.FileMode(420), modTime: time.Unix(1466896703, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/rust.micro", size: 1091, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1839,7 +1839,7 @@ func runtimeSyntaxShMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/sh.micro", size: 1697, mode: os.FileMode(420), modTime: time.Unix(1466896763, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/sh.micro", size: 1697, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1899,7 +1899,7 @@ func runtimeSyntaxSwiftMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/swift.micro", size: 1035, mode: os.FileMode(420), modTime: time.Unix(1466896686, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/swift.micro", size: 1035, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1999,7 +1999,7 @@ func runtimeSyntaxViMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/vi.micro", size: 362, mode: os.FileMode(420), modTime: time.Unix(1466896604, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/vi.micro", size: 362, mode: os.FileMode(420), modTime: time.Unix(1466955865, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2159,7 +2159,7 @@ var _bindata = map[string]func() (*asset, error){
 	"runtime/README.md": runtimeReadmeMd,
 	"runtime/colorschemes/atom-dark-tc.micro": runtimeColorschemesAtomDarkTcMicro,
 	"runtime/colorschemes/default.micro": runtimeColorschemesDefaultMicro,
-	"runtime/colorschemes/monokai-tc.micro": runtimeColorschemesMonokaiTcMicro,
+	"runtime/colorschemes/monokai.micro": runtimeColorschemesMonokaiMicro,
 	"runtime/colorschemes/solarized-tc.micro": runtimeColorschemesSolarizedTcMicro,
 	"runtime/colorschemes/solarized.micro": runtimeColorschemesSolarizedMicro,
 	"runtime/help/help.md": runtimeHelpHelpMd,
@@ -2300,7 +2300,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"colorschemes": &bintree{nil, map[string]*bintree{
 			"atom-dark-tc.micro": &bintree{runtimeColorschemesAtomDarkTcMicro, map[string]*bintree{}},
 			"default.micro": &bintree{runtimeColorschemesDefaultMicro, map[string]*bintree{}},
-			"monokai-tc.micro": &bintree{runtimeColorschemesMonokaiTcMicro, map[string]*bintree{}},
+			"monokai.micro": &bintree{runtimeColorschemesMonokaiMicro, map[string]*bintree{}},
 			"solarized-tc.micro": &bintree{runtimeColorschemesSolarizedTcMicro, map[string]*bintree{}},
 			"solarized.micro": &bintree{runtimeColorschemesSolarizedMicro, map[string]*bintree{}},
 		}},

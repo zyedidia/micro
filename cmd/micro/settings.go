@@ -73,7 +73,7 @@ func GetOption(name string) interface{} {
 func DefaultSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
-		"colorscheme":  "default",
+		"colorscheme":  "monokai",
 		"cursorline":   false,
 		"ignorecase":   false,
 		"indentchar":   " ",
