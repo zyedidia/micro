@@ -142,6 +142,13 @@ func (v *View) Resize(w, h int) {
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
 	v.height = int(float32(h) * float32(v.heightPercent) / 100)
+	if w%2 == 1 && v.x > 1 && v.widthPercent < 100 {
+		v.width++
+	}
+
+	if h%2 == 1 && v.y > 1 && v.heightPercent < 100 {
+		v.height++
+	}
 	if settings["statusline"].(bool) {
 		// Make room for the status line if it is enabled
 		v.height--
@@ -251,6 +258,7 @@ func (v *View) HSplit(buf *Buffer) bool {
 	newView.splitParent = v
 	v.splitChild = newView
 	tab.views = append(tab.views, newView)
+	newView.Resize(screen.Size())
 	return false
 }
 
@@ -278,6 +286,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 	newView.splitParent = v
 	v.splitChild = newView
 	tab.views = append(tab.views, newView)
+	newView.Resize(screen.Size())
 	return false
 }
 
