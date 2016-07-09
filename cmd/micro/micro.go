@@ -174,11 +174,11 @@ func InitScreen() {
 // RedrawAll redraws everything -- all the views and the messenger
 func RedrawAll() {
 	messenger.Clear()
+	DisplayTabs()
+	messenger.Display()
 	for _, v := range tabs[curTab].views {
 		v.Display()
 	}
-	DisplayTabs()
-	messenger.Display()
 	screen.Show()
 }
 
@@ -281,10 +281,16 @@ func main() {
 		case *tcell.EventMouse:
 			if e.Buttons() == tcell.Button1 {
 				_, h := screen.Size()
-				_, y := e.Position()
+				x, y := e.Position()
 				if y == h-1 && messenger.message != "" {
 					clipboard.WriteAll(messenger.message)
 					continue
+				}
+
+				for _, v := range tabs[curTab].views {
+					if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
+						tabs[curTab].curView = v.Num
+					}
 				}
 			}
 		}

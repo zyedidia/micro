@@ -78,6 +78,7 @@ you can rebind them to your liking.
 	"CtrlB":          "ShellMode",
 	"CtrlQ":          "Quit",
 	"CtrlE":          "CommandMode",
+	"CtrlW":          "NextSplit",
 	
 	// Emacs-style keybindings
 	"Alt-f": "WordRight",
@@ -114,6 +115,7 @@ You can execute an editor command by pressing `Ctrl-e` followed by the command.
 Here are the possible commands that you can use.
 
 * `quit`: Quits micro.
+
 * `save`: Saves the current buffer.
 
 * `replace "search" "value" flags`: This will replace `search` with `value`. 
@@ -132,6 +134,12 @@ Here are the possible commands that you can use.
 
 * `bind key action`: creates a keybinding from key to action. See the sections on
    keybindings above for more info about what keys and actions are available.
+
+* `vsplit filename`: opens a vertical split with `filename`. If no filename is
+   provided, a vertical split is opened with an empty buffer
+
+* `hsplit filename`: same as `vsplit` but opens a horizontal split instead of
+   a vertical split
 
 ### Options
 

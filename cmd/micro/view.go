@@ -87,6 +87,11 @@ type View struct {
 	matches SyntaxMatches
 	// The matches from the last frame
 	lastMatches SyntaxMatches
+
+	splitParent         *View
+	splitChild          *View
+	splitOrigDimensions [2]int
+	splitOrigPos        [2]int
 }
 
 // NewView returns a new fullscreen view
@@ -124,15 +129,26 @@ func (v *View) Resize(w, h int) {
 	// Always include 1 line for the command line at the bottom
 	h--
 	if len(tabs) > 1 {
-		// Include one line for the tab bar at the top
-		h--
-		v.y = 1
+		if v.y == 0 {
+			// Include one line for the tab bar at the top
+			h--
+			v.y = 1
+		}
 	} else {
-		v.y = 0
+		if v.y == 1 {
+			v.y = 0
+		}
 	}
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
 	v.height = int(float32(h) * float32(v.heightPercent) / 100)
+	if w%2 == 0 && v.x > 1 && v.widthPercent < 100 {
+		v.width++
+	}
+
+	if h%2 == 1 && v.y > 1 && v.heightPercent < 100 {
+		v.height++
+	}
 	if settings["statusline"].(bool) {
 		// Make room for the status line if it is enabled
 		v.height--
@@ -216,6 +232,62 @@ func (v *View) ReOpen() {
 		v.Relocate()
 		v.matches = Match(v)
 	}
+}
+
+// HSplit opens a horizontal split with the given buffer
+func (v *View) HSplit(buf *Buffer) bool {
+	origDimensions := [2]int{v.widthPercent, v.heightPercent}
+	origPos := [2]int{v.x, v.y}
+
+	v.heightPercent /= 2
+	v.Resize(screen.Size())
+
+	newView := NewViewWidthHeight(buf, v.widthPercent, v.heightPercent)
+
+	v.splitOrigDimensions = origDimensions
+	v.splitOrigPos = origPos
+	newView.splitOrigDimensions = origDimensions
+	newView.splitOrigPos = origPos
+
+	newView.TabNum = v.TabNum
+	newView.y = v.y + v.height + 1
+	newView.x = v.x
+	tab := tabs[v.TabNum]
+	tab.curView++
+	newView.Num = len(tab.views)
+	newView.splitParent = v
+	v.splitChild = newView
+	tab.views = append(tab.views, newView)
+	newView.Resize(screen.Size())
+	return false
+}
+
+// VSplit opens a vertical split with the given buffer
+func (v *View) VSplit(buf *Buffer) bool {
+	origDimensions := [2]int{v.widthPercent, v.heightPercent}
+	origPos := [2]int{v.x, v.y}
+
+	v.widthPercent /= 2
+	v.Resize(screen.Size())
+
+	newView := NewViewWidthHeight(buf, v.widthPercent, v.heightPercent)
+
+	v.splitOrigDimensions = origDimensions
+	v.splitOrigPos = origPos
+	newView.splitOrigDimensions = origDimensions
+	newView.splitOrigPos = origPos
+
+	newView.TabNum = v.TabNum
+	newView.y = v.y
+	newView.x = v.x + v.width
+	tab := tabs[v.TabNum]
+	tab.curView++
+	newView.Num = len(tab.views)
+	newView.splitParent = v
+	v.splitChild = newView
+	tab.views = append(tab.views, newView)
+	newView.Resize(screen.Size())
+	return false
 }
 
 // Relocate moves the view window so that the cursor is in view
@@ -340,7 +412,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		v.freshClip = false
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		x -= v.lineNumOffset - v.leftCol
+		x -= v.lineNumOffset - v.leftCol + v.x
 		y += v.Topline - v.y
 		// Don't relocate for mouse events
 		relocate = false
@@ -457,8 +529,15 @@ func (v *View) ClearAllGutterMessages() {
 	}
 }
 
+func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
+	if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
+		screen.SetContent(x, y, ch, combc, style)
+	}
+}
+
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+
 	// The character number of the character in the top left of the screen
 	charNum := Loc{0, v.Topline}
 
@@ -483,13 +562,23 @@ func (v *View) DisplayView() {
 		v.lineNumOffset += 2
 	}
 
+	if v.x != 0 {
+		// One space for the extra split divider
+		v.lineNumOffset++
+	}
+
 	for lineN := 0; lineN < v.height; lineN++ {
 		x := v.x
+		if v.x != 0 {
+			// Draw the split divider
+			v.drawCell(x, lineN+v.y, ' ', nil, defStyle.Reverse(true))
+			x++
+		}
 		// If the buffer is smaller than the view height
 		if lineN+v.Topline >= v.Buf.NumLines {
 			// We have to clear all this space
-			for i := 0; i < v.width; i++ {
-				screen.SetContent(i, lineN+v.y, ' ', nil, defStyle)
+			for i := x; i < v.x+v.width; i++ {
+				v.drawCell(i, lineN+v.y, ' ', nil, defStyle)
 			}
 
 			continue
@@ -517,9 +606,9 @@ func (v *View) DisplayView() {
 								gutterStyle = style
 							}
 						}
-						screen.SetContent(x, lineN+v.y, '>', nil, gutterStyle)
+						v.drawCell(x, lineN+v.y, '>', nil, gutterStyle)
 						x++
-						screen.SetContent(x, lineN+v.y, '>', nil, gutterStyle)
+						v.drawCell(x, lineN+v.y, '>', nil, gutterStyle)
 						x++
 						if v.Cursor.Y == lineN+v.Topline {
 							messenger.Message(msg.msg)
@@ -529,9 +618,9 @@ func (v *View) DisplayView() {
 				}
 			}
 			if !msgOnLine {
-				screen.SetContent(x, lineN+v.y, ' ', nil, defStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, defStyle)
 				x++
-				screen.SetContent(x, lineN+v.y, ' ', nil, defStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, defStyle)
 				x++
 				if v.Cursor.Y == lineN+v.Topline && messenger.gutterMessage {
 					messenger.Reset()
@@ -550,18 +639,18 @@ func (v *View) DisplayView() {
 		if settings["ruler"] == true {
 			lineNum = strconv.Itoa(lineN + v.Topline + 1)
 			for i := 0; i < maxLineLength-len(lineNum); i++ {
-				screen.SetContent(x, lineN+v.y, ' ', nil, lineNumStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, lineNumStyle)
 				x++
 			}
 			// Write the actual line number
 			for _, ch := range lineNum {
-				screen.SetContent(x, lineN+v.y, ch, nil, lineNumStyle)
+				v.drawCell(x, lineN+v.y, ch, nil, lineNumStyle)
 				x++
 			}
 
 			if settings["ruler"] == true {
 				// Write the extra space
-				screen.SetContent(x, lineN+v.y, ' ', nil, lineNumStyle)
+				v.drawCell(x, lineN+v.y, ' ', nil, lineNumStyle)
 				x++
 			}
 		}
@@ -587,7 +676,7 @@ func (v *View) DisplayView() {
 				lineStyle = highlightStyle
 			}
 
-			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
+			if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -609,7 +698,7 @@ func (v *View) DisplayView() {
 						lineIndentStyle = style
 					}
 				}
-				if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
+				if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 					if style, ok := colorscheme["cursor-line"]; ok {
 						fg, _, _ := style.Decompose()
 						lineIndentStyle = lineIndentStyle.Background(fg)
@@ -617,28 +706,28 @@ func (v *View) DisplayView() {
 				}
 				indentChar := []rune(settings["indentchar"].(string))
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN+v.y, indentChar[0], nil, lineIndentStyle)
+					v.drawCell(x-v.leftCol, lineN+v.y, indentChar[0], nil, lineIndentStyle)
 				}
 				tabSize := int(settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
+						v.drawCell(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
 					}
 				}
 			} else if runewidth.RuneWidth(ch) > 1 {
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN, ch, nil, lineStyle)
+					v.drawCell(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
 				}
 				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
 					x++
 					if x-v.leftCol >= v.lineNumOffset {
-						screen.SetContent(x-v.leftCol, lineN, ' ', nil, lineStyle)
+						v.drawCell(x-v.leftCol, lineN+v.y, ' ', nil, lineStyle)
 					}
 				}
 			} else {
 				if x-v.leftCol >= v.lineNumOffset {
-					screen.SetContent(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
+					v.drawCell(x-v.leftCol, lineN+v.y, ch, nil, lineStyle)
 				}
 			}
 			charNum = charNum.Move(1, v.Buf)
@@ -657,22 +746,22 @@ func (v *View) DisplayView() {
 			if style, ok := colorscheme["selection"]; ok {
 				selectStyle = style
 			}
-			screen.SetContent(x-v.leftCol, lineN+v.y, ' ', nil, selectStyle)
+			v.drawCell(x-v.leftCol, lineN+v.y, ' ', nil, selectStyle)
 			x++
 		}
 
 		charNum = charNum.Move(1, v.Buf)
 
-		for i := 0; i < v.width-(x-v.leftCol); i++ {
+		for i := 0; i < v.width-((x-v.x)-v.leftCol); i++ {
 			lineStyle := defStyle
-			if settings["cursorline"].(bool) && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
+			if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == lineN+v.Topline {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
 				}
 			}
 			if !(x-v.leftCol < v.lineNumOffset) {
-				screen.SetContent(x+i, lineN+v.y, ' ', nil, lineStyle)
+				v.drawCell(x+i, lineN+v.y, ' ', nil, lineStyle)
 			}
 		}
 	}
@@ -691,7 +780,9 @@ func (v *View) DisplayCursor() {
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	v.DisplayCursor()
+	if v.Num == tabs[curTab].curView {
+		v.DisplayCursor()
+	}
 	if settings["statusline"].(bool) {
 		v.sline.Display()
 	}
