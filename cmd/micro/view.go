@@ -142,7 +142,7 @@ func (v *View) Resize(w, h int) {
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
 	v.height = int(float32(h) * float32(v.heightPercent) / 100)
-	if w%2 == 1 && v.x > 1 && v.widthPercent < 100 {
+	if w%2 == 0 && v.x > 1 && v.widthPercent < 100 {
 		v.width++
 	}
 
