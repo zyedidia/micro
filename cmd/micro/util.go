@@ -140,12 +140,15 @@ func GetModTime(path string) (time.Time, bool) {
 	return info.ModTime(), true
 }
 
+// StringWidth returns the width of a string where tabs count as `tabsize` width
 func StringWidth(str string) int {
 	sw := runewidth.StringWidth(str)
 	sw += NumOccurences(str, '\t') * (int(settings["tabsize"].(float64)) - 1)
 	return sw
 }
 
+// WidthOfLargeRunes searches all the runes in a string and counts up all the widths of runes
+// that have a width larger than 1 (this also counts tabs as `tabsize` width)
 func WidthOfLargeRunes(str string) int {
 	count := 0
 	for _, ch := range str {
@@ -162,6 +165,8 @@ func WidthOfLargeRunes(str string) int {
 	return count
 }
 
+// RunePos returns the rune index of a given byte index
+// This could cause problems if the byte index is between code points
 func runePos(p int, str string) int {
 	return utf8.RuneCountInString(str[:p])
 }

@@ -17,13 +17,6 @@ import (
 	"github.com/zyedidia/tcell/encoding"
 )
 
-const (
-	synLinesUp           = 75  // How many lines up to look to do syntax highlighting
-	synLinesDown         = 75  // How many lines down to look to do syntax highlighting
-	doubleClickThreshold = 400 // How many milliseconds to wait before a second click is not a double click
-	undoThreshold        = 500 // If two events are less than n milliseconds apart, undo both of them
-)
-
 var (
 	// The main screen
 	screen tcell.Screen
@@ -41,7 +34,7 @@ var (
 	configDir string
 
 	// Version is the version number or commit hash
-	// This should be set by the linker
+	// This should be set by the linker when compiling
 	Version = "Unknown"
 
 	// L is the lua state
@@ -54,15 +47,18 @@ var (
 	// It's just an index to the tab in the tabs array
 	curTab int
 
-	jobs   chan JobFunction
+	// Channel of jobs running in the background
+	jobs chan JobFunction
+	// Event channel
 	events chan tcell.Event
 )
 
-// LoadInput loads the file input for the editor
+// LoadInput determines which files should be loaded into buffers
+// based on the input stored in os.Args
 func LoadInput() []*Buffer {
 	// There are a number of ways micro should start given its input
 
-	// 1. If it is given a file in os.Args, it should open that
+	// 1. If it is given a files in os.Args, it should open those
 
 	// 2. If there is no input file and the input is not a terminal, that means
 	// something is being piped in and the stdin should be opened in an
@@ -71,8 +67,6 @@ func LoadInput() []*Buffer {
 	// 3. If there is no input file and the input is a terminal, an empty buffer
 	// should be opened
 
-	// These are empty by default so if we get to option 3, we can just returns the
-	// default values
 	var filename string
 	var input []byte
 	var err error
@@ -80,16 +74,19 @@ func LoadInput() []*Buffer {
 
 	if len(os.Args) > 1 {
 		// Option 1
+		// We go through each file and load it
 		for i := 1; i < len(os.Args); i++ {
 			filename = os.Args[i]
 			// Check that the file exists
 			if _, e := os.Stat(filename); e == nil {
+				// If it exists we load it into a buffer
 				input, err = ioutil.ReadFile(filename)
 				if err != nil {
 					TermMessage(err)
 					continue
 				}
 			}
+			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, NewBuffer(input, filename))
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
@@ -182,15 +179,18 @@ func RedrawAll() {
 	screen.Show()
 }
 
-var flagVersion = flag.Bool("version", false, "Show version number")
+// Passing -version as a flag will have micro print out the version number
+var flagVersion = flag.Bool("version", false, "Show the version number")
 
 func main() {
 	flag.Parse()
 	if *flagVersion {
+		// If -version was passed
 		fmt.Println("Micro version:", Version)
 		os.Exit(0)
 	}
 
+	// Start the Lua VM for running plugins
 	L = lua.NewState()
 	defer L.Close()
 
@@ -200,15 +200,19 @@ func main() {
 
 	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
+
 	// Load the user's settings
 	InitSettings()
 	InitCommands()
 	InitBindings()
+
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
+
 	// Load the help files
 	LoadHelp()
 
+	// Start the screen
 	InitScreen()
 
 	// This is just so if we have an error, we can exit cleanly and not completely
@@ -224,11 +228,15 @@ func main() {
 		}
 	}()
 
+	// Create a new messenger
+	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
 
+	// Now we load the input
 	buffers := LoadInput()
 	for _, buf := range buffers {
+		// For each buffer we create a new tab and place the view in that tab
 		tab := NewTabFromView(NewView(buf))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
@@ -239,6 +247,8 @@ func main() {
 		}
 	}
 
+	// Load all the plugin stuff
+	// We give plugins access to a bunch of variables here which could be useful to them
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
 	L.SetGlobal("tabs", luar.New(L, tabs))
 	L.SetGlobal("curTab", luar.New(L, curTab))
@@ -250,6 +260,7 @@ func main() {
 	L.SetGlobal("CurView", luar.New(L, CurView))
 	L.SetGlobal("IsWordChar", luar.New(L, IsWordChar))
 
+	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
 	L.SetGlobal("JobSend", luar.New(L, JobSend))
 	L.SetGlobal("JobStop", luar.New(L, JobStop))
@@ -259,6 +270,7 @@ func main() {
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event)
 
+	// Here is the event loop which runs in a separate thread
 	go func() {
 		for {
 			events <- screen.PollEvent()
@@ -270,8 +282,11 @@ func main() {
 		RedrawAll()
 
 		var event tcell.Event
+
+		// Check for new events
 		select {
 		case f := <-jobs:
+			// If a new job has finished while running in the background we should execute the callback
 			f.function(f.output, f.args...)
 			continue
 		case event = <-events:
@@ -280,13 +295,20 @@ func main() {
 		switch e := event.(type) {
 		case *tcell.EventMouse:
 			if e.Buttons() == tcell.Button1 {
+				// If the user left clicked we check a couple things
 				_, h := screen.Size()
 				x, y := e.Position()
 				if y == h-1 && messenger.message != "" {
+					// If the user clicked in the bottom bar, and there is a message down there
+					// we copy it to the clipboard.
+					// Often error messages are displayed down there so it can be useful to easily
+					// copy the message
 					clipboard.WriteAll(messenger.message)
 					continue
 				}
 
+				// We loop through each view in the current tab and make sure the current view
+				// it the one being clicked in
 				for _, v := range tabs[curTab].views {
 					if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
 						tabs[curTab].curView = v.Num
@@ -295,13 +317,16 @@ func main() {
 			}
 		}
 
+		// This function checks the mouse event for the possibility of changing the current tab
+		// If the tab was changed it returns true
 		if TabbarHandleMouseEvent(event) {
 			continue
 		}
 
 		if searching {
 			// Since searching is done in real time, we need to redraw every time
-			// there is a new event in the search bar
+			// there is a new event in the search bar so we need a special function
+			// to run instead of the standard HandleEvent.
 			HandleSearchEvent(event, CurView())
 		} else {
 			// Send it to the view

@@ -18,6 +18,7 @@ import (
 type Buffer struct {
 	// The eventhandler for undo/redo
 	*EventHandler
+	// This stores all the text in the buffer as an array of lines
 	*LineArray
 
 	Cursor Cursor
@@ -27,6 +28,7 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	Name string
 
+	// Whether or not the buffer has been modified since it was opened
 	IsModified bool
 
 	// Stores the last modification time of the file the buffer is pointing to
@@ -41,6 +43,7 @@ type Buffer struct {
 }
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
+// These are used for the savecursor and saveundo options
 type SerializedBuffer struct {
 	EventHandler *EventHandler
 	Cursor       Cursor
@@ -55,10 +58,12 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	b.Path = path
 	b.Name = path
 
+	// If the file doesn't have a path to disk then we give it no name
 	if path == "" {
 		b.Name = "No name"
 	}
 
+	// The last time this file was modified
 	b.ModTime, _ = GetModTime(b.Path)
 
 	b.EventHandler = NewEventHandler(b)
@@ -80,6 +85,8 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	}
 
 	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
+		// If either savecursor or saveundo is turned on, we need to load the serialized information
+		// from ~/.config/micro/buffers
 		absPath, _ := filepath.Abs(b.Path)
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(absPath))
 		if err == nil {

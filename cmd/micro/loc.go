@@ -83,6 +83,7 @@ func (l Loc) LessEqual(b Loc) bool {
 	return false
 }
 
+// This moves the location one character to the right
 func (l Loc) right(buf *Buffer) Loc {
 	if l == buf.End() {
 		return Loc{l.X + 1, l.Y}
@@ -95,6 +96,8 @@ func (l Loc) right(buf *Buffer) Loc {
 	}
 	return res
 }
+
+// This moves the given location one character to the left
 func (l Loc) left(buf *Buffer) Loc {
 	if l == buf.Start() {
 		return Loc{l.X - 1, l.Y}
@@ -108,6 +111,8 @@ func (l Loc) left(buf *Buffer) Loc {
 	return res
 }
 
+// Move moves the cursor n characters to the left or right
+// It moves the cursor left if n is negative
 func (l Loc) Move(n int, buf *Buffer) Loc {
 	if n > 0 {
 		for i := 0; i < n; i++ {
@@ -120,7 +125,3 @@ func (l Loc) Move(n int, buf *Buffer) Loc {
 	}
 	return l
 }
-
-// func (l Loc) DistanceTo(b Loc, buf *Buffer) int {
-//
-// }

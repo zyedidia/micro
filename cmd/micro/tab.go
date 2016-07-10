@@ -17,6 +17,7 @@ type Tab struct {
 	name string
 }
 
+// NewTabFromView creates a new tab and puts the given view in the tab
 func NewTabFromView(v *View) *Tab {
 	t := new(Tab)
 	t.views = append(t.views, v)
@@ -24,6 +25,7 @@ func NewTabFromView(v *View) *Tab {
 	return t
 }
 
+// SetNum sets all this tab's views to have the correct tab number
 func (t *Tab) SetNum(num int) {
 	for _, v := range t.views {
 		v.TabNum = num
@@ -36,6 +38,10 @@ func CurView() *View {
 	return curTab.views[curTab.curView]
 }
 
+// TabbarString returns the string that should be displayed in the tabbar
+// It also returns a map containing which indicies correspond to which tab number
+// This is useful when we know that the mouse click has occured at an x location
+// but need to know which tab that corresponds to to accurately change the tab
 func TabbarString() (string, map[int]int) {
 	str := ""
 	indicies := make(map[int]int)
@@ -57,7 +63,11 @@ func TabbarString() (string, map[int]int) {
 	return str, indicies
 }
 
+// TabbarHandleMouseEvent checks the given mouse event if it is clicking on the tabbar
+// If it is it changes the current tab accordingly
+// This function returns true if the tab is changed
 func TabbarHandleMouseEvent(event tcell.Event) bool {
+	// There is no tabbar displayed if there are less than 2 tabs
 	if len(tabs) <= 1 {
 		return false
 	}
@@ -65,6 +75,7 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 	switch e := event.(type) {
 	case *tcell.EventMouse:
 		button := e.Buttons()
+		// Must be a left click
 		if button == tcell.Button1 {
 			x, y := e.Position()
 			if y != 0 {
@@ -94,6 +105,7 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 	return false
 }
 
+// DisplayTabs displays the tabbar at the top of the editor if there are multiple tabs
 func DisplayTabs() {
 	if len(tabs) <= 1 {
 		return
