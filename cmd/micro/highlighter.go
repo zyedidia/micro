@@ -71,6 +71,7 @@ var preInstalledSynFiles = []string{
 	"keymap",
 	"kickstart",
 	"ledger",
+	"lilypond",
 	"lisp",
 	"lua",
 	"makefile",
