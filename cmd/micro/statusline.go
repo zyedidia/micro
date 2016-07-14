@@ -37,7 +37,7 @@ func (sline *Statusline) Display() {
 	file += " " + sline.view.Buf.FileType
 
 	rightText := helpBinding + " for help "
-	if sline.view.helpOpen {
+	if sline.view.Help {
 		rightText = helpBinding + " to close help "
 	}
 

@@ -189,7 +189,6 @@ func (b *Buffer) Serialize() error {
 				b.Cursor,
 				b.ModTime,
 			})
-			// err = enc.Encode(b.Cursor)
 		}
 		file.Close()
 		return err

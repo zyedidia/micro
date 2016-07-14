@@ -327,7 +327,7 @@ func (v *View) InsertTab() bool {
 
 // Save the buffer to disk
 func (v *View) Save() bool {
-	if v.helpOpen {
+	if v.Help {
 		// We can't save the help text
 		return false
 	}
@@ -651,15 +651,13 @@ func (v *View) ClearStatus() bool {
 
 // ToggleHelp toggles the help screen
 func (v *View) ToggleHelp() bool {
-	if !v.helpOpen {
-		v.lastBuffer = v.Buf
+	if !CurView().Help {
 		helpBuffer := NewBuffer([]byte(helpTxt), "help.md")
 		helpBuffer.Name = "Help"
-		v.helpOpen = true
-		v.OpenBuffer(helpBuffer)
+		v.HSplit(helpBuffer)
+		CurView().Help = true
 	} else {
-		v.OpenBuffer(v.lastBuffer)
-		v.helpOpen = false
+		v.Quit()
 	}
 	return true
 }
@@ -688,9 +686,6 @@ func (v *View) CommandMode() bool {
 // is the last view
 // However, since micro only supports one view for now, it doesn't really matter
 func (v *View) Quit() bool {
-	if v.helpOpen {
-		return v.ToggleHelp()
-	}
 	// Make sure not to quit if there are unsaved changes
 	if v.CanClose("Quit anyway? (yes, no, save) ") {
 		v.CloseBuffer()

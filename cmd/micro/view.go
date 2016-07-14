@@ -27,6 +27,9 @@ type View struct {
 	widthPercent  int
 	heightPercent int
 
+	// Specifies whether or not this view holds a help buffer
+	Help bool
+
 	// Actual with and height
 	width  int
 	height int
@@ -40,22 +43,13 @@ type View struct {
 	// Holds the list of gutter messages
 	messages map[string][]GutterMessage
 
-	// Is the help text opened in this view
-	helpOpen bool
-
 	// This is the index of this view in the views array
 	Num int
 	// What tab is this view stored in
 	TabNum int
 
-	// Is this view modifiable?
-	Modifiable bool
-
 	// The buffer
 	Buf *Buffer
-	// This is the buffer that was last opened
-	// This is used to open help, and then go back to the previously opened buffer
-	lastBuffer *Buffer
 	// The statusline
 	sline Statusline
 
