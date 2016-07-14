@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/tcell"
 )
 
@@ -366,7 +367,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Cursor.Right()
 
 			for _, pl := range loadedPlugins {
-				err := Call(pl+".onRune", []string{string(e.Rune())})
+				_, err := Call(pl+".onRune", []string{string(e.Rune())})
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
 				}
@@ -382,12 +383,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 					if e.Modifiers() == key.modifiers {
 						relocate = false
 						for _, action := range actions {
-							relocate = action(v) || relocate
+							executeAction := true
+							funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
 							for _, pl := range loadedPlugins {
-								funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
-								err := Call(pl+".on"+funcName[len(funcName)-1], nil)
+								ret, err := Call(pl+".pre"+funcName[len(funcName)-1], nil)
 								if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 									TermMessage(err)
+									continue
+								}
+								if ret == lua.LFalse {
+									executeAction = false
+								}
+							}
+							if executeAction {
+								relocate = action(v) || relocate
+								for _, pl := range loadedPlugins {
+									_, err := Call(pl+".on"+funcName[len(funcName)-1], nil)
+									if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+										TermMessage(err)
+										continue
+									}
 								}
 							}
 						}

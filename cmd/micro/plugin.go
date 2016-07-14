@@ -20,12 +20,12 @@ var preInstalledPlugins = []string{
 // Call calls the lua function 'function'
 // If it does not exist nothing happens, if there is an error,
 // the error is returned
-func Call(function string, args []string) error {
+func Call(function string, args []string) (lua.LValue, error) {
 	var luaFunc lua.LValue
 	if strings.Contains(function, ".") {
 		plugin := L.GetGlobal(strings.Split(function, ".")[0])
 		if plugin.String() == "nil" {
-			return errors.New("function does not exist: " + function)
+			return nil, errors.New("function does not exist: " + function)
 		}
 		luaFunc = L.GetField(plugin, strings.Split(function, ".")[1])
 	} else {
@@ -33,7 +33,7 @@ func Call(function string, args []string) error {
 	}
 
 	if luaFunc.String() == "nil" {
-		return errors.New("function does not exist: " + function)
+		return nil, errors.New("function does not exist: " + function)
 	}
 	var luaArgs []lua.LValue
 	for _, v := range args {
@@ -41,10 +41,14 @@ func Call(function string, args []string) error {
 	}
 	err := L.CallByParam(lua.P{
 		Fn:      luaFunc,
-		NRet:    0,
+		NRet:    1,
 		Protect: true,
 	}, luaArgs...)
-	return err
+	ret := L.Get(-1) // returned value
+	if ret.String() != "nil" {
+		L.Pop(1) // remove received value
+	}
+	return ret, err
 }
 
 // LuaFunctionBinding is a function generator which takes the name of a lua function
@@ -53,7 +57,7 @@ func Call(function string, args []string) error {
 // to bind keys to lua functions
 func LuaFunctionBinding(function string) func(*View) bool {
 	return func(v *View) bool {
-		err := Call(function, nil)
+		_, err := Call(function, nil)
 		if err != nil {
 			TermMessage(err)
 		}
@@ -65,7 +69,7 @@ func LuaFunctionBinding(function string) func(*View) bool {
 // so that a command can be bound to a lua function
 func LuaFunctionCommand(function string) func([]string) {
 	return func(args []string) {
-		err := Call(function, args)
+		_, err := Call(function, args)
 		if err != nil {
 			TermMessage(err)
 		}
@@ -74,7 +78,7 @@ func LuaFunctionCommand(function string) func([]string) {
 
 func LuaFunctionJob(function string) func(string, ...string) {
 	return func(output string, args ...string) {
-		err := Call(function, append([]string{output}, args...))
+		_, err := Call(function, append([]string{output}, args...))
 		if err != nil {
 			TermMessage(err)
 		}
