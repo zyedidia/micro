@@ -388,7 +388,7 @@ func DefaultBindings() map[string]string {
 		"End":            "End",
 		"PageUp":         "CursorPageUp",
 		"PageDown":       "CursorPageDown",
-		"CtrlG":          "ToggleHelp",
+		"CtrlH":          "ToggleHelp",
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
