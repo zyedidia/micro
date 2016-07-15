@@ -592,7 +592,7 @@ func (v *View) DisplayView() {
 
 		if v.x != 0 {
 			// Draw the split divider
-			v.drawCell(screenX, screenY, ' ', nil, defStyle.Reverse(true))
+			v.drawCell(screenX, screenY, '|', nil, defStyle.Reverse(true))
 			screenX++
 		}
 
@@ -815,7 +815,12 @@ func (v *View) Display() {
 	if v.Num == tabs[curTab].curView {
 		v.DisplayCursor()
 	}
+	_, screenH := screen.Size()
 	if settings["statusline"].(bool) {
 		v.sline.Display()
+	} else if (v.y + v.height) != screenH-1 {
+		for x := 0; x < v.width; x++ {
+			screen.SetContent(v.x+x, v.y+v.height, '-', nil, defStyle.Reverse(true))
+		}
 	}
 }
