@@ -254,6 +254,7 @@ func (v *View) HSplit(buf *Buffer) bool {
 	v.splitChild = newView
 	tab.views = append(tab.views, newView)
 	newView.Resize(screen.Size())
+	newView.matches = Match(newView)
 	return false
 }
 
@@ -282,6 +283,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 	v.splitChild = newView
 	tab.views = append(tab.views, newView)
 	newView.Resize(screen.Size())
+	newView.matches = Match(newView)
 	return false
 }
 
