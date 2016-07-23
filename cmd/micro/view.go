@@ -794,7 +794,7 @@ func (v *View) DisplayView() {
 					lineStyle = lineStyle.Background(fg)
 				}
 			}
-			if screenX-v.x-v.leftCol >= v.lineNumOffset {
+			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
 				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
 		}
