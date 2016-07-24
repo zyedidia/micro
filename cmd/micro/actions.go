@@ -7,8 +7,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/atotto/clipboard"
 	"github.com/mitchellh/go-homedir"
+	"github.com/zyedidia/clipboard"
 )
 
 // CursorUp moves the cursor up

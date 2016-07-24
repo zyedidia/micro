@@ -7,12 +7,12 @@ import (
 	"os"
 	"runtime"
 
-	"github.com/atotto/clipboard"
 	"github.com/go-errors/errors"
 	"github.com/layeh/gopher-luar"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
+	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
 )
