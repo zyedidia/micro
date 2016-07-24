@@ -64,7 +64,7 @@ function onInsertEnter()
     end
 end
 
-function onBackspace()
+function preBackspace()
     if not GetOption("autoclose") then
         return
     end
@@ -73,8 +73,10 @@ function onBackspace()
 
     for i = 1, #autoclosePairs do
         local curLine = v.Buf:Line(v.Cursor.Y)
-        if charAt(curLine, v.Cursor.X+1) == charAt(autoclosePairs[i], 2) then
+        if charAt(curLine, v.Cursor.X+1) == charAt(autoclosePairs[i], 2) and charAt(curLine, v.Cursor.X) == charAt(autoclosePairs[i], 1) then
             v:Delete()
         end
     end
+
+    return true
 end
