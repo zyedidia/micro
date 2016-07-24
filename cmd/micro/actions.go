@@ -674,7 +674,7 @@ func (v *View) ShellMode() bool {
 
 // CommandMode lets the user enter a command
 func (v *View) CommandMode() bool {
-	input, canceled := messenger.Prompt("> ", "Command", NoCompletion)
+	input, canceled := messenger.Prompt("> ", "Command", FileCompletion)
 	if !canceled {
 		HandleCommand(input)
 	}

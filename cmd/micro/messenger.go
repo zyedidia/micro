@@ -164,7 +164,9 @@ func (m *Messenger) Prompt(prompt, historyType string, completionType Completion
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
 				if completionType == FileCompletion {
-					dirs := strings.Split(m.response, "/")
+					args := strings.Split(m.response, " ")
+					currentArg := args[len(args)-1]
+					dirs := strings.Split(currentArg, "/")
 					var files []os.FileInfo
 					var err error
 					if len(dirs) > 1 {
@@ -187,10 +189,14 @@ func (m *Messenger) Prompt(prompt, historyType string, completionType Completion
 					}
 					if len(suggestions) == 1 {
 						if len(dirs) > 1 {
-							m.response = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
+							currentArg = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
 						} else {
-							m.response = suggestions[0]
+							currentArg = suggestions[0]
 						}
+						if len(args) > 1 {
+							currentArg = " " + currentArg
+						}
+						m.response = strings.Join(args[:len(args)-1], " ") + currentArg
 						m.cursorx = Count(m.response)
 					}
 				}
