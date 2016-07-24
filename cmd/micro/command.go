@@ -23,6 +23,7 @@ var commandActions = map[string]func([]string){
 	"Replace": Replace,
 	"VSplit":  VSplit,
 	"HSplit":  HSplit,
+	"Tab":     NewTab,
 }
 
 // InitCommands initializes the default commands
@@ -63,6 +64,7 @@ func DefaultCommands() map[string]string {
 		"replace": "Replace",
 		"vsplit":  "VSplit",
 		"hsplit":  "HSplit",
+		"tab":     "Tab",
 	}
 }
 
@@ -107,6 +109,30 @@ func HSplit(args []string) {
 			buf = NewBuffer(file, filename)
 		}
 		CurView().HSplit(buf)
+	}
+}
+
+// Tab opens the given file in a new tab
+func NewTab(args []string) {
+	if len(args) == 0 {
+		CurView().AddTab()
+	} else {
+		filename := args[0]
+		home, _ := homedir.Dir()
+		filename = strings.Replace(filename, "~", home, 1)
+		file, _ := ioutil.ReadFile(filename)
+
+		tab := NewTabFromView(NewView(NewBuffer(file, filename)))
+		tab.SetNum(len(tabs))
+		tabs = append(tabs, tab)
+		curTab++
+		if len(tabs) == 2 {
+			for _, t := range tabs {
+				for _, v := range t.views {
+					v.Resize(screen.Size())
+				}
+			}
+		}
 	}
 }
 

@@ -141,6 +141,8 @@ Here are the possible commands that you can use.
 * `hsplit filename`: same as `vsplit` but opens a horizontal split instead of
    a vertical split
 
+* `tab filename`: opens the given file in a new tab.
+
 ### Options
 
 Micro stores all of the user configuration in its configuration directory.
