@@ -1087,11 +1087,9 @@ func (v *View) ToggleHelp() bool {
 		return false
 	}
 
-	if !CurView().Help {
-		helpBuffer := NewBuffer([]byte(helpTxt), "help.md")
-		helpBuffer.Name = "Help"
-		v.HSplit(helpBuffer)
-		CurView().Help = true
+	if !v.Help {
+		// Open the default help
+		v.openHelp("help")
 	} else {
 		v.Quit()
 	}

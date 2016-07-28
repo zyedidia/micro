@@ -24,6 +24,7 @@ var commandActions = map[string]func([]string){
 	"VSplit":  VSplit,
 	"HSplit":  HSplit,
 	"Tab":     NewTab,
+	"Help":    Help,
 }
 
 // InitCommands initializes the default commands
@@ -65,6 +66,22 @@ func DefaultCommands() map[string]string {
 		"vsplit":  "VSplit",
 		"hsplit":  "HSplit",
 		"tab":     "Tab",
+		"help":    "Help",
+	}
+}
+
+// Help tries to open the given help page in a horizontal split
+func Help(args []string) {
+	if len(args) < 1 {
+		// Open the default help if the user just typed "> help"
+		CurView().openHelp("help")
+	} else {
+		helpPage := args[0]
+		if _, ok := helpPages[helpPage]; ok {
+			CurView().openHelp(helpPage)
+		} else {
+			messenger.Error("Sorry, no help for ", helpPage)
+		}
 	}
 }
 

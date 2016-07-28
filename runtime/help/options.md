@@ -1,0 +1,118 @@
+### Options
+
+Micro stores all of the user configuration in its configuration directory.
+
+Micro uses the `$XDG_CONFIG_HOME/micro` as the configuration directory. As per
+the XDG spec, if `$XDG_CONFIG_HOME` is not set, `~/.config/micro` is used as 
+the config directory.
+
+Here are the options that you can set:
+
+* `colorscheme`: loads the colorscheme stored in 
+   $(configDir)/colorschemes/`option`.micro
+
+	default value: `default`
+	Note that the default colorschemes (default, solarized, and solarized-tc)
+	are not located in configDir, because they are embedded in the micro binary
+
+	The colorscheme can be selected from all the files in the 
+	~/.config/micro/colorschemes/ directory. Micro comes by default with three
+	colorschemes:
+
+	* default: this is the default colorscheme.
+
+	* solarized: this is the solarized colorscheme (used in the screenshot). 
+	  You should have the solarized color palette in your terminal to use it.
+
+	* solarized-tc: this is the solarized colorscheme for true color, just 
+	  make sure your terminal supports true color before using it and that the 
+	  MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
+
+	* monokai-tc: this is the monokai colorscheme. It requires true color to
+	  look perfect, but the 256 color approximation looks good as well.
+
+	* atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
+	  It requires true color to look good.
+
+
+* `tabsize`: sets the tab size to `option`
+
+	default value: `4`
+
+* `indentchar`: sets the indentation character
+
+	default value: ` `
+
+* `ignorecase`: perform case-insensitive searches
+
+	default value: `off`
+
+* `syntax`: turns syntax on or off
+
+	default value: `on`
+
+* `tabstospaces`: use spaces instead of tabs
+
+	default value: `off`
+
+* `autoindent`: when creating a new line use the same indentation as the 
+   previous line
+
+	default value: `on`
+
+* `cursorline`: highlight the line that the cursor is on in a different color
+   (the color is defined by the colorscheme you are using)
+
+	default value: `off`
+
+* `ruler`: display line numbers
+
+	default value: `on`
+
+* `statusline`: display the status line at the bottom of the screen
+
+	default value: `on`
+
+* `savecursor`: remember where the cursor was last time the file was opened and
+   put it there when you open the file again
+
+	default value: `off`
+
+* `saveundo`: when this option is on, undo is saved even after you close a file
+   so if you close and reopen a file, you can keep undoing
+
+	default value: `off`
+
+* `scrollmargin`: amount of lines you would like to see above and below the cursor
+
+	default value: `3`
+
+* `scrollspeed`: amount of lines to scroll for one scroll event
+
+	default value: `2`
+
+---
+
+Default plugin options:
+
+* `linter`: lint languages on save (supported languages are C, D, Go, Java,
+   Javascript, Lua). Provided by the `linter` plugin.
+
+	default value: `on`
+
+* `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the autoclose plugin
+
+	default value: `on`
+
+* `goimports`: Run goimports on save. Provided by the `go` plugin.
+
+	default value: `off`
+
+* `gofmt`: Run gofmt on save. Provided by the `go` plugin.
+
+	default value: `on`
+
+Any option you set in the editor will be saved to the file 
+~/.config/micro/settings.json so, in effect, your configuration file will be 
+created for you. If you'd like to take your configuration with you to another
+machine, simply copy the settings.json to the other machine.

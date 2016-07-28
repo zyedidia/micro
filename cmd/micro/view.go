@@ -464,6 +464,14 @@ func (v *View) ClearAllGutterMessages() {
 	}
 }
 
+// Opens the given help page in a new horizontal split
+func (v *View) openHelp(helpPage string) {
+	helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
+	helpBuffer.Name = "Help"
+	v.HSplit(helpBuffer)
+	CurView().Help = true
+}
+
 func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
 	if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
 		screen.SetContent(x, y, ch, combc, style)
