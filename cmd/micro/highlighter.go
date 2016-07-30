@@ -59,6 +59,7 @@ var preInstalledSynFiles = []string{
 	"git-rebase-todo",
 	"glsl",
 	"go",
+	"golo",
 	"groff",
 	"haml",
 	"haskell",
