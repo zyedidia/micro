@@ -1,6 +1,6 @@
 syntax "Golo" "\.golo$"
 
-color orange "\b(function|fun|)\b"
+color type "\b(function|fun|)\b"
 color type "\b(struct|DynamicObject|union|AdapterFabric|Adapter|DynamicVariable|Observable)\b"
 color type "\b(list|set|array|vector|tuple|map)\b"
 color type "\b(Ok|Error|Empty|None|Some|Option|Result|Result.ok|Result.fail|Result.error|Result.empty|Optional.empty|Optional.of)\b"
@@ -27,13 +27,13 @@ color statement "\b(newWithSameType|destruct|append|add|addIfAbsent|prepend|inse
 color statement "\b(add|addTo|succ|pred|mul|neg|sub|rsub|div|rdiv|mod|rmod|pow|rpow|str|lt|gt|eq|ne|ge|le|`and|`or|`not|xor|even|odd|contains|isEmpty|`is|`isnt|`oftype|`orIfNull|fst|snd|getitem|setitem|getter|id|const|False|True|Null|curry|uncurry|unary|spreader|varargs|swapArgs|swapCurry|swapCouple|swap|invokeWith|pipe|compose|io|andThen|until|recur|cond)\b"
 color statement "\b(toUpperCase|equals|startsWith)\b"
 
-color blue "\b(if|else|then|when|case|match|otherwise)\b"
-color brightblue "\b(with|break|continue|return)\b"
-color green "\b(try|catch|finally|throw)\b"
-color brightgreen "\b(super|this|let|var|local)\b"
-color brightred "[(){}]" "\[" "\]"
-color yellow "\b(for|while|foreach|in)\b"
-color orange "\b(and|in|is|not|or|isnt|orIfNull)\b"
+color preproc "\b(if|else|then|when|case|match|otherwise)\b"
+color preproc "\b(with|break|continue|return)\b"
+color error "\b(try|catch|finally|throw)\b"
+color identifier "\b(super|this|let|var|local)\b"
+color special "[(){}]" "\[" "\]"
+color preproc "\b(for|while|foreach|in)\b"
+color constant "\b(and|in|is|not|or|isnt|orIfNull)\b"
 
 color constant "\b(true|false)\b"
 color constant  "\b(null|undefined)\b"
