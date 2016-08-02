@@ -293,7 +293,6 @@ func (c *Cursor) Start() {
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
 	tabSize := int(settings["tabsize"].(float64))
-	// This is the visual line -- every \t replaced with the correct number of spaces
 	visualLineLen := StringWidth(c.buf.Line(lineNum))
 	if visualPos > visualLineLen {
 		visualPos = visualLineLen

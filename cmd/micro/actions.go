@@ -309,6 +309,16 @@ func (v *View) Delete() bool {
 func (v *View) InsertTab() bool {
 	// Insert a tab
 	if v.Cursor.HasSelection() {
+		if v.Cursor.CurSelection[0].Y != v.Cursor.CurSelection[1].Y {
+			for i := v.Cursor.CurSelection[0].Y; i <= v.Cursor.CurSelection[1].Y; i++ {
+				if settings["tabstospaces"].(bool) {
+					v.Buf.Insert(Loc{0, i}, Spaces(int(settings["tabsize"].(float64))))
+				} else {
+					v.Buf.Insert(Loc{0, i}, "\t")
+				}
+			}
+			return true
+		}
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
