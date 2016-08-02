@@ -204,11 +204,6 @@ func (m *Messenger) Prompt(prompt, historyType string, completionType Completion
 		}
 
 		m.HandleEvent(event, m.history[historyType])
-
-		if m.cursorx < 0 {
-			// Cancel
-			m.hasPrompt = false
-		}
 	}
 
 	m.Reset()
@@ -243,8 +238,8 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 		case tcell.KeyBackspace2, tcell.KeyBackspace:
 			if m.cursorx > 0 {
 				m.response = string([]rune(m.response)[:m.cursorx-1]) + string(m.response[m.cursorx:])
+				m.cursorx--
 			}
-			m.cursorx--
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++
