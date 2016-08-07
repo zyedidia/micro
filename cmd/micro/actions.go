@@ -305,23 +305,91 @@ func (v *View) Delete() bool {
 	return true
 }
 
-// InsertTab inserts a tab or spaces
-func (v *View) InsertTab() bool {
-	// Insert a tab
+// IndentSelection indents the current selection
+func (v *View) IndentSelection() bool {
 	if v.Cursor.HasSelection() {
-		if v.Cursor.CurSelection[0].Y != v.Cursor.CurSelection[1].Y {
-			for i := v.Cursor.CurSelection[0].Y; i <= v.Cursor.CurSelection[1].Y; i++ {
-				if settings["tabstospaces"].(bool) {
-					v.Buf.Insert(Loc{0, i}, Spaces(int(settings["tabsize"].(float64))))
-				} else {
-					v.Buf.Insert(Loc{0, i}, "\t")
+		start := v.Cursor.CurSelection[0].Y
+		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
+		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
+		for i := start; i <= end; i++ {
+			if settings["tabstospaces"].(bool) {
+				tabsize := int(settings["tabsize"].(float64))
+				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
+				if i == start {
+					if v.Cursor.CurSelection[0].X > 0 {
+						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(tabsize, v.Buf)
+					}
+				}
+				if i == end {
+					v.Cursor.CurSelection[1] = Loc{endX + tabsize + 1, end}
+				}
+			} else {
+				v.Buf.Insert(Loc{0, i}, "\t")
+				if i == start {
+					if v.Cursor.CurSelection[0].X > 0 {
+						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(1, v.Buf)
+					}
+				}
+				if i == end {
+					v.Cursor.CurSelection[1] = Loc{endX + 2, end}
 				}
 			}
-			return true
 		}
-		v.Cursor.DeleteSelection()
-		v.Cursor.ResetSelection()
+		v.Cursor.Relocate()
+		return true
 	}
+	return false
+}
+
+// OutdentSelection takes the current selection and moves it back one indent level
+func (v *View) OutdentSelection() bool {
+	if v.Cursor.HasSelection() {
+		start := v.Cursor.CurSelection[0].Y
+		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
+		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
+		for i := start; i <= end; i++ {
+			if len(GetLeadingWhitespace(v.Buf.Line(i))) > 0 {
+				if settings["tabstospaces"].(bool) {
+					tabsize := int(settings["tabsize"].(float64))
+					for j := 0; j < tabsize; j++ {
+						if len(GetLeadingWhitespace(v.Buf.Line(i))) == 0 {
+							break
+						}
+						v.Buf.Remove(Loc{0, i}, Loc{1, i})
+						if i == start {
+							if v.Cursor.CurSelection[0].X > 0 {
+								v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+							}
+						}
+						if i == end {
+							v.Cursor.CurSelection[1] = Loc{endX, end}
+						}
+					}
+				} else {
+					v.Buf.Remove(Loc{0, i}, Loc{1, i})
+					if i == start {
+						if v.Cursor.CurSelection[0].X > 0 {
+							v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+						}
+					}
+					if i == end {
+						v.Cursor.CurSelection[1] = Loc{endX, end}
+					}
+				}
+			}
+		}
+		v.Cursor.Relocate()
+		return true
+	}
+	return false
+}
+
+// InsertTab inserts a tab or spaces
+func (v *View) InsertTab() bool {
+	if v.Cursor.HasSelection() {
+		return false
+	}
+	// Insert a tab
 	if settings["tabstospaces"].(bool) {
 		tabSize := int(settings["tabsize"].(float64))
 		v.Buf.Insert(v.Cursor.Loc, Spaces(tabSize))
