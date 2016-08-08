@@ -370,6 +370,7 @@ func DefaultBindings() map[string]string {
 		"Alt-Backspace":  "DeleteWordLeft",
 		"Alt-Backspace2": "DeleteWordLeft",
 		"Tab":            "IndentSelection,InsertTab",
+		"Backtab":        "OutdentSelection",
 		"CtrlO":          "OpenFile",
 		"CtrlS":          "Save",
 		"CtrlF":          "Find",
