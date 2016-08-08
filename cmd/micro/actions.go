@@ -362,7 +362,7 @@ func (v *View) OutdentSelection() bool {
 							}
 						}
 						if i == end {
-							v.Cursor.CurSelection[1] = Loc{endX, end}
+							v.Cursor.CurSelection[1] = Loc{endX - j, end}
 						}
 					}
 				} else {
