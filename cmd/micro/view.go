@@ -82,11 +82,6 @@ type View struct {
 	matches SyntaxMatches
 	// The matches from the last frame
 	lastMatches SyntaxMatches
-
-	splitParent         *View
-	splitChild          *View
-	splitOrigDimensions [2]int
-	splitOrigPos        [2]int
 }
 
 // NewView returns a new fullscreen view
@@ -137,13 +132,6 @@ func (v *View) Resize(w, h int) {
 	v.width = int(float32(w) * float32(v.widthPercent) / 100)
 	// We subtract 1 for the statusline
 	v.height = int(float32(h) * float32(v.heightPercent) / 100)
-	if w%2 == 0 && v.x > 1 && v.widthPercent < 100 {
-		v.width++
-	}
-
-	if h%2 == 1 && v.y > 1 && v.heightPercent < 100 {
-		v.height++
-	}
 	if settings["statusline"].(bool) {
 		// Make room for the status line if it is enabled
 		v.height--
@@ -231,59 +219,11 @@ func (v *View) ReOpen() {
 
 // HSplit opens a horizontal split with the given buffer
 func (v *View) HSplit(buf *Buffer) bool {
-	origDimensions := [2]int{v.widthPercent, v.heightPercent}
-	origPos := [2]int{v.x, v.y}
-
-	v.heightPercent /= 2
-	v.Resize(screen.Size())
-
-	newView := NewViewWidthHeight(buf, v.widthPercent, v.heightPercent)
-
-	v.splitOrigDimensions = origDimensions
-	v.splitOrigPos = origPos
-	newView.splitOrigDimensions = origDimensions
-	newView.splitOrigPos = origPos
-
-	newView.TabNum = v.TabNum
-	newView.y = v.y + v.height + 1
-	newView.x = v.x
-	tab := tabs[v.TabNum]
-	tab.curView++
-	newView.Num = len(tab.views)
-	newView.splitParent = v
-	v.splitChild = newView
-	tab.views = append(tab.views, newView)
-	newView.Resize(screen.Size())
-	newView.matches = Match(newView)
 	return false
 }
 
 // VSplit opens a vertical split with the given buffer
 func (v *View) VSplit(buf *Buffer) bool {
-	origDimensions := [2]int{v.widthPercent, v.heightPercent}
-	origPos := [2]int{v.x, v.y}
-
-	v.widthPercent /= 2
-	v.Resize(screen.Size())
-
-	newView := NewViewWidthHeight(buf, v.widthPercent, v.heightPercent)
-
-	v.splitOrigDimensions = origDimensions
-	v.splitOrigPos = origPos
-	newView.splitOrigDimensions = origDimensions
-	newView.splitOrigPos = origPos
-
-	newView.TabNum = v.TabNum
-	newView.y = v.y
-	newView.x = v.x + v.width
-	tab := tabs[v.TabNum]
-	tab.curView++
-	newView.Num = len(tab.views)
-	newView.splitParent = v
-	v.splitChild = newView
-	tab.views = append(tab.views, newView)
-	newView.Resize(screen.Size())
-	newView.matches = Match(newView)
 	return false
 }
 
