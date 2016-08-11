@@ -61,6 +61,7 @@ func (l *LeafNode) VSplit(buf *Buffer) {
 		newView.Num = len(tab.views)
 		s.children = []Node{l, NewLeafNode(newView, s)}
 		l.parent.children[search(l.parent.children, l)] = s
+		l.parent = s
 
 		tab.curView++
 		tab.views = append(tab.views, newView)
@@ -86,6 +87,7 @@ func (l *LeafNode) HSplit(buf *Buffer) {
 		newView.Num = len(tab.views)
 		s.children = []Node{l, NewLeafNode(newView, s)}
 		l.parent.children[search(l.parent.children, l)] = s
+		l.parent = s
 
 		tab.curView++
 		tab.views = append(tab.views, newView)
@@ -119,6 +121,7 @@ func (s *SplitTree) Cleanup() {
 			if len(n.children) == 1 {
 				if _, ok := n.children[0].(*LeafNode); ok {
 					s.children[i] = n.children[0]
+					continue
 				}
 			}
 			n.Cleanup()
