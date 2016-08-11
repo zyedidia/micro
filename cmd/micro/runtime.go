@@ -301,7 +301,7 @@ func runtimeHelpHelpMd() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/help/help.md", size: 7868, mode: os.FileMode(420), modTime: time.Unix(1469826737, 0)}
+	info := bindataFileInfo{name: "runtime/help/help.md", size: 7868, mode: os.FileMode(420), modTime: time.Unix(1470951059, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -1001,7 +1001,7 @@ func runtimeSyntaxGoloMicro() (*asset, error) {
 		return nil, err
 	}
 
-	info := bindataFileInfo{name: "runtime/syntax/golo.micro", size: 3430, mode: os.FileMode(420), modTime: time.Unix(1469908842, 0)}
+	info := bindataFileInfo{name: "runtime/syntax/golo.micro", size: 3430, mode: os.FileMode(420), modTime: time.Unix(1470937955, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
