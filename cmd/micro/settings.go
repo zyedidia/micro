@@ -126,7 +126,7 @@ func SetOption(view *View, args []string) {
 		}
 
 		if option == "statusline" {
-			view.Resize(screen.Size())
+			// view.Resize(screen.Size())
 		}
 
 		err := WriteSettings(filename)

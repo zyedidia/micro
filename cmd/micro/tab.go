@@ -15,6 +15,8 @@ type Tab struct {
 	curView int
 	// Generally this is the name of the current view's buffer
 	name string
+
+	tree *SplitTree
 }
 
 // NewTabFromView creates a new tab and puts the given view in the tab
@@ -22,6 +24,14 @@ func NewTabFromView(v *View) *Tab {
 	t := new(Tab)
 	t.views = append(t.views, v)
 	t.views[0].Num = 0
+
+	t.tree = new(SplitTree)
+	t.tree.kind = VerticalSplit
+	t.tree.children = []Node{NewLeafNode(t.views[0], t.tree)}
+
+	w, h := screen.Size()
+	t.tree.width = w
+	t.tree.height = h
 	return t
 }
 
@@ -30,6 +40,10 @@ func (t *Tab) SetNum(num int) {
 	for _, v := range t.views {
 		v.TabNum = num
 	}
+}
+
+func (t *Tab) Resize() {
+	t.tree.ResizeSplits()
 }
 
 // CurView returns the current view

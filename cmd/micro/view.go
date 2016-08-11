@@ -82,11 +82,14 @@ type View struct {
 	matches SyntaxMatches
 	// The matches from the last frame
 	lastMatches SyntaxMatches
+
+	splitNode *LeafNode
 }
 
 // NewView returns a new fullscreen view
 func NewView(buf *Buffer) *View {
-	return NewViewWidthHeight(buf, 100, 100)
+	screenW, screenH := screen.Size()
+	return NewViewWidthHeight(buf, screenW, screenH-1)
 }
 
 // NewViewWidthHeight returns a new view with the specified width and height percentages
@@ -96,9 +99,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.x, v.y = 0, 0
 
-	v.widthPercent = w
-	v.heightPercent = h
-	v.Resize(screen.Size())
+	v.width = w
+	v.height = h
 
 	v.OpenBuffer(buf)
 
@@ -108,34 +110,11 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		view: v,
 	}
 
-	return v
-}
-
-// Resize recalculates the actual width and height of the view from the width and height
-// percentages
-// This is usually called when the window is resized, or when a split has been added and
-// the percentages have changed
-func (v *View) Resize(w, h int) {
-	// Always include 1 line for the command line at the bottom
-	h--
-	if len(tabs) > 1 {
-		if v.y == 0 {
-			// Include one line for the tab bar at the top
-			h--
-			v.y = 1
-		}
-	} else {
-		if v.y == 1 {
-			v.y = 0
-		}
-	}
-	v.width = int(float32(w) * float32(v.widthPercent) / 100)
-	// We subtract 1 for the statusline
-	v.height = int(float32(h) * float32(v.heightPercent) / 100)
 	if settings["statusline"].(bool) {
-		// Make room for the status line if it is enabled
 		v.height--
 	}
+
+	return v
 }
 
 // ScrollUp scrolls the view up n lines (if possible)
@@ -219,11 +198,15 @@ func (v *View) ReOpen() {
 
 // HSplit opens a horizontal split with the given buffer
 func (v *View) HSplit(buf *Buffer) bool {
+	v.splitNode.HSplit(buf)
+	tabs[v.TabNum].Resize()
 	return false
 }
 
 // VSplit opens a vertical split with the given buffer
 func (v *View) VSplit(buf *Buffer) bool {
+	v.splitNode.VSplit(buf)
+	tabs[v.TabNum].Resize()
 	return false
 }
 
@@ -297,7 +280,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
-		v.Resize(e.Size())
+		// v.Resize(e.Size())
 	case *tcell.EventKey:
 		if e.Key() == tcell.KeyRune && (e.Modifiers() == 0 || e.Modifiers() == tcell.ModShift) {
 			// Insert a character

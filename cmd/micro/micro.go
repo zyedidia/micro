@@ -247,11 +247,11 @@ func main() {
 		tab := NewTabFromView(NewView(buf))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
-		for _, t := range tabs {
-			for _, v := range t.views {
-				v.Resize(screen.Size())
-			}
-		}
+		// for _, t := range tabs {
+		// 	for _, v := range t.views {
+		// 		v.Resize(screen.Size())
+		// 	}
+		// }
 	}
 
 	// Load all the plugin stuff
