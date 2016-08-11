@@ -768,8 +768,9 @@ func (v *View) Quit() bool {
 	if v.CanClose("Quit anyway? (yes, no, save) ") {
 		v.CloseBuffer()
 		if len(tabs[curTab].views) > 1 {
-			screen.Fini()
-			os.Exit(0)
+			v.splitNode.Delete()
+			tabs[v.TabNum].Cleanup()
+			tabs[v.TabNum].Resize()
 		} else if len(tabs) > 1 {
 			if len(tabs[v.TabNum].views) == 1 {
 				tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]

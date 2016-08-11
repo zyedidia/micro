@@ -42,6 +42,10 @@ func (t *Tab) SetNum(num int) {
 	}
 }
 
+func (t *Tab) Cleanup() {
+	t.tree.Cleanup()
+}
+
 func (t *Tab) Resize() {
 	t.tree.ResizeSplits()
 }
