@@ -102,6 +102,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v.width = w
 	v.height = h
 
+	v.ToggleTabbar()
+
 	v.OpenBuffer(buf)
 
 	v.messages = make(map[string][]GutterMessage)
@@ -115,6 +117,29 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	}
 
 	return v
+}
+
+func (v *View) ToggleStatusLine() {
+	if settings["statusline"].(bool) {
+		v.height--
+	} else {
+		v.height++
+	}
+}
+
+func (v *View) ToggleTabbar() {
+	if len(tabs) > 1 {
+		if v.y == 0 {
+			// Include one line for the tab bar at the top
+			v.height--
+			v.y = 1
+		}
+	} else {
+		if v.y == 1 {
+			v.y = 0
+			v.height++
+		}
+	}
 }
 
 // ScrollUp scrolls the view up n lines (if possible)
@@ -280,7 +305,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
-		// v.Resize(e.Size())
+		tabs[v.TabNum].Resize()
 	case *tcell.EventKey:
 		if e.Key() == tcell.KeyRune && (e.Modifiers() == 0 || e.Modifiers() == tcell.ModShift) {
 			// Insert a character

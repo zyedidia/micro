@@ -142,6 +142,13 @@ func (s *SplitTree) ResizeSplits() {
 				n.view.y = s.y + n.view.height*i
 				n.view.x = s.x
 			}
+			// n.view.ToggleStatusLine()
+			_, screenH := screen.Size()
+			if settings["statusline"].(bool) || (n.view.y+n.view.height) != screenH-1 {
+				n.view.height--
+			}
+
+			n.view.ToggleTabbar()
 			n.view.matches = Match(n.view)
 		} else if n, ok := node.(*SplitTree); ok {
 			if s.kind == VerticalSplit {

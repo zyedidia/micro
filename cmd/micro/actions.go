@@ -782,6 +782,7 @@ func (v *View) Quit() bool {
 				}
 				if curTab == 0 {
 					// CurView().Resize(screen.Size())
+					CurView().ToggleTabbar()
 					CurView().matches = Match(CurView())
 				}
 			}
@@ -799,13 +800,13 @@ func (v *View) AddTab() bool {
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
 	curTab++
-	// if len(tabs) == 2 {
-	// 	for _, t := range tabs {
-	// 		for _, v := range t.views {
-	// 			v.Resize(screen.Size())
-	// 		}
-	// 	}
-	// }
+	if len(tabs) == 2 {
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.ToggleTabbar()
+			}
+		}
+	}
 	return true
 }
 

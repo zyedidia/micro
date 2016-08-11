@@ -31,7 +31,7 @@ func NewTabFromView(v *View) *Tab {
 
 	w, h := screen.Size()
 	t.tree.width = w
-	t.tree.height = h
+	t.tree.height = h - 1
 	return t
 }
 
@@ -47,6 +47,9 @@ func (t *Tab) Cleanup() {
 }
 
 func (t *Tab) Resize() {
+	w, h := screen.Size()
+	t.tree.width = w
+	t.tree.height = h - 1
 	t.tree.ResizeSplits()
 }
 
