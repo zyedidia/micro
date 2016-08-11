@@ -119,8 +119,9 @@ func (s *SplitTree) Cleanup() {
 	for i, node := range s.children {
 		if n, ok := node.(*SplitTree); ok {
 			if len(n.children) == 1 {
-				if _, ok := n.children[0].(*LeafNode); ok {
-					s.children[i] = n.children[0]
+				if child, ok := n.children[0].(*LeafNode); ok {
+					s.children[i] = child
+					child.parent = s
 					continue
 				}
 			}
