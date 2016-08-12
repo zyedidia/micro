@@ -85,10 +85,68 @@ Generally colorschemes which require true color terminals to look good are marke
 
 ---
 
+Here is a list of the colorscheme groups that you can use:
+
+* default (color of the background and foreground for unhighlighted text)
+* comment
+* identifier
+* constant
+* statement
+* preproc
+* type
+* special
+* underlined
+* error
+* todo
+* statusline (color of the statusline)
+* indent-char (color of the character which indicates tabs if the option is enabled)
+* line-number
+* gutter-error
+* gutter-warning
+* cursor-line
+
 Colorschemes can be placed in the `~/.config/micro/colorschemes` directory to be used.
 
 ### Syntax files
 
 The syntax files specify how to highlight certain languages.
 
-In progress...
+The first statement in a syntax file will probably the syntax statement. This tells micro
+what language the syntax file is for and how to detect a file in that language.
+
+Essentially, it's just
+
+```
+syntax "Name of language" "\.extension$"
+```
+
+For the extension, micro will just compare that regex to the filename and if it matches then it
+will use the syntax rules defined in the remainder of the file.
+
+There is also a possibility to use a header statement which is a regex that micro will compare
+with the first line of the file. This is almost only used for shebangs at the top of shell scripts
+which don't have any extension (see sh.micro for an example).
+
+---
+
+The rest of a syntax file is very simple and is essentially a list of regexes specifying how to highlight
+different expressions.
+
+It is recommended that when creating a syntax file you use the colorscheme groups (see above) to
+highlight different expressions. You may also hard code colors, but that may not look good depending
+on what terminal colorscheme the user has installed.
+
+Here is an example to highlight comments (expressions starting with `//`):
+
+```
+color comment "//.*"
+```
+
+This will highlight the regex `//.*` in the color that the user's colorscheme has linked to the comment
+group.
+
+Note that this regex only matches the current line. Here is an example for multiline comments (`/* comment */`):
+
+```
+color comment start="/\*" end="\*/"
+```
