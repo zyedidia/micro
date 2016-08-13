@@ -266,6 +266,8 @@ func main() {
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 	L.SetGlobal("CurView", luar.New(L, CurView))
 	L.SetGlobal("IsWordChar", luar.New(L, IsWordChar))
+	L.SetGlobal("HandleCommand", luar.New(L, HandleCommand))
+	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
