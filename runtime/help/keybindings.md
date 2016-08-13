@@ -1,4 +1,4 @@
-### Keybindings
+# Keybindings
 
 Here are the default keybindings in json form which is also how
 you can rebind them to your liking.
@@ -31,7 +31,7 @@ you can rebind them to your liking.
 	"Backspace2":     "Backspace",
 	"Alt-Backspace":  "DeleteWordLeft",
 	"Alt-Backspace2": "DeleteWordLeft",
-	"Tab":            "InsertTab",
+	"Tab":            "InsertTab,IndentSelection",
 	"CtrlO":          "OpenFile",
 	"CtrlS":          "Save",
 	"CtrlF":          "Find",
@@ -78,6 +78,8 @@ ctrl up and down move the cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
+# Rebinding keys
+
 The bindings may be rebound using the `~/.config/micro/bindings.json`
 file. Each key is bound to an action.
 
@@ -88,5 +90,14 @@ following in the `bindings.json` file.
 {
 	"CtrlY": "Undo",
 	"CtrlZ": "Redo"
+}
+```
+
+You can also chain commands when rebinding. For example, if you want Alt-s to save
+and quit you can bind it like so:
+
+```json
+{
+    "Alt-s": "Save,Quit"
 }
 ```
