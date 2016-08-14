@@ -108,17 +108,27 @@ func LoadPlugins() {
 	}
 
 	for _, pluginName := range preInstalledPlugins {
-		plugin := "runtime/plugins/" + pluginName + "/" + pluginName + ".lua"
-		data, err := Asset(plugin)
-		if err != nil {
-			TermMessage("Error loading pre-installed plugin: " + pluginName)
-			continue
+		alreadyExists := false
+		for _, pl := range loadedPlugins {
+			if pl == pluginName {
+				alreadyExists = true
+				break
+			}
 		}
-		pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
-		if err := L.DoString(pluginDef + string(data)); err != nil {
-			TermMessage(err)
-			continue
+		if !alreadyExists {
+			plugin := "runtime/plugins/" + pluginName + "/" + pluginName + ".lua"
+			data, err := Asset(plugin)
+			if err != nil {
+				TermMessage("Error loading pre-installed plugin: " + pluginName)
+				continue
+			}
+			pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
+			if err := L.DoString(pluginDef + string(data)); err != nil {
+				TermMessage(err)
+				continue
+			}
+
+			loadedPlugins = append(loadedPlugins, pluginName)
 		}
-		loadedPlugins = append(loadedPlugins, pluginName)
 	}
 }
