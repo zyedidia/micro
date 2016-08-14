@@ -443,20 +443,19 @@ func Match(v *View) SyntaxMatches {
 	str := strings.Join(buf.Lines(totalStart, totalEnd), "\n")
 	startNum := ToCharPos(Loc{0, totalStart}, v.Buf)
 
-	toplineNum := ToCharPos(Loc{0, v.Topline}, v.Buf)
-
 	for _, rule := range rules {
 		if rule.startend {
 			if indicies := rule.regex.FindAllStringIndex(str, -1); indicies != nil {
 				for _, value := range indicies {
 					value[0] = runePos(value[0], str) + startNum
 					value[1] = runePos(value[1], str) + startNum
-					for i := value[0]; i < value[1]; i++ {
-						if i < toplineNum {
+					startLoc := FromCharPos(value[0], buf)
+					endLoc := FromCharPos(value[1], buf)
+					for curLoc := startLoc; curLoc.LessThan(endLoc); curLoc = curLoc.Move(1, buf) {
+						if curLoc.Y < v.Topline {
 							continue
 						}
-						loc := FromCharPos(i, buf)
-						colNum, lineNum := loc.X, loc.Y
+						colNum, lineNum := curLoc.X, curLoc.Y
 						if lineNum == -1 || colNum == -1 {
 							continue
 						}
