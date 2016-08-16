@@ -43,7 +43,7 @@ function onRune(r)
     end
 end
 
-function onInsertEnter()
+function onInsertNewline()
     if not GetOption("autoclose") then
         return
     end

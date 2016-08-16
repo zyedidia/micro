@@ -1,14 +1,11 @@
 package main
 
 import (
-	"reflect"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mattn/go-runewidth"
-	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/tcell"
 )
 
@@ -333,28 +330,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					if e.Modifiers() == key.modifiers {
 						relocate = false
 						for _, action := range actions {
-							executeAction := true
-							funcName := strings.Split(runtime.FuncForPC(reflect.ValueOf(action).Pointer()).Name(), ".")
-							for _, pl := range loadedPlugins {
-								ret, err := Call(pl+".pre"+funcName[len(funcName)-1], nil)
-								if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-									TermMessage(err)
-									continue
-								}
-								if ret == lua.LFalse {
-									executeAction = false
-								}
-							}
-							if executeAction {
-								relocate = action(v) || relocate
-								for _, pl := range loadedPlugins {
-									_, err := Call(pl+".on"+funcName[len(funcName)-1], nil)
-									if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-										TermMessage(err)
-										continue
-									}
-								}
-							}
+							relocate = action(v) || relocate
 						}
 					}
 				}
