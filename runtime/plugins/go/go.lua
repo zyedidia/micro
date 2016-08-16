@@ -19,7 +19,6 @@ function onSave()
 end
 
 function gofmt()
-    CurView():Save()
     local handle = io.popen("gofmt -w " .. CurView().Buf.Path)
     local result = handle:read("*a")
     handle:close()
@@ -28,7 +27,6 @@ function gofmt()
 end
 
 function goimports()
-    CurView():Save()
     local handle = io.popen("goimports -w " .. CurView().Buf.Path)
     local result = split(handle:read("*a"), ":")
     handle:close()
