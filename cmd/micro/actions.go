@@ -211,8 +211,8 @@ func (v *View) InsertSpace() bool {
 	return true
 }
 
-// InsertEnter inserts a newline plus possible some whitespace if autoindent is on
-func (v *View) InsertEnter() bool {
+// InsertNewline inserts a newline plus possible some whitespace if autoindent is on
+func (v *View) InsertNewline() bool {
 	// Insert a newline
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()

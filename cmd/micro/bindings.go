@@ -35,7 +35,7 @@ var bindingActions = map[string]func(*View) bool{
 	"DeleteWordLeft":      (*View).DeleteWordLeft,
 	"SelectToStartOfLine": (*View).SelectToStartOfLine,
 	"SelectToEndOfLine":   (*View).SelectToEndOfLine,
-	"InsertEnter":         (*View).InsertEnter,
+	"InsertNewline":       (*View).InsertNewline,
 	"InsertSpace":         (*View).InsertSpace,
 	"Backspace":           (*View).Backspace,
 	"Delete":              (*View).Delete,
@@ -76,6 +76,9 @@ var bindingActions = map[string]func(*View) bool{
 	"NextTab":             (*View).NextTab,
 	"NextSplit":           (*View).NextSplit,
 	"PreviousSplit":       (*View).PreviousSplit,
+
+	// This was changed to InsertNewline but I don't want to break backwards compatibility
+	"InsertEnter": (*View).InsertNewline,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -363,7 +366,7 @@ func DefaultBindings() map[string]string {
 		"CtrlDown":       "CursorEnd",
 		"CtrlShiftUp":    "SelectToStart",
 		"CtrlShiftDown":  "SelectToEnd",
-		"Enter":          "InsertEnter",
+		"Enter":          "InsertNewline",
 		"Space":          "InsertSpace",
 		"Backspace":      "Backspace",
 		"Backspace2":     "Backspace",
@@ -387,8 +390,8 @@ func DefaultBindings() map[string]string {
 		"CtrlT":          "AddTab",
 		"CtrlRightSq":    "PreviousTab",
 		"CtrlBackslash":  "NextTab",
-		"Home":           "Start",
-		"End":            "End",
+		"Home":           "StartOfLine",
+		"End":            "EndOfLine",
 		"PageUp":         "CursorPageUp",
 		"PageDown":       "CursorPageDown",
 		"CtrlG":          "ToggleHelp",

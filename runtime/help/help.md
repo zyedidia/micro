@@ -43,13 +43,14 @@ you can rebind them to your liking.
 	"CtrlDown":       "CursorEnd",
 	"CtrlShiftUp":    "SelectToStart",
 	"CtrlShiftDown":  "SelectToEnd",
-	"Enter":          "InsertEnter",
+	"Enter":          "InsertNewline",
 	"Space":          "InsertSpace",
 	"Backspace":      "Backspace",
 	"Backspace2":     "Backspace",
 	"Alt-Backspace":  "DeleteWordLeft",
 	"Alt-Backspace2": "DeleteWordLeft",
-	"Tab":            "InsertTab",
+	"Tab":            "IndentSelection,InsertTab",
+	"Backtab":        "OutdentSelection",
 	"CtrlO":          "OpenFile",
 	"CtrlS":          "Save",
 	"CtrlF":          "Find",
@@ -63,11 +64,11 @@ you can rebind them to your liking.
 	"CtrlD":          "DuplicateLine",
 	"CtrlV":          "Paste",
 	"CtrlA":          "SelectAll",
-	"CtrlT":          "AddTab"
+	"CtrlT":          "AddTab",
 	"CtrlRightSq":    "PreviousTab",
 	"CtrlBackslash":  "NextTab",
-	"Home":           "Start",
-	"End":            "End",
+	"Home":           "StartOfLine",
+	"End":            "EndOfLine",
 	"PageUp":         "CursorPageUp",
 	"PageDown":       "CursorPageDown",
 	"CtrlG":          "ToggleHelp",
@@ -79,14 +80,14 @@ you can rebind them to your liking.
 	"CtrlQ":          "Quit",
 	"CtrlE":          "CommandMode",
 	"CtrlW":          "NextSplit",
-	
+
 	// Emacs-style keybindings
 	"Alt-f": "WordRight",
 	"Alt-b": "WordLeft",
 	"Alt-a": "StartOfLine",
 	"Alt-e": "EndOfLine",
 	"Alt-p": "CursorUp",
-	"Alt-n": "CursorDown"
+	"Alt-n": "CursorDown",
 }
 ```
 
