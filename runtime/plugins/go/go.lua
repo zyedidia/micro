@@ -5,8 +5,8 @@ if GetOption("gofmt") == nil then
     AddOption("gofmt", true)
 end
 
-MakeCommand("goimports", "go.goimports")
-MakeCommand("gofmt", "go.gofmt")
+MakeCommand("goimports", "go.save")
+MakeCommand("gofmt", "go.save")
 
 function onSave()
     if CurView().Buf.FileType == "Go" then
@@ -32,6 +32,11 @@ function goimports()
     handle:close()
 
     CurView():ReOpen()
+end
+
+function save()
+    -- This will trigger onSave and cause gofmt or goimports to run
+    CurView():Save()
 end
 
 function split(str, sep)
