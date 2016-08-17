@@ -58,7 +58,6 @@ call `function` when executed.
 * HandleShellCommand(shellCmd string, interactive bool): runs the given shell
 command
 
-// Used for asynchronous jobs
 * JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string):
 Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
 are callbacks to lua functions which will be called when the given actions happen
@@ -72,3 +71,21 @@ to the background process.
 This may seem like a small list of available functions but some of the objects
 returned by the functions have many methods. `CurView()` returns a view object
 which has all the actions which you can call. For example `CurView():Save()`.
+You can see the full list of possible actions in the keybindings help topic.
+
+Using the view object, you can also access the buffer associated with that view
+by using `CurView().Buf`, which lets you access the `FileType`, `Path`, `Name`...
+
+The possible methods which you can call using the `messenger` variable are:
+
+* `messenger.Message(msg ...interface{})`
+* `messenger.Error(msg ...interface{})`
+* `messenger.YesNoPrompt(prompt string) (bool, bool)`
+* `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
+
+If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+
+# Default plugins
+
+For examples of plugins, see the default plugins `linter`, `go`, and `autoclose`.
+They are stored in Micro's github repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).
