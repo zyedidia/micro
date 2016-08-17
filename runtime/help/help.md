@@ -197,6 +197,10 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `followview`: toggles the cursor following the view
+
+	default value: `off`
+
 * `tabstospaces`: use spaces instead of tabs
 
 	default value: `off`
