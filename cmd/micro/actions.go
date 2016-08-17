@@ -1119,7 +1119,7 @@ func (v *View) CommandMode() bool {
 		return false
 	}
 
-	input, canceled := messenger.Prompt("> ", "Command", FileCompletion)
+	input, canceled := messenger.Prompt("> ", "Command", CommandCompletion)
 	if !canceled {
 		HandleCommand(input)
 		PostActionCall("CommandMode")

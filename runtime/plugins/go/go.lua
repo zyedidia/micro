@@ -5,8 +5,8 @@ if GetOption("gofmt") == nil then
     AddOption("gofmt", true)
 end
 
-MakeCommand("goimports", "go.save")
-MakeCommand("gofmt", "go.save")
+MakeCommand("goimports", "go.save", 0)
+MakeCommand("gofmt", "go.save", 0)
 
 function onSave()
     if CurView().Buf.FileType == "Go" then

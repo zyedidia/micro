@@ -12,7 +12,17 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
-var commands map[string]func([]string)
+type Command struct {
+	action      func([]string)
+	completions []Completion
+}
+
+type StrCommand struct {
+	action      string
+	completions []Completion
+}
+
+var commands map[string]Command
 
 var commandActions = map[string]func([]string){
 	"Set":     Set,
@@ -29,21 +39,21 @@ var commandActions = map[string]func([]string){
 
 // InitCommands initializes the default commands
 func InitCommands() {
-	commands = make(map[string]func([]string))
+	commands = make(map[string]Command)
 
 	defaults := DefaultCommands()
 	parseCommands(defaults)
 }
 
-func parseCommands(userCommands map[string]string) {
+func parseCommands(userCommands map[string]StrCommand) {
 	for k, v := range userCommands {
-		MakeCommand(k, v)
+		MakeCommand(k, v.action, v.completions...)
 	}
 }
 
 // MakeCommand is a function to easily create new commands
 // This can be called by plugins in Lua so that plugins can define their own commands
-func MakeCommand(name, function string) {
+func MakeCommand(name, function string, completions ...Completion) {
 	action := commandActions[function]
 	if _, ok := commandActions[function]; !ok {
 		// If the user seems to be binding a function that doesn't exist
@@ -51,22 +61,22 @@ func MakeCommand(name, function string) {
 		action = LuaFunctionCommand(function)
 	}
 
-	commands[name] = action
+	commands[name] = Command{action, completions}
 }
 
 // DefaultCommands returns a map containing micro's default commands
-func DefaultCommands() map[string]string {
-	return map[string]string{
-		"set":     "Set",
-		"bind":    "Bind",
-		"run":     "Run",
-		"quit":    "Quit",
-		"save":    "Save",
-		"replace": "Replace",
-		"vsplit":  "VSplit",
-		"hsplit":  "HSplit",
-		"tab":     "Tab",
-		"help":    "Help",
+func DefaultCommands() map[string]StrCommand {
+	return map[string]StrCommand{
+		"set":     StrCommand{"Set", []Completion{OptionCompletion, NoCompletion}},
+		"bind":    StrCommand{"Bind", []Completion{NoCompletion}},
+		"run":     StrCommand{"Run", []Completion{NoCompletion}},
+		"quit":    StrCommand{"Quit", []Completion{NoCompletion}},
+		"save":    StrCommand{"Save", []Completion{NoCompletion}},
+		"replace": StrCommand{"Replace", []Completion{NoCompletion}},
+		"vsplit":  StrCommand{"VSplit", []Completion{FileCompletion, NoCompletion}},
+		"hsplit":  StrCommand{"HSplit", []Completion{FileCompletion, NoCompletion}},
+		"tab":     StrCommand{"Tab", []Completion{FileCompletion, NoCompletion}},
+		"help":    StrCommand{"Help", []Completion{HelpCompletion, NoCompletion}},
 	}
 }
 
@@ -129,7 +139,7 @@ func HSplit(args []string) {
 	}
 }
 
-// Tab opens the given file in a new tab
+// NewTab opens the given file in a new tab
 func NewTab(args []string) {
 	if len(args) == 0 {
 		CurView().AddTab()
@@ -370,6 +380,6 @@ func HandleCommand(input string) {
 	if _, ok := commands[inputCmd]; !ok {
 		messenger.Error("Unkown command ", inputCmd)
 	} else {
-		commands[inputCmd](args)
+		commands[inputCmd].action(args)
 	}
 }

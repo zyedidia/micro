@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -129,11 +128,14 @@ type Completion int
 const (
 	NoCompletion Completion = iota
 	FileCompletion
+	CommandCompletion
+	HelpCompletion
+	OptionCompletion
 )
 
 // Prompt sends the user a message and waits for a response to be typed in
 // This function blocks the main loop while waiting for input
-func (m *Messenger) Prompt(prompt, historyType string, completionType Completion) (string, bool) {
+func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Completion) (string, bool) {
 	m.hasPrompt = true
 	m.Message(prompt)
 	if _, ok := m.history[historyType]; !ok {
@@ -163,42 +165,40 @@ func (m *Messenger) Prompt(prompt, historyType string, completionType Completion
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
+				args := strings.Split(m.response, " ")
+				currentArgNum := len(args) - 1
+				currentArg := args[currentArgNum]
+				var completionType Completion
+
+				if completionTypes[0] == CommandCompletion && len(completionTypes) == 1 && currentArgNum > 0 {
+					if command, ok := commands[args[0]]; ok {
+						completionTypes = append(completionTypes, command.completions...)
+					}
+				}
+
+				if currentArgNum >= len(completionTypes) {
+					completionType = completionTypes[len(completionTypes)-1]
+				} else {
+					completionType = completionTypes[currentArgNum]
+				}
+
+				var chosen string
 				if completionType == FileCompletion {
-					args := strings.Split(m.response, " ")
-					currentArg := args[len(args)-1]
-					dirs := strings.Split(currentArg, "/")
-					var files []os.FileInfo
-					var err error
-					if len(dirs) > 1 {
-						files, err = ioutil.ReadDir(strings.Join(dirs[:len(dirs)-1], "/"))
-					} else {
-						files, err = ioutil.ReadDir(".")
+					chosen, _ = FileComplete(currentArg)
+				} else if completionType == CommandCompletion {
+					chosen, _ = CommandComplete(currentArg)
+				} else if completionType == HelpCompletion {
+					chosen, _ = HelpComplete(currentArg)
+				} else if completionType == OptionCompletion {
+					chosen, _ = OptionComplete(currentArg)
+				}
+
+				if chosen != "" {
+					if len(args) > 1 {
+						chosen = " " + chosen
 					}
-					if err != nil {
-						continue
-					}
-					var suggestions []string
-					for _, f := range files {
-						name := f.Name()
-						if f.IsDir() {
-							name += "/"
-						}
-						if strings.HasPrefix(name, dirs[len(dirs)-1]) {
-							suggestions = append(suggestions, name)
-						}
-					}
-					if len(suggestions) == 1 {
-						if len(dirs) > 1 {
-							currentArg = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
-						} else {
-							currentArg = suggestions[0]
-						}
-						if len(args) > 1 {
-							currentArg = " " + currentArg
-						}
-						m.response = strings.Join(args[:len(args)-1], " ") + currentArg
-						m.cursorx = Count(m.response)
-					}
+					m.response = strings.Join(args[:len(args)-1], " ") + chosen
+					m.cursorx = Count(m.response)
 				}
 			}
 		}
