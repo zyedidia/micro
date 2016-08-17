@@ -48,8 +48,9 @@ value (`interface{}` means any type in Go).
 
 * BindKey(key, action string): binds `key` to `action`.
 
-* MakeCommand(name, function string): creates a command with `name` which will
-call `function` when executed.
+* MakeCommand(name, function string, completions ...Completion): 
+  creates a command with `name` which will call `function` when executed.
+  Use 0 for completions to get NoCompletion.
 
 * CurView(): returns the current view
 
@@ -70,8 +71,12 @@ to the background process.
 
 This may seem like a small list of available functions but some of the objects
 returned by the functions have many methods. `CurView()` returns a view object
-which has all the actions which you can call. For example `CurView():Save()`.
+which has all the actions which you can call. For example `CurView():Save(false)`.
 You can see the full list of possible actions in the keybindings help topic.
+The boolean on all the actions indicates whether or not the lua callbacks should
+be run. I would recommend generally sticking to false when making a plugin to
+avoid recursive problems, for example if you call `CurView():Save(true)` in `onSave()`.
+Just use `CurView():Save(false)` so that it won't call `onSave()` again.
 
 Using the view object, you can also access the buffer associated with that view
 by using `CurView().Buf`, which lets you access the `FileType`, `Path`, `Name`...

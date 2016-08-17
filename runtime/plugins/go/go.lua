@@ -5,8 +5,8 @@ if GetOption("gofmt") == nil then
     AddOption("gofmt", true)
 end
 
-MakeCommand("goimports", "go.save", 0)
-MakeCommand("gofmt", "go.save", 0)
+MakeCommand("goimports", "go.goimports", 0)
+MakeCommand("gofmt", "go.gofmt", 0)
 
 function onSave()
     if CurView().Buf.FileType == "Go" then
@@ -19,6 +19,7 @@ function onSave()
 end
 
 function gofmt()
+    CurView():Save(false)
     local handle = io.popen("gofmt -w " .. CurView().Buf.Path)
     local result = handle:read("*a")
     handle:close()
@@ -27,16 +28,12 @@ function gofmt()
 end
 
 function goimports()
+    CurView():Save(false)
     local handle = io.popen("goimports -w " .. CurView().Buf.Path)
     local result = split(handle:read("*a"), ":")
     handle:close()
 
     CurView():ReOpen()
-end
-
-function save()
-    -- This will trigger onSave and cause gofmt or goimports to run
-    CurView():Save()
 end
 
 function split(str, sep)

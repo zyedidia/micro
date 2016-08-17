@@ -9,10 +9,10 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-var bindings map[Key][]func(*View) bool
+var bindings map[Key][]func(*View, bool) bool
 var helpBinding string
 
-var bindingActions = map[string]func(*View) bool{
+var bindingActions = map[string]func(*View, bool) bool{
 	"CursorUp":            (*View).CursorUp,
 	"CursorDown":          (*View).CursorDown,
 	"CursorPageUp":        (*View).CursorPageUp,
@@ -221,7 +221,7 @@ type Key struct {
 
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
-	bindings = make(map[Key][]func(*View) bool)
+	bindings = make(map[Key][]func(*View, bool) bool)
 
 	var parsed map[string]string
 	defaults := DefaultBindings()
@@ -314,7 +314,7 @@ modSearch:
 }
 
 // findAction will find 'action' using string 'v'
-func findAction(v string) (action func(*View) bool) {
+func findAction(v string) (action func(*View, bool) bool) {
 	action, ok := bindingActions[v]
 	if !ok {
 		// If the user seems to be binding a function that doesn't exist
@@ -335,7 +335,7 @@ func BindKey(k, v string) {
 	}
 
 	actionNames := strings.Split(v, ",")
-	actions := make([]func(*View) bool, 0, len(actionNames))
+	actions := make([]func(*View, bool) bool, 0, len(actionNames))
 	for _, actionName := range actionNames {
 		actions = append(actions, findAction(actionName))
 	}

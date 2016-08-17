@@ -170,7 +170,7 @@ func (v *View) CanClose(msg string) bool {
 			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
 				return true
 			} else if strings.ToLower(quit) == "save" || strings.ToLower(quit) == "s" {
-				v.Save()
+				v.Save(true)
 				return true
 			}
 		}
@@ -330,7 +330,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					if e.Modifiers() == key.modifiers {
 						relocate = false
 						for _, action := range actions {
-							relocate = action(v) || relocate
+							relocate = action(v, true) || relocate
 						}
 					}
 				}

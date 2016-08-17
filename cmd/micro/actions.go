@@ -40,8 +40,8 @@ func PostActionCall(funcName string) {
 }
 
 // CursorUp moves the cursor up
-func (v *View) CursorUp() bool {
-	if !PreActionCall("CursorUp") {
+func (v *View) CursorUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorUp") {
 		return false
 	}
 
@@ -51,13 +51,15 @@ func (v *View) CursorUp() bool {
 	}
 	v.Cursor.Up()
 
-	PostActionCall("CursorUp")
+	if usePlugin {
+		PostActionCall("CursorUp")
+	}
 	return true
 }
 
 // CursorDown moves the cursor down
-func (v *View) CursorDown() bool {
-	if !PreActionCall("CursorDown") {
+func (v *View) CursorDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorDown") {
 		return false
 	}
 
@@ -67,13 +69,15 @@ func (v *View) CursorDown() bool {
 	}
 	v.Cursor.Down()
 
-	PostActionCall("CursorDown")
+	if usePlugin {
+		PostActionCall("CursorDown")
+	}
 	return true
 }
 
 // CursorLeft moves the cursor left
-func (v *View) CursorLeft() bool {
-	if !PreActionCall("CursorLeft") {
+func (v *View) CursorLeft(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorLeft") {
 		return false
 	}
 
@@ -84,13 +88,15 @@ func (v *View) CursorLeft() bool {
 		v.Cursor.Left()
 	}
 
-	PostActionCall("CursorLeft")
+	if usePlugin {
+		PostActionCall("CursorLeft")
+	}
 	return true
 }
 
 // CursorRight moves the cursor right
-func (v *View) CursorRight() bool {
-	if !PreActionCall("CursorRight") {
+func (v *View) CursorRight(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorRight") {
 		return false
 	}
 
@@ -101,37 +107,43 @@ func (v *View) CursorRight() bool {
 		v.Cursor.Right()
 	}
 
-	PostActionCall("CursorRight")
+	if usePlugin {
+		PostActionCall("CursorRight")
+	}
 	return true
 }
 
 // WordRight moves the cursor one word to the right
-func (v *View) WordRight() bool {
-	if !PreActionCall("WordRight") {
+func (v *View) WordRight(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("WordRight") {
 		return false
 	}
 
 	v.Cursor.WordRight()
 
-	PostActionCall("WordRight")
+	if usePlugin {
+		PostActionCall("WordRight")
+	}
 	return true
 }
 
 // WordLeft moves the cursor one word to the left
-func (v *View) WordLeft() bool {
-	if !PreActionCall("WordLeft") {
+func (v *View) WordLeft(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("WordLeft") {
 		return false
 	}
 
 	v.Cursor.WordLeft()
 
-	PostActionCall("WordLeft")
+	if usePlugin {
+		PostActionCall("WordLeft")
+	}
 	return true
 }
 
 // SelectUp selects up one line
-func (v *View) SelectUp() bool {
-	if !PreActionCall("SelectUp") {
+func (v *View) SelectUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectUp") {
 		return false
 	}
 
@@ -141,13 +153,15 @@ func (v *View) SelectUp() bool {
 	v.Cursor.Up()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectUp")
+	if usePlugin {
+		PostActionCall("SelectUp")
+	}
 	return true
 }
 
 // SelectDown selects down one line
-func (v *View) SelectDown() bool {
-	if !PreActionCall("SelectDown") {
+func (v *View) SelectDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectDown") {
 		return false
 	}
 
@@ -157,13 +171,15 @@ func (v *View) SelectDown() bool {
 	v.Cursor.Down()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectDown")
+	if usePlugin {
+		PostActionCall("SelectDown")
+	}
 	return true
 }
 
 // SelectLeft selects the character to the left of the cursor
-func (v *View) SelectLeft() bool {
-	if !PreActionCall("SelectLeft") {
+func (v *View) SelectLeft(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectLeft") {
 		return false
 	}
 
@@ -178,13 +194,15 @@ func (v *View) SelectLeft() bool {
 	v.Cursor.Left()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectLeft")
+	if usePlugin {
+		PostActionCall("SelectLeft")
+	}
 	return true
 }
 
 // SelectRight selects the character to the right of the cursor
-func (v *View) SelectRight() bool {
-	if !PreActionCall("SelectRight") {
+func (v *View) SelectRight(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectRight") {
 		return false
 	}
 
@@ -199,13 +217,15 @@ func (v *View) SelectRight() bool {
 	v.Cursor.Right()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectRight")
+	if usePlugin {
+		PostActionCall("SelectRight")
+	}
 	return true
 }
 
 // SelectWordRight selects the word to the right of the cursor
-func (v *View) SelectWordRight() bool {
-	if !PreActionCall("SelectWordRight") {
+func (v *View) SelectWordRight(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectWordRight") {
 		return false
 	}
 
@@ -215,13 +235,15 @@ func (v *View) SelectWordRight() bool {
 	v.Cursor.WordRight()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectWordRight")
+	if usePlugin {
+		PostActionCall("SelectWordRight")
+	}
 	return true
 }
 
 // SelectWordLeft selects the word to the left of the cursor
-func (v *View) SelectWordLeft() bool {
-	if !PreActionCall("SelectWordLeft") {
+func (v *View) SelectWordLeft(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectWordLeft") {
 		return false
 	}
 
@@ -231,37 +253,43 @@ func (v *View) SelectWordLeft() bool {
 	v.Cursor.WordLeft()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectWordLeft")
+	if usePlugin {
+		PostActionCall("SelectWordLeft")
+	}
 	return true
 }
 
 // StartOfLine moves the cursor to the start of the line
-func (v *View) StartOfLine() bool {
-	if !PreActionCall("StartOfLine") {
+func (v *View) StartOfLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("StartOfLine") {
 		return false
 	}
 
 	v.Cursor.Start()
 
-	PostActionCall("StartOfLine")
+	if usePlugin {
+		PostActionCall("StartOfLine")
+	}
 	return true
 }
 
 // EndOfLine moves the cursor to the end of the line
-func (v *View) EndOfLine() bool {
-	if !PreActionCall("EndOfLine") {
+func (v *View) EndOfLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("EndOfLine") {
 		return false
 	}
 
 	v.Cursor.End()
 
-	PostActionCall("EndOfLine")
+	if usePlugin {
+		PostActionCall("EndOfLine")
+	}
 	return true
 }
 
 // SelectToStartOfLine selects to the start of the current line
-func (v *View) SelectToStartOfLine() bool {
-	if !PreActionCall("SelectToStartOfLine") {
+func (v *View) SelectToStartOfLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectToStartOfLine") {
 		return false
 	}
 
@@ -271,13 +299,15 @@ func (v *View) SelectToStartOfLine() bool {
 	v.Cursor.Start()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectToStartOfLine")
+	if usePlugin {
+		PostActionCall("SelectToStartOfLine")
+	}
 	return true
 }
 
 // SelectToEndOfLine selects to the end of the current line
-func (v *View) SelectToEndOfLine() bool {
-	if !PreActionCall("SelectToEndOfLine") {
+func (v *View) SelectToEndOfLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectToEndOfLine") {
 		return false
 	}
 
@@ -287,70 +317,80 @@ func (v *View) SelectToEndOfLine() bool {
 	v.Cursor.End()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 
-	PostActionCall("SelectToEndOfLine")
+	if usePlugin {
+		PostActionCall("SelectToEndOfLine")
+	}
 	return true
 }
 
 // CursorStart moves the cursor to the start of the buffer
-func (v *View) CursorStart() bool {
-	if !PreActionCall("CursorStart") {
+func (v *View) CursorStart(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorStart") {
 		return false
 	}
 
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
 
-	PostActionCall("CursorStart")
+	if usePlugin {
+		PostActionCall("CursorStart")
+	}
 	return true
 }
 
 // CursorEnd moves the cursor to the end of the buffer
-func (v *View) CursorEnd() bool {
-	if !PreActionCall("CursorEnd") {
+func (v *View) CursorEnd(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorEnd") {
 		return false
 	}
 
 	v.Cursor.Loc = v.Buf.End()
 
-	PostActionCall("CursorEnd")
+	if usePlugin {
+		PostActionCall("CursorEnd")
+	}
 	return true
 }
 
 // SelectToStart selects the text from the cursor to the start of the buffer
-func (v *View) SelectToStart() bool {
-	if !PreActionCall("SelectToStart") {
+func (v *View) SelectToStart(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectToStart") {
 		return false
 	}
 
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
-	v.CursorStart()
+	v.CursorStart(false)
 	v.Cursor.SelectTo(v.Buf.Start())
 
-	PostActionCall("SelectToStart")
+	if usePlugin {
+		PostActionCall("SelectToStart")
+	}
 	return true
 }
 
 // SelectToEnd selects the text from the cursor to the end of the buffer
-func (v *View) SelectToEnd() bool {
-	if !PreActionCall("SelectToEnd") {
+func (v *View) SelectToEnd(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectToEnd") {
 		return false
 	}
 
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
-	v.CursorEnd()
+	v.CursorEnd(false)
 	v.Cursor.SelectTo(v.Buf.End())
 
-	PostActionCall("SelectToEnd")
+	if usePlugin {
+		PostActionCall("SelectToEnd")
+	}
 	return true
 }
 
 // InsertSpace inserts a space
-func (v *View) InsertSpace() bool {
-	if !PreActionCall("InsertSpace") {
+func (v *View) InsertSpace(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("InsertSpace") {
 		return false
 	}
 
@@ -361,13 +401,15 @@ func (v *View) InsertSpace() bool {
 	v.Buf.Insert(v.Cursor.Loc, " ")
 	v.Cursor.Right()
 
-	PostActionCall("InsertSpace")
+	if usePlugin {
+		PostActionCall("InsertSpace")
+	}
 	return true
 }
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
-func (v *View) InsertNewline() bool {
-	if !PreActionCall("InsertNewline") {
+func (v *View) InsertNewline(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("InsertNewline") {
 		return false
 	}
 
@@ -389,13 +431,15 @@ func (v *View) InsertNewline() bool {
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 
-	PostActionCall("InsertNewline")
+	if usePlugin {
+		PostActionCall("InsertNewline")
+	}
 	return true
 }
 
 // Backspace deletes the previous character
-func (v *View) Backspace() bool {
-	if !PreActionCall("Backspace") {
+func (v *View) Backspace(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Backspace") {
 		return false
 	}
 
@@ -433,45 +477,51 @@ func (v *View) Backspace() bool {
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 
-	PostActionCall("Backspace")
+	if usePlugin {
+		PostActionCall("Backspace")
+	}
 	return true
 }
 
 // DeleteWordRight deletes the word to the right of the cursor
-func (v *View) DeleteWordRight() bool {
-	if !PreActionCall("DeleteWordRight") {
+func (v *View) DeleteWordRight(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("DeleteWordRight") {
 		return false
 	}
 
-	v.SelectWordRight()
+	v.SelectWordRight(false)
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
 
-	PostActionCall("DeleteWordRight")
+	if usePlugin {
+		PostActionCall("DeleteWordRight")
+	}
 	return true
 }
 
 // DeleteWordLeft deletes the word to the left of the cursor
-func (v *View) DeleteWordLeft() bool {
-	if !PreActionCall("DeleteWordLeft") {
+func (v *View) DeleteWordLeft(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("DeleteWordLeft") {
 		return false
 	}
 
-	v.SelectWordLeft()
+	v.SelectWordLeft(false)
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
 
-	PostActionCall("DeleteWordLeft")
+	if usePlugin {
+		PostActionCall("DeleteWordLeft")
+	}
 	return true
 }
 
 // Delete deletes the next character
-func (v *View) Delete() bool {
-	if !PreActionCall("Delete") {
+func (v *View) Delete(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Delete") {
 		return false
 	}
 
@@ -485,13 +535,15 @@ func (v *View) Delete() bool {
 		}
 	}
 
-	PostActionCall("Delete")
+	if usePlugin {
+		PostActionCall("Delete")
+	}
 	return true
 }
 
 // IndentSelection indents the current selection
-func (v *View) IndentSelection() bool {
-	if !PreActionCall("IndentSelection") {
+func (v *View) IndentSelection(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("IndentSelection") {
 		return false
 	}
 
@@ -525,15 +577,17 @@ func (v *View) IndentSelection() bool {
 		}
 		v.Cursor.Relocate()
 
-		PostActionCall("IndentSelection")
+		if usePlugin {
+			PostActionCall("IndentSelection")
+		}
 		return true
 	}
 	return false
 }
 
 // OutdentSelection takes the current selection and moves it back one indent level
-func (v *View) OutdentSelection() bool {
-	if !PreActionCall("OutdentSelection") {
+func (v *View) OutdentSelection(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("OutdentSelection") {
 		return false
 	}
 
@@ -574,15 +628,17 @@ func (v *View) OutdentSelection() bool {
 		}
 		v.Cursor.Relocate()
 
-		PostActionCall("OutdentSelection")
+		if usePlugin {
+			PostActionCall("OutdentSelection")
+		}
 		return true
 	}
 	return false
 }
 
 // InsertTab inserts a tab or spaces
-func (v *View) InsertTab() bool {
-	if !PreActionCall("InsertTab") {
+func (v *View) InsertTab(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("InsertTab") {
 		return false
 	}
 
@@ -601,13 +657,15 @@ func (v *View) InsertTab() bool {
 		v.Cursor.Right()
 	}
 
-	PostActionCall("InsertTab")
+	if usePlugin {
+		PostActionCall("InsertTab")
+	}
 	return true
 }
 
 // Save the buffer to disk
-func (v *View) Save() bool {
-	if !PreActionCall("Save") {
+func (v *View) Save(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Save") {
 		return false
 	}
 
@@ -646,13 +704,15 @@ func (v *View) Save() bool {
 		messenger.Message("Saved " + v.Buf.Path)
 	}
 
-	PostActionCall("Save")
+	if usePlugin {
+		PostActionCall("Save")
+	}
 	return false
 }
 
 // Find opens a prompt and searches forward for the input
-func (v *View) Find() bool {
-	if !PreActionCall("Find") {
+func (v *View) Find(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Find") {
 		return false
 	}
 
@@ -663,13 +723,15 @@ func (v *View) Find() bool {
 	}
 	BeginSearch()
 
-	PostActionCall("Find")
+	if usePlugin {
+		PostActionCall("Find")
+	}
 	return true
 }
 
 // FindNext searches forwards for the last used search term
-func (v *View) FindNext() bool {
-	if !PreActionCall("FindNext") {
+func (v *View) FindNext(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("FindNext") {
 		return false
 	}
 
@@ -681,13 +743,15 @@ func (v *View) FindNext() bool {
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, true)
 
-	PostActionCall("FindNext")
+	if usePlugin {
+		PostActionCall("FindNext")
+	}
 	return true
 }
 
 // FindPrevious searches backwards for the last used search term
-func (v *View) FindPrevious() bool {
-	if !PreActionCall("FindPrevious") {
+func (v *View) FindPrevious(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("FindPrevious") {
 		return false
 	}
 
@@ -699,39 +763,45 @@ func (v *View) FindPrevious() bool {
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, false)
 
-	PostActionCall("FindPrevious")
+	if usePlugin {
+		PostActionCall("FindPrevious")
+	}
 	return true
 }
 
 // Undo undoes the last action
-func (v *View) Undo() bool {
-	if !PreActionCall("Undo") {
+func (v *View) Undo(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Undo") {
 		return false
 	}
 
 	v.Buf.Undo()
 	messenger.Message("Undid action")
 
-	PostActionCall("Undo")
+	if usePlugin {
+		PostActionCall("Undo")
+	}
 	return true
 }
 
 // Redo redoes the last action
-func (v *View) Redo() bool {
-	if !PreActionCall("Redo") {
+func (v *View) Redo(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Redo") {
 		return false
 	}
 
 	v.Buf.Redo()
 	messenger.Message("Redid action")
 
-	PostActionCall("Redo")
+	if usePlugin {
+		PostActionCall("Redo")
+	}
 	return true
 }
 
 // Copy the selection to the system clipboard
-func (v *View) Copy() bool {
-	if !PreActionCall("Copy") {
+func (v *View) Copy(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Copy") {
 		return false
 	}
 
@@ -741,13 +811,15 @@ func (v *View) Copy() bool {
 		messenger.Message("Copied selection")
 	}
 
-	PostActionCall("Copy")
+	if usePlugin {
+		PostActionCall("Copy")
+	}
 	return true
 }
 
 // CutLine cuts the current line to the clipboard
-func (v *View) CutLine() bool {
-	if !PreActionCall("CutLine") {
+func (v *View) CutLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CutLine") {
 		return false
 	}
 
@@ -764,7 +836,7 @@ func (v *View) CutLine() bool {
 			}
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
-		v.Copy()
+		v.Copy(true)
 	}
 	v.freshClip = true
 	v.lastCutTime = time.Now()
@@ -772,13 +844,15 @@ func (v *View) CutLine() bool {
 	v.Cursor.ResetSelection()
 	messenger.Message("Cut line")
 
-	PostActionCall("CutLine")
+	if usePlugin {
+		PostActionCall("CutLine")
+	}
 	return true
 }
 
 // Cut the selection to the system clipboard
-func (v *View) Cut() bool {
-	if !PreActionCall("Cut") {
+func (v *View) Cut(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Cut") {
 		return false
 	}
 
@@ -789,7 +863,9 @@ func (v *View) Cut() bool {
 		v.freshClip = true
 		messenger.Message("Cut selection")
 
-		PostActionCall("Cut")
+		if usePlugin {
+			PostActionCall("Cut")
+		}
 		return true
 	}
 
@@ -797,8 +873,8 @@ func (v *View) Cut() bool {
 }
 
 // DuplicateLine duplicates the current line
-func (v *View) DuplicateLine() bool {
-	if !PreActionCall("DuplicateLine") {
+func (v *View) DuplicateLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("DuplicateLine") {
 		return false
 	}
 
@@ -807,13 +883,15 @@ func (v *View) DuplicateLine() bool {
 	v.Cursor.Right()
 	messenger.Message("Duplicated line")
 
-	PostActionCall("DuplicateLine")
+	if usePlugin {
+		PostActionCall("DuplicateLine")
+	}
 	return true
 }
 
 // DeleteLine deletes the current line
-func (v *View) DeleteLine() bool {
-	if !PreActionCall("DeleteLine") {
+func (v *View) DeleteLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("DeleteLine") {
 		return false
 	}
 
@@ -825,14 +903,16 @@ func (v *View) DeleteLine() bool {
 	v.Cursor.ResetSelection()
 	messenger.Message("Deleted line")
 
-	PostActionCall("DeleteLine")
+	if usePlugin {
+		PostActionCall("DeleteLine")
+	}
 	return true
 }
 
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
-func (v *View) Paste() bool {
-	if !PreActionCall("Paste") {
+func (v *View) Paste(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Paste") {
 		return false
 	}
 
@@ -846,13 +926,15 @@ func (v *View) Paste() bool {
 	v.freshClip = false
 	messenger.Message("Pasted clipboard")
 
-	PostActionCall("Paste")
+	if usePlugin {
+		PostActionCall("Paste")
+	}
 	return true
 }
 
 // SelectAll selects the entire buffer
-func (v *View) SelectAll() bool {
-	if !PreActionCall("SelectAll") {
+func (v *View) SelectAll(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectAll") {
 		return false
 	}
 
@@ -862,13 +944,15 @@ func (v *View) SelectAll() bool {
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
 
-	PostActionCall("SelectAll")
+	if usePlugin {
+		PostActionCall("SelectAll")
+	}
 	return true
 }
 
 // OpenFile opens a new file in the buffer
-func (v *View) OpenFile() bool {
-	if !PreActionCall("OpenFile") {
+func (v *View) OpenFile(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("OpenFile") {
 		return false
 	}
 
@@ -890,27 +974,31 @@ func (v *View) OpenFile() bool {
 		}
 		v.OpenBuffer(buf)
 
-		PostActionCall("OpenFile")
+		if usePlugin {
+			PostActionCall("OpenFile")
+		}
 		return true
 	}
 	return false
 }
 
 // Start moves the viewport to the start of the buffer
-func (v *View) Start() bool {
-	if !PreActionCall("Start") {
+func (v *View) Start(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Start") {
 		return false
 	}
 
 	v.Topline = 0
 
-	PostActionCall("Start")
+	if usePlugin {
+		PostActionCall("Start")
+	}
 	return false
 }
 
 // End moves the viewport to the end of the buffer
-func (v *View) End() bool {
-	if !PreActionCall("End") {
+func (v *View) End(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("End") {
 		return false
 	}
 
@@ -920,13 +1008,15 @@ func (v *View) End() bool {
 		v.Topline = v.Buf.NumLines - v.height
 	}
 
-	PostActionCall("End")
+	if usePlugin {
+		PostActionCall("End")
+	}
 	return false
 }
 
 // PageUp scrolls the view up a page
-func (v *View) PageUp() bool {
-	if !PreActionCall("PageUp") {
+func (v *View) PageUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PageUp") {
 		return false
 	}
 
@@ -936,13 +1026,15 @@ func (v *View) PageUp() bool {
 		v.Topline = 0
 	}
 
-	PostActionCall("PageUp")
+	if usePlugin {
+		PostActionCall("PageUp")
+	}
 	return false
 }
 
 // PageDown scrolls the view down a page
-func (v *View) PageDown() bool {
-	if !PreActionCall("PageDown") {
+func (v *View) PageDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PageDown") {
 		return false
 	}
 
@@ -952,13 +1044,15 @@ func (v *View) PageDown() bool {
 		v.Topline = v.Buf.NumLines - v.height
 	}
 
-	PostActionCall("PageDown")
+	if usePlugin {
+		PostActionCall("PageDown")
+	}
 	return false
 }
 
 // CursorPageUp places the cursor a page up
-func (v *View) CursorPageUp() bool {
-	if !PreActionCall("CursorPageUp") {
+func (v *View) CursorPageUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorPageUp") {
 		return false
 	}
 
@@ -968,13 +1062,15 @@ func (v *View) CursorPageUp() bool {
 	}
 	v.Cursor.UpN(v.height)
 
-	PostActionCall("CursorPageUp")
+	if usePlugin {
+		PostActionCall("CursorPageUp")
+	}
 	return true
 }
 
 // CursorPageDown places the cursor a page up
-func (v *View) CursorPageDown() bool {
-	if !PreActionCall("CursorPageDown") {
+func (v *View) CursorPageDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CursorPageDown") {
 		return false
 	}
 
@@ -984,13 +1080,15 @@ func (v *View) CursorPageDown() bool {
 	}
 	v.Cursor.DownN(v.height)
 
-	PostActionCall("CursorPageDown")
+	if usePlugin {
+		PostActionCall("CursorPageDown")
+	}
 	return true
 }
 
 // HalfPageUp scrolls the view up half a page
-func (v *View) HalfPageUp() bool {
-	if !PreActionCall("HalfPageUp") {
+func (v *View) HalfPageUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("HalfPageUp") {
 		return false
 	}
 
@@ -1000,13 +1098,15 @@ func (v *View) HalfPageUp() bool {
 		v.Topline = 0
 	}
 
-	PostActionCall("HalfPageUp")
+	if usePlugin {
+		PostActionCall("HalfPageUp")
+	}
 	return false
 }
 
 // HalfPageDown scrolls the view down half a page
-func (v *View) HalfPageDown() bool {
-	if !PreActionCall("HalfPageDown") {
+func (v *View) HalfPageDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("HalfPageDown") {
 		return false
 	}
 
@@ -1018,13 +1118,15 @@ func (v *View) HalfPageDown() bool {
 		}
 	}
 
-	PostActionCall("HalfPageDown")
+	if usePlugin {
+		PostActionCall("HalfPageDown")
+	}
 	return false
 }
 
 // ToggleRuler turns line numbers off and on
-func (v *View) ToggleRuler() bool {
-	if !PreActionCall("ToggleRuler") {
+func (v *View) ToggleRuler(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ToggleRuler") {
 		return false
 	}
 
@@ -1036,13 +1138,15 @@ func (v *View) ToggleRuler() bool {
 		messenger.Message("Disabled ruler")
 	}
 
-	PostActionCall("ToggleRuler")
+	if usePlugin {
+		PostActionCall("ToggleRuler")
+	}
 	return false
 }
 
 // JumpLine jumps to a line and moves the view accordingly.
-func (v *View) JumpLine() bool {
-	if !PreActionCall("JumpLine") {
+func (v *View) JumpLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("JumpLine") {
 		return false
 	}
 
@@ -1062,7 +1166,9 @@ func (v *View) JumpLine() bool {
 		v.Cursor.X = 0
 		v.Cursor.Y = lineint
 
-		PostActionCall("JumpLine")
+		if usePlugin {
+			PostActionCall("JumpLine")
+		}
 		return true
 	}
 	messenger.Error("Only ", v.Buf.NumLines, " lines to jump")
@@ -1070,20 +1176,22 @@ func (v *View) JumpLine() bool {
 }
 
 // ClearStatus clears the messenger bar
-func (v *View) ClearStatus() bool {
-	if !PreActionCall("ClearStatus") {
+func (v *View) ClearStatus(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ClearStatus") {
 		return false
 	}
 
 	messenger.Message("")
 
-	PostActionCall("ClearStatus")
+	if usePlugin {
+		PostActionCall("ClearStatus")
+	}
 	return false
 }
 
 // ToggleHelp toggles the help screen
-func (v *View) ToggleHelp() bool {
-	if !PreActionCall("ToggleHelp") {
+func (v *View) ToggleHelp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ToggleHelp") {
 		return false
 	}
 
@@ -1091,16 +1199,18 @@ func (v *View) ToggleHelp() bool {
 		// Open the default help
 		v.openHelp("help")
 	} else {
-		v.Quit()
+		v.Quit(true)
 	}
 
-	PostActionCall("ToggleHelp")
+	if usePlugin {
+		PostActionCall("ToggleHelp")
+	}
 	return true
 }
 
 // ShellMode opens a terminal to run a shell command
-func (v *View) ShellMode() bool {
-	if !PreActionCall("ShellMode") {
+func (v *View) ShellMode(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ShellMode") {
 		return false
 	}
 
@@ -1108,21 +1218,25 @@ func (v *View) ShellMode() bool {
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
 		HandleShellCommand(input, true)
-		PostActionCall("ShellMode")
+		if usePlugin {
+			PostActionCall("ShellMode")
+		}
 	}
 	return false
 }
 
 // CommandMode lets the user enter a command
-func (v *View) CommandMode() bool {
-	if !PreActionCall("CommandMode") {
+func (v *View) CommandMode(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("CommandMode") {
 		return false
 	}
 
 	input, canceled := messenger.Prompt("> ", "Command", CommandCompletion)
 	if !canceled {
 		HandleCommand(input)
-		PostActionCall("CommandMode")
+		if usePlugin {
+			PostActionCall("CommandMode")
+		}
 	}
 
 	return false
@@ -1132,8 +1246,8 @@ func (v *View) CommandMode() bool {
 // This behavior needs to be changed and should really only quit the editor if this
 // is the last view
 // However, since micro only supports one view for now, it doesn't really matter
-func (v *View) Quit() bool {
-	if !PreActionCall("Quit") {
+func (v *View) Quit(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Quit") {
 		return false
 	}
 
@@ -1160,20 +1274,24 @@ func (v *View) Quit() bool {
 				}
 			}
 		} else {
-			PostActionCall("Quit")
+			if usePlugin {
+				PostActionCall("Quit")
+			}
 
 			screen.Fini()
 			os.Exit(0)
 		}
 	}
 
-	PostActionCall("Quit")
+	if usePlugin {
+		PostActionCall("Quit")
+	}
 	return false
 }
 
 // AddTab adds a new tab with an empty buffer
-func (v *View) AddTab() bool {
-	if !PreActionCall("AddTab") {
+func (v *View) AddTab(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("AddTab") {
 		return false
 	}
 
@@ -1189,13 +1307,15 @@ func (v *View) AddTab() bool {
 		}
 	}
 
-	PostActionCall("AddTab")
+	if usePlugin {
+		PostActionCall("AddTab")
+	}
 	return true
 }
 
 // PreviousTab switches to the previous tab in the tab list
-func (v *View) PreviousTab() bool {
-	if !PreActionCall("PreviousTab") {
+func (v *View) PreviousTab(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PreviousTab") {
 		return false
 	}
 
@@ -1205,13 +1325,15 @@ func (v *View) PreviousTab() bool {
 		curTab = len(tabs) - 1
 	}
 
-	PostActionCall("PreviousTab")
+	if usePlugin {
+		PostActionCall("PreviousTab")
+	}
 	return false
 }
 
 // NextTab switches to the next tab in the tab list
-func (v *View) NextTab() bool {
-	if !PreActionCall("NextTab") {
+func (v *View) NextTab(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("NextTab") {
 		return false
 	}
 
@@ -1221,13 +1343,15 @@ func (v *View) NextTab() bool {
 		curTab = 0
 	}
 
-	PostActionCall("NextTab")
+	if usePlugin {
+		PostActionCall("NextTab")
+	}
 	return false
 }
 
 // NextSplit changes the view to the next split
-func (v *View) NextSplit() bool {
-	if !PreActionCall("NextSplit") {
+func (v *View) NextSplit(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("NextSplit") {
 		return false
 	}
 
@@ -1238,13 +1362,15 @@ func (v *View) NextSplit() bool {
 		tab.curView = 0
 	}
 
-	PostActionCall("NextSplit")
+	if usePlugin {
+		PostActionCall("NextSplit")
+	}
 	return false
 }
 
 // PreviousSplit changes the view to the previous split
-func (v *View) PreviousSplit() bool {
-	if !PreActionCall("PreviousSplit") {
+func (v *View) PreviousSplit(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PreviousSplit") {
 		return false
 	}
 
@@ -1255,7 +1381,9 @@ func (v *View) PreviousSplit() bool {
 		tab.curView = len(tab.views) - 1
 	}
 
-	PostActionCall("PreviousSplit")
+	if usePlugin {
+		PostActionCall("PreviousSplit")
+	}
 	return false
 }
 

@@ -20,8 +20,8 @@ function onRune(r)
             local curLine = v.Buf:Line(v.Cursor.Y)
 
             if charAt(curLine, v.Cursor.X+1) == charAt(autoclosePairs[i], 2) then
-                v:Backspace()
-                v:CursorRight()
+                v:Backspace(false)
+                v:CursorRight(false)
                 break
             end
 
@@ -57,7 +57,7 @@ function onInsertNewline()
     for i = 1, #autoNewlinePairs do
         if curRune == charAt(autoNewlinePairs[i], 1) then
             if nextRune == charAt(autoNewlinePairs[i], 2) then
-                v:InsertTab()
+                v:InsertTab(false)
                 v.Buf:Insert(-v.Cursor.Loc, "\n")
             end
         end
@@ -74,7 +74,7 @@ function preBackspace()
     for i = 1, #autoclosePairs do
         local curLine = v.Buf:Line(v.Cursor.Y)
         if charAt(curLine, v.Cursor.X+1) == charAt(autoclosePairs[i], 2) and charAt(curLine, v.Cursor.X) == charAt(autoclosePairs[i], 1) then
-            v:Delete()
+            v:Delete(false)
         end
     end
 

@@ -55,8 +55,8 @@ func Call(function string, args []string) (lua.LValue, error) {
 // and creates a function that will call that lua function
 // Specifically it creates a function that can be called as a binding because this is used
 // to bind keys to lua functions
-func LuaFunctionBinding(function string) func(*View) bool {
-	return func(v *View) bool {
+func LuaFunctionBinding(function string) func(*View, bool) bool {
+	return func(v *View, _ bool) bool {
 		_, err := Call(function, nil)
 		if err != nil {
 			TermMessage(err)

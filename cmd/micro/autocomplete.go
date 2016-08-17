@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+// This file is meant (for now) for autocompletion in command mode, not
+// while coding. This helps micro autocomplete commands and then filenames
+// for example with `vsplit filename`.
+
+// FileComplete autocompletes filenames
 func FileComplete(input string) (string, []string) {
 	dirs := strings.Split(input, "/")
 	var files []os.FileInfo
@@ -41,6 +46,7 @@ func FileComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// CommandComplete autocompletes commands
 func CommandComplete(input string) (string, []string) {
 	var suggestions []string
 	for cmd := range commands {
@@ -56,6 +62,7 @@ func CommandComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// HelpComplete autocompletes help topics
 func HelpComplete(input string) (string, []string) {
 	var suggestions []string
 
@@ -73,6 +80,7 @@ func HelpComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// OptionComplete autocompletes options
 func OptionComplete(input string) (string, []string) {
 	var suggestions []string
 	for option := range settings {

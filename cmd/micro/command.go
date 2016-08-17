@@ -142,7 +142,7 @@ func HSplit(args []string) {
 // NewTab opens the given file in a new tab
 func NewTab(args []string) {
 	if len(args) == 0 {
-		CurView().AddTab()
+		CurView().AddTab(true)
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
@@ -191,13 +191,13 @@ func Run(args []string) {
 // Quit closes the main view
 func Quit(args []string) {
 	// Close the main view
-	CurView().Quit()
+	CurView().Quit(true)
 }
 
 // Save saves the buffer in the main view
 func Save(args []string) {
 	// Save the main view
-	CurView().Save()
+	CurView().Save(true)
 }
 
 // Replace runs search and replace
