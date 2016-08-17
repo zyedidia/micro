@@ -279,17 +279,23 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 	w, screenH := screen.Size()
 
 	y := screenH - 2
+
+	statusLineStyle := defStyle.Reverse(true)
+	if style, ok := colorscheme["statusline"]; ok {
+		statusLineStyle = style
+	}
+
 	for x := 0; x < w; x++ {
-		screen.SetContent(x, y, ' ', nil, defStyle.Reverse(true))
+		screen.SetContent(x, y, ' ', nil, statusLineStyle)
 	}
 
 	x := 1
 	for _, suggestion := range suggestions {
 		for _, c := range suggestion {
-			screen.SetContent(x, y, c, nil, defStyle.Reverse(true))
+			screen.SetContent(x, y, c, nil, statusLineStyle)
 			x++
 		}
-		screen.SetContent(x, y, ' ', nil, defStyle.Reverse(true))
+		screen.SetContent(x, y, ' ', nil, statusLineStyle)
 		x++
 	}
 }
