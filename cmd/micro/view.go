@@ -582,8 +582,12 @@ func (v *View) DisplayView() {
 		if settings["ruler"] == true {
 			// Write the line number
 			lineNumStyle := defStyle
+			curLineNumStyle := defStyle
 			if style, ok := colorscheme["line-number"]; ok {
 				lineNumStyle = style
+			}
+			if style, ok := colorscheme["current-line-number"]; ok {
+				curLineNumStyle = style
 			}
 
 			lineNum := strconv.Itoa(curLineN + 1)
@@ -595,7 +599,11 @@ func (v *View) DisplayView() {
 			}
 			// Write the actual line number
 			for _, ch := range lineNum {
-				v.drawCell(screenX, screenY, ch, nil, lineNumStyle)
+				if curLineN == v.Cursor.Y {
+					v.drawCell(screenX, screenY, ch, nil, curLineNumStyle)
+				} else {
+					v.drawCell(screenX, screenY, ch, nil, lineNumStyle)
+				}
 				screenX++
 			}
 
