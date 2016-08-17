@@ -147,9 +147,10 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 
 	response, canceled := "", true
 
+	RedrawAll()
 	for m.hasPrompt {
+		var suggestions []string
 		m.Clear()
-		m.Display()
 
 		event := <-events
 
@@ -170,9 +171,9 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				currentArg := args[currentArgNum]
 				var completionType Completion
 
-				if completionTypes[0] == CommandCompletion && len(completionTypes) == 1 && currentArgNum > 0 {
+				if completionTypes[0] == CommandCompletion && currentArgNum > 0 {
 					if command, ok := commands[args[0]]; ok {
-						completionTypes = append(completionTypes, command.completions...)
+						completionTypes = append([]Completion{CommandCompletion}, command.completions...)
 					}
 				}
 
@@ -184,13 +185,13 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 
 				var chosen string
 				if completionType == FileCompletion {
-					chosen, _ = FileComplete(currentArg)
+					chosen, suggestions = FileComplete(currentArg)
 				} else if completionType == CommandCompletion {
-					chosen, _ = CommandComplete(currentArg)
+					chosen, suggestions = CommandComplete(currentArg)
 				} else if completionType == HelpCompletion {
-					chosen, _ = HelpComplete(currentArg)
+					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
-					chosen, _ = OptionComplete(currentArg)
+					chosen, suggestions = OptionComplete(currentArg)
 				}
 
 				if chosen != "" {
@@ -204,6 +205,17 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 		}
 
 		m.HandleEvent(event, m.history[historyType])
+
+		messenger.Clear()
+		for _, v := range tabs[curTab].views {
+			v.Display()
+		}
+		DisplayTabs()
+		messenger.Display()
+		if len(suggestions) > 1 {
+			m.DisplaySuggestions(suggestions)
+		}
+		screen.Show()
 	}
 
 	m.Reset()
@@ -260,6 +272,25 @@ func (m *Messenger) Clear() {
 	w, h := screen.Size()
 	for x := 0; x < w; x++ {
 		screen.SetContent(x, h-1, ' ', nil, defStyle)
+	}
+}
+
+func (m *Messenger) DisplaySuggestions(suggestions []string) {
+	w, screenH := screen.Size()
+
+	y := screenH - 2
+	for x := 0; x < w; x++ {
+		screen.SetContent(x, y, ' ', nil, defStyle.Reverse(true))
+	}
+
+	x := 1
+	for _, suggestion := range suggestions {
+		for _, c := range suggestion {
+			screen.SetContent(x, y, c, nil, defStyle.Reverse(true))
+			x++
+		}
+		screen.SetContent(x, y, ' ', nil, defStyle.Reverse(true))
+		x++
 	}
 }
 
