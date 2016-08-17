@@ -12,6 +12,7 @@ import (
 var loadedPlugins []string
 
 var preInstalledPlugins = []string{
+	"fish",
 	"go",
 	"linter",
 	"autoclose",

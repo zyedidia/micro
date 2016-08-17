@@ -258,6 +258,12 @@ Default plugin options:
 
 	default value: `on`
 
+* `fishfmt`: Run fish_indent on save. Provided by the `fish` plugin.
+
+	default value: `off`
+
+---
+
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
