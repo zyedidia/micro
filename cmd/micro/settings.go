@@ -6,7 +6,6 @@ import (
 	"os"
 	"reflect"
 	"strconv"
-	"strings"
 )
 
 // The options that the user can set
@@ -90,51 +89,58 @@ func DefaultSettings() map[string]interface{} {
 }
 
 // SetOption prompts the user to set an option and checks that the response is valid
-func SetOption(view *View, args []string) {
+func SetOption(option, value string) {
 	filename := configDir + "/settings.json"
-	if len(args) == 2 {
-		option := strings.TrimSpace(args[0])
-		value := strings.TrimSpace(args[1])
+	if _, ok := settings[option]; !ok {
+		messenger.Error(option + " is not a valid option")
+		return
+	}
 
-		if _, ok := settings[option]; !ok {
-			messenger.Error(option + " is not a valid option")
-			return
-		}
-
-		kind := reflect.TypeOf(settings[option]).Kind()
-		if kind == reflect.Bool {
-			b, err := ParseBool(value)
-			if err != nil {
-				messenger.Error("Invalid value for " + option)
-				return
-			}
-			settings[option] = b
-		} else if kind == reflect.String {
-			settings[option] = value
-		} else if kind == reflect.Float64 {
-			i, err := strconv.Atoi(value)
-			if err != nil {
-				messenger.Error("Invalid value for " + option)
-				return
-			}
-			settings[option] = float64(i)
-		}
-
-		if option == "colorscheme" {
-			LoadSyntaxFiles()
-			view.Buf.UpdateRules()
-		}
-
-		if option == "statusline" {
-			view.ToggleStatusLine()
-		}
-
-		err := WriteSettings(filename)
+	kind := reflect.TypeOf(settings[option]).Kind()
+	if kind == reflect.Bool {
+		b, err := ParseBool(value)
 		if err != nil {
-			messenger.Error("Error writing to settings.json: " + err.Error())
+			messenger.Error("Invalid value for " + option)
 			return
 		}
-	} else {
-		messenger.Error("No value given")
+		settings[option] = b
+	} else if kind == reflect.String {
+		settings[option] = value
+	} else if kind == reflect.Float64 {
+		i, err := strconv.Atoi(value)
+		if err != nil {
+			messenger.Error("Invalid value for " + option)
+			return
+		}
+		settings[option] = float64(i)
+	}
+
+	if option == "colorscheme" {
+		LoadSyntaxFiles()
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				view.Buf.UpdateRules()
+				if settings["syntax"].(bool) {
+					view.matches = Match(view)
+				}
+			}
+		}
+	}
+
+	if option == "statusline" {
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				view.ToggleStatusLine()
+				if settings["syntax"].(bool) {
+					view.matches = Match(view)
+				}
+			}
+		}
+	}
+
+	err := WriteSettings(filename)
+	if err != nil {
+		messenger.Error("Error writing to settings.json: " + err.Error())
+		return
 	}
 }

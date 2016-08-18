@@ -165,12 +165,14 @@ func NewTab(args []string) {
 
 // Set sets an option
 func Set(args []string) {
-	// Set an option and we have to set it for every view
-	for _, tab := range tabs {
-		for _, view := range tab.views {
-			SetOption(view, args)
-		}
+	if len(args) < 2 {
+		return
 	}
+
+	option := strings.TrimSpace(args[0])
+	value := strings.TrimSpace(args[1])
+
+	SetOption(option, value)
 }
 
 // Bind creates a new keybinding

@@ -262,6 +262,7 @@ func main() {
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
 	L.SetGlobal("AddOption", luar.New(L, AddOption))
+	L.SetGlobal("SetOption", luar.New(L, SetOption))
 	L.SetGlobal("BindKey", luar.New(L, BindKey))
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 	L.SetGlobal("CurView", luar.New(L, CurView))
