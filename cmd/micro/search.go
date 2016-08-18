@@ -84,10 +84,10 @@ func Search(searchStr string, v *View, down bool) {
 	var charPos int
 	text := v.Buf.String()
 	if down {
-		str = text[searchStart:]
+		str = string([]rune(text)[searchStart:])
 		charPos = searchStart
 	} else {
-		str = text[:searchStart]
+		str = string([]rune(text)[:searchStart])
 	}
 	r, err := regexp.Compile(searchStr)
 	if settings["ignorecase"].(bool) {
@@ -127,7 +127,6 @@ func Search(searchStr string, v *View, down bool) {
 
 	v.Cursor.CurSelection[0] = FromCharPos(charPos+runePos(match[0], str), v.Buf)
 	v.Cursor.CurSelection[1] = FromCharPos(charPos+runePos(match[1], str), v.Buf)
-	v.Cursor.Loc = FromCharPos(charPos+match[1]-1, v.Buf)
 	if v.Relocate() {
 		v.matches = Match(v)
 	}

@@ -249,7 +249,7 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 			}
 		case tcell.KeyBackspace2, tcell.KeyBackspace:
 			if m.cursorx > 0 {
-				m.response = string([]rune(m.response)[:m.cursorx-1]) + string(m.response[m.cursorx:])
+				m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
 				m.cursorx--
 			}
 		case tcell.KeyRune:

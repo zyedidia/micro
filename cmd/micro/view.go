@@ -624,7 +624,8 @@ func (v *View) DisplayView() {
 		}
 
 		// Now we actually draw the line
-		for colN, ch := range line {
+		colN := 0
+		for _, ch := range line {
 			lineStyle := defStyle
 
 			if settings["syntax"].(bool) {
@@ -709,6 +710,7 @@ func (v *View) DisplayView() {
 			}
 			charNum = charNum.Move(1, v.Buf)
 			screenX++
+			colN++
 		}
 		// Here we are at a newline
 

@@ -472,6 +472,7 @@ func Match(v *View) SyntaxMatches {
 					for _, value := range indicies {
 						start := runePos(value[0], line)
 						end := runePos(value[1], line)
+						// messenger.Message(start, " ", end)
 						for i := start; i < end; i++ {
 							matches[lineN][i] = rule.style
 						}
