@@ -121,7 +121,7 @@ func (l Loc) Move(n int, buf *Buffer) Loc {
 		return l
 	}
 	for i := 0; i < Abs(n); i++ {
-		return l.left(buf)
+		l = l.left(buf)
 	}
 	return l
 }
