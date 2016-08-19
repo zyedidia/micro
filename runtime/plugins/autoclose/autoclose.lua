@@ -61,13 +61,12 @@ function preInsertNewline()
                 v:InsertNewline(false)
                 v:InsertTab(false)
                 v.Buf:Insert(-v.Cursor.Loc, "\n" .. ws)
-                -- v:InsertNewline(false)
-                break
+                return false
             end
         end
     end
 
-    return false
+    return true
 end
 
 function preBackspace()
