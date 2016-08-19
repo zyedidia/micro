@@ -269,6 +269,7 @@ func main() {
 	L.SetGlobal("IsWordChar", luar.New(L, IsWordChar))
 	L.SetGlobal("HandleCommand", luar.New(L, HandleCommand))
 	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
+	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))

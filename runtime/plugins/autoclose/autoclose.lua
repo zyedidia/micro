@@ -43,25 +43,31 @@ function onRune(r)
     end
 end
 
-function onInsertNewline()
+function preInsertNewline()
     if not GetOption("autoclose") then
         return
     end
 
     local v = CurView()
     local curLine = v.Buf:Line(v.Cursor.Y)
-    local lastLine = v.Buf:Line(v.Cursor.Y-1)
-    local curRune = charAt(lastLine, #lastLine)
-    local nextRune = charAt(curLine, 1)
+    local curRune = charAt(curLine, v.Cursor.X)
+    local nextRune = charAt(curLine, v.Cursor.X+1)
+    local ws = GetLeadingWhitespace(curLine)
+    messenger:Message(curRune, " ", nextRune)
 
     for i = 1, #autoNewlinePairs do
         if curRune == charAt(autoNewlinePairs[i], 1) then
             if nextRune == charAt(autoNewlinePairs[i], 2) then
+                v:InsertNewline(false)
                 v:InsertTab(false)
-                v.Buf:Insert(-v.Cursor.Loc, "\n")
+                v.Buf:Insert(-v.Cursor.Loc, "\n" .. ws)
+                -- v:InsertNewline(false)
+                break
             end
         end
     end
+
+    return false
 end
 
 function preBackspace()

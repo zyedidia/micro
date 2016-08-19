@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	// "github.com/mitchellh/go-homedir"
 )
 
 // This file is meant (for now) for autocompletion in command mode, not
@@ -16,6 +17,12 @@ func FileComplete(input string) (string, []string) {
 	var files []os.FileInfo
 	var err error
 	if len(dirs) > 1 {
+		// home, _ := homedir.Dir()
+
+		// directories := strings.Join(dirs[:len(dirs)-1], "/")
+		// if strings.HasPrefix(directories, "~") {
+		// 	directories = strings.Replace(directories, "~", home)
+		// }
 		files, err = ioutil.ReadDir(strings.Join(dirs[:len(dirs)-1], "/"))
 	} else {
 		files, err = ioutil.ReadDir(".")
