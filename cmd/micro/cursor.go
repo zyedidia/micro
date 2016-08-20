@@ -167,14 +167,15 @@ func (c *Cursor) SelectTo(loc Loc) {
 
 // WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
-	c.Right()
 	for IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == Count(c.buf.Line(c.Y)) {
+			c.Right()
 			return
 		}
 		c.Right()
 	}
-	for !IsWhitespace(c.RuneUnder(c.X)) {
+	c.Right()
+	for IsWordChar(string(c.RuneUnder(c.X))) {
 		if c.X == Count(c.buf.Line(c.Y)) {
 			return
 		}
@@ -184,20 +185,20 @@ func (c *Cursor) WordRight() {
 
 // WordLeft moves the cursor one word to the left
 func (c *Cursor) WordLeft() {
-	c.Left()
 	for IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == 0 {
+			c.Left()
 			return
 		}
 		c.Left()
 	}
-	for !IsWhitespace(c.RuneUnder(c.X)) {
+	c.Left()
+	for IsWordChar(string(c.RuneUnder(c.X))) {
 		if c.X == 0 {
 			return
 		}
 		c.Left()
 	}
-	c.Right()
 }
 
 // RuneUnder returns the rune under the given x position
