@@ -5,6 +5,10 @@ if GetOption("gofmt") == nil then
     AddOption("gofmt", true)
 end
 
+if CurView().Buf.FileType == "Go" then
+	SetOption("tabstospaces", "off")
+end
+
 MakeCommand("goimports", "go.goimports", 0)
 MakeCommand("gofmt", "go.gofmt", 0)
 

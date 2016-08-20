@@ -172,7 +172,7 @@ func Set(args []string) {
 	option := strings.TrimSpace(args[0])
 	value := strings.TrimSpace(args[1])
 
-	SetOption(option, value)
+	SetOptionAndSettings(option, value)
 }
 
 // Bind creates a new keybinding

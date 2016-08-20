@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io/ioutil"
 	"os"
 	"reflect"
@@ -88,20 +89,17 @@ func DefaultSettings() map[string]interface{} {
 	}
 }
 
-// SetOption prompts the user to set an option and checks that the response is valid
-func SetOption(option, value string) {
-	filename := configDir + "/settings.json"
+// SetOption attempts to set the given option to the value
+func SetOption(option, value string) error {
 	if _, ok := settings[option]; !ok {
-		messenger.Error(option + " is not a valid option")
-		return
+		return errors.New("Invalid option")
 	}
 
 	kind := reflect.TypeOf(settings[option]).Kind()
 	if kind == reflect.Bool {
 		b, err := ParseBool(value)
 		if err != nil {
-			messenger.Error("Invalid value for " + option)
-			return
+			return errors.New("Invalid value")
 		}
 		settings[option] = b
 	} else if kind == reflect.String {
@@ -109,8 +107,7 @@ func SetOption(option, value string) {
 	} else if kind == reflect.Float64 {
 		i, err := strconv.Atoi(value)
 		if err != nil {
-			messenger.Error("Invalid value for " + option)
-			return
+			return errors.New("Invalid value")
 		}
 		settings[option] = float64(i)
 	}
@@ -138,7 +135,21 @@ func SetOption(option, value string) {
 		}
 	}
 
-	err := WriteSettings(filename)
+	return nil
+}
+
+// SetOptionAndSettings sets the given option and saves the option setting to the settings config file
+func SetOptionAndSettings(option, value string) {
+	filename := configDir + "/settings.json"
+
+	err := SetOption(option, value)
+
+	if err != nil {
+		messenger.Message(err.Error())
+		return
+	}
+
+	err = WriteSettings(filename)
 	if err != nil {
 		messenger.Error("Error writing to settings.json: " + err.Error())
 		return
