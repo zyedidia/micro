@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 )
 
@@ -252,11 +253,20 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 				m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
 				m.cursorx--
 			}
+		case tcell.KeyCtrlV:
+			clip, _ := clipboard.ReadAll()
+			m.response = Insert(m.response, m.cursorx, clip)
+			m.cursorx += Count(clip)
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++
 		}
 		history[m.historyNum] = m.response
+
+	case *tcell.EventPaste:
+		clip := e.Text()
+		m.response = Insert(m.response, m.cursorx, clip)
+		m.cursorx += Count(clip)
 	}
 }
 
