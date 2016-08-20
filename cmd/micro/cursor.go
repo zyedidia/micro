@@ -185,9 +185,9 @@ func (c *Cursor) WordRight() {
 
 // WordLeft moves the cursor one word to the left
 func (c *Cursor) WordLeft() {
+	c.Left()
 	for IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == 0 {
-			c.Left()
 			return
 		}
 		c.Left()
@@ -199,6 +199,7 @@ func (c *Cursor) WordLeft() {
 		}
 		c.Left()
 	}
+	c.Right()
 }
 
 // RuneUnder returns the rune under the given x position
