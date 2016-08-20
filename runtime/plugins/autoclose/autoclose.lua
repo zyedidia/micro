@@ -53,7 +53,6 @@ function preInsertNewline()
     local curRune = charAt(curLine, v.Cursor.X)
     local nextRune = charAt(curLine, v.Cursor.X+1)
     local ws = GetLeadingWhitespace(curLine)
-    messenger:Message(curRune, " ", nextRune)
 
     for i = 1, #autoNewlinePairs do
         if curRune == charAt(autoNewlinePairs[i], 1) then

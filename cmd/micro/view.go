@@ -89,8 +89,8 @@ func NewView(buf *Buffer) *View {
 	return NewViewWidthHeight(buf, screenW, screenH-1)
 }
 
-// NewViewWidthHeight returns a new view with the specified width and height percentages
-// Note that w and h are percentages not actual values
+// NewViewWidthHeight returns a new view with the specified width and height
+// Note that w and h are raw column and row values
 func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	v := new(View)
 

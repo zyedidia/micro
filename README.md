@@ -5,7 +5,7 @@
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 
-> Micro is very much a work in progress
+> Micro is still a work in progress
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
 of modern terminals. It comes as one single, batteries-included, static binary with no dependencies, and you can download and use it right now.
@@ -20,13 +20,17 @@ Here is a picture of micro editing its source code.
 * No dependencies or external files are needed -- just the binary you can download further down the page
 * Common keybindings (ctrl-s, ctrl-c, ctrl-v, ctrl-z...)
     * Keybindings can be rebound to your liking
+* Sane defaults
+    * You shouldn't have to configure much out of the box (and it is extremely easy to configure)
 * Extremely good mouse support
+    * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
 * Cross platform (It should work on all the platforms Go runs on)
 * Plugin system (plugins are written in Lua)
+* Automatic linting and error notifications
 * Syntax highlighting (for over [75 languages](runtime/syntax)!)
 * Colorscheme support
+    * By default, micro comes with 16, 256, and true color themes.
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
-* Sane defaults
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
@@ -34,26 +38,29 @@ Here is a picture of micro editing its source code.
 
 # Installation
 
-This section gives instructions for how to simply install micro using the prebuilt binaries, or building from source.
+To install micro, you can download a prebuilt binary, or you can build it from source.
 
 You can also install micro with a few package managers (on OSX, Arch Linux, and CRUX). 
-See the [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details.
+See this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details.
+
+Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
+means that micro is restricted to the platforms tcell supports. As a result, micro does not support
+Plan9, NaCl, and Cygwin (although this may change in the future).
 
 ### Prebuilt binaries
 
-To easily install micro on any of the operating systems listed below, just download the tar file, 
-extract it, and run the binary inside. It's as simple as that!
+All you need to install micro is one file, the binary itself. It's as simple as that!
+
+You can download the correct binary for your operating system from the list in the [nightly build release](https://github.com/zyedidia/micro/releases/tag/nightly).
 
 Micro has no released version, instead these binaries are compiled every night and you can find the
-commit it was compiled with by running `micro -version`.
+commit they were compiled with by running `micro -version`.
 
-[You can find the binaries in the nightly build release](https://github.com/zyedidia/micro/releases/tag/nightly)
-
-To run the micro binary just run `./micro` (you probably want to place the binary on your `$PATH` for ease of use).
+If your operating system does not have binary, but does run Go, you can build from source.
 
 ### Building from source
 
-Make sure that you have Go version 1.4 or greater.
+Make sure that you have Go version 1.5 or greater (Go 1.4 will work for the systems like support CGO then).
 
 ```sh
 go get -u github.com/zyedidia/micro/...
@@ -83,17 +90,14 @@ ifconfig | micro
 
 You can move the cursor around with the arrow keys and mouse.
 
-You can also use the mouse to manipulate the text. Simply clicking and dragging will select text. You can also double click
-to enable word selection, and triple click to enable line selection.
+You can also use the mouse to manipulate the text. Simply clicking and dragging
+will select text. You can also double click to enable word selection, and triple
+click to enable line selection.
 
-You can run `$ micro -version` to get the version number. Since there is no release, this just gives you the
-commit hash. The version is unknown if you built with `go get`, instead use `make install` or `make` to get a binary
-with a version number defined.
+### Documentation and Help
 
-### Help text
-
-See the [help text](./runtime/help/help.md) for information about keybindings, editor commands, colorschemes and
-configuration options.
+Micro has a built-in help system which you can access by pressing `CtrlE` and typing `help`. Additionally, you can
+view the help files online [here](https://github.com/zyedidia/micro/tree/master/runtime/help).
 
 # Contributing
 
