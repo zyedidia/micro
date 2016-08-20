@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"io/ioutil"
+	"os"
 	"strings"
 
 	"github.com/layeh/gopher-luar"
@@ -129,6 +130,12 @@ func LoadPlugins() {
 			}
 
 			loadedPlugins = append(loadedPlugins, pluginName)
+		}
+	}
+
+	if _, err := os.Stat(configDir + "/init.lua"); err == nil {
+		if err := L.DoFile(configDir + "/init.lua"); err != nil {
+			TermMessage(err)
 		}
 	}
 }
