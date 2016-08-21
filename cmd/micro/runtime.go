@@ -3,6 +3,7 @@
 // runtime/README.md
 // runtime/colorschemes/atom-dark-tc.micro
 // runtime/colorschemes/default.micro
+// runtime/colorschemes/gruvbox.micro
 // runtime/colorschemes/monokai.micro
 // runtime/colorschemes/solarized-tc.micro
 // runtime/colorschemes/solarized.micro
@@ -227,6 +228,26 @@ func runtimeColorschemesDefaultMicro() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "runtime/colorschemes/default.micro", size: 477, mode: os.FileMode(420), modTime: time.Unix(1471461104, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _runtimeColorschemesGruvboxMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x74\x90\xc1\x6a\x86\x40\x0c\x84\xef\x7d\x8a\x90\xf3\x6f\xe9\x46\x45\xfa\x38\xfe\x6e\x2c\x4b\xd7\x44\xb2\xf1\xd0\xb7\x2f\x8b\x50\x2a\xeb\x7f\x0b\x7c\x93\x64\x66\x16\xcd\x6a\x5d\x4e\xf2\x0d\x91\xd7\xf9\xc8\x0e\x48\xd4\x3f\xa8\x1f\xf1\xed\x1f\x5c\x74\xdb\x58\x2a\x1c\xee\xa0\x14\x9f\x2b\x0d\xd3\xf8\x92\xbe\x17\xb7\x24\x5f\x80\x61\xa0\x46\x94\x22\x8b\xa7\x35\xb1\x01\x86\x8f\xcf\x86\x17\x9f\x9d\x4f\x07\x81\x86\x06\xef\xc6\xbb\xe9\x02\x38\xb5\xa7\xfd\x67\x67\x40\x0a\xed\x56\xd9\x79\x49\x73\xae\xb6\xdb\xb5\x43\x22\x5b\x4e\xc2\x11\xf0\x6f\x86\x3b\x6f\x6c\xa6\x06\x48\xfd\xf8\x08\x34\x5c\x7f\x6b\x54\xc0\xa7\xe6\x08\x77\xad\xd6\x93\x9d\x1c\xdb\xb3\xc6\x3e\x9b\x9d\xae\xdd\x1d\x66\x2c\xde\x5d\x84\xa7\xdb\x46\x58\xce\xb9\x66\xad\xf0\x37\x00\x00\xff\xff\xa7\x0e\xc1\xad\xda\x01\x00\x00")
+
+func runtimeColorschemesGruvboxMicroBytes() ([]byte, error) {
+	return bindataRead(
+		_runtimeColorschemesGruvboxMicro,
+		"runtime/colorschemes/gruvbox.micro",
+	)
+}
+
+func runtimeColorschemesGruvboxMicro() (*asset, error) {
+	bytes, err := runtimeColorschemesGruvboxMicroBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "runtime/colorschemes/gruvbox.micro", size: 474, mode: os.FileMode(420), modTime: time.Unix(1471813912, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2306,6 +2327,7 @@ var _bindata = map[string]func() (*asset, error){
 	"runtime/README.md": runtimeReadmeMd,
 	"runtime/colorschemes/atom-dark-tc.micro": runtimeColorschemesAtomDarkTcMicro,
 	"runtime/colorschemes/default.micro": runtimeColorschemesDefaultMicro,
+	"runtime/colorschemes/gruvbox.micro": runtimeColorschemesGruvboxMicro,
 	"runtime/colorschemes/monokai.micro": runtimeColorschemesMonokaiMicro,
 	"runtime/colorschemes/solarized-tc.micro": runtimeColorschemesSolarizedTcMicro,
 	"runtime/colorschemes/solarized.micro": runtimeColorschemesSolarizedMicro,
@@ -2454,6 +2476,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"colorschemes": &bintree{nil, map[string]*bintree{
 			"atom-dark-tc.micro": &bintree{runtimeColorschemesAtomDarkTcMicro, map[string]*bintree{}},
 			"default.micro": &bintree{runtimeColorschemesDefaultMicro, map[string]*bintree{}},
+			"gruvbox.micro": &bintree{runtimeColorschemesGruvboxMicro, map[string]*bintree{}},
 			"monokai.micro": &bintree{runtimeColorschemesMonokaiMicro, map[string]*bintree{}},
 			"solarized-tc.micro": &bintree{runtimeColorschemesSolarizedTcMicro, map[string]*bintree{}},
 			"solarized.micro": &bintree{runtimeColorschemesSolarizedMicro, map[string]*bintree{}},

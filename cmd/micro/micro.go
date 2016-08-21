@@ -289,6 +289,8 @@ func main() {
 	}()
 
 	for {
+		// Display everything
+		RedrawAll()
 
 		var event tcell.Event
 
@@ -341,8 +343,5 @@ func main() {
 			// Send it to the view
 			CurView().HandleEvent(event)
 		}
-
-		// Display everything
-		RedrawAll()
 	}
 }
