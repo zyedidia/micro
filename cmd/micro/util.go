@@ -112,6 +112,17 @@ func IsSpaces(str string) bool {
 	return true
 }
 
+// IsSpacesOrTabs checks if a given string contains only spaces and tabs
+func IsSpacesOrTabs(str string) bool {
+	for _, c := range str {
+		if c != ' ' && c != '\t' {
+			return false
+		}
+	}
+
+	return true
+}
+
 // ParseBool is almost exactly like strconv.ParseBool, except it also accepts 'on' and 'off'
 // as 'true' and 'false' respectively
 func ParseBool(str string) (bool, error) {

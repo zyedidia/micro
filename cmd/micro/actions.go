@@ -428,6 +428,11 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 		for i := 0; i < len(ws); i++ {
 			v.Cursor.Right()
 		}
+
+		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) {
+			line := v.Buf.Line(v.Cursor.Y - 1)
+			v.Buf.Remove(Loc{0, v.Cursor.Y - 1}, Loc{Count(line), v.Cursor.Y - 1})
+		}
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 
