@@ -573,7 +573,7 @@ func (v *View) DisplayView() {
 						screenX++
 						v.drawCell(screenX, screenY, '>', nil, gutterStyle)
 						screenX++
-						if v.Cursor.Y == curLineN {
+						if v.Cursor.Y == curLineN && !messenger.hasPrompt {
 							messenger.Message(msg.msg)
 							messenger.gutterMessage = true
 						}
