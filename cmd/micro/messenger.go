@@ -299,7 +299,7 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 		screen.SetContent(x, y, ' ', nil, statusLineStyle)
 	}
 
-	x := 1
+	x := 0
 	for _, suggestion := range suggestions {
 		for _, c := range suggestion {
 			screen.SetContent(x, y, c, nil, statusLineStyle)
