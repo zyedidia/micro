@@ -921,11 +921,14 @@ func (v *View) Paste(usePlugin bool) bool {
 		return false
 	}
 
+	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
 	clip, _ := clipboard.ReadAll()
+	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
 	v.Buf.Insert(v.Cursor.Loc, clip)
 	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
 	v.freshClip = false

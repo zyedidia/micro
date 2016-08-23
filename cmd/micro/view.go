@@ -337,14 +337,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 	case *tcell.EventPaste:
-		if v.Cursor.HasSelection() {
-			v.Cursor.DeleteSelection()
-			v.Cursor.ResetSelection()
-		}
-		clip := e.Text()
-		v.Buf.Insert(v.Cursor.Loc, clip)
-		v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
-		v.freshClip = false
+		relocate = v.Paste(true)
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
