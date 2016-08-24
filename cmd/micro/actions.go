@@ -447,7 +447,7 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 	ws := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
 	v.Cursor.Right()
 
-	if settings["autoindent"].(bool) {
+	if v.Buf.Settings["autoindent"].(bool) {
 		v.Buf.Insert(v.Cursor.Loc, ws)
 		for i := 0; i < len(ws); i++ {
 			v.Cursor.Right()
@@ -487,8 +487,8 @@ func (v *View) Backspace(usePlugin bool) bool {
 		// whitespace at the start of the line, we should delete as if its a
 		// tab (tabSize number of spaces)
 		lineStart := v.Buf.Line(v.Cursor.Y)[:v.Cursor.X]
-		tabSize := int(settings["tabsize"].(float64))
-		if settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
+		tabSize := int(v.Buf.Settings["tabsize"].(float64))
+		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc
 			v.Cursor.Loc = loc.Move(-tabSize, v.Buf)
 			cx, cy := v.Cursor.X, v.Cursor.Y
@@ -581,8 +581,8 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
 		for i := start; i <= end; i++ {
-			if settings["tabstospaces"].(bool) {
-				tabsize := int(settings["tabsize"].(float64))
+			if v.Buf.Settings["tabstospaces"].(bool) {
+				tabsize := int(v.Buf.Settings["tabsize"].(float64))
 				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
@@ -626,8 +626,8 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
 		for i := start; i <= end; i++ {
 			if len(GetLeadingWhitespace(v.Buf.Line(i))) > 0 {
-				if settings["tabstospaces"].(bool) {
-					tabsize := int(settings["tabsize"].(float64))
+				if v.Buf.Settings["tabstospaces"].(bool) {
+					tabsize := int(v.Buf.Settings["tabsize"].(float64))
 					for j := 0; j < tabsize; j++ {
 						if len(GetLeadingWhitespace(v.Buf.Line(i))) == 0 {
 							break
@@ -675,8 +675,8 @@ func (v *View) InsertTab(usePlugin bool) bool {
 		return false
 	}
 	// Insert a tab
-	if settings["tabstospaces"].(bool) {
-		tabSize := int(settings["tabsize"].(float64))
+	if v.Buf.Settings["tabstospaces"].(bool) {
+		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		v.Buf.Insert(v.Cursor.Loc, Spaces(tabSize))
 		for i := 0; i < tabSize; i++ {
 			v.Cursor.Right()
@@ -1162,11 +1162,11 @@ func (v *View) ToggleRuler(usePlugin bool) bool {
 		return false
 	}
 
-	if settings["ruler"] == false {
-		settings["ruler"] = true
+	if v.Buf.Settings["ruler"] == false {
+		v.Buf.Settings["ruler"] = true
 		messenger.Message("Enabled ruler")
 	} else {
-		settings["ruler"] = false
+		v.Buf.Settings["ruler"] = false
 		messenger.Message("Disabled ruler")
 	}
 

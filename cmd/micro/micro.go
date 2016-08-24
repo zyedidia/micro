@@ -248,6 +248,14 @@ func main() {
 		tab := NewTabFromView(NewView(buf))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.Center(false)
+				if globalSettings["syntax"].(bool) {
+					v.matches = Match(v)
+				}
+			}
+		}
 	}
 
 	// Load all the plugin stuff
@@ -258,7 +266,7 @@ func main() {
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
 	L.SetGlobal("AddOption", luar.New(L, AddOption))
-	L.SetGlobal("SetOption", luar.New(L, SetOption))
+	L.SetGlobal("SetOption", luar.New(L, SetGlobalOption))
 	L.SetGlobal("BindKey", luar.New(L, BindKey))
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 	L.SetGlobal("CurView", luar.New(L, CurView))
@@ -283,7 +291,7 @@ func main() {
 			if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 				TermMessage(err)
 			}
-			if settings["syntax"].(bool) {
+			if v.Buf.Settings["syntax"].(bool) {
 				v.matches = Match(v)
 			}
 		}

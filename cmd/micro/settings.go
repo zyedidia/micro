@@ -10,7 +10,7 @@ import (
 )
 
 // The options that the user can set
-var settings map[string]interface{}
+var globalSettings map[string]interface{}
 
 // InitSettings initializes the options map and sets all options to their default values
 func InitSettings() {
@@ -31,12 +31,12 @@ func InitSettings() {
 		}
 	}
 
-	settings = make(map[string]interface{})
+	globalSettings = make(map[string]interface{})
 	for k, v := range defaults {
-		settings[k] = v
+		globalSettings[k] = v
 	}
 	for k, v := range parsed {
-		settings[k] = v
+		globalSettings[k] = v
 	}
 
 	err := WriteSettings(filename)
@@ -49,7 +49,7 @@ func InitSettings() {
 func WriteSettings(filename string) error {
 	var err error
 	if _, e := os.Stat(configDir); e == nil {
-		txt, _ := json.MarshalIndent(settings, "", "    ")
+		txt, _ := json.MarshalIndent(globalSettings, "", "    ")
 		err = ioutil.WriteFile(filename, txt, 0644)
 	}
 	return err
@@ -57,7 +57,7 @@ func WriteSettings(filename string) error {
 
 // AddOption creates a new option. This is meant to be called by plugins to add options.
 func AddOption(name string, value interface{}) {
-	settings[name] = value
+	globalSettings[name] = value
 	err := WriteSettings(configDir + "/settings.json")
 	if err != nil {
 		TermMessage("Error writing settings.json file: " + err.Error())
@@ -65,8 +65,19 @@ func AddOption(name string, value interface{}) {
 }
 
 // GetOption returns the specified option. This is meant to be called by plugins to add options.
+func GetGlobalOption(name string) interface{} {
+	return globalSettings[name]
+}
+
+func GetLocalOption(name string, buf *Buffer) interface{} {
+	return buf.Settings[name]
+}
+
 func GetOption(name string) interface{} {
-	return settings[name]
+	if GetLocalOption(name, CurView().Buf) != nil {
+		return GetLocalOption(name, CurView().Buf)
+	}
+	return GetGlobalOption(name)
 }
 
 // DefaultSettings returns the default settings for micro
@@ -90,48 +101,72 @@ func DefaultSettings() map[string]interface{} {
 }
 
 // SetOption attempts to set the given option to the value
-func SetOption(option, value string) error {
-	if _, ok := settings[option]; !ok {
+func SetGlobalOption(option, value string) error {
+	if _, ok := globalSettings[option]; !ok {
 		return errors.New("Invalid option")
 	}
 
-	kind := reflect.TypeOf(settings[option]).Kind()
+	kind := reflect.TypeOf(globalSettings[option]).Kind()
 	if kind == reflect.Bool {
 		b, err := ParseBool(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		settings[option] = b
+		globalSettings[option] = b
 	} else if kind == reflect.String {
-		settings[option] = value
+		globalSettings[option] = value
 	} else if kind == reflect.Float64 {
 		i, err := strconv.Atoi(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		settings[option] = float64(i)
+		globalSettings[option] = float64(i)
+	}
+
+	for _, tab := range tabs {
+		for _, view := range tab.views {
+			SetLocalOption(option, value, view)
+		}
+	}
+
+	return nil
+}
+
+func SetLocalOption(option, value string, view *View) error {
+	buf := view.Buf
+	if _, ok := buf.Settings[option]; !ok {
+		return errors.New("Invalid option")
+	}
+
+	kind := reflect.TypeOf(buf.Settings[option]).Kind()
+	if kind == reflect.Bool {
+		b, err := ParseBool(value)
+		if err != nil {
+			return errors.New("Invalid value")
+		}
+		buf.Settings[option] = b
+	} else if kind == reflect.String {
+		buf.Settings[option] = value
+	} else if kind == reflect.Float64 {
+		i, err := strconv.Atoi(value)
+		if err != nil {
+			return errors.New("Invalid value")
+		}
+		buf.Settings[option] = float64(i)
 	}
 
 	if option == "colorscheme" {
 		LoadSyntaxFiles()
-		for _, tab := range tabs {
-			for _, view := range tab.views {
-				view.Buf.UpdateRules()
-				if settings["syntax"].(bool) {
-					view.matches = Match(view)
-				}
-			}
+		buf.UpdateRules()
+		if buf.Settings["syntax"].(bool) {
+			view.matches = Match(view)
 		}
 	}
 
 	if option == "statusline" {
-		for _, tab := range tabs {
-			for _, view := range tab.views {
-				view.ToggleStatusLine()
-				if settings["syntax"].(bool) {
-					view.matches = Match(view)
-				}
-			}
+		view.ToggleStatusLine()
+		if buf.Settings["syntax"].(bool) {
+			view.matches = Match(view)
 		}
 	}
 
@@ -142,7 +177,7 @@ func SetOption(option, value string) error {
 func SetOptionAndSettings(option, value string) {
 	filename := configDir + "/settings.json"
 
-	err := SetOption(option, value)
+	err := SetGlobalOption(option, value)
 
 	if err != nil {
 		messenger.Message(err.Error())

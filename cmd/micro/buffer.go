@@ -41,6 +41,9 @@ type Buffer struct {
 	rules []SyntaxRule
 	// The buffer's filetype
 	FileType string
+
+	// Buffer local settings
+	Settings map[string]interface{}
 }
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -55,6 +58,11 @@ type SerializedBuffer struct {
 func NewBuffer(txt []byte, path string) *Buffer {
 	b := new(Buffer)
 	b.LineArray = NewLineArray(txt)
+
+	b.Settings = make(map[string]interface{})
+	for k, v := range globalSettings {
+		b.Settings[k] = v
+	}
 
 	b.Path = path
 	b.Name = path
@@ -85,7 +93,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 		buf: b,
 	}
 
-	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
+	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		absPath, _ := filepath.Abs(b.Path)
@@ -98,13 +106,13 @@ func NewBuffer(txt []byte, path string) *Buffer {
 			if err != nil {
 				TermMessage(err.Error(), "\n", "You may want to remove the files in ~/.config/micro/buffers (these files store the information for the 'saveundo' and 'savecursor' options) if this problem persists.")
 			}
-			if settings["savecursor"].(bool) {
+			if b.Settings["savecursor"].(bool) {
 				b.Cursor = buffer.Cursor
 				b.Cursor.buf = b
 				b.Cursor.Relocate()
 			}
 
-			if settings["saveundo"].(bool) {
+			if b.Settings["saveundo"].(bool) {
 				// We should only use last time's eventhandler if the file wasn't by someone else in the meantime
 				if b.ModTime == buffer.ModTime {
 					b.EventHandler = buffer.EventHandler
@@ -184,7 +192,7 @@ func (b *Buffer) SaveWithSudo() error {
 
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
-	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
+	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		absPath, _ := filepath.Abs(b.Path)
 		file, err := os.Create(configDir + "/buffers/" + EscapePath(absPath))
 		if err == nil {

@@ -25,16 +25,17 @@ type StrCommand struct {
 var commands map[string]Command
 
 var commandActions = map[string]func([]string){
-	"Set":     Set,
-	"Run":     Run,
-	"Bind":    Bind,
-	"Quit":    Quit,
-	"Save":    Save,
-	"Replace": Replace,
-	"VSplit":  VSplit,
-	"HSplit":  HSplit,
-	"Tab":     NewTab,
-	"Help":    Help,
+	"Set":      Set,
+	"SetLocal": SetLocal,
+	"Run":      Run,
+	"Bind":     Bind,
+	"Quit":     Quit,
+	"Save":     Save,
+	"Replace":  Replace,
+	"VSplit":   VSplit,
+	"HSplit":   HSplit,
+	"Tab":      NewTab,
+	"Help":     Help,
 }
 
 // InitCommands initializes the default commands
@@ -67,16 +68,17 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":     StrCommand{"Set", []Completion{OptionCompletion, NoCompletion}},
-		"bind":    StrCommand{"Bind", []Completion{NoCompletion}},
-		"run":     StrCommand{"Run", []Completion{NoCompletion}},
-		"quit":    StrCommand{"Quit", []Completion{NoCompletion}},
-		"save":    StrCommand{"Save", []Completion{NoCompletion}},
-		"replace": StrCommand{"Replace", []Completion{NoCompletion}},
-		"vsplit":  StrCommand{"VSplit", []Completion{FileCompletion, NoCompletion}},
-		"hsplit":  StrCommand{"HSplit", []Completion{FileCompletion, NoCompletion}},
-		"tab":     StrCommand{"Tab", []Completion{FileCompletion, NoCompletion}},
-		"help":    StrCommand{"Help", []Completion{HelpCompletion, NoCompletion}},
+		"set":      StrCommand{"Set", []Completion{OptionCompletion, NoCompletion}},
+		"setlocal": StrCommand{"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"bind":     StrCommand{"Bind", []Completion{NoCompletion}},
+		"run":      StrCommand{"Run", []Completion{NoCompletion}},
+		"quit":     StrCommand{"Quit", []Completion{NoCompletion}},
+		"save":     StrCommand{"Save", []Completion{NoCompletion}},
+		"replace":  StrCommand{"Replace", []Completion{NoCompletion}},
+		"vsplit":   StrCommand{"VSplit", []Completion{FileCompletion, NoCompletion}},
+		"hsplit":   StrCommand{"HSplit", []Completion{FileCompletion, NoCompletion}},
+		"tab":      StrCommand{"Tab", []Completion{FileCompletion, NoCompletion}},
+		"help":     StrCommand{"Help", []Completion{HelpCompletion, NoCompletion}},
 	}
 }
 
@@ -175,6 +177,17 @@ func Set(args []string) {
 	SetOptionAndSettings(option, value)
 }
 
+func SetLocal(args []string) {
+	if len(args) < 2 {
+		return
+	}
+
+	option := strings.TrimSpace(args[0])
+	value := strings.TrimSpace(args[1])
+
+	SetLocalOption(option, value, CurView())
+}
+
 // Bind creates a new keybinding
 func Bind(args []string) {
 	if len(args) != 2 {
@@ -259,7 +272,7 @@ func Replace(args []string) {
 			// The 'check' flag was used
 			Search(search, view, true)
 			view.Relocate()
-			if settings["syntax"].(bool) {
+			if view.Buf.Settings["syntax"].(bool) {
 				view.matches = Match(view)
 			}
 			RedrawAll()
