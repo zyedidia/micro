@@ -44,6 +44,25 @@ func PostActionCall(funcName string) bool {
 	return relocate
 }
 
+// Center centers the view on the cursor
+func (v *View) Center(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Center") {
+		return false
+	}
+
+	v.Topline = v.Cursor.Y - v.height/2
+	if v.Topline < 0 {
+		v.Topline = 0
+	} else if v.Topline+v.height > v.Buf.NumLines {
+		v.Topline = v.Buf.NumLines - v.height
+	}
+
+	if usePlugin {
+		return PostActionCall("Center")
+	}
+	return true
+}
+
 // CursorUp moves the cursor up
 func (v *View) CursorUp(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorUp") {

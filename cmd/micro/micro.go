@@ -249,7 +249,7 @@ func main() {
 		tabs = append(tabs, tab)
 		for _, t := range tabs {
 			for _, v := range t.views {
-				v.Relocate()
+				v.Center(false)
 				if settings["syntax"].(bool) {
 					v.matches = Match(v)
 				}

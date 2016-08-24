@@ -44,6 +44,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"Find":                (*View).Find,
 	"FindNext":            (*View).FindNext,
 	"FindPrevious":        (*View).FindPrevious,
+	"Center":              (*View).Center,
 	"Undo":                (*View).Undo,
 	"Redo":                (*View).Redo,
 	"Copy":                (*View).Copy,
