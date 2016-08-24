@@ -77,8 +77,6 @@ type View struct {
 
 	// Syntax highlighting matches
 	matches SyntaxMatches
-	// The matches from the last frame
-	lastMatches SyntaxMatches
 
 	splitNode *LeafNode
 }
