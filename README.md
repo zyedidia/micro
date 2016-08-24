@@ -94,7 +94,7 @@ You can also use the mouse to manipulate the text. Simply clicking and dragging
 will select text. You can also double click to enable word selection, and triple
 click to enable line selection.
 
-### Documentation and Help
+# Documentation and Help
 
 Micro has a built-in help system which you can access by pressing `CtrlE` and typing `help`. Additionally, you can
 view the help files online [here](https://github.com/zyedidia/micro/tree/master/runtime/help).
@@ -102,3 +102,5 @@ view the help files online [here](https://github.com/zyedidia/micro/tree/master/
 # Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
+
+You can use the Github issue tracker to report bugs, ask questions, or suggest new features.
