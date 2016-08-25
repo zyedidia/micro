@@ -66,11 +66,19 @@ func LuaFunctionBinding(function string) func(*View, bool) bool {
 	}
 }
 
+func unpack(old []string) []interface{} {
+	new := make([]interface{}, len(old))
+	for i, v := range old {
+		new[i] = v
+	}
+	return new
+}
+
 // LuaFunctionCommand is the same as LuaFunctionBinding except it returns a normal function
 // so that a command can be bound to a lua function
 func LuaFunctionCommand(function string) func([]string) {
 	return func(args []string) {
-		_, err := Call(function, args)
+		_, err := Call(function, unpack(args)...)
 		if err != nil {
 			TermMessage(err)
 		}
@@ -79,7 +87,7 @@ func LuaFunctionCommand(function string) func([]string) {
 
 func LuaFunctionJob(function string) func(string, ...string) {
 	return func(output string, args ...string) {
-		_, err := Call(function, append([]string{output}, args...))
+		_, err := Call(function, unpack(append([]string{output}, args...))...)
 		if err != nil {
 			TermMessage(err)
 		}

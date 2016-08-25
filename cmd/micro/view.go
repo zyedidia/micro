@@ -313,7 +313,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Cursor.Right()
 
 			for _, pl := range loadedPlugins {
-				_, err := Call(pl+".onRune", []string{string(e.Rune())})
+				_, err := Call(pl+".onRune", string(e.Rune()))
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
 				}
