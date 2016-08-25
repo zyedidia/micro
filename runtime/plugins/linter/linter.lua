@@ -30,7 +30,7 @@ function runLinter()
     end
 end
 
-function onSave()
+function onSave(view)
     if GetOption("linter") then
         runLinter()
     else

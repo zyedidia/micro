@@ -9,13 +9,12 @@ MakeCommand("goimports", "go.goimports", 0)
 MakeCommand("gofmt", "go.gofmt", 0)
 
 function onViewOpen(view)
-    -- messenger:Message("HI")
     if view.Buf:FileType() == "go" then
         SetLocalOption("tabstospaces", "off", view)
     end
 end
 
-function onSave()
+function onSave(view)
     if CurView().Buf:FileType() == "go" then
         if GetOption("goimports") then
             goimports()
