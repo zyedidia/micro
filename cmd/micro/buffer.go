@@ -39,8 +39,6 @@ type Buffer struct {
 
 	// Syntax highlighting rules
 	rules []SyntaxRule
-	// The buffer's filetype
-	FileType string
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -78,6 +76,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	b.EventHandler = NewEventHandler(b)
 
 	b.Update()
+	b.FindFileType()
 	b.UpdateRules()
 
 	if _, err := os.Stat(configDir + "/buffers/"); os.IsNotExist(err) {
@@ -134,7 +133,17 @@ func NewBuffer(txt []byte, path string) *Buffer {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.rules, b.FileType = GetRules(b)
+	b.rules = GetRules(b)
+}
+
+// FindFileType identifies this buffer's filetype based on the extension or header
+func (b *Buffer) FindFileType() {
+	b.Settings["filetype"] = FindFileType(b)
+}
+
+// FileType returns the buffer's filetype
+func (b *Buffer) FileType() string {
+	return b.Settings["filetype"].(string)
 }
 
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
