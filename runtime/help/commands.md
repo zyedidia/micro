@@ -15,8 +15,11 @@ Here are the possible commands that you can use.
    Note that `search` must be a valid regex.  If one of the arguments
    does not have any spaces in it, you may omit the quotes.
 
-* `set option value`: sets the option to value. Please see the next section for
-   a list of options you can set.
+* `set option value`: sets the option to value. See the `options` help topic
+   for a list of options you can set.
+
+* `setlocal option value`: sets the option to value locally (only in the current
+   buffer).
 
 * `run sh-command`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.

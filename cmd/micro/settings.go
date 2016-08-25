@@ -64,15 +64,19 @@ func AddOption(name string, value interface{}) {
 	}
 }
 
-// GetOption returns the specified option. This is meant to be called by plugins to add options.
+// GetGlobalOption returns the global value of the given option
 func GetGlobalOption(name string) interface{} {
 	return globalSettings[name]
 }
 
+// GetLocalOption returns the local value of the given option
 func GetLocalOption(name string, buf *Buffer) interface{} {
 	return buf.Settings[name]
 }
 
+// GetOption returns the value of the given option
+// If there is a local version of the option, it returns that
+// otherwise it will return the global version
 func GetOption(name string) interface{} {
 	if GetLocalOption(name, CurView().Buf) != nil {
 		return GetLocalOption(name, CurView().Buf)
@@ -81,6 +85,7 @@ func GetOption(name string) interface{} {
 }
 
 // DefaultSettings returns the default settings for micro
+// Note that colorscheme is a global only option
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
@@ -100,6 +105,8 @@ func DefaultGlobalSettings() map[string]interface{} {
 	}
 }
 
+// DefaultLocalSettings returns the default local settings
+// Note that filetype is a local only option
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
@@ -172,6 +179,7 @@ func SetOption(option, value string) error {
 	return nil
 }
 
+// SetLocalOption sets the local version of this option
 func SetLocalOption(option, value string, view *View) error {
 	buf := view.Buf
 	if _, ok := buf.Settings[option]; !ok {

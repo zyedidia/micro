@@ -10,6 +10,7 @@ Here are the options that you can set:
 
 * `colorscheme`: loads the colorscheme stored in 
    $(configDir)/colorschemes/`option`.micro
+   This setting is `global only`.
 
 	default value: `default`
 	Note that the default colorschemes (default, solarized, and solarized-tc)
@@ -42,6 +43,10 @@ Here are the options that you can set:
 * `indentchar`: sets the indentation character
 
 	default value: ` `
+
+* `filetype`: sets the filetype for the current buffer. This setting is `local only`
+
+    default value: this will be automatically set depending on the file you have open
 
 * `ignorecase`: perform case-insensitive searches
 
@@ -116,3 +121,13 @@ Any option you set in the editor will be saved to the file
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
+
+# Global and local settings
+
+You can set these settings either globally or locally. Locally means that the setting
+won't be saved to `~/.config/micro/settings.json` and that it will only be set in
+the current buffer. Setting an option globally is the default, and will set the option
+in all buffers.
+
+The `colorscheme` option is global only, and the `filetype` option is local only. To
+set an option locally, use `setlocal` instead of `set`.
