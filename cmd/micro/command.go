@@ -185,7 +185,10 @@ func SetLocal(args []string) {
 	option := strings.TrimSpace(args[0])
 	value := strings.TrimSpace(args[1])
 
-	SetLocalOption(option, value, CurView())
+	err := SetLocalOption(option, value, CurView())
+	if err != nil {
+		messenger.Error(err.Error())
+	}
 }
 
 // Bind creates a new keybinding

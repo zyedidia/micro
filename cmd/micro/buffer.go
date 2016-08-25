@@ -57,9 +57,11 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	b := new(Buffer)
 	b.LineArray = NewLineArray(txt)
 
-	b.Settings = make(map[string]interface{})
+	b.Settings = DefaultLocalSettings()
 	for k, v := range globalSettings {
-		b.Settings[k] = v
+		if _, ok := b.Settings[k]; ok {
+			b.Settings[k] = v
+		}
 	}
 
 	b.Path = path

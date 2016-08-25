@@ -14,7 +14,7 @@ var globalSettings map[string]interface{}
 
 // InitSettings initializes the options map and sets all options to their default values
 func InitSettings() {
-	defaults := DefaultSettings()
+	defaults := DefaultGlobalSettings()
 	var parsed map[string]interface{}
 
 	filename := configDir + "/settings.json"
@@ -81,10 +81,28 @@ func GetOption(name string) interface{} {
 }
 
 // DefaultSettings returns the default settings for micro
-func DefaultSettings() map[string]interface{} {
+func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
 		"colorscheme":  "monokai",
+		"cursorline":   false,
+		"ignorecase":   false,
+		"indentchar":   " ",
+		"ruler":        true,
+		"savecursor":   false,
+		"saveundo":     false,
+		"scrollspeed":  float64(2),
+		"scrollmargin": float64(3),
+		"statusline":   true,
+		"syntax":       true,
+		"tabsize":      float64(4),
+		"tabstospaces": false,
+	}
+}
+
+func DefaultLocalSettings() map[string]interface{} {
+	return map[string]interface{}{
+		"autoindent":   true,
 		"cursorline":   false,
 		"filetype":     "Unknown",
 		"ignorecase":   false,
@@ -102,9 +120,16 @@ func DefaultSettings() map[string]interface{} {
 }
 
 // SetOption attempts to set the given option to the value
-func SetGlobalOption(option, value string) error {
+// By default it will set the option as global, but if the option
+// is local only it will set the local version
+// Use setlocal to force an option to be set locally
+func SetOption(option, value string) error {
 	if _, ok := globalSettings[option]; !ok {
-		return errors.New("Invalid option")
+		if _, ok := CurView().Buf.Settings[option]; !ok {
+			return errors.New("Invalid option")
+		}
+		SetLocalOption(option, value, CurView())
+		return nil
 	}
 
 	kind := reflect.TypeOf(globalSettings[option]).Kind()
@@ -124,9 +149,23 @@ func SetGlobalOption(option, value string) error {
 		globalSettings[option] = float64(i)
 	}
 
-	for _, tab := range tabs {
-		for _, view := range tab.views {
-			SetLocalOption(option, value, view)
+	if option == "colorscheme" {
+		LoadSyntaxFiles()
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				view.Buf.UpdateRules()
+				if view.Buf.Settings["syntax"].(bool) {
+					view.matches = Match(view)
+				}
+			}
+		}
+	}
+
+	if _, ok := CurView().Buf.Settings[option]; ok {
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				SetLocalOption(option, value, view)
+			}
 		}
 	}
 
@@ -156,16 +195,16 @@ func SetLocalOption(option, value string, view *View) error {
 		buf.Settings[option] = float64(i)
 	}
 
-	if option == "colorscheme" {
-		LoadSyntaxFiles()
-		buf.UpdateRules()
+	if option == "statusline" {
+		view.ToggleStatusLine()
 		if buf.Settings["syntax"].(bool) {
 			view.matches = Match(view)
 		}
 	}
 
-	if option == "statusline" {
-		view.ToggleStatusLine()
+	if option == "filetype" {
+		LoadSyntaxFiles()
+		buf.UpdateRules()
 		if buf.Settings["syntax"].(bool) {
 			view.matches = Match(view)
 		}
@@ -178,10 +217,10 @@ func SetLocalOption(option, value string, view *View) error {
 func SetOptionAndSettings(option, value string) {
 	filename := configDir + "/settings.json"
 
-	err := SetGlobalOption(option, value)
+	err := SetOption(option, value)
 
 	if err != nil {
-		messenger.Message(err.Error())
+		messenger.Error(err.Error())
 		return
 	}
 
