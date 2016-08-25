@@ -5,15 +5,18 @@ if GetOption("gofmt") == nil then
     AddOption("gofmt", true)
 end
 
-if CurView().Buf.FileType == "go" then
-	SetOption("tabstospaces", "off")
-end
-
 MakeCommand("goimports", "go.goimports", 0)
 MakeCommand("gofmt", "go.gofmt", 0)
 
+function onViewOpen(view)
+    -- messenger:Message("HI")
+    if view.Buf:FileType() == "go" then
+        SetLocalOption("tabstospaces", "off", view)
+    end
+end
+
 function onSave()
-    if CurView().Buf.FileType == "go" then
+    if CurView().Buf:FileType() == "go" then
         if GetOption("goimports") then
             goimports()
         elseif GetOption("gofmt") then

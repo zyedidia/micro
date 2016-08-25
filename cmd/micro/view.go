@@ -111,6 +111,14 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		v.height--
 	}
 
+	for _, pl := range loadedPlugins {
+		_, err := Call(pl+".onViewOpen", v)
+		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+			TermMessage(err)
+			continue
+		}
+	}
+
 	return v
 }
 

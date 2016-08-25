@@ -267,6 +267,7 @@ func main() {
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
 	L.SetGlobal("AddOption", luar.New(L, AddOption))
 	L.SetGlobal("SetOption", luar.New(L, SetOption))
+	L.SetGlobal("SetLocalOption", luar.New(L, SetLocalOption))
 	L.SetGlobal("BindKey", luar.New(L, BindKey))
 	L.SetGlobal("MakeCommand", luar.New(L, MakeCommand))
 	L.SetGlobal("CurView", luar.New(L, CurView))
@@ -287,9 +288,12 @@ func main() {
 
 	for _, t := range tabs {
 		for _, v := range t.views {
-			_, err := Call("onBufferOpen", v.Buf)
-			if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-				TermMessage(err)
+			for _, pl := range loadedPlugins {
+				_, err := Call(pl+".onViewOpen", v)
+				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+					TermMessage(err)
+					continue
+				}
 			}
 			if v.Buf.Settings["syntax"].(bool) {
 				v.matches = Match(v)

@@ -6,7 +6,7 @@ MakeCommand("lint", "linter.runLinter", 0)
 
 function runLinter()
     CurView():Save(false)
-    local ft = CurView().Buf.FileType
+    local ft = CurView().Buf:FileType()
     local file = CurView().Buf.Path
     local devnull = "/dev/null"
     if OS == "windows" then
