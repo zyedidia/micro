@@ -189,6 +189,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.leftCol = 0
 	v.Cursor.ResetSelection()
 	v.Relocate()
+	v.Center(false)
 	v.messages = make(map[string][]GutterMessage)
 
 	v.matches = Match(v)

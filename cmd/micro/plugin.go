@@ -21,7 +21,7 @@ var preInstalledPlugins = []string{
 // Call calls the lua function 'function'
 // If it does not exist nothing happens, if there is an error,
 // the error is returned
-func Call(function string, args []string) (lua.LValue, error) {
+func Call(function string, args ...interface{}) (lua.LValue, error) {
 	var luaFunc lua.LValue
 	if strings.Contains(function, ".") {
 		plugin := L.GetGlobal(strings.Split(function, ".")[0])

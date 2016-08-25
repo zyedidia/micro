@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -112,6 +113,11 @@ func NewBuffer(txt []byte, path string) *Buffer {
 			}
 		}
 		file.Close()
+	}
+
+	_, err := Call("onBufferOpen", b)
+	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+		TermMessage(err)
 	}
 
 	return b

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"runtime"
+	"strings"
 
 	"github.com/go-errors/errors"
 	"github.com/layeh/gopher-luar"
@@ -247,14 +248,6 @@ func main() {
 		tab := NewTabFromView(NewView(buf))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
-		for _, t := range tabs {
-			for _, v := range t.views {
-				v.Center(false)
-				if settings["syntax"].(bool) {
-					v.matches = Match(v)
-				}
-			}
-		}
 	}
 
 	// Load all the plugin stuff
@@ -283,6 +276,18 @@ func main() {
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event)
+
+	for _, t := range tabs {
+		for _, v := range t.views {
+			_, err := Call("onBufferOpen", v.Buf)
+			if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+				TermMessage(err)
+			}
+			if settings["syntax"].(bool) {
+				v.matches = Match(v)
+			}
+		}
+	}
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
