@@ -1,6 +1,6 @@
 ## Nano syntax highlighting for Puppet.
 ##
-syntax "Puppet" "\.pp$"
+syntax "puppet" "\.pp$"
 
 #This goes first, so the normal builtins will override in some classes
 ## Paramerers

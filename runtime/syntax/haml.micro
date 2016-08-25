@@ -1,4 +1,4 @@
-syntax "Haml" "\.haml$"
+syntax "haml" "\.haml$"
 
 color cyan   "-|="
 color white "->|=>"

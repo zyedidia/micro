@@ -1,4 +1,4 @@
-syntax "MPD" "mpd\.conf$"
+syntax "mpd" "mpd\.conf$"
 
 color cyan "\<(user|group|bind_to_address|host|port|plugin|name|type)\>"
 color cyan "\<((music|playlist)_directory|(db|log|state|pid|sticker)_file)\>"

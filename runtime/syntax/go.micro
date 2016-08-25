@@ -1,4 +1,4 @@
-syntax "Go" "\.go$"
+syntax "go" "\.go$"
 
 color statement "\b(append|cap|close|complex|copy|delete|imag|len)\b"
 color statement "\b(make|new|panic|print|println|protect|real|recover)\b"

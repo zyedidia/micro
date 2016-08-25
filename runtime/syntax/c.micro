@@ -1,6 +1,6 @@
 ## Here is an example for C/C++.
 ##
-syntax "C" "\.(c(c|pp|xx)?|C)$" "\.(h(h|pp|xx)?|H)$" "\.ii?$" "\.(def)$"
+syntax "c" "\.(c(c|pp|xx)?|C)$" "\.(h(h|pp|xx)?|H)$" "\.ii?$" "\.(def)$"
 color identifier "\b[A-Z_][0-9A-Z_]+\b" 
 color type "\b(float|double|bool|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline)\b"
 color type "\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\b"

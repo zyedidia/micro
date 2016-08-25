@@ -1,6 +1,6 @@
 ## Here is an example for Fortran 90/95
 
-syntax "Fortran" "\.([Ff]|[Ff]90|[Ff]95|[Ff][Oo][Rr])$"
+syntax "fortran" "\.([Ff]|[Ff]90|[Ff]95|[Ff][Oo][Rr])$"
 
 #color red "\<[A-Z_]a[0-9A-Z_]+\>" 
 color red "\<[0-9]+\>" 

@@ -1,6 +1,6 @@
 ## Here is an example for nanorc files.
 ##
-syntax "Conf" "\.c[o]?nf$"
+syntax "conf" "\.c[o]?nf$"
 ## Possible errors and parameters
 ## Strings
 white (i) ""(\\.|[^"])*""

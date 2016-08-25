@@ -2,7 +2,7 @@
 ## Syntax highlighting for conkyrc files.
 ##
 ##
-syntax "Conky" "(\.*conkyrc.*$|conky.conf)"
+syntax "conky" "(\.*conkyrc.*$|conky.conf)"
 
 ## Configuration items
 color green "\<(alignment|append_file|background|border_inner_margin|border_outer_margin|border_width|color0|color1|color2|color3|color4|color5|color6|color7|color8|color9|colorN|cpu_avg_samples|default_bar_height|default_bar_width|default_color|default_gauge_height|default_gauge_width|default_graph_height|default_graph_width|default_outline_color|default_shade_color|diskio_avg_samples|display|double_buffer|draw_borders|draw_graph_borders|draw_outline|draw_shades|extra_newline|font|format_human_readable|gap_x|gap_y|http_refresh|if_up_strictness|imap|imlib_cache_flush_interval|imlib_cache_size|lua_draw_hook_post|lua_draw_hook_pre|lua_load|lua_shutdown_hook|lua_startup_hook|mail_spool|max_port_monitor_connections|max_text_width|max_user_text|maximum_width|minimum_height|minimum_width|mpd_host|mpd_password|mpd_port|music_player_interval|mysql_host|mysql_port|mysql_user|mysql_password|mysql_db|net_avg_samples|no_buffers|nvidia_display|out_to_console|out_to_http|out_to_ncurses|out_to_stderr|out_to_x|override_utf8_locale|overwrite_file|own_window|own_window_class|own_window_colour|own_window_hints|own_window_title|own_window_transparent|own_window_type|pad_percents|pop3|sensor_device|short_units|show_graph_range|show_graph_scale|stippled_borders|temperature_unit|template|template0|template1|template2|template3|template4|template5|template6|template7|template8|template9|text|text_buffer_size|times_in_seconds|top_cpu_separate|top_name_width|total_run_times|update_interval|update_interval_on_battery|uppercase|use_spacer|use_xft|xftalpha|xftfont)\>"

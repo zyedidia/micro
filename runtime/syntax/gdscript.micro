@@ -1,6 +1,6 @@
 ## GDScript syntax file, based on Python syntax file.
 ##
-syntax "GDScript" "\.gd$"
+syntax "gdscript" "\.gd$"
 
 ## built-in objects
 color constant "\b(null|self|true|false)\b"

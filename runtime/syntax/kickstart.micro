@@ -1,4 +1,4 @@
-syntax "KickStart" "\.ks$" "\.kickstart$"
+syntax "kickstart" "\.ks$" "\.kickstart$"
 
 color brightmagenta  "%[a-z]+"
 color cyan  "^[[:space:]]*(install|cdrom|text|graphical|volgroup|logvol|reboot|timezone|lang|keyboard|authconfig|firstboot|rootpw|user|firewall|selinux|repo|part|partition|clearpart|bootloader)"

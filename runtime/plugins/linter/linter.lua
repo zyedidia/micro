@@ -12,20 +12,20 @@ function runLinter()
     if OS == "windows" then
         devnull = "NUL"
     end
-    if ft == "Go" then
+    if ft == "go" then
         lint("gobuild", "go build -o " .. devnull, "%f:%l: %m")
         lint("golint", "golint " .. CurView().Buf.Path, "%f:%l:%d+: %m")
-    elseif ft == "Lua" then
+    elseif ft == "lua" then
         lint("luacheck", "luacheck --no-color " .. file, "%f:%l:%d+: %m")
-    elseif ft == "Python" then
+    elseif ft == "python" then
         lint("pyflakes", "pyflakes " .. file, "%f:%l: %m")
-    elseif ft == "C" then
+    elseif ft == "c" then
         lint("gcc", "gcc -fsyntax-only -Wall -Wextra " .. file, "%f:%l:%d+:.+: %m")
-    elseif ft == "D" then
+    elseif ft == "d" then
         lint("dmd", "dmd -color=off -o- -w -wi -c " .. file, "%f%(%l%):.+: %m")
-    elseif ft == "Java" then
+    elseif ft == "java" then
         lint("javac", "javac " .. file, "%f:%l: error: %m")
-    elseif ft == "JavaScript" then
+    elseif ft == "javascript" then
         lint("jshint", "jshint " .. file, "%f: line %l,.+, %m")
     end
 end

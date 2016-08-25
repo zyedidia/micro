@@ -1,4 +1,4 @@
-syntax "PEG" "\.l?peg$"
+syntax "peg" "\.l?peg$"
 
 color cyan  "^[[:space:]]*[A-Za-z][A-Za-z0-9_]*[[:space:]]*<-"
 color blue   "\^[+-]?[0-9]+"

@@ -1,6 +1,6 @@
 ## Here is an example for groff.
 ##
-syntax "Groff" "\.m[ems]$" "\.rof" "\.tmac$" "^tmac."
+syntax "groff" "\.m[ems]$" "\.rof" "\.tmac$" "^tmac."
 ## The argument of .ds or .nr
 color cyan "^\.(ds|nr) [^[[:space:]]]*"
 ## Single character escapes

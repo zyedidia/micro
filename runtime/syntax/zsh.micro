@@ -1,5 +1,5 @@
 ## Syntax highlighting for ZSH scripts (initially copied from sh.nanorc)
-syntax "ZSH" "\.zsh$" "\.?(zshenv|zprofile|zshrc|zlogin|zlogout)$"
+syntax "zsh" "\.zsh$" "\.?(zshenv|zprofile|zshrc|zlogin|zlogout)$"
 header "^#!.*/(env +)?zsh( |$)"
 
 ## Numbers

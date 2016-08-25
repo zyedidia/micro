@@ -1,4 +1,4 @@
-syntax "YUM" "\.repo$|yum.*\.conf$"
+syntax "yum" "\.repo$|yum.*\.conf$"
 
 color cyan "^[[:space:]]*[^=]*="
 color brightmagenta "^[[:space:]]*\[.*\]$"

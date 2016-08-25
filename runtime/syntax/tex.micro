@@ -1,6 +1,6 @@
 ## Here is a short example for TeX files.
 ##
-syntax "TeX" "\.tex$" "bib" "\.bib$" "cls" "\.cls$"
+syntax "tex" "\.tex$" "bib" "\.bib$" "cls" "\.cls$"
 color yellow "\$[^$]*\$"
 green (i) "\\.|\\[A-Z]*"
 color magenta "[{}]"

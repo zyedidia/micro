@@ -1,4 +1,4 @@
-syntax "PO" "\.pot?$"
+syntax "po" "\.pot?$"
 
 color cyan  "\<(msgid|msgstr)\>"
 color yellow ""(\\.|[^"])*"|'(\\.|[^'])*'"

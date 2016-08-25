@@ -1,6 +1,6 @@
 ## Arch PKGBUILD files
 ##
-syntax "PKGBUILD" "^.*PKGBUILD$"
+syntax "pkgbuild" "^.*PKGBUILD$"
 color green start="^." end="$"
 color cyan "^.*(pkgbase|pkgname|pkgver|pkgrel|pkgdesc|arch|url|license).*=.*$"
 color brightcyan "\<(pkgbase|pkgname|pkgver|pkgrel|pkgdesc|arch|url|license)\>"

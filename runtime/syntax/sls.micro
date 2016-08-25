@@ -1,7 +1,7 @@
 ## SaltStack files (*.sls)
 ##
 
-syntax "Salt" "\.sls$"
+syntax "salt" "\.sls$"
 
 # Anything ending in a colon (:), including things that start with a dash (-)
 color blue "^[^ -].*:$"

@@ -1,4 +1,4 @@
-syntax "SQL" "\.sql$" "sqliterc$"
+syntax "sql" "\.sql$" "sqliterc$"
 
 cyan (i) "\<(ALL|ASC|AS|ALTER|AND|ADD|AUTO_INCREMENT)\>"
 cyan (i) "\<(BETWEEN|BINARY|BOTH|BY|BOOLEAN)\>"
