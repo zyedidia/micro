@@ -1,4 +1,4 @@
-# Micro
+![Micro](./assets/logo.png)
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 ![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)
@@ -12,7 +12,7 @@ of modern terminals. It comes as one single, batteries-included, static binary w
 
 Here is a picture of micro editing its source code.
 
-![Screenshot](./screenshot.png)
+![Screenshot](./assets/micro-solarized.png)
 
 # Features
 
