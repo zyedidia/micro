@@ -28,93 +28,93 @@ github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-osx.tar.gz" \
-    --file binaries/micro-osx.tar.gz
+    --name "micro-$1-osx.tar.gz" \
+    --file binaries/micro-$1-osx.tar.gz
 
 echo "Uploading Linux 64 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-linux64.tar.gz" \
-    --file binaries/micro-linux64.tar.gz
+    --name "micro-$1-linux64.tar.gz" \
+    --file binaries/micro-$1-linux64.tar.gz
 
 echo "Uploading Linux 32 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-linux32.tar.gz" \
-    --file binaries/micro-linux32.tar.gz
+    --name "micro-$1-linux32.tar.gz" \
+    --file binaries/micro-$1-linux32.tar.gz
 
 echo "Uploading Linux Arm binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-linux-arm.tar.gz" \
-    --file binaries/micro-linux-arm.tar.gz
+    --name "micro-$1-linux-arm.tar.gz" \
+    --file binaries/micro-$1-linux-arm.tar.gz
 
 echo "Uploading FreeBSD 64 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-freebsd64.tar.gz" \
-    --file binaries/micro-freebsd64.tar.gz
+    --name "micro-$1-freebsd64.tar.gz" \
+    --file binaries/micro-$1-freebsd64.tar.gz
 
 echo "Uploading FreeBSD 32 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-freebsd32.tar.gz" \
-    --file binaries/micro-freebsd32.tar.gz
+    --name "micro-$1-freebsd32.tar.gz" \
+    --file binaries/micro-$1-freebsd32.tar.gz
 
 echo "Uploading OpenBSD 64 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-openbsd64.tar.gz" \
-    --file binaries/micro-openbsd64.tar.gz
+    --name "micro-$1-openbsd64.tar.gz" \
+    --file binaries/micro-$1-openbsd64.tar.gz
 
 echo "Uploading OpenBSD 32 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-openbsd32.tar.gz" \
-    --file binaries/micro-openbsd32.tar.gz
+    --name "micro-$1-openbsd32.tar.gz" \
+    --file binaries/micro-$1-openbsd32.tar.gz
 
 echo "Uploading NetBSD 64 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-netbsd64.tar.gz" \
-    --file binaries/micro-netbsd64.tar.gz
+    --name "micro-$1-netbsd64.tar.gz" \
+    --file binaries/micro-$1-netbsd64.tar.gz
 
 echo "Uploading NetBSD 32 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-netbsd32.tar.gz" \
-    --file binaries/micro-netbsd32.tar.gz
+    --name "micro-$1-netbsd32.tar.gz" \
+    --file binaries/micro-$1-netbsd32.tar.gz
 
 echo "Uploading Windows 64 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-win64.zip" \
-    --file binaries/micro-win64.zip
+    --name "micro-$1-win64.zip" \
+    --file binaries/micro-$1-win64.zip
 
 echo "Uploading Windows 32 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag nightly \
-    --name "micro-win32.zip" \
-    --file binaries/micro-win32.zip
+    --name "micro-$1-win32.zip" \
+    --file binaries/micro-$1-win32.zip
