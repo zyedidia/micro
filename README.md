@@ -1,4 +1,4 @@
-![Micro](./assets/logo.png)
+# ![Micro](./assets/logo.png)
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 ![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)
