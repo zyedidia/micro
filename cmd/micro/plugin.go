@@ -142,8 +142,11 @@ func LoadPlugins() {
 	}
 
 	if _, err := os.Stat(configDir + "/init.lua"); err == nil {
-		if err := L.DoFile(configDir + "/init.lua"); err != nil {
+		pluginDef := "\nlocal P = {}\n" + "init" + " = P\nsetmetatable(" + "init" + ", {__index = _G})\nsetfenv(1, P)\n"
+		data, _ := ioutil.ReadFile(configDir + "/init.lua")
+		if err := L.DoString(pluginDef + string(data)); err != nil {
 			TermMessage(err)
 		}
+		loadedPlugins = append(loadedPlugins, "init")
 	}
 }

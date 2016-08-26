@@ -2,7 +2,7 @@
 # Swift syntax highlighting for Nano.
 ##############################################################################
 
-syntax "Swift" "\.swift$"
+syntax "swift" "\.swift$"
 
 # Operators
 color statement "[.:;,+*|=!?\%]" "<" ">" "/" "-" "&"

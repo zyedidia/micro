@@ -389,19 +389,29 @@ func LoadRulesFromFile(text, filename string) []SyntaxRule {
 	return rules
 }
 
-// GetRules finds the syntax rules that should be used for the buffer
-// and returns them. It also returns the filetype of the file
-func GetRules(buf *Buffer) ([]SyntaxRule, string) {
+// FindFileType finds the filetype for the given buffer
+func FindFileType(buf *Buffer) string {
 	for r := range syntaxFiles {
 		if r[0] != nil && r[0].MatchString(buf.Path) {
-			// Check if the syntax statement matches the extension
-			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename), syntaxFiles[r].filetype
+			// The syntax statement matches the extension
+			return syntaxFiles[r].filetype
 		} else if r[1] != nil && r[1].MatchString(buf.Line(0)) {
-			// Check if the header statement matches the first line
-			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename), syntaxFiles[r].filetype
+			// The header statement matches the first line
+			return syntaxFiles[r].filetype
 		}
 	}
-	return nil, "Unknown"
+	return "Unknown"
+}
+
+// GetRules finds the syntax rules that should be used for the buffer
+// and returns them. It also returns the filetype of the file
+func GetRules(buf *Buffer) []SyntaxRule {
+	for r := range syntaxFiles {
+		if syntaxFiles[r].filetype == buf.FileType() {
+			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename)
+		}
+	}
+	return nil
 }
 
 // SyntaxMatches is an alias to a map from character numbers to styles,
@@ -425,7 +435,7 @@ func Match(v *View) SyntaxMatches {
 
 	for i, line := range lines {
 		matches[i] = make([]tcell.Style, len(line)+1)
-		for j, _ := range matches[i] {
+		for j := range matches[i] {
 			matches[i][j] = defStyle
 		}
 	}

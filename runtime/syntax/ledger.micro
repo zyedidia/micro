@@ -1,4 +1,4 @@
-syntax "Ledger" "(^|\.|/)ledger|ldgr|beancount|bnct$"
+syntax "ledger" "(^|\.|/)ledger|ldgr|beancount|bnct$"
 
 color brightmagenta  "^([0-9]{4}(/|-)[0-9]{2}(/|-)[0-9]{2}|[=~]) .*"
 color blue   "^[0-9]{4}(/|-)[0-9]{2}(/|-)[0-9]{2}"

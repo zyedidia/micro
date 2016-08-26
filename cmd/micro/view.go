@@ -107,15 +107,23 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		view: v,
 	}
 
-	if settings["statusline"].(bool) {
+	if v.Buf.Settings["statusline"].(bool) {
 		v.height--
+	}
+
+	for _, pl := range loadedPlugins {
+		_, err := Call(pl+".onViewOpen", v)
+		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+			TermMessage(err)
+			continue
+		}
 	}
 
 	return v
 }
 
 func (v *View) ToggleStatusLine() {
-	if settings["statusline"].(bool) {
+	if v.Buf.Settings["statusline"].(bool) {
 		v.height--
 	} else {
 		v.height++
@@ -236,7 +244,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 func (v *View) Relocate() bool {
 	ret := false
 	cy := v.Cursor.Y
-	scrollmargin := int(settings["scrollmargin"].(float64))
+	scrollmargin := int(v.Buf.Settings["scrollmargin"].(float64))
 	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
 		v.Topline = cy - scrollmargin
 		ret = true
@@ -313,7 +321,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Cursor.Right()
 
 			for _, pl := range loadedPlugins {
-				_, err := Call(pl+".onRune", string(e.Rune()))
+				_, err := Call(pl+".onRune", string(e.Rune()), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
 				}
@@ -408,11 +416,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		case tcell.WheelUp:
 			// Scroll up
-			scrollspeed := int(settings["scrollspeed"].(float64))
+			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
 			v.ScrollUp(scrollspeed)
 		case tcell.WheelDown:
 			// Scroll down
-			scrollspeed := int(settings["scrollspeed"].(float64))
+			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
 			v.ScrollDown(scrollspeed)
 		}
 	}
@@ -420,7 +428,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
-	if settings["syntax"].(bool) {
+	if v.Buf.Settings["syntax"].(bool) {
 		v.matches = Match(v)
 	}
 }
@@ -486,7 +494,7 @@ func (v *View) DisplayView() {
 	// We are going to have to offset by that amount
 	maxLineLength := len(strconv.Itoa(v.Buf.NumLines))
 
-	if settings["ruler"] == true {
+	if v.Buf.Settings["ruler"] == true {
 		// + 1 for the little space after the line number
 		v.lineNumOffset = maxLineLength + 1
 	} else {
@@ -585,7 +593,7 @@ func (v *View) DisplayView() {
 			}
 		}
 
-		if settings["ruler"] == true {
+		if v.Buf.Settings["ruler"] == true {
 			// Write the line number
 			lineNumStyle := defStyle
 			if style, ok := colorscheme["line-number"]; ok {
@@ -620,7 +628,7 @@ func (v *View) DisplayView() {
 		for _, ch := range line {
 			lineStyle := defStyle
 
-			if settings["syntax"].(bool) {
+			if v.Buf.Settings["syntax"].(bool) {
 				// Syntax highlighting is enabled
 				highlightStyle = v.matches[viewLine][colN]
 			}
@@ -640,7 +648,7 @@ func (v *View) DisplayView() {
 
 			// We need to display the background of the linestyle with the correct color if cursorline is enabled
 			// and this is the current view and there is no selection on this line and the cursor is on this line
-			if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -666,19 +674,19 @@ func (v *View) DisplayView() {
 						lineIndentStyle = style
 					}
 				}
-				if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 					if style, ok := colorscheme["cursor-line"]; ok {
 						fg, _, _ := style.Decompose()
 						lineIndentStyle = lineIndentStyle.Background(fg)
 					}
 				}
 				// Here we get the indent char
-				indentChar := []rune(settings["indentchar"].(string))
+				indentChar := []rune(v.Buf.Settings["indentchar"].(string))
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
 					v.drawCell(screenX-v.leftCol, screenY, indentChar[0], nil, lineIndentStyle)
 				}
 				// Now the tab has to be displayed as a bunch of spaces
-				tabSize := int(settings["tabsize"].(float64))
+				tabSize := int(v.Buf.Settings["tabsize"].(float64))
 				for i := 0; i < tabSize-1; i++ {
 					screenX++
 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
@@ -725,7 +733,7 @@ func (v *View) DisplayView() {
 
 		for i := 0; i < v.width; i++ {
 			lineStyle := defStyle
-			if settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -755,7 +763,7 @@ func (v *View) Display() {
 		v.DisplayCursor()
 	}
 	_, screenH := screen.Size()
-	if settings["statusline"].(bool) {
+	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
 	} else if (v.y + v.height) != screenH-1 {
 		for x := 0; x < v.width; x++ {

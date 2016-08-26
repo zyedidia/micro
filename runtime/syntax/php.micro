@@ -1,5 +1,5 @@
 ## PHP Syntax Highlighting
-syntax "PHP" "\.php[2345s~]?$"
+syntax "php" "\.php[2345s~]?$"
 color white start="<\?(php|=)?" end="\?>"
 # Functions
 color brightblue "([a-zA-Z0-9_-]*)\("

@@ -3,7 +3,7 @@
 ## Author: Andrei Vinokurov
 ## Based on D lexer specification (http://dlang.org/lex)
 
-syntax "D" "\.(d(i|d)?)$"
+syntax "d" "\.(d(i|d)?)$"
 
 ## Operators and punctuation
 color statement "(\*|/|%|\+|-|>>|<<|>>>|&|\^(\^)?|\||~)?="

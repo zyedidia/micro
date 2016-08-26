@@ -1,6 +1,6 @@
 ## Here is a short improved example for HTML.
 ##
-syntax "HTML" "\.htm[l]?$"
+syntax "html" "\.htm[l]?$"
 color identifier start="<" end=">"
 color special "&[^;[[:space:]]]*;"
 color constant ""[^"]*"|qq\|.*\|"

@@ -1,4 +1,4 @@
-syntax "GLSL" "\.(frag|vert|fp|vp|glsl)$"
+syntax "glsl" "\.(frag|vert|fp|vp|glsl)$"
 
 color brightblue "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
 color green     "\<(void|bool|bvec2|bvec3|bvec4|int|ivec2|ivec3|ivec4|float|vec2|vec3|vec4|mat2|mat3|mat4|struct|sampler1D|sampler2D|sampler3D|samplerCUBE|sampler1DShadow|sampler2DShadow)\>"

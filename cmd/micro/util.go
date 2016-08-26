@@ -152,20 +152,20 @@ func GetModTime(path string) (time.Time, bool) {
 }
 
 // StringWidth returns the width of a string where tabs count as `tabsize` width
-func StringWidth(str string) int {
+func StringWidth(str string, tabsize int) int {
 	sw := runewidth.StringWidth(str)
-	sw += NumOccurences(str, '\t') * (int(settings["tabsize"].(float64)) - 1)
+	sw += NumOccurences(str, '\t') * (tabsize - 1)
 	return sw
 }
 
 // WidthOfLargeRunes searches all the runes in a string and counts up all the widths of runes
 // that have a width larger than 1 (this also counts tabs as `tabsize` width)
-func WidthOfLargeRunes(str string) int {
+func WidthOfLargeRunes(str string, tabsize int) int {
 	count := 0
 	for _, ch := range str {
 		var w int
 		if ch == '\t' {
-			w = int(settings["tabsize"].(float64))
+			w = tabsize
 		} else {
 			w = runewidth.RuneWidth(ch)
 		}

@@ -1,4 +1,4 @@
-syntax "Privoxy-action" "\.action$"
+syntax "privoxy-action" "\.action$"
 
 color brightred   "[{[:space:]]\-block([[:space:]{}]|$)"
 color brightgreen "[{[:space:]]\+block([[:space:]{}]|$)"

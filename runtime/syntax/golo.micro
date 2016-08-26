@@ -1,4 +1,4 @@
-syntax "Golo" "\.golo$"
+syntax "golo" "\.golo$"
 
 color type "\b(function|fun|)\b"
 color type "\b(struct|DynamicObject|union|AdapterFabric|Adapter|DynamicVariable|Observable)\b"

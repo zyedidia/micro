@@ -148,7 +148,7 @@ func (s *SplitTree) ResizeSplits() {
 			}
 			// n.view.ToggleStatusLine()
 			_, screenH := screen.Size()
-			if settings["statusline"].(bool) || (n.view.y+n.view.height) != screenH-1 {
+			if n.view.Buf.Settings["statusline"].(bool) || (n.view.y+n.view.height) != screenH-1 {
 				n.view.height--
 			}
 

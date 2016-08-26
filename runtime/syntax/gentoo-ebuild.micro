@@ -1,6 +1,6 @@
 ## Here is an example for ebuilds/eclasses
 ##
-syntax "Ebuild" "\.e(build|class)$"
+syntax "ebuild" "\.e(build|class)$"
 ## All the standard portage functions
 color brightgreen "^src_(unpack|compile|install|test)" "^pkg_(config|nofetch|setup|(pre|post)(inst|rm))"
 ## Highlight bash related syntax

@@ -91,7 +91,13 @@ func HelpComplete(input string) (string, []string) {
 // OptionComplete autocompletes options
 func OptionComplete(input string) (string, []string) {
 	var suggestions []string
-	for option := range settings {
+	localSettings := DefaultLocalSettings()
+	for option := range globalSettings {
+		if strings.HasPrefix(option, input) {
+			suggestions = append(suggestions, option)
+		}
+	}
+	for option := range localSettings {
 		if strings.HasPrefix(option, input) {
 			suggestions = append(suggestions, option)
 		}

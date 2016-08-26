@@ -24,7 +24,7 @@ func InitColorscheme() {
 
 // LoadDefaultColorscheme loads the default colorscheme from $(configDir)/colorschemes
 func LoadDefaultColorscheme() {
-	LoadColorscheme(settings["colorscheme"].(string), configDir+"/colorschemes")
+	LoadColorscheme(globalSettings["colorscheme"].(string), configDir+"/colorschemes")
 }
 
 // LoadColorscheme loads the given colorscheme from a directory

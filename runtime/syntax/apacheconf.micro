@@ -1,5 +1,5 @@
 # Apache files
-syntax "Apacheconf" "httpd\.conf|mime\.types|vhosts\.d\\*|\.htaccess"
+syntax "apacheconf" "httpd\.conf|mime\.types|vhosts\.d\\*|\.htaccess"
 color yellow ".+"
 color brightcyan "(AcceptMutex|AcceptPathInfo|AccessFileName|Action|AddAlt|AddAltByEncoding|AddAltByType|AddCharset|AddDefaultCharset|AddDescription|AddEncoding)"
 color brightcyan "(AddHandler|AddIcon|AddIconByEncoding|AddIconByType|AddInputFilter|AddLanguage|AddModuleInfo|AddOutputFilter|AddOutputFilterByType|AddType|Alias|AliasMatch)"

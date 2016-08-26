@@ -1,4 +1,4 @@
-syntax "Keymap" "\.(k|key)?map$|Xmodmap$"
+syntax "keymap" "\.(k|key)?map$|Xmodmap$"
 
 color cyan  "\<(add|clear|compose|keycode|keymaps|keysym|remove|string)\>"
 color cyan  "\<(control|alt|shift)\>"

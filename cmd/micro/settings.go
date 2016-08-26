@@ -7,14 +7,17 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
+
+	"github.com/zyedidia/glob"
 )
 
 // The options that the user can set
-var settings map[string]interface{}
+var globalSettings map[string]interface{}
 
-// InitSettings initializes the options map and sets all options to their default values
-func InitSettings() {
-	defaults := DefaultSettings()
+// InitGlobalSettings initializes the options map and sets all options to their default values
+func InitGlobalSettings() {
+	defaults := DefaultGlobalSettings()
 	var parsed map[string]interface{}
 
 	filename := configDir + "/settings.json"
@@ -31,17 +34,57 @@ func InitSettings() {
 		}
 	}
 
-	settings = make(map[string]interface{})
+	globalSettings = make(map[string]interface{})
 	for k, v := range defaults {
-		settings[k] = v
+		globalSettings[k] = v
 	}
 	for k, v := range parsed {
-		settings[k] = v
+		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			globalSettings[k] = v
+		}
 	}
 
-	err := WriteSettings(filename)
-	if err != nil {
-		TermMessage("Error writing settings.json file: " + err.Error())
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		err := WriteSettings(filename)
+		if err != nil {
+			TermMessage("Error writing settings.json file: " + err.Error())
+		}
+	}
+}
+
+// InitLocalSettings scans the json in settings.json and sets the options locally based
+// on whether the buffer matches the glob
+func InitLocalSettings(buf *Buffer) {
+	var parsed map[string]interface{}
+
+	filename := configDir + "/settings.json"
+	if _, e := os.Stat(filename); e == nil {
+		input, err := ioutil.ReadFile(filename)
+		if err != nil {
+			TermMessage("Error reading settings.json file: " + err.Error())
+			return
+		}
+
+		err = json.Unmarshal(input, &parsed)
+		if err != nil {
+			TermMessage("Error reading settings.json:", err.Error())
+		}
+	}
+
+	for k, v := range parsed {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			g, err := glob.Compile(k)
+			if err != nil {
+				TermMessage("Error with glob setting ", k, ": ", err)
+				continue
+			}
+
+			if g.MatchString(buf.Path) {
+				for k1, v1 := range v.(map[string]interface{}) {
+					buf.Settings[k1] = v1
+				}
+			}
+		}
 	}
 }
 
@@ -49,7 +92,30 @@ func InitSettings() {
 func WriteSettings(filename string) error {
 	var err error
 	if _, e := os.Stat(configDir); e == nil {
-		txt, _ := json.MarshalIndent(settings, "", "    ")
+		var parsed map[string]interface{}
+
+		filename := configDir + "/settings.json"
+		if _, e := os.Stat(filename); e == nil {
+			input, err := ioutil.ReadFile(filename)
+			if err != nil {
+				return err
+			}
+
+			err = json.Unmarshal(input, &parsed)
+			if err != nil {
+				TermMessage("Error reading settings.json:", err.Error())
+			}
+		}
+
+		for k, v := range parsed {
+			if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+				if _, ok := globalSettings[k]; ok {
+					parsed[k] = globalSettings[k]
+				}
+			}
+		}
+
+		txt, _ := json.MarshalIndent(parsed, "", "    ")
 		err = ioutil.WriteFile(filename, txt, 0644)
 	}
 	return err
@@ -57,20 +123,36 @@ func WriteSettings(filename string) error {
 
 // AddOption creates a new option. This is meant to be called by plugins to add options.
 func AddOption(name string, value interface{}) {
-	settings[name] = value
+	globalSettings[name] = value
 	err := WriteSettings(configDir + "/settings.json")
 	if err != nil {
 		TermMessage("Error writing settings.json file: " + err.Error())
 	}
 }
 
-// GetOption returns the specified option. This is meant to be called by plugins to add options.
+// GetGlobalOption returns the global value of the given option
+func GetGlobalOption(name string) interface{} {
+	return globalSettings[name]
+}
+
+// GetLocalOption returns the local value of the given option
+func GetLocalOption(name string, buf *Buffer) interface{} {
+	return buf.Settings[name]
+}
+
+// GetOption returns the value of the given option
+// If there is a local version of the option, it returns that
+// otherwise it will return the global version
 func GetOption(name string) interface{} {
-	return settings[name]
+	if GetLocalOption(name, CurView().Buf) != nil {
+		return GetLocalOption(name, CurView().Buf)
+	}
+	return GetGlobalOption(name)
 }
 
 // DefaultSettings returns the default settings for micro
-func DefaultSettings() map[string]interface{} {
+// Note that colorscheme is a global only option
+func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
 		"colorscheme":  "monokai",
@@ -89,27 +171,55 @@ func DefaultSettings() map[string]interface{} {
 	}
 }
 
+// DefaultLocalSettings returns the default local settings
+// Note that filetype is a local only option
+func DefaultLocalSettings() map[string]interface{} {
+	return map[string]interface{}{
+		"autoindent":   true,
+		"cursorline":   false,
+		"filetype":     "Unknown",
+		"ignorecase":   false,
+		"indentchar":   " ",
+		"ruler":        true,
+		"savecursor":   false,
+		"saveundo":     false,
+		"scrollspeed":  float64(2),
+		"scrollmargin": float64(3),
+		"statusline":   true,
+		"syntax":       true,
+		"tabsize":      float64(4),
+		"tabstospaces": false,
+	}
+}
+
 // SetOption attempts to set the given option to the value
+// By default it will set the option as global, but if the option
+// is local only it will set the local version
+// Use setlocal to force an option to be set locally
 func SetOption(option, value string) error {
-	if _, ok := settings[option]; !ok {
-		return errors.New("Invalid option")
+	if _, ok := globalSettings[option]; !ok {
+		if _, ok := CurView().Buf.Settings[option]; !ok {
+			return errors.New("Invalid option")
+		}
+		SetLocalOption(option, value, CurView())
+		return nil
 	}
 
-	kind := reflect.TypeOf(settings[option]).Kind()
+	kind := reflect.TypeOf(globalSettings[option]).Kind()
 	if kind == reflect.Bool {
 		b, err := ParseBool(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		settings[option] = b
+		globalSettings[option] = b
 	} else if kind == reflect.String {
-		settings[option] = value
+		globalSettings[option] = value
 	} else if kind == reflect.Float64 {
 		i, err := strconv.Atoi(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		settings[option] = float64(i)
+		globalSettings[option] = float64(i)
 	}
 
 	if option == "colorscheme" {
@@ -117,21 +227,60 @@ func SetOption(option, value string) error {
 		for _, tab := range tabs {
 			for _, view := range tab.views {
 				view.Buf.UpdateRules()
-				if settings["syntax"].(bool) {
+				if view.Buf.Settings["syntax"].(bool) {
 					view.matches = Match(view)
 				}
 			}
 		}
 	}
 
-	if option == "statusline" {
+	if _, ok := CurView().Buf.Settings[option]; ok {
 		for _, tab := range tabs {
 			for _, view := range tab.views {
-				view.ToggleStatusLine()
-				if settings["syntax"].(bool) {
-					view.matches = Match(view)
-				}
+				SetLocalOption(option, value, view)
 			}
+		}
+	}
+
+	return nil
+}
+
+// SetLocalOption sets the local version of this option
+func SetLocalOption(option, value string, view *View) error {
+	buf := view.Buf
+	if _, ok := buf.Settings[option]; !ok {
+		return errors.New("Invalid option")
+	}
+
+	kind := reflect.TypeOf(buf.Settings[option]).Kind()
+	if kind == reflect.Bool {
+		b, err := ParseBool(value)
+		if err != nil {
+			return errors.New("Invalid value")
+		}
+		buf.Settings[option] = b
+	} else if kind == reflect.String {
+		buf.Settings[option] = value
+	} else if kind == reflect.Float64 {
+		i, err := strconv.Atoi(value)
+		if err != nil {
+			return errors.New("Invalid value")
+		}
+		buf.Settings[option] = float64(i)
+	}
+
+	if option == "statusline" {
+		view.ToggleStatusLine()
+		if buf.Settings["syntax"].(bool) {
+			view.matches = Match(view)
+		}
+	}
+
+	if option == "filetype" {
+		LoadSyntaxFiles()
+		buf.UpdateRules()
+		if buf.Settings["syntax"].(bool) {
+			view.matches = Match(view)
 		}
 	}
 
@@ -145,7 +294,7 @@ func SetOptionAndSettings(option, value string) {
 	err := SetOption(option, value)
 
 	if err != nil {
-		messenger.Message(err.Error())
+		messenger.Error(err.Error())
 		return
 	}
 

@@ -12,7 +12,7 @@
 
 
 # Automatically use for '.lua' files
-syntax "Lua" ".*\.lua$"
+syntax "lua" ".*\.lua$"
 
 # Operators
 color statement ":|\*\*|\*|/|%|\+|-|\^|>|>=|<|<=|~=|=|\.\.|\b(not|and|or)\b"

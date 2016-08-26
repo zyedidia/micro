@@ -1,4 +1,4 @@
-syntax "Rpmspec" "\.spec$" "\.rpmspec$"
+syntax "rpmspec" "\.spec$" "\.rpmspec$"
 
 color cyan  "\<(Icon|ExclusiveOs|ExcludeOs):"
 color cyan  "\<(BuildArch|BuildArchitectures|ExclusiveArch|ExcludeArch):"

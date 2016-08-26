@@ -294,12 +294,12 @@ func (c *Cursor) Start() {
 // GetCharPosInLine gets the char position of a visual x y coordinate (this is necessary because tabs are 1 char but 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
-	tabSize := int(settings["tabsize"].(float64))
-	visualLineLen := StringWidth(c.buf.Line(lineNum))
+	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	visualLineLen := StringWidth(c.buf.Line(lineNum), tabSize)
 	if visualPos > visualLineLen {
 		visualPos = visualLineLen
 	}
-	width := WidthOfLargeRunes(c.buf.Line(lineNum))
+	width := WidthOfLargeRunes(c.buf.Line(lineNum), tabSize)
 	if visualPos >= width {
 		return visualPos - width
 	}
@@ -309,7 +309,8 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.buf.Line(c.Y))
-	return StringWidth(string(runes[:c.X]))
+	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	return StringWidth(string(runes[:c.X]), tabSize)
 }
 
 // Relocate makes sure that the cursor is inside the bounds of the buffer

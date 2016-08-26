@@ -1,6 +1,6 @@
 ## CMake syntax highlighter for GNU Nano
 ##
-syntax "CMake" "(CMakeLists\.txt|\.cmake)$"
+syntax "cmake" "(CMakeLists\.txt|\.cmake)$"
 
 green (i) "^[[:space:]]*[A-Z0-9_]+"
 brightyellow (i) "^[[:space:]]*(include|include_directories|include_external_msproject)\>"

@@ -1,6 +1,6 @@
 # R source code
 
-syntax "R" "\.(r|R)$"
+syntax "r" "\.(r|R)$"
 
 color statement "\b(break|else|for|function|if|in|next|repeat|return|while)\b"
 color constant "\b(TRUE|FALSE|NULL|Inf|NaN|NA|NA_integer_|NA_real_|NA_complex_|NA_character_)\b"

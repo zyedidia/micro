@@ -1,6 +1,6 @@
 ## Here is an example for assembler.
 ##
-syntax "ASM" "\.(S|s|asm)$"
+syntax "asm" "\.(S|s|asm)$"
 color red "\<[A-Z_]{2,}\>"
 color brightgreen "\.(data|subsection|text)"
 color green "\.(align|file|globl|global|hidden|section|size|type|weak)"

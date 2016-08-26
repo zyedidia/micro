@@ -9,12 +9,11 @@ end
 local autoclosePairs = {"\"\"", "''", "()", "{}", "[]"}
 local autoNewlinePairs = {"()", "{}", "[]"}
 
-function onRune(r)
+function onRune(r, v)
     if not GetOption("autoclose") then
         return
     end
 
-    local v = CurView()
     for i = 1, #autoclosePairs do
         if r == charAt(autoclosePairs[i], 2) then
             local curLine = v.Buf:Line(v.Cursor.Y)
@@ -43,12 +42,11 @@ function onRune(r)
     end
 end
 
-function preInsertNewline()
+function preInsertNewline(v)
     if not GetOption("autoclose") then
         return
     end
 
-    local v = CurView()
     local curLine = v.Buf:Line(v.Cursor.Y)
     local curRune = charAt(curLine, v.Cursor.X)
     local nextRune = charAt(curLine, v.Cursor.X+1)
@@ -68,12 +66,10 @@ function preInsertNewline()
     return true
 end
 
-function preBackspace()
+function preBackspace(v)
     if not GetOption("autoclose") then
         return
     end
-
-    local v = CurView()
 
     for i = 1, #autoclosePairs do
         local curLine = v.Buf:Line(v.Cursor.Y)

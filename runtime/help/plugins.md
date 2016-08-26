@@ -6,15 +6,18 @@ main script which is run at startup which should be placed in
 
 There are a number of callback functions which you can create in your
 plugin to run code at times other than startup. The naming scheme is
-`onAction()`. For example a function which is run every time the user saves
+`onAction(view)`. For example a function which is run every time the user saves
 the buffer would be:
 
 ```lua
-function onSave()
+function onSave(view)
     ...
     return false
 end
 ```
+
+The `view` variable is a reference to the view the action is being executed on.
+This is almost always the current view, which you can get with `CurView()` as well.
 
 All available actions are listed in the keybindings section of the help.
 
@@ -26,48 +29,59 @@ want a callback before the action is executed, use `preAction()`. In this case
 the boolean returned specifies whether or not the action should be executed
 after the lua code completes.
 
+Another useful callback to know about which is not a action is
+`onViewOpen(view)` which is called whenever a new view is opened and the new
+view is passed in. This is useful for setting local options based on the filetype,
+for example turning off `tabstospaces` only for Go files when they are opened.
+
 ---
 
 There are a number of functions and variables that are available to you in
 oder to access the inner workings of micro. Here is a list (the type signatures
 for functions are given using Go's type system):
 
-* OS: variable which gives the OS micro is currently running on (this is the same
+* `OS`: variable which gives the OS micro is currently running on (this is the same
 as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
-* tabs: a list of all the tabs currently in use
+* `tabs`: a list of all the tabs currently in use
 
-* curTab: the index of the current tabs in the tabs list
+* `curTab`: the index of the current tabs in the tabs list
 
-* messenger: lets you send messages to the user or create prompts
+* `messenger`: lets you send messages to the user or create prompts
 
-* GetOption(name string): returns the value of the requested option
+* `GetOption(name string)`: returns the value of the requested option
 
-* AddOption(name string, value interface{}): sets the given option with the given
-value (`interface{}` means any type in Go).
+* `AddOption(name string, value interface{})`: sets the given option with the given
+   value (`interface{}` means any type in Go).
 
-* BindKey(key, action string): binds `key` to `action`.
+* `SetOption(option, value string)`: sets the given option to the value. This will
+   set the option globally, unless it is a local only option.
 
-* MakeCommand(name, function string, completions ...Completion): 
-  creates a command with `name` which will call `function` when executed.
-  Use 0 for completions to get NoCompletion.
+* `SetLocalOption(option, value string, buffer *Buffer)`: sets the given option to
+   the value locally in the given buffer.
 
-* CurView(): returns the current view
+* `BindKey(key, action string)`: binds `key` to `action`.
 
-* HandleCommand(cmd string): runs the given command
+* `MakeCommand(name, function string, completions ...Completion)`: 
+   creates a command with `name` which will call `function` when executed.
+   Use 0 for completions to get NoCompletion.
 
-* HandleShellCommand(shellCmd string, interactive bool): runs the given shell
-command
+* `CurView()`: returns the current view
 
-* JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string):
-Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
-are callbacks to lua functions which will be called when the given actions happen
-to the background process.
-`userargs` are the arguments which will get passed to the callback functions
+* `HandleCommand(cmd string)`: runs the given command
 
-* JobSend(cmd *exec.Cmd, data string): send a string into the stdin of the job process
+* `HandleShellCommand(shellCmd string, interactive bool)`: runs the given shell
+   command
 
-* JobStop(cmd *exec.Cmd): kill a job
+* `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
+   Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
+   are callbacks to lua functions which will be called when the given actions happen
+   to the background process.
+   `userargs` are the arguments which will get passed to the callback functions
+
+* `JobSend(cmd *exec.Cmd, data string)`: send a string into the stdin of the job process
+
+* `JobStop(cmd *exec.Cmd)`: kill a job
 
 This may seem like a small list of available functions but some of the objects
 returned by the functions have many methods. `CurView()` returns a view object

@@ -8,7 +8,6 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -39,8 +38,9 @@ type Buffer struct {
 
 	// Syntax highlighting rules
 	rules []SyntaxRule
-	// The buffer's filetype
-	FileType string
+
+	// Buffer local settings
+	Settings map[string]interface{}
 }
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -56,6 +56,13 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	b := new(Buffer)
 	b.LineArray = NewLineArray(txt)
 
+	b.Settings = DefaultLocalSettings()
+	for k, v := range globalSettings {
+		if _, ok := b.Settings[k]; ok {
+			b.Settings[k] = v
+		}
+	}
+
 	b.Path = path
 	b.Name = path
 
@@ -70,6 +77,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	b.EventHandler = NewEventHandler(b)
 
 	b.Update()
+	b.FindFileType()
 	b.UpdateRules()
 
 	if _, err := os.Stat(configDir + "/buffers/"); os.IsNotExist(err) {
@@ -85,7 +93,9 @@ func NewBuffer(txt []byte, path string) *Buffer {
 		buf: b,
 	}
 
-	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
+	InitLocalSettings(b)
+
+	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		absPath, _ := filepath.Abs(b.Path)
@@ -98,13 +108,13 @@ func NewBuffer(txt []byte, path string) *Buffer {
 			if err != nil {
 				TermMessage(err.Error(), "\n", "You may want to remove the files in ~/.config/micro/buffers (these files store the information for the 'saveundo' and 'savecursor' options) if this problem persists.")
 			}
-			if settings["savecursor"].(bool) {
+			if b.Settings["savecursor"].(bool) {
 				b.Cursor = buffer.Cursor
 				b.Cursor.buf = b
 				b.Cursor.Relocate()
 			}
 
-			if settings["saveundo"].(bool) {
+			if b.Settings["saveundo"].(bool) {
 				// We should only use last time's eventhandler if the file wasn't by someone else in the meantime
 				if b.ModTime == buffer.ModTime {
 					b.EventHandler = buffer.EventHandler
@@ -115,18 +125,23 @@ func NewBuffer(txt []byte, path string) *Buffer {
 		file.Close()
 	}
 
-	_, err := Call("onBufferOpen", b)
-	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-		TermMessage(err)
-	}
-
 	return b
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.rules, b.FileType = GetRules(b)
+	b.rules = GetRules(b)
+}
+
+// FindFileType identifies this buffer's filetype based on the extension or header
+func (b *Buffer) FindFileType() {
+	b.Settings["filetype"] = FindFileType(b)
+}
+
+// FileType returns the buffer's filetype
+func (b *Buffer) FileType() string {
+	return b.Settings["filetype"].(string)
 }
 
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
@@ -184,7 +199,7 @@ func (b *Buffer) SaveWithSudo() error {
 
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
-	if settings["savecursor"].(bool) || settings["saveundo"].(bool) {
+	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		absPath, _ := filepath.Abs(b.Path)
 		file, err := os.Create(configDir + "/buffers/" + EscapePath(absPath))
 		if err == nil {

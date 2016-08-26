@@ -1,4 +1,4 @@
-syntax "Makefile" "([Mm]akefile|\.ma?k)$"
+syntax "makefile" "([Mm]akefile|\.ma?k)$"
 header "^#!.*/(env +)?[bg]?make( |$)"
 
 color preproc  "\<(ifeq|ifdef|ifneq|ifndef|else|endif)\>"

@@ -1,4 +1,4 @@
-syntax "Inputrc" "inputrc$"
+syntax "inputrc" "inputrc$"
 
 color red   "\<(off|none)\>"
 color green "\<on\>"
