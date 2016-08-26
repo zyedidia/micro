@@ -210,7 +210,7 @@ func main() {
 	InitConfigDir()
 
 	// Load the user's settings
-	InitSettings()
+	InitGlobalSettings()
 	InitCommands()
 	InitBindings()
 

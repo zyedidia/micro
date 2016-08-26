@@ -93,6 +93,8 @@ func NewBuffer(txt []byte, path string) *Buffer {
 		buf: b,
 	}
 
+	InitLocalSettings(b)
+
 	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers

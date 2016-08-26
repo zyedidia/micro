@@ -7,13 +7,16 @@ import (
 	"os"
 	"reflect"
 	"strconv"
+	"strings"
+
+	"github.com/zyedidia/glob"
 )
 
 // The options that the user can set
 var globalSettings map[string]interface{}
 
-// InitSettings initializes the options map and sets all options to their default values
-func InitSettings() {
+// InitGlobalSettings initializes the options map and sets all options to their default values
+func InitGlobalSettings() {
 	defaults := DefaultGlobalSettings()
 	var parsed map[string]interface{}
 
@@ -36,12 +39,52 @@ func InitSettings() {
 		globalSettings[k] = v
 	}
 	for k, v := range parsed {
-		globalSettings[k] = v
+		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			globalSettings[k] = v
+		}
 	}
 
-	err := WriteSettings(filename)
-	if err != nil {
-		TermMessage("Error writing settings.json file: " + err.Error())
+	if _, err := os.Stat(filename); os.IsNotExist(err) {
+		err := WriteSettings(filename)
+		if err != nil {
+			TermMessage("Error writing settings.json file: " + err.Error())
+		}
+	}
+}
+
+// InitLocalSettings scans the json in settings.json and sets the options locally based
+// on whether the buffer matches the glob
+func InitLocalSettings(buf *Buffer) {
+	var parsed map[string]interface{}
+
+	filename := configDir + "/settings.json"
+	if _, e := os.Stat(filename); e == nil {
+		input, err := ioutil.ReadFile(filename)
+		if err != nil {
+			TermMessage("Error reading settings.json file: " + err.Error())
+			return
+		}
+
+		err = json.Unmarshal(input, &parsed)
+		if err != nil {
+			TermMessage("Error reading settings.json:", err.Error())
+		}
+	}
+
+	for k, v := range parsed {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			g, err := glob.Compile(k)
+			if err != nil {
+				TermMessage("Error with glob setting ", k, ": ", err)
+				continue
+			}
+
+			if g.MatchString(buf.Path) {
+				for k1, v1 := range v.(map[string]interface{}) {
+					buf.Settings[k1] = v1
+				}
+			}
+		}
 	}
 }
 
@@ -49,7 +92,30 @@ func InitSettings() {
 func WriteSettings(filename string) error {
 	var err error
 	if _, e := os.Stat(configDir); e == nil {
-		txt, _ := json.MarshalIndent(globalSettings, "", "    ")
+		var parsed map[string]interface{}
+
+		filename := configDir + "/settings.json"
+		if _, e := os.Stat(filename); e == nil {
+			input, err := ioutil.ReadFile(filename)
+			if err != nil {
+				return err
+			}
+
+			err = json.Unmarshal(input, &parsed)
+			if err != nil {
+				TermMessage("Error reading settings.json:", err.Error())
+			}
+		}
+
+		for k, v := range parsed {
+			if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+				if _, ok := globalSettings[k]; ok {
+					parsed[k] = globalSettings[k]
+				}
+			}
+		}
+
+		txt, _ := json.MarshalIndent(parsed, "", "    ")
 		err = ioutil.WriteFile(filename, txt, 0644)
 	}
 	return err
