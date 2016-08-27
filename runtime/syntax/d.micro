@@ -13,27 +13,27 @@ color statement "\.\.(\.)?|!|\*|&|~|\(|\)|\[|\]|\\|/|\+|-|%|<|>|\?|:|;"
 color error "(0[0-7_]*)(L[uU]?|[uU]L?)?"
 
 ## Decimal integer literals
-color constant "([0-9]|[1-9][0-9_]*)(L[uU]?|[uU]L?)?"
+color constant.number "([0-9]|[1-9][0-9_]*)(L[uU]?|[uU]L?)?"
 
 ## Binary integer literals
 color constant "(0[bB][01_]*)(L[uU]?|[uU]L?)?"
 
 ## Decimal float literals
-color constant "[0-9][0-9_]*\.([0-9][0-9_]*)([eE][+-]?([0-9][0-9_]*))?[fFL]?i?"
-color constant "[0-9][0-9_]*([eE][+-]?([0-9][0-9_]*))[fFL]?i?"
-color constant "[^.]\.([0-9][0-9_]*)([eE][+-]?([0-9][0-9_]*))?[fFL]?i?"
-color constant "[0-9][0-9_]*([fFL]?i|[fF])"
+color constant.number "[0-9][0-9_]*\.([0-9][0-9_]*)([eE][+-]?([0-9][0-9_]*))?[fFL]?i?"
+color constant.number "[0-9][0-9_]*([eE][+-]?([0-9][0-9_]*))[fFL]?i?"
+color constant.number "[^.]\.([0-9][0-9_]*)([eE][+-]?([0-9][0-9_]*))?[fFL]?i?"
+color constant.number "[0-9][0-9_]*([fFL]?i|[fF])"
 
 ## Hexadecimal integer literals
-color constant "(0[xX]([0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F]))(L[uU]?|[uU]L?)?"
+color constant.number "(0[xX]([0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F]))(L[uU]?|[uU]L?)?"
 
 ## Hexadecimal float literals
-color constant "0[xX]([0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F])(\.[0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F])?[pP][+-]?([0-9][0-9_]*)[fFL]?i?"
-color constant "0[xX]\.([0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F])[pP][+-]?([0-9][0-9_]*)[fFL]?i?"
+color constant.number "0[xX]([0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F])(\.[0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F])?[pP][+-]?([0-9][0-9_]*)[fFL]?i?"
+color constant.number "0[xX]\.([0-9a-fA-F][0-9a-fA-F_]*|[0-9a-fA-F_]*[0-9a-fA-F])[pP][+-]?([0-9][0-9_]*)[fFL]?i?"
 
 
 ## Character literals
-color constant "'([^\']|\\(['"?\abfnrtv]|x[[:xdigit:]]{2}|[0-7]{1,3}|u[[:xdigit:]]{4}|U[[:xdigit:]]{8}|&.*;))'"
+color constant.string "'([^\']|\\(['"?\abfnrtv]|x[[:xdigit:]]{2}|[0-7]{1,3}|u[[:xdigit:]]{4}|U[[:xdigit:]]{8}|&.*;))'"
 
 ## Keywords
 ## a-e

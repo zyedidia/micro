@@ -46,7 +46,7 @@ color constant "\b(false|nil|true)\b"
 color statement "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"
 
 # Numbers
-color constant "\b([0-9]+)\b"
+color constant.number "\b([0-9]+)\b"
 
 # Symbols
 color statement "(\(|\)|\[|\]|\{|\})"

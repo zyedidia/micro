@@ -16,6 +16,9 @@ color special "[a-z_]+!"
 # Constants
 color constant "[A-Z][A-Z_]+"
 
+# Numbers
+color constant.number "\b[0-9]+\b"
+
 # Traits/Enums/Structs/Types/etc.
 color type "[A-Z][a-z]+"
 

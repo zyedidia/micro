@@ -30,7 +30,7 @@ color statement "[.:;,+*|=!\%@]" "<" ">" "/" "-" "&"
 color statement "[(){}]" "\[" "\]"
 
 ## numbers
-color constant "\b[0-9]+\b"
+color constant.number "\b[0-9]+\b"
 
 ## strings
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"

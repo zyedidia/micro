@@ -6,6 +6,7 @@ color statement "\b(break|case|catch|continue|default|do|else|finally|for|if|ret
 color type "\b(abstract|class|extends|final|implements|import|instanceof|interface|native|package|private|protected|public|static|strictfp|super|synchronized|throws|volatile)\b"
 color constant.string ""[^"]*""
 color constant "\b(true|false|null)\b"
+color constant.number "\b[0-9]+\b"
 color comment "//.*"
 color comment start="/\*" end="\*/"
 color comment start="/\*\*" end="\*/"

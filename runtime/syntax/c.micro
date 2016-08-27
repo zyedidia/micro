@@ -21,6 +21,7 @@ color statement "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
 #Parenthetical Color
 # color magenta "[(){}]" "\[" "\]"
 
+color constant.number "\b[0-9]+\b"
 
 ##
 ## String highlighting.  You will in general want your brightblacks and

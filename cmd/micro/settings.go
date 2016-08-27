@@ -150,12 +150,12 @@ func GetOption(name string) interface{} {
 	return GetGlobalOption(name)
 }
 
-// DefaultSettings returns the default settings for micro
+// DefaultGlobalSettings returns the default global settings for micro
 // Note that colorscheme is a global only option
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
-		"colorscheme":  "monokai",
+		"colorscheme":  "zenburn",
 		"cursorline":   false,
 		"ignorecase":   false,
 		"indentchar":   " ",

@@ -1,9 +1,9 @@
 syntax "javascript" "\.js$"
 
-color blue   "\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\b"
-color blue   "\b[-+]?([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
-color blue   "\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
-color brightblue "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
+color constant.number   "\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\b"
+color constant.number   "\b[-+]?([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
+color constant.number   "\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
+color identifier "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
 color statement  "\b(break|case|catch|continue|default|delete|do|else|finally)\b"
 color statement  "\b(for|function|get|if|in|instanceof|new|return|set|switch)\b"
 color statement  "\b(switch|this|throw|try|typeof|var|void|while|with)\b"
