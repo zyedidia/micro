@@ -7,6 +7,7 @@
 // runtime/colorschemes/monokai.micro
 // runtime/colorschemes/solarized-tc.micro
 // runtime/colorschemes/solarized.micro
+// runtime/colorschemes/zenburn.micro
 // runtime/help/colors.md
 // runtime/help/commands.md
 // runtime/help/help.md
@@ -309,6 +310,26 @@ func runtimeColorschemesSolarizedMicro() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "runtime/colorschemes/solarized.micro", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _runtimeColorschemesZenburnMicro = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x7c\x90\xc1\x6e\xc3\x20\x10\x44\xef\xf9\x0a\xc4\x39\xae\x0a\x6e\x6c\xff\x0e\x81\x4d\x8a\x8a\x17\x6b\x59\x0e\xfd\xfb\x6a\xdd\xaa\x6a\x0a\xce\x0d\xe9\xcd\x30\xb3\xe3\x73\xca\x34\xa4\x88\x1f\x2a\xc0\xcd\xd5\xc4\x4a\x9b\x65\x39\xdb\x71\xd6\xa7\x3f\xd0\xe7\x75\x05\x14\xf8\xda\x83\x58\xd8\x21\xbf\x14\xa6\x88\x77\xa5\xcd\xfc\x76\x2c\xc2\xba\x5e\x81\x94\x36\x66\x3a\x14\x49\x09\xd3\xd0\x18\x00\x39\xde\xa2\xb8\xad\x1d\x1b\x5e\xd8\x31\xfc\xd4\x5c\xe6\x06\x6f\x04\x1b\x65\xdf\xf7\xf2\xe7\x06\x7d\x5b\xd9\xc0\x47\x97\xfa\x95\x2a\x06\xa0\x14\x11\x42\x7f\x37\x20\xca\xfb\xad\x97\xb3\x1d\xa7\xc7\xc4\x1c\xb2\xd2\xd7\x9c\x82\xb2\x97\x76\x2f\x39\xa6\x16\xf9\x5a\x7e\x9e\x1a\x7b\x44\x59\x63\xf0\xef\x4e\xd6\x18\xdb\x68\xb1\x0e\xbf\x63\xef\xdd\x96\x07\xc1\xbd\x32\x03\x0d\x4f\x2a\xfa\x4a\xe5\xfb\x0d\x7b\xc6\x7f\x48\xd2\xa0\x93\x33\xeb\xd3\x57\x00\x00\x00\xff\xff\x3f\xb3\x30\x84\x59\x02\x00\x00")
+
+func runtimeColorschemesZenburnMicroBytes() ([]byte, error) {
+	return bindataRead(
+		_runtimeColorschemesZenburnMicro,
+		"runtime/colorschemes/zenburn.micro",
+	)
+}
+
+func runtimeColorschemesZenburnMicro() (*asset, error) {
+	bytes, err := runtimeColorschemesZenburnMicroBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "runtime/colorschemes/zenburn.micro", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2352,6 +2373,7 @@ var _bindata = map[string]func() (*asset, error){
 	"runtime/colorschemes/monokai.micro": runtimeColorschemesMonokaiMicro,
 	"runtime/colorschemes/solarized-tc.micro": runtimeColorschemesSolarizedTcMicro,
 	"runtime/colorschemes/solarized.micro": runtimeColorschemesSolarizedMicro,
+	"runtime/colorschemes/zenburn.micro": runtimeColorschemesZenburnMicro,
 	"runtime/help/colors.md": runtimeHelpColorsMd,
 	"runtime/help/commands.md": runtimeHelpCommandsMd,
 	"runtime/help/help.md": runtimeHelpHelpMd,
@@ -2502,6 +2524,7 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"monokai.micro": &bintree{runtimeColorschemesMonokaiMicro, map[string]*bintree{}},
 			"solarized-tc.micro": &bintree{runtimeColorschemesSolarizedTcMicro, map[string]*bintree{}},
 			"solarized.micro": &bintree{runtimeColorschemesSolarizedMicro, map[string]*bintree{}},
+			"zenburn.micro": &bintree{runtimeColorschemesZenburnMicro, map[string]*bintree{}},
 		}},
 		"help": &bintree{nil, map[string]*bintree{
 			"colors.md": &bintree{runtimeHelpColorsMd, map[string]*bintree{}},
