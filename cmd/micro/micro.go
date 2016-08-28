@@ -43,7 +43,9 @@ var (
 
 	// Version is the version number or commit hash
 	// This should be set by the linker when compiling
-	Version = "Unknown"
+	Version     = "Unknown"
+	CommitHash  = "Unknown"
+	CompileDate = "Unknown"
 
 	// L is the lua state
 	// This is the VM that runs the plugins
@@ -194,7 +196,9 @@ func main() {
 	flag.Parse()
 	if *flagVersion {
 		// If -version was passed
-		fmt.Println("Micro version:", Version)
+		fmt.Println("Version:", Version)
+		fmt.Println("Commit hash:", CommitHash)
+		fmt.Println("Compiled on", CompileDate)
 		os.Exit(0)
 	}
 

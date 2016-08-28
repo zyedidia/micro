@@ -25,6 +25,7 @@ Here is a picture of micro editing its source code.
 * Extremely good mouse support
     * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
 * Cross platform (It should work on all the platforms Go runs on)
+    * Note that while Windows is supported, there are still some bugs that need to be worked out
 * Plugin system (plugins are written in Lua)
 * Automatic linting and error notifications
 * Syntax highlighting (for over [75 languages](runtime/syntax)!)
@@ -51,14 +52,16 @@ Plan9, NaCl, and Cygwin (although this may change in the future).
 
 All you need to install micro is one file, the binary itself. It's as simple as that!
 
-You can download the correct binary for your operating system from the list in the [nightly build release](https://github.com/zyedidia/micro/releases/tag/nightly).
+You can download the correct binary for your operating system from the list in the [nightly build release](https://github.com/zyedidia/micro/releases).
 
-Micro has no released version, instead these binaries are compiled every night and you can find the
-commit they were compiled with by running `micro -version`.
+On that page you'll see the nightly release, which contains binaries for micro which are built every night,
+and you'll see all the stable releases with the corresponding binaries.
 
-If your operating system does not have binary, but does run Go, you can build from source.
+If you'd like to see more information after installing micro, run `micro -version`.
 
 ### Building from source
+
+If your operating system does not have binary, but does run Go, you can build from source.
 
 Make sure that you have Go version 1.5 or greater (Go 1.4 will work for the systems like support CGO then).
 

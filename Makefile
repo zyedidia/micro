@@ -1,9 +1,10 @@
 .PHONY: runtime
 
-VERSION = "$(shell git rev-parse --short HEAD)"
+VERSION = $(shell git describe --tags --abbrev=0)
+HASH = $(shell git rev-parse --short HEAD)
 
 build: tcell
-	go build -ldflags "-X main.Version=$(VERSION)" -o micro ./cmd/micro
+	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(shell date -u '+%B %d, %Y')'" -o micro ./cmd/micro
 
 install: build
 	mv micro $(GOPATH)/bin
