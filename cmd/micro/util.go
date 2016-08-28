@@ -182,6 +182,34 @@ func runePos(p int, str string) int {
 	return utf8.RuneCountInString(str[:p])
 }
 
+func lcs(a, b string) string {
+	arunes := []rune(a)
+	brunes := []rune(b)
+
+	lcs := ""
+	for i, r := range arunes {
+		if i >= len(brunes) {
+			break
+		}
+		if r == brunes[i] {
+			lcs += string(r)
+		} else {
+			break
+		}
+	}
+	return lcs
+}
+
+func CommonSubstring(arr ...string) string {
+	commonStr := arr[0]
+
+	for _, str := range arr[1:] {
+		commonStr = lcs(commonStr, str)
+	}
+
+	return commonStr
+}
+
 // Abs is a simple absolute value function for ints
 func Abs(n int) int {
 	if n < 0 {

@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestNumOccurences(t *testing.T) {
 	var tests = []struct {

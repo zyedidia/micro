@@ -49,6 +49,10 @@ func FileComplete(input string) (string, []string) {
 		} else {
 			chosen = suggestions[0]
 		}
+	} else {
+		if len(dirs) > 1 {
+			chosen = strings.Join(dirs[:len(dirs)-1], "/") + "/"
+		}
 	}
 
 	return chosen, suggestions

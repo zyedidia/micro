@@ -195,6 +195,10 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 					chosen, suggestions = OptionComplete(currentArg)
 				}
 
+				if len(suggestions) > 1 {
+					chosen = chosen + CommonSubstring(suggestions...)
+				}
+
 				if chosen != "" {
 					if len(args) > 1 {
 						chosen = " " + chosen
