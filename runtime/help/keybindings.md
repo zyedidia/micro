@@ -136,6 +136,7 @@ InsertNewline
 InsertSpace
 Backspace
 Delete
+Center
 InsertTab
 Save
 Find

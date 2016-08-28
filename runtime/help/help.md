@@ -12,6 +12,7 @@ Typing help followed by nothing will open this page.
 
 Here are the possible help topics that you can read:
 
+* tutorial: A brief tutorial which gives an overview of all the other help topics
 * keybindings: Gives a full list of the default keybindings as well as how to rebind them
 * commands: Gives a list of all the commands and what they do
 * options: Gives a list of all the options you can customize
@@ -20,6 +21,10 @@ Here are the possible help topics that you can read:
   own colorschemes or add new languages to the engine
 
 For example to open the help page on plugins you would press CtrlE and type `help plugins`.
+
+I recommend looking at the `tutorial` help file because it is short for each section and
+gives concrete examples of how to use the various configuration options in micro. However,
+it does not give the in-depth documentation that the other topics provide.
 
 ### Usage
 

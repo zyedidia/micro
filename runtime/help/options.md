@@ -20,21 +20,8 @@ Here are the options that you can set:
 	~/.config/micro/colorschemes/ directory. Micro comes by default with three
 	colorschemes:
 
-	* default: this is the default colorscheme.
-
-	* solarized: this is the solarized colorscheme (used in the screenshot). 
-	  You should have the solarized color palette in your terminal to use it.
-
-	* solarized-tc: this is the solarized colorscheme for true color, just 
-	  make sure your terminal supports true color before using it and that the 
-	  MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
-
-	* monokai-tc: this is the monokai colorscheme. It requires true color to
-	  look perfect, but the 256 color approximation looks good as well.
-
-	* atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
-	  It requires true color to look good.
-
+    You can read more about micro's colorschemes in the `colors` help topic
+    (`help colors`).
 
 * `tabsize`: sets the tab size to `option`
 
