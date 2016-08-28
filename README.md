@@ -1,18 +1,21 @@
 # ![Micro](./assets/logo.png)
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
-![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
-
-> Micro is still a work in progress
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
 of modern terminals. It comes as one single, batteries-included, static binary with no dependencies, and you can download and use it right now.
 
+As the name indicates, micro aims to be somewhat of a successor to the nano editor by being easy to install and use in a pinch, but micro also aims to be
+enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
+
 Here is a picture of micro editing its source code.
 
 ![Screenshot](./assets/micro-solarized.png)
+
+To see more screenshots of micro, showcasing all of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/colorschemes).
 
 # Features
 
@@ -37,22 +40,23 @@ Here is a picture of micro editing its source code.
 * Easily configurable
 * Common editor things such as undo/redo, line numbers, unicode support...
 
+Although not yet implemented, I hope to add more features such as autocompletion, and multiple cursors in the future.
+
 # Installation
 
 To install micro, you can download a prebuilt binary, or you can build it from source.
-
-You can also install micro with a few package managers (on OSX, Arch Linux, and CRUX). 
-See this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details.
 
 Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
 Plan9, NaCl, and Cygwin (although this may change in the future).
 
+If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro)
+
 ### Prebuilt binaries
 
 All you need to install micro is one file, the binary itself. It's as simple as that!
 
-You can download the correct binary for your operating system from the list in the [nightly build release](https://github.com/zyedidia/micro/releases).
+You can download the correct binary for your operating system from the [releases](https://github.com/zyedidia/micro/releases).
 
 On that page you'll see the nightly release, which contains binaries for micro which are built every night,
 and you'll see all the stable releases with the corresponding binaries.
@@ -63,7 +67,7 @@ If you'd like to see more information after installing micro, run `micro -versio
 
 If your operating system does not have binary, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work for the systems like support CGO then).
+Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO).
 
 ```sh
 go get -u github.com/zyedidia/micro/...
@@ -101,6 +105,9 @@ click to enable line selection.
 
 Micro has a built-in help system which you can access by pressing `CtrlE` and typing `help`. Additionally, you can
 view the help files online [here](https://github.com/zyedidia/micro/tree/master/runtime/help).
+
+I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
+a brief introduction to the more powerful features micro offers.
 
 # Contributing
 

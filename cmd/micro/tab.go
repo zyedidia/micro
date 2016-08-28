@@ -61,7 +61,7 @@ func CurView() *View {
 
 // TabbarString returns the string that should be displayed in the tabbar
 // It also returns a map containing which indicies correspond to which tab number
-// This is useful when we know that the mouse click has occured at an x location
+// This is useful when we know that the mouse click has occurred at an x location
 // but need to know which tab that corresponds to to accurately change the tab
 func TabbarString() (string, map[int]int) {
 	str := ""

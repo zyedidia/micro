@@ -13,7 +13,7 @@ func TestNumOccurences(t *testing.T) {
 		{"∆ƒ\tø ® \t\t", '\t', 3},
 	}
 	for _, test := range tests {
-		if got := NumOccurences(test.inputStr, test.inputChar); got != test.want {
+		if got := NumOccurrences(test.inputStr, test.inputChar); got != test.want {
 			t.Errorf("NumOccurences(%s, %c) = %d", test.inputStr, test.inputChar, got)
 		}
 	}

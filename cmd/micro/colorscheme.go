@@ -2,11 +2,12 @@ package main
 
 import (
 	"fmt"
-	"github.com/zyedidia/tcell"
 	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
+
+	"github.com/zyedidia/tcell"
 )
 
 // Colorscheme is a map from string to style -- it represents a colorscheme

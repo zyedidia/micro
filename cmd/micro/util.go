@@ -20,8 +20,8 @@ func Count(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
-// NumOccurences counts the number of occurences of a byte in a string
-func NumOccurences(s string, c byte) int {
+// NumOccurrences counts the number of occurences of a byte in a string
+func NumOccurrences(s string, c byte) int {
 	var n int
 	for i := 0; i < len(s); i++ {
 		if s[i] == c {
@@ -154,7 +154,7 @@ func GetModTime(path string) (time.Time, bool) {
 // StringWidth returns the width of a string where tabs count as `tabsize` width
 func StringWidth(str string, tabsize int) int {
 	sw := runewidth.StringWidth(str)
-	sw += NumOccurences(str, '\t') * (tabsize - 1)
+	sw += NumOccurrences(str, '\t') * (tabsize - 1)
 	return sw
 }
 

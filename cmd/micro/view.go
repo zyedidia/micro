@@ -600,7 +600,7 @@ func (v *View) DisplayView() {
 				lineNumStyle = style
 			}
 			if style, ok := colorscheme["current-line-number"]; ok {
-				if curLineN == v.Cursor.Y {
+				if curLineN == v.Cursor.Y && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() {
 					lineNumStyle = style
 				}
 			}

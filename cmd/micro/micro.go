@@ -42,7 +42,7 @@ var (
 	configDir string
 
 	// Version is the version number or commit hash
-	// This should be set by the linker when compiling
+	// These variables should be set by the linker when compiling
 	Version     = "Unknown"
 	CommitHash  = "Unknown"
 	CompileDate = "Unknown"
@@ -104,6 +104,10 @@ func LoadInput() []*Buffer {
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
 		input, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			TermMessage("Error reading from stdin: ", err)
+			input = []byte{}
+		}
 		buffers = append(buffers, NewBuffer(input, filename))
 	} else {
 		// Option 3, just open an empty buffer

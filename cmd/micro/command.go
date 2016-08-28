@@ -68,17 +68,17 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":      StrCommand{"Set", []Completion{OptionCompletion, NoCompletion}},
-		"setlocal": StrCommand{"SetLocal", []Completion{OptionCompletion, NoCompletion}},
-		"bind":     StrCommand{"Bind", []Completion{NoCompletion}},
-		"run":      StrCommand{"Run", []Completion{NoCompletion}},
-		"quit":     StrCommand{"Quit", []Completion{NoCompletion}},
-		"save":     StrCommand{"Save", []Completion{NoCompletion}},
-		"replace":  StrCommand{"Replace", []Completion{NoCompletion}},
-		"vsplit":   StrCommand{"VSplit", []Completion{FileCompletion, NoCompletion}},
-		"hsplit":   StrCommand{"HSplit", []Completion{FileCompletion, NoCompletion}},
-		"tab":      StrCommand{"Tab", []Completion{FileCompletion, NoCompletion}},
-		"help":     StrCommand{"Help", []Completion{HelpCompletion, NoCompletion}},
+		"set":      {"Set", []Completion{OptionCompletion, NoCompletion}},
+		"setlocal": {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"bind":     {"Bind", []Completion{NoCompletion}},
+		"run":      {"Run", []Completion{NoCompletion}},
+		"quit":     {"Quit", []Completion{NoCompletion}},
+		"save":     {"Save", []Completion{NoCompletion}},
+		"replace":  {"Replace", []Completion{NoCompletion}},
+		"vsplit":   {"VSplit", []Completion{FileCompletion, NoCompletion}},
+		"hsplit":   {"HSplit", []Completion{FileCompletion, NoCompletion}},
+		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
+		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 	}
 }
 
@@ -308,9 +308,9 @@ func Replace(args []string) {
 	view.Cursor.Relocate()
 
 	if found > 1 {
-		messenger.Message("Replaced ", found, " occurences of ", search)
+		messenger.Message("Replaced ", found, " occurrences of ", search)
 	} else if found == 1 {
-		messenger.Message("Replaced ", found, " occurence of ", search)
+		messenger.Message("Replaced ", found, " occurrence of ", search)
 	} else {
 		messenger.Message("Nothing matched ", search)
 	}
@@ -396,7 +396,7 @@ func HandleCommand(input string) {
 	args := strings.Split(input, " ")[1:]
 
 	if _, ok := commands[inputCmd]; !ok {
-		messenger.Error("Unkown command ", inputCmd)
+		messenger.Error("Unknown command ", inputCmd)
 	} else {
 		commands[inputCmd].action(args)
 	}
