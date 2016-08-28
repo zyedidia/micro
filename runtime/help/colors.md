@@ -9,11 +9,12 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 
 Micro comes with a number of colorschemes by default. Here is the list:
 
-* default: this is the simplest colorscheme. It uses 16 colors which are
+* simple: this is the simplest colorscheme. It uses 16 colors which are
   set by your terminal
 
 * zenburn: this is micro's default colorscheme because it looks very good
   and works in 256 color terminals.
+  this colorscheme also has the name 'default'
 
 * solarized: this is the solarized colorscheme. 
   You should have the solarized color palette in your terminal to use it.
