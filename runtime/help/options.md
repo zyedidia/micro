@@ -55,7 +55,7 @@ Here are the options that you can set:
 * `cursorline`: highlight the line that the cursor is on in a different color
    (the color is defined by the colorscheme you are using)
 
-	default value: `off`
+	default value: `on`
 
 * `ruler`: display line numbers
 

@@ -156,7 +156,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
 		"colorscheme":  "zenburn",
-		"cursorline":   false,
+		"cursorline":   true,
 		"ignorecase":   false,
 		"indentchar":   " ",
 		"ruler":        true,
@@ -176,7 +176,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
-		"cursorline":   false,
+		"cursorline":   true,
 		"filetype":     "Unknown",
 		"ignorecase":   false,
 		"indentchar":   " ",
