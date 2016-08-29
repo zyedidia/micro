@@ -25,16 +25,3 @@ For example to open the help page on plugins you would press CtrlE and type `hel
 I recommend looking at the `tutorial` help file because it is short for each section and
 gives concrete examples of how to use the various configuration options in micro. However,
 it does not give the in-depth documentation that the other topics provide.
-
-### Usage
-
-Once you have built the editor, simply start it by running 
-`micro path/to/file.txt` or simply `micro` to open an empty buffer.
-
-Micro also supports creating buffers from stdin:
-
-```
-$ ifconfig | micro
-```
-
-You can move the cursor around with the arrow keys and mouse.

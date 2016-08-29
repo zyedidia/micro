@@ -25,6 +25,7 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
     * Keybindings can be rebound to your liking
 * Sane defaults
     * You shouldn't have to configure much out of the box (and it is extremely easy to configure)
+* Splits and tabs
 * Extremely good mouse support
     * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
 * Cross platform (It should work on all the platforms Go runs on)
@@ -117,7 +118,7 @@ Micro has a built-in help system which you can access by pressing `CtrlE` and ty
 view the help files online [here](https://github.com/zyedidia/micro/tree/master/runtime/help).
 
 I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
-a brief introduction to the more powerful features micro offers.
+a brief introduction to the more powerful configuration features micro offers.
 
 # Contributing
 
