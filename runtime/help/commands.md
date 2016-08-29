@@ -21,6 +21,8 @@ Here are the possible commands that you can use.
 * `setlocal option value`: sets the option to value locally (only in the current
    buffer).
 
+* `show option`: shows the current value of the given option.
+
 * `run sh-command`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.
 

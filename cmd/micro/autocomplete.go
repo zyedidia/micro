@@ -92,6 +92,15 @@ func HelpComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+func contains(s []string, e string) bool {
+	for _, a := range s {
+		if a == e {
+			return true
+		}
+	}
+	return false
+}
+
 // OptionComplete autocompletes options
 func OptionComplete(input string) (string, []string) {
 	var suggestions []string
@@ -102,7 +111,7 @@ func OptionComplete(input string) (string, []string) {
 		}
 	}
 	for option := range localSettings {
-		if strings.HasPrefix(option, input) {
+		if strings.HasPrefix(option, input) && !contains(suggestions, option) {
 			suggestions = append(suggestions, option)
 		}
 	}

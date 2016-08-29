@@ -27,6 +27,7 @@ var commands map[string]Command
 var commandActions = map[string]func([]string){
 	"Set":      Set,
 	"SetLocal": SetLocal,
+	"Show":     Show,
 	"Run":      Run,
 	"Bind":     Bind,
 	"Quit":     Quit,
@@ -70,6 +71,7 @@ func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
 		"set":      {"Set", []Completion{OptionCompletion, NoCompletion}},
 		"setlocal": {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"show":     {"Show", []Completion{OptionCompletion, NoCompletion}},
 		"bind":     {"Bind", []Completion{NoCompletion}},
 		"run":      {"Run", []Completion{NoCompletion}},
 		"quit":     {"Quit", []Completion{NoCompletion}},
@@ -168,6 +170,7 @@ func NewTab(args []string) {
 // Set sets an option
 func Set(args []string) {
 	if len(args) < 2 {
+		messenger.Error("Not enough arguments")
 		return
 	}
 
@@ -177,8 +180,10 @@ func Set(args []string) {
 	SetOptionAndSettings(option, value)
 }
 
+// SetLocal sets an option local to the buffer
 func SetLocal(args []string) {
 	if len(args) < 2 {
+		messenger.Error("Not enough arguments")
 		return
 	}
 
@@ -191,10 +196,27 @@ func SetLocal(args []string) {
 	}
 }
 
+// Show shows the value of the given option
+func Show(args []string) {
+	if len(args) < 1 {
+		messenger.Error("Please provide an option to show")
+		return
+	}
+
+	option := GetOption(args[0])
+
+	if option == nil {
+		messenger.Error(args[0], " is not a valid option")
+		return
+	}
+
+	messenger.Message(option)
+}
+
 // Bind creates a new keybinding
 func Bind(args []string) {
-	if len(args) != 2 {
-		messenger.Error("Incorrect number of arguments")
+	if len(args) < 2 {
+		messenger.Error("Not enough arguments")
 		return
 	}
 	BindKey(args[0], args[1])

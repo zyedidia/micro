@@ -30,6 +30,7 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Cross platform (It should work on all the platforms Go runs on)
     * Note that while Windows is supported, there are still some bugs that need to be worked out
 * Plugin system (plugins are written in Lua)
+* Persistent undo
 * Automatic linting and error notifications
 * Syntax highlighting (for over [75 languages](runtime/syntax)!)
 * Colorscheme support
@@ -73,7 +74,7 @@ Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your vers
 go get -u github.com/zyedidia/micro/...
 ```
 
-### Clipboard support
+### Linux clipboard support
 
 On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed.
 
@@ -84,6 +85,13 @@ sudo apt-get install xclip
 ```
 
 If you don't have xclip or xsel, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
+
+### Windows colors
+
+Many of the Windows terminals don't support more than 16 colors, which means
+that micro's default colorscheme won't look very good. You can either set
+the colorscheme to `simple`, or download a better terminal emulator, like
+mintty or cmder.
 
 # Usage
 
