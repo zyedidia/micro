@@ -169,13 +169,13 @@ func (v *View) ScrollDown(n int) {
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
 // The message is what to print after saying "You have unsaved changes. "
-func (v *View) CanClose(msg string) bool {
+func (v *View) CanClose(msg string, responses ...rune) bool {
 	if v.Buf.IsModified {
-		quit, canceled := messenger.Prompt("You have unsaved changes. "+msg, "Unsaved", NoCompletion)
+		char, canceled := messenger.LetterPrompt("You have unsaved changes. "+msg, responses...)
 		if !canceled {
-			if strings.ToLower(quit) == "yes" || strings.ToLower(quit) == "y" {
+			if char == 'y' {
 				return true
-			} else if strings.ToLower(quit) == "save" || strings.ToLower(quit) == "s" {
+			} else if char == 's' {
 				v.Save(true)
 				return true
 			}
@@ -217,7 +217,7 @@ func (v *View) CloseBuffer() {
 
 // ReOpen reloads the current buffer
 func (v *View) ReOpen() {
-	if v.CanClose("Continue? (yes, no, save) ") {
+	if v.CanClose("Continue? (y,n,s) ", 'y', 'n', 's') {
 		screen.Clear()
 		v.Buf.ReOpen()
 		v.Relocate()

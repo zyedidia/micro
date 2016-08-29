@@ -124,6 +124,35 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	}
 }
 
+// LetterPrompt gives the user a prompt and waits for a one letter response
+func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) {
+	m.Message(prompt)
+
+	_, h := screen.Size()
+	for {
+		m.Clear()
+		m.Display()
+		screen.ShowCursor(Count(m.message), h-1)
+		screen.Show()
+		event := <-events
+
+		switch e := event.(type) {
+		case *tcell.EventKey:
+			switch e.Key() {
+			case tcell.KeyRune:
+				for _, r := range responses {
+					if e.Rune() == r {
+						m.Reset()
+						return r, false
+					}
+				}
+			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				return ' ', true
+			}
+		}
+	}
+}
+
 type Completion int
 
 const (
