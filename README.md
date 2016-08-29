@@ -45,11 +45,7 @@ Although not yet implemented, I hope to add more features such as autocompletion
 
 # Installation
 
-To install micro, you can download a prebuilt binary, or you can build it from source.
-
-Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
-means that micro is restricted to the platforms tcell supports. As a result, micro does not support
-Plan9, NaCl, and Cygwin (although this may change in the future).
+To install micro, you can download a [prebuilt binary](https://github.com/zyedidia/micro/releases), or you can build it from source.
 
 If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro)
 
@@ -57,7 +53,7 @@ If you want more information about ways to install micro, see this [wiki page](h
 
 All you need to install micro is one file, the binary itself. It's as simple as that!
 
-You can download the correct binary for your operating system from the [releases](https://github.com/zyedidia/micro/releases).
+Download the binary from the [releases](https://github.com/zyedidia/micro/releases) page.
 
 On that page you'll see the nightly release, which contains binaries for micro which are built every night,
 and you'll see all the stable releases with the corresponding binaries.
@@ -92,6 +88,12 @@ Many of the Windows terminals don't support more than 16 colors, which means
 that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty or cmder.
+
+### Plan9, NaCl, Cygwin
+
+Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
+means that micro is restricted to the platforms tcell supports. As a result, micro does not support
+Plan9, NaCl, and Cygwin (although this may change in the future).
 
 # Usage
 
