@@ -18,6 +18,7 @@ github-release release \
     --tag $tag \
     --name "$1" \
     --description "$2" \
+    --pre-release
 
 echo "Uploading OSX binary"
 github-release upload \
@@ -114,4 +115,3 @@ github-release upload \
     --tag $tag \
     --name "micro-$1-win32.zip" \
     --file binaries/micro-$1-win32.zip
-
