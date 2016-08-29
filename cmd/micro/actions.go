@@ -51,10 +51,11 @@ func (v *View) Center(usePlugin bool) bool {
 	}
 
 	v.Topline = v.Cursor.Y - v.height/2
+	if v.Topline+v.height > v.Buf.NumLines {
+		v.Topline = v.Buf.NumLines - v.height
+	}
 	if v.Topline < 0 {
 		v.Topline = 0
-	} else if v.Topline+v.height > v.Buf.NumLines {
-		v.Topline = v.Buf.NumLines - v.height
 	}
 
 	if usePlugin {
