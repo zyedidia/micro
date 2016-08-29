@@ -93,7 +93,8 @@ func LoadInput() []*Buffer {
 				input, err = ioutil.ReadFile(filename)
 				if err != nil {
 					TermMessage(err)
-					continue
+					input = []byte{}
+					filename = ""
 				}
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
