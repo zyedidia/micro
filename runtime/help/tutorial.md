@@ -68,7 +68,7 @@ what actions are available, see the `keybindings` help topic (`> help keybinding
 
 If you need more power than the json files provide, you can use the `init.lua`
 file. Create it in `~/.config/micro`. This file is a lua file that is run
-when micro starts and is essential a one-file plugin.
+when micro starts and is essentially a one-file plugin.
 
 I'll show you how to use the `init.lua` file by giving an example of how to
 create a binding to `CtrlR` which will execute `go run` on the current file,
