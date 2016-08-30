@@ -38,4 +38,33 @@ color statement "\b(?i)(fisttp)(?-i)\b"
 color statement "\b(?i)(ffreep)(?-i)\b"
 
 # SIMD
-color statement "\b(?i)()(?-i)\b"
+color statement "\b(?i)(emms|movd|movq|packssdw|packsswb|packuswb|paddb|paddw|paddd|paddsb|paddsw|paddusb|paddusw|pand|pandn|por|pxor|pcmpeqb|pcmpeqw|pcmpeqd|pcmpgtb|pcmpgtw|pcmpgtd|pmaddwd|pmulhw|pmullw|psllw|pslld|psllq|psrad|psraw|psrlw|psrld|psrlq|psubb|psubw|psubd|psubsb|psubsw|psubusb|punpckhbw|punpckhwd|punpckhdq|punkcklbw|punpckldq|punpcklwd)(?-i)\b"
+color statement "\b(?i)(paveb|paddsiw|pmagw|pdistib|psubsiw|pmwzb|pmulhrw|pmvnzb|pmvlzb|pmvgezb|pmulhriw|pmachriw)(?-i)\b"
+color statement "\b(?i)(femms|pavgusb|pf2id|pfacc|pfadd|pfcmpeq|pfcmpge|pfcmpgt|pfmax|pfmin|pfmul|pfrcp|pfrcpit1|pfrcpit2|pfrsqit1|pfrsqrt|pfsub|pfsubr|pi2fd|pmulhrw|prefetch|prefetchw)(?-i)\b"
+color statement "\b(?i)(pf2iw|pfnacc|pfpnacc|pi2fw|pswapd)(?-i)\b"
+color statement "\b(?i)(pfrsqrtv|pfrcpv)(?-i)\b"
+color statement "\b(?i)(addps|addss|cmpps|cmpss|comiss|cvtpi2ps|cvtps2pi|cvtsi2ss|cvtss2si|cvttps2pi|cvttss2si|divps|divss|ldmxcsr|maxps|maxss|minps|minss|movaps|movhlps|movhps|movlhps|movlps|movmskps|movntps|movss|movups|mulps|mulss|rcpps|rcpss|rsqrtps|rsqrtss|shufps|sqrtps|sqrtss|stmxcsr|subps|subss|ucomiss|unpckhps|unpcklps)(?-i)\b"
+color statement "\b(?i)(andnps|andps|orps|pavgb|pavgw|pextrw|pinsrw|pmaxsw|pmaxub|pminsw|pminub|pmovmskb|pmulhuw|psadbw|pshufw|xorps)(?-i)\b"
+color statement "\b(?i)(movups|movss|movlps|movhlps|movlps|unpcklps|unpckhps|movhps|movlhps|prefetchnta|prefetch0|prefetch1|prefetch2|nop|movaps|cvtpi2ps|cvtsi2ss|cvtps2pi|cvttss2si|cvtps2pi|cvtss2si|ucomiss|comiss|sqrtps|sqrtss|rsqrtps|rsqrtss|rcpps|andps|orps|xorps|addps|addss|mulps|mulss|subps|subss|minps|minss|divps|divss|maxps|maxss|pshufw|ldmxcsr|stmxcsr|sfence|cmpps|cmpss|pinsrw|pextrw|shufps|pmovmskb|pminub|pmaxub|pavgb|pavgw|pmulhuw|movntq|pminsw|pmaxsw|psadbw|maskmovq)(?-i)\b"
+color statement "\b(?i)(addpd|addsd|addnpd|cmppd|cmpsd)(?-i)\b"
+color statement "\b(?i)(addpd|addsd|andnpd|andpd|cmppd|cmpsd|comisd|cvtdq2pd|cvtdq2ps|cvtpd2dq|cvtpd2pi|cvtpd2ps|cvtpi2pd|cvtps2dq|cvtps2pd|cvtsd2si|cvtsd2ss|cvtsi2sd|cvtss2sd|cvttpd2dq|cvttpd2pi|cvttps2dq|cvttsd2si|divpd|divsd|maxpd|maxsd|minpd|minsd|movapd|movhpd|movlpd|movmskpd|movsd|movupd|mulpd|mulsd|orpd|shufpd|sqrtpd|sqrtsd|subpd|subsd|ucomisd|unpckhpd|unpcklpd|xorpd)(?-i)\b"
+color statement "\b(?i)(movdq2q|movdqa|movdqu|movq2dq|paddq|psubq|pmuludq|pshufhw|pshuflw|pshufd|pslldq|psrldq|punpckhqdq|punpcklqdq)(?-i)\b"
+color statement "\b(?i)(addsubpd|addsubps|haddpd|haddps|hsubpd|hsubps|movddup|movshdup|movsldu)(?-i)\b"
+color statement "\b(?i)(lddqu)(?-i)\b"
+color statement "\b(?i)(psignw|psignd|psignb|pshufb|pmulhrsw|pmaddubsw|phsubw|phsubsw|phsubd|phaddw|phaddsw|phaddd|palignr|pabsw|pabsd|pabsb)(?-i)\b"
+color statement "\b(?i)(dpps|dppd|blendps|blendpd|blendvps|blendvpd|roundps|roundss|roundpd|roundsd|insertps|extractps)(?-i)\b"
+color statement "\b(?i)(mpsadbw|phminposuw|pmulld|pmuldq|pblendvb|pblendw|pminsb|pmaxsb|pminuw|pmaxuw|pminud|pmaxud|pminsd|pmaxsd|pinsrb|pinsrd/pinsrq|pextrb|pextrw|pextrd/pextrq|pmovsxbw|pmovzxbw|pmovsxbd|pmovzxbd|pmovsxbq|pmovzxbq|pmovsxwd|pmovzxwd|pmovsxwq|pmovzxwq|pmovsxdq|pmovzxdq|ptest|pcmpeqq|packusdw|movntdqa)(?-i)\b"
+color statement "\b(?i)(extrq|insertq|movntsd|movntss)(?-i)\b"
+color statement "\b(?i)(crc32|pcmpestri|pcmpestrm|pcmpistri|pcmpistrm|pcmpgtq)(?-i)\b"
+color statement "\b(?i)(vfmaddpd|vfmaddps|vfmaddsd|vfmaddss|vfmaddsubpd|vfmaddsubps|vfmsubaddpd|vfmsubaddps|vfmsubpd|vfmsubps|vfmsubsd|vfmsubss|vfnmaddpd|vfnmaddps|vfnmaddsd|vfnmaddss|vfnmsubps|vfnmsubsd|vfnmsubss)(?-i)\b"
+
+# Crypto
+color statement "\b(?i)(aesenc|aesenclast|aesdec|aesdeclast|aeskeygenassist|aesimc)(?-i)\b"
+color statement "\b(?i)(sha1rnds4|sha1nexte|sha1msg1|sha1msg2|sha256rnds2|sha256msg1|sha256msg2)(?-i)\b"
+
+# Undocumented
+color statement "\b(?i)(aam|aad|salc|icebp|loadall|loadalld|ud1)(?-i)\b"
+
+
+
+# color identifier "\b(?i)()(?-i)\b"
