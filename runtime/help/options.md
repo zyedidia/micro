@@ -123,16 +123,16 @@ In the `settings.json` file you can also put set options locally by specifying a
 Here is an example which has `tabstospaces` on for all files except Go files, and
 `tabsize` 4 for all files except Ruby files:
 
-```
+```json
 {
     "*.go": {
         "tabstospaces": false
     },
     "*.rb": {
         "tabsize": 2
-    }
+    },
     "tabstospaces": true,
-    "tabsize": 4,
+    "tabsize": 4
 }
 ```
 
