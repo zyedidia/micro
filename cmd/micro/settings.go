@@ -21,16 +21,21 @@ func InitGlobalSettings() {
 	var parsed map[string]interface{}
 
 	filename := configDir + "/settings.json"
+	writeSettings := false
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			TermMessage("Error reading settings.json file: " + err.Error())
-			return
-		}
+		if !strings.HasPrefix(string(input), "null") {
+			if err != nil {
+				TermMessage("Error reading settings.json file: " + err.Error())
+				return
+			}
 
-		err = json.Unmarshal(input, &parsed)
-		if err != nil {
-			TermMessage("Error reading settings.json:", err.Error())
+			err = json.Unmarshal(input, &parsed)
+			if err != nil {
+				TermMessage("Error reading settings.json:", err.Error())
+			}
+		} else {
+			writeSettings = true
 		}
 	}
 
@@ -44,7 +49,7 @@ func InitGlobalSettings() {
 		}
 	}
 
-	if _, err := os.Stat(filename); os.IsNotExist(err) {
+	if _, err := os.Stat(filename); os.IsNotExist(err) || writeSettings {
 		err := WriteSettings(filename)
 		if err != nil {
 			TermMessage("Error writing settings.json file: " + err.Error())
@@ -98,19 +103,21 @@ func WriteSettings(filename string) error {
 		parsed = globalSettings
 		if _, e := os.Stat(filename); e == nil {
 			input, err := ioutil.ReadFile(filename)
-			if err != nil {
-				return err
-			}
+			if string(input) != "null" {
+				if err != nil {
+					return err
+				}
 
-			err = json.Unmarshal(input, &parsed)
-			if err != nil {
-				TermMessage("Error reading settings.json:", err.Error())
-			}
+				err = json.Unmarshal(input, &parsed)
+				if err != nil {
+					TermMessage("Error reading settings.json:", err.Error())
+				}
 
-			for k, v := range parsed {
-				if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-					if _, ok := globalSettings[k]; ok {
-						parsed[k] = globalSettings[k]
+				for k, v := range parsed {
+					if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+						if _, ok := globalSettings[k]; ok {
+							parsed[k] = globalSettings[k]
+						}
 					}
 				}
 			}
