@@ -45,7 +45,7 @@ you can rebind them to your liking.
 	"CtrlD":          "DuplicateLine",
 	"CtrlV":          "Paste",
 	"CtrlA":          "SelectAll",
-	"CtrlT":          "AddTab"
+	"CtrlT":          "AddTab",
 	"CtrlRightSq":    "PreviousTab",
 	"CtrlBackslash":  "NextTab",
 	"Home":           "Start",
