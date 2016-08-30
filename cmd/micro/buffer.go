@@ -219,6 +219,7 @@ func (b *Buffer) Serialize() error {
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
+	b.FindFileType()
 	b.UpdateRules()
 	b.Name = filename
 	b.Path = filename
@@ -235,6 +236,7 @@ func (b *Buffer) SaveAs(filename string) error {
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
 // with tee to use sudo so the user doesn't have to reopen micro with sudo
 func (b *Buffer) SaveAsWithSudo(filename string) error {
+	b.FindFileType()
 	b.UpdateRules()
 	b.Name = filename
 	b.Path = filename
