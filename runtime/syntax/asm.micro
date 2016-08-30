@@ -1,17 +1,30 @@
 ## Here is an example for assembler.
 ##
 syntax "asm" "\.(S|s|asm)$"
-color red "\<[A-Z_]{2,}\>"
-color brightgreen "\.(data|subsection|text)"
-color green "\.(align|file|globl|global|hidden|section|size|type|weak)"
-color brightyellow "\.(ascii|asciz|byte|double|float|hword|int|long|short|single|struct|word)"
-brightred (i) "^[[:space:]]*[.0-9A-Z_]*:"
-color brightcyan "^[[:space:]]*#[[:space:]]*(define|undef|include|ifn?def|endif|elif|else|if|warning|error)"
-## Highlight strings (note: VERY resource intensive)
-color brightyellow "<[^= 	]*>" ""(\\.|[^"])*""
-color brightyellow start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
-## Highlight comments
-color brightblue "//.*"
-color brightblue start="/\*" end="\*/"
-## Highlight trailing whitespace
-color ,green "[[:space:]]+$"
+
+# Template - will be removed later: color xxx "\b(?i)()(?-i)\b"
+# This file is made for NASM assembly
+
+# Comments
+color comment ";.*"
+
+# Instructions
+color statement "\b(?i)(mov|aaa|aad|aam|aas|adc|add|and|call|cbw|clc|cld|cli|cmc|cmp|cmpsb|cmpsw|cwd|daa|das|dec|div|esc|hlt|idiv|imul|in|inc|int|into|iret|ja|jae|jb|jbe|jc|je|jg|jge|jl|jle|jna|jnae|jnb|jnbe|jnc|jne|jng|jnge|jnl|jnle|jno|jnp|jns|jnz|jo|jp|jpe|jpo|js|jz|jcxz|jmp|lahf|lds|lea|les|lock|lodsb|lodsw|loop|loope|loopne|loopnz|loopz|movsb|movsw|mul|neg|nop|or|pop|popf|push|pushf|rcl|rcr|rep|repe|repne|repnz|repz|ret|retn|retf|rol|ror|sahf|sal|sar|sbb|scasb|scasw|shl|shr|stc|std|sti|stosb|stosw|sub|test|wait|xchg|xlat|xor)(?-i)\b"
+color statement "\b(?i)(bound|enter|ins|leave|outs|popa|pusha)(?-i)\b"
+color statement "\b(?i)(arpl|clts|lar|lgdt|lidt|lldt|lmsw|loadall|lsl|ltr|sgdt|sidt|sldt|smsw|str|verr|verw)(?-i)\b"
+color statement "\b(?i)(bsf|bsr|bt|btc|btr|bts|cdq|cmpsd|cwde|insd|iret|iretd|iretf|jecxz|lfs|lgs|lss|lodsd|loopw|loopew|loopnew|loopnzw|loopzw|loopd|looped|loopned|loopnzd|loopzd|cr|tr|dr|movsd|movsx|movzx|outsd|popad|popfd|pushad|pushfd|scasd|seta|setae|setb|setbe|setc|sete|setg|setge|setl|setle|setna|setnae|setnb|setnbe|setnc|setne|setng|setnge|setnl|setnle|setno|setnp|setns|setnz|seto|setp|setpe|setpo|sets|setz|shdl|shrd|stosd)(?-i)\b"
+color statement "\b(?i)(bswap|cmpxcgh|invd|invlpg|wbinvd|xadd)(?-i)\b"
+color statement "\b(?i)(cpuid|cmpxchg8b|rdmsr|rdtsc|wrmsr|rsm)(?-i)\b"
+color statement "\b(?i)(rdpmc)(?-i)\b"
+color statement "\b(?i)(syscall|sysret)(?-i)\b"
+color statement "\b(?i)(cmova|cmovae|cmovb|cmovbe|cmovc|cmove|cmovg|cmovge|cmovl|cmovle|cmovna|cmovnae|cmovnb|cmovnbe|cmovnc|cmovne|cmovng|cmovnge|cmovnle|cmovno|cmovpn|cmovns|cmovnz|cmovo|cmovp|cmovpe|cmovpo|cmovs|cmovz|sysenter|sysexit|ud2)(?-i)\b"
+color statement "\b(?i)(maskmovq|movntps|movntq|prefetch0|prefetch1|prefetch2|prefetchnta|sfence)(?-i)\b"
+color statement "\b(?i)(clflush|lfence|maskmovdqu|mfence|movntdq|movnti|movntpd|pause)(?-i)\b"
+color statement "\b(?i)(monitor|mwait)(?-i)\b"
+color statement "\b(?i)(cdqe|cqo|cmpsq|cmpxchg16b|iretq|jrcxz|lodsq|movsdx|popfq|pushfq|rdtscp|scasq|stosq|swapgs)(?-i)\b"
+color statement "\b(?i)(clgi|invlpga|skinit|stgi|vmload|vmmcall|vmrun|vmsave)(?-i)\b"
+color statement "\b(?i)(vmptrdl|vmptrst|vmclear|vmread|vmwrite|vmcall|vmlaunch|vmresume|vmxoff|vmxon)(?-i)\b"
+color statement "\b(?i)(lzcnt|popcnt)(?-i)\b"
+color statement "\b(?i)(bextr|blcfill|blci|blcic|blcmask|blcs|blsfill|blsic|t1mskc|tzmsk)(?-i)\b"
+
+color statement "\b(?i)()(?-i)\b"
