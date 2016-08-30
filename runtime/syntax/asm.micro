@@ -1,14 +1,14 @@
-## Here is an example for assembler.
-##
+## Made by Nickolay Ilyushin <nickolay02@inbox.ru>. Next line is from previous (first) version
 syntax "asm" "\.(S|s|asm)$"
 
 # Template - will be removed later: color xxx "\b(?i)()(?-i)\b"
 # This file is made for NASM assembly
 
-# Comments
+## Comments
 color comment ";.*"
 
-# Instructions
+## Instructions
+# x86
 color statement "\b(?i)(mov|aaa|aad|aam|aas|adc|add|and|call|cbw|clc|cld|cli|cmc|cmp|cmpsb|cmpsw|cwd|daa|das|dec|div|esc|hlt|idiv|imul|in|inc|int|into|iret|ja|jae|jb|jbe|jc|je|jg|jge|jl|jle|jna|jnae|jnb|jnbe|jnc|jne|jng|jnge|jnl|jnle|jno|jnp|jns|jnz|jo|jp|jpe|jpo|js|jz|jcxz|jmp|lahf|lds|lea|les|lock|lodsb|lodsw|loop|loope|loopne|loopnz|loopz|movsb|movsw|mul|neg|nop|or|pop|popf|push|pushf|rcl|rcr|rep|repe|repne|repnz|repz|ret|retn|retf|rol|ror|sahf|sal|sar|sbb|scasb|scasw|shl|shr|stc|std|sti|stosb|stosw|sub|test|wait|xchg|xlat|xor)(?-i)\b"
 color statement "\b(?i)(bound|enter|ins|leave|outs|popa|pusha)(?-i)\b"
 color statement "\b(?i)(arpl|clts|lar|lgdt|lidt|lldt|lmsw|loadall|lsl|ltr|sgdt|sidt|sldt|smsw|str|verr|verw)(?-i)\b"
@@ -27,4 +27,15 @@ color statement "\b(?i)(vmptrdl|vmptrst|vmclear|vmread|vmwrite|vmcall|vmlaunch|v
 color statement "\b(?i)(lzcnt|popcnt)(?-i)\b"
 color statement "\b(?i)(bextr|blcfill|blci|blcic|blcmask|blcs|blsfill|blsic|t1mskc|tzmsk)(?-i)\b"
 
+# x87
+color statement "\b(?i)(f2xm1|fabs|fadd|faddp|fbld|fbstp|fchs|fclex|fcom|fcomp|fcompp|fdecstp|fdisi|fdiv|fvidp|fdivr|fdivrp|feni|ffree|fiadd|ficom|ficomp|fidiv|fidivr|fild|fimul|fincstp|finit|fist|fistp|fisub|fisubr|fld|fld1|fldcw|fldenv|fldenvw|fldl2e|fldl2t|fldlg2|fldln2|fldpi|fldz|fmul|fmulp|fnclex|fndisi|fneni|fninit|fnop|fnsave|fnsavenew|fnstcw|fnstenv|fnstenvw|fnstsw|fpatan|fprem|fptan|frndint|frstor|frstorw|fsave|fsavew|fscale|fsqrt|fst|fstcw|fstenv|fstenvw|fstp|fstpsw|fsub|fsubp|fsubr|fsubrp|ftst|fwait|fxam|fxch|fxtract|fyl2x|fyl2xp1)(?-i)\b"
+color statement "\b(?i)(fsetpm)(?-i)\b"
+color statement "\b(?i)(fcos|fldenvd|fsaved|fstenvd|fprem1|frstord|fsin|fsincos|fstenvd|fucom|fucomp|fucompp)(?-i)\b"
+color statement "\b(?i)(fcmovb|fcmovbe|fcmove|fcmove|fcmovnb|fcmovnbe|fcmovne|fcmovnu|fcmovu)(?-i)\b"
+color statement "\b(?i)(fcomi|fcomip|fucomi|fucomip)(?-i)\b"
+color statement "\b(?i)(fxrstor|fxsave)(?-i)\b"
+color statement "\b(?i)(fisttp)(?-i)\b"
+color statement "\b(?i)(ffreep)(?-i)\b"
+
+# SIMD
 color statement "\b(?i)()(?-i)\b"
