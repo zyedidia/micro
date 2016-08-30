@@ -2,10 +2,14 @@ if GetOption("linter") == nil then
     AddOption("linter", true)
 end
 
-MakeCommand("lint", "linter.runLinter", 0)
+MakeCommand("lint", "linter.lintCommand", 0)
+
+function lintCommand()
+    CurView():Save(false)
+    runLinter()
+end
 
 function runLinter()
-    CurView():Save(false)
     local ft = CurView().Buf:FileType()
     local file = CurView().Buf.Path
     local devnull = "/dev/null"
