@@ -9,6 +9,7 @@ var helpFiles = []string{
 	"colors",
 	"options",
 	"commands",
+	"tutorial",
 }
 
 // LoadHelp loads the help text from inside the binary
