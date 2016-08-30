@@ -97,10 +97,12 @@ func InitLocalSettings(buf *Buffer) {
 func WriteSettings(filename string) error {
 	var err error
 	if _, e := os.Stat(configDir); e == nil {
-		var parsed map[string]interface{}
+		parsed := make(map[string]interface{})
 
 		filename := configDir + "/settings.json"
-		parsed = globalSettings
+		for k, v := range globalSettings {
+			parsed[k] = v
+		}
 		if _, e := os.Stat(filename); e == nil {
 			input, err := ioutil.ReadFile(filename)
 			if string(input) != "null" {
