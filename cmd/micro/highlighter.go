@@ -38,6 +38,7 @@ var preInstalledSynFiles = []string{
 	"asm",
 	"awk",
 	"c",
+	"caddyfile",
 	"cmake",
 	"coffeescript",
 	"colortest",
