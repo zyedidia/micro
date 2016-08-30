@@ -347,11 +347,13 @@ func main() {
 					continue
 				}
 
-				// We loop through each view in the current tab and make sure the current view
-				// it the one being clicked in
-				for _, v := range tabs[curTab].views {
-					if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
-						tabs[curTab].curView = v.Num
+				if CurView().mouseReleased {
+					// We loop through each view in the current tab and make sure the current view
+					// is the one being clicked in
+					for _, v := range tabs[curTab].views {
+						if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
+							tabs[curTab].curView = v.Num
+						}
 					}
 				}
 			}
