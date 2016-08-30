@@ -88,7 +88,7 @@ If you don't have xclip or xsel, micro will use an internal clipboard for copy a
 Many of the Windows terminals don't support more than 16 colors, which means
 that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
-mintty or cmder.
+mintty.
 
 ### Plan9, NaCl, Cygwin
 
