@@ -81,7 +81,7 @@ color constant.number "\b0x[0-9 a-f A-F]+\b"
 
 ## Preprocessor (NASM)
 color preproc "%+(\+|\?|\?\?|)[a-z A-Z 0-9]+"
-color preproc "%\[.*|[a-z][A-Z]*\]"
+color preproc "%\[[. a-z A-Z 0-9]*\]"
 
 ## Other
 color statement "\b(?i)(segment|\.text|\.data|\.bss)(?-i)\b"
