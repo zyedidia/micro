@@ -1,3 +1,6 @@
 ./micro
 !cmd/micro
 binaries/
+tmp.sh
+micro
+test/
