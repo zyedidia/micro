@@ -72,6 +72,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"ShellMode":           (*View).ShellMode,
 	"CommandMode":         (*View).CommandMode,
 	"Quit":                (*View).Quit,
+	"QuitAll":             (*View).QuitAll,
 	"AddTab":              (*View).AddTab,
 	"PreviousTab":         (*View).PreviousTab,
 	"NextTab":             (*View).NextTab,

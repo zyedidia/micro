@@ -169,6 +169,7 @@ ClearStatus
 ShellMode
 CommandMode
 Quit
+QuitAll
 AddTab
 PreviousTab
 NextTab

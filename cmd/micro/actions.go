@@ -1322,6 +1322,39 @@ func (v *View) Quit(usePlugin bool) bool {
 	return false
 }
 
+// QuitAll quits the whole editor; all splits and tabs
+func (v *View) QuitAll(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("QuitAll", v) {
+		return false
+	}
+
+	closeAll := true
+	for _, tab := range tabs {
+		for _, v := range tab.views {
+			if !v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+				closeAll = false
+			}
+		}
+	}
+
+	if closeAll {
+		for _, tab := range tabs {
+			for _, v := range tab.views {
+				v.CloseBuffer()
+			}
+		}
+
+		if usePlugin {
+			PostActionCall("QuitAll", v)
+		}
+
+		screen.Fini()
+		os.Exit(0)
+	}
+
+	return false
+}
+
 // AddTab adds a new tab with an empty buffer
 func (v *View) AddTab(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("AddTab", v) {
