@@ -87,6 +87,13 @@ func LoadInput() []*Buffer {
 		// We go through each file and load it
 		for i := 1; i < len(os.Args); i++ {
 			filename = os.Args[i]
+
+			// Need to skip arguments that are not filenames
+			if filename == "-cursor" {
+				i++ // also skip the LINE,COL for -cursor
+				continue
+			}
+
 			// Check that the file exists
 			if _, e := os.Stat(filename); e == nil {
 				// If it exists we load it into a buffer
@@ -196,6 +203,9 @@ func RedrawAll() {
 
 // Passing -version as a flag will have micro print out the version number
 var flagVersion = flag.Bool("version", false, "Show the version number")
+
+// Passing -cursor LINE,COL will start the cursor at position LINE,COL
+var flagLineColumn = flag.String("cursor", "", "Start the cursor at position `LINE,COL`")
 
 func main() {
 	flag.Parse()
