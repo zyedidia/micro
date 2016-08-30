@@ -83,7 +83,14 @@ sudo apt-get install xclip
 
 If you don't have xclip or xsel, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
 
-### Windows colors
+### Colors and syntax highlighting
+
+If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
+you are using a terminal which does not support 256 color. Try changing the colorscheme to `simple`
+by running `> set colorscheme simple`.
+
+If you are using the default ubuntu terminal, to enable 256 make sure your `TERM` variable is set
+to `xterm-256color`.
 
 Many of the Windows terminals don't support more than 16 colors, which means
 that micro's default colorscheme won't look very good. You can either set
