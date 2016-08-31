@@ -80,6 +80,7 @@ var preInstalledSynFiles = []string{
 	"man",
 	"markdown",
 	"mpdconf",
+	"micro",
 	"nanorc",
 	"nginx",
 	"ocaml",
