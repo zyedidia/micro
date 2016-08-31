@@ -344,7 +344,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 	case *tcell.EventPaste:
-		relocate = v.Paste(true)
+		if !PreActionCall("Paste", v) {
+			break
+		}
+
+		leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+
+		if v.Cursor.HasSelection() {
+			v.Cursor.DeleteSelection()
+			v.Cursor.ResetSelection()
+		}
+		clip := e.Text()
+		clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
+		v.Buf.Insert(v.Cursor.Loc, clip)
+		v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+		v.freshClip = false
+		messenger.Message("Pasted clipboard")
+
+		PostActionCall("Paste", v)
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
