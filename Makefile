@@ -45,3 +45,6 @@ test:
 
 clean:
 	rm -f micro
+
+sysinstall_linux:
+	cp micro /usr/bin
