@@ -44,6 +44,15 @@ func PostActionCall(funcName string, view *View) bool {
 	return relocate
 }
 
+func (v *View) deselect(index int) bool {
+	if v.Cursor.HasSelection() {
+		v.Cursor.Loc = v.Cursor.CurSelection[index]
+		v.Cursor.ResetSelection()
+		return true
+	}
+	return false
+}
+
 // Center centers the view on the cursor
 func (v *View) Center(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Center", v) {
@@ -70,10 +79,7 @@ func (v *View) CursorUp(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Cursor.HasSelection() {
-		v.Cursor.Loc = v.Cursor.CurSelection[0]
-		v.Cursor.ResetSelection()
-	}
+	v.deselect(0)
 	v.Cursor.Up()
 
 	if usePlugin {
@@ -88,10 +94,7 @@ func (v *View) CursorDown(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Cursor.HasSelection() {
-		v.Cursor.Loc = v.Cursor.CurSelection[1]
-		v.Cursor.ResetSelection()
-	}
+	v.deselect(1)
 	v.Cursor.Down()
 
 	if usePlugin {
@@ -290,6 +293,8 @@ func (v *View) StartOfLine(usePlugin bool) bool {
 		return false
 	}
 
+	v.deselect(0)
+
 	v.Cursor.Start()
 
 	if usePlugin {
@@ -303,6 +308,8 @@ func (v *View) EndOfLine(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("EndOfLine", v) {
 		return false
 	}
+
+	v.deselect(0)
 
 	v.Cursor.End()
 
@@ -368,6 +375,8 @@ func (v *View) CursorEnd(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorEnd", v) {
 		return false
 	}
+
+	v.deselect(0)
 
 	v.Cursor.Loc = v.Buf.End()
 
@@ -1089,6 +1098,8 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 		return false
 	}
 
+	v.deselect(0)
+
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
@@ -1106,6 +1117,8 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorPageDown", v) {
 		return false
 	}
+
+	v.deselect(0)
 
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1]
