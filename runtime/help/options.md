@@ -31,6 +31,11 @@ Here are the options that you can set:
 
 	default value: ` `
 
+* `infobar`: enables the line at the bottom of the editor where messages are printed.
+   This option is `global only`.
+
+	default value: `on`
+
 * `filetype`: sets the filetype for the current buffer. This setting is `local only`
 
     default value: this will be automatically set depending on the file you have open

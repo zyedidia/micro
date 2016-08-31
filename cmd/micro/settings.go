@@ -169,6 +169,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"cursorline":   true,
 		"ignorecase":   false,
 		"indentchar":   " ",
+		"infobar":      true,
 		"ruler":        true,
 		"savecursor":   false,
 		"saveundo":     false,
@@ -241,6 +242,12 @@ func SetOption(option, value string) error {
 					view.matches = Match(view)
 				}
 			}
+		}
+	}
+
+	if option == "infobar" {
+		for _, tab := range tabs {
+			tab.Resize()
 		}
 	}
 

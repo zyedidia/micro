@@ -347,6 +347,9 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 func (m *Messenger) Display() {
 	_, h := screen.Size()
 	if m.hasMessage {
+		if !m.hasPrompt {
+			return
+		}
 		runes := []rune(m.message + m.response)
 		for x := 0; x < len(runes); x++ {
 			screen.SetContent(x, h-1, runes[x], nil, m.style)

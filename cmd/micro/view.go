@@ -84,7 +84,7 @@ type View struct {
 // NewView returns a new fullscreen view
 func NewView(buf *Buffer) *View {
 	screenW, screenH := screen.Size()
-	return NewViewWidthHeight(buf, screenW, screenH-1)
+	return NewViewWidthHeight(buf, screenW, screenH)
 }
 
 // NewViewWidthHeight returns a new view with the specified width and height
