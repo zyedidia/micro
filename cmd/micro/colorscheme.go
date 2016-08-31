@@ -16,7 +16,7 @@ type Colorscheme map[string]tcell.Style
 // The current colorscheme
 var colorscheme Colorscheme
 
-var preInstalledColors = []string{"default", "simple", "solarized", "solarized-tc", "atom-dark-tc", "monokai", "gruvbox", "zenburn"}
+var preInstalledColors = []string{"default", "simple", "solarized", "solarized-tc", "atom-dark-tc", "monokai", "gruvbox", "zenburn", "bubblegum"}
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
