@@ -2,29 +2,27 @@
 ##
 syntax "ebuild" "\.e(build|class)$"
 ## All the standard portage functions
-color brightgreen "^src_(unpack|compile|install|test)" "^pkg_(config|nofetch|setup|(pre|post)(inst|rm))"
+color identifier "^src_(unpack|compile|install|test)" "^pkg_(config|nofetch|setup|(pre|post)(inst|rm))"
 ## Highlight bash related syntax
-color green "\<(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while|continue|break)\>"
-color green "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
-color green "-(e|d|f|r|g|u|w|x|L)\>"
-color green "-(eq|ne|gt|lt|ge|le|s|n|z)\>"
+color statement "\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while|continue|break)\b"
+color statement "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
+color statement "-(e|d|f|r|g|u|w|x|L)\b"
+color statement "-(eq|ne|gt|lt|ge|le|s|n|z)\b"
 ## Highlight variables ... official portage ones in red, all others in bright red
-color brightred "\$\{?[a-zA-Z_0-9]+\}?"
-color red "\<(ARCH|HOMEPAGE|DESCRIPTION|IUSE|SRC_URI|LICENSE|SLOT|KEYWORDS|FILESDIR|WORKDIR|(P|R)?DEPEND|PROVIDE|DISTDIR|RESTRICT|USERLAND)\>"
-color red "\<(S|D|T|PV|PF|P|PN|A)\>" "\<C(XX)?FLAGS\>" "\<LDFLAGS\>" "\<C(HOST|TARGET|BUILD)\>"
+color preproc "\$\{?[a-zA-Z_0-9]+\}?"
+color special "\b(ARCH|HOMEPAGE|DESCRIPTION|IUSE|SRC_URI|LICENSE|SLOT|KEYWORDS|FILESDIR|WORKDIR|(P|R)?DEPEND|PROVIDE|DISTDIR|RESTRICT|USERLAND)\b"
+color special "\b(S|D|T|PV|PF|P|PN|A)\b" "\bC(XX)?FLAGS\b" "\bLDFLAGS\b" "\bC(HOST|TARGET|BUILD)\b"
 ## Highlight portage commands
-color magenta "\<use(_(with|enable))?\> [!a-zA-Z0-9_+ -]*" "inherit.*"
-color brightblue "\<e(begin|end|conf|install|make|warn|infon?|error|log|patch|new(group|user))\>"
-color brightblue "\<die\>" "\<use(_(with|enable))?\>" "\<inherit\>" "\<has\>" "\<(has|best)_version\>" "\<unpack\>"
-color brightblue "\<(do|new)(ins|s?bin|doc|lib(\.so|\.a)|man|info|exe|initd|confd|envd|pam|menu|icon)\>"
-color brightblue "\<do(python|sed|dir|hard|sym|html|jar|mo)\>" "\<keepdir\>"
-color brightblue "prepall(docs|info|man|strip)" "prep(info|lib|lib\.(so|a)|man|strip)"
-color brightblue "\<(doc|ins|exe)into\>" "\<f(owners|perms)\>" "\<(exe|ins|dir)opts\>"
+color identifier "\buse(_(with|enable))?\b [!a-zA-Z0-9_+ -]*" "inherit.*"
+color statement "\be(begin|end|conf|install|make|warn|infon?|error|log|patch|new(group|user))\b"
+color statement "\bdie\b" "\buse(_(with|enable))?\b" "\binherit\b" "\bhas\b" "\b(has|best)_version\b" "\bunpack\b"
+color statement "\b(do|new)(ins|s?bin|doc|lib(\.so|\.a)|man|info|exe|initd|confd|envd|pam|menu|icon)\b"
+color statement "\bdo(python|sed|dir|hard|sym|html|jar|mo)\b" "\bkeepdir\b"
+color statement "prepall(docs|info|man|strip)" "prep(info|lib|lib\.(so|a)|man|strip)"
+color statement "\b(doc|ins|exe)into\b" "\bf(owners|perms)\b" "\b(exe|ins|dir)opts\b"
 ## Highlight common commands used in ebuilds
-color blue "\<make\>" "\<(cat|cd|chmod|chown|cp|echo|env|export|grep|let|ln|mkdir|mv|rm|sed|set|tar|touch|unset)\>"
+color type "\bmake\b" "\b(cat|cd|chmod|chown|cp|echo|env|export|grep|let|ln|mkdir|mv|rm|sed|set|tar|touch|unset)\b"
 ## Highlight comments (doesnt work that well)
-color yellow "#.*$"
+color comment "#.*$"
 ## Highlight strings (doesnt work that well)
-color brightyellow ""(\\.|[^\"])*"" "'(\\.|[^'])*'"
-## Trailing space is bad!
-color ,green "[[:space:]]+$"
+color constant.string ""(\\.|[^\"])*"" "'(\\.|[^'])*'"
