@@ -37,7 +37,7 @@ for example turning off `tabstospaces` only for Go files when they are opened.
 ---
 
 There are a number of functions and variables that are available to you in
-oder to access the inner workings of micro. Here is a list (the type signatures
+order to access the inner workings of micro. Here is a list (the type signatures
 for functions are given using Go's type system):
 
 * `OS`: variable which gives the OS micro is currently running on (this is the same

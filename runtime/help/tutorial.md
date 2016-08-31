@@ -1,7 +1,7 @@
 # Tutorial
 
-This is a brief intro to micro's configuration system that will will give some
-simple examples showing how to configure settings, rebind keys, 
+This is a brief intro to micro's configuration system that will give some
+simple examples showing how to configure settings, rebind keys,
 and use `init.lua` to configure micro to your liking.
 
 Hopefully you'll find this useful.
