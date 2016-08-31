@@ -88,9 +88,9 @@ func LoadInput() []*Buffer {
 		for i := 1; i < len(os.Args); i++ {
 			filename = os.Args[i]
 
-			// Need to skip arguments that are not filenames
-			if filename == "-cursor" {
-				i++ // also skip the LINE,COL for -cursor
+			// Check if +LINE,COL was passed, and send this to the flagLineColumn
+			if string(filename[0]) == "+" && strings.Contains(filename, ",") {
+				flagLineColumn = filename
 				continue
 			}
 
@@ -204,8 +204,8 @@ func RedrawAll() {
 // Passing -version as a flag will have micro print out the version number
 var flagVersion = flag.Bool("version", false, "Show the version number")
 
-// Passing -cursor LINE,COL will start the cursor at position LINE,COL
-var flagLineColumn = flag.String("cursor", "", "Start the cursor at position `LINE,COL`")
+// Passing +LINE,COL will start the cursor at position LINE,COL
+var flagLineColumn = ""
 
 func main() {
 	flag.Parse()

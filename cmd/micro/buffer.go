@@ -89,9 +89,9 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	// Put the cursor at the first spot
 	cursorStartX := 0
 	cursorStartY := 0
-	// If -cursor LINE,COL was passed, use start position LINE,COL
-	if len(*flagLineColumn) > 0 {
-		positions := strings.Split(*flagLineColumn, ",")
+	// If +LINE,COL was passed, use start position LINE,COL
+	if len(flagLineColumn) > 0 {
+		positions := strings.Split(flagLineColumn[1:], ",")
 		if len(positions) == 2 {
 			lineNum, errPos1 := strconv.Atoi(positions[0])
 			colNum, errPos2 := strconv.Atoi(positions[1])
