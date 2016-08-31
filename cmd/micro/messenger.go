@@ -347,7 +347,7 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 func (m *Messenger) Display() {
 	_, h := screen.Size()
 	if m.hasMessage {
-		if !m.hasPrompt {
+		if !m.hasPrompt && !globalSettings["infobar"].(bool) {
 			return
 		}
 		runes := []rune(m.message + m.response)
