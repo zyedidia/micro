@@ -3,6 +3,12 @@
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, 
 while also taking advantage of the full capabilities of modern terminals.
 
+*Press CtrlQ to quit, and CtrlS to save.*
+
+If you want to see all the keybindings press CtrlE and type `help keybindings`.
+
+See the next section for more information about documentation and help.
+
 ### Accessing more help
 
 Micro has a built-in help system much like Vim's (although less extensive).
