@@ -170,7 +170,8 @@ func InitScreen() {
 	screen, err = tcell.NewScreen()
 
 	if err != nil && err.Error() == "terminal entry not found" {
-		termDB, err := MkInfo()
+		var termDB []byte
+		termDB, err = MkInfo()
 
 		if err != nil {
 			fmt.Println("Terminal entry not found")
