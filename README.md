@@ -122,7 +122,14 @@ click to enable line selection.
 # Documentation and Help
 
 Micro has a built-in help system which you can access by pressing `CtrlE` and typing `help`. Additionally, you can
-view the help files online [here](https://github.com/zyedidia/micro/tree/master/runtime/help).
+view the help files here:
+
+* [main help](https://github.com/zyedidia/micro/tree/master/runtime/help)
+* [keybindings](https://github.com/zyedidia/micro/tree/master/runtime/help)
+* [commands](https://github.com/zyedidia/micro/tree/master/runtime/help)
+* [colors](https://github.com/zyedidia/micro/tree/master/runtime/help)
+* [options](https://github.com/zyedidia/micro/tree/master/runtime/help)
+* [plugins](https://github.com/zyedidia/micro/tree/master/runtime/help)
 
 I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
 a brief introduction to the more powerful configuration features micro offers.
