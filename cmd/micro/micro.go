@@ -163,9 +163,28 @@ func InitScreen() {
 		os.Setenv("TERM", "xterm-truecolor")
 	}
 
+	os.Setenv("TCELLDB", configDir+"/.tcelldb")
+
 	// Initilize tcell
 	var err error
 	screen, err = tcell.NewScreen()
+
+	if err != nil && err.Error() == "terminal entry not found" {
+		termDB, err := MkInfo()
+
+		if err != nil {
+			fmt.Println("Terminal entry not found")
+			fmt.Println("Error when trying to read terminfo: ", err)
+			os.Exit(1)
+		}
+
+		if _, e := os.Stat(configDir); e == nil {
+			ioutil.WriteFile(configDir+"/.tcelldb", termDB, 0644)
+		}
+
+		screen, err = tcell.NewScreen()
+	}
+
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
