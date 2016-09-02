@@ -845,7 +845,7 @@ func (v *View) Copy(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection())
+		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.freshClip = true
 		messenger.Message("Copied selection")
 	}
@@ -868,10 +868,10 @@ func (v *View) CutLine(usePlugin bool) bool {
 	}
 	if v.freshClip == true {
 		if v.Cursor.HasSelection() {
-			if clip, err := clipboard.ReadAll(); err != nil {
+			if clip, err := clipboard.ReadAll("clipboard"); err != nil {
 				messenger.Error(err)
 			} else {
-				clipboard.WriteAll(clip + v.Cursor.GetSelection())
+				clipboard.WriteAll(clip+v.Cursor.GetSelection(), "clipboard")
 			}
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
@@ -896,7 +896,7 @@ func (v *View) Cut(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection())
+		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 		v.freshClip = true
@@ -955,18 +955,23 @@ func (v *View) Paste(usePlugin bool) bool {
 		return false
 	}
 
-	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	clip, _ := clipboard.ReadAll("clipboard")
+	v.paste(clip)
 
-	if v.Cursor.HasSelection() {
-		v.Cursor.DeleteSelection()
-		v.Cursor.ResetSelection()
+	if usePlugin {
+		return PostActionCall("Paste", v)
 	}
-	clip, _ := clipboard.ReadAll()
-	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
-	v.Buf.Insert(v.Cursor.Loc, clip)
-	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
-	v.freshClip = false
-	messenger.Message("Pasted clipboard")
+	return true
+}
+
+// PastePrimary pastes from the primary clipboard (only use on linux)
+func (v *View) PastePrimary(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Paste", v) {
+		return false
+	}
+
+	clip, _ := clipboard.ReadAll("primary")
+	v.paste(clip)
 
 	if usePlugin {
 		return PostActionCall("Paste", v)
