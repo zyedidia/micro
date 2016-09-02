@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -216,4 +217,63 @@ func Abs(n int) int {
 		return -n
 	}
 	return n
+}
+
+// SplitCommandArgs seperates multiple command arguments which may be quoted.
+// The returned slice contains at least one string
+func SplitCommandArgs(input string) []string {
+	var result []string
+
+	inQuote := false
+	escape := false
+	curArg := new(bytes.Buffer)
+	for _, r := range input {
+		if !escape {
+			switch {
+			case r == '\\' && inQuote:
+				escape = true
+				continue
+			case r == '"' && inQuote:
+				inQuote = false
+				continue
+			case r == '"' && !inQuote && curArg.Len() == 0:
+				inQuote = true
+				continue
+			case r == ' ' && !inQuote:
+				result = append(result, curArg.String())
+				curArg.Reset()
+				continue
+			}
+		}
+		escape = false
+		curArg.WriteRune(r)
+	}
+	if curArg.Len() > 0 || len(result) == 0 {
+		result = append(result, curArg.String())
+	}
+	return result
+}
+
+// JoinCommandArgs joins multiple command arguments and quote the strings if needed.
+func JoinCommandArgs(args ...string) string {
+	buf := new(bytes.Buffer)
+	for _, arg := range args {
+		if buf.Len() > 0 {
+			buf.WriteRune(' ')
+		}
+		if !strings.Contains(arg, " ") {
+			buf.WriteString(arg)
+		} else {
+			buf.WriteRune('"')
+			for _, r := range arg {
+				if r == '"' || r == '\\' {
+					buf.WriteRune('\\')
+				}
+				buf.WriteRune(r)
+			}
+			buf.WriteRune('"')
+		}
+	}
+
+	return buf.String()
 }
