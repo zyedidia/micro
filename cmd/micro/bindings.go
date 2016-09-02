@@ -1,11 +1,11 @@
 package main
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"os"
 	"strings"
 
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/zyedidia/tcell"
 )
 
@@ -236,7 +236,7 @@ func InitBindings() {
 			return
 		}
 
-		err = json.Unmarshal(input, &parsed)
+		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			TermMessage("Error reading bindings.json:", err.Error())
 		}

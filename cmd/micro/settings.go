@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/zyedidia/glob"
 )
 
@@ -30,7 +30,7 @@ func InitGlobalSettings() {
 				return
 			}
 
-			err = json.Unmarshal(input, &parsed)
+			err = json5.Unmarshal(input, &parsed)
 			if err != nil {
 				TermMessage("Error reading settings.json:", err.Error())
 			}
@@ -70,7 +70,7 @@ func InitLocalSettings(buf *Buffer) {
 			return
 		}
 
-		err = json.Unmarshal(input, &parsed)
+		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			TermMessage("Error reading settings.json:", err.Error())
 		}
@@ -110,7 +110,7 @@ func WriteSettings(filename string) error {
 					return err
 				}
 
-				err = json.Unmarshal(input, &parsed)
+				err = json5.Unmarshal(input, &parsed)
 				if err != nil {
 					TermMessage("Error reading settings.json:", err.Error())
 				}
@@ -125,7 +125,7 @@ func WriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
+		txt, _ := json5.MarshalIndent(parsed, "", "    ")
 		err = ioutil.WriteFile(filename, txt, 0644)
 	}
 	return err
