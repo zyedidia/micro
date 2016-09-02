@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -196,7 +195,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
-				args := strings.Split(m.response, " ")
+				args := SplitCommandArgs(m.response)
 				currentArgNum := len(args) - 1
 				currentArg := args[currentArgNum]
 				var completionType Completion
@@ -229,10 +228,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				}
 
 				if chosen != "" {
-					if len(args) > 1 {
-						chosen = " " + chosen
-					}
-					m.response = strings.Join(args[:len(args)-1], " ") + chosen
+					m.response = JoinCommandArgs(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
 			}

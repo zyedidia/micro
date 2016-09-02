@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"reflect"
+	"testing"
+)
 
 func TestNumOccurences(t *testing.T) {
 	var tests = []struct {
@@ -61,5 +64,30 @@ func TestIsWordChar(t *testing.T) {
 	}
 	if IsWordChar("\n") == true {
 		t.Errorf("IsWordChar(\n)) = true")
+	}
+}
+
+func TestJoinAndSplitCommandArgs(t *testing.T) {
+	tests := []struct {
+		Query  []string
+		Wanted string
+	}{
+		{[]string{`test case`}, `"test case"`},
+		{[]string{`quote "test"`}, `"quote \"test\""`},
+		{[]string{`slash\\\ test`}, `"slash\\\\\\ test"`},
+		{[]string{`path 1`, `path\" 2`}, `"path 1" "path\\\" 2"`},
+		{[]string{`foo`}, `foo`},
+		{[]string{`foo\"bar`}, `foo\"bar`},
+		{[]string{``}, ``},
+	}
+
+	for i, test := range tests {
+		if result := JoinCommandArgs(test.Query...); test.Wanted != result {
+			t.Errorf("JoinCommandArgs failed at Test %d\nGot: %v", i, result)
+		}
+
+		if result := SplitCommandArgs(test.Wanted); !reflect.DeepEqual(test.Query, result) {
+			t.Errorf("SplitCommandArgs failed at Test %d\nGot: %v", i, result)
+		}
 	}
 }
