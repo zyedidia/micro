@@ -1,11 +1,13 @@
 package main
 
 import (
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 )
 
@@ -446,6 +448,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
 					v.Cursor.CurSelection[1] = v.Cursor.Loc
+
+					if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
+						clipboard.WriteAll(v.Cursor.GetSelection(), "primary")
+					}
 				}
 				v.mouseReleased = true
 			}
