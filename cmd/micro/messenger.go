@@ -222,6 +222,8 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
 					chosen, suggestions = OptionComplete(currentArg)
+				} else if completionType < NoCompletion {
+					chosen, suggestions = PluginComplete(completionType, currentArg)
 				}
 
 				if len(suggestions) > 1 {
