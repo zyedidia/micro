@@ -66,6 +66,9 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    creates a command with `name` which will call `function` when executed.
    Use 0 for completions to get NoCompletion.
 
+* `MakeCompletion(function string)`:
+   creates a `Completion` to use with `MakeCommand`.
+
 * `CurView()`: returns the current view
 
 * `HandleCommand(cmd string)`: runs the given command
@@ -103,6 +106,36 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 
 If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+
+# Autocomplete command arguments
+
+See this example to learn how to use `MakeCompletion` and `MakeCommand`
+
+```lua
+local function StartsWith(String,Start)
+  String = String:upper()
+  Start = Start:upper() 
+  return string.sub(String,1,string.len(Start))==Start
+end
+
+function complete(input)
+  local allCompletions = {"Hello", "World", "Foo", "Bar"}
+  local result = {}
+   
+  for i,v in pairs(allCompletions) do
+  if StartsWith(v, input) then
+       table.insert(result, v)
+     end
+   end
+   return result
+end
+
+function foo(arg)
+  messenger:Message(arg)
+end
+
+MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
+```
 
 # Default plugins
 
