@@ -225,7 +225,7 @@ func Bind(args []string) {
 // Run runs a shell command in the background
 func Run(args []string) {
 	// Run a shell command in the background (openTerm is false)
-	HandleShellCommand(strings.Join(args, " "), false)
+	HandleShellCommand(JoinCommandArgs(args...), false)
 }
 
 // Quit closes the main view
@@ -340,8 +340,8 @@ func Replace(args []string) {
 
 // RunShellCommand executes a shell command and returns the output/error
 func RunShellCommand(input string) (string, error) {
-	inputCmd := strings.Split(input, " ")[0]
-	args := strings.Split(input, " ")[1:]
+	inputCmd := SplitCommandArgs(input)[0]
+	args := SplitCommandArgs(input)[1:]
 
 	cmd := exec.Command(inputCmd, args...)
 	outputBytes := &bytes.Buffer{}
@@ -357,7 +357,7 @@ func RunShellCommand(input string) (string, error) {
 // The openTerm argument specifies whether a terminal should be opened (for viewing output
 // or interacting with stdin)
 func HandleShellCommand(input string, openTerm bool) {
-	inputCmd := strings.Split(input, " ")[0]
+	inputCmd := SplitCommandArgs(input)[0]
 	if !openTerm {
 		// Simply run the command in the background and notify the user when it's done
 		messenger.Message("Running...")
@@ -382,7 +382,7 @@ func HandleShellCommand(input string, openTerm bool) {
 		screen.Fini()
 		screen = nil
 
-		args := strings.Split(input, " ")[1:]
+		args := SplitCommandArgs(input)[1:]
 
 		// Set up everything for the command
 		cmd := exec.Command(inputCmd, args...)
@@ -414,12 +414,12 @@ func HandleShellCommand(input string, openTerm bool) {
 
 // HandleCommand handles input from the user
 func HandleCommand(input string) {
-	inputCmd := strings.Split(input, " ")[0]
-	args := strings.Split(input, " ")[1:]
+	args := SplitCommandArgs(input)
+	inputCmd := args[0]
 
 	if _, ok := commands[inputCmd]; !ok {
 		messenger.Error("Unknown command ", inputCmd)
 	} else {
-		commands[inputCmd].action(args)
+		commands[inputCmd].action(args[1:])
 	}
 }

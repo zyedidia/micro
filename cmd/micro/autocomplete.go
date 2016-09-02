@@ -14,13 +14,14 @@ import (
 
 // FileComplete autocompletes filenames
 func FileComplete(input string) (string, []string) {
-	dirs := strings.Split(input, "/")
+	var sep string = string(os.PathSeparator)
+	dirs := strings.Split(input, sep)
 	var files []os.FileInfo
 	var err error
 	if len(dirs) > 1 {
 		home, _ := homedir.Dir()
 
-		directories := strings.Join(dirs[:len(dirs)-1], "/")
+		directories := strings.Join(dirs[:len(dirs)-1], sep)
 		if strings.HasPrefix(directories, "~") {
 			directories = strings.Replace(directories, "~", home, 1)
 		}
@@ -35,7 +36,7 @@ func FileComplete(input string) (string, []string) {
 	for _, f := range files {
 		name := f.Name()
 		if f.IsDir() {
-			name += "/"
+			name += sep
 		}
 		if strings.HasPrefix(name, dirs[len(dirs)-1]) {
 			suggestions = append(suggestions, name)
@@ -45,13 +46,13 @@ func FileComplete(input string) (string, []string) {
 	var chosen string
 	if len(suggestions) == 1 {
 		if len(dirs) > 1 {
-			chosen = strings.Join(dirs[:len(dirs)-1], "/") + "/" + suggestions[0]
+			chosen = strings.Join(dirs[:len(dirs)-1], sep) + sep + suggestions[0]
 		} else {
 			chosen = suggestions[0]
 		}
 	} else {
 		if len(dirs) > 1 {
-			chosen = strings.Join(dirs[:len(dirs)-1], "/") + "/"
+			chosen = strings.Join(dirs[:len(dirs)-1], sep) + sep
 		}
 	}
 
