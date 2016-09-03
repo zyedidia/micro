@@ -50,6 +50,8 @@ you can rebind them to your liking.
 	"CtrlBackslash":  "NextTab",
 	"Home":           "Start",
 	"End":            "End",
+	"CtrlHome":       "CursorStart",
+	"CtrlEnd":        "CursorEnd",
 	"PageUp":         "CursorPageUp",
 	"PageDown":       "CursorPageDown",
 	"CtrlG":          "ToggleHelp",

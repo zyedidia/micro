@@ -394,6 +394,8 @@ func DefaultBindings() map[string]string {
 		"CtrlBackslash":  "NextTab",
 		"Home":           "StartOfLine",
 		"End":            "EndOfLine",
+		"CtrlHome":       "CursorStart",
+		"CtrlEnd":        "CursorEnd",
 		"PageUp":         "CursorPageUp",
 		"PageDown":       "CursorPageDown",
 		"CtrlG":          "ToggleHelp",
