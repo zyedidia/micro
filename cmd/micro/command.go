@@ -287,13 +287,8 @@ func Replace(args []string) {
 	view := CurView()
 
 	found := 0
-	for {
-		match := regex.FindStringIndex(view.Buf.String())
-		if match == nil {
-			break
-		}
-		found++
-		if strings.Contains(flags, "c") {
+	if strings.Contains(flags, "c") {
+		for {
 			// The 'check' flag was used
 			Search(search, view, true)
 			view.Relocate()
@@ -308,13 +303,14 @@ func Replace(args []string) {
 					view.Cursor.ResetSelection()
 				}
 				messenger.Reset()
-				return
+				break
 			}
 			if choice {
 				view.Cursor.DeleteSelection()
-				view.Buf.Insert(FromCharPos(match[0], view.Buf), replace)
+				view.Buf.Insert(view.Cursor.Loc, replace)
 				view.Cursor.ResetSelection()
 				messenger.Reset()
+				found++
 			} else {
 				if view.Cursor.HasSelection() {
 					searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
@@ -323,7 +319,14 @@ func Replace(args []string) {
 				}
 				continue
 			}
-		} else {
+		}
+	} else {
+		for {
+			match := regex.FindStringIndex(view.Buf.String())
+			if match == nil {
+				break
+			}
+			found++
 			view.Buf.Replace(FromCharPos(match[0], view.Buf), FromCharPos(match[1], view.Buf), replace)
 		}
 	}
