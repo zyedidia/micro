@@ -64,11 +64,11 @@ var (
 )
 
 // LoadInput determines which files should be loaded into buffers
-// based on the input stored in os.Args
+// based on the input stored in flag.Args()
 func LoadInput() []*Buffer {
 	// There are a number of ways micro should start given its input
 
-	// 1. If it is given a files in os.Args, it should open those
+	// 1. If it is given a files in flag.Args(), it should open those
 
 	// 2. If there is no input file and the input is not a terminal, that means
 	// something is being piped in and the stdin should be opened in an
@@ -82,17 +82,11 @@ func LoadInput() []*Buffer {
 	var err error
 	var buffers []*Buffer
 
-	if len(os.Args) > 1 {
+	if len(flag.Args()) > 0 {
 		// Option 1
 		// We go through each file and load it
-		for i := 1; i < len(os.Args); i++ {
-			filename = os.Args[i]
-
-			// Check if +LINE,COL was passed, and send this to the flagLineColumn
-			if string(filename[0]) == "+" && strings.Contains(filename, ",") {
-				flagLineColumn = filename
-				continue
-			}
+		for i := 0; i < len(flag.Args()); i++ {
+			filename = flag.Args()[i]
 
 			// Check that the file exists
 			if _, e := os.Stat(filename); e == nil {
@@ -202,13 +196,24 @@ func RedrawAll() {
 }
 
 // Passing -version as a flag will have micro print out the version number
-var flagVersion = flag.Bool("version", false, "Show the version number")
-
-// Passing +LINE,COL will start the cursor at position LINE,COL
-var flagLineColumn = ""
+var flagVersion = flag.Bool("version", false, "Show the version number and information")
+var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
 
 func main() {
+	flag.Usage = func() {
+		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
+		fmt.Println("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n")
+		flag.PrintDefaults()
+	}
+
+	optionFlags := make(map[string]*string)
+
+	for k, v := range DefaultGlobalSettings() {
+		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
+	}
+
 	flag.Parse()
+
 	if *flagVersion {
 		// If -version was passed
 		fmt.Println("Version:", Version)
@@ -230,6 +235,7 @@ func main() {
 
 	// Load the user's settings
 	InitGlobalSettings()
+
 	InitCommands()
 	InitBindings()
 
@@ -274,6 +280,12 @@ func main() {
 					v.matches = Match(v)
 				}
 			}
+		}
+	}
+
+	for k, v := range optionFlags {
+		if *v != "" {
+			SetOption(k, *v)
 		}
 	}
 
