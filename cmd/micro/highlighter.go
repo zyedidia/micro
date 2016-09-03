@@ -48,6 +48,7 @@ var preInstalledSynFiles = []string{
 	"css",
 	"cython",
 	"d",
+	"dart",
 	"dot",
 	"erb",
 	"fish",
