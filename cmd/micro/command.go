@@ -242,40 +242,20 @@ func Save(args []string) {
 
 // Replace runs search and replace
 func Replace(args []string) {
-	// This is a regex to parse the replace expression
-	// We allow no quotes if there are no spaces, but if you want to search
-	// for or replace an expression with spaces, you can add double quotes
-	r := regexp.MustCompile(`"[^"\\]*(?:\\.[^"\\]*)*"|[^\s]*`)
-	replaceCmd := r.FindAllString(strings.Join(args, " "), -1)
-	if len(replaceCmd) < 2 {
+	if len(args) < 2 {
 		// We need to find both a search and replace expression
 		messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
 		return
 	}
 
 	var flags string
-	if len(replaceCmd) == 3 {
+	if len(args) == 3 {
 		// The user included some flags
-		flags = replaceCmd[2]
+		flags = args[2]
 	}
 
-	search := string(replaceCmd[0])
-	replace := string(replaceCmd[1])
-
-	// If the search and replace expressions have quotes, we need to remove those
-	if strings.HasPrefix(search, `"`) && strings.HasSuffix(search, `"`) {
-		search = search[1 : len(search)-1]
-	}
-	if strings.HasPrefix(replace, `"`) && strings.HasSuffix(replace, `"`) {
-		replace = replace[1 : len(replace)-1]
-	}
-
-	// We replace all escaped double quotes to real double quotes
-	search = strings.Replace(search, `\"`, `"`, -1)
-	replace = strings.Replace(replace, `\"`, `"`, -1)
-	// Replace some things so users can actually insert newlines and tabs in replacements
-	replace = strings.Replace(replace, "\\n", "\n", -1)
-	replace = strings.Replace(replace, "\\t", "\t", -1)
+	search := string(args[0])
+	replace := string(args[1])
 
 	regex, err := regexp.Compile(search)
 	if err != nil {
