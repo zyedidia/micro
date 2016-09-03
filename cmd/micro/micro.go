@@ -360,7 +360,7 @@ func main() {
 				// If the user left clicked we check a couple things
 				_, h := screen.Size()
 				x, y := e.Position()
-				if y == h-1 && messenger.message != "" {
+				if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
 					// If the user clicked in the bottom bar, and there is a message down there
 					// we copy it to the clipboard.
 					// Often error messages are displayed down there so it can be useful to easily

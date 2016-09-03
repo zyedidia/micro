@@ -98,6 +98,7 @@ func (m *Messenger) Error(msg ...interface{}) {
 
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
 func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
+	m.hasPrompt = true
 	m.Message(prompt)
 
 	_, h := screen.Size()
@@ -126,6 +127,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 
 // LetterPrompt gives the user a prompt and waits for a one letter response
 func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) {
+	m.hasPrompt = true
 	m.Message(prompt)
 
 	_, h := screen.Size()
@@ -347,14 +349,14 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 func (m *Messenger) Display() {
 	_, h := screen.Size()
 	if m.hasMessage {
-		if !m.hasPrompt && !globalSettings["infobar"].(bool) {
-			return
-		}
-		runes := []rune(m.message + m.response)
-		for x := 0; x < len(runes); x++ {
-			screen.SetContent(x, h-1, runes[x], nil, m.style)
+		if m.hasPrompt || globalSettings["infobar"].(bool) {
+			runes := []rune(m.message + m.response)
+			for x := 0; x < len(runes); x++ {
+				screen.SetContent(x, h-1, runes[x], nil, m.style)
+			}
 		}
 	}
+
 	if m.hasPrompt {
 		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
 		screen.Show()
