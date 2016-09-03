@@ -248,9 +248,7 @@ func SplitCommandArgs(input string) []string {
 		escape = false
 		curArg.WriteRune(r)
 	}
-	//if curArg.Len() > 0 || len(result) == 0 {
 	result = append(result, curArg.String())
-	//	}
 	return result
 }
 
