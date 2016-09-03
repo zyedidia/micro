@@ -79,15 +79,18 @@ func TestJoinAndSplitCommandArgs(t *testing.T) {
 		{[]string{`foo`}, `foo`},
 		{[]string{`foo\"bar`}, `foo\"bar`},
 		{[]string{``}, ``},
+		{[]string{`a`, ``}, `a `},
+		{[]string{``, ``, ``, ``}, `   `},
 	}
 
 	for i, test := range tests {
 		if result := JoinCommandArgs(test.Query...); test.Wanted != result {
-			t.Errorf("JoinCommandArgs failed at Test %d\nGot: %v", i, result)
+			t.Errorf("JoinCommandArgs failed at Test %d\nGot: %q", i, result)
 		}
 
 		if result := SplitCommandArgs(test.Wanted); !reflect.DeepEqual(test.Query, result) {
-			t.Errorf("SplitCommandArgs failed at Test %d\nGot: %v", i, result)
+			t.Errorf("SplitCommandArgs failed at Test %d\nGot: `%s`", i, result)
 		}
 	}
+
 }

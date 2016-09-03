@@ -248,17 +248,20 @@ func SplitCommandArgs(input string) []string {
 		escape = false
 		curArg.WriteRune(r)
 	}
-	if curArg.Len() > 0 || len(result) == 0 {
-		result = append(result, curArg.String())
-	}
+	//if curArg.Len() > 0 || len(result) == 0 {
+	result = append(result, curArg.String())
+	//	}
 	return result
 }
 
 // JoinCommandArgs joins multiple command arguments and quote the strings if needed.
 func JoinCommandArgs(args ...string) string {
 	buf := new(bytes.Buffer)
+	first := true
 	for _, arg := range args {
-		if buf.Len() > 0 {
+		if first {
+			first = false
+		} else {
 			buf.WriteRune(' ')
 		}
 		if !strings.Contains(arg, " ") {
