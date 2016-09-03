@@ -223,32 +223,47 @@ func Abs(n int) int {
 // The returned slice contains at least one string
 func SplitCommandArgs(input string) []string {
 	var result []string
-
+	curArg := new(bytes.Buffer)
 	inQuote := false
 	escape := false
-	curArg := new(bytes.Buffer)
-	for _, r := range input {
-		if !escape {
-			switch {
-			case r == '\\' && inQuote:
-				escape = true
-				continue
-			case r == '"' && inQuote:
-				inQuote = false
-				continue
-			case r == '"' && !inQuote && curArg.Len() == 0:
-				inQuote = true
-				continue
-			case r == ' ' && !inQuote:
-				result = append(result, curArg.String())
-				curArg.Reset()
-				continue
+
+	appendResult := func() {
+		str := curArg.String()
+		inQuote = false
+		escape = false
+		if strings.HasPrefix(str, `"`) && strings.HasSuffix(str, `"`) {
+			if unquoted, err := strconv.Unquote(str); err == nil {
+				str = unquoted
 			}
 		}
-		escape = false
-		curArg.WriteRune(r)
+		result = append(result, str)
+		curArg.Reset()
 	}
-	result = append(result, curArg.String())
+
+	for _, r := range input {
+		if r == ' ' && !inQuote {
+			appendResult()
+		} else {
+			curArg.WriteRune(r)
+
+			if r == '"' && !inQuote {
+				inQuote = true
+			} else {
+				if inQuote && !escape {
+					if r == '"' {
+						inQuote = false
+					}
+					if r == '\\' {
+						escape = true
+						continue
+					}
+				}
+			}
+		}
+
+		escape = false
+	}
+	appendResult()
 	return result
 }
 
@@ -262,17 +277,11 @@ func JoinCommandArgs(args ...string) string {
 		} else {
 			buf.WriteRune(' ')
 		}
-		if !strings.Contains(arg, " ") {
-			buf.WriteString(arg)
+		quoted := strconv.Quote(arg)
+		if quoted[1:len(quoted)-1] != arg || strings.ContainsRune(arg, ' ') {
+			buf.WriteString(quoted)
 		} else {
-			buf.WriteRune('"')
-			for _, r := range arg {
-				if r == '"' || r == '\\' {
-					buf.WriteRune('\\')
-				}
-				buf.WriteRune(r)
-			}
-			buf.WriteRune('"')
+			buf.WriteString(arg)
 		}
 	}
 

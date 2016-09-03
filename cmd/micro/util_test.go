@@ -77,10 +77,13 @@ func TestJoinAndSplitCommandArgs(t *testing.T) {
 		{[]string{`slash\\\ test`}, `"slash\\\\\\ test"`},
 		{[]string{`path 1`, `path\" 2`}, `"path 1" "path\\\" 2"`},
 		{[]string{`foo`}, `foo`},
-		{[]string{`foo\"bar`}, `foo\"bar`},
+		{[]string{`foo\"bar`}, `"foo\\\"bar"`},
 		{[]string{``}, ``},
+		{[]string{`"`}, `"\""`},
 		{[]string{`a`, ``}, `a `},
 		{[]string{``, ``, ``, ``}, `   `},
+		{[]string{"\n"}, `"\n"`},
+		{[]string{"foo\tbar"}, `"foo\tbar"`},
 	}
 
 	for i, test := range tests {
@@ -89,8 +92,22 @@ func TestJoinAndSplitCommandArgs(t *testing.T) {
 		}
 
 		if result := SplitCommandArgs(test.Wanted); !reflect.DeepEqual(test.Query, result) {
-			t.Errorf("SplitCommandArgs failed at Test %d\nGot: `%s`", i, result)
+			t.Errorf("SplitCommandArgs failed at Test %d\nGot: `%q`", i, result)
 		}
 	}
 
+	splitTests := []struct {
+		Query  string
+		Wanted []string
+	}{
+		{`"hallo""Welt"`, []string{`"hallo""Welt"`}},
+		{`\"`, []string{`\"`}},
+		{`"\"`, []string{`"\"`}},
+	}
+
+	for i, test := range splitTests {
+		if result := SplitCommandArgs(test.Query); !reflect.DeepEqual(test.Wanted, result) {
+			t.Errorf("SplitCommandArgs failed at Split-Test %d\nGot: `%q`", i, result)
+		}
+	}
 }
