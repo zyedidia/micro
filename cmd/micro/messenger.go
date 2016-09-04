@@ -151,6 +151,8 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 					}
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.Clear()
+				m.Reset()
 				m.hasPrompt = false
 				return ' ', true
 			}

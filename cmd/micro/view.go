@@ -172,8 +172,6 @@ func (v *View) ScrollDown(n int) {
 func (v *View) CanClose(msg string, responses ...rune) bool {
 	if v.Buf.IsModified {
 		char, canceled := messenger.LetterPrompt("You have unsaved changes. "+msg, responses...)
-		messenger.Clear()
-		messenger.Reset()
 		if !canceled {
 			if char == 'y' {
 				return true
