@@ -144,11 +144,14 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 			case tcell.KeyRune:
 				for _, r := range responses {
 					if e.Rune() == r {
+						m.Clear()
 						m.Reset()
+						m.hasPrompt = false
 						return r, false
 					}
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.hasPrompt = false
 				return ' ', true
 			}
 		}
@@ -242,18 +245,19 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 
 		m.HandleEvent(event, m.history[historyType])
 
-		messenger.Clear()
+		m.Clear()
 		for _, v := range tabs[curTab].views {
 			v.Display()
 		}
 		DisplayTabs()
-		messenger.Display()
+		m.Display()
 		if len(suggestions) > 1 {
 			m.DisplaySuggestions(suggestions)
 		}
 		screen.Show()
 	}
 
+	m.Clear()
 	m.Reset()
 	return response, canceled
 }
