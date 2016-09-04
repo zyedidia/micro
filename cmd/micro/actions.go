@@ -687,6 +687,9 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	// Insert a tab
 	if v.Buf.Settings["tabstospaces"].(bool) {
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
+		if remainder := v.Cursor.Loc.X % tabSize; remainder != 0 {
+			tabSize = tabSize - remainder
+		}
 		v.Buf.Insert(v.Cursor.Loc, Spaces(tabSize))
 		for i := 0; i < tabSize; i++ {
 			v.Cursor.Right()
