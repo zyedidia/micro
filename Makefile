@@ -2,7 +2,7 @@
 
 VERSION = $(shell git describe --tags --abbrev=0)
 HASH = $(shell git rev-parse --short HEAD)
-DATE = $(shell python -c 'import time; print(time.strftime("%B %d, %Y"))')
+DATE = $(shell go run tools/build-date.go)
 
 # Builds micro after checking dependencies but without updating the runtime
 build: deps tcell
