@@ -208,6 +208,12 @@ func DefaultLocalSettings() map[string]interface{} {
 // is local only it will set the local version
 // Use setlocal to force an option to be set locally
 func SetOption(option, value string) error {
+	if option == "colorscheme" {
+		if !ColorschemeExists(value) {
+			return errors.New(value + " is not a valid colorscheme")
+		}
+	}
+
 	if _, ok := globalSettings[option]; !ok {
 		if _, ok := CurView().Buf.Settings[option]; !ok {
 			return errors.New("Invalid option")
