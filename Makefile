@@ -2,17 +2,18 @@
 
 VERSION = $(shell git describe --tags --abbrev=0)
 HASH = $(shell git rev-parse --short HEAD)
+DATE = $(shell python -c 'import time; print(time.strftime("%B %d, %Y"))')
 
 # Builds micro after checking dependencies but without updating the runtime
 build: deps tcell
-	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(shell date -u '+%B %d, %Y')'" -o micro ./cmd/micro
+	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)'" -o micro ./cmd/micro
 
 # Builds micro after building the runtime and checking dependencies
 build-all: runtime build
 
 # Builds micro without checking for dependencies
 build-quick:
-	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(shell date -u '+%B %d, %Y')'" -o micro ./cmd/micro
+	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)'" -o micro ./cmd/micro
 
 # Same as 'build' but installs to $GOPATH/bin afterward
 install: build
