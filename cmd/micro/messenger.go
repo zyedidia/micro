@@ -114,11 +114,14 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 			switch e.Key() {
 			case tcell.KeyRune:
 				if e.Rune() == 'y' {
+					m.hasPrompt = false
 					return true, false
 				} else if e.Rune() == 'n' {
+					m.hasPrompt = false
 					return false, false
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.hasPrompt = false
 				return false, true
 			}
 		}
