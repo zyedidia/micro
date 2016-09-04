@@ -126,7 +126,7 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json5.MarshalIndent(parsed, "", "    ")
-		err = ioutil.WriteFile(filename, txt, 0644)
+		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return err
 }
