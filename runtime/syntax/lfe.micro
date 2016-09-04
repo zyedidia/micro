@@ -1,0 +1,21 @@
+syntax "lfe" "lfe$" "\.lfe$"
+
+# Parens are everywhere!
+color statement "\("
+color statement "\)"
+
+# Good overrides for LFE in particular
+color type "defun|define-syntax|define|defmacro|defmodule|export"
+
+# Dirty base cases stolen from the generic lisp syntax
+color constant "\ [A-Za-z][A-Za-z0-9_-]+\ "
+color statement "\(([-+*/<>]|<=|>=)|'"
+color constant.number "\<[0-9]+\>"
+color constant.string "\"(\\.|[^"])*\""
+color special "['|`][A-Za-z][A-Za-z0-9_-]+"
+color constant.string "\\.?"
+color comment "(^|[[:space:]]);.*"
+
+# Some warning colors because our indents are wrong.
+color ,green "[[:space:]]+$"
+color ,red "	+ +| +	+"
