@@ -291,6 +291,9 @@ func Replace(args []string) {
 		for {
 			// The 'check' flag was used
 			Search(search, view, true)
+			if !view.Cursor.HasSelection() {
+				break
+			}
 			view.Relocate()
 			if view.Buf.Settings["syntax"].(bool) {
 				view.matches = Match(view)
