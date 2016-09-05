@@ -361,6 +361,8 @@ func (v *View) CursorStart(usePlugin bool) bool {
 		return false
 	}
 
+	v.deselect(0)
+
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
 
