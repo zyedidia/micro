@@ -1,2 +1,5 @@
 language: go
-script: make test
+script:
+  # Check if the runtime was updated.
+  - make runtime && git diff --exit-code > /dev/null
+  - make test
