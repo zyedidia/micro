@@ -8,6 +8,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 )
 
+var pluginCompletions []func(string) []string
+
 // This file is meant (for now) for autocompletion in command mode, not
 // while coding. This helps micro autocomplete commands and then filenames
 // for example with `vsplit filename`.
@@ -122,4 +124,25 @@ func OptionComplete(input string) (string, []string) {
 		chosen = suggestions[0]
 	}
 	return chosen, suggestions
+}
+
+// MakeCompletion registeres a function from a plugin for autocomplete commands
+func MakeCompletion(function string) Completion {
+	pluginCompletions = append(pluginCompletions, LuaFunctionComplete(function))
+	return Completion(-len(pluginCompletions))
+}
+
+// PluginComplete autocompletes from plugin function
+func PluginComplete(complete Completion, input string) (chosen string, suggestions []string) {
+	idx := int(-complete) - 1
+
+	if len(pluginCompletions) <= idx {
+		return "", nil
+	}
+	suggestions = pluginCompletions[idx](input)
+
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+	return
 }
