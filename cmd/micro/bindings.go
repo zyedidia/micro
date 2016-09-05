@@ -55,6 +55,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"IndentSelection":     (*View).IndentSelection,
 	"OutdentSelection":    (*View).OutdentSelection,
 	"Paste":               (*View).Paste,
+	"PastePrimary":        (*View).PastePrimary,
 	"SelectAll":           (*View).SelectAll,
 	"OpenFile":            (*View).OpenFile,
 	"Start":               (*View).Start,

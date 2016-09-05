@@ -300,7 +300,7 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 				m.cursorx--
 			}
 		case tcell.KeyCtrlV:
-			clip, _ := clipboard.ReadAll()
+			clip, _ := clipboard.ReadAll("clipboard")
 			m.response = Insert(m.response, m.cursorx, clip)
 			m.cursorx += Count(clip)
 		case tcell.KeyRune:

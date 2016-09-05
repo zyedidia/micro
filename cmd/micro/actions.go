@@ -598,21 +598,21 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(tabsize, v.Buf)
+						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
 					}
 				}
 				if i == end {
-					v.Cursor.CurSelection[1] = Loc{endX + tabsize + 1, end}
+					v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
 				}
 			} else {
 				v.Buf.Insert(Loc{0, i}, "\t")
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(1, v.Buf)
+						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(1, v.Buf))
 					}
 				}
 				if i == end {
-					v.Cursor.CurSelection[1] = Loc{endX + 2, end}
+					v.Cursor.SetSelectionEnd(Loc{endX + 2, end})
 				}
 			}
 		}
@@ -647,22 +647,22 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 						v.Buf.Remove(Loc{0, i}, Loc{1, i})
 						if i == start {
 							if v.Cursor.CurSelection[0].X > 0 {
-								v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+								v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 							}
 						}
 						if i == end {
-							v.Cursor.CurSelection[1] = Loc{endX - j, end}
+							v.Cursor.SetSelectionEnd(Loc{endX - j, end})
 						}
 					}
 				} else {
 					v.Buf.Remove(Loc{0, i}, Loc{1, i})
 					if i == start {
 						if v.Cursor.CurSelection[0].X > 0 {
-							v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+							v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 						}
 					}
 					if i == end {
-						v.Cursor.CurSelection[1] = Loc{endX, end}
+						v.Cursor.SetSelectionEnd(Loc{endX, end})
 					}
 				}
 			}
@@ -850,7 +850,7 @@ func (v *View) Copy(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection())
+		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.freshClip = true
 		messenger.Message("Copied selection")
 	}
@@ -873,10 +873,10 @@ func (v *View) CutLine(usePlugin bool) bool {
 	}
 	if v.freshClip == true {
 		if v.Cursor.HasSelection() {
-			if clip, err := clipboard.ReadAll(); err != nil {
+			if clip, err := clipboard.ReadAll("clipboard"); err != nil {
 				messenger.Error(err)
 			} else {
-				clipboard.WriteAll(clip + v.Cursor.GetSelection())
+				clipboard.WriteAll(clip+v.Cursor.GetSelection(), "clipboard")
 			}
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
@@ -901,7 +901,7 @@ func (v *View) Cut(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection())
+		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 		v.freshClip = true
@@ -960,18 +960,23 @@ func (v *View) Paste(usePlugin bool) bool {
 		return false
 	}
 
-	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	clip, _ := clipboard.ReadAll("clipboard")
+	v.paste(clip)
 
-	if v.Cursor.HasSelection() {
-		v.Cursor.DeleteSelection()
-		v.Cursor.ResetSelection()
+	if usePlugin {
+		return PostActionCall("Paste", v)
 	}
-	clip, _ := clipboard.ReadAll()
-	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
-	v.Buf.Insert(v.Cursor.Loc, clip)
-	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
-	v.freshClip = false
-	messenger.Message("Pasted clipboard")
+	return true
+}
+
+// PastePrimary pastes from the primary clipboard (only use on linux)
+func (v *View) PastePrimary(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Paste", v) {
+		return false
+	}
+
+	clip, _ := clipboard.ReadAll("primary")
+	v.paste(clip)
 
 	if usePlugin {
 		return PostActionCall("Paste", v)
@@ -985,8 +990,8 @@ func (v *View) SelectAll(usePlugin bool) bool {
 		return false
 	}
 
-	v.Cursor.CurSelection[0] = v.Buf.Start()
-	v.Cursor.CurSelection[1] = v.Buf.End()
+	v.Cursor.SetSelectionStart(v.Buf.Start())
+	v.Cursor.SetSelectionEnd(v.Buf.End())
 	// Put the cursor at the beginning
 	v.Cursor.X = 0
 	v.Cursor.Y = 0

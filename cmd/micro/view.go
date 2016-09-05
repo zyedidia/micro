@@ -145,6 +145,20 @@ func (v *View) ToggleTabbar() {
 	}
 }
 
+func (v *View) paste(clip string) {
+	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
+	}
+	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
+	v.Buf.Insert(v.Cursor.Loc, clip)
+	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+	v.freshClip = false
+	messenger.Message("Pasted clipboard")
+}
+
 // ScrollUp scrolls the view up n lines (if possible)
 func (v *View) ScrollUp(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
@@ -411,9 +425,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 			}
+		case tcell.Button2:
+			// Middle mouse button was clicked,
+			// We should paste primary
+			v.PastePrimary(true)
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -427,7 +445,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 				v.mouseReleased = true
 			}

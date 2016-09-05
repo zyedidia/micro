@@ -366,7 +366,7 @@ func main() {
 					// we copy it to the clipboard.
 					// Often error messages are displayed down there so it can be useful to easily
 					// copy the message
-					clipboard.WriteAll(messenger.message)
+					clipboard.WriteAll(messenger.message, "primary")
 					continue
 				}
 
