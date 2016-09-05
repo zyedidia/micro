@@ -14,6 +14,7 @@ var loadedPlugins []string
 
 var preInstalledPlugins = []string{
 	"go",
+	"gocover",
 	"linter",
 	"autoclose",
 }
