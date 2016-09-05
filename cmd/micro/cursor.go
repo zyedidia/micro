@@ -37,14 +37,14 @@ func (c *Cursor) ResetSelection() {
 
 // SetSelectionStart sets the start of the selection
 func (c *Cursor) SetSelectionStart(pos Loc) {
-	c.SetSelectionStart(pos)
+	c.CurSelection[0] = pos
 	// Copy to primary clipboard for linux
 	clipboard.WriteAll(c.GetSelection(), "primary")
 }
 
 // SetSelectionEnd sets the end of the selection
 func (c *Cursor) SetSelectionEnd(pos Loc) {
-	c.SetSelectionEnd(pos)
+	c.CurSelection[1] = pos
 	// Copy to primary clipboard for linux
 	clipboard.WriteAll(c.GetSelection(), "primary")
 }
