@@ -1,13 +1,11 @@
 package main
 
 import (
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mattn/go-runewidth"
-	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 )
 
@@ -416,8 +414,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.lastClickTime = time.Now()
 
 					v.Cursor.OrigSelection[0] = v.Cursor.Loc
-					v.Cursor.CurSelection[0] = v.Cursor.Loc
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.Cursor.SetSelectionStart(v.Cursor.Loc)
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 				v.mouseReleased = false
 			} else if !v.mouseReleased {
@@ -427,7 +425,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 			}
 		case tcell.Button2:
@@ -447,11 +445,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
-
-					if runtime.GOOS != "windows" && runtime.GOOS != "darwin" {
-						clipboard.WriteAll(v.Cursor.GetSelection(), "primary")
-					}
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 				v.mouseReleased = true
 			}

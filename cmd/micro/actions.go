@@ -596,21 +596,21 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(tabsize, v.Buf)
+						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
 					}
 				}
 				if i == end {
-					v.Cursor.CurSelection[1] = Loc{endX + tabsize + 1, end}
+					v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
 				}
 			} else {
 				v.Buf.Insert(Loc{0, i}, "\t")
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(1, v.Buf)
+						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(1, v.Buf))
 					}
 				}
 				if i == end {
-					v.Cursor.CurSelection[1] = Loc{endX + 2, end}
+					v.Cursor.SetSelectionEnd(Loc{endX + 2, end})
 				}
 			}
 		}
@@ -645,22 +645,22 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 						v.Buf.Remove(Loc{0, i}, Loc{1, i})
 						if i == start {
 							if v.Cursor.CurSelection[0].X > 0 {
-								v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+								v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 							}
 						}
 						if i == end {
-							v.Cursor.CurSelection[1] = Loc{endX - j, end}
+							v.Cursor.SetSelectionEnd(Loc{endX - j, end})
 						}
 					}
 				} else {
 					v.Buf.Remove(Loc{0, i}, Loc{1, i})
 					if i == start {
 						if v.Cursor.CurSelection[0].X > 0 {
-							v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+							v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 						}
 					}
 					if i == end {
-						v.Cursor.CurSelection[1] = Loc{endX, end}
+						v.Cursor.SetSelectionEnd(Loc{endX, end})
 					}
 				}
 			}
@@ -985,8 +985,8 @@ func (v *View) SelectAll(usePlugin bool) bool {
 		return false
 	}
 
-	v.Cursor.CurSelection[0] = v.Buf.Start()
-	v.Cursor.CurSelection[1] = v.Buf.End()
+	v.Cursor.SetSelectionStart(v.Buf.Start())
+	v.Cursor.SetSelectionEnd(v.Buf.End())
 	// Put the cursor at the beginning
 	v.Cursor.X = 0
 	v.Cursor.Y = 0

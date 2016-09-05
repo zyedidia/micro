@@ -1,5 +1,7 @@
 package main
 
+import "github.com/zyedidia/clipboard"
+
 // The Cursor struct stores the location of the cursor in the view
 // The complicated part about the cursor is storing its location.
 // The cursor must be displayed at an x, y location, but since the buffer
@@ -29,8 +31,22 @@ func (c *Cursor) Goto(b Cursor) {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.CurSelection[0] = c.buf.Start()
-	c.CurSelection[1] = c.buf.Start()
+	c.SetSelectionStart(c.buf.Start())
+	c.SetSelectionEnd(c.buf.Start())
+}
+
+// SetSelectionStart sets the start of the selection
+func (c *Cursor) SetSelectionStart(pos Loc) {
+	c.SetSelectionStart(pos)
+	// Copy to primary clipboard for linux
+	clipboard.WriteAll(c.GetSelection(), "primary")
+}
+
+// SetSelectionEnd sets the end of the selection
+func (c *Cursor) SetSelectionEnd(pos Loc) {
+	c.SetSelectionEnd(pos)
+	// Copy to primary clipboard for linux
+	clipboard.WriteAll(c.GetSelection(), "primary")
 }
 
 // HasSelection returns whether or not the user has selected anything
@@ -62,12 +78,12 @@ func (c *Cursor) GetSelection() string {
 // SelectLine selects the current line
 func (c *Cursor) SelectLine() {
 	c.Start()
-	c.CurSelection[0] = c.Loc
+	c.SetSelectionStart(c.Loc)
 	c.End()
 	if c.buf.NumLines-1 > c.Y {
-		c.CurSelection[1] = c.Loc.Move(1, c.buf)
+		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
 	} else {
-		c.CurSelection[1] = c.Loc
+		c.SetSelectionEnd(c.Loc)
 	}
 
 	c.OrigSelection = c.CurSelection
@@ -77,13 +93,13 @@ func (c *Cursor) SelectLine() {
 func (c *Cursor) AddLineToSelection() {
 	if c.Loc.LessThan(c.OrigSelection[0]) {
 		c.Start()
-		c.CurSelection[0] = c.Loc
-		c.CurSelection[1] = c.OrigSelection[1]
+		c.SetSelectionStart(c.Loc)
+		c.SetSelectionEnd(c.OrigSelection[1])
 	}
 	if c.Loc.GreaterThan(c.OrigSelection[1]) {
 		c.End()
-		c.CurSelection[1] = c.Loc.Move(1, c.buf)
-		c.CurSelection[0] = c.OrigSelection[0]
+		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
+		c.SetSelectionStart(c.OrigSelection[0])
 	}
 
 	if c.Loc.LessThan(c.OrigSelection[1]) && c.Loc.GreaterThan(c.OrigSelection[0]) {
@@ -98,8 +114,8 @@ func (c *Cursor) SelectWord() {
 	}
 
 	if !IsWordChar(string(c.RuneUnder(c.X))) {
-		c.CurSelection[0] = c.Loc
-		c.CurSelection[1] = c.Loc.Move(1, c.buf)
+		c.SetSelectionStart(c.Loc)
+		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
 		c.OrigSelection = c.CurSelection
 		return
 	}
@@ -110,14 +126,14 @@ func (c *Cursor) SelectWord() {
 		backward--
 	}
 
-	c.CurSelection[0] = Loc{backward, c.Y}
+	c.SetSelectionStart(Loc{backward, c.Y})
 	c.OrigSelection[0] = c.CurSelection[0]
 
 	for forward < Count(c.buf.Line(c.Y))-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
 		forward++
 	}
 
-	c.CurSelection[1] = Loc{forward, c.Y}.Move(1, c.buf)
+	c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
 	c.OrigSelection[1] = c.CurSelection[1]
 	c.Loc = c.CurSelection[1]
 }
@@ -136,8 +152,8 @@ func (c *Cursor) AddWordToSelection() {
 			backward--
 		}
 
-		c.CurSelection[0] = Loc{backward, c.Y}
-		c.CurSelection[1] = c.OrigSelection[1]
+		c.SetSelectionStart(Loc{backward, c.Y})
+		c.SetSelectionEnd(c.OrigSelection[1])
 	}
 
 	if c.Loc.GreaterThan(c.OrigSelection[1]) {
@@ -147,8 +163,8 @@ func (c *Cursor) AddWordToSelection() {
 			forward++
 		}
 
-		c.CurSelection[1] = Loc{forward, c.Y}.Move(1, c.buf)
-		c.CurSelection[0] = c.OrigSelection[0]
+		c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
+		c.SetSelectionStart(c.OrigSelection[0])
 	}
 
 	c.Loc = c.CurSelection[1]
@@ -157,11 +173,11 @@ func (c *Cursor) AddWordToSelection() {
 // SelectTo selects from the current cursor location to the given location
 func (c *Cursor) SelectTo(loc Loc) {
 	if loc.GreaterThan(c.OrigSelection[0]) {
-		c.CurSelection[0] = c.OrigSelection[0]
-		c.CurSelection[1] = loc
+		c.SetSelectionStart(c.OrigSelection[0])
+		c.SetSelectionEnd(loc)
 	} else {
-		c.CurSelection[0] = loc
-		c.CurSelection[1] = c.OrigSelection[0]
+		c.SetSelectionStart(loc)
+		c.SetSelectionEnd(c.OrigSelection[0])
 	}
 }
 
