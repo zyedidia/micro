@@ -156,6 +156,14 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	return b
 }
 
+// AbsPath returns the absolute filepath of the buffer
+func (b *Buffer) AbsPath() string {
+	if res, err := filepath.Abs(b.Path); err == nil {
+		return res
+	}
+	return b.Path
+}
+
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
