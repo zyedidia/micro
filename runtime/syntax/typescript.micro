@@ -5,7 +5,7 @@ color constant.number   "\b[-+]?([0-9]+\.[0-9]*|[0-9]*\.[0-9]+)([EePp][+-]?[0-9]
 color constant.number   "\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
 color identifier "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
 color statement  "\b(break|case|catch|continue|default|delete|do|else|finally)\b"
-color statement  "\b(declare|interface|import|for|function|get|if|in|instanceof|new|return|set|switch)\b"
+color statement  "\b(declare|interface|import|export|from|for|function|get|if|in|instanceof|new|return|set|switch)\b"
 color statement  "\b(switch|this|throw|try|typeof|var|void|while|with|async|await)\b"
 color constant  "\b(null|undefined|NaN)\b"
 color constant "\b(true|false)\b"
