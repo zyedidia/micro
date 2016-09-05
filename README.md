@@ -139,3 +139,5 @@ a brief introduction to the more powerful configuration features micro offers.
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
 
 You can use the Github issue tracker to report bugs, ask questions, or suggest new features.
+
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).
