@@ -11,6 +11,12 @@ color special "!important"
 color identifier ":active|:focus|:hover|:link|:visited|:link|:after|:before|$"
 color special "(\{|\}|\(|\)|\;|:|\]|~|<|>|,)"
 
+# SCSS Varaibles
+color identifier (i) "\$\{?[0-9A-Z_!@#$*?-]+\}?"
+
+# SCSS Commands
+color statement "@import|@mixin|@extend"
+
 # Strings
 color constant ""(\\.|[^"])*""
 color constant "'(\\.|[^'])*'"
