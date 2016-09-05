@@ -85,6 +85,7 @@ var preInstalledSynFiles = []string{
 	"nanorc",
 	"nginx",
 	"ocaml",
+	"pascal",
 	"patch",
 	"peg",
 	"perl",

@@ -27,6 +27,7 @@ Here is a list of the files that have been converted to properly use colorscheme
 * rust
 * java
 * javascript
+* pascal
 * python
 * ruby
 * sh
