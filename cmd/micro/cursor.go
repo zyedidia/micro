@@ -31,22 +31,26 @@ func (c *Cursor) Goto(b Cursor) {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.SetSelectionStart(c.buf.Start())
-	c.SetSelectionEnd(c.buf.Start())
+	c.CurSelection[0] = c.buf.Start()
+	c.CurSelection[1] = c.buf.Start()
 }
 
 // SetSelectionStart sets the start of the selection
 func (c *Cursor) SetSelectionStart(pos Loc) {
 	c.CurSelection[0] = pos
 	// Copy to primary clipboard for linux
-	clipboard.WriteAll(c.GetSelection(), "primary")
+	if c.HasSelection() {
+		clipboard.WriteAll(c.GetSelection(), "primary")
+	}
 }
 
 // SetSelectionEnd sets the end of the selection
 func (c *Cursor) SetSelectionEnd(pos Loc) {
 	c.CurSelection[1] = pos
 	// Copy to primary clipboard for linux
-	clipboard.WriteAll(c.GetSelection(), "primary")
+	if c.HasSelection() {
+		clipboard.WriteAll(c.GetSelection(), "primary")
+	}
 }
 
 // HasSelection returns whether or not the user has selected anything
@@ -59,7 +63,7 @@ func (c *Cursor) DeleteSelection() {
 	if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
 		c.buf.Remove(c.CurSelection[1], c.CurSelection[0])
 		c.Loc = c.CurSelection[1]
-	} else if c.GetSelection() == "" {
+	} else if !c.HasSelection() {
 		return
 	} else {
 		c.buf.Remove(c.CurSelection[0], c.CurSelection[1])

@@ -414,8 +414,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.lastClickTime = time.Now()
 
 					v.Cursor.OrigSelection[0] = v.Cursor.Loc
-					v.Cursor.SetSelectionStart(v.Cursor.Loc)
-					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+					v.Cursor.CurSelection[0] = v.Cursor.Loc
+					v.Cursor.CurSelection[1] = v.Cursor.Loc
 				}
 				v.mouseReleased = false
 			} else if !v.mouseReleased {
