@@ -182,7 +182,6 @@ func (v *View) ScrollDown(n int) {
 // CanClose returns whether or not the view can be closed
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
-// The message is what to print after saying "You have unsaved changes. "
 func (v *View) CanClose() bool {
 	if v.Buf.IsModified {
 		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
