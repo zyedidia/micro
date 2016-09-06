@@ -73,8 +73,10 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
 * `HandleCommand(cmd string)`: runs the given command
 
-* `HandleShellCommand(shellCmd string, interactive bool)`: runs the given shell
-   command
+* `HandleShellCommand(shellCmd string, interactive bool, waitToClose bool)`: runs the given shell
+   command. The `interactive` bool specifies whether the command should run in the background. The
+   `waitToClose` bool only applies if `interactive` is true and means that it should wait before
+   returning to the editor.
 
 * `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
    Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -225,7 +226,7 @@ func Bind(args []string) {
 // Run runs a shell command in the background
 func Run(args []string) {
 	// Run a shell command in the background (openTerm is false)
-	HandleShellCommand(strings.Join(args, " "), false)
+	HandleShellCommand(strings.Join(args, " "), false, true)
 }
 
 // Quit closes the main view
@@ -362,7 +363,7 @@ func RunShellCommand(input string) (string, error) {
 // HandleShellCommand runs the shell command
 // The openTerm argument specifies whether a terminal should be opened (for viewing output
 // or interacting with stdin)
-func HandleShellCommand(input string, openTerm bool) {
+func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 	inputCmd := strings.Split(input, " ")[0]
 	if !openTerm {
 		// Simply run the command in the background and notify the user when it's done
@@ -391,9 +392,10 @@ func HandleShellCommand(input string, openTerm bool) {
 		args := strings.Split(input, " ")[1:]
 
 		// Set up everything for the command
+		var outputBuf bytes.Buffer
 		cmd := exec.Command(inputCmd, args...)
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
+		cmd.Stdout = io.MultiWriter(os.Stdout, &outputBuf)
 		cmd.Stderr = os.Stderr
 
 		// This is a trap for Ctrl-C so that it doesn't kill micro
@@ -406,16 +408,25 @@ func HandleShellCommand(input string, openTerm bool) {
 			}
 		}()
 
-		// Start the command
 		cmd.Start()
-		cmd.Wait()
+		err := cmd.Wait()
 
-		// This is just so we don't return right away and let the user press enter to return
-		TermMessage("")
+		output := outputBuf.String()
+		if err != nil {
+			output = err.Error()
+		}
+
+		if waitToFinish {
+			// This is just so we don't return right away and let the user press enter to return
+			TermMessage("")
+		}
 
 		// Start the screen back up
 		InitScreen()
+
+		return output
 	}
+	return ""
 }
 
 // HandleCommand handles input from the user

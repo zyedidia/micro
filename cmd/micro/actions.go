@@ -1273,7 +1273,7 @@ func (v *View) ShellMode(usePlugin bool) bool {
 	input, canceled := messenger.Prompt("$ ", "Shell", NoCompletion)
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
-		HandleShellCommand(input, true)
+		HandleShellCommand(input, true, true)
 		if usePlugin {
 			return PostActionCall("ShellMode", v)
 		}
