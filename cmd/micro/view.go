@@ -340,6 +340,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 					TermMessage(err)
 				}
 			}
+
+			if recordingMacro {
+				curMacro = append(curMacro, e.Rune())
+			}
 		} else {
 			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
@@ -352,6 +356,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 						relocate = false
 						for _, action := range actions {
 							relocate = action(v, true) || relocate
+							funcName := FuncName(action)
+							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
+								if recordingMacro {
+									curMacro = append(curMacro, action)
+								}
+							}
 						}
 					}
 				}

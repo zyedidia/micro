@@ -79,6 +79,8 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"NextTab":             (*View).NextTab,
 	"NextSplit":           (*View).NextSplit,
 	"PreviousSplit":       (*View).PreviousSplit,
+	"ToggleMacro":         (*View).ToggleMacro,
+	"PlayMacro":           (*View).PlayMacro,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,
@@ -408,6 +410,8 @@ func DefaultBindings() map[string]string {
 		"CtrlQ":          "Quit",
 		"CtrlE":          "CommandMode",
 		"CtrlW":          "NextSplit",
+		"CtrlU":          "ToggleMacro",
+		"CtrlJ":          "PlayMacro",
 
 		// Emacs-style keybindings
 		"Alt-f": "WordRight",

@@ -40,6 +40,7 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
+* Macros
 * Common editor things such as undo/redo, line numbers, unicode support...
 
 Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.

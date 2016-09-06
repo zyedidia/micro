@@ -1476,6 +1476,62 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 	return false
 }
 
+var curMacro []interface{}
+var recordingMacro bool
+
+func (v *View) ToggleMacro(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ToggleMacro", v) {
+		return false
+	}
+
+	recordingMacro = !recordingMacro
+
+	if recordingMacro {
+		curMacro = []interface{}{}
+		messenger.Message("Recording")
+	} else {
+		messenger.Message("Stopped recording")
+	}
+
+	if usePlugin {
+		return PostActionCall("ToggleMacro", v)
+	}
+	return true
+}
+
+func (v *View) PlayMacro(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PlayMacro", v) {
+		return false
+	}
+
+	for _, action := range curMacro {
+		switch t := action.(type) {
+		case rune:
+			// Insert a character
+			if v.Cursor.HasSelection() {
+				v.Cursor.DeleteSelection()
+				v.Cursor.ResetSelection()
+			}
+			v.Buf.Insert(v.Cursor.Loc, string(t))
+			v.Cursor.Right()
+
+			for _, pl := range loadedPlugins {
+				_, err := Call(pl+".onRune", string(t), v)
+				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+					TermMessage(err)
+				}
+			}
+		case func(*View, bool) bool:
+			t(v, true)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("PlayMacro", v)
+	}
+	return true
+}
+
 // None is no action
 func None() bool {
 	return false
