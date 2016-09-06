@@ -721,6 +721,8 @@ func (v *View) Save(usePlugin bool) bool {
 	if v.Buf.Path == "" {
 		filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
 		if !canceled {
+			// the filename might or might not be quoted, so unquote first then join the strings.
+			filename = strings.Join(SplitCommandArgs(filename), " ")
 			v.Buf.Path = filename
 			v.Buf.Name = filename
 		} else {
@@ -1013,6 +1015,9 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		if canceled {
 			return false
 		}
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		filename = strings.Join(SplitCommandArgs(filename), " ")
+
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := ioutil.ReadFile(filename)
