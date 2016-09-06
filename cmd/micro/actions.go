@@ -1008,7 +1008,7 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		return false
 	}
 
-	if v.CanClose("Continue? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		filename, canceled := messenger.Prompt("File to open: ", "Open", FileCompletion)
 		if canceled {
 			return false
@@ -1308,7 +1308,7 @@ func (v *View) Quit(usePlugin bool) bool {
 	}
 
 	// Make sure not to quit if there are unsaved changes
-	if v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		v.CloseBuffer()
 		if len(tabs[curTab].views) > 1 {
 			v.splitNode.Delete()
@@ -1354,7 +1354,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 	closeAll := true
 	for _, tab := range tabs {
 		for _, v := range tab.views {
-			if !v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+			if !v.CanClose() {
 				closeAll = false
 			}
 		}
