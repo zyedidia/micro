@@ -721,6 +721,8 @@ func (v *View) Save(usePlugin bool) bool {
 	if v.Buf.Path == "" {
 		filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
 		if !canceled {
+			// the filename might or might not be quoted, so unquote first then join the strings.
+			filename = strings.Join(SplitCommandArgs(filename), " ")
 			v.Buf.Path = filename
 			v.Buf.Name = filename
 		} else {
@@ -1008,11 +1010,14 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		return false
 	}
 
-	if v.CanClose("Continue? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		filename, canceled := messenger.Prompt("File to open: ", "Open", FileCompletion)
 		if canceled {
 			return false
 		}
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		filename = strings.Join(SplitCommandArgs(filename), " ")
+
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := ioutil.ReadFile(filename)
@@ -1308,7 +1313,7 @@ func (v *View) Quit(usePlugin bool) bool {
 	}
 
 	// Make sure not to quit if there are unsaved changes
-	if v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		v.CloseBuffer()
 		if len(tabs[curTab].views) > 1 {
 			v.splitNode.Delete()
@@ -1354,7 +1359,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 	closeAll := true
 	for _, tab := range tabs {
 		for _, v := range tab.views {
-			if !v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+			if !v.CanClose() {
 				closeAll = false
 			}
 		}
@@ -1474,6 +1479,62 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 		return PostActionCall("PreviousSplit", v)
 	}
 	return false
+}
+
+var curMacro []interface{}
+var recordingMacro bool
+
+func (v *View) ToggleMacro(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ToggleMacro", v) {
+		return false
+	}
+
+	recordingMacro = !recordingMacro
+
+	if recordingMacro {
+		curMacro = []interface{}{}
+		messenger.Message("Recording")
+	} else {
+		messenger.Message("Stopped recording")
+	}
+
+	if usePlugin {
+		return PostActionCall("ToggleMacro", v)
+	}
+	return true
+}
+
+func (v *View) PlayMacro(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PlayMacro", v) {
+		return false
+	}
+
+	for _, action := range curMacro {
+		switch t := action.(type) {
+		case rune:
+			// Insert a character
+			if v.Cursor.HasSelection() {
+				v.Cursor.DeleteSelection()
+				v.Cursor.ResetSelection()
+			}
+			v.Buf.Insert(v.Cursor.Loc, string(t))
+			v.Cursor.Right()
+
+			for _, pl := range loadedPlugins {
+				_, err := Call(pl+".onRune", string(t), v)
+				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+					TermMessage(err)
+				}
+			}
+		case func(*View, bool) bool:
+			t(v, true)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("PlayMacro", v)
+	}
+	return true
 }
 
 // None is no action

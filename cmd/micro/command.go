@@ -226,7 +226,7 @@ func Bind(args []string) {
 // Run runs a shell command in the background
 func Run(args []string) {
 	// Run a shell command in the background (openTerm is false)
-	HandleShellCommand(strings.Join(args, " "), false, true)
+	HandleShellCommand(JoinCommandArgs(args...), false, true)
 }
 
 // Quit closes the main view
@@ -243,40 +243,20 @@ func Save(args []string) {
 
 // Replace runs search and replace
 func Replace(args []string) {
-	// This is a regex to parse the replace expression
-	// We allow no quotes if there are no spaces, but if you want to search
-	// for or replace an expression with spaces, you can add double quotes
-	r := regexp.MustCompile(`"[^"\\]*(?:\\.[^"\\]*)*"|[^\s]*`)
-	replaceCmd := r.FindAllString(strings.Join(args, " "), -1)
-	if len(replaceCmd) < 2 {
+	if len(args) < 2 {
 		// We need to find both a search and replace expression
 		messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
 		return
 	}
 
 	var flags string
-	if len(replaceCmd) == 3 {
+	if len(args) == 3 {
 		// The user included some flags
-		flags = replaceCmd[2]
+		flags = args[2]
 	}
 
-	search := string(replaceCmd[0])
-	replace := string(replaceCmd[1])
-
-	// If the search and replace expressions have quotes, we need to remove those
-	if strings.HasPrefix(search, `"`) && strings.HasSuffix(search, `"`) {
-		search = search[1 : len(search)-1]
-	}
-	if strings.HasPrefix(replace, `"`) && strings.HasSuffix(replace, `"`) {
-		replace = replace[1 : len(replace)-1]
-	}
-
-	// We replace all escaped double quotes to real double quotes
-	search = strings.Replace(search, `\"`, `"`, -1)
-	replace = strings.Replace(replace, `\"`, `"`, -1)
-	// Replace some things so users can actually insert newlines and tabs in replacements
-	replace = strings.Replace(replace, "\\n", "\n", -1)
-	replace = strings.Replace(replace, "\\t", "\t", -1)
+	search := string(args[0])
+	replace := string(args[1])
 
 	regex, err := regexp.Compile(search)
 	if err != nil {
@@ -347,8 +327,8 @@ func Replace(args []string) {
 
 // RunShellCommand executes a shell command and returns the output/error
 func RunShellCommand(input string) (string, error) {
-	inputCmd := strings.Split(input, " ")[0]
-	args := strings.Split(input, " ")[1:]
+	inputCmd := SplitCommandArgs(input)[0]
+	args := SplitCommandArgs(input)[1:]
 
 	cmd := exec.Command(inputCmd, args...)
 	outputBytes := &bytes.Buffer{}
@@ -364,7 +344,7 @@ func RunShellCommand(input string) (string, error) {
 // The openTerm argument specifies whether a terminal should be opened (for viewing output
 // or interacting with stdin)
 func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
-	inputCmd := strings.Split(input, " ")[0]
+	inputCmd := SplitCommandArgs(input)[0]
 	if !openTerm {
 		// Simply run the command in the background and notify the user when it's done
 		messenger.Message("Running...")
@@ -389,7 +369,7 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		screen.Fini()
 		screen = nil
 
-		args := strings.Split(input, " ")[1:]
+		args := SplitCommandArgs(input)[1:]
 
 		// Set up everything for the command
 		var outputBuf bytes.Buffer
@@ -431,12 +411,12 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 
 // HandleCommand handles input from the user
 func HandleCommand(input string) {
-	inputCmd := strings.Split(input, " ")[0]
-	args := strings.Split(input, " ")[1:]
+	args := SplitCommandArgs(input)
+	inputCmd := args[0]
 
 	if _, ok := commands[inputCmd]; !ok {
 		messenger.Error("Unknown command ", inputCmd)
 	} else {
-		commands[inputCmd].action(args)
+		commands[inputCmd].action(args[1:])
 	}
 }

@@ -182,15 +182,14 @@ func (v *View) ScrollDown(n int) {
 // CanClose returns whether or not the view can be closed
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
-// The message is what to print after saying "You have unsaved changes. "
-func (v *View) CanClose(msg string, responses ...rune) bool {
+func (v *View) CanClose() bool {
 	if v.Buf.IsModified {
-		char, canceled := messenger.LetterPrompt("You have unsaved changes. "+msg, responses...)
+		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
 		if !canceled {
 			if char == 'y' {
-				return true
-			} else if char == 's' {
 				v.Save(true)
+				return true
+			} else if char == 'n' {
 				return true
 			}
 		}
@@ -231,7 +230,7 @@ func (v *View) CloseBuffer() {
 
 // ReOpen reloads the current buffer
 func (v *View) ReOpen() {
-	if v.CanClose("Continue? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		screen.Clear()
 		v.Buf.ReOpen()
 		v.Relocate()
@@ -340,6 +339,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 					TermMessage(err)
 				}
 			}
+
+			if recordingMacro {
+				curMacro = append(curMacro, e.Rune())
+			}
 		} else {
 			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
@@ -352,6 +355,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 						relocate = false
 						for _, action := range actions {
 							relocate = action(v, true) || relocate
+							funcName := FuncName(action)
+							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
+								if recordingMacro {
+									curMacro = append(curMacro, action)
+								}
+							}
 						}
 					}
 				}
