@@ -1,13 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 )
@@ -1018,18 +1016,7 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		// the filename might or might not be quoted, so unquote first then join the strings.
 		filename = strings.Join(SplitCommandArgs(filename), " ")
 
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
-
-		var buf *Buffer
-		if err != nil {
-			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer([]byte{}, filename)
-		} else {
-			buf = NewBuffer(file, filename)
-		}
-		v.OpenBuffer(buf)
+		v.Open(filename)
 
 		if usePlugin {
 			return PostActionCall("OpenFile", v)

@@ -307,6 +307,7 @@ func main() {
 	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
+	L.SetGlobal("NewBuffer", luar.New(L, NewBuffer))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))

@@ -1,11 +1,13 @@
 package main
 
 import (
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/tcell"
 )
 
@@ -219,6 +221,22 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// the editor is opened
 	v.mouseReleased = true
 	v.lastClickTime = time.Time{}
+}
+
+func (v *View) Open(filename string) {
+	home, _ := homedir.Dir()
+	filename = strings.Replace(filename, "~", home, 1)
+	file, err := ioutil.ReadFile(filename)
+
+	var buf *Buffer
+	if err != nil {
+		messenger.Message(err.Error())
+		// File does not exist -- create an empty buffer with that name
+		buf = NewBuffer([]byte{}, filename)
+	} else {
+		buf = NewBuffer(file, filename)
+	}
+	v.OpenBuffer(buf)
 }
 
 // CloseBuffer performs any closing functions on the buffer
