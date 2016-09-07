@@ -65,7 +65,7 @@ func Max(a, b int) int {
 func IsWordChar(str string) bool {
 	if len(str) > 1 {
 		// Unicode
-		return false
+		return true
 	}
 	c := str[0]
 	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')
