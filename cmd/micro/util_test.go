@@ -50,14 +50,14 @@ func TestIsWordChar(t *testing.T) {
 	if IsWordChar("_") == false {
 		t.Errorf("IsWordChar(_) = false")
 	}
+	if IsWordChar("ß") == false {
+		t.Errorf("IsWordChar(ß) = false")
+	}
 	if IsWordChar("~") == true {
 		t.Errorf("IsWordChar(~) = true")
 	}
 	if IsWordChar(" ") == true {
 		t.Errorf("IsWordChar( ) = true")
-	}
-	if IsWordChar("ß") == true {
-		t.Errorf("IsWordChar(ß) = true")
 	}
 	if IsWordChar(")") == true {
 		t.Errorf("IsWordChar()) = true")
