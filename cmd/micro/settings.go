@@ -165,6 +165,7 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"colorcolumn":  float64(0),
 		"colorscheme":  "zenburn",
 		"cursorline":   true,
 		"ignorecase":   false,
@@ -187,6 +188,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"colorcolumn":  float64(0),
 		"cursorline":   true,
 		"filetype":     "Unknown",
 		"ignorecase":   false,

@@ -806,7 +806,16 @@ func (v *View) DisplayView() {
 				}
 			}
 			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
-				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+				if colorcolumn != 0 && screenX-v.leftCol+i == colorcolumn-1 {
+					if style, ok := colorscheme["color-column"]; ok {
+						fg, _, _ := style.Decompose()
+						lineStyle = lineStyle.Background(fg)
+					}
+					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+				} else {
+					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+				}
 			}
 		}
 	}
