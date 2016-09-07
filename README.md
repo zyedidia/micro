@@ -62,7 +62,7 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
-##### Homebrew
+### Homebrew
 
 You can also install micro using Homebrew:
 
