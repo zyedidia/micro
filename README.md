@@ -62,6 +62,15 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
+##### Homebrew
+
+You can also install micro using Homebrew:
+
+```
+$ brew tap zyedidia/micro
+$ brew install micro
+```
+
 ### Building from source
 
 If your operating system does not have binary, but does run Go, you can build from source.
