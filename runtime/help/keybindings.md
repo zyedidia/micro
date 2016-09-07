@@ -73,6 +73,14 @@ you can rebind them to your liking.
 	"Alt-e": "EndOfLine",
 	"Alt-p": "CursorUp",
 	"Alt-n": "CursorDown"
+
+	// Integration with file managers
+        "F1": "ToggleHelp",
+        "F2": "Save",
+        "F4": "Quit",
+        "F7": "Find",
+        "F10": "Quit",
+        "Esc": "Quit",
 }
 ```
 
