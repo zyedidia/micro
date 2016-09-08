@@ -280,6 +280,8 @@ func main() {
 					v.matches = Match(v)
 				}
 			}
+
+			t.Resize()
 		}
 	}
 
