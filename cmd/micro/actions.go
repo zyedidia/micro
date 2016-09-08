@@ -494,7 +494,7 @@ func (v *View) Backspace(usePlugin bool) bool {
 		// and restore the position
 
 		// If the user is using spaces instead of tabs and they are deleting
-		// whitespace at the start of the line, we should delete as if its a
+		// whitespace at the start of the line, we should delete as if it's a
 		// tab (tabSize number of spaces)
 		lineStart := v.Buf.Line(v.Cursor.Y)[:v.Cursor.X]
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
