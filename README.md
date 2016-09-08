@@ -64,7 +64,7 @@ If you'd like to see more information after installing micro, run `micro -versio
 
 ### Homebrew
 
-You can also install micro using Homebrew:
+You can also install micro using Homebrew on Mac:
 
 ```
 $ brew tap zyedidia/micro
@@ -73,7 +73,7 @@ $ brew install micro
 
 ### Building from source
 
-If your operating system does not have binary, but does run Go, you can build from source.
+If your operating system does not have a binary release, but does run Go, you can build from source.
 
 Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO).
 
