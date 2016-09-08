@@ -1,4 +1,4 @@
-syntax "shell" "\.sh$" "\.bash" "\.bashrc" "bashrc" "\.bash_aliases" "bash_aliases" "\.bash_functions" "bash_functions" "\.bash_profile" "bash_profile" "Pkgfile" "PKGBUILD" ".ebuild\$" "APKBUILD"
+syntax "shell" "\.sh$" "\.bash" "\.bashrc" "bashrc" "\.bash_aliases" "bash_aliases" "\.bash_functions" "bash_functions" "\.bash_profile" "bash_profile" "Pkgfile" "pkgmk.conf" "profile" "rc.conf" "PKGBUILD" ".ebuild\$" "APKBUILD"
 header "^#!.*/(env +)?(ba)?sh( |$)"
 
 # Numbers

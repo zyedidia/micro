@@ -1,13 +1,11 @@
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 )
@@ -361,6 +359,8 @@ func (v *View) CursorStart(usePlugin bool) bool {
 		return false
 	}
 
+	v.deselect(0)
+
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
 
@@ -596,21 +596,21 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(tabsize, v.Buf)
+						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
 					}
 				}
 				if i == end {
-					v.Cursor.CurSelection[1] = Loc{endX + tabsize + 1, end}
+					v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
 				}
 			} else {
 				v.Buf.Insert(Loc{0, i}, "\t")
 				if i == start {
 					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(1, v.Buf)
+						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(1, v.Buf))
 					}
 				}
 				if i == end {
-					v.Cursor.CurSelection[1] = Loc{endX + 2, end}
+					v.Cursor.SetSelectionEnd(Loc{endX + 2, end})
 				}
 			}
 		}
@@ -645,22 +645,22 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 						v.Buf.Remove(Loc{0, i}, Loc{1, i})
 						if i == start {
 							if v.Cursor.CurSelection[0].X > 0 {
-								v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+								v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 							}
 						}
 						if i == end {
-							v.Cursor.CurSelection[1] = Loc{endX - j, end}
+							v.Cursor.SetSelectionEnd(Loc{endX - j, end})
 						}
 					}
 				} else {
 					v.Buf.Remove(Loc{0, i}, Loc{1, i})
 					if i == start {
 						if v.Cursor.CurSelection[0].X > 0 {
-							v.Cursor.CurSelection[0] = v.Cursor.CurSelection[0].Move(-1, v.Buf)
+							v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 						}
 					}
 					if i == end {
-						v.Cursor.CurSelection[1] = Loc{endX, end}
+						v.Cursor.SetSelectionEnd(Loc{endX, end})
 					}
 				}
 			}
@@ -687,6 +687,9 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	// Insert a tab
 	if v.Buf.Settings["tabstospaces"].(bool) {
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
+		if remainder := v.Cursor.Loc.X % tabSize; remainder != 0 {
+			tabSize = tabSize - remainder
+		}
 		v.Buf.Insert(v.Cursor.Loc, Spaces(tabSize))
 		for i := 0; i < tabSize; i++ {
 			v.Cursor.Right()
@@ -716,6 +719,8 @@ func (v *View) Save(usePlugin bool) bool {
 	if v.Buf.Path == "" {
 		filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
 		if !canceled {
+			// the filename might or might not be quoted, so unquote first then join the strings.
+			filename = strings.Join(SplitCommandArgs(filename), " ")
 			v.Buf.Path = filename
 			v.Buf.Name = filename
 		} else {
@@ -845,7 +850,7 @@ func (v *View) Copy(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection())
+		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.freshClip = true
 		messenger.Message("Copied selection")
 	}
@@ -868,10 +873,10 @@ func (v *View) CutLine(usePlugin bool) bool {
 	}
 	if v.freshClip == true {
 		if v.Cursor.HasSelection() {
-			if clip, err := clipboard.ReadAll(); err != nil {
+			if clip, err := clipboard.ReadAll("clipboard"); err != nil {
 				messenger.Error(err)
 			} else {
-				clipboard.WriteAll(clip + v.Cursor.GetSelection())
+				clipboard.WriteAll(clip+v.Cursor.GetSelection(), "clipboard")
 			}
 		}
 	} else if time.Since(v.lastCutTime)/time.Second > 10*time.Second || v.freshClip == false {
@@ -896,7 +901,7 @@ func (v *View) Cut(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection())
+		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 		v.freshClip = true
@@ -955,18 +960,23 @@ func (v *View) Paste(usePlugin bool) bool {
 		return false
 	}
 
-	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	clip, _ := clipboard.ReadAll("clipboard")
+	v.paste(clip)
 
-	if v.Cursor.HasSelection() {
-		v.Cursor.DeleteSelection()
-		v.Cursor.ResetSelection()
+	if usePlugin {
+		return PostActionCall("Paste", v)
 	}
-	clip, _ := clipboard.ReadAll()
-	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
-	v.Buf.Insert(v.Cursor.Loc, clip)
-	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
-	v.freshClip = false
-	messenger.Message("Pasted clipboard")
+	return true
+}
+
+// PastePrimary pastes from the primary clipboard (only use on linux)
+func (v *View) PastePrimary(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Paste", v) {
+		return false
+	}
+
+	clip, _ := clipboard.ReadAll("primary")
+	v.paste(clip)
 
 	if usePlugin {
 		return PostActionCall("Paste", v)
@@ -980,8 +990,8 @@ func (v *View) SelectAll(usePlugin bool) bool {
 		return false
 	}
 
-	v.Cursor.CurSelection[0] = v.Buf.Start()
-	v.Cursor.CurSelection[1] = v.Buf.End()
+	v.Cursor.SetSelectionStart(v.Buf.Start())
+	v.Cursor.SetSelectionEnd(v.Buf.End())
 	// Put the cursor at the beginning
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
@@ -998,23 +1008,15 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		return false
 	}
 
-	if v.CanClose("Continue? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		filename, canceled := messenger.Prompt("File to open: ", "Open", FileCompletion)
 		if canceled {
 			return false
 		}
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		filename = strings.Join(SplitCommandArgs(filename), " ")
 
-		var buf *Buffer
-		if err != nil {
-			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer([]byte{}, filename)
-		} else {
-			buf = NewBuffer(file, filename)
-		}
-		v.OpenBuffer(buf)
+		v.Open(filename)
 
 		if usePlugin {
 			return PostActionCall("OpenFile", v)
@@ -1263,7 +1265,7 @@ func (v *View) ShellMode(usePlugin bool) bool {
 	input, canceled := messenger.Prompt("$ ", "Shell", NoCompletion)
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
-		HandleShellCommand(input, true)
+		HandleShellCommand(input, true, true)
 		if usePlugin {
 			return PostActionCall("ShellMode", v)
 		}
@@ -1298,7 +1300,7 @@ func (v *View) Quit(usePlugin bool) bool {
 	}
 
 	// Make sure not to quit if there are unsaved changes
-	if v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		v.CloseBuffer()
 		if len(tabs[curTab].views) > 1 {
 			v.splitNode.Delete()
@@ -1344,7 +1346,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 	closeAll := true
 	for _, tab := range tabs {
 		for _, v := range tab.views {
-			if !v.CanClose("Quit anyway? (y,n,s) ", 'y', 'n', 's') {
+			if !v.CanClose() {
 				closeAll = false
 			}
 		}
@@ -1464,6 +1466,62 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 		return PostActionCall("PreviousSplit", v)
 	}
 	return false
+}
+
+var curMacro []interface{}
+var recordingMacro bool
+
+func (v *View) ToggleMacro(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ToggleMacro", v) {
+		return false
+	}
+
+	recordingMacro = !recordingMacro
+
+	if recordingMacro {
+		curMacro = []interface{}{}
+		messenger.Message("Recording")
+	} else {
+		messenger.Message("Stopped recording")
+	}
+
+	if usePlugin {
+		return PostActionCall("ToggleMacro", v)
+	}
+	return true
+}
+
+func (v *View) PlayMacro(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PlayMacro", v) {
+		return false
+	}
+
+	for _, action := range curMacro {
+		switch t := action.(type) {
+		case rune:
+			// Insert a character
+			if v.Cursor.HasSelection() {
+				v.Cursor.DeleteSelection()
+				v.Cursor.ResetSelection()
+			}
+			v.Buf.Insert(v.Cursor.Loc, string(t))
+			v.Cursor.Right()
+
+			for _, pl := range loadedPlugins {
+				_, err := Call(pl+".onRune", string(t), v)
+				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+					TermMessage(err)
+				}
+			}
+		case func(*View, bool) bool:
+			t(v, true)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("PlayMacro", v)
+	}
+	return true
 }
 
 // None is no action

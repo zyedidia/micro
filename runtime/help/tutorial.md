@@ -1,7 +1,7 @@
 # Tutorial
 
-This is a brief intro to micro's configuration system that will will give some
-simple examples showing how to configure settings, rebind keys, 
+This is a brief intro to micro's configuration system that will give some
+simple examples showing how to configure settings, rebind keys,
 and use `init.lua` to configure micro to your liking.
 
 Hopefully you'll find this useful.
@@ -80,7 +80,7 @@ You can do that by putting the following in `init.lua`:
 function gorun()
     local buf = CurView().Buf -- The current buffer
     if buf:FileType() == "go" then
-        HandleShellCommand("go run " .. buf.Path, true) -- true means don't run it in the background
+        HandleShellCommand("go run " .. buf.Path, true, true) -- the first true means don't run it in the background
     end
 end
 

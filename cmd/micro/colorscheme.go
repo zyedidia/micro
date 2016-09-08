@@ -16,7 +16,25 @@ type Colorscheme map[string]tcell.Style
 // The current colorscheme
 var colorscheme Colorscheme
 
-var preInstalledColors = []string{"default", "simple", "solarized", "solarized-tc", "atom-dark-tc", "monokai", "gruvbox", "zenburn"}
+var preInstalledColors = []string{"default", "simple", "solarized", "solarized-tc", "atom-dark-tc", "monokai", "gruvbox", "zenburn", "bubblegum"}
+
+// ColorschemeExists checks if a given colorscheme exists
+func ColorschemeExists(colorschemeName string) bool {
+	files, _ := ioutil.ReadDir(configDir + "/colorschemes")
+	for _, f := range files {
+		if f.Name() == colorschemeName+".micro" {
+			return true
+		}
+	}
+
+	for _, name := range preInstalledColors {
+		if name == colorschemeName {
+			return true
+		}
+	}
+
+	return false
+}
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
@@ -31,6 +49,7 @@ func LoadDefaultColorscheme() {
 // LoadColorscheme loads the given colorscheme from a directory
 func LoadColorscheme(colorschemeName, dir string) {
 	files, _ := ioutil.ReadDir(dir)
+	found := false
 	for _, f := range files {
 		if f.Name() == colorschemeName+".micro" {
 			text, err := ioutil.ReadFile(dir + "/" + f.Name())
@@ -39,6 +58,7 @@ func LoadColorscheme(colorschemeName, dir string) {
 				continue
 			}
 			colorscheme = ParseColorscheme(string(text))
+			found = true
 		}
 	}
 
@@ -50,7 +70,12 @@ func LoadColorscheme(colorschemeName, dir string) {
 				continue
 			}
 			colorscheme = ParseColorscheme(string(data))
+			found = true
 		}
+	}
+
+	if !found {
+		TermMessage(colorschemeName, "is not a valid colorscheme")
 	}
 }
 

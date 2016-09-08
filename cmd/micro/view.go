@@ -1,11 +1,13 @@
 package main
 
 import (
+	"io/ioutil"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/tcell"
 )
 
@@ -84,7 +86,7 @@ type View struct {
 // NewView returns a new fullscreen view
 func NewView(buf *Buffer) *View {
 	screenW, screenH := screen.Size()
-	return NewViewWidthHeight(buf, screenW, screenH-1)
+	return NewViewWidthHeight(buf, screenW, screenH)
 }
 
 // NewViewWidthHeight returns a new view with the specified width and height
@@ -145,6 +147,20 @@ func (v *View) ToggleTabbar() {
 	}
 }
 
+func (v *View) paste(clip string) {
+	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+
+	if v.Cursor.HasSelection() {
+		v.Cursor.DeleteSelection()
+		v.Cursor.ResetSelection()
+	}
+	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
+	v.Buf.Insert(v.Cursor.Loc, clip)
+	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+	v.freshClip = false
+	messenger.Message("Pasted clipboard")
+}
+
 // ScrollUp scrolls the view up n lines (if possible)
 func (v *View) ScrollUp(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
@@ -168,15 +184,14 @@ func (v *View) ScrollDown(n int) {
 // CanClose returns whether or not the view can be closed
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
-// The message is what to print after saying "You have unsaved changes. "
-func (v *View) CanClose(msg string, responses ...rune) bool {
+func (v *View) CanClose() bool {
 	if v.Buf.IsModified {
-		char, canceled := messenger.LetterPrompt("You have unsaved changes. "+msg, responses...)
+		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
 		if !canceled {
 			if char == 'y' {
-				return true
-			} else if char == 's' {
 				v.Save(true)
+				return true
+			} else if char == 'n' {
 				return true
 			}
 		}
@@ -208,6 +223,22 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 }
 
+func (v *View) Open(filename string) {
+	home, _ := homedir.Dir()
+	filename = strings.Replace(filename, "~", home, 1)
+	file, err := ioutil.ReadFile(filename)
+
+	var buf *Buffer
+	if err != nil {
+		messenger.Message(err.Error())
+		// File does not exist -- create an empty buffer with that name
+		buf = NewBuffer([]byte{}, filename)
+	} else {
+		buf = NewBuffer(file, filename)
+	}
+	v.OpenBuffer(buf)
+}
+
 // CloseBuffer performs any closing functions on the buffer
 func (v *View) CloseBuffer() {
 	if v.Buf != nil {
@@ -217,7 +248,7 @@ func (v *View) CloseBuffer() {
 
 // ReOpen reloads the current buffer
 func (v *View) ReOpen() {
-	if v.CanClose("Continue? (y,n,s) ", 'y', 'n', 's') {
+	if v.CanClose() {
 		screen.Clear()
 		v.Buf.ReOpen()
 		v.Relocate()
@@ -311,7 +342,33 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// Window resized
 		tabs[v.TabNum].Resize()
 	case *tcell.EventKey:
-		if e.Key() == tcell.KeyRune && (e.Modifiers() == 0 || e.Modifiers() == tcell.ModShift) {
+		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
+		isBinding := false
+		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
+			for key, actions := range bindings {
+				if e.Key() == key.keyCode {
+					if e.Key() == tcell.KeyRune {
+						if e.Rune() != key.r {
+							continue
+						}
+					}
+					if e.Modifiers() == key.modifiers {
+						relocate = false
+						isBinding = true
+						for _, action := range actions {
+							relocate = action(v, true) || relocate
+							funcName := FuncName(action)
+							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
+								if recordingMacro {
+									curMacro = append(curMacro, action)
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+		if !isBinding && e.Key() == tcell.KeyRune {
 			// Insert a character
 			if v.Cursor.HasSelection() {
 				v.Cursor.DeleteSelection()
@@ -326,25 +383,30 @@ func (v *View) HandleEvent(event tcell.Event) {
 					TermMessage(err)
 				}
 			}
-		} else {
-			for key, actions := range bindings {
-				if e.Key() == key.keyCode {
-					if e.Key() == tcell.KeyRune {
-						if e.Rune() != key.r {
-							continue
-						}
-					}
-					if e.Modifiers() == key.modifiers {
-						relocate = false
-						for _, action := range actions {
-							relocate = action(v, true) || relocate
-						}
-					}
-				}
+
+			if recordingMacro {
+				curMacro = append(curMacro, e.Rune())
 			}
 		}
 	case *tcell.EventPaste:
-		relocate = v.Paste(true)
+		if !PreActionCall("Paste", v) {
+			break
+		}
+
+		leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+
+		if v.Cursor.HasSelection() {
+			v.Cursor.DeleteSelection()
+			v.Cursor.ResetSelection()
+		}
+		clip := e.Text()
+		clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
+		v.Buf.Insert(v.Cursor.Loc, clip)
+		v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+		v.freshClip = false
+		messenger.Message("Pasted clipboard")
+
+		PostActionCall("Paste", v)
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
@@ -394,9 +456,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 			}
+		case tcell.Button2:
+			// Middle mouse button was clicked,
+			// We should paste primary
+			v.PastePrimary(true)
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -410,7 +476,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 				}
 				v.mouseReleased = true
 			}
@@ -740,7 +806,16 @@ func (v *View) DisplayView() {
 				}
 			}
 			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
-				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+				if colorcolumn != 0 && screenX-v.leftCol+i == colorcolumn-1 {
+					if style, ok := colorscheme["color-column"]; ok {
+						fg, _, _ := style.Decompose()
+						lineStyle = lineStyle.Background(fg)
+					}
+					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+				} else {
+					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+				}
 			}
 		}
 	}

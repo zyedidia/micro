@@ -23,6 +23,11 @@ Here are the options that you can set:
     You can read more about micro's colorschemes in the `colors` help topic
     (`help colors`).
 
+* `colorcolumn`: if this is not set to 0, it will display a column at the specified
+   column. This is useful if you want column 80 to be highlighted special for example.
+
+	default value: `0`
+
 * `tabsize`: sets the tab size to `option`
 
 	default value: `4`
@@ -30,6 +35,11 @@ Here are the options that you can set:
 * `indentchar`: sets the indentation character
 
 	default value: ` `
+
+* `infobar`: enables the line at the bottom of the editor where messages are printed.
+   This option is `global only`.
+
+	default value: `on`
 
 * `filetype`: sets the filetype for the current buffer. This setting is `local only`
 

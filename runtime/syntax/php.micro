@@ -1,40 +1,30 @@
-## PHP Syntax Highlighting
 syntax "php" "\.php[2345s~]?$"
-color white start="<\?(php|=)?" end="\?>"
-# Functions
-color brightblue "([a-zA-Z0-9_-]*)\("
-# Constructs
-color brightblue "(class|extends|goto) ([a-zA-Z0-9_]*)"
-color green "[^a-z0-9_-]{1}(var|class|function|echo|case|break|default|exit|switch|if|else|elseif|endif|foreach|endforeach|@|while|public|private|protected|return|true|false|null|TRUE|FALSE|NULL|const|static|extends|as|array|require|include|require_once|include_once|define|do|continue|declare|goto|print|in|namespace|use)[^a-z0-9_-]{1}"
-color brightblue "[a-zA-Z0-9]+:"
-# Variables
-color white "\$[a-zA-Z_0-9$]*|[=!<>]"
-color white "\->[a-zA-Z_0-9$]*|[=!<>]"
-# Special Characters
-color yellow "[.,{}();]"
-color yellow "\["
-color yellow "\]"
-color yellow "[=][^>]"
-# Numbers
-color magenta "[+-]*([0-9]\.)*[0-9]+([eE][+-]?([0-9]\.)*[0-9])*"
-color magenta "0x[0-9a-zA-Z]*"
-# Special Variables
-color brightblue "(\$this|parent::|self::|\$this->)"
-# Bitwise Operations
-color magenta "(\;|\||\^){1}"
-# And/Or/SRO/etc
-color green "(\;\;|\|\||::|=>|->)"
-# Online Comments
-color brightyellow "(#.*|//.*)$"
-# STRINGS!
-color red "('[^']*')|(\"[^\"]*\")"
-# Inline Variables
-color white "\{\$[^}]*\}"
-# PHP Tags
-color red "(<\?(php)?|\?>)"
-# General HTML
-color red start="\?>" end="<\?(php|=)?"
-# trailing whitespace
-color ,green "[^[:space:]]{1}[[:space:]]+$"
-# multi-line comments
-color brightyellow start="/\*" end="\*/"
+color default start="<\?(php|=)?" end="\?>"
+
+color special "([a-zA-Z0-9_-]+)\("
+
+color identifier "(var|class|goto|extends|function|echo|case|break|default|exit|switch|foreach|endforeach|while|const|static|extends|as|require|include|require_once|include_once|define|do|continue|declare|goto|print|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)[\s|\)]"
+
+color identifier "[a-zA-Z\\]+::"
+
+color identifier "new\s([a-zA-Z0-9\\]+)"
+color identifier "([A-Z][a-zA-Z0-9_]+)\s"
+color identifier "([A-Z0-9_]+)[;|\s|\)|,]"
+
+color statement "(implements|abstract|global|public|instanceof|private|protected|static|if|else|elseif|endif|namespace|use|as|new|throw|catch|try|return)[\s|;]"
+
+color constant "(true|false|null|TRUE|FALSE|NULL)"
+
+color constant "[\s|=|>|\s|\(|/|+|-|\*|\[](\d+)"
+
+color identifier "(\$this|parent|self|\$this->)"
+
+color statement "(=>|===|!==|==|!=|&&|\|\||::|=|->|\!)"
+
+color default "(\$[a-zA-Z0-9\-_]+)"
+color default "[\(|\)|/|+|-|\*|\[|,|;]"
+
+color constant.string "('.*?'|\".*?\")"
+
+color comment start="/\*" end="\*/"
+color comment "(#.*|//.*)$"

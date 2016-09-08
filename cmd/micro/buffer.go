@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"strconv"
+	"strings"
 	"time"
 	"unicode/utf8"
 )
@@ -85,10 +87,36 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	}
 
 	// Put the cursor at the first spot
+	cursorStartX := 0
+	cursorStartY := 0
+	// If -startpos LINE,COL was passed, use start position LINE,COL
+	if len(*flagStartPos) > 0 {
+		positions := strings.Split(*flagStartPos, ",")
+		if len(positions) == 2 {
+			lineNum, errPos1 := strconv.Atoi(positions[0])
+			colNum, errPos2 := strconv.Atoi(positions[1])
+			if errPos1 == nil && errPos2 == nil {
+				cursorStartX = colNum
+				cursorStartY = lineNum - 1
+				// Check to avoid line overflow
+				if cursorStartY > b.NumLines {
+					cursorStartY = b.NumLines - 1
+				} else if cursorStartY < 0 {
+					cursorStartY = 0
+				}
+				// Check to avoid column overflow
+				if cursorStartX > len(b.Line(cursorStartY)) {
+					cursorStartX = len(b.Line(cursorStartY))
+				} else if cursorStartX < 0 {
+					cursorStartX = 0
+				}
+			}
+		}
+	}
 	b.Cursor = Cursor{
 		Loc: Loc{
-			X: 0,
-			Y: 0,
+			X: cursorStartX,
+			Y: cursorStartY,
 		},
 		buf: b,
 	}

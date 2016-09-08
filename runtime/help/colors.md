@@ -108,6 +108,8 @@ Here is a list of the colorscheme groups that you can use:
 * gutter-error
 * gutter-warning
 * cursor-line
+* current-line-number
+* color-column
 
 Colorschemes can be placed in the `~/.config/micro/colorschemes` directory to be used.
 

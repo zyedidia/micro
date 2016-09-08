@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -9,6 +8,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/zyedidia/glob"
 )
 
@@ -30,7 +30,7 @@ func InitGlobalSettings() {
 				return
 			}
 
-			err = json.Unmarshal(input, &parsed)
+			err = json5.Unmarshal(input, &parsed)
 			if err != nil {
 				TermMessage("Error reading settings.json:", err.Error())
 			}
@@ -70,7 +70,7 @@ func InitLocalSettings(buf *Buffer) {
 			return
 		}
 
-		err = json.Unmarshal(input, &parsed)
+		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			TermMessage("Error reading settings.json:", err.Error())
 		}
@@ -110,7 +110,7 @@ func WriteSettings(filename string) error {
 					return err
 				}
 
-				err = json.Unmarshal(input, &parsed)
+				err = json5.Unmarshal(input, &parsed)
 				if err != nil {
 					TermMessage("Error reading settings.json:", err.Error())
 				}
@@ -125,8 +125,8 @@ func WriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		err = ioutil.WriteFile(filename, txt, 0644)
+		txt, _ := json5.MarshalIndent(parsed, "", "    ")
+		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return err
 }
@@ -165,10 +165,12 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"colorcolumn":  float64(0),
 		"colorscheme":  "zenburn",
 		"cursorline":   true,
 		"ignorecase":   false,
 		"indentchar":   " ",
+		"infobar":      true,
 		"ruler":        true,
 		"savecursor":   false,
 		"saveundo":     false,
@@ -186,6 +188,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"colorcolumn":  float64(0),
 		"cursorline":   true,
 		"filetype":     "Unknown",
 		"ignorecase":   false,
@@ -207,6 +210,12 @@ func DefaultLocalSettings() map[string]interface{} {
 // is local only it will set the local version
 // Use setlocal to force an option to be set locally
 func SetOption(option, value string) error {
+	if option == "colorscheme" {
+		if !ColorschemeExists(value) {
+			return errors.New(value + " is not a valid colorscheme")
+		}
+	}
+
 	if _, ok := globalSettings[option]; !ok {
 		if _, ok := CurView().Buf.Settings[option]; !ok {
 			return errors.New("Invalid option")
@@ -241,6 +250,12 @@ func SetOption(option, value string) error {
 					view.matches = Match(view)
 				}
 			}
+		}
+	}
+
+	if option == "infobar" {
+		for _, tab := range tabs {
+			tab.Resize()
 		}
 	}
 

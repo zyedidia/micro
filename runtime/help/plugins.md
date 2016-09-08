@@ -37,7 +37,7 @@ for example turning off `tabstospaces` only for Go files when they are opened.
 ---
 
 There are a number of functions and variables that are available to you in
-oder to access the inner workings of micro. Here is a list (the type signatures
+order to access the inner workings of micro. Here is a list (the type signatures
 for functions are given using Go's type system):
 
 * `OS`: variable which gives the OS micro is currently running on (this is the same
@@ -66,12 +66,17 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    creates a command with `name` which will call `function` when executed.
    Use 0 for completions to get NoCompletion.
 
+* `MakeCompletion(function string)`:
+   creates a `Completion` to use with `MakeCommand`.
+
 * `CurView()`: returns the current view
 
 * `HandleCommand(cmd string)`: runs the given command
 
-* `HandleShellCommand(shellCmd string, interactive bool)`: runs the given shell
-   command
+* `HandleShellCommand(shellCmd string, interactive bool, waitToClose bool)`: runs the given shell
+   command. The `interactive` bool specifies whether the command should run in the background. The
+   `waitToClose` bool only applies if `interactive` is true and means that it should wait before
+   returning to the editor.
 
 * `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
    Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
@@ -103,6 +108,36 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 
 If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+
+# Autocomplete command arguments
+
+See this example to learn how to use `MakeCompletion` and `MakeCommand`
+
+```lua
+local function StartsWith(String,Start)
+  String = String:upper()
+  Start = Start:upper() 
+  return string.sub(String,1,string.len(Start))==Start
+end
+
+function complete(input)
+  local allCompletions = {"Hello", "World", "Foo", "Bar"}
+  local result = {}
+   
+  for i,v in pairs(allCompletions) do
+  if StartsWith(v, input) then
+       table.insert(result, v)
+     end
+   end
+   return result
+end
+
+function foo(arg)
+  messenger:Message(arg)
+end
+
+MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
+```
 
 # Default plugins
 

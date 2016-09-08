@@ -50,6 +50,8 @@ you can rebind them to your liking.
 	"CtrlBackslash":  "NextTab",
 	"Home":           "Start",
 	"End":            "End",
+	"CtrlHome":       "CursorStart",
+	"CtrlEnd":        "CursorEnd",
 	"PageUp":         "CursorPageUp",
 	"PageDown":       "CursorPageDown",
 	"CtrlG":          "ToggleHelp",
@@ -61,6 +63,8 @@ you can rebind them to your liking.
 	"CtrlQ":          "Quit",
 	"CtrlE":          "CommandMode",
 	"CtrlW":          "NextSplit",
+	"CtrlU":          "ToggleMacro",
+	"CtrlJ":          "PlayMacro",
 	
 	// Emacs-style keybindings
 	"Alt-f": "WordRight",
@@ -175,6 +179,8 @@ PreviousTab
 NextTab
 NextSplit
 PreviousSplit
+ToggleMacro
+PlayMacro
 ```
 
 Here is the list of all possible keys you can bind:

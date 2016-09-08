@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -98,6 +97,7 @@ func (m *Messenger) Error(msg ...interface{}) {
 
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
 func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
+	m.hasPrompt = true
 	m.Message(prompt)
 
 	_, h := screen.Size()
@@ -113,11 +113,14 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 			switch e.Key() {
 			case tcell.KeyRune:
 				if e.Rune() == 'y' {
+					m.hasPrompt = false
 					return true, false
 				} else if e.Rune() == 'n' {
+					m.hasPrompt = false
 					return false, false
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.hasPrompt = false
 				return false, true
 			}
 		}
@@ -126,6 +129,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 
 // LetterPrompt gives the user a prompt and waits for a one letter response
 func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) {
+	m.hasPrompt = true
 	m.Message(prompt)
 
 	_, h := screen.Size()
@@ -142,11 +146,16 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 			case tcell.KeyRune:
 				for _, r := range responses {
 					if e.Rune() == r {
+						m.Clear()
 						m.Reset()
+						m.hasPrompt = false
 						return r, false
 					}
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.Clear()
+				m.Reset()
+				m.hasPrompt = false
 				return ' ', true
 			}
 		}
@@ -196,7 +205,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
-				args := strings.Split(m.response, " ")
+				args := SplitCommandArgs(m.response)
 				currentArgNum := len(args) - 1
 				currentArg := args[currentArgNum]
 				var completionType Completion
@@ -222,6 +231,8 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
 					chosen, suggestions = OptionComplete(currentArg)
+				} else if completionType < NoCompletion {
+					chosen, suggestions = PluginComplete(completionType, currentArg)
 				}
 
 				if len(suggestions) > 1 {
@@ -229,10 +240,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				}
 
 				if chosen != "" {
-					if len(args) > 1 {
-						chosen = " " + chosen
-					}
-					m.response = strings.Join(args[:len(args)-1], " ") + chosen
+					m.response = JoinCommandArgs(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
 			}
@@ -240,18 +248,19 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 
 		m.HandleEvent(event, m.history[historyType])
 
-		messenger.Clear()
+		m.Clear()
 		for _, v := range tabs[curTab].views {
 			v.Display()
 		}
 		DisplayTabs()
-		messenger.Display()
+		m.Display()
 		if len(suggestions) > 1 {
 			m.DisplaySuggestions(suggestions)
 		}
 		screen.Show()
 	}
 
+	m.Clear()
 	m.Reset()
 	return response, canceled
 }
@@ -287,7 +296,7 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 				m.cursorx--
 			}
 		case tcell.KeyCtrlV:
-			clip, _ := clipboard.ReadAll()
+			clip, _ := clipboard.ReadAll("clipboard")
 			m.response = Insert(m.response, m.cursorx, clip)
 			m.cursorx += Count(clip)
 		case tcell.KeyRune:
@@ -347,11 +356,14 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 func (m *Messenger) Display() {
 	_, h := screen.Size()
 	if m.hasMessage {
-		runes := []rune(m.message + m.response)
-		for x := 0; x < len(runes); x++ {
-			screen.SetContent(x, h-1, runes[x], nil, m.style)
+		if m.hasPrompt || globalSettings["infobar"].(bool) {
+			runes := []rune(m.message + m.response)
+			for x := 0; x < len(runes); x++ {
+				screen.SetContent(x, h-1, runes[x], nil, m.style)
+			}
 		}
 	}
+
 	if m.hasPrompt {
 		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
 		screen.Show()

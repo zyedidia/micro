@@ -64,11 +64,11 @@ var (
 )
 
 // LoadInput determines which files should be loaded into buffers
-// based on the input stored in os.Args
+// based on the input stored in flag.Args()
 func LoadInput() []*Buffer {
 	// There are a number of ways micro should start given its input
 
-	// 1. If it is given a files in os.Args, it should open those
+	// 1. If it is given a files in flag.Args(), it should open those
 
 	// 2. If there is no input file and the input is not a terminal, that means
 	// something is being piped in and the stdin should be opened in an
@@ -82,11 +82,12 @@ func LoadInput() []*Buffer {
 	var err error
 	var buffers []*Buffer
 
-	if len(os.Args) > 1 {
+	if len(flag.Args()) > 0 {
 		// Option 1
 		// We go through each file and load it
-		for i := 1; i < len(os.Args); i++ {
-			filename = os.Args[i]
+		for i := 0; i < len(flag.Args()); i++ {
+			filename = flag.Args()[i]
+
 			// Check that the file exists
 			if _, e := os.Stat(filename); e == nil {
 				// If it exists we load it into a buffer
@@ -195,10 +196,24 @@ func RedrawAll() {
 }
 
 // Passing -version as a flag will have micro print out the version number
-var flagVersion = flag.Bool("version", false, "Show the version number")
+var flagVersion = flag.Bool("version", false, "Show the version number and information")
+var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
 
 func main() {
+	flag.Usage = func() {
+		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
+		fmt.Println("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n")
+		flag.PrintDefaults()
+	}
+
+	optionFlags := make(map[string]*string)
+
+	for k, v := range DefaultGlobalSettings() {
+		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
+	}
+
 	flag.Parse()
+
 	if *flagVersion {
 		// If -version was passed
 		fmt.Println("Version:", Version)
@@ -220,6 +235,7 @@ func main() {
 
 	// Load the user's settings
 	InitGlobalSettings()
+
 	InitCommands()
 	InitBindings()
 
@@ -267,6 +283,12 @@ func main() {
 		}
 	}
 
+	for k, v := range optionFlags {
+		if *v != "" {
+			SetOption(k, *v)
+		}
+	}
+
 	// Load all the plugin stuff
 	// We give plugins access to a bunch of variables here which could be useful to them
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
@@ -284,6 +306,8 @@ func main() {
 	L.SetGlobal("HandleCommand", luar.New(L, HandleCommand))
 	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
+	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
+	L.SetGlobal("NewBuffer", luar.New(L, NewBuffer))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
@@ -338,12 +362,12 @@ func main() {
 				// If the user left clicked we check a couple things
 				_, h := screen.Size()
 				x, y := e.Position()
-				if y == h-1 && messenger.message != "" {
+				if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
 					// If the user clicked in the bottom bar, and there is a message down there
 					// we copy it to the clipboard.
 					// Often error messages are displayed down there so it can be useful to easily
 					// copy the message
-					clipboard.WriteAll(messenger.message)
+					clipboard.WriteAll(messenger.message, "primary")
 					continue
 				}
 
