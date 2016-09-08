@@ -143,6 +143,7 @@ Delete
 Center
 InsertTab
 Save
+SaveAs
 Find
 FindNext
 FindPrevious

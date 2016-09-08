@@ -754,6 +754,21 @@ func (v *View) Save(usePlugin bool) bool {
 	return false
 }
 
+// SaveAs saves the buffer to disk with the given name
+func (v *View) SaveAs(usePlugin bool) bool {
+	filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
+	if !canceled {
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		filename = strings.Join(SplitCommandArgs(filename), " ")
+		v.Buf.Path = filename
+		v.Buf.Name = filename
+
+		v.Save(true)
+	}
+
+	return false
+}
+
 // Find opens a prompt and searches forward for the input
 func (v *View) Find(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Find", v) {

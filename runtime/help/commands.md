@@ -5,7 +5,8 @@ Here are the possible commands that you can use.
 
 * `quit`: Quits micro.
 
-* `save`: Saves the current buffer.
+* `save filename?`: Saves the current buffer. If the filename is provided it will
+   'save as' the filename.
 
 * `replace "search" "value" flags`: This will replace `search` with `value`. 
    The `flags` are optional.

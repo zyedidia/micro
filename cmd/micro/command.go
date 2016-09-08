@@ -237,8 +237,12 @@ func Quit(args []string) {
 
 // Save saves the buffer in the main view
 func Save(args []string) {
-	// Save the main view
-	CurView().Save(true)
+	if len(args) == 0 {
+		// Save the main view
+		CurView().Save(true)
+	} else {
+		CurView().Buf.SaveAs(args[0])
+	}
 }
 
 // Replace runs search and replace
