@@ -14,7 +14,7 @@ Here are the options that you can set:
 
 	default value: `default`
 	Note that the default colorschemes (default, solarized, and solarized-tc)
-	are not located in configDir, because they are embedded in the micro binary
+	are not located in configDir, because they are embedded in the micro binary.
 
 	The colorscheme can be selected from all the files in the 
 	~/.config/micro/colorschemes/ directory. Micro comes by default with three
@@ -22,6 +22,11 @@ Here are the options that you can set:
 
     You can read more about micro's colorschemes in the `colors` help topic
     (`help colors`).
+
+* `colorcolumn`: if this is not set to 0, it will display a column at the specified
+   column. This is useful if you want column 80 to be highlighted special for example.
+
+	default value: `0`
 
 * `tabsize`: sets the tab size to `option`
 
@@ -97,7 +102,7 @@ Default plugin options:
 
 	default value: `on`
 
-* `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the autoclose plugin
+* `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the `autoclose` plugin
 
 	default value: `on`
 

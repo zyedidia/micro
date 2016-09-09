@@ -19,12 +19,12 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * solarized: this is the solarized colorscheme. 
   You should have the solarized color palette in your terminal to use it.
 
-* solarized-tc: this is the solarized colorscheme for true color, just 
+* solarized-tc: this is the solarized colorscheme for true color; just 
   make sure your terminal supports true color before using it and that the 
   MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
 
-* monokai: this is the monokai colorscheme, you may recognize it as 
-  sublime text's default colorscheme. It requires true color to
+* monokai: this is the monokai colorscheme; you may recognize it as 
+  Sublime Text's default colorscheme. It requires true color to
   look perfect, but the 256 color approximation looks very good as well.
 
 * atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
@@ -108,6 +108,8 @@ Here is a list of the colorscheme groups that you can use:
 * gutter-error
 * gutter-warning
 * cursor-line
+* current-line-number
+* color-column
 
 Colorschemes can be placed in the `~/.config/micro/colorschemes` directory to be used.
 

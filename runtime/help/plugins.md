@@ -52,26 +52,31 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 * `GetOption(name string)`: returns the value of the requested option
 
 * `AddOption(name string, value interface{})`: sets the given option with the given
-   value (`interface{}` means any type in Go).
+   value (`interface{}` means any type in Go)
 
 * `SetOption(option, value string)`: sets the given option to the value. This will
    set the option globally, unless it is a local only option.
 
 * `SetLocalOption(option, value string, buffer *Buffer)`: sets the given option to
-   the value locally in the given buffer.
+   the value locally in the given buffer
 
-* `BindKey(key, action string)`: binds `key` to `action`.
+* `BindKey(key, action string)`: binds `key` to `action`
 
 * `MakeCommand(name, function string, completions ...Completion)`: 
    creates a command with `name` which will call `function` when executed.
    Use 0 for completions to get NoCompletion.
 
+* `MakeCompletion(function string)`:
+   creates a `Completion` to use with `MakeCommand`
+
 * `CurView()`: returns the current view
 
 * `HandleCommand(cmd string)`: runs the given command
 
-* `HandleShellCommand(shellCmd string, interactive bool)`: runs the given shell
-   command
+* `HandleShellCommand(shellCmd string, interactive bool, waitToClose bool)`: runs the given shell
+   command. The `interactive` bool specifies whether the command should run in the background. The
+   `waitToClose` bool only applies if `interactive` is true and means that it should wait before
+   returning to the editor.
 
 * `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
    Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
@@ -104,7 +109,37 @@ The possible methods which you can call using the `messenger` variable are:
 
 If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
 
+# Autocomplete command arguments
+
+See this example to learn how to use `MakeCompletion` and `MakeCommand`
+
+```lua
+local function StartsWith(String,Start)
+  String = String:upper()
+  Start = Start:upper() 
+  return string.sub(String,1,string.len(Start))==Start
+end
+
+function complete(input)
+  local allCompletions = {"Hello", "World", "Foo", "Bar"}
+  local result = {}
+   
+  for i,v in pairs(allCompletions) do
+  if StartsWith(v, input) then
+       table.insert(result, v)
+     end
+   end
+   return result
+end
+
+function foo(arg)
+  messenger:Message(arg)
+end
+
+MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
+```
+
 # Default plugins
 
 For examples of plugins, see the default plugins `linter`, `go`, and `autoclose`.
-They are stored in Micro's github repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).
+They are stored in Micro's GitHub repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).

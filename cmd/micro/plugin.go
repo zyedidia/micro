@@ -85,6 +85,30 @@ func LuaFunctionCommand(function string) func([]string) {
 	}
 }
 
+// LuaFunctionComplete returns a function which can be used for autocomplete in plugins
+func LuaFunctionComplete(function string) func(string) []string {
+	return func(input string) (result []string) {
+
+		res, err := Call(function, input)
+		if err != nil {
+			TermMessage(err)
+		}
+		if tbl, ok := res.(*lua.LTable); !ok {
+			TermMessage(function, "should return a table of strings")
+		} else {
+			for i := 1; i <= tbl.Len(); i++ {
+				val := tbl.RawGetInt(i)
+				if v, ok := val.(lua.LString); !ok {
+					TermMessage(function, "should return a table of strings")
+				} else {
+					result = append(result, string(v))
+				}
+			}
+		}
+		return result
+	}
+}
+
 func LuaFunctionJob(function string) func(string, ...string) {
 	return func(output string, args ...string) {
 		_, err := Call(function, unpack(append([]string{output}, args...))...)

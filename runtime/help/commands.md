@@ -5,7 +5,8 @@ Here are the possible commands that you can use.
 
 * `quit`: Quits micro.
 
-* `save`: Saves the current buffer.
+* `save filename?`: Saves the current buffer. If the filename is provided it will
+   'save as' the filename.
 
 * `replace "search" "value" flags`: This will replace `search` with `value`. 
    The `flags` are optional.
@@ -22,6 +23,10 @@ Here are the possible commands that you can use.
    buffer).
 
 * `show option`: shows the current value of the given option.
+
+* `eval "expression"`: Evaluates a Lua expression. Note that micro will not
+   print anything so you should use `messenger:Message(...)` to display a
+   value.
 
 * `run sh-command`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.

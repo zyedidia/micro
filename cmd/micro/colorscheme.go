@@ -20,7 +20,7 @@ var preInstalledColors = []string{"default", "simple", "solarized", "solarized-t
 
 // ColorschemeExists checks if a given colorscheme exists
 func ColorschemeExists(colorschemeName string) bool {
-	files, _ := ioutil.ReadDir(configDir)
+	files, _ := ioutil.ReadDir(configDir + "/colorschemes")
 	for _, f := range files {
 		if f.Name() == colorschemeName+".micro" {
 			return true

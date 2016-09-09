@@ -37,6 +37,8 @@ func NewTabFromView(v *View) *Tab {
 		t.tree.height--
 	}
 
+	t.Resize()
+
 	return t
 }
 

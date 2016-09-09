@@ -40,7 +40,8 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
-* Common editor things such as undo/redo, line numbers, unicode support...
+* Macros
+* Common editor things such as undo/redo, line numbers, Unicode support...
 
 Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.
 
@@ -48,7 +49,7 @@ Although not yet implemented, I hope to add more features such as autocompletion
 
 To install micro, you can download a [prebuilt binary](https://github.com/zyedidia/micro/releases), or you can build it from source.
 
-If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro)
+If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro).
 
 ### Prebuilt binaries
 
@@ -61,9 +62,17 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
+### Homebrew
+
+You can also install micro using Homebrew on Mac:
+
+```
+$ brew install micro
+```
+
 ### Building from source
 
-If your operating system does not have binary, but does run Go, you can build from source.
+If your operating system does not have a binary release, but does run Go, you can build from source.
 
 Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO).
 
@@ -73,7 +82,7 @@ go get -u github.com/zyedidia/micro/...
 
 ### Linux clipboard support
 
-On Linux, clipboard support requires 'xclip' or 'xsel' command to be installed.
+On Linux, clipboard support requires the 'xclip' or 'xsel' commands to be installed.
 
 For Ubuntu:
 
@@ -89,7 +98,7 @@ If you open micro and it doesn't seem like syntax highlighting is working, this 
 you are using a terminal which does not support 256 color. Try changing the colorscheme to `simple`
 by running `> set colorscheme simple`.
 
-If you are using the default ubuntu terminal, to enable 256 make sure your `TERM` variable is set
+If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.
 
 Many of the Windows terminals don't support more than 16 colors, which means
@@ -121,7 +130,7 @@ click to enable line selection.
 
 # Documentation and Help
 
-Micro has a built-in help system which you can access by pressing `CtrlE` and typing `help`. Additionally, you can
+Micro has a built-in help system which you can access by pressing `Ctrl-E` and typing `help`. Additionally, you can
 view the help files here:
 
 * [main help](https://github.com/zyedidia/micro/tree/master/runtime/help/help.md)
@@ -138,4 +147,6 @@ a brief introduction to the more powerful configuration features micro offers.
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
 
-You can use the Github issue tracker to report bugs, ask questions, or suggest new features.
+You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues) to report bugs, ask questions, or suggest new features.
+
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).

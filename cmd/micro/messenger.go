@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -206,7 +205,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
-				args := strings.Split(m.response, " ")
+				args := SplitCommandArgs(m.response)
 				currentArgNum := len(args) - 1
 				currentArg := args[currentArgNum]
 				var completionType Completion
@@ -232,6 +231,8 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
 					chosen, suggestions = OptionComplete(currentArg)
+				} else if completionType < NoCompletion {
+					chosen, suggestions = PluginComplete(completionType, currentArg)
 				}
 
 				if len(suggestions) > 1 {
@@ -239,10 +240,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 				}
 
 				if chosen != "" {
-					if len(args) > 1 {
-						chosen = " " + chosen
-					}
-					m.response = strings.Join(args[:len(args)-1], " ") + chosen
+					m.response = JoinCommandArgs(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
 			}
@@ -298,7 +296,7 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 				m.cursorx--
 			}
 		case tcell.KeyCtrlV:
-			clip, _ := clipboard.ReadAll()
+			clip, _ := clipboard.ReadAll("clipboard")
 			m.response = Insert(m.response, m.cursorx, clip)
 			m.cursorx += Count(clip)
 		case tcell.KeyRune:

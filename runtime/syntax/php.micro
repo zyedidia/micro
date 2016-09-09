@@ -3,7 +3,7 @@ color default start="<\?(php|=)?" end="\?>"
 
 color special "([a-zA-Z0-9_-]+)\("
 
-color identifier "(var|class|goto|extends|function|echo|case|break|default|exit|switch|foreach|endforeach|while|const|static|extends|as|require|include|require_once|include_once|define|do|continue|declare|goto|print|in|interface|[E|e]xception|array|int|string|bool)[\s|\)]"
+color identifier "(var|class|goto|extends|function|echo|case|break|default|exit|switch|foreach|endforeach|while|const|static|extends|as|require|include|require_once|include_once|define|do|continue|declare|goto|print|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)[\s|\)]"
 
 color identifier "[a-zA-Z\\]+::"
 
