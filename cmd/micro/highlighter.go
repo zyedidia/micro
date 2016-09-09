@@ -92,7 +92,6 @@ var preInstalledSynFiles = []string{
 	"perl6",
 	"php",
 	"pkg-config",
-	"pkgbuild",
 	"po",
 	"pov",
 	"privoxy-action",
