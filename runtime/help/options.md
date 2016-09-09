@@ -14,7 +14,7 @@ Here are the options that you can set:
 
 	default value: `default`
 	Note that the default colorschemes (default, solarized, and solarized-tc)
-	are not located in configDir, because they are embedded in the micro binary
+	are not located in configDir, because they are embedded in the micro binary.
 
 	The colorscheme can be selected from all the files in the 
 	~/.config/micro/colorschemes/ directory. Micro comes by default with three
@@ -102,7 +102,7 @@ Default plugin options:
 
 	default value: `on`
 
-* `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the autoclose plugin
+* `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the `autoclose` plugin
 
 	default value: `on`
 

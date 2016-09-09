@@ -280,6 +280,8 @@ func main() {
 					v.matches = Match(v)
 				}
 			}
+
+			t.Resize()
 		}
 	}
 
@@ -317,7 +319,7 @@ func main() {
 	LoadPlugins()
 
 	jobs = make(chan JobFunction, 100)
-	events = make(chan tcell.Event)
+	events = make(chan tcell.Event, 100)
 
 	for _, t := range tabs {
 		for _, v := range t.views {
@@ -356,47 +358,56 @@ func main() {
 		case event = <-events:
 		}
 
-		switch e := event.(type) {
-		case *tcell.EventMouse:
-			if e.Buttons() == tcell.Button1 {
-				// If the user left clicked we check a couple things
-				_, h := screen.Size()
-				x, y := e.Position()
-				if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
-					// If the user clicked in the bottom bar, and there is a message down there
-					// we copy it to the clipboard.
-					// Often error messages are displayed down there so it can be useful to easily
-					// copy the message
-					clipboard.WriteAll(messenger.message, "primary")
-					continue
-				}
+		for event != nil {
+			switch e := event.(type) {
+			case *tcell.EventMouse:
+				if e.Buttons() == tcell.Button1 {
+					// If the user left clicked we check a couple things
+					_, h := screen.Size()
+					x, y := e.Position()
+					if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
+						// If the user clicked in the bottom bar, and there is a message down there
+						// we copy it to the clipboard.
+						// Often error messages are displayed down there so it can be useful to easily
+						// copy the message
+						clipboard.WriteAll(messenger.message, "primary")
+						continue
+					}
 
-				if CurView().mouseReleased {
-					// We loop through each view in the current tab and make sure the current view
-					// is the one being clicked in
-					for _, v := range tabs[curTab].views {
-						if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
-							tabs[curTab].curView = v.Num
+					if CurView().mouseReleased {
+						// We loop through each view in the current tab and make sure the current view
+						// is the one being clicked in
+						for _, v := range tabs[curTab].views {
+							if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
+								tabs[curTab].curView = v.Num
+							}
 						}
 					}
 				}
 			}
-		}
 
-		// This function checks the mouse event for the possibility of changing the current tab
-		// If the tab was changed it returns true
-		if TabbarHandleMouseEvent(event) {
-			continue
-		}
+			// This function checks the mouse event for the possibility of changing the current tab
+			// If the tab was changed it returns true
+			if TabbarHandleMouseEvent(event) {
+				continue
+			}
 
-		if searching {
-			// Since searching is done in real time, we need to redraw every time
-			// there is a new event in the search bar so we need a special function
-			// to run instead of the standard HandleEvent.
-			HandleSearchEvent(event, CurView())
-		} else {
-			// Send it to the view
-			CurView().HandleEvent(event)
+			if searching {
+				// Since searching is done in real time, we need to redraw every time
+				// there is a new event in the search bar so we need a special function
+				// to run instead of the standard HandleEvent.
+				HandleSearchEvent(event, CurView())
+			} else {
+				// Send it to the view
+				CurView().HandleEvent(event)
+			}
+
+			select {
+			case event = <-events:
+			default:
+				event = nil
+			}
+
 		}
 	}
 }
