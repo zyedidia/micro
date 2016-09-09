@@ -52,22 +52,22 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 * `GetOption(name string)`: returns the value of the requested option
 
 * `AddOption(name string, value interface{})`: sets the given option with the given
-   value (`interface{}` means any type in Go).
+   value (`interface{}` means any type in Go)
 
 * `SetOption(option, value string)`: sets the given option to the value. This will
    set the option globally, unless it is a local only option.
 
 * `SetLocalOption(option, value string, buffer *Buffer)`: sets the given option to
-   the value locally in the given buffer.
+   the value locally in the given buffer
 
-* `BindKey(key, action string)`: binds `key` to `action`.
+* `BindKey(key, action string)`: binds `key` to `action`
 
 * `MakeCommand(name, function string, completions ...Completion)`: 
    creates a command with `name` which will call `function` when executed.
    Use 0 for completions to get NoCompletion.
 
 * `MakeCompletion(function string)`:
-   creates a `Completion` to use with `MakeCommand`.
+   creates a `Completion` to use with `MakeCommand`
 
 * `CurView()`: returns the current view
 
@@ -142,4 +142,4 @@ MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
 # Default plugins
 
 For examples of plugins, see the default plugins `linter`, `go`, and `autoclose`.
-They are stored in Micro's github repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).
+They are stored in Micro's GitHub repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).

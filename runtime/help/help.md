@@ -13,8 +13,8 @@ See the next section for more information about documentation and help.
 
 Micro has a built-in help system much like Vim's (although less extensive).
 
-To use it, press CtrlE to access command mode and type in help followed by a topic.
-Typing help followed by nothing will open this page.
+To use it, press CtrlE to access command mode and type in `help` followed by a topic.
+Typing `help` followed by nothing will open this page.
 
 Here are the possible help topics that you can read:
 
@@ -26,7 +26,7 @@ Here are the possible help topics that you can read:
 * colors: Explains micro's colorscheme and syntax highlighting engine and how to create your
   own colorschemes or add new languages to the engine
 
-For example to open the help page on plugins you would press CtrlE and type `help plugins`.
+For example, to open the help page on plugins you would press CtrlE and type `help plugins`.
 
 I recommend looking at the `tutorial` help file because it is short for each section and
 gives concrete examples of how to use the various configuration options in micro. However,
