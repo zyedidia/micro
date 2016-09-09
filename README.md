@@ -67,7 +67,6 @@ If you'd like to see more information after installing micro, run `micro -versio
 You can also install micro using Homebrew on Mac:
 
 ```
-$ brew tap zyedidia/micro
 $ brew install micro
 ```
 

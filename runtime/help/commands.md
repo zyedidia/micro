@@ -24,6 +24,10 @@ Here are the possible commands that you can use.
 
 * `show option`: shows the current value of the given option.
 
+* `eval "expression"`: Evaluates a Lua expression. Note that micro will not
+   print anything so you should use `messenger:Message(...)` to display a
+   value.
+
 * `run sh-command`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.
 

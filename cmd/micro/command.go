@@ -38,6 +38,7 @@ var commandActions = map[string]func([]string){
 	"HSplit":   HSplit,
 	"Tab":      NewTab,
 	"Help":     Help,
+	"Eval":     Eval,
 }
 
 // InitCommands initializes the default commands
@@ -82,6 +83,7 @@ func DefaultCommands() map[string]StrCommand {
 		"hsplit":   {"HSplit", []Completion{FileCompletion, NoCompletion}},
 		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
+		"eval":     {"Eval", []Completion{NoCompletion}},
 	}
 }
 
@@ -141,6 +143,18 @@ func HSplit(args []string) {
 			buf = NewBuffer(file, filename)
 		}
 		CurView().HSplit(buf)
+	}
+}
+
+// Eval evaluates a lua expression
+func Eval(args []string) {
+	if len(args) >= 1 {
+		err := L.DoString(args[0])
+		if err != nil {
+			messenger.Error(err)
+		}
+	} else {
+		messenger.Error("Not enough arguments")
 	}
 }
 
