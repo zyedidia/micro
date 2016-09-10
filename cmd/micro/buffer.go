@@ -55,6 +55,14 @@ type SerializedBuffer struct {
 
 // NewBuffer creates a new buffer from `txt` with path and name `path`
 func NewBuffer(txt []byte, path string) *Buffer {
+	for _, tab := range tabs {
+		for _, view := range tab.views {
+			if view.Buf.Path == path {
+				return view.Buf
+			}
+		}
+	}
+
 	b := new(Buffer)
 	b.LineArray = NewLineArray(txt)
 

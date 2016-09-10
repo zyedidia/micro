@@ -1,11 +1,8 @@
 ## Here is an example for xml files.
-##
 
 syntax "xml" "\.(xml|sgml?|rng|plist)$"
-color white "^.+$"
-color green  start="<" end=">"
-color cyan   "<[^> ]+"
-color cyan   ">"
-color yellow start="<!DOCTYPE" end="[/]?>"
-color yellow start="<!--" end="-->"
-color red    "&[^;]*;"
+color statement   "<[^> ]+"
+color statement   ">"
+color comment start="<!DOCTYPE" end="[/]?>"
+color comment start="<!--" end="-->"
+color special    "&[^;]*;"

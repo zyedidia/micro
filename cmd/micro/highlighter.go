@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/zyedidia/tcell"
 	"io/ioutil"
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/zyedidia/tcell"
 )
 
 // FileTypeRules represents a complete set of syntax rules for a filetype

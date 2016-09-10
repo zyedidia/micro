@@ -494,9 +494,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
-	if v.Buf.Settings["syntax"].(bool) {
-		v.matches = Match(v)
-	}
 }
 
 // GutterMessage creates a message in this view's gutter
@@ -552,6 +549,9 @@ func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+	if v.Buf.Settings["syntax"].(bool) {
+		v.matches = Match(v)
+	}
 	// The charNum we are currently displaying
 	// starts at the start of the viewport
 	charNum := Loc{0, v.Topline}
