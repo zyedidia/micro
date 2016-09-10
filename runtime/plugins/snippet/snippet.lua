@@ -1,7 +1,6 @@
 local curFileType = ""
 local snippets = {}
 
-
 local Snippet = {}
 Snippet.__index = Snippet
 
@@ -21,15 +20,26 @@ end
 function Snippet.Prepare(self)
 	if not self.placeholders then
 		self.placeholders = {}
+		self.locations = {}
+		local pattern = "${(%d+):?([^}]*)}"
+		while true do
+  			local num, value = self.code:match(pattern)
+  			if not num then
+    			break
+  			end
+  			local idx = tonumber(self.code:find(pattern))
+  			self.code = self.code:gsub(pattern, "", 1)
 
-		for ph in self.code:gmatch("${%d+[^}]*}") do
-  			local idx = tonumber(ph:match("${(%d+)[^}]*}"))
-  			local p = self.placeholders[idx]
+  			local p = self.placeholders[num]
   			if not p then
   				p = {}
-  				self.placeholders[idx] = p
+  				self.placeholders[num] = p
   			end
-  			local value = ph:match("${%d+:([^}]*)}")
+  			self.locations[#self.locations+1] = {
+	  			idx = idx,
+	  			ph = p
+	  		}
+
   			if value then
   				p.value = value
   			end
@@ -41,6 +51,15 @@ function Snippet.newInstance(self)
 	self:Prepare()
 	-- todo
 	return self
+end
+
+function Snippet.str(self)
+	local res = self.code
+	for i = #self.locations, 1, -1 do
+		local loc = self.locations[i]
+		res = res:sub(0, loc.idx-1) .. loc.ph.value .. res:sub(loc.idx)
+	end
+	return res
 end
 
 local function CursorWord()
@@ -107,15 +126,13 @@ function foo()
 	EnsureSnippets()
 	local curSn = snippets[name]
 	if curSn then
+		curSn = curSn:newInstance()
+
 		c:SetSelectionStart({X = xy.X - name:len(), Y = xy.Y})
 		c:SetSelectionEnd(xy)
-
-
-		curSn = curSn:newInstance()
 		c:DeleteSelection()
 		c:ResetSelection()
-
-		v.Buf:insert(xy, curSn.code)
+		v.Buf:insert(xy, curSn:str())
 	end
 end
 
