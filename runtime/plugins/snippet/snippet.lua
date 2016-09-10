@@ -1,3 +1,47 @@
+local curFileType = ""
+local snippets = {}
+
+
+local Snippet = {}
+Snippet.__index = Snippet
+
+function Snippet.new()
+	local self = setmetatable({}, Snippet)
+	self.code = ""
+    return self
+end
+
+function Snippet.AddCodeLine(self, line)
+	if self.code ~= "" then
+		self.code = self.code .. "\n"
+	end
+	self.code = self.code .. line
+end
+
+function Snippet.Prepare(self)
+	if not self.placeholders then
+		self.placeholders = {}
+
+		for ph in self.code:gmatch("${%d+[^}]*}") do
+  			local idx = tonumber(ph:match("${(%d+)[^}]*}"))
+  			local p = self.placeholders[idx]
+  			if not p then
+  				p = {}
+  				self.placeholders[idx] = p
+  			end
+  			local value = ph:match("${%d+:([^}]*)}")
+  			if value then
+  				p.value = value
+  			end
+		end
+	end
+end
+
+function Snippet.newInstance(self)
+	self:Prepare()
+	-- todo
+	return self
+end
 
 local function CursorWord()
 	local c = CurView().Cursor
@@ -15,9 +59,6 @@ local function CursorWord()
 
 	return result
 end
-
-local curFileType = ""
-local snippets = {}
 
 local function ReadSnippets(filetype)
 	local snippets = {}
@@ -38,12 +79,12 @@ local function ReadSnippets(filetype)
 		if string.match(line,"^#") then
 			-- comment
 		elseif line:match("^snippet") then
-			curSnip = { code = "" }
+			curSnip = Snippet.new()
 			for snipName in line:gmatch("%s(%a+)") do
 				snippets[snipName] = curSnip
 			end
 		else
-			curSnip.code = curSnip.code .. "\n" .. line:match("^\t(.*)$")
+			curSnip:AddCodeLine(line:match("^\t(.*)$"))
 		end
 	end
 	return snippets
@@ -58,10 +99,24 @@ local function EnsureSnippets()
 end
 
 function foo()
+	local v = CurView()
+	local c = v.Cursor
+	local xy = {X=c.X, Y=c.Y}
+	local name = CursorWord()
+
 	EnsureSnippets()
-	local curSn = snippets[CursorWord()]
+	local curSn = snippets[name]
 	if curSn then
-		messenger:Message(curSn.code)
+		c:SetSelectionStart({X = xy.X - name:len(), Y = xy.Y})
+		c:SetSelectionEnd(xy)
+
+
+		curSn = curSn:newInstance()
+		c:DeleteSelection()
+		c:ResetSelection()
+
+		v.Buf:insert(xy, curSn.code)
 	end
 end
+
 MakeCommand("foo", "snippet.foo", 0)
