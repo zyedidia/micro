@@ -1,7 +1,7 @@
 ## Here is an example for xml files.
 ##
 
-syntax "xml" "\.([jrs]?html?|xml|sgml?|rng|plist)$"
+syntax "xml" "\.(xml|sgml?|rng|plist)$"
 color white "^.+$"
 color green  start="<" end=">"
 color cyan   "<[^> ]+"
