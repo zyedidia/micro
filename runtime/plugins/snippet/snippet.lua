@@ -204,7 +204,7 @@ end
 
 local function ReadSnippets(filetype)
 	local snippets = {}
-	local filename = JoinPaths(configDir, "plugins", "snippet", filetype .. ".snippet")
+	local filename = JoinPaths(configDir, "plugins", "snippet", filetype .. ".snippets")
 
 	-- first test if the file exists
 	local f = io.open(filename, "r")
