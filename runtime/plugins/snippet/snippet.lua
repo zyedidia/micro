@@ -1,10 +1,63 @@
 local curFileType = ""
 local snippets = {}
 
+local Location = {}
+Location.__index = Location
+
 local Snippet = {}
 Snippet.__index = Snippet
 
+function Location.new(idx, ph, snip)
+	local self = setmetatable({}, Location)
+	self.idx = idx 
+	self.ph = ph
+	self.snippet = snip
+    return self
+end
 
+-- offset of the location relative to the snippet start
+function Location.offset(self)
+	local add = 0
+	for i = 1, #self.snippet.locations do
+		local loc = self.snippet.locations[i]
+		if loc == self then
+			break
+		end
+
+		local val = loc.ph.value
+		if val then
+			add = add + val:len()
+		end
+	end
+	return self.idx+add
+end
+
+function Location.startPos(self)
+	local loc = self.snippet.startPos
+	return loc:Move(self:offset(), self.snippet.view.buf)
+end
+
+-- returns the length of the location (but at least 1)
+function Location.len(self)
+	local len = 0
+	if self.ph.value then
+		len = self.ph.value:len()
+	end
+	if len <= 0 then
+		len = 1
+	end
+	return len
+end
+
+function Location.endPos(self)
+	local start = self:startPos()
+	return start:Move(self:len(), self.snippet.view.buf)
+end
+
+-- check if the given loc is within the location
+function Location.isWithin(self, loc)
+	return loc:GreaterEqual(self:startPos()) and loc:LessEqual(self:endPos())
+end
 
 function Snippet.new()
 	local self = setmetatable({}, Snippet)
@@ -38,10 +91,7 @@ function Snippet.Prepare(self)
   				p = {}
   				self.placeholders[num] = p
   			end
-  			self.locations[#self.locations+1] = {
-	  			idx = idx,
-	  			ph = p
-	  		}
+  			self.locations[#self.locations+1] = Location.new(idx, p, self)
 
   			if value then
   				p.value = value
@@ -66,8 +116,6 @@ function Snippet.str(self)
 	return res
 end
 
-
-
 function Snippet.select(self, i)
 	local add = 0
 	local idx = 0
@@ -85,9 +133,8 @@ function Snippet.select(self, i)
 		end
 	end
 	
-	local v = CurView()
-	local c = v.Cursor
-	local buf = v.Buf
+	local c = self.view.Cursor
+	local buf = self.view.Buf
 	local len = 0
 	if wanted.value then
 		len = wanted.value:len()
@@ -101,8 +148,17 @@ function Snippet.select(self, i)
 	c:SetSelectionEnd(start:Move(len, buf))
 end
 
-local function CursorWord()
-	local c = CurView().Cursor
+function Snippet.findPlaceholder(self, loc)
+	for i = 1, #self.locations do
+		if self.locations[i]:isWithin(loc) then
+			return self.locations[i].ph
+		end
+	end
+	return nil
+end
+
+local function CursorWord(v)
+	local c = v.Cursor
 	local x = c.X-1 -- start one rune before the cursor
 	local result = ""
 	while x >= 0 do
@@ -156,25 +212,40 @@ local function EnsureSnippets()
 	end
 end
 
+local currentSnippet = nil
+
+function onRune(r)
+	if currentSnippet ~= nil and currentSnippet.view == CurView() then
+		local c = CurView().Cursor
+		local ph = currentSnippet:findPlaceholder(Loc(c.X, c.Y))
+		if ph then
+			messenger:Message(ph.value)
+		else
+			messenger:Message("not found")
+		end
+	end
+end
+
 function foo()
 	local v = CurView()
 	local c = v.Cursor
 	local buf = v.Buf
 	local xy = Loc(c.X, c.Y)
-	local name = CursorWord()
+	local name = CursorWord(v)
 
 	EnsureSnippets()
 	local curSn = snippets[name]
 	if curSn then
-		curSn = curSn:clone()
-		curSn.startPos = xy:Move(-name:len(), buf)
+		currentSnippet = curSn:clone()
+		currentSnippet.startPos = xy:Move(-name:len(), buf)
+		currentSnippet.view = v
 
-		c:SetSelectionStart(curSn.startPos)
+		c:SetSelectionStart(currentSnippet.startPos)
 		c:SetSelectionEnd(xy)
 		c:DeleteSelection()
 		c:ResetSelection()
 
-		v.Buf:insert(xy, curSn:str())
+		v.Buf:insert(xy, currentSnippet:str())
 
 		-- curSn:select(2)
 	end
