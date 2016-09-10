@@ -59,6 +59,38 @@ function Location.isWithin(self, loc)
 	return loc:GreaterEqual(self:startPos()) and loc:LessEqual(self:endPos())
 end
 
+function Location.handleInput(self, ev)
+	if ev.EventType == 1 then
+		if ev.Text == "\t" then
+			self.snippet:focusNext()
+			return true
+		elseif ev.Text == "\n" then
+			currentSnippet = nil
+			return true
+		else
+			-- TextInput
+			local offset = 1
+			local sp = self:startPos()
+			while sp:LessEqual(-ev.Start) do
+				sp = sp:Move(1, self.snippet.view.Buf)
+				offset = offset + 1
+			end
+
+			self.snippet:remove()
+			local v = self.ph.value
+			if v == nil then
+				v = ""
+			end
+
+			self.ph.value = v:sub(0, offset-1) .. ev.Text .. v:sub(offset)
+			self.snippet:insert()
+		end
+		return true
+	end
+
+	return false
+end
+
 function Snippet.new()
 	local self = setmetatable({}, Snippet)
 	self.code = ""
@@ -116,45 +148,41 @@ function Snippet.str(self)
 	return res
 end
 
-function Snippet.select(self, i)
-	local add = 0
-	local idx = 0
-	local wanted = self.placeholders[i]
-	for i = 1, #self.locations do
-		local ph = self.locations[i].ph
-		if ph == wanted then
-			idx = self.locations[i].idx -1
-			break
-		end
-
-		local val = ph.value
-		if val then
-			add = add + val:len()
-		end
-	end
-	
-	local c = self.view.Cursor
-	local buf = self.view.Buf
-	local len = 0
-	if wanted.value then
-		len = wanted.value:len()
-	end
-	if len == 0 then
-		len = 1
-	end
-
-	local start = self.startPos:Move(idx+add, buf)
-	c:SetSelectionStart(start)
-	c:SetSelectionEnd(start:Move(len, buf))
-end
-
-function Snippet.findPlaceholder(self, loc)
+function Snippet.findLocation(self, loc)
 	for i = 1, #self.locations do
 		if self.locations[i]:isWithin(loc) then
-			return self.locations[i].ph
+			return self.locations[i]
 		end
 	end
 	return nil
+end
+
+function Snippet.remove(self)
+	local endPos = self.startPos:Move(self:str():len(), self.view.Buf)
+	self.modText = true
+	self.view.Cursor:SetSelectionStart(self.startPos)
+	self.view.Cursor:SetSelectionEnd(endPos)
+	self.view.Cursor:DeleteSelection()
+	self.view.Cursor:ResetSelection()
+	self.modText = false
+end
+
+function Snippet.insert(self)
+	self.modText = true
+	self.view.Buf:insert(self.startPos, self:str())
+	self.modText = false
+end
+
+function Snippet.focusNext(self)
+	if self.focused == nil then
+		self.focused = 0
+	else 
+		self.focused = (self.focused + 1) % #self.locations
+	end
+	local loc = self.locations[self.focused+1]
+
+	self.view.Cursor:SetSelectionStart(loc:startPos():Move(-1, self.view.Buf))
+	self.view.Cursor:SetSelectionEnd(loc:endPos():Move(-1, self.view.Buf))
 end
 
 local function CursorWord(v)
@@ -214,16 +242,25 @@ end
 
 local currentSnippet = nil
 
-function onRune(r)
+function onBeforeTextEvent(ev)
 	if currentSnippet ~= nil and currentSnippet.view == CurView() then
-		local c = CurView().Cursor
-		local ph = currentSnippet:findPlaceholder(Loc(c.X, c.Y))
-		if ph then
-			messenger:Message(ph.value)
-		else
-			messenger:Message("not found")
+		if currentSnippet.modText then
+			-- text event from the snippet. simply ignore it...
+			return true
 		end
+
+		local locStart = currentSnippet:findLocation(ev.Start:Move(1, CurView().Buf))
+		local locEnd = currentSnippet:findLocation(ev.End)
+		if locStart ~= nil and ((locStart == locEnd) or (ev.End.Y==0 and ev.End.X==0))  then
+			if locStart:handleInput(ev) then
+				CurView().Cursor:Goto(-ev.C)
+				return false
+			end
+		end
+		currentSnippet = nil
 	end
+
+	return true
 end
 
 function foo()
@@ -239,15 +276,17 @@ function foo()
 		currentSnippet = curSn:clone()
 		currentSnippet.startPos = xy:Move(-name:len(), buf)
 		currentSnippet.view = v
+		currentSnippet.modText = true
 
 		c:SetSelectionStart(currentSnippet.startPos)
 		c:SetSelectionEnd(xy)
 		c:DeleteSelection()
 		c:ResetSelection()
+		
+		currentSnippet.modText = false
+		currentSnippet:insert()
 
-		v.Buf:insert(xy, currentSnippet:str())
-
-		-- curSn:select(2)
+		currentSnippet:focusNext()
 	end
 end
 
