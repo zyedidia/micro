@@ -314,6 +314,9 @@ func main() {
 	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
 		return string(r)
 	}))
+	L.SetGlobal("Loc", luar.New(L, func(x, y int) Loc {
+		return Loc{x, y}
+	}))
 	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
 	L.SetGlobal("configDir", luar.New(L, configDir))
 
