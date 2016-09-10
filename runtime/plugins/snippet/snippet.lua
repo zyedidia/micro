@@ -4,6 +4,8 @@ local snippets = {}
 local Snippet = {}
 Snippet.__index = Snippet
 
+
+
 function Snippet.new()
 	local self = setmetatable({}, Snippet)
 	self.code = ""
@@ -27,7 +29,8 @@ function Snippet.Prepare(self)
   			if not num then
     			break
   			end
-  			local idx = tonumber(self.code:find(pattern))
+  			num = tonumber(num)
+  			local idx = self.code:find(pattern)
   			self.code = self.code:gsub(pattern, "", 1)
 
   			local p = self.placeholders[num]
@@ -47,10 +50,11 @@ function Snippet.Prepare(self)
 	end
 end
 
-function Snippet.newInstance(self)
-	self:Prepare()
-	-- todo
-	return self
+function Snippet.clone(self)
+	local result = Snippet.new()
+	result:AddCodeLine(self.code)
+	result:Prepare()
+	return result
 end
 
 function Snippet.str(self)
@@ -60,6 +64,41 @@ function Snippet.str(self)
 		res = res:sub(0, loc.idx-1) .. loc.ph.value .. res:sub(loc.idx)
 	end
 	return res
+end
+
+
+
+function Snippet.select(self, i)
+	local add = 0
+	local idx = 0
+	local wanted = self.placeholders[i]
+	for i = 1, #self.locations do
+		local ph = self.locations[i].ph
+		if ph == wanted then
+			idx = self.locations[i].idx -1
+			break
+		end
+
+		local val = ph.value
+		if val then
+			add = add + val:len()
+		end
+	end
+	
+	local v = CurView()
+	local c = v.Cursor
+	local buf = v.Buf
+	local len = 0
+	if wanted.value then
+		len = wanted.value:len()
+	end
+	if len == 0 then
+		len = 1
+	end
+
+	local start = self.startPos:Move(idx+add, buf)
+	c:SetSelectionStart(start)
+	c:SetSelectionEnd(start:Move(len, buf))
 end
 
 local function CursorWord()
@@ -120,19 +159,24 @@ end
 function foo()
 	local v = CurView()
 	local c = v.Cursor
-	local xy = {X=c.X, Y=c.Y}
+	local buf = v.Buf
+	local xy = Loc(c.X, c.Y)
 	local name = CursorWord()
 
 	EnsureSnippets()
 	local curSn = snippets[name]
 	if curSn then
-		curSn = curSn:newInstance()
+		curSn = curSn:clone()
+		curSn.startPos = xy:Move(-name:len(), buf)
 
-		c:SetSelectionStart({X = xy.X - name:len(), Y = xy.Y})
+		c:SetSelectionStart(curSn.startPos)
 		c:SetSelectionEnd(xy)
 		c:DeleteSelection()
 		c:ResetSelection()
+
 		v.Buf:insert(xy, curSn:str())
+
+		-- curSn:select(2)
 	end
 end
 
