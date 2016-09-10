@@ -1,7 +1,7 @@
 ## Here is a short improved example for HTML.
 ##
 syntax "html" "\.htm[l]?$"
-color identifier start="<" end=">"
+color identifier "<.*?>"
 color special "&[^;[[:space:]]]*;"
 color constant ""[^"]*"|qq\|.*\|"
 color statement "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
