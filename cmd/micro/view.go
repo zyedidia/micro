@@ -695,6 +695,7 @@ func (v *View) DisplayView() {
 		charNum = Loc{v.leftCol, charNum.Y}
 		for _, ch := range Sub(line, v.leftCol, v.leftCol+v.width) {
 			if screenX-v.leftCol > v.x+v.width {
+				charNum = charNum.Move(Count(line[:v.leftCol+v.width]), v.Buf)
 				break
 			}
 
