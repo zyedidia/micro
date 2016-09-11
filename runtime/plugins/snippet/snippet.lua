@@ -59,13 +59,29 @@ function Location.isWithin(self, loc)
 	return loc:GreaterEqual(self:startPos()) and loc:LessEqual(self:endPos())
 end
 
+function Location.focus(self)
+	local view = self.snippet.view
+	local startP = self:startPos():Move(-1, view.Buf)
+	local endP = self:endPos():Move(-1, view.Buf)
+
+	while view.Cursor:LessThan(startP) do
+		view.Cursor:Right()
+	end
+	while view.Cursor:GreaterThan(endP) do
+		view.Cursor:Left()
+	end
+
+	view.Cursor:SetSelectionStart(startP)
+	view.Cursor:SetSelectionEnd(endP)
+end
+
 function Location.handleInput(self, ev)
 	if ev.EventType == 1 then
 		if ev.Text == "\t" then
 			self.snippet:focusNext()
 			return true
 		elseif ev.Text == "\n" then
-			currentSnippet = nil
+			finishSnippet()
 			return true
 		else
 			-- TextInput
@@ -85,6 +101,32 @@ function Location.handleInput(self, ev)
 			self.ph.value = v:sub(0, offset-1) .. ev.Text .. v:sub(offset)
 			self.snippet:insert()
 		end
+		return true
+	elseif ev.EventType == -1 then
+		local offset = 1
+		local sp = self:startPos()
+		while sp:LessEqual(-ev.Start) do
+			sp = sp:Move(1, self.snippet.view.Buf)
+			offset = offset + 1
+		end
+
+		if ev.Start.Y ~= ev.End.Y then
+			return false
+		end
+
+
+		self.snippet:remove()
+
+		local v = self.ph.value
+		if v == nil then
+			v = ""
+		end
+
+		local len = ev.End.X - ev.Start.X
+		
+
+		self.ph.value = v:sub(0, offset-1) .. v:sub(offset+len)
+		self.snippet:insert()
 		return true
 	end
 
@@ -177,12 +219,16 @@ function Snippet.focusNext(self)
 	if self.focused == nil then
 		self.focused = 0
 	else 
-		self.focused = (self.focused + 1) % #self.locations
+		self.focused = (self.focused + 1) % #self.placeholders
 	end
-	local loc = self.locations[self.focused+1]
+	local ph = self.placeholders[self.focused+1]
 
-	self.view.Cursor:SetSelectionStart(loc:startPos():Move(-1, self.view.Buf))
-	self.view.Cursor:SetSelectionEnd(loc:endPos():Move(-1, self.view.Buf))
+	for i = 1, #self.locations do
+		if self.locations[i].ph == ph then
+			self.locations[i]:focus()
+			return
+		end
+	end
 end
 
 local function CursorWord(v)
@@ -242,6 +288,11 @@ end
 
 local currentSnippet = nil
 
+local function finishSnippet()
+	currentSnippet = nil
+	-- messenger:Message("snippet editing finished")
+end
+
 function onBeforeTextEvent(ev)
 	if currentSnippet ~= nil and currentSnippet.view == CurView() then
 		if currentSnippet.modText then
@@ -257,7 +308,7 @@ function onBeforeTextEvent(ev)
 				return false
 			end
 		end
-		currentSnippet = nil
+		finishSnippet()
 	end
 
 	return true
