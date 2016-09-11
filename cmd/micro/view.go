@@ -690,15 +690,8 @@ func (v *View) DisplayView() {
 		}
 
 		// Now we actually draw the line
-		colN := v.leftCol
-		screenX += v.leftCol
-		charNum = Loc{v.leftCol, charNum.Y}
-		for _, ch := range Sub(line, v.leftCol, v.leftCol+v.width) {
-			if screenX-v.leftCol > v.x+v.width {
-				charNum = charNum.Move(Count(line[:v.leftCol+v.width]), v.Buf)
-				break
-			}
-
+		colN := 0
+		for _, ch := range line {
 			lineStyle := defStyle
 
 			if v.Buf.Settings["syntax"].(bool) {

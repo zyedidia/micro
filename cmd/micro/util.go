@@ -294,17 +294,3 @@ func JoinCommandArgs(args ...string) string {
 
 	return buf.String()
 }
-
-func Sub(str string, start, end int) string {
-	len := Count(str)
-	if len > start && len > end {
-		return str[start:end]
-	}
-	if len > start && len < end {
-		return str[start:]
-	}
-	if len < start {
-		return str
-	}
-	return ""
-}
