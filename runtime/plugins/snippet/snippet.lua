@@ -77,10 +77,7 @@ end
 
 function Location.handleInput(self, ev)
 	if ev.EventType == 1 then
-		if ev.Text == "\t" then
-			self.snippet:focusNext()
-			return true
-		elseif ev.Text == "\n" then
+		if ev.Text == "\n" then
 			finishSnippet()
 			return true
 		else
@@ -314,31 +311,66 @@ function onBeforeTextEvent(ev)
 	return true
 end
 
-function foo()
+function StartSnippet(name)
 	local v = CurView()
 	local c = v.Cursor
 	local buf = v.Buf
 	local xy = Loc(c.X, c.Y)
-	local name = CursorWord(v)
+	local noArg = false
+	if not name then
+		name = CursorWord(v)
+		noArg = true
+	end
 
 	EnsureSnippets()
 	local curSn = snippets[name]
 	if curSn then
 		currentSnippet = curSn:clone()
-		currentSnippet.startPos = xy:Move(-name:len(), buf)
 		currentSnippet.view = v
-		currentSnippet.modText = true
-
-		c:SetSelectionStart(currentSnippet.startPos)
-		c:SetSelectionEnd(xy)
-		c:DeleteSelection()
-		c:ResetSelection()
 		
-		currentSnippet.modText = false
-		currentSnippet:insert()
+		if noArg then
+			currentSnippet.startPos = xy:Move(-name:len(), buf)
+			
+			currentSnippet.modText = true
 
+			c:SetSelectionStart(currentSnippet.startPos)
+			c:SetSelectionEnd(xy)
+			c:DeleteSelection()
+			c:ResetSelection()
+		
+			currentSnippet.modText = false
+		else
+			currentSnippet.startPos = xy
+		end
+		
+		currentSnippet:insert()
 		currentSnippet:focusNext()
 	end
 end
 
-MakeCommand("foo", "snippet.foo", 0)
+function NextPlaceholder()
+	if currentSnippet then
+		currentSnippet:focusNext()
+	end
+end
+
+local function StartsWith(String,Start)
+  String = String:upper()
+  Start = Start:upper() 
+  return string.sub(String,1,string.len(Start))==Start
+end
+
+function findSnippet(input)
+  	local result = {}
+    EnsureSnippets()
+
+  	for name,v in pairs(snippets) do
+  		if StartsWith(name, input) then
+       		table.insert(result, name)
+     	end
+   	end
+    return result
+end
+
+MakeCommand("snippetinsert", "snippet.StartSnippet", MakeCompletion("snippet.findSnippet"), 0)
+MakeCommand("snippetnext", "snippet.NextPlaceholder", 0)
