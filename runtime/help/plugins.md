@@ -53,6 +53,8 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
 * `RuneStr(r rune) string`: returns a string containing the given rune
 
+* `Loc(x, y int) Loc`: returns a new `Loc` struct
+
 * `JoinPaths(dir... string) string` combines multiple directories to a full path
 
 * `GetOption(name string)`: returns the value of the requested option
