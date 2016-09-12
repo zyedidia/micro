@@ -1,5 +1,6 @@
 local curFileType = ""
 local snippets = {}
+local currentSnippet = nil
 
 local Location = {}
 Location.__index = Location
@@ -9,10 +10,10 @@ Snippet.__index = Snippet
 
 function Location.new(idx, ph, snip)
 	local self = setmetatable({}, Location)
-	self.idx = idx 
+	self.idx = idx
 	self.ph = ph
 	self.snippet = snip
-    return self
+	return self
 end
 
 -- offset of the location relative to the snippet start
@@ -71,17 +72,21 @@ function Location.focus(self)
 		view.Cursor:Left()
 	end
 
-	view.Cursor:SetSelectionStart(startP)
-	view.Cursor:SetSelectionEnd(endP)
+	if self.ph.value:len() > 0 then
+		view.Cursor:SetSelectionStart(startP)
+		view.Cursor:SetSelectionEnd(endP)
+	else
+		view.Cursor:ResetSelection()
+	end
 end
 
 function Location.handleInput(self, ev)
 	if ev.EventType == 1 then
+		-- TextInput
 		if ev.Text == "\n" then
-			finishSnippet()
-			return true
+			FinishSnippet()
+			return false
 		else
-			-- TextInput
 			local offset = 1
 			local sp = self:startPos()
 			while sp:LessEqual(-ev.Start) do
@@ -97,9 +102,10 @@ function Location.handleInput(self, ev)
 
 			self.ph.value = v:sub(0, offset-1) .. ev.Text .. v:sub(offset)
 			self.snippet:insert()
+			return true
 		end
-		return true
 	elseif ev.EventType == -1 then
+		-- TextRemove
 		local offset = 1
 		local sp = self:startPos()
 		while sp:LessEqual(-ev.Start) do
@@ -111,7 +117,6 @@ function Location.handleInput(self, ev)
 			return false
 		end
 
-
 		self.snippet:remove()
 
 		local v = self.ph.value
@@ -120,7 +125,6 @@ function Location.handleInput(self, ev)
 		end
 
 		local len = ev.End.X - ev.Start.X
-		
 
 		self.ph.value = v:sub(0, offset-1) .. v:sub(offset+len)
 		self.snippet:insert()
@@ -133,7 +137,7 @@ end
 function Snippet.new()
 	local self = setmetatable({}, Snippet)
 	self.code = ""
-    return self
+	return self
 end
 
 function Snippet.AddCodeLine(self, line)
@@ -147,26 +151,28 @@ function Snippet.Prepare(self)
 	if not self.placeholders then
 		self.placeholders = {}
 		self.locations = {}
+		local count = 0
 		local pattern = "${(%d+):?([^}]*)}"
 		while true do
-  			local num, value = self.code:match(pattern)
-  			if not num then
-    			break
-  			end
-  			num = tonumber(num)
-  			local idx = self.code:find(pattern)
-  			self.code = self.code:gsub(pattern, "", 1)
+			local num, value = self.code:match(pattern)
+			if not num then
+				break
+			end
+			count = count+1
+			num = tonumber(num)
+			local idx = self.code:find(pattern)
+			self.code = self.code:gsub(pattern, "", 1)
 
-  			local p = self.placeholders[num]
-  			if not p then
-  				p = {}
-  				self.placeholders[num] = p
-  			end
-  			self.locations[#self.locations+1] = Location.new(idx, p, self)
+			local p = self.placeholders[num]
+			if not p then
+				p = {num = num}
+				self.placeholders[#self.placeholders+1] = p
+			end
+			self.locations[#self.locations+1] = Location.new(idx, p, self)
 
-  			if value then
-  				p.value = value
-  			end
+			if value then
+				p.value = value
+			end
 		end
 	end
 end
@@ -215,9 +221,10 @@ end
 function Snippet.focusNext(self)
 	if self.focused == nil then
 		self.focused = 0
-	else 
+	else
 		self.focused = (self.focused + 1) % #self.placeholders
 	end
+
 	local ph = self.placeholders[self.focused+1]
 
 	for i = 1, #self.locations do
@@ -254,13 +261,15 @@ local function ReadSnippets(filetype)
 	if f then
 		f:close()
 	else
+		messenger:Error("No snippets file for \""..filetype.."\"")
 		return snippets
 	end
 
-	
-	local curSnip = nil
 
+	local curSnip = nil
+	local lineNo = 0
 	for line in io.lines(filename) do
+		lineNo = lineNo + 1
 		if string.match(line,"^#") then
 			-- comment
 		elseif line:match("^snippet") then
@@ -269,7 +278,12 @@ local function ReadSnippets(filetype)
 				snippets[snipName] = curSnip
 			end
 		else
-			curSnip:AddCodeLine(line:match("^\t(.*)$"))
+			local codeLine = line:match("^\t(.*)$")
+			if codeLine ~= nil then
+				curSnip:AddCodeLine(codeLine)
+			else
+				messenger:Error("Invalid snippets file (Line #"..tostring(lineNo)..")")
+			end
 		end
 	end
 	return snippets
@@ -281,13 +295,6 @@ local function EnsureSnippets()
 		snippets = ReadSnippets(filetype)
 		curFileType = filetype
 	end
-end
-
-local currentSnippet = nil
-
-local function finishSnippet()
-	currentSnippet = nil
-	-- messenger:Message("snippet editing finished")
 end
 
 function onBeforeTextEvent(ev)
@@ -305,7 +312,7 @@ function onBeforeTextEvent(ev)
 				return false
 			end
 		end
-		finishSnippet()
+		FinishSnippet()
 	end
 
 	return true
@@ -327,24 +334,37 @@ function StartSnippet(name)
 	if curSn then
 		currentSnippet = curSn:clone()
 		currentSnippet.view = v
-		
+
 		if noArg then
 			currentSnippet.startPos = xy:Move(-name:len(), buf)
-			
+
 			currentSnippet.modText = true
 
 			c:SetSelectionStart(currentSnippet.startPos)
 			c:SetSelectionEnd(xy)
 			c:DeleteSelection()
 			c:ResetSelection()
-		
+
 			currentSnippet.modText = false
 		else
 			currentSnippet.startPos = xy
 		end
-		
+
 		currentSnippet:insert()
-		currentSnippet:focusNext()
+
+		if #currentSnippet.placeholders == 0 then
+			local pos = currentSnippet.startPos:Move(currentSnippet:str():len(), v.Buf)
+			while v.Cursor:LessThan(pos) do
+				v.Cursor:Right()
+			end
+			while v.Cursor:GreaterThan(pos) do
+				v.Cursor:Left()
+			end
+		else
+			currentSnippet:focusNext()
+		end
+	else
+		messenger:Message("Unknown snippet \""..name.."\"")
 	end
 end
 
@@ -354,23 +374,41 @@ function NextPlaceholder()
 	end
 end
 
+function FinishSnippet()
+	currentSnippet = nil
+end
+
+function CancelSnippet()
+	if currentSnippet then
+		currentSnippet:remove()
+		FinishSnippet()
+	end
+end
+
+
 local function StartsWith(String,Start)
   String = String:upper()
-  Start = Start:upper() 
+  Start = Start:upper()
   return string.sub(String,1,string.len(Start))==Start
 end
 
 function findSnippet(input)
-  	local result = {}
-    EnsureSnippets()
+	local result = {}
+	EnsureSnippets()
 
-  	for name,v in pairs(snippets) do
-  		if StartsWith(name, input) then
-       		table.insert(result, name)
-     	end
-   	end
-    return result
+	for name,v in pairs(snippets) do
+		if StartsWith(name, input) then
+			table.insert(result, name)
+		end
+	end
+	return result
 end
 
+-- Insert a snippet
 MakeCommand("snippetinsert", "snippet.StartSnippet", MakeCompletion("snippet.findSnippet"), 0)
+-- Mark next placeholder
 MakeCommand("snippetnext", "snippet.NextPlaceholder", 0)
+-- Cancel current snippet (removes the text)
+MakeCommand("snippetcancel", "snippet.CancelSnippet", 0)
+-- finishes snipped editing
+MakeCommand("snippetaccept", "snippet.FinishSnippet", 0)
