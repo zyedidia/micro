@@ -529,15 +529,18 @@ func (v *View) ClearAllGutterMessages() {
 
 // Opens the given help page in a new horizontal split
 func (v *View) openHelp(helpPage string) {
-	if v.Help {
-		helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
-		helpBuffer.Name = "Help"
-		v.OpenBuffer(helpBuffer)
+	if data, err := helpPages[helpPage].HelpFile(); err != nil {
+		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
-		helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
+		helpBuffer := NewBuffer(data, helpPage+".md")
 		helpBuffer.Name = "Help"
-		v.HSplit(helpBuffer)
-		CurView().Help = true
+
+		if v.Help {
+			v.OpenBuffer(helpBuffer)
+		} else {
+			v.HSplit(helpBuffer)
+			CurView().Help = true
+		}
 	}
 }
 

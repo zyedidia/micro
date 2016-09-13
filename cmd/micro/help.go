@@ -1,25 +1,21 @@
 package main
 
-var helpPages map[string]string
-
-var helpFiles = []string{
-	"help",
-	"keybindings",
-	"plugins",
-	"colors",
-	"options",
-	"commands",
-	"tutorial",
+type HelpPage interface {
+	HelpFile() ([]byte, error)
 }
 
-// LoadHelp loads the help text from inside the binary
-func LoadHelp() {
-	helpPages = make(map[string]string)
-	for _, file := range helpFiles {
-		data, err := Asset("runtime/help/" + file + ".md")
-		if err != nil {
-			TermMessage("Unable to load help text", file)
-		}
-		helpPages[file] = string(data)
-	}
+var helpPages map[string]HelpPage = map[string]HelpPage{
+	"help":        assetHelpPage("help"),
+	"keybindings": assetHelpPage("keybindings"),
+	"plugins":     assetHelpPage("plugins"),
+	"colors":      assetHelpPage("colors"),
+	"options":     assetHelpPage("options"),
+	"commands":    assetHelpPage("commands"),
+	"tutorial":    assetHelpPage("tutorial"),
+}
+
+type assetHelpPage string
+
+func (file assetHelpPage) HelpFile() ([]byte, error) {
+	return Asset("runtime/help/" + string(file) + ".md")
 }
