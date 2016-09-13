@@ -1,5 +1,9 @@
 package main
 
+import (
+	"io/ioutil"
+)
+
 type HelpPage interface {
 	HelpFile() ([]byte, error)
 }
@@ -18,4 +22,17 @@ type assetHelpPage string
 
 func (file assetHelpPage) HelpFile() ([]byte, error) {
 	return Asset("runtime/help/" + string(file) + ".md")
+}
+
+type fileHelpPage string
+
+func (file fileHelpPage) HelpFile() ([]byte, error) {
+	return ioutil.ReadFile(string(file))
+}
+
+func AddPluginHelp(name, file string) {
+	if _, exists := helpPages[name]; exists {
+		return
+	}
+	helpPages[name] = fileHelpPage(file)
 }
