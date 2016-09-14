@@ -371,7 +371,7 @@ func main() {
 						// Often error messages are displayed down there so it can be useful to easily
 						// copy the message
 						clipboard.WriteAll(messenger.message, "primary")
-						continue
+						break
 					}
 
 					if CurView().mouseReleased {
@@ -389,7 +389,7 @@ func main() {
 			// This function checks the mouse event for the possibility of changing the current tab
 			// If the tab was changed it returns true
 			if TabbarHandleMouseEvent(event) {
-				continue
+				break
 			}
 
 			if searching {
