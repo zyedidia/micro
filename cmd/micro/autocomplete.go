@@ -18,12 +18,14 @@ var pluginCompletions []func(string) []string
 func FileComplete(input string) (string, []string) {
 	var sep string = string(os.PathSeparator)
 	dirs := strings.Split(input, sep)
+
 	var files []os.FileInfo
 	var err error
 	if len(dirs) > 1 {
 		home, _ := homedir.Dir()
 
-		directories := strings.Join(dirs[:len(dirs)-1], sep)
+		directories := strings.Join(dirs[:len(dirs)-1], sep) + sep
+
 		if strings.HasPrefix(directories, "~") {
 			directories = strings.Replace(directories, "~", home, 1)
 		}
@@ -31,6 +33,7 @@ func FileComplete(input string) (string, []string) {
 	} else {
 		files, err = ioutil.ReadDir(".")
 	}
+
 	var suggestions []string
 	if err != nil {
 		return "", suggestions
