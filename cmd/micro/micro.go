@@ -242,9 +242,6 @@ func main() {
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
 
-	// Load the help files
-	LoadHelp()
-
 	// Start the screen
 	InitScreen()
 

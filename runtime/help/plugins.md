@@ -4,6 +4,8 @@ Micro supports creating plugins with a simple Lua system. Every plugin has a
 main script which is run at startup which should be placed in 
 `~/.config/micro/plugins/pluginName/pluginName.lua`.
 
+If you want to add a help page for your plugin, place a markdown file in `~/.config/micro/plugins/pluginName/help.md`. 
+
 There are a number of callback functions which you can create in your
 plugin to run code at times other than startup. The naming scheme is
 `onAction(view)`. For example a function which is run every time the user saves
