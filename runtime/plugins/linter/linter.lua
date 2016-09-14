@@ -22,7 +22,7 @@ function runLinter()
     elseif ft == "lua" then
         lint("luacheck", "luacheck --no-color " .. file, "%f:%l:%d+: %m")
     elseif ft == "python" then
-        lint("pyflakes", "pyflakes " .. file, "%f:%l: %m")
+        lint("pyflakes", "pyflakes " .. file, "%f:%l:.-:? %m")
     elseif ft == "c" then
         lint("gcc", "gcc -fsyntax-only -Wall -Wextra " .. file, "%f:%l:%d+:.+: %m")
     elseif ft == "d" then
@@ -51,7 +51,7 @@ end
 function onExit(output, linter, errorformat)
     local lines = split(output, "\n")
 
-    local regex = errorformat:gsub("%%f", "(.+)"):gsub("%%l", "(%d+)"):gsub("%%m", "(.+)")
+    local regex = errorformat:gsub("%%f", "(..-)"):gsub("%%l", "(%d+)"):gsub("%%m", "(.+)")
     for _,line in ipairs(lines) do
         -- Trim whitespace
         line = line:match("^%s*(.+)%s*$")
