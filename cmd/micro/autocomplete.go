@@ -84,7 +84,8 @@ func CommandComplete(input string) (string, []string) {
 func HelpComplete(input string) (string, []string) {
 	var suggestions []string
 
-	for topic, _ := range helpPages {
+	for _, file := range ListExtensionFiles(FILE_Help) {
+		topic := file.Name()
 		if strings.HasPrefix(topic, input) {
 			suggestions = append(suggestions, topic)
 		}

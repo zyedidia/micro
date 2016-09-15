@@ -94,7 +94,7 @@ func Help(args []string) {
 		CurView().openHelp("help")
 	} else {
 		helpPage := args[0]
-		if _, ok := helpPages[helpPage]; ok {
+		if FindExtensionFile(FILE_Help, helpPage) != nil {
 			CurView().openHelp(helpPage)
 		} else {
 			messenger.Error("Sorry, no help for ", helpPage)

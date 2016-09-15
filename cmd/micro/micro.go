@@ -233,6 +233,9 @@ func main() {
 	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
 
+	// Build a list of available Extensions (Syntax, Colorscheme etc.)
+	InitExtensionFiles()
+
 	// Load the user's settings
 	InitGlobalSettings()
 

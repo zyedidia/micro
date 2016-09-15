@@ -1,8 +1,6 @@
 package main
 
 import (
-	"io/ioutil"
-	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -30,150 +28,16 @@ type SyntaxRule struct {
 
 var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
-// These syntax files are pre installed and embedded in the resulting binary by go-bindata
-var preInstalledSynFiles = []string{
-	"Dockerfile",
-	"apacheconf",
-	"arduino",
-	"asciidoc",
-	"asm",
-	"awk",
-	"c",
-	"caddyfile",
-	"cmake",
-	"coffeescript",
-	"colortest",
-	"conf",
-	"conky",
-	"csharp",
-	"css",
-	"cython",
-	"d",
-	"dart",
-	"dot",
-	"erb",
-	"fish",
-	"fortran",
-	"gdscript",
-	"gentoo-ebuild",
-	"gentoo-etc-portage",
-	"git-commit",
-	"git-config",
-	"git-rebase-todo",
-	"glsl",
-	"go",
-	"golo",
-	"groff",
-	"haml",
-	"haskell",
-	"html",
-	"ini",
-	"inputrc",
-	"java",
-	"javascript",
-	"json",
-	"keymap",
-	"kickstart",
-	"ledger",
-	"lilypond",
-	"lisp",
-	"lua",
-	"makefile",
-	"man",
-	"markdown",
-	"mpdconf",
-	"micro",
-	"nanorc",
-	"nginx",
-	"ocaml",
-	"pascal",
-	"patch",
-	"peg",
-	"perl",
-	"perl6",
-	"php",
-	"pkg-config",
-	"po",
-	"pov",
-	"privoxy-action",
-	"privoxy-config",
-	"privoxy-filter",
-	"puppet",
-	"python",
-	"r",
-	"reST",
-	"rpmspec",
-	"ruby",
-	"rust",
-	"scala",
-	"sed",
-	"sh",
-	"sls",
-	"sql",
-	"swift",
-	"systemd",
-	"tcl",
-	"tex",
-	"vala",
-	"vi",
-	"xml",
-	"xresources",
-	"yaml",
-	"yum",
-	"zsh",
-}
-
 // LoadSyntaxFiles loads the syntax files from the default directory (configDir)
 func LoadSyntaxFiles() {
-	// Load the user's custom syntax files, if there are any
-	LoadSyntaxFilesFromDir(configDir + "/syntax")
-
-	// Load the pre-installed syntax files from inside the binary
-	for _, filetype := range preInstalledSynFiles {
-		data, err := Asset("runtime/syntax/" + filetype + ".micro")
-		if err != nil {
-			TermMessage("Unable to load pre-installed syntax file " + filetype)
-			continue
-		}
-
-		LoadSyntaxFile(string(data), filetype+".micro")
-	}
-}
-
-// LoadSyntaxFilesFromDir loads the syntax files from a specified directory
-// To load the syntax files, we must fill the `syntaxFiles` map
-// This involves finding the regex for syntax and if it exists, the regex
-// for the header. Then we must get the text for the file and the filetype.
-func LoadSyntaxFilesFromDir(dir string) {
-	colorscheme = make(Colorscheme)
 	InitColorscheme()
-
-	// Default style
-	defStyle = tcell.StyleDefault.
-		Foreground(tcell.ColorDefault).
-		Background(tcell.ColorDefault)
-
-	// There may be another default style defined in the colorscheme
-	// In that case we should use that one
-	if style, ok := colorscheme["default"]; ok {
-		defStyle = style
-	}
-	if screen != nil {
-		screen.SetStyle(defStyle)
-	}
-
 	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
-	files, _ := ioutil.ReadDir(dir)
-	for _, f := range files {
-		if filepath.Ext(f.Name()) == ".micro" {
-			filename := dir + "/" + f.Name()
-			text, err := ioutil.ReadFile(filename)
-
-			if err != nil {
-				TermMessage("Error loading syntax file " + filename + ": " + err.Error())
-				return
-			}
-			LoadSyntaxFile(string(text), filename)
+	for _, f := range ListExtensionFiles(FILE_Syntax) {
+		data, err := f.Data()
+		if err != nil {
+			TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+		} else {
+			LoadSyntaxFile(string(data), f.Name())
 		}
 	}
 }
