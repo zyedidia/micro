@@ -234,7 +234,7 @@ func main() {
 	InitConfigDir()
 
 	// Build a list of available Extensions (Syntax, Colorscheme etc.)
-	InitExtensionFiles()
+	InitRuntimeFiles()
 
 	// Load the user's settings
 	InitGlobalSettings()
@@ -315,6 +315,10 @@ func main() {
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
 	L.SetGlobal("JobSend", luar.New(L, JobSend))
 	L.SetGlobal("JobStop", luar.New(L, JobStop))
+
+	// Extension Files
+	L.SetGlobal("ReadRuntimeFile", luar.New(L, PluginReadRuntimeFile))
+	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
 
 	LoadPlugins()
 
