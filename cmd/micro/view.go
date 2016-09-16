@@ -529,7 +529,7 @@ func (v *View) ClearAllGutterMessages() {
 
 // Opens the given help page in a new horizontal split
 func (v *View) openHelp(helpPage string) {
-	if data, err := helpPages[helpPage].HelpFile(); err != nil {
+	if data, err := FindRuntimeFile(FILE_Help, helpPage).Data(); err != nil {
 		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
 		helpBuffer := NewBuffer(data, helpPage+".md")
