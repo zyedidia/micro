@@ -319,6 +319,7 @@ func main() {
 	// Extension Files
 	L.SetGlobal("ReadRuntimeFile", luar.New(L, PluginReadRuntimeFile))
 	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
+	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
 
 	LoadPlugins()
 

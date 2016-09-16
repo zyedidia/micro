@@ -2,6 +2,7 @@ package main
 
 import (
 	"io/ioutil"
+	"os"
 	"path"
 	"path/filepath"
 )
@@ -141,4 +142,14 @@ func PluginListRuntimeFiles(fileType string) []string {
 		result[i] = f.Name()
 	}
 	return result
+}
+
+func PluginAddRuntimeFile(plugin, filetype, path string) {
+	fullpath := configDir + "/plugins/" + plugin + "/" + path
+	if _, err := os.Stat(fullpath); err == nil {
+		AddRuntimeFile(filetype, realFile(fullpath))
+	} else {
+		fullpath = "runtime/plugins/" + plugin + "/" + path
+		AddRuntimeFile(filetype, assetFile(fullpath))
+	}
 }

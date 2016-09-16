@@ -137,8 +137,6 @@ func LoadPlugins() {
 						continue
 					}
 					loadedPlugins = append(loadedPlugins, pluginName)
-				} else if f.Name() == "help.md" {
-					AddRuntimeFile(FILE_Help, namedFile{realFile(fullPath), pluginName})
 				}
 			}
 		}

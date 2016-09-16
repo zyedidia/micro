@@ -4,8 +4,6 @@ Micro supports creating plugins with a simple Lua system. Every plugin has a
 main script which is run at startup which should be placed in 
 `~/.config/micro/plugins/pluginName/pluginName.lua`.
 
-If you want to add a help page for your plugin, place a markdown file in `~/.config/micro/plugins/pluginName/help.md`. 
-
 There are a number of callback functions which you can create in your
 plugin to run code at times other than startup. The naming scheme is
 `onAction(view)`. For example a function which is run every time the user saves
@@ -110,6 +108,16 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 
 If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+
+# Adding help files, syntax files, or colorschemes in your plugin
+
+You can use the `AddRuntimeFile(name, type, path string)` function to add various kinds of
+files to your plugin. For example, if you'd like to add a help topic and to your plugin
+called `test`, you would create the `test.md` file for example, and runt the function:
+
+```lua
+AddRuntimeFile("test", "help", "test.md")
+```
 
 # Autocomplete command arguments
 
