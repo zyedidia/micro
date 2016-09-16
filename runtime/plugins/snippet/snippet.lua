@@ -84,7 +84,7 @@ function Location.handleInput(self, ev)
 	if ev.EventType == 1 then
 		-- TextInput
 		if ev.Text == "\n" then
-			FinishSnippet()
+			Accept()
 			return false
 		else
 			local offset = 1
@@ -312,13 +312,13 @@ function onBeforeTextEvent(ev)
 				return false
 			end
 		end
-		FinishSnippet()
+		Accept()
 	end
 
 	return true
 end
 
-function StartSnippet(name)
+function Insert(name)
 	local v = CurView()
 	local c = v.Cursor
 	local buf = v.Buf
@@ -368,20 +368,20 @@ function StartSnippet(name)
 	end
 end
 
-function NextPlaceholder()
+function Next()
 	if currentSnippet then
 		currentSnippet:focusNext()
 	end
 end
 
-function FinishSnippet()
+function Accept()
 	currentSnippet = nil
 end
 
-function CancelSnippet()
+function Cancel()
 	if currentSnippet then
 		currentSnippet:remove()
-		FinishSnippet()
+		Accept()
 	end
 end
 
@@ -405,10 +405,16 @@ function findSnippet(input)
 end
 
 -- Insert a snippet
-MakeCommand("snippetinsert", "snippet.StartSnippet", MakeCompletion("snippet.findSnippet"), 0)
+MakeCommand("snippetinsert", "snippet.Insert", MakeCompletion("snippet.findSnippet"), 0)
 -- Mark next placeholder
-MakeCommand("snippetnext", "snippet.NextPlaceholder", 0)
+MakeCommand("snippetnext", "snippet.Next", 0)
 -- Cancel current snippet (removes the text)
-MakeCommand("snippetcancel", "snippet.CancelSnippet", 0)
--- finishes snipped editing
-MakeCommand("snippetaccept", "snippet.FinishSnippet", 0)
+MakeCommand("snippetcancel", "snippet.Cancel", 0)
+-- Acceptes snipped editing
+MakeCommand("snippetaccept", "snippet.Accept", 0)
+
+
+BindKey("Alt-w", "snippet.Next")
+BindKey("Alt-a", "snippet.Accept")
+BindKey("Alt-s", "snippet.Insert")
+BindKey("Alt-d", "snippet.Cancel")
