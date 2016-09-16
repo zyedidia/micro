@@ -413,6 +413,7 @@ MakeCommand("snippetcancel", "snippet.Cancel", 0)
 -- Acceptes snipped editing
 MakeCommand("snippetaccept", "snippet.Accept", 0)
 
+AddRuntimeFile("snippet", "help", "help/snippet.md")
 
 BindKey("Alt-w", "snippet.Next")
 BindKey("Alt-a", "snippet.Accept")
