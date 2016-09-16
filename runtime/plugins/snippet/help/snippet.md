@@ -23,6 +23,9 @@ The snippet files have a very simple syntax:
 * every line of code within the snippet must start with a tab (`\t`)
 * a snippet can have multiple placeholders which are indicated by `${num[:name]}` where num is a numeric value. Placeholders with the same number share the same value. You also have the option to give a placeholder a name / description / default value.
 
+Plugins can provide snippet files they just need to publish them as a runtime file with type `snippets`.
+See the plugins help for additional details.
+
 Sample for go:
 
 ```
