@@ -1,5 +1,4 @@
 syntax "yaml" "\.ya?ml$"
-header "^---" "%YAML"
 
 color type     "(^| )!!(binary|bool|float|int|map|null|omap|seq|set|str) "
 color constant  "\b(YES|yes|Y|y|ON|on|NO|no|N|n|OFF|off)\b"
