@@ -254,21 +254,26 @@ end
 
 local function ReadSnippets(filetype)
 	local snippets = {}
-	local filename = JoinPaths(configDir, "plugins", "snippet", filetype .. ".snippets")
+	local allSnippetFiles = ListRuntimeFiles("snippets")
+	local exists = false
 
-	-- first test if the file exists
-	local f = io.open(filename, "r")
-	if f then
-		f:close()
-	else
+	for i = 1, #allSnippetFiles do
+		if allSnippetFiles[i] == filetype then
+			exists = true
+			break
+		end
+	end
+
+	if not exists then
 		messenger:Error("No snippets file for \""..filetype.."\"")
 		return snippets
 	end
 
+	local snippetFile = ReadRuntimeFile("snippets", filetype)
 
 	local curSnip = nil
 	local lineNo = 0
-	for line in io.lines(filename) do
+	for line in string.gmatch(snippetFile, "(.-)\r?\n") do
 		lineNo = lineNo + 1
 		if string.match(line,"^#") then
 			-- comment
