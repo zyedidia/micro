@@ -145,11 +145,11 @@ func PluginListRuntimeFiles(fileType string) []string {
 }
 
 func PluginAddRuntimeFile(plugin, filetype, path string) {
-	fullpath := configDir + "/plugins/" + plugin + "/" + path
+	fullpath := filepath.Join(configDir, "plugins", plugin, path)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
 	} else {
-		fullpath = "runtime/plugins/" + plugin + "/" + path
+		fullpath = path.Join("runtime", "plugins", plugin, path)
 		AddRuntimeFile(filetype, assetFile(fullpath))
 	}
 }
