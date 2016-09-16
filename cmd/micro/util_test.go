@@ -100,9 +100,14 @@ func TestJoinAndSplitCommandArgs(t *testing.T) {
 		Query  string
 		Wanted []string
 	}{
-		{`"hallo""Welt"`, []string{`"hallo""Welt"`}},
+		{`"hallo""Welt"`, []string{`halloWelt`}},
+		{`"hallo" "Welt"`, []string{`hallo`, `Welt`}},
 		{`\"`, []string{`\"`}},
+		{`"foo`, []string{`"foo`}},
+		{`"foo"`, []string{`foo`}},
 		{`"\"`, []string{`"\"`}},
+		{`"C:\\"foo.txt`, []string{`C:\foo.txt`}},
+		{`"\n"new"\n"line`, []string{"\nnew\nline"}},
 	}
 
 	for i, test := range splitTests {

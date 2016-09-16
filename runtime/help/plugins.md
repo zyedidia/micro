@@ -117,6 +117,16 @@ The possible methods which you can call using the `messenger` variable are:
 
 If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
 
+# Adding help files, syntax files, or colorschemes in your plugin
+
+You can use the `AddRuntimeFile(name, type, path string)` function to add various kinds of
+files to your plugin. For example, if you'd like to add a help topic and to your plugin
+called `test`, you would create the `test.md` file for example, and runt the function:
+
+```lua
+AddRuntimeFile("test", "help", "test.md")
+```
+
 # Autocomplete command arguments
 
 See this example to learn how to use `MakeCompletion` and `MakeCommand`

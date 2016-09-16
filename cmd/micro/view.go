@@ -494,9 +494,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	if relocate {
 		v.Relocate()
 	}
-	if v.Buf.Settings["syntax"].(bool) {
-		v.matches = Match(v)
-	}
 }
 
 // GutterMessage creates a message in this view's gutter
@@ -532,15 +529,18 @@ func (v *View) ClearAllGutterMessages() {
 
 // Opens the given help page in a new horizontal split
 func (v *View) openHelp(helpPage string) {
-	if v.Help {
-		helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
-		helpBuffer.Name = "Help"
-		v.OpenBuffer(helpBuffer)
+	if data, err := FindRuntimeFile(FILE_Help, helpPage).Data(); err != nil {
+		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
-		helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
+		helpBuffer := NewBuffer(data, helpPage+".md")
 		helpBuffer.Name = "Help"
-		v.HSplit(helpBuffer)
-		CurView().Help = true
+
+		if v.Help {
+			v.OpenBuffer(helpBuffer)
+		} else {
+			v.HSplit(helpBuffer)
+			CurView().Help = true
+		}
 	}
 }
 
@@ -552,6 +552,9 @@ func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+	if v.Buf.Settings["syntax"].(bool) {
+		v.matches = Match(v)
+	}
 	// The charNum we are currently displaying
 	// starts at the start of the viewport
 	charNum := Loc{0, v.Topline}

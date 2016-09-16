@@ -230,41 +230,63 @@ func FuncName(i interface{}) string {
 // The returned slice contains at least one string
 func SplitCommandArgs(input string) []string {
 	var result []string
+	var curQuote *bytes.Buffer = nil
+
 	curArg := new(bytes.Buffer)
-	inQuote := false
 	escape := false
 
-	appendResult := func() {
-		str := curArg.String()
-		inQuote = false
-		escape = false
-		if strings.HasPrefix(str, `"`) && strings.HasSuffix(str, `"`) {
-			if unquoted, err := strconv.Unquote(str); err == nil {
-				str = unquoted
-			}
+	finishQuote := func() {
+		if curQuote == nil {
+			return
 		}
+		str := curQuote.String()
+		if unquoted, err := strconv.Unquote(str); err == nil {
+			str = unquoted
+		}
+		curArg.WriteString(str)
+		curQuote = nil
+	}
+
+	appendResult := func() {
+		finishQuote()
+		escape = false
+
+		str := curArg.String()
 		result = append(result, str)
 		curArg.Reset()
 	}
 
 	for _, r := range input {
-		if r == ' ' && !inQuote {
+		if r == ' ' && curQuote == nil {
 			appendResult()
 		} else {
-			curArg.WriteRune(r)
+			runeHandled := false
+			appendRuneToBuff := func() {
+				if curQuote != nil {
+					curQuote.WriteRune(r)
+				} else {
+					curArg.WriteRune(r)
+				}
+				runeHandled = true
+			}
 
-			if r == '"' && !inQuote {
-				inQuote = true
+			if r == '"' && curQuote == nil {
+				curQuote = new(bytes.Buffer)
+				appendRuneToBuff()
 			} else {
-				if inQuote && !escape {
+				if curQuote != nil && !escape {
 					if r == '"' {
-						inQuote = false
-					}
-					if r == '\\' {
+						appendRuneToBuff()
+						finishQuote()
+					} else if r == '\\' {
+						appendRuneToBuff()
 						escape = true
 						continue
 					}
 				}
+			}
+			if !runeHandled {
+				appendRuneToBuff()
 			}
 		}
 

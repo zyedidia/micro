@@ -4,6 +4,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/layeh/gopher-luar"
@@ -126,8 +127,9 @@ func LoadPlugins() {
 			pluginName := plugin.Name()
 			files, _ := ioutil.ReadDir(configDir + "/plugins/" + pluginName)
 			for _, f := range files {
+				fullPath := filepath.Join(configDir, "plugins", pluginName, f.Name())
 				if f.Name() == pluginName+".lua" {
-					data, _ := ioutil.ReadFile(configDir + "/plugins/" + pluginName + "/" + f.Name())
+					data, _ := ioutil.ReadFile(fullPath)
 					pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
 
 					if err := L.DoString(pluginDef + string(data)); err != nil {

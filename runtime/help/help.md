@@ -3,11 +3,25 @@
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, 
 while also taking advantage of the full capabilities of modern terminals.
 
-*Press CtrlQ to quit, and CtrlS to save.*
-
 If you want to see all the keybindings press CtrlE and type `help keybindings`.
 
 See the next section for more information about documentation and help.
+
+### Quick-start
+
+Press CtrlQ to quit, and CtrlS to save. Press CtrlE to start typing commands
+and you can see which commands are available by pressing tab, or by
+viewing the help topic `> help commands`. When I write `> ...` I mean press
+CtrlE and then type whatever is there.
+
+Move the cursor around with the mouse or the arrow keys.
+
+If the colorscheme doesn't look good, you can change it with `> set colorscheme ...`.
+You can press tab to see the available colorschemes, or see more information with
+`> help colors`.
+
+Press CtrlW to move between splits, and type `> vsplit filename` or `> hsplit filename`
+to open a new split.
 
 ### Accessing more help
 

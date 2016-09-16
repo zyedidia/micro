@@ -94,7 +94,7 @@ func Help(args []string) {
 		CurView().openHelp("help")
 	} else {
 		helpPage := args[0]
-		if _, ok := helpPages[helpPage]; ok {
+		if FindRuntimeFile(FILE_Help, helpPage) != nil {
 			CurView().openHelp(helpPage)
 		} else {
 			messenger.Error("Sorry, no help for ", helpPage)
@@ -323,13 +323,25 @@ func Replace(args []string) {
 			}
 		}
 	} else {
-		for {
-			match := regex.FindStringIndex(view.Buf.String())
-			if match == nil {
-				break
+		matches := regex.FindAllStringIndex(view.Buf.String(), -1)
+		if matches != nil && len(matches) > 0 {
+			adjust := 0
+			prevMatch := matches[0]
+			from := FromCharPos(prevMatch[0], view.Buf)
+			to := from.Move(Count(search), view.Buf)
+			adjust += Count(replace) - Count(search)
+			view.Buf.Replace(from, to, replace)
+			if len(matches) > 1 {
+				for _, match := range matches[1:] {
+					found++
+					from = from.Move(match[0]-prevMatch[0]+adjust, view.Buf)
+					to := from.Move(Count(search), view.Buf)
+					// TermMessage(match[0], " ", prevMatch[0], " ", adjust, "\n", from, " ", to)
+					view.Buf.Replace(from, to, replace)
+					prevMatch = match
+					// adjust += Count(replace) - Count(search)
+				}
 			}
-			found++
-			view.Buf.Replace(FromCharPos(match[0], view.Buf), FromCharPos(match[1], view.Buf), replace)
 		}
 	}
 	view.Cursor.Relocate()

@@ -234,6 +234,9 @@ func main() {
 	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
 
+	// Build a list of available Extensions (Syntax, Colorscheme etc.)
+	InitRuntimeFiles()
+
 	// Load the user's settings
 	InitGlobalSettings()
 
@@ -242,9 +245,6 @@ func main() {
 
 	// Load the syntax files, including the colorscheme
 	LoadSyntaxFiles()
-
-	// Load the help files
-	LoadHelp()
 
 	// Start the screen
 	InitScreen()
@@ -325,6 +325,11 @@ func main() {
 	L.SetGlobal("JobSend", luar.New(L, JobSend))
 	L.SetGlobal("JobStop", luar.New(L, JobStop))
 
+	// Extension Files
+	L.SetGlobal("ReadRuntimeFile", luar.New(L, PluginReadRuntimeFile))
+	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
+	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
+
 	LoadPlugins()
 
 	jobs = make(chan JobFunction, 100)
@@ -380,7 +385,7 @@ func main() {
 						// Often error messages are displayed down there so it can be useful to easily
 						// copy the message
 						clipboard.WriteAll(messenger.message, "primary")
-						continue
+						break
 					}
 
 					if CurView().mouseReleased {
@@ -398,7 +403,7 @@ func main() {
 			// This function checks the mouse event for the possibility of changing the current tab
 			// If the tab was changed it returns true
 			if TabbarHandleMouseEvent(event) {
-				continue
+				break
 			}
 
 			if searching {
