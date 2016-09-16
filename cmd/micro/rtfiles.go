@@ -144,12 +144,12 @@ func PluginListRuntimeFiles(fileType string) []string {
 	return result
 }
 
-func PluginAddRuntimeFile(plugin, filetype, path string) {
-	fullpath := filepath.Join(configDir, "plugins", plugin, path)
+func PluginAddRuntimeFile(plugin, filetype, filePath string) {
+	fullpath := filepath.Join(configDir, "plugins", plugin, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
 	} else {
-		fullpath = path.Join("runtime", "plugins", plugin, path)
+		fullpath = path.Join("runtime", "plugins", plugin, filePath)
 		AddRuntimeFile(filetype, assetFile(fullpath))
 	}
 }
