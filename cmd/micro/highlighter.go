@@ -32,7 +32,7 @@ var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 func LoadSyntaxFiles() {
 	InitColorscheme()
 	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
-	for _, f := range ListRuntimeFiles(FILE_Syntax) {
+	for _, f := range ListRuntimeFiles(RTSyntax) {
 		data, err := f.Data()
 		if err != nil {
 			TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())

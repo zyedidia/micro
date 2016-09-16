@@ -17,7 +17,7 @@ var colorscheme Colorscheme
 
 // ColorschemeExists checks if a given colorscheme exists
 func ColorschemeExists(colorschemeName string) bool {
-	return FindRuntimeFile(FILE_ColorScheme, colorschemeName) != nil
+	return FindRuntimeFile(RTColorscheme, colorschemeName) != nil
 }
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
@@ -39,7 +39,7 @@ func LoadDefaultColorscheme() {
 
 // LoadColorscheme loads the given colorscheme from a directory
 func LoadColorscheme(colorschemeName string) {
-	file := FindRuntimeFile(FILE_ColorScheme, colorschemeName)
+	file := FindRuntimeFile(RTColorscheme, colorschemeName)
 	if file == nil {
 		TermMessage(colorschemeName, "is not a valid colorscheme")
 	} else {

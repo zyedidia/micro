@@ -94,7 +94,7 @@ func Help(args []string) {
 		CurView().openHelp("help")
 	} else {
 		helpPage := args[0]
-		if FindRuntimeFile(FILE_Help, helpPage) != nil {
+		if FindRuntimeFile(RTHelp, helpPage) != nil {
 			CurView().openHelp(helpPage)
 		} else {
 			messenger.Error("Sorry, no help for ", helpPage)
