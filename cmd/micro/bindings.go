@@ -405,7 +405,6 @@ func DefaultBindings() map[string]string {
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
-		"Esc":            "ClearStatus",
 		"CtrlB":          "ShellMode",
 		"CtrlQ":          "Quit",
 		"CtrlE":          "CommandMode",
@@ -420,5 +419,13 @@ func DefaultBindings() map[string]string {
 		"Alt-e": "EndOfLine",
 		"Alt-p": "CursorUp",
 		"Alt-n": "CursorDown",
+
+		// Integration with file managers
+                "F1": "ToggleHelp",
+                "F2": "Save",
+                "F4": "Quit",
+                "F7": "Find",
+                "F10": "Quit",
+                "Esc": "Quit",
 	}
 }
