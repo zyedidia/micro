@@ -102,7 +102,12 @@ func ParseColorscheme(text string) Colorscheme {
 			link := string(matches[1])
 			colors := string(matches[2])
 
-			c[link] = StringToStyle(colors)
+			style := StringToStyle(colors)
+			c[link] = style
+
+			if link == "default" {
+				defStyle = style
+			}
 		} else {
 			fmt.Println("Color-link statement is not valid:", line)
 		}
@@ -115,8 +120,7 @@ func ParseColorscheme(text string) Colorscheme {
 // The strings must be in the format "extra foregroundcolor,backgroundcolor"
 // The 'extra' can be bold, reverse, or underline
 func StringToStyle(str string) tcell.Style {
-	var fg string
-	bg := "default"
+	var fg, bg string
 	split := strings.Split(str, ",")
 	if len(split) > 1 {
 		fg, bg = split[0], split[1]
@@ -126,7 +130,19 @@ func StringToStyle(str string) tcell.Style {
 	fg = strings.TrimSpace(fg)
 	bg = strings.TrimSpace(bg)
 
-	style := defStyle.Foreground(StringToColor(fg)).Background(StringToColor(bg))
+	var fgColor, bgColor tcell.Color
+	if fg == "" {
+		fgColor, _, _ = defStyle.Decompose()
+	} else {
+		fgColor = StringToColor(fg)
+	}
+	if bg == "" {
+		_, bgColor, _ = defStyle.Decompose()
+	} else {
+		bgColor = StringToColor(bg)
+	}
+
+	style := defStyle.Foreground(fgColor).Background(bgColor)
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
 	}
