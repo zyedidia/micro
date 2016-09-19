@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -310,6 +311,14 @@ func main() {
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
 	L.SetGlobal("NewBuffer", luar.New(L, NewBuffer))
+	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
+		return string(r)
+	}))
+	L.SetGlobal("Loc", luar.New(L, func(x, y int) Loc {
+		return Loc{x, y}
+	}))
+	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
+	L.SetGlobal("configDir", luar.New(L, configDir))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
