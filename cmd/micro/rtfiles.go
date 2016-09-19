@@ -11,6 +11,7 @@ const (
 	RTColorscheme = "colorscheme"
 	RTSyntax      = "syntax"
 	RTHelp        = "help"
+	RTPlugin      = "plugin"
 )
 
 // RuntimeFile allows the program to read runtime data like colorschemes or syntax files
@@ -121,6 +122,26 @@ func InitRuntimeFiles() {
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.micro")
 	add(RTHelp, "help", "*.md")
+
+	// Search configDir for plugin-scripts
+	files, _ := ioutil.ReadDir(filepath.Join(configDir, "plugins"))
+	for _, f := range files {
+		if f.IsDir() {
+			scriptPath := filepath.Join(configDir, "plugins", f.Name(), f.Name()+".lua")
+			if _, err := os.Stat(scriptPath); err == nil {
+				AddRuntimeFile(RTPlugin, realFile(scriptPath))
+			}
+		}
+	}
+
+	if files, err := AssetDir("runtime/plugins"); err == nil {
+		for _, f := range files {
+			scriptPath := path.Join("runtime/plugins", f, f+".lua")
+			if _, err := AssetInfo(scriptPath); err == nil {
+				AddRuntimeFile(RTPlugin, assetFile(scriptPath))
+			}
+		}
+	}
 }
 
 // PluginReadRuntimeFile allows plugin scripts to read the content of a runtime file
