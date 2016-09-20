@@ -43,11 +43,19 @@ for functions are given using Go's type system):
 * `OS`: variable which gives the OS micro is currently running on (this is the same
 as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
+* `configDir`: contains the path to the micro configuration files
+
 * `tabs`: a list of all the tabs currently in use
 
 * `curTab`: the index of the current tabs in the tabs list
 
 * `messenger`: lets you send messages to the user or create prompts
+
+* `RuneStr(r rune) string`: returns a string containing the given rune
+
+* `Loc(x, y int) Loc`: returns a new `Loc` struct
+
+* `JoinPaths(dir... string) string` combines multiple directories to a full path
 
 * `GetOption(name string)`: returns the value of the requested option
 

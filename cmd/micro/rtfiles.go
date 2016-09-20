@@ -144,12 +144,12 @@ func PluginListRuntimeFiles(fileType string) []string {
 }
 
 // PluginAddRuntimeFile adds a file to the runtime files for a plugin
-func PluginAddRuntimeFile(plugin, filetype, path string) {
-	fullpath := configDir + "/plugins/" + plugin + "/" + path
+func PluginAddRuntimeFile(plugin, filetype, filePath string) {
+	fullpath := filepath.Join(configDir, "plugins", plugin, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
 	} else {
-		fullpath = "runtime/plugins/" + plugin + "/" + path
+		fullpath = path.Join("runtime", "plugins", plugin, filePath)
 		AddRuntimeFile(filetype, assetFile(fullpath))
 	}
 }
