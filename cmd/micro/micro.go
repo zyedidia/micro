@@ -337,6 +337,8 @@ func main() {
 
 	for _, t := range tabs {
 		for _, v := range t.views {
+			v.Buf.FindFileType()
+			v.Buf.UpdateRules()
 			for _, pl := range loadedPlugins {
 				_, err := Call(pl+".onViewOpen", v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
