@@ -243,9 +243,6 @@ func main() {
 	InitCommands()
 	InitBindings()
 
-	// Load the syntax files, including the colorscheme
-	LoadSyntaxFiles()
-
 	// Start the screen
 	InitScreen()
 
@@ -330,10 +327,13 @@ func main() {
 	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
 	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
 
-	LoadPlugins()
-
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
+
+	LoadPlugins()
+
+	// Load the syntax files, including the colorscheme
+	LoadSyntaxFiles()
 
 	for _, t := range tabs {
 		for _, v := range t.views {

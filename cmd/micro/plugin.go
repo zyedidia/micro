@@ -4,7 +4,6 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
-	"path/filepath"
 	"strings"
 
 	"github.com/layeh/gopher-luar"
@@ -12,12 +11,6 @@ import (
 )
 
 var loadedPlugins []string
-
-var preInstalledPlugins = []string{
-	"go",
-	"linter",
-	"autoclose",
-}
 
 // Call calls the lua function 'function'
 // If it does not exist nothing happens, if there is an error,
@@ -121,48 +114,28 @@ func LuaFunctionJob(function string) func(string, ...string) {
 
 // LoadPlugins loads the pre-installed plugins and the plugins located in ~/.config/micro/plugins
 func LoadPlugins() {
-	files, _ := ioutil.ReadDir(configDir + "/plugins")
-	for _, plugin := range files {
-		if plugin.IsDir() {
-			pluginName := plugin.Name()
-			files, _ := ioutil.ReadDir(configDir + "/plugins/" + pluginName)
-			for _, f := range files {
-				fullPath := filepath.Join(configDir, "plugins", pluginName, f.Name())
-				if f.Name() == pluginName+".lua" {
-					data, _ := ioutil.ReadFile(fullPath)
-					pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
-
-					if err := L.DoString(pluginDef + string(data)); err != nil {
-						TermMessage(err)
-						continue
-					}
-					loadedPlugins = append(loadedPlugins, pluginName)
-				}
-			}
-		}
-	}
-
-	for _, pluginName := range preInstalledPlugins {
+	for _, plugin := range ListRuntimeFiles(RTPlugin) {
 		alreadyExists := false
+		pluginName := plugin.Name()
 		for _, pl := range loadedPlugins {
 			if pl == pluginName {
 				alreadyExists = true
 				break
 			}
 		}
+
 		if !alreadyExists {
-			plugin := "runtime/plugins/" + pluginName + "/" + pluginName + ".lua"
-			data, err := Asset(plugin)
+			data, err := plugin.Data()
 			if err != nil {
-				TermMessage("Error loading pre-installed plugin: " + pluginName)
+				TermMessage("Error loading plugin: " + pluginName)
 				continue
 			}
 			pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
+
 			if err := L.DoString(pluginDef + string(data)); err != nil {
 				TermMessage(err)
 				continue
 			}
-
 			loadedPlugins = append(loadedPlugins, pluginName)
 		}
 	}
