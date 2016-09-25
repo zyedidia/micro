@@ -6,7 +6,7 @@ if GetOption("autoclose") == nil then
     AddOption("autoclose", true)
 end
 
-local autoclosePairs = {"\"\"", "''", "()", "{}", "[]"}
+local autoclosePairs = {"\"\"", "''", "``", "()", "{}", "[]"}
 local autoNewlinePairs = {"()", "{}", "[]"}
 
 function onRune(r, v)
