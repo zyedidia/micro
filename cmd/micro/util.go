@@ -88,7 +88,15 @@ func Contains(list []string, a string) bool {
 
 // Insert makes a simple insert into a string at the given position
 func Insert(str string, pos int, value string) string {
-	return string([]rune(str)[:pos]) + value + string([]rune(str)[pos:])
+	cx := 0
+	pos2 := 0
+	if (pos > 0) {
+		for cx < pos {
+			cx += runewidth.RuneWidth([]rune(str)[pos2])
+			pos2++
+		}
+	}
+	return string([]rune(str)[:pos2]) + value + string([]rune(str)[pos2:])
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given string
@@ -156,8 +164,17 @@ func GetModTime(path string) (time.Time, bool) {
 
 // StringWidth returns the width of a string where tabs count as `tabsize` width
 func StringWidth(str string, tabsize int) int {
-	sw := runewidth.StringWidth(str)
-	sw += NumOccurrences(str, '\t') * (tabsize - 1)
+	sw := 0
+	for _, rune_elem := range []rune(str) {
+		rw := runewidth.RuneWidth(rune_elem)
+		switch string(rune_elem) {
+		case "\t":
+			sw += (tabsize - (sw % tabsize))
+		default:
+			sw += rw
+		}
+	}
+
 	return sw
 }
 
@@ -165,7 +182,7 @@ func StringWidth(str string, tabsize int) int {
 // that have a width larger than 1 (this also counts tabs as `tabsize` width)
 func WidthOfLargeRunes(str string, tabsize int) int {
 	count := 0
-	for _, ch := range str {
+	for _, ch := range []rune(str) {
 		var w int
 		if ch == '\t' {
 			w = tabsize

@@ -28,7 +28,8 @@ install-quick: build-quick
 
 # Updates tcell
 tcell:
-	git -C $(GOPATH)/src/github.com/zyedidia/tcell pull
+	git -C $(GOPATH)/src/github.com/imai9999/tcell pull
+#	git -C $(GOPATH)/src/github.com/zyedidia/tcell pull
 
 # Checks for dependencies
 deps:

@@ -8,7 +8,7 @@ import (
 
 	"github.com/mattn/go-runewidth"
 	"github.com/mitchellh/go-homedir"
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
 )
 
 // The View struct stores information about a view into a buffer.
@@ -756,7 +756,8 @@ func (v *View) DisplayView() {
 				}
 				// Now the tab has to be displayed as a bunch of spaces
 				tabSize := int(v.Buf.Settings["tabsize"].(float64))
-				for i := 0; i < tabSize-1; i++ {
+				sx := screenX
+				for i := 0; i < tabSize - ((sx-(v.x + v.lineNumOffset)) % tabSize) - 1; i++ {
 					screenX++
 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
 						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
@@ -764,14 +765,9 @@ func (v *View) DisplayView() {
 				}
 			} else if runewidth.RuneWidth(ch) > 1 {
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
-					v.drawCell(screenX, screenY, ch, nil, lineStyle)
+					v.drawCell(screenX-v.leftCol, screenY, ch, nil, lineStyle)
 				}
-				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
-					screenX++
-					if screenX-v.x-v.leftCol >= v.lineNumOffset {
-						v.drawCell(screenX-v.leftCol, screenY, '<', nil, lineStyle)
-					}
-				}
+				screenX += (runewidth.RuneWidth(ch) - 1)
 			} else {
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
 					v.drawCell(screenX-v.leftCol, screenY, ch, nil, lineStyle)

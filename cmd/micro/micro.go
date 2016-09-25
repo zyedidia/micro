@@ -15,8 +15,8 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
-	"github.com/zyedidia/tcell"
-	"github.com/zyedidia/tcell/encoding"
+	"github.com/imai9999/tcell"
+	"github.com/imai9999/tcell/encoding"
 )
 
 const (

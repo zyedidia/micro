@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
 )
 
 // FileTypeRules represents a complete set of syntax rules for a filetype

@@ -3,7 +3,8 @@ package main
 import (
 	"sort"
 
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
+	"github.com/mattn/go-runewidth"
 )
 
 type Tab struct {
@@ -154,9 +155,12 @@ func DisplayTabs() {
 	// Maybe there is a unicode filename?
 	fileRunes := []rune(str)
 	w, _ := screen.Size()
+	fx := 0
 	for x := 0; x < w; x++ {
-		if x < len(fileRunes) {
-			screen.SetContent(x, 0, fileRunes[x], nil, tabBarStyle)
+		if fx < len(fileRunes) {
+			screen.SetContent(x, 0, fileRunes[fx], nil, tabBarStyle)
+			x += (runewidth.RuneWidth(fileRunes[fx]) - 1)
+			fx++
 		} else {
 			screen.SetContent(x, 0, ' ', nil, tabBarStyle)
 		}
