@@ -364,6 +364,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 								}
 							}
 						}
+						break
 					}
 				}
 			}

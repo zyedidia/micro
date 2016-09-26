@@ -205,12 +205,11 @@ var bindingKeys = map[string]tcell.Key{
 	"CtrlRightSq":    tcell.KeyCtrlRightSq,
 	"CtrlCarat":      tcell.KeyCtrlCarat,
 	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
-	"Backspace":      tcell.KeyBackspace,
 	"Tab":            tcell.KeyTab,
 	"Esc":            tcell.KeyEsc,
 	"Escape":         tcell.KeyEscape,
 	"Enter":          tcell.KeyEnter,
-	"Backspace2":     tcell.KeyBackspace2,
+	"Backspace":      tcell.KeyBackspace2,
 
 	// I renamed these keys to PageUp and PageDown but I don't want to break someone's keybindings
 	"PgUp":   tcell.KeyPgUp,
@@ -267,7 +266,8 @@ modSearch:
 		case strings.HasPrefix(k, "-"):
 			// We optionally support dashes between modifiers
 			k = k[1:]
-		case strings.HasPrefix(k, "Ctrl"):
+		case strings.HasPrefix(k, "Ctrl") && !k == "CtrlH":
+			// CtrlH technically does not have a 'Ctrl' modifier because it is really backspace
 			k = k[4:]
 			modifiers |= tcell.ModCtrl
 		case strings.HasPrefix(k, "Alt"):
@@ -373,10 +373,10 @@ func DefaultBindings() map[string]string {
 		"CtrlShiftDown":  "SelectToEnd",
 		"Enter":          "InsertNewline",
 		"Space":          "InsertSpace",
+		"CtrlH":          "Backspace",
 		"Backspace":      "Backspace",
-		"Backspace2":     "Backspace",
+		"Alt-CtrlH":      "DeleteWordLeft",
 		"Alt-Backspace":  "DeleteWordLeft",
-		"Alt-Backspace2": "DeleteWordLeft",
 		"Tab":            "IndentSelection,InsertTab",
 		"Backtab":        "OutdentSelection",
 		"CtrlO":          "OpenFile",
@@ -421,11 +421,11 @@ func DefaultBindings() map[string]string {
 		"Alt-n": "CursorDown",
 
 		// Integration with file managers
-                "F1": "ToggleHelp",
-                "F2": "Save",
-                "F4": "Quit",
-                "F7": "Find",
-                "F10": "Quit",
-                "Esc": "Quit",
+		"F1":  "ToggleHelp",
+		"F2":  "Save",
+		"F4":  "Quit",
+		"F7":  "Find",
+		"F10": "Quit",
+		"Esc": "Quit",
 	}
 }
