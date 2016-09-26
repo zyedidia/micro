@@ -24,12 +24,12 @@ func TestDependencyResolving(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	selected, err := all.ResolveStep(PluginVersions{}, PluginDependencies{
+	selected, err := all.Resolve(PluginVersions{}, PluginDependencies{
 		&PluginDependency{"Bar", semver.MustParseRange(">=1.0.0")},
 	})
 
 	check := func(name, version string) {
-		v := selected.Find(name)
+		v := selected.find(name)
 		expected := semver.MustParse(version)
 		if v == nil {
 			t.Errorf("Failed to resolve %s", name)
@@ -45,7 +45,7 @@ func TestDependencyResolving(t *testing.T) {
 		check("Bar", "1.0.0")
 	}
 
-	selected, err = all.ResolveStep(PluginVersions{}, PluginDependencies{
+	selected, err = all.Resolve(PluginVersions{}, PluginDependencies{
 		&PluginDependency{"Unresolvable", semver.MustParseRange(">0.0.0")},
 	})
 	if err == nil {
