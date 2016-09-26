@@ -269,36 +269,58 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
+		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
+			for key, actions := range bindings {
+				if e.Key() == key.keyCode {
+					if e.Key() == tcell.KeyRune {
+						if e.Rune() != key.r {
+							continue
+						}
+					}
+					if e.Modifiers() == key.modifiers {
+						for _, action := range actions {
+							funcName := FuncName(action)
+							switch funcName {
+							case "main.(*View).CursorUp":
+								if m.historyNum > 0 {
+									m.historyNum--
+									m.response = history[m.historyNum]
+									m.cursorx = Count(m.response)
+								}
+							case "main.(*View).CursorDown":
+								if m.historyNum < len(history)-1 {
+									m.historyNum++
+									m.response = history[m.historyNum]
+									m.cursorx = Count(m.response)
+								}
+							case "main.(*View).CursorLeft":
+								if m.cursorx > 0 {
+									m.cursorx--
+								}
+							case "main.(*View).CursorRight":
+								if m.cursorx < Count(m.response) {
+									m.cursorx++
+								}
+							case "main.(*View).CursorStart", "main.(*View).StartOfLine":
+								m.cursorx = 0
+							case "main.(*View).CursorEnd", "main.(*View).EndOfLine":
+								m.cursorx = Count(m.response)
+							case "main.(*View).Backspace":
+								if m.cursorx > 0 {
+									m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
+									m.cursorx--
+								}
+							case "main.(*View).Paste":
+								clip, _ := clipboard.ReadAll("clipboard")
+								m.response = Insert(m.response, m.cursorx, clip)
+								m.cursorx += Count(clip)
+							}
+						}
+					}
+				}
+			}
+		}
 		switch e.Key() {
-		case tcell.KeyUp:
-			if m.historyNum > 0 {
-				m.historyNum--
-				m.response = history[m.historyNum]
-				m.cursorx = Count(m.response)
-			}
-		case tcell.KeyDown:
-			if m.historyNum < len(history)-1 {
-				m.historyNum++
-				m.response = history[m.historyNum]
-				m.cursorx = Count(m.response)
-			}
-		case tcell.KeyLeft:
-			if m.cursorx > 0 {
-				m.cursorx--
-			}
-		case tcell.KeyRight:
-			if m.cursorx < Count(m.response) {
-				m.cursorx++
-			}
-		case tcell.KeyBackspace2, tcell.KeyBackspace:
-			if m.cursorx > 0 {
-				m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
-				m.cursorx--
-			}
-		case tcell.KeyCtrlV:
-			clip, _ := clipboard.ReadAll("clipboard")
-			m.response = Insert(m.response, m.cursorx, clip)
-			m.cursorx += Count(clip)
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++
@@ -309,6 +331,23 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 		clip := e.Text()
 		m.response = Insert(m.response, m.cursorx, clip)
 		m.cursorx += Count(clip)
+	case *tcell.EventMouse:
+		x, y := e.Position()
+		x -= Count(m.message)
+		button := e.Buttons()
+		_, screenH := screen.Size()
+
+		if y == screenH-1 {
+			switch button {
+			case tcell.Button1:
+				m.cursorx = x
+				if m.cursorx < 0 {
+					m.cursorx = 0
+				} else if m.cursorx > Count(m.response) {
+					m.cursorx = Count(m.response)
+				}
+			}
+		}
 	}
 }
 

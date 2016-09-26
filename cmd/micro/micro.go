@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
 
@@ -242,9 +243,6 @@ func main() {
 	InitCommands()
 	InitBindings()
 
-	// Load the syntax files, including the colorscheme
-	LoadSyntaxFiles()
-
 	// Start the screen
 	InitScreen()
 
@@ -310,6 +308,14 @@ func main() {
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
 	L.SetGlobal("NewBuffer", luar.New(L, NewBuffer))
+	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
+		return string(r)
+	}))
+	L.SetGlobal("Loc", luar.New(L, func(x, y int) Loc {
+		return Loc{x, y}
+	}))
+	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
+	L.SetGlobal("configDir", luar.New(L, configDir))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
@@ -321,13 +327,18 @@ func main() {
 	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
 	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
 
-	LoadPlugins()
-
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
 
+	LoadPlugins()
+
+	// Load the syntax files, including the colorscheme
+	LoadSyntaxFiles()
+
 	for _, t := range tabs {
 		for _, v := range t.views {
+			v.Buf.FindFileType()
+			v.Buf.UpdateRules()
 			for _, pl := range loadedPlugins {
 				_, err := Call(pl+".onViewOpen", v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
