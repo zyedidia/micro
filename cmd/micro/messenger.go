@@ -24,6 +24,7 @@ func TermMessage(msg ...interface{}) {
 	}
 
 	fmt.Println(msg...)
+	messenger.addLog(fmt.Sprint(msg...))
 	fmt.Print("\nPress enter to continue")
 
 	reader := bufio.NewReader(os.Stdin)
@@ -83,9 +84,7 @@ func (m *Messenger) getBuffer() *Buffer {
 
 // Message sends a message to the user
 func (m *Messenger) Message(msg ...interface{}) {
-	buf := new(bytes.Buffer)
-	fmt.Fprint(buf, msg...)
-	m.message = buf.String()
+	m.message = fmt.Sprint(msg...)
 	m.style = defStyle
 
 	if _, ok := colorscheme["message"]; ok {
