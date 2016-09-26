@@ -39,6 +39,7 @@ var commandActions = map[string]func([]string){
 	"Tab":      NewTab,
 	"Help":     Help,
 	"Eval":     Eval,
+	"Plugin":   PluginCmd,
 }
 
 // InitCommands initializes the default commands
@@ -84,6 +85,40 @@ func DefaultCommands() map[string]StrCommand {
 		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 		"eval":     {"Eval", []Completion{NoCompletion}},
+		"plugin":   {"Plugin", []Completion{NoCompletion}},
+	}
+}
+
+// InstallPlugin installs the given plugin by exact name match
+func PluginCmd(args []string) {
+	if len(args) >= 1 {
+		switch args[0] {
+		case "install":
+			for _, plugin := range args[1:] {
+				pp := GetAllPluginPackages().Get(plugin)
+				if pp == nil {
+					messenger.Error("Unknown plugin \"" + plugin + "\"")
+				} else if !pp.IsInstallable() {
+					messenger.Error("Plugin \"" + plugin + "\" can not be installed.")
+				} else {
+					pp.Install()
+				}
+			}
+		case "remove":
+			for _, plugin := range args[1:] {
+				// check if the plugin exists.
+				for _, lp := range loadedPlugins {
+					if lp == plugin {
+						UninstallPlugin(plugin)
+						continue
+					}
+				}
+			}
+		case "update":
+			UpdatePlugins()
+		}
+	} else {
+		messenger.Error("Not enough arguments")
 	}
 }
 
