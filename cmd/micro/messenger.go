@@ -43,6 +43,7 @@ func TermError(filename string, lineNum int, err string) {
 // Messenger is an object that makes it easy to send messages to the user
 // and get input from the user
 type Messenger struct {
+	log *Buffer
 	// Are we currently prompting the user?
 	hasPrompt bool
 	// Is there a message to print
@@ -67,6 +68,19 @@ type Messenger struct {
 	gutterMessage bool
 }
 
+func (m *Messenger) addLog(msg string) {
+	buffer := m.getBuffer()
+	buffer.Insert(buffer.End(), msg+"\n")
+}
+
+func (m *Messenger) getBuffer() *Buffer {
+	if m.log == nil {
+		m.log = NewBuffer([]byte{}, "")
+		m.log.Name = "Log"
+	}
+	return m.log
+}
+
 // Message sends a message to the user
 func (m *Messenger) Message(msg ...interface{}) {
 	buf := new(bytes.Buffer)
@@ -77,6 +91,7 @@ func (m *Messenger) Message(msg ...interface{}) {
 	if _, ok := colorscheme["message"]; ok {
 		m.style = colorscheme["message"]
 	}
+	m.addLog(m.message)
 	m.hasMessage = true
 }
 
@@ -92,6 +107,7 @@ func (m *Messenger) Error(msg ...interface{}) {
 	if _, ok := colorscheme["error-message"]; ok {
 		m.style = colorscheme["error-message"]
 	}
+	m.addLog(m.message)
 	m.hasMessage = true
 }
 
@@ -113,13 +129,16 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 			switch e.Key() {
 			case tcell.KeyRune:
 				if e.Rune() == 'y' {
+					m.addLog("\t--> y")
 					m.hasPrompt = false
 					return true, false
 				} else if e.Rune() == 'n' {
+					m.addLog("\t--> n")
 					m.hasPrompt = false
 					return false, false
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.addLog("\t--> (cancel)")
 				m.hasPrompt = false
 				return false, true
 			}
@@ -146,6 +165,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 			case tcell.KeyRune:
 				for _, r := range responses {
 					if e.Rune() == r {
+						m.addLog("\t--> " + string(r))
 						m.Clear()
 						m.Reset()
 						m.hasPrompt = false
@@ -153,6 +173,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 					}
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.addLog("\t--> (cancel)")
 				m.Clear()
 				m.Reset()
 				m.hasPrompt = false
@@ -198,9 +219,11 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 			switch e.Key() {
 			case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEscape:
 				// Cancel
+				m.addLog("\t--> (cancel)")
 				m.hasPrompt = false
 			case tcell.KeyEnter:
 				// User is done entering their response
+				m.addLog("\t--> " + m.response)
 				m.hasPrompt = false
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response

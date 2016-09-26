@@ -11,6 +11,14 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+type ViewType int
+
+const (
+	vtDefault ViewType = iota
+	vtHelp
+	vtLog
+)
+
 // The View struct stores information about a view into a buffer.
 // It stores information about the cursor, and the viewport
 // that the user sees the buffer from.
@@ -28,7 +36,7 @@ type View struct {
 	heightPercent int
 
 	// Specifies whether or not this view holds a help buffer
-	Help bool
+	Type ViewType
 
 	// Actual with and height
 	width  int
@@ -536,11 +544,11 @@ func (v *View) openHelp(helpPage string) {
 		helpBuffer := NewBuffer(data, helpPage+".md")
 		helpBuffer.Name = "Help"
 
-		if v.Help {
+		if v.Type == vtHelp {
 			v.OpenBuffer(helpBuffer)
 		} else {
 			v.HSplit(helpBuffer)
-			CurView().Help = true
+			CurView().Type = vtHelp
 		}
 	}
 }

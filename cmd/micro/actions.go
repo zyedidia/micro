@@ -711,7 +711,7 @@ func (v *View) Save(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Help {
+	if v.Type == vtHelp {
 		// We can't save the help text
 		return false
 	}
@@ -1258,7 +1258,7 @@ func (v *View) ToggleHelp(usePlugin bool) bool {
 		return false
 	}
 
-	if !v.Help {
+	if v.Type != vtHelp {
 		// Open the default help
 		v.openHelp("help")
 	} else {
