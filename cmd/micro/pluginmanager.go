@@ -3,7 +3,6 @@ package main
 import (
 	"archive/zip"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -16,6 +15,7 @@ import (
 	"sync"
 
 	"github.com/blang/semver"
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/yuin/gopher-lua"
 )
 
@@ -114,7 +114,7 @@ func (pc PluginChannel) Fetch() PluginPackages {
 		return PluginPackages{}
 	}
 	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
+	decoder := json5.NewDecoder(resp.Body)
 
 	var repositories []PluginRepository
 	if err := decoder.Decode(&repositories); err != nil {
@@ -134,7 +134,7 @@ func (pr PluginRepository) Fetch() PluginPackages {
 		return PluginPackages{}
 	}
 	defer resp.Body.Close()
-	decoder := json.NewDecoder(resp.Body)
+	decoder := json5.NewDecoder(resp.Body)
 
 	var plugins PluginPackages
 	if err := decoder.Decode(&plugins); err != nil {
@@ -152,7 +152,7 @@ func (pv *PluginVersion) UnmarshalJSON(data []byte) error {
 		Require map[string]string
 	}
 
-	if err := json.Unmarshal(data, &values); err != nil {
+	if err := json5.Unmarshal(data, &values); err != nil {
 		return err
 	}
 	pv.Version = values.Version
@@ -176,7 +176,7 @@ func (pp *PluginPackage) UnmarshalJSON(data []byte) error {
 		Tags        []string
 		Versions    PluginVersions
 	}
-	if err := json.Unmarshal(data, &values); err != nil {
+	if err := json5.Unmarshal(data, &values); err != nil {
 		return err
 	}
 	pp.Name = values.Name

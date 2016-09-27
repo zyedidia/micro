@@ -1,9 +1,10 @@
 package main
 
 import (
-	"encoding/json"
 	"github.com/blang/semver"
 	"testing"
+
+	"github.com/yosuke-furukawa/json5/encoding/json5"
 )
 
 func TestDependencyResolving(t *testing.T) {
@@ -20,7 +21,7 @@ func TestDependencyResolving(t *testing.T) {
 	}]
 `
 	var all PluginPackages
-	err := json.Unmarshal([]byte(js), &all)
+	err := json5.Unmarshal([]byte(js), &all)
 	if err != nil {
 		t.Error(err)
 	}
