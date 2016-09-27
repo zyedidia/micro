@@ -92,7 +92,7 @@ func DefaultCommands() map[string]StrCommand {
 func ToggleLog(args []string) {
 	buffer := messenger.getBuffer()
 	if CurView().Type != vtLog {
-		CurView().VSplit(buffer)
+		CurView().HSplit(buffer)
 		CurView().Type = vtLog
 	} else {
 		CurView().Quit(true)
