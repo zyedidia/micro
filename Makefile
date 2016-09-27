@@ -1,6 +1,6 @@
 .PHONY: runtime
 
-VERSION = $(shell git describe --tags --abbrev=0)
+VERSION = $(shell go run tools/build-version.go)
 HASH = $(shell git rev-parse --short HEAD)
 DATE = $(shell go run tools/build-date.go)
 
