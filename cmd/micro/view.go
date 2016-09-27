@@ -11,6 +11,14 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+type ViewType int
+
+const (
+	vtDefault ViewType = iota
+	vtHelp
+	vtLog
+)
+
 // The View struct stores information about a view into a buffer.
 // It stores information about the cursor, and the viewport
 // that the user sees the buffer from.
@@ -28,7 +36,7 @@ type View struct {
 	heightPercent int
 
 	// Specifies whether or not this view holds a help buffer
-	Help bool
+	Type ViewType
 
 	// Actual with and height
 	width  int
@@ -185,7 +193,7 @@ func (v *View) ScrollDown(n int) {
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
-	if v.Buf.IsModified {
+	if v.Type == vtDefault && v.Buf.IsModified {
 		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
 		if !canceled {
 			if char == 'y' {
@@ -536,11 +544,11 @@ func (v *View) openHelp(helpPage string) {
 		helpBuffer := NewBuffer(data, helpPage+".md")
 		helpBuffer.Name = "Help"
 
-		if v.Help {
+		if v.Type == vtHelp {
 			v.OpenBuffer(helpBuffer)
 		} else {
 			v.HSplit(helpBuffer)
-			CurView().Help = true
+			CurView().Type = vtHelp
 		}
 	}
 }
@@ -553,9 +561,15 @@ func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+	if v.Type == vtLog {
+		// Log views should always follow the cursor...
+		v.Relocate()
+	}
+
 	if v.Buf.Settings["syntax"].(bool) {
 		v.matches = Match(v)
 	}
+
 	// The charNum we are currently displaying
 	// starts at the start of the viewport
 	charNum := Loc{0, v.Topline}

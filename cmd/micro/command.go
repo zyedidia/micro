@@ -26,19 +26,20 @@ type StrCommand struct {
 var commands map[string]Command
 
 var commandActions = map[string]func([]string){
-	"Set":      Set,
-	"SetLocal": SetLocal,
-	"Show":     Show,
-	"Run":      Run,
-	"Bind":     Bind,
-	"Quit":     Quit,
-	"Save":     Save,
-	"Replace":  Replace,
-	"VSplit":   VSplit,
-	"HSplit":   HSplit,
-	"Tab":      NewTab,
-	"Help":     Help,
-	"Eval":     Eval,
+	"Set":       Set,
+	"SetLocal":  SetLocal,
+	"Show":      Show,
+	"Run":       Run,
+	"Bind":      Bind,
+	"Quit":      Quit,
+	"Save":      Save,
+	"Replace":   Replace,
+	"VSplit":    VSplit,
+	"HSplit":    HSplit,
+	"Tab":       NewTab,
+	"Help":      Help,
+	"Eval":      Eval,
+	"ToggleLog": ToggleLog,
 }
 
 // InitCommands initializes the default commands
@@ -84,6 +85,17 @@ func DefaultCommands() map[string]StrCommand {
 		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 		"eval":     {"Eval", []Completion{NoCompletion}},
+		"log":      {"ToggleLog", []Completion{NoCompletion}},
+	}
+}
+
+func ToggleLog(args []string) {
+	buffer := messenger.getBuffer()
+	if CurView().Type != vtLog {
+		CurView().VSplit(buffer)
+		CurView().Type = vtLog
+	} else {
+		CurView().Quit(true)
 	}
 }
 
