@@ -193,7 +193,7 @@ func (v *View) ScrollDown(n int) {
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
-	if v.Buf.IsModified {
+	if v.Type == vtDefault && v.Buf.IsModified {
 		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
 		if !canceled {
 			if char == 'y' {
@@ -561,9 +561,15 @@ func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+	if v.Type == vtLog {
+		// Log views should always follow the cursor...
+		v.Relocate()
+	}
+
 	if v.Buf.Settings["syntax"].(bool) {
 		v.matches = Match(v)
 	}
+
 	// The charNum we are currently displaying
 	// starts at the start of the viewport
 	charNum := Loc{0, v.Topline}
