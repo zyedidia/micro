@@ -27,6 +27,9 @@ var (
 	allPluginPackages PluginPackages = nil
 )
 
+// CorePluginName is a plugin dependency name for the micro core.
+const CorePluginName = "micro"
+
 // PluginChannel contains an url to a json list of PluginRepository
 type PluginChannel string
 
@@ -252,9 +255,12 @@ func SearchPlugin(text string) (plugins PluginPackages) {
 }
 
 func newStaticPluginVersion(name, version string) *PluginVersion {
-	vers, err := semver.Parse(version)
+	vers, err := semver.ParseTolerant(version)
+
 	if err != nil {
-		return nil
+		if vers, err = semver.ParseTolerant("0.0.0-" + version); err != nil {
+			vers = semver.MustParse("0.0.0-unknown")
+		}
 	}
 	pl := &PluginPackage{
 		Name: name,
@@ -271,7 +277,7 @@ func newStaticPluginVersion(name, version string) *PluginVersion {
 // micro itself. This can be used to resolve dependencies.
 func GetInstalledVersions() PluginVersions {
 	result := PluginVersions{
-		newStaticPluginVersion("micro", Version),
+		newStaticPluginVersion(CorePluginName, Version),
 	}
 
 	for _, name := range loadedPlugins {
@@ -419,9 +425,9 @@ func (all PluginPackages) Resolve(selectedVersions PluginVersions, open PluginDe
 func (versions PluginVersions) install() {
 	anyInstalled := false
 	for _, sel := range versions {
-		if sel.pack.Name != "micro" {
+		if sel.pack.Name != CorePluginName {
 			installed := GetInstalledPluginVersion(sel.pack.Name)
-			if v, err := semver.Parse(installed); err != nil || v.NE(sel.Version) {
+			if v, err := semver.ParseTolerant(installed); err != nil || v.NE(sel.Version) {
 				UninstallPlugin(sel.pack.Name)
 			}
 			if err := sel.DownloadAndInstall(); err != nil {
@@ -458,7 +464,7 @@ func (pl PluginPackage) Install() {
 
 func UpdatePlugins() {
 	microVersion := PluginVersions{
-		newStaticPluginVersion("micro", Version),
+		newStaticPluginVersion(CorePluginName, Version),
 	}
 
 	var updates = make(PluginDependencies, 0)
