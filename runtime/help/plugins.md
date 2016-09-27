@@ -127,6 +127,9 @@ called `test`, you would create the `test.md` file for example, and runt the fun
 AddRuntimeFile("test", "help", "test.md")
 ```
 
+Use `AddRuntimeFilesFromDirectory(name, type, dir, pattern)` to add a number of files
+to the runtime.
+
 # Autocomplete command arguments
 
 See this example to learn how to use `MakeCompletion` and `MakeCommand`

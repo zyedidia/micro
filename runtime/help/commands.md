@@ -42,6 +42,8 @@ Here are the possible commands that you can use.
 
 * `tab filename`: opens the given file in a new tab.
 
+* `log`: opens a log of all messages and debug statements
+
 ---
 
 The following commands are provided by the default plugins:

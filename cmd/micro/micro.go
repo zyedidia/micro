@@ -326,6 +326,7 @@ func main() {
 	L.SetGlobal("ReadRuntimeFile", luar.New(L, PluginReadRuntimeFile))
 	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
 	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
+	L.SetGlobal("AddRuntimeFilesFromDirectory", luar.New(L, PluginAddRuntimeFilesFromDirectory))
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)

@@ -26,20 +26,21 @@ type StrCommand struct {
 var commands map[string]Command
 
 var commandActions = map[string]func([]string){
-	"Set":      Set,
-	"SetLocal": SetLocal,
-	"Show":     Show,
-	"Run":      Run,
-	"Bind":     Bind,
-	"Quit":     Quit,
-	"Save":     Save,
-	"Replace":  Replace,
-	"VSplit":   VSplit,
-	"HSplit":   HSplit,
-	"Tab":      NewTab,
-	"Help":     Help,
-	"Eval":     Eval,
-	"Plugin":   PluginCmd,
+	"Set":       Set,
+	"SetLocal":  SetLocal,
+	"Show":      Show,
+	"Run":       Run,
+	"Bind":      Bind,
+	"Quit":      Quit,
+	"Save":      Save,
+	"Replace":   Replace,
+	"VSplit":    VSplit,
+	"HSplit":    HSplit,
+	"Tab":       NewTab,
+	"Help":      Help,
+	"Eval":      Eval,
+	"ToggleLog": ToggleLog,
+	"Plugin":    PluginCmd,
 }
 
 // InitCommands initializes the default commands
@@ -85,6 +86,7 @@ func DefaultCommands() map[string]StrCommand {
 		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 		"eval":     {"Eval", []Completion{NoCompletion}},
+		"log":      {"ToggleLog", []Completion{NoCompletion}},
 		"plugin":   {"Plugin", []Completion{NoCompletion}},
 	}
 }
@@ -119,6 +121,16 @@ func PluginCmd(args []string) {
 		}
 	} else {
 		messenger.Error("Not enough arguments")
+	}
+}
+
+func ToggleLog(args []string) {
+	buffer := messenger.getBuffer()
+	if CurView().Type != vtLog {
+		CurView().HSplit(buffer)
+		CurView().Type = vtLog
+	} else {
+		CurView().Quit(true)
 	}
 }
 
