@@ -71,6 +71,22 @@ type PluginDependency struct {
 // PluginDependencies is a slice of PluginDependency
 type PluginDependencies []*PluginDependency
 
+func (pp *PluginPackage) String() string {
+	buf := new(bytes.Buffer)
+	buf.WriteString("Plugin: ")
+	buf.WriteString(pp.Name)
+	buf.WriteRune('\n')
+	if pp.Author != "" {
+		buf.WriteString("Author: ")
+		buf.WriteString(pp.Author)
+		buf.WriteRune('\n')
+	}
+	if pp.Description != "" {
+		buf.WriteString(pp.Description)
+	}
+	return buf.String()
+}
+
 func fetchAllSources(count int, fetcher func(i int) PluginPackages) PluginPackages {
 	wgQuery := new(sync.WaitGroup)
 	wgQuery.Add(count)

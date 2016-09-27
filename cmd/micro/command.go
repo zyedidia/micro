@@ -118,6 +118,19 @@ func PluginCmd(args []string) {
 			}
 		case "update":
 			UpdatePlugins()
+		case "search":
+			searchText := strings.Join(args[1:], " ")
+			plugins := SearchPlugin(searchText)
+			messenger.Message(len(plugins), " plugins found")
+			for _, p := range plugins {
+				messenger.AddLog("\n")
+				messenger.AddLog(p.String())
+			}
+			if len(plugins) > 0 {
+				if CurView().Type != vtLog {
+					ToggleLog([]string{})
+				}
+			}
 		}
 	} else {
 		messenger.Error("Not enough arguments")
