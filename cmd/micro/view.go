@@ -715,6 +715,8 @@ func (v *View) DisplayView() {
 
 		// Now we actually draw the line
 		colN := 0
+		strWidth := 0
+		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		for _, ch := range line {
 			lineStyle := defStyle
 
@@ -776,8 +778,7 @@ func (v *View) DisplayView() {
 					v.drawCell(screenX-v.leftCol, screenY, indentChar[0], nil, lineIndentStyle)
 				}
 				// Now the tab has to be displayed as a bunch of spaces
-				tabSize := int(v.Buf.Settings["tabsize"].(float64))
-				visLoc := StringWidth(line[:colN], tabSize)
+				visLoc := strWidth
 				remainder := tabSize - (visLoc % tabSize)
 				for i := 0; i < remainder-1; i++ {
 					screenX++
@@ -803,6 +804,7 @@ func (v *View) DisplayView() {
 			charNum = charNum.Move(1, v.Buf)
 			screenX++
 			colN++
+			strWidth += StringWidth(string(ch), tabSize)
 		}
 		// Here we are at a newline
 
