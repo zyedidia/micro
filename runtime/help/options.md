@@ -93,6 +93,13 @@ Here are the options that you can set:
 
 	default value: `2`
 
+* `autosave`: micro will save the buffer every 8 seconds automatically.
+  Micro also will automatically save and quit when you exit without asking.
+  Be careful when using this feature, because you might accidentally save a file,
+  overwriting what was there before.
+
+	default value: `off`
+
 ---
 
 Default plugin options:
