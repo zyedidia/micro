@@ -71,7 +71,7 @@ type Messenger struct {
 
 func (m *Messenger) AddLog(msg string) {
 	buffer := m.getBuffer()
-	buffer.Insert(buffer.End(), msg+"\n")
+	buffer.insert(buffer.End(), []byte(msg+"\n"))
 	buffer.Cursor.Loc = buffer.End()
 	buffer.Cursor.Relocate()
 }
