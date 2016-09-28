@@ -3,7 +3,7 @@ package main
 import (
 	"regexp"
 
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
 )
 
 var (

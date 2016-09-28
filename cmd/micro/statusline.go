@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"github.com/mattn/go-runewidth"
 )
 
 // Statusline represents the information line at the bottom
@@ -53,9 +54,12 @@ func (sline *Statusline) Display() {
 		screen.SetContent(viewX, y, ' ', nil, statusLineStyle)
 		viewX++
 	}
+	fx := 0
 	for x := 0; x < sline.view.width; x++ {
-		if x < len(fileRunes) {
-			screen.SetContent(viewX+x, y, fileRunes[x], nil, statusLineStyle)
+		if fx < len(fileRunes) {
+			screen.SetContent(viewX+x, y, fileRunes[fx], nil, statusLineStyle)
+			x += (runewidth.RuneWidth(fileRunes[fx]) - 1)
+			fx++
 		} else if x >= sline.view.width-len(rightText) && x < len(rightText)+sline.view.width-len(rightText) {
 			screen.SetContent(viewX+x, y, []rune(rightText)[x-sline.view.width+len(rightText)], nil, statusLineStyle)
 		} else {

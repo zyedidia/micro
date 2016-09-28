@@ -1,6 +1,9 @@
 package main
 
-import "github.com/zyedidia/clipboard"
+import (
+	"github.com/zyedidia/clipboard"
+	"github.com/mattn/go-runewidth"
+)
 
 // The Cursor struct stores the location of the cursor in the view
 // The complicated part about the cursor is storing its location.
@@ -319,11 +322,28 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	if visualPos > visualLineLen {
 		visualPos = visualLineLen
 	}
-	width := WidthOfLargeRunes(c.buf.Line(lineNum), tabSize)
-	if visualPos >= width {
-		return visualPos - width
+	
+	newCharPos := 0
+	newVisualPos := 0
+	rw := 0
+	for _, ch := range []rune(c.buf.Line(lineNum)) {
+		if string(ch) == "\t" {
+			rw = tabSize - (newVisualPos % tabSize)
+		} else {
+			rw = runewidth.RuneWidth(ch)
+		}
+		
+		if newVisualPos + rw > visualPos {
+			break;
+		}
+		
+		newVisualPos += rw
+		newCharPos ++
 	}
-	return visualPos / tabSize
+	
+	visualPos = newVisualPos
+	
+	return newCharPos
 }
 
 // GetVisualX returns the x value of the cursor in visual spaces

@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
 )
 
 // Colorscheme is a map from string to style -- it represents a colorscheme

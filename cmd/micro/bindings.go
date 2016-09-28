@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/yosuke-furukawa/json5/encoding/json5"
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
 )
 
 var bindings map[Key][]func(*View, bool) bool

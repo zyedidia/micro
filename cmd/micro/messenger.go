@@ -8,7 +8,8 @@ import (
 	"strconv"
 
 	"github.com/zyedidia/clipboard"
-	"github.com/zyedidia/tcell"
+	"github.com/imai9999/tcell"
+	"github.com/mattn/go-runewidth"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -121,7 +122,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	for {
 		m.Clear()
 		m.Display()
-		screen.ShowCursor(Count(m.message), h-1)
+		screen.ShowCursor(runewidth.StringWidth(m.message), h-1)
 		screen.Show()
 		event := <-events
 
@@ -156,7 +157,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 	for {
 		m.Clear()
 		m.Display()
-		screen.ShowCursor(Count(m.message), h-1)
+		screen.ShowCursor(runewidth.StringWidth(m.message), h-1)
 		screen.Show()
 		event := <-events
 
@@ -265,7 +266,7 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 
 				if chosen != "" {
 					m.response = JoinCommandArgs(append(args[:len(args)-1], chosen)...)
-					m.cursorx = Count(m.response)
+					m.cursorx = runewidth.StringWidth(m.response)
 				}
 			}
 		}
@@ -309,35 +310,57 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 								if m.historyNum > 0 {
 									m.historyNum--
 									m.response = history[m.historyNum]
-									m.cursorx = Count(m.response)
+									m.cursorx = runewidth.StringWidth(m.response)
 								}
 							case "main.(*View).CursorDown":
 								if m.historyNum < len(history)-1 {
 									m.historyNum++
 									m.response = history[m.historyNum]
-									m.cursorx = Count(m.response)
+									m.cursorx = runewidth.StringWidth(m.response)
 								}
 							case "main.(*View).CursorLeft":
 								if m.cursorx > 0 {
-									m.cursorx--
+					 				fx := 0
+					 				x := 0
+					 				for x < m.cursorx {
+					 					x += runewidth.RuneWidth([]rune(m.response)[fx])
+					 					fx++
+					 				}
+					 				
+					 				m.cursorx -= runewidth.RuneWidth([]rune(m.response)[fx - 1])
 								}
 							case "main.(*View).CursorRight":
-								if m.cursorx < Count(m.response) {
-									m.cursorx++
+					 			if m.cursorx < runewidth.StringWidth(string([]rune(m.response))) {
+					 				fx := 0
+					 				x := 0
+					 				for x < m.cursorx {
+					 					x += runewidth.RuneWidth([]rune(m.response)[fx])
+					 					fx++
+					 				}
+					 				
+					 				m.cursorx += runewidth.RuneWidth([]rune(m.response)[fx])
 								}
 							case "main.(*View).CursorStart", "main.(*View).StartOfLine":
 								m.cursorx = 0
 							case "main.(*View).CursorEnd", "main.(*View).EndOfLine":
-								m.cursorx = Count(m.response)
+								m.cursorx = runewidth.StringWidth(m.response)
 							case "main.(*View).Backspace":
 								if m.cursorx > 0 {
-									m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
-									m.cursorx--
+					 				fx := 0
+					 				x := 0
+					 				for x < m.cursorx {
+					 					x += runewidth.RuneWidth([]rune(m.response)[fx])
+					 					fx++
+					 				}
+					 				
+					 				cw := runewidth.RuneWidth([]rune(m.response)[fx-1])
+					 				m.response = string([]rune(m.response)[:fx-1]) + string([]rune(m.response)[fx:])
+					 				m.cursorx -= cw
 								}
 							case "main.(*View).Paste":
 								clip, _ := clipboard.ReadAll("clipboard")
 								m.response = Insert(m.response, m.cursorx, clip)
-								m.cursorx += Count(clip)
+								m.cursorx += runewidth.StringWidth(clip)
 							}
 						}
 					}
@@ -347,17 +370,17 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 		switch e.Key() {
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
-			m.cursorx++
+			m.cursorx += runewidth.StringWidth(string(e.Rune()))
 		}
 		history[m.historyNum] = m.response
 
 	case *tcell.EventPaste:
 		clip := e.Text()
 		m.response = Insert(m.response, m.cursorx, clip)
-		m.cursorx += Count(clip)
+		m.cursorx += runewidth.StringWidth(clip)
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		x -= Count(m.message)
+		x -= runewidth.StringWidth(m.message)
 		button := e.Buttons()
 		_, screenH := screen.Size()
 
@@ -367,8 +390,8 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 				m.cursorx = x
 				if m.cursorx < 0 {
 					m.cursorx = 0
-				} else if m.cursorx > Count(m.response) {
-					m.cursorx = Count(m.response)
+				} else if m.cursorx > runewidth.StringWidth(m.response) {
+					m.cursorx = runewidth.StringWidth(m.response)
 				}
 			}
 		}
@@ -408,7 +431,7 @@ func (m *Messenger) DisplaySuggestions(suggestions []string) {
 	for _, suggestion := range suggestions {
 		for _, c := range suggestion {
 			screen.SetContent(x, y, c, nil, statusLineStyle)
-			x++
+			x += runewidth.RuneWidth(c)
 		}
 		screen.SetContent(x, y, ' ', nil, statusLineStyle)
 		x++
@@ -421,14 +444,16 @@ func (m *Messenger) Display() {
 	if m.hasMessage {
 		if m.hasPrompt || globalSettings["infobar"].(bool) {
 			runes := []rune(m.message + m.response)
-			for x := 0; x < len(runes); x++ {
-				screen.SetContent(x, h-1, runes[x], nil, m.style)
+			x := 0
+			for _, rune_elem := range runes {
+				screen.SetContent(x, h-1, rune_elem, nil, m.style)
+				x += runewidth.RuneWidth(rune_elem)
 			}
 		}
 	}
 
 	if m.hasPrompt {
-		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
+		screen.ShowCursor(runewidth.StringWidth(m.message)+m.cursorx, h-1)
 		screen.Show()
 	}
 }
