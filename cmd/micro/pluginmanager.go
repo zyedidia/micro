@@ -501,14 +501,19 @@ func (pl PluginPackage) Install() {
 	selected.install()
 }
 
-func UpdatePlugins() {
+func UpdatePlugins(plugins []string) {
+	// if no plugins are specified, update all installed plugins.
+	if len(plugins) == 0 {
+		plugins = loadedPlugins
+	}
+
 	messenger.AddLog("Checking for plugin updates")
 	microVersion := PluginVersions{
 		newStaticPluginVersion(CorePluginName, Version),
 	}
 
 	var updates = make(PluginDependencies, 0)
-	for _, name := range loadedPlugins {
+	for _, name := range plugins {
 		pv := GetInstalledPluginVersion(name)
 		r, err := semver.ParseRange(">=" + pv) // Try to get newer versions.
 		if err == nil {

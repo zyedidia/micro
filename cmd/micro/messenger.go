@@ -192,6 +192,8 @@ const (
 	CommandCompletion
 	HelpCompletion
 	OptionCompletion
+	PluginCmdCompletion
+	PluginNameCompletion
 )
 
 // Prompt sends the user a message and waits for a response to be typed in
@@ -255,6 +257,10 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
 					chosen, suggestions = OptionComplete(currentArg)
+				} else if completionType == PluginCmdCompletion {
+					chosen, suggestions = PluginCmdComplete(currentArg)
+				} else if completionType == PluginNameCompletion {
+					chosen, suggestions = PluginNameComplete(currentArg)
 				} else if completionType < NoCompletion {
 					chosen, suggestions = PluginComplete(completionType, currentArg)
 				}

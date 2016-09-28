@@ -87,7 +87,7 @@ func DefaultCommands() map[string]StrCommand {
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 		"eval":     {"Eval", []Completion{NoCompletion}},
 		"log":      {"ToggleLog", []Completion{NoCompletion}},
-		"plugin":   {"Plugin", []Completion{NoCompletion}},
+		"plugin":   {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
 	}
 }
 
@@ -117,7 +117,7 @@ func PluginCmd(args []string) {
 				}
 			}
 		case "update":
-			UpdatePlugins()
+			UpdatePlugins(args[1:])
 		case "search":
 			searchText := strings.Join(args[1:], " ")
 			plugins := SearchPlugin(searchText)
