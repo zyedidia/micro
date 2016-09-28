@@ -81,6 +81,7 @@ func (pp *PluginPackage) String() string {
 		buf.WriteRune('\n')
 	}
 	if pp.Description != "" {
+		buf.WriteRune('\n')
 		buf.WriteString(pp.Description)
 	}
 	return buf.String()
@@ -270,10 +271,18 @@ func (pp PluginPackage) IsInstallable() bool {
 
 // SearchPlugin retrieves a list of all PluginPackages which match the given search text and
 // could be or are already installed
-func SearchPlugin(text string) (plugins PluginPackages) {
+func SearchPlugin(texts []string) (plugins PluginPackages) {
 	plugins = make(PluginPackages, 0)
+
+pluginLoop:
 	for _, pp := range GetAllPluginPackages() {
-		if pp.Match(text) && pp.IsInstallable() {
+		for _, text := range texts {
+			if !pp.Match(text) {
+				continue pluginLoop
+			}
+		}
+
+		if pp.IsInstallable() {
 			plugins = append(plugins, pp)
 		}
 	}

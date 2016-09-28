@@ -119,13 +119,13 @@ func PluginCmd(args []string) {
 		case "update":
 			UpdatePlugins(args[1:])
 		case "search":
-			searchText := strings.Join(args[1:], " ")
-			plugins := SearchPlugin(searchText)
+			plugins := SearchPlugin(args[1:])
 			messenger.Message(len(plugins), " plugins found")
 			for _, p := range plugins {
-				messenger.AddLog("\n")
+				messenger.AddLog("----------------")
 				messenger.AddLog(p.String())
 			}
+			messenger.AddLog("----------------")
 			if len(plugins) > 0 {
 				if CurView().Type != vtLog {
 					ToggleLog([]string{})
