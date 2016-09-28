@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -240,11 +239,20 @@ func (s PluginVersions) Less(i, j int) bool {
 
 // Match returns true if the package matches a given search text
 func (pp PluginPackage) Match(text string) bool {
-	// ToDo: improve matching.
-	text = "(?i)" + text
-	if r, err := regexp.Compile(text); err == nil {
-		return r.MatchString(pp.Name)
+	text = strings.ToLower(text)
+	for _, t := range pp.Tags {
+		if strings.ToLower(t) == text {
+			return true
+		}
 	}
+	if strings.Contains(strings.ToLower(pp.Name), text) {
+		return true
+	}
+
+	if strings.Contains(strings.ToLower(pp.Description), text) {
+		return true
+	}
+
 	return false
 }
 
