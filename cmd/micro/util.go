@@ -157,7 +157,18 @@ func GetModTime(path string) (time.Time, bool) {
 // StringWidth returns the width of a string where tabs count as `tabsize` width
 func StringWidth(str string, tabsize int) int {
 	sw := runewidth.StringWidth(str)
-	sw += NumOccurrences(str, '\t') * (tabsize - 1)
+	lineIdx := 0
+	for _, ch := range str {
+		switch ch {
+		case '\t':
+			ts := tabsize - (lineIdx % tabsize)
+			sw += ts - 1
+		case '\n':
+			lineIdx = 0
+		default:
+			lineIdx++
+		}
+	}
 	return sw
 }
 
@@ -165,15 +176,21 @@ func StringWidth(str string, tabsize int) int {
 // that have a width larger than 1 (this also counts tabs as `tabsize` width)
 func WidthOfLargeRunes(str string, tabsize int) int {
 	count := 0
+	lineIdx := 0
 	for _, ch := range str {
 		var w int
 		if ch == '\t' {
-			w = tabsize
+			w = tabsize - (lineIdx % tabsize)
 		} else {
 			w = runewidth.RuneWidth(ch)
 		}
 		if w > 1 {
 			count += (w - 1)
+		}
+		if ch == '\n' {
+			lineIdx = 0
+		} else {
+			lineIdx++
 		}
 	}
 	return count
