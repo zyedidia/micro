@@ -123,6 +123,7 @@ func (pc PluginChannels) Fetch() PluginPackages {
 
 // Fetch retrieves all available PluginPackages from the given channel
 func (pc PluginChannel) Fetch() PluginPackages {
+	messenger.AddLog(fmt.Sprintf("Fetching channel: %q", string(pc)))
 	resp, err := http.Get(string(pc))
 	if err != nil {
 		TermMessage("Failed to query plugin channel:\n", err)
@@ -143,6 +144,7 @@ func (pc PluginChannel) Fetch() PluginPackages {
 
 // Fetch retrieves all available PluginPackages from the given repository
 func (pr PluginRepository) Fetch() PluginPackages {
+	messenger.AddLog(fmt.Sprintf("Fetching repository: %q", string(pr)))
 	resp, err := http.Get(string(pr))
 	if err != nil {
 		TermMessage("Failed to query plugin repository:\n", err)
@@ -474,6 +476,8 @@ func (versions PluginVersions) install() {
 	}
 	if anyInstalled {
 		messenger.Message("One or more plugins installed. Please restart micro.")
+	} else {
+		messenger.AddLog("Nothing to install / update")
 	}
 }
 
@@ -498,6 +502,7 @@ func (pl PluginPackage) Install() {
 }
 
 func UpdatePlugins() {
+	messenger.AddLog("Checking for plugin updates")
 	microVersion := PluginVersions{
 		newStaticPluginVersion(CorePluginName, Version),
 	}
