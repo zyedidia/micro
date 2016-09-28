@@ -777,7 +777,9 @@ func (v *View) DisplayView() {
 				}
 				// Now the tab has to be displayed as a bunch of spaces
 				tabSize := int(v.Buf.Settings["tabsize"].(float64))
-				for i := 0; i < tabSize-1; i++ {
+				visLoc := StringWidth(line[:colN], tabSize)
+				remainder := tabSize - (visLoc % tabSize)
+				for i := 0; i < remainder-1; i++ {
 					screenX++
 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
 						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
