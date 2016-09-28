@@ -320,6 +320,7 @@ func GetInstalledPluginVersion(name string) string {
 }
 
 func (pv *PluginVersion) DownloadAndInstall() error {
+	messenger.AddLog(fmt.Sprintf("Downloading %q (%s) from %q", pv.pack.Name, pv.Version, pv.Url))
 	resp, err := http.Get(pv.Url)
 	if err != nil {
 		return err
@@ -440,17 +441,27 @@ func (all PluginPackages) Resolve(selectedVersions PluginVersions, open PluginDe
 
 func (versions PluginVersions) install() {
 	anyInstalled := false
+	currentlyInstalled := GetInstalledVersions()
+
 	for _, sel := range versions {
 		if sel.pack.Name != CorePluginName {
-			installed := GetInstalledPluginVersion(sel.pack.Name)
-			if v, err := semver.ParseTolerant(installed); err != nil || v.NE(sel.Version) {
-				UninstallPlugin(sel.pack.Name)
+			shouldInstall := true
+			if pv := currentlyInstalled.find(sel.pack.Name); pv != nil {
+				if pv.Version.NE(sel.Version) {
+					messenger.AddLog(fmt.Sprint("Uninstalling %q", sel.pack.Name))
+					UninstallPlugin(sel.pack.Name)
+				} else {
+					shouldInstall = false
+				}
 			}
-			if err := sel.DownloadAndInstall(); err != nil {
-				messenger.Error(err)
-				return
+
+			if shouldInstall {
+				if err := sel.DownloadAndInstall(); err != nil {
+					messenger.Error(err)
+					return
+				}
+				anyInstalled = true
 			}
-			anyInstalled = true
 		}
 	}
 	if anyInstalled {
