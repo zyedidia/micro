@@ -38,7 +38,7 @@ type View struct {
 	// Specifies whether or not this view holds a help buffer
 	Type ViewType
 
-	// Actual with and height
+	// Actual width and height
 	width  int
 	height int
 
@@ -831,15 +831,13 @@ func (v *View) DisplayView() {
 			}
 			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
 				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-				if colorcolumn != 0 && screenX-v.leftCol+i == colorcolumn-1 {
+				if colorcolumn != 0 && screenX-v.lineNumOffset+i == colorcolumn-1 {
 					if style, ok := colorscheme["color-column"]; ok {
 						fg, _, _ := style.Decompose()
 						lineStyle = lineStyle.Background(fg)
 					}
-					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
-				} else {
-					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 				}
+				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
 		}
 	}
