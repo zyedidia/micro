@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/zyedidia/glob"
+	"github.com/zyedidia/json5/encoding/json5"
 )
 
 type optionValidator func(string, interface{}) error
