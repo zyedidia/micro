@@ -56,6 +56,7 @@ func (l *LeafNode) VSplit(buf *Buffer) {
 		s := new(SplitTree)
 		s.kind = VerticalSplit
 		s.parent = l.parent
+		s.tabNum = l.parent.tabNum
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
 		newView.Num = len(tab.views)
@@ -81,6 +82,7 @@ func (l *LeafNode) HSplit(buf *Buffer) {
 	} else {
 		s := new(SplitTree)
 		s.kind = HorizontalSplit
+		s.tabNum = l.parent.tabNum
 		s.parent = l.parent
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
