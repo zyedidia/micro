@@ -19,10 +19,6 @@ import (
 )
 
 var (
-	pluginChannels PluginChannels = PluginChannels{
-		PluginChannel("https://www.boombuler.de/channel.json"),
-	}
-
 	allPluginPackages PluginPackages = nil
 )
 
@@ -211,7 +207,40 @@ func (pp *PluginPackage) UnmarshalJSON(data []byte) error {
 // GetAllPluginPackages gets all PluginPackages which may be available.
 func GetAllPluginPackages() PluginPackages {
 	if allPluginPackages == nil {
-		allPluginPackages = pluginChannels.Fetch()
+		getOption := func(name string) []string {
+			data := GetOption(name)
+			if strs, ok := data.([]string); ok {
+				return strs
+			}
+			if ifs, ok := data.([]interface{}); ok {
+				result := make([]string, len(ifs))
+				for i, urlIf := range ifs {
+					if url, ok := urlIf.(string); ok {
+						result[i] = url
+					} else {
+						return nil
+					}
+				}
+				return result
+			}
+			return nil
+		}
+
+		channels := PluginChannels{}
+		for _, url := range getOption("pluginchannels") {
+			channels = append(channels, PluginChannel(url))
+		}
+		repos := []PluginRepository{}
+		for _, url := range getOption("pluginrepos") {
+			repos = append(repos, PluginRepository(url))
+		}
+		allPluginPackages = fetchAllSources(len(repos)+1, func(i int) PluginPackages {
+			if i == 0 {
+				return channels.Fetch()
+			} else {
+				return repos[i-1].Fetch()
+			}
+		})
 	}
 	return allPluginPackages
 }
