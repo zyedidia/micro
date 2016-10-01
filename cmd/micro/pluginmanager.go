@@ -174,8 +174,13 @@ func (pv *PluginVersion) UnmarshalJSON(data []byte) error {
 	pv.Require = make(PluginDependencies, 0)
 
 	for k, v := range values.Require {
-		if vRange, err := semver.ParseRange(v); err == nil {
-			pv.Require = append(pv.Require, &PluginDependency{k, vRange})
+		// don't add the dependency if it's the core and
+		// we have a unknown version number.
+		// in that case just accept that dependency (which equals to not adding it.)
+		if k != CorePluginName || !isUnknownCoreVersion() {
+			if vRange, err := semver.ParseRange(v); err == nil {
+				pv.Require = append(pv.Require, &PluginDependency{k, vRange})
+			}
 		}
 	}
 	return nil
@@ -316,6 +321,11 @@ pluginLoop:
 		}
 	}
 	return
+}
+
+func isUnknownCoreVersion() bool {
+	_, err := semver.ParseTolerant(Version)
+	return err != nil
 }
 
 func newStaticPluginVersion(name, version string) *PluginVersion {
