@@ -38,7 +38,7 @@ type View struct {
 	// Specifies whether or not this view holds a help buffer
 	Type ViewType
 
-	// Actual with and height
+	// Actual width and height
 	width  int
 	height int
 
@@ -194,7 +194,13 @@ func (v *View) ScrollDown(n int) {
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
 	if v.Type == vtDefault && v.Buf.IsModified {
-		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
+		var char rune
+		var canceled bool
+		if v.Buf.Settings["autosave"].(bool) {
+			char = 'y'
+		} else {
+			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
+		}
 		if !canceled {
 			if char == 'y' {
 				v.Save(true)
@@ -709,6 +715,8 @@ func (v *View) DisplayView() {
 
 		// Now we actually draw the line
 		colN := 0
+		strWidth := 0
+		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		for _, ch := range line {
 			lineStyle := defStyle
 
@@ -770,8 +778,9 @@ func (v *View) DisplayView() {
 					v.drawCell(screenX-v.leftCol, screenY, indentChar[0], nil, lineIndentStyle)
 				}
 				// Now the tab has to be displayed as a bunch of spaces
-				tabSize := int(v.Buf.Settings["tabsize"].(float64))
-				for i := 0; i < tabSize-1; i++ {
+				visLoc := strWidth
+				remainder := tabSize - (visLoc % tabSize)
+				for i := 0; i < remainder-1; i++ {
 					screenX++
 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
 						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
@@ -795,6 +804,7 @@ func (v *View) DisplayView() {
 			charNum = charNum.Move(1, v.Buf)
 			screenX++
 			colN++
+			strWidth += StringWidth(string(ch), tabSize)
 		}
 		// Here we are at a newline
 
@@ -825,15 +835,13 @@ func (v *View) DisplayView() {
 			}
 			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
 				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-				if colorcolumn != 0 && screenX-v.leftCol+i == colorcolumn-1 {
+				if colorcolumn != 0 && screenX-v.lineNumOffset+i == colorcolumn-1 {
 					if style, ok := colorscheme["color-column"]; ok {
 						fg, _, _ := style.Decompose()
 						lineStyle = lineStyle.Background(fg)
 					}
-					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
-				} else {
-					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 				}
+				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
 		}
 	}

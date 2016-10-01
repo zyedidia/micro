@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/zyedidia/glob"
+	"github.com/zyedidia/json5/encoding/json5"
 )
 
 type optionValidator func(string, interface{}) error
@@ -176,6 +176,7 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"autosave":     false,
 		"colorcolumn":  float64(0),
 		"colorscheme":  "zenburn",
 		"cursorline":   true,
@@ -199,6 +200,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"autosave":     false,
 		"colorcolumn":  float64(0),
 		"cursorline":   true,
 		"filetype":     "Unknown",

@@ -44,6 +44,7 @@ func NewTabFromView(v *View) *Tab {
 
 // SetNum sets all this tab's views to have the correct tab number
 func (t *Tab) SetNum(num int) {
+	t.tree.tabNum = num
 	for _, v := range t.views {
 		v.TabNum = num
 	}

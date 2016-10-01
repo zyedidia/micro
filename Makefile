@@ -17,6 +17,7 @@ build-quick:
 
 # Same as 'build' but installs to $GOPATH/bin afterward
 install: build
+	mkdir -p $(GOPATH)/bin
 	mv micro $(GOPATH)/bin
 
 # Same as 'build-all' but installs to $GOPATH/bin afterward
@@ -24,6 +25,7 @@ install-all: runtime install
 
 # Same as 'build-quick' but installs to $GOPATH/bin afterward
 install-quick: build-quick
+	mkdir -p $(GOPATH)/bin
 	mv micro $(GOPATH)/bin
 
 # Updates tcell

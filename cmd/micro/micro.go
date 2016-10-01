@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/go-errors/errors"
 	"github.com/layeh/gopher-luar"
@@ -24,6 +25,7 @@ const (
 	synLinesDown         = 75  // How many lines down to look to do syntax highlighting
 	doubleClickThreshold = 400 // How many milliseconds to wait before a second click is not a double click
 	undoThreshold        = 500 // If two events are less than n milliseconds apart, undo both of them
+	autosaveTime         = 8   // Number of seconds to wait before autosaving
 )
 
 var (
@@ -61,7 +63,8 @@ var (
 	// Channel of jobs running in the background
 	jobs chan JobFunction
 	// Event channel
-	events chan tcell.Event
+	events   chan tcell.Event
+	autosave chan bool
 )
 
 // LoadInput determines which files should be loaded into buffers
@@ -330,6 +333,7 @@ func main() {
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
+	autosave = make(chan bool)
 
 	LoadPlugins()
 
@@ -360,6 +364,15 @@ func main() {
 		}
 	}()
 
+	go func() {
+		for {
+			time.Sleep(autosaveTime * time.Second)
+			if globalSettings["autosave"].(bool) {
+				autosave <- true
+			}
+		}
+	}()
+
 	for {
 		// Display everything
 		RedrawAll()
@@ -372,6 +385,8 @@ func main() {
 			// If a new job has finished while running in the background we should execute the callback
 			f.function(f.output, f.args...)
 			continue
+		case <-autosave:
+			CurView().Save(true)
 		case event = <-events:
 		}
 
