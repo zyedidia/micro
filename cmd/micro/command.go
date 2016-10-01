@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -118,6 +119,19 @@ func PluginCmd(args []string) {
 			}
 		case "update":
 			UpdatePlugins(args[1:])
+		case "list":
+			plugins := GetInstalledVersions(false)
+			messenger.AddLog("----------------")
+			messenger.AddLog("The following plugins are currently installed:\n")
+			for _, p := range plugins {
+				messenger.AddLog(fmt.Sprintf("%s (%s)", p.pack.Name, p.Version))
+			}
+			messenger.AddLog("----------------")
+			if len(plugins) > 0 {
+				if CurView().Type != vtLog {
+					ToggleLog([]string{})
+				}
+			}
 		case "search":
 			plugins := SearchPlugin(args[1:])
 			messenger.Message(len(plugins), " plugins found")

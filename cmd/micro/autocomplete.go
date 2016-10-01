@@ -151,7 +151,7 @@ func PluginComplete(complete Completion, input string) (chosen string, suggestio
 }
 
 func PluginCmdComplete(input string) (chosen string, suggestions []string) {
-	for _, cmd := range []string{"install", "remove", "search", "update"} {
+	for _, cmd := range []string{"install", "remove", "search", "update", "list"} {
 		if strings.HasPrefix(cmd, input) {
 			suggestions = append(suggestions, cmd)
 		}

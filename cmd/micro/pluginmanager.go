@@ -261,7 +261,7 @@ func (pp PluginPackage) Match(text string) bool {
 
 // IsInstallable returns true if the package can be installed.
 func (pp PluginPackage) IsInstallable() bool {
-	_, err := GetAllPluginPackages().Resolve(GetInstalledVersions(), PluginDependencies{
+	_, err := GetAllPluginPackages().Resolve(GetInstalledVersions(true), PluginDependencies{
 		&PluginDependency{
 			Name:  pp.Name,
 			Range: semver.Range(func(v semver.Version) bool { return true }),
@@ -310,9 +310,10 @@ func newStaticPluginVersion(name, version string) *PluginVersion {
 
 // GetInstalledVersions returns a list of all currently installed plugins including an entry for
 // micro itself. This can be used to resolve dependencies.
-func GetInstalledVersions() PluginVersions {
-	result := PluginVersions{
-		newStaticPluginVersion(CorePluginName, Version),
+func GetInstalledVersions(withCore bool) PluginVersions {
+	result := PluginVersions{}
+	if withCore {
+		result = append(result, newStaticPluginVersion(CorePluginName, Version))
 	}
 
 	for _, name := range loadedPlugins {
@@ -460,7 +461,7 @@ func (all PluginPackages) Resolve(selectedVersions PluginVersions, open PluginDe
 
 func (versions PluginVersions) install() {
 	anyInstalled := false
-	currentlyInstalled := GetInstalledVersions()
+	currentlyInstalled := GetInstalledVersions(true)
 
 	for _, sel := range versions {
 		if sel.pack.Name != CorePluginName {
@@ -498,7 +499,7 @@ func UninstallPlugin(name string) {
 }
 
 func (pl PluginPackage) Install() {
-	selected, err := GetAllPluginPackages().Resolve(GetInstalledVersions(), PluginDependencies{
+	selected, err := GetAllPluginPackages().Resolve(GetInstalledVersions(true), PluginDependencies{
 		&PluginDependency{
 			Name:  pl.Name,
 			Range: semver.Range(func(v semver.Version) bool { return true }),
