@@ -360,8 +360,32 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 	if err = os.MkdirAll(targetDir, dirPerm); err != nil {
 		return err
 	}
+
+	// Check if all files in zip are in the same directory.
+	// this might be the case if the plugin zip contains the whole plugin dir
+	// instead of its content.
+	var prefix string
+	allPrefixed := false
+	for i, f := range z.File {
+		parts := strings.Split(f.Name, "/")
+		if i == 0 {
+			prefix = parts[0]
+		} else if parts[0] != prefix {
+			allPrefixed = false
+			break
+		} else {
+			// switch to true since we have at least a second file
+			allPrefixed = true
+		}
+	}
+
 	for _, f := range z.File {
-		targetName := filepath.Join(targetDir, filepath.Join(strings.Split(f.Name, "/")...))
+		parts := strings.Split(f.Name, "/")
+		if allPrefixed {
+			parts = parts[1:]
+		}
+
+		targetName := filepath.Join(targetDir, filepath.Join(parts...))
 		if f.FileInfo().IsDir() {
 			if err := os.MkdirAll(targetName, dirPerm); err != nil {
 				return err
