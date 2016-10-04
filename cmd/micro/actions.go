@@ -1445,6 +1445,55 @@ func (v *View) NextTab(usePlugin bool) bool {
 	return false
 }
 
+// VSplitBinding opens an empty vertical split
+func (v *View) VSplitBinding(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("VSplit", v) {
+		return false
+	}
+
+	v.VSplit(NewBuffer([]byte{}, ""))
+
+	if usePlugin {
+		return PostActionCall("VSplit", v)
+	}
+	return false
+}
+
+// HSplitBinding opens an empty horizontal split
+func (v *View) HSplitBinding(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("HSplit", v) {
+		return false
+	}
+
+	v.HSplit(NewBuffer([]byte{}, ""))
+
+	if usePlugin {
+		return PostActionCall("HSplit", v)
+	}
+	return false
+}
+
+// Unsplit closes all splits in the current tab except the active one
+func (v *View) Unsplit(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Unsplit", v) {
+		return false
+	}
+
+	curView := tabs[curTab].curView
+	for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
+		view := tabs[curTab].views[i]
+		if view != nil && view.Num != curView {
+			view.Quit(true)
+			// messenger.Message("Quit ", view.Buf.Path)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("Unsplit", v)
+	}
+	return false
+}
+
 // NextSplit changes the view to the next split
 func (v *View) NextSplit(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("NextSplit", v) {

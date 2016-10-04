@@ -79,6 +79,9 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"NextTab":             (*View).NextTab,
 	"NextSplit":           (*View).NextSplit,
 	"PreviousSplit":       (*View).PreviousSplit,
+	"Unsplit":             (*View).Unsplit,
+	"VSplit":              (*View).VSplitBinding,
+	"HSplit":              (*View).HSplitBinding,
 	"ToggleMacro":         (*View).ToggleMacro,
 	"PlayMacro":           (*View).PlayMacro,
 

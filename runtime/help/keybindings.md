@@ -187,6 +187,9 @@ AddTab
 PreviousTab
 NextTab
 NextSplit
+Unsplit
+VSplit
+HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
