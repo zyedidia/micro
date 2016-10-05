@@ -155,7 +155,11 @@ func (pr PluginRepository) Fetch() PluginPackages {
 		TermMessage("Failed to decode repository data:\n", err)
 		return PluginPackages{}
 	}
-	return plugins
+	if len(plugins) > 0 {
+		return PluginPackages{plugins[0]}
+	}
+	return nil
+	// return plugins
 }
 
 // UnmarshalJSON unmarshals raw json to a PluginVersion
