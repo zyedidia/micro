@@ -164,3 +164,39 @@ MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
 
 For examples of plugins, see the default plugins `linter`, `go`, and `autoclose`.
 They are stored in Micro's GitHub repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).
+
+# Plugin Manager
+
+Micro also has a built in plugin manager which you can invoke with the `> plugin ...` command.
+
+For the valid commands you can use, see the `command` help topic.
+
+The manager fetches plugins from the channels (which is simply a list of plugin metadata)
+which it knows about. By default, micro only knows about the official channel which is located
+at github.com/micro-editor/plugin-channel but you can add your own third-party channels using
+the `pluginchannels` option and you can directly link third-party plugins to allow installation
+through the plugin manager with the `pluginrepos` option.
+
+If you'd like to publish a plugin you've made as an official plugin, you should upload your
+plugin online (to Github preferably) and add a `repo.json` file. This file will contain the
+metadata for your plugin. Here is an example:
+
+```json
+[{
+  "Name": "pluginname",
+  "Description": "Here is a nice concise description of my plugin",
+  "Tags": ["python", "linting"],
+  "Versions": [
+    {
+      "Version": "1.0.0",
+      "Url": "https://github.com/user/plugin/archive/v1.0.0.zip",
+      "Require": {
+        "micro": ">=1.0.3"
+      }
+    }
+  ]
+}]
+```
+
+Then open a pull request at github.com/micro-editor/plugin-channel adding a link to the
+raw `repo.json` that is in your plugin repository.

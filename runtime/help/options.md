@@ -94,11 +94,24 @@ Here are the options that you can set:
 	default value: `2`
 
 * `autosave`: micro will save the buffer every 8 seconds automatically.
-  Micro also will automatically save and quit when you exit without asking.
-  Be careful when using this feature, because you might accidentally save a file,
-  overwriting what was there before.
+   Micro also will automatically save and quit when you exit without asking.
+   Be careful when using this feature, because you might accidentally save a file,
+   overwriting what was there before.
 
 	default value: `off`
+
+* `pluginchannels`: contains all the channels micro's plugin manager will search
+   for plugins in. A channel is simply a list of 'repository' json files which contain
+   metadata about the given plugin. See the `Plugin Manager` section of the `plugins` help topic
+   for more information.
+
+    default value: `https://github.com/micro-editor/plugin-channel`
+
+* `pluginrepos`: contains all the 'repositories' micro's plugin manager will search for
+   plugins in. A repository consists of a `repo.json` file which contains metadata for a
+   single plugin.
+
+    default value: ` `
 
 ---
 
