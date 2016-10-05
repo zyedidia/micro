@@ -31,6 +31,7 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Cross platform (It should work on all the platforms Go runs on)
     * Note that while Windows is supported, there are still some bugs that need to be worked out
 * Plugin system (plugins are written in Lua)
+    * Micro has a built-in plugin manager to automatically install, remove, and update all your plugins
 * Persistent undo
 * Automatic linting and error notifications
 * Syntax highlighting (for over [75 languages](runtime/syntax)!)
