@@ -192,6 +192,10 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"syntax":       true,
 		"tabsize":      float64(4),
 		"tabstospaces": false,
+		"pluginchannels": []string{
+			"https://www.boombuler.de/channel.json",
+		},
+		"pluginrepos": []string{},
 	}
 }
 

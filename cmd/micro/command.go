@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -40,6 +41,7 @@ var commandActions = map[string]func([]string){
 	"Help":      Help,
 	"Eval":      Eval,
 	"ToggleLog": ToggleLog,
+	"Plugin":    PluginCmd,
 }
 
 // InitCommands initializes the default commands
@@ -86,6 +88,66 @@ func DefaultCommands() map[string]StrCommand {
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 		"eval":     {"Eval", []Completion{NoCompletion}},
 		"log":      {"ToggleLog", []Completion{NoCompletion}},
+		"plugin":   {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
+	}
+}
+
+// InstallPlugin installs the given plugin by exact name match
+func PluginCmd(args []string) {
+	if len(args) >= 1 {
+		switch args[0] {
+		case "install":
+			for _, plugin := range args[1:] {
+				pp := GetAllPluginPackages().Get(plugin)
+				if pp == nil {
+					messenger.Error("Unknown plugin \"" + plugin + "\"")
+				} else if !pp.IsInstallable() {
+					messenger.Error("Plugin \"" + plugin + "\" can not be installed.")
+				} else {
+					pp.Install()
+				}
+			}
+		case "remove":
+			for _, plugin := range args[1:] {
+				// check if the plugin exists.
+				for _, lp := range loadedPlugins {
+					if lp == plugin {
+						UninstallPlugin(plugin)
+						continue
+					}
+				}
+			}
+		case "update":
+			UpdatePlugins(args[1:])
+		case "list":
+			plugins := GetInstalledVersions(false)
+			messenger.AddLog("----------------")
+			messenger.AddLog("The following plugins are currently installed:\n")
+			for _, p := range plugins {
+				messenger.AddLog(fmt.Sprintf("%s (%s)", p.pack.Name, p.Version))
+			}
+			messenger.AddLog("----------------")
+			if len(plugins) > 0 {
+				if CurView().Type != vtLog {
+					ToggleLog([]string{})
+				}
+			}
+		case "search":
+			plugins := SearchPlugin(args[1:])
+			messenger.Message(len(plugins), " plugins found")
+			for _, p := range plugins {
+				messenger.AddLog("----------------")
+				messenger.AddLog(p.String())
+			}
+			messenger.AddLog("----------------")
+			if len(plugins) > 0 {
+				if CurView().Type != vtLog {
+					ToggleLog([]string{})
+				}
+			}
+		}
+	} else {
+		messenger.Error("Not enough arguments")
 	}
 }
 

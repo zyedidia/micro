@@ -149,3 +149,29 @@ func PluginComplete(complete Completion, input string) (chosen string, suggestio
 	}
 	return
 }
+
+func PluginCmdComplete(input string) (chosen string, suggestions []string) {
+	for _, cmd := range []string{"install", "remove", "search", "update", "list"} {
+		if strings.HasPrefix(cmd, input) {
+			suggestions = append(suggestions, cmd)
+		}
+	}
+
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+	return chosen, suggestions
+}
+
+func PluginNameComplete(input string) (chosen string, suggestions []string) {
+	for _, pp := range GetAllPluginPackages() {
+		if strings.HasPrefix(pp.Name, input) {
+			suggestions = append(suggestions, pp.Name)
+		}
+	}
+
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+	return chosen, suggestions
+}
