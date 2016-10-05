@@ -193,7 +193,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"tabsize":      float64(4),
 		"tabstospaces": false,
 		"pluginchannels": []string{
-			"https://www.boombuler.de/channel.json",
+			"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json",
 		},
 		"pluginrepos": []string{},
 	}
