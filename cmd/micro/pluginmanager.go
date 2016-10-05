@@ -298,13 +298,13 @@ func (pp PluginPackage) Match(text string) bool {
 }
 
 // IsInstallable returns true if the package can be installed.
-func (pp PluginPackage) IsInstallable() bool {
+func (pp PluginPackage) IsInstallable() error {
 	_, err := GetAllPluginPackages().Resolve(GetInstalledVersions(true), PluginDependencies{
 		&PluginDependency{
 			Name:  pp.Name,
 			Range: semver.Range(func(v semver.Version) bool { return true }),
 		}})
-	return err == nil
+	return err
 }
 
 // SearchPlugin retrieves a list of all PluginPackages which match the given search text and
@@ -320,7 +320,7 @@ pluginLoop:
 			}
 		}
 
-		if pp.IsInstallable() {
+		if err := pp.IsInstallable(); err == nil {
 			plugins = append(plugins, pp)
 		}
 	}

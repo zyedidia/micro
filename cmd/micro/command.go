@@ -92,7 +92,7 @@ func DefaultCommands() map[string]StrCommand {
 	}
 }
 
-// InstallPlugin installs the given plugin by exact name match
+// PluginCmd installs, removes, updates, lists, or searches for given plugins
 func PluginCmd(args []string) {
 	if len(args) >= 1 {
 		switch args[0] {
@@ -101,8 +101,8 @@ func PluginCmd(args []string) {
 				pp := GetAllPluginPackages().Get(plugin)
 				if pp == nil {
 					messenger.Error("Unknown plugin \"" + plugin + "\"")
-				} else if !pp.IsInstallable() {
-					messenger.Error("Plugin \"" + plugin + "\" can not be installed.")
+				} else if err := pp.IsInstallable(); err != nil {
+					messenger.Error("Error installing ", plugin, ": ", err)
 				} else {
 					pp.Install()
 				}
