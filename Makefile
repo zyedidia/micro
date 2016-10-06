@@ -6,14 +6,14 @@ DATE = $(shell go run tools/build-date.go)
 
 # Builds micro after checking dependencies but without updating the runtime
 build: deps tcell
-	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)'" ./cmd/micro
+	go build -ldflags "-s -w -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)'" ./cmd/micro
 
 # Builds micro after building the runtime and checking dependencies
 build-all: runtime build
 
 # Builds micro without checking for dependencies
 build-quick:
-	go build -ldflags "-X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)'" ./cmd/micro
+	go build -ldflags "-s -w -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)'" ./cmd/micro
 
 # Same as 'build' but installs to $GOPATH/bin afterward
 install: build
