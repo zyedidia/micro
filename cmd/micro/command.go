@@ -97,6 +97,7 @@ func PluginCmd(args []string) {
 	if len(args) >= 1 {
 		switch args[0] {
 		case "install":
+			installedVersions := GetInstalledVersions(false)
 			for _, plugin := range args[1:] {
 				pp := GetAllPluginPackages().Get(plugin)
 				if pp == nil {
@@ -104,18 +105,34 @@ func PluginCmd(args []string) {
 				} else if err := pp.IsInstallable(); err != nil {
 					messenger.Error("Error installing ", plugin, ": ", err)
 				} else {
+					for _, installed := range installedVersions {
+						if pp.Name == installed.pack.Name {
+							if pp.Versions[0].Version.Compare(installed.Version) == 1 {
+								messenger.Error(pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
+							} else {
+								messenger.Error(pp.Name, " is already installed")
+							}
+						}
+					}
 					pp.Install()
 				}
 			}
 		case "remove":
+			removed := ""
 			for _, plugin := range args[1:] {
 				// check if the plugin exists.
 				for _, lp := range loadedPlugins {
 					if lp == plugin {
 						UninstallPlugin(plugin)
+						removed += plugin + " "
 						continue
 					}
 				}
+			}
+			if !IsSpaces(removed) {
+				messenger.Message("Removed ", removed)
+			} else {
+				messenger.Error("The requested plugins do not exist")
 			}
 		case "update":
 			UpdatePlugins(args[1:])
