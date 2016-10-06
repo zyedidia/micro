@@ -117,20 +117,7 @@ Here are the options that you can set:
 
 Default plugin options:
 
-* `linter`: lint languages on save (supported languages are C, D, Go, Java,
-   Javascript, Lua). Provided by the `linter` plugin.
-
-	default value: `on`
-
 * `autoclose`: Automatically close `{}` `()` `[]` `""` `''`. Provided by the `autoclose` plugin
-
-	default value: `on`
-
-* `goimports`: Run goimports on save. Provided by the `go` plugin.
-
-	default value: `off`
-
-* `gofmt`: Run gofmt on save. Provided by the `go` plugin.
 
 	default value: `on`
 

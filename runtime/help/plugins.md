@@ -162,8 +162,8 @@ MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
 
 # Default plugins
 
-For examples of plugins, see the default plugins `linter`, `go`, and `autoclose`.
-They are stored in Micro's GitHub repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).
+For examples of plugins, see the default `autoclose` plugin (stored in the normal micro core repo under `runtime/plugins/autoclose`) as well as
+any plugins that are stored in the official channel [here](https://github.com/micro-editor/plugin-channel).
 
 # Plugin Manager
 
