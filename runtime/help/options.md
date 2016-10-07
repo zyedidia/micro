@@ -121,6 +121,10 @@ Default plugin options:
 
 	default value: `on`
 
+* `linter`: Automatically lint when the file is saved. Provided by the `linter` plugin
+
+	default value: `on`
+
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another

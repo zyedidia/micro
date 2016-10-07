@@ -64,7 +64,3 @@ Here are the possible commands that you can use.
 The following commands are provided by the default plugins:
 
 * `lint`: Lint the current file for errors.
-
-* `gofmt`: Run gofmt on the current file.
-
-* `goimports`: Run goimports on the current file.
