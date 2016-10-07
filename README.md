@@ -38,6 +38,8 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Colorscheme support
     * By default, micro comes with 16, 256, and true color themes.
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
+* Snippets
+    * The snippet plugin can be installed with `> plugin install snippets`
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
