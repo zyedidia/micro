@@ -21,10 +21,10 @@ func TermMessage(msg ...interface{}) {
 	screenWasNil := screen == nil
 	if !screenWasNil {
 		screen.Fini()
+		screen = nil
 	}
 
 	fmt.Println(msg...)
-	messenger.AddLog(fmt.Sprint(msg...))
 	fmt.Print("\nPress enter to continue")
 
 	reader := bufio.NewReader(os.Stdin)
