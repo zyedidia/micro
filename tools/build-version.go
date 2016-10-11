@@ -32,7 +32,7 @@ func main() {
 	version, err := semver.ParseTolerant(versionStr)
 	if err != nil {
 		// no version tag found so just return what ever we can find.
-		fmt.Println(getTag())
+		fmt.Println("0.0.0-unknown")
 		return
 	}
 	// Get the tag of the current revision.
