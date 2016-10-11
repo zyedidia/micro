@@ -70,18 +70,24 @@ If you'd like to see more information after installing micro, run `micro -versio
 You can also install micro using Homebrew on Mac:
 
 ```
-$ brew install micro
+brew install micro
 ```
 
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO).
+Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommand setting it to `~/go` if you don't have one).
 
-```sh
-go get -u github.com/zyedidia/micro/...
 ```
+git clone https://github.com/zyedidia/micro
+cd micro
+make install
+```
+
+The binary will then be installed to `$GOPATH/bin`.
+
+You can install with `go get` (`go get -u github.com/zyedidia/micro/...`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
 
 ### Linux clipboard support
 
