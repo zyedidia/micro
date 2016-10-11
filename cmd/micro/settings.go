@@ -178,7 +178,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"autoindent":   true,
 		"autosave":     false,
 		"colorcolumn":  float64(0),
-		"colorscheme":  "zenburn",
+		"colorscheme":  "default",
 		"cursorline":   true,
 		"ignorecase":   false,
 		"indentchar":   " ",
