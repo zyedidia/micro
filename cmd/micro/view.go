@@ -753,7 +753,7 @@ func (v *View) DisplayView() {
 				// First the user may have configured an `indent-char` to be displayed to show that this
 				// is a tab character
 				lineIndentStyle := defStyle
-				if style, ok := colorscheme["indent-char"]; ok {
+				if style, ok := colorscheme["indent-char"]; ok && v.Buf.Settings["indentchar"].(string) != " " {
 					lineIndentStyle = style
 				}
 				if v.Cursor.HasSelection() &&
