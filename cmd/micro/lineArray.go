@@ -132,6 +132,31 @@ func (la *LineArray) DeleteByte(pos Loc) {
 	la.lines[pos.Y] = la.lines[pos.Y][:pos.X+copy(la.lines[pos.Y][pos.X:], la.lines[pos.Y][pos.X+1:])]
 }
 
+func (la *LineArray) MoveLinesUp(y0 int, y1 int) {
+    // 0 < y0 < y1 <= len(la.lines)
+    if y0 < 1 || y0 >= y1 || y1 > len(la.lines) {
+        return // what to do? FIXME
+    }
+    before := la.lines[y0-1]
+    for y := y0 ; y < y1 ; y ++ {
+        la.lines[y-1] = la.lines[y]
+    }
+    la.lines[y1-1] = before
+}
+
+func (la *LineArray) MoveLinesDown(y0 int, y1 int) {
+    // 0 <= y0 < y1 < len(la.lines)
+    if y0 < 0 || y0 >= y1 || y1 >= len(la.lines) {
+        return // what to do? FIXME
+    }
+    after := la.lines[y1]
+    for y := y1-1 ; y >= y0 ; y -- {
+        la.lines[y+1] = la.lines[y]
+    }
+    la.lines[y0] = after
+}
+
+
 // Substr returns the string representation between two locations
 func (la *LineArray) Substr(start, end Loc) string {
 	startX := runeToByteIndex(start.X, la.lines[start.Y])

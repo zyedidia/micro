@@ -968,6 +968,85 @@ func (v *View) DeleteLine(usePlugin bool) bool {
 	return true
 }
 
+// MoveLinesUp moves up the current line or selected lines if any
+func (v *View) MoveLinesUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("MoveLinesUp", v) {
+		return false
+	}
+
+	if v.Cursor.HasSelection() {
+		if v.Cursor.CurSelection[0].Y == 0 {
+			messenger.Message("Can not move further up")
+			return true
+		}
+		v.Buf.MoveLinesUp(
+			v.Cursor.CurSelection[0].Y,
+			v.Cursor.CurSelection[1].Y,
+		)
+		v.Cursor.UpN(1)
+		v.Cursor.CurSelection[0].Y -= 1
+		v.Cursor.CurSelection[1].Y -= 1
+		messenger.Message("Moved up selected line(s)")
+	} else {
+		if v.Cursor.Loc.Y == 0 {
+			messenger.Message("Can not move further up")
+			return true
+		}
+		v.Buf.MoveLinesUp(
+			v.Cursor.Loc.Y,
+			v.Cursor.Loc.Y + 1,
+		)
+		v.Cursor.UpN(1)
+		messenger.Message("Moved up current line")
+	}
+	v.Buf.IsModified = true
+
+	if usePlugin {
+		return PostActionCall("MoveLinesUp", v)
+	}
+	return true
+}
+
+// MoveLinesDown moves down the current line or selected lines if any
+func (v *View) MoveLinesDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("MoveLinesDown", v) {
+		return false
+	}
+
+	if v.Cursor.HasSelection() {
+		if v.Cursor.CurSelection[1].Y >= len(v.Buf.lines) {
+			messenger.Message("Can not move further down")
+			return true
+		}
+		v.Buf.MoveLinesDown(
+			v.Cursor.CurSelection[0].Y,
+			v.Cursor.CurSelection[1].Y,
+		)
+		v.Cursor.DownN(1)
+		v.Cursor.CurSelection[0].Y += 1
+		v.Cursor.CurSelection[1].Y += 1
+		messenger.Message("Moved down selected line(s)")
+	} else {
+		if v.Cursor.Loc.Y >= len(v.Buf.lines)-1 {
+			messenger.Message("Can not move further down")
+			return true
+		}
+		v.Buf.MoveLinesDown(
+			v.Cursor.Loc.Y,
+			v.Cursor.Loc.Y + 1,
+		)
+		v.Cursor.DownN(1)
+		messenger.Message("Moved down current line")
+	}
+	v.Buf.IsModified = true
+
+	if usePlugin {
+		return PostActionCall("MoveLinesDown", v)
+	}
+	return true
+}
+
+
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
 func (v *View) Paste(usePlugin bool) bool {
