@@ -12,9 +12,12 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * simple: this is the simplest colorscheme. It uses 16 colors which are
   set by your terminal
 
-* zenburn: this is micro's default colorscheme because it looks very good
-  and works in 256 color terminals.
-  this colorscheme also has the name 'default'
+* monokai: this is the monokai colorscheme; you may recognize it as
+  Sublime Text's default colorscheme. It requires true color to
+  look perfect, but the 256 color approximation looks very good as well.
+  It's also the default colorscheme.
+
+* zenburn: The 'zenburn' colorscheme and works well with 256 color terminals
 
 * solarized: this is the solarized colorscheme. 
   You should have the solarized color palette in your terminal to use it.
@@ -22,10 +25,6 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * solarized-tc: this is the solarized colorscheme for true color; just 
   make sure your terminal supports true color before using it and that the 
   MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
-
-* monokai: this is the monokai colorscheme; you may recognize it as 
-  Sublime Text's default colorscheme. It requires true color to
-  look perfect, but the 256 color approximation looks very good as well.
 
 * atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
   It requires true color to look good.
