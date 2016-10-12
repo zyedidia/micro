@@ -394,7 +394,9 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 
 func (b *Buffer) MoveLinesDown(start int, end int) {
     // 0 <= start < end < len(b.lines)
-    if start < 0 || start >= end || end >= len(b.lines) {
+    // if end == len(b.lines), we can't do anything here because the
+    // last line is unaccessible, FIXME
+    if start < 0 || start >= end || end >= len(b.lines)-1 {
         return // what to do? FIXME
     }
     b.Insert(
@@ -402,15 +404,8 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
         b.Line(end) + "\n",
     )
     end += 1
-    rmEndLoc := Loc{0, end + 1}
-    if end >= len(b.lines)-1 {
-        rmEndLoc = Loc{
-            utf8.RuneCount(b.lines[end]) - 1,
-            end,
-        }
-    }
     b.Remove(
         Loc{0, end},
-        rmEndLoc,
+        Loc{0, end + 1},
     )
 }
