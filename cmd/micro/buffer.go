@@ -346,6 +346,9 @@ func (b *Buffer) End() Loc {
 
 // Line returns a single line
 func (b *Buffer) Line(n int) string {
+	if n >= len(b.lines) {
+		return ""
+	}
 	return string(b.lines[n])
 }
 
@@ -365,39 +368,44 @@ func (b *Buffer) Len() int {
 }
 
 func (b *Buffer) MoveLinesUp(start int, end int) {
-    // 0 < start < end <= len(b.lines)
-    if start < 1 || start >= end || end > len(b.lines) {
-        return // what to do? FIXME
-    }
-    b.Insert(
-        Loc{0, end},
-        b.Line(start - 1) + "\n",
-    )
-    b.Remove(
-        Loc{0, start - 1},
-        Loc{0, start},
-    )
+	// 0 < start < end <= len(b.lines)
+	if start < 1 || start >= end || end > len(b.lines) {
+		return // what to do? FIXME
+	}
+	if end == len(b.lines) {
+		b.Insert(
+			Loc{
+				utf8.RuneCount(b.lines[end-1]),
+				end - 1,
+			},
+			"\n" + b.Line(start - 1),
+		)
+	} else {
+		b.Insert(
+			Loc{0, end},
+			b.Line(start - 1) + "\n",
+		)
+	}
+	b.Remove(
+		Loc{0, start - 1},
+		Loc{0, start},
+	)
 }
 
 func (b *Buffer) MoveLinesDown(start int, end int) {
-    // 0 <= start < end < len(b.lines)
-    if start < 0 || start >= end || end >= len(b.lines) {
-        return // what to do? FIXME
-    }
-    b.Insert(
-        Loc{0, start},
-        b.Line(end) + "\n",
-    )
-    end += 1
-    rmEndLoc := Loc{0, end + 1}
-    if end >= len(b.lines)-1 {
-        rmEndLoc = Loc{
-            utf8.RuneCount(b.lines[end]) - 1,
-            end,
-        }
-    }
-    b.Remove(
-        Loc{0, end},
-        rmEndLoc,
-    )
+	// 0 <= start < end < len(b.lines)
+	// if end == len(b.lines), we can't do anything here because the
+	// last line is unaccessible, FIXME
+	if start < 0 || start >= end || end >= len(b.lines)-1 {
+		return // what to do? FIXME
+	}
+	b.Insert(
+		Loc{0, start},
+		b.Line(end) + "\n",
+	)
+	end += 1
+	b.Remove(
+		Loc{0, end},
+		Loc{0, end + 1},
+	)
 }
