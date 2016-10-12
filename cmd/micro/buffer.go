@@ -346,6 +346,9 @@ func (b *Buffer) End() Loc {
 
 // Line returns a single line
 func (b *Buffer) Line(n int) string {
+	if n >= len(b.lines) {
+		return ""
+	}
 	return string(b.lines[n])
 }
 
