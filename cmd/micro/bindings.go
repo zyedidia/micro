@@ -74,6 +74,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"ClearStatus":         (*View).ClearStatus,
 	"ShellMode":           (*View).ShellMode,
 	"CommandMode":         (*View).CommandMode,
+	"Escape":              (*View).Escape,
 	"Quit":                (*View).Quit,
 	"QuitAll":             (*View).QuitAll,
 	"AddTab":              (*View).AddTab,
@@ -433,6 +434,6 @@ func DefaultBindings() map[string]string {
 		"F4":  "Quit",
 		"F7":  "Find",
 		"F10": "Quit",
-		"Esc": "Quit",
+		"Esc": "Escape",
 	}
 }
