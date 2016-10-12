@@ -17,6 +17,8 @@ you can rebind them to your liking.
     "AltRight":       "WordRight",
     "AltShiftRight":  "SelectWordRight",
     "AltShiftLeft":   "SelectWordLeft",
+    "AltUp"           "MoveLinesUp",
+    "AltDown"         "MoveLinesDown",
     "CtrlLeft":       "StartOfLine",
     "CtrlRight":      "EndOfLine",
     "CtrlShiftLeft":  "SelectToStartOfLine",
@@ -140,6 +142,8 @@ WordRight
 WordLeft
 SelectWordRight
 SelectWordLeft
+MoveLinesUp
+MoveLinesDown
 DeleteWordRight
 DeleteWordLeft
 SelectToStartOfLine
