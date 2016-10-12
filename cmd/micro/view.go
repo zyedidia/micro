@@ -615,6 +615,7 @@ func (v *View) DisplayView() {
 	screenX, screenY := v.x, v.y-1
 
 	highlightStyle := defStyle
+	curLineN := 0
 
 	// ViewLine is the current line from the top of the viewport
 	for viewLine := 0; viewLine < v.height; viewLine++ {
@@ -622,10 +623,9 @@ func (v *View) DisplayView() {
 		screenX = v.x
 
 		// This is the current line number of the buffer that we are drawing
-		curLineN := viewLine + v.Topline
+		curLineN = viewLine + v.Topline
 
 		if screenY >= v.height {
-			v.Bottomline = curLineN
 			break
 		}
 
@@ -871,6 +871,10 @@ func (v *View) DisplayView() {
 				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
 		}
+	}
+	v.Bottomline = curLineN
+	if !v.Buf.Settings["softwrap"].(bool) {
+		v.Bottomline++
 	}
 }
 
