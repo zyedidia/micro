@@ -363,3 +363,41 @@ func (b *Buffer) Lines(start, end int) []string {
 func (b *Buffer) Len() int {
 	return Count(b.String())
 }
+
+func (b *Buffer) MoveLinesUp(start int, end int) {
+    // 0 < start < end <= len(b.lines)
+    if start < 1 || start >= end || end > len(b.lines) {
+        return // what to do? FIXME
+    }
+    b.Insert(
+        Loc{0, end},
+        b.Line(start - 1) + "\n",
+    )
+    b.Remove(
+        Loc{0, start - 1},
+        Loc{0, start},
+    )
+}
+
+func (b *Buffer) MoveLinesDown(start int, end int) {
+    // 0 <= start < end < len(b.lines)
+    if start < 0 || start >= end || end >= len(b.lines) {
+        return // what to do? FIXME
+    }
+    b.Insert(
+        Loc{0, start},
+        b.Line(end) + "\n",
+    )
+    end += 1
+    rmEndLoc := Loc{0, end + 1}
+    if end >= len(b.lines)-1 {
+        rmEndLoc = Loc{
+            utf8.RuneCount(b.lines[end]) - 1,
+            end,
+        }
+    }
+    b.Remove(
+        Loc{0, end},
+        rmEndLoc,
+    )
+}
