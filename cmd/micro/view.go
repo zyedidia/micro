@@ -32,10 +32,6 @@ type View struct {
 	// The leftmost column, used for horizontal scrolling
 	leftCol int
 
-	// Percentage of the terminal window that this view takes up (from 0 to 100)
-	widthPercent  int
-	heightPercent int
-
 	// Specifies whether or not this view holds a help buffer
 	Type ViewType
 

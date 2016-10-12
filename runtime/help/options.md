@@ -93,6 +93,10 @@ Here are the options that you can set:
 
 	default value: `2`
 
+* `softwrap`: should micro wrap lines that are too long to fit on the screen
+
+    default value: `off`
+
 * `autosave`: micro will save the buffer every 8 seconds automatically.
    Micro also will automatically save and quit when you exit without asking.
    Be careful when using this feature, because you might accidentally save a file,
