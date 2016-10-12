@@ -27,7 +27,8 @@ type View struct {
 	Cursor *Cursor
 
 	// The topmost line, used for vertical scrolling
-	Topline int
+	Topline    int
+	Bottomline int
 	// The leftmost column, used for horizontal scrolling
 	leftCol int
 
@@ -287,6 +288,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
+	height := v.Bottomline - v.Topline
 	ret := false
 	cy := v.Cursor.Y
 	scrollmargin := int(v.Buf.Settings["scrollmargin"].(float64))
@@ -297,22 +299,24 @@ func (v *View) Relocate() bool {
 		v.Topline = cy
 		ret = true
 	}
-	if cy > v.Topline+v.height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
-		v.Topline = cy - v.height + 1 + scrollmargin
+	if cy > v.Topline+height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
+		v.Topline = cy - height + 1 + scrollmargin
 		ret = true
-	} else if cy >= v.Buf.NumLines-scrollmargin && cy > v.height {
-		v.Topline = v.Buf.NumLines - v.height
+	} else if cy >= v.Buf.NumLines-scrollmargin && cy > height {
+		v.Topline = v.Buf.NumLines - height
 		ret = true
 	}
 
-	cx := v.Cursor.GetVisualX()
-	if cx < v.leftCol {
-		v.leftCol = cx
-		ret = true
-	}
-	if cx+v.lineNumOffset+1 > v.leftCol+v.width {
-		v.leftCol = cx - v.width + v.lineNumOffset + 1
-		ret = true
+	if !v.Buf.Settings["softwrap"].(bool) {
+		cx := v.Cursor.GetVisualX()
+		if cx < v.leftCol {
+			v.leftCol = cx
+			ret = true
+		}
+		if cx+v.lineNumOffset+1 > v.leftCol+v.width {
+			v.leftCol = cx - v.width + v.lineNumOffset + 1
+			ret = true
+		}
 	}
 	return ret
 }
@@ -608,17 +612,22 @@ func (v *View) DisplayView() {
 	}
 
 	// These represent the current screen coordinates
-	screenX, screenY := 0, 0
+	screenX, screenY := v.x, v.y-1
 
 	highlightStyle := defStyle
 
 	// ViewLine is the current line from the top of the viewport
 	for viewLine := 0; viewLine < v.height; viewLine++ {
-		screenY = v.y + viewLine
+		screenY++
 		screenX = v.x
 
 		// This is the current line number of the buffer that we are drawing
 		curLineN := viewLine + v.Topline
+
+		if screenY >= v.height {
+			v.Bottomline = curLineN
+			break
+		}
 
 		if v.x != 0 {
 			// Draw the split divider
@@ -683,9 +692,9 @@ func (v *View) DisplayView() {
 			}
 		}
 
+		lineNumStyle := defStyle
 		if v.Buf.Settings["ruler"] == true {
 			// Write the line number
-			lineNumStyle := defStyle
 			if style, ok := colorscheme["line-number"]; ok {
 				lineNumStyle = style
 			}
@@ -718,6 +727,20 @@ func (v *View) DisplayView() {
 		strWidth := 0
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		for _, ch := range line {
+			if v.Buf.Settings["softwrap"].(bool) {
+				if screenX-v.x >= v.width {
+					screenY++
+					for i := 0; i < v.lineNumOffset; i++ {
+						screen.SetContent(v.x+i, screenY, ' ', nil, lineNumStyle)
+					}
+					screenX = v.x + v.lineNumOffset
+				}
+			}
+
+			if tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+				v.DisplayCursor(screenX, screenY)
+			}
+
 			lineStyle := defStyle
 
 			if v.Buf.Settings["syntax"].(bool) {
@@ -808,6 +831,10 @@ func (v *View) DisplayView() {
 		}
 		// Here we are at a newline
 
+		if tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+			v.DisplayCursor(screenX, screenY)
+		}
+
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
 		if v.Cursor.HasSelection() &&
@@ -848,20 +875,17 @@ func (v *View) DisplayView() {
 }
 
 // DisplayCursor draws the current buffer's cursor to the screen
-func (v *View) DisplayCursor() {
-	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
-		screen.HideCursor()
-	} else {
-		screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.Y-v.Topline+v.y)
-	}
+func (v *View) DisplayCursor(x, y int) {
+	// screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, y)
+	screen.ShowCursor(x, y)
 }
 
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	if v.Num == tabs[curTab].curView {
-		v.DisplayCursor()
+	// Don't draw the cursor if it is out of the viewport or if it has a selection
+	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
+		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
 	if v.Buf.Settings["statusline"].(bool) {
