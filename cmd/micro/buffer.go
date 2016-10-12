@@ -369,10 +369,20 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
     if start < 1 || start >= end || end > len(b.lines) {
         return // what to do? FIXME
     }
-    b.Insert(
-        Loc{0, end},
-        b.Line(start - 1) + "\n",
-    )
+    if end == len(b.lines) {
+        b.Insert(
+            Loc{
+                utf8.RuneCount(b.lines[end-1]),
+                end - 1,
+            },
+            "\n" + b.Line(start - 1),
+        )
+    } else {
+        b.Insert(
+            Loc{0, end},
+            b.Line(start - 1) + "\n",
+        )
+    }
     b.Remove(
         Loc{0, start - 1},
         Loc{0, start},
