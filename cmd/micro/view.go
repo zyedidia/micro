@@ -281,6 +281,40 @@ func (v *View) VSplit(buf *Buffer) bool {
 	return false
 }
 
+func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
+	if !v.Buf.Settings["softwrap"].(bool) {
+		return vx, vy
+	}
+
+	screenX, screenY := 0, v.Topline
+	for lineN := v.Topline; lineN < v.Bottomline; lineN++ {
+		line := v.Buf.Line(lineN)
+
+		colN := 0
+		for _, ch := range line {
+			if screenX >= v.width-v.lineNumOffset {
+				screenX = 0
+				screenY++
+			}
+
+			if screenX == vx && screenY == vy {
+				return colN, lineN
+			}
+
+			if ch == '\t' {
+				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			}
+
+			screenX++
+			colN++
+		}
+		screenX = 0
+		screenY++
+	}
+
+	return 0, 0
+}
+
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
@@ -334,7 +368,8 @@ func (v *View) MoveToMouseClick(x, y int) {
 		x = 0
 	}
 
-	x = v.Cursor.GetCharPosInLine(y, x)
+	x, y = v.GetSoftWrapLocation(x, y)
+	// x = v.Cursor.GetCharPosInLine(y, x)
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
