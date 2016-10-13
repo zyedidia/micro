@@ -621,7 +621,7 @@ func (v *View) DisplayView() {
 		// This is the current line number of the buffer that we are drawing
 		curLineN = viewLine + v.Topline
 
-		if screenY >= v.height {
+		if screenY-v.y >= v.height {
 			break
 		}
 
