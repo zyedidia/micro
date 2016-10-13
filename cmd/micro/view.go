@@ -734,7 +734,7 @@ func (v *View) DisplayView() {
 			}
 
 			if tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
-				v.DisplayCursor(screenX, screenY)
+				v.DisplayCursor(screenX-v.leftCol, screenY)
 			}
 
 			lineStyle := defStyle
@@ -828,7 +828,7 @@ func (v *View) DisplayView() {
 		// Here we are at a newline
 
 		if tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
-			v.DisplayCursor(screenX, screenY)
+			v.DisplayCursor(screenX-v.leftCol, screenY)
 		}
 
 		// The newline may be selected, in which case we should draw the selection style
