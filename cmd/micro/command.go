@@ -367,7 +367,7 @@ func Replace(args []string) {
 	search := string(args[0])
 	replace := string(args[1])
 
-	regex, err := regexp.Compile(search)
+	regex, err := regexp.Compile("(?m)" + search)
 	if err != nil {
 		// There was an error with the user's regex
 		messenger.Error(err.Error())
@@ -414,23 +414,28 @@ func Replace(args []string) {
 			}
 		}
 	} else {
-		matches := regex.FindAllStringIndex(view.Buf.String(), -1)
+		bufStr := view.Buf.String()
+		matches := regex.FindAllStringIndex(bufStr, -1)
 		if matches != nil && len(matches) > 0 {
+			prevMatchCount := runePos(matches[0][0], bufStr)
+			searchCount := runePos(matches[0][1], bufStr) - prevMatchCount
 			adjust := 0
 			prevMatch := matches[0]
 			from := FromCharPos(prevMatch[0], view.Buf)
-			to := from.Move(Count(search), view.Buf)
-			adjust += Count(replace) - Count(search)
+			to := from.Move(searchCount, view.Buf)
+			adjust += Count(replace) - searchCount
 			view.Buf.Replace(from, to, replace)
 			if len(matches) > 1 {
 				for _, match := range matches[1:] {
 					found++
-					from = from.Move(match[0]-prevMatch[0]+adjust, view.Buf)
-					to := from.Move(Count(search), view.Buf)
+					matchCount := runePos(match[0], bufStr)
+					from = from.Move(matchCount-prevMatchCount+adjust, view.Buf)
+					to := from.Move(searchCount, view.Buf)
 					// TermMessage(match[0], " ", prevMatch[0], " ", adjust, "\n", from, " ", to)
 					view.Buf.Replace(from, to, replace)
 					prevMatch = match
-					// adjust += Count(replace) - Count(search)
+					prevMatchCount = matchCount
+					// adjust += Count(replace) - searchCount
 				}
 			}
 		}
