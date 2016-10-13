@@ -283,6 +283,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 
 func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	if !v.Buf.Settings["softwrap"].(bool) {
+		vx = v.Cursor.GetCharPosInLine(vy, vx)
 		return vx, vy
 	}
 
@@ -307,6 +308,9 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 
 			screenX++
 			colN++
+		}
+		if screenY == vy {
+			return colN, lineN
 		}
 		screenX = 0
 		screenY++
