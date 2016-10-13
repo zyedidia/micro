@@ -21,10 +21,12 @@ var (
 )
 
 // BeginSearch starts a search
-func BeginSearch() {
+func BeginSearch(searchStr string) {
 	searchHistory = append(searchHistory, "")
 	messenger.historyNum = len(searchHistory) - 1
 	searching = true
+	messenger.response = searchStr
+	messenger.cursorx = Count(searchStr)
 	messenger.hasPrompt = true
 	messenger.Message("Find: ")
 }
@@ -41,13 +43,27 @@ func EndSearch() {
 	}
 }
 
+// exit the search mode, reset active search phrase, and clear status bar
+func ExitSearch(v *View) {
+	lastSearch = ""
+	searching = false
+	messenger.hasPrompt = false
+	messenger.Clear()
+	messenger.Reset()
+	v.Cursor.ResetSelection()
+}
+
 // HandleSearchEvent takes an event and a view and will do a real time match from the messenger's output
 // to the current buffer. It searches down the buffer.
 func HandleSearchEvent(event tcell.Event, v *View) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
 		switch e.Key() {
-		case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEscape, tcell.KeyEnter:
+		case tcell.KeyEscape:
+			// Exit the search mode
+			ExitSearch(v)
+			return
+		case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEnter:
 			// Done
 			EndSearch()
 			return

@@ -775,12 +775,15 @@ func (v *View) Find(usePlugin bool) bool {
 		return false
 	}
 
+	searchStr := ""
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		searchStr = v.Cursor.GetSelection()
 	} else {
 		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
 	}
-	BeginSearch()
+	BeginSearch(searchStr)
 
 	if usePlugin {
 		return PostActionCall("Find", v)
@@ -796,8 +799,14 @@ func (v *View) FindNext(usePlugin bool) bool {
 
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		if lastSearch == "" { // or always? FIXME
+			lastSearch = v.Cursor.GetSelection()
+		}
 	} else {
 		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+	}
+	if lastSearch == "" {
+		return true
 	}
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, true)
@@ -1382,6 +1391,21 @@ func (v *View) CommandMode(usePlugin bool) bool {
 	}
 
 	return false
+}
+
+// Escape leaves current mode / quits the editor
+func (v *View) Escape(usePlugin bool) bool {
+	// check if user is searching, or the last search is still active
+	if searching || lastSearch != "" {
+		ExitSearch(v)
+		return true
+	}
+	// check if a prompt is shown, hide it and don't quit
+	if messenger.hasPrompt {
+		messenger.Reset() // FIXME
+		return true
+	}
+	return v.Quit(usePlugin)
 }
 
 // Quit quits the editor
