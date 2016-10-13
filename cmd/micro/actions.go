@@ -799,9 +799,7 @@ func (v *View) FindNext(usePlugin bool) bool {
 
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
-		if lastSearch == "" { // or always? FIXME
-			lastSearch = v.Cursor.GetSelection()
-		}
+		lastSearch = v.Cursor.GetSelection()
 	} else {
 		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
 	}
@@ -1003,7 +1001,7 @@ func (v *View) MoveLinesUp(usePlugin bool) bool {
 		}
 		v.Buf.MoveLinesUp(
 			v.Cursor.Loc.Y,
-			v.Cursor.Loc.Y + 1,
+			v.Cursor.Loc.Y+1,
 		)
 		v.Cursor.UpN(1)
 		messenger.Message("Moved up current line")
@@ -1042,7 +1040,7 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 		}
 		v.Buf.MoveLinesDown(
 			v.Cursor.Loc.Y,
-			v.Cursor.Loc.Y + 1,
+			v.Cursor.Loc.Y+1,
 		)
 		v.Cursor.DownN(1)
 		messenger.Message("Moved down current line")
@@ -1054,7 +1052,6 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 	}
 	return true
 }
-
 
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection

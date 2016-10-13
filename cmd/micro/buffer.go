@@ -378,12 +378,12 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 				utf8.RuneCount(b.lines[end-1]),
 				end - 1,
 			},
-			"\n" + b.Line(start - 1),
+			"\n"+b.Line(start-1),
 		)
 	} else {
 		b.Insert(
 			Loc{0, end},
-			b.Line(start - 1) + "\n",
+			b.Line(start-1)+"\n",
 		)
 	}
 	b.Remove(
@@ -401,7 +401,7 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 	}
 	b.Insert(
 		Loc{0, start},
-		b.Line(end) + "\n",
+		b.Line(end)+"\n",
 	)
 	end += 1
 	b.Remove(
