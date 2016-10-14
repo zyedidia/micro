@@ -1,7 +1,6 @@
 # Keybindings
 
-Here are the default keybindings in json form which is also how
-you can rebind them to your liking.
+Here are the default keybindings in json format. You can rebind them to your liking, following the same format.
 
 ```json
 {
