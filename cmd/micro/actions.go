@@ -590,28 +590,21 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		start := v.Cursor.CurSelection[0].Y
 		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
-		for i := start; i <= end; i++ {
+		for line := start; line <= end; line++ {
+			tabsize := 1
+			tab := "\t"
 			if v.Buf.Settings["tabstospaces"].(bool) {
-				tabsize := int(v.Buf.Settings["tabsize"].(float64))
-				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
-				if i == start {
-					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
-					}
+				tabsize = int(v.Buf.Settings["tabsize"].(float64))
+				tab = Spaces(tabsize)
+			}
+			v.Buf.Insert(Loc{0, line}, tab)
+			if line == start {
+				if v.Cursor.CurSelection[0].X > 0 {
+					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
 				}
-				if i == end {
-					v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
-				}
-			} else {
-				v.Buf.Insert(Loc{0, i}, "\t")
-				if i == start {
-					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(1, v.Buf))
-					}
-				}
-				if i == end {
-					v.Cursor.SetSelectionEnd(Loc{endX + 2, end})
-				}
+			}
+			if line == end {
+				v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
 			}
 		}
 		v.Cursor.Relocate()
