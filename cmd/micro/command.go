@@ -419,23 +419,22 @@ func Replace(args []string) {
 		if matches != nil && len(matches) > 0 {
 			prevMatchCount := runePos(matches[0][0], bufStr)
 			searchCount := runePos(matches[0][1], bufStr) - prevMatchCount
-			adjust := 0
 			prevMatch := matches[0]
 			from := FromCharPos(prevMatch[0], view.Buf)
 			to := from.Move(searchCount, view.Buf)
-			adjust += Count(replace) - searchCount
+			adjust := Count(replace) - searchCount
 			view.Buf.Replace(from, to, replace)
 			if len(matches) > 1 {
 				for _, match := range matches[1:] {
 					found++
 					matchCount := runePos(match[0], bufStr)
+					searchCount = runePos(match[1], bufStr) - matchCount
 					from = from.Move(matchCount-prevMatchCount+adjust, view.Buf)
-					to := from.Move(searchCount, view.Buf)
-					// TermMessage(match[0], " ", prevMatch[0], " ", adjust, "\n", from, " ", to)
+					to = from.Move(searchCount, view.Buf)
 					view.Buf.Replace(from, to, replace)
 					prevMatch = match
 					prevMatchCount = matchCount
-					// adjust += Count(replace) - searchCount
+					adjust = Count(replace) - searchCount
 				}
 			}
 		}
