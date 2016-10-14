@@ -621,18 +621,16 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
 		for y := startY; y <= endY; y++ {
-			if len(GetLeadingWhitespace(v.Buf.Line(y))) > 0 {
-				for x := 0; x < len(v.Buf.IndentString()); x++ {
-					if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
-						break
-					}
-					v.Buf.Remove(Loc{0, y}, Loc{1, y})
-					if y == startY && v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
-					}
-					if y == endY {
-						v.Cursor.SetSelectionEnd(Loc{endX - x, endY})
-					}
+			for x := 0; x < len(v.Buf.IndentString()); x++ {
+				if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
+					break
+				}
+				v.Buf.Remove(Loc{0, y}, Loc{1, y})
+				if y == startY && v.Cursor.CurSelection[0].X > 0 {
+					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
+				}
+				if y == endY {
+					v.Cursor.SetSelectionEnd(Loc{endX - x, endY})
 				}
 			}
 		}
