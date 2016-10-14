@@ -627,33 +627,24 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 		start := v.Cursor.CurSelection[0].Y
 		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
-		for i := start; i <= end; i++ {
-			if len(GetLeadingWhitespace(v.Buf.Line(i))) > 0 {
+		for line := start; line <= end; line++ {
+			if len(GetLeadingWhitespace(v.Buf.Line(line))) > 0 {
+				tabsize := 1
 				if v.Buf.Settings["tabstospaces"].(bool) {
-					tabsize := int(v.Buf.Settings["tabsize"].(float64))
-					for j := 0; j < tabsize; j++ {
-						if len(GetLeadingWhitespace(v.Buf.Line(i))) == 0 {
-							break
-						}
-						v.Buf.Remove(Loc{0, i}, Loc{1, i})
-						if i == start {
-							if v.Cursor.CurSelection[0].X > 0 {
-								v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
-							}
-						}
-						if i == end {
-							v.Cursor.SetSelectionEnd(Loc{endX - j, end})
-						}
+					tabsize = int(v.Buf.Settings["tabsize"].(float64))
+				}
+				for j := 0; j < tabsize; j++ {
+					if len(GetLeadingWhitespace(v.Buf.Line(line))) == 0 {
+						break
 					}
-				} else {
-					v.Buf.Remove(Loc{0, i}, Loc{1, i})
-					if i == start {
+					v.Buf.Remove(Loc{0, line}, Loc{1, line})
+					if line == start {
 						if v.Cursor.CurSelection[0].X > 0 {
 							v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 						}
 					}
-					if i == end {
-						v.Cursor.SetSelectionEnd(Loc{endX, end})
+					if line == end {
+						v.Cursor.SetSelectionEnd(Loc{endX - j, end})
 					}
 				}
 			}
