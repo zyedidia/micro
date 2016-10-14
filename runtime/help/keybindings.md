@@ -82,7 +82,7 @@ you can rebind them to your liking.
     "F4":  "Quit",
     "F7":  "Find",
     "F10": "Quit",
-    "Esc": "Quit",
+    "Esc": "Escape",
 }
 ```
 
