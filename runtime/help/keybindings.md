@@ -16,8 +16,8 @@ Here are the default keybindings in json format. You can rebind them to your lik
     "AltRight":       "WordRight",
     "AltShiftRight":  "SelectWordRight",
     "AltShiftLeft":   "SelectWordLeft",
-    "AltUp"           "MoveLinesUp",
-    "AltDown"         "MoveLinesDown",
+    "AltUp":          "MoveLinesUp",
+    "AltDown":        "MoveLinesDown",
     "CtrlLeft":       "StartOfLine",
     "CtrlRight":      "EndOfLine",
     "CtrlShiftLeft":  "SelectToStartOfLine",
@@ -81,7 +81,7 @@ Here are the default keybindings in json format. You can rebind them to your lik
     "F4":  "Quit",
     "F7":  "Find",
     "F10": "Quit",
-    "Esc": "Quit",
+    "Esc": "Escape",
 }
 ```
 
