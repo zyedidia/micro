@@ -182,6 +182,16 @@ func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)
 }
 
+// IndentString returns the sting used to produce an indent based on
+// this buffer's settings
+func (b *Buffer) IndentString() string {
+	if b.Settings["tabstospaces"].(bool) {
+		return Spaces(int(b.Settings["tabsize"].(float64)))
+	} else {
+		return "\t"
+	}
+}
+
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
 // by an external program since it was last read
 // If it has, we ask the user if they would like to reload the file

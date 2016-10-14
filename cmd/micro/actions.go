@@ -591,13 +591,8 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
 		for y := startY; y <= endY; y++ {
-			tabsize := 1
-			tab := "\t"
-			if v.Buf.Settings["tabstospaces"].(bool) {
-				tabsize = int(v.Buf.Settings["tabsize"].(float64))
-				tab = Spaces(tabsize)
-			}
-			v.Buf.Insert(Loc{0, y}, tab)
+			tabsize := len(v.Buf.IndentString())
+			v.Buf.Insert(Loc{0, y}, v.Buf.IndentString())
 			if y == startY {
 				if v.Cursor.CurSelection[0].X > 0 {
 					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
@@ -629,11 +624,7 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
 		for y := startY; y <= endY; y++ {
 			if len(GetLeadingWhitespace(v.Buf.Line(y))) > 0 {
-				tabsize := 1
-				if v.Buf.Settings["tabstospaces"].(bool) {
-					tabsize = int(v.Buf.Settings["tabsize"].(float64))
-				}
-				for x := 0; x < tabsize; x++ {
+				for x := 0; x < len(v.Buf.IndentString()); x++ {
 					if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
 						break
 					}
@@ -668,18 +659,13 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		return false
 	}
-	// Insert a tab
-	if v.Buf.Settings["tabstospaces"].(bool) {
-		tabSize := int(v.Buf.Settings["tabsize"].(float64))
-		if remainder := v.Cursor.GetVisualX() % tabSize; remainder != 0 {
-			tabSize = tabSize - remainder
-		}
-		v.Buf.Insert(v.Cursor.Loc, Spaces(tabSize))
-		for i := 0; i < tabSize; i++ {
-			v.Cursor.Right()
-		}
-	} else {
-		v.Buf.Insert(v.Cursor.Loc, "\t")
+	
+	tabSize := int(v.Buf.Settings["tabsize"].(float64))
+	if remainder := v.Cursor.GetVisualX() % tabSize; remainder != 0 {
+		tabSize = tabSize - remainder
+	}
+	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString())
+	for i := 0; i < len(v.Buf.IndentString()); i++ {
 		v.Cursor.Right()
 	}
 
