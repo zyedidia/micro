@@ -587,31 +587,24 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		start := v.Cursor.CurSelection[0].Y
-		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
+		startY := v.Cursor.CurSelection[0].Y
+		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
-		for i := start; i <= end; i++ {
+		for y := startY; y <= endY; y++ {
+			tabsize := 1
+			tab := "\t"
 			if v.Buf.Settings["tabstospaces"].(bool) {
-				tabsize := int(v.Buf.Settings["tabsize"].(float64))
-				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
-				if i == start {
-					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
-					}
+				tabsize = int(v.Buf.Settings["tabsize"].(float64))
+				tab = Spaces(tabsize)
+			}
+			v.Buf.Insert(Loc{0, y}, tab)
+			if y == startY {
+				if v.Cursor.CurSelection[0].X > 0 {
+					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
 				}
-				if i == end {
-					v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
-				}
-			} else {
-				v.Buf.Insert(Loc{0, i}, "\t")
-				if i == start {
-					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(1, v.Buf))
-					}
-				}
-				if i == end {
-					v.Cursor.SetSelectionEnd(Loc{endX + 2, end})
-				}
+			}
+			if y == endY {
+				v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, endY})
 			}
 		}
 		v.Cursor.Relocate()
@@ -631,36 +624,27 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		start := v.Cursor.CurSelection[0].Y
-		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
+		startY := v.Cursor.CurSelection[0].Y
+		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
-		for i := start; i <= end; i++ {
-			if len(GetLeadingWhitespace(v.Buf.Line(i))) > 0 {
+		for y := startY; y <= endY; y++ {
+			if len(GetLeadingWhitespace(v.Buf.Line(y))) > 0 {
+				tabsize := 1
 				if v.Buf.Settings["tabstospaces"].(bool) {
-					tabsize := int(v.Buf.Settings["tabsize"].(float64))
-					for j := 0; j < tabsize; j++ {
-						if len(GetLeadingWhitespace(v.Buf.Line(i))) == 0 {
-							break
-						}
-						v.Buf.Remove(Loc{0, i}, Loc{1, i})
-						if i == start {
-							if v.Cursor.CurSelection[0].X > 0 {
-								v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
-							}
-						}
-						if i == end {
-							v.Cursor.SetSelectionEnd(Loc{endX - j, end})
-						}
+					tabsize = int(v.Buf.Settings["tabsize"].(float64))
+				}
+				for x := 0; x < tabsize; x++ {
+					if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
+						break
 					}
-				} else {
-					v.Buf.Remove(Loc{0, i}, Loc{1, i})
-					if i == start {
+					v.Buf.Remove(Loc{0, y}, Loc{1, y})
+					if y == startY {
 						if v.Cursor.CurSelection[0].X > 0 {
 							v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
 						}
 					}
-					if i == end {
-						v.Cursor.SetSelectionEnd(Loc{endX, end})
+					if y == endY {
+						v.Cursor.SetSelectionEnd(Loc{endX - x, endY})
 					}
 				}
 			}
