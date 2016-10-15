@@ -922,15 +922,20 @@ func (v *View) Cut(usePlugin bool) bool {
 	return false
 }
 
-// DuplicateLine duplicates the current line
+// DuplicateLine duplicates the current line or selection
 func (v *View) DuplicateLine(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("DuplicateLine", v) {
 		return false
 	}
 
-	v.Cursor.End()
-	v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
-	v.Cursor.Right()
+	if v.Cursor.HasSelection() {
+		v.Buf.Insert(v.Cursor.CurSelection[1], v.Cursor.GetSelection())
+	} else {
+		v.Cursor.End()
+		v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
+		v.Cursor.Right()
+	}
+
 	messenger.Message("Duplicated line")
 
 	if usePlugin {
