@@ -654,12 +654,10 @@ func (v *View) InsertTab(usePlugin bool) bool {
 		return false
 	}
 	
-	tabSize := int(v.Buf.Settings["tabsize"].(float64))
-	if remainder := v.Cursor.GetVisualX() % tabSize; remainder != 0 {
-		tabSize = tabSize - remainder
-	}
-	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString())
-	for i := 0; i < len(v.Buf.IndentString()); i++ {
+	tabBytes := len(v.Buf.IndentString())
+	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
+	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])
+	for i := 0; i < bytesUntilIndent; i++ {
 		v.Cursor.Right()
 	}
 
