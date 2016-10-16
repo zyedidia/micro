@@ -200,7 +200,7 @@ func (v *View) CanClose() bool {
 		}
 		if !canceled {
 			if char == 'y' {
-				v.Save(true)
+				v.DoActions("Save")
 				return true
 			} else if char == 'n' {
 				return true
@@ -223,7 +223,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.leftCol = 0
 	v.Cursor.ResetSelection()
 	v.Relocate()
-	v.Center(false)
+	v.Center()
 	v.messages = make(map[string][]GutterMessage)
 
 	v.matches = Match(v)
@@ -408,15 +408,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					if e.Modifiers() == key.modifiers {
 						relocate = false
 						isBinding = true
-						for _, action := range actions {
-							relocate = action(v, true) || relocate
-							funcName := FuncName(action)
-							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
-								if recordingMacro {
-									curMacro = append(curMacro, action)
-								}
-							}
-						}
+						relocate = v.DoActions(actions) || relocate
 						break
 					}
 				}
@@ -516,7 +508,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.Button2:
 			// Middle mouse button was clicked,
 			// We should paste primary
-			v.PastePrimary(true)
+			v.DoActions("PastePrimary")
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {

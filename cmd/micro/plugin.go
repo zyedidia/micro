@@ -46,18 +46,13 @@ func Call(function string, args ...interface{}) (lua.LValue, error) {
 	return ret, err
 }
 
-// LuaFunctionBinding is a function generator which takes the name of a lua function
-// and creates a function that will call that lua function
-// Specifically it creates a function that can be called as a binding because this is used
-// to bind keys to lua functions
-func LuaFunctionBinding(function string) func(*View, bool) bool {
-	return func(v *View, _ bool) bool {
-		_, err := Call(function, nil)
-		if err != nil {
-			TermMessage(err)
-		}
-		return false
+// LuaAction runs a Lua function as an action
+func LuaAction(function string) bool {
+	_, err := Call(function, nil)
+	if err != nil {
+		TermMessage(err)
 	}
+	return err == nil
 }
 
 func unpack(old []string) []interface{} {

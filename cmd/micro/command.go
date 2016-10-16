@@ -174,7 +174,7 @@ func ToggleLog(args []string) {
 		CurView().HSplit(buffer)
 		CurView().Type = vtLog
 	} else {
-		CurView().Quit(true)
+		CurView().DoActions("Quit")
 	}
 }
 
@@ -252,7 +252,7 @@ func Eval(args []string) {
 // NewTab opens the given file in a new tab
 func NewTab(args []string) {
 	if len(args) == 0 {
-		CurView().AddTab(true)
+		CurView().DoActions("AddTab")
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
@@ -337,14 +337,14 @@ func Run(args []string) {
 // Quit closes the main view
 func Quit(args []string) {
 	// Close the main view
-	CurView().Quit(true)
+	CurView().DoActions("Quit")
 }
 
 // Save saves the buffer in the main view
 func Save(args []string) {
 	if len(args) == 0 {
 		// Save the main view
-		CurView().Save(true)
+		CurView().DoActions("Save")
 	} else {
 		CurView().Buf.SaveAs(args[0])
 	}
