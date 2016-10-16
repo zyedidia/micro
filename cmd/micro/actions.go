@@ -610,6 +610,31 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 	return false
 }
 
+// OutdentLine moves the current line back one indentation
+func (v *View) OutdentLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("OutdentLine", v) {
+		return false
+	}
+
+	if v.Cursor.HasSelection() {
+		return false
+	}
+	
+	for x := 0; x < len(v.Buf.IndentString()); x++ {
+		if len(GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))) == 0 {
+			break
+		}
+		v.Buf.Remove(Loc{0, v.Cursor.Y}, Loc{1, v.Cursor.Y})
+		v.Cursor.X -= 1
+	}
+	v.Cursor.Relocate()
+
+	if usePlugin {
+		return PostActionCall("OutdentLine", v)
+	}
+	return true
+}
+
 // OutdentSelection takes the current selection and moves it back one indent level
 func (v *View) OutdentSelection(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("OutdentSelection", v) {
