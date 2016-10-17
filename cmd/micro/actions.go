@@ -2,10 +2,10 @@ package main
 
 import (
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
-	"reflect"
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
@@ -79,7 +79,7 @@ func (v *View) deselect(index int) bool {
 }
 
 // Center centers the view on the cursor
-func (v *View) Center() bool {
+func (v *View) Center(deprecatedUsePlugin ...bool) bool {
 	v.Topline = v.Cursor.Y - v.height/2
 	if v.Topline+v.height > v.Buf.NumLines {
 		v.Topline = v.Buf.NumLines - v.height
@@ -92,21 +92,21 @@ func (v *View) Center() bool {
 }
 
 // CursorUp moves the cursor up
-func (v *View) CursorUp() bool {
+func (v *View) CursorUp(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 	v.Cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
-func (v *View) CursorDown() bool {
+func (v *View) CursorDown(deprecatedUsePlugin ...bool) bool {
 	v.deselect(1)
 	v.Cursor.Down()
 	return true
 }
 
 // CursorLeft moves the cursor left
-func (v *View) CursorLeft() bool {
+func (v *View) CursorLeft(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
@@ -118,7 +118,7 @@ func (v *View) CursorLeft() bool {
 }
 
 // CursorRight moves the cursor right
-func (v *View) CursorRight() bool {
+func (v *View) CursorRight(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
 		v.Cursor.ResetSelection()
@@ -129,19 +129,19 @@ func (v *View) CursorRight() bool {
 }
 
 // WordRight moves the cursor one word to the right
-func (v *View) WordRight() bool {
+func (v *View) WordRight(deprecatedUsePlugin ...bool) bool {
 	v.Cursor.WordRight()
 	return true
 }
 
 // WordLeft moves the cursor one word to the left
-func (v *View) WordLeft() bool {
+func (v *View) WordLeft(deprecatedUsePlugin ...bool) bool {
 	v.Cursor.WordLeft()
 	return true
 }
 
 // SelectUp selects up one line
-func (v *View) SelectUp() bool {
+func (v *View) SelectUp(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -151,7 +151,7 @@ func (v *View) SelectUp() bool {
 }
 
 // SelectDown selects down one line
-func (v *View) SelectDown() bool {
+func (v *View) SelectDown(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -161,7 +161,7 @@ func (v *View) SelectDown() bool {
 }
 
 // SelectLeft selects the character to the left of the cursor
-func (v *View) SelectLeft() bool {
+func (v *View) SelectLeft(deprecatedUsePlugin ...bool) bool {
 	loc := v.Cursor.Loc
 	count := v.Buf.End().Move(-1, v.Buf)
 	if loc.GreaterThan(count) {
@@ -176,7 +176,7 @@ func (v *View) SelectLeft() bool {
 }
 
 // SelectRight selects the character to the right of the cursor
-func (v *View) SelectRight() bool {
+func (v *View) SelectRight(deprecatedUsePlugin ...bool) bool {
 	loc := v.Cursor.Loc
 	count := v.Buf.End().Move(-1, v.Buf)
 	if loc.GreaterThan(count) {
@@ -191,7 +191,7 @@ func (v *View) SelectRight() bool {
 }
 
 // SelectWordRight selects the word to the right of the cursor
-func (v *View) SelectWordRight() bool {
+func (v *View) SelectWordRight(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -201,7 +201,7 @@ func (v *View) SelectWordRight() bool {
 }
 
 // SelectWordLeft selects the word to the left of the cursor
-func (v *View) SelectWordLeft() bool {
+func (v *View) SelectWordLeft(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -211,21 +211,21 @@ func (v *View) SelectWordLeft() bool {
 }
 
 // StartOfLine moves the cursor to the start of the line
-func (v *View) StartOfLine() bool {
+func (v *View) StartOfLine(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 	v.Cursor.Start()
 	return true
 }
 
 // EndOfLine moves the cursor to the end of the line
-func (v *View) EndOfLine() bool {
+func (v *View) EndOfLine(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 	v.Cursor.End()
 	return true
 }
 
 // SelectToStartOfLine selects to the start of the current line
-func (v *View) SelectToStartOfLine() bool {
+func (v *View) SelectToStartOfLine(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -235,14 +235,14 @@ func (v *View) SelectToStartOfLine() bool {
 }
 
 // SelectToEndOfLine selects to the end of the current line
-func (v *View) SelectToEndOfLine() bool {
+func (v *View) SelectToEndOfLine(deprecatedUsePlugin ...bool) bool {
 	v.Cursor.End()
 	v.Cursor.SelectTo(v.Cursor.Loc)
 	return true
 }
 
 // CursorStart moves the cursor to the start of the buffer
-func (v *View) CursorStart() bool {
+func (v *View) CursorStart(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 
 	v.Cursor.X = 0
@@ -252,7 +252,7 @@ func (v *View) CursorStart() bool {
 }
 
 // CursorEnd moves the cursor to the end of the buffer
-func (v *View) CursorEnd() bool {
+func (v *View) CursorEnd(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 
 	v.Cursor.Loc = v.Buf.End()
@@ -261,7 +261,7 @@ func (v *View) CursorEnd() bool {
 }
 
 // SelectToStart selects the text from the cursor to the start of the buffer
-func (v *View) SelectToStart() bool {
+func (v *View) SelectToStart(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -272,7 +272,7 @@ func (v *View) SelectToStart() bool {
 }
 
 // SelectToEnd selects the text from the cursor to the end of the buffer
-func (v *View) SelectToEnd() bool {
+func (v *View) SelectToEnd(deprecatedUsePlugin ...bool) bool {
 	if !v.Cursor.HasSelection() {
 		v.Cursor.OrigSelection[0] = v.Cursor.Loc
 	}
@@ -283,7 +283,7 @@ func (v *View) SelectToEnd() bool {
 }
 
 // InsertSpace inserts a space
-func (v *View) InsertSpace() bool {
+func (v *View) InsertSpace(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
@@ -295,7 +295,7 @@ func (v *View) InsertSpace() bool {
 }
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
-func (v *View) InsertNewline() bool {
+func (v *View) InsertNewline(deprecatedUsePlugin ...bool) bool {
 	// Insert a newline
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
@@ -323,12 +323,12 @@ func (v *View) InsertNewline() bool {
 }
 
 // InsertEnter calls InsertNewline for backwards compatability
-func (v *View) InsertEnter() bool {
+func (v *View) InsertEnter(deprecatedUsePlugin ...bool) bool {
 	return v.InsertNewline()
 }
 
 // Backspace deletes the previous character
-func (v *View) Backspace() bool {
+func (v *View) Backspace(deprecatedUsePlugin ...bool) bool {
 	// Delete a character
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
@@ -367,7 +367,7 @@ func (v *View) Backspace() bool {
 }
 
 // DeleteWordRight deletes the word to the right of the cursor
-func (v *View) DeleteWordRight() bool {
+func (v *View) DeleteWordRight(deprecatedUsePlugin ...bool) bool {
 	v.SelectWordRight()
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
@@ -378,7 +378,7 @@ func (v *View) DeleteWordRight() bool {
 }
 
 // DeleteWordLeft deletes the word to the left of the cursor
-func (v *View) DeleteWordLeft() bool {
+func (v *View) DeleteWordLeft(deprecatedUsePlugin ...bool) bool {
 	v.SelectWordLeft()
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
@@ -389,7 +389,7 @@ func (v *View) DeleteWordLeft() bool {
 }
 
 // Delete deletes the next character
-func (v *View) Delete() bool {
+func (v *View) Delete(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
@@ -404,7 +404,7 @@ func (v *View) Delete() bool {
 }
 
 // IndentSelection indents the current selection
-func (v *View) IndentSelection() bool {
+func (v *View) IndentSelection(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		startY := v.Cursor.CurSelection[0].Y
 		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
@@ -426,11 +426,11 @@ func (v *View) IndentSelection() bool {
 }
 
 // OutdentLine moves the current line back one indentation
-func (v *View) OutdentLine() bool {
+func (v *View) OutdentLine(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		return false
 	}
-	
+
 	for x := 0; x < len(v.Buf.IndentString()); x++ {
 		if len(GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))) == 0 {
 			break
@@ -444,7 +444,7 @@ func (v *View) OutdentLine() bool {
 }
 
 // OutdentSelection takes the current selection and moves it back one indent level
-func (v *View) OutdentSelection() bool {
+func (v *View) OutdentSelection(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		startY := v.Cursor.CurSelection[0].Y
 		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
@@ -471,11 +471,11 @@ func (v *View) OutdentSelection() bool {
 }
 
 // InsertTab inserts a tab or spaces
-func (v *View) InsertTab() bool {
+func (v *View) InsertTab(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		return false
 	}
-	
+
 	tabBytes := len(v.Buf.IndentString())
 	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
 	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])
@@ -487,7 +487,7 @@ func (v *View) InsertTab() bool {
 }
 
 // Save the buffer to disk
-func (v *View) Save() bool {
+func (v *View) Save(deprecatedUsePlugin ...bool) bool {
 	if v.Type == vtHelp {
 		// We can't save the help text
 		return false
@@ -529,7 +529,7 @@ func (v *View) Save() bool {
 }
 
 // SaveAs saves the buffer to disk with the given name
-func (v *View) SaveAs() bool {
+func (v *View) SaveAs(deprecatedUsePlugin ...bool) bool {
 	filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
 	if !canceled {
 		// the filename might or might not be quoted, so unquote first then join the strings.
@@ -544,7 +544,7 @@ func (v *View) SaveAs() bool {
 }
 
 // Find opens a prompt and searches forward for the input
-func (v *View) Find() bool {
+func (v *View) Find(deprecatedUsePlugin ...bool) bool {
 	searchStr := ""
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
@@ -559,7 +559,7 @@ func (v *View) Find() bool {
 }
 
 // FindNext searches forwards for the last used search term
-func (v *View) FindNext() bool {
+func (v *View) FindNext(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
 		lastSearch = v.Cursor.GetSelection()
@@ -576,7 +576,7 @@ func (v *View) FindNext() bool {
 }
 
 // FindPrevious searches backwards for the last used search term
-func (v *View) FindPrevious() bool {
+func (v *View) FindPrevious(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[0], v.Buf)
 	} else {
@@ -589,7 +589,7 @@ func (v *View) FindPrevious() bool {
 }
 
 // Undo undoes the last action
-func (v *View) Undo() bool {
+func (v *View) Undo(deprecatedUsePlugin ...bool) bool {
 	v.Buf.Undo()
 	messenger.Message("Undid action")
 
@@ -597,7 +597,7 @@ func (v *View) Undo() bool {
 }
 
 // Redo redoes the last action
-func (v *View) Redo() bool {
+func (v *View) Redo(deprecatedUsePlugin ...bool) bool {
 	v.Buf.Redo()
 	messenger.Message("Redid action")
 
@@ -605,7 +605,7 @@ func (v *View) Redo() bool {
 }
 
 // Copy the selection to the system clipboard
-func (v *View) Copy() bool {
+func (v *View) Copy(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.freshClip = true
@@ -615,7 +615,7 @@ func (v *View) Copy() bool {
 }
 
 // CutLine cuts the current line to the clipboard
-func (v *View) CutLine() bool {
+func (v *View) CutLine(deprecatedUsePlugin ...bool) bool {
 	v.Cursor.SelectLine()
 	if !v.Cursor.HasSelection() {
 		return false
@@ -641,7 +641,7 @@ func (v *View) CutLine() bool {
 }
 
 // Cut the selection to the system clipboard
-func (v *View) Cut() bool {
+func (v *View) Cut(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
 		v.Cursor.DeleteSelection()
@@ -656,7 +656,7 @@ func (v *View) Cut() bool {
 }
 
 // DuplicateLine duplicates the current line or selection
-func (v *View) DuplicateLine() bool {
+func (v *View) DuplicateLine(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Buf.Insert(v.Cursor.CurSelection[1], v.Cursor.GetSelection())
 	} else {
@@ -671,7 +671,7 @@ func (v *View) DuplicateLine() bool {
 }
 
 // DeleteLine deletes the current line
-func (v *View) DeleteLine() bool {
+func (v *View) DeleteLine(deprecatedUsePlugin ...bool) bool {
 	v.Cursor.SelectLine()
 	if !v.Cursor.HasSelection() {
 		return false
@@ -684,7 +684,7 @@ func (v *View) DeleteLine() bool {
 }
 
 // MoveLinesUp moves up the current line or selected lines if any
-func (v *View) MoveLinesUp() bool {
+func (v *View) MoveLinesUp(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		if v.Cursor.CurSelection[0].Y == 0 {
 			messenger.Message("Can not move further up")
@@ -716,7 +716,7 @@ func (v *View) MoveLinesUp() bool {
 }
 
 // MoveLinesDown moves down the current line or selected lines if any
-func (v *View) MoveLinesDown() bool {
+func (v *View) MoveLinesDown(deprecatedUsePlugin ...bool) bool {
 	if v.Cursor.HasSelection() {
 		if v.Cursor.CurSelection[1].Y >= len(v.Buf.lines) {
 			messenger.Message("Can not move further down")
@@ -749,21 +749,21 @@ func (v *View) MoveLinesDown() bool {
 
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
-func (v *View) Paste() bool {
+func (v *View) Paste(deprecatedUsePlugin ...bool) bool {
 	clip, _ := clipboard.ReadAll("clipboard")
 	v.paste(clip)
 	return true
 }
 
 // PastePrimary pastes from the primary clipboard (only use on linux)
-func (v *View) PastePrimary() bool {
+func (v *View) PastePrimary(deprecatedUsePlugin ...bool) bool {
 	clip, _ := clipboard.ReadAll("primary")
 	v.paste(clip)
 	return true
 }
 
 // SelectAll selects the entire buffer
-func (v *View) SelectAll() bool {
+func (v *View) SelectAll(deprecatedUsePlugin ...bool) bool {
 	v.Cursor.SetSelectionStart(v.Buf.Start())
 	v.Cursor.SetSelectionEnd(v.Buf.End())
 	// Put the cursor at the beginning
@@ -774,7 +774,7 @@ func (v *View) SelectAll() bool {
 }
 
 // OpenFile opens a new file in the buffer
-func (v *View) OpenFile() bool {
+func (v *View) OpenFile(deprecatedUsePlugin ...bool) bool {
 	if v.CanClose() {
 		filename, canceled := messenger.Prompt("File to open: ", "Open", FileCompletion)
 		if canceled {
@@ -791,13 +791,13 @@ func (v *View) OpenFile() bool {
 }
 
 // Start moves the viewport to the start of the buffer
-func (v *View) Start() bool {
+func (v *View) Start(deprecatedUsePlugin ...bool) bool {
 	v.Topline = 0
 	return false
 }
 
 // End moves the viewport to the end of the buffer
-func (v *View) End() bool {
+func (v *View) End(deprecatedUsePlugin ...bool) bool {
 	if v.height > v.Buf.NumLines {
 		v.Topline = 0
 	} else {
@@ -808,7 +808,7 @@ func (v *View) End() bool {
 }
 
 // PageUp scrolls the view up a page
-func (v *View) PageUp() bool {
+func (v *View) PageUp(deprecatedUsePlugin ...bool) bool {
 	if v.Topline > v.height {
 		v.ScrollUp(v.height)
 	} else {
@@ -818,7 +818,7 @@ func (v *View) PageUp() bool {
 }
 
 // PageDown scrolls the view down a page
-func (v *View) PageDown() bool {
+func (v *View) PageDown(deprecatedUsePlugin ...bool) bool {
 	if v.Buf.NumLines-(v.Topline+v.height) > v.height {
 		v.ScrollDown(v.height)
 	} else if v.Buf.NumLines >= v.height {
@@ -829,7 +829,7 @@ func (v *View) PageDown() bool {
 }
 
 // CursorPageUp places the cursor a page up
-func (v *View) CursorPageUp() bool {
+func (v *View) CursorPageUp(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 
 	if v.Cursor.HasSelection() {
@@ -842,7 +842,7 @@ func (v *View) CursorPageUp() bool {
 }
 
 // CursorPageDown places the cursor a page up
-func (v *View) CursorPageDown() bool {
+func (v *View) CursorPageDown(deprecatedUsePlugin ...bool) bool {
 	v.deselect(0)
 
 	if v.Cursor.HasSelection() {
@@ -855,7 +855,7 @@ func (v *View) CursorPageDown() bool {
 }
 
 // HalfPageUp scrolls the view up half a page
-func (v *View) HalfPageUp() bool {
+func (v *View) HalfPageUp(deprecatedUsePlugin ...bool) bool {
 	if v.Topline > v.height/2 {
 		v.ScrollUp(v.height / 2)
 	} else {
@@ -866,7 +866,7 @@ func (v *View) HalfPageUp() bool {
 }
 
 // HalfPageDown scrolls the view down half a page
-func (v *View) HalfPageDown() bool {
+func (v *View) HalfPageDown(deprecatedUsePlugin ...bool) bool {
 	if v.Buf.NumLines-(v.Topline+v.height) > v.height/2 {
 		v.ScrollDown(v.height / 2)
 	} else {
@@ -879,7 +879,7 @@ func (v *View) HalfPageDown() bool {
 }
 
 // ToggleRuler turns line numbers off and on
-func (v *View) ToggleRuler() bool {
+func (v *View) ToggleRuler(deprecatedUsePlugin ...bool) bool {
 	if v.Buf.Settings["ruler"] == false {
 		v.Buf.Settings["ruler"] = true
 		messenger.Message("Enabled ruler")
@@ -892,7 +892,7 @@ func (v *View) ToggleRuler() bool {
 }
 
 // JumpLine jumps to a line and moves the view accordingly.
-func (v *View) JumpLine() bool {
+func (v *View) JumpLine(deprecatedUsePlugin ...bool) bool {
 	// Prompt for line number
 	linestring, canceled := messenger.Prompt("Jump to line # ", "LineNumber", NoCompletion)
 	if canceled {
@@ -916,13 +916,13 @@ func (v *View) JumpLine() bool {
 }
 
 // ClearStatus clears the messenger bar
-func (v *View) ClearStatus() bool {
+func (v *View) ClearStatus(deprecatedUsePlugin ...bool) bool {
 	messenger.Message("")
 	return false
 }
 
 // ToggleHelp toggles the help screen
-func (v *View) ToggleHelp() bool {
+func (v *View) ToggleHelp(deprecatedUsePlugin ...bool) bool {
 	if v.Type != vtHelp {
 		// Open the default help
 		v.openHelp("help")
@@ -934,7 +934,7 @@ func (v *View) ToggleHelp() bool {
 }
 
 // ShellMode opens a terminal to run a shell command
-func (v *View) ShellMode() bool {
+func (v *View) ShellMode(deprecatedUsePlugin ...bool) bool {
 	input, canceled := messenger.Prompt("$ ", "Shell", NoCompletion)
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
@@ -944,7 +944,7 @@ func (v *View) ShellMode() bool {
 }
 
 // CommandMode lets the user enter a command
-func (v *View) CommandMode() bool {
+func (v *View) CommandMode(deprecatedUsePlugin ...bool) bool {
 	input, canceled := messenger.Prompt("> ", "Command", CommandCompletion)
 	if !canceled {
 		HandleCommand(input)
@@ -954,7 +954,7 @@ func (v *View) CommandMode() bool {
 }
 
 // Escape leaves current mode / quits the editor
-func (v *View) Escape() bool {
+func (v *View) Escape(deprecatedUsePlugin ...bool) bool {
 	// check if user is searching, or the last search is still active
 	if searching || lastSearch != "" {
 		ExitSearch(v)
@@ -972,7 +972,7 @@ func (v *View) Escape() bool {
 // This behavior needs to be changed and should really only quit the editor if this
 // is the last view
 // However, since micro only supports one view for now, it doesn't really matter
-func (v *View) Quit() bool {
+func (v *View) Quit(deprecatedUsePlugin ...bool) bool {
 	// Make sure not to quit if there are unsaved changes
 	if v.CanClose() {
 		v.CloseBuffer()
@@ -1006,7 +1006,7 @@ func (v *View) Quit() bool {
 }
 
 // QuitAll quits the whole editor; all splits and tabs
-func (v *View) QuitAll() bool {
+func (v *View) QuitAll(deprecatedUsePlugin ...bool) bool {
 	closeAll := true
 	for _, tab := range tabs {
 		for _, v := range tab.views {
@@ -1033,7 +1033,7 @@ func (v *View) QuitAll() bool {
 }
 
 // AddTab adds a new tab with an empty buffer
-func (v *View) AddTab() bool {
+func (v *View) AddTab(deprecatedUsePlugin ...bool) bool {
 	tab := NewTabFromView(NewView(NewBuffer([]byte{}, "")))
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
@@ -1050,7 +1050,7 @@ func (v *View) AddTab() bool {
 }
 
 // PreviousTab switches to the previous tab in the tab list
-func (v *View) PreviousTab() bool {
+func (v *View) PreviousTab(deprecatedUsePlugin ...bool) bool {
 	if curTab > 0 {
 		curTab--
 	} else if curTab == 0 {
@@ -1060,7 +1060,7 @@ func (v *View) PreviousTab() bool {
 }
 
 // NextTab switches to the next tab in the tab list
-func (v *View) NextTab() bool {
+func (v *View) NextTab(deprecatedUsePlugin ...bool) bool {
 	if curTab < len(tabs)-1 {
 		curTab++
 	} else if curTab == len(tabs)-1 {
@@ -1071,19 +1071,19 @@ func (v *View) NextTab() bool {
 }
 
 // VSplitBinding opens an empty vertical split
-func (v *View) VSplitBinding() bool {
+func (v *View) VSplitBinding(deprecatedUsePlugin ...bool) bool {
 	v.VSplit(NewBuffer([]byte{}, ""))
 	return false
 }
 
 // HSplitBinding opens an empty horizontal split
-func (v *View) HSplitBinding() bool {
+func (v *View) HSplitBinding(deprecatedUsePlugin ...bool) bool {
 	v.HSplit(NewBuffer([]byte{}, ""))
 	return false
 }
 
 // Unsplit closes all splits in the current tab except the active one
-func (v *View) Unsplit() bool {
+func (v *View) Unsplit(deprecatedUsePlugin ...bool) bool {
 	curView := tabs[curTab].curView
 	for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
 		view := tabs[curTab].views[i]
@@ -1096,7 +1096,7 @@ func (v *View) Unsplit() bool {
 }
 
 // NextSplit changes the view to the next split
-func (v *View) NextSplit() bool {
+func (v *View) NextSplit(deprecatedUsePlugin ...bool) bool {
 	tab := tabs[curTab]
 	if tab.curView < len(tab.views)-1 {
 		tab.curView++
@@ -1108,7 +1108,7 @@ func (v *View) NextSplit() bool {
 }
 
 // PreviousSplit changes the view to the previous split
-func (v *View) PreviousSplit() bool {
+func (v *View) PreviousSplit(deprecatedUsePlugin ...bool) bool {
 	tab := tabs[curTab]
 	if tab.curView > 0 {
 		tab.curView--
@@ -1122,7 +1122,7 @@ func (v *View) PreviousSplit() bool {
 var curMacro []interface{}
 var recordingMacro bool
 
-func (v *View) ToggleMacro() bool {
+func (v *View) ToggleMacro(deprecatedUsePlugin ...bool) bool {
 	recordingMacro = !recordingMacro
 
 	if recordingMacro {
@@ -1135,7 +1135,7 @@ func (v *View) ToggleMacro() bool {
 	return true
 }
 
-func (v *View) PlayMacro() bool {
+func (v *View) PlayMacro(deprecatedUsePlugin ...bool) bool {
 	for _, action := range curMacro {
 		switch t := action.(type) {
 		case rune:
