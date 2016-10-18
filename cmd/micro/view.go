@@ -129,6 +129,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	return v
 }
 
+// ToggleStatusLine creates an extra row for the statusline if necessary
 func (v *View) ToggleStatusLine() {
 	if v.Buf.Settings["statusline"].(bool) {
 		v.height--
@@ -137,6 +138,7 @@ func (v *View) ToggleStatusLine() {
 	}
 }
 
+// ToggleTabbar creates an extra row for the tabbar if necessary
 func (v *View) ToggleTabbar() {
 	if len(tabs) > 1 {
 		if v.y == 0 {
@@ -234,6 +236,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 }
 
+// Open opens the given file in the view
 func (v *View) Open(filename string) {
 	home, _ := homedir.Dir()
 	filename = strings.Replace(filename, "~", home, 1)
@@ -281,6 +284,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 	return false
 }
 
+// GetSoftWrapLocation gets the location of a visual click on the screen and converts it to col,line
 func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		vx = v.Cursor.GetCharPosInLine(vy, vx)

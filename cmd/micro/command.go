@@ -419,8 +419,7 @@ func Replace(args []string) {
 		if matches != nil && len(matches) > 0 {
 			prevMatchCount := runePos(matches[0][0], bufStr)
 			searchCount := runePos(matches[0][1], bufStr) - prevMatchCount
-			prevMatch := matches[0]
-			from := FromCharPos(prevMatch[0], view.Buf)
+			from := FromCharPos(matches[0][0], view.Buf)
 			to := from.Move(searchCount, view.Buf)
 			adjust := Count(replace) - searchCount
 			view.Buf.Replace(from, to, replace)
@@ -432,7 +431,6 @@ func Replace(args []string) {
 					from = from.Move(matchCount-prevMatchCount+adjust, view.Buf)
 					to = from.Move(searchCount, view.Buf)
 					view.Buf.Replace(from, to, replace)
-					prevMatch = match
 					prevMatchCount = matchCount
 					adjust = Count(replace) - searchCount
 				}

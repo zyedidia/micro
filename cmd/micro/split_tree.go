@@ -1,24 +1,30 @@
 package main
 
+// SpltType specifies whether a split is horizontal or vertical
 type SplitType bool
 
 const (
-	VerticalSplit   = false
+	// VerticalSplit type
+	VerticalSplit = false
+	// HorizontalSplit type
 	HorizontalSplit = true
 )
 
+// A Node on the split tree
 type Node interface {
 	VSplit(buf *Buffer)
 	HSplit(buf *Buffer)
 	String() string
 }
 
+// A LeafNode is an actual split so it contains a view
 type LeafNode struct {
 	view *View
 
 	parent *SplitTree
 }
 
+// NewLeafNode returns a new leaf node containing the given view
 func NewLeafNode(v *View, parent *SplitTree) *LeafNode {
 	n := new(LeafNode)
 	n.view = v
@@ -27,6 +33,7 @@ func NewLeafNode(v *View, parent *SplitTree) *LeafNode {
 	return n
 }
 
+// A SplitTree is a Node itself and it contains other nodes
 type SplitTree struct {
 	kind SplitType
 
@@ -42,6 +49,7 @@ type SplitTree struct {
 	tabNum int
 }
 
+// VSplit creates a vertical split
 func (l *LeafNode) VSplit(buf *Buffer) {
 	tab := tabs[l.parent.tabNum]
 	if l.parent.kind == VerticalSplit {
@@ -69,6 +77,7 @@ func (l *LeafNode) VSplit(buf *Buffer) {
 	}
 }
 
+// HSplit creates a horizontal split
 func (l *LeafNode) HSplit(buf *Buffer) {
 	tab := tabs[l.parent.tabNum]
 	if l.parent.kind == HorizontalSplit {
@@ -96,6 +105,7 @@ func (l *LeafNode) HSplit(buf *Buffer) {
 	}
 }
 
+// Delete deletes a split
 func (l *LeafNode) Delete() {
 	i := search(l.parent.children, l)
 
@@ -117,6 +127,7 @@ func (l *LeafNode) Delete() {
 	}
 }
 
+// Cleanup rearranges all the parents after a split has been deleted
 func (s *SplitTree) Cleanup() {
 	for i, node := range s.children {
 		if n, ok := node.(*SplitTree); ok {
@@ -132,6 +143,7 @@ func (s *SplitTree) Cleanup() {
 	}
 }
 
+// ResizeSplits resizes all the splits correctly
 func (s *SplitTree) ResizeSplits() {
 	for i, node := range s.children {
 		if n, ok := node.(*LeafNode); ok {
@@ -195,7 +207,10 @@ func findView(haystack []*View, needle *View) int {
 	return 0
 }
 
+// VSplit is here just to make SplitTree fit the Node interface
 func (s *SplitTree) VSplit(buf *Buffer) {}
+
+// HSplit is here just to make SplitTree fit the Node interface
 func (s *SplitTree) HSplit(buf *Buffer) {}
 
 func (s *SplitTree) String() string {

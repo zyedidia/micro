@@ -206,7 +206,7 @@ var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at 
 func main() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
-		fmt.Println("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n")
+		fmt.Print("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n\n")
 		flag.PrintDefaults()
 	}
 

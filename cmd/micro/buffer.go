@@ -186,9 +186,8 @@ func (b *Buffer) FileType() string {
 func (b *Buffer) IndentString() string {
 	if b.Settings["tabstospaces"].(bool) {
 		return Spaces(int(b.Settings["tabsize"].(float64)))
-	} else {
-		return "\t"
 	}
+	return "\t"
 }
 
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
@@ -376,6 +375,7 @@ func (b *Buffer) Len() int {
 	return Count(b.String())
 }
 
+// MoveLinesUp moves the range of lines up one row
 func (b *Buffer) MoveLinesUp(start int, end int) {
 	// 0 < start < end <= len(b.lines)
 	if start < 1 || start >= end || end > len(b.lines) {
@@ -401,6 +401,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	)
 }
 
+// MoveLinesDown moves the range of lines down one row
 func (b *Buffer) MoveLinesDown(start int, end int) {
 	// 0 <= start < end < len(b.lines)
 	// if end == len(b.lines), we can't do anything here because the
@@ -412,7 +413,7 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 		Loc{0, start},
 		b.Line(end)+"\n",
 	)
-	end += 1
+	end++
 	b.Remove(
 		Loc{0, end},
 		Loc{0, end + 1},

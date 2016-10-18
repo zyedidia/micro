@@ -23,7 +23,7 @@ func Count(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
-// NumOccurrences counts the number of occurences of a byte in a string
+// NumOccurrences counts the number of occurrences of a byte in a string
 func NumOccurrences(s string, c byte) int {
 	var n int
 	for i := 0; i < len(s); i++ {
@@ -244,11 +244,11 @@ func FuncName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
-// SplitCommandArgs seperates multiple command arguments which may be quoted.
+// SplitCommandArgs separates multiple command arguments which may be quoted.
 // The returned slice contains at least one string
 func SplitCommandArgs(input string) []string {
 	var result []string
-	var curQuote *bytes.Buffer = nil
+	var curQuote *bytes.Buffer
 
 	curArg := new(bytes.Buffer)
 	escape := false

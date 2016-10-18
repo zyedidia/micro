@@ -619,7 +619,7 @@ func (v *View) OutdentLine(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		return false
 	}
-	
+
 	for x := 0; x < len(v.Buf.IndentString()); x++ {
 		if len(GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))) == 0 {
 			break
@@ -678,7 +678,7 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		return false
 	}
-	
+
 	tabBytes := len(v.Buf.IndentString())
 	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
 	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])
@@ -1627,6 +1627,7 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 var curMacro []interface{}
 var recordingMacro bool
 
+// ToggleMacro toggles recording of a macro
 func (v *View) ToggleMacro(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("ToggleMacro", v) {
 		return false
@@ -1647,6 +1648,7 @@ func (v *View) ToggleMacro(usePlugin bool) bool {
 	return true
 }
 
+// PlayMacro plays back the most recently recorded macro
 func (v *View) PlayMacro(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("PlayMacro", v) {
 		return false

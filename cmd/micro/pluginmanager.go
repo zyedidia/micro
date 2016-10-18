@@ -19,7 +19,7 @@ import (
 )
 
 var (
-	allPluginPackages PluginPackages = nil
+	allPluginPackages PluginPackages
 )
 
 // CorePluginName is a plugin dependency name for the micro core.
@@ -57,7 +57,7 @@ type PluginVersion struct {
 // PluginVersions is a slice of PluginVersion
 type PluginVersions []*PluginVersion
 
-// PluginDenendency descripes a dependency to another plugin or micro itself.
+// PluginDependency descripes a dependency to another plugin or micro itself.
 type PluginDependency struct {
 	Name  string
 	Range semver.Range
@@ -246,9 +246,8 @@ func GetAllPluginPackages() PluginPackages {
 		allPluginPackages = fetchAllSources(len(repos)+1, func(i int) PluginPackages {
 			if i == 0 {
 				return channels.Fetch()
-			} else {
-				return repos[i-1].Fetch()
 			}
+			return repos[i-1].Fetch()
 		})
 	}
 	return allPluginPackages
@@ -274,8 +273,8 @@ func (pv PluginVersions) Swap(i, j int) {
 }
 
 // Less returns true if the version at position i is greater then the version at position j (used for sorting)
-func (s PluginVersions) Less(i, j int) bool {
-	return s[i].Version.GT(s[j].Version)
+func (pv PluginVersions) Less(i, j int) bool {
+	return pv[i].Version.GT(pv[j].Version)
 }
 
 // Match returns true if the package matches a given search text
@@ -382,6 +381,7 @@ func GetInstalledPluginVersion(name string) string {
 	return ""
 }
 
+// DownloadAndInstall downloads and installs the given plugin and version
 func (pv *PluginVersion) DownloadAndInstall() error {
 	messenger.AddLog(fmt.Sprintf("Downloading %q (%s) from %q", pv.pack.Name, pv.Version, pv.Url))
 	resp, err := http.Get(pv.Url)
@@ -439,13 +439,13 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 				return err
 			}
 			defer content.Close()
-			if target, err := os.Create(targetName); err != nil {
+			target, err := os.Create(targetName)
+			if err != nil {
 				return err
-			} else {
-				defer target.Close()
-				if _, err = io.Copy(target, content); err != nil {
-					return err
-				}
+			}
+			defer target.Close()
+			if _, err = io.Copy(target, content); err != nil {
+				return err
 			}
 		}
 	}
@@ -495,6 +495,7 @@ func (req PluginDependencies) Join(other PluginDependencies) PluginDependencies 
 	return result
 }
 
+// Resolve resolves dependencies between different plugins
 func (all PluginPackages) Resolve(selectedVersions PluginVersions, open PluginDependencies) (PluginVersions, error) {
 	if len(open) == 0 {
 		return selectedVersions, nil
@@ -506,31 +507,29 @@ func (all PluginPackages) Resolve(selectedVersions PluginVersions, open PluginDe
 				return all.Resolve(selectedVersions, stillOpen)
 			}
 			return nil, fmt.Errorf("unable to find a matching version for \"%s\"", currentRequirement.Name)
-		} else {
-			availableVersions := all.GetAllVersions(currentRequirement.Name)
-			sort.Sort(availableVersions)
+		}
+		availableVersions := all.GetAllVersions(currentRequirement.Name)
+		sort.Sort(availableVersions)
 
-			for _, version := range availableVersions {
-				if currentRequirement.Range(version.Version) {
-					resolved, err := all.Resolve(append(selectedVersions, version), stillOpen.Join(version.Require))
+		for _, version := range availableVersions {
+			if currentRequirement.Range(version.Version) {
+				resolved, err := all.Resolve(append(selectedVersions, version), stillOpen.Join(version.Require))
 
-					if err == nil {
-						return resolved, nil
-					}
+				if err == nil {
+					return resolved, nil
 				}
 			}
-			return nil, fmt.Errorf("unable to find a matching version for \"%s\"", currentRequirement.Name)
 		}
-	} else {
-		return selectedVersions, nil
+		return nil, fmt.Errorf("unable to find a matching version for \"%s\"", currentRequirement.Name)
 	}
+	return selectedVersions, nil
 }
 
-func (versions PluginVersions) install() {
+func (pv PluginVersions) install() {
 	anyInstalled := false
 	currentlyInstalled := GetInstalledVersions(true)
 
-	for _, sel := range versions {
+	for _, sel := range pv {
 		if sel.pack.Name != CorePluginName {
 			shouldInstall := true
 			if pv := currentlyInstalled.find(sel.pack.Name); pv != nil {
@@ -565,6 +564,7 @@ func UninstallPlugin(name string) {
 	}
 }
 
+// Install installs the plugin
 func (pl PluginPackage) Install() {
 	selected, err := GetAllPluginPackages().Resolve(GetInstalledVersions(true), PluginDependencies{
 		&PluginDependency{
@@ -578,6 +578,7 @@ func (pl PluginPackage) Install() {
 	selected.install()
 }
 
+// UpdatePlugins updates the given plugins
 func UpdatePlugins(plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
