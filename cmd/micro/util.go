@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -333,4 +334,81 @@ func JoinCommandArgs(args ...string) string {
 	}
 
 	return buf.String()
+}
+
+// FindProjectRoot finds the root of a project given a filename
+func FindProjectRoot(filename string) string {
+	abs, err := filepath.Abs(filename)
+	if err != nil {
+		return filepath.Dir(filename)
+	}
+
+	root := filepath.Dir(abs)
+
+	if root == filename {
+		return root
+	}
+
+	files, err := ioutil.ReadDir(root)
+	if err != nil {
+		return root
+	}
+
+	for _, file := range files {
+		rootFiles := map[string]bool{
+			".git":       true,
+			"makefile":   true,
+			"license":    true,
+			"readme":     true,
+			"readme.md":  true,
+			"readme.txt": true,
+		}
+
+		if rootFiles[strings.ToLower(file.Name())] {
+			return root
+		}
+	}
+	return FindProjectRoot(root)
+}
+
+// ListProjectFiles lists at most `max` files in the same project as filename
+func ListProjectFiles(root string, max int) []string {
+	var files []string
+
+	children, err := ioutil.ReadDir(root)
+	if err != nil {
+		return files
+	}
+
+	for _, file := range children {
+		abs := filepath.Join(root, file.Name())
+		if err == nil {
+			if len(files) < max {
+				if file.IsDir() {
+					if !strings.HasPrefix(file.Name(), ".") {
+						files = append(files, ListProjectFiles(abs, max-len(files))...)
+					}
+				} else {
+					files = append(files, abs)
+				}
+			}
+		}
+	}
+
+	return files
+}
+
+// ListProjectFilesRel lists at most `max` files relative to project root in the same project as filename
+func ListProjectFilesRel(root string, max int) []string {
+	files := ListProjectFiles(root, max)
+
+	var relFiles []string
+
+	for _, file := range files {
+		rel, _ := filepath.Rel(root, file)
+
+		relFiles = append(relFiles, rel)
+	}
+
+	return relFiles
 }
