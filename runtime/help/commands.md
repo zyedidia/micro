@@ -59,6 +59,8 @@ Here are the possible commands that you can use.
    You can also see more information about the plugin manager
    in the `Plugin Manager` section of the `plugins` help topic.
 
+* `reload`: reloads all runtime files.
+
 ---
 
 The following commands are provided by the default plugins:

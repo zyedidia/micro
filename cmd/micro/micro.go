@@ -199,6 +199,31 @@ func RedrawAll() {
 	screen.Show()
 }
 
+func LoadAll() {
+	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
+	InitConfigDir()
+
+	// Build a list of available Extensions (Syntax, Colorscheme etc.)
+	InitRuntimeFiles()
+
+	// Load the user's settings
+	InitGlobalSettings()
+
+	InitCommands()
+	InitBindings()
+
+	LoadSyntaxFiles()
+
+	for _, tab := range tabs {
+		for _, v := range tab.views {
+			v.Buf.UpdateRules()
+			if v.Buf.Settings["syntax"].(bool) {
+				v.matches = Match(v)
+			}
+		}
+	}
+}
+
 // Passing -version as a flag will have micro print out the version number
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
@@ -234,17 +259,7 @@ func main() {
 	encoding.Register()
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
-	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
-	InitConfigDir()
-
-	// Build a list of available Extensions (Syntax, Colorscheme etc.)
-	InitRuntimeFiles()
-
-	// Load the user's settings
-	InitGlobalSettings()
-
-	InitCommands()
-	InitBindings()
+	LoadAll()
 
 	// Start the screen
 	InitScreen()
@@ -319,6 +334,7 @@ func main() {
 	}))
 	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
 	L.SetGlobal("configDir", luar.New(L, configDir))
+	L.SetGlobal("Reload", luar.New(L, LoadAll))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
