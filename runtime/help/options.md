@@ -28,6 +28,10 @@ Here are the options that you can set:
 
 	default value: `0`
 
+* `eofnewline`: micro will automatically add a newline to the file.
+
+	default value: `false`
+
 * `tabsize`: sets the tab size to `option`
 
 	default value: `4`

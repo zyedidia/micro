@@ -269,7 +269,14 @@ func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	b.Name = filename
 	b.Path = filename
-	data := []byte(b.String())
+	str := b.String()
+	if b.Settings["eofnewline"].(bool) {
+		end := b.End()
+		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
+			b.Insert(end, "\n")
+		}
+	}
+	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.IsModified = false
@@ -350,6 +357,15 @@ func (b *Buffer) Start() Loc {
 // End returns the location of the last character in the buffer
 func (b *Buffer) End() Loc {
 	return Loc{utf8.RuneCount(b.lines[b.NumLines-1]), b.NumLines - 1}
+}
+
+// RuneAt returns the rune at a given location in the buffer
+func (b *Buffer) RuneAt(loc Loc) rune {
+	line := []rune(b.Line(loc.Y))
+	if len(line) > 0 {
+		return line[loc.X]
+	}
+	return '\n'
 }
 
 // Line returns a single line
