@@ -26,22 +26,27 @@ type StrCommand struct {
 
 var commands map[string]Command
 
-var commandActions = map[string]func([]string){
-	"Set":       Set,
-	"SetLocal":  SetLocal,
-	"Show":      Show,
-	"Run":       Run,
-	"Bind":      Bind,
-	"Quit":      Quit,
-	"Save":      Save,
-	"Replace":   Replace,
-	"VSplit":    VSplit,
-	"HSplit":    HSplit,
-	"Tab":       NewTab,
-	"Help":      Help,
-	"Eval":      Eval,
-	"ToggleLog": ToggleLog,
-	"Plugin":    PluginCmd,
+var commandActions map[string]func([]string)
+
+func init() {
+	commandActions = map[string]func([]string){
+		"Set":       Set,
+		"SetLocal":  SetLocal,
+		"Show":      Show,
+		"Run":       Run,
+		"Bind":      Bind,
+		"Quit":      Quit,
+		"Save":      Save,
+		"Replace":   Replace,
+		"VSplit":    VSplit,
+		"HSplit":    HSplit,
+		"Tab":       NewTab,
+		"Help":      Help,
+		"Eval":      Eval,
+		"ToggleLog": ToggleLog,
+		"Plugin":    PluginCmd,
+		"Reload":    Reload,
+	}
 }
 
 // InitCommands initializes the default commands
@@ -89,6 +94,7 @@ func DefaultCommands() map[string]StrCommand {
 		"eval":     {"Eval", []Completion{NoCompletion}},
 		"log":      {"ToggleLog", []Completion{NoCompletion}},
 		"plugin":   {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
+		"reload":   {"Reload", []Completion{NoCompletion}},
 	}
 }
 
@@ -162,6 +168,15 @@ func PluginCmd(args []string) {
 					ToggleLog([]string{})
 				}
 			}
+		case "available":
+			packages := GetAllPluginPackages()
+			messenger.AddLog("Available Plugins:")
+			for _, pkg := range packages {
+				messenger.AddLog(pkg.Name)
+			}
+			if CurView().Type != vtLog {
+				ToggleLog([]string{})
+			}
 		}
 	} else {
 		messenger.Error("Not enough arguments")
@@ -173,9 +188,18 @@ func ToggleLog(args []string) {
 	if CurView().Type != vtLog {
 		CurView().HSplit(buffer)
 		CurView().Type = vtLog
+		RedrawAll()
+		buffer.Cursor.Loc = buffer.Start()
+		CurView().Relocate()
+		buffer.Cursor.Loc = buffer.End()
+		CurView().Relocate()
 	} else {
 		CurView().DoActions("Quit")
 	}
+}
+
+func Reload(args []string) {
+	LoadAll()
 }
 
 // Help tries to open the given help page in a horizontal split
@@ -419,8 +443,7 @@ func Replace(args []string) {
 		if matches != nil && len(matches) > 0 {
 			prevMatchCount := runePos(matches[0][0], bufStr)
 			searchCount := runePos(matches[0][1], bufStr) - prevMatchCount
-			prevMatch := matches[0]
-			from := FromCharPos(prevMatch[0], view.Buf)
+			from := FromCharPos(matches[0][0], view.Buf)
 			to := from.Move(searchCount, view.Buf)
 			adjust := Count(replace) - searchCount
 			view.Buf.Replace(from, to, replace)
@@ -432,7 +455,6 @@ func Replace(args []string) {
 					from = from.Move(matchCount-prevMatchCount+adjust, view.Buf)
 					to = from.Move(searchCount, view.Buf)
 					view.Buf.Replace(from, to, replace)
-					prevMatch = match
 					prevMatchCount = matchCount
 					adjust = Count(replace) - searchCount
 				}

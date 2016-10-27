@@ -27,8 +27,7 @@ type View struct {
 	Cursor *Cursor
 
 	// The topmost line, used for vertical scrolling
-	Topline    int
-	Bottomline int
+	Topline int
 	// The leftmost column, used for horizontal scrolling
 	leftCol int
 
@@ -129,6 +128,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	return v
 }
 
+// ToggleStatusLine creates an extra row for the statusline if necessary
 func (v *View) ToggleStatusLine() {
 	if v.Buf.Settings["statusline"].(bool) {
 		v.height--
@@ -137,6 +137,7 @@ func (v *View) ToggleStatusLine() {
 	}
 }
 
+// ToggleTabbar creates an extra row for the tabbar if necessary
 func (v *View) ToggleTabbar() {
 	if len(tabs) > 1 {
 		if v.y == 0 {
@@ -234,6 +235,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 }
 
+// Open opens the given file in the view
 func (v *View) Open(filename string) {
 	home, _ := homedir.Dir()
 	filename = strings.Replace(filename, "~", home, 1)
@@ -281,6 +283,7 @@ func (v *View) VSplit(buf *Buffer) bool {
 	return false
 }
 
+// GetSoftWrapLocation gets the location of a visual click on the screen and converts it to col,line
 func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		vx = v.Cursor.GetCharPosInLine(vy, vx)
@@ -288,7 +291,7 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	}
 
 	screenX, screenY := 0, v.Topline
-	for lineN := v.Topline; lineN < v.Bottomline; lineN++ {
+	for lineN := v.Topline; lineN < v.height; lineN++ {
 		line := v.Buf.Line(lineN)
 
 		colN := 0
@@ -319,10 +322,41 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	return 0, 0
 }
 
+func (v *View) Bottomline() int {
+	screenX, screenY := 0, 0
+	numLines := 0
+	for lineN := v.Topline; lineN < v.Topline+v.height; lineN++ {
+		line := v.Buf.Line(lineN)
+
+		colN := 0
+		for _, ch := range line {
+			if screenX >= v.width-v.lineNumOffset {
+				screenX = 0
+				screenY++
+			}
+
+			if ch == '\t' {
+				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			}
+
+			screenX++
+			colN++
+		}
+		screenX = 0
+		screenY++
+		numLines++
+
+		if screenY >= v.height {
+			break
+		}
+	}
+	return numLines + v.Topline
+}
+
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
-	height := v.Bottomline - v.Topline
+	height := v.Bottomline() - v.Topline
 	ret := false
 	cy := v.Cursor.Y
 	scrollmargin := int(v.Buf.Settings["scrollmargin"].(float64))
@@ -898,10 +932,6 @@ func (v *View) DisplayView() {
 				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
 		}
-	}
-	v.Bottomline = curLineN
-	if !v.Buf.Settings["softwrap"].(bool) {
-		v.Bottomline++
 	}
 }
 

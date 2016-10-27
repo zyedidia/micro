@@ -17,6 +17,8 @@ Here is a picture of micro editing its source code.
 
 To see more screenshots of micro, showcasing all of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
 
+You can also check out the website for Micro at https://micro-editor.github.io.
+
 # Features
 
 * Easy to use and to install
@@ -44,7 +46,7 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Small and simple
 * Easily configurable
 * Macros
-* Common editor things such as undo/redo, line numbers, Unicode support...
+* Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
 
 Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.
 

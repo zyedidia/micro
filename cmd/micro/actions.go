@@ -431,6 +431,10 @@ func (v *View) OutdentLine(deprecatedUsePlugin ...bool) bool {
 		return false
 	}
 
+	if v.Cursor.HasSelection() {
+		return false
+	}
+	
 	for x := 0; x < len(v.Buf.IndentString()); x++ {
 		if len(GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))) == 0 {
 			break
@@ -476,6 +480,10 @@ func (v *View) InsertTab(deprecatedUsePlugin ...bool) bool {
 		return false
 	}
 
+	if v.Cursor.HasSelection() {
+		return false
+	}
+	
 	tabBytes := len(v.Buf.IndentString())
 	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
 	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])

@@ -186,9 +186,8 @@ func (b *Buffer) FileType() string {
 func (b *Buffer) IndentString() string {
 	if b.Settings["tabstospaces"].(bool) {
 		return Spaces(int(b.Settings["tabsize"].(float64)))
-	} else {
-		return "\t"
 	}
+	return "\t"
 }
 
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
@@ -270,7 +269,14 @@ func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	b.Name = filename
 	b.Path = filename
-	data := []byte(b.String())
+	str := b.String()
+	if b.Settings["eofnewline"].(bool) {
+		end := b.End()
+		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
+			b.Insert(end, "\n")
+		}
+	}
+	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.IsModified = false
@@ -353,6 +359,15 @@ func (b *Buffer) End() Loc {
 	return Loc{utf8.RuneCount(b.lines[b.NumLines-1]), b.NumLines - 1}
 }
 
+// RuneAt returns the rune at a given location in the buffer
+func (b *Buffer) RuneAt(loc Loc) rune {
+	line := []rune(b.Line(loc.Y))
+	if len(line) > 0 {
+		return line[loc.X]
+	}
+	return '\n'
+}
+
 // Line returns a single line
 func (b *Buffer) Line(n int) string {
 	if n >= len(b.lines) {
@@ -376,6 +391,7 @@ func (b *Buffer) Len() int {
 	return Count(b.String())
 }
 
+// MoveLinesUp moves the range of lines up one row
 func (b *Buffer) MoveLinesUp(start int, end int) {
 	// 0 < start < end <= len(b.lines)
 	if start < 1 || start >= end || end > len(b.lines) {
@@ -401,6 +417,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	)
 }
 
+// MoveLinesDown moves the range of lines down one row
 func (b *Buffer) MoveLinesDown(start int, end int) {
 	// 0 <= start < end < len(b.lines)
 	// if end == len(b.lines), we can't do anything here because the
@@ -412,7 +429,7 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 		Loc{0, start},
 		b.Line(end)+"\n",
 	)
-	end += 1
+	end++
 	b.Remove(
 		Loc{0, end},
 		Loc{0, end + 1},
