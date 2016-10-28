@@ -291,7 +291,7 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	}
 
 	screenX, screenY := 0, v.Topline
-	for lineN := v.Topline; lineN < v.height; lineN++ {
+	for lineN := v.Topline; lineN < v.Bottomline(); lineN++ {
 		line := v.Buf.Line(lineN)
 
 		colN := 0
