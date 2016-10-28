@@ -418,16 +418,13 @@ func (v *View) MoveToMouseClick(x, y int) {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
-	// This bool determines whether the view is relocated at the end of the function
-	// By default it's true because most events should cause a relocate
-	relocate := true
-
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
 		tabs[v.TabNum].Resize()
+		v.Relocate()
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
@@ -440,9 +437,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 						}
 					}
 					if e.Modifiers() == key.modifiers {
-						relocate = false
 						isBinding = true
-						relocate = v.DoActions(actions) || relocate
+						v.DoActions(actions)
 						break
 					}
 				}
@@ -467,7 +463,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 			if recordingMacro {
 				curMacro = append(curMacro, e.Rune())
 			}
+
 		}
+		v.Relocate()
 	case *tcell.EventPaste:
 		if !PreActionCall("Paste", v) {
 			break
@@ -487,12 +485,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 		messenger.Message("Pasted clipboard")
 
 		PostActionCall("Paste", v)
+		v.Relocate()
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
 		y += v.Topline - v.y
-		// Don't relocate for mouse events
-		relocate = false
 
 		button := e.Buttons()
 
@@ -569,10 +566,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
 			v.ScrollDown(scrollspeed)
 		}
-	}
-
-	if relocate {
-		v.Relocate()
 	}
 }
 
