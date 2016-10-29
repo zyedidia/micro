@@ -168,6 +168,15 @@ func PluginCmd(args []string) {
 					ToggleLog([]string{})
 				}
 			}
+		case "available":
+			packages := GetAllPluginPackages()
+			messenger.AddLog("Available Plugins:")
+			for _, pkg := range packages {
+				messenger.AddLog(pkg.Name)
+			}
+			if CurView().Type != vtLog {
+				ToggleLog([]string{})
+			}
 		}
 	} else {
 		messenger.Error("Not enough arguments")
@@ -179,6 +188,11 @@ func ToggleLog(args []string) {
 	if CurView().Type != vtLog {
 		CurView().HSplit(buffer)
 		CurView().Type = vtLog
+		RedrawAll()
+		buffer.Cursor.Loc = buffer.Start()
+		CurView().Relocate()
+		buffer.Cursor.Loc = buffer.End()
+		CurView().Relocate()
 	} else {
 		CurView().Quit(true)
 	}

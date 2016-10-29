@@ -59,6 +59,9 @@ Here are the possible commands that you can use.
    You can also see more information about the plugin manager
    in the `Plugin Manager` section of the `plugins` help topic.
 
+* `plugin available`: list plugins available for download (this includes
+   any plugins that may be already installed).
+
 * `reload`: reloads all runtime files.
 
 ---
