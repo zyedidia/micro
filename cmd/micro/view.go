@@ -201,7 +201,7 @@ func (v *View) CanClose() bool {
 		}
 		if !canceled {
 			if char == 'y' {
-				v.Save(true)
+				v.DoActions("Save")
 				return true
 			} else if char == 'n' {
 				return true
@@ -224,7 +224,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.leftCol = 0
 	v.Cursor.ResetSelection()
 	v.Relocate()
-	v.Center(false)
+	v.Center()
 	v.messages = make(map[string][]GutterMessage)
 
 	v.matches = Match(v)
@@ -418,16 +418,13 @@ func (v *View) MoveToMouseClick(x, y int) {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
-	// This bool determines whether the view is relocated at the end of the function
-	// By default it's true because most events should cause a relocate
-	relocate := true
-
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
 	case *tcell.EventResize:
 		// Window resized
 		tabs[v.TabNum].Resize()
+		v.Relocate()
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
@@ -440,17 +437,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 						}
 					}
 					if e.Modifiers() == key.modifiers {
-						relocate = false
 						isBinding = true
-						for _, action := range actions {
-							relocate = action(v, true) || relocate
-							funcName := FuncName(action)
-							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
-								if recordingMacro {
-									curMacro = append(curMacro, action)
-								}
-							}
-						}
+						v.DoActions(actions)
 						break
 					}
 				}
@@ -475,7 +463,9 @@ func (v *View) HandleEvent(event tcell.Event) {
 			if recordingMacro {
 				curMacro = append(curMacro, e.Rune())
 			}
+
 		}
+		v.Relocate()
 	case *tcell.EventPaste:
 		if !PreActionCall("Paste", v) {
 			break
@@ -495,12 +485,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 		messenger.Message("Pasted clipboard")
 
 		PostActionCall("Paste", v)
+		v.Relocate()
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
 		y += v.Topline - v.y
-		// Don't relocate for mouse events
-		relocate = false
 
 		button := e.Buttons()
 
@@ -550,7 +539,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		case tcell.Button2:
 			// Middle mouse button was clicked,
 			// We should paste primary
-			v.PastePrimary(true)
+			v.DoActions("PastePrimary")
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -577,10 +566,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
 			v.ScrollDown(scrollspeed)
 		}
-	}
-
-	if relocate {
-		v.Relocate()
 	}
 }
 

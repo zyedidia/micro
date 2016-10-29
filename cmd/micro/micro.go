@@ -291,7 +291,7 @@ func main() {
 		tabs = append(tabs, tab)
 		for _, t := range tabs {
 			for _, v := range t.views {
-				v.Center(false)
+				v.Center()
 				if globalSettings["syntax"].(bool) {
 					v.matches = Match(v)
 				}
@@ -402,7 +402,7 @@ func main() {
 			f.function(f.output, f.args...)
 			continue
 		case <-autosave:
-			CurView().Save(true)
+			CurView().DoActions("Save")
 		case event = <-events:
 		}
 

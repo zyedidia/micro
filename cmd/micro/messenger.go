@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -296,7 +297,8 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 }
 
 // HandleEvent handles an event for the prompter
-func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
+func
+ (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
 		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
@@ -308,39 +310,38 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 						}
 					}
 					if e.Modifiers() == key.modifiers {
-						for _, action := range actions {
-							funcName := FuncName(action)
-							switch funcName {
-							case "main.(*View).CursorUp":
+						for _, action := range strings.Split(actions,",") {
+							switch action {
+							case "CursorUp":
 								if m.historyNum > 0 {
 									m.historyNum--
 									m.response = history[m.historyNum]
 									m.cursorx = Count(m.response)
 								}
-							case "main.(*View).CursorDown":
+							case "CursorDown":
 								if m.historyNum < len(history)-1 {
 									m.historyNum++
 									m.response = history[m.historyNum]
 									m.cursorx = Count(m.response)
 								}
-							case "main.(*View).CursorLeft":
+							case "CursorLeft":
 								if m.cursorx > 0 {
 									m.cursorx--
 								}
-							case "main.(*View).CursorRight":
+							case "CursorRight":
 								if m.cursorx < Count(m.response) {
 									m.cursorx++
 								}
-							case "main.(*View).CursorStart", "main.(*View).StartOfLine":
+							case "CursorStart", "StartOfLine":
 								m.cursorx = 0
-							case "main.(*View).CursorEnd", "main.(*View).EndOfLine":
+							case "CursorEnd", "EndOfLine":
 								m.cursorx = Count(m.response)
-							case "main.(*View).Backspace":
+							case "Backspace":
 								if m.cursorx > 0 {
 									m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
 									m.cursorx--
 								}
-							case "main.(*View).Paste":
+							case "Paste":
 								clip, _ := clipboard.ReadAll("clipboard")
 								m.response = Insert(m.response, m.cursorx, clip)
 								m.cursorx += Count(clip)

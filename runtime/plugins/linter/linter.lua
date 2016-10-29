@@ -5,7 +5,7 @@ end
 MakeCommand("lint", "linter.lintCommand", 0)
 
 function lintCommand()
-    CurView():Save(false)
+    CurView():Save()
     runLinter()
 end
 

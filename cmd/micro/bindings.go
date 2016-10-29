@@ -9,89 +9,8 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-var bindings map[Key][]func(*View, bool) bool
+var bindings map[Key]string
 var helpBinding string
-
-var bindingActions = map[string]func(*View, bool) bool{
-	"CursorUp":            (*View).CursorUp,
-	"CursorDown":          (*View).CursorDown,
-	"CursorPageUp":        (*View).CursorPageUp,
-	"CursorPageDown":      (*View).CursorPageDown,
-	"CursorLeft":          (*View).CursorLeft,
-	"CursorRight":         (*View).CursorRight,
-	"CursorStart":         (*View).CursorStart,
-	"CursorEnd":           (*View).CursorEnd,
-	"SelectToStart":       (*View).SelectToStart,
-	"SelectToEnd":         (*View).SelectToEnd,
-	"SelectUp":            (*View).SelectUp,
-	"SelectDown":          (*View).SelectDown,
-	"SelectLeft":          (*View).SelectLeft,
-	"SelectRight":         (*View).SelectRight,
-	"WordRight":           (*View).WordRight,
-	"WordLeft":            (*View).WordLeft,
-	"SelectWordRight":     (*View).SelectWordRight,
-	"SelectWordLeft":      (*View).SelectWordLeft,
-	"DeleteWordRight":     (*View).DeleteWordRight,
-	"DeleteWordLeft":      (*View).DeleteWordLeft,
-	"SelectToStartOfLine": (*View).SelectToStartOfLine,
-	"SelectToEndOfLine":   (*View).SelectToEndOfLine,
-	"InsertNewline":       (*View).InsertNewline,
-	"InsertSpace":         (*View).InsertSpace,
-	"Backspace":           (*View).Backspace,
-	"Delete":              (*View).Delete,
-	"InsertTab":           (*View).InsertTab,
-	"Save":                (*View).Save,
-	"Find":                (*View).Find,
-	"FindNext":            (*View).FindNext,
-	"FindPrevious":        (*View).FindPrevious,
-	"Center":              (*View).Center,
-	"Undo":                (*View).Undo,
-	"Redo":                (*View).Redo,
-	"Copy":                (*View).Copy,
-	"Cut":                 (*View).Cut,
-	"CutLine":             (*View).CutLine,
-	"DuplicateLine":       (*View).DuplicateLine,
-	"DeleteLine":          (*View).DeleteLine,
-	"MoveLinesUp":         (*View).MoveLinesUp,
-	"MoveLinesDown":       (*View).MoveLinesDown,
-	"IndentSelection":     (*View).IndentSelection,
-	"OutdentSelection":    (*View).OutdentSelection,
-	"OutdentLine":         (*View).OutdentLine,
-	"Paste":               (*View).Paste,
-	"PastePrimary":        (*View).PastePrimary,
-	"SelectAll":           (*View).SelectAll,
-	"OpenFile":            (*View).OpenFile,
-	"Start":               (*View).Start,
-	"End":                 (*View).End,
-	"PageUp":              (*View).PageUp,
-	"PageDown":            (*View).PageDown,
-	"HalfPageUp":          (*View).HalfPageUp,
-	"HalfPageDown":        (*View).HalfPageDown,
-	"StartOfLine":         (*View).StartOfLine,
-	"EndOfLine":           (*View).EndOfLine,
-	"ToggleHelp":          (*View).ToggleHelp,
-	"ToggleRuler":         (*View).ToggleRuler,
-	"JumpLine":            (*View).JumpLine,
-	"ClearStatus":         (*View).ClearStatus,
-	"ShellMode":           (*View).ShellMode,
-	"CommandMode":         (*View).CommandMode,
-	"Escape":              (*View).Escape,
-	"Quit":                (*View).Quit,
-	"QuitAll":             (*View).QuitAll,
-	"AddTab":              (*View).AddTab,
-	"PreviousTab":         (*View).PreviousTab,
-	"NextTab":             (*View).NextTab,
-	"NextSplit":           (*View).NextSplit,
-	"PreviousSplit":       (*View).PreviousSplit,
-	"Unsplit":             (*View).Unsplit,
-	"VSplit":              (*View).VSplitBinding,
-	"HSplit":              (*View).HSplitBinding,
-	"ToggleMacro":         (*View).ToggleMacro,
-	"PlayMacro":           (*View).PlayMacro,
-
-	// This was changed to InsertNewline but I don't want to break backwards compatibility
-	"InsertEnter": (*View).InsertNewline,
-}
 
 var bindingKeys = map[string]tcell.Key{
 	"Up":             tcell.KeyUp,
@@ -232,7 +151,7 @@ type Key struct {
 
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
-	bindings = make(map[Key][]func(*View, bool) bool)
+	bindings = make(map[Key]string)
 
 	var parsed map[string]string
 	defaults := DefaultBindings()
@@ -325,17 +244,6 @@ modSearch:
 	return Key{}, false
 }
 
-// findAction will find 'action' using string 'v'
-func findAction(v string) (action func(*View, bool) bool) {
-	action, ok := bindingActions[v]
-	if !ok {
-		// If the user seems to be binding a function that doesn't exist
-		// We hope that it's a lua function that exists and bind it to that
-		action = LuaFunctionBinding(v)
-	}
-	return action
-}
-
 // BindKey takes a key and an action and binds the two together
 func BindKey(k, v string) {
 	key, ok := findKey(k)
@@ -346,13 +254,7 @@ func BindKey(k, v string) {
 		helpBinding = k
 	}
 
-	actionNames := strings.Split(v, ",")
-	actions := make([]func(*View, bool) bool, 0, len(actionNames))
-	for _, actionName := range actionNames {
-		actions = append(actions, findAction(actionName))
-	}
-
-	bindings[key] = actions
+	bindings[key] = v
 }
 
 // DefaultBindings returns a map containing micro's default keybindings
