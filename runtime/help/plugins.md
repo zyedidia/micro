@@ -86,6 +86,10 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    `waitToClose` bool only applies if `interactive` is true and means that it should wait before
    returning to the editor.
 
+* `ToCharPos(loc Loc, buf *Buffer) int`: returns the character position of a given x, y location.
+
+* `ByteOffset(loc Loc, buf *Buffer) int`: exactly like `ToCharPos` except it it counts bytes instead of runes.
+
 * `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
    Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
    are callbacks to lua functions which will be called when the given actions happen

@@ -335,6 +335,8 @@ func main() {
 	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
 	L.SetGlobal("configDir", luar.New(L, configDir))
 	L.SetGlobal("Reload", luar.New(L, LoadAll))
+	L.SetGlobal("ByteOffset", luar.New(L, ByteOffset))
+	L.SetGlobal("ToCharPos", luar.New(L, ToCharPos))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))

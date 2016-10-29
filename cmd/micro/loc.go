@@ -28,6 +28,18 @@ func ToCharPos(start Loc, buf *Buffer) int {
 	return loc
 }
 
+// ByteOffset is just like ToCharPos except it counts bytes instead of runes
+func ByteOffset(pos Loc, buf *Buffer) int {
+	x, y := pos.X, pos.Y
+	loc := 0
+	for i := 0; i < y; i++ {
+		// + 1 for the newline
+		loc += len(buf.Line(i)) + 1
+	}
+	loc += len(buf.Line(y)[:x])
+	return loc
+}
+
 // Loc stores a location
 type Loc struct {
 	X, Y int
