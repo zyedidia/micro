@@ -260,11 +260,14 @@ func LoadRulesFromFile(text, filename string) []SyntaxRule {
 // FindFileType finds the filetype for the given buffer
 func FindFileType(buf *Buffer) string {
 	for r := range syntaxFiles {
+		if r[1] != nil && r[1].MatchString(buf.Line(0)) {
+			// The header statement matches the first line
+			return syntaxFiles[r].filetype
+		}
+	}
+	for r := range syntaxFiles {
 		if r[0] != nil && r[0].MatchString(buf.Path) {
 			// The syntax statement matches the extension
-			return syntaxFiles[r].filetype
-		} else if r[1] != nil && r[1].MatchString(buf.Line(0)) {
-			// The header statement matches the first line
 			return syntaxFiles[r].filetype
 		}
 	}
