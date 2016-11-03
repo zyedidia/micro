@@ -283,6 +283,7 @@ func (b *Buffer) SaveAs(filename string) error {
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
 	}
+	b.ModTime, _ = GetModTime(filename)
 	return err
 }
 

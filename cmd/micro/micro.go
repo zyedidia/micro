@@ -46,7 +46,7 @@ var (
 
 	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
-	Version     = "Unknown"
+	Version     = "0.0.0-unknown"
 	CommitHash  = "Unknown"
 	CompileDate = "Unknown"
 
