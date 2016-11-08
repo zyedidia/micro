@@ -18,6 +18,7 @@
 // runtime/help/plugins.md
 // runtime/help/tutorial.md
 // runtime/plugins/autoclose/autoclose.lua
+// runtime/plugins/ftoptions/ftoptions.lua
 // runtime/plugins/linter/linter.lua
 // runtime/syntax/Dockerfile.micro
 // runtime/syntax/LICENSE
@@ -537,6 +538,26 @@ func runtimePluginsAutocloseAutocloseLua() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "runtime/plugins/autoclose/autoclose.lua", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _runtimePluginsFtoptionsFtoptionsLua = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x94\x8e\xb1\x0a\xc2\x40\x0c\x86\xf7\x3e\x45\xc8\x54\x41\xfa\x06\x5d\x7c\x81\x0e\x05\x17\x71\x38\x6b\xd2\x06\xcf\xe4\xf0\x52\x4b\xdf\x5e\xae\x52\x9c\x0d\x64\xf9\xf3\xf1\xe5\xe7\x59\x07\x17\x53\x30\x3d\x0b\x2d\x5d\x22\xad\xdf\x42\xcb\xa1\x02\x00\x88\x36\x84\x08\xec\xd0\x42\x09\x9b\xd3\xcc\x4d\x4f\xee\xa2\x63\xbe\x20\x4b\x24\x5f\x13\xe1\xb5\xda\x68\xe1\x0d\x6d\x01\x9f\xe1\x41\xe5\x8a\x60\xaf\x3d\x1b\x0d\xc1\x27\xd2\x0d\x2d\xd3\x93\x77\xa9\xfc\xae\xd1\xc3\x2d\xbb\xe5\x14\x06\xca\x78\x04\x34\x66\xfc\x36\xa0\x98\xe9\xe7\x4d\xab\x4f\xa6\x7f\x78\x74\xd7\xe8\xbd\x2a\xfb\x09\x00\x00\xff\xff\xf6\x91\x6e\x48\xef\x00\x00\x00")
+
+func runtimePluginsFtoptionsFtoptionsLuaBytes() ([]byte, error) {
+	return bindataRead(
+		_runtimePluginsFtoptionsFtoptionsLua,
+		"runtime/plugins/ftoptions/ftoptions.lua",
+	)
+}
+
+func runtimePluginsFtoptionsFtoptionsLua() (*asset, error) {
+	bytes, err := runtimePluginsFtoptionsFtoptionsLuaBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "runtime/plugins/ftoptions/ftoptions.lua", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -2531,6 +2552,7 @@ var _bindata = map[string]func() (*asset, error){
 	"runtime/help/plugins.md": runtimeHelpPluginsMd,
 	"runtime/help/tutorial.md": runtimeHelpTutorialMd,
 	"runtime/plugins/autoclose/autoclose.lua": runtimePluginsAutocloseAutocloseLua,
+	"runtime/plugins/ftoptions/ftoptions.lua": runtimePluginsFtoptionsFtoptionsLua,
 	"runtime/plugins/linter/linter.lua": runtimePluginsLinterLinterLua,
 	"runtime/syntax/Dockerfile.micro": runtimeSyntaxDockerfileMicro,
 	"runtime/syntax/LICENSE": runtimeSyntaxLicense,
@@ -2694,6 +2716,9 @@ var _bintree = &bintree{nil, map[string]*bintree{
 		"plugins": &bintree{nil, map[string]*bintree{
 			"autoclose": &bintree{nil, map[string]*bintree{
 				"autoclose.lua": &bintree{runtimePluginsAutocloseAutocloseLua, map[string]*bintree{}},
+			}},
+			"ftoptions": &bintree{nil, map[string]*bintree{
+				"ftoptions.lua": &bintree{runtimePluginsFtoptionsFtoptionsLua, map[string]*bintree{}},
 			}},
 			"linter": &bintree{nil, map[string]*bintree{
 				"linter.lua": &bintree{runtimePluginsLinterLinterLua, map[string]*bintree{}},
