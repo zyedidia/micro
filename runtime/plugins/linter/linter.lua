@@ -13,8 +13,10 @@ function runLinter()
     local ft = CurView().Buf:FileType()
     local file = CurView().Buf.Path
     local devnull = "/dev/null"
+    local temp = os.getenv("TMPDIR")
     if OS == "windows" then
         devnull = "NUL"
+        temp = os.getenv("TEMP")
     end
     if ft == "go" then
         lint("gobuild", "go build -o " .. devnull, "%f:%l: %m")
@@ -28,7 +30,7 @@ function runLinter()
     elseif ft == "d" then
         lint("dmd", "dmd -color=off -o- -w -wi -c " .. file, "%f%(%l%):.+: %m")
     elseif ft == "java" then
-        lint("javac", "javac " .. file, "%f:%l: error: %m")
+        lint("javac", "javac -d " .. temp .. " " .. file, "%f:%l: error: %m")
     elseif ft == "javascript" then
         lint("jshint", "jshint " .. file, "%f: line %l,.+, %m")
     end
