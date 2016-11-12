@@ -28,6 +28,15 @@ func ToCharPos(start Loc, buf *Buffer) int {
 	return loc
 }
 
+// InBounds returns whether the given location is a valid character position in the given buffer
+func InBounds(pos Loc, buf *Buffer) bool {
+	if pos.Y < 0 || pos.Y >= buf.NumLines || pos.X < 0 || pos.X > Count(buf.Line(pos.Y)) {
+		return false
+	}
+
+	return true
+}
+
 // ByteOffset is just like ToCharPos except it counts bytes instead of runes
 func ByteOffset(pos Loc, buf *Buffer) int {
 	x, y := pos.X, pos.Y
