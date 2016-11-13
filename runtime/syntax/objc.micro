@@ -1,8 +1,8 @@
-## Here is an example for C/C++/Obj-C.
+## Here is an example for Obj-C.
 ##
 syntax "Objective-C" "\.(m|mm|h)$"
 
-color type "\b(float|double|CGFloat|id|bool|BOOL|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline|Class|SEL|IMP)\b"
+color type "\b(float|double|CGFloat|id|bool|BOOL|Boolean|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline|Class|SEL|IMP|NS(U)?Integer)\b"
 color type "\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\b"
 color type "\b[A-Z][A-Z][[:alnum:]]*\b"
 color type "\b[A-Za-z0-9_]*_t\b"
