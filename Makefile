@@ -4,7 +4,7 @@ VERSION = $(shell go run tools/build-version.go)
 HASH = $(shell git rev-parse --short HEAD)
 DATE = $(shell go run tools/build-date.go)
 
-GOBIN ?= $($GOPATH)/bin
+GOBIN ?= $(GOPATH)/bin
 
 # Builds micro after checking dependencies but without updating the runtime
 build: deps
