@@ -38,6 +38,9 @@ type View struct {
 	width  int
 	height int
 
+	lockWidth  bool
+	lockHeight bool
+
 	// Where this view is located
 	x, y int
 
@@ -323,6 +326,10 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 }
 
 func (v *View) Bottomline() int {
+	if !v.Buf.Settings["softwrap"].(bool) {
+		return v.Topline + v.height
+	}
+
 	screenX, screenY := 0, 0
 	numLines := 0
 	for lineN := v.Topline; lineN < v.Topline+v.height; lineN++ {

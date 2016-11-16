@@ -43,8 +43,10 @@ type SplitTree struct {
 	x int
 	y int
 
-	width  int
-	height int
+	width      int
+	height     int
+	lockWidth  bool
+	lockHeight bool
 
 	tabNum int
 }
@@ -145,20 +147,57 @@ func (s *SplitTree) Cleanup() {
 
 // ResizeSplits resizes all the splits correctly
 func (s *SplitTree) ResizeSplits() {
-	for i, node := range s.children {
+	lockedWidth := 0
+	lockedHeight := 0
+	lockedChildren := 0
+	for _, node := range s.children {
 		if n, ok := node.(*LeafNode); ok {
 			if s.kind == VerticalSplit {
-				n.view.width = s.width / len(s.children)
+				if n.view.lockWidth {
+					lockedWidth += n.view.width
+					lockedChildren++
+				}
+			} else {
+				if n.view.lockHeight {
+					lockedHeight += n.view.height
+					lockedChildren++
+				}
+			}
+		} else if n, ok := node.(*SplitTree); ok {
+			if s.kind == VerticalSplit {
+				if n.lockWidth {
+					lockedWidth += n.width
+					lockedChildren++
+				}
+			} else {
+				if n.lockHeight {
+					lockedHeight += n.height
+					lockedChildren++
+				}
+			}
+		}
+	}
+	x, y := 0, 0
+	for _, node := range s.children {
+		if n, ok := node.(*LeafNode); ok {
+			if s.kind == VerticalSplit {
+				if !n.view.lockWidth {
+					n.view.width = (s.width - lockedWidth) / (len(s.children) - lockedChildren)
+				}
 				n.view.height = s.height
 
-				n.view.x = s.x + n.view.width*i
+				n.view.x = s.x + x
 				n.view.y = s.y
+				x += n.view.width
 			} else {
-				n.view.height = s.height / len(s.children)
+				if !n.view.lockHeight {
+					n.view.height = (s.height - lockedHeight) / (len(s.children) - lockedChildren)
+				}
 				n.view.width = s.width
 
-				n.view.y = s.y + n.view.height*i
+				n.view.y = s.y + y
 				n.view.x = s.x
+				y += n.view.height
 			}
 			if n.view.Buf.Settings["statusline"].(bool) {
 				n.view.height--
@@ -168,17 +207,23 @@ func (s *SplitTree) ResizeSplits() {
 			n.view.matches = Match(n.view)
 		} else if n, ok := node.(*SplitTree); ok {
 			if s.kind == VerticalSplit {
-				n.width = s.width / len(s.children)
+				if !n.lockWidth {
+					n.width = (s.width - lockedWidth) / (len(s.children) - lockedChildren)
+				}
 				n.height = s.height
 
-				n.x = s.x + n.width*i
+				n.x = s.x + x
 				n.y = s.y
+				x += n.width
 			} else {
-				n.height = s.height / len(s.children)
+				if !n.lockHeight {
+					n.height = (s.height - lockedHeight) / (len(s.children) - lockedChildren)
+				}
 				n.width = s.width
 
-				n.y = s.y + n.height*i
+				n.y = s.y + y
 				n.x = s.x
+				y += n.height
 			}
 			n.ResizeSplits()
 		}
