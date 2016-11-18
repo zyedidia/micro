@@ -333,6 +333,7 @@ func main() {
 		return Loc{x, y}
 	}))
 	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
+	L.SetGlobal("DirectoryName", luar.New(L, filepath.Dir))
 	L.SetGlobal("configDir", luar.New(L, configDir))
 	L.SetGlobal("Reload", luar.New(L, LoadAll))
 	L.SetGlobal("ByteOffset", luar.New(L, ByteOffset))
