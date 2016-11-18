@@ -64,6 +64,10 @@ Here are the possible commands that you can use.
 
 * `reload`: reloads all runtime files.
 
+* `cd path`: Change the working directory to the given `path`.
+
+* `pwd`: Print the current working directory.
+
 ---
 
 The following commands are provided by the default plugins:

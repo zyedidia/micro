@@ -81,12 +81,6 @@ func NewBuffer(txt []byte, path string) *Buffer {
 
 	b.Path = path
 	b.AbsPath = absPath
-	b.Name = path
-
-	// If the file doesn't have a path to disk then we give it no name
-	if path == "" {
-		b.Name = "No name"
-	}
 
 	// The last time this file was modified
 	b.ModTime, _ = GetModTime(b.Path)
@@ -270,7 +264,6 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) SaveAs(filename string) error {
 	b.FindFileType()
 	b.UpdateRules()
-	b.Name = filename
 	b.Path = filename
 	str := b.String()
 	if b.Settings["eofnewline"].(bool) {
@@ -295,7 +288,6 @@ func (b *Buffer) SaveAs(filename string) error {
 func (b *Buffer) SaveAsWithSudo(filename string) error {
 	b.FindFileType()
 	b.UpdateRules()
-	b.Name = filename
 	b.Path = filename
 
 	// The user may have already used sudo in which case we won't need the password

@@ -91,6 +91,18 @@ func Insert(str string, pos int, value string) string {
 	return string([]rune(str)[:pos]) + value + string([]rune(str)[pos:])
 }
 
+// MakeRelative will attempt to make a relative path between path and base
+func MakeRelative(path, base string) (string, error) {
+	if len(path) > 0 {
+		rel, err := filepath.Rel(base, path)
+		if err != nil {
+			return path, err
+		}
+		return rel, nil
+	}
+	return path, nil
+}
+
 // GetLeadingWhitespace returns the leading whitespace of the given string
 func GetLeadingWhitespace(str string) string {
 	ws := ""

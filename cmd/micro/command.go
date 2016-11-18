@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -46,6 +47,8 @@ func init() {
 		"ToggleLog": ToggleLog,
 		"Plugin":    PluginCmd,
 		"Reload":    Reload,
+		"Cd":        Cd,
+		"Pwd":       Pwd,
 	}
 }
 
@@ -95,6 +98,8 @@ func DefaultCommands() map[string]StrCommand {
 		"log":      {"ToggleLog", []Completion{NoCompletion}},
 		"plugin":   {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
 		"reload":   {"Reload", []Completion{NoCompletion}},
+		"cd":       {"Cd", []Completion{FileCompletion}},
+		"pwd":      {"Pwd", []Completion{NoCompletion}},
 	}
 }
 
@@ -180,6 +185,32 @@ func PluginCmd(args []string) {
 		}
 	} else {
 		messenger.Error("Not enough arguments")
+	}
+}
+
+func Cd(args []string) {
+	if len(args) > 0 {
+		home, _ := homedir.Dir()
+		path := strings.Replace(args[0], "~", home, 1)
+		os.Chdir(path)
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				wd, _ := os.Getwd()
+				view.Buf.Path, _ = MakeRelative(view.Buf.AbsPath, wd)
+				if p, _ := filepath.Abs(view.Buf.Path); !strings.Contains(p, wd) {
+					view.Buf.Path = view.Buf.AbsPath
+				}
+			}
+		}
+	}
+}
+
+func Pwd(args []string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		messenger.Message(err.Error())
+	} else {
+		messenger.Message(wd)
 	}
 }
 
