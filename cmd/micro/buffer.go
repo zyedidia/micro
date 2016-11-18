@@ -27,6 +27,8 @@ type Buffer struct {
 
 	// Path to the file on disk
 	Path string
+	// Absolute path to the file on disk
+	AbsPath string
 	// Name of the buffer on the status line
 	Name string
 
@@ -75,7 +77,10 @@ func NewBuffer(txt []byte, path string) *Buffer {
 		}
 	}
 
+	absPath, _ := filepath.Abs(path)
+
 	b.Path = path
+	b.AbsPath = absPath
 	b.Name = path
 
 	// If the file doesn't have a path to disk then we give it no name
@@ -136,8 +141,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
-		absPath, _ := filepath.Abs(b.Path)
-		file, err := os.Open(configDir + "/buffers/" + EscapePath(absPath))
+		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))
 		if err == nil {
 			var buffer SerializedBuffer
 			decoder := gob.NewDecoder(file)
@@ -246,8 +250,7 @@ func (b *Buffer) SaveWithSudo() error {
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
 	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-		absPath, _ := filepath.Abs(b.Path)
-		file, err := os.Create(configDir + "/buffers/" + EscapePath(absPath))
+		file, err := os.Create(configDir + "/buffers/" + EscapePath(b.AbsPath))
 		if err == nil {
 			enc := gob.NewEncoder(file)
 			gob.Register(TextEvent{})
