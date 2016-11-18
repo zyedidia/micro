@@ -57,6 +57,8 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
 * `JoinPaths(dir... string) string` combines multiple directories to a full path
 
+* `DirectoryName(path string)` returns all but the last element of path ,typically the path's directory
+
 * `GetOption(name string)`: returns the value of the requested option
 
 * `AddOption(name string, value interface{})`: sets the given option with the given
