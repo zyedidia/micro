@@ -198,7 +198,7 @@ const (
 
 // Prompt sends the user a message and waits for a response to be typed in
 // This function blocks the main loop while waiting for input
-func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Completion) (string, bool) {
+func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTypes ...Completion) (string, bool) {
 	m.hasPrompt = true
 	m.Message(prompt)
 	if _, ok := m.history[historyType]; !ok {
@@ -208,7 +208,9 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 	}
 	m.historyNum = len(m.history[historyType]) - 1
 
-	response, canceled := "", true
+	response, canceled := placeholder, true
+	m.response = response
+	m.cursorx = Count(placeholder)
 
 	RedrawAll()
 	for m.hasPrompt {

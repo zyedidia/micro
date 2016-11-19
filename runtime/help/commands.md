@@ -68,6 +68,8 @@ Here are the possible commands that you can use.
 
 * `pwd`: Print the current working directory.
 
+* `open filename`: Open a file in the current buffer.
+
 ---
 
 The following commands are provided by the default plugins:

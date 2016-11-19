@@ -49,6 +49,7 @@ func init() {
 		"Reload":    Reload,
 		"Cd":        Cd,
 		"Pwd":       Pwd,
+		"Open":      Open,
 	}
 }
 
@@ -100,6 +101,7 @@ func DefaultCommands() map[string]StrCommand {
 		"reload":   {"Reload", []Completion{NoCompletion}},
 		"cd":       {"Cd", []Completion{FileCompletion}},
 		"pwd":      {"Pwd", []Completion{NoCompletion}},
+		"open":     {"Open", []Completion{FileCompletion}},
 	}
 }
 
@@ -211,6 +213,18 @@ func Pwd(args []string) {
 		messenger.Message(err.Error())
 	} else {
 		messenger.Message(wd)
+	}
+}
+
+func Open(args []string) {
+	if len(args) > 0 {
+		filename := args[0]
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		filename = strings.Join(SplitCommandArgs(filename), " ")
+
+		CurView().Open(filename)
+	} else {
+		messenger.Error("No filename")
 	}
 }
 

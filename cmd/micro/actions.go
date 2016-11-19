@@ -704,15 +704,7 @@ func (v *View) Save(usePlugin bool) bool {
 	}
 	// If this is an empty buffer, ask for a filename
 	if v.Buf.Path == "" {
-		filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
-		if !canceled {
-			// the filename might or might not be quoted, so unquote first then join the strings.
-			filename = strings.Join(SplitCommandArgs(filename), " ")
-			v.Buf.Path = filename
-			v.Buf.Name = filename
-		} else {
-			return false
-		}
+		v.SaveAs(false)
 	}
 	err := v.Buf.Save()
 	if err != nil {
@@ -743,7 +735,7 @@ func (v *View) Save(usePlugin bool) bool {
 
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
-	filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
+	filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 	if !canceled {
 		// the filename might or might not be quoted, so unquote first then join the strings.
 		filename = strings.Join(SplitCommandArgs(filename), " ")
@@ -1101,19 +1093,13 @@ func (v *View) OpenFile(usePlugin bool) bool {
 	}
 
 	if v.CanClose() {
-		filename, canceled := messenger.Prompt("File to open: ", "Open", FileCompletion)
-		if canceled {
-			return false
+		input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
+		if !canceled {
+			HandleCommand(input)
+			if usePlugin {
+				return PostActionCall("OpenFile", v)
+			}
 		}
-		// the filename might or might not be quoted, so unquote first then join the strings.
-		filename = strings.Join(SplitCommandArgs(filename), " ")
-
-		v.Open(filename)
-
-		if usePlugin {
-			return PostActionCall("OpenFile", v)
-		}
-		return true
 	}
 	return false
 }
@@ -1291,7 +1277,7 @@ func (v *View) JumpLine(usePlugin bool) bool {
 	}
 
 	// Prompt for line number
-	linestring, canceled := messenger.Prompt("Jump to line # ", "LineNumber", NoCompletion)
+	linestring, canceled := messenger.Prompt("Jump to line # ", "", "LineNumber", NoCompletion)
 	if canceled {
 		return false
 	}
@@ -1354,7 +1340,7 @@ func (v *View) ShellMode(usePlugin bool) bool {
 		return false
 	}
 
-	input, canceled := messenger.Prompt("$ ", "Shell", NoCompletion)
+	input, canceled := messenger.Prompt("$ ", "", "Shell", NoCompletion)
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
 		HandleShellCommand(input, true, true)
@@ -1371,7 +1357,7 @@ func (v *View) CommandMode(usePlugin bool) bool {
 		return false
 	}
 
-	input, canceled := messenger.Prompt("> ", "Command", CommandCompletion)
+	input, canceled := messenger.Prompt("> ", "", "Command", CommandCompletion)
 	if !canceled {
 		HandleCommand(input)
 		if usePlugin {
