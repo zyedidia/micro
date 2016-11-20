@@ -79,7 +79,7 @@ func (m *Messenger) AddLog(msg string) {
 func (m *Messenger) getBuffer() *Buffer {
 	if m.log == nil {
 		m.log = NewBuffer([]byte{}, "")
-		m.log.Name = "Log"
+		m.log.name = "Log"
 	}
 	return m.log
 }

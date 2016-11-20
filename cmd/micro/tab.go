@@ -85,7 +85,7 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		str += t.views[t.curView].Buf.Name
+		str += t.views[t.curView].Buf.GetName()
 		if i == curTab {
 			str += "]"
 		} else {

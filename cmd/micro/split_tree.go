@@ -231,7 +231,7 @@ func (s *SplitTree) ResizeSplits() {
 }
 
 func (l *LeafNode) String() string {
-	return l.view.Buf.Name
+	return l.view.Buf.GetName()
 }
 
 func search(haystack []Node, needle Node) int {

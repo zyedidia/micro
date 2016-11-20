@@ -740,7 +740,7 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		// the filename might or might not be quoted, so unquote first then join the strings.
 		filename = strings.Join(SplitCommandArgs(filename), " ")
 		v.Buf.Path = filename
-		v.Buf.Name = filename
+		v.Buf.name = filename
 
 		v.Save(true)
 	}

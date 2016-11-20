@@ -17,10 +17,7 @@ func (sline *Statusline) Display() {
 	// We'll draw the line at the lowest line in the view
 	y := sline.view.height + sline.view.y
 
-	file := sline.view.Buf.Name
-	if file == "" {
-		file = sline.view.Buf.Path
-	}
+	file := sline.view.Buf.GetName()
 
 	// If the buffer is dirty (has been modified) write a little '+'
 	if sline.view.Buf.IsModified {

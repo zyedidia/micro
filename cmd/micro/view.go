@@ -200,7 +200,7 @@ func (v *View) CanClose() bool {
 		if v.Buf.Settings["autosave"].(bool) {
 			char = 'y'
 		} else {
-			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
+			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.GetName()+" before closing? (y,n,esc) ", 'y', 'n')
 		}
 		if !canceled {
 			if char == 'y' {
@@ -617,7 +617,7 @@ func (v *View) openHelp(helpPage string) {
 		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
 		helpBuffer := NewBuffer(data, helpPage+".md")
-		helpBuffer.Name = "Help"
+		helpBuffer.name = "Help"
 
 		if v.Type == vtHelp {
 			v.OpenBuffer(helpBuffer)

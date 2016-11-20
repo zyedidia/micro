@@ -30,7 +30,7 @@ type Buffer struct {
 	// Absolute path to the file on disk
 	AbsPath string
 	// Name of the buffer on the status line
-	Name string
+	name string
 
 	// Whether or not the buffer has been modified since it was opened
 	IsModified bool
@@ -162,6 +162,13 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	}
 
 	return b
+}
+
+func (b *Buffer) GetName() string {
+	if b.name == "" {
+		return b.Path
+	}
+	return b.name
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
