@@ -259,7 +259,17 @@ func main() {
 	encoding.Register()
 	tcell.SetEncodingFallback(tcell.EncodingFallbackASCII)
 
-	LoadAll()
+	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
+	InitConfigDir()
+
+	// Build a list of available Extensions (Syntax, Colorscheme etc.)
+	InitRuntimeFiles()
+
+	// Load the user's settings
+	InitGlobalSettings()
+
+	InitCommands()
+	InitBindings()
 
 	// Start the screen
 	InitScreen()
@@ -292,9 +302,6 @@ func main() {
 		for _, t := range tabs {
 			for _, v := range t.views {
 				v.Center(false)
-				if globalSettings["syntax"].(bool) {
-					v.matches = Match(v)
-				}
 			}
 
 			t.Resize()
