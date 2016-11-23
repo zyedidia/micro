@@ -26,6 +26,7 @@ type SyntaxRule struct {
 	style tcell.Style
 }
 
+var syntaxKeys [][2]*regexp.Regexp
 var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
 
 // LoadSyntaxFiles loads the syntax files from the default directory (configDir)
@@ -124,6 +125,7 @@ func LoadSyntaxFile(text, filename string) {
 	if syntaxRegex != nil {
 		// Add the current rules to the syntaxFiles variable
 		regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
+		syntaxKeys = append(syntaxKeys, regexes)
 		syntaxFiles[regexes] = FileTypeRules{filetype, filename, text}
 	}
 }
@@ -259,13 +261,13 @@ func LoadRulesFromFile(text, filename string) []SyntaxRule {
 
 // FindFileType finds the filetype for the given buffer
 func FindFileType(buf *Buffer) string {
-	for r := range syntaxFiles {
+	for _, r := range syntaxKeys {
 		if r[1] != nil && r[1].MatchString(buf.Line(0)) {
 			// The header statement matches the first line
 			return syntaxFiles[r].filetype
 		}
 	}
-	for r := range syntaxFiles {
+	for _, r := range syntaxKeys {
 		if r[0] != nil && r[0].MatchString(buf.Path) {
 			// The syntax statement matches the extension
 			return syntaxFiles[r].filetype
@@ -277,7 +279,7 @@ func FindFileType(buf *Buffer) string {
 // GetRules finds the syntax rules that should be used for the buffer
 // and returns them. It also returns the filetype of the file
 func GetRules(buf *Buffer) []SyntaxRule {
-	for r := range syntaxFiles {
+	for _, r := range syntaxKeys {
 		if syntaxFiles[r].filetype == buf.FileType() {
 			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename)
 		}
