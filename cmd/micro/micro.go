@@ -29,8 +29,13 @@ const (
 )
 
 var (
+	cursorGX int
+	cursorGY int
 	// The main screen
 	screen tcell.Screen
+
+	// Object to handle autocomplete
+	autocomplete *AutocompletionBox
 
 	// Object to send messages and prompts to the user
 	messenger *Messenger
@@ -193,6 +198,7 @@ func RedrawAll() {
 	messenger.Clear()
 	for _, v := range tabs[curTab].views {
 		v.Display()
+		autocomplete.Display(v)
 	}
 	DisplayTabs()
 	messenger.Display()
@@ -291,6 +297,9 @@ func main() {
 	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
+
+	// Create a new autocompletebox
+	autocomplete = new(AutocompletionBox)
 
 	// Now we load the input
 	buffers := LoadInput()

@@ -436,6 +436,15 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// Window resized
 		tabs[v.TabNum].Resize()
 	case *tcell.EventKey:
+
+		// Check if we have a autocomplete prompt open, if we do grab selection
+		if autocomplete.open {
+			if autocomplete.HandleEvent(e, v) {
+				return
+			}
+			autocomplete.generateAutocomplete(v)
+		}
+
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
 		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
@@ -942,6 +951,11 @@ func (v *View) DisplayView() {
 // DisplayCursor draws the current buffer's cursor to the screen
 func (v *View) DisplayCursor(x, y int) {
 	// screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, y)
+
+	// track cursor positions
+	cursorGX = x
+	cursorGY = y
+
 	screen.ShowCursor(x, y)
 }
 
