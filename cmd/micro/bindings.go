@@ -88,6 +88,8 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"HSplit":              (*View).HSplitBinding,
 	"ToggleMacro":         (*View).ToggleMacro,
 	"PlayMacro":           (*View).PlayMacro,
+	"NextLoc":             (*View).NextLoc,
+	"PrevLoc":             (*View).PrevLoc,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,
@@ -358,16 +360,16 @@ func BindKey(k, v string) {
 // DefaultBindings returns a map containing micro's default keybindings
 func DefaultBindings() map[string]string {
 	return map[string]string{
-		"Up":             "CursorUp",
-		"Down":           "CursorDown",
-		"Right":          "CursorRight",
-		"Left":           "CursorLeft",
-		"ShiftUp":        "SelectUp",
-		"ShiftDown":      "SelectDown",
-		"ShiftLeft":      "SelectLeft",
-		"ShiftRight":     "SelectRight",
-		"AltLeft":        "WordLeft",
-		"AltRight":       "WordRight",
+		"Up":         "CursorUp",
+		"Down":       "CursorDown",
+		"Right":      "CursorRight",
+		"Left":       "CursorLeft",
+		"ShiftUp":    "SelectUp",
+		"ShiftDown":  "SelectDown",
+		"ShiftLeft":  "SelectLeft",
+		"ShiftRight": "SelectRight",
+		//"AltLeft":        "WordLeft",
+		//"AltRight":       "WordRight",
 		"AltUp":          "MoveLinesUp",
 		"AltDown":        "MoveLinesDown",
 		"AltShiftRight":  "SelectWordRight",
@@ -420,7 +422,8 @@ func DefaultBindings() map[string]string {
 		"CtrlW":          "NextSplit",
 		"CtrlU":          "ToggleMacro",
 		"CtrlJ":          "PlayMacro",
-
+		"AltRight":       "NextLoc",
+		"AltLeft":        "PrevLoc",
 		// Emacs-style keybindings
 		"Alt-f": "WordRight",
 		"Alt-b": "WordLeft",
