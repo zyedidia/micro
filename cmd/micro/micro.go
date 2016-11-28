@@ -98,8 +98,7 @@ func LoadInput() []*Buffer {
 				input, err = ioutil.ReadFile(filename)
 				if err != nil {
 					TermMessage(err)
-					input = []byte{}
-					filename = ""
+					continue
 				}
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
@@ -294,6 +293,10 @@ func main() {
 
 	// Now we load the input
 	buffers := LoadInput()
+	if len(buffers) == 0 {
+		screen.Fini()
+		os.Exit(1)
+	}
 	for _, buf := range buffers {
 		// For each buffer we create a new tab and place the view in that tab
 		tab := NewTabFromView(NewView(buf))
