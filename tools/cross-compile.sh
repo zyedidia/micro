@@ -1,18 +1,16 @@
+# Source tar
+
+./vendor-src.sh micro-$1-src
 cd ..
 
 mkdir -p binaries
 mkdir -p micro-$1
 
-cp LICENSE micro-$1
-cp README.md micro-$1
-
-# Source tar
-
-cd tools
-./vendor-src.sh micro-$1-src
-cd ..
 mv micro-$1-src.tar.gz binaries
 mv micro-$1-src.zip binaries
+
+cp LICENSE micro-$1
+cp README.md micro-$1
 
 HASH="$(git rev-parse --short HEAD)"
 VERSION="$(go run tools/build-version.go)"
@@ -81,4 +79,3 @@ zip -r -q -T micro-$1-win32.zip micro-$1
 mv micro-$1-win32.zip binaries
 
 rm -rf micro-$1
-
