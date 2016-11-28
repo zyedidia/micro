@@ -18,6 +18,9 @@ func (sline *Statusline) Display() {
 	y := sline.view.height + sline.view.y
 
 	file := sline.view.Buf.GetName()
+	if file == "" {
+		file = "No name"
+	}
 
 	// If the buffer is dirty (has been modified) write a little '+'
 	if sline.view.Buf.IsModified {
