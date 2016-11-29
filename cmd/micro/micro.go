@@ -105,7 +105,6 @@ func LoadInput() []*Buffer {
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, NewBuffer(input, filename))
-			fmt.Print("\a")
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
@@ -407,7 +406,6 @@ func main() {
 	}()
 
 	for {
-		fmt.Print("\a")
 		// Display everything
 		RedrawAll()
 
