@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"io"
 	"unicode/utf8"
 )
 
@@ -33,14 +35,23 @@ type LineArray struct {
 }
 
 // NewLineArray returns a new line array from an array of bytes
-func NewLineArray(text []byte) *LineArray {
+func NewLineArray(reader io.Reader) *LineArray {
 	la := new(LineArray)
-	// Split the bytes into lines
-	split := bytes.Split(text, []byte("\n"))
-	la.lines = make([][]byte, len(split))
-	for i := range split {
-		la.lines[i] = make([]byte, len(split[i]))
-		copy(la.lines[i], split[i])
+	br := bufio.NewReader(reader)
+
+	i := 0
+	for {
+		data, err := br.ReadBytes('\n')
+		if err != nil {
+			if err == io.EOF {
+				la.lines = append(la.lines, data[:len(data)])
+			}
+			// Last line was read
+			break
+		} else {
+			la.lines = append(la.lines, data[:len(data)-1])
+		}
+		i++
 	}
 
 	return la

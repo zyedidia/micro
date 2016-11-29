@@ -13,8 +13,6 @@ type Tab struct {
 	views []*View
 	// This is the current view for this tab
 	CurView int
-	// Generally this is the name of the current view's buffer
-	name string
 
 	tree *SplitTree
 }

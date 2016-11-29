@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -242,13 +242,14 @@ func (v *View) OpenBuffer(buf *Buffer) {
 func (v *View) Open(filename string) {
 	home, _ := homedir.Dir()
 	filename = strings.Replace(filename, "~", home, 1)
-	file, err := ioutil.ReadFile(filename)
+	file, err := os.Open(filename)
+	defer file.Close()
 
 	var buf *Buffer
 	if err != nil {
 		messenger.Message(err.Error())
 		// File does not exist -- create an empty buffer with that name
-		buf = NewBuffer([]byte{}, filename)
+		buf = NewBuffer(strings.NewReader(""), filename)
 	} else {
 		buf = NewBuffer(file, filename)
 	}
@@ -630,7 +631,7 @@ func (v *View) openHelp(helpPage string) {
 	if data, err := FindRuntimeFile(RTHelp, helpPage).Data(); err != nil {
 		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
-		helpBuffer := NewBuffer(data, helpPage+".md")
+		helpBuffer := NewBuffer(strings.NewReader(string(data)), helpPage+".md")
 		helpBuffer.name = "Help"
 
 		if v.Type == vtHelp {
