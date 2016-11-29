@@ -1557,7 +1557,7 @@ func (v *View) Unsplit(usePlugin bool) bool {
 		return false
 	}
 
-	curView := tabs[curTab].curView
+	curView := tabs[curTab].CurView
 	for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
 		view := tabs[curTab].views[i]
 		if view != nil && view.Num != curView {
@@ -1579,10 +1579,10 @@ func (v *View) NextSplit(usePlugin bool) bool {
 	}
 
 	tab := tabs[curTab]
-	if tab.curView < len(tab.views)-1 {
-		tab.curView++
+	if tab.CurView < len(tab.views)-1 {
+		tab.CurView++
 	} else {
-		tab.curView = 0
+		tab.CurView = 0
 	}
 
 	if usePlugin {
@@ -1598,10 +1598,10 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 	}
 
 	tab := tabs[curTab]
-	if tab.curView > 0 {
-		tab.curView--
+	if tab.CurView > 0 {
+		tab.CurView--
 	} else {
-		tab.curView = len(tab.views) - 1
+		tab.CurView = len(tab.views) - 1
 	}
 
 	if usePlugin {

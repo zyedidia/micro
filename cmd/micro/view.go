@@ -778,7 +778,7 @@ func (v *View) DisplayView() {
 				lineNumStyle = style
 			}
 			if style, ok := colorscheme["current-line-number"]; ok {
-				if curLineN == v.Cursor.Y && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() {
+				if curLineN == v.Cursor.Y && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() {
 					lineNumStyle = style
 				}
 			}
@@ -816,7 +816,7 @@ func (v *View) DisplayView() {
 				}
 			}
 
-			if tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
 				v.DisplayCursor(screenX-v.leftCol, screenY)
 			}
 
@@ -842,7 +842,7 @@ func (v *View) DisplayView() {
 
 			// We need to display the background of the linestyle with the correct color if cursorline is enabled
 			// and this is the current view and there is no selection on this line and the cursor is on this line
-			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -868,7 +868,7 @@ func (v *View) DisplayView() {
 						lineIndentStyle = style
 					}
 				}
-				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 					if style, ok := colorscheme["cursor-line"]; ok {
 						fg, _, _ := style.Decompose()
 						lineIndentStyle = lineIndentStyle.Background(fg)
@@ -910,7 +910,7 @@ func (v *View) DisplayView() {
 		}
 		// Here we are at a newline
 
-		if tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+		if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
 			v.DisplayCursor(screenX-v.leftCol, screenY)
 		}
 
@@ -933,7 +933,7 @@ func (v *View) DisplayView() {
 
 		for i := 0; i < v.Width; i++ {
 			lineStyle := defStyle
-			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)

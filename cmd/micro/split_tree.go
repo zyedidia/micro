@@ -74,7 +74,7 @@ func (l *LeafNode) VSplit(buf *Buffer, splitIndex int) {
 		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
 		tab.views[splitIndex] = newView
 
-		tab.curView = splitIndex
+		tab.CurView = splitIndex
 	} else {
 		if splitIndex > 1 {
 			splitIndex = 1
@@ -98,7 +98,7 @@ func (l *LeafNode) VSplit(buf *Buffer, splitIndex int) {
 		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
 		tab.views[splitIndex] = newView
 
-		tab.curView = splitIndex
+		tab.CurView = splitIndex
 	}
 
 	tab.Resize()
@@ -127,7 +127,7 @@ func (l *LeafNode) HSplit(buf *Buffer, splitIndex int) {
 		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
 		tab.views[splitIndex] = newView
 
-		tab.curView = splitIndex
+		tab.CurView = splitIndex
 	} else {
 		if splitIndex > 1 {
 			splitIndex = 1
@@ -152,7 +152,7 @@ func (l *LeafNode) HSplit(buf *Buffer, splitIndex int) {
 		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
 		tab.views[splitIndex] = newView
 
-		tab.curView = splitIndex
+		tab.CurView = splitIndex
 	}
 
 	tab.Resize()
@@ -175,8 +175,8 @@ func (l *LeafNode) Delete() {
 	for i, v := range tab.views {
 		v.Num = i
 	}
-	if tab.curView > 0 {
-		tab.curView--
+	if tab.CurView > 0 {
+		tab.CurView--
 	}
 }
 

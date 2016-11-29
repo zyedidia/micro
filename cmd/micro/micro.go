@@ -440,7 +440,7 @@ func main() {
 						// is the one being clicked in
 						for _, v := range tabs[curTab].views {
 							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
-								tabs[curTab].curView = v.Num
+								tabs[curTab].CurView = v.Num
 							}
 						}
 					}

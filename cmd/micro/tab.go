@@ -12,7 +12,7 @@ type Tab struct {
 	// multiple views with splits
 	views []*View
 	// This is the current view for this tab
-	curView int
+	CurView int
 	// Generally this is the name of the current view's buffer
 	name string
 
@@ -73,7 +73,7 @@ func (t *Tab) Resize() {
 // CurView returns the current view
 func CurView() *View {
 	curTab := tabs[curTab]
-	return curTab.views[curTab.curView]
+	return curTab.views[curTab.CurView]
 }
 
 // TabbarString returns the string that should be displayed in the tabbar
@@ -89,7 +89,7 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		str += t.views[t.curView].Buf.GetName()
+		str += t.views[t.CurView].Buf.GetName()
 		if i == curTab {
 			str += "]"
 		} else {
