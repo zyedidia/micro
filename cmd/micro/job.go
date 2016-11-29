@@ -40,15 +40,20 @@ func (f *CallbackFile) Write(data []byte) (int, error) {
 	return f.Writer.Write(data)
 }
 
-// JobStart starts a process in the background with the given callbacks
+// JobStart starts a shell command in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
 func JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string) *exec.Cmd {
 	split := strings.Split(cmd, " ")
-	args := split[1:]
+	cmdArgs := split[1:]
 	cmdName := split[0]
+	return JobSpawn(cmdName, cmdArgs, onStdout, onStderr, onExit, userargs...)
+}
 
+// JobSpawn starts a process with args in the background with the given callbacks
+// It returns an *exec.Cmd as the job id
+func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...string) *exec.Cmd {
 	// Set up everything correctly if the functions have been provided
-	proc := exec.Command(cmdName, args...)
+	proc := exec.Command(cmdName, cmdArgs...)
 	var outbuf bytes.Buffer
 	if onStdout != "" {
 		proc.Stdout = &CallbackFile{&outbuf, LuaFunctionJob(onStdout), userargs}

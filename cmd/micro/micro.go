@@ -351,6 +351,7 @@ func main() {
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
+	L.SetGlobal("JobSpawn", luar.New(L, JobSpawn))
 	L.SetGlobal("JobSend", luar.New(L, JobSend))
 	L.SetGlobal("JobStop", luar.New(L, JobStop))
 
