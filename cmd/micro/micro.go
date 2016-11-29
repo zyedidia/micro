@@ -104,7 +104,11 @@ func LoadInput() []*Buffer {
 				}
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			buffers = append(buffers, NewBuffer(input, filename))
+			if input != nil {
+				buffers = append(buffers, NewBuffer(input, filename))
+			} else {
+				buffers = append(buffers, NewBuffer(strings.NewReader(""), filename))
+			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
