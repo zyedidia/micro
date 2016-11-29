@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-// Display autocompletions in a box above or below the cursor
+// AutocompletionBox Display autocompletions in a box above or below the cursor
 type AutocompletionBox struct {
 	open       bool
 	showPrompt bool
@@ -34,16 +34,25 @@ type AutocompletionBox struct {
 	AcceptTab   AcceptFcn
 	Pop         PopulateFcn
 }
+
+// AcceptFcn funtion to invoke on accept selection from box
 type AcceptFcn func(message Message)
+
+// PopulateFcn function to populate autobox
 type PopulateFcn func(v *View) (messages Messages)
+
+// Message is used to save lines
 type Message struct {
 	// Searchable is the target of search
 	Searchable string
 	// MessageToDisplay is the string inside the box
 	MessageToDisplay string
+
 	// Value2 is used as a return type for accept
 	Value2 []byte
 }
+
+// Messages all the lines in the autobox
 type Messages []Message
 
 func (s Messages) Len() int {
@@ -143,6 +152,7 @@ func (a *AutocompletionBox) Display(v *View) {
 	}
 }
 
+// Reset the autocompletebox
 func (a *AutocompletionBox) Reset() {
 	a.selected = 0
 	a.response = ""
