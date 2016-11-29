@@ -15,7 +15,7 @@ type Statusline struct {
 // Display draws the statusline to the screen
 func (sline *Statusline) Display() {
 	// We'll draw the line at the lowest line in the view
-	y := sline.view.height + sline.view.y
+	y := sline.view.Height + sline.view.y
 
 	file := sline.view.Buf.GetName()
 	if file == "" {
@@ -56,11 +56,11 @@ func (sline *Statusline) Display() {
 		screen.SetContent(viewX, y, ' ', nil, statusLineStyle)
 		viewX++
 	}
-	for x := 0; x < sline.view.width; x++ {
+	for x := 0; x < sline.view.Width; x++ {
 		if x < len(fileRunes) {
 			screen.SetContent(viewX+x, y, fileRunes[x], nil, statusLineStyle)
-		} else if x >= sline.view.width-len(rightText) && x < len(rightText)+sline.view.width-len(rightText) {
-			screen.SetContent(viewX+x, y, []rune(rightText)[x-sline.view.width+len(rightText)], nil, statusLineStyle)
+		} else if x >= sline.view.Width-len(rightText) && x < len(rightText)+sline.view.Width-len(rightText) {
+			screen.SetContent(viewX+x, y, []rune(rightText)[x-sline.view.Width+len(rightText)], nil, statusLineStyle)
 		} else {
 			screen.SetContent(viewX+x, y, ' ', nil, statusLineStyle)
 		}

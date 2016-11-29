@@ -204,13 +204,13 @@ func (s *SplitTree) ResizeSplits() {
 	for _, node := range s.children {
 		if n, ok := node.(*LeafNode); ok {
 			if s.kind == VerticalSplit {
-				if n.view.lockWidth {
-					lockedWidth += n.view.width
+				if n.view.LockWidth {
+					lockedWidth += n.view.Width
 					lockedChildren++
 				}
 			} else {
-				if n.view.lockHeight {
-					lockedHeight += n.view.height
+				if n.view.LockHeight {
+					lockedHeight += n.view.Height
 					lockedChildren++
 				}
 			}
@@ -232,26 +232,26 @@ func (s *SplitTree) ResizeSplits() {
 	for _, node := range s.children {
 		if n, ok := node.(*LeafNode); ok {
 			if s.kind == VerticalSplit {
-				if !n.view.lockWidth {
-					n.view.width = (s.width - lockedWidth) / (len(s.children) - lockedChildren)
+				if !n.view.LockWidth {
+					n.view.Width = (s.width - lockedWidth) / (len(s.children) - lockedChildren)
 				}
-				n.view.height = s.height
+				n.view.Height = s.height
 
 				n.view.x = s.x + x
 				n.view.y = s.y
-				x += n.view.width
+				x += n.view.Width
 			} else {
-				if !n.view.lockHeight {
-					n.view.height = (s.height - lockedHeight) / (len(s.children) - lockedChildren)
+				if !n.view.LockHeight {
+					n.view.Height = (s.height - lockedHeight) / (len(s.children) - lockedChildren)
 				}
-				n.view.width = s.width
+				n.view.Width = s.width
 
 				n.view.y = s.y + y
 				n.view.x = s.x
-				y += n.view.height
+				y += n.view.Height
 			}
 			if n.view.Buf.Settings["statusline"].(bool) {
-				n.view.height--
+				n.view.Height--
 			}
 
 			n.view.ToggleTabbar()
