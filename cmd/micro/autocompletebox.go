@@ -137,7 +137,6 @@ func (a *AutocompletionBox) Reset() {
 	a.Pop = nil
 }
 
-// AcceptTab autocompletionbox
 func (a *AutocompletionBox) filterAutocomplete() {
 	mess := Messages{}
 	for _, value := range a.messages {
@@ -148,6 +147,12 @@ func (a *AutocompletionBox) filterAutocomplete() {
 		mess = append(mess, value)
 	}
 	a.messagesToshow = mess
+	if a.selected < 0 && len(a.messages) > 0 {
+		a.selected = 0
+	}
+	if a.selected-1 > len(a.messages) {
+		a.selected = len(a.message) - 1
+	}
 }
 
 // HandleEvent handles an event for the prompter
