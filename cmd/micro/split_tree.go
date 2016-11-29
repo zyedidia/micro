@@ -12,8 +12,8 @@ const (
 
 // A Node on the split tree
 type Node interface {
-	VSplit(buf *Buffer)
-	HSplit(buf *Buffer)
+	VSplit(buf *Buffer, splitRight bool)
+	HSplit(buf *Buffer, splitBottom bool)
 	String() string
 }
 
@@ -52,16 +52,26 @@ type SplitTree struct {
 }
 
 // VSplit creates a vertical split
-func (l *LeafNode) VSplit(buf *Buffer) {
+func (l *LeafNode) VSplit(buf *Buffer, splitRight bool) {
 	tab := tabs[l.parent.tabNum]
 	if l.parent.kind == VerticalSplit {
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
-		newView.Num = len(tab.views)
-		l.parent.children = append(l.parent.children, NewLeafNode(newView, l.parent))
 
-		tab.curView++
-		tab.views = append(tab.views, newView)
+		i := 0
+		if splitRight {
+			i = 1
+		}
+
+		l.parent.children = append(l.parent.children, nil)
+		copy(l.parent.children[l.view.Num+i+1:], l.parent.children[l.view.Num+i:])
+		l.parent.children[l.view.Num+i] = NewLeafNode(newView, l.parent)
+
+		tab.views = append(tab.views, nil)
+		copy(tab.views[l.view.Num+i+1:], tab.views[l.view.Num+i:])
+		tab.views[l.view.Num+i] = newView
+
+		tab.curView = l.view.Num + i
 	} else {
 		s := new(SplitTree)
 		s.kind = VerticalSplit
@@ -69,27 +79,47 @@ func (l *LeafNode) VSplit(buf *Buffer) {
 		s.tabNum = l.parent.tabNum
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
-		newView.Num = len(tab.views)
-		s.children = []Node{l, NewLeafNode(newView, s)}
+		i := 0
+		if splitRight {
+			i = 1
+			s.children = []Node{l, NewLeafNode(newView, s)}
+		} else {
+			tab.curView = l.view.Num
+		}
 		l.parent.children[search(l.parent.children, l)] = s
 		l.parent = s
 
-		tab.curView++
-		tab.views = append(tab.views, newView)
+		tab.views = append(tab.views, nil)
+		copy(tab.views[l.view.Num+i+1:], tab.views[l.view.Num+i:])
+		tab.views[l.view.Num+i] = newView
+
+		tab.curView = l.view.Num + i
 	}
+
+	tab.Resize()
 }
 
 // HSplit creates a horizontal split
-func (l *LeafNode) HSplit(buf *Buffer) {
+func (l *LeafNode) HSplit(buf *Buffer, splitBottom bool) {
 	tab := tabs[l.parent.tabNum]
 	if l.parent.kind == HorizontalSplit {
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
-		newView.Num = len(tab.views)
-		l.parent.children = append(l.parent.children, NewLeafNode(newView, l.parent))
 
-		tab.curView++
-		tab.views = append(tab.views, newView)
+		i := 0
+		if splitBottom {
+			i = 1
+		}
+
+		l.parent.children = append(l.parent.children, nil)
+		copy(l.parent.children[l.view.Num+i+1:], l.parent.children[l.view.Num+i:])
+		l.parent.children[l.view.Num+i] = NewLeafNode(newView, l.parent)
+
+		tab.views = append(tab.views, nil)
+		copy(tab.views[l.view.Num+i+1:], tab.views[l.view.Num+i:])
+		tab.views[l.view.Num+i] = newView
+
+		tab.curView = l.view.Num + i
 	} else {
 		s := new(SplitTree)
 		s.kind = HorizontalSplit
@@ -98,13 +128,24 @@ func (l *LeafNode) HSplit(buf *Buffer) {
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
 		newView.Num = len(tab.views)
-		s.children = []Node{l, NewLeafNode(newView, s)}
+		i := 0
+		if splitBottom {
+			i = 1
+			s.children = []Node{l, NewLeafNode(newView, s)}
+		} else {
+			s.children = []Node{NewLeafNode(newView, s), l}
+		}
 		l.parent.children[search(l.parent.children, l)] = s
 		l.parent = s
 
-		tab.curView++
-		tab.views = append(tab.views, newView)
+		tab.views = append(tab.views, nil)
+		copy(tab.views[l.view.Num+i+1:], tab.views[l.view.Num+i:])
+		tab.views[l.view.Num+i] = newView
+
+		tab.curView = l.view.Num + i
 	}
+
+	tab.Resize()
 }
 
 // Delete deletes a split
@@ -253,10 +294,10 @@ func findView(haystack []*View, needle *View) int {
 }
 
 // VSplit is here just to make SplitTree fit the Node interface
-func (s *SplitTree) VSplit(buf *Buffer) {}
+func (s *SplitTree) VSplit(buf *Buffer, splitRight bool) {}
 
 // HSplit is here just to make SplitTree fit the Node interface
-func (s *SplitTree) HSplit(buf *Buffer) {}
+func (s *SplitTree) HSplit(buf *Buffer, splitBottom bool) {}
 
 func (s *SplitTree) String() string {
 	str := "["

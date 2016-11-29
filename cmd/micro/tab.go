@@ -64,6 +64,10 @@ func (t *Tab) Resize() {
 	}
 
 	t.tree.ResizeSplits()
+
+	for i, v := range t.views {
+		v.Num = i
+	}
 }
 
 // CurView returns the current view

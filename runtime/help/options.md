@@ -101,6 +101,16 @@ Here are the options that you can set:
 
     default value: `off`
 
+* `splitRight`: when a vertical split is created, should it be created to the right of
+   the current split?
+
+    default value: `on`
+
+* `splitRight`: when a horizontal split is created, should it be created below the
+   current split?
+
+    default value: `on`
+
 * `autosave`: micro will save the buffer every 8 seconds automatically.
    Micro also will automatically save and quit when you exit without asking.
    Be careful when using this feature, because you might accidentally save a file,
