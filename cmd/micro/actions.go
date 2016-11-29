@@ -1113,9 +1113,9 @@ func (v *View) GotoFile(usePlugin bool) bool {
 	}
 	autocomplete.Open(func(v *View) (messages Messages) {
 		files := getFilesInCurrentDir()
-		for _, value := range files {
-			b, _ := json.Marshal(value)
-			message := Message{Value1: fmt.Sprintf("%s (%s)", value.Name, value.Path), Value2: b}
+		for _, file := range files {
+			b, _ := json.Marshal(file)
+			message := Message{Searchable: file.Name, MessageToDisplay: fmt.Sprintf("%s (%s)", file.Name, file.Path), Value2: b}
 			messages = append(messages, message)
 		}
 		return messages

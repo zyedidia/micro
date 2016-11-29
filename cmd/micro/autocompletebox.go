@@ -37,7 +37,11 @@ type AutocompletionBox struct {
 type AcceptFcn func(message Message)
 type PopulateFcn func(v *View) (messages Messages)
 type Message struct {
-	Value1 string
+	// Searchable is the target of search
+	Searchable string
+	// MessageToDisplay is the string inside the box
+	MessageToDisplay string
+	// Value2 is used as a return type for accept
 	Value2 []byte
 }
 type Messages []Message
@@ -49,9 +53,10 @@ func (s Messages) Swap(i, j int) {
 	s[i], s[j] = s[j], s[i]
 }
 func (s Messages) Less(i, j int) bool {
-	return s[i].Value1 < s[j].Value1
+	return s[i].MessageToDisplay < s[j].MessageToDisplay
 }
 
+//Open opens a box with prompt
 func (a *AutocompletionBox) Open(pop PopulateFcn, acceptEnter, acceptTab AcceptFcn, v *View) {
 	a.Pop = pop
 	a.generateAutocomplete(v)
@@ -60,6 +65,8 @@ func (a *AutocompletionBox) Open(pop PopulateFcn, acceptEnter, acceptTab AcceptF
 	a.AcceptEnter = acceptEnter
 	a.AcceptTab = acceptTab
 }
+
+//OpenNoPrompt opens a box with no prompt. Typing will cause the box to move.
 func (a *AutocompletionBox) OpenNoPrompt(pop PopulateFcn, acceptEnter, acceptTab AcceptFcn, v *View) {
 	a.Pop = pop
 	a.generateAutocomplete(v)
@@ -72,7 +79,10 @@ func (a *AutocompletionBox) OpenNoPrompt(pop PopulateFcn, acceptEnter, acceptTab
 func (a *AutocompletionBox) generateAutocomplete(v *View) {
 	a.messages = a.Pop(v)
 	for _, message := range a.messages {
-		a.width = Max(a.width, Count(message.Value1))
+		if message.Searchable == "" {
+			message.Searchable = message.MessageToDisplay
+		}
+		a.width = Max(a.width, Count(message.MessageToDisplay))
 	}
 	sort.Sort(a.messages)
 	a.filterAutocomplete()
@@ -103,8 +113,8 @@ func (a *AutocompletionBox) Display(v *View) {
 	messages := a.messagesToshow[skipped:]
 
 	for i, message := range messages[:Min(len(messages), 11)] {
-		runes := []rune(message.Value1)
-		firstIndex := strings.Index(message.Value1, a.response)
+		runes := []rune(message.MessageToDisplay)
+		firstIndex := strings.Index(message.MessageToDisplay, a.response)
 		for x := 0; x < a.width; x++ {
 			if i == a.selected-skipped {
 				a.style = defStyle
@@ -139,12 +149,12 @@ func (a *AutocompletionBox) Reset() {
 
 func (a *AutocompletionBox) filterAutocomplete() {
 	mess := Messages{}
-	for _, value := range a.messages {
-		index := strings.Index(value.Value1, a.response)
+	for _, message := range a.messages {
+		index := strings.Index(message.Searchable, a.response)
 		if index == -1 {
 			continue
 		}
-		mess = append(mess, value)
+		mess = append(mess, message)
 	}
 	a.messagesToshow = mess
 	if a.selected < 0 && len(a.messages) > 0 {
@@ -247,7 +257,6 @@ func (a *AutocompletionBox) HandleEvent(event tcell.Event, v *View) (swallow boo
 		a.cursorx += Count(clip)
 	case *tcell.EventMouse:
 		x, y := e.Position()
-		x -= Count(a.message)
 		button := e.Buttons()
 		if y == cursorGY {
 			switch button {
