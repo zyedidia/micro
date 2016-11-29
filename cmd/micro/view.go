@@ -35,11 +35,11 @@ type View struct {
 	Type ViewType
 
 	// Actual width and height
-	width  int
-	height int
+	Width  int
+	Height int
 
-	lockWidth  bool
-	lockHeight bool
+	LockWidth  bool
+	LockHeight bool
 
 	// Where this view is located
 	x, y int
