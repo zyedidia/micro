@@ -273,15 +273,31 @@ func (v *View) ReOpen() {
 }
 
 // HSplit opens a horizontal split with the given buffer
-func (v *View) HSplit(buf *Buffer) bool {
-	v.splitNode.HSplit(buf, v.Buf.Settings["splitRight"].(bool))
-	return false
+func (v *View) HSplit(buf *Buffer) {
+	i := 0
+	if v.Buf.Settings["splitBottom"].(bool) {
+		i = 1
+	}
+	v.splitNode.HSplit(buf, v.Num+i)
 }
 
 // VSplit opens a vertical split with the given buffer
-func (v *View) VSplit(buf *Buffer) bool {
-	v.splitNode.VSplit(buf, v.Buf.Settings["splitBottom"].(bool))
-	return false
+func (v *View) VSplit(buf *Buffer) {
+	i := 0
+	if v.Buf.Settings["splitRight"].(bool) {
+		i = 1
+	}
+	v.splitNode.VSplit(buf, v.Num+i)
+}
+
+// HSplitIndex opens a horizontal split with the given buffer at the given index
+func (v *View) HSplitIndex(buf *Buffer, splitIndex int) {
+	v.splitNode.HSplit(buf, splitIndex)
+}
+
+// VSplitIndex opens a vertical split with the given buffer at the given index
+func (v *View) VSplitIndex(buf *Buffer, splitIndex int) {
+	v.splitNode.VSplit(buf, splitIndex)
 }
 
 // GetSoftWrapLocation gets the location of a visual click on the screen and converts it to col,line
