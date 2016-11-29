@@ -114,16 +114,25 @@ func (a *AutocompletionBox) Display(v *View) {
 
 	for i, message := range messages[:Min(len(messages), 11)] {
 		runes := []rune(message.MessageToDisplay)
-		firstIndex := strings.Index(message.MessageToDisplay, a.response)
+		var j int
+		var indexes []int
+		for _, r := range a.response {
+			j = j + strings.IndexRune(message.MessageToDisplay[j:], r)
+			indexes = append(indexes, j)
+		}
 		for x := 0; x < a.width; x++ {
 			if i == a.selected-skipped {
 				a.style = defStyle
 			} else {
 				a.style = defStyle.Reverse(true)
 			}
-			if firstIndex != -1 && x >= firstIndex && x < firstIndex+len(a.response) {
-				a.style = a.style.Foreground(tcell.ColorYellow)
+			for _, value := range indexes {
+				if value == x {
+					a.style = a.style.Foreground(tcell.ColorYellow)
+					break
+				}
 			}
+
 			i := rune(' ')
 			if x < len(runes) {
 				i = runes[x]
@@ -150,11 +159,21 @@ func (a *AutocompletionBox) Reset() {
 func (a *AutocompletionBox) filterAutocomplete() {
 	mess := Messages{}
 	for _, message := range a.messages {
-		index := strings.Index(message.Searchable, a.response)
-		if index == -1 {
-			continue
+
+		var j int
+		var notFound bool
+		for _, r := range a.response {
+			i := strings.IndexRune(message.Searchable[j:], r)
+			if i == -1 {
+				notFound = true
+				break
+			}
+			j += i
 		}
-		mess = append(mess, message)
+		if !notFound {
+			mess = append(mess, message)
+		}
+
 	}
 	a.messagesToshow = mess
 	if a.selected < 0 && len(a.messages) > 0 {
