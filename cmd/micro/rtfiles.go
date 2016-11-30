@@ -126,7 +126,9 @@ func InitRuntimeFiles() {
 	// Search configDir for plugin-scripts
 	files, _ := ioutil.ReadDir(filepath.Join(configDir, "plugins"))
 	for _, f := range files {
-		if f.IsDir() {
+		realpath, _ := filepath.EvalSymlinks(filepath.Join(configDir, "plugins", f.Name()))
+		realpathStat, _ := os.Stat(realpath)
+		if realpathStat.IsDir() {
 			scriptPath := filepath.Join(configDir, "plugins", f.Name(), f.Name()+".lua")
 			if _, err := os.Stat(scriptPath); err == nil {
 				AddRuntimeFile(RTPlugin, realFile(scriptPath))
