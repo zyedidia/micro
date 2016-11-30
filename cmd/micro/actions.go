@@ -1125,7 +1125,7 @@ func (v *View) GotoFile(usePlugin bool) bool {
 		v.Buf.Save()
 		v.Open(f.Path)
 		// Move cursor and view if possible.
-		if message.Extra.line < v.Buf.NumLines && message.Extra.line >= 0 {
+		if message.Extra.line+1 < v.Buf.NumLines && message.Extra.line-1 >= 0 {
 			v.Cursor.Y = message.Extra.line - 1
 			v.Relocate()
 		}

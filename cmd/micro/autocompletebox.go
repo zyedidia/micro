@@ -119,7 +119,10 @@ func (a *AutocompletionBox) Display(v *View) {
 	if a.showPrompt {
 		screen.ShowCursor(a.cursorx+cursorGX, cursorGY)
 		a.style = tcell.StyleDefault
-		a.style = a.style.Foreground(tcell.ColorYellow).Background(tcell.ColorBlue)
+		if style, ok := colorscheme["statusline"]; ok {
+			fg, bg, _ := style.Decompose()
+			a.style = a.style.Foreground(fg).Background(bg)
+		}
 		runes := []rune(a.response)
 		for x := 0; x < a.width; x++ {
 			i := rune(' ')
@@ -144,13 +147,20 @@ func (a *AutocompletionBox) Display(v *View) {
 		}
 		for x := 0; x < a.width; x++ {
 			if i == a.selected-skipped {
+				if style, ok := colorscheme["cursor-line"]; ok {
+					_, bg, _ := style.Decompose()
+					a.style = a.style.Background(bg)
+				}
 				a.style = defStyle
 			} else {
 				a.style = defStyle.Reverse(true)
 			}
 			for _, value := range indexes {
 				if value == x {
-					a.style = a.style.Foreground(tcell.ColorYellow)
+					if style, ok := colorscheme["constant.string"]; ok {
+						fg, _, _ := style.Decompose()
+						a.style = a.style.Foreground(fg)
+					}
 					break
 				}
 			}
