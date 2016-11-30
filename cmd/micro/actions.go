@@ -1124,6 +1124,11 @@ func (v *View) GotoFile(usePlugin bool) bool {
 		json.Unmarshal(message.Value2, &f)
 		v.Buf.Save()
 		v.Open(f.Path)
+		// Move cursor and view if possible.
+		if message.Extra.line < v.Buf.NumLines && message.Extra.line >= 0 {
+			v.Cursor.Y = message.Extra.line - 1
+			v.Relocate()
+		}
 	}, nil, v)
 
 	if usePlugin {

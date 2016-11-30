@@ -1,11 +1,13 @@
 package main
 
 import (
-	"github.com/zyedidia/clipboard"
-	"github.com/zyedidia/tcell"
 	"index/suffixarray"
 	"sort"
 	"strings"
+
+	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/tcell"
+	"strconv"
 )
 
 // AutocompletionBox Display autocompletions in a box above or below the cursor
@@ -17,6 +19,7 @@ type AutocompletionBox struct {
 	message string
 	// The user's response to a prompt
 	response string
+	search   string
 	cursorx  int
 	// style to use when drawing the message
 	style tcell.Style
@@ -33,6 +36,12 @@ type AutocompletionBox struct {
 	AcceptEnter AcceptFcn
 	AcceptTab   AcceptFcn
 	Pop         PopulateFcn
+	Extra       Extra
+}
+
+// Extra holds additional information for the response
+type Extra struct {
+	line int
 }
 
 // AcceptFcn funtion to invoke on accept selection from box
@@ -45,11 +54,15 @@ type PopulateFcn func(v *View) (messages Messages)
 type Message struct {
 	// Searchable is the target of search
 	Searchable string
+
 	// MessageToDisplay is the string inside the box
 	MessageToDisplay string
 
 	// Value2 is used as a return type for accept
 	Value2 []byte
+
+	// Extra
+	Extra Extra
 }
 
 // Messages all the lines in the autobox
@@ -125,7 +138,7 @@ func (a *AutocompletionBox) Display(v *View) {
 		runes := []rune(message.MessageToDisplay)
 		var j int
 		var indexes []int
-		for _, r := range a.response {
+		for _, r := range a.search {
 			j = j + strings.IndexRune(message.MessageToDisplay[j:], r)
 			indexes = append(indexes, j)
 		}
@@ -156,6 +169,7 @@ func (a *AutocompletionBox) Display(v *View) {
 func (a *AutocompletionBox) Reset() {
 	a.selected = 0
 	a.response = ""
+	a.search = ""
 	a.cursorx = 0
 	a.cursory = 0
 	a.open = false
@@ -168,11 +182,24 @@ func (a *AutocompletionBox) Reset() {
 
 func (a *AutocompletionBox) filterAutocomplete() {
 	mess := Messages{}
-	for _, message := range a.messages {
 
+	a.search = a.response
+	index := strings.IndexRune(a.search, ':')
+	if index != -1 {
+		split := strings.Split(a.search, ":")
+		if len(split) > 1 {
+			line, err := strconv.Atoi(split[1])
+			if err == nil {
+				a.Extra.line = line
+			}
+		}
+		a.search = a.search[:index]
+	}
+
+	for _, message := range a.messages {
 		var j int
 		var notFound bool
-		for _, r := range a.response {
+		for _, r := range a.search {
 			i := strings.IndexRune(message.Searchable[j:], r)
 			if i == -1 {
 				notFound = true
@@ -202,7 +229,9 @@ func (a *AutocompletionBox) HandleEvent(event tcell.Event, v *View) (swallow boo
 		case tcell.KeyEnter:
 			if a.AcceptEnter != nil {
 				if len(a.messagesToshow) > a.selected && len(a.messagesToshow) > 0 {
-					a.AcceptEnter(a.messagesToshow[a.selected])
+					message := a.messagesToshow[a.selected]
+					message.Extra = a.Extra
+					a.AcceptEnter(message)
 				}
 				a.Reset()
 			}
@@ -210,7 +239,9 @@ func (a *AutocompletionBox) HandleEvent(event tcell.Event, v *View) (swallow boo
 		case tcell.KeyTAB:
 			if a.AcceptTab != nil {
 				if len(a.messagesToshow) > a.selected {
-					a.AcceptTab(a.messagesToshow[a.selected])
+					message := a.messagesToshow[a.selected]
+					message.Extra = a.Extra
+					a.AcceptEnter(message)
 				}
 				a.Reset()
 			}
