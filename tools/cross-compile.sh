@@ -1,7 +1,13 @@
+# Source tar
+
+./vendor-src.sh micro-$1-src
 cd ..
 
 mkdir -p binaries
 mkdir -p micro-$1
+
+mv micro-$1-src.tar.gz binaries
+mv micro-$1-src.zip binaries
 
 cp LICENSE micro-$1
 cp README.md micro-$1

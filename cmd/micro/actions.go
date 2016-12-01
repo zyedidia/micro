@@ -57,9 +57,9 @@ func (v *View) Center(usePlugin bool) bool {
 		return false
 	}
 
-	v.Topline = v.Cursor.Y - v.height/2
-	if v.Topline+v.height > v.Buf.NumLines {
-		v.Topline = v.Buf.NumLines - v.height
+	v.Topline = v.Cursor.Y - v.Height/2
+	if v.Topline+v.Height > v.Buf.NumLines {
+		v.Topline = v.Buf.NumLines - v.Height
 	}
 	if v.Topline < 0 {
 		v.Topline = 0
@@ -1159,10 +1159,10 @@ func (v *View) End(usePlugin bool) bool {
 		return false
 	}
 
-	if v.height > v.Buf.NumLines {
+	if v.Height > v.Buf.NumLines {
 		v.Topline = 0
 	} else {
-		v.Topline = v.Buf.NumLines - v.height
+		v.Topline = v.Buf.NumLines - v.Height
 	}
 
 	if usePlugin {
@@ -1177,8 +1177,8 @@ func (v *View) PageUp(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Topline > v.height {
-		v.ScrollUp(v.height)
+	if v.Topline > v.Height {
+		v.ScrollUp(v.Height)
 	} else {
 		v.Topline = 0
 	}
@@ -1195,10 +1195,10 @@ func (v *View) PageDown(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Buf.NumLines-(v.Topline+v.height) > v.height {
-		v.ScrollDown(v.height)
-	} else if v.Buf.NumLines >= v.height {
-		v.Topline = v.Buf.NumLines - v.height
+	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height {
+		v.ScrollDown(v.Height)
+	} else if v.Buf.NumLines >= v.Height {
+		v.Topline = v.Buf.NumLines - v.Height
 	}
 
 	if usePlugin {
@@ -1255,7 +1255,7 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
 	}
-	v.Cursor.UpN(v.height)
+	v.Cursor.UpN(v.Height)
 
 	if usePlugin {
 		return PostActionCall("CursorPageUp", v)
@@ -1275,7 +1275,7 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
 	}
-	v.Cursor.DownN(v.height)
+	v.Cursor.DownN(v.Height)
 
 	if usePlugin {
 		return PostActionCall("CursorPageDown", v)
@@ -1289,8 +1289,8 @@ func (v *View) HalfPageUp(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Topline > v.height/2 {
-		v.ScrollUp(v.height / 2)
+	if v.Topline > v.Height/2 {
+		v.ScrollUp(v.Height / 2)
 	} else {
 		v.Topline = 0
 	}
@@ -1307,11 +1307,11 @@ func (v *View) HalfPageDown(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Buf.NumLines-(v.Topline+v.height) > v.height/2 {
-		v.ScrollDown(v.height / 2)
+	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height/2 {
+		v.ScrollDown(v.Height / 2)
 	} else {
-		if v.Buf.NumLines >= v.height {
-			v.Topline = v.Buf.NumLines - v.height
+		if v.Buf.NumLines >= v.Height {
+			v.Topline = v.Buf.NumLines - v.Height
 		}
 	}
 
@@ -1540,7 +1540,7 @@ func (v *View) AddTab(usePlugin bool) bool {
 		return false
 	}
 
-	tab := NewTabFromView(NewView(NewBuffer([]byte{}, "")))
+	tab := NewTabFromView(NewView(NewBuffer(strings.NewReader(""), "")))
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
 	curTab++
@@ -1600,7 +1600,7 @@ func (v *View) VSplitBinding(usePlugin bool) bool {
 		return false
 	}
 
-	v.VSplit(NewBuffer([]byte{}, ""))
+	v.VSplit(NewBuffer(strings.NewReader(""), ""))
 
 	if usePlugin {
 		return PostActionCall("VSplit", v)
@@ -1614,7 +1614,7 @@ func (v *View) HSplitBinding(usePlugin bool) bool {
 		return false
 	}
 
-	v.HSplit(NewBuffer([]byte{}, ""))
+	v.HSplit(NewBuffer(strings.NewReader(""), ""))
 
 	if usePlugin {
 		return PostActionCall("HSplit", v)
@@ -1628,7 +1628,7 @@ func (v *View) Unsplit(usePlugin bool) bool {
 		return false
 	}
 
-	curView := tabs[curTab].curView
+	curView := tabs[curTab].CurView
 	for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
 		view := tabs[curTab].views[i]
 		if view != nil && view.Num != curView {
@@ -1650,10 +1650,10 @@ func (v *View) NextSplit(usePlugin bool) bool {
 	}
 
 	tab := tabs[curTab]
-	if tab.curView < len(tab.views)-1 {
-		tab.curView++
+	if tab.CurView < len(tab.views)-1 {
+		tab.CurView++
 	} else {
-		tab.curView = 0
+		tab.CurView = 0
 	}
 
 	if usePlugin {
@@ -1669,10 +1669,10 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 	}
 
 	tab := tabs[curTab]
-	if tab.curView > 0 {
-		tab.curView--
+	if tab.CurView > 0 {
+		tab.CurView--
 	} else {
-		tab.curView = len(tab.views) - 1
+		tab.CurView = len(tab.views) - 1
 	}
 
 	if usePlugin {

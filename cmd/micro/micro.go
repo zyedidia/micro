@@ -95,17 +95,22 @@ func LoadInput() []*Buffer {
 			filename = flag.Args()[i]
 
 			// Check that the file exists
+			var input *os.File
 			if _, e := os.Stat(filename); e == nil {
 				// If it exists we load it into a buffer
-				input, err = ioutil.ReadFile(filename)
+				input, err = os.Open(filename)
+				defer input.Close()
 				if err != nil {
 					TermMessage(err)
-					input = []byte{}
-					filename = ""
+					continue
 				}
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			buffers = append(buffers, NewBuffer(input, filename))
+			if input != nil {
+				buffers = append(buffers, NewBuffer(input, filename))
+			} else {
+				buffers = append(buffers, NewBuffer(strings.NewReader(""), filename))
+			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
@@ -116,10 +121,10 @@ func LoadInput() []*Buffer {
 			TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
-		buffers = append(buffers, NewBuffer(input, filename))
+		buffers = append(buffers, NewBuffer(strings.NewReader(string(input)), filename))
 	} else {
 		// Option 3, just open an empty buffer
-		buffers = append(buffers, NewBuffer(input, filename))
+		buffers = append(buffers, NewBuffer(strings.NewReader(string(input)), filename))
 	}
 
 	return buffers
@@ -296,6 +301,10 @@ func main() {
 
 	// Now we load the input
 	buffers := LoadInput()
+	if len(buffers) == 0 {
+		screen.Fini()
+		os.Exit(1)
+	}
 	for _, buf := range buffers {
 		// For each buffer we create a new tab and place the view in that tab
 		tab := NewTabFromView(NewView(buf))
@@ -334,7 +343,7 @@ func main() {
 	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
-	L.SetGlobal("NewBuffer", luar.New(L, NewBuffer))
+	L.SetGlobal("NewBuffer", luar.New(L, NewBufferFromString))
 	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
 		return string(r)
 	}))
@@ -350,6 +359,7 @@ func main() {
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
+	L.SetGlobal("JobSpawn", luar.New(L, JobSpawn))
 	L.SetGlobal("JobSend", luar.New(L, JobSend))
 	L.SetGlobal("JobStop", luar.New(L, JobStop))
 
@@ -438,8 +448,8 @@ func main() {
 						// We loop through each view in the current tab and make sure the current view
 						// is the one being clicked in
 						for _, v := range tabs[curTab].views {
-							if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
-								tabs[curTab].curView = v.Num
+							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								tabs[curTab].CurView = v.Num
 							}
 						}
 					}

@@ -92,11 +92,15 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
 * `ByteOffset(loc Loc, buf *Buffer) int`: exactly like `ToCharPos` except it it counts bytes instead of runes.
 
-* `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
-   Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
+* `JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...string)`:
+   Starts running the given process in the background. `onStdout` `onStderr` and `onExit`
    are callbacks to lua functions which will be called when the given actions happen
    to the background process.
    `userargs` are the arguments which will get passed to the callback functions
+
+* `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
+   Starts running the given shell command in the background.
+   This function is a shorthand for `JobSpawn`.
 
 * `JobSend(cmd *exec.Cmd, data string)`: send a string into the stdin of the job process
 

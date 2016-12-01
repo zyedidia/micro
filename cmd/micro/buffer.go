@@ -3,6 +3,7 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -55,8 +56,12 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
-// NewBuffer creates a new buffer from `txt` with path and name `path`
-func NewBuffer(txt []byte, path string) *Buffer {
+func NewBufferFromString(text, path string) *Buffer {
+	return NewBuffer(strings.NewReader(text), path)
+}
+
+// NewBuffer creates a new buffer from a given reader with a given path
+func NewBuffer(reader io.Reader, path string) *Buffer {
 	if path != "" {
 		for _, tab := range tabs {
 			for _, view := range tab.views {
@@ -68,7 +73,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	}
 
 	b := new(Buffer)
-	b.LineArray = NewLineArray(txt)
+	b.LineArray = NewLineArray(reader)
 
 	b.Settings = DefaultLocalSettings()
 	for k, v := range globalSettings {
@@ -166,6 +171,9 @@ func NewBuffer(txt []byte, path string) *Buffer {
 
 func (b *Buffer) GetName() string {
 	if b.name == "" {
+		if b.Path == "" {
+			return "No name"
+		}
 		return b.Path
 	}
 	return b.name

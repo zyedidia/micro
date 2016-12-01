@@ -115,3 +115,19 @@ github-release upload \
     --name "micro-$1-win32.zip" \
     --file binaries/micro-$1-win32.zip
 
+echo "Uploading vendored tarball"
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag $tag \
+    --name "micro-$1-src.tar.gz" \
+    --file binaries/micro-$1-src.tar.gz
+
+echo "Uploading vendored zip"
+
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag $tag \
+    --name "micro-$1-src.zip" \
+    --file binaries/micro-$1-src.zip

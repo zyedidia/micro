@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -266,17 +265,18 @@ func Help(args []string) {
 // If no file is given, it opens an empty buffer in a new split
 func VSplit(args []string) {
 	if len(args) == 0 {
-		CurView().VSplit(NewBuffer([]byte{}, ""))
+		CurView().VSplit(NewBuffer(strings.NewReader(""), ""))
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
+		file, err := os.Open(filename)
+		defer file.Close()
 
 		var buf *Buffer
 		if err != nil {
 			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer([]byte{}, filename)
+			buf = NewBuffer(strings.NewReader(""), filename)
 		} else {
 			buf = NewBuffer(file, filename)
 		}
@@ -288,17 +288,18 @@ func VSplit(args []string) {
 // If no file is given, it opens an empty buffer in a new split
 func HSplit(args []string) {
 	if len(args) == 0 {
-		CurView().HSplit(NewBuffer([]byte{}, ""))
+		CurView().HSplit(NewBuffer(strings.NewReader(""), ""))
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
+		file, err := os.Open(filename)
+		defer file.Close()
 
 		var buf *Buffer
 		if err != nil {
 			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer([]byte{}, filename)
+			buf = NewBuffer(strings.NewReader(""), filename)
 		} else {
 			buf = NewBuffer(file, filename)
 		}
@@ -326,7 +327,8 @@ func NewTab(args []string) {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, _ := ioutil.ReadFile(filename)
+		file, _ := os.Open(filename)
+		defer file.Close()
 
 		tab := NewTabFromView(NewView(NewBuffer(file, filename)))
 		tab.SetNum(len(tabs))

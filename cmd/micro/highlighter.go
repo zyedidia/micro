@@ -298,7 +298,7 @@ func Match(v *View) SyntaxMatches {
 	rules := v.Buf.rules
 
 	viewStart := v.Topline
-	viewEnd := v.Topline + v.height
+	viewEnd := v.Topline + v.Height
 	if viewEnd > buf.NumLines {
 		viewEnd = buf.NumLines
 	}
@@ -315,7 +315,7 @@ func Match(v *View) SyntaxMatches {
 
 	// We don't actually check the entire buffer, just from synLinesUp to synLinesDown
 	totalStart := v.Topline - synLinesUp
-	totalEnd := v.Topline + v.height + synLinesDown
+	totalEnd := v.Topline + v.Height + synLinesDown
 	if totalStart < 0 {
 		totalStart = 0
 	}
@@ -343,7 +343,7 @@ func Match(v *View) SyntaxMatches {
 							continue
 						}
 						lineNum -= viewStart
-						if lineNum >= 0 && lineNum < v.height {
+						if lineNum >= 0 && lineNum < v.Height {
 							matches[lineNum][colNum] = rule.style
 						}
 					}
