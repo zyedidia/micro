@@ -5,12 +5,12 @@ syntax "vhdl" "\.vhdl?$"
 color type (i) "\b(string|integer|natural|positive|(un)?signed|std_u?logic(_vector)?|bit(_vector)?|boolean|u?x01z?|array|range)\b"
 
 ## identifiers (component-, library-names etc.)
-color identifier (i) "library[ 	]+[a-zA-Z_0-9]+"
-color identifier (i) "use[ 	]+[a-zA-Z_0-9\.]+"
-color identifier (i) "component[ 	]+[a-zA-Z_0-9]+"
-color identifier (i) "(architecture|configuration)[ 	]+[a-zA-Z_0-9]+[ 	]+of[ 	]+[a-zA-Z_0-9]+"
-color identifier (i) "(entity|package)[ 	]+[a-zA-Z_0-9]+[ 	]+is"
-color identifier (i) "end[ 	]+((architecture|entity|component|process|package|generate)[ 	]+)?[a-zA-Z_0-9]+"
+color identifier (i) "library[[:space:]]+[a-zA-Z_0-9]+"
+color identifier (i) "use[[:space:]]+[a-zA-Z_0-9\.]+"
+color identifier (i) "component[[:space:]]+[a-zA-Z_0-9]+"
+color identifier (i) "(architecture|configuration)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+of[[:space:]]+[a-zA-Z_0-9]+"
+color identifier (i) "(entity|package)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+is"
+color identifier (i) "end[[:space:]]+((architecture|entity|component|process|package|generate)[[:space:]]+)?[a-zA-Z_0-9]+"
 
 ## reserved words
 color statement (i) "\b(abs|access|after|alias|all|and|architecture|assert|attribute)\b"
