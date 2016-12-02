@@ -436,6 +436,8 @@ func (v *View) MoveToMouseClick(x, y int) {
 	v.Cursor.X = x
 	v.Cursor.Y = y
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
+
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 }
 
 // HandleEvent handles an event passed by the main loop

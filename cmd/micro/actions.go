@@ -79,7 +79,6 @@ func (v *View) CursorUp(usePlugin bool) bool {
 
 	v.deselect(0)
 	v.Cursor.Up()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorUp", v)
@@ -95,7 +94,6 @@ func (v *View) CursorDown(usePlugin bool) bool {
 
 	v.deselect(1)
 	v.Cursor.Down()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorDown", v)
@@ -115,7 +113,6 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 	} else {
 		v.Cursor.Left()
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorLeft", v)
@@ -135,7 +132,6 @@ func (v *View) CursorRight(usePlugin bool) bool {
 	} else {
 		v.Cursor.Right()
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorRight", v)
@@ -150,7 +146,6 @@ func (v *View) WordRight(usePlugin bool) bool {
 	}
 
 	v.Cursor.WordRight()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("WordRight", v)
@@ -165,7 +160,6 @@ func (v *View) WordLeft(usePlugin bool) bool {
 	}
 
 	v.Cursor.WordLeft()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("WordLeft", v)
@@ -184,7 +178,6 @@ func (v *View) SelectUp(usePlugin bool) bool {
 	}
 	v.Cursor.Up()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectUp", v)
@@ -203,7 +196,6 @@ func (v *View) SelectDown(usePlugin bool) bool {
 	}
 	v.Cursor.Down()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectDown", v)
@@ -227,7 +219,6 @@ func (v *View) SelectLeft(usePlugin bool) bool {
 	}
 	v.Cursor.Left()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectLeft", v)
@@ -251,7 +242,6 @@ func (v *View) SelectRight(usePlugin bool) bool {
 	}
 	v.Cursor.Right()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectRight", v)
@@ -270,7 +260,6 @@ func (v *View) SelectWordRight(usePlugin bool) bool {
 	}
 	v.Cursor.WordRight()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectWordRight", v)
@@ -289,7 +278,6 @@ func (v *View) SelectWordLeft(usePlugin bool) bool {
 	}
 	v.Cursor.WordLeft()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectWordLeft", v)
@@ -306,7 +294,6 @@ func (v *View) StartOfLine(usePlugin bool) bool {
 	v.deselect(0)
 
 	v.Cursor.Start()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("StartOfLine", v)
@@ -323,7 +310,6 @@ func (v *View) EndOfLine(usePlugin bool) bool {
 	v.deselect(0)
 
 	v.Cursor.End()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("EndOfLine", v)
@@ -342,7 +328,6 @@ func (v *View) SelectToStartOfLine(usePlugin bool) bool {
 	}
 	v.Cursor.Start()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectToStartOfLine", v)
@@ -361,7 +346,6 @@ func (v *View) SelectToEndOfLine(usePlugin bool) bool {
 	}
 	v.Cursor.End()
 	v.Cursor.SelectTo(v.Cursor.Loc)
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectToEndOfLine", v)
@@ -415,7 +399,6 @@ func (v *View) SelectToStart(usePlugin bool) bool {
 	}
 	v.CursorStart(false)
 	v.Cursor.SelectTo(v.Buf.Start())
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectToStart", v)
@@ -434,7 +417,6 @@ func (v *View) SelectToEnd(usePlugin bool) bool {
 	}
 	v.CursorEnd(false)
 	v.Cursor.SelectTo(v.Buf.End())
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectToEnd", v)
@@ -454,7 +436,6 @@ func (v *View) InsertSpace(usePlugin bool) bool {
 	}
 	v.Buf.Insert(v.Cursor.Loc, " ")
 	v.Cursor.Right()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("InsertSpace", v)
@@ -490,7 +471,6 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 		}
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("InsertNewline", v)
@@ -537,7 +517,6 @@ func (v *View) Backspace(usePlugin bool) bool {
 		}
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("Backspace", v)
@@ -556,7 +535,6 @@ func (v *View) DeleteWordRight(usePlugin bool) bool {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("DeleteWordRight", v)
@@ -575,7 +553,6 @@ func (v *View) DeleteWordLeft(usePlugin bool) bool {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("DeleteWordLeft", v)
@@ -598,7 +575,6 @@ func (v *View) Delete(usePlugin bool) bool {
 			v.Buf.Remove(loc, loc.Move(1, v.Buf))
 		}
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("Delete", v)
@@ -633,7 +609,6 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		}
 		return true
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	return false
 }
@@ -656,7 +631,6 @@ func (v *View) OutdentLine(usePlugin bool) bool {
 		v.Cursor.X -= 1
 	}
 	v.Cursor.Relocate()
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("OutdentLine", v)
@@ -689,7 +663,6 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 			}
 		}
 		v.Cursor.Relocate()
-		cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 		if usePlugin {
 			return PostActionCall("OutdentSelection", v)
@@ -715,7 +688,6 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	for i := 0; i < bytesUntilIndent; i++ {
 		v.Cursor.Right()
 	}
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("InsertTab", v)
@@ -983,7 +955,6 @@ func (v *View) DeleteLine(usePlugin bool) bool {
 	v.Cursor.DeleteSelection()
 	v.Cursor.ResetSelection()
 	messenger.Message("Deleted line")
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("DeleteLine", v)
@@ -1023,7 +994,6 @@ func (v *View) MoveLinesUp(usePlugin bool) bool {
 		messenger.Message("Moved up current line")
 	}
 	v.Buf.IsModified = true
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("MoveLinesUp", v)
@@ -1063,7 +1033,6 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 		messenger.Message("Moved down current line")
 	}
 	v.Buf.IsModified = true
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("MoveLinesDown", v)
@@ -1113,7 +1082,6 @@ func (v *View) SelectAll(usePlugin bool) bool {
 	// Put the cursor at the beginning
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
-	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("SelectAll", v)
@@ -1131,6 +1099,7 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
 		if !canceled {
 			HandleCommand(input)
+			cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 			if usePlugin {
 				return PostActionCall("OpenFile", v)
 			}
@@ -1165,6 +1134,7 @@ func (v *View) End(usePlugin bool) bool {
 		v.Topline = v.Buf.NumLines - v.Height
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("End", v)
 	}
@@ -1183,6 +1153,7 @@ func (v *View) PageUp(usePlugin bool) bool {
 		v.Topline = 0
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("PageUp", v)
 	}
@@ -1256,6 +1227,7 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 	v.Cursor.UpN(v.Height)
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorPageUp", v)
@@ -1276,6 +1248,7 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 	v.Cursor.DownN(v.Height)
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorPageDown", v)
@@ -1602,6 +1575,7 @@ func (v *View) VSplitBinding(usePlugin bool) bool {
 
 	v.VSplit(NewBuffer(strings.NewReader(""), ""))
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("VSplit", v)
 	}
@@ -1616,6 +1590,7 @@ func (v *View) HSplitBinding(usePlugin bool) bool {
 
 	v.HSplit(NewBuffer(strings.NewReader(""), ""))
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("HSplit", v)
 	}
@@ -1637,6 +1612,7 @@ func (v *View) Unsplit(usePlugin bool) bool {
 		}
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("Unsplit", v)
 	}
@@ -1656,6 +1632,7 @@ func (v *View) NextSplit(usePlugin bool) bool {
 		tab.CurView = 0
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("NextSplit", v)
 	}
@@ -1675,6 +1652,7 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 		tab.CurView = len(tab.views) - 1
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("PreviousSplit", v)
 	}
