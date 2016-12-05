@@ -363,6 +363,7 @@ func (v *View) CursorStart(usePlugin bool) bool {
 
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorStart", v)
@@ -379,6 +380,7 @@ func (v *View) CursorEnd(usePlugin bool) bool {
 	v.deselect(0)
 
 	v.Cursor.Loc = v.Buf.End()
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorEnd", v)
@@ -607,6 +609,7 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		}
 		return true
 	}
+
 	return false
 }
 
@@ -1096,6 +1099,7 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
 		if !canceled {
 			HandleCommand(input)
+			cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 			if usePlugin {
 				return PostActionCall("OpenFile", v)
 			}
@@ -1130,6 +1134,7 @@ func (v *View) End(usePlugin bool) bool {
 		v.Topline = v.Buf.NumLines - v.Height
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("End", v)
 	}
@@ -1148,6 +1153,7 @@ func (v *View) PageUp(usePlugin bool) bool {
 		v.Topline = 0
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("PageUp", v)
 	}
@@ -1172,6 +1178,42 @@ func (v *View) PageDown(usePlugin bool) bool {
 	return false
 }
 
+// NextLoc moves char to next place
+func (v *View) NextLoc(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("NextLoc", v) {
+		return false
+	}
+	next := cursorLocations.GetNext()
+	if next.Path != "" {
+		v.Open(next.Path)
+	}
+	v.Buf.Cursor.X = next.X
+	v.Buf.Cursor.Y = next.Y
+	v.Buf.Cursor.Relocate()
+	if usePlugin {
+		return PostActionCall("NextLoc", v)
+	}
+	return true
+}
+
+// PrevLoc moves char to prev place
+func (v *View) PrevLoc(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("PrevLoc", v) {
+		return false
+	}
+	prev := cursorLocations.GetPrev()
+	if prev.Path != "" {
+		v.Open(prev.Path)
+	}
+	v.Buf.Cursor.X = prev.X
+	v.Buf.Cursor.Y = prev.Y
+	v.Buf.Cursor.Relocate()
+	if usePlugin {
+		return PostActionCall("PrevLoc", v)
+	}
+	return true
+}
+
 // CursorPageUp places the cursor a page up
 func (v *View) CursorPageUp(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorPageUp", v) {
@@ -1185,6 +1227,7 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 	v.Cursor.UpN(v.Height)
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorPageUp", v)
@@ -1205,6 +1248,7 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 	v.Cursor.DownN(v.Height)
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 
 	if usePlugin {
 		return PostActionCall("CursorPageDown", v)
@@ -1531,6 +1575,7 @@ func (v *View) VSplitBinding(usePlugin bool) bool {
 
 	v.VSplit(NewBuffer(strings.NewReader(""), ""))
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("VSplit", v)
 	}
@@ -1545,6 +1590,7 @@ func (v *View) HSplitBinding(usePlugin bool) bool {
 
 	v.HSplit(NewBuffer(strings.NewReader(""), ""))
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("HSplit", v)
 	}
@@ -1566,6 +1612,7 @@ func (v *View) Unsplit(usePlugin bool) bool {
 		}
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("Unsplit", v)
 	}
@@ -1585,6 +1632,7 @@ func (v *View) NextSplit(usePlugin bool) bool {
 		tab.CurView = 0
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("NextSplit", v)
 	}
@@ -1604,6 +1652,7 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 		tab.CurView = len(tab.views) - 1
 	}
 
+	cursorLocations.AddLocation(CursorLocation{X: v.Buf.Cursor.X, Y: v.Buf.Cursor.Y, Path: v.Buf.Path})
 	if usePlugin {
 		return PostActionCall("PreviousSplit", v)
 	}

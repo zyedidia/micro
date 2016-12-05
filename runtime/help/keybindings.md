@@ -196,6 +196,8 @@ HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
+NextLoc
+PrevLoc
 ```
 
 Here is the list of all possible keys you can bind:

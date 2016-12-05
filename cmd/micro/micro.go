@@ -44,6 +44,8 @@ var (
 	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
 	configDir string
 
+	cursorLocations CursorLocations
+
 	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
 	Version     = "0.0.0-unknown"
