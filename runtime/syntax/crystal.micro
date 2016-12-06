@@ -1,0 +1,34 @@
+## Crystal Syntax file.
+##
+syntax "crystal" "\.cr$" "Gemfile" "config.ru" "Rakefile" "Capfile" "Vagrantfile"
+header "^#!.*/(env +)?crystal( |$)"
+
+## Asciibetical list of reserved words
+color statement "\b(BEGIN|END|abstract|alias|and|begin|break|case|class|def|defined\?|do|else|elsif|end|ensure|enum|false|for|fun|if|in|include|lib|loop|macro|module|next|nil|not|of|or|pointerof|private|protected|raise|redo|require|rescue|retry|return|self|sizeof|spawn|struct|super|then|true|type|undef|union|uninitialized|unless|until|when|while|yield)\b"
+## Constants
+color constant "(\$|@|@@)?\b[A-Z]+[0-9A-Z_a-z]*"
+color constant.number "\b[0-9]+\b"
+## Crystal "symbols"
+color constant (i) "([ 	]|^):[0-9A-Z_]+\b"
+## Some unique things we want to stand out
+color constant "\b(__FILE__|__LINE__)\b"
+## Regular expressions
+color constant "/([^/]|(\\/))*/[iomx]*" "%r\{([^}]|(\\}))*\}[iomx]*"
+## Shell command expansion is in `backticks` or like %x{this}.  These are
+## "double-quotish" (to use a perlism).
+color constant.string "`[^`]*`" "%x\{[^}]*\}"
+## Strings, double-quoted
+color constant.string ""([^"]|(\\"))*"" "%[QW]?\{[^}]*\}" "%[QW]?\([^)]*\)" "%[QW]?<[^>]*>" "%[QW]?\[[^]]*\]" "%[QW]?\$[^$]*\$" "%[QW]?\^[^^]*\^" "%[QW]?![^!]*!"
+## Expression substitution.  These go inside double-quoted strings,
+## "like #{this}".
+color special "#\{[^}]*\}"
+## Characters are single-quoted
+color constant.string.char "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>" "%[qw]\[[^]]*\]" "%[qw]\$[^$]*\$" "%[qw]\^[^^]*\^" "%[qw]![^!]*!"
+## Comments
+color comment "#[^{].*$" "#$"
+color comment "##[^{].*$" "##$"
+## "Here" docs
+color constant start="<<-?'?EOT'?" end="^EOT"
+## Some common markers
+color todo "(XXX|TODO|FIXME|\?\?\?)"
+
