@@ -889,6 +889,7 @@ func (v *View) DisplayView() {
 						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
 					}
 				}
+				strWidth += remainder
 			} else if runewidth.RuneWidth(ch) > 1 {
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
 					v.drawCell(screenX, screenY, ch, nil, lineStyle)
@@ -899,15 +900,16 @@ func (v *View) DisplayView() {
 						v.drawCell(screenX-v.leftCol, screenY, '<', nil, lineStyle)
 					}
 				}
+				strWidth += StringWidth(string(ch), tabSize)
 			} else {
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
 					v.drawCell(screenX-v.leftCol, screenY, ch, nil, lineStyle)
 				}
+				strWidth += StringWidth(string(ch), tabSize)
 			}
 			charNum = charNum.Move(1, v.Buf)
 			screenX++
 			colN++
-			strWidth += StringWidth(string(ch), tabSize)
 		}
 		// Here we are at a newline
 
