@@ -97,9 +97,14 @@ func LoadInput() []*Buffer {
 			if _, e := os.Stat(filename); e == nil {
 				// If it exists we load it into a buffer
 				input, err = os.Open(filename)
+				stat, _ := input.Stat()
 				defer input.Close()
 				if err != nil {
 					TermMessage(err)
+					continue
+				}
+				if stat.IsDir() {
+					TermMessage("Cannot read", filename, "because it is a directory")
 					continue
 				}
 			}
