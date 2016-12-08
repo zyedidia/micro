@@ -11,21 +11,21 @@ color statement "\b(if|then|elseif|else|end|match|where|try|with|as|recover|obje
 color statement "\b(while|do|repeat|until|for|in)\b"
 
 color statement "(\?|=>)"
-color statement "(\\||\\&|\\,|\\^)"
+color statement "(\||\&|\,|\^)"
 
-color statement "(\-|\+|\\*|/|\!|%|<<|>>)"
+color statement "(\-|\+|\*|/|\!|%|<<|>>)"
 color statement "(==|!=|<=|>=|<|>)"
 color statement "\b(is|isnt|not|and|or|xor)\b"
 
-color type "\b(_*[A-Z][_a-zA-Z0-9\\']*)\b"
+color type "\b(_*[A-Z][_a-zA-Z0-9\']*)\b"
 
 color constant "\b(this)\b"
 color constant "\b(true|false)\b"
 
-color constant.number "\b((0b[0-1_]*)|(0o[0-7_]*)|(0x[0-9a-fA-F_]*)|([0-9_]+(\\.[0-9_]+)?((e|E)(\\+|-)?[0-9_]+)?))\b"
-color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color constant.number "\b((0b[0-1_]*)|(0o[0-7_]*)|(0x[0-9a-fA-F_]*)|([0-9_]+(\.[0-9_]+)?((e|E)(\\+|-)?[0-9_]+)?))\b"
+color constant.string ""(\\.|[^"])*""
 
-color comment start=""""([^"]|$)" end="""""
+color comment start=""""[^"]*" end="""""
 color comment "(^|[[:space:]])//.*"
 color comment start="/\*" end="\*/"
 color todo "TODO:?"
