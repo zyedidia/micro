@@ -36,7 +36,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
     * Micro has a built-in plugin manager to automatically install, remove, and update all your plugins
 * Persistent undo
 * Automatic linting and error notifications
-* Syntax highlighting (for over [75 languages](runtime/syntax)!)
+* Syntax highlighting (for over [90 languages](runtime/syntax)!)
 * Colorscheme support
     * By default, micro comes with 16, 256, and true color themes.
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
