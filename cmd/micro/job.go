@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"io"
 	"os/exec"
-	"strings"
 )
 
 // Jobs are the way plugins can run processes in the background
@@ -43,10 +42,7 @@ func (f *CallbackFile) Write(data []byte) (int, error) {
 // JobStart starts a shell command in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
 func JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string) *exec.Cmd {
-	split := strings.Split(cmd, " ")
-	cmdArgs := split[1:]
-	cmdName := split[0]
-	return JobSpawn(cmdName, cmdArgs, onStdout, onStderr, onExit, userargs...)
+	return JobSpawn("sh", []string{"-c", cmd}, onStdout, onStderr, onExit, userargs...)
 }
 
 // JobSpawn starts a process with args in the background with the given callbacks

@@ -99,8 +99,8 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    `userargs` are the arguments which will get passed to the callback functions
 
 * `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
-   Starts running the given shell command in the background.
-   This function is a shorthand for `JobSpawn`.
+   Starts running the given shell command in the background. Note that the command execute
+   is first parsed by a shell when using this command. It is executed with `sh -c`.
 
 * `JobSend(cmd *exec.Cmd, data string)`: send a string into the stdin of the job process
 

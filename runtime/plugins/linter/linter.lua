@@ -19,20 +19,20 @@ function runLinter()
         temp = os.getenv("TEMP")
     end
     if ft == "go" then
-        lint("gobuild", "go build -o " .. devnull, "%f:%l: %m")
-        lint("golint", "golint " .. CurView().Buf.Path, "%f:%l:%d+: %m")
+        lint("gobuild", "go", {"build", "-o", devnull}, "%f:%l: %m")
+        lint("golint", "golint", {CurView().Buf.Path}, "%f:%l:%d+: %m")
     elseif ft == "lua" then
-        lint("luacheck", "luacheck --no-color " .. file, "%f:%l:%d+: %m")
+        lint("luacheck", "luacheck", {"--no-color", file}, "%f:%l:%d+: %m")
     elseif ft == "python" then
-        lint("pyflakes", "pyflakes " .. file, "%f:%l:.-:? %m")
+        lint("pyflakes", "pyflakes", {file}, "%f:%l:.-:? %m")
     elseif ft == "c" then
-        lint("gcc", "gcc -fsyntax-only -Wall -Wextra " .. file, "%f:%l:%d+:.+: %m")
+        lint("gcc", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
     elseif ft == "d" then
-        lint("dmd", "dmd -color=off -o- -w -wi -c " .. file, "%f%(%l%):.+: %m")
+        lint("dmd", "dmd", {"-color=off", "-o-", "-w", "-wi", "-c", file}, "%f%(%l%):.+: %m")
     elseif ft == "java" then
-        lint("javac", "javac -d " .. temp .. " " .. file, "%f:%l: error: %m")
+        lint("javac", "javac", {"-d", temp, file}, "%f:%l: error: %m")
     elseif ft == "javascript" then
-        lint("jshint", "jshint " .. file, "%f: line %l,.+, %m")
+        lint("jshint", "jshint", {file}, "%f: line %l,.+, %m")
     end
 end
 
@@ -44,10 +44,10 @@ function onSave(view)
     end
 end
 
-function lint(linter, cmd, errorformat)
+function lint(linter, cmd, args, errorformat)
     CurView():ClearGutterMessages(linter)
 
-    JobStart(cmd, "", "", "linter.onExit", linter, errorformat)
+    JobSpawn(cmd, args, "", "", "linter.onExit", linter, errorformat)
 end
 
 function onExit(output, linter, errorformat)
