@@ -1,25 +1,20 @@
 syntax "ocaml" "\.mli?$"
-#uid
-color red "\<[A-Z][0-9a-z_]{2,}\>"
-#declarations
-color green "\<(let|val|method|in|and|rec|private|virtual|constraint)\>"
-#structure items
-color red "\<(type|open|class|module|exception|external)\>"
-#patterns
-color blue "\<(fun|function|functor|match|try|with)\>"
-#patterns-modifiers
-color yellow "\<(as|when|of)\>" 
-#conditions
-color cyan "\<(if|then|else)\>"
-#blocs
-color magenta "\<(begin|end|object|struct|sig|for|while|do|done|to|downto)\>"
-#constantes
-color green "\<(true|false)\>"
-#modules/classes
-color green "\<(include|inherit|initializer)\>"
-#expr modifiers
-color yellow "\<(new|ref|mutable|lazy|assert|raise)\>"
-#comments
-color white start="\(\*" end="\*\)"
-#strings (no multiline handling yet)
-color brightblack ""[^\"]*""
+
+# Numbers
+## Integers
+### Binary
+color constant.number "-?0[bB][01][01_]*"
+### Octal
+color constant.number "-?0[oO][0-7][0-7_]*"
+### Decimal
+color constant.number "-?\d[\d_]*"
+### Hexadecimal
+color constant.number "-?0[xX][0-9a-fA-F][0-9a-fA-F_]*"
+## Real
+### Decimal
+color constant.number "-?\d[\d_]*.\d[\d_]*([eE][+-]\d[\d_]*.\d[\d_]*)?"
+### Hexadecimal
+color constant.number "-?0[xX][0-9a-fA-F][0-9a-fA-F_]*.[0-9a-fA-F][0-9a-fA-F_]*([pP][+-][0-9a-fA-F][0-9a-fA-F_]*.[0-9a-fA-F][0-9a-fA-F_]*)?"
+
+# Comments
+color comment start="\(\*" end="\*\)"
