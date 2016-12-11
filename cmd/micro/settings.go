@@ -176,6 +176,7 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"removewhitespaces": true,
 		"autosave":     false,
 		"colorcolumn":  float64(0),
 		"colorscheme":  "default",
@@ -208,6 +209,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"removewhitespaces": true,
 		"autosave":     false,
 		"colorcolumn":  float64(0),
 		"cursorline":   true,
