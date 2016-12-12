@@ -13,7 +13,7 @@ import (
 // PreActionCall executes the lua pre callback if possible
 func PreActionCall(funcName string, view *View) bool {
 	executeAction := true
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".pre"+funcName, view)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -29,7 +29,7 @@ func PreActionCall(funcName string, view *View) bool {
 // PostActionCall executes the lua plugin callback if possible
 func PostActionCall(funcName string, view *View) bool {
 	relocate := true
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".on"+funcName, view)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -1651,7 +1651,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 			v.Buf.Insert(v.Cursor.Loc, string(t))
 			v.Cursor.Right()
 
-			for _, pl := range loadedPlugins {
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(t), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)

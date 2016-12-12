@@ -133,12 +133,10 @@ func PluginCmd(args []string) {
 			removed := ""
 			for _, plugin := range args[1:] {
 				// check if the plugin exists.
-				for _, lp := range loadedPlugins {
-					if lp == plugin {
-						UninstallPlugin(plugin)
-						removed += plugin + " "
-						continue
-					}
+				if _, ok := loadedPlugins[plugin]; ok {
+					UninstallPlugin(plugin)
+					removed += plugin + " "
+					continue
 				}
 			}
 			if !IsSpaces(removed) {
