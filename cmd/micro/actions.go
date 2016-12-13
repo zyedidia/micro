@@ -1472,7 +1472,7 @@ func (v *View) AddTab(usePlugin bool) bool {
 	tab := NewTabFromView(NewView(NewBuffer(strings.NewReader(""), "")))
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
-	curTab++
+	curTab = len(tabs) - 1
 	if len(tabs) == 2 {
 		for _, t := range tabs {
 			for _, v := range t.views {
