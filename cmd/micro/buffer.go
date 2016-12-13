@@ -13,6 +13,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -279,7 +281,8 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) SaveAs(filename string) error {
 	b.FindFileType()
 	b.UpdateRules()
-	b.Path = filename
+	dir, _ := homedir.Dir()
+	b.Path = strings.Replace(filename, "~", dir, 1)
 	str := b.String()
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
