@@ -73,7 +73,7 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 * `SetOption(option, value string)`: sets the given option to the value. This will
    set the option globally, unless it is a local only option.
 
-* `SetLocalOption(option, value string, buffer *Buffer)`: sets the given option to
+* `SetLocalOption(option, value string, view *View)`: sets the given option to
    the value locally in the given buffer
 
 * `BindKey(key, action string)`: binds `key` to `action`
