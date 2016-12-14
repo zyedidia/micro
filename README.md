@@ -107,7 +107,7 @@ If you don't have xclip or xsel, micro will use an internal clipboard for copy a
 
 If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
 you are using a terminal which does not support 256 color. Try changing the colorscheme to `simple`
-by running `> set colorscheme simple`.
+by pressing CtrlE in micro and typing `set colorscheme simple`.
 
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.

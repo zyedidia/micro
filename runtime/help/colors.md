@@ -29,7 +29,7 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
   It requires true color to look good.
 
-To enable one of these colorschemes just run the command `set colorscheme solarized`.
+To enable one of these colorschemes just press CtrlE in micro and type `set colorscheme solarized`.
 (or whichever one you choose).
 
 ---
