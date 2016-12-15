@@ -283,13 +283,13 @@ func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	dir, _ := homedir.Dir()
 	b.Path = strings.Replace(filename, "~", dir, 1)
-	str := b.String()
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
 			b.Insert(end, "\n")
 		}
 	}
+	str := b.String()
 	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
