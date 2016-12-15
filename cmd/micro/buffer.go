@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -283,6 +284,18 @@ func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	dir, _ := homedir.Dir()
 	b.Path = strings.Replace(filename, "~", dir, 1)
+	if b.Settings["rmtrailingws"].(bool) {
+		r, _ := regexp.Compile(`[ \t]+$`)
+		for lineNum, line := range b.Lines(0, b.NumLines) {
+			indices := r.FindStringIndex(line)
+			if indices == nil {
+				continue
+			}
+			startLoc := Loc{indices[0], lineNum}
+			b.deleteToEnd(startLoc)
+		}
+		b.Cursor.Relocate()
+	}
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
@@ -361,6 +374,11 @@ func (b *Buffer) remove(start, end Loc) string {
 	sub := b.LineArray.remove(start, end)
 	b.Update()
 	return sub
+}
+func (b *Buffer) deleteToEnd(start Loc) {
+	b.IsModified = true
+	b.LineArray.DeleteToEnd(start)
+	b.Update()
 }
 
 // Start returns the location of the first character in the buffer
