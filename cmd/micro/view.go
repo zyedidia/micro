@@ -418,9 +418,6 @@ func (v *View) MoveToMouseClick(x, y int) {
 		v.ScrollDown(1)
 		y = v.Height + v.Topline - 1
 	}
-	if y >= v.Buf.NumLines {
-		y = v.Buf.NumLines - 1
-	}
 	if y < 0 {
 		y = 0
 	}
