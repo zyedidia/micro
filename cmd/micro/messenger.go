@@ -87,7 +87,7 @@ func (m *Messenger) getBuffer() *Buffer {
 
 // Message sends a message to the user
 func (m *Messenger) Message(msg ...interface{}) {
-	displayMessage = fmt.Sprint(msg...)
+	displayMessage := fmt.Sprint(msg...)
 	// only display a new message if there isn't an active prompt
 	// this is to prevent overwriting an existing prompt to the user
 	if m.hasPrompt == false {
