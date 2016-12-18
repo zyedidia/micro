@@ -27,8 +27,8 @@ func BeginSearch(searchStr string) {
 	searching = true
 	messenger.response = searchStr
 	messenger.cursorx = Count(searchStr)
-	messenger.hasPrompt = true
 	messenger.Message("Find: ")
+	messenger.hasPrompt = true
 }
 
 // EndSearch stops the current search
