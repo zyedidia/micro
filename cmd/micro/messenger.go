@@ -87,30 +87,46 @@ func (m *Messenger) getBuffer() *Buffer {
 
 // Message sends a message to the user
 func (m *Messenger) Message(msg ...interface{}) {
-	m.message = fmt.Sprint(msg...)
-	m.style = defStyle
+	displayMessage := fmt.Sprint(msg...)
+	// only display a new message if there isn't an active prompt
+	// this is to prevent overwriting an existing prompt to the user
+	if m.hasPrompt == false {
+		// if there is no active prompt then style and display the message as normal
+		m.message = displayMessage
 
-	if _, ok := colorscheme["message"]; ok {
-		m.style = colorscheme["message"]
+		m.style = defStyle
+
+		if _, ok := colorscheme["message"]; ok {
+			m.style = colorscheme["message"]
+		}
+
+		m.hasMessage = true
 	}
-	m.AddLog(m.message)
-	m.hasMessage = true
+	// add the message to the log regardless of active prompts
+	m.AddLog(displayMessage)
 }
 
 // Error sends an error message to the user
 func (m *Messenger) Error(msg ...interface{}) {
 	buf := new(bytes.Buffer)
 	fmt.Fprint(buf, msg...)
-	m.message = buf.String()
-	m.style = defStyle.
-		Foreground(tcell.ColorBlack).
-		Background(tcell.ColorMaroon)
 
-	if _, ok := colorscheme["error-message"]; ok {
-		m.style = colorscheme["error-message"]
+	// only display a new message if there isn't an active prompt
+	// this is to prevent overwriting an existing prompt to the user
+	if m.hasPrompt == false {
+		// if there is no active prompt then style and display the message as normal
+		m.message = buf.String()
+		m.style = defStyle.
+			Foreground(tcell.ColorBlack).
+			Background(tcell.ColorMaroon)
+		
+		if _, ok := colorscheme["error-message"]; ok {
+			m.style = colorscheme["error-message"]
+		}
+		m.hasMessage = true
 	}
-	m.AddLog(m.message)
-	m.hasMessage = true
+	// add the message to the log regardless of active prompts
+	m.AddLog(buf.String())
 }
 
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
