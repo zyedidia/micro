@@ -120,7 +120,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		v.Height--
 	}
 
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		_, err := Call(pl+".onViewOpen", v)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -484,7 +484,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
 			v.Cursor.Right()
 
-			for _, pl := range loadedPlugins {
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(e.Rune()), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
