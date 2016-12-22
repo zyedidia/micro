@@ -32,6 +32,10 @@ Here are the options that you can set:
 
 	default value: `false`
 
+* `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
+
+	default value: `false`
+
 * `tabsize`: sets the tab size to `option`
 
 	default value: `4`
