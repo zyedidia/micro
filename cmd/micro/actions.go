@@ -463,7 +463,8 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 			v.Cursor.Right()
 		}
 
-		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) {
+		// Remove the whitespaces if keepautoindent setting is off
+		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) && !v.Buf.Settings["keepautoindent"].(bool) {
 			line := v.Buf.Line(v.Cursor.Y - 1)
 			v.Buf.Remove(Loc{0, v.Cursor.Y - 1}, Loc{Count(line), v.Cursor.Y - 1})
 		}
