@@ -119,7 +119,7 @@ func (m *Messenger) Error(msg ...interface{}) {
 		m.style = defStyle.
 			Foreground(tcell.ColorBlack).
 			Background(tcell.ColorMaroon)
-		
+
 		if _, ok := colorscheme["error-message"]; ok {
 			m.style = colorscheme["error-message"]
 		}
@@ -129,10 +129,26 @@ func (m *Messenger) Error(msg ...interface{}) {
 	m.AddLog(buf.String())
 }
 
+func (m *Messenger) PromptText(msg ...interface{}) {
+	displayMessage := fmt.Sprint(msg...)
+	// if there is no active prompt then style and display the message as normal
+	m.message = displayMessage
+
+	m.style = defStyle
+
+	if _, ok := colorscheme["message"]; ok {
+		m.style = colorscheme["message"]
+	}
+
+	m.hasMessage = true
+	// add the message to the log regardless of active prompts
+	m.AddLog(displayMessage)
+}
+
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
 func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	m.hasPrompt = true
-	m.Message(prompt)
+	m.PromptText(prompt)
 
 	_, h := screen.Size()
 	for {
@@ -167,7 +183,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 // LetterPrompt gives the user a prompt and waits for a one letter response
 func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) {
 	m.hasPrompt = true
-	m.Message(prompt)
+	m.PromptText(prompt)
 
 	_, h := screen.Size()
 	for {
@@ -217,7 +233,7 @@ const (
 // This function blocks the main loop while waiting for input
 func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTypes ...Completion) (string, bool) {
 	m.hasPrompt = true
-	m.Message(prompt)
+	m.PromptText(prompt)
 	if _, ok := m.history[historyType]; !ok {
 		m.history[historyType] = []string{""}
 	} else {
