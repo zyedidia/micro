@@ -117,7 +117,7 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	}
 	eh.UndoStack.Push(t)
 
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".onBeforeTextEvent", t)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)

@@ -10,7 +10,7 @@ import (
 	"github.com/yuin/gopher-lua"
 )
 
-var loadedPlugins []string
+var loadedPlugins map[string]string
 
 // Call calls the lua function 'function'
 // If it does not exist nothing happens, if there is an error,
@@ -112,32 +112,39 @@ func LuaFunctionJob(function string) func(string, ...string) {
 	}
 }
 
+// luaPluginName convert a human-friendly plugin name into a valid lua variable name.
+func luaPluginName(name string) string {
+	return strings.Replace(name, "-", "_", -1)
+}
+
 // LoadPlugins loads the pre-installed plugins and the plugins located in ~/.config/micro/plugins
 func LoadPlugins() {
+
+	loadedPlugins = make(map[string]string)
+
 	for _, plugin := range ListRuntimeFiles(RTPlugin) {
-		alreadyExists := false
+
 		pluginName := plugin.Name()
-		for _, pl := range loadedPlugins {
-			if pl == pluginName {
-				alreadyExists = true
-				break
-			}
+		if _, ok := loadedPlugins[pluginName]; ok {
+			continue
 		}
 
-		if !alreadyExists {
-			data, err := plugin.Data()
-			if err != nil {
-				TermMessage("Error loading plugin: " + pluginName)
-				continue
-			}
-			pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
-
-			if err := L.DoString(pluginDef + string(data)); err != nil {
-				TermMessage(err)
-				continue
-			}
-			loadedPlugins = append(loadedPlugins, pluginName)
+		data, err := plugin.Data()
+		if err != nil {
+			TermMessage("Error loading plugin: " + pluginName)
+			continue
 		}
+
+		pluginLuaName := luaPluginName(pluginName)
+		pluginDef := "\nlocal P = {}\n" + pluginLuaName + " = P\nsetmetatable(" + pluginLuaName + ", {__index = _G})\nsetfenv(1, P)\n"
+
+		if err := L.DoString(pluginDef + string(data)); err != nil {
+			TermMessage(err)
+			continue
+		}
+
+		loadedPlugins[pluginName] = pluginLuaName
+
 	}
 
 	if _, err := os.Stat(configDir + "/init.lua"); err == nil {
@@ -146,6 +153,6 @@ func LoadPlugins() {
 		if err := L.DoString(pluginDef + string(data)); err != nil {
 			TermMessage(err)
 		}
-		loadedPlugins = append(loadedPlugins, "init")
+		loadedPlugins["init"] = "init"
 	}
 }
