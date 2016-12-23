@@ -44,7 +44,7 @@ func LoadColorscheme(colorschemeName string) {
 		TermMessage(colorschemeName, "is not a valid colorscheme")
 	} else {
 		if data, err := file.Data(); err != nil {
-			fmt.Println("Error loading colorscheme:", err)
+			TermMessage("Error loading colorscheme:", err)
 		} else {
 			colorscheme = ParseColorscheme(string(data))
 

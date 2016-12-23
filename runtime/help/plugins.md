@@ -51,6 +51,12 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
 * `messenger`: lets you send messages to the user or create prompts
 
+* `NewBuffer(text, path string) *Buffer`: creates a new buffer from a given reader with a given path
+
+* `GetLeadingWhitespace() bool`: returns the leading whitespace of the given string
+
+* `IsWordChar(str string) bool`: returns whether or not the string is a 'word character'
+
 * `RuneStr(r rune) string`: returns a string containing the given rune
 
 * `Loc(x, y int) Loc`: returns a new `Loc` struct
@@ -88,9 +94,11 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    `waitToClose` bool only applies if `interactive` is true and means that it should wait before
    returning to the editor.
 
-* `ToCharPos(loc Loc, buf *Buffer) int`: returns the character position of a given x, y location.
+* `ToCharPos(loc Loc, buf *Buffer) int`: returns the character position of a given x, y location
 
-* `ByteOffset(loc Loc, buf *Buffer) int`: exactly like `ToCharPos` except it it counts bytes instead of runes.
+* `Reload`: (Re)load everything
+
+* `ByteOffset(loc Loc, buf *Buffer) int`: exactly like `ToCharPos` except it it counts bytes instead of runes
 
 * `JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...string)`:
    Starts running the given process in the background. `onStdout` `onStderr` and `onExit`
@@ -99,8 +107,8 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    `userargs` are the arguments which will get passed to the callback functions
 
 * `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
-   Starts running the given shell command in the background.
-   This function is a shorthand for `JobSpawn`.
+   Starts running the given shell command in the background. Note that the command execute
+   is first parsed by a shell when using this command. It is executed with `sh -c`.
 
 * `JobSend(cmd *exec.Cmd, data string)`: send a string into the stdin of the job process
 
@@ -130,8 +138,8 @@ If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
 # Adding help files, syntax files, or colorschemes in your plugin
 
 You can use the `AddRuntimeFile(name, type, path string)` function to add various kinds of
-files to your plugin. For example, if you'd like to add a help topic and to your plugin
-called `test`, you would create the `test.md` file for example, and runt the function:
+files to your plugin. For example, if you'd like to add a help topic to your plugin
+called `test`, you would create a `test.md` file, and call the function:
 
 ```lua
 AddRuntimeFile("test", "help", "test.md")
@@ -139,6 +147,8 @@ AddRuntimeFile("test", "help", "test.md")
 
 Use `AddRuntimeFilesFromDirectory(name, type, dir, pattern)` to add a number of files
 to the runtime.
+To read the content of a runtime file use `ReadRuntimeFile(fileType, name string)`
+or `ListRuntimeFiles(fileType string)` for all runtime files.
 
 # Autocomplete command arguments
 
