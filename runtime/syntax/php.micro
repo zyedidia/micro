@@ -27,5 +27,6 @@ color default "[\(|\)|/|+|-|\*|\[|,|;]"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color constant.specialChar "\\[abfnrtv'\"\\]"
 
+color comment "(^|[[:space:]])//.*"
+color comment "(^|[[:space:]])#.*"
 color comment start="/\*" end="\*/"
-color comment "(#.*|//.*)$"
