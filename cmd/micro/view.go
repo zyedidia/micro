@@ -427,6 +427,9 @@ func (v *View) MoveToMouseClick(x, y int) {
 
 	x, y = v.GetSoftWrapLocation(x, y)
 	// x = v.Cursor.GetCharPosInLine(y, x)
+	if y > v.Buf.NumLines {
+		y = v.Buf.NumLines - 1
+	}
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
