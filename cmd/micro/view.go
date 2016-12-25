@@ -304,6 +304,10 @@ func (v *View) VSplitIndex(buf *Buffer, splitIndex int) {
 // GetSoftWrapLocation gets the location of a visual click on the screen and converts it to col,line
 func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	if !v.Buf.Settings["softwrap"].(bool) {
+		// Remap clicks 'below' text to last line, if softwrap is off
+		if vy > v.Buf.NumLines {
+			vy = v.Buf.NumLines - 1
+		}
 		vx = v.Cursor.GetCharPosInLine(vy, vx)
 		return vx, vy
 	}
@@ -331,6 +335,10 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 			colN++
 		}
 		if screenY == vy {
+			// make sure lineN isn't below actual text
+			if lineN > v.Buf.NumLines {
+				lineN = v.Buf.NumLines - 1
+			}
 			return colN, lineN
 		}
 		screenX = 0
@@ -426,10 +434,7 @@ func (v *View) MoveToMouseClick(x, y int) {
 	}
 
 	x, y = v.GetSoftWrapLocation(x, y)
-	// x = v.Cursor.GetCharPosInLine(y, x)
-	if y > v.Buf.NumLines {
-		y = v.Buf.NumLines - 1
-	}
+
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
