@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/go-errors/errors"
-	"github.com/layeh/gopher-luar"
+	"layeh.com/gopher-luar"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
