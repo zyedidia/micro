@@ -595,10 +595,10 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 			tabsize := len(v.Buf.IndentString())
 			v.Buf.Insert(Loc{0, y}, v.Buf.IndentString())
 			if y == startY && v.Cursor.CurSelection[0].X > 0 {
-				v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
+				v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf), true)
 			}
 			if y == endY {
-				v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, endY})
+				v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, endY}, true)
 			}
 		}
 		v.Cursor.Relocate()
@@ -653,10 +653,10 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 				}
 				v.Buf.Remove(Loc{0, y}, Loc{1, y})
 				if y == startY && v.Cursor.CurSelection[0].X > 0 {
-					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
+					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf), true)
 				}
 				if y == endY {
-					v.Cursor.SetSelectionEnd(Loc{endX - x, endY})
+					v.Cursor.SetSelectionEnd(Loc{endX - x, endY}, true)
 				}
 			}
 		}
@@ -869,7 +869,7 @@ func (v *View) CutLine(usePlugin bool) bool {
 		return false
 	}
 
-	v.Cursor.SelectLine()
+	v.Cursor.SelectLine(false)
 	if !v.Cursor.HasSelection() {
 		return false
 	}
@@ -946,7 +946,7 @@ func (v *View) DeleteLine(usePlugin bool) bool {
 		return false
 	}
 
-	v.Cursor.SelectLine()
+	v.Cursor.SelectLine(false)
 	if !v.Cursor.HasSelection() {
 		return false
 	}
@@ -1075,8 +1075,8 @@ func (v *View) SelectAll(usePlugin bool) bool {
 		return false
 	}
 
-	v.Cursor.SetSelectionStart(v.Buf.Start())
-	v.Cursor.SetSelectionEnd(v.Buf.End())
+	v.Cursor.SetSelectionStart(v.Buf.Start(), true)
+	v.Cursor.SetSelectionEnd(v.Buf.End(), true)
 	// Put the cursor at the beginning
 	v.Cursor.X = 0
 	v.Cursor.Y = 0

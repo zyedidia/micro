@@ -531,7 +531,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.tripleClick = true
 						v.doubleClick = false
 
-						v.Cursor.SelectLine()
+						v.Cursor.SelectLine(true)
 					} else {
 						// Double click
 						v.lastClickTime = time.Now()
@@ -558,7 +558,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
-					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc, true)
 				}
 			}
 		case tcell.Button2:
@@ -578,7 +578,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
-					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+					v.Cursor.SetSelectionEnd(v.Cursor.Loc, true)
 				}
 				v.mouseReleased = true
 			}
