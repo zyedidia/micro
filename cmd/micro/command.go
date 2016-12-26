@@ -133,12 +133,10 @@ func PluginCmd(args []string) {
 			removed := ""
 			for _, plugin := range args[1:] {
 				// check if the plugin exists.
-				for _, lp := range loadedPlugins {
-					if lp == plugin {
-						UninstallPlugin(plugin)
-						removed += plugin + " "
-						continue
-					}
+				if _, ok := loadedPlugins[plugin]; ok {
+					UninstallPlugin(plugin)
+					removed += plugin + " "
+					continue
 				}
 			}
 			if !IsSpaces(removed) {
@@ -333,7 +331,7 @@ func NewTab(args []string) {
 		tab := NewTabFromView(NewView(NewBuffer(file, filename)))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
-		curTab++
+		curTab = len(tabs) - 1
 		if len(tabs) == 2 {
 			for _, t := range tabs {
 				for _, v := range t.views {

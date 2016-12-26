@@ -176,11 +176,13 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"keepautoindent": false,
 		"autosave":     false,
 		"colorcolumn":  float64(0),
 		"colorscheme":  "default",
 		"cursorline":   true,
 		"eofnewline":   false,
+		"rmtrailingws": false,
 		"ignorecase":   false,
 		"indentchar":   " ",
 		"infobar":      true,
@@ -208,10 +210,12 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":   true,
+		"keepautoindent": false,
 		"autosave":     false,
 		"colorcolumn":  float64(0),
 		"cursorline":   true,
 		"eofnewline":   false,
+		"rmtrailingws": false,
 		"filetype":     "Unknown",
 		"ignorecase":   false,
 		"indentchar":   " ",

@@ -13,7 +13,7 @@ import (
 // PreActionCall executes the lua pre callback if possible
 func PreActionCall(funcName string, view *View) bool {
 	executeAction := true
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".pre"+funcName, view)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -29,7 +29,7 @@ func PreActionCall(funcName string, view *View) bool {
 // PostActionCall executes the lua plugin callback if possible
 func PostActionCall(funcName string, view *View) bool {
 	relocate := true
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".on"+funcName, view)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -463,7 +463,8 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 			v.Cursor.Right()
 		}
 
-		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) {
+		// Remove the whitespaces if keepautoindent setting is off
+		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) && !v.Buf.Settings["keepautoindent"].(bool) {
 			line := v.Buf.Line(v.Cursor.Y - 1)
 			v.Buf.Remove(Loc{0, v.Cursor.Y - 1}, Loc{Count(line), v.Cursor.Y - 1})
 		}
@@ -1472,7 +1473,7 @@ func (v *View) AddTab(usePlugin bool) bool {
 	tab := NewTabFromView(NewView(NewBuffer(strings.NewReader(""), "")))
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
-	curTab++
+	curTab = len(tabs) - 1
 	if len(tabs) == 2 {
 		for _, t := range tabs {
 			for _, v := range t.views {
@@ -1651,7 +1652,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 			v.Buf.Insert(v.Cursor.Loc, string(t))
 			v.Cursor.Right()
 
-			for _, pl := range loadedPlugins {
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(t), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)

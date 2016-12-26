@@ -1,6 +1,6 @@
 ## Here is an example for Python.
 ##
-syntax "python3" "\.py$"
+syntax "python3" "\.py3$"
 header "^#!.*/(env +)?python3$"
 
 ## built-in objects
@@ -16,7 +16,7 @@ color identifier "\b(__abs__|__add__|__and__|__call__|__cmp__|__coerce__|__compl
 ## exception classes
 # color cyan "\b(Exception|StandardError|ArithmeticError|LookupError|EnvironmentError|AssertionError|AttributeError|EOFError|FloatingPointError|IOError|ImportError|IndexError|KeyError|KeyboardInterrupt|MemoryError|NameError|NotImplementedError|OSError|OverflowError|RuntimeError|SyntaxError|SystemError|SystemExit|TypeError|UnboundLocalError|UnicodeError|ValueError|WindowsError|ZeroDivisionError)\b"
 ## types
-color type "\b(bool|bytearray|bytes|classmethod|complex|dict|enumerate|filter|float|frozenset|int|list|map|memoryview|object|property|range|reversed|set|slice|staticmethod|str|super|tuple|type|zip)"
+color type "\b(bool|bytearray|bytes|classmethod|complex|dict|enumerate|filter|float|frozenset|int|list|map|memoryview|object|property|range|reversed|set|slice|staticmethod|str|super|tuple|type|zip)\b"
 #color type "\b(NoneType|TypeType|IntType|LongType|FloatType|ComplexType|StringType|UnicodeType|BufferType|TupleType|ListType|DictType|FunctionType|LambdaType|CodeType|ClassType|UnboundMethodType|InstanceType|MethodType|BuiltinFunctionType|BuiltinMethodType|ModuleType|FileType|TracebackType|FrameType|SliceType|EllipsisType)\b"
 ## definitions
 color identifier "def [a-zA-Z_0-9]+" 

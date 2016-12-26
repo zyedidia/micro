@@ -358,8 +358,8 @@ func GetInstalledVersions(withCore bool) PluginVersions {
 		result = append(result, newStaticPluginVersion(CorePluginName, Version))
 	}
 
-	for _, name := range loadedPlugins {
-		version := GetInstalledPluginVersion(name)
+	for name, lpname := range loadedPlugins {
+		version := GetInstalledPluginVersion(lpname)
 		if pv := newStaticPluginVersion(name, version); pv != nil {
 			result = append(result, pv)
 		}
@@ -561,7 +561,9 @@ func (pv PluginVersions) install() {
 func UninstallPlugin(name string) {
 	if err := os.RemoveAll(filepath.Join(configDir, "plugins", name)); err != nil {
 		messenger.Error(err)
+		return
 	}
+	delete(loadedPlugins, name)
 }
 
 // Install installs the plugin
@@ -582,7 +584,9 @@ func (pl PluginPackage) Install() {
 func UpdatePlugins(plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
-		plugins = loadedPlugins
+		for name := range loadedPlugins {
+			plugins = append(plugins, name)
+		}
 	}
 
 	messenger.AddLog("Checking for plugin updates")

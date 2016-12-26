@@ -9,10 +9,13 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -279,14 +282,27 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) SaveAs(filename string) error {
 	b.FindFileType()
 	b.UpdateRules()
-	b.Path = filename
-	str := b.String()
+	dir, _ := homedir.Dir()
+	b.Path = strings.Replace(filename, "~", dir, 1)
+	if b.Settings["rmtrailingws"].(bool) {
+		r, _ := regexp.Compile(`[ \t]+$`)
+		for lineNum, line := range b.Lines(0, b.NumLines) {
+			indices := r.FindStringIndex(line)
+			if indices == nil {
+				continue
+			}
+			startLoc := Loc{indices[0], lineNum}
+			b.deleteToEnd(startLoc)
+		}
+		b.Cursor.Relocate()
+	}
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
 			b.Insert(end, "\n")
 		}
 	}
+	str := b.String()
 	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
@@ -358,6 +374,11 @@ func (b *Buffer) remove(start, end Loc) string {
 	sub := b.LineArray.remove(start, end)
 	b.Update()
 	return sub
+}
+func (b *Buffer) deleteToEnd(start Loc) {
+	b.IsModified = true
+	b.LineArray.DeleteToEnd(start)
+	b.Update()
 }
 
 // Start returns the location of the first character in the buffer

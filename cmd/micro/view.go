@@ -120,7 +120,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		v.Height--
 	}
 
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		_, err := Call(pl+".onViewOpen", v)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -418,9 +418,6 @@ func (v *View) MoveToMouseClick(x, y int) {
 		v.ScrollDown(1)
 		y = v.Height + v.Topline - 1
 	}
-	if y >= v.Buf.NumLines {
-		y = v.Buf.NumLines - 1
-	}
 	if y < 0 {
 		y = 0
 	}
@@ -430,6 +427,9 @@ func (v *View) MoveToMouseClick(x, y int) {
 
 	x, y = v.GetSoftWrapLocation(x, y)
 	// x = v.Cursor.GetCharPosInLine(y, x)
+	if y > v.Buf.NumLines {
+		y = v.Buf.NumLines - 1
+	}
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
@@ -487,7 +487,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
 			v.Cursor.Right()
 
-			for _, pl := range loadedPlugins {
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(e.Rune()), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
