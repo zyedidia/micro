@@ -1,0 +1,13 @@
+syntax "mail" "(.*/mutt-.*|\.eml)$"
+header "^From .* \d+:\d+:\d+ \d+"
+
+color yellow          "^From .*"
+color identifier      "^[^[:space:]]+:"
+color preproc         "^List-(Id|Archive|Subscribe|Unsubscribe|Post|Help):"
+color constant        "^(To|From):"
+color constant.string "^Subject:.*"
+color statement       "<?[^@[:space:]]+@[^[:space:]]+>?"
+
+color default start="^\n\n" end=".*"
+
+color comment "^>.*$"
