@@ -15,10 +15,11 @@ cp README.md micro-$1
 HASH="$(git rev-parse --short HEAD)"
 VERSION="$(go run tools/build-version.go)"
 DATE="$(go run tools/build-date.go)"
+ADDITIONAL_GO_LINKER_FLAGS="$(go run tools/info-plist.go $VERSION)"
 
 # Mac
 echo "OSX 64"
-GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE'" -o micro-$1/micro ./cmd/micro
+GOOS=darwin GOARCH=amd64 go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE' $ADDITIONAL_GO_LINKER_FLAGS" -o micro-$1/micro ./cmd/micro
 tar -czf micro-$1-osx.tar.gz micro-$1
 mv micro-$1-osx.tar.gz binaries
 
