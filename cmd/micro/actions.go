@@ -1369,7 +1369,7 @@ func (v *View) CommandMode(usePlugin bool) bool {
 	return false
 }
 
-// Escape leaves current mode / quits the editor
+// Escape leaves current mode
 func (v *View) Escape(usePlugin bool) bool {
 	// check if user is searching, or the last search is still active
 	if searching || lastSearch != "" {
@@ -1381,13 +1381,11 @@ func (v *View) Escape(usePlugin bool) bool {
 		messenger.Reset() // FIXME
 		return true
 	}
-	return v.Quit(usePlugin)
+
+	return false
 }
 
-// Quit quits the editor
-// This behavior needs to be changed and should really only quit the editor if this
-// is the last view
-// However, since micro only supports one view for now, it doesn't really matter
+// Quit this will close the current tab or view that is open
 func (v *View) Quit(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Quit", v) {
 		return false
@@ -1410,7 +1408,6 @@ func (v *View) Quit(usePlugin bool) bool {
 					curTab--
 				}
 				if curTab == 0 {
-					// CurView().Resize(screen.Size())
 					CurView().ToggleTabbar()
 					CurView().matches = Match(CurView())
 				}
@@ -1446,7 +1443,9 @@ func (v *View) QuitAll(usePlugin bool) bool {
 		}
 	}
 
-	if closeAll {
+	should_quit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
+
+	if should_quit && closeAll {
 		for _, tab := range tabs {
 			for _, v := range tab.views {
 				v.CloseBuffer()
