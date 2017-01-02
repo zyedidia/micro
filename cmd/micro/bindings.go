@@ -350,17 +350,21 @@ func BindKey(k, v string) {
 		helpBinding = ""
 	}
 	
-	if v == "UnbindKey" {
+	actionNames := strings.Split(v, ",")
+	if actionNames[0] == "UnbindKey" {
 		delete(bindings, key)
-	} else {
-		actionNames := strings.Split(v, ",")
-		actions := make([]func(*View, bool) bool, 0, len(actionNames))
-		for _, actionName := range actionNames {
-			actions = append(actions, findAction(actionName))
+		if len(actionNames) == 1 {
+			actionNames = make([]string, 0, 0)
+		} else {
+			actionNames = append(actionNames[:0], actionNames[1:]...)
 		}
-
-		bindings[key] = actions
 	}
+	actions := make([]func(*View, bool) bool, 0, len(actionNames))
+	for _, actionName := range actionNames {
+		actions = append(actions, findAction(actionName))
+	}
+
+	bindings[key] = actions
 }
 
 // DefaultBindings returns a map containing micro's default keybindings
