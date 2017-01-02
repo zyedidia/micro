@@ -115,6 +115,11 @@ and quit you can bind it like so:
 }
 ```
 
+# Unbinding keys
+
+It is also possible to disable any of the default key bindings by use of the 
+`UnbindKey` action in the user's `bindings.json` file.
+
 # Bindable actions and bindable keys
 
 The list of default keybindings contains most of the possible actions and keys
@@ -196,6 +201,7 @@ HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
+UnbindKey
 ```
 
 Here is the list of all possible keys you can bind:
