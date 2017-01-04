@@ -36,9 +36,12 @@ func (sline *Statusline) Display() {
 	// Add the filetype
 	file += " " + sline.view.Buf.FileType()
 
-	rightText := helpBinding + " for help "
-	if sline.view.Type == vtHelp {
-		rightText = helpBinding + " to close help "
+	rightText := ""
+	if len(helpBinding) > 0 {
+		rightText = helpBinding + " for help "
+		if sline.view.Type == vtHelp {
+			rightText = helpBinding + " to close help "
+		}
 	}
 
 	statusLineStyle := defStyle.Reverse(true)
