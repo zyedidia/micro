@@ -6,6 +6,8 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+var tabBarOffset int
+
 type Tab struct {
 	// This contains all the views in this tab
 	// There is generally only one view per tab, but you can have
@@ -118,7 +120,7 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 				return false
 			}
 			str, indicies := TabbarString()
-			if x >= len(str) {
+			if x + tabBarOffset >= len(str) {
 				return false
 			}
 			var tabnum int
@@ -128,7 +130,7 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			}
 			sort.Ints(keys)
 			for _, k := range keys {
-				if x <= k {
+				if x + tabBarOffset <= k {
 					tabnum = indicies[k] - 1
 					break
 				}
@@ -147,7 +149,7 @@ func DisplayTabs() {
 		return
 	}
 
-	str, _ := TabbarString()
+	str, indicies := TabbarString()
 
 	tabBarStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["tabbar"]; ok {
@@ -157,6 +159,96 @@ func DisplayTabs() {
 	// Maybe there is a unicode filename?
 	fileRunes := []rune(str)
 	w, _ := screen.Size()
+	tooWide := (w < len(fileRunes))
+
+	// if the entire tab-bar is longer than the screen is wide,
+	// then it should be truncated appropriately to keep the
+	// active tab visible on the UI.
+	if tooWide == true {
+		// first we have to work out where the selected tab is
+		// out of the total length of the tab bar. this is done
+		// by extracting the hit-areas from the indicies map 
+		// that was constructed by `TabbarString()`
+		var keys []int
+		for offset := range indicies {
+			keys = append(keys, offset)
+		}
+		// sort them to be in ascending order so that values will
+		// correctly reflect the displayed ordering of the tabs
+		sort.Ints(keys)
+		// record the offset of each tab and the previous tab so
+		// we can find the position of the tab's hit-box.
+		previousTabOffset := 0
+		currentTabOffset := 0
+		for _, k := range keys {
+			tabIndex := indicies[k] - 1
+			if tabIndex == curTab {
+				currentTabOffset = k
+				break
+			}
+			// this is +2 because there are two padding spaces that aren't accounted
+			// for in the display. please note that this is for cosmetic purposes only.
+			previousTabOffset = k + 2
+		}
+		// get the width of the hitbox of the active tab, from there calculate the offsets
+		// to the left and right of it to approximately center it on the tab bar display.
+		centeringOffset := (w - (currentTabOffset - previousTabOffset))
+		leftBuffer := previousTabOffset - (centeringOffset / 2)
+		rightBuffer := currentTabOffset + (centeringOffset / 2)
+
+		// check to make sure we haven't overshot the bounds of the string,
+		// if we have, then take that remainder and put it on the left side 
+		overshotRight := rightBuffer - len(fileRunes)
+		if overshotRight > 0 {
+			leftBuffer = leftBuffer + overshotRight
+		}
+
+		overshotLeft := leftBuffer - 0
+		if overshotLeft < 0 {
+			leftBuffer = 0
+			rightBuffer = leftBuffer + (w - 1)
+		} else {
+			rightBuffer = leftBuffer + (w - 2)
+		}
+		
+		if rightBuffer > len(fileRunes) - 1 {
+			rightBuffer = len(fileRunes) - 1
+		}
+
+		// construct a new buffer of text to put the 
+		// newly formatted tab bar text into.
+		var displayText []rune
+
+		// if the left-side of the tab bar isn't at the start
+		// of the constructed tab bar text, then show that are
+		// more tabs to the left by displaying a "+"
+		if leftBuffer != 0 {
+			displayText = append(displayText, '+')
+		}
+		// copy the runes in from the original tab bar text string
+		// into the new display buffer
+		for x := leftBuffer; x < rightBuffer; x++ {
+			displayText = append(displayText, fileRunes[x])
+		}
+		// if there is more text to the right of the right-most
+		// column in the tab bar text, then indicate there are more
+		// tabs to ther right by displaying a "+"
+		if rightBuffer < len(fileRunes) - 1 {
+			displayText = append(displayText, '+')
+		}
+
+		// now store the offset from zero of the left-most text
+		// that is being displayed. This is to ensure that when 
+		// clicking on the tab bar, the correct tab gets selected.
+		tabBarOffset = leftBuffer
+
+		// use the constructed buffer as the display buffer to print
+		// onscreen.
+		fileRunes = displayText
+	}
+
+	// iterate over the width of the terminal display and for each column,
+	// write a character into the tab display area with the appropraite style.
 	for x := 0; x < w; x++ {
 		if x < len(fileRunes) {
 			screen.SetContent(x, 0, fileRunes[x], nil, tabBarStyle)
