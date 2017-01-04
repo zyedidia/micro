@@ -813,8 +813,16 @@ func (v *View) DisplayView() {
 			if v.Buf.Settings["softwrap"].(bool) {
 				if screenX-v.x >= v.Width {
 					screenY++
+
+					x := 0
+					if hasGutterMessages {
+						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
+						x++
+						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
+						x++
+					}
 					for i := 0; i < v.lineNumOffset; i++ {
-						screen.SetContent(v.x+i, screenY, ' ', nil, lineNumStyle)
+						screen.SetContent(v.x+i+x, screenY, ' ', nil, lineNumStyle)
 					}
 					screenX = v.x + v.lineNumOffset
 				}
