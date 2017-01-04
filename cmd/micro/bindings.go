@@ -41,6 +41,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"Delete":              (*View).Delete,
 	"InsertTab":           (*View).InsertTab,
 	"Save":                (*View).Save,
+	"SaveAs":              (*View).SaveAs,
 	"Find":                (*View).Find,
 	"FindNext":            (*View).FindNext,
 	"FindPrevious":        (*View).FindPrevious,
