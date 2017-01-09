@@ -29,6 +29,13 @@ func (c *Cursor) Goto(b Cursor) {
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
 }
 
+// CopySelection copies the user's selection to either "primary" or "clipboard"
+func (c *Cursor) CopySelection(target string) {
+	if c.HasSelection() {
+		clipboard.WriteAll(c.GetSelection(), target)
+	}
+}
+
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
 	c.CurSelection[0] = c.buf.Start()
@@ -38,19 +45,11 @@ func (c *Cursor) ResetSelection() {
 // SetSelectionStart sets the start of the selection
 func (c *Cursor) SetSelectionStart(pos Loc) {
 	c.CurSelection[0] = pos
-	// Copy to primary clipboard for linux
-	if c.HasSelection() {
-		clipboard.WriteAll(c.GetSelection(), "primary")
-	}
 }
 
 // SetSelectionEnd sets the end of the selection
 func (c *Cursor) SetSelectionEnd(pos Loc) {
 	c.CurSelection[1] = pos
-	// Copy to primary clipboard for linux
-	if c.HasSelection() {
-		clipboard.WriteAll(c.GetSelection(), "primary")
-	}
 }
 
 // HasSelection returns whether or not the user has selected anything
