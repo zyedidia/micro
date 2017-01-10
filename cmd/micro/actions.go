@@ -1443,21 +1443,24 @@ func (v *View) QuitAll(usePlugin bool) bool {
 		}
 	}
 
-	should_quit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
-
-	if should_quit && closeAll {
-		for _, tab := range tabs {
-			for _, v := range tab.views {
-				v.CloseBuffer()
+	if closeAll {
+		// only quit if all of the buffers can be closed and the user confirms that they actually want to quit everything
+		should_quit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
+		
+		if should_quit {
+			for _, tab := range tabs {
+				for _, v := range tab.views {
+					v.CloseBuffer()
+				}
 			}
-		}
 
-		if usePlugin {
-			PostActionCall("QuitAll", v)
-		}
+			if usePlugin {
+				PostActionCall("QuitAll", v)
+			}
 
-		screen.Fini()
-		os.Exit(0)
+			screen.Fini()
+			os.Exit(0)
+		}
 	}
 
 	return false
