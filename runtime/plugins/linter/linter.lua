@@ -29,6 +29,8 @@ function runLinter()
         lint("pylint", "pylint", {"--output-format=parseable", "--reports=no", file}, "%f:%l: %m")
     elseif ft == "c" then
         lint("gcc", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
+    elseif ft == "Objective-C" then
+        lint("clang", "xcrun", {"clang", "-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
     elseif ft == "d" then
         lint("dmd", "dmd", {"-color=off", "-o-", "-w", "-wi", "-c", file}, "%f%(%l%):.+: %m")
     elseif ft == "java" then
