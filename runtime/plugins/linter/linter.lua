@@ -25,6 +25,8 @@ function runLinter()
         lint("luacheck", "luacheck", {"--no-color", file}, "%f:%l:%d+: %m")
     elseif ft == "python" then
         lint("pyflakes", "pyflakes", {file}, "%f:%l:.-:? %m")
+        lint("mypy", "mypy", {file}, "%f:%l: %m")
+        lint("pylint", "pylint", {"--output-format=parseable", "--reports=no", file}, "%f:%l: %m")
     elseif ft == "c" then
         lint("gcc", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
     elseif ft == "d" then
