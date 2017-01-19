@@ -95,7 +95,7 @@ Here is a list of the colorscheme groups that you can use:
 * identifier
 * constant
 * statement
-* operator
+* symbol
 * preproc
 * type
 * special
