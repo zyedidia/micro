@@ -1,6 +1,6 @@
 color-link default "#ebdbb2,#282828"
 color-link comment "#928374,#282828"
-color-link operator "#d79921,#282828"
+color-link symbol "#d79921,#282828"
 color-link constant "#d3869b,#282828"
 color-link constant.string "#b8bb26,#282828"
 color-link constant.string.char "#b8bb26,#282828"
