@@ -1,6 +1,6 @@
 ##############################################################################
 #
-# Lua syntax highlighting for Nano.
+# Lua syntax highlighting for Micro.
 #
 # Author:  Matthew Wild <mwild1 (at) gmail.com>
 # License: GPL 2  or later
@@ -14,11 +14,11 @@
 # Automatically use for '.lua' files
 syntax "lua" ".*\.lua$"
 
-# Operators
-color statement ":|\*\*|\*|/|%|\+|-|\^|>|>=|<|<=|~=|=|\.\.|\b(not|and|or)\b"
-
 # Statements
 color statement "\b(do|end|while|repeat|until|if|elseif|then|else|for|in|function|local|return)\b"
+
+# Logic
+color statement "\b(not|and|or)\b"
 
 # Keywords
 color statement "\b(debug|string|math|table|io|coroutine|os|utf8|bit32)\b\."
@@ -49,7 +49,7 @@ color statement "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"
 color constant.number "\b([0-9]+)\b"
 
 # Symbols
-color statement "(\(|\)|\[|\]|\{|\})"
+color symbol "(\(|\)|\[|\]|\{|\}|\*\*|\*|/|%|\+|-|\^|>|>=|<|<=|~=|=|\.\.)"
 
 # Strings
 color constant.string "\"(\\.|[^\\\"])*\"|'(\\.|[^\\'])*'"

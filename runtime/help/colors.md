@@ -19,11 +19,11 @@ Micro comes with a number of colorschemes by default. Here is the list:
 
 * zenburn: The 'zenburn' colorscheme and works well with 256 color terminals
 
-* solarized: this is the solarized colorscheme. 
+* solarized: this is the solarized colorscheme.
   You should have the solarized color palette in your terminal to use it.
 
-* solarized-tc: this is the solarized colorscheme for true color; just 
-  make sure your terminal supports true color before using it and that the 
+* solarized-tc: this is the solarized colorscheme for true color; just
+  make sure your terminal supports true color before using it and that the
   MICRO_TRUECOLOR environment variable is set to 1 before starting micro.
 
 * atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
@@ -95,6 +95,7 @@ Here is a list of the colorscheme groups that you can use:
 * identifier
 * constant
 * statement
+* symbol
 * preproc
 * type
 * special
