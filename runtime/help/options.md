@@ -110,7 +110,7 @@ Here are the options that you can set:
 
     default value: `on`
 
-* `splitRight`: when a horizontal split is created, should it be created below the
+* `splitBottom`: when a horizontal split is created, should it be created below the
    current split?
 
     default value: `on`
