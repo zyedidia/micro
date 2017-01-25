@@ -67,12 +67,18 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
-### Homebrew
+### Package Managers
 
-You can also install micro using Homebrew on Mac:
+You can install micro using Homebrew on Mac:
 
 ```
 brew install micro
+```
+
+On Windows, you can install micro through Chocolatey:
+
+```
+choco install micro
 ```
 
 ### Building from source
