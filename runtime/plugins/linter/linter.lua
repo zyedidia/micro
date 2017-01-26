@@ -29,6 +29,8 @@ function runLinter()
         lint("pylint", "pylint", {"--output-format=parseable", "--reports=no", file}, "%f:%l: %m")
     elseif ft == "c" then
         lint("gcc", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
+    elseif ft == "swift" then
+        lint("switfc", "xcrun", {"swiftc", file}, "%f:%l:%d+:.+: %m")
     elseif ft == "Objective-C" then
         lint("clang", "xcrun", {"clang", "-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
     elseif ft == "d" then
@@ -37,6 +39,8 @@ function runLinter()
         lint("javac", "javac", {"-d", temp, file}, "%f:%l: error: %m")
     elseif ft == "javascript" then
         lint("jshint", "jshint", {file}, "%f: line %l,.+, %m")
+    elseif ft == "nim" then
+        lint("nim", "nim", {"check", "--listFullPaths", "--stdout", "--hints:off", file}, "%f\\(%l, %d\\) .+: %m")
     end
 end
 
@@ -62,6 +66,7 @@ function onExit(output, linter, errorformat)
         -- Trim whitespace
         line = line:match("^%s*(.+)%s*$")
         if string.find(line, regex) then
+            print(regex)
             local file, line, msg = string.match(line, regex)
             if basename(CurView().Buf.Path) == basename(file) then
                 CurView():GutterMessage(linter, tonumber(line), msg, 2)
