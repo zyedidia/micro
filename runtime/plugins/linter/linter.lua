@@ -40,7 +40,7 @@ function runLinter()
     elseif ft == "javascript" then
         lint("jshint", "jshint", {file}, "%f: line %l,.+, %m")
     elseif ft == "nim" then
-        lint("nim", "nim", {"check", "--listFullPaths", "--stdout", "--hints:off", file}, "%f\\(%l, %d\\) .+: %m")
+        lint("nim", "nim", {"check", "--listFullPaths", "--stdout", "--hints:off", file}, "%f.%l, %d+. %m")
     end
 end
 
@@ -66,7 +66,6 @@ function onExit(output, linter, errorformat)
         -- Trim whitespace
         line = line:match("^%s*(.+)%s*$")
         if string.find(line, regex) then
-            print(regex)
             local file, line, msg = string.match(line, regex)
             if basename(CurView().Buf.Path) == basename(file) then
                 CurView():GutterMessage(linter, tonumber(line), msg, 2)
