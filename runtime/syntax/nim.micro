@@ -23,6 +23,6 @@ color constant.number "\b[0-9_]((\.?)[0-9_]+)?[eE][+\-][0-9][0-9_]+\b"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 
 color comment "[[:space:]]*#.*$" 
-color comment start="#[" end="]#"
+color comment start="\#\[" end="\]\#"
 
 color todo "(TODO|FIXME|XXX):?"
