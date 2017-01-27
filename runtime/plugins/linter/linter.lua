@@ -17,6 +17,10 @@ function runLinter()
     if OS == "windows" then
         devnull = "NUL"
         temp = os.getenv("TEMP")
+    else
+      if not temp then
+        temp = "/tmp"
+      end
     end
     if ft == "go" then
         lint("gobuild", "go", {"build", "-o", devnull}, "%f:%l: %m")
