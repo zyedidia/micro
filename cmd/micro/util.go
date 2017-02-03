@@ -174,7 +174,7 @@ func StringWidth(str string, tabsize int) int {
 		switch ch {
 		case '\t':
 			ts := tabsize - (lineIdx % tabsize)
-			sw += ts - 1
+			sw += ts
 			lineIdx += ts
 		case '\n':
 			lineIdx = 0
