@@ -103,17 +103,17 @@ Here are the options that you can set:
 
 * `softwrap`: should micro wrap lines that are too long to fit on the screen
 
-    default value: `off`
+	default value: `off`
 
 * `splitRight`: when a vertical split is created, should it be created to the right of
    the current split?
 
-    default value: `on`
+	default value: `on`
 
 * `splitBottom`: when a horizontal split is created, should it be created below the
    current split?
 
-    default value: `on`
+	default value: `on`
 
 * `autosave`: micro will save the buffer every 8 seconds automatically.
    Micro also will automatically save and quit when you exit without asking.
@@ -127,13 +127,18 @@ Here are the options that you can set:
    metadata about the given plugin. See the `Plugin Manager` section of the `plugins` help topic
    for more information.
 
-    default value: `https://github.com/micro-editor/plugin-channel`
+	default value: `https://github.com/micro-editor/plugin-channel`
 
 * `pluginrepos`: contains all the 'repositories' micro's plugin manager will search for
    plugins in. A repository consists of a `repo.json` file which contains metadata for a
    single plugin.
 
-    default value: ` `
+	default value: ` `
+
+* `useprimary` (only useful on Linux): defines whether or not micro will use the primary clipboard to copy selections
+   in the background. This does not affect the normal clipboard using Ctrl-C and Ctrl-V.
+
+	default value: `on`
 
 ---
 

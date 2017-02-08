@@ -32,7 +32,9 @@ func (c *Cursor) Goto(b Cursor) {
 // CopySelection copies the user's selection to either "primary" or "clipboard"
 func (c *Cursor) CopySelection(target string) {
 	if c.HasSelection() {
-		clipboard.WriteAll(c.GetSelection(), target)
+		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
+			clipboard.WriteAll(c.GetSelection(), target)
+		}
 	}
 }
 
