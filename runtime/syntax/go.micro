@@ -12,7 +12,7 @@ color type "\b(u?int(8|16|32|64)?|float(32|64)|complex(64|128))\b"
 color type "\b(uintptr|byte|rune|string|interface|bool|map|chan|error)\b"
 color constant "\b(true|false|nil)\b"
 
-# Brackets n shit
+# Brackets
 color statement "(\{|\})"
 color statement "(\(|\))"
 color statement "(\[|\])"
@@ -25,10 +25,8 @@ color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color constant.specialChar "\\[abfnrtv'\"\\]"
 color constant.specialChar "\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
 color constant.string "`[^`]*`"
-color constant.specialChar """
-color constant.specialChar "'"
 
 # Comments & TODOs
 color comment "(^|[[:space:]])//.*"
-#color comment start="/\*" end="\*/"
+color comment start="/\*" end="\*/"
 color todo "(TODO|XXX|FIXME):?"
