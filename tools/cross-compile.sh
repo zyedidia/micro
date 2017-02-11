@@ -11,6 +11,7 @@ mv micro-$1-src.zip binaries
 
 cp LICENSE micro-$1
 cp README.md micro-$1
+cp LICENSE-THIRD-PARTY micro-$1
 
 HASH="$(git rev-parse --short HEAD)"
 VERSION="$(go run tools/build-version.go)"
