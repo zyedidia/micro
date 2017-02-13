@@ -11,12 +11,16 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-type ViewType int
+type ViewType struct {
+	readonly bool // The file cannot be edited
+	scratch  bool // The file cannot be saved
+}
 
-const (
-	vtDefault ViewType = iota
-	vtHelp
-	vtLog
+var (
+	vtDefault = ViewType{false, false}
+	vtHelp    = ViewType{true, true}
+	vtLog     = ViewType{true, true}
+	vtScratch = ViewType{false, true}
 )
 
 // The View struct stores information about a view into a buffer.
