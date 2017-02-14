@@ -2,11 +2,9 @@ package main
 
 import (
 	"os"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/mattn/go-runewidth"
 	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/tcell"
 )
@@ -91,6 +89,8 @@ type View struct {
 	// Syntax highlighting matches
 	matches SyntaxMatches
 
+	cellview *CellView
+
 	splitNode *LeafNode
 }
 
@@ -109,6 +109,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.Width = w
 	v.Height = h
+	v.cellview = new(CellView)
 
 	v.ToggleTabbar()
 
@@ -658,319 +659,319 @@ func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
 }
 
 // DisplayView renders the view to the screen
-func (v *View) DisplayView() {
-	if v.Type == vtLog {
-		// Log views should always follow the cursor...
-		v.Relocate()
-	}
-
-	if v.Buf.Settings["syntax"].(bool) {
-		v.matches = Match(v)
-	}
-
-	// The charNum we are currently displaying
-	// starts at the start of the viewport
-	charNum := Loc{0, v.Topline}
-
-	// Convert the length of buffer to a string, and get the length of the string
-	// We are going to have to offset by that amount
-	maxLineLength := len(strconv.Itoa(v.Buf.NumLines))
-
-	if v.Buf.Settings["ruler"] == true {
-		// + 1 for the little space after the line number
-		v.lineNumOffset = maxLineLength + 1
-	} else {
-		v.lineNumOffset = 0
-	}
-
-	// We need to add to the line offset if there are gutter messages
-	var hasGutterMessages bool
-	for _, v := range v.messages {
-		if len(v) > 0 {
-			hasGutterMessages = true
-		}
-	}
-	if hasGutterMessages {
-		v.lineNumOffset += 2
-	}
-
-	if v.x != 0 {
-		// One space for the extra split divider
-		v.lineNumOffset++
-	}
-
-	// These represent the current screen coordinates
-	screenX, screenY := v.x, v.y-1
-
-	highlightStyle := defStyle
-	curLineN := 0
-
-	// ViewLine is the current line from the top of the viewport
-	for viewLine := 0; viewLine < v.Height; viewLine++ {
-		screenY++
-		screenX = v.x
-
-		// This is the current line number of the buffer that we are drawing
-		curLineN = viewLine + v.Topline
-
-		if screenY-v.y >= v.Height {
-			break
-		}
-
-		if v.x != 0 {
-			// Draw the split divider
-			v.drawCell(screenX, screenY, '|', nil, defStyle.Reverse(true))
-			screenX++
-		}
-
-		// If the buffer is smaller than the view height we have to clear all this space
-		if curLineN >= v.Buf.NumLines {
-			for i := screenX; i < v.x+v.Width; i++ {
-				v.drawCell(i, screenY, ' ', nil, defStyle)
-			}
-
-			continue
-		}
-		line := v.Buf.Line(curLineN)
-
-		// If there are gutter messages we need to display the '>>' symbol here
-		if hasGutterMessages {
-			// msgOnLine stores whether or not there is a gutter message on this line in particular
-			msgOnLine := false
-			for k := range v.messages {
-				for _, msg := range v.messages[k] {
-					if msg.lineNum == curLineN {
-						msgOnLine = true
-						gutterStyle := defStyle
-						switch msg.kind {
-						case GutterInfo:
-							if style, ok := colorscheme["gutter-info"]; ok {
-								gutterStyle = style
-							}
-						case GutterWarning:
-							if style, ok := colorscheme["gutter-warning"]; ok {
-								gutterStyle = style
-							}
-						case GutterError:
-							if style, ok := colorscheme["gutter-error"]; ok {
-								gutterStyle = style
-							}
-						}
-						v.drawCell(screenX, screenY, '>', nil, gutterStyle)
-						screenX++
-						v.drawCell(screenX, screenY, '>', nil, gutterStyle)
-						screenX++
-						if v.Cursor.Y == curLineN && !messenger.hasPrompt {
-							messenger.Message(msg.msg)
-							messenger.gutterMessage = true
-						}
-					}
-				}
-			}
-			// If there is no message on this line we just display an empty offset
-			if !msgOnLine {
-				v.drawCell(screenX, screenY, ' ', nil, defStyle)
-				screenX++
-				v.drawCell(screenX, screenY, ' ', nil, defStyle)
-				screenX++
-				if v.Cursor.Y == curLineN && messenger.gutterMessage {
-					messenger.Reset()
-					messenger.gutterMessage = false
-				}
-			}
-		}
-
-		lineNumStyle := defStyle
-		if v.Buf.Settings["ruler"] == true {
-			// Write the line number
-			if style, ok := colorscheme["line-number"]; ok {
-				lineNumStyle = style
-			}
-			if style, ok := colorscheme["current-line-number"]; ok {
-				if curLineN == v.Cursor.Y && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() {
-					lineNumStyle = style
-				}
-			}
-
-			lineNum := strconv.Itoa(curLineN + 1)
-
-			// Write the spaces before the line number if necessary
-			for i := 0; i < maxLineLength-len(lineNum); i++ {
-				v.drawCell(screenX, screenY, ' ', nil, lineNumStyle)
-				screenX++
-			}
-			// Write the actual line number
-			for _, ch := range lineNum {
-				v.drawCell(screenX, screenY, ch, nil, lineNumStyle)
-				screenX++
-			}
-
-			// Write the extra space
-			v.drawCell(screenX, screenY, ' ', nil, lineNumStyle)
-			screenX++
-		}
-
-		// Now we actually draw the line
-		colN := 0
-		strWidth := 0
-		tabSize := int(v.Buf.Settings["tabsize"].(float64))
-		for _, ch := range line {
-			if v.Buf.Settings["softwrap"].(bool) {
-				if screenX-v.x >= v.Width {
-					screenY++
-
-					x := 0
-					if hasGutterMessages {
-						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
-						x++
-						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
-						x++
-					}
-					for i := 0; i < v.lineNumOffset; i++ {
-						screen.SetContent(v.x+i+x, screenY, ' ', nil, lineNumStyle)
-					}
-					screenX = v.x + v.lineNumOffset
-				}
-			}
-
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
-				v.DisplayCursor(screenX-v.leftCol, screenY)
-			}
-
-			lineStyle := defStyle
-
-			if v.Buf.Settings["syntax"].(bool) {
-				// Syntax highlighting is enabled
-				highlightStyle = v.matches[viewLine][colN]
-			}
-
-			if v.Cursor.HasSelection() &&
-				(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
-					charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
-				// The current character is selected
-				lineStyle = defStyle.Reverse(true)
-
-				if style, ok := colorscheme["selection"]; ok {
-					lineStyle = style
-				}
-			} else {
-				lineStyle = highlightStyle
-			}
-
-			// We need to display the background of the linestyle with the correct color if cursorline is enabled
-			// and this is the current view and there is no selection on this line and the cursor is on this line
-			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
-				if style, ok := colorscheme["cursor-line"]; ok {
-					fg, _, _ := style.Decompose()
-					lineStyle = lineStyle.Background(fg)
-				}
-			}
-
-			if ch == '\t' {
-				// If the character we are displaying is a tab, we need to do a bunch of special things
-
-				// First the user may have configured an `indent-char` to be displayed to show that this
-				// is a tab character
-				lineIndentStyle := defStyle
-				if style, ok := colorscheme["indent-char"]; ok && v.Buf.Settings["indentchar"].(string) != " " {
-					lineIndentStyle = style
-				}
-				if v.Cursor.HasSelection() &&
-					(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
-						charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
-
-					lineIndentStyle = defStyle.Reverse(true)
-
-					if style, ok := colorscheme["selection"]; ok {
-						lineIndentStyle = style
-					}
-				}
-				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
-					if style, ok := colorscheme["cursor-line"]; ok {
-						fg, _, _ := style.Decompose()
-						lineIndentStyle = lineIndentStyle.Background(fg)
-					}
-				}
-				// Here we get the indent char
-				indentChar := []rune(v.Buf.Settings["indentchar"].(string))
-				if screenX-v.x-v.leftCol >= v.lineNumOffset {
-					v.drawCell(screenX-v.leftCol, screenY, indentChar[0], nil, lineIndentStyle)
-				}
-				// Now the tab has to be displayed as a bunch of spaces
-				visLoc := strWidth
-				remainder := tabSize - (visLoc % tabSize)
-				for i := 0; i < remainder-1; i++ {
-					screenX++
-					if screenX-v.x-v.leftCol >= v.lineNumOffset {
-						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
-					}
-				}
-				strWidth += remainder
-			} else if runewidth.RuneWidth(ch) > 1 {
-				if screenX-v.x-v.leftCol >= v.lineNumOffset {
-					v.drawCell(screenX, screenY, ch, nil, lineStyle)
-				}
-				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
-					screenX++
-					if screenX-v.x-v.leftCol >= v.lineNumOffset {
-						v.drawCell(screenX-v.leftCol, screenY, '<', nil, lineStyle)
-					}
-				}
-				strWidth += StringWidth(string(ch), tabSize)
-			} else {
-				if screenX-v.x-v.leftCol >= v.lineNumOffset {
-					v.drawCell(screenX-v.leftCol, screenY, ch, nil, lineStyle)
-				}
-				strWidth += StringWidth(string(ch), tabSize)
-			}
-			charNum = charNum.Move(1, v.Buf)
-			screenX++
-			colN++
-		}
-		// Here we are at a newline
-
-		if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
-			v.DisplayCursor(screenX-v.leftCol, screenY)
-		}
-
-		// The newline may be selected, in which case we should draw the selection style
-		// with a space to represent it
-		if v.Cursor.HasSelection() &&
-			(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
-				charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
-
-			selectStyle := defStyle.Reverse(true)
-
-			if style, ok := colorscheme["selection"]; ok {
-				selectStyle = style
-			}
-			v.drawCell(screenX, screenY, ' ', nil, selectStyle)
-			screenX++
-		}
-
-		charNum = charNum.Move(1, v.Buf)
-
-		for i := 0; i < v.Width; i++ {
-			lineStyle := defStyle
-			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
-				if style, ok := colorscheme["cursor-line"]; ok {
-					fg, _, _ := style.Decompose()
-					lineStyle = lineStyle.Background(fg)
-				}
-			}
-			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
-				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-				if colorcolumn != 0 && screenX-v.lineNumOffset+i == colorcolumn-1 {
-					if style, ok := colorscheme["color-column"]; ok {
-						fg, _, _ := style.Decompose()
-						lineStyle = lineStyle.Background(fg)
-					}
-				}
-				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
-			}
-		}
-	}
-}
+// func (v *View) DisplayView() {
+// 	if v.Type == vtLog {
+// 		// Log views should always follow the cursor...
+// 		v.Relocate()
+// 	}
+//
+// 	if v.Buf.Settings["syntax"].(bool) {
+// 		v.matches = Match(v)
+// 	}
+//
+// 	// The charNum we are currently displaying
+// 	// starts at the start of the viewport
+// 	charNum := Loc{0, v.Topline}
+//
+// 	// Convert the length of buffer to a string, and get the length of the string
+// 	// We are going to have to offset by that amount
+// 	maxLineLength := len(strconv.Itoa(v.Buf.NumLines))
+//
+// 	if v.Buf.Settings["ruler"] == true {
+// 		// + 1 for the little space after the line number
+// 		v.lineNumOffset = maxLineLength + 1
+// 	} else {
+// 		v.lineNumOffset = 0
+// 	}
+//
+// 	// We need to add to the line offset if there are gutter messages
+// 	var hasGutterMessages bool
+// 	for _, v := range v.messages {
+// 		if len(v) > 0 {
+// 			hasGutterMessages = true
+// 		}
+// 	}
+// 	if hasGutterMessages {
+// 		v.lineNumOffset += 2
+// 	}
+//
+// 	if v.x != 0 {
+// 		// One space for the extra split divider
+// 		v.lineNumOffset++
+// 	}
+//
+// 	// These represent the current screen coordinates
+// 	screenX, screenY := v.x, v.y-1
+//
+// 	highlightStyle := defStyle
+// 	curLineN := 0
+//
+// 	// ViewLine is the current line from the top of the viewport
+// 	for viewLine := 0; viewLine < v.Height; viewLine++ {
+// 		screenY++
+// 		screenX = v.x
+//
+// 		// This is the current line number of the buffer that we are drawing
+// 		curLineN = viewLine + v.Topline
+//
+// 		if screenY-v.y >= v.Height {
+// 			break
+// 		}
+//
+// 		if v.x != 0 {
+// 			// Draw the split divider
+// 			v.drawCell(screenX, screenY, '|', nil, defStyle.Reverse(true))
+// 			screenX++
+// 		}
+//
+// 		// If the buffer is smaller than the view height we have to clear all this space
+// 		if curLineN >= v.Buf.NumLines {
+// 			for i := screenX; i < v.x+v.Width; i++ {
+// 				v.drawCell(i, screenY, ' ', nil, defStyle)
+// 			}
+//
+// 			continue
+// 		}
+// 		line := v.Buf.Line(curLineN)
+//
+// 		// If there are gutter messages we need to display the '>>' symbol here
+// 		if hasGutterMessages {
+// 			// msgOnLine stores whether or not there is a gutter message on this line in particular
+// 			msgOnLine := false
+// 			for k := range v.messages {
+// 				for _, msg := range v.messages[k] {
+// 					if msg.lineNum == curLineN {
+// 						msgOnLine = true
+// 						gutterStyle := defStyle
+// 						switch msg.kind {
+// 						case GutterInfo:
+// 							if style, ok := colorscheme["gutter-info"]; ok {
+// 								gutterStyle = style
+// 							}
+// 						case GutterWarning:
+// 							if style, ok := colorscheme["gutter-warning"]; ok {
+// 								gutterStyle = style
+// 							}
+// 						case GutterError:
+// 							if style, ok := colorscheme["gutter-error"]; ok {
+// 								gutterStyle = style
+// 							}
+// 						}
+// 						v.drawCell(screenX, screenY, '>', nil, gutterStyle)
+// 						screenX++
+// 						v.drawCell(screenX, screenY, '>', nil, gutterStyle)
+// 						screenX++
+// 						if v.Cursor.Y == curLineN && !messenger.hasPrompt {
+// 							messenger.Message(msg.msg)
+// 							messenger.gutterMessage = true
+// 						}
+// 					}
+// 				}
+// 			}
+// 			// If there is no message on this line we just display an empty offset
+// 			if !msgOnLine {
+// 				v.drawCell(screenX, screenY, ' ', nil, defStyle)
+// 				screenX++
+// 				v.drawCell(screenX, screenY, ' ', nil, defStyle)
+// 				screenX++
+// 				if v.Cursor.Y == curLineN && messenger.gutterMessage {
+// 					messenger.Reset()
+// 					messenger.gutterMessage = false
+// 				}
+// 			}
+// 		}
+//
+// 		lineNumStyle := defStyle
+// 		if v.Buf.Settings["ruler"] == true {
+// 			// Write the line number
+// 			if style, ok := colorscheme["line-number"]; ok {
+// 				lineNumStyle = style
+// 			}
+// 			if style, ok := colorscheme["current-line-number"]; ok {
+// 				if curLineN == v.Cursor.Y && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() {
+// 					lineNumStyle = style
+// 				}
+// 			}
+//
+// 			lineNum := strconv.Itoa(curLineN + 1)
+//
+// 			// Write the spaces before the line number if necessary
+// 			for i := 0; i < maxLineLength-len(lineNum); i++ {
+// 				v.drawCell(screenX, screenY, ' ', nil, lineNumStyle)
+// 				screenX++
+// 			}
+// 			// Write the actual line number
+// 			for _, ch := range lineNum {
+// 				v.drawCell(screenX, screenY, ch, nil, lineNumStyle)
+// 				screenX++
+// 			}
+//
+// 			// Write the extra space
+// 			v.drawCell(screenX, screenY, ' ', nil, lineNumStyle)
+// 			screenX++
+// 		}
+//
+// 		// Now we actually draw the line
+// 		colN := 0
+// 		strWidth := 0
+// 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
+// 		for _, ch := range line {
+// 			if v.Buf.Settings["softwrap"].(bool) {
+// 				if screenX-v.x >= v.Width {
+// 					screenY++
+//
+// 					x := 0
+// 					if hasGutterMessages {
+// 						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
+// 						x++
+// 						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
+// 						x++
+// 					}
+// 					for i := 0; i < v.lineNumOffset; i++ {
+// 						screen.SetContent(v.x+i+x, screenY, ' ', nil, lineNumStyle)
+// 					}
+// 					screenX = v.x + v.lineNumOffset
+// 				}
+// 			}
+//
+// 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+// 				v.DisplayCursor(screenX-v.leftCol, screenY)
+// 			}
+//
+// 			lineStyle := defStyle
+//
+// 			if v.Buf.Settings["syntax"].(bool) {
+// 				// Syntax highlighting is enabled
+// 				highlightStyle = v.matches[viewLine][colN]
+// 			}
+//
+// 			if v.Cursor.HasSelection() &&
+// 				(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
+// 					charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
+// 				// The current character is selected
+// 				lineStyle = defStyle.Reverse(true)
+//
+// 				if style, ok := colorscheme["selection"]; ok {
+// 					lineStyle = style
+// 				}
+// 			} else {
+// 				lineStyle = highlightStyle
+// 			}
+//
+// 			// We need to display the background of the linestyle with the correct color if cursorline is enabled
+// 			// and this is the current view and there is no selection on this line and the cursor is on this line
+// 			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+// 				if style, ok := colorscheme["cursor-line"]; ok {
+// 					fg, _, _ := style.Decompose()
+// 					lineStyle = lineStyle.Background(fg)
+// 				}
+// 			}
+//
+// 			if ch == '\t' {
+// 				// If the character we are displaying is a tab, we need to do a bunch of special things
+//
+// 				// First the user may have configured an `indent-char` to be displayed to show that this
+// 				// is a tab character
+// 				lineIndentStyle := defStyle
+// 				if style, ok := colorscheme["indent-char"]; ok && v.Buf.Settings["indentchar"].(string) != " " {
+// 					lineIndentStyle = style
+// 				}
+// 				if v.Cursor.HasSelection() &&
+// 					(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
+// 						charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
+//
+// 					lineIndentStyle = defStyle.Reverse(true)
+//
+// 					if style, ok := colorscheme["selection"]; ok {
+// 						lineIndentStyle = style
+// 					}
+// 				}
+// 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+// 					if style, ok := colorscheme["cursor-line"]; ok {
+// 						fg, _, _ := style.Decompose()
+// 						lineIndentStyle = lineIndentStyle.Background(fg)
+// 					}
+// 				}
+// 				// Here we get the indent char
+// 				indentChar := []rune(v.Buf.Settings["indentchar"].(string))
+// 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
+// 					v.drawCell(screenX-v.leftCol, screenY, indentChar[0], nil, lineIndentStyle)
+// 				}
+// 				// Now the tab has to be displayed as a bunch of spaces
+// 				visLoc := strWidth
+// 				remainder := tabSize - (visLoc % tabSize)
+// 				for i := 0; i < remainder-1; i++ {
+// 					screenX++
+// 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
+// 						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
+// 					}
+// 				}
+// 				strWidth += remainder
+// 			} else if runewidth.RuneWidth(ch) > 1 {
+// 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
+// 					v.drawCell(screenX, screenY, ch, nil, lineStyle)
+// 				}
+// 				for i := 0; i < runewidth.RuneWidth(ch)-1; i++ {
+// 					screenX++
+// 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
+// 						v.drawCell(screenX-v.leftCol, screenY, '<', nil, lineStyle)
+// 					}
+// 				}
+// 				strWidth += StringWidth(string(ch), tabSize)
+// 			} else {
+// 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
+// 					v.drawCell(screenX-v.leftCol, screenY, ch, nil, lineStyle)
+// 				}
+// 				strWidth += StringWidth(string(ch), tabSize)
+// 			}
+// 			charNum = charNum.Move(1, v.Buf)
+// 			screenX++
+// 			colN++
+// 		}
+// 		// Here we are at a newline
+//
+// 		if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+// 			v.DisplayCursor(screenX-v.leftCol, screenY)
+// 		}
+//
+// 		// The newline may be selected, in which case we should draw the selection style
+// 		// with a space to represent it
+// 		if v.Cursor.HasSelection() &&
+// 			(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
+// 				charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
+//
+// 			selectStyle := defStyle.Reverse(true)
+//
+// 			if style, ok := colorscheme["selection"]; ok {
+// 				selectStyle = style
+// 			}
+// 			v.drawCell(screenX, screenY, ' ', nil, selectStyle)
+// 			screenX++
+// 		}
+//
+// 		charNum = charNum.Move(1, v.Buf)
+//
+// 		for i := 0; i < v.Width; i++ {
+// 			lineStyle := defStyle
+// 			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+// 				if style, ok := colorscheme["cursor-line"]; ok {
+// 					fg, _, _ := style.Decompose()
+// 					lineStyle = lineStyle.Background(fg)
+// 				}
+// 			}
+// 			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
+// 				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+// 				if colorcolumn != 0 && screenX-v.lineNumOffset+i == colorcolumn-1 {
+// 					if style, ok := colorscheme["color-column"]; ok {
+// 						fg, _, _ := style.Decompose()
+// 						lineStyle = lineStyle.Background(fg)
+// 					}
+// 				}
+// 				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
+// 			}
+// 		}
+// 	}
+// }
 
 // DisplayCursor draws the current buffer's cursor to the screen
 func (v *View) DisplayCursor(x, y int) {
