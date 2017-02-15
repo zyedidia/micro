@@ -97,6 +97,10 @@ The binary will then be installed to `$GOPATH/bin` (or your `$GOBIN`).
 
 You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
 
+### MacOS terminal
+
+If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. The newest versions also support true color.
+
 ### Linux clipboard support
 
 On Linux, clipboard support requires the 'xclip' or 'xsel' commands to be installed.
