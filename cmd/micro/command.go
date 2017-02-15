@@ -349,8 +349,8 @@ func Set(args []string) {
 		return
 	}
 
-	option := strings.TrimSpace(args[0])
-	value := strings.TrimSpace(args[1])
+	option := args[0]
+	value := args[1]
 
 	SetOptionAndSettings(option, value)
 }
@@ -362,8 +362,8 @@ func SetLocal(args []string) {
 		return
 	}
 
-	option := strings.TrimSpace(args[0])
-	value := strings.TrimSpace(args[1])
+	option := args[0]
+	value := args[1]
 
 	err := SetLocalOption(option, value, CurView())
 	if err != nil {
