@@ -96,6 +96,11 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			if wrap && viewCol >= width {
 				viewLine++
 
+				// If we go too far soft wrapping we have to cut off
+				if viewLine >= height {
+					break
+				}
+
 				nextLine := line[colN:]
 				lineLength := min(StringWidth(string(nextLine), tabsize), width)
 				if len(c.lines[viewLine]) != lineLength {
@@ -104,10 +109,6 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 				viewCol = 0
 
-				// If we go too far soft wrapping we have to cut off
-				if viewLine >= height {
-					break
-				}
 			}
 		}
 
