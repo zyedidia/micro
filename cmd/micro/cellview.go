@@ -45,14 +45,16 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
 
-	if len(c.lines) != height {
-		c.lines = make([][]*Char, height)
-	}
+	c.lines = make([][]*Char, 0)
 
 	viewLine := 0
 	lineN := top
 
 	for viewLine < height {
+		if lineN >= len(buf.lines) {
+			break
+		}
+
 		lineStr := string(buf.lines[lineN])
 		line := []rune(lineStr)
 
@@ -62,9 +64,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		// We'll either draw the length of the line, or the width of the screen
 		// whichever is smaller
 		lineLength := min(StringWidth(lineStr, tabsize), width)
-		if len(c.lines[viewLine]) != lineLength {
-			c.lines[viewLine] = make([]*Char, lineLength)
-		}
+		c.lines = append(c.lines, make([]*Char, lineLength))
 
 		wrap := false
 		// We only need to wrap if the length of the line is greater than the width of the terminal screen

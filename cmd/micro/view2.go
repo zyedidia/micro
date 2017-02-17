@@ -45,15 +45,78 @@ func (v *View) DisplayView() {
 	v.cellview.Draw(v.Buf, top, height, left, width)
 
 	screenX := v.x
-	for lineN, line := range v.cellview.lines {
+	realLineN := top - 1
+	for visualLineN, line := range v.cellview.lines {
+		var firstChar *Char
+		if len(line) > 0 {
+			firstChar = line[0]
+		}
+
+		var softwrapped bool
+		if firstChar != nil {
+			if firstChar.realLoc.Y == realLineN {
+				softwrapped = true
+			}
+			realLineN = firstChar.realLoc.Y
+		} else {
+			realLineN++
+		}
+
 		screenX = v.x
-		curLineN := v.Topline + lineN
 
 		if v.x != 0 {
 			// Draw the split divider
-			screen.SetContent(screenX, lineN, '|', nil, defStyle.Reverse(true))
+			screen.SetContent(screenX, visualLineN, '|', nil, defStyle.Reverse(true))
 			screenX++
 		}
+
+		// If there are gutter messages we need to display the '>>' symbol here
+		if hasGutterMessages {
+			// msgOnLine stores whether or not there is a gutter message on this line in particular
+			msgOnLine := false
+			for k := range v.messages {
+				for _, msg := range v.messages[k] {
+					if msg.lineNum == realLineN {
+						msgOnLine = true
+						gutterStyle := defStyle
+						switch msg.kind {
+						case GutterInfo:
+							if style, ok := colorscheme["gutter-info"]; ok {
+								gutterStyle = style
+							}
+						case GutterWarning:
+							if style, ok := colorscheme["gutter-warning"]; ok {
+								gutterStyle = style
+							}
+						case GutterError:
+							if style, ok := colorscheme["gutter-error"]; ok {
+								gutterStyle = style
+							}
+						}
+						v.drawCell(screenX, visualLineN, '>', nil, gutterStyle)
+						screenX++
+						v.drawCell(screenX, visualLineN, '>', nil, gutterStyle)
+						screenX++
+						if v.Cursor.Y == realLineN && !messenger.hasPrompt {
+							messenger.Message(msg.msg)
+							messenger.gutterMessage = true
+						}
+					}
+				}
+			}
+			// If there is no message on this line we just display an empty offset
+			if !msgOnLine {
+				v.drawCell(screenX, visualLineN, ' ', nil, defStyle)
+				screenX++
+				v.drawCell(screenX, visualLineN, ' ', nil, defStyle)
+				screenX++
+				if v.Cursor.Y == realLineN && messenger.gutterMessage {
+					messenger.Reset()
+					messenger.gutterMessage = false
+				}
+			}
+		}
+
 		lineNumStyle := defStyle
 		if v.Buf.Settings["ruler"] == true {
 			// Write the line number
@@ -61,26 +124,34 @@ func (v *View) DisplayView() {
 				lineNumStyle = style
 			}
 			if style, ok := colorscheme["current-line-number"]; ok {
-				if curLineN == v.Cursor.Y && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() {
+				if realLineN == v.Cursor.Y && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() {
 					lineNumStyle = style
 				}
 			}
 
-			lineNum := strconv.Itoa(curLineN + 1)
+			lineNum := strconv.Itoa(realLineN + 1)
 
 			// Write the spaces before the line number if necessary
 			for i := 0; i < maxLineNumLength-len(lineNum); i++ {
-				screen.SetContent(screenX, lineN, ' ', nil, lineNumStyle)
+				screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
 				screenX++
 			}
-			// Write the actual line number
-			for _, ch := range lineNum {
-				screen.SetContent(screenX, lineN, ch, nil, lineNumStyle)
-				screenX++
+			if softwrapped && visualLineN != 0 {
+				// Pad without the line number because it was written on the visual line before
+				for range lineNum {
+					screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+					screenX++
+				}
+			} else {
+				// Write the actual line number
+				for _, ch := range lineNum {
+					screen.SetContent(screenX, visualLineN, ch, nil, lineNumStyle)
+					screenX++
+				}
 			}
 
 			// Write the extra space
-			screen.SetContent(screenX, lineN, ' ', nil, lineNumStyle)
+			screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
 			screenX++
 		}
 
@@ -105,8 +176,8 @@ func (v *View) DisplayView() {
 			}
 		} else if len(line) == 0 {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == curLineN {
-				screen.ShowCursor(xOffset, lineN)
+				v.Cursor.Y == realLineN {
+				screen.ShowCursor(xOffset, visualLineN)
 			}
 		}
 	}
