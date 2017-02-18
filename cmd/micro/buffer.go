@@ -16,6 +16,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/zyedidia/highlight"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -44,8 +45,8 @@ type Buffer struct {
 
 	NumLines int
 
-	// Syntax highlighting rules
-	rules []SyntaxRule
+	syntaxDef   *highlight.Def
+	highlighter *highlight.Highlighter
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -96,7 +97,6 @@ func NewBuffer(reader io.Reader, path string) *Buffer {
 	b.EventHandler = NewEventHandler(b)
 
 	b.Update()
-	b.FindFileType()
 	b.UpdateRules()
 
 	if _, err := os.Stat(configDir + "/buffers/"); os.IsNotExist(err) {
@@ -185,12 +185,11 @@ func (b *Buffer) GetName() string {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.rules = GetRules(b)
-}
-
-// FindFileType identifies this buffer's filetype based on the extension or header
-func (b *Buffer) FindFileType() {
-	b.Settings["filetype"] = FindFileType(b)
+	b.syntaxDef = highlight.DetectFiletype(syntaxDefs, b.Path, []byte(b.Line(0)))
+	if b.highlighter == nil || b.Settings["filetype"].(string) != b.syntaxDef.FileType {
+		b.Settings["filetype"] = b.syntaxDef.FileType
+		b.highlighter = highlight.NewHighlighter(b.syntaxDef)
+	}
 }
 
 // FileType returns the buffer's filetype
@@ -280,7 +279,6 @@ func (b *Buffer) Serialize() error {
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
-	b.FindFileType()
 	b.UpdateRules()
 	dir, _ := homedir.Dir()
 	b.Path = strings.Replace(filename, "~", dir, 1)
@@ -317,7 +315,6 @@ func (b *Buffer) SaveAs(filename string) error {
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
 // with tee to use sudo so the user doesn't have to reopen micro with sudo
 func (b *Buffer) SaveAsWithSudo(filename string) error {
-	b.FindFileType()
 	b.UpdateRules()
 	b.Path = filename
 

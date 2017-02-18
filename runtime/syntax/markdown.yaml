@@ -1,0 +1,49 @@
+filetype: markdown
+
+detect:
+    filename: "\\.(md|mkd|mkdn|markdown)$"
+
+rules:
+    # Tables (Github extension)
+    - type: ".*[ :]\\|[ :].*"
+
+      # quotes
+    - statement:  "^>.*"
+
+      # Emphasis
+    - type: "(^|[[:space:]])(_[^ ][^_]*_|\\*[^ ][^*]*\\*)"
+
+      # Strong emphasis
+    - type: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
+
+      # strike-through
+    - type: "(^|[[:space:]])~~[^ ][^~]*~~"
+
+      # horizontal rules
+    - special: "^(---+|===+|___+|\\*\\*\\*+)\\s*$"
+
+      # headlines
+    - special:  "^#{1,6}.*"
+
+      # lists
+    - identifier:   "^[[:space:]]*[\\*+-] |^[[:space:]]*[0-9]+\\. "
+
+      # misc
+    - preproc:   "(\\(([CcRr]|[Tt][Mm])\\)|\\.{3}|(^|[[:space:]])\\-\\-($|[[:space:]]))"
+
+      # links
+    - constant: "\\[[^]]+\\]"
+    - constant: "\\[([^][]|\\[[^]]*\\])*\\]\\([^)]+\\)"
+
+      # images
+    - underlined: "!\\[[^][]*\\](\\([^)]+\\)|\\[[^]]+\\])"
+
+      # urls
+    - underlined: "https?://[^ )>]+"
+
+    - special: "^```$"
+
+    - special:
+        start: "`"
+        end: "`"
+        rules: []

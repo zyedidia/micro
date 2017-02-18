@@ -1,0 +1,44 @@
+filetype: ebuild
+
+detect:
+    filename: "\\.e(build|class)$"
+
+rules:
+    # All the standard portage functions
+    - identifier: "^src_(unpack|compile|install|test)|^pkg_(config|nofetch|setup|(pre|post)(inst|rm))"
+    # Highlight bash related syntax
+    - statement: "\\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while|continue|break)\\b"
+    - statement: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|!|=|&|\\|)"
+    - statement: "-(e|d|f|r|g|u|w|x|L)\\b"
+    - statement: "-(eq|ne|gt|lt|ge|le|s|n|z)\\b"   
+    # Highlight variables ... official portage ones in red, all others in bright red
+    - preproc: "\\$\\{?[a-zA-Z_0-9]+\\}?"
+    - special: "\\b(ARCH|HOMEPAGE|DESCRIPTION|IUSE|SRC_URI|LICENSE|SLOT|KEYWORDS|FILESDIR|WORKDIR|(P|R)?DEPEND|PROVIDE|DISTDIR|RESTRICT|USERLAND)\\b" 
+    - special: "\\b(S|D|T|PV|PF|P|PN|A)\\b|\\bC(XX)?FLAGS\\b|\\bLDFLAGS\\b|\\bC(HOST|TARGET|BUILD)\\b"
+    # Highlight portage commands
+    - identifier: "\\buse(_(with|enable))?\\b [!a-zA-Z0-9_+ -]*|inherit.*"
+    - statement: "\\be(begin|end|conf|install|make|warn|infon?|error|log|patch|new(group|user))\\b"
+    - statement: "\\bdie\\b|\\buse(_(with|enable))?\\b|\\binherit\\b|\\bhas\\b|\\b(has|best)_version\\b|\\bunpack\\b"
+    - statement: "\\b(do|new)(ins|s?bin|doc|lib(\\.so|\\.a)|man|info|exe|initd|confd|envd|pam|menu|icon)\\b"
+    - statement: "\\bdo(python|sed|dir|hard|sym|html|jar|mo)\\b|\\bkeepdir|\b"
+    - statement: "prepall(docs|info|man|strip)|prep(info|lib|lib\\.(so|a)|man|strip)"
+    - statement: "\\b(doc|ins|exe)into\\b|\\bf(owners|perms)\\b|\\b(exe|ins|dir)opts\\b"
+    # Highlight common commands used in ebuilds
+    - type: "\\bmake\\b|\\b(cat|cd|chmod|chown|cp|echo|env|export|grep|let|ln|mkdir|mv|rm|sed|set|tar|touch|unset)\\b"
+    # Highlight comments (doesnt work that well)
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+    # Highlight strings (doesnt work that well)
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+            

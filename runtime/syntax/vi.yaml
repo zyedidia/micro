@@ -1,0 +1,29 @@
+filetype: vi
+
+detect:
+    filename: "(^|/|\\.)(ex|vim)rc$|\\.vim"
+
+rules:
+    - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
+    - statement: "\\b([nvxsoilc]?(nore|un)?map|[nvlx]n|[ico]?no|[cilovx][um]|s?unm)\\b"
+    - statement: "\\b(snor|nun|nm|set|if|endif|let|unlet)\\b"
+    - statement: "[!&=]"
+    - constant.number: "\\b[0-9]+\\b"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.comment:
+        start: "\""
+        end: "$"
+        rules: []
+        

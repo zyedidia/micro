@@ -1,9 +1,0 @@
-syntax "vi" "(^|/|\.)(ex|vim)rc$|\.vim"
-
-color identifier "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
-color statement  "\b([nvxsoilc]?(nore|un)?map|[nvlx]n|[ico]?no|[cilovx][um]|s?unm)\b"
-color statement  "\b(snor|nun|nm|set|if|endif|let|unlet)\b"
-color statement "[!&=]"
-color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color constant.number "\b[0-9]+\b"
-color comment  "(^|[[:space:]])\"[^"]*$"

@@ -15,6 +15,33 @@ type Colorscheme map[string]tcell.Style
 // The current colorscheme
 var colorscheme Colorscheme
 
+// This takes in a syntax group and returns the colorscheme's style for that group
+func GetColor(color string) tcell.Style {
+	st := defStyle
+	if color == "" {
+		return st
+	}
+	groups := strings.Split(color, ".")
+	if len(groups) > 1 {
+		curGroup := ""
+		for i, g := range groups {
+			if i != 0 {
+				curGroup += "."
+			}
+			curGroup += g
+			if style, ok := colorscheme[curGroup]; ok {
+				st = style
+			}
+		}
+	} else if style, ok := colorscheme[color]; ok {
+		st = style
+	} else {
+		st = StringToStyle(color)
+	}
+
+	return st
+}
+
 // ColorschemeExists checks if a given colorscheme exists
 func ColorschemeExists(colorschemeName string) bool {
 	return FindRuntimeFile(RTColorscheme, colorschemeName) != nil
@@ -23,10 +50,11 @@ func ColorschemeExists(colorschemeName string) bool {
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
 	colorscheme = make(Colorscheme)
+	defStyle = tcell.StyleDefault.
+		Foreground(tcell.ColorDefault).
+		Background(tcell.ColorDefault)
 	if screen != nil {
-		screen.SetStyle(tcell.StyleDefault.
-			Foreground(tcell.ColorDefault).
-			Background(tcell.ColorDefault))
+		screen.SetStyle(defStyle)
 	}
 
 	LoadDefaultColorscheme()
@@ -47,20 +75,6 @@ func LoadColorscheme(colorschemeName string) {
 			TermMessage("Error loading colorscheme:", err)
 		} else {
 			colorscheme = ParseColorscheme(string(data))
-
-			// Default style
-			defStyle = tcell.StyleDefault.
-				Foreground(tcell.ColorDefault).
-				Background(tcell.ColorDefault)
-
-			// There may be another default style defined in the colorscheme
-			// In that case we should use that one
-			if style, ok := colorscheme["default"]; ok {
-				defStyle = style
-			}
-			if screen != nil {
-				screen.SetStyle(defStyle)
-			}
 		}
 	}
 }
@@ -93,6 +107,9 @@ func ParseColorscheme(text string) Colorscheme {
 
 			if link == "default" {
 				defStyle = style
+			}
+			if screen != nil {
+				screen.SetStyle(defStyle)
 			}
 		} else {
 			fmt.Println("Color-link statement is not valid:", line)

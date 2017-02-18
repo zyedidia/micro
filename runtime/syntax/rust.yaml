@@ -1,0 +1,46 @@
+filetype: rust
+
+detect:
+    filename: "\\.rs$"
+
+rules:
+    # function definition
+    - identifier: "fn [a-z0-9_]+"
+      # Reserved words
+    - statement: "\\b(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\\b"
+      # macros
+    - special: "[a-z_]+!"
+      # Constants
+    - constant: "[A-Z][A-Z_]+"
+      # Numbers
+    - constant.number: "\\b[0-9]+\\b"
+      # Traits/Enums/Structs/Types/etc.
+    - type: "[A-Z][a-z]+"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "r#+\""
+        end: "\"#+"
+        rules: []
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - special:
+        start: "#!\\["
+        end: "\\]"
+        rules: []

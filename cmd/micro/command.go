@@ -485,9 +485,6 @@ func Replace(args []string) {
 				break
 			}
 			view.Relocate()
-			if view.Buf.Settings["syntax"].(bool) {
-				view.matches = Match(view)
-			}
 			RedrawAll()
 			choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 			if canceled {

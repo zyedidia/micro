@@ -1,0 +1,33 @@
+filetype: asciidoc
+
+detect:
+    filename: "\\.(asc|asciidoc|adoc)$"
+
+rules:
+    - red: "^====+$"
+    - red: "^==[[:space:]].*$"
+    - red: "^----+$"
+    - magenta: "^===[[:space:]].*$"
+    - magenta: "^~~~~+$"
+    - green: "^====[[:space:]].*$"
+    - green: "^\\^\\^\\^\\^+$"
+    - brightblue: "^=====[[:space:]].*$"
+    - brightblue: "^\\+\\+\\+\\++$"
+    - brightgreen: ":.*:"
+    - brightred: "\\{[a-z0-9]*\\}"
+    - red: "\\\\\\{[a-z0-9]*\\}"
+    - red: "\\+\\+\\+\\{[a-z0-9]*\\}\\+\\+\\+"
+    - yellow: "^\\..*$"
+    - magenta: "^\\[(source,.+|NOTE|TIP|IMPORTANT|WARNING|CAUTION)\\]"
+    - yellow: ".*[[:space:]]\\+$"
+    - yellow: "_[^_]+_"
+    - yellow: "\\*[^\\*]+\\*"
+    - yellow: "\\+[^\\+]+\\+"
+    - yellow: "`[^`]+`"
+    - yellow: "\\^[^\\^]+\\^"
+    - yellow: "~[^~]+~"
+    - yellow: "'[^']+'"
+    - cyan: "`{1,2}[^']+'{1,2}"
+    - brightmagenta: "^[[:space:]]*[\\*\\.-]{1,5}[[:space:]]"
+    - brightwhite: "\\[\\[.*\\]\\]"
+    - brightwhite: "<<.*>>"

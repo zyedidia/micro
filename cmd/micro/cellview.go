@@ -45,11 +45,14 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
 
+	matches := buf.highlighter.Highlight(buf.String())
+
 	c.lines = make([][]*Char, 0)
 
 	viewLine := 0
 	lineN := top
 
+	curStyle := defStyle
 	for viewLine < height {
 		if lineN >= len(buf.lines) {
 			break
@@ -78,17 +81,21 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			if colN >= len(line) {
 				break
 			}
+			if group, ok := matches[lineN][colN]; ok {
+				curStyle = GetColor(group)
+			}
+
 			char := line[colN]
 
 			if char == '\t' {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, indentchar, tcell.StyleDefault}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, indentchar, curStyle}
 				// TODO: this always adds 4 spaces but it should really add just the remainder to the next tab location
 				viewCol += tabsize
 			} else if runewidth.RuneWidth(char) > 1 {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, tcell.StyleDefault}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, curStyle}
 				viewCol += runewidth.RuneWidth(char)
 			} else {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, tcell.StyleDefault}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, curStyle}
 				viewCol++
 			}
 			colN++
@@ -107,6 +114,10 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 				viewCol = 0
 			}
+
+		}
+		if group, ok := matches[lineN][len(line)]; ok {
+			curStyle = GetColor(group)
 		}
 
 		// newline

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/zyedidia/highlight"
 	"github.com/zyedidia/tcell"
 )
 
@@ -87,7 +88,7 @@ type View struct {
 	tripleClick bool
 
 	// Syntax highlighting matches
-	matches SyntaxMatches
+	matches []highlight.LineMatch
 
 	cellview *CellView
 
@@ -235,8 +236,6 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.Center(false)
 	v.messages = make(map[string][]GutterMessage)
 
-	v.matches = Match(v)
-
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
 	v.mouseReleased = true
@@ -274,7 +273,6 @@ func (v *View) ReOpen() {
 		screen.Clear()
 		v.Buf.ReOpen()
 		v.Relocate()
-		v.matches = Match(v)
 	}
 }
 

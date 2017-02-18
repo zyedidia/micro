@@ -255,7 +255,6 @@ func (s *SplitTree) ResizeSplits() {
 			}
 
 			n.view.ToggleTabbar()
-			n.view.matches = Match(n.view)
 		} else if n, ok := node.(*SplitTree); ok {
 			if s.kind == VerticalSplit {
 				if !n.lockWidth {

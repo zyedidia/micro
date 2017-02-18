@@ -1,0 +1,11 @@
+filetype: html
+
+detect:
+    filename: "\\.htm[l]?$"
+
+rules:
+    - identifier: "<.*?>"
+    - special: "&[^;[[:space:]]]*;"
+    - statement: "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
+    - constant: "\"[^\"]*\"|qq\\|.*\\|"
+    

@@ -1,0 +1,35 @@
+filetype: makefile
+
+detect:
+    filename: "([Mm]akefile|\\.ma?k)$"
+    header: "^#!.*/(env +)?[bg]?make( |$)"
+
+rules:
+    - preproc: "\\<(ifeq|ifdef|ifneq|ifndef|else|endif)\\>"
+    - statement: "^(export|include|override)\\>"
+    - operator: "^[^:=	]+:"
+    - operator: "([=,%]|\\+=|\\?=|:=|&&|\\|\\|)"
+    - statement: "\\$\\((abspath|addprefix|addsuffix|and|basename|call|dir)[[:space:]]"
+    - statement: "\\$\\((error|eval|filter|filter-out|findstring|firstword)[[:space:]]"
+    - statement: "\\$\\((flavor|foreach|if|info|join|lastword|notdir|or)[[:space:]]"
+    - statement: "\\$\\((origin|patsubst|realpath|shell|sort|strip|suffix)[[:space:]]"
+    - statement: "\\$\\((value|warning|wildcard|word|wordlist|words)[[:space:]]"
+    - identifier: "^.+:"
+    - identifier: "[()$]"
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+    - identifier: "\\$+(\\{[^} ]+\\}|\\([^) ]+\\))"
+    - identifier: "\\$[@^<*?%|+]|\\$\\([@^<*?%+-][DF]\\)"
+    - identifier: "\\$\\$|\\\\.?"
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []

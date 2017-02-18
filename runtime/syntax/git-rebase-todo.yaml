@@ -1,0 +1,30 @@
+filetype: git-rebase-todo
+
+detect:
+    filename: "git-rebase-todo"
+
+rules:
+    # Default
+    - ignore: ".*"
+    # Comments
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+    # Rebase commands
+    - keyword: "^(e|edit) [0-9a-f]{7,40}"
+    - keyword: "^#  (e, edit)"
+    - keyword: "^(f|fixup) [0-9a-f]{7,40}"
+    - keyword: "^#  (f, fixup)"
+    - keyword: "^(p|pick) [0-9a-f]{7,40}"
+    - keyword: "^#  (p, pick)"
+    - keyword: "^(r|reword) [0-9a-f]{7,40}"
+    - keyword: "^#  (r, reword)"
+    - keyword: "^(s|squash) [0-9a-f]{7,40}"
+    - keyword: "^#  (s, squash)"
+    - keyword: "^(x|exec) [^ ]+ [0-9a-f]{7,40}"
+    - keyword: "^#  (x, exec)"
+    # Recolor hash symbols
+    - special: "#"
+    # Commit IDs
+    - identifier: "[0-9a-f]{7,40}"

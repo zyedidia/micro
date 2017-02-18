@@ -1,0 +1,38 @@
+filetype: solidity
+
+detect:
+    filename: "\\.sol$"
+
+rules:
+    - preproc: "\\b(contract|library|pragma)\\b"
+    - constant.number: "\\b[-]?([0-9]+|0x[0-9a-fA-F]+)\\b"
+    - identifier: "[a-zA-Z][_a-zA-Z0-9]*[[:space:]]*"
+    - statement: "\\b(assembly|break|continue|do|for|function|if|else|new|return|returns|while)\\b"
+    - special: "\\b(\\.send|throw)\\b" # make sure they are very visible
+    - keyword: "\\b(anonymous|constant|indexed|payable|public|private|external|internal)\\b"
+    - constant: "\\b(block(\\.(blockhash|coinbase|difficulty|gaslimit|number|timestamp))?|msg(\\.(data|gas|sender|value))?|now|tx(\\.(gasprice|origin))?)\\b"
+    - constant: "\\b(keccak256|sha3|sha256|ripemd160|ecrecover|addmod|mulmod|this|super|selfdestruct|\\.balance)\\b"
+    - constant: "\\b(true|false)\\b"
+    - constant: "\\b(wei|szabo|finney|ether|seconds|minutes|hours|days|weeks|years)\\b"
+    - type: "\\b(address|bool|mapping|string|var|int(\\d*)|uint(\\d*)|byte(\\d*)|fixed(\\d*)|ufixed(\\d*))\\b"
+    - error: "\\b(abstract|after|case|catch|default|final|in|inline|interface|let|match|null|of|pure|relocatable|static|switch|try|type|typeof|view)\\b"
+    - operator: "[-+/*=<>!~%?:&|]"
+    - comment:
+        start: "//"
+        end: "$"
+        rules: []
+    - comment: 
+        start: "/\\*"
+        end: "\\*/"
+        rules: []
+    - todo: "TODO:?"
+    - constant.string: 
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."

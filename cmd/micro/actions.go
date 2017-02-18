@@ -1409,7 +1409,6 @@ func (v *View) Quit(usePlugin bool) bool {
 				}
 				if curTab == 0 {
 					CurView().ToggleTabbar()
-					CurView().matches = Match(CurView())
 				}
 			}
 		} else {
@@ -1445,7 +1444,6 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 	if closeAll {
 		// only quit if all of the buffers can be closed and the user confirms that they actually want to quit everything
-
 		shouldQuit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
 
 		if shouldQuit {
