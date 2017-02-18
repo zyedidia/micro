@@ -385,7 +385,7 @@ func (b *Buffer) Start() Loc {
 
 // End returns the location of the last character in the buffer
 func (b *Buffer) End() Loc {
-	return Loc{utf8.RuneCount(b.lines[b.NumLines-1]), b.NumLines - 1}
+	return Loc{utf8.RuneCount(b.lines[b.NumLines-1].data), b.NumLines - 1}
 }
 
 // RuneAt returns the rune at a given location in the buffer
@@ -402,7 +402,7 @@ func (b *Buffer) Line(n int) string {
 	if n >= len(b.lines) {
 		return ""
 	}
-	return string(b.lines[n])
+	return string(b.lines[n].data)
 }
 
 // Lines returns an array of strings containing the lines from start to end
@@ -410,7 +410,7 @@ func (b *Buffer) Lines(start, end int) []string {
 	lines := b.lines[start:end]
 	var slice []string
 	for _, line := range lines {
-		slice = append(slice, string(line))
+		slice = append(slice, string(line.data))
 	}
 	return slice
 }
@@ -429,7 +429,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	if end == len(b.lines) {
 		b.Insert(
 			Loc{
-				utf8.RuneCount(b.lines[end-1]),
+				utf8.RuneCount(b.lines[end-1].data),
 				end - 1,
 			},
 			"\n"+b.Line(start-1),

@@ -58,7 +58,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			break
 		}
 
-		lineStr := string(buf.lines[lineN])
+		lineStr := buf.Line(lineN)
 		line := []rune(lineStr)
 
 		colN := VisualToCharPos(left, lineStr, tabsize)
