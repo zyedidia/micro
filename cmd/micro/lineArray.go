@@ -173,3 +173,19 @@ func (la *LineArray) Substr(start, end Loc) string {
 	str += string(la.lines[end.Y].data[:endX])
 	return str
 }
+
+func (la *LineArray) LineData() [][]byte {
+	lines := make([][]byte, len(la.lines))
+	for i, l := range la.lines {
+		lines[i] = l.data
+	}
+	return lines
+}
+
+func (la *LineArray) State(lineN int) highlight.State {
+	return la.lines[lineN].state
+}
+
+func (la *LineArray) SetState(lineN int, s highlight.State) {
+	la.lines[lineN].state = s
+}

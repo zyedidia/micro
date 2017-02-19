@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/zyedidia/highlight"
 	"github.com/zyedidia/tcell"
 )
 
@@ -86,9 +85,6 @@ type View struct {
 	doubleClick bool
 	// Same here, just to keep track for mouse move events
 	tripleClick bool
-
-	// Syntax highlighting matches
-	matches []highlight.LineMatch
 
 	cellview *CellView
 

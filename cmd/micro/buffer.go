@@ -47,6 +47,7 @@ type Buffer struct {
 
 	syntaxDef   *highlight.Def
 	highlighter *highlight.Highlighter
+	matches     []highlight.LineMatch
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -189,6 +190,7 @@ func (b *Buffer) UpdateRules() {
 	if b.highlighter == nil || b.Settings["filetype"].(string) != b.syntaxDef.FileType {
 		b.Settings["filetype"] = b.syntaxDef.FileType
 		b.highlighter = highlight.NewHighlighter(b.syntaxDef)
+		b.matches = b.highlighter.Highlight(b, 0)
 	}
 }
 
