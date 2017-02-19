@@ -161,24 +161,51 @@ func (v *View) DisplayView() {
 		var lastChar *Char
 		for _, char := range line {
 			if char != nil {
+				lineStyle := char.style
+
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X {
 					screen.ShowCursor(xOffset+char.visualLoc.X, char.visualLoc.Y)
 				}
-				screen.SetContent(xOffset+char.visualLoc.X, char.visualLoc.Y, char.drawChar, nil, char.style)
+
+				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
+					style := GetColor("cursor-line")
+					fg, _, _ := style.Decompose()
+					lineStyle = lineStyle.Background(fg)
+
+					width := StringWidth(string(char.char), tabsize)
+					for i := 1; i < width; i++ {
+						screen.SetContent(xOffset+char.visualLoc.X+i, char.visualLoc.Y, ' ', nil, lineStyle)
+					}
+				}
+
+				screen.SetContent(xOffset+char.visualLoc.X, char.visualLoc.Y, char.drawChar, nil, lineStyle)
+
 				lastChar = char
 			}
 		}
 
+		lastX := 0
 		if lastChar != nil {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
 				screen.ShowCursor(xOffset+StringWidth(string(lineStr), tabsize), lastChar.visualLoc.Y)
 			}
+			lastX = xOffset + StringWidth(string(lineStr), tabsize)
 		} else if len(line) == 0 {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == realLineN {
 				screen.ShowCursor(xOffset, visualLineN)
+			}
+			lastX = xOffset
+		}
+
+		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
+			for i := lastX; i < v.Width; i++ {
+				style := GetColor("cursor-line")
+				fg, _, _ := style.Decompose()
+				style = style.Background(fg)
+				screen.SetContent(i, visualLineN, ' ', nil, style)
 			}
 		}
 	}
