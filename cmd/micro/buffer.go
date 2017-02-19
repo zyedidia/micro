@@ -189,7 +189,9 @@ func (b *Buffer) UpdateRules() {
 	if b.highlighter == nil || b.Settings["filetype"].(string) != b.syntaxDef.FileType {
 		b.Settings["filetype"] = b.syntaxDef.FileType
 		b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-		b.highlighter.Highlight(b, 0)
+		if b.Settings["syntax"].(bool) {
+			b.highlighter.Highlight(b, 0)
+		}
 	}
 }
 

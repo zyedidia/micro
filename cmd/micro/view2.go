@@ -171,7 +171,8 @@ func (v *View) DisplayView() {
 					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
 				}
 
-				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
+				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
+					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
 					style := GetColor("cursor-line")
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -203,7 +204,8 @@ func (v *View) DisplayView() {
 			lastX = xOffset
 		}
 
-		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
+		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
+			!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
 			for i := lastX; i < xOffset+v.Width; i++ {
 				style := GetColor("cursor-line")
 				fg, _, _ := style.Decompose()

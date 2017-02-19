@@ -1,6 +1,8 @@
 package main
 
 import (
+	"time"
+
 	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/tcell"
 )
@@ -49,18 +51,17 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
 
 	start := buf.Cursor.Y
-	// startTime := time.Now()
-	if start > 0 && buf.lines[start-1].rehighlight {
-		buf.highlighter.ReHighlightLine(buf, start-1)
-		buf.lines[start-1].rehighlight = false
-	}
+	if buf.Settings["syntax"].(bool) {
+		startTime := time.Now()
+		if start > 0 && buf.lines[start-1].rehighlight {
+			buf.highlighter.ReHighlightLine(buf, start-1)
+			buf.lines[start-1].rehighlight = false
+		}
 
-	buf.highlighter.ReHighlight(buf, start)
-	// elapsed := time.Since(startTime)
-	// for i, m := range matches {
-	// 	buf.matches[start+i] = m
-	// }
-	// messenger.Message("Rehighlighted ", len(matches), " lines in ", elapsed)
+		buf.highlighter.ReHighlight(buf, start)
+		elapsed := time.Since(startTime)
+		messenger.Message("Rehighlighted in ", elapsed)
+	}
 
 	c.lines = make([][]*Char, 0)
 
