@@ -82,7 +82,7 @@ func (la *LineArray) String() string {
 func (la *LineArray) NewlineBelow(y int) {
 	la.lines = append(la.lines, Line{[]byte(" "), nil, nil, false})
 	copy(la.lines[y+2:], la.lines[y+1:])
-	la.lines[y+1] = Line{[]byte(""), nil, nil, false}
+	la.lines[y+1] = Line{[]byte(""), la.lines[y].state, nil, false}
 }
 
 // inserts a byte array at a given location
