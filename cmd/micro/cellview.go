@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/tcell"
 )
@@ -48,13 +46,18 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
 
 	start := buf.Cursor.Y
-	startTime := time.Now()
-	matches := buf.highlighter.ReHighlight(buf, start)
-	elapsed := time.Since(startTime)
-	for i, m := range matches {
-		buf.matches[start+i] = m
+	// startTime := time.Now()
+	if start > 0 && buf.lines[start-1].rehighlight {
+		buf.highlighter.ReHighlightLine(buf, start-1)
+		buf.lines[start-1].rehighlight = false
 	}
-	messenger.Message("Rehighlighted ", len(matches), " lines in ", elapsed)
+
+	buf.highlighter.ReHighlight(buf, start)
+	// elapsed := time.Since(startTime)
+	// for i, m := range matches {
+	// 	buf.matches[start+i] = m
+	// }
+	// messenger.Message("Rehighlighted ", len(matches), " lines in ", elapsed)
 
 	c.lines = make([][]*Char, 0)
 
@@ -90,7 +93,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			if colN >= len(line) {
 				break
 			}
-			if group, ok := buf.matches[lineN][colN]; ok {
+			if group, ok := buf.Match(lineN)[colN]; ok {
 				curStyle = GetColor(group)
 			}
 
@@ -124,7 +127,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			}
 
 		}
-		if group, ok := buf.matches[lineN][len(line)]; ok {
+		if group, ok := buf.Match(lineN)[len(line)]; ok {
 			curStyle = GetColor(group)
 		}
 

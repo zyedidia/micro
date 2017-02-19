@@ -32,7 +32,9 @@ func runeToByteIndex(n int, txt []byte) int {
 type Line struct {
 	data []byte
 
-	state highlight.State
+	state       highlight.State
+	match       highlight.LineMatch
+	rehighlight bool
 }
 
 // A LineArray simply stores and array of lines and makes it easy to insert
@@ -51,12 +53,12 @@ func NewLineArray(reader io.Reader) *LineArray {
 		data, err := br.ReadBytes('\n')
 		if err != nil {
 			if err == io.EOF {
-				la.lines = append(la.lines, Line{data[:len(data)], nil})
+				la.lines = append(la.lines, Line{data[:len(data)], nil, nil, false})
 			}
 			// Last line was read
 			break
 		} else {
-			la.lines = append(la.lines, Line{data[:len(data)-1], nil})
+			la.lines = append(la.lines, Line{data[:len(data)-1], nil, nil, false})
 		}
 		i++
 	}
@@ -78,9 +80,9 @@ func (la *LineArray) String() string {
 
 // NewlineBelow adds a newline below the given line number
 func (la *LineArray) NewlineBelow(y int) {
-	la.lines = append(la.lines, Line{[]byte(" "), nil})
+	la.lines = append(la.lines, Line{[]byte(" "), nil, nil, false})
 	copy(la.lines[y+2:], la.lines[y+1:])
-	la.lines[y+1] = Line{[]byte(""), nil}
+	la.lines[y+1] = Line{[]byte(""), nil, nil, false}
 }
 
 // inserts a byte array at a given location
@@ -117,6 +119,10 @@ func (la *LineArray) Split(pos Loc) {
 	la.NewlineBelow(pos.Y)
 	la.insert(Loc{0, pos.Y + 1}, la.lines[pos.Y].data[pos.X:])
 	la.lines[pos.Y+1].state = la.lines[pos.Y].state
+	la.lines[pos.Y].state = nil
+	la.lines[pos.Y].match = nil
+	la.lines[pos.Y+1].match = nil
+	la.lines[pos.Y].rehighlight = true
 	la.DeleteToEnd(Loc{pos.X, pos.Y})
 }
 
@@ -188,4 +194,12 @@ func (la *LineArray) State(lineN int) highlight.State {
 
 func (la *LineArray) SetState(lineN int, s highlight.State) {
 	la.lines[lineN].state = s
+}
+
+func (la *LineArray) SetMatch(lineN int, m highlight.LineMatch) {
+	la.lines[lineN].match = m
+}
+
+func (la *LineArray) Match(lineN int) highlight.LineMatch {
+	return la.lines[lineN].match
 }
