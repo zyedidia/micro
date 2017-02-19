@@ -42,7 +42,7 @@ func (v *View) DisplayView() {
 	left := v.leftCol
 	top := v.Topline
 
-	v.cellview.Draw(v.Buf, top, height, left, width)
+	v.cellview.Draw(v.Buf, top, height, left, width-v.lineNumOffset)
 
 	screenX := v.x
 	realLineN := top - 1

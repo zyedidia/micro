@@ -103,12 +103,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 				nextLine := line[colN:]
 				lineLength := min(StringWidth(string(nextLine), tabsize), width)
-				if len(c.lines[viewLine]) != lineLength {
-					c.lines[viewLine] = make([]*Char, lineLength)
-				}
+				c.lines = append(c.lines, make([]*Char, lineLength))
 
 				viewCol = 0
-
 			}
 		}
 
