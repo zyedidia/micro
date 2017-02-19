@@ -33,7 +33,10 @@ type Char struct {
 	visualLoc Loc
 	realLoc   Loc
 	char      rune
-	style     tcell.Style
+	// The actual character that is drawn
+	// This is only different from char if it's for example hidden character
+	drawChar rune
+	style    tcell.Style
 }
 
 type CellView struct {
@@ -100,13 +103,13 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			char := line[colN]
 
 			if char == '\t' {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, indentchar, curStyle}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, indentchar, curStyle}
 				viewCol += tabsize - viewCol%tabsize
 			} else if runewidth.RuneWidth(char) > 1 {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, curStyle}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle}
 				viewCol += runewidth.RuneWidth(char)
 			} else {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, curStyle}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle}
 				viewCol++
 			}
 			colN++

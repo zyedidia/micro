@@ -3,6 +3,7 @@ package main
 import "strconv"
 
 func (v *View) DisplayView() {
+	tabsize := int(v.Buf.Settings["tabsize"].(float64))
 	if v.Type == vtLog {
 		// Log views should always follow the cursor...
 		v.Relocate()
@@ -69,6 +70,8 @@ func (v *View) DisplayView() {
 			screen.SetContent(screenX, visualLineN, '|', nil, defStyle.Reverse(true))
 			screenX++
 		}
+
+		lineStr := v.Buf.Line(realLineN)
 
 		// If there are gutter messages we need to display the '>>' symbol here
 		if hasGutterMessages {
@@ -156,23 +159,21 @@ func (v *View) DisplayView() {
 		}
 
 		var lastChar *Char
-		for i, char := range line {
+		for _, char := range line {
 			if char != nil {
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X {
 					screen.ShowCursor(xOffset+char.visualLoc.X, char.visualLoc.Y)
 				}
-				screen.SetContent(xOffset+char.visualLoc.X, char.visualLoc.Y, char.char, nil, char.style)
-				if i == len(line)-1 {
-					lastChar = char
-				}
+				screen.SetContent(xOffset+char.visualLoc.X, char.visualLoc.Y, char.drawChar, nil, char.style)
+				lastChar = char
 			}
 		}
 
 		if lastChar != nil {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-				screen.ShowCursor(xOffset+lastChar.visualLoc.X+1, lastChar.visualLoc.Y)
+				screen.ShowCursor(xOffset+StringWidth(string(lineStr), tabsize), lastChar.visualLoc.Y)
 			}
 		} else if len(line) == 0 {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
