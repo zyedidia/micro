@@ -37,6 +37,7 @@ func (v *View) DisplayView() {
 	}
 
 	xOffset := v.x + v.lineNumOffset
+	yOffset := v.y
 
 	height := v.Height
 	width := v.Width
@@ -47,7 +48,9 @@ func (v *View) DisplayView() {
 
 	screenX := v.x
 	realLineN := top - 1
-	for visualLineN, line := range v.cellview.lines {
+	visualLineN := 0
+	var line []*Char
+	for visualLineN, line = range v.cellview.lines {
 		var firstChar *Char
 		if len(line) > 0 {
 			firstChar = line[0]
@@ -67,7 +70,7 @@ func (v *View) DisplayView() {
 
 		if v.x != 0 {
 			// Draw the split divider
-			screen.SetContent(screenX, visualLineN, '|', nil, defStyle.Reverse(true))
+			screen.SetContent(screenX, yOffset+visualLineN, '|', nil, defStyle.Reverse(true))
 			screenX++
 		}
 
@@ -96,9 +99,9 @@ func (v *View) DisplayView() {
 								gutterStyle = style
 							}
 						}
-						v.drawCell(screenX, visualLineN, '>', nil, gutterStyle)
+						v.drawCell(screenX, yOffset+visualLineN, '>', nil, gutterStyle)
 						screenX++
-						v.drawCell(screenX, visualLineN, '>', nil, gutterStyle)
+						v.drawCell(screenX, yOffset+visualLineN, '>', nil, gutterStyle)
 						screenX++
 						if v.Cursor.Y == realLineN && !messenger.hasPrompt {
 							messenger.Message(msg.msg)
@@ -109,9 +112,9 @@ func (v *View) DisplayView() {
 			}
 			// If there is no message on this line we just display an empty offset
 			if !msgOnLine {
-				v.drawCell(screenX, visualLineN, ' ', nil, defStyle)
+				v.drawCell(screenX, yOffset+visualLineN, ' ', nil, defStyle)
 				screenX++
-				v.drawCell(screenX, visualLineN, ' ', nil, defStyle)
+				v.drawCell(screenX, yOffset+visualLineN, ' ', nil, defStyle)
 				screenX++
 				if v.Cursor.Y == realLineN && messenger.gutterMessage {
 					messenger.Reset()
@@ -136,25 +139,25 @@ func (v *View) DisplayView() {
 
 			// Write the spaces before the line number if necessary
 			for i := 0; i < maxLineNumLength-len(lineNum); i++ {
-				screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+				screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
 				screenX++
 			}
 			if softwrapped && visualLineN != 0 {
 				// Pad without the line number because it was written on the visual line before
 				for range lineNum {
-					screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+					screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
 					screenX++
 				}
 			} else {
 				// Write the actual line number
 				for _, ch := range lineNum {
-					screen.SetContent(screenX, visualLineN, ch, nil, lineNumStyle)
+					screen.SetContent(screenX, yOffset+visualLineN, ch, nil, lineNumStyle)
 					screenX++
 				}
 			}
 
 			// Write the extra space
-			screen.SetContent(screenX, visualLineN, ' ', nil, lineNumStyle)
+			screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
 			screenX++
 		}
 
@@ -165,7 +168,7 @@ func (v *View) DisplayView() {
 
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X {
-					screen.ShowCursor(xOffset+char.visualLoc.X, char.visualLoc.Y)
+					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
 				}
 
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
@@ -175,11 +178,11 @@ func (v *View) DisplayView() {
 
 					width := StringWidth(string(char.char), tabsize)
 					for i := 1; i < width; i++ {
-						screen.SetContent(xOffset+char.visualLoc.X+i, char.visualLoc.Y, ' ', nil, lineStyle)
+						screen.SetContent(xOffset+char.visualLoc.X+i, yOffset+char.visualLoc.Y, ' ', nil, lineStyle)
 					}
 				}
 
-				screen.SetContent(xOffset+char.visualLoc.X, char.visualLoc.Y, char.drawChar, nil, lineStyle)
+				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
 
 				lastChar = char
 			}
@@ -189,24 +192,30 @@ func (v *View) DisplayView() {
 		if lastChar != nil {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-				screen.ShowCursor(xOffset+StringWidth(string(lineStr), tabsize), lastChar.visualLoc.Y)
+				screen.ShowCursor(xOffset+StringWidth(string(lineStr), tabsize), yOffset+lastChar.visualLoc.Y)
 			}
 			lastX = xOffset + StringWidth(string(lineStr), tabsize)
 		} else if len(line) == 0 {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == realLineN {
-				screen.ShowCursor(xOffset, visualLineN)
+				screen.ShowCursor(xOffset, yOffset+visualLineN)
 			}
 			lastX = xOffset
 		}
 
 		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
-			for i := lastX; i < v.Width; i++ {
+			for i := lastX; i < xOffset+v.Width; i++ {
 				style := GetColor("cursor-line")
 				fg, _, _ := style.Decompose()
 				style = style.Background(fg)
-				screen.SetContent(i, visualLineN, ' ', nil, style)
+				screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
 			}
+		}
+	}
+
+	if v.x != 0 && visualLineN < v.Height {
+		for i := visualLineN + 1; i < v.Height; i++ {
+			screen.SetContent(v.x, yOffset+i, '|', nil, defStyle.Reverse(true))
 		}
 	}
 }
