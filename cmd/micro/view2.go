@@ -166,6 +166,23 @@ func (v *View) DisplayView() {
 			if char != nil {
 				lineStyle := char.style
 
+				charLoc := char.realLoc
+				if v.Cursor.HasSelection() &&
+					(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
+						charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
+					// The current character is selected
+					lineStyle = defStyle.Reverse(true)
+
+					if style, ok := colorscheme["selection"]; ok {
+						lineStyle = style
+					}
+
+					width := StringWidth(string(char.char), tabsize)
+					for i := 1; i < width; i++ {
+						screen.SetContent(xOffset+char.visualLoc.X+i, yOffset+char.visualLoc.Y, ' ', nil, lineStyle)
+					}
+				}
+
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X {
 					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
@@ -190,18 +207,36 @@ func (v *View) DisplayView() {
 		}
 
 		lastX := 0
+		var realLoc Loc
+		var visualLoc Loc
 		if lastChar != nil {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
 				screen.ShowCursor(xOffset+StringWidth(string(lineStr), tabsize), yOffset+lastChar.visualLoc.Y)
 			}
 			lastX = xOffset + StringWidth(string(lineStr), tabsize)
+			realLoc = Loc{lastChar.realLoc.X, realLineN}
+			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == realLineN {
 				screen.ShowCursor(xOffset, yOffset+visualLineN)
 			}
 			lastX = xOffset
+			realLoc = Loc{0, realLineN}
+			visualLoc = Loc{0, visualLineN}
+		}
+
+		if v.Cursor.HasSelection() &&
+			(realLoc.GreaterEqual(v.Cursor.CurSelection[0]) && realLoc.LessThan(v.Cursor.CurSelection[1]) ||
+				realLoc.LessThan(v.Cursor.CurSelection[0]) && realLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
+			// The current character is selected
+			selectStyle := defStyle.Reverse(true)
+
+			if style, ok := colorscheme["selection"]; ok {
+				selectStyle = style
+			}
+			screen.SetContent(xOffset+visualLoc.X, yOffset+visualLoc.Y, ' ', nil, selectStyle)
 		}
 
 		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
