@@ -98,8 +98,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 			if char == '\t' {
 				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, indentchar, curStyle}
-				// TODO: this always adds 4 spaces but it should really add just the remainder to the next tab location
-				viewCol += tabsize
+				viewCol += tabsize - viewCol%tabsize
 			} else if runewidth.RuneWidth(char) > 1 {
 				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, curStyle}
 				viewCol += runewidth.RuneWidth(char)
