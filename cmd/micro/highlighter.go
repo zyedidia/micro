@@ -14,6 +14,8 @@ func LoadSyntaxFiles() {
 			LoadSyntaxFile(data, f.Name())
 		}
 	}
+
+	highlight.ResolveIncludes(syntaxDefs)
 }
 
 func LoadSyntaxFile(text []byte, filename string) {

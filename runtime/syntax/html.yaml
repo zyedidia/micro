@@ -7,5 +7,20 @@ rules:
     - identifier: "<.*?>"
     - special: "&[^;[[:space:]]]*;"
     - statement: "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
-    - constant: "\"[^\"]*\"|qq\\|.*\\|"
-    
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules: []
+
+    - default:
+        start: "<script.*?>"
+        end: "</script.*?>"
+        rules:
+            - include: "javascript"
+
+    - default:
+        start: "<style.*?>"
+        end: "</style.*?>"
+        rules:
+            - include: "css"
