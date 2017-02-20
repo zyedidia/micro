@@ -450,9 +450,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
-	case *tcell.EventResize:
-		// Window resized
-		tabs[v.TabNum].Resize()
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false

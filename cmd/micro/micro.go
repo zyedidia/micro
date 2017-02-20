@@ -11,13 +11,13 @@ import (
 	"time"
 
 	"github.com/go-errors/errors"
-	"layeh.com/gopher-luar"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
+	"layeh.com/gopher-luar"
 )
 
 const (
@@ -433,6 +433,10 @@ func main() {
 
 		for event != nil {
 			switch e := event.(type) {
+			case *tcell.EventResize:
+				for _, t := range tabs {
+					t.Resize()
+				}
 			case *tcell.EventMouse:
 				if e.Buttons() == tcell.Button1 {
 					// If the user left clicked we check a couple things
