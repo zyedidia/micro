@@ -339,6 +339,7 @@ Enter
     // Integration with file managers
     "F1":  "ToggleHelp",
     "F2":  "Save",
+    "F3":  "Find",
     "F4":  "Quit",
     "F7":  "Find",
     "F10": "Quit",

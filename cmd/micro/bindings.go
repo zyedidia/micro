@@ -414,8 +414,8 @@ func DefaultBindings() map[string]string {
 		"CtrlV":          "Paste",
 		"CtrlA":          "SelectAll",
 		"CtrlT":          "AddTab",
-		"Alt,":    "PreviousTab",
-		"Alt.":  "NextTab",
+		"Alt,":           "PreviousTab",
+		"Alt.":           "NextTab",
 		"Home":           "StartOfLine",
 		"End":            "EndOfLine",
 		"CtrlHome":       "CursorStart",
@@ -444,6 +444,7 @@ func DefaultBindings() map[string]string {
 		// Integration with file managers
 		"F1":  "ToggleHelp",
 		"F2":  "Save",
+		"F3":  "Find",
 		"F4":  "Quit",
 		"F7":  "Find",
 		"F10": "Quit",
