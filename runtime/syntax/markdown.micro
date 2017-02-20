@@ -1,7 +1,7 @@
 syntax "markdown" "\.(md|mkd|mkdn|markdown)$"
 
 # Tables (Github extension)
-color type ".*[ :]\|[ :].*"
+color preproc ".*[ :]\|[ :].*"
 
 # quotes
 color statement  "^>.*"
@@ -16,7 +16,7 @@ color type "(^|[[:space:]])(__[^ ][^_]*__|\*\*[^ ][^*]*\*\*)"
 color type "(^|[[:space:]])~~[^ ][^~]*~~"
 
 # horizontal rules
-color special "^(---+|===+|___+|\*\*\*+)\s*$"
+color special "^(---+|\+---+|===+|\+===+|___+|\*\*\*+|\+\*\*\*+)\s*$"
 
 # headlines
 color special  "^#{1,6}.*"

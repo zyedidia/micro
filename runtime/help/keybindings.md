@@ -1,89 +1,15 @@
 # Keybindings
 
-Here are the default keybindings in json format. You can rebind them to your liking, following the same format.
+Micro has a plethora of hotkeys that make it easy and powerful to use and all
+hotkeys are fully customizable to your liking.
+Custom keybindings are stored internally in micro if changed with the `>bind` command or
+you can also be added in the file `~/.config/micro/bindings.json` as discussed below.
+For a list of the default keybindings in the json format used by micro, please see
+the end of this file. For a more user-friendly list with explanations of what the default
+hotkeys are and what they do, please see `>help defaultkeys`
 
-```json
-{
-    "Up":             "CursorUp",
-    "Down":           "CursorDown",
-    "Right":          "CursorRight",
-    "Left":           "CursorLeft",
-    "ShiftUp":        "SelectUp",
-    "ShiftDown":      "SelectDown",
-    "ShiftLeft":      "SelectLeft",
-    "ShiftRight":     "SelectRight",
-    "AltLeft":        "WordLeft",
-    "AltRight":       "WordRight",
-    "AltShiftRight":  "SelectWordRight",
-    "AltShiftLeft":   "SelectWordLeft",
-    "AltUp":          "MoveLinesUp",
-    "AltDown":        "MoveLinesDown",
-    "CtrlLeft":       "StartOfLine",
-    "CtrlRight":      "EndOfLine",
-    "CtrlShiftLeft":  "SelectToStartOfLine",
-    "CtrlShiftRight": "SelectToEndOfLine",
-    "CtrlUp":         "CursorStart",
-    "CtrlDown":       "CursorEnd",
-    "CtrlShiftUp":    "SelectToStart",
-    "CtrlShiftDown":  "SelectToEnd",
-    "Enter":          "InsertNewline",
-    "Space":          "InsertSpace",
-    "CtrlH":          "Backspace",
-    "Backspace":      "Backspace",
-    "Alt-CtrlH":      "DeleteWordLeft",
-    "Alt-Backspace":  "DeleteWordLeft",
-    "Tab":            "IndentSelection,InsertTab",
-    "Backtab":        "OutdentSelection",
-    "CtrlO":          "OpenFile",
-    "CtrlS":          "Save",
-    "CtrlF":          "Find",
-    "CtrlN":          "FindNext",
-    "CtrlP":          "FindPrevious",
-    "CtrlZ":          "Undo",
-    "CtrlY":          "Redo",
-    "CtrlC":          "Copy",
-    "CtrlX":          "Cut",
-    "CtrlK":          "CutLine",
-    "CtrlD":          "DuplicateLine",
-    "CtrlV":          "Paste",
-    "CtrlA":          "SelectAll",
-    "CtrlT":          "AddTab",
-    "Alt,":           "PreviousTab",
-    "Alt.":           "NextTab",
-    "Home":           "StartOfLine",
-    "End":            "EndOfLine",
-    "CtrlHome":       "CursorStart",
-    "CtrlEnd":        "CursorEnd",
-    "PageUp":         "CursorPageUp",
-    "PageDown":       "CursorPageDown",
-    "CtrlG":          "ToggleHelp",
-    "CtrlR":          "ToggleRuler",
-    "CtrlL":          "JumpLine",
-    "Delete":         "Delete",
-    "CtrlB":          "ShellMode",
-    "CtrlQ":          "Quit",
-    "CtrlE":          "CommandMode",
-    "CtrlW":          "NextSplit",
-    "CtrlU":          "ToggleMacro",
-    "CtrlJ":          "PlayMacro",
-
-    // Emacs-style keybindings
-    "Alt-f": "WordRight",
-    "Alt-b": "WordLeft",
-    "Alt-a": "StartOfLine",
-    "Alt-e": "EndOfLine",
-    "Alt-p": "CursorUp",
-    "Alt-n": "CursorDown",
-
-    // Integration with file managers
-    "F1":  "ToggleHelp",
-    "F2":  "Save",
-    "F4":  "Quit",
-    "F7":  "Find",
-    "F10": "Quit",
-    "Esc": "Escape",
-}
-```
+If `~/.config/micro/bindings.json` does not exist, you can simply create it.
+Micro will know what to do with it.
 
 You can use the alt keys + arrows to move word by word.
 Ctrl left and right move the cursor to the start and end of the line, and
@@ -105,6 +31,9 @@ following in the `bindings.json` file.
 	"CtrlZ": "Redo"
 }
 ```
+
+In addition to editing your `~/.config/micro/bindings.json`, you can run
+`>bind <keycombo> <action>` For a list of bindable actions, see below.
 
 You can also chain commands when rebinding. For example, if you want Alt-s to save
 and quit you can bind it like so:
@@ -332,6 +261,92 @@ Escape
 Enter
 ```
 
+# Default keybinding configuration.
+
+```json
+{
+    "Up":             "CursorUp",
+    "Down":           "CursorDown",
+    "Right":          "CursorRight",
+    "Left":           "CursorLeft",
+    "ShiftUp":        "SelectUp",
+    "ShiftDown":      "SelectDown",
+    "ShiftLeft":      "SelectLeft",
+    "ShiftRight":     "SelectRight",
+    "AltLeft":        "WordLeft",
+    "AltRight":       "WordRight",
+    "AltShiftRight":  "SelectWordRight",
+    "AltShiftLeft":   "SelectWordLeft",
+    "AltUp":          "MoveLinesUp",
+    "AltDown":        "MoveLinesDown",
+    "CtrlLeft":       "StartOfLine",
+    "CtrlRight":      "EndOfLine",
+    "CtrlShiftLeft":  "SelectToStartOfLine",
+    "CtrlShiftRight": "SelectToEndOfLine",
+    "CtrlUp":         "CursorStart",
+    "CtrlDown":       "CursorEnd",
+    "CtrlShiftUp":    "SelectToStart",
+    "CtrlShiftDown":  "SelectToEnd",
+    "Enter":          "InsertNewline",
+    "Space":          "InsertSpace",
+    "CtrlH":          "Backspace",
+    "Backspace":      "Backspace",
+    "Alt-CtrlH":      "DeleteWordLeft",
+    "Alt-Backspace":  "DeleteWordLeft",
+    "Tab":            "IndentSelection,InsertTab",
+    "Backtab":        "OutdentSelection",
+    "CtrlO":          "OpenFile",
+    "CtrlS":          "Save",
+    "CtrlF":          "Find",
+    "CtrlN":          "FindNext",
+    "CtrlP":          "FindPrevious",
+    "CtrlZ":          "Undo",
+    "CtrlY":          "Redo",
+    "CtrlC":          "Copy",
+    "CtrlX":          "Cut",
+    "CtrlK":          "CutLine",
+    "CtrlD":          "DuplicateLine",
+    "CtrlV":          "Paste",
+    "CtrlA":          "SelectAll",
+    "CtrlT":          "AddTab",
+    "Alt,":           "PreviousTab",
+    "Alt.":           "NextTab",
+    "Home":           "StartOfLine",
+    "End":            "EndOfLine",
+    "CtrlHome":       "CursorStart",
+    "CtrlEnd":        "CursorEnd",
+    "PageUp":         "CursorPageUp",
+    "PageDown":       "CursorPageDown",
+    "CtrlG":          "ToggleHelp",
+    "CtrlR":          "ToggleRuler",
+    "CtrlL":          "JumpLine",
+    "Delete":         "Delete",
+    "CtrlB":          "ShellMode",
+    "CtrlQ":          "Quit",
+    "CtrlE":          "CommandMode",
+    "CtrlW":          "NextSplit",
+    "CtrlU":          "ToggleMacro",
+    "CtrlJ":          "PlayMacro",
+
+    // Emacs-style keybindings
+    "Alt-f": "WordRight",
+    "Alt-b": "WordLeft",
+    "Alt-a": "StartOfLine",
+    "Alt-e": "EndOfLine",
+    "Alt-p": "CursorUp",
+    "Alt-n": "CursorDown",
+
+    // Integration with file managers
+    "F1":  "ToggleHelp",
+    "F2":  "Save",
+    "F4":  "Quit",
+    "F7":  "Find",
+    "F10": "Quit",
+    "Esc": "Escape",
+}
+```
+
+#Final notes
 Note: On some old terminal emulators and on Windows machines, `CtrlH` should be used
 for backspace.
 
