@@ -245,6 +245,8 @@ func DisplayTabs() {
 		// use the constructed buffer as the display buffer to print
 		// onscreen.
 		fileRunes = displayText
+	} else {
+		tabBarOffset = 0
 	}
 
 	// iterate over the width of the terminal display and for each column,
