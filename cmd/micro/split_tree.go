@@ -1,6 +1,6 @@
 package main
 
-// SpltType specifies whether a split is horizontal or vertical
+// SplitType specifies whether a split is horizontal or vertical
 type SplitType bool
 
 const (

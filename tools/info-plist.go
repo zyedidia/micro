@@ -1,22 +1,22 @@
 package main
 
 import (
-    "os"
-    "fmt"
-    "runtime"
-    "io/ioutil"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"runtime"
 )
 
 func check(e error) {
-    if e != nil {
-        panic(e)
-    }
+	if e != nil {
+		panic(e)
+	}
 }
 
 func main() {
-    if runtime.GOOS == "darwin" {
-        if len(os.Args) == 2 {
-            raw_info_plist_string := `<?xml version="1.0" encoding="UTF-8"?>
+	if runtime.GOOS == "darwin" {
+		if len(os.Args) == 2 {
+			rawInfoPlistString := `<?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
@@ -33,13 +33,13 @@ func main() {
 </dict>
 </plist>
 `
-            info_plist_data := []byte(raw_info_plist_string)
-            
-            err := ioutil.WriteFile("/tmp/micro-info.plist", info_plist_data, 0644)
-            check(err)
-            fmt.Println("-linkmode external -extldflags -Wl,-sectcreate,__TEXT,__info_plist,/tmp/micro-info.plist")
-        } else {
-            panic("missing argument for version number!")
-        }
-    }
+			infoPlistData := []byte(rawInfoPlistString)
+
+			err := ioutil.WriteFile("/tmp/micro-info.plist", infoPlistData, 0644)
+			check(err)
+			fmt.Println("-linkmode external -extldflags -Wl,-sectcreate,__TEXT,__info_plist,/tmp/micro-info.plist")
+		} else {
+			panic("missing argument for version number!")
+		}
+	}
 }

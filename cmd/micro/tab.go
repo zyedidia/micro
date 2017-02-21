@@ -120,7 +120,7 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 				return false
 			}
 			str, indicies := TabbarString()
-			if x + tabBarOffset >= len(str) {
+			if x+tabBarOffset >= len(str) {
 				return false
 			}
 			var tabnum int
@@ -130,7 +130,7 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			}
 			sort.Ints(keys)
 			for _, k := range keys {
-				if x + tabBarOffset <= k {
+				if x+tabBarOffset <= k {
 					tabnum = indicies[k] - 1
 					break
 				}
@@ -167,7 +167,7 @@ func DisplayTabs() {
 	if tooWide == true {
 		// first we have to work out where the selected tab is
 		// out of the total length of the tab bar. this is done
-		// by extracting the hit-areas from the indicies map 
+		// by extracting the hit-areas from the indicies map
 		// that was constructed by `TabbarString()`
 		var keys []int
 		for offset := range indicies {
@@ -197,7 +197,7 @@ func DisplayTabs() {
 		rightBuffer := currentTabOffset + (centeringOffset / 2)
 
 		// check to make sure we haven't overshot the bounds of the string,
-		// if we have, then take that remainder and put it on the left side 
+		// if we have, then take that remainder and put it on the left side
 		overshotRight := rightBuffer - len(fileRunes)
 		if overshotRight > 0 {
 			leftBuffer = leftBuffer + overshotRight
@@ -210,12 +210,12 @@ func DisplayTabs() {
 		} else {
 			rightBuffer = leftBuffer + (w - 2)
 		}
-		
-		if rightBuffer > len(fileRunes) - 1 {
+
+		if rightBuffer > len(fileRunes)-1 {
 			rightBuffer = len(fileRunes) - 1
 		}
 
-		// construct a new buffer of text to put the 
+		// construct a new buffer of text to put the
 		// newly formatted tab bar text into.
 		var displayText []rune
 
@@ -232,13 +232,13 @@ func DisplayTabs() {
 		}
 		// if there is more text to the right of the right-most
 		// column in the tab bar text, then indicate there are more
-		// tabs to ther right by displaying a "+"
-		if rightBuffer < len(fileRunes) - 1 {
+		// tabs to the right by displaying a "+"
+		if rightBuffer < len(fileRunes)-1 {
 			displayText = append(displayText, '+')
 		}
 
 		// now store the offset from zero of the left-most text
-		// that is being displayed. This is to ensure that when 
+		// that is being displayed. This is to ensure that when
 		// clicking on the tab bar, the correct tab gets selected.
 		tabBarOffset = leftBuffer
 
@@ -250,7 +250,7 @@ func DisplayTabs() {
 	}
 
 	// iterate over the width of the terminal display and for each column,
-	// write a character into the tab display area with the appropraite style.
+	// write a character into the tab display area with the appropriate style.
 	for x := 0; x < w; x++ {
 		if x < len(fileRunes) {
 			screen.SetContent(x, 0, fileRunes[x], nil, tabBarStyle)

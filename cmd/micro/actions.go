@@ -464,7 +464,7 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 		}
 
 		// Remove the whitespaces if keepautoindent setting is off
-		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) && !v.Buf.Settings["keepautoindent"].(bool) {
+		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y-1)) && !v.Buf.Settings["keepautoindent"].(bool) {
 			line := v.Buf.Line(v.Cursor.Y - 1)
 			v.Buf.Remove(Loc{0, v.Cursor.Y - 1}, Loc{Count(line), v.Cursor.Y - 1})
 		}
@@ -1445,9 +1445,10 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 	if closeAll {
 		// only quit if all of the buffers can be closed and the user confirms that they actually want to quit everything
-		should_quit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
-		
-		if should_quit {
+
+		shouldQuit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
+
+		if shouldQuit {
 			for _, tab := range tabs {
 				for _, v := range tab.views {
 					v.CloseBuffer()
