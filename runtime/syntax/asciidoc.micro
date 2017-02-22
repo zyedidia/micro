@@ -1,47 +1,47 @@
 syntax "asciidoc" "\.(asc|asciidoc|adoc)$"
 
 # main header
-color red "^====+$"
+color preproc "^====+$"
 # h1
-color red "^==[[:space:]].*$"
-color red "^----+$"
+color statement "^==[[:space:]].*$"
+color statement "^----+$"
 # h2
-color magenta "^===[[:space:]].*$"
-color magenta "^~~~~+$"
+color symbol "^===[[:space:]].*$"
+color symbol "^~~~~+$"
 # h4
-color green "^====[[:space:]].*$"
-color green "^\^\^\^\^+$"
+color type "^====[[:space:]].*$"
+color type "^\^\^\^\^+$"
 # h5
-color brightblue "^=====[[:space:]].*$"
-color brightblue "^\+\+\+\++$"
+color constant "^=====[[:space:]].*$"
+color constant "^\+\+\+\++$"
 
 # attributes
-color brightgreen ":.*:"
-color brightred "\{[a-z0-9]*\}"
-color red "\\\{[a-z0-9]*\}"
-color red "\+\+\+\{[a-z0-9]*\}\+\+\+"
+color type.keyword ":.*:"
+color identifier.macro "\{[a-z0-9]*\}"
+color identifier "\\\{[a-z0-9]*\}"
+color identifier "\+\+\+\{[a-z0-9]*\}\+\+\+"
 
 # Paragraph Title
-color yellow "^\..*$"
+color statement "^\..*$"
 
 # source 
-color magenta "^\[(source,.+|NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]"
+color identifier "^\[(source,.+|NOTE|TIP|IMPORTANT|WARNING|CAUTION)\]"
 
 # Other markup
-color yellow ".*[[:space:]]\+$"
-color yellow "_[^_]+_"
-color yellow "\*[^\*]+\*"
-color yellow "\+[^\+]+\+"
-color yellow "`[^`]+`"
-color yellow "\^[^\^]+\^"
-color yellow "~[^~]+~"
-color yellow "'[^']+'"
+color constant.string ".*[[:space:]]\+$"
+color constant.string "_[^_]+_"
+color constant.string "\*[^\*]+\*"
+color constant.string "\+[^\+]+\+"
+color constant.string "`[^`]+`"
+color constant.string "\^[^\^]+\^"
+color constant.string "~[^~]+~"
+color constant.string "'[^']+'"
 
-color cyan "`{1,2}[^']+'{1,2}"
+color constant "`{1,2}[^']+'{1,2}"
 
 # bullets
-color brightmagenta "^[[:space:]]*[\*\.-]{1,5}[[:space:]]"
+color symbol "^[[:space:]]*[\*\.-]{1,5}[[:space:]]"
 
 # anchors
-color brightwhite "\[\[.*\]\]"
-color brightwhite "<<.*>>"
+color bold default "\[\[.*\]\]"
+color bold default "<<.*>>"

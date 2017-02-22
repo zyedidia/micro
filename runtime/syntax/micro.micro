@@ -3,11 +3,11 @@ syntax "micro" "\.(micro)$"
 
 color statement "\b(syntax|color(-link)?)\b"
 color statement "\b(start=|end=)\b"
-color identifier "\b(default|comment|symbol|identifier|constant(.string(.char)?|.number)?|statement|preproc|type|special|underlined|error|todo|statusline|indent-char|(current-)?line-number|gutter-error|gutter-warning|cursor-line|color-column)\b"
+color identifier "\b(default|comment|symbol|identifier|constant(.string(.char)?|.specialChar|.number)?|statement|preproc|type|special|underlined|error|todo|statusline|indent-char|(current-)?line-number|gutter-error|gutter-warning|cursor-line|color-column|tabbar)\b"
 color constant.number "\b(|h|A|0x)+[0-9]+(|h|A)+\b"
 color constant.number "\b0x[0-9 a-f A-F]+\b"
 
 color comment "#.*$"
 
 color constant.string ""(\\.|[^"])*""
-color constant.number "#[0-9 A-F a-f]+"
+color constant.number "#[0-9 A-F a-f]{1,6}"

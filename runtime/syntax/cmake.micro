@@ -2,22 +2,22 @@
 ##
 syntax "cmake" "(CMakeLists\.txt|\.cmake)$"
 
-green (i) "^[[:space:]]*[A-Z0-9_]+"
-brightyellow (i) "^[[:space:]]*(include|include_directories|include_external_msproject)\>"
+color identifier.var "^[[:space:]]*[A-Z0-9_]+"
+color preproc "^[[:space:]]*(include|include_directories|include_external_msproject)\>"
 
-brightgreen (i) "^[[:space:]]*\<((else|end)?if|else|(end)?while|(end)?foreach|break)\>"
-color brightgreen "\<(COPY|NOT|COMMAND|PROPERTY|POLICY|TARGET|EXISTS|IS_(DIRECTORY|ABSOLUTE)|DEFINED)\>[[:space:]]"
-color brightgreen "[[:space:]]\<(OR|AND|IS_NEWER_THAN|MATCHES|(STR|VERSION_)?(LESS|GREATER|EQUAL))\>[[:space:]]"
+color statement "^[[:space:]]*\<((else|end)?if|else|(end)?while|(end)?foreach|break)\>"
+color statement "\<(COPY|NOT|COMMAND|PROPERTY|POLICY|TARGET|EXISTS|IS_(DIRECTORY|ABSOLUTE)|DEFINED)\>[[:space:]]"
+color statement "[[:space:]]\<(OR|AND|IS_NEWER_THAN|MATCHES|(STR|VERSION_)?(LESS|GREATER|EQUAL))\>[[:space:]]"
 
-brightred (i) "^[[:space:]]*\<((end)?(function|macro)|return)"
+color special "^[[:space:]]*\<((end)?(function|macro)|return)"
 
 #String Color
-color cyan "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
-color cyan "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
+color constant.string "['][^']*[^\\][']" "[']{3}.*[^\\][']{3}"
+color constant.string "["][^"]*[^\\]["]" "["]{3}.*[^\\]["]{3}"
 
-brightred (i) start="\$(\{|ENV\{)" end="\}"
-color magenta "\<(APPLE|UNIX|WIN32|CYGWIN|BORLAND|MINGW|MSVC(_IDE|60|71|80|90)?)\>"
+color preproc start="\$(\{|ENV\{)" end="\}"
+color identifier.macro "\<(APPLE|UNIX|WIN32|CYGWIN|BORLAND|MINGW|MSVC(_IDE|60|71|80|90)?)\>"
 
-brightblue (i) "^([[:space:]]*)?#.*"
-brightblue (i) "[[:space:]]#.*"
+color comment "^([[:space:]]*)?#.*"
+color comment "[[:space:]]#.*"
 

@@ -2,23 +2,23 @@
 ##
 syntax "groff" "\.m[ems]$" "\.rof" "\.tmac$" "^tmac."
 ## The argument of .ds or .nr
-color cyan "^\.(ds|nr) [^[[:space:]]]*"
+color statement "^\.(ds|nr) [^[[:space:]]]*"
 ## Single character escapes
-color brightmagenta "\\."
+color constant.specialChar "\\."
 ## Highlight the argument of \f or \s in the same color
-color brightmagenta "\\f." "\\f\(.." "\\s(\+|\-)?[0-9]"
+color constant.specialChar "\\f." "\\f\(.." "\\s(\+|\-)?[0-9]"
 ## Newlines
-color cyan "(\\|\\\\)n(.|\(..)"
-color cyan start="(\\|\\\\)n\[" end="]"
+color constant "(\\|\\\\)n(.|\(..)"
+color constant start="(\\|\\\\)n\[" end="]"
 ## Requests
-color brightgreen "^\.[[:space:]]*[^[[:space:]]]*"
+color type "^\.[[:space:]]*[^[[:space:]]]*"
 ## Comments
-color yellow "^\.\\".*$"
+color comment "^\.\\".*$"
 ## Strings
-color green "(\\|\\\\)\*(.|\(..)"
-color green start="(\\|\\\\)\*\[" end="]"
+color constant.string "(\\|\\\\)\*(.|\(..)"
+color constant.string start="(\\|\\\\)\*\[" end="]"
 ## Characters
-color brightred "\\\(.."
-color brightred start="\\\[" end="]"
+color constant.specialChar "\\\(.."
+color constant.specialChar start="\\\[" end="]"
 ## Macro arguments
-color brightcyan "\\\\\$[1-9]"
+color identifier.macro "\\\\\$[1-9]"

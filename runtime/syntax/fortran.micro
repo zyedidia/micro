@@ -2,50 +2,50 @@
 
 syntax "fortran" "\.([Ff]|[Ff]90|[Ff]95|[Ff][Oo][Rr])$"
 
-#color red "\<[A-Z_]a[0-9A-Z_]+\>" 
-color red "\<[0-9]+\>" 
+#color red "\\b[A-Z_]a[0-9A-Z_]+\\b" 
+color constant.number "\\b[0-9]+\\b" 
 
-green (i) "\<(action|advance|all|allocatable|allocated|any|apostrophe)\>"
-green (i) "\<(append|asis|assign|assignment|associated|character|common)\>"
-green (i) "\<(complex|data|default|delim|dimension|double precision)\>"
-green (i) "\<(elemental|epsilon|external|file|fmt|form|format|huge)\>"
-green (i) "\<(implicit|include|index|inquire|integer|intent|interface)\>"
-green (i) "\<(intrinsic|iostat|kind|logical|module|none|null|only)\>"
-green (i) "\<(operator|optional|pack|parameter|pointer|position|private)\>"
-green (i) "\<(program|public|real|recl|recursive|selected_int_kind)\>"
-green (i) "\<(selected_real_kind|subroutine|status)\>"
+color type  "(?i)\\b(action|advance|all|allocatable|allocated|any|apostrophe)\\b"
+color type  "(?i)\\b(append|asis|assign|assignment|associated|character|common)\\b"
+color type  "(?i)\\b(complex|data|default|delim|dimension|double precision)\\b"
+color type  "(?i)\\b(elemental|epsilon|external|file|fmt|form|format|huge)\\b"
+color type  "(?i)\\b(implicit|include|index|inquire|integer|intent|interface)\\b"
+color type  "(?i)\\b(intrinsic|iostat|kind|logical|module|none|null|only)\\b"
+color type  "(?i)\\b(operator|optional|pack|parameter|pointer|position|private)\\b"
+color type  "(?i)\\b(program|public|real|recl|recursive|selected_int_kind)\\b"
+color type  "(?i)\\b(selected_real_kind|subroutine|status)\\b"
 
-cyan (i) "\<(abs|achar|adjustl|adjustr|allocate|bit_size|call|char)\>" 
-cyan (i) "\<(close|contains|count|cpu_time|cshift|date_and_time)\>" 
-cyan (i) "\<(deallocate|digits|dot_product|eor|eoshift|function|iachar)\>" 
-cyan (i) "\<(iand|ibclr|ibits|ibset|ichar|ieor|iolength|ior|ishft|ishftc)\>" 
-cyan (i) "\<(lbound|len|len_trim|matmul|maxexponent|maxloc|maxval|merge)\>" 
-cyan (i) "\<(minexponent|minloc|minval|mvbits|namelist|nearest|nullify)\>" 
-cyan (i) "\<(open|pad|present|print|product|pure|quote|radix)\>" 
-cyan (i) "\<(random_number|random_seed|range|read|readwrite|replace)\>" 
-cyan (i) "\<(reshape|rewind|save|scan|sequence|shape|sign|size|spacing)\>" 
-cyan (i) "\<(spread|sum|system_clock|target|transfer|transpose|trim)\>" 
-cyan (i) "\<(ubound|unpack|verify|write|tiny|type|use|yes)\>"
+color constant  "(?i)\\b(abs|achar|adjustl|adjustr|allocate|bit_size|call|char)\\b" 
+color constant  "(?i)\\b(close|contains|count|cpu_time|cshift|date_and_time)\\b" 
+color constant  "(?i)\\b(deallocate|digits|dot_product|eor|eoshift|function|iachar)\\b" 
+color constant  "(?i)\\b(iand|ibclr|ibits|ibset|ichar|ieor|iolength|ior|ishft|ishftc)\\b" 
+color constant  "(?i)\\b(lbound|len|len_trim|matmul|maxexponent|maxloc|maxval|merge)\\b" 
+color constant  "(?i)\\b(minexponent|minloc|minval|mvbits|namelist|nearest|nullify)\\b" 
+color constant  "(?i)\\b(open|pad|present|print|product|pure|quote|radix)\\b" 
+color constant  "(?i)\\b(random_number|random_seed|range|read|readwrite|replace)\\b" 
+color constant  "(?i)\\b(reshape|rewind|save|scan|sequence|shape|sign|size|spacing)\\b" 
+color constant  "(?i)\\b(spread|sum|system_clock|target|transfer|transpose|trim)\\b" 
+color constant  "(?i)\\b(ubound|unpack|verify|write|tiny|type|use|yes)\\b"
 
-yellow (i) "\<(.and.|case|do|else|else?if|else?where|end|end?do|end?if)\>"
-yellow (i) "\<(end?select|.eqv.|forall|if|lge|lgt|lle|llt|.neqv.|.not.)\>"
-yellow (i) "\<(.or.|repeat|select case|then|where|while)\>"
+color statement "(?i)\\b(.and.|case|do|else|else?if|else?where|end|end?do|end?if)\\b"
+color statement "(?i)\\b(end?select|.eqv.|forall|if|lge|lgt|lle|llt|.neqv.|.not.)\\b"
+color statement "(?i)\\b(.or.|repeat|select case|then|where|while)\\b"
 
-magenta (i) "\<(continue|cycle|exit|go?to|result|return)\>"
+color special "(?i)\\b(continue|cycle|exit|go?to|result|return)\\b"
 
 #Operator Color
-color yellow "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
+color symbol.operator "[.:;,+*|=!\%]" "\b" "\b" "/" "-" "&"
 
 #Parenthetical Color
-color magenta "[(){}]" "\[" "\]"
+color symbol.bracket "[(){}]" "\[" "\]"
 
 # Add preprocessor commands.
-color brightcyan "^[[:space:]]*#[[:space:]]*(define|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
+color preproc "^[[:space:]]*#[[:space:]]*(define|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
 
 ## String highlighting.  
-cyan (i) "<[^=     ]*>" ""(\\.|[^"])*""
-cyan (i) "<[^=     ]*>" "'(\\.|[^"])*'"
+color constant.string "\b[^=     ]*\b" ""(\\.|[^"])*""
+color constant.string "\b[^=     ]*\b" "'(\\.|[^"])*'"
 
 ## Comment highlighting
-brightred (i) "!.*$" "(^[Cc]| [Cc]) .*$"
+color comment "!.*$" "(^[Cc]| [Cc]) .*$"
 

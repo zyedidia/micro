@@ -2,48 +2,48 @@
 syntax "vhdl" "\.vhdl?$"
 
 ## types
-color type (i) "\b(string|integer|natural|positive|(un)?signed|std_u?logic(_vector)?|bit(_vector)?|boolean|u?x01z?|array|range)\b"
+color type  "(i)\b(string|integer|natural|positive|(un)?signed|std_u?logic(_vector)?|bit(_vector)?|boolean|u?x01z?|array|range)\b"
 
 ## identifiers (component-, library-names etc.)
-color identifier (i) "library[[:space:]]+[a-zA-Z_0-9]+"
-color identifier (i) "use[[:space:]]+[a-zA-Z_0-9\.]+"
-color identifier (i) "component[[:space:]]+[a-zA-Z_0-9]+"
-color identifier (i) "(architecture|configuration)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+of[[:space:]]+[a-zA-Z_0-9]+"
-color identifier (i) "(entity|package)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+is"
-color identifier (i) "end[[:space:]]+((architecture|entity|component|process|package|generate)[[:space:]]+)?[a-zA-Z_0-9]+"
+color identifier  "(?i)library[[:space:]]+[a-zA-Z_0-9]+"
+color identifier  "(?i)use[[:space:]]+[a-zA-Z_0-9\.]+"
+color identifier  "(?i)component[[:space:]]+[a-zA-Z_0-9]+"
+color identifier  "(?i)(architecture|configuration)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+of[[:space:]]+[a-zA-Z_0-9]+"
+color identifier  "(?i)(entity|package)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+is"
+color identifier  "(?i)end[[:space:]]+((architecture|entity|component|process|package|generate)[[:space:]]+)?[a-zA-Z_0-9]+"
 
 ## reserved words
-color statement (i) "\b(abs|access|after|alias|all|and|architecture|assert|attribute)\b"
-color statement (i) "\b(begin|block|body|buffer|bus|case|component|configuration|constant)\b"
-color statement (i) "\b(disconnect|downto|else|elsif|end|entity|exit)\b"
-color statement (i) "\b(file|for|function|generate|generic|guarded)\b"
-color statement (i) "\b(if|impure|in|inertial|inout|is)\b"
-color statement (i) "\b(label|library|linkage|literal|loop|map|mod)\b"
-color statement (i) "\b(nand|new|next|nor|not|null|of|on|open|or|others|out)\b"
-color statement (i) "\b(package|port|postponed|procedure|process|pure)\b"
-color statement (i) "\b(range|record|register|reject|rem|report|return|rol|ror)\b"
-color statement (i) "\b(select|severity|shared|signal|sla|sll|sra|srl|subtype)\b"
-color statement (i) "\b(then|to|transport|type|unaffected|units|until|use)\b"
-color statement (i) "\b(variable|wait|when|while|with|xnor|xor)\b"
+color statement  "(?i)\b(abs|access|after|alias|all|and|architecture|assert|attribute)\b"
+color statement  "(?i)\b(begin|block|body|buffer|bus|case|component|configuration|constant)\b"
+color statement  "(?i)\b(disconnect|downto|else|elsif|end|entity|exit)\b"
+color statement  "(?i)\b(file|for|function|generate|generic|guarded)\b"
+color statement  "(?i)\b(if|impure|in|inertial|inout|is)\b"
+color statement  "(?i)\b(label|library|linkage|literal|loop|map|mod)\b"
+color statement  "(?i)\b(nand|new|next|nor|not|null|of|on|open|or|others|out)\b"
+color statement  "(?i)\b(package|port|postponed|procedure|process|pure)\b"
+color statement  "(?i)\b(range|record|register|reject|rem|report|return|rol|ror)\b"
+color statement  "(?i)\b(select|severity|shared|signal|sla|sll|sra|srl|subtype)\b"
+color statement  "(?i)\b(then|to|transport|type|unaffected|units|until|use)\b"
+color statement  "(?i)\b(variable|wait|when|while|with|xnor|xor)\b"
 
 ## attributes
-color statement (i) "'(base|left|right|high|low|pos|val|succ|pred|leftof|rightof|image|(last_)?value)"
-color statement (i) "'((reverse_)?range|length|ascending|event|stable)"
-color statement (i) "'(simple|path|instance)_name"
+color statement  "(?i)'(base|left|right|high|low|pos|val|succ|pred|leftof|rightof|image|(last_)?value)"
+color statement  "(?i)'((reverse_)?range|length|ascending|event|stable)"
+color statement  "(?i)'(simple|path|instance)_name"
 
 ## library functions
-color statement (i) "\b(std_match|(rising|falling)_edge|is_x)\b"
-color statement (i) "\bto_(unsigned|signed|integer|u?x01z?|stdu?logic(vector)?)\b"
+color statement  "(?i)\b(std_match|(rising|falling)_edge|is_x)\b"
+color statement  "(?i)\bto_(unsigned|signed|integer|u?x01z?|stdu?logic(vector)?)\b"
 
 ## operators
-color statement "(\+|-|\*|/|&|<|>|=|\.|:)"
+color symbol.operator "(\+|-|\*|/|&|<|>|=|\.|:)"
 
 ## constants
-color constant.number (i) "'([0-1]|u|x|z|w|l|h|-)'" "[box]?"([0-1a-fA-F]|u|x|z|w|l|h|-)+""
-color constant.number (i) "\b[0-9\._]+(e[-]?[0-9]+)?( ?[fpnum]?s)?\b"
-color constant (i) "\b(true|false)\b"
+color constant.number  "(?i)'([0-1]|u|x|z|w|l|h|-)'" "[box]?"([0-1a-fA-F]|u|x|z|w|l|h|-)+""
+color constant.number  "(?i)\b[0-9\._]+(e[-]?[0-9]+)?( ?[fpnum]?s)?\b"
+color constant.bool  "(?i)\b(true|false)\b"
 ## severity levels
-color constant (i) "\b(note|warning|error|failure)\b"
+color constant  "(?i)\b(note|warning|error|failure)\b"
 color constant.string ""[^"]*""
 
 ## Comment highlighting

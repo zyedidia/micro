@@ -22,18 +22,18 @@ color identifier "[a-zA-Z][_a-zA-Z0-9]*[[:space:]]*"
 
 color statement "\b(assembly|break|continue|do|for|function|if|else|new|return|returns|while)\b"
 color special "\b(\.send|throw)\b" # make sure they are very visible
-color keyword "\b(anonymous|constant|indexed|payable|public|private|external|internal)\b"
+color type.keyword "\b(anonymous|constant|indexed|payable|public|private|external|internal)\b"
 
 color constant "\b(block(\.(blockhash|coinbase|difficulty|gaslimit|number|timestamp))?|msg(\.(data|gas|sender|value))?|now|tx(\.(gasprice|origin))?)\b"
 color constant "\b(keccak256|sha3|sha256|ripemd160|ecrecover|addmod|mulmod|this|super|selfdestruct|\.balance)\b"
 
-color constant "\b(true|false)\b"
+color constant.bool "\b(true|false)\b"
 color constant "\b(wei|szabo|finney|ether|seconds|minutes|hours|days|weeks|years)\b"
 color type "\b(address|bool|mapping|string|var|int(\d*)|uint(\d*)|byte(\d*)|fixed(\d*)|ufixed(\d*))\b"
 
 color error "\b(abstract|after|case|catch|default|final|in|inline|interface|let|match|null|of|pure|relocatable|static|switch|try|type|typeof|view)\b"
 
-color operator "[-+/*=<>!~%?:&|]"
+color symbol.operator "[-+/*=<>!~%?:&|]"
 
 color comment "(^|[[:space:]])//.*"
 color comment "/\*.+\*/"

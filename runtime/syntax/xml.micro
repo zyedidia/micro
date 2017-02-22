@@ -2,6 +2,6 @@
 
 syntax "xml" "\.(xml|sgml?|rng|plist)$"
 color identifier "<.*?>"
-color comment start="<!DOCTYPE" end="[/]?>"
-color comment start="<!--" end="-->"
+color preproc start="<!DOCTYPE" end="[/]?>"
+color comment "<!--.+?-->"
 color special    "&[^;]*;"

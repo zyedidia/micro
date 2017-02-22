@@ -6,7 +6,7 @@ color constant.number "\b[0-9]+\b"
 
 # Conditionals and control flow
 color statement "\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while)\b"
-color special "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
+color symbol.operator "(\{|\}|\(|\)|\;|\]|\[|`|\\|\$|<|>|!|=|&|\|)"
 
 # Shell commands
 color type "\b(cd|echo|export|let|set|umask|unset)\b"
@@ -24,12 +24,12 @@ color statement "\ -[a-z]+"
 # Strings
 color constant.string ""(\\.|[^"])*""
 color constant.string "'(\\.|[^'])*'"
-color special """
-color special "'"
+color constant.specialChar """
+color constant.specialChar "'"
 
 # Variables
-color identifier (i) "\$\{?[0-9A-Z_!@#$*?-]+\}?"
-color identifier (i) "\$\{?[0-9A-Z_!@#$*?-]+\}?"
+color identifier.var  "\$\{?[0-9A-Za-z_!@#$*?-]+\}?"
+color identifier.var  "\$\{?[0-9A-Za-z_!@#$*?-]+\}?"
 
 # Comments & TODOs
 color comment "(^|[[:space:]])#.*$"

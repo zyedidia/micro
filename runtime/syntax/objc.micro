@@ -21,7 +21,7 @@ color preproc "__[A-Z0-9_]*__"
 
 color special "^[[:space:]]*[#|@][[:space:]]*(import|include)[[:space:]]*[\"|<].*\/?[>|\"][[:space:]]*$"
 
-color statement "[.:;,+*|=!\%\[\]]" "<" ">" "/" "-" "&" 
+color symbol.operator "[.:;,+*|=!\%\[\]]" "<" ">" "/" "-" "&" 
 
 color constant.number "\b(-?)?[0-9]+\b" "\b\[0-9]+\.[0-9]+\b" "\b0x[0-9A-F]+\b"
 color constant "@\[(\\.|[^\]])*\]" "@\{(\\.|[^\}])*\}" "@\((\\.|[^\)])*\)"
