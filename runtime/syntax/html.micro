@@ -7,6 +7,7 @@ color symbol "[:=]"
 color special "&[^;[[:space:]]]*;"
 color constant.string ""[^"]*"|qq\|.*\|"
 color statement "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
+color constant.string.url "(ft(p|ps)|htt(p|ps)|git|chrome)://[^ 	]+"
 color comment "<!--.+?-->"
 color preproc "<!DOCTYPE.+?>"
 # Bad possible work around for region-less regions. 

@@ -1,1 +1,8 @@
 #Geany
+color-link comment "red"
+color-link constant ""
+color-link constant.string ""
+color-link identifier ""
+color-link statement ""
+color-link type "blue"
+color-link 

@@ -1,1 +1,10 @@
 #Geany Alternate theme
+color-link comment ""
+color-link constant ""
+color-link identifier ""
+color-link special ""
+color-link statement ""
+color-link symbol ""
+color-link type ""
+color-link error ""
+color-link todo ""

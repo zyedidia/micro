@@ -35,7 +35,7 @@ color constant "\[([^][]|\[[^]]*\])*\]\([^)]+\)"
 color underlined "!\[[^][]*\](\([^)]+\)|\[[^]]+\])"
 
 # urls
-color underlined "https?://[^ )>]+"
+color underlined.url "https?://[^ )>]+"
 
 # code
 color special   "`.*?`|^ {4}[^-+*].*"

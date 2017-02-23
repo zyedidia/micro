@@ -1,3 +1,18 @@
 #Paper theme, true color edition
 #Edit on an *actual* white background!
 color-link default "#000000,#efefef"
+color-link comment ""
+color-link constant ""
+color-link constant.string ""
+color-link constant.string.url ""
+color-link identifier "" 
+color-link identifier.var ""
+color-link special ""
+color-link statement ""
+color-link symbol ""
+color-link symbol.brackets ""
+color-link symbol.tag ""
+color-link type ""
+color-link statusline ""
+color-link error ""
+color-link todo ""
