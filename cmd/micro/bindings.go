@@ -350,7 +350,7 @@ func BindKey(k, v string) {
 	if helpBinding == k && v != "ToggleHelp" {
 		helpBinding = ""
 	}
-	
+
 	actionNames := strings.Split(v, ",")
 	if actionNames[0] == "UnbindKey" {
 		delete(bindings, key)

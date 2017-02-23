@@ -129,7 +129,7 @@ func OptionComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
-// MakeCompletion registeres a function from a plugin for autocomplete commands
+// MakeCompletion registers a function from a plugin for autocomplete commands
 func MakeCompletion(function string) Completion {
 	pluginCompletions = append(pluginCompletions, LuaFunctionComplete(function))
 	return Completion(-len(pluginCompletions))

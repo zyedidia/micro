@@ -44,7 +44,7 @@ func NewLineArray(reader io.Reader) *LineArray {
 		data, err := br.ReadBytes('\n')
 		if err != nil {
 			if err == io.EOF {
-				la.lines = append(la.lines, data[:len(data)])
+				la.lines = append(la.lines, data[:])
 			}
 			// Last line was read
 			break

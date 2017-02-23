@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"layeh.com/gopher-luar"
 	"github.com/yuin/gopher-lua"
+	"layeh.com/gopher-luar"
 )
 
 var loadedPlugins map[string]string

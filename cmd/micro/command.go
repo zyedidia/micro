@@ -492,6 +492,7 @@ func Replace(args []string) {
 			to := from.Move(searchCount, view.Buf)
 			adjust := Count(replace) - searchCount
 			view.Buf.Replace(from, to, replace)
+			found++
 			if len(matches) > 1 {
 				for _, match := range matches[1:] {
 					found++
