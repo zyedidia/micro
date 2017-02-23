@@ -19,3 +19,5 @@ color-link gutter-warning "red"
 color-link color-column "white"
 #No extended types. (bool in C)
 color-link type.extended "default"
+#No bracket highlighting. (Might mess up html,php, and apacheconf, let me know if it does.)
+color-link symbol.brackets "default"

@@ -2,7 +2,7 @@
 ## 
 syntax "html" "\.htm[l]?$"
 color symbol "<|>"
-color symbol.brackets "<[^!].*?>"
+color symbol.tag "<[^!].*?>"
 color symbol "[:=]"
 color special "&[^;[[:space:]]]*;"
 color constant.string ""[^"]*"|qq\|.*\|"

@@ -37,7 +37,7 @@ color identifier "(SSLProxyEngine|SSLProxyMachineCertificateFile|SSLProxyMachine
 color identifier "(SSLRequireSSL|SSLSessionCache|SSLSessionCacheTimeout|SSLUserName|SSLVerifyClient|SSLVerifyDepth|StartServers|StartThreads|SuexecUserGroup|ThreadLimit)"
 color identifier "(ThreadsPerChild|ThreadStackSize|TimeOut|TraceEnable|TransferLog|TypesConfig|UnsetEnv|UseCanonicalName|User|UserDir|VirtualDocumentRoot)"
 color identifier "(VirtualDocumentRootIP|VirtualHost|VirtualScriptAlias|VirtualScriptAliasIP|Win32DisableAcceptEx|XBitHack)"
-color symbol.brackets "<[^>]+>"
+color symbol.tag "<[^>]+>"
 color identifier "</?[A-Za-z]+"
 color identifier "(<|</|>)"
 color constant.string "\"(\\.|[^\"])*\""
