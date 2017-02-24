@@ -98,6 +98,25 @@ func HelpComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// ColorschemeComplete tab-completes names of colorschemes.
+func ColorschemeComplete(input string) (string, []string) {
+	var suggestions []string
+	files := ListRuntimeFiles(RTColorscheme)
+
+	for _, f := range files {
+		if strings.HasPrefix(f.Name(), input) {
+			suggestions = append(suggestions, f.Name())
+		}
+	}
+
+	var chosen string
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+
+	return chosen, suggestions
+}
+
 func contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
