@@ -1,8 +1,6 @@
 package main
 
 import (
-	"time"
-
 	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/tcell"
 )
@@ -14,21 +12,29 @@ func min(a, b int) int {
 	return b
 }
 
-func VisualToCharPos(visualIndex int, str string, tabsize int) int {
-	visualPos := 0
+func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsize int) (int, int, *tcell.Style) {
 	charPos := 0
-	for _, c := range str {
-		width := StringWidth(string(c), tabsize)
+	var lastWidth int
+	var style *tcell.Style
+	for i := range str {
+		width := StringWidth(str[:i], tabsize)
 
-		if visualPos+width > visualIndex {
-			return charPos
+		if group, ok := buf.Match(lineN)[charPos]; ok {
+			s := GetColor(group)
+			style = &s
 		}
 
-		visualPos += width
-		charPos++
+		if width >= visualIndex {
+			return charPos, visualIndex - lastWidth, style
+		}
+
+		if i != 0 {
+			charPos++
+		}
+		lastWidth = width
 	}
 
-	return 0
+	return -1, -1, style
 }
 
 type Char struct {
@@ -52,15 +58,12 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 	start := buf.Cursor.Y
 	if buf.Settings["syntax"].(bool) {
-		startTime := time.Now()
 		if start > 0 && buf.lines[start-1].rehighlight {
 			buf.highlighter.ReHighlightLine(buf, start-1)
 			buf.lines[start-1].rehighlight = false
 		}
 
 		buf.highlighter.ReHighlight(buf, start)
-		elapsed := time.Since(startTime)
-		messenger.Message("Rehighlighted in ", elapsed)
 	}
 
 	c.lines = make([][]*Char, 0)
@@ -77,8 +80,14 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		lineStr := buf.Line(lineN)
 		line := []rune(lineStr)
 
-		colN := VisualToCharPos(left, lineStr, tabsize)
-		viewCol := 0
+		colN, startOffset, startStyle := visualToCharPos(left, lineN, lineStr, buf, tabsize)
+		if colN < 0 {
+			colN = len(line)
+		}
+		viewCol := -startOffset
+		if startStyle != nil {
+			curStyle = *startStyle
+		}
 
 		// We'll either draw the length of the line, or the width of the screen
 		// whichever is smaller
@@ -103,14 +112,20 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 			char := line[colN]
 
-			if char == '\t' {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, indentchar, curStyle}
-				viewCol += tabsize - viewCol%tabsize
-			} else if runewidth.RuneWidth(char) > 1 {
+			if viewCol >= 0 {
 				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle}
+			}
+			if char == '\t' {
+				if viewCol >= 0 {
+					c.lines[viewLine][viewCol].drawChar = indentchar
+					viewCol += tabsize - viewCol%tabsize
+				} else {
+					viewCol += tabsize
+				}
+				// viewCol += tabsize
+			} else if runewidth.RuneWidth(char) > 1 {
 				viewCol += runewidth.RuneWidth(char)
 			} else {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle}
 				viewCol++
 			}
 			colN++
