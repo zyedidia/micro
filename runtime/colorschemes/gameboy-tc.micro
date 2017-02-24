@@ -1,23 +1,22 @@
 #Gameboy theme
-color-link default "#000000,#ff8a00"
-color-link comment "#8c0000"
-color-link constant "#8c0000"
-color-link special "#8c0000"
-color-link statement "#8c0000"
-color-link symbol "#8c0000"
-color-link type "#8c0000"
-color-link error "#ffff8c,#8c0000"
-color-link todo ""
-color-link statusline "#ffff8c,#8c0000"
-color-link tabbar "#ffff8c,#8c0000"
-color-link color-column ""
-color-link gutter-error "#ffff8c,#8c0000"
+color-link default "#3f3f3f,#bfc180"
+color-link comment "#7d7343"
+color-link constant "#7d7343"
+color-link identifier "#ddde7d"
+color-link preproc "#ddde7d,#7d7343"
+color-link special "#7d7343"
+color-link statement "#7d7343"
+color-link symbol "#7d7343"
+color-link type "#7d7343"
+color-link error "#ddde7d,#7d7343"
+color-link todo "#7d7343,#ddde7d"
+color-link statusline "#ddde7d,#7d7343"
+color-link tabbar "#ddde7d,#7d7343"
+color-link color-column "#7d7343"
+color-link line-number "#ddde7d,#7d7343"
+color-link current-line-number "#3f3f3f,#bfc180"
+color-link gutter-error "#ddde7d,#7d7343"
 color-link gutter-warning "default"
-#000000
-#8c0000
-#ff8a00
-#ffff8c
-------
 #3f3f3f
 #7d7343
 #bfc180
