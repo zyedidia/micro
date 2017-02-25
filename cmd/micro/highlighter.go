@@ -1,6 +1,6 @@
 package main
 
-import "github.com/zyedidia/highlight"
+import "github.com/zyedidia/micro/cmd/micro/highlight"
 
 var syntaxDefs []*highlight.Def
 

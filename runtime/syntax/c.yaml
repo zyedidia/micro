@@ -39,9 +39,11 @@ rules:
     - comment:
         start: "//"
         end: "$"
-        rules: []
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
 
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

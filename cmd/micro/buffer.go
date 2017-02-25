@@ -16,7 +16,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/go-homedir"
-	"github.com/zyedidia/highlight"
+	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
 // Buffer stores the text for files that are loaded into the text editor

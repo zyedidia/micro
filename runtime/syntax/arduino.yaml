@@ -1,0 +1,98 @@
+filetype: ino
+
+detect:
+    filename: "\\.?ino$"
+
+rules:
+    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b" 
+
+      ## 
+    - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
+
+      ## Constants
+    - constant: "(?i)\\b(HIGH|LOW|INPUT|OUTPUT)\\b"
+
+      ## Serial Print
+    - constant: "(?i)\\b(DEC|BIN|HEX|OCT|BYTE)\\b"
+
+      ## PI Constants
+    - constant: "(?i)\\b(PI|HALF_PI|TWO_PI)\\b"
+
+      ## ShiftOut
+    - constant: "(?i)\\b(LSBFIRST|MSBFIRST)\\b"
+
+      ## Attach Interrupt
+    - constant: "(?i)\\b(CHANGE|FALLING|RISING)\\b"
+
+      ## Analog Reference
+    - constant: "(?i)\\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\\b"
+
+      ## === FUNCTIONS === ##
+
+      ## Data Types
+    - type: "\\b(boolean|byte|char|float|int|long|word)\\b"
+
+      ## Control Structions
+    - statement: "\\b(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\\b" 
+    - statement: "\\b(goto|continue|break|return)\\b"
+
+      ## Math
+    - identifier: "\\b(abs|acos|asin|atan|atan2|ceil|constrain|cos|degrees|exp|floor|log|map|max|min|radians|random|randomSeed|round|sin|sq|sqrt|tan)\\b"
+
+      ## Bits & Bytes
+    - identifier: "\\b(bitRead|bitWrite|bitSet|bitClear|bit|highByte|lowByte)\\b"
+
+      ## Analog I/O
+    - identifier: "\\b(analogReference|analogRead|analogWrite)\\b"
+
+      ## External Interrupts
+    - identifier: "\\b(attachInterrupt|detachInterrupt)\\b"
+
+      ## Time
+    - identifier: "\\b(delay|delayMicroseconds|millis|micros)\\b"
+
+      ## Digital I/O
+    - identifier: "\\b(pinMode|digitalWrite|digitalRead)\\b"
+
+      ## Interrupts
+    - identifier: "\\b(interrupts|noInterrupts)\\b"
+
+      ## Advanced I/O
+    - identifier: "\\b(noTone|pulseIn|shiftIn|shiftOut|tone)\\b"
+
+      ## Serial
+    - identifier: "\\b(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\\b"
+
+      ## Structure
+    - identifier: "\\b(setup|loop)\\b"
+
+      ## 
+    - statement: "^[[:space:]]*#[[:space:]]*(define|include(_next)?|(un|ifn?)def|endif|el(if|se)|if|warning|error|pragma)"
+
+      ## GCC builtins
+    - constant: "(__attribute__[[:space:]]*\\(\\([^)]*\\)\\)|__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__)"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - preproc: "..+"
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

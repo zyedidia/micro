@@ -1,7 +1,7 @@
 filetype: go
 
 detect:
-  filename: "\\.go$"
+    filename: "\\.go$"
 
 rules:
     - statement: "\\b(break|case|continue|default|else|for|go|goto|if|range|return|switch)\\b"
