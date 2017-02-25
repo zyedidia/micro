@@ -186,9 +186,9 @@ func (v *View) ScrollUp(n int) {
 // ScrollDown scrolls the view down n lines (if possible)
 func (v *View) ScrollDown(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
-	if v.Topline+n <= v.Buf.NumLines-v.Height {
+	if v.Topline+n <= v.Buf.NumLines {
 		v.Topline += n
-	} else if v.Topline < v.Buf.NumLines-v.Height {
+	} else if v.Topline < v.Buf.NumLines-1 {
 		v.Topline++
 	}
 }
@@ -647,12 +647,6 @@ func (v *View) openHelp(helpPage string) {
 	}
 }
 
-func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
-	if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
-		screen.SetContent(x, y, ch, combc, style)
-	}
-}
-
 func (v *View) DisplayView() {
 	tabsize := int(v.Buf.Settings["tabsize"].(float64))
 	if v.Type == vtLog {
@@ -750,9 +744,9 @@ func (v *View) DisplayView() {
 								gutterStyle = style
 							}
 						}
-						v.drawCell(screenX, yOffset+visualLineN, '>', nil, gutterStyle)
+						screen.SetContent(screenX, yOffset+visualLineN, '>', nil, gutterStyle)
 						screenX++
-						v.drawCell(screenX, yOffset+visualLineN, '>', nil, gutterStyle)
+						screen.SetContent(screenX, yOffset+visualLineN, '>', nil, gutterStyle)
 						screenX++
 						if v.Cursor.Y == realLineN && !messenger.hasPrompt {
 							messenger.Message(msg.msg)
@@ -763,9 +757,9 @@ func (v *View) DisplayView() {
 			}
 			// If there is no message on this line we just display an empty offset
 			if !msgOnLine {
-				v.drawCell(screenX, yOffset+visualLineN, ' ', nil, defStyle)
+				screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, defStyle)
 				screenX++
-				v.drawCell(screenX, yOffset+visualLineN, ' ', nil, defStyle)
+				screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, defStyle)
 				screenX++
 				if v.Cursor.Y == realLineN && messenger.gutterMessage {
 					messenger.Reset()
