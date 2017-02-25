@@ -118,11 +118,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			if char == '\t' {
 				if viewCol >= 0 {
 					c.lines[viewLine][viewCol].drawChar = indentchar
-					viewCol += tabsize - viewCol%tabsize
-				} else {
-					viewCol += tabsize
 				}
-				// viewCol += tabsize
+
+				viewCol += tabsize - (viewCol+left)%tabsize
 			} else if runewidth.RuneWidth(char) > 1 {
 				viewCol += runewidth.RuneWidth(char)
 			} else {
