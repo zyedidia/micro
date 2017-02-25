@@ -4,3 +4,4 @@ binaries/
 tmp.sh
 test/
 .idea/
+packages/
