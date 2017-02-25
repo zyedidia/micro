@@ -1,19 +1,32 @@
 syntax "go" "\.go$"
 
-color statement "\b(append|cap|close|complex|copy|delete|imag|len)\b"
-color statement "\b(make|new|panic|print|println|protect|real|recover)\b"
-color type     "\b(u?int(8|16|32|64)?|float(32|64)|complex(64|128))\b"
-color type     "\b(uintptr|byte|rune|string|interface|bool|map|chan|error)\b"
-color statement  "\b(package|import|const|var|type|struct|func|go|defer|nil|iota)\b"
-color statement  "\b(for|range|if|else|case|default|switch|return)\b"
-color statement     "\b(go|goto|break|continue)\b"
-color constant "\b(true|false)\b"
+# Conditionals and control flow
+color statement "\b(break|case|continue|default|else|for|go|goto|if|range|return|switch)\b"
+color statement "\b(package|import|const|var|type|struct|func|go|defer|iota)\b"
 color statement "[-+/*=<>!~%&|^]|:="
-color constant.number   "\b([0-9]+|0x[0-9a-fA-F]*)\b|'.'"
+
+# Types
+color special "[a-zA-Z0-9]*\("
+color brightyellow "(,|\.)"
+color type "\b(u?int(8|16|32|64)?|float(32|64)|complex(64|128))\b"
+color type "\b(uintptr|byte|rune|string|interface|bool|map|chan|error)\b"
+color constant "\b(true|false|nil)\b"
+
+# Brackets
+color statement "(\{|\})"
+color statement "(\(|\))"
+color statement "(\[|\])"
+color statement "!"
+color statement ","
+
+# Numbers and strings
+color constant.number "\b([0-9]+|0x[0-9a-fA-F]*)\b|'.'"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color constant.specialChar   "\\[abfnrtv'\"\\]"
-color constant.specialChar   "\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
-color constant.string   "`[^`]*`"
+color constant.specialChar "\\[abfnrtv'\"\\]"
+color constant.specialChar "\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+color constant.string "`[^`]*`"
+
+# Comments & TODOs
 color comment "(^|[[:space:]])//.*"
 color comment start="/\*" end="\*/"
-color todo "TODO:?"
+color todo "(TODO|XXX|FIXME):?"

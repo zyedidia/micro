@@ -6,17 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/layeh/gopher-luar"
 	"github.com/yuin/gopher-lua"
+	"layeh.com/gopher-luar"
 )
 
-var loadedPlugins []string
-
-var preInstalledPlugins = []string{
-	"go",
-	"linter",
-	"autoclose",
-}
+var loadedPlugins map[string]string
 
 // Call calls the lua function 'function'
 // If it does not exist nothing happens, if there is an error,
@@ -118,51 +112,39 @@ func LuaFunctionJob(function string) func(string, ...string) {
 	}
 }
 
+// luaPluginName convert a human-friendly plugin name into a valid lua variable name.
+func luaPluginName(name string) string {
+	return strings.Replace(name, "-", "_", -1)
+}
+
 // LoadPlugins loads the pre-installed plugins and the plugins located in ~/.config/micro/plugins
 func LoadPlugins() {
-	files, _ := ioutil.ReadDir(configDir + "/plugins")
-	for _, plugin := range files {
-		if plugin.IsDir() {
-			pluginName := plugin.Name()
-			files, _ := ioutil.ReadDir(configDir + "/plugins/" + pluginName)
-			for _, f := range files {
-				if f.Name() == pluginName+".lua" {
-					data, _ := ioutil.ReadFile(configDir + "/plugins/" + pluginName + "/" + f.Name())
-					pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
 
-					if err := L.DoString(pluginDef + string(data)); err != nil {
-						TermMessage(err)
-						continue
-					}
-					loadedPlugins = append(loadedPlugins, pluginName)
-				}
-			}
-		}
-	}
+	loadedPlugins = make(map[string]string)
 
-	for _, pluginName := range preInstalledPlugins {
-		alreadyExists := false
-		for _, pl := range loadedPlugins {
-			if pl == pluginName {
-				alreadyExists = true
-				break
-			}
-		}
-		if !alreadyExists {
-			plugin := "runtime/plugins/" + pluginName + "/" + pluginName + ".lua"
-			data, err := Asset(plugin)
-			if err != nil {
-				TermMessage("Error loading pre-installed plugin: " + pluginName)
-				continue
-			}
-			pluginDef := "\nlocal P = {}\n" + pluginName + " = P\nsetmetatable(" + pluginName + ", {__index = _G})\nsetfenv(1, P)\n"
-			if err := L.DoString(pluginDef + string(data)); err != nil {
-				TermMessage(err)
-				continue
-			}
+	for _, plugin := range ListRuntimeFiles(RTPlugin) {
 
-			loadedPlugins = append(loadedPlugins, pluginName)
+		pluginName := plugin.Name()
+		if _, ok := loadedPlugins[pluginName]; ok {
+			continue
 		}
+
+		data, err := plugin.Data()
+		if err != nil {
+			TermMessage("Error loading plugin: " + pluginName)
+			continue
+		}
+
+		pluginLuaName := luaPluginName(pluginName)
+		pluginDef := "\nlocal P = {}\n" + pluginLuaName + " = P\nsetmetatable(" + pluginLuaName + ", {__index = _G})\nsetfenv(1, P)\n"
+
+		if err := L.DoString(pluginDef + string(data)); err != nil {
+			TermMessage(err)
+			continue
+		}
+
+		loadedPlugins[pluginName] = pluginLuaName
+
 	}
 
 	if _, err := os.Stat(configDir + "/init.lua"); err == nil {
@@ -171,6 +153,6 @@ func LoadPlugins() {
 		if err := L.DoString(pluginDef + string(data)); err != nil {
 			TermMessage(err)
 		}
-		loadedPlugins = append(loadedPlugins, "init")
+		loadedPlugins["init"] = "init"
 	}
 }

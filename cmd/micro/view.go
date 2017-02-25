@@ -1,7 +1,7 @@
 package main
 
 import (
-	"io/ioutil"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -9,6 +9,14 @@ import (
 	"github.com/mattn/go-runewidth"
 	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/tcell"
+)
+
+type ViewType int
+
+const (
+	vtDefault ViewType = iota
+	vtHelp
+	vtLog
 )
 
 // The View struct stores information about a view into a buffer.
@@ -23,16 +31,15 @@ type View struct {
 	// The leftmost column, used for horizontal scrolling
 	leftCol int
 
-	// Percentage of the terminal window that this view takes up (from 0 to 100)
-	widthPercent  int
-	heightPercent int
-
 	// Specifies whether or not this view holds a help buffer
-	Help bool
+	Type ViewType
 
-	// Actual with and height
-	width  int
-	height int
+	// Actual width and height
+	Width  int
+	Height int
+
+	LockWidth  bool
+	LockHeight bool
 
 	// Where this view is located
 	x, y int
@@ -96,8 +103,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.x, v.y = 0, 0
 
-	v.width = w
-	v.height = h
+	v.Width = w
+	v.Height = h
 
 	v.ToggleTabbar()
 
@@ -110,10 +117,10 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	}
 
 	if v.Buf.Settings["statusline"].(bool) {
-		v.height--
+		v.Height--
 	}
 
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		_, err := Call(pl+".onViewOpen", v)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -124,25 +131,27 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 	return v
 }
 
+// ToggleStatusLine creates an extra row for the statusline if necessary
 func (v *View) ToggleStatusLine() {
 	if v.Buf.Settings["statusline"].(bool) {
-		v.height--
+		v.Height--
 	} else {
-		v.height++
+		v.Height++
 	}
 }
 
+// ToggleTabbar creates an extra row for the tabbar if necessary
 func (v *View) ToggleTabbar() {
 	if len(tabs) > 1 {
 		if v.y == 0 {
 			// Include one line for the tab bar at the top
-			v.height--
+			v.Height--
 			v.y = 1
 		}
 	} else {
 		if v.y == 1 {
 			v.y = 0
-			v.height++
+			v.Height++
 		}
 	}
 }
@@ -174,9 +183,9 @@ func (v *View) ScrollUp(n int) {
 // ScrollDown scrolls the view down n lines (if possible)
 func (v *View) ScrollDown(n int) {
 	// Try to scroll by n but if it would overflow, scroll by 1
-	if v.Topline+n <= v.Buf.NumLines-v.height {
+	if v.Topline+n <= v.Buf.NumLines-v.Height {
 		v.Topline += n
-	} else if v.Topline < v.Buf.NumLines-v.height {
+	} else if v.Topline < v.Buf.NumLines-v.Height {
 		v.Topline++
 	}
 }
@@ -185,8 +194,14 @@ func (v *View) ScrollDown(n int) {
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
-	if v.Buf.IsModified {
-		char, canceled := messenger.LetterPrompt("Save changes to "+v.Buf.Name+" before closing? (y,n,esc) ", 'y', 'n')
+	if v.Type == vtDefault && v.Buf.IsModified {
+		var char rune
+		var canceled bool
+		if v.Buf.Settings["autosave"].(bool) {
+			char = 'y'
+		} else {
+			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.GetName()+" before closing? (y,n,esc) ", 'y', 'n')
+		}
 		if !canceled {
 			if char == 'y' {
 				v.Save(true)
@@ -223,16 +238,18 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 }
 
+// Open opens the given file in the view
 func (v *View) Open(filename string) {
 	home, _ := homedir.Dir()
 	filename = strings.Replace(filename, "~", home, 1)
-	file, err := ioutil.ReadFile(filename)
+	file, err := os.Open(filename)
+	defer file.Close()
 
 	var buf *Buffer
 	if err != nil {
 		messenger.Message(err.Error())
 		// File does not exist -- create an empty buffer with that name
-		buf = NewBuffer([]byte{}, filename)
+		buf = NewBuffer(strings.NewReader(""), filename)
 	} else {
 		buf = NewBuffer(file, filename)
 	}
@@ -257,22 +274,117 @@ func (v *View) ReOpen() {
 }
 
 // HSplit opens a horizontal split with the given buffer
-func (v *View) HSplit(buf *Buffer) bool {
-	v.splitNode.HSplit(buf)
-	tabs[v.TabNum].Resize()
-	return false
+func (v *View) HSplit(buf *Buffer) {
+	i := 0
+	if v.Buf.Settings["splitBottom"].(bool) {
+		i = 1
+	}
+	v.splitNode.HSplit(buf, v.Num+i)
 }
 
 // VSplit opens a vertical split with the given buffer
-func (v *View) VSplit(buf *Buffer) bool {
-	v.splitNode.VSplit(buf)
-	tabs[v.TabNum].Resize()
-	return false
+func (v *View) VSplit(buf *Buffer) {
+	i := 0
+	if v.Buf.Settings["splitRight"].(bool) {
+		i = 1
+	}
+	v.splitNode.VSplit(buf, v.Num+i)
+}
+
+// HSplitIndex opens a horizontal split with the given buffer at the given index
+func (v *View) HSplitIndex(buf *Buffer, splitIndex int) {
+	v.splitNode.HSplit(buf, splitIndex)
+}
+
+// VSplitIndex opens a vertical split with the given buffer at the given index
+func (v *View) VSplitIndex(buf *Buffer, splitIndex int) {
+	v.splitNode.VSplit(buf, splitIndex)
+}
+
+// GetSoftWrapLocation gets the location of a visual click on the screen and converts it to col,line
+func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
+	if !v.Buf.Settings["softwrap"].(bool) {
+		if vy >= v.Buf.NumLines {
+			vy = v.Buf.NumLines - 1
+		}
+		vx = v.Cursor.GetCharPosInLine(vy, vx)
+		return vx, vy
+	}
+
+	screenX, screenY := 0, v.Topline
+	for lineN := v.Topline; lineN < v.Bottomline(); lineN++ {
+		line := v.Buf.Line(lineN)
+		if lineN >= v.Buf.NumLines {
+			return 0, v.Buf.NumLines - 1
+		}
+
+		colN := 0
+		for _, ch := range line {
+			if screenX >= v.Width-v.lineNumOffset {
+				screenX = 0
+				screenY++
+			}
+
+			if screenX == vx && screenY == vy {
+				return colN, lineN
+			}
+
+			if ch == '\t' {
+				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			}
+
+			screenX++
+			colN++
+		}
+		if screenY == vy {
+			return colN, lineN
+		}
+		screenX = 0
+		screenY++
+	}
+
+	return 0, 0
+}
+
+func (v *View) Bottomline() int {
+	if !v.Buf.Settings["softwrap"].(bool) {
+		return v.Topline + v.Height
+	}
+
+	screenX, screenY := 0, 0
+	numLines := 0
+	for lineN := v.Topline; lineN < v.Topline+v.Height; lineN++ {
+		line := v.Buf.Line(lineN)
+
+		colN := 0
+		for _, ch := range line {
+			if screenX >= v.Width-v.lineNumOffset {
+				screenX = 0
+				screenY++
+			}
+
+			if ch == '\t' {
+				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
+			}
+
+			screenX++
+			colN++
+		}
+		screenX = 0
+		screenY++
+		numLines++
+
+		if screenY >= v.Height {
+			break
+		}
+	}
+	return numLines + v.Topline
 }
 
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
+	height := v.Bottomline() - v.Topline
 	ret := false
 	cy := v.Cursor.Y
 	scrollmargin := int(v.Buf.Settings["scrollmargin"].(float64))
@@ -283,22 +395,24 @@ func (v *View) Relocate() bool {
 		v.Topline = cy
 		ret = true
 	}
-	if cy > v.Topline+v.height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
-		v.Topline = cy - v.height + 1 + scrollmargin
+	if cy > v.Topline+height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
+		v.Topline = cy - height + 1 + scrollmargin
 		ret = true
-	} else if cy >= v.Buf.NumLines-scrollmargin && cy > v.height {
-		v.Topline = v.Buf.NumLines - v.height
+	} else if cy >= v.Buf.NumLines-scrollmargin && cy > height {
+		v.Topline = v.Buf.NumLines - height
 		ret = true
 	}
 
-	cx := v.Cursor.GetVisualX()
-	if cx < v.leftCol {
-		v.leftCol = cx
-		ret = true
-	}
-	if cx+v.lineNumOffset+1 > v.leftCol+v.width {
-		v.leftCol = cx - v.width + v.lineNumOffset + 1
-		ret = true
+	if !v.Buf.Settings["softwrap"].(bool) {
+		cx := v.Cursor.GetVisualX()
+		if cx < v.leftCol {
+			v.leftCol = cx
+			ret = true
+		}
+		if cx+v.lineNumOffset+1 > v.leftCol+v.Width {
+			v.leftCol = cx - v.Width + v.lineNumOffset + 1
+			ret = true
+		}
 	}
 	return ret
 }
@@ -306,12 +420,9 @@ func (v *View) Relocate() bool {
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
 // by a mouse click
 func (v *View) MoveToMouseClick(x, y int) {
-	if y-v.Topline > v.height-1 {
+	if y-v.Topline > v.Height-1 {
 		v.ScrollDown(1)
-		y = v.height + v.Topline - 1
-	}
-	if y >= v.Buf.NumLines {
-		y = v.Buf.NumLines - 1
+		y = v.Height + v.Topline - 1
 	}
 	if y < 0 {
 		y = 0
@@ -320,7 +431,8 @@ func (v *View) MoveToMouseClick(x, y int) {
 		x = 0
 	}
 
-	x = v.Cursor.GetCharPosInLine(y, x)
+	x, y = v.GetSoftWrapLocation(x, y)
+	// x = v.Cursor.GetCharPosInLine(y, x)
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
@@ -338,9 +450,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
-	case *tcell.EventResize:
-		// Window resized
-		tabs[v.TabNum].Resize()
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
@@ -364,6 +473,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 								}
 							}
 						}
+						break
 					}
 				}
 			}
@@ -377,7 +487,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
 			v.Cursor.Right()
 
-			for _, pl := range loadedPlugins {
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(e.Rune()), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
@@ -393,18 +503,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			break
 		}
 
-		leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
-
-		if v.Cursor.HasSelection() {
-			v.Cursor.DeleteSelection()
-			v.Cursor.ResetSelection()
-		}
-		clip := e.Text()
-		clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
-		v.Buf.Insert(v.Cursor.Loc, clip)
-		v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
-		v.freshClip = false
-		messenger.Message("Pasted clipboard")
+		v.paste(e.Text())
 
 		PostActionCall("Paste", v)
 	case *tcell.EventMouse:
@@ -430,6 +529,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.doubleClick = false
 
 						v.Cursor.SelectLine()
+						v.Cursor.CopySelection("primary")
 					} else {
 						// Double click
 						v.lastClickTime = time.Now()
@@ -438,6 +538,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.tripleClick = false
 
 						v.Cursor.SelectWord()
+						v.Cursor.CopySelection("primary")
 					}
 				} else {
 					v.doubleClick = false
@@ -457,6 +558,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					v.Cursor.AddWordToSelection()
 				} else {
 					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+					v.Cursor.CopySelection("primary")
 				}
 			}
 		case tcell.Button2:
@@ -477,6 +579,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				if !v.doubleClick && !v.tripleClick {
 					v.MoveToMouseClick(x, y)
 					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+					v.Cursor.CopySelection("primary")
 				}
 				v.mouseReleased = true
 			}
@@ -493,9 +596,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 	if relocate {
 		v.Relocate()
-	}
-	if v.Buf.Settings["syntax"].(bool) {
-		v.matches = Match(v)
 	}
 }
 
@@ -532,26 +632,38 @@ func (v *View) ClearAllGutterMessages() {
 
 // Opens the given help page in a new horizontal split
 func (v *View) openHelp(helpPage string) {
-	if v.Help {
-		helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
-		helpBuffer.Name = "Help"
-		v.OpenBuffer(helpBuffer)
+	if data, err := FindRuntimeFile(RTHelp, helpPage).Data(); err != nil {
+		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
-		helpBuffer := NewBuffer([]byte(helpPages[helpPage]), helpPage+".md")
-		helpBuffer.Name = "Help"
-		v.HSplit(helpBuffer)
-		CurView().Help = true
+		helpBuffer := NewBuffer(strings.NewReader(string(data)), helpPage+".md")
+		helpBuffer.name = "Help"
+
+		if v.Type == vtHelp {
+			v.OpenBuffer(helpBuffer)
+		} else {
+			v.HSplit(helpBuffer)
+			CurView().Type = vtHelp
+		}
 	}
 }
 
 func (v *View) drawCell(x, y int, ch rune, combc []rune, style tcell.Style) {
-	if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
+	if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
 		screen.SetContent(x, y, ch, combc, style)
 	}
 }
 
 // DisplayView renders the view to the screen
 func (v *View) DisplayView() {
+	if v.Type == vtLog {
+		// Log views should always follow the cursor...
+		v.Relocate()
+	}
+
+	if v.Buf.Settings["syntax"].(bool) {
+		v.matches = Match(v)
+	}
+
 	// The charNum we are currently displaying
 	// starts at the start of the viewport
 	charNum := Loc{0, v.Topline}
@@ -584,17 +696,22 @@ func (v *View) DisplayView() {
 	}
 
 	// These represent the current screen coordinates
-	screenX, screenY := 0, 0
+	screenX, screenY := v.x, v.y-1
 
 	highlightStyle := defStyle
+	curLineN := 0
 
 	// ViewLine is the current line from the top of the viewport
-	for viewLine := 0; viewLine < v.height; viewLine++ {
-		screenY = v.y + viewLine
+	for viewLine := 0; viewLine < v.Height; viewLine++ {
+		screenY++
 		screenX = v.x
 
 		// This is the current line number of the buffer that we are drawing
-		curLineN := viewLine + v.Topline
+		curLineN = viewLine + v.Topline
+
+		if screenY-v.y >= v.Height {
+			break
+		}
 
 		if v.x != 0 {
 			// Draw the split divider
@@ -604,7 +721,7 @@ func (v *View) DisplayView() {
 
 		// If the buffer is smaller than the view height we have to clear all this space
 		if curLineN >= v.Buf.NumLines {
-			for i := screenX; i < v.x+v.width; i++ {
+			for i := screenX; i < v.x+v.Width; i++ {
 				v.drawCell(i, screenY, ' ', nil, defStyle)
 			}
 
@@ -659,14 +776,14 @@ func (v *View) DisplayView() {
 			}
 		}
 
+		lineNumStyle := defStyle
 		if v.Buf.Settings["ruler"] == true {
 			// Write the line number
-			lineNumStyle := defStyle
 			if style, ok := colorscheme["line-number"]; ok {
 				lineNumStyle = style
 			}
 			if style, ok := colorscheme["current-line-number"]; ok {
-				if curLineN == v.Cursor.Y && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() {
+				if curLineN == v.Cursor.Y && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() {
 					lineNumStyle = style
 				}
 			}
@@ -691,7 +808,31 @@ func (v *View) DisplayView() {
 
 		// Now we actually draw the line
 		colN := 0
+		strWidth := 0
+		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		for _, ch := range line {
+			if v.Buf.Settings["softwrap"].(bool) {
+				if screenX-v.x >= v.Width {
+					screenY++
+
+					x := 0
+					if hasGutterMessages {
+						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
+						x++
+						v.drawCell(v.x+x, screenY, ' ', nil, defStyle)
+						x++
+					}
+					for i := 0; i < v.lineNumOffset; i++ {
+						screen.SetContent(v.x+i+x, screenY, ' ', nil, lineNumStyle)
+					}
+					screenX = v.x + v.lineNumOffset
+				}
+			}
+
+			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+				v.DisplayCursor(screenX-v.leftCol, screenY)
+			}
+
 			lineStyle := defStyle
 
 			if v.Buf.Settings["syntax"].(bool) {
@@ -714,7 +855,7 @@ func (v *View) DisplayView() {
 
 			// We need to display the background of the linestyle with the correct color if cursorline is enabled
 			// and this is the current view and there is no selection on this line and the cursor is on this line
-			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -727,7 +868,7 @@ func (v *View) DisplayView() {
 				// First the user may have configured an `indent-char` to be displayed to show that this
 				// is a tab character
 				lineIndentStyle := defStyle
-				if style, ok := colorscheme["indent-char"]; ok {
+				if style, ok := colorscheme["indent-char"]; ok && v.Buf.Settings["indentchar"].(string) != " " {
 					lineIndentStyle = style
 				}
 				if v.Cursor.HasSelection() &&
@@ -740,7 +881,7 @@ func (v *View) DisplayView() {
 						lineIndentStyle = style
 					}
 				}
-				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 					if style, ok := colorscheme["cursor-line"]; ok {
 						fg, _, _ := style.Decompose()
 						lineIndentStyle = lineIndentStyle.Background(fg)
@@ -752,13 +893,15 @@ func (v *View) DisplayView() {
 					v.drawCell(screenX-v.leftCol, screenY, indentChar[0], nil, lineIndentStyle)
 				}
 				// Now the tab has to be displayed as a bunch of spaces
-				tabSize := int(v.Buf.Settings["tabsize"].(float64))
-				for i := 0; i < tabSize-1; i++ {
+				visLoc := strWidth
+				remainder := tabSize - (visLoc % tabSize)
+				for i := 0; i < remainder-1; i++ {
 					screenX++
 					if screenX-v.x-v.leftCol >= v.lineNumOffset {
 						v.drawCell(screenX-v.leftCol, screenY, ' ', nil, lineStyle)
 					}
 				}
+				strWidth += remainder
 			} else if runewidth.RuneWidth(ch) > 1 {
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
 					v.drawCell(screenX, screenY, ch, nil, lineStyle)
@@ -769,16 +912,22 @@ func (v *View) DisplayView() {
 						v.drawCell(screenX-v.leftCol, screenY, '<', nil, lineStyle)
 					}
 				}
+				strWidth += StringWidth(string(ch), tabSize)
 			} else {
 				if screenX-v.x-v.leftCol >= v.lineNumOffset {
 					v.drawCell(screenX-v.leftCol, screenY, ch, nil, lineStyle)
 				}
+				strWidth += StringWidth(string(ch), tabSize)
 			}
 			charNum = charNum.Move(1, v.Buf)
 			screenX++
 			colN++
 		}
 		// Here we are at a newline
+
+		if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN && colN == v.Cursor.X {
+			v.DisplayCursor(screenX-v.leftCol, screenY)
+		}
 
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
@@ -797,9 +946,9 @@ func (v *View) DisplayView() {
 
 		charNum = charNum.Move(1, v.Buf)
 
-		for i := 0; i < v.width; i++ {
+		for i := 0; i < v.Width; i++ {
 			lineStyle := defStyle
-			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].curView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
+			if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && v.Cursor.Y == curLineN {
 				if style, ok := colorscheme["cursor-line"]; ok {
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
@@ -807,42 +956,37 @@ func (v *View) DisplayView() {
 			}
 			if screenX-v.x-v.leftCol+i >= v.lineNumOffset {
 				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-				if colorcolumn != 0 && screenX-v.leftCol+i == colorcolumn-1 {
+				if colorcolumn != 0 && screenX-v.lineNumOffset+i == colorcolumn-1 {
 					if style, ok := colorscheme["color-column"]; ok {
 						fg, _, _ := style.Decompose()
 						lineStyle = lineStyle.Background(fg)
 					}
-					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
-				} else {
-					v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 				}
+				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
 		}
 	}
 }
 
 // DisplayCursor draws the current buffer's cursor to the screen
-func (v *View) DisplayCursor() {
-	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.height-1) || v.Cursor.HasSelection() {
-		screen.HideCursor()
-	} else {
-		screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, v.Cursor.Y-v.Topline+v.y)
-	}
+func (v *View) DisplayCursor(x, y int) {
+	// screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, y)
+	screen.ShowCursor(x, y)
 }
 
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	v.DisplayView()
-	if v.Num == tabs[curTab].curView {
-		v.DisplayCursor()
+	// Don't draw the cursor if it is out of the viewport or if it has a selection
+	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || v.Cursor.HasSelection() {
+		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
 	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
-	} else if (v.y + v.height) != screenH-1 {
-		for x := 0; x < v.width; x++ {
-			screen.SetContent(v.x+x, v.y+v.height, '-', nil, defStyle.Reverse(true))
+	} else if (v.y + v.Height) != screenH-1 {
+		for x := 0; x < v.Width; x++ {
+			screen.SetContent(v.x+x, v.y+v.Height, '-', nil, defStyle.Reverse(true))
 		}
 	}
 }

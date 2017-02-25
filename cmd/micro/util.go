@@ -23,7 +23,7 @@ func Count(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
-// NumOccurrences counts the number of occurences of a byte in a string
+// NumOccurrences counts the number of occurrences of a byte in a string
 func NumOccurrences(s string, c byte) int {
 	var n int
 	for i := 0; i < len(s); i++ {
@@ -89,6 +89,18 @@ func Contains(list []string, a string) bool {
 // Insert makes a simple insert into a string at the given position
 func Insert(str string, pos int, value string) string {
 	return string([]rune(str)[:pos]) + value + string([]rune(str)[pos:])
+}
+
+// MakeRelative will attempt to make a relative path between path and base
+func MakeRelative(path, base string) (string, error) {
+	if len(path) > 0 {
+		rel, err := filepath.Rel(base, path)
+		if err != nil {
+			return path, err
+		}
+		return rel, nil
+	}
+	return path, nil
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given string
@@ -157,7 +169,19 @@ func GetModTime(path string) (time.Time, bool) {
 // StringWidth returns the width of a string where tabs count as `tabsize` width
 func StringWidth(str string, tabsize int) int {
 	sw := runewidth.StringWidth(str)
-	sw += NumOccurrences(str, '\t') * (tabsize - 1)
+	lineIdx := 0
+	for _, ch := range str {
+		switch ch {
+		case '\t':
+			ts := tabsize - (lineIdx % tabsize)
+			sw += ts
+			lineIdx += ts
+		case '\n':
+			lineIdx = 0
+		default:
+			lineIdx++
+		}
+	}
 	return sw
 }
 
@@ -165,15 +189,21 @@ func StringWidth(str string, tabsize int) int {
 // that have a width larger than 1 (this also counts tabs as `tabsize` width)
 func WidthOfLargeRunes(str string, tabsize int) int {
 	count := 0
+	lineIdx := 0
 	for _, ch := range str {
 		var w int
 		if ch == '\t' {
-			w = tabsize
+			w = tabsize - (lineIdx % tabsize)
 		} else {
 			w = runewidth.RuneWidth(ch)
 		}
 		if w > 1 {
 			count += (w - 1)
+		}
+		if ch == '\n' {
+			lineIdx = 0
+		} else {
+			lineIdx += w
 		}
 	}
 	return count
@@ -226,45 +256,67 @@ func FuncName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
 }
 
-// SplitCommandArgs seperates multiple command arguments which may be quoted.
+// SplitCommandArgs separates multiple command arguments which may be quoted.
 // The returned slice contains at least one string
 func SplitCommandArgs(input string) []string {
 	var result []string
+	var curQuote *bytes.Buffer
+
 	curArg := new(bytes.Buffer)
-	inQuote := false
 	escape := false
 
-	appendResult := func() {
-		str := curArg.String()
-		inQuote = false
-		escape = false
-		if strings.HasPrefix(str, `"`) && strings.HasSuffix(str, `"`) {
-			if unquoted, err := strconv.Unquote(str); err == nil {
-				str = unquoted
-			}
+	finishQuote := func() {
+		if curQuote == nil {
+			return
 		}
+		str := curQuote.String()
+		if unquoted, err := strconv.Unquote(str); err == nil {
+			str = unquoted
+		}
+		curArg.WriteString(str)
+		curQuote = nil
+	}
+
+	appendResult := func() {
+		finishQuote()
+		escape = false
+
+		str := curArg.String()
 		result = append(result, str)
 		curArg.Reset()
 	}
 
 	for _, r := range input {
-		if r == ' ' && !inQuote {
+		if r == ' ' && curQuote == nil {
 			appendResult()
 		} else {
-			curArg.WriteRune(r)
+			runeHandled := false
+			appendRuneToBuff := func() {
+				if curQuote != nil {
+					curQuote.WriteRune(r)
+				} else {
+					curArg.WriteRune(r)
+				}
+				runeHandled = true
+			}
 
-			if r == '"' && !inQuote {
-				inQuote = true
+			if r == '"' && curQuote == nil {
+				curQuote = new(bytes.Buffer)
+				appendRuneToBuff()
 			} else {
-				if inQuote && !escape {
+				if curQuote != nil && !escape {
 					if r == '"' {
-						inQuote = false
-					}
-					if r == '\\' {
+						appendRuneToBuff()
+						finishQuote()
+					} else if r == '\\' {
+						appendRuneToBuff()
 						escape = true
 						continue
 					}
 				}
+			}
+			if !runeHandled {
+				appendRuneToBuff()
 			}
 		}
 

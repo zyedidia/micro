@@ -1,11 +1,10 @@
 package main
 
 import (
-	"github.com/zyedidia/tcell"
-	"io/ioutil"
-	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/zyedidia/tcell"
 )
 
 // FileTypeRules represents a complete set of syntax rules for a filetype
@@ -27,152 +26,19 @@ type SyntaxRule struct {
 	style tcell.Style
 }
 
+var syntaxKeys [][2]*regexp.Regexp
 var syntaxFiles map[[2]*regexp.Regexp]FileTypeRules
-
-// These syntax files are pre installed and embedded in the resulting binary by go-bindata
-var preInstalledSynFiles = []string{
-	"Dockerfile",
-	"apacheconf",
-	"arduino",
-	"asciidoc",
-	"asm",
-	"awk",
-	"c",
-	"caddyfile",
-	"cmake",
-	"coffeescript",
-	"colortest",
-	"conf",
-	"conky",
-	"csharp",
-	"css",
-	"cython",
-	"d",
-	"dart",
-	"dot",
-	"erb",
-	"fish",
-	"fortran",
-	"gdscript",
-	"gentoo-ebuild",
-	"gentoo-etc-portage",
-	"git-commit",
-	"git-config",
-	"git-rebase-todo",
-	"glsl",
-	"go",
-	"golo",
-	"groff",
-	"haml",
-	"haskell",
-	"html",
-	"ini",
-	"inputrc",
-	"java",
-	"javascript",
-	"json",
-	"keymap",
-	"kickstart",
-	"ledger",
-	"lilypond",
-	"lisp",
-	"lua",
-	"makefile",
-	"man",
-	"markdown",
-	"mpdconf",
-	"micro",
-	"nanorc",
-	"nginx",
-	"ocaml",
-	"pascal",
-	"patch",
-	"peg",
-	"perl",
-	"perl6",
-	"php",
-	"pkg-config",
-	"po",
-	"pov",
-	"privoxy-action",
-	"privoxy-config",
-	"privoxy-filter",
-	"puppet",
-	"python",
-	"r",
-	"reST",
-	"rpmspec",
-	"ruby",
-	"rust",
-	"scala",
-	"sed",
-	"sh",
-	"sls",
-	"sql",
-	"swift",
-	"systemd",
-	"tcl",
-	"tex",
-	"vala",
-	"vi",
-	"xml",
-	"xresources",
-	"yaml",
-	"yum",
-	"zsh",
-}
 
 // LoadSyntaxFiles loads the syntax files from the default directory (configDir)
 func LoadSyntaxFiles() {
-	// Load the user's custom syntax files, if there are any
-	LoadSyntaxFilesFromDir(configDir + "/syntax")
-
-	// Load the pre-installed syntax files from inside the binary
-	for _, filetype := range preInstalledSynFiles {
-		data, err := Asset("runtime/syntax/" + filetype + ".micro")
-		if err != nil {
-			TermMessage("Unable to load pre-installed syntax file " + filetype)
-			continue
-		}
-
-		LoadSyntaxFile(string(data), filetype+".micro")
-	}
-}
-
-// LoadSyntaxFilesFromDir loads the syntax files from a specified directory
-// To load the syntax files, we must fill the `syntaxFiles` map
-// This involves finding the regex for syntax and if it exists, the regex
-// for the header. Then we must get the text for the file and the filetype.
-func LoadSyntaxFilesFromDir(dir string) {
-	colorscheme = make(Colorscheme)
 	InitColorscheme()
-
-	// Default style
-	defStyle = tcell.StyleDefault.
-		Foreground(tcell.ColorDefault).
-		Background(tcell.ColorDefault)
-
-	// There may be another default style defined in the colorscheme
-	// In that case we should use that one
-	if style, ok := colorscheme["default"]; ok {
-		defStyle = style
-	}
-	if screen != nil {
-		screen.SetStyle(defStyle)
-	}
-
 	syntaxFiles = make(map[[2]*regexp.Regexp]FileTypeRules)
-	files, _ := ioutil.ReadDir(dir)
-	for _, f := range files {
-		if filepath.Ext(f.Name()) == ".micro" {
-			filename := dir + "/" + f.Name()
-			text, err := ioutil.ReadFile(filename)
-
-			if err != nil {
-				TermMessage("Error loading syntax file " + filename + ": " + err.Error())
-				return
-			}
-			LoadSyntaxFile(string(text), filename)
+	for _, f := range ListRuntimeFiles(RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+		} else {
+			LoadSyntaxFile(string(data), f.Name())
 		}
 	}
 }
@@ -259,6 +125,7 @@ func LoadSyntaxFile(text, filename string) {
 	if syntaxRegex != nil {
 		// Add the current rules to the syntaxFiles variable
 		regexes := [2]*regexp.Regexp{syntaxRegex, headerRegex}
+		syntaxKeys = append(syntaxKeys, regexes)
 		syntaxFiles[regexes] = FileTypeRules{filetype, filename, text}
 	}
 }
@@ -394,12 +261,15 @@ func LoadRulesFromFile(text, filename string) []SyntaxRule {
 
 // FindFileType finds the filetype for the given buffer
 func FindFileType(buf *Buffer) string {
-	for r := range syntaxFiles {
+	for _, r := range syntaxKeys {
+		if r[1] != nil && r[1].MatchString(buf.Line(0)) {
+			// The header statement matches the first line
+			return syntaxFiles[r].filetype
+		}
+	}
+	for _, r := range syntaxKeys {
 		if r[0] != nil && r[0].MatchString(buf.Path) {
 			// The syntax statement matches the extension
-			return syntaxFiles[r].filetype
-		} else if r[1] != nil && r[1].MatchString(buf.Line(0)) {
-			// The header statement matches the first line
 			return syntaxFiles[r].filetype
 		}
 	}
@@ -409,7 +279,7 @@ func FindFileType(buf *Buffer) string {
 // GetRules finds the syntax rules that should be used for the buffer
 // and returns them. It also returns the filetype of the file
 func GetRules(buf *Buffer) []SyntaxRule {
-	for r := range syntaxFiles {
+	for _, r := range syntaxKeys {
 		if syntaxFiles[r].filetype == buf.FileType() {
 			return LoadRulesFromFile(syntaxFiles[r].text, syntaxFiles[r].filename)
 		}
@@ -428,7 +298,7 @@ func Match(v *View) SyntaxMatches {
 	rules := v.Buf.rules
 
 	viewStart := v.Topline
-	viewEnd := v.Topline + v.height
+	viewEnd := v.Topline + v.Height
 	if viewEnd > buf.NumLines {
 		viewEnd = buf.NumLines
 	}
@@ -445,7 +315,7 @@ func Match(v *View) SyntaxMatches {
 
 	// We don't actually check the entire buffer, just from synLinesUp to synLinesDown
 	totalStart := v.Topline - synLinesUp
-	totalEnd := v.Topline + v.height + synLinesDown
+	totalEnd := v.Topline + v.Height + synLinesDown
 	if totalStart < 0 {
 		totalStart = 0
 	}
@@ -473,7 +343,7 @@ func Match(v *View) SyntaxMatches {
 							continue
 						}
 						lineNum -= viewStart
-						if lineNum >= 0 && lineNum < v.height {
+						if lineNum >= 0 && lineNum < v.Height {
 							matches[lineNum][colNum] = rule.style
 						}
 					}

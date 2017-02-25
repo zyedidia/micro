@@ -1,78 +1,87 @@
 # Keybindings
 
-Here are the default keybindings in json form which is also how
-you can rebind them to your liking.
+Here are the default keybindings in json format. You can rebind them to your liking, following the same format.
 
 ```json
 {
-	"Up":             "CursorUp",
-	"Down":           "CursorDown",
-	"Right":          "CursorRight",
-	"Left":           "CursorLeft",
-	"ShiftUp":        "SelectUp",
-	"ShiftDown":      "SelectDown",
-	"ShiftLeft":      "SelectLeft",
-	"ShiftRight":     "SelectRight",
-	"AltLeft":        "WordLeft",
-	"AltRight":       "WordRight",
-	"AltShiftRight":  "SelectWordRight",
-	"AltShiftLeft":   "SelectWordLeft",
-	"CtrlLeft":       "StartOfLine",
-	"CtrlRight":      "EndOfLine",
-	"CtrlShiftLeft":  "SelectToStartOfLine",
-	"CtrlShiftRight": "SelectToEndOfLine",
-	"CtrlUp":         "CursorStart",
-	"CtrlDown":       "CursorEnd",
-	"CtrlShiftUp":    "SelectToStart",
-	"CtrlShiftDown":  "SelectToEnd",
-	"Enter":          "InsertEnter",
-	"Space":          "InsertSpace",
-	"Backspace":      "Backspace",
-	"Backspace2":     "Backspace",
-	"Alt-Backspace":  "DeleteWordLeft",
-	"Alt-Backspace2": "DeleteWordLeft",
-	"Tab":            "InsertTab,IndentSelection",
-	"CtrlO":          "OpenFile",
-	"CtrlS":          "Save",
-	"CtrlF":          "Find",
-	"CtrlN":          "FindNext",
-	"CtrlP":          "FindPrevious",
-	"CtrlZ":          "Undo",
-	"CtrlY":          "Redo",
-	"CtrlC":          "Copy",
-	"CtrlX":          "Cut",
-	"CtrlK":          "CutLine",
-	"CtrlD":          "DuplicateLine",
-	"CtrlV":          "Paste",
-	"CtrlA":          "SelectAll",
-	"CtrlT":          "AddTab",
-	"CtrlRightSq":    "PreviousTab",
-	"CtrlBackslash":  "NextTab",
-	"Home":           "Start",
-	"End":            "End",
-	"CtrlHome":       "CursorStart",
-	"CtrlEnd":        "CursorEnd",
-	"PageUp":         "CursorPageUp",
-	"PageDown":       "CursorPageDown",
-	"CtrlG":          "ToggleHelp",
-	"CtrlR":          "ToggleRuler",
-	"CtrlL":          "JumpLine",
-	"Delete":         "Delete",
-	"Esc":            "ClearStatus",
-	"CtrlB":          "ShellMode",
-	"CtrlQ":          "Quit",
-	"CtrlE":          "CommandMode",
-	"CtrlW":          "NextSplit",
-	"CtrlU":          "ToggleMacro",
-	"CtrlJ":          "PlayMacro",
-	
-	// Emacs-style keybindings
-	"Alt-f": "WordRight",
-	"Alt-b": "WordLeft",
-	"Alt-a": "StartOfLine",
-	"Alt-e": "EndOfLine",
-	"Alt-p": "CursorUp",
-	"Alt-n": "CursorDown"
+    "Up":             "CursorUp",
+    "Down":           "CursorDown",
+    "Right":          "CursorRight",
+    "Left":           "CursorLeft",
+    "ShiftUp":        "SelectUp",
+    "ShiftDown":      "SelectDown",
+    "ShiftLeft":      "SelectLeft",
+    "ShiftRight":     "SelectRight",
+    "AltLeft":        "WordLeft",
+    "AltRight":       "WordRight",
+    "AltShiftRight":  "SelectWordRight",
+    "AltShiftLeft":   "SelectWordLeft",
+    "AltUp":          "MoveLinesUp",
+    "AltDown":        "MoveLinesDown",
+    "CtrlLeft":       "StartOfLine",
+    "CtrlRight":      "EndOfLine",
+    "CtrlShiftLeft":  "SelectToStartOfLine",
+    "CtrlShiftRight": "SelectToEndOfLine",
+    "CtrlUp":         "CursorStart",
+    "CtrlDown":       "CursorEnd",
+    "CtrlShiftUp":    "SelectToStart",
+    "CtrlShiftDown":  "SelectToEnd",
+    "Enter":          "InsertNewline",
+    "Space":          "InsertSpace",
+    "CtrlH":          "Backspace",
+    "Backspace":      "Backspace",
+    "Alt-CtrlH":      "DeleteWordLeft",
+    "Alt-Backspace":  "DeleteWordLeft",
+    "Tab":            "IndentSelection,InsertTab",
+    "Backtab":        "OutdentSelection",
+    "CtrlO":          "OpenFile",
+    "CtrlS":          "Save",
+    "CtrlF":          "Find",
+    "CtrlN":          "FindNext",
+    "CtrlP":          "FindPrevious",
+    "CtrlZ":          "Undo",
+    "CtrlY":          "Redo",
+    "CtrlC":          "Copy",
+    "CtrlX":          "Cut",
+    "CtrlK":          "CutLine",
+    "CtrlD":          "DuplicateLine",
+    "CtrlV":          "Paste",
+    "CtrlA":          "SelectAll",
+    "CtrlT":          "AddTab",
+    "CtrlRightSq":    "PreviousTab",
+    "CtrlBackslash":  "NextTab",
+    "Home":           "StartOfLine",
+    "End":            "EndOfLine",
+    "CtrlHome":       "CursorStart",
+    "CtrlEnd":        "CursorEnd",
+    "PageUp":         "CursorPageUp",
+    "PageDown":       "CursorPageDown",
+    "CtrlG":          "ToggleHelp",
+    "CtrlR":          "ToggleRuler",
+    "CtrlL":          "JumpLine",
+    "Delete":         "Delete",
+    "CtrlB":          "ShellMode",
+    "CtrlQ":          "Quit",
+    "CtrlE":          "CommandMode",
+    "CtrlW":          "NextSplit",
+    "CtrlU":          "ToggleMacro",
+    "CtrlJ":          "PlayMacro",
+
+    // Emacs-style keybindings
+    "Alt-f": "WordRight",
+    "Alt-b": "WordLeft",
+    "Alt-a": "StartOfLine",
+    "Alt-e": "EndOfLine",
+    "Alt-p": "CursorUp",
+    "Alt-n": "CursorDown",
+
+    // Integration with file managers
+    "F1":  "ToggleHelp",
+    "F2":  "Save",
+    "F4":  "Quit",
+    "F7":  "Find",
+    "F10": "Quit",
+    "Esc": "Escape",
 }
 ```
 
@@ -106,6 +115,11 @@ and quit you can bind it like so:
 }
 ```
 
+# Unbinding keys
+
+It is also possible to disable any of the default key bindings by use of the 
+`UnbindKey` action in the user's `bindings.json` file.
+
 # Bindable actions and bindable keys
 
 The list of default keybindings contains most of the possible actions and keys
@@ -132,6 +146,8 @@ WordRight
 WordLeft
 SelectWordRight
 SelectWordLeft
+MoveLinesUp
+MoveLinesDown
 DeleteWordRight
 DeleteWordLeft
 SelectToStartOfLine
@@ -179,9 +195,13 @@ AddTab
 PreviousTab
 NextTab
 NextSplit
+Unsplit
+VSplit
+HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
+UnbindKey
 ```
 
 Here is the list of all possible keys you can bind:
@@ -310,8 +330,10 @@ Tab
 Esc
 Escape
 Enter
-Backspace2
 ```
+
+Note: On some old terminal emulators and on Windows machines, `CtrlH` should be used
+for backspace.
 
 Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a`
 or `Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and `Ctrl`

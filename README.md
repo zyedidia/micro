@@ -17,6 +17,8 @@ Here is a picture of micro editing its source code.
 
 To see more screenshots of micro, showcasing all of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
 
+You can also check out the website for Micro at https://micro-editor.github.io.
+
 # Features
 
 * Easy to use and to install
@@ -31,17 +33,20 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 * Cross platform (It should work on all the platforms Go runs on)
     * Note that while Windows is supported, there are still some bugs that need to be worked out
 * Plugin system (plugins are written in Lua)
+    * Micro has a built-in plugin manager to automatically install, remove, and update all your plugins
 * Persistent undo
 * Automatic linting and error notifications
-* Syntax highlighting (for over [75 languages](runtime/syntax)!)
+* Syntax highlighting (for over [90 languages](runtime/syntax)!)
 * Colorscheme support
     * By default, micro comes with 16, 256, and true color themes.
 * True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
+* Snippets
+    * The snippet plugin can be installed with `> plugin install snippets`
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
 * Macros
-* Common editor things such as undo/redo, line numbers, Unicode support...
+* Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
 
 Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.
 
@@ -62,23 +67,39 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
-### Homebrew
+### Package Managers
 
-You can also install micro using Homebrew on Mac:
+You can install micro using Homebrew on Mac:
 
 ```
-$ brew install micro
+brew install micro
+```
+
+On Windows, you can install micro through Chocolatey:
+
+```
+choco install micro
 ```
 
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO).
+Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommand setting it to `~/go` if you don't have one).
 
-```sh
-go get -u github.com/zyedidia/micro/...
 ```
+go get -d github.com/zyedidia/micro
+cd $GOPATH/src/github.com/zyedidia/micro
+make install
+```
+
+The binary will then be installed to `$GOPATH/bin` (or your `$GOBIN`).
+
+You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
+
+### MacOS terminal
+
+If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. The newest versions also support true color.
 
 ### Linux clipboard support
 
@@ -96,7 +117,7 @@ If you don't have xclip or xsel, micro will use an internal clipboard for copy a
 
 If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
 you are using a terminal which does not support 256 color. Try changing the colorscheme to `simple`
-by running `> set colorscheme simple`.
+by pressing CtrlE in micro and typing `set colorscheme simple`.
 
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.
@@ -147,6 +168,7 @@ a brief introduction to the more powerful configuration features micro offers.
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
 
-You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues) to report bugs, ask questions, or suggest new features.
+You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
+to report bugs, ask questions, or suggest new features.
 
 For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).

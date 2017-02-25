@@ -3,15 +3,19 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"github.com/mitchellh/go-homedir"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -27,8 +31,10 @@ type Buffer struct {
 
 	// Path to the file on disk
 	Path string
+	// Absolute path to the file on disk
+	AbsPath string
 	// Name of the buffer on the status line
-	Name string
+	name string
 
 	// Whether or not the buffer has been modified since it was opened
 	IsModified bool
@@ -53,10 +59,24 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
-// NewBuffer creates a new buffer from `txt` with path and name `path`
-func NewBuffer(txt []byte, path string) *Buffer {
+func NewBufferFromString(text, path string) *Buffer {
+	return NewBuffer(strings.NewReader(text), path)
+}
+
+// NewBuffer creates a new buffer from a given reader with a given path
+func NewBuffer(reader io.Reader, path string) *Buffer {
+	if path != "" {
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				if view.Buf.Path == path {
+					return view.Buf
+				}
+			}
+		}
+	}
+
 	b := new(Buffer)
-	b.LineArray = NewLineArray(txt)
+	b.LineArray = NewLineArray(reader)
 
 	b.Settings = DefaultLocalSettings()
 	for k, v := range globalSettings {
@@ -65,13 +85,10 @@ func NewBuffer(txt []byte, path string) *Buffer {
 		}
 	}
 
-	b.Path = path
-	b.Name = path
+	absPath, _ := filepath.Abs(path)
 
-	// If the file doesn't have a path to disk then we give it no name
-	if path == "" {
-		b.Name = "No name"
-	}
+	b.Path = path
+	b.AbsPath = absPath
 
 	// The last time this file was modified
 	b.ModTime, _ = GetModTime(b.Path)
@@ -126,8 +143,7 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
-		absPath, _ := filepath.Abs(b.Path)
-		file, err := os.Open(configDir + "/buffers/" + EscapePath(absPath))
+		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))
 		if err == nil {
 			var buffer SerializedBuffer
 			decoder := gob.NewDecoder(file)
@@ -156,6 +172,16 @@ func NewBuffer(txt []byte, path string) *Buffer {
 	return b
 }
 
+func (b *Buffer) GetName() string {
+	if b.name == "" {
+		if b.Path == "" {
+			return "No name"
+		}
+		return b.Path
+	}
+	return b.name
+}
+
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
@@ -170,6 +196,14 @@ func (b *Buffer) FindFileType() {
 // FileType returns the buffer's filetype
 func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)
+}
+
+// IndentString returns a string representing one level of indentation
+func (b *Buffer) IndentString() string {
+	if b.Settings["tabstospaces"].(bool) {
+		return Spaces(int(b.Settings["tabsize"].(float64)))
+	}
+	return "\t"
 }
 
 // CheckModTime makes sure that the file this buffer points to hasn't been updated
@@ -228,8 +262,7 @@ func (b *Buffer) SaveWithSudo() error {
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
 	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-		absPath, _ := filepath.Abs(b.Path)
-		file, err := os.Create(configDir + "/buffers/" + EscapePath(absPath))
+		file, err := os.Create(configDir + "/buffers/" + EscapePath(b.AbsPath))
 		if err == nil {
 			enc := gob.NewEncoder(file)
 			gob.Register(TextEvent{})
@@ -249,15 +282,35 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) SaveAs(filename string) error {
 	b.FindFileType()
 	b.UpdateRules()
-	b.Name = filename
-	b.Path = filename
-	data := []byte(b.String())
+	dir, _ := homedir.Dir()
+	b.Path = strings.Replace(filename, "~", dir, 1)
+	if b.Settings["rmtrailingws"].(bool) {
+		r, _ := regexp.Compile(`[ \t]+$`)
+		for lineNum, line := range b.Lines(0, b.NumLines) {
+			indices := r.FindStringIndex(line)
+			if indices == nil {
+				continue
+			}
+			startLoc := Loc{indices[0], lineNum}
+			b.deleteToEnd(startLoc)
+		}
+		b.Cursor.Relocate()
+	}
+	if b.Settings["eofnewline"].(bool) {
+		end := b.End()
+		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
+			b.Insert(end, "\n")
+		}
+	}
+	str := b.String()
+	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
 	}
+	b.ModTime, _ = GetModTime(filename)
 	return err
 }
 
@@ -266,7 +319,6 @@ func (b *Buffer) SaveAs(filename string) error {
 func (b *Buffer) SaveAsWithSudo(filename string) error {
 	b.FindFileType()
 	b.UpdateRules()
-	b.Name = filename
 	b.Path = filename
 
 	// The user may have already used sudo in which case we won't need the password
@@ -323,6 +375,11 @@ func (b *Buffer) remove(start, end Loc) string {
 	b.Update()
 	return sub
 }
+func (b *Buffer) deleteToEnd(start Loc) {
+	b.IsModified = true
+	b.LineArray.DeleteToEnd(start)
+	b.Update()
+}
 
 // Start returns the location of the first character in the buffer
 func (b *Buffer) Start() Loc {
@@ -334,8 +391,20 @@ func (b *Buffer) End() Loc {
 	return Loc{utf8.RuneCount(b.lines[b.NumLines-1]), b.NumLines - 1}
 }
 
+// RuneAt returns the rune at a given location in the buffer
+func (b *Buffer) RuneAt(loc Loc) rune {
+	line := []rune(b.Line(loc.Y))
+	if len(line) > 0 {
+		return line[loc.X]
+	}
+	return '\n'
+}
+
 // Line returns a single line
 func (b *Buffer) Line(n int) string {
+	if n >= len(b.lines) {
+		return ""
+	}
 	return string(b.lines[n])
 }
 
@@ -352,4 +421,49 @@ func (b *Buffer) Lines(start, end int) []string {
 // Len gives the length of the buffer
 func (b *Buffer) Len() int {
 	return Count(b.String())
+}
+
+// MoveLinesUp moves the range of lines up one row
+func (b *Buffer) MoveLinesUp(start int, end int) {
+	// 0 < start < end <= len(b.lines)
+	if start < 1 || start >= end || end > len(b.lines) {
+		return // what to do? FIXME
+	}
+	if end == len(b.lines) {
+		b.Insert(
+			Loc{
+				utf8.RuneCount(b.lines[end-1]),
+				end - 1,
+			},
+			"\n"+b.Line(start-1),
+		)
+	} else {
+		b.Insert(
+			Loc{0, end},
+			b.Line(start-1)+"\n",
+		)
+	}
+	b.Remove(
+		Loc{0, start - 1},
+		Loc{0, start},
+	)
+}
+
+// MoveLinesDown moves the range of lines down one row
+func (b *Buffer) MoveLinesDown(start int, end int) {
+	// 0 <= start < end < len(b.lines)
+	// if end == len(b.lines), we can't do anything here because the
+	// last line is unaccessible, FIXME
+	if start < 0 || start >= end || end >= len(b.lines)-1 {
+		return // what to do? FIXME
+	}
+	b.Insert(
+		Loc{0, start},
+		b.Line(end)+"\n",
+	)
+	end++
+	b.Remove(
+		Loc{0, end},
+		Loc{0, end + 1},
+	)
 }

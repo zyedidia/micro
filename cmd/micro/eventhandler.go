@@ -1,9 +1,11 @@
 package main
 
 import (
+	"strings"
 	"time"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/yuin/gopher-lua"
 )
 
 const (
@@ -114,6 +116,17 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 		eh.RedoStack = new(Stack)
 	}
 	eh.UndoStack.Push(t)
+
+	for pl := range loadedPlugins {
+		ret, err := Call(pl+".onBeforeTextEvent", t)
+		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+			TermMessage(err)
+		}
+		if val, ok := ret.(lua.LBool); ok && val == lua.LFalse {
+			return
+		}
+	}
+
 	ExecuteTextEvent(t, eh.buf)
 }
 

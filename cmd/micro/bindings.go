@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/yosuke-furukawa/json5/encoding/json5"
+	"github.com/zyedidia/json5/encoding/json5"
 	"github.com/zyedidia/tcell"
 )
 
@@ -41,6 +41,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"Delete":              (*View).Delete,
 	"InsertTab":           (*View).InsertTab,
 	"Save":                (*View).Save,
+	"SaveAs":              (*View).SaveAs,
 	"Find":                (*View).Find,
 	"FindNext":            (*View).FindNext,
 	"FindPrevious":        (*View).FindPrevious,
@@ -52,8 +53,11 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"CutLine":             (*View).CutLine,
 	"DuplicateLine":       (*View).DuplicateLine,
 	"DeleteLine":          (*View).DeleteLine,
+	"MoveLinesUp":         (*View).MoveLinesUp,
+	"MoveLinesDown":       (*View).MoveLinesDown,
 	"IndentSelection":     (*View).IndentSelection,
 	"OutdentSelection":    (*View).OutdentSelection,
+	"OutdentLine":         (*View).OutdentLine,
 	"Paste":               (*View).Paste,
 	"PastePrimary":        (*View).PastePrimary,
 	"SelectAll":           (*View).SelectAll,
@@ -72,6 +76,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"ClearStatus":         (*View).ClearStatus,
 	"ShellMode":           (*View).ShellMode,
 	"CommandMode":         (*View).CommandMode,
+	"Escape":              (*View).Escape,
 	"Quit":                (*View).Quit,
 	"QuitAll":             (*View).QuitAll,
 	"AddTab":              (*View).AddTab,
@@ -79,6 +84,9 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"NextTab":             (*View).NextTab,
 	"NextSplit":           (*View).NextSplit,
 	"PreviousSplit":       (*View).PreviousSplit,
+	"Unsplit":             (*View).Unsplit,
+	"VSplit":              (*View).VSplitBinding,
+	"HSplit":              (*View).HSplitBinding,
 	"ToggleMacro":         (*View).ToggleMacro,
 	"PlayMacro":           (*View).PlayMacro,
 
@@ -205,12 +213,11 @@ var bindingKeys = map[string]tcell.Key{
 	"CtrlRightSq":    tcell.KeyCtrlRightSq,
 	"CtrlCarat":      tcell.KeyCtrlCarat,
 	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
-	"Backspace":      tcell.KeyBackspace,
 	"Tab":            tcell.KeyTab,
 	"Esc":            tcell.KeyEsc,
 	"Escape":         tcell.KeyEscape,
 	"Enter":          tcell.KeyEnter,
-	"Backspace2":     tcell.KeyBackspace2,
+	"Backspace":      tcell.KeyBackspace2,
 
 	// I renamed these keys to PageUp and PageDown but I don't want to break someone's keybindings
 	"PgUp":   tcell.KeyPgUp,
@@ -267,7 +274,8 @@ modSearch:
 		case strings.HasPrefix(k, "-"):
 			// We optionally support dashes between modifiers
 			k = k[1:]
-		case strings.HasPrefix(k, "Ctrl"):
+		case strings.HasPrefix(k, "Ctrl") && k != "CtrlH":
+			// CtrlH technically does not have a 'Ctrl' modifier because it is really backspace
 			k = k[4:]
 			modifiers |= tcell.ModCtrl
 		case strings.HasPrefix(k, "Alt"):
@@ -333,13 +341,25 @@ func findAction(v string) (action func(*View, bool) bool) {
 func BindKey(k, v string) {
 	key, ok := findKey(k)
 	if !ok {
+		TermMessage("Unknown keybinding: " + k)
 		return
 	}
 	if v == "ToggleHelp" {
 		helpBinding = k
 	}
+	if helpBinding == k && v != "ToggleHelp" {
+		helpBinding = ""
+	}
 
 	actionNames := strings.Split(v, ",")
+	if actionNames[0] == "UnbindKey" {
+		delete(bindings, key)
+		if len(actionNames) == 1 {
+			actionNames = make([]string, 0, 0)
+		} else {
+			actionNames = append(actionNames[:0], actionNames[1:]...)
+		}
+	}
 	actions := make([]func(*View, bool) bool, 0, len(actionNames))
 	for _, actionName := range actionNames {
 		actions = append(actions, findAction(actionName))
@@ -361,6 +381,8 @@ func DefaultBindings() map[string]string {
 		"ShiftRight":     "SelectRight",
 		"AltLeft":        "WordLeft",
 		"AltRight":       "WordRight",
+		"AltUp":          "MoveLinesUp",
+		"AltDown":        "MoveLinesDown",
 		"AltShiftRight":  "SelectWordRight",
 		"AltShiftLeft":   "SelectWordLeft",
 		"CtrlLeft":       "StartOfLine",
@@ -372,13 +394,12 @@ func DefaultBindings() map[string]string {
 		"CtrlShiftUp":    "SelectToStart",
 		"CtrlShiftDown":  "SelectToEnd",
 		"Enter":          "InsertNewline",
-		"Space":          "InsertSpace",
+		"CtrlH":          "Backspace",
 		"Backspace":      "Backspace",
-		"Backspace2":     "Backspace",
+		"Alt-CtrlH":      "DeleteWordLeft",
 		"Alt-Backspace":  "DeleteWordLeft",
-		"Alt-Backspace2": "DeleteWordLeft",
 		"Tab":            "IndentSelection,InsertTab",
-		"Backtab":        "OutdentSelection",
+		"Backtab":        "OutdentSelection,OutdentLine",
 		"CtrlO":          "OpenFile",
 		"CtrlS":          "Save",
 		"CtrlF":          "Find",
@@ -405,7 +426,6 @@ func DefaultBindings() map[string]string {
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
-		"Esc":            "ClearStatus",
 		"CtrlB":          "ShellMode",
 		"CtrlQ":          "Quit",
 		"CtrlE":          "CommandMode",
@@ -420,5 +440,13 @@ func DefaultBindings() map[string]string {
 		"Alt-e": "EndOfLine",
 		"Alt-p": "CursorUp",
 		"Alt-n": "CursorDown",
+
+		// Integration with file managers
+		"F1":  "ToggleHelp",
+		"F2":  "Save",
+		"F4":  "Quit",
+		"F7":  "Find",
+		"F10": "Quit",
+		"Esc": "Escape",
 	}
 }

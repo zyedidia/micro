@@ -8,12 +8,23 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/yosuke-furukawa/json5/encoding/json5"
 	"github.com/zyedidia/glob"
+	"github.com/zyedidia/json5/encoding/json5"
 )
+
+type optionValidator func(string, interface{}) error
 
 // The options that the user can set
 var globalSettings map[string]interface{}
+
+// Options with validators
+var optionValidators = map[string]optionValidator{
+	"tabsize":      validatePositiveValue,
+	"scrollmargin": validateNonNegativeValue,
+	"scrollspeed":  validateNonNegativeValue,
+	"colorscheme":  validateColorscheme,
+	"colorcolumn":  validateNonNegativeValue,
+}
 
 // InitGlobalSettings initializes the options map and sets all options to their default values
 func InitGlobalSettings() {
@@ -164,22 +175,34 @@ func GetOption(name string) interface{} {
 // Note that colorscheme is a global only option
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
-		"autoindent":   true,
-		"colorcolumn":  float64(0),
-		"colorscheme":  "zenburn",
-		"cursorline":   true,
-		"ignorecase":   false,
-		"indentchar":   " ",
-		"infobar":      true,
-		"ruler":        true,
-		"savecursor":   false,
-		"saveundo":     false,
-		"scrollspeed":  float64(2),
-		"scrollmargin": float64(3),
-		"statusline":   true,
-		"syntax":       true,
-		"tabsize":      float64(4),
-		"tabstospaces": false,
+		"autoindent":     true,
+		"keepautoindent": false,
+		"autosave":       false,
+		"colorcolumn":    float64(0),
+		"colorscheme":    "default",
+		"cursorline":     true,
+		"eofnewline":     false,
+		"rmtrailingws":   false,
+		"ignorecase":     false,
+		"indentchar":     " ",
+		"infobar":        true,
+		"ruler":          true,
+		"savecursor":     false,
+		"saveundo":       false,
+		"scrollspeed":    float64(2),
+		"scrollmargin":   float64(3),
+		"softwrap":       false,
+		"splitRight":     true,
+		"splitBottom":    true,
+		"statusline":     true,
+		"syntax":         true,
+		"tabsize":        float64(4),
+		"tabstospaces":   false,
+		"pluginchannels": []string{
+			"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json",
+		},
+		"pluginrepos": []string{},
+		"useprimary":  true,
 	}
 }
 
@@ -187,21 +210,29 @@ func DefaultGlobalSettings() map[string]interface{} {
 // Note that filetype is a local only option
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
-		"autoindent":   true,
-		"colorcolumn":  float64(0),
-		"cursorline":   true,
-		"filetype":     "Unknown",
-		"ignorecase":   false,
-		"indentchar":   " ",
-		"ruler":        true,
-		"savecursor":   false,
-		"saveundo":     false,
-		"scrollspeed":  float64(2),
-		"scrollmargin": float64(3),
-		"statusline":   true,
-		"syntax":       true,
-		"tabsize":      float64(4),
-		"tabstospaces": false,
+		"autoindent":     true,
+		"keepautoindent": false,
+		"autosave":       false,
+		"colorcolumn":    float64(0),
+		"cursorline":     true,
+		"eofnewline":     false,
+		"rmtrailingws":   false,
+		"filetype":       "Unknown",
+		"ignorecase":     false,
+		"indentchar":     " ",
+		"ruler":          true,
+		"savecursor":     false,
+		"saveundo":       false,
+		"scrollspeed":    float64(2),
+		"scrollmargin":   float64(3),
+		"softwrap":       false,
+		"splitRight":     true,
+		"splitBottom":    true,
+		"statusline":     true,
+		"syntax":         true,
+		"tabsize":        float64(4),
+		"tabstospaces":   false,
+		"useprimary":     true,
 	}
 }
 
@@ -210,12 +241,6 @@ func DefaultLocalSettings() map[string]interface{} {
 // is local only it will set the local version
 // Use setlocal to force an option to be set locally
 func SetOption(option, value string) error {
-	if option == "colorscheme" {
-		if !ColorschemeExists(value) {
-			return errors.New(value + " is not a valid colorscheme")
-		}
-	}
-
 	if _, ok := globalSettings[option]; !ok {
 		if _, ok := CurView().Buf.Settings[option]; !ok {
 			return errors.New("Invalid option")
@@ -224,22 +249,32 @@ func SetOption(option, value string) error {
 		return nil
 	}
 
+	var nativeValue interface{}
+
 	kind := reflect.TypeOf(globalSettings[option]).Kind()
 	if kind == reflect.Bool {
 		b, err := ParseBool(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		globalSettings[option] = b
+		nativeValue = b
 	} else if kind == reflect.String {
-		globalSettings[option] = value
+		nativeValue = value
 	} else if kind == reflect.Float64 {
 		i, err := strconv.Atoi(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		globalSettings[option] = float64(i)
+		nativeValue = float64(i)
+	} else {
+		return errors.New("Option has unsupported value type")
 	}
+
+	if err := optionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
+	globalSettings[option] = nativeValue
 
 	if option == "colorscheme" {
 		LoadSyntaxFiles()
@@ -277,22 +312,32 @@ func SetLocalOption(option, value string, view *View) error {
 		return errors.New("Invalid option")
 	}
 
+	var nativeValue interface{}
+
 	kind := reflect.TypeOf(buf.Settings[option]).Kind()
 	if kind == reflect.Bool {
 		b, err := ParseBool(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		buf.Settings[option] = b
+		nativeValue = b
 	} else if kind == reflect.String {
-		buf.Settings[option] = value
+		nativeValue = value
 	} else if kind == reflect.Float64 {
 		i, err := strconv.Atoi(value)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
-		buf.Settings[option] = float64(i)
+		nativeValue = float64(i)
+	} else {
+		return errors.New("Option has unsupported value type")
 	}
+
+	if err := optionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
+	buf.Settings[option] = nativeValue
 
 	if option == "statusline" {
 		view.ToggleStatusLine()
@@ -328,4 +373,56 @@ func SetOptionAndSettings(option, value string) {
 		messenger.Error("Error writing to settings.json: " + err.Error())
 		return
 	}
+}
+
+func optionIsValid(option string, value interface{}) error {
+	if validator, ok := optionValidators[option]; ok {
+		return validator(option, value)
+	}
+
+	return nil
+}
+
+// Option validators
+
+func validatePositiveValue(option string, value interface{}) error {
+	tabsize, ok := value.(float64)
+
+	if !ok {
+		return errors.New("Expected numeric type for " + option)
+	}
+
+	if tabsize < 1 {
+		return errors.New(option + " must be greater than 0")
+	}
+
+	return nil
+}
+
+func validateNonNegativeValue(option string, value interface{}) error {
+	nativeValue, ok := value.(float64)
+
+	if !ok {
+		return errors.New("Expected numeric type for " + option)
+	}
+
+	if nativeValue < 0 {
+		return errors.New(option + " must be non-negative")
+	}
+
+	return nil
+}
+
+func validateColorscheme(option string, value interface{}) error {
+	colorscheme, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for colorscheme")
+	}
+
+	if !ColorschemeExists(colorscheme) {
+		return errors.New(colorscheme + " is not a valid colorscheme")
+	}
+
+	return nil
 }

@@ -13,7 +13,7 @@ import (
 // PreActionCall executes the lua pre callback if possible
 func PreActionCall(funcName string, view *View) bool {
 	executeAction := true
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".pre"+funcName, view)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -29,7 +29,7 @@ func PreActionCall(funcName string, view *View) bool {
 // PostActionCall executes the lua plugin callback if possible
 func PostActionCall(funcName string, view *View) bool {
 	relocate := true
-	for _, pl := range loadedPlugins {
+	for pl := range loadedPlugins {
 		ret, err := Call(pl+".on"+funcName, view)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
@@ -57,9 +57,9 @@ func (v *View) Center(usePlugin bool) bool {
 		return false
 	}
 
-	v.Topline = v.Cursor.Y - v.height/2
-	if v.Topline+v.height > v.Buf.NumLines {
-		v.Topline = v.Buf.NumLines - v.height
+	v.Topline = v.Cursor.Y - v.Height/2
+	if v.Topline+v.Height > v.Buf.NumLines {
+		v.Topline = v.Buf.NumLines - v.Height
 	}
 	if v.Topline < 0 {
 		v.Topline = 0
@@ -463,7 +463,8 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 			v.Cursor.Right()
 		}
 
-		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y - 1)) {
+		// Remove the whitespaces if keepautoindent setting is off
+		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y-1)) && !v.Buf.Settings["keepautoindent"].(bool) {
 			line := v.Buf.Line(v.Cursor.Y - 1)
 			v.Buf.Remove(Loc{0, v.Cursor.Y - 1}, Loc{Count(line), v.Cursor.Y - 1})
 		}
@@ -587,31 +588,17 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		start := v.Cursor.CurSelection[0].Y
-		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
+		startY := v.Cursor.CurSelection[0].Y
+		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
-		for i := start; i <= end; i++ {
-			if v.Buf.Settings["tabstospaces"].(bool) {
-				tabsize := int(v.Buf.Settings["tabsize"].(float64))
-				v.Buf.Insert(Loc{0, i}, Spaces(tabsize))
-				if i == start {
-					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
-					}
-				}
-				if i == end {
-					v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, end})
-				}
-			} else {
-				v.Buf.Insert(Loc{0, i}, "\t")
-				if i == start {
-					if v.Cursor.CurSelection[0].X > 0 {
-						v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(1, v.Buf))
-					}
-				}
-				if i == end {
-					v.Cursor.SetSelectionEnd(Loc{endX + 2, end})
-				}
+		for y := startY; y <= endY; y++ {
+			tabsize := len(v.Buf.IndentString())
+			v.Buf.Insert(Loc{0, y}, v.Buf.IndentString())
+			if y == startY && v.Cursor.CurSelection[0].X > 0 {
+				v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
+			}
+			if y == endY {
+				v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, endY})
 			}
 		}
 		v.Cursor.Relocate()
@@ -624,6 +611,31 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 	return false
 }
 
+// OutdentLine moves the current line back one indentation
+func (v *View) OutdentLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("OutdentLine", v) {
+		return false
+	}
+
+	if v.Cursor.HasSelection() {
+		return false
+	}
+
+	for x := 0; x < len(v.Buf.IndentString()); x++ {
+		if len(GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))) == 0 {
+			break
+		}
+		v.Buf.Remove(Loc{0, v.Cursor.Y}, Loc{1, v.Cursor.Y})
+		v.Cursor.X -= 1
+	}
+	v.Cursor.Relocate()
+
+	if usePlugin {
+		return PostActionCall("OutdentLine", v)
+	}
+	return true
+}
+
 // OutdentSelection takes the current selection and moves it back one indent level
 func (v *View) OutdentSelection(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("OutdentSelection", v) {
@@ -631,37 +643,20 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		start := v.Cursor.CurSelection[0].Y
-		end := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
+		startY := v.Cursor.CurSelection[0].Y
+		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
 		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
-		for i := start; i <= end; i++ {
-			if len(GetLeadingWhitespace(v.Buf.Line(i))) > 0 {
-				if v.Buf.Settings["tabstospaces"].(bool) {
-					tabsize := int(v.Buf.Settings["tabsize"].(float64))
-					for j := 0; j < tabsize; j++ {
-						if len(GetLeadingWhitespace(v.Buf.Line(i))) == 0 {
-							break
-						}
-						v.Buf.Remove(Loc{0, i}, Loc{1, i})
-						if i == start {
-							if v.Cursor.CurSelection[0].X > 0 {
-								v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
-							}
-						}
-						if i == end {
-							v.Cursor.SetSelectionEnd(Loc{endX - j, end})
-						}
-					}
-				} else {
-					v.Buf.Remove(Loc{0, i}, Loc{1, i})
-					if i == start {
-						if v.Cursor.CurSelection[0].X > 0 {
-							v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
-						}
-					}
-					if i == end {
-						v.Cursor.SetSelectionEnd(Loc{endX, end})
-					}
+		for y := startY; y <= endY; y++ {
+			for x := 0; x < len(v.Buf.IndentString()); x++ {
+				if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
+					break
+				}
+				v.Buf.Remove(Loc{0, y}, Loc{1, y})
+				if y == startY && v.Cursor.CurSelection[0].X > 0 {
+					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
+				}
+				if y == endY {
+					v.Cursor.SetSelectionEnd(Loc{endX - x, endY})
 				}
 			}
 		}
@@ -684,18 +679,11 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		return false
 	}
-	// Insert a tab
-	if v.Buf.Settings["tabstospaces"].(bool) {
-		tabSize := int(v.Buf.Settings["tabsize"].(float64))
-		if remainder := v.Cursor.Loc.X % tabSize; remainder != 0 {
-			tabSize = tabSize - remainder
-		}
-		v.Buf.Insert(v.Cursor.Loc, Spaces(tabSize))
-		for i := 0; i < tabSize; i++ {
-			v.Cursor.Right()
-		}
-	} else {
-		v.Buf.Insert(v.Cursor.Loc, "\t")
+
+	tabBytes := len(v.Buf.IndentString())
+	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
+	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])
+	for i := 0; i < bytesUntilIndent; i++ {
 		v.Cursor.Right()
 	}
 
@@ -711,21 +699,13 @@ func (v *View) Save(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Help {
+	if v.Type == vtHelp {
 		// We can't save the help text
 		return false
 	}
 	// If this is an empty buffer, ask for a filename
 	if v.Buf.Path == "" {
-		filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
-		if !canceled {
-			// the filename might or might not be quoted, so unquote first then join the strings.
-			filename = strings.Join(SplitCommandArgs(filename), " ")
-			v.Buf.Path = filename
-			v.Buf.Name = filename
-		} else {
-			return false
-		}
+		v.SaveAs(false)
 	}
 	err := v.Buf.Save()
 	if err != nil {
@@ -756,12 +736,12 @@ func (v *View) Save(usePlugin bool) bool {
 
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
-	filename, canceled := messenger.Prompt("Filename: ", "Save", NoCompletion)
+	filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 	if !canceled {
 		// the filename might or might not be quoted, so unquote first then join the strings.
 		filename = strings.Join(SplitCommandArgs(filename), " ")
 		v.Buf.Path = filename
-		v.Buf.Name = filename
+		v.Buf.name = filename
 
 		v.Save(true)
 	}
@@ -775,12 +755,15 @@ func (v *View) Find(usePlugin bool) bool {
 		return false
 	}
 
+	searchStr := ""
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		searchStr = v.Cursor.GetSelection()
 	} else {
 		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
 	}
-	BeginSearch()
+	BeginSearch(searchStr)
 
 	if usePlugin {
 		return PostActionCall("Find", v)
@@ -796,8 +779,12 @@ func (v *View) FindNext(usePlugin bool) bool {
 
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		lastSearch = v.Cursor.GetSelection()
 	} else {
 		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+	}
+	if lastSearch == "" {
+		return true
 	}
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, true)
@@ -865,7 +852,7 @@ func (v *View) Copy(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
+		v.Cursor.CopySelection("clipboard")
 		v.freshClip = true
 		messenger.Message("Copied selection")
 	}
@@ -916,7 +903,7 @@ func (v *View) Cut(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		clipboard.WriteAll(v.Cursor.GetSelection(), "clipboard")
+		v.Cursor.CopySelection("clipboard")
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 		v.freshClip = true
@@ -931,15 +918,20 @@ func (v *View) Cut(usePlugin bool) bool {
 	return false
 }
 
-// DuplicateLine duplicates the current line
+// DuplicateLine duplicates the current line or selection
 func (v *View) DuplicateLine(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("DuplicateLine", v) {
 		return false
 	}
 
-	v.Cursor.End()
-	v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
-	v.Cursor.Right()
+	if v.Cursor.HasSelection() {
+		v.Buf.Insert(v.Cursor.CurSelection[1], v.Cursor.GetSelection())
+	} else {
+		v.Cursor.End()
+		v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
+		v.Cursor.Right()
+	}
+
 	messenger.Message("Duplicated line")
 
 	if usePlugin {
@@ -964,6 +956,84 @@ func (v *View) DeleteLine(usePlugin bool) bool {
 
 	if usePlugin {
 		return PostActionCall("DeleteLine", v)
+	}
+	return true
+}
+
+// MoveLinesUp moves up the current line or selected lines if any
+func (v *View) MoveLinesUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("MoveLinesUp", v) {
+		return false
+	}
+
+	if v.Cursor.HasSelection() {
+		if v.Cursor.CurSelection[0].Y == 0 {
+			messenger.Message("Can not move further up")
+			return true
+		}
+		v.Buf.MoveLinesUp(
+			v.Cursor.CurSelection[0].Y,
+			v.Cursor.CurSelection[1].Y,
+		)
+		v.Cursor.UpN(1)
+		v.Cursor.CurSelection[0].Y -= 1
+		v.Cursor.CurSelection[1].Y -= 1
+		messenger.Message("Moved up selected line(s)")
+	} else {
+		if v.Cursor.Loc.Y == 0 {
+			messenger.Message("Can not move further up")
+			return true
+		}
+		v.Buf.MoveLinesUp(
+			v.Cursor.Loc.Y,
+			v.Cursor.Loc.Y+1,
+		)
+		v.Cursor.UpN(1)
+		messenger.Message("Moved up current line")
+	}
+	v.Buf.IsModified = true
+
+	if usePlugin {
+		return PostActionCall("MoveLinesUp", v)
+	}
+	return true
+}
+
+// MoveLinesDown moves down the current line or selected lines if any
+func (v *View) MoveLinesDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("MoveLinesDown", v) {
+		return false
+	}
+
+	if v.Cursor.HasSelection() {
+		if v.Cursor.CurSelection[1].Y >= len(v.Buf.lines) {
+			messenger.Message("Can not move further down")
+			return true
+		}
+		v.Buf.MoveLinesDown(
+			v.Cursor.CurSelection[0].Y,
+			v.Cursor.CurSelection[1].Y,
+		)
+		v.Cursor.DownN(1)
+		v.Cursor.CurSelection[0].Y += 1
+		v.Cursor.CurSelection[1].Y += 1
+		messenger.Message("Moved down selected line(s)")
+	} else {
+		if v.Cursor.Loc.Y >= len(v.Buf.lines)-1 {
+			messenger.Message("Can not move further down")
+			return true
+		}
+		v.Buf.MoveLinesDown(
+			v.Cursor.Loc.Y,
+			v.Cursor.Loc.Y+1,
+		)
+		v.Cursor.DownN(1)
+		messenger.Message("Moved down current line")
+	}
+	v.Buf.IsModified = true
+
+	if usePlugin {
+		return PostActionCall("MoveLinesDown", v)
 	}
 	return true
 }
@@ -1024,19 +1094,13 @@ func (v *View) OpenFile(usePlugin bool) bool {
 	}
 
 	if v.CanClose() {
-		filename, canceled := messenger.Prompt("File to open: ", "Open", FileCompletion)
-		if canceled {
-			return false
+		input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
+		if !canceled {
+			HandleCommand(input)
+			if usePlugin {
+				return PostActionCall("OpenFile", v)
+			}
 		}
-		// the filename might or might not be quoted, so unquote first then join the strings.
-		filename = strings.Join(SplitCommandArgs(filename), " ")
-
-		v.Open(filename)
-
-		if usePlugin {
-			return PostActionCall("OpenFile", v)
-		}
-		return true
 	}
 	return false
 }
@@ -1061,10 +1125,10 @@ func (v *View) End(usePlugin bool) bool {
 		return false
 	}
 
-	if v.height > v.Buf.NumLines {
+	if v.Height > v.Buf.NumLines {
 		v.Topline = 0
 	} else {
-		v.Topline = v.Buf.NumLines - v.height
+		v.Topline = v.Buf.NumLines - v.Height
 	}
 
 	if usePlugin {
@@ -1079,8 +1143,8 @@ func (v *View) PageUp(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Topline > v.height {
-		v.ScrollUp(v.height)
+	if v.Topline > v.Height {
+		v.ScrollUp(v.Height)
 	} else {
 		v.Topline = 0
 	}
@@ -1097,10 +1161,10 @@ func (v *View) PageDown(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Buf.NumLines-(v.Topline+v.height) > v.height {
-		v.ScrollDown(v.height)
-	} else if v.Buf.NumLines >= v.height {
-		v.Topline = v.Buf.NumLines - v.height
+	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height {
+		v.ScrollDown(v.Height)
+	} else if v.Buf.NumLines >= v.Height {
+		v.Topline = v.Buf.NumLines - v.Height
 	}
 
 	if usePlugin {
@@ -1121,7 +1185,7 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
 	}
-	v.Cursor.UpN(v.height)
+	v.Cursor.UpN(v.Height)
 
 	if usePlugin {
 		return PostActionCall("CursorPageUp", v)
@@ -1141,7 +1205,7 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
 	}
-	v.Cursor.DownN(v.height)
+	v.Cursor.DownN(v.Height)
 
 	if usePlugin {
 		return PostActionCall("CursorPageDown", v)
@@ -1155,8 +1219,8 @@ func (v *View) HalfPageUp(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Topline > v.height/2 {
-		v.ScrollUp(v.height / 2)
+	if v.Topline > v.Height/2 {
+		v.ScrollUp(v.Height / 2)
 	} else {
 		v.Topline = 0
 	}
@@ -1173,11 +1237,11 @@ func (v *View) HalfPageDown(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Buf.NumLines-(v.Topline+v.height) > v.height/2 {
-		v.ScrollDown(v.height / 2)
+	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height/2 {
+		v.ScrollDown(v.Height / 2)
 	} else {
-		if v.Buf.NumLines >= v.height {
-			v.Topline = v.Buf.NumLines - v.height
+		if v.Buf.NumLines >= v.Height {
+			v.Topline = v.Buf.NumLines - v.Height
 		}
 	}
 
@@ -1214,7 +1278,7 @@ func (v *View) JumpLine(usePlugin bool) bool {
 	}
 
 	// Prompt for line number
-	linestring, canceled := messenger.Prompt("Jump to line # ", "LineNumber", NoCompletion)
+	linestring, canceled := messenger.Prompt("Jump to line # ", "", "LineNumber", NoCompletion)
 	if canceled {
 		return false
 	}
@@ -1258,7 +1322,7 @@ func (v *View) ToggleHelp(usePlugin bool) bool {
 		return false
 	}
 
-	if !v.Help {
+	if v.Type != vtHelp {
 		// Open the default help
 		v.openHelp("help")
 	} else {
@@ -1277,7 +1341,7 @@ func (v *View) ShellMode(usePlugin bool) bool {
 		return false
 	}
 
-	input, canceled := messenger.Prompt("$ ", "Shell", NoCompletion)
+	input, canceled := messenger.Prompt("$ ", "", "Shell", NoCompletion)
 	if !canceled {
 		// The true here is for openTerm to make the command interactive
 		HandleShellCommand(input, true, true)
@@ -1294,7 +1358,7 @@ func (v *View) CommandMode(usePlugin bool) bool {
 		return false
 	}
 
-	input, canceled := messenger.Prompt("> ", "Command", CommandCompletion)
+	input, canceled := messenger.Prompt("> ", "", "Command", CommandCompletion)
 	if !canceled {
 		HandleCommand(input)
 		if usePlugin {
@@ -1305,10 +1369,23 @@ func (v *View) CommandMode(usePlugin bool) bool {
 	return false
 }
 
-// Quit quits the editor
-// This behavior needs to be changed and should really only quit the editor if this
-// is the last view
-// However, since micro only supports one view for now, it doesn't really matter
+// Escape leaves current mode
+func (v *View) Escape(usePlugin bool) bool {
+	// check if user is searching, or the last search is still active
+	if searching || lastSearch != "" {
+		ExitSearch(v)
+		return true
+	}
+	// check if a prompt is shown, hide it and don't quit
+	if messenger.hasPrompt {
+		messenger.Reset() // FIXME
+		return true
+	}
+
+	return false
+}
+
+// Quit this will close the current tab or view that is open
 func (v *View) Quit(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Quit", v) {
 		return false
@@ -1331,7 +1408,6 @@ func (v *View) Quit(usePlugin bool) bool {
 					curTab--
 				}
 				if curTab == 0 {
-					// CurView().Resize(screen.Size())
 					CurView().ToggleTabbar()
 					CurView().matches = Match(CurView())
 				}
@@ -1368,18 +1444,24 @@ func (v *View) QuitAll(usePlugin bool) bool {
 	}
 
 	if closeAll {
-		for _, tab := range tabs {
-			for _, v := range tab.views {
-				v.CloseBuffer()
+		// only quit if all of the buffers can be closed and the user confirms that they actually want to quit everything
+
+		shouldQuit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
+
+		if shouldQuit {
+			for _, tab := range tabs {
+				for _, v := range tab.views {
+					v.CloseBuffer()
+				}
 			}
-		}
 
-		if usePlugin {
-			PostActionCall("QuitAll", v)
-		}
+			if usePlugin {
+				PostActionCall("QuitAll", v)
+			}
 
-		screen.Fini()
-		os.Exit(0)
+			screen.Fini()
+			os.Exit(0)
+		}
 	}
 
 	return false
@@ -1391,10 +1473,10 @@ func (v *View) AddTab(usePlugin bool) bool {
 		return false
 	}
 
-	tab := NewTabFromView(NewView(NewBuffer([]byte{}, "")))
+	tab := NewTabFromView(NewView(NewBuffer(strings.NewReader(""), "")))
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
-	curTab++
+	curTab = len(tabs) - 1
 	if len(tabs) == 2 {
 		for _, t := range tabs {
 			for _, v := range t.views {
@@ -1445,6 +1527,55 @@ func (v *View) NextTab(usePlugin bool) bool {
 	return false
 }
 
+// VSplitBinding opens an empty vertical split
+func (v *View) VSplitBinding(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("VSplit", v) {
+		return false
+	}
+
+	v.VSplit(NewBuffer(strings.NewReader(""), ""))
+
+	if usePlugin {
+		return PostActionCall("VSplit", v)
+	}
+	return false
+}
+
+// HSplitBinding opens an empty horizontal split
+func (v *View) HSplitBinding(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("HSplit", v) {
+		return false
+	}
+
+	v.HSplit(NewBuffer(strings.NewReader(""), ""))
+
+	if usePlugin {
+		return PostActionCall("HSplit", v)
+	}
+	return false
+}
+
+// Unsplit closes all splits in the current tab except the active one
+func (v *View) Unsplit(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Unsplit", v) {
+		return false
+	}
+
+	curView := tabs[curTab].CurView
+	for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
+		view := tabs[curTab].views[i]
+		if view != nil && view.Num != curView {
+			view.Quit(true)
+			// messenger.Message("Quit ", view.Buf.Path)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("Unsplit", v)
+	}
+	return false
+}
+
 // NextSplit changes the view to the next split
 func (v *View) NextSplit(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("NextSplit", v) {
@@ -1452,10 +1583,10 @@ func (v *View) NextSplit(usePlugin bool) bool {
 	}
 
 	tab := tabs[curTab]
-	if tab.curView < len(tab.views)-1 {
-		tab.curView++
+	if tab.CurView < len(tab.views)-1 {
+		tab.CurView++
 	} else {
-		tab.curView = 0
+		tab.CurView = 0
 	}
 
 	if usePlugin {
@@ -1471,10 +1602,10 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 	}
 
 	tab := tabs[curTab]
-	if tab.curView > 0 {
-		tab.curView--
+	if tab.CurView > 0 {
+		tab.CurView--
 	} else {
-		tab.curView = len(tab.views) - 1
+		tab.CurView = len(tab.views) - 1
 	}
 
 	if usePlugin {
@@ -1486,6 +1617,7 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 var curMacro []interface{}
 var recordingMacro bool
 
+// ToggleMacro toggles recording of a macro
 func (v *View) ToggleMacro(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("ToggleMacro", v) {
 		return false
@@ -1506,6 +1638,7 @@ func (v *View) ToggleMacro(usePlugin bool) bool {
 	return true
 }
 
+// PlayMacro plays back the most recently recorded macro
 func (v *View) PlayMacro(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("PlayMacro", v) {
 		return false
@@ -1522,7 +1655,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 			v.Buf.Insert(v.Cursor.Loc, string(t))
 			v.Cursor.Right()
 
-			for _, pl := range loadedPlugins {
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(t), v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)

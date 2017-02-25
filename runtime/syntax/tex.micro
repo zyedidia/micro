@@ -1,8 +1,21 @@
-## Here is a short example for TeX files.
-##
+## TeX
 syntax "tex" "\.tex$" "bib" "\.bib$" "cls" "\.cls$"
-color yellow "\$[^$]*\$"
-green (i) "\\.|\\[A-Z]*"
-color magenta "[{}]"
-color blue "%.*"
-color blue start="\\begin\{comment\}" end="\\end\{comment\}"
+
+## colorize the identifiers of {<identifier>} and [<identifier>]
+color identifier start="\{" end="\}"
+color identifier start="\[" end="\]"
+
+## numbers
+color constant.number "\b[0-9]+(\.[0-9]+)?([[:space:]](pt|mm|cm|in|ex|em|bp|pc|dd|cc|nd|nc|sp))?\b"
+
+## let brackets have the default color again
+color default "[{}\[\]]"
+
+color special "[&\\]"
+
+## macros
+color statement "\\@?[a-zA-Z_]+"
+
+## commments
+color comment "%.*"
+color comment start="\\begin\{comment\}" end="\\end\{comment\}"

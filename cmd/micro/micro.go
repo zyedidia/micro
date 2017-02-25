@@ -5,17 +5,19 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/go-errors/errors"
-	"github.com/layeh/gopher-luar"
 	"github.com/mattn/go-isatty"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
+	"layeh.com/gopher-luar"
 )
 
 const (
@@ -23,6 +25,7 @@ const (
 	synLinesDown         = 75  // How many lines down to look to do syntax highlighting
 	doubleClickThreshold = 400 // How many milliseconds to wait before a second click is not a double click
 	undoThreshold        = 500 // If two events are less than n milliseconds apart, undo both of them
+	autosaveTime         = 8   // Number of seconds to wait before autosaving
 )
 
 var (
@@ -43,7 +46,7 @@ var (
 
 	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
-	Version     = "Unknown"
+	Version     = "0.0.0-unknown"
 	CommitHash  = "Unknown"
 	CompileDate = "Unknown"
 
@@ -60,7 +63,8 @@ var (
 	// Channel of jobs running in the background
 	jobs chan JobFunction
 	// Event channel
-	events chan tcell.Event
+	events   chan tcell.Event
+	autosave chan bool
 )
 
 // LoadInput determines which files should be loaded into buffers
@@ -89,17 +93,27 @@ func LoadInput() []*Buffer {
 			filename = flag.Args()[i]
 
 			// Check that the file exists
+			var input *os.File
 			if _, e := os.Stat(filename); e == nil {
 				// If it exists we load it into a buffer
-				input, err = ioutil.ReadFile(filename)
+				input, err = os.Open(filename)
+				stat, _ := input.Stat()
+				defer input.Close()
 				if err != nil {
 					TermMessage(err)
-					input = []byte{}
-					filename = ""
+					continue
+				}
+				if stat.IsDir() {
+					TermMessage("Cannot read", filename, "because it is a directory")
+					continue
 				}
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			buffers = append(buffers, NewBuffer(input, filename))
+			if input != nil {
+				buffers = append(buffers, NewBuffer(input, filename))
+			} else {
+				buffers = append(buffers, NewBuffer(strings.NewReader(""), filename))
+			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
@@ -110,10 +124,10 @@ func LoadInput() []*Buffer {
 			TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
-		buffers = append(buffers, NewBuffer(input, filename))
+		buffers = append(buffers, NewBuffer(strings.NewReader(string(input)), filename))
 	} else {
 		// Option 3, just open an empty buffer
-		buffers = append(buffers, NewBuffer(input, filename))
+		buffers = append(buffers, NewBuffer(strings.NewReader(string(input)), filename))
 	}
 
 	return buffers
@@ -195,6 +209,31 @@ func RedrawAll() {
 	screen.Show()
 }
 
+func LoadAll() {
+	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
+	InitConfigDir()
+
+	// Build a list of available Extensions (Syntax, Colorscheme etc.)
+	InitRuntimeFiles()
+
+	// Load the user's settings
+	InitGlobalSettings()
+
+	InitCommands()
+	InitBindings()
+
+	LoadSyntaxFiles()
+
+	for _, tab := range tabs {
+		for _, v := range tab.views {
+			v.Buf.UpdateRules()
+			if v.Buf.Settings["syntax"].(bool) {
+				v.matches = Match(v)
+			}
+		}
+	}
+}
+
 // Passing -version as a flag will have micro print out the version number
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
@@ -202,7 +241,7 @@ var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at 
 func main() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
-		fmt.Println("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n")
+		fmt.Print("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n\n")
 		flag.PrintDefaults()
 	}
 
@@ -233,17 +272,14 @@ func main() {
 	// Find the user's configuration directory (probably $XDG_CONFIG_HOME/micro)
 	InitConfigDir()
 
+	// Build a list of available Extensions (Syntax, Colorscheme etc.)
+	InitRuntimeFiles()
+
 	// Load the user's settings
 	InitGlobalSettings()
 
 	InitCommands()
 	InitBindings()
-
-	// Load the syntax files, including the colorscheme
-	LoadSyntaxFiles()
-
-	// Load the help files
-	LoadHelp()
 
 	// Start the screen
 	InitScreen()
@@ -268,6 +304,10 @@ func main() {
 
 	// Now we load the input
 	buffers := LoadInput()
+	if len(buffers) == 0 {
+		screen.Fini()
+		os.Exit(1)
+	}
 	for _, buf := range buffers {
 		// For each buffer we create a new tab and place the view in that tab
 		tab := NewTabFromView(NewView(buf))
@@ -276,9 +316,6 @@ func main() {
 		for _, t := range tabs {
 			for _, v := range t.views {
 				v.Center(false)
-				if globalSettings["syntax"].(bool) {
-					v.matches = Match(v)
-				}
 			}
 
 			t.Resize()
@@ -309,21 +346,46 @@ func main() {
 	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
-	L.SetGlobal("NewBuffer", luar.New(L, NewBuffer))
+	L.SetGlobal("NewBuffer", luar.New(L, NewBufferFromString))
+	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
+		return string(r)
+	}))
+	L.SetGlobal("Loc", luar.New(L, func(x, y int) Loc {
+		return Loc{x, y}
+	}))
+	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
+	L.SetGlobal("DirectoryName", luar.New(L, filepath.Dir))
+	L.SetGlobal("configDir", luar.New(L, configDir))
+	L.SetGlobal("Reload", luar.New(L, LoadAll))
+	L.SetGlobal("ByteOffset", luar.New(L, ByteOffset))
+	L.SetGlobal("ToCharPos", luar.New(L, ToCharPos))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
+	L.SetGlobal("JobSpawn", luar.New(L, JobSpawn))
 	L.SetGlobal("JobSend", luar.New(L, JobSend))
 	L.SetGlobal("JobStop", luar.New(L, JobStop))
 
-	LoadPlugins()
+	// Extension Files
+	L.SetGlobal("ReadRuntimeFile", luar.New(L, PluginReadRuntimeFile))
+	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
+	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
+	L.SetGlobal("AddRuntimeFilesFromDirectory", luar.New(L, PluginAddRuntimeFilesFromDirectory))
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
+	autosave = make(chan bool)
+
+	LoadPlugins()
+
+	// Load the syntax files, including the colorscheme
+	LoadSyntaxFiles()
 
 	for _, t := range tabs {
 		for _, v := range t.views {
-			for _, pl := range loadedPlugins {
+			v.Buf.FindFileType()
+			v.Buf.UpdateRules()
+			for pl := range loadedPlugins {
 				_, err := Call(pl+".onViewOpen", v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 					TermMessage(err)
@@ -343,6 +405,15 @@ func main() {
 		}
 	}()
 
+	go func() {
+		for {
+			time.Sleep(autosaveTime * time.Second)
+			if globalSettings["autosave"].(bool) {
+				autosave <- true
+			}
+		}
+	}()
+
 	for {
 		// Display everything
 		RedrawAll()
@@ -355,11 +426,17 @@ func main() {
 			// If a new job has finished while running in the background we should execute the callback
 			f.function(f.output, f.args...)
 			continue
+		case <-autosave:
+			CurView().Save(true)
 		case event = <-events:
 		}
 
 		for event != nil {
 			switch e := event.(type) {
+			case *tcell.EventResize:
+				for _, t := range tabs {
+					t.Resize()
+				}
 			case *tcell.EventMouse:
 				if e.Buttons() == tcell.Button1 {
 					// If the user left clicked we check a couple things
@@ -371,15 +448,15 @@ func main() {
 						// Often error messages are displayed down there so it can be useful to easily
 						// copy the message
 						clipboard.WriteAll(messenger.message, "primary")
-						continue
+						break
 					}
 
 					if CurView().mouseReleased {
 						// We loop through each view in the current tab and make sure the current view
 						// is the one being clicked in
 						for _, v := range tabs[curTab].views {
-							if x >= v.x && x < v.x+v.width && y >= v.y && y < v.y+v.height {
-								tabs[curTab].curView = v.Num
+							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								tabs[curTab].CurView = v.Num
 							}
 						}
 					}
@@ -389,7 +466,7 @@ func main() {
 			// This function checks the mouse event for the possibility of changing the current tab
 			// If the tab was changed it returns true
 			if TabbarHandleMouseEvent(event) {
-				continue
+				break
 			}
 
 			if searching {

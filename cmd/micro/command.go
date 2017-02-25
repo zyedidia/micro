@@ -2,11 +2,12 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"os/signal"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -25,20 +26,30 @@ type StrCommand struct {
 
 var commands map[string]Command
 
-var commandActions = map[string]func([]string){
-	"Set":      Set,
-	"SetLocal": SetLocal,
-	"Show":     Show,
-	"Run":      Run,
-	"Bind":     Bind,
-	"Quit":     Quit,
-	"Save":     Save,
-	"Replace":  Replace,
-	"VSplit":   VSplit,
-	"HSplit":   HSplit,
-	"Tab":      NewTab,
-	"Help":     Help,
-	"Eval":     Eval,
+var commandActions map[string]func([]string)
+
+func init() {
+	commandActions = map[string]func([]string){
+		"Set":       Set,
+		"SetLocal":  SetLocal,
+		"Show":      Show,
+		"Run":       Run,
+		"Bind":      Bind,
+		"Quit":      Quit,
+		"Save":      Save,
+		"Replace":   Replace,
+		"VSplit":    VSplit,
+		"HSplit":    HSplit,
+		"Tab":       NewTab,
+		"Help":      Help,
+		"Eval":      Eval,
+		"ToggleLog": ToggleLog,
+		"Plugin":    PluginCmd,
+		"Reload":    Reload,
+		"Cd":        Cd,
+		"Pwd":       Pwd,
+		"Open":      Open,
+	}
 }
 
 // InitCommands initializes the default commands
@@ -84,7 +95,153 @@ func DefaultCommands() map[string]StrCommand {
 		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
 		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
 		"eval":     {"Eval", []Completion{NoCompletion}},
+		"log":      {"ToggleLog", []Completion{NoCompletion}},
+		"plugin":   {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
+		"reload":   {"Reload", []Completion{NoCompletion}},
+		"cd":       {"Cd", []Completion{FileCompletion}},
+		"pwd":      {"Pwd", []Completion{NoCompletion}},
+		"open":     {"Open", []Completion{FileCompletion}},
 	}
+}
+
+// PluginCmd installs, removes, updates, lists, or searches for given plugins
+func PluginCmd(args []string) {
+	if len(args) >= 1 {
+		switch args[0] {
+		case "install":
+			installedVersions := GetInstalledVersions(false)
+			for _, plugin := range args[1:] {
+				pp := GetAllPluginPackages().Get(plugin)
+				if pp == nil {
+					messenger.Error("Unknown plugin \"" + plugin + "\"")
+				} else if err := pp.IsInstallable(); err != nil {
+					messenger.Error("Error installing ", plugin, ": ", err)
+				} else {
+					for _, installed := range installedVersions {
+						if pp.Name == installed.pack.Name {
+							if pp.Versions[0].Version.Compare(installed.Version) == 1 {
+								messenger.Error(pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
+							} else {
+								messenger.Error(pp.Name, " is already installed")
+							}
+						}
+					}
+					pp.Install()
+				}
+			}
+		case "remove":
+			removed := ""
+			for _, plugin := range args[1:] {
+				// check if the plugin exists.
+				if _, ok := loadedPlugins[plugin]; ok {
+					UninstallPlugin(plugin)
+					removed += plugin + " "
+					continue
+				}
+			}
+			if !IsSpaces(removed) {
+				messenger.Message("Removed ", removed)
+			} else {
+				messenger.Error("The requested plugins do not exist")
+			}
+		case "update":
+			UpdatePlugins(args[1:])
+		case "list":
+			plugins := GetInstalledVersions(false)
+			messenger.AddLog("----------------")
+			messenger.AddLog("The following plugins are currently installed:\n")
+			for _, p := range plugins {
+				messenger.AddLog(fmt.Sprintf("%s (%s)", p.pack.Name, p.Version))
+			}
+			messenger.AddLog("----------------")
+			if len(plugins) > 0 {
+				if CurView().Type != vtLog {
+					ToggleLog([]string{})
+				}
+			}
+		case "search":
+			plugins := SearchPlugin(args[1:])
+			messenger.Message(len(plugins), " plugins found")
+			for _, p := range plugins {
+				messenger.AddLog("----------------")
+				messenger.AddLog(p.String())
+			}
+			messenger.AddLog("----------------")
+			if len(plugins) > 0 {
+				if CurView().Type != vtLog {
+					ToggleLog([]string{})
+				}
+			}
+		case "available":
+			packages := GetAllPluginPackages()
+			messenger.AddLog("Available Plugins:")
+			for _, pkg := range packages {
+				messenger.AddLog(pkg.Name)
+			}
+			if CurView().Type != vtLog {
+				ToggleLog([]string{})
+			}
+		}
+	} else {
+		messenger.Error("Not enough arguments")
+	}
+}
+
+func Cd(args []string) {
+	if len(args) > 0 {
+		home, _ := homedir.Dir()
+		path := strings.Replace(args[0], "~", home, 1)
+		os.Chdir(path)
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				wd, _ := os.Getwd()
+				view.Buf.Path, _ = MakeRelative(view.Buf.AbsPath, wd)
+				if p, _ := filepath.Abs(view.Buf.Path); !strings.Contains(p, wd) {
+					view.Buf.Path = view.Buf.AbsPath
+				}
+			}
+		}
+	}
+}
+
+func Pwd(args []string) {
+	wd, err := os.Getwd()
+	if err != nil {
+		messenger.Message(err.Error())
+	} else {
+		messenger.Message(wd)
+	}
+}
+
+func Open(args []string) {
+	if len(args) > 0 {
+		filename := args[0]
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		filename = strings.Join(SplitCommandArgs(filename), " ")
+
+		CurView().Open(filename)
+	} else {
+		messenger.Error("No filename")
+	}
+}
+
+func ToggleLog(args []string) {
+	buffer := messenger.getBuffer()
+	if CurView().Type != vtLog {
+		CurView().HSplit(buffer)
+		CurView().Type = vtLog
+		RedrawAll()
+		buffer.Cursor.Loc = buffer.Start()
+		CurView().Relocate()
+		buffer.Cursor.Loc = buffer.End()
+		CurView().Relocate()
+	} else {
+		CurView().Quit(true)
+	}
+}
+
+func Reload(args []string) {
+	LoadAll()
 }
 
 // Help tries to open the given help page in a horizontal split
@@ -94,7 +251,7 @@ func Help(args []string) {
 		CurView().openHelp("help")
 	} else {
 		helpPage := args[0]
-		if _, ok := helpPages[helpPage]; ok {
+		if FindRuntimeFile(RTHelp, helpPage) != nil {
 			CurView().openHelp(helpPage)
 		} else {
 			messenger.Error("Sorry, no help for ", helpPage)
@@ -106,17 +263,18 @@ func Help(args []string) {
 // If no file is given, it opens an empty buffer in a new split
 func VSplit(args []string) {
 	if len(args) == 0 {
-		CurView().VSplit(NewBuffer([]byte{}, ""))
+		CurView().VSplit(NewBuffer(strings.NewReader(""), ""))
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
+		file, err := os.Open(filename)
+		defer file.Close()
 
 		var buf *Buffer
 		if err != nil {
 			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer([]byte{}, filename)
+			buf = NewBuffer(strings.NewReader(""), filename)
 		} else {
 			buf = NewBuffer(file, filename)
 		}
@@ -128,17 +286,18 @@ func VSplit(args []string) {
 // If no file is given, it opens an empty buffer in a new split
 func HSplit(args []string) {
 	if len(args) == 0 {
-		CurView().HSplit(NewBuffer([]byte{}, ""))
+		CurView().HSplit(NewBuffer(strings.NewReader(""), ""))
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, err := ioutil.ReadFile(filename)
+		file, err := os.Open(filename)
+		defer file.Close()
 
 		var buf *Buffer
 		if err != nil {
 			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer([]byte{}, filename)
+			buf = NewBuffer(strings.NewReader(""), filename)
 		} else {
 			buf = NewBuffer(file, filename)
 		}
@@ -166,12 +325,13 @@ func NewTab(args []string) {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, _ := ioutil.ReadFile(filename)
+		file, _ := os.Open(filename)
+		defer file.Close()
 
 		tab := NewTabFromView(NewView(NewBuffer(file, filename)))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
-		curTab++
+		curTab = len(tabs) - 1
 		if len(tabs) == 2 {
 			for _, t := range tabs {
 				for _, v := range t.views {
@@ -189,8 +349,8 @@ func Set(args []string) {
 		return
 	}
 
-	option := strings.TrimSpace(args[0])
-	value := strings.TrimSpace(args[1])
+	option := args[0]
+	value := args[1]
 
 	SetOptionAndSettings(option, value)
 }
@@ -202,8 +362,8 @@ func SetLocal(args []string) {
 		return
 	}
 
-	option := strings.TrimSpace(args[0])
-	value := strings.TrimSpace(args[1])
+	option := args[0]
+	value := args[1]
 
 	err := SetLocalOption(option, value, CurView())
 	if err != nil {
@@ -276,7 +436,7 @@ func Replace(args []string) {
 	search := string(args[0])
 	replace := string(args[1])
 
-	regex, err := regexp.Compile(search)
+	regex, err := regexp.Compile("(?m)" + search)
 	if err != nil {
 		// There was an error with the user's regex
 		messenger.Error(err.Error())
@@ -323,13 +483,28 @@ func Replace(args []string) {
 			}
 		}
 	} else {
-		for {
-			match := regex.FindStringIndex(view.Buf.String())
-			if match == nil {
-				break
-			}
+		bufStr := view.Buf.String()
+		matches := regex.FindAllStringIndex(bufStr, -1)
+		if matches != nil && len(matches) > 0 {
+			prevMatchCount := runePos(matches[0][0], bufStr)
+			searchCount := runePos(matches[0][1], bufStr) - prevMatchCount
+			from := FromCharPos(matches[0][0], view.Buf)
+			to := from.Move(searchCount, view.Buf)
+			adjust := Count(replace) - searchCount
+			view.Buf.Replace(from, to, replace)
 			found++
-			view.Buf.Replace(FromCharPos(match[0], view.Buf), FromCharPos(match[1], view.Buf), replace)
+			if len(matches) > 1 {
+				for _, match := range matches[1:] {
+					found++
+					matchCount := runePos(match[0], bufStr)
+					searchCount = runePos(match[1], bufStr) - matchCount
+					from = from.Move(matchCount-prevMatchCount+adjust, view.Buf)
+					to = from.Move(searchCount, view.Buf)
+					view.Buf.Replace(from, to, replace)
+					prevMatchCount = matchCount
+					adjust = Count(replace) - searchCount
+				}
+			}
 		}
 	}
 	view.Cursor.Relocate()

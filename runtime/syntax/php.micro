@@ -24,7 +24,9 @@ color statement "(=>|===|!==|==|!=|&&|\|\||::|=|->|\!)"
 color default "(\$[a-zA-Z0-9\-_]+)"
 color default "[\(|\)|/|+|-|\*|\[|,|;]"
 
-color constant.string "('.*?'|\".*?\")"
+color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color constant.specialChar "\\[abfnrtv'\"\\]"
 
+color comment "(^|[[:space:]])//.*"
+color comment "(^|[[:space:]])#.*"
 color comment start="/\*" end="\*/"
-color comment "(#.*|//.*)$"

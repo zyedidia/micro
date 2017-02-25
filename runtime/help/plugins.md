@@ -43,11 +43,27 @@ for functions are given using Go's type system):
 * `OS`: variable which gives the OS micro is currently running on (this is the same
 as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
+* `configDir`: contains the path to the micro configuration files
+
 * `tabs`: a list of all the tabs currently in use
 
 * `curTab`: the index of the current tabs in the tabs list
 
 * `messenger`: lets you send messages to the user or create prompts
+
+* `NewBuffer(text, path string) *Buffer`: creates a new buffer from a given reader with a given path
+
+* `GetLeadingWhitespace() bool`: returns the leading whitespace of the given string
+
+* `IsWordChar(str string) bool`: returns whether or not the string is a 'word character'
+
+* `RuneStr(r rune) string`: returns a string containing the given rune
+
+* `Loc(x, y int) Loc`: returns a new `Loc` struct
+
+* `JoinPaths(dir... string) string` combines multiple directories to a full path
+
+* `DirectoryName(path string)` returns all but the last element of path ,typically the path's directory
 
 * `GetOption(name string)`: returns the value of the requested option
 
@@ -57,7 +73,7 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 * `SetOption(option, value string)`: sets the given option to the value. This will
    set the option globally, unless it is a local only option.
 
-* `SetLocalOption(option, value string, buffer *Buffer)`: sets the given option to
+* `SetLocalOption(option, value string, view *View)`: sets the given option to
    the value locally in the given buffer
 
 * `BindKey(key, action string)`: binds `key` to `action`
@@ -78,11 +94,21 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
    `waitToClose` bool only applies if `interactive` is true and means that it should wait before
    returning to the editor.
 
-* `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
-   Starts running the given shell command in the background. `onStdout` `onStderr` and `onExit`
+* `ToCharPos(loc Loc, buf *Buffer) int`: returns the character position of a given x, y location
+
+* `Reload`: (Re)load everything
+
+* `ByteOffset(loc Loc, buf *Buffer) int`: exactly like `ToCharPos` except it it counts bytes instead of runes
+
+* `JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...string)`:
+   Starts running the given process in the background. `onStdout` `onStderr` and `onExit`
    are callbacks to lua functions which will be called when the given actions happen
    to the background process.
    `userargs` are the arguments which will get passed to the callback functions
+
+* `JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string)`:
+   Starts running the given shell command in the background. Note that the command execute
+   is first parsed by a shell when using this command. It is executed with `sh -c`.
 
 * `JobSend(cmd *exec.Cmd, data string)`: send a string into the stdin of the job process
 
@@ -108,6 +134,21 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 
 If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+
+# Adding help files, syntax files, or colorschemes in your plugin
+
+You can use the `AddRuntimeFile(name, type, path string)` function to add various kinds of
+files to your plugin. For example, if you'd like to add a help topic to your plugin
+called `test`, you would create a `test.md` file, and call the function:
+
+```lua
+AddRuntimeFile("test", "help", "test.md")
+```
+
+Use `AddRuntimeFilesFromDirectory(name, type, dir, pattern)` to add a number of files
+to the runtime.
+To read the content of a runtime file use `ReadRuntimeFile(fileType, name string)`
+or `ListRuntimeFiles(fileType string)` for all runtime files.
 
 # Autocomplete command arguments
 
@@ -141,5 +182,44 @@ MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))
 
 # Default plugins
 
-For examples of plugins, see the default plugins `linter`, `go`, and `autoclose`.
-They are stored in Micro's GitHub repository [here](https://github.com/zyedidia/micro/tree/master/runtime/plugins).
+For examples of plugins, see the default `autoclose` and `linter` plugins
+(stored in the normal micro core repo under `runtime/plugins`) as well as
+any plugins that are stored in the official channel [here](https://github.com/micro-editor/plugin-channel).
+
+# Plugin Manager
+
+Micro also has a built in plugin manager which you can invoke with the `> plugin ...` command.
+
+For the valid commands you can use, see the `command` help topic.
+
+The manager fetches plugins from the channels (which is simply a list of plugin metadata)
+which it knows about. By default, micro only knows about the official channel which is located
+at github.com/micro-editor/plugin-channel but you can add your own third-party channels using
+the `pluginchannels` option and you can directly link third-party plugins to allow installation
+through the plugin manager with the `pluginrepos` option.
+
+If you'd like to publish a plugin you've made as an official plugin, you should upload your
+plugin online (to Github preferably) and add a `repo.json` file. This file will contain the
+metadata for your plugin. Here is an example:
+
+```json
+[{
+  "Name": "pluginname",
+  "Description": "Here is a nice concise description of my plugin",
+  "Tags": ["python", "linting"],
+  "Versions": [
+    {
+      "Version": "1.0.0",
+      "Url": "https://github.com/user/plugin/archive/v1.0.0.zip",
+      "Require": {
+        "micro": ">=1.0.3"
+      }
+    }
+  ]
+}]
+```
+
+Then open a pull request at github.com/micro-editor/plugin-channel adding a link to the
+raw `repo.json` that is in your plugin repository.
+To make updating the plugin work, the first line of your plugins lua code should contain the version of the plugin. (Like this: `VERSION = "1.0.0"`)
+Please make sure to use [semver](http://semver.org/) for versioning.

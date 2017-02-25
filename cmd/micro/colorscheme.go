@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"regexp"
 	"strconv"
 	"strings"
@@ -16,66 +15,53 @@ type Colorscheme map[string]tcell.Style
 // The current colorscheme
 var colorscheme Colorscheme
 
-var preInstalledColors = []string{"default", "simple", "solarized", "solarized-tc", "atom-dark-tc", "monokai", "gruvbox", "zenburn", "bubblegum"}
-
 // ColorschemeExists checks if a given colorscheme exists
 func ColorschemeExists(colorschemeName string) bool {
-	files, _ := ioutil.ReadDir(configDir + "/colorschemes")
-	for _, f := range files {
-		if f.Name() == colorschemeName+".micro" {
-			return true
-		}
-	}
-
-	for _, name := range preInstalledColors {
-		if name == colorschemeName {
-			return true
-		}
-	}
-
-	return false
+	return FindRuntimeFile(RTColorscheme, colorschemeName) != nil
 }
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() {
+	colorscheme = make(Colorscheme)
+	if screen != nil {
+		screen.SetStyle(tcell.StyleDefault.
+			Foreground(tcell.ColorDefault).
+			Background(tcell.ColorDefault))
+	}
+
 	LoadDefaultColorscheme()
 }
 
 // LoadDefaultColorscheme loads the default colorscheme from $(configDir)/colorschemes
 func LoadDefaultColorscheme() {
-	LoadColorscheme(globalSettings["colorscheme"].(string), configDir+"/colorschemes")
+	LoadColorscheme(globalSettings["colorscheme"].(string))
 }
 
 // LoadColorscheme loads the given colorscheme from a directory
-func LoadColorscheme(colorschemeName, dir string) {
-	files, _ := ioutil.ReadDir(dir)
-	found := false
-	for _, f := range files {
-		if f.Name() == colorschemeName+".micro" {
-			text, err := ioutil.ReadFile(dir + "/" + f.Name())
-			if err != nil {
-				fmt.Println("Error loading colorscheme:", err)
-				continue
-			}
-			colorscheme = ParseColorscheme(string(text))
-			found = true
-		}
-	}
-
-	for _, name := range preInstalledColors {
-		if name == colorschemeName {
-			data, err := Asset("runtime/colorschemes/" + name + ".micro")
-			if err != nil {
-				TermMessage("Unable to load pre-installed colorscheme " + name)
-				continue
-			}
-			colorscheme = ParseColorscheme(string(data))
-			found = true
-		}
-	}
-
-	if !found {
+func LoadColorscheme(colorschemeName string) {
+	file := FindRuntimeFile(RTColorscheme, colorschemeName)
+	if file == nil {
 		TermMessage(colorschemeName, "is not a valid colorscheme")
+	} else {
+		if data, err := file.Data(); err != nil {
+			TermMessage("Error loading colorscheme:", err)
+		} else {
+			colorscheme = ParseColorscheme(string(data))
+
+			// Default style
+			defStyle = tcell.StyleDefault.
+				Foreground(tcell.ColorDefault).
+				Background(tcell.ColorDefault)
+
+			// There may be another default style defined in the colorscheme
+			// In that case we should use that one
+			if style, ok := colorscheme["default"]; ok {
+				defStyle = style
+			}
+			if screen != nil {
+				screen.SetStyle(defStyle)
+			}
+		}
 	}
 }
 
@@ -102,7 +88,12 @@ func ParseColorscheme(text string) Colorscheme {
 			link := string(matches[1])
 			colors := string(matches[2])
 
-			c[link] = StringToStyle(colors)
+			style := StringToStyle(colors)
+			c[link] = style
+
+			if link == "default" {
+				defStyle = style
+			}
 		} else {
 			fmt.Println("Color-link statement is not valid:", line)
 		}
@@ -115,9 +106,14 @@ func ParseColorscheme(text string) Colorscheme {
 // The strings must be in the format "extra foregroundcolor,backgroundcolor"
 // The 'extra' can be bold, reverse, or underline
 func StringToStyle(str string) tcell.Style {
-	var fg string
-	bg := "default"
-	split := strings.Split(str, ",")
+	var fg, bg string
+	spaceSplit := strings.Split(str, " ")
+	var split []string
+	if len(spaceSplit) > 1 {
+		split = strings.Split(spaceSplit[1], ",")
+	} else {
+		split = strings.Split(str, ",")
+	}
 	if len(split) > 1 {
 		fg, bg = split[0], split[1]
 	} else {
@@ -126,7 +122,19 @@ func StringToStyle(str string) tcell.Style {
 	fg = strings.TrimSpace(fg)
 	bg = strings.TrimSpace(bg)
 
-	style := defStyle.Foreground(StringToColor(fg)).Background(StringToColor(bg))
+	var fgColor, bgColor tcell.Color
+	if fg == "" {
+		fgColor, _, _ = defStyle.Decompose()
+	} else {
+		fgColor = StringToColor(fg)
+	}
+	if bg == "" {
+		_, bgColor, _ = defStyle.Decompose()
+	} else {
+		bgColor = StringToColor(bg)
+	}
+
+	style := defStyle.Foreground(fgColor).Background(bgColor)
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
 	}

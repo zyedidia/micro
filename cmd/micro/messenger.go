@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -21,6 +22,7 @@ func TermMessage(msg ...interface{}) {
 	screenWasNil := screen == nil
 	if !screenWasNil {
 		screen.Fini()
+		screen = nil
 	}
 
 	fmt.Println(msg...)
@@ -43,6 +45,7 @@ func TermError(filename string, lineNum int, err string) {
 // Messenger is an object that makes it easy to send messages to the user
 // and get input from the user
 type Messenger struct {
+	log *Buffer
 	// Are we currently prompting the user?
 	hasPrompt bool
 	// Is there a message to print
@@ -67,38 +70,85 @@ type Messenger struct {
 	gutterMessage bool
 }
 
+func (m *Messenger) AddLog(msg string) {
+	buffer := m.getBuffer()
+	buffer.insert(buffer.End(), []byte(msg+"\n"))
+	buffer.Cursor.Loc = buffer.End()
+	buffer.Cursor.Relocate()
+}
+
+func (m *Messenger) getBuffer() *Buffer {
+	if m.log == nil {
+		m.log = NewBuffer(strings.NewReader(""), "")
+		m.log.name = "Log"
+	}
+	return m.log
+}
+
 // Message sends a message to the user
 func (m *Messenger) Message(msg ...interface{}) {
-	buf := new(bytes.Buffer)
-	fmt.Fprint(buf, msg...)
-	m.message = buf.String()
-	m.style = defStyle
+	displayMessage := fmt.Sprint(msg...)
+	// only display a new message if there isn't an active prompt
+	// this is to prevent overwriting an existing prompt to the user
+	if m.hasPrompt == false {
+		// if there is no active prompt then style and display the message as normal
+		m.message = displayMessage
 
-	if _, ok := colorscheme["message"]; ok {
-		m.style = colorscheme["message"]
+		m.style = defStyle
+
+		if _, ok := colorscheme["message"]; ok {
+			m.style = colorscheme["message"]
+		}
+
+		m.hasMessage = true
 	}
-	m.hasMessage = true
+	// add the message to the log regardless of active prompts
+	m.AddLog(displayMessage)
 }
 
 // Error sends an error message to the user
 func (m *Messenger) Error(msg ...interface{}) {
 	buf := new(bytes.Buffer)
 	fmt.Fprint(buf, msg...)
-	m.message = buf.String()
-	m.style = defStyle.
-		Foreground(tcell.ColorBlack).
-		Background(tcell.ColorMaroon)
 
-	if _, ok := colorscheme["error-message"]; ok {
-		m.style = colorscheme["error-message"]
+	// only display a new message if there isn't an active prompt
+	// this is to prevent overwriting an existing prompt to the user
+	if m.hasPrompt == false {
+		// if there is no active prompt then style and display the message as normal
+		m.message = buf.String()
+		m.style = defStyle.
+			Foreground(tcell.ColorBlack).
+			Background(tcell.ColorMaroon)
+
+		if _, ok := colorscheme["error-message"]; ok {
+			m.style = colorscheme["error-message"]
+		}
+		m.hasMessage = true
 	}
+	// add the message to the log regardless of active prompts
+	m.AddLog(buf.String())
+}
+
+func (m *Messenger) PromptText(msg ...interface{}) {
+	displayMessage := fmt.Sprint(msg...)
+	// if there is no active prompt then style and display the message as normal
+	m.message = displayMessage
+
+	m.style = defStyle
+
+	if _, ok := colorscheme["message"]; ok {
+		m.style = colorscheme["message"]
+	}
+
 	m.hasMessage = true
+	// add the message to the log regardless of active prompts
+	m.AddLog(displayMessage)
 }
 
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
 func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	m.hasPrompt = true
-	m.Message(prompt)
+	m.PromptText(prompt)
 
 	_, h := screen.Size()
 	for {
@@ -113,13 +163,16 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 			switch e.Key() {
 			case tcell.KeyRune:
 				if e.Rune() == 'y' {
+					m.AddLog("\t--> y")
 					m.hasPrompt = false
 					return true, false
 				} else if e.Rune() == 'n' {
+					m.AddLog("\t--> n")
 					m.hasPrompt = false
 					return false, false
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.AddLog("\t--> (cancel)")
 				m.hasPrompt = false
 				return false, true
 			}
@@ -130,7 +183,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 // LetterPrompt gives the user a prompt and waits for a one letter response
 func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) {
 	m.hasPrompt = true
-	m.Message(prompt)
+	m.PromptText(prompt)
 
 	_, h := screen.Size()
 	for {
@@ -146,6 +199,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 			case tcell.KeyRune:
 				for _, r := range responses {
 					if e.Rune() == r {
+						m.AddLog("\t--> " + string(r))
 						m.Clear()
 						m.Reset()
 						m.hasPrompt = false
@@ -153,6 +207,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 					}
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+				m.AddLog("\t--> (cancel)")
 				m.Clear()
 				m.Reset()
 				m.hasPrompt = false
@@ -170,13 +225,15 @@ const (
 	CommandCompletion
 	HelpCompletion
 	OptionCompletion
+	PluginCmdCompletion
+	PluginNameCompletion
 )
 
 // Prompt sends the user a message and waits for a response to be typed in
 // This function blocks the main loop while waiting for input
-func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Completion) (string, bool) {
+func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTypes ...Completion) (string, bool) {
 	m.hasPrompt = true
-	m.Message(prompt)
+	m.PromptText(prompt)
 	if _, ok := m.history[historyType]; !ok {
 		m.history[historyType] = []string{""}
 	} else {
@@ -184,7 +241,9 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 	}
 	m.historyNum = len(m.history[historyType]) - 1
 
-	response, canceled := "", true
+	response, canceled := placeholder, true
+	m.response = response
+	m.cursorx = Count(placeholder)
 
 	RedrawAll()
 	for m.hasPrompt {
@@ -198,9 +257,11 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 			switch e.Key() {
 			case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEscape:
 				// Cancel
+				m.AddLog("\t--> (cancel)")
 				m.hasPrompt = false
 			case tcell.KeyEnter:
 				// User is done entering their response
+				m.AddLog("\t--> " + m.response)
 				m.hasPrompt = false
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
@@ -231,6 +292,10 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
 					chosen, suggestions = OptionComplete(currentArg)
+				} else if completionType == PluginCmdCompletion {
+					chosen, suggestions = PluginCmdComplete(currentArg)
+				} else if completionType == PluginNameCompletion {
+					chosen, suggestions = PluginNameComplete(currentArg)
 				} else if completionType < NoCompletion {
 					chosen, suggestions = PluginComplete(completionType, currentArg)
 				}
@@ -269,36 +334,58 @@ func (m *Messenger) Prompt(prompt, historyType string, completionTypes ...Comple
 func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
+		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
+			for key, actions := range bindings {
+				if e.Key() == key.keyCode {
+					if e.Key() == tcell.KeyRune {
+						if e.Rune() != key.r {
+							continue
+						}
+					}
+					if e.Modifiers() == key.modifiers {
+						for _, action := range actions {
+							funcName := FuncName(action)
+							switch funcName {
+							case "main.(*View).CursorUp":
+								if m.historyNum > 0 {
+									m.historyNum--
+									m.response = history[m.historyNum]
+									m.cursorx = Count(m.response)
+								}
+							case "main.(*View).CursorDown":
+								if m.historyNum < len(history)-1 {
+									m.historyNum++
+									m.response = history[m.historyNum]
+									m.cursorx = Count(m.response)
+								}
+							case "main.(*View).CursorLeft":
+								if m.cursorx > 0 {
+									m.cursorx--
+								}
+							case "main.(*View).CursorRight":
+								if m.cursorx < Count(m.response) {
+									m.cursorx++
+								}
+							case "main.(*View).CursorStart", "main.(*View).StartOfLine":
+								m.cursorx = 0
+							case "main.(*View).CursorEnd", "main.(*View).EndOfLine":
+								m.cursorx = Count(m.response)
+							case "main.(*View).Backspace":
+								if m.cursorx > 0 {
+									m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
+									m.cursorx--
+								}
+							case "main.(*View).Paste":
+								clip, _ := clipboard.ReadAll("clipboard")
+								m.response = Insert(m.response, m.cursorx, clip)
+								m.cursorx += Count(clip)
+							}
+						}
+					}
+				}
+			}
+		}
 		switch e.Key() {
-		case tcell.KeyUp:
-			if m.historyNum > 0 {
-				m.historyNum--
-				m.response = history[m.historyNum]
-				m.cursorx = Count(m.response)
-			}
-		case tcell.KeyDown:
-			if m.historyNum < len(history)-1 {
-				m.historyNum++
-				m.response = history[m.historyNum]
-				m.cursorx = Count(m.response)
-			}
-		case tcell.KeyLeft:
-			if m.cursorx > 0 {
-				m.cursorx--
-			}
-		case tcell.KeyRight:
-			if m.cursorx < Count(m.response) {
-				m.cursorx++
-			}
-		case tcell.KeyBackspace2, tcell.KeyBackspace:
-			if m.cursorx > 0 {
-				m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
-				m.cursorx--
-			}
-		case tcell.KeyCtrlV:
-			clip, _ := clipboard.ReadAll("clipboard")
-			m.response = Insert(m.response, m.cursorx, clip)
-			m.cursorx += Count(clip)
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++
@@ -309,6 +396,23 @@ func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 		clip := e.Text()
 		m.response = Insert(m.response, m.cursorx, clip)
 		m.cursorx += Count(clip)
+	case *tcell.EventMouse:
+		x, y := e.Position()
+		x -= Count(m.message)
+		button := e.Buttons()
+		_, screenH := screen.Size()
+
+		if y == screenH-1 {
+			switch button {
+			case tcell.Button1:
+				m.cursorx = x
+				if m.cursorx < 0 {
+					m.cursorx = 0
+				} else if m.cursorx > Count(m.response) {
+					m.cursorx = Count(m.response)
+				}
+			}
+		}
 	}
 }
 

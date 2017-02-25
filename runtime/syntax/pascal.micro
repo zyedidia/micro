@@ -2,12 +2,6 @@ syntax "pascal" "\.pas$"
 
 # color identifier "\b[\pL_][\pL_\pN]*\b"
 
-color comment "//.*"
-color comment start="\(\*" end="\*\)"
-color comment start="({)(?:[^$])" end="}"
-
-color special start="asm" end="end"
-
 color type "\b(?i:(string|ansistring|widestring|shortstring|char|ansichar|widechar|boolean|byte|shortint|word|smallint|longword|cardinal|longint|integer|int64|single|currency|double|extended))\b"
 
 color statement "\b(?i:(and|asm|array|begin|break|case|const|constructor|continue|destructor|div|do|downto|else|end|file|for|function|goto|if|implementation|in|inline|interface|label|mod|not|object|of|on|operator|or|packed|procedure|program|record|repeat|resourcestring|set|shl|shr|then|to|type|unit|until|uses|var|while|with|xor))\b"
@@ -15,10 +9,15 @@ color statement "\b(?i:(as|class|dispose|except|exit|exports|finalization|finall
 color statement "\b(?i:(absolute|abstract|alias|assembler|cdecl|cppdecl|default|export|external|forward|generic|index|local|name|nostackframe|oldfpccall|override|pascal|private|protected|public|published|read|register|reintroduce|safecall|softfloat|specialize|stdcall|virtual|write))\b"
 
 color constant "\b(?i:(false|true|nil))\b"
-color constant "\$[0-9A-Fa-f]+" "\b[+-]?[0-9]+([.]?[0-9]+)?(?i:e[+-]?[0-9]+)?"
 
+color special start="asm" end="end"
+
+color constant.number "\$[0-9A-Fa-f]+" "\b[+-]?[0-9]+([.]?[0-9]+)?(?i:e[+-]?[0-9]+)?"
+color constant.string "#[0-9]{1,}"
 color constant.string "'(?:[^']+|'')*'"
 
-
-
 color preproc start="{\$" end="}"
+
+color comment "//.*"
+color comment start="\(\*" end="\*\)"
+color comment start="({)(?:[^$])" end="}"

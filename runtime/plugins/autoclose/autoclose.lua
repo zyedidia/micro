@@ -1,12 +1,16 @@
 function charAt(str, i)
-    return string.sub(str, i, i)
+    if i <= #str then
+        return string.sub(str, i, i)
+    else
+        return ""
+    end
 end
 
 if GetOption("autoclose") == nil then
     AddOption("autoclose", true)
 end
 
-local autoclosePairs = {"\"\"", "''", "()", "{}", "[]"}
+local autoclosePairs = {"\"\"", "''", "``", "()", "{}", "[]"}
 local autoNewlinePairs = {"()", "{}", "[]"}
 
 function onRune(r, v)
