@@ -54,6 +54,17 @@ type Loc struct {
 	X, Y int
 }
 
+// Inside returns true if l is inside the square made by p1 & p2
+func (l Loc) Inside(p1, p2 Loc) bool {
+	if p1.X > p2.X {
+		p1.X, p2.X = p2.X, p1.X
+	}
+	if p1.Y > p2.Y {
+		p1.Y, p2.Y = p2.Y, p1.Y
+	}
+	return l.Y >= p1.Y && l.X >= p1.X && l.Y <= p2.Y && l.X <= p2.X
+}
+
 // LessThan returns true if b is smaller
 func (l Loc) LessThan(b Loc) bool {
 	if l.Y < b.Y {
