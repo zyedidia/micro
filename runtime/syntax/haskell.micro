@@ -16,7 +16,7 @@ color special "(->|<-)"
 color symbol "\.|\$"
 
 ## Data constructors
-color constant.bool "(True|False)""
+color constant.bool "\b(True|False)\b"
 color constant "(Nothing|Just|Left|Right|LT|EQ|GT)"
 
 ## Data classes
