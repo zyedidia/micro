@@ -42,6 +42,10 @@ Here are the possible commands that you can use.
 
 * `tab filename`: opens the given file in a new tab.
 
+* `tabswitch tab`: This command will switch to the specified tab.
+   The `tab` can either be a tab number, or a name of a tab.
+                     
+
 * `log`: opens a log of all messages and debug statements.
 
 * `plugin install plugin_name`: installs the given plugin.

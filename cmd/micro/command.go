@@ -9,6 +9,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/mitchellh/go-homedir"
@@ -49,6 +50,7 @@ func init() {
 		"Cd":        Cd,
 		"Pwd":       Pwd,
 		"Open":      Open,
+		"TabSwitch": TabSwitch,
 	}
 }
 
@@ -82,25 +84,26 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":      {"Set", []Completion{OptionCompletion, NoCompletion}},
-		"setlocal": {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
-		"show":     {"Show", []Completion{OptionCompletion, NoCompletion}},
-		"bind":     {"Bind", []Completion{NoCompletion}},
-		"run":      {"Run", []Completion{NoCompletion}},
-		"quit":     {"Quit", []Completion{NoCompletion}},
-		"save":     {"Save", []Completion{NoCompletion}},
-		"replace":  {"Replace", []Completion{NoCompletion}},
-		"vsplit":   {"VSplit", []Completion{FileCompletion, NoCompletion}},
-		"hsplit":   {"HSplit", []Completion{FileCompletion, NoCompletion}},
-		"tab":      {"Tab", []Completion{FileCompletion, NoCompletion}},
-		"help":     {"Help", []Completion{HelpCompletion, NoCompletion}},
-		"eval":     {"Eval", []Completion{NoCompletion}},
-		"log":      {"ToggleLog", []Completion{NoCompletion}},
-		"plugin":   {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
-		"reload":   {"Reload", []Completion{NoCompletion}},
-		"cd":       {"Cd", []Completion{FileCompletion}},
-		"pwd":      {"Pwd", []Completion{NoCompletion}},
-		"open":     {"Open", []Completion{FileCompletion}},
+		"set":       {"Set", []Completion{OptionCompletion, NoCompletion}},
+		"setlocal":  {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"show":      {"Show", []Completion{OptionCompletion, NoCompletion}},
+		"bind":      {"Bind", []Completion{NoCompletion}},
+		"run":       {"Run", []Completion{NoCompletion}},
+		"quit":      {"Quit", []Completion{NoCompletion}},
+		"save":      {"Save", []Completion{NoCompletion}},
+		"replace":   {"Replace", []Completion{NoCompletion}},
+		"vsplit":    {"VSplit", []Completion{FileCompletion, NoCompletion}},
+		"hsplit":    {"HSplit", []Completion{FileCompletion, NoCompletion}},
+		"tab":       {"Tab", []Completion{FileCompletion, NoCompletion}},
+		"help":      {"Help", []Completion{HelpCompletion, NoCompletion}},
+		"eval":      {"Eval", []Completion{NoCompletion}},
+		"log":       {"ToggleLog", []Completion{NoCompletion}},
+		"plugin":    {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
+		"reload":    {"Reload", []Completion{NoCompletion}},
+		"cd":        {"Cd", []Completion{FileCompletion}},
+		"pwd":       {"Pwd", []Completion{NoCompletion}},
+		"open":      {"Open", []Completion{FileCompletion}},
+		"tabswitch": {"TabSwitch", []Completion{NoCompletion}},
 	}
 }
 
@@ -184,6 +187,34 @@ func PluginCmd(args []string) {
 		}
 	} else {
 		messenger.Error("Not enough arguments")
+	}
+}
+
+func TabSwitch(args []string) {
+	if len(args) > 0 {
+		num, err := strconv.Atoi(args[0])
+		if err != nil {
+			// Check for tab with this name
+
+			found := false
+			for _, t := range tabs {
+				v := t.views[t.CurView]
+				if v.Buf.GetName() == args[0] {
+					curTab = v.Num
+					found = true
+				}
+			}
+			if !found {
+				messenger.Error("Could not find tab: ", err)
+			}
+		} else {
+			num--
+			if num >= 0 && num < len(tabs) {
+				curTab = num
+			} else {
+				messenger.Error("Invalid tab index")
+			}
+		}
 	}
 }
 
