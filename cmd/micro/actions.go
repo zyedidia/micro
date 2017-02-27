@@ -6,6 +6,8 @@ import (
 	"strings"
 	"time"
 
+	"encoding/json"
+	"fmt"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 )
@@ -1103,6 +1105,37 @@ func (v *View) OpenFile(usePlugin bool) bool {
 		}
 	}
 	return false
+}
+
+// GotoFile open autocomplete for file
+func (v *View) GotoFile(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("GotoFile", v) {
+		return false
+	}
+	autocomplete.Open(func(v *View) (messages Messages) {
+		files := getFilesInCurrentDir()
+		for _, file := range files {
+			b, _ := json.Marshal(file)
+			message := Message{Searchable: file.Name, MessageToDisplay: fmt.Sprintf("%s (%s)", file.Name, file.Path), Value2: b}
+			messages = append(messages, message)
+		}
+		return messages
+	}, func(message Message) {
+		var f File
+		json.Unmarshal(message.Value2, &f)
+		v.Buf.Save()
+		v.Open(f.Path)
+		// Move cursor and view if possible.
+		if message.Extra.line+1 < v.Buf.NumLines && message.Extra.line-1 >= 0 {
+			v.Cursor.Y = message.Extra.line - 1
+			v.Relocate()
+		}
+	}, nil, v)
+
+	if usePlugin {
+		return PostActionCall("GotoFile", v)
+	}
+	return true
 }
 
 // Start moves the viewport to the start of the buffer
