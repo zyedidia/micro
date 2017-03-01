@@ -2,18 +2,18 @@
 ##
 syntax "etc-portage" "\.(keywords|mask|unmask|use)$"
 ## Base text:
-color green "^.+$"
+color default "^.+$"
 ## Use flags:
-color brightred "[[:space:]]+\+?[a-zA-Z0-9_-]+"
-color brightblue "[[:space:]]+-[a-zA-Z0-9_-]+"
+color constant.bool.false "[[:space:]]+\+?[a-zA-Z0-9_-]+"
+color constant.bool.true "[[:space:]]+-[a-zA-Z0-9_-]+"
 ## Likely version numbers:
-color magenta "-[[:digit:]].*([[:space:]]|$)"
+color special "-[[:digit:]].*([[:space:]]|$)"
 ## Accepted arches:
-color white "[~-]?\<(alpha|amd64|arm|hppa|ia64|mips|ppc|ppc64|s390|sh|sparc|x86|x86-fbsd)\>"
-color white "[[:space:]][~-]?\*"
+color identifier.class "[~-]?\b(alpha|amd64|arm|hppa|ia64|mips|ppc|ppc64|s390|sh|sparc|x86|x86-fbsd)\b"
+color identifier.class "[[:space:]][~-]?\*"
 ## Categories:
-color cyan "^[[:space:]]*.*/"
+color statement "^[[:space:]]*.*/"
 ## Masking regulators:
-color brightmagenta "^[[:space:]]*(=|~|<|<=|=<|>|>=|=>)"
+color symbol "^[[:space:]]*(=|~|<|<=|=<|>|>=|=>)"
 ## Comments:
-color yellow "#.*$"
+color comment "#.*$"

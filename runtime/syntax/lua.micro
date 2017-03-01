@@ -40,7 +40,7 @@ color identifier "bit32\.\b(arshift|band|bnot|bor|btest|bxor|extract|replace|lro
 color identifier "\:\b(close|flush|lines|read|seek|setvbuf|write)\b"
 
 # false, nil, true
-color constant "\b(false|nil|true)\b"
+color constant.bool "\b(false|nil|true)\b"
 
 # External files
 color statement "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"

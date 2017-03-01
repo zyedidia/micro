@@ -1,7 +1,7 @@
 syntax "git-config" "git(config|modules)$|\.git/config$"
 
-color constant "\<(true|false)\>"
-color keyword "^[[:space:]]*[^=]*="
+color constant.bool "\<(true|false)\>"
+color statement "^[[:space:]]*[^=]*="
 color constant "^[[:space:]]*\[.*\]$"
-color constant ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color comment "(^|[[:space:]])#([^{].*)?$"

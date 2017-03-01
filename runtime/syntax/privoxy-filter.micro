@@ -1,8 +1,10 @@
 syntax "privoxy-filter" "\.filter$"
 
-color cyan  "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER): [a-z-]+"
-color brightblue "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER):"
-color magenta   "\\.?"
-color brightblack "(^|[[:space:]])#([^{].*)?$"
-color ,green "[[:space:]]+$"
-color ,red "	+ +| +	+"
+color statement  "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER): [a-z-]+"
+color identifier "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER):"
+##Not sure what this does? 
+#color default "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER):"
+color constant.specialChar   "\\.?"
+color comment "(^|[[:space:]])#([^{].*)?$"
+color indent-char.whitespace "[[:space:]]+$"
+color indent-char "	+ +| +	+"

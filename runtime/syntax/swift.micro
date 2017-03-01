@@ -1,11 +1,11 @@
 ##############################################################################
-# Swift syntax highlighting for Nano.
+# Swift syntax highlighting for Micro.
 ##############################################################################
 
 syntax "swift" "\.swift$"
 
 # Operators
-color statement "[.:;,+*|=!?\%]" "<" ">" "/" "-" "&"
+color symbol.operator "[.:;,+*|=!?\%]" "<" ">" "/" "-" "&"
 
 # Statements
 color statement  "(class|import|let|var|struct|enum|func|if|else|switch|case|default|for|in|internal|external|unowned|private|public|throws)\ "
@@ -20,7 +20,7 @@ color constant.number "([0-9]+)"
 
 # Standard Types
 color type "\ ((U)?Int(8|16|32|64))"
-color constant "(true|false|nil)"
+color constant.bool "(true|false|nil)"
 color type "\ (Double|String|Float|Boolean|Dictionary|Array|Int)"
 color type "\ (AnyObject)"
 

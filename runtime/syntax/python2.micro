@@ -24,13 +24,13 @@ color identifier "def [a-zA-Z_0-9]+"
 color statement "\b(and|as|assert|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|raise|return|try|while|with|yield)\b"
 
 ## decorators
-color brightgreen "@.*[(]"
+color special "@.*[(]"
 
 ## operators
-color statement "[.:;,+*|=!\%@]" "<" ">" "/" "-" "&"
+color symbol.operator "[.:;,+*|=!\%@]" "<" ">" "/" "-" "&"
 
 ## parentheses
-color statement "[(){}]" "\[" "\]"
+color symbol.brackets "[(){}]" "\[" "\]"
 
 ## numbers
 color constant.number "\b[0-9]+\b"

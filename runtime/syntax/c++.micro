@@ -16,13 +16,13 @@ color constant "'([^'\\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0
 color statement "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
 
 #Operator Color
-color statement "[.:;,+*|=!\%]" "<" ">" "/" "-" "&" 
+color symbol.operator "[.:;,+*|=!\%]" "<" ">" "/" "-" "&" 
 
 #Parenthetical Color
-# color magenta "[(){}]" "\[" "\]"
+color symbol.brackets "[(){}]" "\[" "\]"
 
 color constant.number "\b[0-9]+\b" "\b0x[0-9A-Fa-f]+\b"
-color constant.number "\b(true|false)\b" "NULL"
+color constant.bool "\b(true|false)\b" "NULL"
 
 ##
 ## String highlighting.  You will in general want your brightblacks and
@@ -38,4 +38,4 @@ color comment "//.*"
 color comment start="/\*" end="\*/"
 
 ## Trailing whitespace
-#color ,green "[[:space:]]+$"
+color indent-char.whitespace "[[:space:]]+$"

@@ -1,7 +1,7 @@
 syntax "mail" "(.*/mutt-.*|\.eml)$"
 header "^From .* \d+:\d+:\d+ \d+"
 
-color yellow          "^From .*"
+color constant          "^From .*"
 color identifier      "^[^[:space:]]+:"
 color preproc         "^List-(Id|Archive|Subscribe|Unsubscribe|Post|Help):"
 color constant        "^(To|From):"

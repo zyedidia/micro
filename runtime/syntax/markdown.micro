@@ -1,31 +1,31 @@
 syntax "markdown" "\.(md|mkd|mkdn|markdown)$"
 
 # Tables (Github extension)
-color type ".*[ :]\|[ :].*"
+color preproc ".*[ :]\|[ :].*"
 
 # quotes
-color statement  "^>.*"
+color constant.string  "^>.*"
 
 # Emphasis
 color type "(^|[[:space:]])(_[^ ][^_]*_|\*[^ ][^*]*\*)"
 
 # Strong emphasis
-color type "(^|[[:space:]])(__[^ ][^_]*__|\*\*[^ ][^*]*\*\*)"
+color type.keyword "(^|[[:space:]])(__[^ ][^_]*__|\*\*[^ ][^*]*\*\*)"
 
 # strike-through
 color type "(^|[[:space:]])~~[^ ][^~]*~~"
 
 # horizontal rules
-color special "^(---+|===+|___+|\*\*\*+)\s*$"
+color symbol "^(---+|\+---+|===+|\+===+|___+|\*\*\*+|\+\*\*\*+)\s*$"
 
 # headlines
-color special  "^#{1,6}.*"
+color statement  "^#{1,6}.*"
 
 # lists
 color identifier   "^[[:space:]]*[\*+-] |^[[:space:]]*[0-9]+\. "
 
 # misc
-color preproc   "\(([CcRr]|[Tt][Mm])\)" "\.{3}" "(^|[[:space:]])\-\-($|[[:space:]])"
+color preproc   "\b([CcRr]|[Tt][Mm])\b" "\.{3}" "(^|[[:space:]])\-\-($|[[:space:]])"
 
 # links
 color constant "\[[^]]+\]"
@@ -35,10 +35,10 @@ color constant "\[([^][]|\[[^]]*\])*\]\([^)]+\)"
 color underlined "!\[[^][]*\](\([^)]+\)|\[[^]]+\])"
 
 # urls
-color underlined "https?://[^ )>]+"
+color underlined.url "https?://[^ )>]+"
 
 # code
 color special   "`.*?`|^ {4}[^-+*].*"
 # code blocks
-color special "^```$"
+color symbol "^```$"
 

@@ -29,88 +29,88 @@
 syntax "ino"  "\.?ino$"
 
 ## 
-color brightred "\<[A-Z_][0-9A-Z_]+\>" 
+color identifier.macro "\b[A-Z_][0-9A-Z_]+\b" 
 
 ## 
-color green "\<((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\>"
+color type "\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\b"
 
 ## Constants
-green (i) "\<(HIGH|LOW|INPUT|OUTPUT)\>"
+color constant "\b(HIGH|LOW|INPUT|OUTPUT)\b"
 
 ## Serial Print
-red (i) "\<(DEC|BIN|HEX|OCT|BYTE)\>"
+color identifier.macro "\b(DEC|BIN|HEX|OCT|BYTE)\b"
 
 ## PI Constants
-green (i) "\<(PI|HALF_PI|TWO_PI)\>"
+color constant "\b(PI|HALF_PI|TWO_PI)\b"
 
 ## ShiftOut
-green (i) "\<(LSBFIRST|MSBFIRST)\>"
+color constant "\b(LSBFIRST|MSBFIRST)\b"
 
 ## Attach Interrupt
-green (i) "\<(CHANGE|FALLING|RISING)\>"
+color constant  "\b(CHANGE|FALLING|RISING)\b"
 
 ## Analog Reference
-green (i) "\<(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\>"
+color constant  "\b(DEFAULT|EXTERNAL|INTERNAL|INTERNAL1V1|INTERNAL2V56)\b"
 
 ## === FUNCTIONS === ##
 
 ## Data Types
-color green "\<(boolean|byte|char|float|int|long|word)\>"
+color type "\b(boolean|byte|char|float|int|long|word)\b"
 
 ## Control Structions
-color brightyellow "\<(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\>" 
-color magenta "\<(goto|continue|break|return)\>"
+color statement "\b(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\b" 
+color special "\b(goto|continue|break|return)\b"
 
 ## Math
-color brightyellow "\<(abs|acos|asin|atan|atan2|ceil|constrain|cos|degrees|exp|floor|log|map|max|min|radians|random|randomSeed|round|sin|sq|sqrt|tan)\>"
+color statement "\b(abs|acos|asin|atan|atan2|ceil|constrain|cos|degrees|exp|floor|log|map|max|min|radians|random|randomSeed|round|sin|sq|sqrt|tan)\b"
 
 ## Bits & Bytes
-color brightyellow "\<(bitRead|bitWrite|bitSet|bitClear|bit|highByte|lowByte)\>"
+color statement "\b(bitRead|bitWrite|bitSet|bitClear|bit|highByte|lowByte)\b"
 
 ## Analog I/O
-color brightyellow "\<(analogReference|analogRead|analogWrite)\>"
+color statement "\b(analogReference|analogRead|analogWrite)\b"
 
 ## External Interrupts
-color brightyellow "\<(attachInterrupt|detachInterrupt)\>"
+color statement "\b(attachInterrupt|detachInterrupt)\b"
 
 ## Time
-color brightyellow "\<(delay|delayMicroseconds|millis|micros)\>"
+color statement "\b(delay|delayMicroseconds|millis|micros)\b"
 
 ## Digital I/O
-color brightyellow "\<(pinMode|digitalWrite|digitalRead)\>"
+color statement "\b(pinMode|digitalWrite|digitalRead)\b"
 
 ## Interrupts
-color brightyellow "\<(interrupts|noInterrupts)\>"
+color statement "\b(interrupts|noInterrupts)\b"
 
 ## Advanced I/O
-color brightyellow "\<(noTone|pulseIn|shiftIn|shiftOut|tone)\>"
+color statement "\b(noTone|pulseIn|shiftIn|shiftOut|tone)\b"
 
 ## Serial
-color magenta "\<(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\>"
+color special "b<(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\b"
 
 ## Structure
-color brightyellow "\<(setup|loop)\>"
+color statement "\b(setup|loop)\b"
 
 ## 
-color brightcyan "^[[:space:]]*#[[:space:]]*(define|include(_next)?|(un|ifn?)def|endif|el(if|se)|if|warning|error|pragma)"
+color preproc "^[[:space:]]*#[[:space:]]*(define|include(_next)?|(un|ifn?)def|endif|el(if|se)|if|warning|error|pragma)"
 
 ## 
-color brightmagenta "'([^']|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
+color constant.specialChar "'([^']|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0-9A-Fa-f]{1,2}'"
 
 ## GCC builtins
-color cyan "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
+color preproc "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
 
 ## String highlighting.  You will in general want your comments and
 ## strings to come last, because syntax highlighting rules will be
 ## applied in the order they are read in.
-color brightyellow "<[^=    ]*>" ""(\\.|[^"])*""
+color constant.string "<[^=    ]*>" ""(\\.|[^"])*""
 
 ## This string is VERY resource intensive!
-color brightyellow start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
+color constant.string start=""(\\.|[^"])*\\[[:space:]]*$" end="^(\\.|[^"])*""
 
 ## Comments
-color brightblue "//.*"
-color brightblue start="/\*" end="\*/"
+color comment "//.*"
+color comment start="/\*" end="\*/"
 
 ## Trailing whitespace
-color ,green "[[:space:]]+$"
+color indent-char.whitespace "[[:space:]]+$"

@@ -13,8 +13,8 @@ color statement "\b(while|do|repeat|until|for|in)\b"
 color statement "(\?|=>)"
 color statement "(\||\&|\,|\^)"
 
-color statement "(\-|\+|\*|/|\!|%|<<|>>)"
-color statement "(==|!=|<=|>=|<|>)"
+color symbol.operator "(\-|\+|\*|/|\!|%|<<|>>)"
+color symbol.operator "(==|!=|<=|>=|<|>)"
 color statement "\b(is|isnt|not|and|or|xor)\b"
 
 color type "\b(_*[A-Z][_a-zA-Z0-9\']*)\b"

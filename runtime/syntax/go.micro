@@ -1,23 +1,29 @@
 syntax "go" "\.go$"
 
+##This file may need cleanup.
+
 # Conditionals and control flow
-color statement "\b(break|case|continue|default|else|for|go|goto|if|range|return|switch)\b"
-color statement "\b(package|import|const|var|type|struct|func|go|defer|iota)\b"
-color statement "[-+/*=<>!~%&|^]|:="
+color special "\b(break|case|continue|default|go|goto|range|return)\b"
+color statement "\b(else|for|if|switch)\b"
+color preproc "\b(package|import|const|var|type|struct|func|go|defer|iota)\b"
+color symbol.operator "[-+/*=<>!~%&|^]|:="
 
 # Types
 color special "[a-zA-Z0-9]*\("
-color brightyellow "(,|\.)"
+color symbol "(,|\.)"
 color type "\b(u?int(8|16|32|64)?|float(32|64)|complex(64|128))\b"
 color type "\b(uintptr|byte|rune|string|interface|bool|map|chan|error)\b"
-color constant "\b(true|false|nil)\b"
+##I'm... not sure, but aren't structs a type?
+color type "\b(struct)\b"
+color constant.bool "\b(true|false|nil)\b"
 
 # Brackets
-color statement "(\{|\})"
-color statement "(\(|\))"
-color statement "(\[|\])"
-color statement "!"
-color statement ","
+color symbol.brackets "(\{|\})"
+color symbol.brackets "(\(|\))"
+color symbol.brackets "(\[|\])"
+##Redundant??
+#color symbol.operator "!"
+#color symbol.operator ","
 
 # Numbers and strings
 color constant.number "\b([0-9]+|0x[0-9a-fA-F]*)\b|'.'"

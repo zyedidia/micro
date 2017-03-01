@@ -9,7 +9,7 @@ color statement "\b(BEGIN|END|abstract|alias|and|begin|break|case|class|def|defi
 color constant "(\$|@|@@)?\b[A-Z]+[0-9A-Z_a-z]*"
 color constant.number "\b[0-9]+\b"
 ## Crystal "symbols"
-color constant (i) "([ 	]|^):[0-9A-Z_]+\b"
+color constant  "([ 	]|^):[0-9A-Z_]+\b"
 ## Some unique things we want to stand out
 color constant "\b(__FILE__|__LINE__)\b"
 ## Regular expressions

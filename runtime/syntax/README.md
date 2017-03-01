@@ -11,8 +11,7 @@ Micro syntax files are almost identical to Nano's, except for some key differenc
 
 # Using with colorschemes
 
-Not all of these files have been converted to use micro's colorscheme feature. Most of them just hardcode the colors, which
-can be problematic depending on the colorscheme you use.
+Not all of these files have been converted to use micro's colorscheme feature. Most of them just hardcode the colors, which can be problematic depending on the colorscheme you use.
 
 Here is a list of the files that have been converted to properly use colorschemes:
 

@@ -4,23 +4,23 @@
 syntax "salt" "\.sls$"
 
 # Anything ending in a colon (:), including things that start with a dash (-)
-color blue "^[^ -].*:$"
-color blue ".*:"
+color identifier.var "^[^ -].*:$"
+color identifier.var ".*:"
 # Except for salt:// URLs
-color white "salt:"
+color default "salt:"
 
 # Numbers, etc
-color red "/*[0-9]/*"
-color red "\<(True|False)\>"
+color constant.number "/*[0-9]/*"
+color constant "\<(True|False)\>"
 
 # Anything between two single quotes
-color green ""(\\.|[^"])*"|'(\\.|[^'])*'"
+color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 
 # Matching keywords
-color yellow "\<(grain|grains|compound|pcre|grain_pcre|list|pillar)\>"
+color special "\<(grain|grains|compound|pcre|grain_pcre|list|pillar)\>"
 
 # Comments
-color brightblack "^#.*"
+color comment "^#.*"
 
 # Logic keywords
-color magenta "\<(if|elif|else|or|not|and|endif|end)\>"
+color statement "\<(if|elif|else|or|not|and|endif|end)\>"

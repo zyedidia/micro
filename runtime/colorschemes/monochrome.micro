@@ -1,0 +1,3 @@
+#Monochrome
+#This makes micro use only the terminal's default
+# foreground and background colours.

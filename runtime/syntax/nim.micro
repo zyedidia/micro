@@ -4,7 +4,7 @@ color preproc "[\{\|]\b(atom|lit|sym|ident|call|lvalue|sideeffect|nosideeffect|p
 
 color statement "\b(addr|and|as|asm|atomic|bind|block|break|case|cast|concept|const|continue|converter|defer|discard|distinct|div|do|elif|else|end|enum|except|export|finally|for|from|func|generic|if|import|in|include|interface|is|isnot|iterator|let|macro|method|mixin|mod|nil|not|notin|object|of|or|out|proc|ptr|raise|ref|return|shl|shr|static|template|try|tuple|type|using|var|when|while|with|without|xor|yield)\b"
 color statement "\b(deprecated|noSideEffect|constructor|destructor|override|procvar|compileTime|noReturn|acyclic|final|shallow|pure|asmNoStackFrame|error|fatal|warning|hint|line|linearScanEnd|computedGoto|unroll|immediate|checks|boundsChecks|overflowChecks|nilChecks|assertations|warnings|hints|optimization|patterns|callconv|push|pop|global|pragma|experimental|bitsize|volatile|noDecl|header|incompleteStruct|compile|link|passC|passL|emit|importc|importcpp|importobjc|codegenDecl|injectStmt|intdefine|strdefine|varargs|exportc|extern|bycopy|byref|union|packed|unchecked|dynlib|cdecl|thread|gcsafe|threadvar|guard|locks|compileTime)\b"
-color statement "[=\+\-\*/<>@\$~&%\|!\?\^\.:\\]+"
+color symbol.operator "[=\+\-\*/<>@\$~&%\|!\?\^\.:\\]+"
 
 color special "\{\." "\.\}" "\[\." "\.\]" "\(\." "\.\)" ";" "," "`"
 

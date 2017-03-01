@@ -18,7 +18,7 @@ color identifier "func [a-zA-Z_0-9]+"
 color statement "\b(and|as|assert|break|breakpoint|class|const|continue|elif|else|export|extends|for|func|if|in|map|not|onready|or|pass|return|signal|var|while|yield)\b" 
 
 ## decorators
-color brightgreen "@.*[(]"
+color special "@.*[(]"
 
 ## operators
 color statement "[.:;,+*|=!\%@]" "<" ">" "/" "-" "&"

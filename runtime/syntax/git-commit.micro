@@ -14,20 +14,20 @@ color ignore ".*"
 color comment "^#.*"
 
 # Files changes
-color keyword       "#[[:space:]](deleted|modified|new file|renamed):[[:space:]].*"
-color keyword         "#[[:space:]]deleted:"
-color keyword       "#[[:space:]]modified:"
-color keyword "#[[:space:]]new file:"
-color keyword  "#[[:space:]]renamed:"
+color statement       "#[[:space:]](deleted|modified|new file|renamed):[[:space:]].*"
+color statement         "#[[:space:]]deleted:"
+color statement       "#[[:space:]]modified:"
+color statement "#[[:space:]]new file:"
+color statement  "#[[:space:]]renamed:"
 
 # Untracked filenames
 color error "^#	[^/?*:;{}\\]+\.[^/?*:;{}\\]+$"
 
-color keyword "^#[[:space:]]Changes.*[:]"
-color keyword "^#[[:space:]]Your branch and '[^']+"
-color keyword "^#[[:space:]]Your branch and '"
-color keyword "^#[[:space:]]On branch [^ ]+"
-color keyword "^#[[:space:]]On branch"
+color statement "^#[[:space:]]Changes.*[:]"
+color statement "^#[[:space:]]Your branch and '[^']+"
+color statement "^#[[:space:]]Your branch and '"
+color statement "^#[[:space:]]On branch [^ ]+"
+color statement "^#[[:space:]]On branch"
 
 # Recolor hash symbols
 

@@ -5,13 +5,13 @@
 syntax "rust" "\.rs"
 
 # function definition
-color identifier "fn [a-z0-9_]+"
+color identifier.class "fn [a-z0-9_]+"
 
 # Reserved words
 color statement "\b(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\b"
 
 # macros
-color special "[a-z_]+!"
+color identifier.macro "[a-z_]+!"
 
 # Constants
 color constant "[A-Z][A-Z_]+"
@@ -26,7 +26,7 @@ color type "[A-Z][a-z]+"
 color constant.string "\".*\""
 color constant.string start="\".*\\$" end=".*\""
 # NOTE: This isn't accurate but matching "#{0,} for the end of the string is too liberal
-color green start="r#+\"" end="\"#+"
+color special start="r#+\"" end="\"#+"
 
 # Comments
 color comment "//.*"
