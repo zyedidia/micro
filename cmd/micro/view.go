@@ -982,6 +982,8 @@ func (v *View) Display() {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
+	//Set title to the name of the current buffer
+	tcell.SetTitle("micro: " + t.views[t.CurView].Buf.GetName())
 	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
 	} else if (v.y + v.Height) != screenH-1 {

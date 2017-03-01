@@ -2,6 +2,7 @@ package main
 
 import (
 	"sort"
+	"path/filepath"
 
 	"github.com/zyedidia/tcell"
 )
@@ -89,7 +90,9 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		str += t.views[t.CurView].Buf.GetName()
+		//To address issue 556.2
+		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
+		str += name
 		if i == curTab {
 			str += "]"
 		} else {
