@@ -1,6 +1,6 @@
 ## Here is an example for Ruby.
 ##
-syntax "ruby" "\.rb$" "Gemfile" "config.ru" "Rakefile" "Capfile" "Vagrantfile"
+syntax "ruby" "\.rb$" "\.gemspec$" "Gemfile" "config.ru" "Rakefile" "Capfile" "Vagrantfile"
 header "^#!.*/(env +)?ruby( |$)"
 
 ## Asciibetical list of reserved words
