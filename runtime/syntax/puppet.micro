@@ -13,9 +13,9 @@ color statement "\b(class|define|if|else|undef|inherits)\b"
 color symbol "(=|-|~|>)"
 
 ## Constants
-color identifier.var "(\$|@|@@)?\<[A-Z]+[0-9A-Z_a-z]*"
+color identifier.var "(\$|@|@@)?\b[A-Z]+[0-9A-Z_a-z]*"
 ## Ruby "symbols"
-color symbol "([      ]|^):[0-9A-Z_]+\>"
+color symbol "([      ]|^):[0-9A-Z_]+\b"
 ## Regular expressions
 color constant "/([^/]|(\\/))*/[iomx]*" "%r\{([^}]|(\\}))*\}[iomx]*"
 ## Shell command expansion is in `backticks` or like %x{this}.  These are

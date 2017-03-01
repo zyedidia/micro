@@ -1,6 +1,6 @@
 syntax "po" "\.pot?$"
 
-color preproc  "\<(msgid|msgstr)\>"
+color preproc  "\b(msgid|msgstr)\b"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color special   "\\.?"
 color comment "(^|[[:space:]])#([^{].*)?$"
