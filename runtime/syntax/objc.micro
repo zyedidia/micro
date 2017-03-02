@@ -25,7 +25,7 @@ color symbol.operator "[.:;,+*|=!\%\[\]]" "<" ">" "/" "-" "&"
 
 color constant.number "\b(-?)?[0-9]+\b" "\b\[0-9]+\.[0-9]+\b" "\b0x[0-9A-F]+\b"
 color constant "@\[(\\.|[^\]])*\]" "@\{(\\.|[^\}])*\}" "@\((\\.|[^\)])*\)"
-color constant "\b<(\\.[^\>])*\>\b"
+color constant "\b<(\\.[^\b])*\b\b"
 color constant "\b(nil|NULL|YES|NO|TRUE|true|FALSE|false|self)\b"
 color constant "\bk[[:alnum]]*\b"
 color constant.string "\"(\\.|[^\"])*\"" "@\"(\\.|[^\"])*\"" "'.'"

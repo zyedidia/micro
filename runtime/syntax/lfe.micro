@@ -10,7 +10,7 @@ color type "defun|define-syntax|define|defmacro|defmodule|export"
 # Dirty base cases stolen from the generic lisp syntax
 color constant "\ [A-Za-z][A-Za-z0-9_-]+\ "
 color symbol.operator "\(([-+*/<>]|<=|>=)|'"
-color constant.number "\<[0-9]+\>"
+color constant.number "\b[0-9]+\b"
 color constant.string "\"(\\.|[^"])*\""
 color special "['|`][A-Za-z][A-Za-z0-9_-]+"
 color constant.string "\\.?"

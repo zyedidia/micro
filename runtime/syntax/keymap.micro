@@ -1,8 +1,8 @@
 syntax "keymap" "\.(k|key)?map$|Xmodmap$"
 
-color statement  "\<(add|clear|compose|keycode|keymaps|keysym|remove|string)\>"
-color statement  "\<(control|alt|shift)\>"
-color constant.number   "\<[0-9]+\>"
+color statement  "\b(add|clear|compose|keycode|keymaps|keysym|remove|string)\b"
+color statement  "\b(control|alt|shift)\b"
+color constant.number   "\b[0-9]+\b"
 color symbol "="
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color comment  "^!.*$"

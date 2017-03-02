@@ -1,8 +1,8 @@
 syntax "inputrc" "inputrc$"
 
-color constant.bool.false   "\<(off|none)\>"
-color constant.bool.true "\<on\>"
-color preproc   "\<set|\$include\>"
+color constant.bool.false   "\b(off|none)\b"
+color constant.bool.true "\bon\b"
+color preproc   "\bset|\$include\b"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color constant.specialChar     "\\.?"
 color comment "(^|[[:space:]])#([^{].*)?$"

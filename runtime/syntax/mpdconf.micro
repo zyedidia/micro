@@ -1,7 +1,7 @@
 syntax "mpd" "mpd\.conf$"
 
-color statement "\<(user|group|bind_to_address|host|port|plugin|name|type)\>"
-color statement "\<((music|playlist)_directory|(db|log|state|pid|sticker)_file)\>"
+color statement "\b(user|group|bind_to_address|host|port|plugin|name|type)\b"
+color statement "\b((music|playlist)_directory|(db|log|state|pid|sticker)_file)\b"
 color special "^(input|audio_output|decoder)[[:space:]]*\{|\}"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color comment "(^|[[:space:]])#([^{].*)?$"
