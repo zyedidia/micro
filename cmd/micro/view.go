@@ -976,14 +976,14 @@ func (v *View) DisplayCursor(x, y int) {
 
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
+	//Set title to the name of the current buffer
+	screen.SetTitle("micro: " + v.Buf.GetName())
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
 	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || v.Cursor.HasSelection() {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
-	//Set title to the name of the current buffer
-	screen.SetTitle("micro: " + t.views[t.CurView].Buf.GetName())
 	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
 	} else if (v.y + v.Height) != screenH-1 {
