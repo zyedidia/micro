@@ -1,10 +1,12 @@
 ## Here is a short improved example for HTML.
 ## 
 syntax "html" "\.htm[l]?$"
+header "<!DOCTYPE html5>"
+
 color symbol.tag "<[^!].*?>"
 color special "&[^;[[:space:]]]*;"
 color symbol "[:=]"
-color statement "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
+color identifier "(alt|bgcolor|height|href|id|label|longdesc|name|on(click|focus|load|mouseover)|size|span|src|style|target|type|value|width)="
 color constant.string ""[^"]*""
 color constant.number "(?i)#[0-9A-F]{6,6}"
 #Don't want or need tag highlighting outside of a tag! :)

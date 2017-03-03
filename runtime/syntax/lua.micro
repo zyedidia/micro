@@ -60,9 +60,6 @@ color constant start="\s*\[\[" end="\]\]"
 # Escapes
 color special "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
 
-# Shebang
-color preproc "^#!.*"
-
 # Simple brightblacks
 color comment "\-\-.*$"
 
