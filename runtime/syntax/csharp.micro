@@ -14,7 +14,7 @@ color statement  "\b(abstract|async|class|const|delegate|enum|event|explicit|ext
 color statement  "\b(from|where|select|group|info|orderby|join|let|in|on|equals|by|ascending|descending)\b"
 color special     "\b(break|continue)\b"
 color constant.bool "\b(true|false)\b"
-color symbol.operator "[-+/*=<>?:!~%&|]"
+color symbol.operator "[\-+/*=<>?:!~%&|]"
 color constant.number   "\b([0-9._]+|0x[A-Fa-f0-9_]+|0b[0-1_]+)[FL]?\b"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color constant.specialChar   "\\([btnfr]|'|\"|\\)"

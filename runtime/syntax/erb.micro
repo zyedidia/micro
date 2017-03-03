@@ -23,7 +23,7 @@ color comment "<!--.+?-->"
 color preproc "<!DOCTYPE.+?>"
 ## The tags that were here before. Disabled now.
 #color symbol.tag start="<" end=">"
-#Ignore anything outside of ruby when inside it.
+#Reset syntax highlighting for ruby
 color default start="<%" end="%>"
 color preproc "<%|%>"
 color red "&[^;[[:space:]]]*;"

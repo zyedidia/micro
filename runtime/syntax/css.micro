@@ -13,7 +13,7 @@ color identifier ":active|:focus|:hover|:link|:visited|:link|:after|:before|$"
 color symbol "(\{|\}|\(|\)|\;|:|\]|~|<|>|,)"
 
 # SCSS Varaibles
-color identifier "(i?)\$\{?[0-9A-Z_!@#$*?-]+\}?"
+color identifier "(?i)\$\{?[0-9A-Z_!@#$*?-]+\}?"
 
 # SCSS Commands
 color preproc "@import|@mixin|@extend"

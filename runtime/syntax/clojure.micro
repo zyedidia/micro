@@ -19,7 +19,7 @@ color symbol.operator "[=>+\-*/'?]"
 color type "\b(byte|short|(big)?int(eger)?|long|float|num|bigdec|rationalize)\b"
 
 #Bitwise operations
-color special
+color special ""
 
 #String highlighting
 color constant.string ""
