@@ -21,16 +21,18 @@ color type "\b(bool|bytearray|bytes|classmethod|complex|dict|enumerate|filter|fl
 ## definitions
 color identifier "def [a-zA-Z_0-9]+" 
 ## keywords
-color statement "\b(and|as|assert|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|nonlocal|not|or|pass|raise|return|try|while|with|yield)\b" 
+color preproc "\b(import)\b"
+color statement "\b(and|as|assert|class|def|del|elif|else|except|finally|for|from|global|if|in|is|lambda|nonlocal|not|or|pass|raise|try|while|with|yield)\b" 
+color special "\b(break|continue|return)\b"
 
 ## decorators
 color special "@.*[(]"
 
 ## operators
-color statement "[.:;,+*|=!\%@]" "<" ">" "/" "-" "&"
+color symbol.operator "[.:;,+*|=!\%@]" "<" ">" "/" "-" "&"
 
 ## parentheses
-color statement "[(){}]" "\[" "\]"
+color symbol.brackets "[(){}]" "\[" "\]"
 
 ## numbers
 color constant.number "\b[0-9]+\b"
@@ -44,3 +46,6 @@ color comment "#.*$"
 ## block brightblacks
 color comment start=""""([^"]|$)" end="""""
 color comment start="'''([^']|$)" end="'''"
+
+## Shebang
+color preproc.shebang "^#!.+?( |$)"

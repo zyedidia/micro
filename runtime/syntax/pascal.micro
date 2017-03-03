@@ -12,7 +12,7 @@ color constant "\b(?i:(false|true|nil))\b"
 
 color special start="asm" end="end"
 
-color constant.number "\$[0-9A-Fa-f]+" "\b[+-]?[0-9]+([.]?[0-9]+)?(?i:e[+-]?[0-9]+)?"
+color constant.number "\$[0-9A-Fa-f]+" "\b[+\-]?[0-9]+([.]?[0-9]+)?(?i:e[+\-]?[0-9]+)?"
 color constant.string "#[0-9]{1,}"
 color constant.string "'(?:[^']+|'')*'"
 

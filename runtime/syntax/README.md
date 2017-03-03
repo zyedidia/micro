@@ -7,7 +7,7 @@ They are taken from Nano, specifically from [this repository](https://github.com
 Micro syntax files are almost identical to Nano's, except for some key differences:
 
 * Micro does not use `icolor`. Instead, for a case insensitive match, use the case insensitive flag (`i`) in the regular expression
-    * For example, `icolor green ".*"` would become `color green (i) ".*"`
+    * For example, `icolor green ".*"` would become `color green "(?i).*"`
 
 # Using with colorschemes
 

@@ -1,10 +1,10 @@
 syntax "lisp" "(emacs|zile)$" "\.(el|li?sp|scm|ss)$"
 
 color default "\([a-z-]+"
-color symbol "\(([-+*/<>]|<=|>=)|'"
+color symbol "\(([\-+*/<>]|<=|>=)|'"
 color constant.number   "\b[0-9]+b>"
 color special  "\bnil\b"
-color brightcyan  "\b[tT]b>"
+color preproc  "\b[tT]b>"
 color constant.string   "\"(\\.|[^"])*\""
 color constant.specialChar   "'[A-Za-z][A-Za-z0-9_-]+"
 color constant.specialChar   "\\.?"

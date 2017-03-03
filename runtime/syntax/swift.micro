@@ -12,8 +12,8 @@ color statement  "(class|import|let|var|struct|enum|func|if|else|switch|case|def
 color statement  "(prefix|postfix|operator|extension|lazy|get|set|self|willSet|didSet|override|super|convenience|weak|strong|mutating|return|guard)\ "
 
 # Keywords
-color statement "(print)"
-color statement "(init)"
+color preproc "(print)"
+color preproc "(init)"
 
 # Numbers
 color constant.number "([0-9]+)"

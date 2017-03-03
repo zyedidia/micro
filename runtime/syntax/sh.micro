@@ -34,3 +34,6 @@ color identifier.var  "\$\{?[0-9A-Za-z_!@#$*?-]+\}?"
 # Comments & TODOs
 color comment "(^|[[:space:]])#.*$"
 color todo "(TODO|XXX|FIXME):?"
+
+# Shebang
+color preproc.shebang "^#!.+?( |$)"

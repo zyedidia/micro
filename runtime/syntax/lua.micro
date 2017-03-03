@@ -43,7 +43,7 @@ color identifier "\:\b(close|flush|lines|read|seek|setvbuf|write)\b"
 color constant.bool "\b(false|nil|true)\b"
 
 # External files
-color statement "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"
+color preproc "(\b(dofile|require|include)|%q|%!|%Q|%r|%x)\b"
 
 # Numbers
 color constant.number "\b([0-9]+)\b"
@@ -59,9 +59,6 @@ color constant start="\s*\[\[" end="\]\]"
 
 # Escapes
 color special "\\[0-7][0-7][0-7]|\\x[0-9a-fA-F][0-9a-fA-F]|\\[abefnrs]|(\\c|\\C-|\\M-|\\M-\\C-)."
-
-# Shebang
-color comment "^#!.*"
 
 # Simple brightblacks
 color comment "\-\-.*$"
