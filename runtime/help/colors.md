@@ -52,7 +52,7 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * paper-tc: A nice minimalist theme with a light background, good for editing documents on.
   Requires true color to look its best. Not to be confused with `-paper` suffixed themes.
 
-* geany: Colorscheme 
+* geany: Colorscheme based on geany's default highlighting.
 
 * geany-alt-tc: Based on an alternate theme bundled with geany. 
 
@@ -140,9 +140,9 @@ Here is a list of the colorscheme groups that you can use:
 * underlined
 * error
 * todo
-* statusline (color of the statusline)
-* tabbar ( color of the tabbar that lists open files.)
-* indent-char (color of the character which indicates tabs if the option is enabled)
+* statusline ( Color of the statusline)
+* tabbar ( Color of the tabbar that lists open files.)
+* indent-char ( Color of the character which indicates tabs if the option is enabled)
 * line-number
 * gutter-error
 * gutter-warning
@@ -150,6 +150,7 @@ Here is a list of the colorscheme groups that you can use:
 * current-line-number
 * color-column
 * ignore
+* divider ( Color of the divider between vertical splits. )
 
 Colorschemes must be placed in the `~/.config/micro/colorschemes` directory to be used.
 
