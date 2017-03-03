@@ -714,8 +714,12 @@ func (v *View) DisplayView() {
 		}
 
 		if v.x != 0 {
+			dividerStyle := defStyle
+					if style, ok := colorscheme["divider"]; ok {
+							dividerstyle = style
+					}
 			// Draw the split divider
-			v.drawCell(screenX, screenY, '|', nil, defStyle.Reverse(true))
+			v.drawCell(screenX, screenY, tcell.RuneVLine, nil, dividerStyle)
 			screenX++
 		}
 
