@@ -588,14 +588,20 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		startY := v.Cursor.CurSelection[0].Y
-		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
-		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
+		start := v.Cursor.CurSelection[0]
+		end := v.Cursor.CurSelection[1]
+		if end.Y < start.Y {
+			start, end = end, start
+		}
+
+		startY := start.Y
+		endY := end.Move(-1, v.Buf).Y
+		endX := end.Move(-1, v.Buf).X
 		for y := startY; y <= endY; y++ {
 			tabsize := len(v.Buf.IndentString())
 			v.Buf.Insert(Loc{0, y}, v.Buf.IndentString())
-			if y == startY && v.Cursor.CurSelection[0].X > 0 {
-				v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(tabsize, v.Buf))
+			if y == startY && start.X > 0 {
+				v.Cursor.SetSelectionStart(start.Move(tabsize, v.Buf))
 			}
 			if y == endY {
 				v.Cursor.SetSelectionEnd(Loc{endX + tabsize + 1, endY})
@@ -643,17 +649,23 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		startY := v.Cursor.CurSelection[0].Y
-		endY := v.Cursor.CurSelection[1].Move(-1, v.Buf).Y
-		endX := v.Cursor.CurSelection[1].Move(-1, v.Buf).X
+		start := v.Cursor.CurSelection[0]
+		end := v.Cursor.CurSelection[1]
+		if end.Y < start.Y {
+			start, end = end, start
+		}
+
+		startY := start.Y
+		endY := end.Move(-1, v.Buf).Y
+		endX := end.Move(-1, v.Buf).X
 		for y := startY; y <= endY; y++ {
 			for x := 0; x < len(v.Buf.IndentString()); x++ {
 				if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
 					break
 				}
 				v.Buf.Remove(Loc{0, y}, Loc{1, y})
-				if y == startY && v.Cursor.CurSelection[0].X > 0 {
-					v.Cursor.SetSelectionStart(v.Cursor.CurSelection[0].Move(-1, v.Buf))
+				if y == startY && start.X > 0 {
+					v.Cursor.SetSelectionStart(start.Move(-1, v.Buf))
 				}
 				if y == endY {
 					v.Cursor.SetSelectionEnd(Loc{endX - x, endY})

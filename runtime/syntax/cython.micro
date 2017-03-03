@@ -8,12 +8,12 @@ color preproc "cdef cppclass [ 0-9A-Z_]+\(.*\):"
 
 
 # Python Keyword Color
-color statement "\<(and|as|assert|class|def|DEF|del|elif|ELIF|else|ELSE|except|exec|finally|for|from|global|if|IF|import|in|is|lambda|map|not|or|pass|print|raise|try|while|with|yield)\>"
-color special "\<(continue|break|return)\>"
+color statement "\b(and|as|assert|class|def|DEF|del|elif|ELIF|else|ELSE|except|exec|finally|for|from|global|if|IF|import|in|is|lambda|map|not|or|pass|print|raise|try|while|with|yield)\b"
+color special "\b(continue|break|return)\b"
 
 # Cython Keyword Color
-color identifier.macro "\<(cdef|cimport|cpdef|cppclass|ctypedef|extern|include|namespace|property|struct)\>"
-color type "\<(bint|char|double|int|public|void|unsigned)\>"
+color identifier.macro "\b(cdef|cimport|cpdef|cppclass|ctypedef|extern|include|namespace|property|struct)\b"
+color type "\b(bint|char|double|int|public|void|unsigned)\b"
 
 #Operator Color
 color symbol "[.:;,+*|=!\%]" "<" ">" "/" "-" "&"
