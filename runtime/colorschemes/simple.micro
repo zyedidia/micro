@@ -21,3 +21,5 @@ color-link color-column "white"
 color-link type.extended "default"
 #No bracket highlighting.
 color-link symbol.brackets "default"
+#Color shebangs the comment color
+color-link preproc.shebang "comment"
