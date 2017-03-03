@@ -12,7 +12,7 @@ color statement "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin
 color statement "\b(class|namespace|template|public|protected|private|typename|this|friend|virtual|using|mutable|volatile|register|explicit)\b"
 color statement "\b(for|if|while|do|else|case|default|switch)\b"
 color statement "\b(try|throw|catch|operator|new|delete)\b"
-color statement "\b(goto|continue|break|return)\b"
+color special "\b(goto|continue|break|return)\b"
 color statement "\b(nonatomic|atomic|readonly|readwrite|strong|weak|assign)\b"
 color statement "@(encode|end|interface|implementation|class|selector|protocol|synchronized|try|catch|finally|property|optional|required|import|autoreleasepool)"
 
@@ -26,7 +26,8 @@ color symbol.operator "[.:;,+*|=!\%\[\]]" "<" ">" "/" "-" "&"
 color constant.number "\b(-?)?[0-9]+\b" "\b\[0-9]+\.[0-9]+\b" "\b0x[0-9A-F]+\b"
 color constant "@\[(\\.|[^\]])*\]" "@\{(\\.|[^\}])*\}" "@\((\\.|[^\)])*\)"
 color constant "\b<(\\.[^\b])*\b\b"
-color constant "\b(nil|NULL|YES|NO|TRUE|true|FALSE|false|self)\b"
+color constant.bool "\b(nil|NULL|YES|NO|TRUE|true|FALSE|false)\b"
+color special "\b(self)\b"
 color constant "\bk[[:alnum]]*\b"
 color constant.string "\"(\\.|[^\"])*\"" "@\"(\\.|[^\"])*\"" "'.'"
 

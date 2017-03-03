@@ -1,7 +1,8 @@
 syntax "ini" "\.(ini|desktop|lfl|override)$" "(mimeapps\.list|pinforc|setup\.cfg)$" "weechat/.+\.conf$"
 header "^\[[A-Za-z]+\]$"
 
-color constant "\b(true|false)\b"
+color constant.bool.true "\btrue\b"
+color constant.bool.false "\bfalse\b"
 color identifier "^[[:space:]]*[^=]*="
 color special "^[[:space:]]*\[.*\]$"
 color statement "[=;]"

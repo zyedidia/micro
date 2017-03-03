@@ -86,7 +86,7 @@ color statement "\b(interrupts|noInterrupts)\b"
 color statement "\b(noTone|pulseIn|shiftIn|shiftOut|tone)\b"
 
 ## Serial
-color special "b<(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\b"
+color special "\b(Serial|Serial1|Serial2|Serial3|begin|end|peek|read|print|println|available|flush)\b"
 
 ## Structure
 color statement "\b(setup|loop)\b"

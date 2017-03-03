@@ -1,36 +1,65 @@
 #This file probably needs cleanup!!
 syntax "php" "\.php[2345s~]?$"
-color symbol.brackets "<.+?>"
-color preproc "<\?(php|=)?"
-color preproc "\?>"
-#color preproc start="<\?(php|=)?" end="\?>"
 
+#Broken! Don't enable! 
+color default start="<.+?>" end="<.+?>"
+color symbol.operator "<|>"
+color error ""
+color symbol.tag "</?(a(bbr|cronym|ddress|pplet|rea|rticle|side|udio)?|b(ase(font)?)|d(i|o)?|ig|lockquote|r)?|ca(nvas|ption)|center|cite|co(de|l|lgroup)|d(atalist|d|el|etails|fn|ialog|ir|l|t)|em(bed)?|fieldset|fig(caption|ure)|font|(i)?frame|frameset|h[1-6]|hr|img|in(put|s)|kbd|keygen|label|legend|li(nk)?|ma(in|p|rk)|menu(item)?|met(a|er)|nav|no(frames|script)|o(l|pt(group|ion)|utput)|p(aram|icture|re|rogress)?|q|r(p|t|uby)|samp|se(ction|lect)|small|source|span|strong|su(b|p|mmary)|textarea|track|u(l)?|var|video|wbr) .+?>"
+color symbol.tag.extended "</?(body|div|html|head(er)?|footer|title|table|t(body|d|h(ead)?|r|foot)) .+?>"
+color preproc "</?(script|style) .+?>"
+#Highlighting from html land
+color special "&[^;[[:space:]]]*;"
+color symbol "[:=]"
+color statement "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
+color constant.string ""[^"]*""
+color constant.number "(?i)#[0-9A-F]{6,6}"
+#Don't want or need tag highlighting outside of a tag! :)
+#color default start=">" end="<"
+color constant.string.url "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
+
+#Reset highlighting to begin php
+color default "<\?(php|=)" end="\?>"
 color identifier.class "([a-zA-Z0-9_-]+)\("
 
-color type "(var|class|goto|extends|function|echo|case|break|default|exit|switch|foreach|endforeach|while|const|static|extends|as|require|include|require_once|include_once|define|do|continue|declare|goto|print|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)[\s|\)]"
+color preproc "(require|include|require_once|include_once)"
+
+color type "\b(var|class|extends|function|echo|case|default|exit|switch|extends|as|define|do|declare|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)\b"
 
 color identifier.class "[a-zA-Z\\]+::"
 
-color identifier "new\s([a-zA-Z0-9\\]+)"
 color identifier "([A-Z][a-zA-Z0-9_]+)\s"
 color identifier "([A-Z0-9_]+)[;|\s|\)|,]"
 
-color statement "(implements|abstract|global|public|instanceof|private|protected|static|if|else|elseif|endif|namespace|use|as|new|throw|catch|try|return)[\s|;]"
+color type.keyword "(global|public|private|protected|static|const)"
+color statement "(implements|abstract|instanceof|if|else(if)?|endif|namespace|use|as|new|throw|catch|try|while|print|(end)?(foreach)?)\b"
+color identifier "new\s([a-zA-Z0-9\\]+)"
+color special "(break|continue|goto|return)"
 
 color constant.bool "(true|false|null|TRUE|FALSE|NULL)"
 
-color constant "[\s|=|>|\s|\(|/|+|-|\*|\[](\d+)"
+color constant "[\s|=|\s|\(|/|+|-|\*|\[]"
+color constant.number "[0-9]"
 
 color identifier "(\$this|parent|self|\$this->)"
 
 color symbol.operator "(=>|===|!==|==|!=|&&|\|\||::|=|->|\!)"
 
 color identifier.var "(\$[a-zA-Z0-9\-_]+)"
-color symbol.operator "[\(|\)|/|+|-|\*|\[|,|;]"
+color symbol.operator "[\(|\)|/|+|\-|\*|\[|.|,|;]"
 
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color constant.specialChar "\\[abfnrtv'\"\\]"
 
+color symbol.brackets "(\[|\]|\{|\}|[()])"
+
 color comment "(^|[[:space:]])//.*"
 color comment "(^|[[:space:]])#.*"
 color comment start="/\*" end="\*/"
+
+color comment "<!--.+?-->"
+color preproc "<\?(php|=)?"
+color preproc "\?>"
+color preproc "<!DOCTYPE.+?>"
+
+

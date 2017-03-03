@@ -16,14 +16,15 @@ color constant "'([^'\\]|(\\["'abfnrtv\\]))'" "'\\(([0-3]?[0-7]{1,2}))'" "'\\x[0
 ## GCC builtins
 color statement "__attribute__[[:space:]]*\(\([^)]*\)\)" "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
 
+#Includes
+color constant.string "<.+?>"
+
 #Operator Color
 color symbol.operator "[.:;,+*|=!\%]" "<" ">" "/" "-" "&" 
 
 #Parenthetical Color
 color symbol.brackets "[(){}]" "\[" "\]"
 
-#Includes
-color constant.string "<.+?>"
 #Integers
 color constant.number "\b[0-9]+\b" "\b0x[0-9A-Fa-f]+\b"
 color constant.number "NULL"

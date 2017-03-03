@@ -1,14 +1,17 @@
 ## Here is a short improved example for HTML.
 ## 
 syntax "html" "\.htm[l]?$"
-color symbol "<|>"
 color symbol.tag "<[^!].*?>"
-color symbol "[:=]"
 color special "&[^;[[:space:]]]*;"
-color constant.string ""[^"]*"|qq\|.*\|"
+color symbol "[:=]"
 color statement "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
-color constant.string.url "(ft(p|ps)|htt(p|ps)|git|chrome)://[^ 	]+"
+color constant.string ""[^"]*""
+color constant.number "(?i)#[0-9A-F]{6,6}"
+#Don't want or need tag highlighting outside of a tag! :)
+color default start=">" end="<"
+color symbol.tag "<|>"
+color constant.string.url "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
 color comment "<!--.+?-->"
 color preproc "<!DOCTYPE.+?>"
-# Bad possible work around for region-less regions. 
-#color default start=">" end="<"
+
+# There's only so much we can do before regions and includes are implemented. :/

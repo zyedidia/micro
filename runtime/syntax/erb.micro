@@ -3,10 +3,26 @@
 ## Licensed under the CC (Creative Commons) License.
 ##
 ## https://github.com/geomic/ERB-And-More-Code-Highlighting-for-nano
+#Note for dummies like me who had no idea what Embedded Ruby is:
+# https://en.wikipedia.org/wiki/ERuby
+# It's like Ruby for your browser. Heh. Cheers, CaptainMcClellan
 
 syntax "erb" "\.erb$" "\.rhtml$"
-color symbol.brackets start="<" end=">"
+#Highlights from html-land
+color symbol.tag "<[^!].*?>"
+color special "&[^;[[:space:]]]*;"
+color symbol "[:=]"
+color statement "(alt|bgcolor|height|href|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
+color constant.string ""[^"]*""
+color constant.number "(?i)#[0-9A-F]{6,6}"
+color constant.string.url "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
+color comment "<!--.+?-->"
+color preproc "<!DOCTYPE.+?>"
+## The tags that were here before. Disabled now.
+#color symbol.tag start="<" end=">"
+#Ignore anything outside of ruby when inside it.
 color default start="<%" end="%>"
+color preproc "<%|%>"
 color red "&[^;[[:space:]]]*;"
 color statement "\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\?|do|else|elsif|end|ensure|false|for|if|in|module|next|nil|not|or|redo|rescue|retry|return|self|super|then|true|undef|unless|until|when|while|yield)\b"
 color identifier.var "(\$|@|@@)?\b[A-Z]+[0-9A-Z_a-z]*"
@@ -21,5 +37,4 @@ color comment "#[^{].*$" "#$"
 color comment.bright "##[^{].*$" "##$"
 color identifier.macro start="<<-?'?EOT'?" end="^EOT"
 color todo "(XXX|TODO|FIXME|\?\?\?)"
-
 

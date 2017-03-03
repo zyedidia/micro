@@ -38,7 +38,7 @@ color constant "\b(and|in|is|not|or|isnt|orIfNull)\b"
 color constant.bool "\b(true|false)\b"
 color constant  "\b(null|undefined)\b"
 
-color symbol.brackets "[-+/*=<>!~%&|^]|:="
+color symbol.operator "[\-+/*=<>!~%&|^]|:="
 color constant.number   "\b([0-9]+|0x[0-9a-fA-F]*)\b|'.'"
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 

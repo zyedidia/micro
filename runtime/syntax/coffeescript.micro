@@ -1,7 +1,7 @@
 syntax "coffeescript" "\.coffee$"
 header "^#!.*/(env +)?coffee"
 
-color symbol.operator "[!&|=/*+-<>]|\b(and|or|is|isnt|not)\b"
+color symbol.operator "[!&|=/*+\-<>]|\b(and|or|is|isnt|not)\b"
 color identifier.class "[A-Za-z_][A-Za-z0-9_]*:[[:space:]]*(->|\()" "->"
 color symbol.brackets "[()]"
 color statement  "\b(for|of|continue|break|isnt|null|unless|this|else|if|return)\b"
@@ -14,3 +14,4 @@ color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
 color comment "(^|[[:space:]])#([^{].*)?$"
 color indent-char.whitespace "[[:space:]]+$"
 color indent-char "	+ +| +	+"
+color preproc "#!.+$"
