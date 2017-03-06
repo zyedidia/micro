@@ -791,7 +791,7 @@ func (v *View) FindNext(usePlugin bool) bool {
 
 	if v.Cursor.HasSelection() {
 		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
-		lastSearch = v.Cursor.GetSelection()
+		// lastSearch = v.Cursor.GetSelection()
 	} else {
 		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
 	}

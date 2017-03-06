@@ -22,7 +22,7 @@ color symbol "^(---+|\+---+|===+|\+===+|___+|\*\*\*+|\+\*\*\*+)\s*$"
 color statement  "^#{1,6}.*"
 
 # lists
-color identifier   "^[[:space:]]*[\*+-] |^[[:space:]]*[0-9]+\. "
+color identifier   "^[[:space:]]*[\*+\-] |^[[:space:]]*[0-9]+\. "
 
 # misc
 color preproc   "\b([CcRr]|[Tt][Mm])\b" "\.{3}" "(^|[[:space:]])\-\-($|[[:space:]])"
@@ -38,7 +38,7 @@ color underlined "!\[[^][]*\](\([^)]+\)|\[[^]]+\])"
 color underlined.url "https?://[^ )>]+"
 
 # code
-color special   "`.*?`|^ {4}[^-+*].*"
+color special   "`.*?`|^ {4}[^\-+*].*"
 # code blocks
 color symbol "^```$"
 

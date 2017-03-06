@@ -1,27 +1,42 @@
 ## For reST
 syntax "rst" "\.rest$" "\.rst$"
+
+# Lists, bulleted and enumerated
+color identifier "^[\*+\-] "
+color identifier "^[0-9]+?\. "
 # italics
-#color magenta "\*[^*]\*"
+color type "\*[^*]+?\*"
 # bold
-color red "\*\*[^*]+\*\*"
+color type.keyword "\*\*[^\*]+\*\*"
 # code block
-color brightred "::"
+color symbol "::"
 # link reference
-color blue "`[^`]+`_{1,2}"
+color underlined.url "`[^`]+`_{1,2}"
 # code
-color yellow "``[^`]+``"
+color special "``[^`]+``"
 # directives or comments
-color cyan "^\.\. .*$"
+color comment "^\.\. .*$"
 # anon link targets
-color cyan "^__ .*$"
+color underlined "^__ .*$"
 # h1
-color yellow "^###+$"
-color yellow "^\*\*\*+$"
+color statement "^###+$"
+color statement "^\*\*\*+$"
 # h2
-color magenta "^===+$"
+color preproc "^===+$"
 # h3
-color red "^---+$"
+color identifier "^---+$"
 # h4
-color green "^\^\^\^+$"
+color type.keyword "^\^\^\^+$"
 # h5
-color blue "^"""+$"
+color constant "^"""+$"
+
+# urls
+color underlined.url "http(s)?://[^ 	)>]+"
+
+#Tables
+color preproc "\+[\-=+]+\+"
+color preproc "\|"
+
+# I went and looked up an reStructured Text Specification.
+# I really hope I got the right one. I tried to align
+# color choices with the ones for markdown and asciidoc

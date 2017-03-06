@@ -11,7 +11,7 @@ color default "salt:"
 
 # Numbers, etc
 color constant.number "/*[0-9]/*"
-color constant "\b(True|False)\b"
+color constant.bool "\b(True|False)\b"
 
 # Anything between two single quotes
 color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"

@@ -183,6 +183,7 @@ Here's a list of subgroups used in micro's built-in syntax files.
 * identifier.class ( Also used for functions. )
 * identifier.macro
 * identifier.var
+* preproc.shebang ( The #! at the beginning of a file that tells the os what script interpreter to use. )
 * symbol.brackets ( {}()[] and sometimes <> )
 * symbol.operator ( Color operator symbols differently. )
 * symbol.tag ( For html tags, among other things.)

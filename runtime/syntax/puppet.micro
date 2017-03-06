@@ -30,7 +30,7 @@ color special "\$\{[^}]*\}"
 color constant.string "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>" "%[qw]\[[^]]*\]" "%[qw]\$[^$]*\$" "%[qw]\^[^^]*\^" "%[qw]![^!]*!"
 ## Comments
 color comment "#[^{].*$" "#$"
-color comment "##[^{].*$" "##$"
+color comment.bright "##[^{].*$" "##$"
 ## Some common markers
 color todo "(XXX|TODO|FIXME|\?\?\?)"
 ## Trailing spaces

@@ -40,3 +40,6 @@ color comment.bright "(^|[[:space:]])##.*$"
 
 ## Trailing spaces
 color indent-char.whitespace "[[:space:]]+$"
+
+##Shebang
+color preproc.shebang "^#!.+?( |$)"

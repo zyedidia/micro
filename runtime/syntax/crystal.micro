@@ -26,7 +26,7 @@ color special "#\{[^}]*\}"
 color constant.string.char "'([^']|(\\'))*'" "%[qw]\{[^}]*\}" "%[qw]\([^)]*\)" "%[qw]<[^>]*>" "%[qw]\[[^]]*\]" "%[qw]\$[^$]*\$" "%[qw]\^[^^]*\^" "%[qw]![^!]*!"
 ## Comments
 color comment "#[^{].*$" "#$"
-color comment "##[^{].*$" "##$"
+color comment.bright "##[^{].*$" "##$"
 ## "Here" docs
 color constant start="<<-?'?EOT'?" end="^EOT"
 ## Some common markers

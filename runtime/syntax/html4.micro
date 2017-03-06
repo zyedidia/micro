@@ -1,6 +1,8 @@
-## Here is a short improved example for generic HTML.
+## Here is a short improved example for HTML.
 ## 
-syntax "html" "\.htm[l]?$"
+## HTML 4 strict. (No html5 or depreciated html)
+syntax "html4" "\.htm[l]?$"
+header "<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">"
 
 color error "<[^!].*?>"
 color symbol.tag "(?i)<[/]?(a(bbr|cronym|ddress|pplet|rea|rticle|side|udio)?|b(ase(font)?|d(i|o)|ig|lockquote|r)?|ca(nvas|ption)|center|cite|co(de|l|lgroup)|d(ata(list)?|d|el|etails|fn|ialog|ir|l|t)|em(bed)?|fieldset|fig(caption|ure)|font|form|(i)?frame|frameset|h[1-6]|hr|i|img|in(put|s)|kbd|keygen|label|legend|li(nk)?|ma(in|p|rk)|menu(item)?|met(a|er)|nav|no(frames|script)|o(l|pt(group|ion)|utput)|p(aram|icture|re|rogress)?|q|r(p|t|uby)|s(trike)?|samp|se(ction|lect)|small|source|span|strong|su(b|p|mmary)|textarea|time|track|u(l)?|var|video|wbr)( .*|>)*?>"
@@ -17,5 +19,3 @@ color symbol.tag "<|>"
 color constant.string.url "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
 color comment "<!--.+?-->"
 color preproc "<!DOCTYPE.+?>"
-
-# There's only so much we can do before regions and includes are implemented. :/

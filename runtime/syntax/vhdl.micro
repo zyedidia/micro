@@ -40,7 +40,7 @@ color symbol.operator "(\+|-|\*|/|&|<|>|=|\.|:)"
 
 ## constants
 color constant.number  "(?i)'([0-1]|u|x|z|w|l|h|-)'" "[box]?"([0-1a-fA-F]|u|x|z|w|l|h|-)+""
-color constant.number  "(?i)\b[0-9\._]+(e[-]?[0-9]+)?( ?[fpnum]?s)?\b"
+color constant.number  "(?i)\b[0-9\._]+(e[\-]?[0-9]+)?( ?[fpnum]?s)?\b"
 color constant.bool  "(?i)\b(true|false)\b"
 ## severity levels
 color constant  "(?i)\b(note|warning|error|failure)\b"
