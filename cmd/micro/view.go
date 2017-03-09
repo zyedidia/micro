@@ -243,6 +243,13 @@ func (v *View) Open(filename string) {
 	home, _ := homedir.Dir()
 	filename = strings.Replace(filename, "~", home, 1)
 	file, err := os.Open(filename)
+	fileInfo, _ := os.Stat(filename)
+
+	if err == nil && fileInfo.IsDir() {
+		messenger.Error(filename, " is a directory")
+		return
+	}
+
 	defer file.Close()
 
 	var buf *Buffer
