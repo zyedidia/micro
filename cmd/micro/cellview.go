@@ -45,6 +45,7 @@ type Char struct {
 	// This is only different from char if it's for example hidden character
 	drawChar rune
 	style    tcell.Style
+	width    int
 }
 
 type CellView struct {
@@ -113,16 +114,34 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			char := line[colN]
 
 			if viewCol >= 0 {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle, 1}
 			}
 			if char == '\t' {
+				width := tabsize - (viewCol+left)%tabsize
 				if viewCol >= 0 {
 					c.lines[viewLine][viewCol].drawChar = indentchar
+					c.lines[viewLine][viewCol].width = width
 				}
 
-				viewCol += tabsize - (viewCol+left)%tabsize
+				for i := 1; i < width; i++ {
+					viewCol++
+					if viewCol >= 0 {
+						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
+					}
+				}
+				viewCol++
 			} else if runewidth.RuneWidth(char) > 1 {
-				viewCol += runewidth.RuneWidth(char)
+				width := runewidth.RuneWidth(char)
+				if viewCol >= 0 {
+					c.lines[viewLine][viewCol].width = width
+				}
+				for i := 1; i < width; i++ {
+					viewCol++
+					if viewCol >= 0 {
+						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
+					}
+				}
+				viewCol++
 			} else {
 				viewCol++
 			}

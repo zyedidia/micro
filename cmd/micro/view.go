@@ -648,7 +648,6 @@ func (v *View) openHelp(helpPage string) {
 }
 
 func (v *View) DisplayView() {
-	tabsize := int(v.Buf.Settings["tabsize"].(float64))
 	if v.Type == vtLog {
 		// Log views should always follow the cursor...
 		v.Relocate()
@@ -718,8 +717,6 @@ func (v *View) DisplayView() {
 			screen.SetContent(screenX, yOffset+visualLineN, '|', nil, defStyle.Reverse(true))
 			screenX++
 		}
-
-		lineStr := v.Buf.Line(realLineN)
 
 		// If there are gutter messages we need to display the '>>' symbol here
 		if hasGutterMessages {
@@ -807,6 +804,7 @@ func (v *View) DisplayView() {
 		}
 
 		var lastChar *Char
+		cursorSet := false
 		for _, char := range line {
 			if char != nil {
 				lineStyle := char.style
@@ -821,16 +819,12 @@ func (v *View) DisplayView() {
 					if style, ok := colorscheme["selection"]; ok {
 						lineStyle = style
 					}
-
-					width := StringWidth(string(char.char), tabsize)
-					for i := 1; i < width; i++ {
-						screen.SetContent(xOffset+char.visualLoc.X+i, yOffset+char.visualLoc.Y, ' ', nil, lineStyle)
-					}
 				}
 
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X {
+					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && !cursorSet {
 					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
+					cursorSet = true
 				}
 
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
@@ -838,11 +832,6 @@ func (v *View) DisplayView() {
 					style := GetColor("cursor-line")
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
-
-					width := StringWidth(string(char.char), tabsize)
-					for i := 1; i < width; i++ {
-						screen.SetContent(xOffset+char.visualLoc.X+i, yOffset+char.visualLoc.Y, ' ', nil, lineStyle)
-					}
 				}
 
 				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
@@ -855,11 +844,11 @@ func (v *View) DisplayView() {
 		var realLoc Loc
 		var visualLoc Loc
 		if lastChar != nil {
+			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-				screen.ShowCursor(xOffset+StringWidth(string(lineStr), tabsize), yOffset+lastChar.visualLoc.Y)
+				screen.ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
 			}
-			lastX = xOffset + StringWidth(string(lineStr), tabsize)
 			realLoc = Loc{lastChar.realLoc.X, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
