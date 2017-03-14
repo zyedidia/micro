@@ -564,6 +564,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 				} else if v.doubleClick {
 					v.Cursor.AddWordToSelection()
 				} else {
+					// If Shift is pressed
+					if e.Modifiers() == 1 {
+						v.Cursor.SelectionType = BlockSelectionType
+					} else {
+						v.Cursor.SelectionType = LineSelectionType
+					}
 					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 					v.Cursor.CopySelection("primary")
 				}
@@ -851,9 +857,7 @@ func (v *View) DisplayView() {
 				highlightStyle = v.matches[viewLine][colN]
 			}
 
-			if v.Cursor.HasSelection() &&
-				(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
-					charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
+			if v.Cursor.IsSelected(charNum) {
 				// The current character is selected
 				lineStyle = defStyle.Reverse(true)
 
@@ -882,10 +886,7 @@ func (v *View) DisplayView() {
 				if style, ok := colorscheme["indent-char"]; ok && v.Buf.Settings["indentchar"].(string) != " " {
 					lineIndentStyle = style
 				}
-				if v.Cursor.HasSelection() &&
-					(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
-						charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
-
+				if v.Cursor.IsSelected(charNum) {
 					lineIndentStyle = defStyle.Reverse(true)
 
 					if style, ok := colorscheme["selection"]; ok {
@@ -942,10 +943,7 @@ func (v *View) DisplayView() {
 
 		// The newline may be selected, in which case we should draw the selection style
 		// with a space to represent it
-		if v.Cursor.HasSelection() &&
-			(charNum.GreaterEqual(v.Cursor.CurSelection[0]) && charNum.LessThan(v.Cursor.CurSelection[1]) ||
-				charNum.LessThan(v.Cursor.CurSelection[0]) && charNum.GreaterEqual(v.Cursor.CurSelection[1])) {
-
+		if v.Cursor.IsSelected(charNum) {
 			selectStyle := defStyle.Reverse(true)
 
 			if style, ok := colorscheme["selection"]; ok {

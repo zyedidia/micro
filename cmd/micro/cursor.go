@@ -1,6 +1,15 @@
 package main
 
-import "github.com/zyedidia/clipboard"
+import (
+	"strings"
+
+	"github.com/zyedidia/clipboard"
+)
+
+const (
+	LineSelectionType = iota
+	BlockSelectionType
+)
 
 // The Cursor struct stores the location of the cursor in the view
 // The complicated part about the cursor is storing its location.
@@ -21,6 +30,8 @@ type Cursor struct {
 	// This is used for line and word selection where it is necessary
 	// to know what the original selection was
 	OrigSelection [2]Loc
+
+	SelectionType int
 }
 
 // Goto puts the cursor at the given cursor's location and gives the current cursor its selection too
@@ -54,6 +65,23 @@ func (c *Cursor) SetSelectionEnd(pos Loc) {
 	c.CurSelection[1] = pos
 }
 
+func (c *Cursor) IsSelected(l Loc) bool {
+	if c.HasSelection() {
+		if c.SelectionType == BlockSelectionType {
+			realCurSelectionStart := c.GetVisualLoc(c.CurSelection[0])
+			realCurSelectionEnd := c.GetVisualLoc(c.CurSelection[1])
+			realAskedLoc := c.GetVisualLoc(l)
+			return realAskedLoc.Inside(realCurSelectionStart, realCurSelectionEnd)
+		} else {
+			if l.GreaterEqual(c.CurSelection[0]) && l.LessThan(c.CurSelection[1]) ||
+				l.LessThan(c.CurSelection[0]) && l.GreaterEqual(c.CurSelection[1]) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // HasSelection returns whether or not the user has selected anything
 func (c *Cursor) HasSelection() bool {
 	return c.CurSelection[0] != c.CurSelection[1]
@@ -61,24 +89,61 @@ func (c *Cursor) HasSelection() bool {
 
 // DeleteSelection deletes the currently selected text
 func (c *Cursor) DeleteSelection() {
-	if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
-		c.buf.Remove(c.CurSelection[1], c.CurSelection[0])
-		c.Loc = c.CurSelection[1]
-	} else if !c.HasSelection() {
+	if !c.HasSelection() {
 		return
-	} else {
-		c.buf.Remove(c.CurSelection[0], c.CurSelection[1])
-		c.Loc = c.CurSelection[0]
+	}
+	if c.SelectionType == LineSelectionType {
+		if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
+			c.buf.Remove(c.CurSelection[1], c.CurSelection[0])
+			c.Loc = c.CurSelection[1]
+		} else {
+			c.buf.Remove(c.CurSelection[0], c.CurSelection[1])
+			c.Loc = c.CurSelection[0]
+		}
+	} else if c.SelectionType == BlockSelectionType {
+		p1 := c.CurSelection[0]
+		p2 := c.CurSelection[1]
+		newLoc := p1
+		if p1.Y > p2.Y {
+			p1.Y, p2.Y = p2.Y, p1.Y
+		}
+		if p1.X > p2.X {
+			newLoc.X = p2.X
+			p1.X, p2.X = p2.X, p1.X
+		}
+		for i := p1.Y; i <= p2.Y; i++ {
+			c.buf.Remove(Loc{p1.X, i}, Loc{p2.X + 1, i})
+		}
+		c.Loc = newLoc
 	}
 }
 
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() string {
-	if InBounds(c.CurSelection[0], c.buf) && InBounds(c.CurSelection[1], c.buf) {
-		if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
-			return c.buf.Substr(c.CurSelection[1], c.CurSelection[0])
+	if c.SelectionType == LineSelectionType {
+		if InBounds(c.CurSelection[0], c.buf) && InBounds(c.CurSelection[1], c.buf) {
+			if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
+				return c.buf.Substr(c.CurSelection[1], c.CurSelection[0])
+			}
+			return c.buf.Substr(c.CurSelection[0], c.CurSelection[1])
 		}
-		return c.buf.Substr(c.CurSelection[0], c.CurSelection[1])
+	} else if c.SelectionType == BlockSelectionType {
+		if InBounds(c.CurSelection[0], c.buf) && InBounds(c.CurSelection[1], c.buf) {
+			p1 := c.CurSelection[0]
+			p2 := c.CurSelection[1]
+			if p1.X > p2.X {
+				p1.X, p2.X = p2.X, p1.X
+			}
+			if p1.Y > p2.Y {
+				p1.Y, p2.Y = p2.Y, p1.Y
+			}
+			var lines []string
+			for i := p1.Y; i <= p2.Y; i++ {
+				lines = append(lines, c.buf.Substr(Loc{p1.X, i}, Loc{p2.X + 1, i}))
+			}
+			result := strings.Join(lines, "\n")
+			return result
+		}
 	}
 	return ""
 }
@@ -330,11 +395,20 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	return visualPos / tabSize
 }
 
+// GetVisualLoc returns the value of l in visual spaces
+func (c *Cursor) GetVisualLoc(l Loc) Loc {
+	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	line := c.buf.Line(l.Y)
+	max := l.X
+	if max > Count(line) {
+		max = Count(line)
+	}
+	return Loc{StringWidth(line[:max], tabSize), l.Y}
+}
+
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
-	runes := []rune(c.buf.Line(c.Y))
-	tabSize := int(c.buf.Settings["tabsize"].(float64))
-	return StringWidth(string(runes[:c.X]), tabSize)
+	return c.GetVisualLoc(c.Loc).X
 }
 
 // Relocate makes sure that the cursor is inside the bounds of the buffer
