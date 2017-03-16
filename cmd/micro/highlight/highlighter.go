@@ -73,6 +73,10 @@ func FindAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, line []byte, region *Region) LineMatch {
 	highlights := make(LineMatch)
 
+	if start == 0 {
+		highlights[0] = region.group
+	}
+
 	loc := FindIndex(region.end, line, start == 0, canMatchEnd)
 	if loc != nil {
 		if region.parent == nil {
