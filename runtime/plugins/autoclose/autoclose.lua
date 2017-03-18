@@ -1,6 +1,11 @@
 function charAt(str, i)
     if i <= #str then
-        return string.sub(str, i, i)
+    	if i >= 1 then
+	        return string.sub(str, i, i)
+	    end
+	    else
+	    	return ""
+	    end
     else
         return ""
     end

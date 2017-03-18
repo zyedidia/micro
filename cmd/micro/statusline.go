@@ -2,6 +2,7 @@ package main
 
 import (
 	"strconv"
+	"time"
 )
 
 // Statusline represents the information line at the bottom
@@ -10,6 +11,7 @@ import (
 // modified, filetype, cursor location
 type Statusline struct {
 	view *View
+	pluginline string
 }
 
 // Display draws the statusline to the screen
@@ -17,7 +19,43 @@ func (sline *Statusline) Display() {
 	// We'll draw the line at the lowest line in the view
 	y := sline.view.Height + sline.view.y
 
-	file := sline.view.Buf.GetName()
+	file := ""
+
+	if globalSettings["showclock"].(bool) {
+		t := time.Now()
+		curtime := "["
+		if globalSettings["12hourclock"].(bool) { 
+			if t.Hour() > 12 {
+				if t.Hour()-12 >= 10 {curtime += strconv.Itoa(t.Hour()-12) + ":" } else {
+					curtime += "0" + strconv.Itoa(t.Hour()-12) + ":"
+				} 
+			} else {
+				if t.Hour()+1 >= 10 {curtime += strconv.Itoa(t.Hour()+1) + ":" } else {
+					curtime += "0" + strconv.Itoa(t.Hour()) + ":"
+				}
+			} 
+			if t.Minute() < 10 {curtime += "0" + strconv.Itoa(t.Minute()) } else {
+				curtime += strconv.Itoa(t.Minute())
+			}
+		}
+		if !globalSettings["12hourclock"].(bool) { 
+			if t.Hour() < 10 { curtime += "0" + strconv.Itoa(t.Hour()) + ":"  } else {
+				curtime += strconv.Itoa(t.Hour()) + ":" 
+			}
+			if t.Minute() < 10 { curtime += "0" + strconv.Itoa(t.Minute()) } else {
+				curtime += strconv.Itoa(t.Minute())
+			}
+		}
+		if globalSettings["showseconds"].(bool) {
+			if t.Second() < 10 { curtime += ":0" + strconv.Itoa(t.Second()) } else {
+				curtime += ":" + strconv.Itoa(t.Second())
+			}
+		}
+		curtime += "] "
+		file += curtime
+	}
+	
+	file += sline.view.Buf.GetName()
 
 	// If the buffer is dirty (has been modified) write a little '+'
 	if sline.view.Buf.IsModified {
@@ -35,6 +73,9 @@ func (sline *Statusline) Display() {
 
 	// Add the filetype
 	file += " " + sline.view.Buf.FileType()
+
+	//Support for modifying the statusline
+	file += " " +  sline.pluginline + pluginsline
 
 	rightText := ""
 	if len(helpBinding) > 0 {

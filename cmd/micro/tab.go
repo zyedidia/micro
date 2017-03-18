@@ -2,6 +2,8 @@ package main
 
 import (
 	"sort"
+	"strconv"
+	"path/filepath"
 
 	"github.com/zyedidia/tcell"
 )
@@ -89,7 +91,11 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		str += t.views[t.CurView].Buf.GetName()
+		if globalSettings["numberedtabs"].(bool){
+			str += "(" + strconv.Itoa(i + 1) + ")"
+		}
+		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
+		str += name
 		if i == curTab {
 			str += "]"
 		} else {
@@ -138,6 +144,39 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			curTab = tabnum
 			return true
 		}
+		//Close tab on middle click
+		if button == tcell.Button2 {
+			x, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			if x != 0 {
+				return false
+			}
+			return true
+		}
+		//Scroll left on mousewheel up
+		if button == tcell.WheelUp {
+			x, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			if x != 0 {
+				return false
+			}
+			return true
+		}
+		//Scroll right on mousewheel down
+		if button == tcell.WheelDown {
+			x, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			if x != 0 {
+				return false
+			}
+			return true
+		}
 	}
 
 	return false
@@ -146,7 +185,9 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 // DisplayTabs displays the tabbar at the top of the editor if there are multiple tabs
 func DisplayTabs() {
 	if len(tabs) <= 1 {
-		return
+		if !globalSettings["tabbaralways"].(bool) {
+			return
+		}
 	}
 
 	str, indicies := TabbarString()
@@ -221,9 +262,9 @@ func DisplayTabs() {
 
 		// if the left-side of the tab bar isn't at the start
 		// of the constructed tab bar text, then show that are
-		// more tabs to the left by displaying a "+"
+		// more tabs to the left by displaying a "<"
 		if leftBuffer != 0 {
-			displayText = append(displayText, '+')
+			displayText = append(displayText, '<')
 		}
 		// copy the runes in from the original tab bar text string
 		// into the new display buffer
@@ -232,9 +273,9 @@ func DisplayTabs() {
 		}
 		// if there is more text to the right of the right-most
 		// column in the tab bar text, then indicate there are more
-		// tabs to the right by displaying a "+"
+		// tabs to the right by displaying a ">"
 		if rightBuffer < len(fileRunes)-1 {
-			displayText = append(displayText, '+')
+			displayText = append(displayText, '>')
 		}
 
 		// now store the offset from zero of the left-most text

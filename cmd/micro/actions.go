@@ -1684,6 +1684,17 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 	return true
 }
 
+//Shortcut for the replace command
+func (v *View) Replace(usePlugin bool) bool {
+	input, canceled := messenger.Prompt("> ", "replace ", "", 0)
+	if !canceled {
+		HandleCommand(input)
+		return true
+	}
+	return true
+}
+
+
 // None is no action
 func None() bool {
 	return false

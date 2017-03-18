@@ -44,6 +44,8 @@ var (
 	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
 	configDir string
 
+	pluginsline string
+
 	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
 	Version     = "0.0.0-unknown"
@@ -410,6 +412,21 @@ func main() {
 			time.Sleep(autosaveTime * time.Second)
 			if globalSettings["autosave"].(bool) {
 				autosave <- true
+			}
+		}
+	}()
+
+	//Async refresh the screen if using the statusline clock
+	go func() {
+		for {
+			if globalSettings["showclock"].(bool) {
+				if globalSettings["showseconds"].(bool){
+					RedrawAll()
+					time.Sleep(1 * time.Second)
+				} else {
+					RedrawAll()
+					time.Sleep(15 * time.Second)
+				}
 			}
 		}
 	}()
