@@ -29,6 +29,44 @@ import (
 )
 
 var (
+<<<<<<< HEAD
+=======
+	// The main screen
+	screen tcell.Screen
+
+	// Object to send messages and prompts to the user
+	messenger *Messenger
+
+	// The default highlighting style
+	// This simply defines the default foreground and background colors
+	defStyle tcell.Style
+
+	// Where the user's configuration is
+	// This should be $XDG_CONFIG_HOME/micro
+	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
+	configDir string
+
+	pluginsline string
+
+	// Version is the version number or commit hash
+	// These variables should be set by the linker when compiling
+	Version     = "0.0.0-unknown"
+	CommitHash  = "Unknown"
+	CompileDate = "Unknown"
+
+	// L is the lua state
+	// This is the VM that runs the plugins
+	L *lua.LState
+
+	// The list of views
+	tabs []*Tab
+	// This is the currently open tab
+	// It's just an index to the tab in the tabs array
+	curTab int
+
+	// Channel of jobs running in the background
+	jobs chan JobFunction
+>>>>>>> dc272633 (UI Tweaks)
 	// Event channel
 	autosave chan bool
 
@@ -364,6 +402,7 @@ func main() {
 		}
 	}()
 
+<<<<<<< HEAD
 	// clear the drawchan so we don't redraw excessively
 	// if someone requested a redraw before we started displaying
 	for len(screen.DrawChan()) > 0 {
@@ -377,6 +416,22 @@ func main() {
 	case <-time.After(10 * time.Millisecond):
 		// time out after 10ms
 	}
+=======
+	//Async refresh the screen if using the statusline clock
+	go func() {
+		for {
+			if globalSettings["showclock"].(bool) {
+				if globalSettings["showseconds"].(bool){
+					RedrawAll()
+					time.Sleep(1 * time.Second)
+				} else {
+					RedrawAll()
+					time.Sleep(15 * time.Second)
+				}
+			}
+		}
+	}()
+>>>>>>> dc272633 (UI Tweaks)
 
 	for {
 		DoEvent()

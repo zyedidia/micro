@@ -142,7 +142,7 @@ func (v *View) ToggleStatusLine() {
 
 // ToggleTabbar creates an extra row for the tabbar if necessary
 func (v *View) ToggleTabbar() {
-	if len(tabs) > 1 {
+	if len(tabs) > 1 || globalSettings["tabbaralways"].(bool) {
 		if v.y == 0 {
 			// Include one line for the tab bar at the top
 			v.Height--
