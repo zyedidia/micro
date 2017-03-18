@@ -1694,6 +1694,16 @@ func (v *View) Replace(usePlugin bool) bool {
 	return true
 }
 
+//Shortcut for the tabswitch command
+func (v *View) Tabswitch(usePlugin bool) bool {
+	input, canceled := messenger.Prompt("> ", "tabswitch ", "", 0)
+	if !canceled {
+		HandleCommand(input)
+		return true
+	}
+	return true
+}
+
 
 // None is no action
 func None() bool {
