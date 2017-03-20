@@ -467,3 +467,11 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 		Loc{0, end + 1},
 	)
 }
+
+// ClearMatches clears all of the syntax highlighting for this buffer
+func (b *Buffer) ClearMatches() {
+	for i := range b.lines {
+		b.SetMatch(i, nil)
+		b.SetState(i, nil)
+	}
+}

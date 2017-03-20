@@ -345,6 +345,14 @@ func SetLocalOption(option, value string, view *View) error {
 		buf.UpdateRules()
 	}
 
+	if option == "syntax" {
+		if !nativeValue.(bool) {
+			buf.ClearMatches()
+		} else {
+			buf.highlighter.Highlight(buf, 0)
+		}
+	}
+
 	return nil
 }
 
