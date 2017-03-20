@@ -8,7 +8,7 @@ import (
 func combineLineMatch(src, dst LineMatch) LineMatch {
 	for k, v := range src {
 		if g, ok := dst[k]; ok {
-			if g == "" {
+			if g == 0 {
 				dst[k] = v
 			}
 		} else {
@@ -38,7 +38,7 @@ func NewHighlighter(def *Def) *Highlighter {
 	return h
 }
 
-type LineMatch map[int]string
+type LineMatch map[int]uint8
 
 func FindIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
@@ -80,7 +80,7 @@ func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, 
 	loc := FindIndex(region.end, line, start == 0, canMatchEnd)
 	if loc != nil {
 		if region.parent == nil {
-			highlights[start+loc[1]] = ""
+			highlights[start+loc[1]] = 0
 			return combineLineMatch(highlights,
 				combineLineMatch(h.highlightRegion(start, false, lineNum, line[:loc[0]], region),
 					h.highlightEmptyRegion(start+loc[1], canMatchEnd, lineNum, line[loc[1]:])))
@@ -166,7 +166,7 @@ func (h *Highlighter) highlightEmptyRegion(start int, canMatchEnd bool, lineNum 
 		for _, m := range matches {
 			highlights[start+m[0]] = p.group
 			if _, ok := highlights[start+m[1]]; !ok {
-				highlights[start+m[1]] = ""
+				highlights[start+m[1]] = 0
 			}
 		}
 	}
