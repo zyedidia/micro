@@ -66,9 +66,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		}
 
 		buf.highlighter.ReHighlightStates(buf, start)
-	}
 
-	buf.highlighter.HighlightMatches(buf, top, top+height)
+		buf.highlighter.HighlightMatches(buf, top, top+height)
+	}
 
 	c.lines = make([][]*Char, 0)
 
