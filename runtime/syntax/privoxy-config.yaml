@@ -1,0 +1,10 @@
+filetype: privoxy-config
+
+detect: 
+    filename: "privoxy/config$"
+
+rules:
+    - statement: "(accept-intercepted-requests|actionsfile|admin-address|allow-cgi-request-crunching|buffer-limit|compression-level|confdir|connection-sharing|debug|default-server-timeout|deny-access|enable-compression|enable-edit-actions|enable-remote-http-toggle|enable-remote-toggle|enforce-blocks|filterfile|forward|forwarded-connect-retries|forward-socks4|forward-socks4a|forward-socks5|handle-as-empty-doc-returns-ok|hostname|keep-alive-timeout|listen-address|logdir|logfile|max-client-connections|permit-access|proxy-info-url|single-threaded|socket-timeout|split-large-forms|templdir|toggle|tolerate-pipelining|trustfile|trust-info-url|user-manual)[[:space:]]"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

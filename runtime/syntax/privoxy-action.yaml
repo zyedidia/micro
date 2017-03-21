@@ -1,0 +1,14 @@
+filetype: privoxy-action
+
+detect: 
+    filename: "\\.action$"
+
+rules:
+    - constant.bool.false: "[{[:space:]]\\-block([[:space:]{}]|$)"
+    - constant.bool.true: "[{[:space:]]\\+block([[:space:]{}]|$)"
+    - constant.bool.false: "-(add-header|change-x-forwarded-for|client-header-filter|client-header-tagger|content-type-overwrite|crunch-client-header|crunch-if-none-match|crunch-incoming-cookies|crunch-outgoing-cookies|crunch-server-header|deanimate-gifs|downgrade-http-version|fast-redirects|filter|force-text-mode|forward-override|handle-as-empty-document|handle-as-image|hide-accept-language|hide-content-disposition|hide-from-header|hide-if-modified-since|hide-referrer|hide-user-agent|limit-connect|overwrite-last-modified|prevent-compression|redirect|server-header-filter|server-header-tagger|session-cookies-only|set-image-blocker)"
+    - constant.bool.true: "\\+(add-header|change-x-forwarded-for|client-header-filter|client-header-tagger|content-type-overwrite|crunch-client-header|crunch-if-none-match|crunch-incoming-cookies|crunch-outgoing-cookies|crunch-server-header|deanimate-gifs|downgrade-http-version|fast-redirects|filter|force-text-mode|forward-override|handle-as-empty-document|handle-as-image|hide-accept-language|hide-content-disposition|hide-from-header|hide-if-modified-since|hide-referrer|hide-user-agent|limit-connect|overwrite-last-modified|prevent-compression|redirect|server-header-filter|server-header-tagger|session-cookies-only|set-image-blocker)"
+    - constant.specialChar: "\\\\.?"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

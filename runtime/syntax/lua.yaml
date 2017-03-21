@@ -1,7 +1,7 @@
 filetype: lua
 
-detect:
-    filename: "\\.lua$"
+detect: 
+    filename: ".*\\.lua$"
 
 rules:
     - statement: "\\b(do|end|while|repeat|until|if|elseif|then|else|for|in|function|local|return)\\b"
@@ -19,42 +19,20 @@ rules:
     - identifier: "debug\\.\\b(debug|getfenv|gethook|getinfo|getlocal|getmetatable|getregistry|getupvalue|getuservalue|setfenv|sethook|setlocal|setmetatable|setupvalue|setuservalue|traceback|upvalueid|upvaluejoin)\\b"
     - identifier: "bit32\\.\\b(arshift|band|bnot|bor|btest|bxor|extract|replace|lrotate|lshift|rrotate|rshift)\\b"
     - identifier: "\\:\\b(close|flush|lines|read|seek|setvbuf|write)\\b"
-    - constant: "\\b(false|nil|true)\\b"
-    - statement: "(\\b(dofile|require|include)|%q|%!|%Q|%r|%x)\\b"
+    - constant.bool: "\\b(false|nil|true)\\b"
+    - preproc: "(\\b(dofile|require|include)|%q|%!|%Q|%r|%x)\\b"
     - constant.number: "\\b([0-9]+)\\b"
     - symbol: "(\\(|\\)|\\[|\\]|\\{|\\}|\\*\\*|\\*|/|%|\\+|-|\\^|>|>=|<|<=|~=|=|\\.\\.)"
-
-    - constant.string:
-        start: "\""
-        end: "\""
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - constant.string:
-        start: "'"
-        end: "'"
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - constant.string:
-        start: "\\[\\["
+    - constant.string: "\\\"(\\\\.|[^\\\\\\\"])*\\\"|'(\\\\.|[^\\\\'])*'"
+    - constant:
+        start: "\\s*\\[\\["
         end: "\\]\\]"
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
     - special: "\\\\[0-7][0-7][0-7]|\\\\x[0-9a-fA-F][0-9a-fA-F]|\\\\[abefnrs]|(\\\\c|\\\\C-|\\\\M-|\\\\M-\\\\C-)."
-
+    - comment: "\\-\\-.*$"
     - comment:
-        start: "#"
-        end: "$"
-        rules: []
-
-    - comment: 
-        start: "\\-\\-"
-        end: "$"
-        rules: []
-
-    - comment: 
-        start: "\\-\\-\\[\\["
+        start: "\\s*\\-\\-\\s*\\[\\["
         end: "\\]\\]"
         rules: []
+

@@ -1,14 +1,12 @@
 filetype: git-config
 
-detect:
+detect: 
     filename: "git(config|modules)$|\\.git/config$"
 
 rules:
-    - constant: "\\<(true|false)\\>"
-    - keyword: "^[[:space:]]*[^=]*="
+    - constant.bool.true: "\\btrue\\b"
+    - constant.bool.false: "\\bfalse\\b"
+    - statement: "^[[:space:]]*[^=]*="
     - constant: "^[[:space:]]*\\[.*\\]$"
-    - constant: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
-    - comment:
-        start: "#"
-        end: "$"
-        rules: []
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - comment: "(^|[[:space:]])#([^{].*)?$"

@@ -1,16 +1,14 @@
 filetype: xml
 
-detect:
+detect: 
     filename: "\\.(xml|sgml?|rng|plist)$"
 
 rules:
-    - identifier: "<.*?>"
-    - comment:
+    - symbol.tag: "<.*?>"
+    - preproc:
         start: "<!DOCTYPE"
         end: "[/]?>"
         rules: []
-    - comment: 
-        start: "<!--"
-        end: "-->"
-        rules: []
+
+    - comment: "<!--.+?-->"
     - special: "&[^;]*;"

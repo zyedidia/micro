@@ -1,0 +1,15 @@
+filetype: salt
+
+detect: 
+    filename: "\\.sls$"
+
+rules:
+    - identifier.var: "^[^ -].*:$"
+    - identifier.var: ".*:"
+    - default: "salt:"
+    - constant.number: "/*[0-9]/*"
+    - constant.bool: "\\b(True|False)\\b"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - special: "\\b(grain|grains|compound|pcre|grain_pcre|list|pillar)\\b"
+    - comment: "^#.*"
+    - statement: "\\b(if|elif|else|or|not|and|endif|end)\\b"

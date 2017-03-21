@@ -1,33 +1,12 @@
 filetype: dockerfile
 
-detect:
-    filename: "(Dockerfile[^/]*$|\\.dockerfile$)"
+detect: 
+    filename: "Dockerfile[^/]*$|\\.dockerfile$"
 
 rules:
-    ## Keywords
-    - keyword: "(?i)^(FROM|MAINTAINER|RUN|CMD|LABEL|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ONBUILD|ARG|HEALTHCHECK|STOPSIGNAL|SHELL)[[:space:]]"
-
-      ## Brackets & parenthesis
-    - statement: "(\\(|\\)|\\[|\\])"
-
-      ## Double ampersand
+    - statement: "^(FROM|MAINTAINER|RUN|CMD|LABEL|EXPOSE|ENV|ADD|COPY|ENTRYPOINT|VOLUME|USER|WORKDIR|ONBUILD|ARG|HEALTHCHECK|STOPSIGNAL|SHELL)[[:space:]]"
+    - symbol.brackets: "(\\(|\\)|\\[|\\])"
     - special: "&&"
-
-      ## Comments
-    - comment:
-        start: "#"
-        end: "$"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
-
-    - constant.string:
-        start: "\""
-        end: "\""
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - constant.string:
-        start: "'"
-        end: "'"
-        rules:
-            - constant.specialChar: "\\\\."
+    - comment: "^[[:space:]]*#.*$"
+    - constant.string: "'([^']|(\\\\'))*'|%[qw]\\{[^}]*\\}|%[qw]\\([^)]*\\)|%[qw]<[^>]*>|%[qw]\\[[^]]*\\]|%[qw]\\$[^$]*\\$|%[qw]\\^[^^]*\\^|%[qw]![^!]*!"
+    - constant.string: "\"([^\"]|(\\\\\"))*\"|%[QW]?\\{[^}]*\\}|%[QW]?\\([^)]*\\)|%[QW]?<[^>]*>|%[QW]?\\[[^]]*\\]|%[QW]?\\$[^$]*\\$|%[QW]?\\^[^^]*\\^|%[QW]?![^!]*!"

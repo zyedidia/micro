@@ -1,0 +1,9 @@
+filetype: conf
+
+detect: 
+    filename: "\\.c[o]?nf$"
+
+rules:
+    - constant.string: "\"(\\\\.|[^\"])*\""
+    - comment: "^[[:space:]]*#.*$"
+    - comment: "^[[:space:]]*##.*$"

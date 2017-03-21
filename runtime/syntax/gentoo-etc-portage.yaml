@@ -1,0 +1,15 @@
+filetype: etc-portage
+
+detect: 
+    filename: "\\.(keywords|mask|unmask|use)$"
+
+rules:
+    - default: "^.+$"
+    - constant.bool.false: "[[:space:]]+\\+?[a-zA-Z0-9_-]+"
+    - constant.bool.true: "[[:space:]]+-[a-zA-Z0-9_-]+"
+    - special: "-[[:digit:]].*([[:space:]]|$)"
+    - identifier.class: "[~-]?\\b(alpha|amd64|arm|hppa|ia64|mips|ppc|ppc64|s390|sh|sparc|x86|x86-fbsd)\\b"
+    - identifier.class: "[[:space:]][~-]?\\*"
+    - statement: "^[[:space:]]*.*/"
+    - symbol: "^[[:space:]]*(=|~|<|<=|=<|>|>=|=>)"
+    - comment: "#.*$"

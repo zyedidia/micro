@@ -1,30 +1,22 @@
 filetype: git-rebase-todo
 
-detect:
+detect: 
     filename: "git-rebase-todo"
 
 rules:
-    # Default
     - ignore: ".*"
-    # Comments
-    - comment:
-        start: "#"
-        end: "$"
-        rules: []
-    # Rebase commands
-    - keyword: "^(e|edit) [0-9a-f]{7,40}"
-    - keyword: "^#  (e, edit)"
-    - keyword: "^(f|fixup) [0-9a-f]{7,40}"
-    - keyword: "^#  (f, fixup)"
-    - keyword: "^(p|pick) [0-9a-f]{7,40}"
-    - keyword: "^#  (p, pick)"
-    - keyword: "^(r|reword) [0-9a-f]{7,40}"
-    - keyword: "^#  (r, reword)"
-    - keyword: "^(s|squash) [0-9a-f]{7,40}"
-    - keyword: "^#  (s, squash)"
-    - keyword: "^(x|exec) [^ ]+ [0-9a-f]{7,40}"
-    - keyword: "^#  (x, exec)"
-    # Recolor hash symbols
+    - comment: "^#.*"
+    - statement: "^(e|edit) [0-9a-f]{7,40}"
+    - statement: "^#  (e, edit)"
+    - statement: "^(f|fixup) [0-9a-f]{7,40}"
+    - statement: "^#  (f, fixup)"
+    - statement: "^(p|pick) [0-9a-f]{7,40}"
+    - statement: "^#  (p, pick)"
+    - statement: "^(r|reword) [0-9a-f]{7,40}"
+    - statement: "^#  (r, reword)"
+    - statement: "^(s|squash) [0-9a-f]{7,40}"
+    - statement: "^#  (s, squash)"
+    - statement: "^(x|exec) [^ ]+ [0-9a-f]{7,40}"
+    - statement: "^#  (x, exec)"
     - special: "#"
-    # Commit IDs
     - identifier: "[0-9a-f]{7,40}"

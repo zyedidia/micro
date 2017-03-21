@@ -1,46 +1,35 @@
 filetype: rust
 
-detect:
-    filename: "\\.rs$"
+detect: 
+    filename: "\\.rs"
 
 rules:
-    # function definition
-    - identifier: "fn [a-z0-9_]+"
-      # Reserved words
+    - identifier.class: "fn [a-z0-9_]+"
     - statement: "\\b(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\\b"
-      # macros
-    - special: "[a-z_]+!"
-      # Constants
+    - identifier.macro: "[a-z_]+!"
     - constant: "[A-Z][A-Z_]+"
-      # Numbers
     - constant.number: "\\b[0-9]+\\b"
-      # Traits/Enums/Structs/Types/etc.
     - type: "[A-Z][a-z]+"
-
+    - constant.string: "\\\".*\\\""
     - constant.string:
-        start: "\""
-        end: "\""
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - constant.string:
-        start: "r#+\""
-        end: "\"#+"
+        start: "\\\".*\\\\$"
+        end: ".*\\\""
         rules: []
 
-    - comment:
-        start: "//"
-        end: "$"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
+    - special:
+        start: "r#+\\\""
+        end: "\\\"#+"
+        rules: []
 
+    - comment: "//.*"
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
+        rules: []
 
     - special:
         start: "#!\\["
         end: "\\]"
         rules: []
+
+    - todo: "(XXX|TODO|FIXME|\\?\\?\\?)"

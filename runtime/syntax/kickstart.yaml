@@ -1,0 +1,16 @@
+filetype: kickstart
+
+detect: 
+    filename: "\\.ks$|\\.kickstart$"
+
+rules:
+    - special: "%[a-z]+"
+    - statement: "^[[:space:]]*(install|cdrom|text|graphical|volgroup|logvol|reboot|timezone|lang|keyboard|authconfig|firstboot|rootpw|user|firewall|selinux|repo|part|partition|clearpart|bootloader)"
+    - constant: "--(name|mirrorlist|baseurl|utc)(=|\\>)"
+    - statement: "\\$(releasever|basearch)\\>"
+    - brightblack: "^@[A-Za-z][A-Za-z-]*"
+    - brightred: "^-@[a-zA-Z0-9*-]+"
+    - red: "^-[a-zA-Z0-9*-]+"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

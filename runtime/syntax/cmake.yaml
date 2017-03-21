@@ -1,0 +1,22 @@
+filetype: cmake
+
+detect: 
+    filename: "(CMakeLists\\.txt|\\.cmake)$"
+
+rules:
+    - identifier.var: "^[[:space:]]*[A-Z0-9_]+"
+    - preproc: "^[[:space:]]*(include|include_directories|include_external_msproject)\\b"
+    - statement: "^[[:space:]]*\\b((else|end)?if|else|(end)?while|(end)?foreach|break)\\b"
+    - statement: "\\b(COPY|NOT|COMMAND|PROPERTY|POLICY|TARGET|EXISTS|IS_(DIRECTORY|ABSOLUTE)|DEFINED)\\b[[:space:]]"
+    - statement: "[[:space:]]\\b(OR|AND|IS_NEWER_THAN|MATCHES|(STR|VERSION_)?(LESS|GREATER|EQUAL))\\b[[:space:]]"
+    - special: "^[[:space:]]*\\b((end)?(function|macro)|return)"
+    - constant.string: "['][^']*[^\\\\][']|[']{3}.*[^\\\\][']{3}"
+    - constant.string: "[\"][^\"]*[^\\\\][\"]|[\"]{3}.*[^\\\\][\"]{3}"
+    - preproc:
+        start: "\\$(\\{|ENV\\{)"
+        end: "\\}"
+        rules: []
+
+    - identifier.macro: "\\b(APPLE|UNIX|WIN32|CYGWIN|BORLAND|MINGW|MSVC(_IDE|60|71|80|90)?)\\b"
+    - comment: "^([[:space:]]*)?#.*"
+    - comment: "[[:space:]]#.*"

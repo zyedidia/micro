@@ -1,0 +1,12 @@
+filetype: yum
+
+detect: 
+    filename: "\\.repo$|yum.*\\.conf$"
+
+rules:
+    - identifier: "^[[:space:]]*[^=]*="
+    - constant.specialChar: "^[[:space:]]*\\[.*\\]$"
+    - statement: "\\$(releasever|arch|basearch|uuid|YUM[0-9])"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"
