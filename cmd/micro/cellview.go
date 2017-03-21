@@ -69,7 +69,6 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	}
 
 	buf.highlighter.HighlightMatches(buf, top, top+height)
-	messenger.Message(top, top+height)
 
 	c.lines = make([][]*Char, 0)
 

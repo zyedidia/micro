@@ -77,6 +77,7 @@ func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 }
 
 func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, line []byte, region *Region) LineMatch {
+	fullHighlights := make([]uint8, len(line))
 	highlights := make(LineMatch)
 
 	if start == 0 {
@@ -126,10 +127,18 @@ func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, 
 	for _, p := range region.rules.patterns {
 		matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
 		for _, m := range matches {
-			highlights[start+m[0]] = p.group
-			if _, ok := highlights[start+m[1]]; !ok {
-				highlights[start+m[1]] = region.group
+			for i := m[0]; i < m[1]; i++ {
+				fullHighlights[i] = p.group
 			}
+			// highlights[start+m[0]] = p.group
+			// if _, ok := highlights[start+m[1]]; !ok {
+			// 	highlights[start+m[1]] = region.group
+			// }
+		}
+	}
+	for i, h := range fullHighlights {
+		if i == 0 || h != fullHighlights[i-1] {
+			highlights[start+i] = h
 		}
 	}
 
@@ -141,6 +150,7 @@ func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, 
 }
 
 func (h *Highlighter) highlightEmptyRegion(start int, canMatchEnd bool, lineNum int, line []byte) LineMatch {
+	fullHighlights := make([]uint8, len(line))
 	highlights := make(LineMatch)
 	if len(line) == 0 {
 		if canMatchEnd {
@@ -170,10 +180,18 @@ func (h *Highlighter) highlightEmptyRegion(start int, canMatchEnd bool, lineNum 
 	for _, p := range h.def.rules.patterns {
 		matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
 		for _, m := range matches {
-			highlights[start+m[0]] = p.group
-			if _, ok := highlights[start+m[1]]; !ok {
-				highlights[start+m[1]] = 0
+			for i := m[0]; i < m[1]; i++ {
+				fullHighlights[i] = p.group
 			}
+			// highlights[start+m[0]] = p.group
+			// if _, ok := highlights[start+m[1]]; !ok {
+			// 	highlights[start+m[1]] = 0
+			// }
+		}
+	}
+	for i, h := range fullHighlights {
+		if i == 0 || h != fullHighlights[i-1] {
+			highlights[start+i] = h
 		}
 	}
 
@@ -269,9 +287,6 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
 		curState := h.lastRegion
 		lastState := input.State(i)
 
-		// if i < endline {
-		// 	input.SetMatch(i, match)
-		// }
 		input.SetState(i, curState)
 
 		if curState == lastState {

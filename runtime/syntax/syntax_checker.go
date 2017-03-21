@@ -14,7 +14,7 @@ func main() {
 	hadErr := false
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".yaml") {
-			input, _ := ioutil.ReadFile("/Users/zachary/gocode/src/github.com/zyedidia/highlight/syntax_files/" + f.Name())
+			input, _ := ioutil.ReadFile(f.Name())
 			_, err := highlight.ParseDef(input)
 			if err != nil {
 				hadErr = true
