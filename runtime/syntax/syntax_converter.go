@@ -148,8 +148,8 @@ func generateFile(filetype, syntax, header string, rules []interface{}) string {
 			output += fmt.Sprintf("    - %s: \"%s\"\n", rule.color, strings.Replace(strings.Replace(rule.regex, "\\", "\\\\", -1), "\"", "\\\"", -1))
 		} else if rule, ok := r.(MultiRule); ok {
 			output += fmt.Sprintf("    - %s:\n", rule.color)
-			output += fmt.Sprintf("        start: \"%s\"\n", rule.start)
-			output += fmt.Sprintf("        end: \"%s\"\n", rule.end)
+			output += fmt.Sprintf("        start: \"%s\"\n", strings.Replace(strings.Replace(rule.start, "\\", "\\\\", -1), "\"", "\\\"", -1))
+			output += fmt.Sprintf("        end: \"%s\"\n", strings.Replace(strings.Replace(rule.end, "\\", "\\\\", -1), "\"", "\\\"", -1))
 			output += fmt.Sprintf("        rules: []\n\n")
 		}
 	}
