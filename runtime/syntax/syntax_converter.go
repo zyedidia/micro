@@ -135,22 +135,22 @@ func generateFile(filetype, syntax, header string, rules []interface{}) string {
 	output := ""
 
 	output += fmt.Sprintf("filetype: %s\n\n", filetype)
-	output += fmt.Sprintf("detect: \n\tfilename: \"%s\"\n", strings.Replace(syntax, "\\", "\\\\", -1))
+	output += fmt.Sprintf("detect: \n    filename: \"%s\"\n", strings.Replace(syntax, "\\", "\\\\", -1))
 
 	if header != "" {
-		output += fmt.Sprintf("\theader: \"%s\"\n", strings.Replace(header, "\\", "\\\\", -1))
+		output += fmt.Sprintf("    header: \"%s\"\n", strings.Replace(header, "\\", "\\\\", -1))
 	}
 
 	output += "\nrules:\n"
 
 	for _, r := range rules {
 		if rule, ok := r.(SingleRule); ok {
-			output += fmt.Sprintf("\t- %s: \"%s\"\n", rule.color, strings.Replace(strings.Replace(rule.regex, "\\", "\\\\", -1), "\"", "\\\"", -1))
+			output += fmt.Sprintf("    - %s: \"%s\"\n", rule.color, strings.Replace(strings.Replace(rule.regex, "\\", "\\\\", -1), "\"", "\\\"", -1))
 		} else if rule, ok := r.(MultiRule); ok {
-			output += fmt.Sprintf("\t- %s:\n", rule.color)
-			output += fmt.Sprintf("\t\tstart: \"%s\"\n", rule.start)
-			output += fmt.Sprintf("\t\tend: \"%s\"\n", rule.end)
-			output += fmt.Sprintf("\t\trules: []\n\n")
+			output += fmt.Sprintf("    - %s:\n", rule.color)
+			output += fmt.Sprintf("        start: \"%s\"\n", rule.start)
+			output += fmt.Sprintf("        end: \"%s\"\n", rule.end)
+			output += fmt.Sprintf("        rules: []\n\n")
 		}
 	}
 
