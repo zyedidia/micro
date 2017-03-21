@@ -78,6 +78,10 @@ func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 
 func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, line []byte, region *Region) LineMatch {
 	fullHighlights := make([]uint8, len(line))
+	for i := 0; i < len(fullHighlights); i++ {
+		fullHighlights[i] = region.group
+	}
+
 	highlights := make(LineMatch)
 
 	if start == 0 {
@@ -130,15 +134,13 @@ func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, 
 			for i := m[0]; i < m[1]; i++ {
 				fullHighlights[i] = p.group
 			}
-			// highlights[start+m[0]] = p.group
-			// if _, ok := highlights[start+m[1]]; !ok {
-			// 	highlights[start+m[1]] = region.group
-			// }
 		}
 	}
 	for i, h := range fullHighlights {
 		if i == 0 || h != fullHighlights[i-1] {
-			highlights[start+i] = h
+			if _, ok := highlights[start+i]; !ok {
+				highlights[start+i] = h
+			}
 		}
 	}
 
@@ -183,15 +185,13 @@ func (h *Highlighter) highlightEmptyRegion(start int, canMatchEnd bool, lineNum 
 			for i := m[0]; i < m[1]; i++ {
 				fullHighlights[i] = p.group
 			}
-			// highlights[start+m[0]] = p.group
-			// if _, ok := highlights[start+m[1]]; !ok {
-			// 	highlights[start+m[1]] = 0
-			// }
 		}
 	}
 	for i, h := range fullHighlights {
 		if i == 0 || h != fullHighlights[i-1] {
-			highlights[start+i] = h
+			if _, ok := highlights[start+i]; !ok {
+				highlights[start+i] = h
+			}
 		}
 	}
 

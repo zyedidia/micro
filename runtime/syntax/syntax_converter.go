@@ -135,10 +135,10 @@ func generateFile(filetype, syntax, header string, rules []interface{}) string {
 	output := ""
 
 	output += fmt.Sprintf("filetype: %s\n\n", filetype)
-	output += fmt.Sprintf("detect: \n    filename: \"%s\"\n", strings.Replace(syntax, "\\", "\\\\", -1))
+	output += fmt.Sprintf("detect: \n    filename: \"%s\"\n", strings.Replace(strings.Replace(syntax, "\\", "\\\\", -1), "\"", "\\\"", -1))
 
 	if header != "" {
-		output += fmt.Sprintf("    header: \"%s\"\n", strings.Replace(header, "\\", "\\\\", -1))
+		output += fmt.Sprintf("    header: \"%s\"\n", strings.Replace(strings.Replace(header, "\\", "\\\\", -1), "\"", "\\\"", -1))
 	}
 
 	output += "\nrules:\n"

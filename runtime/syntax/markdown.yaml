@@ -1,21 +1,49 @@
 filetype: markdown
 
-detect: 
+detect:
     filename: "\\.(md|mkd|mkdn|markdown)$"
 
 rules:
-    - preproc: ".*[ :]\\|[ :].*"
-    - constant.string: "^>.*"
+    # Tables (Github extension)
+    - type: ".*[ :]\\|[ :].*"
+
+      # quotes
+    - statement:  "^>.*"
+
+      # Emphasis
     - type: "(^|[[:space:]])(_[^ ][^_]*_|\\*[^ ][^*]*\\*)"
-    - type.keyword: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
+
+      # Strong emphasis
+    - type: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
+
+      # strike-through
     - type: "(^|[[:space:]])~~[^ ][^~]*~~"
-    - symbol: "^(---+|\\+---+|===+|\\+===+|___+|\\*\\*\\*+|\\+\\*\\*\\*+)\\s*$"
-    - statement: "^#{1,6}.*"
-    - identifier: "^[[:space:]]*[\\*+\\-] |^[[:space:]]*[0-9]+\\. "
-    - preproc: "\\b([CcRr]|[Tt][Mm])\\b|\\.{3}|(^|[[:space:]])\\-\\-($|[[:space:]])"
+
+      # horizontal rules
+    - special: "^(---+|===+|___+|\\*\\*\\*+)\\s*$"
+
+      # headlines
+    - special:  "^#{1,6}.*"
+
+      # lists
+    - identifier:   "^[[:space:]]*[\\*+-] |^[[:space:]]*[0-9]+\\. "
+
+      # misc
+    - preproc:   "(\\(([CcRr]|[Tt][Mm])\\)|\\.{3}|(^|[[:space:]])\\-\\-($|[[:space:]]))"
+
+      # links
     - constant: "\\[[^]]+\\]"
     - constant: "\\[([^][]|\\[[^]]*\\])*\\]\\([^)]+\\)"
+
+      # images
     - underlined: "!\\[[^][]*\\](\\([^)]+\\)|\\[[^]]+\\])"
-    - underlined.url: "https?://[^ )>]+"
-    - special: "`.*?`|^ {4}[^\\-+*].*"
-    - symbol: "^```$"
+
+      # urls
+    - underlined: "https?://[^ )>]+"
+
+    - special: "^```$"
+
+    - special:
+        start: "`"
+        end: "`"
+        rules: []

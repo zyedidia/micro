@@ -15,15 +15,16 @@ rules:
     - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
     - constant: "('([^'\\\\]|(\\\\[\"'abfnrtv\\\\]))'|'\\\\(([0-3]?[0-7]{1,2}))'|'\\\\x[0-9A-Fa-f]{1,2}')"
 
-      ##
-      ## GCC builtins
+      # GCC builtins
     - statement: "(__attribute__[[:space:]]*\\(\\([^)]*\\)\\)|__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__)"
 
-      #Operator Color
-    - statement: "([.:;,+*|=!\\%]|<|>|/|-|&)" 
+      # Operator Color
+    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)" 
+      # Parenthetical Color
+    - symbol.brackets: "[(){}]|\\[|\\]"
 
     - constant.number: "(\\b[0-9]+\\b|\\b0x[0-9A-Fa-f]+\\b)"
-    - constant.number: "(\\b(true|false)\\b|NULL)"
+    - constant.bool: "(\\b(true|false)\\b|NULL)"
 
     - constant.string:
         start: "\""

@@ -1,10 +1,9 @@
 filetype: apacheconf
 
-detect: 
+detect:
     filename: "httpd\\.conf|mime\\.types|vhosts\\.d\\\\*|\\.htaccess"
 
 rules:
-    - special: ".+"
     - identifier: "(AcceptMutex|AcceptPathInfo|AccessFileName|Action|AddAlt|AddAltByEncoding|AddAltByType|AddCharset|AddDefaultCharset|AddDescription|AddEncoding)"
     - identifier: "(AddHandler|AddIcon|AddIconByEncoding|AddIconByType|AddInputFilter|AddLanguage|AddModuleInfo|AddOutputFilter|AddOutputFilterByType|AddType|Alias|AliasMatch)"
     - identifier: "(Allow|AllowCONNECT|AllowEncodedSlashes|AllowOverride|Anonymous|Anonymous_Authoritative|Anonymous_LogEmail|Anonymous_MustGiveEmail|Anonymous_NoUserID)"
@@ -44,5 +43,15 @@ rules:
     - symbol.tag: "<[^>]+>"
     - identifier: "</?[A-Za-z]+"
     - identifier: "(<|</|>)"
-    - constant.string: "\\\"(\\\\.|[^\\\"])*\\\""
-    - comment: "#.*"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

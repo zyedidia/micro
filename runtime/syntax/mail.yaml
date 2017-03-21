@@ -1,19 +1,25 @@
 filetype: mail
 
-detect: 
+detect:
     filename: "(.*/mutt-.*|\\.eml)$"
     header: "^From .* \\d+:\\d+:\\d+ \\d+"
 
 rules:
-    - constant: "^From .*"
+    - type: "^From .*"
     - identifier: "^[^[:space:]]+:"
     - preproc: "^List-(Id|Archive|Subscribe|Unsubscribe|Post|Help):"
     - constant: "^(To|From):"
-    - constant.string: "^Subject:.*"
+    - constant.string:
+        start: "^Subject:.*"
+        end: "$"
+        rules: 
+            - constant.specialChar: "\\\\."
     - statement: "<?[^@[:space:]]+@[^[:space:]]+>?"
     - default:
         start: "^\\n\\n"
         end: ".*"
         rules: []
-
-    - comment: "^>.*$"
+    - comment:
+        start: "^>.*"
+        end: "$"
+        rules: []

@@ -1,17 +1,22 @@
 filetype: micro
 
-detect: 
+detect:
     filename: "\\.(micro)$"
 
 rules:
     - statement: "\\b(syntax|color(-link)?)\\b"
-    - type.keyword: "\\b(start=|end=)\\b"
-    - identifier: "\\b(default|comment|symbol(.brackets|.tag)?|identifier|constant(.string(.char)?|.bool|.specialChar|.number)?|statement|preproc|type|special|underlined|error|todo|statusline|indent-char|(current-)?line-number|gutter-error|gutter-warning|cursor-line|color-column|tabbar)\\b"
-    - preproc: "\\b(syntax|header)\\b"
+    - statement: "\\b(start=|end=)\\b"
+    - identifier: "\\b(default|comment|symbol|identifier|constant(.string(.char)?|.number)?|statement|preproc|type|special|underlined|error|todo|statusline|indent-char|(current-)?line-number|gutter-error|gutter-warning|cursor-line|color-column)\\b"
     - constant.number: "\\b(|h|A|0x)+[0-9]+(|h|A)+\\b"
     - constant.number: "\\b0x[0-9 a-f A-F]+\\b"
-    - comment: "#.*$"
-    - comment.bright: "##.*$"
-    - constant.string: "\"(\\\\.|[^\"])*\""
-    - constant.number: "#[0-9 A-F a-f]{1,6}"
-    - comment: "^#.*$"
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.number: "#[0-9 A-F a-f]+"
+    

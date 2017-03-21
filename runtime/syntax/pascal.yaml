@@ -1,6 +1,6 @@
 filetype: pascal
 
-detect: 
+detect:
     filename: "\\.pas$"
 
 rules:
@@ -13,23 +13,31 @@ rules:
         start: "asm"
         end: "end"
         rules: []
-
-    - constant.number: "\\$[0-9A-Fa-f]+|\\b[+\\-]?[0-9]+([.]?[0-9]+)?(?i:e[+\\-]?[0-9]+)?"
-    - constant.string: "#[0-9]{1,}"
-    - constant.string: "'(?:[^']+|'')*'"
+    - constant.number: "\\$[0-9A-Fa-f]+"
+    - constant.number: "\\b[+-]?[0-9]+([.]?[0-9]+)?(?i:e[+-]?[0-9]+)?"
+    - constant.string:
+        start: "#[0-9]{1,}"
+        end: "$"
+        rules: 
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
     - preproc:
         start: "{\\$"
         end: "}"
         rules: []
-
-    - comment: "//.*"
+    - comment:
+        start: "//"
+        end: "$"
+        rules: []
     - comment:
         start: "\\(\\*"
         end: "\\*\\)"
         rules: []
-
     - comment:
         start: "({)(?:[^$])"
         end: "}"
         rules: []
-

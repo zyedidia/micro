@@ -1,19 +1,32 @@
 filetype: yaml
 
-detect: 
+detect:
     filename: "\\.ya?ml$"
     header: "%YAML"
 
 rules:
     - type: "(^| )!!(binary|bool|float|int|map|null|omap|seq|set|str) "
-    - constant.bool.true: "\\b(YES|yes|Y|y|ON|on)\\b"
-    - constant.bool.false: "\\b(NO|no|N|n|OFF|off)\\b"
-    - constant.bool.true: "\\b(true)\\b"
-    - constant.bool.false: "\\b(false)\\b"
-    - statement: ":[[:space:]]|\\[|\\]|:[[:space:]]+[|>]|^[[:space:]]*- "
+    - constant:  "\\b(YES|yes|Y|y|ON|on|NO|no|N|n|OFF|off)\\b"
+    - constant: "\\b(true|false)\\b"
+    - statement: "(:[[:space:]]|\\[|\\]|:[[:space:]]+[|>]|^[[:space:]]*- )"
     - identifier: "[[:space:]][\\*&][A-Za-z0-9]+"
-    - type: "([-\\w\\.\\/]+[[:space:]]*:\\s+)|([-\\w\\.\\/]+[[:space:]]*:$)"
-    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
-    - comment: "(^|[[:space:]])#([^{].*)?$"
-    - special: "^---|^\\.\\.\\.|^%YAML|^%TAG"
-    - indent-char.whitespace: "  $"
+    - type: "([-\\w]+:\\s+)|([-\\w]+:$)"
+    - special:  "(^---|^\\.\\.\\.|^%YAML|^%TAG)"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+

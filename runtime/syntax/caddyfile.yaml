@@ -1,6 +1,6 @@
 filetype: caddyfile
 
-detect: 
+detect:
     filename: "Caddyfile"
 
 rules:
@@ -9,11 +9,13 @@ rules:
     - constant.specialChar: "\\s{$"
     - constant.specialChar: "^\\s*}$"
     - constant.string:
-        start: "\\\""
-        end: "\\\""
-        rules: []
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
 
     - preproc: "\\{(\\w+|\\$\\w+|%\\w+%)\\}"
-    - comment: "#.*"
-    - indent-char: "([[:space:]]{2,}|\\t){$"
-    - indent-char: "[[:space:]]+$"
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []

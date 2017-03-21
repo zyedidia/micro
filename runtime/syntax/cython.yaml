@@ -1,23 +1,49 @@
 filetype: cython
 
-detect: 
+detect:
     filename: "\\.pyx$|\\.pxd$|\\.pyi$"
 
 rules:
-    - preproc: "def [ 0-9A-Z_]+"
-    - preproc: "cpdef [0-9A-Z_]+\\(.*\\):"
-    - preproc: "cdef cppclass [ 0-9A-Z_]+\\(.*\\):"
+    # Python Keyword Color
     - statement: "\\b(and|as|assert|class|def|DEF|del|elif|ELIF|else|ELSE|except|exec|finally|for|from|global|if|IF|import|in|is|lambda|map|not|or|pass|print|raise|try|while|with|yield)\\b"
     - special: "\\b(continue|break|return)\\b"
+
+      # Cython Keyword Color
     - identifier.macro: "\\b(cdef|cimport|cpdef|cppclass|ctypedef|extern|include|namespace|property|struct)\\b"
     - type: "\\b(bint|char|double|int|public|void|unsigned)\\b"
-    - symbol: "[.:;,+*|=!\\%]|<|>|/|-|&"
-    - symbol.brackets: "[(){}]|\\[|\\]"
-    - constant.string: "['][^']*[^\\\\][']|[']{3}.*[^\\\\][']{3}"
-    - constant.string: "[\"][^\"]*[^\\\\][\"]|[\"]{3}.*[^\\\\][\"]{3}"
-    - constant.string:
-        start: "\"\"\"[^\"]\" end=\"\"\"\"\" start=\"'''[^']"
-        end: "'''"
-        rules: []
 
-    - comment: "#.*$"
+      # Operator Color
+    - symbol: "[.:;,+*|=!\\%]|<|>|/|-|&"
+
+      # Parenthetical Color
+    - symbol.brackets: "[(){}]|\\[|\\]"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'''"
+        end: "'''"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

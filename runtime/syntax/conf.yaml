@@ -1,9 +1,15 @@
 filetype: conf
 
-detect: 
+detect:
     filename: "\\.c[o]?nf$"
 
 rules:
-    - constant.string: "\"(\\\\.|[^\"])*\""
-    - comment: "^[[:space:]]*#.*$"
-    - comment: "^[[:space:]]*##.*$"
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules: []
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []

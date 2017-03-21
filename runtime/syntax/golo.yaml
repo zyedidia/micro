@@ -1,6 +1,6 @@
 filetype: golo
 
-detect: 
+detect:
     filename: "\\.golo$"
 
 rules:
@@ -8,6 +8,7 @@ rules:
     - type: "\\b(struct|DynamicObject|union|AdapterFabric|Adapter|DynamicVariable|Observable)\\b"
     - type: "\\b(list|set|array|vector|tuple|map)\\b"
     - type: "\\b(Ok|Error|Empty|None|Some|Option|Result|Result.ok|Result.fail|Result.error|Result.empty|Optional.empty|Optional.of)\\b"
+
     - identifier.class: "\\b(augment|pimp)\\b"
     - identifier.class: "\\b(interfaces|implements|extends|overrides|maker|newInstance)\\b"
     - identifier.class: "\\b(isEmpty|isNone|isPresent|isSome|iterator|flattened|toList|flatMap|`and|orElseGet|`or|toResult|apply|either)\\b"
@@ -29,6 +30,7 @@ rules:
     - identifier.class: "\\b(newWithSameType|destruct|append|add|addIfAbsent|prepend|insert|last|unmodifiableView|find|filter|map|join|reverse|reversed|order|ordered|removeAt|include|exclude|remove|delete|has|contains|getOrElse|toArray)\\b"
     - identifier.class: "\\b(add|addTo|succ|pred|mul|neg|sub|rsub|div|rdiv|mod|rmod|pow|rpow|str|lt|gt|eq|ne|ge|le|`and|`or|`not|xor|even|odd|contains|isEmpty|`is|`isnt|`oftype|`orIfNull|fst|snd|getitem|setitem|getter|id|const|False|True|Null|curry|uncurry|unary|spreader|varargs|swapArgs|swapCurry|swapCouple|swap|invokeWith|pipe|compose|io|andThen|until|recur|cond)\\b"
     - identifier.class: "\\b(toUpperCase|equals|startsWith)\\b"
+
     - statement: "\\b(if|else|then|when|case|match|otherwise)\\b"
     - special: "\\b(with|break|continue|return)\\b"
     - error: "\\b(try|catch|finally|throw)\\b"
@@ -36,15 +38,33 @@ rules:
     - symbol.brackets: "[(){}]|\\[|\\]"
     - statement: "\\b(for|while|foreach|in)\\b"
     - constant: "\\b(and|in|is|not|or|isnt|orIfNull)\\b"
+
     - constant.bool: "\\b(true|false)\\b"
-    - constant: "\\b(null|undefined)\\b"
+    - constant:  "\\b(null|undefined)\\b"
+
     - symbol.operator: "[\\-+/*=<>!~%&|^]|:="
-    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
-    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
-    - comment: "#.*$"
+    - constant.number:   "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
     - comment:
         start: "----"
         end: "----"
-        rules: []
-
-    - todo: "TODO:?"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

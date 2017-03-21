@@ -1,14 +1,24 @@
 filetype: keymap
 
-detect: 
+detect:
     filename: "\\.(k|key)?map$|Xmodmap$"
 
 rules:
     - statement: "\\b(add|clear|compose|keycode|keymaps|keysym|remove|string)\\b"
-    - identifier: "\\b(control|alt|shift)\\b"
+    - statement: "\\b(control|alt|shift)\\b"
     - constant.number: "\\b[0-9]+\\b"
-    - symbol: "="
-    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
-    - comment: "^!.*$"
-    - indent-char.whitespace: "[[:space:]]+$"
-    - indent-char: "	+ +| +	+"
+    - special: "="
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules:
+            - constant.specialChar: "\\\\."
+    - comment:
+        start: "^!"
+        end: "$"
+        rules: []

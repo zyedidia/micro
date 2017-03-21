@@ -1,24 +1,18 @@
 filetype: rst
 
-detect: 
+detect:
     filename: "\\.rest$|\\.rst$"
 
 rules:
-    - identifier: "^[\\*+\\-] "
-    - identifier: "^[0-9]+?\\. "
-    - type: "\\*[^*]+?\\*"
-    - type.keyword: "\\*\\*[^\\*]+\\*\\*"
-    - symbol: "::"
-    - underlined.url: "`[^`]+`_{1,2}"
-    - special: "``[^`]+``"
-    - comment: "^\\.\\. .*$"
-    - underlined: "^__ .*$"
-    - statement: "^###+$"
-    - statement: "^\\*\\*\\*+$"
-    - preproc: "^===+$"
-    - identifier: "^---+$"
-    - type.keyword: "^\\^\\^\\^+$"
-    - constant: "^\"\"\"+$"
-    - underlined.url: "http(s)?://[^ 	)>]+"
-    - preproc: "\\+[\\-=+]+\\+"
-    - preproc: "\\|"
+    - statement: "\\*\\*[^*]+\\*\\*"
+    - preproc: "::"
+    - constant.string: "`[^`]+`_{1,2}"
+    - constant.string: "``[^`]+``"
+    - identifier: "^\\.\\. .*$"
+    - identifier: "^__ .*$"
+    - type: "^###+$"
+    - type: "^\\*\\*\\*+$"
+    - special: "^===+$"
+    - special: "^---+$"
+    - special: "^\\^\\^\\^+$"
+    - special: "^\"\"\"+$"
