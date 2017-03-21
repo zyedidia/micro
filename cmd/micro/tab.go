@@ -85,7 +85,8 @@ func CurView() *View {
 func TabbarString() (string, map[int]int) {
 	str := ""
 	indicies := make(map[int]int)
-	for i, t := range tabs {
+	fo
+	r i, t := range tabs {
 		if i == curTab {
 			str += "["
 		} else {
@@ -144,17 +145,19 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			curTab = tabnum
 			return true
 		}
+		
 		//Close tab on middle click
-		if button == tcell.Button2 {
-			x, y := e.Position()
-			if y != 0 {
-				return false
-			}
-			if x != 0 {
-				return false
-			}
-			return true
-		}
+		//if button == tcell.Button2 {
+		//	x, y := e.Position()
+		//	if y != 0 {
+		//		return false
+		//	}
+		//	if x != 0 {
+		//		return false
+		//	}
+		//	return true
+		//}
+		
 		//Scroll left on mousewheel up
 		if button == tcell.WheelUp {
 			x, y := e.Position()
@@ -164,8 +167,10 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			if x != 0 {
 				return false
 			}
+			
 			return true
 		}
+		
 		//Scroll right on mousewheel down
 		if button == tcell.WheelDown {
 			x, y := e.Position()
