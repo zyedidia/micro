@@ -349,7 +349,7 @@ func SetLocalOption(option, value string, view *View) error {
 		if !nativeValue.(bool) {
 			buf.ClearMatches()
 		} else {
-			buf.highlighter.Highlight(buf, 0)
+			buf.highlighter.HighlightStates(buf)
 		}
 	}
 

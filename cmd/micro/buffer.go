@@ -190,7 +190,7 @@ func (b *Buffer) UpdateRules() {
 		b.Settings["filetype"] = b.syntaxDef.FileType
 		b.highlighter = highlight.NewHighlighter(b.syntaxDef)
 		if b.Settings["syntax"].(bool) {
-			b.highlighter.Highlight(b, 0)
+			b.highlighter.HighlightStates(b)
 		}
 	}
 }
