@@ -12,12 +12,12 @@ rules:
     - constant: "\\b(true|false)\\b"
     - constant.string: 
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules:
             - constant.specialChar: "\\\\."
     - constant.string:
         start: "'"
-        end: "'"
+        end: "(?<!\\\\)'"
         rules:
             - constant.specialChar: "\\\\."
     - statement: "\\\"(\\\\\"|[^\"])*\\\"[[:space:]]*:\"  \"'(\\'|[^'])*'[[:space:]]*:"

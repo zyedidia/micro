@@ -6,10 +6,11 @@ detect:
 rules:
     - constant.string:
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules: []
 
     - comment:
         start: "#"
         end: "$"
         rules: []
+

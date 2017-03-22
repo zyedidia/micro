@@ -11,7 +11,7 @@ rules:
     - special: "[(){}<>]|\\[|\\]"
     - constant.string:
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules:
             - constant.specialChar: "\\\\."
     - comment:
@@ -22,3 +22,4 @@ rules:
         start: "%"
         end: "$"
         rules: []
+

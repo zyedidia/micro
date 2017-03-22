@@ -28,11 +28,12 @@ rules:
     - todo: "TODO:?"
     - constant.string: 
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules:
             - constant.specialChar: "\\\\."
     - constant.string:
         start: "'"
-        end: "'"
+        end: "(?<!\\\\)'"
         rules:
             - constant.specialChar: "\\\\."
+

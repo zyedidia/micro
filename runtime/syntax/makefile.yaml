@@ -23,7 +23,7 @@ rules:
             - constant.specialChar: "\\\\."
     - constant.string:
         start: "'"
-        end: "'"
+        end: "(?<!\\\\)'"
         rules:
             - constant.specialChar: "\\\\."
     - identifier: "\\$+(\\{[^} ]+\\}|\\([^) ]+\\))"
@@ -33,3 +33,4 @@ rules:
         start: "#"
         end: "$"
         rules: []
+

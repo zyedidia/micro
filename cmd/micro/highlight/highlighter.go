@@ -3,6 +3,8 @@ package highlight
 import (
 	"regexp"
 	"strings"
+
+	"github.com/dlclark/regexp2"
 )
 
 func combineLineMatch(src, dst LineMatch) LineMatch {
@@ -46,7 +48,7 @@ func NewHighlighter(def *Def) *Highlighter {
 // color's group (represented as one byte)
 type LineMatch map[int]uint8
 
-func findIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool) []int {
+func findIndex(regex *regexp2.Regexp, str []byte, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -58,7 +60,11 @@ func findIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool
 			return nil
 		}
 	}
-	return regex.FindIndex(str)
+	match, _ := regex.FindStringMatch(string(str))
+	if match == nil {
+		return nil
+	}
+	return []int{match.Index, match.Index + match.Length}
 }
 
 func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool) [][]int {
@@ -77,7 +83,7 @@ func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 }
 
 func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, line []byte, region *Region) LineMatch {
-	fullHighlights := make([]uint8, len(line))
+	fullHighlights := make([]uint8, len([]rune(string(line))))
 	for i := 0; i < len(fullHighlights); i++ {
 		fullHighlights[i] = region.group
 	}
@@ -90,6 +96,7 @@ func (h *Highlighter) highlightRegion(start int, canMatchEnd bool, lineNum int, 
 
 	loc := findIndex(region.end, line, start == 0, canMatchEnd)
 	if loc != nil {
+		highlights[start+loc[1]-1] = region.group
 		if region.parent == nil {
 			highlights[start+loc[1]] = 0
 			return combineLineMatch(highlights,

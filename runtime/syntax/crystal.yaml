@@ -32,14 +32,14 @@ rules:
 
     - constant.string:
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules:
             - constant.specialchar: "\\\\."
             - special: "#\\{[^}]*\\}"
 
     - constant.string:
         start: "'"
-        end: "'"
+        end: "(?<!\\\\)'"
         rules: []
 
     - comment:
@@ -58,3 +58,4 @@ rules:
         start: "<<-?'?EOT'?"
         end: "^EOT"
         rules: []
+

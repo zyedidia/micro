@@ -2,11 +2,11 @@ package highlight
 
 func DetectFiletype(defs []*Def, filename string, firstLine []byte) *Def {
 	for _, d := range defs {
-		if d.ftdetect[0].Match([]byte(filename)) {
+		if isMatch, _ := d.ftdetect[0].MatchString(filename); isMatch {
 			return d
 		}
 		if len(d.ftdetect) > 1 {
-			if d.ftdetect[1].Match(firstLine) {
+			if isMatch, _ := d.ftdetect[1].MatchString(string(firstLine)); isMatch {
 				return d
 			}
 		}

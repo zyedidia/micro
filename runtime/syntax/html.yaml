@@ -10,7 +10,7 @@ rules:
 
     - constant.string:
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules: []
 
     - default:
@@ -24,3 +24,4 @@ rules:
         end: "</style.*?>"
         rules:
             - include: "css"
+

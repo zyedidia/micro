@@ -20,13 +20,13 @@ rules:
 
     - constant.string:
         start: "\""
-        end: "\""
+        end: "(?<!\\\\)\""
         rules:
             - constant.specialChar: "\\\\."
 
     - constant.string:
         start: "'"
-        end: "'"
+        end: "(?<!\\\\)'"
         rules:
             - constant.specialChar: "\\\\."
 
@@ -47,3 +47,4 @@ rules:
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
+

@@ -4,14 +4,16 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/dlclark/regexp2"
+
 	"gopkg.in/yaml.v2"
 )
 
-var groups map[string]uint8
+var Groups map[string]uint8
 var numGroups uint8
 
 func GetGroup(n uint8) string {
-	for k, v := range groups {
+	for k, v := range Groups {
 		if v == n {
 			return k
 		}
@@ -25,7 +27,7 @@ func GetGroup(n uint8) string {
 // Then it has the rules which define how to highlight the file
 type Def struct {
 	FileType string
-	ftdetect []*regexp.Regexp
+	ftdetect []*regexp2.Regexp
 	rules    *Rules
 }
 
@@ -53,13 +55,13 @@ type Rules struct {
 type Region struct {
 	group  uint8
 	parent *Region
-	start  *regexp.Regexp
-	end    *regexp.Regexp
+	start  *regexp2.Regexp
+	end    *regexp2.Regexp
 	rules  *Rules
 }
 
 func init() {
-	groups = make(map[string]uint8)
+	Groups = make(map[string]uint8)
 }
 
 // ParseDef parses an input syntax file into a highlight Def
@@ -86,7 +88,7 @@ func ParseDef(input []byte) (s *Def, err error) {
 		} else if k == "detect" {
 			ftdetect := v.(map[interface{}]interface{})
 			if len(ftdetect) >= 1 {
-				syntax, err := regexp.Compile(ftdetect["filename"].(string))
+				syntax, err := regexp2.Compile(ftdetect["filename"].(string), 0)
 				if err != nil {
 					return nil, err
 				}
@@ -94,7 +96,7 @@ func ParseDef(input []byte) (s *Def, err error) {
 				s.ftdetect = append(s.ftdetect, syntax)
 			}
 			if len(ftdetect) >= 2 {
-				header, err := regexp.Compile(ftdetect["header"].(string))
+				header, err := regexp2.Compile(ftdetect["header"].(string), 0)
 				if err != nil {
 					return nil, err
 				}
@@ -172,11 +174,11 @@ func parseRules(input []interface{}, curRegion *Region) (*Rules, error) {
 					}
 
 					groupStr := group.(string)
-					if _, ok := groups[groupStr]; !ok {
+					if _, ok := Groups[groupStr]; !ok {
 						numGroups++
-						groups[groupStr] = numGroups
+						Groups[groupStr] = numGroups
 					}
-					groupNum := groups[groupStr]
+					groupNum := Groups[groupStr]
 					rules.patterns = append(rules.patterns, &Pattern{groupNum, r})
 				}
 			case map[interface{}]interface{}:
@@ -199,21 +201,21 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	var err error
 
 	region := new(Region)
-	if _, ok := groups[group]; !ok {
+	if _, ok := Groups[group]; !ok {
 		numGroups++
-		groups[group] = numGroups
+		Groups[group] = numGroups
 	}
-	groupNum := groups[group]
+	groupNum := Groups[group]
 	region.group = groupNum
 	region.parent = prevRegion
 
-	region.start, err = regexp.Compile(regionInfo["start"].(string))
+	region.start, err = regexp2.Compile(regionInfo["start"].(string), 0)
 
 	if err != nil {
 		return nil, err
 	}
 
-	region.end, err = regexp.Compile(regionInfo["end"].(string))
+	region.end, err = regexp2.Compile(regionInfo["end"].(string), 0)
 
 	if err != nil {
 		return nil, err
