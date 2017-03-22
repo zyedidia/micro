@@ -22,6 +22,12 @@ var (
 	vtScratch = ViewType{false, true}
 )
 
+type scrollInfo struct {
+	left   int
+	offset int
+	style  *tcell.Style
+}
+
 // The View struct stores information about a view into a buffer.
 // It stores information about the cursor, and the viewport
 // that the user sees the buffer from.
@@ -32,7 +38,8 @@ type View struct {
 	// The topmost line, used for vertical scrolling
 	Topline int
 	// The leftmost column, used for horizontal scrolling
-	leftCol int
+	leftCol     int
+	hScrollInfo []*scrollInfo
 
 	// Specifies whether or not this view holds a help buffer
 	Type ViewType
@@ -159,6 +166,23 @@ func (v *View) ToggleTabbar() {
 	}
 }
 
+func (v *View) calcHScrollInfo() {
+	v.hScrollInfo = make([]*scrollInfo, v.Height)
+	for i := v.Topline; i < v.Topline+v.Height; i++ {
+		if i >= v.Buf.NumLines {
+			break
+		}
+
+		left, offset, style := visualToCharPos(v.leftCol, i, v.Buf.Line(i), v.Buf, int(v.Buf.Settings["tabsize"].(float64)))
+		v.hScrollInfo[i-v.Topline] = &scrollInfo{left, offset, style}
+	}
+}
+
+func (v *View) SetLeftCol(n int) {
+	v.leftCol = n
+	v.calcHScrollInfo()
+}
+
 func (v *View) paste(clip string) {
 	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
 
@@ -227,7 +251,8 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.Buf = buf
 	v.Cursor = &buf.Cursor
 	v.Topline = 0
-	v.leftCol = 0
+	// v.leftCol = 0
+	v.SetLeftCol(0)
 	v.Cursor.ResetSelection()
 	v.Relocate()
 	v.Center(false)
@@ -406,11 +431,13 @@ func (v *View) Relocate() bool {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		cx := v.Cursor.GetVisualX()
 		if cx < v.leftCol {
-			v.leftCol = cx
+			// v.leftCol = cx
+			v.SetLeftCol(cx)
 			ret = true
 		}
 		if cx+v.lineNumOffset+1 > v.leftCol+v.Width {
-			v.leftCol = cx - v.Width + v.lineNumOffset + 1
+			// v.leftCol = cx - v.Width + v.lineNumOffset + 1
+			v.SetLeftCol(cx - v.Width + v.lineNumOffset + 1)
 			ret = true
 		}
 	}
@@ -688,7 +715,7 @@ func (v *View) DisplayView() {
 	left := v.leftCol
 	top := v.Topline
 
-	v.cellview.Draw(v.Buf, top, height, left, width-v.lineNumOffset)
+	v.cellview.Draw(v.Buf, v.hScrollInfo, top, height, left, width-v.lineNumOffset)
 
 	screenX := v.x
 	realLineN := top - 1

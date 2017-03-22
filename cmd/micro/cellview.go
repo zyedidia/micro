@@ -15,10 +15,13 @@ func min(a, b int) int {
 
 func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsize int) (int, int, *tcell.Style) {
 	charPos := 0
+	var lineIdx int
 	var lastWidth int
 	var style *tcell.Style
-	for i := range str {
-		width := StringWidth(str[:i], tabsize)
+	var width int
+	var rw int
+	for i, c := range str {
+		// width := StringWidth(str[:i], tabsize)
 
 		if group, ok := buf.Match(lineN)[charPos]; ok {
 			s := GetColor(highlight.GetGroup(group))
@@ -31,8 +34,17 @@ func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsiz
 
 		if i != 0 {
 			charPos++
+			lineIdx += rw
 		}
 		lastWidth = width
+		rw = 0
+		if c == '\t' {
+			rw := tabsize - (lineIdx % tabsize)
+			width += rw
+		} else {
+			rw = runewidth.RuneWidth(c)
+			width += rw
+		}
 	}
 
 	return -1, -1, style
@@ -53,7 +65,7 @@ type CellView struct {
 	lines [][]*Char
 }
 
-func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
+func (c *CellView) Draw(buf *Buffer, scrollInfo []*scrollInfo, top, height, left, width int) {
 	tabsize := int(buf.Settings["tabsize"].(float64))
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
@@ -84,7 +96,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		lineStr := buf.Line(lineN)
 		line := []rune(lineStr)
 
-		colN, startOffset, startStyle := visualToCharPos(left, lineN, lineStr, buf, tabsize)
+		// colN, startOffset, startStyle := visualToCharPos(left, lineN, lineStr, buf, tabsize)
+		info := scrollInfo[lineN-top]
+		colN, startOffset, startStyle := info.left, info.offset, info.style
 		if colN < 0 {
 			colN = len(line)
 		}
