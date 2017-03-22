@@ -65,7 +65,7 @@ type CellView struct {
 	lines [][]*Char
 }
 
-func (c *CellView) Draw(buf *Buffer, scrollInfo []*scrollInfo, top, height, left, width int) {
+func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	tabsize := int(buf.Settings["tabsize"].(float64))
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
@@ -96,9 +96,7 @@ func (c *CellView) Draw(buf *Buffer, scrollInfo []*scrollInfo, top, height, left
 		lineStr := buf.Line(lineN)
 		line := []rune(lineStr)
 
-		// colN, startOffset, startStyle := visualToCharPos(left, lineN, lineStr, buf, tabsize)
-		info := scrollInfo[lineN-top]
-		colN, startOffset, startStyle := info.left, info.offset, info.style
+		colN, startOffset, startStyle := visualToCharPos(left, lineN, lineStr, buf, tabsize)
 		if colN < 0 {
 			colN = len(line)
 		}
