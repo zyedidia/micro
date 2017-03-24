@@ -27,7 +27,7 @@ func GetGroup(n uint8) string {
 // Then it has the rules which define how to highlight the file
 type Def struct {
 	FileType string
-	ftdetect []*regexp2.Regexp
+	ftdetect []*regexp.Regexp
 	rules    *Rules
 }
 
@@ -88,7 +88,7 @@ func ParseDef(input []byte) (s *Def, err error) {
 		} else if k == "detect" {
 			ftdetect := v.(map[interface{}]interface{})
 			if len(ftdetect) >= 1 {
-				syntax, err := regexp2.Compile(ftdetect["filename"].(string), 0)
+				syntax, err := regexp.Compile(ftdetect["filename"].(string))
 				if err != nil {
 					return nil, err
 				}
@@ -96,7 +96,7 @@ func ParseDef(input []byte) (s *Def, err error) {
 				s.ftdetect = append(s.ftdetect, syntax)
 			}
 			if len(ftdetect) >= 2 {
-				header, err := regexp2.Compile(ftdetect["header"].(string), 0)
+				header, err := regexp.Compile(ftdetect["header"].(string))
 				if err != nil {
 					return nil, err
 				}

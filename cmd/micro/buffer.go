@@ -408,6 +408,10 @@ func (b *Buffer) Line(n int) string {
 	return string(b.lines[n].data)
 }
 
+func (b *Buffer) LinesNum() int {
+	return len(b.lines)
+}
+
 // Lines returns an array of strings containing the lines from start to end
 func (b *Buffer) Lines(start, end int) []string {
 	lines := b.lines[start:end]

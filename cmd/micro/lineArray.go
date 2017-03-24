@@ -180,14 +180,6 @@ func (la *LineArray) Substr(start, end Loc) string {
 	return str
 }
 
-func (la *LineArray) LineData() [][]byte {
-	lines := make([][]byte, len(la.lines))
-	for i, l := range la.lines {
-		lines[i] = l.data
-	}
-	return lines
-}
-
 func (la *LineArray) State(lineN int) highlight.State {
 	return la.lines[lineN].state
 }
