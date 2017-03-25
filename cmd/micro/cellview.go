@@ -188,6 +188,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	}
 
 	for i := top; i < top+height; i++ {
+		if i >= buf.NumLines {
+			break
+		}
 		buf.SetMatch(i, nil)
 	}
 }

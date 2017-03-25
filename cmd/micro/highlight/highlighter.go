@@ -94,7 +94,9 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 
 	loc := findIndex(region.end, line, start == 0, canMatchEnd)
 	if loc != nil {
-		highlights[start+loc[1]-1] = region.group
+		if !statesOnly {
+			highlights[start+loc[1]-1] = region.group
+		}
 		if region.parent == nil {
 			if !statesOnly {
 				highlights[start+loc[1]] = 0
@@ -270,6 +272,10 @@ func (h *Highlighter) HighlightStates(input LineStates) {
 // This assumes that all the states are set correctly
 func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int) {
 	for i := startline; i < endline; i++ {
+		if i >= input.LinesNum() {
+			break
+		}
+
 		line := []byte(input.Line(i))
 		highlights := make(LineMatch)
 
