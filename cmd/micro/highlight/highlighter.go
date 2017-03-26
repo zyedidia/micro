@@ -49,7 +49,7 @@ func NewHighlighter(def *Def) *Highlighter {
 // color's group (represented as one byte)
 type LineMatch map[int]uint8
 
-func findIndex(regex *regexp2.Regexp, str []byte, canMatchStart, canMatchEnd bool) []int {
+func findIndex(regex *regexp2.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -68,7 +68,7 @@ func findIndex(regex *regexp2.Regexp, str []byte, canMatchStart, canMatchEnd boo
 	return []int{match.Index, match.Index + match.Length}
 }
 
-func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool) [][]int {
+func findAllIndex(regex *regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) [][]int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -80,10 +80,10 @@ func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 			return nil
 		}
 	}
-	return regex.FindAllIndex(str, -1)
+	return regex.FindAllIndex([]byte(string(str)), -1)
 }
 
-func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, region *Region, statesOnly bool) LineMatch {
+func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []rune, region *Region, statesOnly bool) LineMatch {
 	// highlights := make(LineMatch)
 
 	if start == 0 {
@@ -167,7 +167,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 	return highlights
 }
 
-func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, statesOnly bool) LineMatch {
+func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []rune, statesOnly bool) LineMatch {
 	if len(line) == 0 {
 		if canMatchEnd {
 			h.lastRegion = nil
@@ -236,7 +236,7 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 	var lineMatches []LineMatch
 
 	for i := 0; i < len(lines); i++ {
-		line := []byte(lines[i])
+		line := []rune(lines[i])
 		highlights := make(LineMatch)
 
 		if i == 0 || h.lastRegion == nil {
@@ -252,7 +252,7 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 // HighlightStates correctly sets all states for the buffer
 func (h *Highlighter) HighlightStates(input LineStates) {
 	for i := 0; i < input.LinesNum(); i++ {
-		line := []byte(input.Line(i))
+		line := []rune(input.Line(i))
 		// highlights := make(LineMatch)
 
 		if i == 0 || h.lastRegion == nil {
@@ -276,7 +276,7 @@ func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int)
 			break
 		}
 
-		line := []byte(input.Line(i))
+		line := []rune(input.Line(i))
 		highlights := make(LineMatch)
 
 		var match LineMatch
@@ -300,7 +300,7 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
 		h.lastRegion = input.State(startline - 1)
 	}
 	for i := startline; i < input.LinesNum(); i++ {
-		line := []byte(input.Line(i))
+		line := []rune(input.Line(i))
 		// highlights := make(LineMatch)
 
 		// var match LineMatch
@@ -322,7 +322,7 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
 
 // ReHighlightLine will rehighlight the state and match for a single line
 func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
-	line := []byte(input.Line(lineN))
+	line := []rune(input.Line(lineN))
 	highlights := make(LineMatch)
 
 	h.lastRegion = nil
