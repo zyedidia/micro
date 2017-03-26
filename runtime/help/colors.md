@@ -117,42 +117,95 @@ Colorschemes can be placed in the `~/.config/micro/colorschemes` directory to be
 
 The syntax files specify how to highlight certain languages.
 
-The first statement in a syntax file will probably the syntax statement. This tells micro
-what language the syntax file is for and how to detect a file in that language.
+Syntax files are specified in the yaml format.
 
-Essentially, it's just
+#### Filetype defintion
 
-```
-syntax "Name of language" "\.extension$"
-```
-
-For the extension, micro will just compare that regex to the filename and if it matches then it
-will use the syntax rules defined in the remainder of the file.
-
-There is also a possibility to use a header statement which is a regex that micro will compare
-with the first line of the file. This is almost only used for shebangs at the top of shell scripts
-which don't have any extension (see sh.micro for an example).
-
----
-
-The rest of a syntax file is very simple and is essentially a list of regexes specifying how to highlight
-different expressions.
-
-It is recommended that when creating a syntax file you use the colorscheme groups (see above) to
-highlight different expressions. You may also hard code colors, but that may not look good depending
-on what terminal colorscheme the user has installed.
-
-Here is an example to highlight comments (expressions starting with `//`):
+You must start the syntax file by declaring the filetype:
 
 ```
-color comment "//.*"
+filetype: go
 ```
 
-This will highlight the regex `//.*` in the color that the user's colorscheme has linked to the comment
-group.
+#### Detect definition
 
-Note that this regex only matches the current line. Here is an example for multiline comments (`/* comment */`):
+Then you can provide information about how to detect the filetype:
 
 ```
-color comment start="/\*" end="\*/"
+detect:
+    filename: "\\.go$"
+```
+
+Micro will match this regex against a given filename to detect the filetype. You may also
+provide an optional `header` regex that will check the first line of the file. For example for yaml:
+
+```
+detect:
+    filename: "\\.ya?ml$"
+    header: "%YAML"
+```
+
+#### Syntax rules
+
+Next you must provide the syntax highlighting rules. There are two types of rules: patterns and regions.
+A pattern is matched on a single line and usually a single word as well. A region highlights between two
+patterns over multiple lines and may have rules of its own inside the region.
+
+Here are some example patterns in Go:
+
+```
+rules:
+    - special: "\\b(break|case|continue|default|go|goto|range|return)\\b"
+    - statement: "\\b(else|for|if|switch)\\b"
+    - preproc: "\\b(package|import|const|var|type|struct|func|go|defer|iota)\\b"
+```
+
+The order of patterns does matter as patterns lower in the file will overwrite the ones defined above them.
+
+And here are some example regions for Go:
+
+```
+- constant.string:
+    start: "\""
+    end: "(?<!\\\\)\""
+    rules:
+        - constant.specialChar: "%."
+        - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+        - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+- comment:
+    start: "//"
+    end: "$"
+    rules:
+        - todo: "(TODO|XXX|FIXME):?"
+
+- comment:
+    start: "/\\*"
+    end: "\\*/"
+    rules:
+        - todo: "(TODO|XXX|FIXME):?"
+```
+
+Notice how the regions may contain rules inside of them.
+
+Also the regexes for region start and end may contain more complex regexes with lookahead and lookbehind,
+but this is not supported for pattern regexes.
+
+#### Includes
+
+You may also include rules from other syntax files as embedded languages. For example, the following is possible
+for html:
+
+```
+- default:
+    start: "<script.*?>"
+    end: "</script.*?>"
+    rules:
+        - include: "javascript"
+
+- default:
+    start: "<style.*?>"
+    end: "</style.*?>"
+    rules:
+        - include: "css"
 ```
