@@ -32,6 +32,18 @@ rules:
     - constant: "\\b[0-9]+\\b"
     - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
 
+    - comment:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "'''"
+        end: "'''"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
     - constant.string:
         start: "\""
         end: "(?<!\\\\)\""
@@ -52,18 +64,6 @@ rules:
     - comment:
         start: "#"
         end: "$"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
-
-    - comment:
-        start: "\"\"\""
-        end: "\"\"\""
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
-
-    - comment:
-        start: "'''"
-        end: "'''"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
 
