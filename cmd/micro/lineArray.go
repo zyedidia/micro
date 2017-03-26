@@ -2,11 +2,31 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
+
+func lineCounter(r io.Reader) (int, error) {
+	buf := make([]byte, 32*1024)
+	count := 0
+	lineSep := []byte{'\n'}
+
+	for {
+		c, err := r.Read(buf)
+		count += bytes.Count(buf[:c], lineSep)
+
+		switch {
+		case err == io.EOF:
+			return count, nil
+
+		case err != nil:
+			return count, err
+		}
+	}
+}
 
 func runeToByteIndex(n int, txt []byte) int {
 	if n == 0 {
@@ -46,21 +66,27 @@ type LineArray struct {
 // NewLineArray returns a new line array from an array of bytes
 func NewLineArray(reader io.Reader) *LineArray {
 	la := new(LineArray)
-	br := bufio.NewReader(reader)
 
-	i := 0
-	for {
+	var buf bytes.Buffer
+	tee := io.TeeReader(reader, &buf)
+	numlines, _ := lineCounter(tee)
+	la.lines = make([]Line, numlines)
+
+	br := bufio.NewReader(&buf)
+
+	for i := 0; i < numlines; i++ {
 		data, err := br.ReadBytes('\n')
 		if err != nil {
 			if err == io.EOF {
-				la.lines = append(la.lines, Line{data[:len(data)], nil, nil, false})
+				// la.lines[i] = Line{data[:len(data)], nil, nil, false}
+				la.lines[i].data = data
 			}
 			// Last line was read
 			break
 		} else {
-			la.lines = append(la.lines, Line{data[:len(data)-1], nil, nil, false})
+			la.lines[i].data = data[:len(data)-1]
+			// la.lines[i] = Line{data[:len(data)-1], nil, nil, false}
 		}
-		i++
 	}
 
 	return la
