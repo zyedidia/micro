@@ -10,7 +10,8 @@ rules:
     - constant: "\\b(true|false)\\b"
     - statement: "(:[[:space:]]|\\[|\\]|:[[:space:]]+[|>]|^[[:space:]]*- )"
     - identifier: "[[:space:]][\\*&][A-Za-z0-9]+"
-    - type: "([-\\w]+:\\s+)|([-\\w]+:$)"
+    - type: "[-.\\w]+:"
+    - statement: ":"
     - special:  "(^---|^\\.\\.\\.|^%YAML|^%TAG)"
 
     - constant.string:
