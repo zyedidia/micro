@@ -70,6 +70,10 @@ func NewLineArray(reader io.Reader) *LineArray {
 	var buf bytes.Buffer
 	tee := io.TeeReader(reader, &buf)
 	numlines, _ := lineCounter(tee)
+	if numlines == 0 {
+		numlines = 1
+	}
+
 	la.lines = make([]Line, numlines)
 
 	br := bufio.NewReader(&buf)
