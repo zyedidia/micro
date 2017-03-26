@@ -100,15 +100,15 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		if region.parent == nil {
 			if !statesOnly {
 				highlights[start+loc[1]] = 0
+				h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], region, statesOnly)
 			}
-			h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], region, statesOnly)
 			h.highlightEmptyRegion(highlights, start+loc[1], canMatchEnd, lineNum, line[loc[1]:], statesOnly)
 			return highlights
 		}
 		if !statesOnly {
 			highlights[start+loc[1]] = region.parent.group
+			h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], region, statesOnly)
 		}
-		h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], region, statesOnly)
 		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, line[loc[1]:], region.parent, statesOnly)
 		return highlights
 	}
