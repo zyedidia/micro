@@ -136,6 +136,13 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 				if viewCol >= 0 {
 					c.lines[viewLine][viewCol].drawChar = indentchar
 					c.lines[viewLine][viewCol].width = width
+
+					indentStyle := curStyle
+					if group, ok := colorscheme["indent-char"]; ok {
+						indentStyle = group
+					}
+
+					c.lines[viewLine][viewCol].style = indentStyle
 				}
 
 				for i := 1; i < width; i++ {
