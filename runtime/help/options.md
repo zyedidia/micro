@@ -140,6 +140,12 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `keepautoindent`: when using autoindent, whitespace is added for you. This option determines if
+   when you move to the next line without any insertions the whitespace that was added should be deleted.
+   By default the autoindent whitespace is deleted if the line was left empty.
+
+    default value: `off`
+
 ---
 
 Default plugin options:
