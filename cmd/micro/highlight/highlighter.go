@@ -11,12 +11,12 @@ import (
 // RunePos returns the rune index of a given byte index
 // This could cause problems if the byte index is between code points
 func runePos(p int, str string) int {
-	// if p < 0 {
-	// 	return -1
-	// }
-	// if p >= len(str) {
-	// 	return -1
-	// }
+	if p < 0 {
+		return 0
+	}
+	if p >= len(str) {
+		return utf8.RuneCountInString(str)
+	}
 	return utf8.RuneCountInString(str[:p])
 }
 
