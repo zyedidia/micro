@@ -185,10 +185,8 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			}
 			c := 0
 			for i := range tabs[tabnum].views {
-				c = i
-			}
-			for i := 0; i < c; i++ {
-				tabs[tabnum].views[1].Quit(false)
+				tabs[tabnum].views[i-c].Quit(false)
+				c++
 			}
 			return true
 		}
