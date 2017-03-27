@@ -195,10 +195,10 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 				return true
 			}
 			//If there is nothing to the left to scroll to, ignore scroll event completely.
-			leftBuffer := previousTabOffset + (currentTabOffset - previousTabOffset)/2
-			if leftBuffer <= 0 {
-				return true
-			}
+			//leftBuffer := previousTabOffset + (currentTabOffset - previousTabOffset)/2
+			//if leftBuffer <= 0 {
+			//	return true
+			//}
 			ScrollOffset--
 			return true
 		}
@@ -214,10 +214,10 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 				return true
 			}
 			//If there is nothing to the right to scroll to, ignore scroll event completely
-			rightBuffer := currentTabOffset + (currentTabOffset - previousTabOffset)/2
-			if rightBuffer <= 0 {
-				return true
-			}
+			//rightBuffer := currentTabOffset + (currentTabOffset - previousTabOffset)/2
+			//if rightBuffer <= 0 {
+			//	return true
+			//}
 			ScrollOffset++
 			return true
 		}
@@ -277,8 +277,8 @@ func DisplayTabs() {
 		}
 		// get the width of the hitbox of the active tab, from there calculate the offsets
 		// to the left and right of it to approximately center it on the tab bar display.
-		//centeringOffset := (w - (currentTabOffset - previousTabOffset) + ScrollOffset)
-		centeringOffset := (w - (currentTabOffset - previousTabOffset) )
+		centeringOffset := (w - (currentTabOffset - previousTabOffset) + ScrollOffset)
+		//centeringOffset := (w - (currentTabOffset - previousTabOffset) )
 		leftBuffer := previousTabOffset - (centeringOffset / 2)
 		rightBuffer := currentTabOffset + (centeringOffset / 2)
 
