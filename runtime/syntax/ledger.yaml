@@ -1,0 +1,14 @@
+filetype: ledger
+
+detect: 
+    filename: "(^|\\.|/)ledger|ldgr|beancount|bnct$"
+
+rules:
+    - special: "^([0-9]{4}(/|-)[0-9]{2}(/|-)[0-9]{2}|[=~]) .*"
+    - constant: "^[0-9]{4}(/|-)[0-9]{2}(/|-)[0-9]{2}"
+    - statement: "^~ .*"
+    - identifier.var: "^= .*"
+    - identifier: "^[[:space:]]+(![[:space:]]+)?\\(?[A-Za-z ]+(:[A-Za-z ]+)*\\)?"
+    - identifier: "^[[:space:]]+(![[:space:]]+)?\\(?[A-Za-z_\\-]+(:[A-Za-z_\\-]+)*\\)?"
+    - symbol: "[*!]"
+    - comment: "^[[:space:]]*;.*"

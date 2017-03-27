@@ -1,0 +1,18 @@
+filetype: rst
+
+detect:
+    filename: "\\.rest$|\\.rst$"
+
+rules:
+    - statement: "\\*\\*[^*]+\\*\\*"
+    - preproc: "::"
+    - constant.string: "`[^`]+`_{1,2}"
+    - constant.string: "``[^`]+``"
+    - identifier: "^\\.\\. .*$"
+    - identifier: "^__ .*$"
+    - type: "^###+$"
+    - type: "^\\*\\*\\*+$"
+    - special: "^===+$"
+    - special: "^---+$"
+    - special: "^\\^\\^\\^+$"
+    - special: "^\"\"\"+$"

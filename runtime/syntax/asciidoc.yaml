@@ -1,0 +1,51 @@
+filetype: asciidoc
+
+detect:
+    filename: "\\.(asc|asciidoc|adoc)$"
+
+rules:
+    # main header
+    - preproc: "^====+$"
+      # h1
+    - statement: "^==[[:space:]].*$"
+    - statement: "^----+$"
+      # h2
+    - symbol: "^===[[:space:]].*$"
+    - symbol: "^~~~~+$"
+      # h4
+    - type: "^====[[:space:]].*$"
+    - type: "^\\^\\^\\^\\^+$"
+      # h5
+    - constant: "^=====[[:space:]].*$"
+    - constant: "^\\+\\+\\+\\++$"
+
+      # attributes
+    - type.keyword: ":.*:"
+    - identifier.macro: "\\{[a-z0-9]*\\}"
+    - identifier: "\\\\\\{[a-z0-9]*\\}"
+    - identifier: "\\+\\+\\+\\{[a-z0-9]*\\}\\+\\+\\+"
+
+      # Paragraph Title
+    - statement: "^\\..*$"
+
+      # source 
+    - identifier: "^\\[(source,.+|NOTE|TIP|IMPORTANT|WARNING|CAUTION)\\]"
+
+      # Other markup
+    - constant.string: ".*[[:space:]]\\+$"
+    - constant.string: "_[^_]+_"
+    - constant.string: "\\*[^\\*]+\\*"
+    - constant.string: "\\+[^\\+]+\\+"
+    - constant.string: "`[^`]+`"
+    - constant.string: "\\^[^\\^]+\\^"
+    - constant.string: "~[^~]+~"
+    - constant.string: "'[^']+'"
+
+    - constant: "`{1,2}[^']+'{1,2}"
+
+      # bullets
+    - symbol: "^[[:space:]]*[\\*\\.-]{1,5}[[:space:]]"
+
+      # anchors
+    - "bold default": "\\[\\[.*\\]\\]"
+    - "bold default": "<<.*>>"

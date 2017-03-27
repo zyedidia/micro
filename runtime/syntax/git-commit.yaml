@@ -1,0 +1,28 @@
+filetype: git-commit
+
+detect:
+    filename: "COMMIT_EDITMSG|TAG_EDITMSG"
+
+rules:
+    # Commit message
+    - ignore: ".*"
+    # Comments
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+    # File changes
+    - keyword: "#[[:space:]](deleted|modified|new file|renamed):[[:space:]].*"
+    - keyword: "#[[:space:]]deleted:"
+    - keyword: "#[[:space:]]modified:"
+    - keyword: "#[[:space:]]new file:"
+    - keyword: "#[[:space:]]renamed:"
+    # Untracked filenames
+    - error: "^#	[^/?*:;{}\\\\]+\\.[^/?*:;{}\\\\]+$"
+    - keyword: "^#[[:space:]]Changes.*[:]"
+    - keyword: "^#[[:space:]]Your branch and '[^']+"
+    - keyword: "^#[[:space:]]Your branch and '"
+    - keyword: "^#[[:space:]]On branch [^ ]+"
+    - keyword: "^#[[:space:]]On branch"
+    # Recolor hash symbols
+    - special: "#"

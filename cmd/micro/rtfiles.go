@@ -120,7 +120,7 @@ func InitRuntimeFiles() {
 	}
 
 	add(RTColorscheme, "colorschemes", "*.micro")
-	add(RTSyntax, "syntax", "*.micro")
+	add(RTSyntax, "syntax", "*.yaml")
 	add(RTHelp, "help", "*.md")
 
 	// Search configDir for plugin-scripts

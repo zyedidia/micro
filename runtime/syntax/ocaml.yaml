@@ -1,0 +1,26 @@
+filetype: ocaml
+
+detect:
+    filename: "\\.mli?$"
+
+rules:
+    # Numbers
+    ## Integers
+    ### Binary
+    - constant.number: "-?0[bB][01][01_]*"
+    ### Octal
+    - constant.number: "-?0[oO][0-7][0-7_]*"
+    ### Decimal
+    - constant.number: "-?\\d[\\d_]*"
+    ### Hexadecimal
+    - constant.number: "-?0[xX][0-9a-fA-F][0-9a-fA-F_]*"
+    ## Real
+    ### Decimal
+    - constant.number: "-?\\d[\\d_]*.\\d[\\d_]*([eE][+-]\\d[\\d_]*.\\d[\\d_]*)?"
+    ### Hexadecimal
+    - constant.number: "-?0[xX][0-9a-fA-F][0-9a-fA-F_]*.[0-9a-fA-F][0-9a-fA-F_]*([pP][+-][0-9a-fA-F][0-9a-fA-F_]*.[0-9a-fA-F][0-9a-fA-F_]*)?"
+    # Comments
+    - comment:
+        start: "\\(\\*"
+        end: "\\*\\)"
+        rules: []

@@ -1,0 +1,13 @@
+filetype: patch
+
+detect: 
+    filename: "\\.(patch|diff)$"
+
+rules:
+    - brightgreen: "^\\+.*"
+    - green: "^\\+\\+\\+.*"
+    - brightblue: "^ .*"
+    - brightred: "^-.*"
+    - red: "^---.*"
+    - brightyellow: "^@@.*"
+    - magenta: "^diff.*"

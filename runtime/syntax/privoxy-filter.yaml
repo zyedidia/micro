@@ -1,0 +1,12 @@
+filetype: privoxy-filter
+
+detect: 
+    filename: "\\.filter$"
+
+rules:
+    - statement: "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER): [a-z-]+"
+    - identifier: "^(FILTER|CLIENT-HEADER-FILTER|CLIENT-HEADER-TAGGER|SERVER-HEADER-FILTER|SERVER-HEADER-TAGGER):"
+    - constant.specialChar: "\\\\.?"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

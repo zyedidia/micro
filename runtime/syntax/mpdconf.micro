@@ -1,9 +1,0 @@
-syntax "mpd" "mpd\.conf$"
-
-color statement "\b(user|group|bind_to_address|host|port|plugin|name|type)\b"
-color statement "\b((music|playlist)_directory|(db|log|state|pid|sticker)_file)\b"
-color special "^(input|audio_output|decoder)[[:space:]]*\{|\}"
-color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color comment "(^|[[:space:]])#([^{].*)?$"
-color indent-char.whitespace "[[:space:]]+$"
-color indent-char "	+ +| +	+"

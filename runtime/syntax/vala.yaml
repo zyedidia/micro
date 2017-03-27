@@ -1,0 +1,26 @@
+filetype: vala
+
+detect: 
+    filename: "\\.vala$"
+
+rules:
+    - type: "\\b(float|double|bool|char|int|uint|short|long|void|(un)?signed)\\b"
+    - identifier.class: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
+    - statement: "\\b(for|if|while|do|else|case|default|switch|try|throw|catch)\\b"
+    - statement: "\\b(inline|typedef|struct|enum|union|extern|static|const)\\b"
+    - statement: "\\b(operator|new|delete|return|null)\\b"
+    - statement: "\\b(class|override|private|public|signal|this|weak)\\b"
+    - special: "\\b(goto|break|continue)\\b"
+    - constant.bool: "\\b(true|false)\\b"
+    - constant.number: "\\b([0-9]+)\\b"
+    - symbol.operator: "[\\-+/*=<>?:!~%&|]|->"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - comment: "(^|[[:space:]])//.*"
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules: []
+
+    - todo: "TODO:?"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

@@ -1,0 +1,30 @@
+filetype: groff
+
+detect: 
+    filename: "\\.m[ems]$|\\.rof|\\.tmac$|^tmac."
+
+rules:
+    - statement: "^\\.(ds|nr) [^[[:space:]]]*"
+    - constant.specialChar: "\\\\."
+    - constant.specialChar: "\\\\f.|\\\\f\\(..|\\\\s(\\+|\\-)?[0-9]"
+    - constant: "(\\\\|\\\\\\\\)n(.|\\(..)"
+    - constant:
+        start: "(\\\\|\\\\\\\\)n\\["
+        end: "]"
+        rules: []
+
+    - type: "^\\.[[:space:]]*[^[[:space:]]]*"
+    - comment: "^\\.\\\\\".*$"
+    - constant.string: "(\\\\|\\\\\\\\)\\*(.|\\(..)"
+    - constant.string:
+        start: "(\\\\|\\\\\\\\)\\*\\["
+        end: "]"
+        rules: []
+
+    - constant.specialChar: "\\\\\\(.."
+    - constant.specialChar:
+        start: "\\\\\\["
+        end: "]"
+        rules: []
+
+    - identifier.macro: "\\\\\\\\\\$[1-9]"

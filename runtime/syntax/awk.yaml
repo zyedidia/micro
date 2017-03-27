@@ -1,0 +1,42 @@
+filetype: awk
+
+detect:
+    filename: "\\.awk$"
+    header: "^#!.*bin/(env +)?awk( |$)"
+
+rules:
+    - preproc: "\\$[A-Za-z0-9_!@#$*?\\-]+"
+    - preproc: "\\b(ARGC|ARGIND|ARGV|BINMODE|CONVFMT|ENVIRON|ERRNO|FIELDWIDTHS)\\b"
+    - preproc: "\\b(FILENAME|FNR|FS|IGNORECASE|LINT|NF|NR|OFMT|OFS|ORS)\\b"
+    - preproc: "\\b(PROCINFO|RS|RT|RSTART|RLENGTH|SUBSEP|TEXTDOMAIN)\\b"
+    - identifier.class: "\\b(function|extension|BEGIN|END)\\b"
+    - symbol.operator: "[\\-+*/%^|!=&<>?;:]|\\\\|\\[|\\]"
+    - statement:  "\\b(for|if|while|do|else|in|delete|exit)\\b"
+    - special:  "\\b(break|continue|return)\\b"
+    - statement: "\\b(close|getline|next|nextfile|print|printf|system|fflush)\\b"
+    - statement: "\\b(atan2|cos|exp|int|log|rand|sin|sqrt|srand)\\b"
+    - statement: "\\b(asort|asorti|gensub|gsub|index|length|match)\\b"
+    - statement: "\\b(split|sprintf|strtonum|sub|substr|tolower|toupper)\\b"
+    - statement: "\\b(mktime|strftime|systime)\\b"
+    - statement: "\\b(and|compl|lshift|or|rshift|xor)\\b"
+    - statement: "\\b(bindtextdomain|dcgettext|dcngettext)\\b"
+    - special:   "/.*[^\\\\]/"
+
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "(?<!\\\\)'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

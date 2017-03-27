@@ -1,0 +1,13 @@
+filetype: sed
+
+detect: 
+    filename: "\\.sed$"
+    header: "^#!.*bin/(env +)?sed( |$)"
+
+rules:
+    - symbol.operator: "[|^$.*+]"
+    - constant.number: "\\{[0-9]+,?[0-9]*\\}"
+    - constant.specialChar: "\\\\."
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

@@ -1,0 +1,50 @@
+filetype: swift
+
+detect:
+    filename: "\\.swift$"
+
+rules:
+    # Operators
+    - statement: "([.:;,+*|=!?\\%]|<|>|/|-|&)"
+
+      # Statements
+    - statement:  "(class|import|let|var|struct|enum|func|if|else|switch|case|default|for|in|internal|external|unowned|private|public|throws)\\ "
+    - statement:  "(prefix|postfix|operator|extension|lazy|get|set|self|willSet|didSet|override|super|convenience|weak|strong|mutating|return|guard)\\ "
+
+      # Keywords
+    - statement: "(print)"
+    - statement: "(init)"
+
+      # Numbers
+    - constant.number: "([0-9]+)"
+
+      # Standard Types
+    - type: "\\ ((U)?Int(8|16|32|64))"
+    - constant: "(true|false|nil)"
+    - type: "\\ (Double|String|Float|Boolean|Dictionary|Array|Int)"
+    - type: "\\ (AnyObject)"
+
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "///"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

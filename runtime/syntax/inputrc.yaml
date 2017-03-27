@@ -1,0 +1,14 @@
+filetype: inputrc
+
+detect: 
+    filename: "inputrc$"
+
+rules:
+    - constant.bool.false: "\\b(off|none)\\b"
+    - constant.bool.true: "\\bon\\b"
+    - preproc: "\\bset|\\$include\\b"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - constant.specialChar: "\\\\.?"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

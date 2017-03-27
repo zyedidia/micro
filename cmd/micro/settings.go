@@ -286,9 +286,6 @@ func SetOption(option, value string) error {
 		for _, tab := range tabs {
 			for _, view := range tab.views {
 				view.Buf.UpdateRules()
-				if view.Buf.Settings["syntax"].(bool) {
-					view.matches = Match(view)
-				}
 			}
 		}
 	}
@@ -346,16 +343,18 @@ func SetLocalOption(option, value string, view *View) error {
 
 	if option == "statusline" {
 		view.ToggleStatusLine()
-		if buf.Settings["syntax"].(bool) {
-			view.matches = Match(view)
-		}
 	}
 
 	if option == "filetype" {
 		LoadSyntaxFiles()
 		buf.UpdateRules()
-		if buf.Settings["syntax"].(bool) {
-			view.matches = Match(view)
+	}
+
+	if option == "syntax" {
+		if !nativeValue.(bool) {
+			buf.ClearMatches()
+		} else {
+			buf.highlighter.HighlightStates(buf)
 		}
 	}
 

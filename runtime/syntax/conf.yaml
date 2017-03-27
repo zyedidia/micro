@@ -1,0 +1,16 @@
+filetype: conf
+
+detect:
+    filename: "\\.c[o]?nf$"
+
+rules:
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules: []
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+

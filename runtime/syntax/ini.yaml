@@ -1,0 +1,14 @@
+filetype: ini
+
+detect: 
+    filename: "\\.(ini|desktop|lfl|override)$|(mimeapps\\.list|pinforc|setup\\.cfg)$|weechat/.+\\.conf$"
+    header: "^\\[[A-Za-z]+\\]$"
+
+rules:
+    - constant.bool.true: "\\btrue\\b"
+    - constant.bool.false: "\\bfalse\\b"
+    - identifier: "^[[:space:]]*[^=]*="
+    - special: "^[[:space:]]*\\[.*\\]$"
+    - statement: "[=;]"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"

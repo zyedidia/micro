@@ -1,7 +1,0 @@
-## Here is an example for xml files.
-
-syntax "xml" "\.(xml|sgml?|rng|plist)$"
-color symbol.tag "<.*?>"
-color preproc start="<!DOCTYPE" end="[/]?>"
-color comment "<!--.+?-->"
-color special    "&[^;]*;"

@@ -9,17 +9,21 @@ import (
 	"os/signal"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
+	humanize "github.com/dustin/go-humanize"
 	"github.com/mitchellh/go-homedir"
 )
 
+// A Command contains a action (a function to call) as well as information about how to autocomplete the command
 type Command struct {
 	action      func([]string)
 	completions []Completion
 }
 
+// A StrCommand is similar to a command but keeps the name of the action
 type StrCommand struct {
 	action      string
 	completions []Completion
@@ -51,6 +55,7 @@ func init() {
 		"Pwd":       Pwd,
 		"Open":      Open,
 		"TabSwitch": TabSwitch,
+		"MemUsage":  MemUsage,
 	}
 }
 
@@ -104,6 +109,7 @@ func DefaultCommands() map[string]StrCommand {
 		"pwd":       {"Pwd", []Completion{NoCompletion}},
 		"open":      {"Open", []Completion{FileCompletion}},
 		"tabswitch": {"TabSwitch", []Completion{NoCompletion}},
+		"memusage":  {"MemUsage", []Completion{NoCompletion}},
 	}
 }
 
@@ -190,6 +196,7 @@ func PluginCmd(args []string) {
 	}
 }
 
+// TabSwitch switches to a given tab either by name or by number
 func TabSwitch(args []string) {
 	if len(args) > 0 {
 		num, err := strconv.Atoi(args[0])
@@ -218,6 +225,7 @@ func TabSwitch(args []string) {
 	}
 }
 
+// Cd changes the current working directory
 func Cd(args []string) {
 	if len(args) > 0 {
 		home, _ := homedir.Dir()
@@ -235,6 +243,21 @@ func Cd(args []string) {
 	}
 }
 
+// MemUsage prints micro's memory usage
+// Alloc shows how many bytes are currently in use
+// Sys shows how many bytes have been requested from the operating system
+// NumGC shows how many times the GC has been run
+// Note that Go commonly reserves more memory from the OS than is currently in-use/required
+// Additionally, even if Go returns memory to the OS, the OS does not always claim it because
+// there may be plenty of memory to spare
+func MemUsage(args []string) {
+	var mem runtime.MemStats
+	runtime.ReadMemStats(&mem)
+
+	messenger.Message(fmt.Sprintf("Alloc: %v, Sys: %v, NumGC: %v", humanize.Bytes(mem.Alloc), humanize.Bytes(mem.Sys), mem.NumGC))
+}
+
+// Pwd prints the current working directory
 func Pwd(args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
@@ -244,6 +267,7 @@ func Pwd(args []string) {
 	}
 }
 
+// Open opens a new buffer with a given filename
 func Open(args []string) {
 	if len(args) > 0 {
 		filename := args[0]
@@ -256,6 +280,7 @@ func Open(args []string) {
 	}
 }
 
+// ToggleLog toggles the log view
 func ToggleLog(args []string) {
 	buffer := messenger.getBuffer()
 	if CurView().Type != vtLog {
@@ -271,6 +296,7 @@ func ToggleLog(args []string) {
 	}
 }
 
+// Reload reloads all files (syntax files, colorschemes...)
 func Reload(args []string) {
 	LoadAll()
 }
@@ -300,6 +326,13 @@ func VSplit(args []string) {
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil && fileInfo.IsDir() {
+			messenger.Error(filename, " is a directory")
+			return
+		}
+
 		defer file.Close()
 
 		var buf *Buffer
@@ -323,6 +356,13 @@ func HSplit(args []string) {
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil && fileInfo.IsDir() {
+			messenger.Error(filename, " is a directory")
+			return
+		}
+
 		defer file.Close()
 
 		var buf *Buffer
@@ -356,10 +396,24 @@ func NewTab(args []string) {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, _ := os.Open(filename)
+		file, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil && fileInfo.IsDir() {
+			messenger.Error(filename, " is a directory")
+			return
+		}
+
 		defer file.Close()
 
-		tab := NewTabFromView(NewView(NewBuffer(file, filename)))
+		var buf *Buffer
+		if err != nil {
+			buf = NewBuffer(strings.NewReader(""), filename)
+		} else {
+			buf = NewBuffer(file, filename)
+		}
+
+		tab := NewTabFromView(NewView(buf))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
 		curTab = len(tabs) - 1
@@ -485,9 +539,6 @@ func Replace(args []string) {
 				break
 			}
 			view.Relocate()
-			if view.Buf.Settings["syntax"].(bool) {
-				view.matches = Match(view)
-			}
 			RedrawAll()
 			choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
 			if canceled {

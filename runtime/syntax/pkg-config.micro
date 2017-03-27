@@ -1,8 +1,0 @@
-syntax "pc" "\.pc$"
-
-color preproc  "^(Name|Description|URL|Version|Conflicts|Cflags):"
-color preproc  "^(Requires|Libs)(\.private)?:"
-color symbol.operator "="
-color identifier.var "\$\{[A-Za-z_][A-Za-z0-9_]*\}"
-color indent-char.whitespace "[[:space:]]+$"
-color indent-char "	+ +| +	+"

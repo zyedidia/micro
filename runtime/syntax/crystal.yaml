@@ -1,0 +1,61 @@
+filetype: crystal
+
+detect:
+    filename: "\\.cr$|Gemfile|config.ru|Rakefile|Capfile|Vagrantfile"
+
+rules:
+    # Asciibetical list of reserved words
+    - statement: "\\b(BEGIN|END|abstract|alias|and|begin|break|case|class|def|defined\\?|do|else|elsif|end|ensure|enum|false|for|fun|if|in|include|lib|loop|macro|module|next|nil|not|of|or|pointerof|private|protected|raise|redo|require|rescue|retry|return|self|sizeof|spawn|struct|super|then|true|type|undef|union|uninitialized|unless|until|when|while|yield)\\b"
+      # Constants
+    - constant: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
+    - constant.number: "\\b[0-9]+\\b"
+      # Crystal "symbols"
+    - constant:  "([ 	]|^):[0-9A-Z_]+\\b"
+      # Some unique things we want to stand out
+    - constant: "\\b(__FILE__|__LINE__)\\b"
+      # Regular expressions
+    - constant: "/([^/]|(\\\\/))*/[iomx]*|%r\\{([^}]|(\\\\}))*\\}[iomx]*"
+
+      # Shell command expansion is in `backticks` or like %x{this}.  These are
+      # "double-quotish" (to use a perlism).
+    - constant.string: "`[^`]*`|%x\\{[^}]*\\}"
+
+    - constant.string:
+        start: "`"
+        end: "`"
+        rules: []
+
+    - constant.string:
+        start: "%x\\{"
+        end: "\\}"
+        rules: []
+
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialchar: "\\\\."
+            - special: "#\\{[^}]*\\}"
+
+    - constant.string:
+        start: "'"
+        end: "(?<!\\\\)'"
+        rules: []
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment.bright:
+        start: "##"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - constant:
+        start: "<<-?'?EOT'?"
+        end: "^EOT"
+        rules: []
+

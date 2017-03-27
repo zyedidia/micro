@@ -1,0 +1,50 @@
+filetype: cython
+
+detect:
+    filename: "\\.pyx$|\\.pxd$|\\.pyi$"
+
+rules:
+    # Python Keyword Color
+    - statement: "\\b(and|as|assert|class|def|DEF|del|elif|ELIF|else|ELSE|except|exec|finally|for|from|global|if|IF|import|in|is|lambda|map|not|or|pass|print|raise|try|while|with|yield)\\b"
+    - special: "\\b(continue|break|return)\\b"
+
+      # Cython Keyword Color
+    - identifier.macro: "\\b(cdef|cimport|cpdef|cppclass|ctypedef|extern|include|namespace|property|struct)\\b"
+    - type: "\\b(bint|char|double|int|public|void|unsigned)\\b"
+
+      # Operator Color
+    - symbol: "[.:;,+*|=!\\%]|<|>|/|-|&"
+
+      # Parenthetical Color
+    - symbol.brackets: "[(){}]|\\[|\\]"
+
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'''"
+        end: "'''"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "(?<!\\\\)'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

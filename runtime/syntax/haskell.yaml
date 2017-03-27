@@ -1,0 +1,49 @@
+filetype: haskell
+
+detect:
+    filename: "\\.hs$"
+
+rules:
+    # Keywords
+    - statement: "[ ](as|case|of|class|data|default|deriving|do|forall|foreign|hiding|if|then|else|import|infix|infixl|infixr|instance|let|in|mdo|module|newtype|qualified|type|where)[ ]"
+    - statement: "(^data|^foreign|^import|^infix|^infixl|^infixr|^instance|^module|^newtype|^type)[ ]"
+    - statement: "[ ](as$|case$|of$|class$|data$|default$|deriving$|do$|forall$|foreign$|hiding$|if$|then$|else$|import$|infix$|infixl$|infixr$|instance$|let$|in$|mdo$|module$|newtype$|qualified$|type$|where$)"
+
+      # Various symbols
+    - symbol: "(\\||@|!|:|_|~|=|\\\\|;|\\(\\)|,|\\[|\\]|\\{|\\})"
+
+      # Operators
+    - symbol.operator: "(==|/=|&&|\\|\\||<|>|<=|>=)"
+
+      # Various symbols
+    - special: "(->|<-)"
+    - symbol: "\\.|\\$"
+
+      # Data constructors
+    - constant.bool: "\\b(True|False)\\b"
+    - constant: "(Nothing|Just|Left|Right|LT|EQ|GT)"
+
+      # Data classes
+    - identifier.class: "[ ](Read|Show|Enum|Eq|Ord|Data|Bounded|Typeable|Num|Real|Fractional|Integral|RealFrac|Floating|RealFloat|Monad|MonadPlus|Functor)"
+
+      # Strings
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+      # Comments
+    - comment:
+        start: "--"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "\\{-"
+        end: "-\\}"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - identifier.micro: "undefined"

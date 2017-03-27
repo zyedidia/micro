@@ -1,0 +1,13 @@
+filetype: mpd
+
+detect: 
+    filename: "mpd\\.conf$"
+
+rules:
+    - statement: "\\b(user|group|bind_to_address|host|port|plugin|name|type)\\b"
+    - statement: "\\b((music|playlist)_directory|(db|log|state|pid|sticker)_file)\\b"
+    - special: "^(input|audio_output|decoder)[[:space:]]*\\{|\\}"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"
