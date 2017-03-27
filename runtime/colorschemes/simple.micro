@@ -14,5 +14,12 @@ color-link line-number "yellow"
 color-link current-line-number "red"
 color-link gutter-error ",red"
 color-link gutter-warning "red"
-color-link cursor-line "white"
+#Cursor line causes readability issues. Disabled for now.
+#color-link cursor-line "white,black"
 color-link color-column "white"
+#No extended types. (bool in C)
+color-link type.extended "default"
+#No bracket highlighting.
+color-link symbol.brackets "default"
+#Color shebangs the comment color
+color-link preproc.shebang "comment"

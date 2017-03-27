@@ -12,6 +12,11 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * simple: this is the simplest colorscheme. It uses 16 colors which are
   set by your terminal
 
+* mc: A 16-color theme based on the look and feel of GNU Midnight Commander.
+  This will look great used in conjunction with Midnight Commander.
+  
+* nano: A 16-color theme loosely based on GNU nano's syntax highlighting.   
+  
 * monokai: this is the monokai colorscheme; you may recognize it as
   Sublime Text's default colorscheme. It requires true color to
   look perfect, but the 256 color approximation looks very good as well.
@@ -29,15 +34,47 @@ Micro comes with a number of colorschemes by default. Here is the list:
 * atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme.
   It requires true color to look good.
 
+* cmc-16: A very nice 16-color theme. Written by contributor CaptainMcClellan
+  (Collin Warren.) Licensed under the same license as the rest of the themes.
+
+* cmc-paper: Basically cmc-16, but on a white background. ( Actually light grey on most 
+  ANSI (16-color) terminals.)
+
+* cmc-tc: A true colour variant of the cmc theme. 
+  It requires true color to look its best. Use cmc-16 if your terminal doesn't support true color.
+
+* codeblocks: A colorscheme based on the Code::Blocks IDE's default syntax highlighting.
+
+* codeblocks-paper: Same as codeblocks, but on a white background. ( Actually light grey. )
+
+* github-tc: A colorscheme based on Github's syntax highlighting. Requires true color to look its best.
+
+* paper-tc: A nice minimalist theme with a light background, good for editing documents on.
+  Requires true color to look its best. Not to be confused with `-paper` suffixed themes.
+
+* geany: Colorscheme based on geany's default highlighting.
+
+* geany-alt-tc: Based on an alternate theme bundled with geany. 
+
+* flamepoint-tc: A fire inspired, high intensity true color theme written by CaptainMcClellan.
+  As with all the other `-tc` suffixed themes, it looks its best on a
+
 To enable one of these colorschemes just press CtrlE in micro and type `set colorscheme solarized`.
-(or whichever one you choose).
+(or whichever one you choose). You can also use `set colorscheme monochrome` if you'd prefer
+to have just the terminal's default foreground and background colors. 
+Note: This provides no syntax highlighting!
+
+See `help gimmickcolors` for a list of some true colour themes that are more 
+just for fun than for serious use. ( Though feel free if you want! )
 
 ---
+
+### Creating a Colorscheme
 
 Micro's colorschemes are also extremely simple to create. The default ones can be found
 [here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
 
-They are only about 18 lines in total.
+They are only about 18-30 lines in total.
 
 Basically to create the colorscheme you need to link highlight groups with actual colors.
 This is done using the `color-link` command.
@@ -84,7 +121,8 @@ If the user's terminal supports true color, then you can also specify colors exa
 their hex codes. If the terminal is not true color but micro is told to use a true color colorscheme
 it will attempt to map the colors to the available 256 colors.
 
-Generally colorschemes which require true color terminals to look good are marked with a `-tc` suffix.
+Generally colorschemes which require true color terminals to look good are marked with a `-tc` suffix
+and colorschemes which supply a white background are marked with a `-paper` suffix.
 
 ---
 
@@ -102,22 +140,74 @@ Here is a list of the colorscheme groups that you can use:
 * underlined
 * error
 * todo
-* statusline (color of the statusline)
-* indent-char (color of the character which indicates tabs if the option is enabled)
+* statusline ( Color of the statusline)
+* tabbar ( Color of the tabbar that lists open files.)
+* indent-char ( Color of the character which indicates tabs if the option is enabled)
 * line-number
 * gutter-error
 * gutter-warning
 * cursor-line
 * current-line-number
 * color-column
+* ignore
+* divider ( Color of the divider between vertical splits. )
 
-Colorschemes can be placed in the `~/.config/micro/colorschemes` directory to be used.
+Colorschemes must be placed in the `~/.config/micro/colorschemes` directory to be used.
+
+---
+
+In addition to the main colorscheme groups, there are subgroups that you can
+specify by adding `.subgroup` to the group. If you're creating your own
+custom syntax files, you can make use of your own subgroups.
+
+If micro can't match the subgroup, it'll default to the root group, so 
+it's safe and recommended to use subgroups in your custom syntax files.
+
+For example if `constant.string` is found in your colorscheme, micro will
+use that for highlighting strings. If it's not found, it will use constant 
+instead. Micro tries to match the largest set of groups it can find in the
+colorscheme definitions, so if, for examle `constant.bool.true` is found then
+micro will use that. If `constant.bool.true` is not found but `constant.bool`
+is found micro will use `constant.bool`. If not, it uses `constant`. 
+
+Here's a list of subgroups used in micro's built-in syntax files.
+
+* comment.bright ( Some filetypes have distinctions between types of comments.)
+* constant.bool
+* constant.bool.true
+* constant.bool.false
+* constant.number 
+* constant.specialChar
+* constant.string
+* constant.string.url 
+* identifier.class ( Also used for functions. )
+* identifier.macro
+* identifier.var
+* preproc.shebang ( The #! at the beginning of a file that tells the os what script interpreter to use. )
+* symbol.brackets ( {}()[] and sometimes <> )
+* symbol.operator ( Color operator symbols differently. )
+* symbol.tag ( For html tags, among other things.)
+* type.keyword ( If you want a special highlight for keywords like `private` )
+
+In the future, plugins may also be able to use color groups for styling.
 
 ### Syntax files
 
 The syntax files specify how to highlight certain languages.
 
+<<<<<<< HEAD
 Syntax files are specified in the yaml format.
+=======
+Micro's builtin syntax highlighting tries very hard to be sane, sensible
+and provide ample coverage of the meaningful elements of a language. Micro has
+syntax files built int for over 100 languages now. However, there may be 
+situations where you find Micro's highlighting to be insufficient or not to
+your liking. Good news is you can create syntax files (.micro extension), place them in 
+`~/.config/micro/syntax` and Micro will use those instead.
+
+The first statement in a syntax file will probably the syntax statement. This tells micro
+what language the syntax file is for and how to detect a file in that language.
+>>>>>>> master
 
 #### Filetype defintion
 
@@ -209,3 +299,7 @@ for html:
     rules:
         - include: "css"
 ```
+
+Note: The format of syntax files will be changing with the view refactor.
+If this help file still retains this note but the syntax files are yaml
+please open an issue.

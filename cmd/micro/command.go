@@ -326,6 +326,13 @@ func VSplit(args []string) {
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil && fileInfo.IsDir() {
+			messenger.Error(filename, " is a directory")
+			return
+		}
+
 		defer file.Close()
 
 		var buf *Buffer
@@ -349,6 +356,13 @@ func HSplit(args []string) {
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
 		file, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil && fileInfo.IsDir() {
+			messenger.Error(filename, " is a directory")
+			return
+		}
+
 		defer file.Close()
 
 		var buf *Buffer
@@ -382,10 +396,24 @@ func NewTab(args []string) {
 		filename := args[0]
 		home, _ := homedir.Dir()
 		filename = strings.Replace(filename, "~", home, 1)
-		file, _ := os.Open(filename)
+		file, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil && fileInfo.IsDir() {
+			messenger.Error(filename, " is a directory")
+			return
+		}
+
 		defer file.Close()
 
-		tab := NewTabFromView(NewView(NewBuffer(file, filename)))
+		var buf *Buffer
+		if err != nil {
+			buf = NewBuffer(strings.NewReader(""), filename)
+		} else {
+			buf = NewBuffer(file, filename)
+		}
+
+		tab := NewTabFromView(NewView(buf))
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
 		curTab = len(tabs) - 1

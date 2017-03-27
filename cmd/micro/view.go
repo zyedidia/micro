@@ -244,6 +244,13 @@ func (v *View) Open(filename string) {
 	home, _ := homedir.Dir()
 	filename = strings.Replace(filename, "~", home, 1)
 	file, err := os.Open(filename)
+	fileInfo, _ := os.Stat(filename)
+
+	if err == nil && fileInfo.IsDir() {
+		messenger.Error(filename, " is a directory")
+		return
+	}
+
 	defer file.Close()
 
 	var buf *Buffer
@@ -718,12 +725,6 @@ func (v *View) DisplayView() {
 
 		screenX = v.x
 
-		if v.x != 0 {
-			// Draw the split divider
-			screen.SetContent(screenX, yOffset+visualLineN, '|', nil, defStyle.Reverse(true))
-			screenX++
-		}
-
 		// If there are gutter messages we need to display the '>>' symbol here
 		if hasGutterMessages {
 			// msgOnLine stores whether or not there is a gutter message on this line in particular
@@ -891,8 +892,12 @@ func (v *View) DisplayView() {
 	}
 
 	if v.x != 0 && visualLineN < v.Height {
+		dividerStyle := defStyle
+		if style, ok := colorscheme["divider"]; ok {
+			dividerStyle = style
+		}
 		for i := visualLineN + 1; i < v.Height; i++ {
-			screen.SetContent(v.x, yOffset+i, '|', nil, defStyle.Reverse(true))
+			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
 		}
 	}
 }
