@@ -1,5 +1,6 @@
 color-link comment "bold brightgreen"
 color-link constant "cyan"
+color-link constant.specialChar "red"
 color-link identifier "blue"
 color-link statement "green"
 color-link symbol "green"
