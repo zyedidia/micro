@@ -9,12 +9,18 @@ import (
 	"gopkg.in/yaml.v2"
 )
 
-var Groups map[string]uint8
-var numGroups uint8
+// A Group represents a syntax group
+type Group uint8
 
-func GetGroup(n uint8) string {
+// Groups contains all of the groups that are defined
+// You can access them in the map via their string name
+var Groups map[string]Group
+var numGroups Group
+
+// String returns the group name attached to the specific group
+func (g Group) String() string {
 	for k, v := range Groups {
-		if v == n {
+		if v == g {
 			return k
 		}
 	}
@@ -28,40 +34,40 @@ func GetGroup(n uint8) string {
 type Def struct {
 	FileType string
 	ftdetect []*regexp.Regexp
-	rules    *Rules
+	rules    *rules
 }
 
 // A Pattern is one simple syntax rule
 // It has a group that the rule belongs to, as well as
 // the regular expression to match the pattern
-type Pattern struct {
-	group uint8
+type pattern struct {
+	group Group
 	regex *regexp.Regexp
 }
 
-// Rules defines which patterns and regions can be used to highlight
+// rules defines which patterns and regions can be used to highlight
 // a filetype
-type Rules struct {
-	regions  []*Region
-	patterns []*Pattern
+type rules struct {
+	regions  []*region
+	patterns []*pattern
 	includes []string
 }
 
-// A Region is a highlighted region (such as a multiline comment, or a string)
+// A region is a highlighted region (such as a multiline comment, or a string)
 // It belongs to a group, and has start and end regular expressions
-// A Region also has rules of its own that only apply when matching inside the
+// A region also has rules of its own that only apply when matching inside the
 // region and also rules from the above region do not match inside this region
 // Note that a region may contain more regions
-type Region struct {
-	group  uint8
-	parent *Region
+type region struct {
+	group  Group
+	parent *region
 	start  *regexp2.Regexp
 	end    *regexp2.Regexp
-	rules  *Rules
+	rules  *rules
 }
 
 func init() {
-	Groups = make(map[string]uint8)
+	Groups = make(map[string]Group)
 }
 
 // ParseDef parses an input syntax file into a highlight Def
@@ -118,6 +124,8 @@ func ParseDef(input []byte) (s *Def, err error) {
 	return s, err
 }
 
+// ResolveIncludes will sort out the rules for including other filetypes
+// You should call this after parsing all the Defs
 func ResolveIncludes(defs []*Def) {
 	for _, d := range defs {
 		resolveIncludesInDef(defs, d)
@@ -139,7 +147,7 @@ func resolveIncludesInDef(defs []*Def, d *Def) {
 	}
 }
 
-func resolveIncludesInRegion(defs []*Def, region *Region) {
+func resolveIncludesInRegion(defs []*Def, region *region) {
 	for _, lang := range region.rules.includes {
 		for _, searchDef := range defs {
 			if lang == searchDef.FileType {
@@ -154,8 +162,8 @@ func resolveIncludesInRegion(defs []*Def, region *Region) {
 	}
 }
 
-func parseRules(input []interface{}, curRegion *Region) (*Rules, error) {
-	rules := new(Rules)
+func parseRules(input []interface{}, curRegion *region) (*rules, error) {
+	rules := new(rules)
 
 	for _, v := range input {
 		rule := v.(map[interface{}]interface{})
@@ -179,10 +187,10 @@ func parseRules(input []interface{}, curRegion *Region) (*Rules, error) {
 						Groups[groupStr] = numGroups
 					}
 					groupNum := Groups[groupStr]
-					rules.patterns = append(rules.patterns, &Pattern{groupNum, r})
+					rules.patterns = append(rules.patterns, &pattern{groupNum, r})
 				}
 			case map[interface{}]interface{}:
-				// Region
+				// region
 				region, err := parseRegion(group.(string), object, curRegion)
 				if err != nil {
 					return nil, err
@@ -197,10 +205,10 @@ func parseRules(input []interface{}, curRegion *Region) (*Rules, error) {
 	return rules, nil
 }
 
-func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *Region) (*Region, error) {
+func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (*region, error) {
 	var err error
 
-	region := new(Region)
+	region := new(region)
 	if _, ok := Groups[group]; !ok {
 		numGroups++
 		Groups[group] = numGroups

@@ -2,7 +2,6 @@ package main
 
 import (
 	"github.com/mattn/go-runewidth"
-	"github.com/zyedidia/micro/cmd/micro/highlight"
 	"github.com/zyedidia/tcell"
 )
 
@@ -24,7 +23,7 @@ func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsiz
 		// width := StringWidth(str[:i], tabsize)
 
 		if group, ok := buf.Match(lineN)[charPos]; ok {
-			s := GetColor(highlight.GetGroup(group))
+			s := GetColor(group.String())
 			style = &s
 		}
 
@@ -123,7 +122,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 				break
 			}
 			if group, ok := buf.Match(lineN)[colN]; ok {
-				curStyle = GetColor(highlight.GetGroup(group))
+				curStyle = GetColor(group.String())
 			}
 
 			char := line[colN]
@@ -186,7 +185,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 		}
 		if group, ok := buf.Match(lineN)[len(line)]; ok {
-			curStyle = GetColor(highlight.GetGroup(group))
+			curStyle = GetColor(group.String())
 		}
 
 		// newline
