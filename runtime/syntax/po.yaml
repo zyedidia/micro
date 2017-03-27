@@ -1,0 +1,12 @@
+filetype: po
+
+detect: 
+    filename: "\\.pot?$"
+
+rules:
+    - preproc: "\\b(msgid|msgstr)\\b"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - special: "\\\\.?"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

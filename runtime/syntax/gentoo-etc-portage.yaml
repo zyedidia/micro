@@ -1,0 +1,23 @@
+filetype: etc-portage
+
+detect:
+    filename: "\\.(keywords|mask|unmask|use)$"
+
+rules:
+    # Use flags:
+    - constant.bool.false: "[[:space:]]+\\+?[a-zA-Z0-9_-]+"
+    - constant.bool.true: "[[:space:]]+-[a-zA-Z0-9_-]+"
+    # Likely version numbers:
+    - special: "-[[:digit:]].*([[:space:]]|$)"
+    # Accepted arches:
+    - identifier.class: "[~-]?\\b(alpha|amd64|arm|hppa|ia64|mips|ppc|ppc64|s390|sh|sparc|x86|x86-fbsd)\\b"
+    - identifier.class: "[[:space:]][~-]?\\*"
+    # Categories:
+    - statement: "^[[:space:]]*.*/"
+    # Masking regulators:
+    - symbol: "^[[:space:]]*(=|~|<|<=|=<|>|>=|=>)"
+    # Comments:
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []

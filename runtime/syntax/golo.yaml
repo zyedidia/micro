@@ -1,0 +1,71 @@
+filetype: golo
+
+detect:
+    filename: "\\.golo$"
+
+rules:
+    - type: "\\b(function|fun|)\\b"
+    - type: "\\b(struct|DynamicObject|union|AdapterFabric|Adapter|DynamicVariable|Observable)\\b"
+    - type: "\\b(list|set|array|vector|tuple|map)\\b"
+    - type: "\\b(Ok|Error|Empty|None|Some|Option|Result|Result.ok|Result.fail|Result.error|Result.empty|Optional.empty|Optional.of)\\b"
+
+    - identifier.class: "\\b(augment|pimp)\\b"
+    - identifier.class: "\\b(interfaces|implements|extends|overrides|maker|newInstance)\\b"
+    - identifier.class: "\\b(isEmpty|isNone|isPresent|isSome|iterator|flattened|toList|flatMap|`and|orElseGet|`or|toResult|apply|either)\\b"
+    - identifier.class: "\\b(result|option|trying|raising|nullify|catching)\\b"
+    - identifier.class: "\\b(promise|setFuture|failedFuture|all|any)\\b"
+    - identifier.class: "\\b(initialize|initializeWithinThread|start|future|fallbackTo|onSet|onFail|cancel|enqueue)\\b"
+    - identifier.class: "\\b(println|print|raise|readln|readPassword|secureReadPassword|requireNotNull|require|newTypedArray|range|reversedRange|mapEntry|asInterfaceInstance|asFunctionalInterface|isClosure|fileToText|textToFile|fileExists|currentDir|sleep|uuid|isArray|arrayTypeOf|charValue|intValue|longValue|doubleValue|floatValue|removeByIndex|box)\\b"
+    - identifier.class: "\\b(likelySupported|reset|bold|underscore|blink|reverse_video|concealed|fg_black|fg_red|fg_green|fg_yellow|fg_blue|fg_magenta|fg_cyan|fg_white|bg_black|bg_red|bg_green|bg_yellow|bg_blue|bg_magenta|bg_cyan|bg_white|cursor_position|cursor_save_position|cursor_restore_position|cursor_up|cursor_down|cursor_forward|cursor_backward|erase_display|erase_line)\\b"
+    - identifier.class: "\\b(emptyList|cons|lazyList|fromIter|generator|repeat|iterate)\\b"
+    - identifier.class: "\\b(asLazyList|foldl|foldr|take|takeWhile|drop|dropWhile|subList)\\b"
+    - identifier.class: "\\b(import)\\b"
+    - identifier.class: "\\b(module)\\b"
+    - identifier.class: "\\b(JSON)\\b"
+    - identifier.class: "\\b(stringify|parse|toJSON|toDynamicObject|updateFromJSON)\\b"
+    - identifier.class: "\\b(newInstance|define|getKey|getValue|properties|fallback)\\b"
+    - identifier.class: "\\b(times|upTo|downTo)\\b"
+    - identifier.class: "\\b(format|toInt|toInteger|toDouble|toFloat|toLong)\\b"
+    - identifier.class: "\\b(head|tail|isEmpty|reduce|each|count|exists)\\b"
+    - identifier.class: "\\b(newWithSameType|destruct|append|add|addIfAbsent|prepend|insert|last|unmodifiableView|find|filter|map|join|reverse|reversed|order|ordered|removeAt|include|exclude|remove|delete|has|contains|getOrElse|toArray)\\b"
+    - identifier.class: "\\b(add|addTo|succ|pred|mul|neg|sub|rsub|div|rdiv|mod|rmod|pow|rpow|str|lt|gt|eq|ne|ge|le|`and|`or|`not|xor|even|odd|contains|isEmpty|`is|`isnt|`oftype|`orIfNull|fst|snd|getitem|setitem|getter|id|const|False|True|Null|curry|uncurry|unary|spreader|varargs|swapArgs|swapCurry|swapCouple|swap|invokeWith|pipe|compose|io|andThen|until|recur|cond)\\b"
+    - identifier.class: "\\b(toUpperCase|equals|startsWith)\\b"
+
+    - statement: "\\b(if|else|then|when|case|match|otherwise)\\b"
+    - special: "\\b(with|break|continue|return)\\b"
+    - error: "\\b(try|catch|finally|throw)\\b"
+    - identifier: "\\b(super|this|let|var|local)\\b"
+    - symbol.brackets: "[(){}]|\\[|\\]"
+    - statement: "\\b(for|while|foreach|in)\\b"
+    - constant: "\\b(and|in|is|not|or|isnt|orIfNull)\\b"
+
+    - constant.bool: "\\b(true|false)\\b"
+    - constant:  "\\b(null|undefined)\\b"
+
+    - symbol.operator: "[\\-+/*=<>!~%&|^]|:="
+    - constant.number:   "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "(?<!\\\\)'"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "----"
+        end: "----"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

@@ -1,0 +1,21 @@
+filetype: pov
+
+detect: 
+    filename: "\\.(pov|POV|povray|POVRAY)$"
+
+rules:
+    - preproc: "^[[:space:]]*#[[:space:]]*(declare)"
+    - statement: "\\b(sphere|cylinder|translate|matrix|rotate|scale)\\b"
+    - statement: "\\b(orthographic|location|up|right|direction|clipped_by)\\b"
+    - statement: "\\b(fog_type|fog_offset|fog_alt|rgb|distance|transform)\\b"
+    - identifier: "^\\b(texture)\\b"
+    - identifier: "\\b(light_source|background)\\b"
+    - identifier: "\\b(fog|object|camera)\\b"
+    - symbol.operator: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|!|=|&|\\|)"
+    - special: "\\b(union|group|subgroup)\\b"
+    - comment: "//.*"
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules: []
+

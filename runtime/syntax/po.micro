@@ -1,8 +1,0 @@
-syntax "po" "\.pot?$"
-
-color preproc  "\b(msgid|msgstr)\b"
-color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color special   "\\.?"
-color comment "(^|[[:space:]])#([^{].*)?$"
-color indent-char.whitespace "[[:space:]]+$"
-color indent-char "	+ +| +	+"

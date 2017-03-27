@@ -1,0 +1,37 @@
+filetype: clojure
+
+detect:
+    filename: "\\.(clj)$"
+
+rules:
+
+    # Constants
+    - constant.bool: "\\b(true|false)\\b"
+    - constant.macro: "\\b(nil)\\b"
+      # Valid numbers
+    - constant.number: "[\\-]?[0-9]+?\\b"
+    - constant.number: "0x[0-9][A-Fa-f]+?\\b"
+    - constant.number: "[\\-]?(3[0-6]|2[0-9]|1[0-9]|[2-9])r[0-9A-Z]+?\\b"
+      # Invalid numbers
+    - error: "[\\-]?([4-9][0-9]|3[7-9]|1|0)r[0-9A-Z]+?\\b"
+
+      # Symbols
+    - symbol.operator: "[=>+\\-*/'?]"
+
+      # Types/casting
+    - type: "\\b(byte|short|(big)?int(eger)?|long|float|num|bigdec|rationalize)\\b"
+
+      # String highlighting
+    - constant.string:
+        start: "\""
+        end: "(?<!\\\\)\""
+        rules:
+            - constant.specialChar: "(\\\\u[0-9A-fa-f]{4,4}|\\\\newline|\\\\space|\\\\tab|\\\\formfeed|\\\\backspace|\\\\return|\\\\.)"
+
+      # Comments
+    - comment:
+        start: ";"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

@@ -16,6 +16,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -44,8 +45,8 @@ type Buffer struct {
 
 	NumLines int
 
-	// Syntax highlighting rules
-	rules []SyntaxRule
+	syntaxDef   *highlight.Def
+	highlighter *highlight.Highlighter
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -96,7 +97,6 @@ func NewBuffer(reader io.Reader, path string) *Buffer {
 	b.EventHandler = NewEventHandler(b)
 
 	b.Update()
-	b.FindFileType()
 	b.UpdateRules()
 
 	if _, err := os.Stat(configDir + "/buffers/"); os.IsNotExist(err) {
@@ -185,12 +185,14 @@ func (b *Buffer) GetName() string {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.rules = GetRules(b)
-}
-
-// FindFileType identifies this buffer's filetype based on the extension or header
-func (b *Buffer) FindFileType() {
-	b.Settings["filetype"] = FindFileType(b)
+	b.syntaxDef = highlight.DetectFiletype(syntaxDefs, b.Path, []byte(b.Line(0)))
+	if b.highlighter == nil || b.Settings["filetype"].(string) != b.syntaxDef.FileType {
+		b.Settings["filetype"] = b.syntaxDef.FileType
+		b.highlighter = highlight.NewHighlighter(b.syntaxDef)
+		if b.Settings["syntax"].(bool) {
+			b.highlighter.HighlightStates(b)
+		}
+	}
 }
 
 // FileType returns the buffer's filetype
@@ -280,7 +282,6 @@ func (b *Buffer) Serialize() error {
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
-	b.FindFileType()
 	b.UpdateRules()
 	dir, _ := homedir.Dir()
 	b.Path = strings.Replace(filename, "~", dir, 1)
@@ -317,7 +318,6 @@ func (b *Buffer) SaveAs(filename string) error {
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
 // with tee to use sudo so the user doesn't have to reopen micro with sudo
 func (b *Buffer) SaveAsWithSudo(filename string) error {
-	b.FindFileType()
 	b.UpdateRules()
 	b.Path = filename
 
@@ -388,7 +388,7 @@ func (b *Buffer) Start() Loc {
 
 // End returns the location of the last character in the buffer
 func (b *Buffer) End() Loc {
-	return Loc{utf8.RuneCount(b.lines[b.NumLines-1]), b.NumLines - 1}
+	return Loc{utf8.RuneCount(b.lines[b.NumLines-1].data), b.NumLines - 1}
 }
 
 // RuneAt returns the rune at a given location in the buffer
@@ -405,7 +405,11 @@ func (b *Buffer) Line(n int) string {
 	if n >= len(b.lines) {
 		return ""
 	}
-	return string(b.lines[n])
+	return string(b.lines[n].data)
+}
+
+func (b *Buffer) LinesNum() int {
+	return len(b.lines)
 }
 
 // Lines returns an array of strings containing the lines from start to end
@@ -413,7 +417,7 @@ func (b *Buffer) Lines(start, end int) []string {
 	lines := b.lines[start:end]
 	var slice []string
 	for _, line := range lines {
-		slice = append(slice, string(line))
+		slice = append(slice, string(line.data))
 	}
 	return slice
 }
@@ -432,7 +436,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	if end == len(b.lines) {
 		b.Insert(
 			Loc{
-				utf8.RuneCount(b.lines[end-1]),
+				utf8.RuneCount(b.lines[end-1].data),
 				end - 1,
 			},
 			"\n"+b.Line(start-1),
@@ -466,4 +470,12 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 		Loc{0, end},
 		Loc{0, end + 1},
 	)
+}
+
+// ClearMatches clears all of the syntax highlighting for this buffer
+func (b *Buffer) ClearMatches() {
+	for i := range b.lines {
+		b.SetMatch(i, nil)
+		b.SetState(i, nil)
+	}
 }

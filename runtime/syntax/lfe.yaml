@@ -1,0 +1,17 @@
+filetype: lfe
+
+detect: 
+    filename: "lfe$|\\.lfe$"
+
+rules:
+    - symbol.brackets: "\\(|\\)"
+    - type: "defun|define-syntax|define|defmacro|defmodule|export"
+    - constant: "\\ [A-Za-z][A-Za-z0-9_-]+\\ "
+    - symbol.operator: "\\(([\\-+*/<>]|<=|>=)|'"
+    - constant.number: "\\b[0-9]+\\b"
+    - constant.string: "\\\"(\\\\.|[^\"])*\\\""
+    - special: "['|`][A-Za-z][A-Za-z0-9_\\-]+"
+    - constant.specialChar: "\\\\.?"
+    - comment: "(^|[[:space:]]);.*"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

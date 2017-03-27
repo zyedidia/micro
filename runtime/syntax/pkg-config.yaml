@@ -1,0 +1,12 @@
+filetype: pc
+
+detect: 
+    filename: "\\.pc$"
+
+rules:
+    - preproc: "^(Name|Description|URL|Version|Conflicts|Cflags):"
+    - preproc: "^(Requires|Libs)(\\.private)?:"
+    - symbol.operator: "="
+    - identifier.var: "\\$\\{[A-Za-z_][A-Za-z0-9_]*\\}"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

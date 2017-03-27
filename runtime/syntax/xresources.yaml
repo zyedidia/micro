@@ -1,0 +1,14 @@
+filetype: xresources
+
+detect: 
+    filename: "X(defaults|resources)$"
+
+rules:
+    - special: "^[[:alnum:]]+\\*"
+    - identifier.var: "\\*[[:alnum:]]+\\:"
+    - constant.number: "\\b[0-9]+\\b"
+    - symbol.operator: "[*:=]"
+    - constant.bool: "\\b(true|false)\\b"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

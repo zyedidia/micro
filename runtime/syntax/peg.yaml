@@ -1,0 +1,16 @@
+filetype: peg
+
+detect: 
+    filename: "\\.l?peg$"
+
+rules:
+    - identifier: "^[[:space:]]*[A-Za-z][A-Za-z0-9_]*[[:space:]]*<-"
+    - constant.number: "\\^[+-]?[0-9]+"
+    - symbol.operator: "[-+*?^/!&]|->|<-|=>"
+    - identifier.var: "%[A-Za-z][A-Za-z0-9_]*"
+    - special: "\\[[^]]*\\]"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - comment: "(^|[[:space:]])\\-\\-.*$"
+    - todo: "TODO:?"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "	+ +| +	+"

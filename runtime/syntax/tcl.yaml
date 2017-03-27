@@ -1,0 +1,18 @@
+filetype: tcl
+
+detect: 
+    filename: "\\.tcl$"
+    header: "^#!.*/(env +)?tclsh( |$)"
+
+rules:
+    - statement: "\\b(after|append|array|auto_execok|auto_import|auto_load|auto_load_index|auto_qualify|binary|break|case|catch|cd|clock|close|concat|continue|else|encoding|eof|error|eval|exec|exit|expr|fblocked|fconfigure|fcopy|file|fileevent|flush|for|foreach|format|gets|glob|global|history|if|incr|info|interp|join|lappend|lindex|linsert|list|llength|load|lrange|lreplace|lsearch|lset|lsort|namespace|open|package|pid|puts|pwd|read|regexp|regsub|rename|return|scan|seek|set|socket|source|split|string|subst|switch|tclLog|tell|time|trace|unknown|unset|update|uplevel|upvar|variable|vwait|while)\\b"
+    - statement: "\\b(array anymore|array donesearch|array exists|array get|array names|array nextelement|array set|array size|array startsearch|array statistics|array unset)\\b"
+    - statement: "\\b(string bytelength|string compare|string equal|string first|string index|string is|string last|string length|string map|string match|string range|string repeat|string replace|string to|string tolower|string totitle|string toupper|string trim|string trimleft|string trimright|string will|string wordend|string wordstart)\\b"
+    - statement: "\\b(alarm|auto_load_pkg|bsearch|catclose|catgets|catopen|ccollate|cconcat|cequal|chgrp|chmod|chown|chroot|cindex|clength|cmdtrace|commandloop|crange|csubstr|ctoken|ctype|dup|echo|execl|fcntl|flock|fork|fstat|ftruncate|funlock|host_info|id|infox|keyldel|keylget|keylkeys|keylset|kill|lassign|lcontain|lempty|lgets|link|lmatch|loadlibindex|loop|lvarcat|lvarpop|lvarpush|max|min|nice|pipe|profile|random|readdir|replicate|scancontext|scanfile|scanmatch|select|server_accept|server_create|signal|sleep|sync|system|tclx_findinit|tclx_fork|tclx_load_tndxs|tclx_sleep|tclx_system|tclx_wait|times|translit|try_eval|umask|wait)\\b"
+    - identifier.class: "proc[[:space:]]|(\\{|\\})"
+    - symbol.operator: "(\\(|\\)|\\;|`|\\\\|\\$|<|>|!|=|&|\\|)"
+    - constant.number: "\\b[0-9]+(\\.[0-9]+)?\\b"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - identifier.var: "\\$\\{?[0-9A-Z_!@#$*?-]+\\}?"
+    - comment: "(^|;)[[:space:]]*#.*"
+    - indent-char.whitespace: "[[:space:]]+$"

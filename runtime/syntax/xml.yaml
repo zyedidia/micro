@@ -1,0 +1,16 @@
+filetype: xml
+
+detect:
+    filename: "\\.(xml|sgml?|rng|plist)$"
+
+rules:
+    - identifier: "<.*?>"
+    - comment:
+        start: "<!DOCTYPE"
+        end: "[/]?>"
+        rules: []
+    - comment: 
+        start: "<!--"
+        end: "-->"
+        rules: []
+    - special: "&[^;]*;"

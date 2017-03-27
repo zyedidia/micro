@@ -1,0 +1,16 @@
+filetype: nanorc
+
+detect: 
+    filename: "\\.?nanorc$"
+
+rules:
+    - default: "(?i)^[[:space:]]*((un)?set|include|syntax|i?color).*$"
+    - type: "(?i)^[[:space:]]*(set|unset)[[:space:]]+(autoindent|backup|backupdir|backwards|boldtext|brackets|casesensitive|const|cut|fill|historylog|matchbrackets|morespace|mouse|multibuffer|noconvert|nofollow|nohelp|nonewlines|nowrap|operatingdir|preserve|punct)\\>|^[[:space:]]*(set|unset)[[:space:]]+(quickblank|quotestr|rebinddelete|rebindkeypad|regexp|smarthome|smooth|speller|suspend|tabsize|tabstospaces|tempfile|undo|view|whitespace|wordbounds)\\b"
+    - preproc: "(?i)^[[:space:]]*(set|unset|include|syntax|header)\\b"
+    - constant.bool.true: "(?i)(set)\\b"
+    - constant.bool.false: "(?i)(unset)\\b"
+    - identifier: "(?i)^[[:space:]]*(i)?color[[:space:]]*(bright)?(white|black|red|blue|green|yellow|magenta|cyan)?(,(white|black|red|blue|green|yellow|magenta|cyan))?\\b"
+    - special: "(?i)^[[:space:]]*(i)?color\\b|\\b(start|end)="
+    - constant.string: "\"(\\\\.|[^\"])*\""
+    - comment: "^[[:space:]]*#.*$"
+    - comment.bright: "^[[:space:]]*##.*$"

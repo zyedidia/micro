@@ -1,0 +1,26 @@
+filetype: glsl
+
+detect:
+    filename: "\\.(frag|vert|fp|vp|glsl)$"
+
+rules:
+    - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
+    - type: "\\b(void|bool|bvec2|bvec3|bvec4|int|ivec2|ivec3|ivec4|float|vec2|vec3|vec4|mat2|mat3|mat4|struct|sampler1D|sampler2D|sampler3D|samplerCUBE|sampler1DShadow|sampler2DShadow)\\b"
+    - identifier: "\\bgl_(DepthRangeParameters|PointParameters|MaterialParameters|LightSourceParameters|LightModelParameters|LightModelProducts|LightProducts|FogParameters)\\b"
+    - statement: "\\b(const|attribute|varying|uniform|in|out|inout|if|else|return|discard|while|for|do)\\b"
+    - statement: "\\b(break|continue)\\b"
+    - constant.bool: "\\b(true|false)\\b"
+    - symbol.operator: "[-+/*=<>?:!~%&|^]"
+    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b"
+
+    - comment: 
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "TODO:?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "TODO:?"

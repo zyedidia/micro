@@ -1,8 +1,0 @@
-syntax "dot" "\.(dot|gv)$"
-
-color type   "\b(digraph|edge|graph|node|subgraph)\b"
-color statement "\b(arrow(head|size|tail)|(bg|fill|font)?color|center|constraint|decorateP|dir|distortion|font(name|size)|head(clip|label)|height|label(angle|distance|font(color|name|size))?|layer(s)?|margin|mclimit|minlen|name|nodesep|nslimit|ordering|orientation|page(dir)?|peripheries|port_label_distance|rank(dir|sep)?|ratio|regular|rotate|same(head|tail)|shape(file)?|sides|size|skew|style|tail(clip|label)|URL|weight|width)\b"
-color symbol  "=|->|--"
-color constant.string ""(\\.|[^"])*"|'(\\.|[^'])*'"
-color comment "(^|[[:space:]])//.*"
-color comment start="/\*" end="\*/"
