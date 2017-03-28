@@ -26,7 +26,7 @@ rules:
     # Character literals
     - constant.string:
         start: "'"
-        end: "(?<!\\\\)'"
+        end: "'"
         rules:
             - constant.specialChar: "\\\\."
     # Keywords
@@ -52,13 +52,13 @@ rules:
     # DoubleQuotedString
     - constant.string: 
         start: "\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules: 
             - constant.specialChar: "\\\\."
     # WysiwygString
     - constant.string:
         start: "r\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules:
             - constant.specialChar: "\\\\."
     - constant.string:
@@ -69,7 +69,7 @@ rules:
     # HexString
     - constant.string:
         start: "x\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules:
             - constant.specialChar: "\\\\."
     # DelimitedString

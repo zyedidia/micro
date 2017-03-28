@@ -3,9 +3,20 @@ package highlight
 import (
 	"regexp"
 	"strings"
-
-	"github.com/dlclark/regexp2"
+	"unicode/utf8"
 )
+
+// RunePos returns the rune index of a given byte index
+// This could cause problems if the byte index is between code points
+func runePos(p int, str string) int {
+	if p < 0 {
+		return 0
+	}
+	if p >= len(str) {
+		return utf8.RuneCountInString(str)
+	}
+	return utf8.RuneCountInString(str[:p])
+}
 
 func combineLineMatch(src, dst LineMatch) LineMatch {
 	for k, v := range src {
@@ -21,7 +32,7 @@ func combineLineMatch(src, dst LineMatch) LineMatch {
 }
 
 // A State represents the region at the end of a line
-type State *Region
+type State *region
 
 // LineStates is an interface for a buffer-like object which can also store the states and matches for every line
 type LineStates interface {
@@ -34,22 +45,22 @@ type LineStates interface {
 
 // A Highlighter contains the information needed to highlight a string
 type Highlighter struct {
-	lastRegion *Region
-	def        *Def
+	lastRegion *region
+	Def        *Def
 }
 
 // NewHighlighter returns a new highlighter from the given syntax definition
 func NewHighlighter(def *Def) *Highlighter {
 	h := new(Highlighter)
-	h.def = def
+	h.Def = def
 	return h
 }
 
 // LineMatch represents the syntax highlighting matches for one line. Each index where the coloring is changed is marked with that
 // color's group (represented as one byte)
-type LineMatch map[int]uint8
+type LineMatch map[int]Group
 
-func findIndex(regex *regexp2.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
+func findIndex(regex *regexp.Regexp, skip []*regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -61,11 +72,30 @@ func findIndex(regex *regexp2.Regexp, str []rune, canMatchStart, canMatchEnd boo
 			return nil
 		}
 	}
-	match, _ := regex.FindStringMatch(string(str))
+
+	var strbytes []byte
+	if skip != nil && len(skip) > 0 {
+		for _, r := range skip {
+			if r != nil {
+				strbytes = r.ReplaceAllFunc([]byte(string(str)), func(match []byte) []byte {
+					res := make([]byte, len(match))
+					// for i := 0; i < len(match); i++ {
+					//
+					// }
+					return res
+				})
+			}
+		}
+	} else {
+		strbytes = []byte(string(str))
+	}
+
+	match := regex.FindIndex(strbytes)
 	if match == nil {
 		return nil
 	}
-	return []int{match.Index, match.Index + match.Length}
+	// return []int{match.Index, match.Index + match.Length}
+	return []int{runePos(match[0], string(str)), runePos(match[1], string(str))}
 }
 
 func findAllIndex(regex *regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) [][]int {
@@ -80,51 +110,65 @@ func findAllIndex(regex *regexp.Regexp, str []rune, canMatchStart, canMatchEnd b
 			return nil
 		}
 	}
-	return regex.FindAllIndex([]byte(string(str)), -1)
+	matches := regex.FindAllIndex([]byte(string(str)), -1)
+	for i, m := range matches {
+		matches[i][0] = runePos(m[0], string(str))
+		matches[i][1] = runePos(m[1], string(str))
+	}
+	return matches
 }
 
-func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []rune, region *Region, statesOnly bool) LineMatch {
+func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []rune, curRegion *region, statesOnly bool) LineMatch {
 	// highlights := make(LineMatch)
 
 	if start == 0 {
 		if !statesOnly {
-			highlights[0] = region.group
+			highlights[0] = curRegion.group
 		}
 	}
 
-	loc := findIndex(region.end, line, start == 0, canMatchEnd)
+	skips := make([]*regexp.Regexp, len(curRegion.rules.patterns)+1)
+	for i := range skips {
+		if i != len(skips)-1 {
+			skips[i] = curRegion.rules.patterns[i].regex
+		} else {
+			skips[i] = curRegion.skip
+		}
+	}
+	loc := findIndex(curRegion.end, skips, line, start == 0, canMatchEnd)
 	if loc != nil {
 		if !statesOnly {
-			highlights[start+loc[1]-1] = region.group
+			highlights[start+loc[1]-1] = curRegion.group
 		}
-		if region.parent == nil {
+		if curRegion.parent == nil {
 			if !statesOnly {
 				highlights[start+loc[1]] = 0
-				h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], region, statesOnly)
+				h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], curRegion, statesOnly)
 			}
 			h.highlightEmptyRegion(highlights, start+loc[1], canMatchEnd, lineNum, line[loc[1]:], statesOnly)
 			return highlights
 		}
 		if !statesOnly {
-			highlights[start+loc[1]] = region.parent.group
-			h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], region, statesOnly)
+			highlights[start+loc[1]] = curRegion.parent.group
+			h.highlightRegion(highlights, start, false, lineNum, line[:loc[0]], curRegion, statesOnly)
 		}
-		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, line[loc[1]:], region.parent, statesOnly)
+		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, line[loc[1]:], curRegion.parent, statesOnly)
 		return highlights
 	}
 
 	if len(line) == 0 || statesOnly {
 		if canMatchEnd {
-			h.lastRegion = region
+			h.lastRegion = curRegion
 		}
 
 		return highlights
 	}
 
 	firstLoc := []int{len(line), 0}
-	var firstRegion *Region
-	for _, r := range region.rules.regions {
-		loc := findIndex(r.start, line, start == 0, canMatchEnd)
+
+	var firstRegion *region
+	for _, r := range curRegion.rules.regions {
+		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
 				firstLoc = loc
@@ -134,17 +178,17 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 	}
 	if firstLoc[0] != len(line) {
 		highlights[start+firstLoc[0]] = firstRegion.group
-		h.highlightRegion(highlights, start, false, lineNum, line[:firstLoc[0]], region, statesOnly)
+		h.highlightRegion(highlights, start, false, lineNum, line[:firstLoc[0]], curRegion, statesOnly)
 		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, line[firstLoc[1]:], firstRegion, statesOnly)
 		return highlights
 	}
 
-	fullHighlights := make([]uint8, len([]rune(string(line))))
+	fullHighlights := make([]Group, len([]rune(string(line))))
 	for i := 0; i < len(fullHighlights); i++ {
-		fullHighlights[i] = region.group
+		fullHighlights[i] = curRegion.group
 	}
 
-	for _, p := range region.rules.patterns {
+	for _, p := range curRegion.rules.patterns {
 		matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
 		for _, m := range matches {
 			for i := m[0]; i < m[1]; i++ {
@@ -161,7 +205,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 	}
 
 	if canMatchEnd {
-		h.lastRegion = region
+		h.lastRegion = curRegion
 	}
 
 	return highlights
@@ -176,9 +220,9 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	}
 
 	firstLoc := []int{len(line), 0}
-	var firstRegion *Region
-	for _, r := range h.def.rules.regions {
-		loc := findIndex(r.start, line, start == 0, canMatchEnd)
+	var firstRegion *region
+	for _, r := range h.Def.rules.regions {
+		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
 				firstLoc = loc
@@ -203,8 +247,8 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 		return highlights
 	}
 
-	fullHighlights := make([]uint8, len(line))
-	for _, p := range h.def.rules.patterns {
+	fullHighlights := make([]Group, len(line))
+	for _, p := range h.Def.rules.patterns {
 		matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
 		for _, m := range matches {
 			for i := m[0]; i < m[1]; i++ {

@@ -9,7 +9,7 @@ rules:
     - statement: "\\b(def|object|case|trait|lazy|implicit|abstract|class|extends|final|implements|import|instanceof|interface|native|package|private|protected|public|static|strictfp|super|synchronized|throws|volatile|sealed)\\b"
     - constant.string:
         start: "\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules:
             - constant.specialChar: "\\\\."
     - constant: "\\b(true|false|null)\\b"

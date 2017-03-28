@@ -15,7 +15,7 @@ rules:
         rules: []
     - constant.string:
         start: "\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules:
             - constant.specialChar: "\\\\."
     - constant.number: "#[0-9 A-F a-f]+"
