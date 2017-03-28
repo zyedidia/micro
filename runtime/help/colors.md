@@ -5,7 +5,7 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 - How to create colorschemes and use them
 - How to create syntax files to add to the list of languages micro can highlight
 
-### Colorschemes
+## Colorschemes
 
 Micro comes with a number of colorschemes by default. Here is the list:
 
@@ -191,13 +191,10 @@ Here's a list of subgroups used in micro's built-in syntax files.
 
 In the future, plugins may also be able to use color groups for styling.
 
-### Syntax files
+## Syntax files
 
-The syntax files specify how to highlight certain languages.
+The syntax files is written in yaml-format and specify how to highlight languages.
 
-<<<<<<< HEAD
-Syntax files are specified in the yaml format.
-=======
 Micro's builtin syntax highlighting tries very hard to be sane, sensible
 and provide ample coverage of the meaningful elements of a language. Micro has
 syntax files built int for over 100 languages now. However, there may be 
@@ -205,11 +202,7 @@ situations where you find Micro's highlighting to be insufficient or not to
 your liking. Good news is you can create syntax files (.micro extension), place them in 
 `~/.config/micro/syntax` and Micro will use those instead.
 
-The first statement in a syntax file will probably the syntax statement. This tells micro
-what language the syntax file is for and how to detect a file in that language.
->>>>>>> master
-
-#### Filetype defintion
+### Filetype defintion
 
 You must start the syntax file by declaring the filetype:
 
@@ -219,7 +212,7 @@ filetype: go
 
 #### Detect definition
 
-Then you can provide information about how to detect the filetype:
+Then you must provide information about how to detect the filetype:
 
 ```
 detect:
@@ -227,7 +220,7 @@ detect:
 ```
 
 Micro will match this regex against a given filename to detect the filetype. You may also
-provide an optional `header` regex that will check the first line of the file. For example for yaml:
+provide an optional `header` regex that will check the first line of the file. For example:
 
 ```
 detect:
@@ -257,7 +250,7 @@ And here are some example regions for Go:
 ```
 - constant.string:
     start: "\""
-    end: "(?<!\\\\)\""
+    end: "\""
     rules:
         - constant.specialChar: "%."
         - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
@@ -276,10 +269,20 @@ And here are some example regions for Go:
         - todo: "(TODO|XXX|FIXME):?"
 ```
 
-Notice how the regions may contain rules inside of them.
+Notice how the regions may contain rules inside of them. Any inner rules that are matched are then skipped when searching
+for the end of the region. For example, when highlighting `"foo \" bar"`, since `\"` is matched by an inner rule in the
+region, it is skipped. Likewise for `"foo \\" bar`, since `\\` is matched by an inner rule, it is skipped, and then the `"`
+is found and the string ends at the correct place.
 
-Also the regexes for region start and end may contain more complex regexes with lookahead and lookbehind,
-but this is not supported for pattern regexes.
+You may also explicitly mark skip regexes if you don't want them to be highlighted. For example:
+
+```
+- constant.string:
+    start: "\""
+    end: "\""
+    skip: "\\."
+    rules: []
+```
 
 #### Includes
 
@@ -299,7 +302,3 @@ for html:
     rules:
         - include: "css"
 ```
-
-Note: The format of syntax files will be changing with the view refactor.
-If this help file still retains this note but the syntax files are yaml
-please open an issue.
