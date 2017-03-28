@@ -24,6 +24,9 @@ function installFiles() {
   cp ../LICENSE $TO
   cp ../LICENSE-THIRD-PARTY $TO
   cp ../README.md $TO
+  gzip -c ../assets/packaging/micro.1 > $1/$2/usr/share/man/man1/micro.1.gz
+  cp ../assets/packaging/micro.desktop $1/$2/usr/share/applications/
+  cp ../assets/logo.svg $1/$2/usr/share/icons/micro.svg
 }
 
 version=$1
@@ -39,7 +42,7 @@ echo "Beginning package build process"
 
 PKGPATH="../packages/deb"
 
-rm -fr ../packages
+rm -fr $PKGPATH
 mkdir -p $PKGPATH/amd64/DEBIAN/
 mkdir -p $PKGPATH/i386/DEBIAN/
 
