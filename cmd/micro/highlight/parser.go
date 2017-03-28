@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/dlclark/regexp2"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -61,8 +59,9 @@ type rules struct {
 type region struct {
 	group  Group
 	parent *region
-	start  *regexp2.Regexp
-	end    *regexp2.Regexp
+	start  *regexp.Regexp
+	end    *regexp.Regexp
+	skip   *regexp.Regexp
 	rules  *rules
 }
 
@@ -217,16 +216,25 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	region.group = groupNum
 	region.parent = prevRegion
 
-	region.start, err = regexp2.Compile(regionInfo["start"].(string), 0)
+	region.start, err = regexp.Compile(regionInfo["start"].(string))
 
 	if err != nil {
 		return nil, err
 	}
 
-	region.end, err = regexp2.Compile(regionInfo["end"].(string), 0)
+	region.end, err = regexp.Compile(regionInfo["end"].(string))
 
 	if err != nil {
 		return nil, err
+	}
+
+	// skip is optional
+	if _, ok := regionInfo["skip"]; ok {
+		region.skip, err = regexp.Compile(regionInfo["skip"].(string))
+
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	region.rules, err = parseRules(regionInfo["rules"].([]interface{}), region)

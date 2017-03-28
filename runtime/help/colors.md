@@ -250,7 +250,7 @@ And here are some example regions for Go:
 ```
 - constant.string:
     start: "\""
-    end: "(?<!\\\\)\""
+    end: "\""
     rules:
         - constant.specialChar: "%."
         - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
@@ -269,10 +269,20 @@ And here are some example regions for Go:
         - todo: "(TODO|XXX|FIXME):?"
 ```
 
-Notice how the regions may contain rules inside of them.
+Notice how the regions may contain rules inside of them. Any inner rules that are matched are then skipped when searching
+for the end of the region. For example, when highlighting `"foo \" bar"`, since `\"` is matched by an inner rule in the
+region, it is skipped. Likewise for `"foo \\" bar`, since `\\` is matched by an inner rule, it is skipped, and then the `"`
+is found and the string ends at the correct place.
 
-Also the regexes for region start and end may contain more complex regexes with lookahead and lookbehind,
-but this is not supported for pattern regexes.
+You may also explicitly mark skip regexes if you don't want them to be highlighted. For example:
+
+```
+- constant.string:
+    start: "\""
+    end: "\""
+    skip: "\\."
+    rules: []
+```
 
 #### Includes
 

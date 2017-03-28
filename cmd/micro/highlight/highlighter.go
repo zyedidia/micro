@@ -4,8 +4,6 @@ import (
 	"regexp"
 	"strings"
 	"unicode/utf8"
-
-	"github.com/dlclark/regexp2"
 )
 
 // RunePos returns the rune index of a given byte index
@@ -62,7 +60,7 @@ func NewHighlighter(def *Def) *Highlighter {
 // color's group (represented as one byte)
 type LineMatch map[int]Group
 
-func findIndex(regex *regexp2.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
+func findIndex(regex *regexp.Regexp, skip []*regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -74,12 +72,30 @@ func findIndex(regex *regexp2.Regexp, str []rune, canMatchStart, canMatchEnd boo
 			return nil
 		}
 	}
-	match, _ := regex.FindStringMatch(string(str))
+
+	var strbytes []byte
+	if skip != nil && len(skip) > 0 {
+		for _, r := range skip {
+			if r != nil {
+				strbytes = r.ReplaceAllFunc([]byte(string(str)), func(match []byte) []byte {
+					res := make([]byte, len(match))
+					// for i := 0; i < len(match); i++ {
+					//
+					// }
+					return res
+				})
+			}
+		}
+	} else {
+		strbytes = []byte(string(str))
+	}
+
+	match := regex.FindIndex(strbytes)
 	if match == nil {
 		return nil
 	}
-	return []int{match.Index, match.Index + match.Length}
-	// return []int{runePos(match.Index, string(str)), runePos(match.Index+match.Length, string(str))}
+	// return []int{match.Index, match.Index + match.Length}
+	return []int{runePos(match[0], string(str)), runePos(match[1], string(str))}
 }
 
 func findAllIndex(regex *regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) [][]int {
@@ -111,7 +127,15 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	loc := findIndex(curRegion.end, line, start == 0, canMatchEnd)
+	skips := make([]*regexp.Regexp, len(curRegion.rules.patterns)+1)
+	for i := range skips {
+		if i != len(skips)-1 {
+			skips[i] = curRegion.rules.patterns[i].regex
+		} else {
+			skips[i] = curRegion.skip
+		}
+	}
+	loc := findIndex(curRegion.end, skips, line, start == 0, canMatchEnd)
 	if loc != nil {
 		if !statesOnly {
 			highlights[start+loc[1]-1] = curRegion.group
@@ -144,7 +168,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 
 	var firstRegion *region
 	for _, r := range curRegion.rules.regions {
-		loc := findIndex(r.start, line, start == 0, canMatchEnd)
+		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
 				firstLoc = loc
@@ -198,7 +222,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	firstLoc := []int{len(line), 0}
 	var firstRegion *region
 	for _, r := range h.Def.rules.regions {
-		loc := findIndex(r.start, line, start == 0, canMatchEnd)
+		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
 				firstLoc = loc
