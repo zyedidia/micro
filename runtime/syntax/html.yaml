@@ -11,7 +11,8 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
-        rules: []
+        rules:
+            - constant.specialChar: "\\\\."
 
     - default:
         start: "<script.*?>"
