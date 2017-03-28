@@ -201,7 +201,14 @@ func InitScreen() {
 // RedrawAll redraws everything -- all the views and the messenger
 func RedrawAll() {
 	messenger.Clear()
-	screen.Clear()
+
+	w, h := screen.Size()
+	for x := 0; x < w; x++ {
+		for y := 0; y < h; y++ {
+			screen.SetContent(x, y, ' ', nil, defStyle)
+		}
+	}
+
 	for _, v := range tabs[curTab].views {
 		v.Display()
 	}

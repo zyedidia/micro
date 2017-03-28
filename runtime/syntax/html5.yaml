@@ -1,7 +1,7 @@
 filetype: html5
 
 detect: 
-    filename: "\\.htm[l]?$"
+    filename: "\\.htm[l]?5$"
     header: "<!DOCTYPE html5>"
 
 rules:

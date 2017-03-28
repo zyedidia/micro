@@ -24,7 +24,7 @@ rules:
       # String highlighting
     - constant.string:
         start: "\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules:
             - constant.specialChar: "(\\\\u[0-9A-fa-f]{4,4}|\\\\newline|\\\\space|\\\\tab|\\\\formfeed|\\\\backspace|\\\\return|\\\\.)"
 

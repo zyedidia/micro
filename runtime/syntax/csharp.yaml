@@ -23,14 +23,14 @@ rules:
 
     - constant.string:
         start: "\""
-        end: "(?<!\\\\)\""
+        end: "\""
         rules:
             - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
             - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
 
     - constant.string:
         start: "'"
-        end: "(?<!\\\\)'"
+        end: "'"
         rules:
             - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
             - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
