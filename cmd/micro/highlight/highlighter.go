@@ -60,7 +60,7 @@ func NewHighlighter(def *Def) *Highlighter {
 // color's group (represented as one byte)
 type LineMatch map[int]Group
 
-func findIndex(regex *regexp.Regexp, skip []*regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
+func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []rune, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -73,16 +73,14 @@ func findIndex(regex *regexp.Regexp, skip []*regexp.Regexp, str []rune, canMatch
 		}
 	}
 
-	strbytes := []byte(string(str))
-	if skip != nil && len(skip) > 0 {
-		for _, r := range skip {
-			if r != nil {
-				strbytes = r.ReplaceAllFunc(strbytes, func(match []byte) []byte {
-					res := make([]byte, utf8.RuneCount(match))
-					return res
-				})
-			}
-		}
+	var strbytes []byte
+	if skip != nil {
+		strbytes = skip.ReplaceAllFunc(strbytes, func(match []byte) []byte {
+			res := make([]byte, utf8.RuneCount(match))
+			return res
+		})
+	} else {
+		strbytes = []byte(string(str))
 	}
 
 	match := regex.FindIndex(strbytes)
@@ -122,15 +120,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	skips := make([]*regexp.Regexp, len(curRegion.rules.patterns)+1)
-	for i := range skips {
-		if i != len(skips)-1 {
-			skips[i] = curRegion.rules.patterns[i].regex
-		} else {
-			skips[i] = curRegion.skip
-		}
-	}
-	loc := findIndex(curRegion.end, skips, line, start == 0, canMatchEnd)
+	loc := findIndex(curRegion.end, curRegion.skip, line, start == 0, canMatchEnd)
 	if loc != nil {
 		if !statesOnly {
 			highlights[start+loc[1]-1] = curRegion.group

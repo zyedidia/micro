@@ -1,7 +1,7 @@
 filetype: csharp
 
 detect:
-    filename: "\\.cs"
+    filename: "\\.cs$"
 
 rules:
     # Class
