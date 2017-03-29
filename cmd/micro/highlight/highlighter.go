@@ -183,9 +183,9 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 	}
 	for i, h := range fullHighlights {
 		if i == 0 || h != fullHighlights[i-1] {
-			if _, ok := highlights[start+i]; !ok {
-				highlights[start+i] = h
-			}
+			// if _, ok := highlights[start+i]; !ok {
+			highlights[start+i] = h
+			// }
 		}
 	}
 
@@ -243,9 +243,9 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	}
 	for i, h := range fullHighlights {
 		if i == 0 || h != fullHighlights[i-1] {
-			if _, ok := highlights[start+i]; !ok {
-				highlights[start+i] = h
-			}
+			// if _, ok := highlights[start+i]; !ok {
+			highlights[start+i] = h
+			// }
 		}
 	}
 
