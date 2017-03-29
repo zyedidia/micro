@@ -21,6 +21,8 @@ echo " and it supports mouse input"
 function installFiles() {
   TO="$1/$2/usr/share/doc/micro/"
   mkdir -p $TO
+  mkdir -p "$1/$2/usr/share/applications/"
+  mkdir -p "$1/$2/usr/share/icons/"
   cp ../LICENSE $TO
   cp ../LICENSE-THIRD-PARTY $TO
   cp ../README.md $TO
