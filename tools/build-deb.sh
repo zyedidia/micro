@@ -48,6 +48,7 @@ PKGPATH="../packages/deb"
 rm -fr $PKGPATH
 mkdir -p $PKGPATH/amd64/DEBIAN/
 mkdir -p $PKGPATH/i386/DEBIAN/
+mkdir -p $PKGPATH/arm/DEBIAN/
 
 getControl "amd64" "$version" > $PKGPATH/amd64/DEBIAN/control
 tar -xzf "../binaries/micro-$version-linux64.tar.gz" "micro-$version/micro"
@@ -59,10 +60,17 @@ tar -xzf "../binaries/micro-$version-linux32.tar.gz" "micro-$version/micro"
 mkdir -p $PKGPATH/i386/usr/local/bin/
 mv "micro-$version/micro" "$PKGPATH/i386/usr/local/bin/"
 
+getControl "arm" "$version" > $PKGPATH/arm/DEBIAN/control
+tar -xzf "../binaries/micro-$version-linux-arm.tar.gz" "micro-$version/micro"
+mkdir -p $PKGPATH/arm/usr/local/bin
+mv "micro-$version/micro" "$PKGPATH/arm/usr/local/bin"
+
 rm -rf "micro-$version"
 
 installFiles $PKGPATH "amd64"
 installFiles $PKGPATH "i386"
+installFiles $PKGPATH "arm"
 
 dpkg -b "$PKGPATH/amd64/" "../packages/micro-$version-amd64.deb"
 dpkg -b "$PKGPATH/i386/" "../packages/micro-$version-i386.deb"
+dpkg -b "$PKGPATH/arm/" "../packages/micro-$version-arm.deb"
