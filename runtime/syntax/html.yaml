@@ -18,6 +18,7 @@ rules:
     - default:
         start: "<script.*?>"
         end: "</script.*?>"
+        limit-group: identifier
         rules:
             - include: "javascript"
 

@@ -116,14 +116,16 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 
 	if start == 0 {
 		if !statesOnly {
-			highlights[0] = curRegion.group
+			if _, ok := highlights[0]; !ok {
+				highlights[0] = curRegion.group
+			}
 		}
 	}
 
 	loc := findIndex(curRegion.end, curRegion.skip, line, start == 0, canMatchEnd)
 	if loc != nil {
 		if !statesOnly {
-			highlights[start+loc[1]-1] = curRegion.group
+			highlights[start+loc[0]] = curRegion.limitGroup
 		}
 		if curRegion.parent == nil {
 			if !statesOnly {
@@ -162,7 +164,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 	if firstLoc[0] != len(line) {
-		highlights[start+firstLoc[0]] = firstRegion.group
+		highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		h.highlightRegion(highlights, start, false, lineNum, line[:firstLoc[0]], curRegion, statesOnly)
 		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, line[firstLoc[1]:], firstRegion, statesOnly)
 		return highlights
@@ -217,7 +219,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	}
 	if firstLoc[0] != len(line) {
 		if !statesOnly {
-			highlights[start+firstLoc[0]] = firstRegion.group
+			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
 		h.highlightEmptyRegion(highlights, start, false, lineNum, line[:firstLoc[0]], statesOnly)
 		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, line[firstLoc[1]:], firstRegion, statesOnly)

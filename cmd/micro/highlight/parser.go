@@ -57,12 +57,13 @@ type rules struct {
 // region and also rules from the above region do not match inside this region
 // Note that a region may contain more regions
 type region struct {
-	group  Group
-	parent *region
-	start  *regexp.Regexp
-	end    *regexp.Regexp
-	skip   *regexp.Regexp
-	rules  *rules
+	group      Group
+	limitGroup Group
+	parent     *region
+	start      *regexp.Regexp
+	end        *regexp.Regexp
+	skip       *regexp.Regexp
+	rules      *rules
 }
 
 func init() {
@@ -235,6 +236,23 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 		if err != nil {
 			return nil, err
 		}
+	}
+
+	// limit-color is optional
+	if _, ok := regionInfo["limit-group"]; ok {
+		groupStr := regionInfo["limit-group"].(string)
+		if _, ok := Groups[groupStr]; !ok {
+			numGroups++
+			Groups[groupStr] = numGroups
+		}
+		groupNum := Groups[groupStr]
+		region.limitGroup = groupNum
+
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		region.limitGroup = region.group
 	}
 
 	region.rules, err = parseRules(regionInfo["rules"].([]interface{}), region)
