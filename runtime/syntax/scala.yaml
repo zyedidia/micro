@@ -10,6 +10,7 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
+        skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
     - constant: "\\b(true|false|null)\\b"

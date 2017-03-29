@@ -75,7 +75,7 @@ func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []rune, canMatchSt
 
 	var strbytes []byte
 	if skip != nil {
-		strbytes = skip.ReplaceAllFunc(strbytes, func(match []byte) []byte {
+		strbytes = skip.ReplaceAllFunc([]byte(string(str)), func(match []byte) []byte {
 			res := make([]byte, utf8.RuneCount(match))
 			return res
 		})

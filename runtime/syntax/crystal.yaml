@@ -33,14 +33,17 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
+        skip: "\\\\."
         rules:
-            - constant.specialchar: "\\\\."
+            - constant.specialChar: "\\\\."
             - special: "#\\{[^}]*\\}"
 
     - constant.string:
         start: "'"
         end: "'"
-        rules: []
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
 
     - comment:
         start: "#"

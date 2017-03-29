@@ -41,12 +41,14 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
+        skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
 
     - constant.string:
         start: "'"
         end: "'"
+        skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
 
