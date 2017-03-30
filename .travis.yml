@@ -1,2 +1,4 @@
 language: go
+rvm:
+  - 2.2
 script: make ci
