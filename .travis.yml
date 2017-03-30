@@ -1,2 +1,2 @@
 language: go
-script: make test
+script: make ci
