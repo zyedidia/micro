@@ -39,7 +39,7 @@ do
 done
 echo "Starting the packaging process"
 #Generate the spec file
-cat micro.spec | sed s/"dev.126"/"$dev"/ | sed s/"Version: 1.1.5"/"Version: $version"/ | sed s/"-Version: 1.1.5"/"-Version: $version"/ | sed s/"rdieter1@localhost.localdomain"/"$USER@$HOSTNAME"/ | tee > $PKGPATH/micro.spec
+cat micro.spec | sed s/"dev.126"/"$dev"/ | sed s/"Version: 1.1.5"/"Version: $version"/ | sed s/"-Version: 1.1.5"/"-Version: $version"/ | sed s/"DATE"/"$(date +%F\ %H:%m)"/ | sed s/"rdieter1@localhost.localdomain"/"$USER@$HOSTNAME"/ | tee > $PKGPATH/micro.spec
 
 cd $PKGPATH
 

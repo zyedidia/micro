@@ -30,3 +30,5 @@ echo "Linux arm"
 GOOS=linux GOARCH=arm go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE'" -o micro-$1/micro ./cmd/micro
 tar -czf micro-$1-linux-arm.tar.gz micro-$1
 mv micro-$1-linux-arm.tar.gz binaries
+
+rm -rf micro-$1

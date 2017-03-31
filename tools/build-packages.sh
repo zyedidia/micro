@@ -10,6 +10,21 @@ echo "Compiling."
 ./compile-linux.sh $version
 
 #Build the debs
+function getControl() {
+echo Section: editors
+echo Package: micro
+echo Version: $2
+echo Priority: extra
+echo Maintainer: \"Zachary Yedidia\" \<zyedidia@gmail.com\>
+echo Standards-Version: 3.9.8
+echo Homepage: https://micro-editor.github.io/
+echo Architecture: $1
+echo "Description: A modern and intuitive terminal-based text editor"
+echo " This package contains a modern alternative to other terminal-based"
+echo " Editors. It is easy to Use, highly customizable via themes and plugins"
+echo " and it supports mouse input"
+}
+
 function installFiles() {
   TO="$1/$2/usr/share/doc/micro/"
   mkdir -p $TO
@@ -55,6 +70,7 @@ echo "Building debs"
 dpkg -b "$PKGPATH/amd64/" "../packages/micro-$version-amd64.deb"
 dpkg -b "$PKGPATH/i386/" "../packages/micro-$version-i386.deb"
 dpkg -b "$PKGPATH/arm/" "../packages/micro-$version-arm.deb"
+
 #Build the RPMS
 echo "Starting RPM build process"
 PKGPATH="../packages/rpm"
@@ -85,6 +101,12 @@ do
 	fi
 	let "i+=1"
 done
+
+#Generate the spec file from template
+cat micro.spec | sed s/"dev.126"/"$dev"/ | sed s/"Version: 1.1.5"/"Version: $version"/ | sed s/"-Version: 1.1.5"/"-Version: $version"/ | sed s/"DATE"/"$(date +%F\ %H:%m)"/ | sed s/"rdieter1@localhost.localdomain"/"$USER@$HOSTNAME"/ | tee > $PKGPATH/micro.spec
+
+cd $PKGPATH
+
 echo "Building the RPM packages"
 rpmbuild -bs micro.spec --define "_sourcedir $(pwd)/../../binaries/" --define "_rpmdir $(pwd)/../"
 rpmbuild -bb micro.spec --define "_sourcedir $(pwd)/../../binaries/" --define "_rpmdir $(pwd)/../" --target x86_64

@@ -2,28 +2,28 @@
 %global dev_rev dev.126
 
 Name: micro
-Version: 1.1.5 
+Version: 1.1.5
 Release: 1.%{dev_rev}
 Summary: A feature-rich terminal text editor
 URL: https://micro-editor.github.io
 Packager: Zachary Yedidia <zyedidia@gmail.com>
 License: MIT
 Group: Applications/Editors
-Source0: https://somethinghub.com/magicant/micro-binaries/micro-%{version}.%{dev_rev}-src.tar.gz 
+Source0: https://somethinghub.com/magicant/micro-binaries/micro-%{version}.%{dev_rev}-src.tar.gz
 
 # disable debuginfo, using prebuilt binaries
 %global debug_package   %{nil}
 
 ## x86_64 section
 Source1: https://somethinghub.com/magicant/micro-binaries/micro-%{version}.%{dev_rev}-linux64.tar.gz
-%ifarch x86_64 
+%ifarch x86_64
 %global micro_src -a 1
 %endif
 
 ## x86 section
 Source2: https://somethinghub.com/magicant/micro-binaries/micro-%{version}.%{dev_rev}-linux32.tar.gz
 %ifarch %{ix86}
-%define micro_src -a 2 
+%define micro_src -a 2
 %endif
 
 ## x86 section
@@ -39,7 +39,7 @@ A modern and intuitive terminal-based text editor.
  via themes and plugins.
 
 
-%prep 
+%prep
 %setup -q -n %{name} %{?micro_src}
 
 
@@ -67,5 +67,5 @@ install -D -m 744 assets/logo.svg %{buildroot}%{_datadir}/icons/hicolor/scalable
 
 %changelog
 * Thu Mar 30 2017 Zachary Yedidia <zyedidia@gmail.com>
--Version: -
--Auto generated on  by rdieter1@localhost.localdomain
+-Version: 1.1.5
+-Auto generated on DATE by rdieter1@localhost.localdomain
