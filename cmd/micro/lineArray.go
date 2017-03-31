@@ -70,27 +70,18 @@ func NewLineArray(reader io.Reader) *LineArray {
 	var buf bytes.Buffer
 	tee := io.TeeReader(reader, &buf)
 	numlines, _ := lineCounter(tee)
-	if numlines == 0 {
-		numlines = 1
-	}
+	numlines++
 
 	la.lines = make([]Line, numlines)
 
 	br := bufio.NewReader(&buf)
 
-	i := 0
-	for {
+	for i := 0; i < numlines; i++ {
 		data, err := br.ReadBytes('\n')
 		if err != nil {
 			if err == io.EOF {
 				// la.lines[i] = Line{data[:len(data)], nil, nil, false}
-				if i >= len(la.lines) {
-					if len(data) != 0 {
-						la.lines = append(la.lines, Line{data, nil, nil, false})
-					}
-				} else {
-					la.lines[i].data = data
-				}
+				la.lines[i].data = data
 			}
 			// Last line was read
 			break
@@ -98,9 +89,6 @@ func NewLineArray(reader io.Reader) *LineArray {
 			la.lines[i].data = data[:len(data)-1]
 			// la.lines[i] = Line{data[:len(data)-1], nil, nil, false}
 		}
-		i++
-	}
-	for i := 0; i < numlines; i++ {
 	}
 
 	return la

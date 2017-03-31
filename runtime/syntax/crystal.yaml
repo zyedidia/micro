@@ -1,7 +1,7 @@
 filetype: crystal
 
 detect:
-    filename: "\\.cr$|Gemfile|config.ru|Rakefile|Capfile|Vagrantfile"
+    filename: "\\.cr$"
 
 rules:
     # Asciibetical list of reserved words
@@ -33,14 +33,17 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
+        skip: "\\\\."
         rules:
-            - constant.specialchar: "\\\\."
+            - constant.specialChar: "\\\\."
             - special: "#\\{[^}]*\\}"
 
     - constant.string:
         start: "'"
         end: "'"
-        rules: []
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
 
     - comment:
         start: "#"

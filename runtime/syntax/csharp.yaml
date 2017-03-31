@@ -1,7 +1,7 @@
 filetype: csharp
 
 detect:
-    filename: "\\.cs"
+    filename: "\\.cs$"
 
 rules:
     # Class
@@ -24,6 +24,7 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
+        skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
             - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
@@ -31,6 +32,7 @@ rules:
     - constant.string:
         start: "'"
         end: "'"
+        skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
             - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
