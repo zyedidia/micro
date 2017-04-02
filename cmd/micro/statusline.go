@@ -59,7 +59,7 @@ func (sline *Statusline) Display() {
 
 	// If the buffer is dirty (has been modified) write a little '+'
 	if sline.view.Buf.IsModified {
-		file += " +"
+		file += " *"
 	}
 
 	// Add one to cursor.x and cursor.y because (0,0) is the top left,
