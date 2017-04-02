@@ -36,6 +36,7 @@ Typing `help` followed by nothing will open this page.
 Here are the possible help topics that you can read:
 
 * tutorial: A brief tutorial which gives an overview of all the other help topics
+* mouse: Gives further explanation of Micro's mouse support.
 * keybindings: Gives a full list of the default keybindings as well as how to rebind them
 * defaultkeys: Gives a more straight-forward list of the hotkey commands and what they do.
 * commands: Gives a list of all the commands and what they do

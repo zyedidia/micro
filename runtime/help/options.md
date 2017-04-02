@@ -30,7 +30,7 @@ Here are the options that you can set:
 
 * `eofnewline`: micro will automatically add a newline to the file.
 
-	default value: `false`
+	default value: `true`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
 
@@ -144,8 +144,27 @@ Here are the options that you can set:
    when you move to the next line without any insertions the whitespace that was added should be deleted.
    By default the autoindent whitespace is deleted if the line was left empty.
 
-    default value: `off`
+	default value: `off`
 
+* `numberedtabs`: Display the tab's number beside it in the tab bar.  
+	default value: `on`
+
+* `showclock`: Display a clock in the status line. 
+	(May be off by up to 20 seconds to save on performance. )
+	*Note:* Setting this causes micro to redraw the screen at least 4 times a 
+	minute, instead of just when it receives input. Hence why it is off by default.
+	
+	default value: `off`
+
+* `12hourclock`: Display time in a 12-hour format, rather than the default 24-hour.
+
+	default value: `off`
+	
+* `showseconds`: Display seconds in the status line clock. 
+	(This is a bit more resource intensive as it redraws the screen every second.)
+	
+	default value: `off`
+	
 ---
 
 Default plugin options:

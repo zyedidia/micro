@@ -10,7 +10,7 @@ Here are the possible commands that you can use.
 
 * `replace "search" "value" flags`: This will replace `search` with `value`. 
    The `flags` are optional.
-   At this point, there is only one flag: `c`, which enables `check` mode 
+   At this point, there is only one flag: `-c`, which enables `check` mode 
    which asks if you'd like to perform the replacement each time.
 
    Note that `search` must be a valid regex.  If one of the arguments
