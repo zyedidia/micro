@@ -86,6 +86,8 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 
 	Search(messenger.response, v, true)
 
+	v.Relocate()
+
 	return
 }
 

@@ -23,5 +23,5 @@ color-link cursor-line "#323232"
 color-link color-column "#323232"
 #No extended types; Plain brackets.
 color-link type.extended "default"
-color-link symbol.brackets "default"
+#color-link symbol.brackets "default"
 color-link symbol.tag "#AE81FF,#282828"
