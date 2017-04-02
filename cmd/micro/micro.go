@@ -419,16 +419,20 @@ func main() {
 
 	//Async refresh the screen if using the statusline clock
 	go func() {
+		i:=0
 		for {
 			if globalSettings["showclock"].(bool) {
 				if globalSettings["showseconds"].(bool){
 					RedrawAll()
-					time.Sleep(1 * time.Second)
 				} else {
-					RedrawAll()
-					time.Sleep(15 * time.Second)
+					if i >= 15 {
+						i=0
+						RedrawAll()
+					}
 				}
 			}
+			i++
+			time.Sleep(1 * time.Second)
 		}
 	}()
 
