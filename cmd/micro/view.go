@@ -897,7 +897,7 @@ func (v *View) DisplayView() {
 			dividerStyle = style
 		}
 		for i := visualLineN + 1; i < v.Height; i++ {
-			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
+			screen.SetContent(v.x, yOffset+i, tcell.RuneVLine, nil, dividerStyle.Reverse(true))
 		}
 	}
 }
