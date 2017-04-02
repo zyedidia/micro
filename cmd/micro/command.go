@@ -207,7 +207,7 @@ func TabSwitch(args []string) {
 			for _, t := range tabs {
 				v := t.views[t.CurView]
 				if v.Buf.GetName() == args[0] {
-					curTab = v.Num
+					curTab = v.TabNum
 					found = true
 				}
 			}
