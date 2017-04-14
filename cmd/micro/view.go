@@ -850,11 +850,13 @@ func (v *View) DisplayView() {
 		lastX := 0
 		var realLoc Loc
 		var visualLoc Loc
+		var cx, cy int
 		if lastChar != nil {
 			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
 				screen.ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
+				cx, cy = lastX, yOffset+lastChar.visualLoc.Y
 			}
 			realLoc = Loc{lastChar.realLoc.X, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
@@ -862,6 +864,7 @@ func (v *View) DisplayView() {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 				v.Cursor.Y == realLineN {
 				screen.ShowCursor(xOffset, yOffset+visualLineN)
+				cx, cy = xOffset, yOffset+visualLineN
 			}
 			lastX = xOffset
 			realLoc = Loc{0, realLineN}
@@ -886,7 +889,9 @@ func (v *View) DisplayView() {
 				style := GetColor("cursor-line")
 				fg, _, _ := style.Decompose()
 				style = style.Background(fg)
-				screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
+				if !(tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() && i == cx && yOffset+visualLineN == cy) {
+					screen.SetContent(i, yOffset+visualLineN, ' ', nil, style)
+				}
 			}
 		}
 	}
