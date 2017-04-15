@@ -37,6 +37,19 @@ type namedFile struct {
 	name string
 }
 
+// a file with the data stored in memory
+type memoryFile struct {
+	name string
+	data []byte
+}
+
+func (mf memoryFile) Name() string {
+	return mf.name
+}
+func (mf memoryFile) Data() ([]byte, error) {
+	return mf.data, nil
+}
+
 func (rf realFile) Name() string {
 	fn := filepath.Base(string(rf))
 	return fn[:len(fn)-len(filepath.Ext(fn))]
@@ -186,4 +199,9 @@ func PluginAddRuntimeFilesFromDirectory(plugin, filetype, directory, pattern str
 		fullpath = path.Join("runtime", "plugins", plugin, directory)
 		AddRuntimeFilesFromAssets(filetype, fullpath, pattern)
 	}
+}
+
+// PluginAddRuntimeFileFromMemory adds a file to the runtime files for a plugin from a given string
+func PluginAddRuntimeFileFromMemory(plugin, filetype, filename, data string) {
+	AddRuntimeFile(filetype, memoryFile{filename, []byte(data)})
 }
