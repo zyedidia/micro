@@ -1,11 +1,14 @@
 .PHONY: runtime
 
-VERSION = $(shell go run tools/build-version.go)
-HASH = $(shell git rev-parse --short HEAD)
-DATE = $(shell go run tools/build-date.go)
-ADDITIONAL_GO_LINKER_FLAGS = $(shell go run tools/info-plist.go "$(VERSION)")
-
-GOBIN ?= $(GOPATH)/bin
+VERSION := $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
+	go run tools/build-version.go)
+HASH := $(shell git rev-parse --short HEAD)
+DATE := $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
+	go run tools/build-date.go)
+ADDITIONAL_GO_LINKER_FLAGS := $(shell GOOS=$(shell go env GOHOSTOS) \
+	GOARCH=$(shell go env GOHOSTARCH) \
+	go run tools/info-plist.go "$(VERSION)")
+GOBIN ?= $(shell go env GOPATH)/bin
 
 # Builds micro after checking dependencies but without updating the runtime
 build: deps
