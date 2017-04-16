@@ -43,6 +43,8 @@ function runLinter()
         lint("jshint", "jshint", {file}, "%f: line %l,.+, %m")
     elseif ft == "nim" then
         lint("nim", "nim", {"check", "--listFullPaths", "--stdout", "--hints:off", file}, "%f.%l, %d+. %m")
+    elseif string.match(ft, "literate") then
+        lint("literate", "lit", {"-c", file}, "%f:%l:%m")
     end
 end
 

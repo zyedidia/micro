@@ -486,7 +486,6 @@ func main() {
 			default:
 				event = nil
 			}
-
 		}
 	}
 }
