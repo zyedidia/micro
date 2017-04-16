@@ -15,6 +15,8 @@ const (
 	TextEventInsert = 1
 	// TextEventRemove represents a deletion event
 	TextEventRemove = -1
+
+	TextEventReplace = 0
 )
 
 // TextEvent holds data for a manipulation on some text that can be undone
@@ -22,18 +24,31 @@ type TextEvent struct {
 	C Cursor
 
 	EventType int
-	Text      string
-	Start     Loc
-	End       Loc
+	Deltas    []Delta
 	Time      time.Time
+}
+
+type Delta struct {
+	Text  string
+	Start Loc
+	End   Loc
 }
 
 // ExecuteTextEvent runs a text event
 func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
 	if t.EventType == TextEventInsert {
-		buf.insert(t.Start, []byte(t.Text))
+		for _, d := range t.Deltas {
+			buf.insert(d.Start, []byte(d.Text))
+		}
 	} else if t.EventType == TextEventRemove {
-		t.Text = buf.remove(t.Start, t.End)
+		for i, d := range t.Deltas {
+			t.Deltas[i].Text = buf.remove(d.Start, d.End)
+		}
+	} else if t.EventType == TextEventReplace {
+		for i, d := range t.Deltas {
+			t.Deltas[i].Text = buf.remove(d.Start, d.End)
+			buf.insert(d.Start, []byte(d.Text))
+		}
 	}
 }
 
@@ -84,12 +99,11 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 	e := &TextEvent{
 		C:         eh.buf.Cursor,
 		EventType: TextEventInsert,
-		Text:      text,
-		Start:     start,
+		Deltas:    []Delta{Delta{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
-	e.End = start.Move(Count(text), eh.buf)
+	e.Deltas[0].End = start.Move(Count(text), eh.buf)
 }
 
 // Remove creates a remove text event and executes it
@@ -97,8 +111,18 @@ func (eh *EventHandler) Remove(start, end Loc) {
 	e := &TextEvent{
 		C:         eh.buf.Cursor,
 		EventType: TextEventRemove,
-		Start:     start,
-		End:       end,
+		Deltas:    []Delta{Delta{"", start, end}},
+		Time:      time.Now(),
+	}
+	eh.Execute(e)
+}
+
+// Multiple creates an multiple insertions executes them
+func (eh *EventHandler) MultipleReplace(deltas []Delta) {
+	e := &TextEvent{
+		C:         eh.buf.Cursor,
+		EventType: TextEventReplace,
+		Deltas:    deltas,
 		Time:      time.Now(),
 	}
 	eh.Execute(e)

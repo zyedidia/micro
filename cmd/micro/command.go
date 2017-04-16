@@ -565,6 +565,7 @@ func Replace(args []string) {
 			}
 		}
 	} else {
+		var deltas []Delta
 		for i := 0; i < view.Buf.LinesNum(); i++ {
 			// view.Buf.lines[i].data = regex.ReplaceAll(view.Buf.lines[i].data, []byte(replace))
 			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
@@ -574,11 +575,13 @@ func Replace(args []string) {
 					from := Loc{m[0], i}
 					to := Loc{m[1], i}
 
-					view.Buf.Replace(from, to, replace)
+					deltas = append(deltas, Delta{replace, from, to})
+					// view.Buf.Replace(from, to, replace)
 					found++
 				}
 			}
 		}
+		view.Buf.MultipleReplace(deltas)
 	}
 	view.Cursor.Relocate()
 
