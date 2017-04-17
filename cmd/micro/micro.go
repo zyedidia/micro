@@ -378,6 +378,7 @@ func main() {
 	L.SetGlobal("ListRuntimeFiles", luar.New(L, PluginListRuntimeFiles))
 	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
 	L.SetGlobal("AddRuntimeFilesFromDirectory", luar.New(L, PluginAddRuntimeFilesFromDirectory))
+	L.SetGlobal("AddRuntimeFileFromMemory", luar.New(L, PluginAddRuntimeFileFromMemory))
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
@@ -506,7 +507,6 @@ func main() {
 			default:
 				event = nil
 			}
-
 		}
 	}
 }

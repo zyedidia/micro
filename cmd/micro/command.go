@@ -565,29 +565,23 @@ func Replace(args []string) {
 			}
 		}
 	} else {
-		bufStr := view.Buf.String()
-		matches := regex.FindAllStringIndex(bufStr, -1)
-		if matches != nil && len(matches) > 0 {
-			prevMatchCount := runePos(matches[0][0], bufStr)
-			searchCount := runePos(matches[0][1], bufStr) - prevMatchCount
-			from := FromCharPos(matches[0][0], view.Buf)
-			to := from.Move(searchCount, view.Buf)
-			adjust := Count(replace) - searchCount
-			view.Buf.Replace(from, to, replace)
-			found++
-			if len(matches) > 1 {
-				for _, match := range matches[1:] {
+		var deltas []Delta
+		for i := 0; i < view.Buf.LinesNum(); i++ {
+			// view.Buf.lines[i].data = regex.ReplaceAll(view.Buf.lines[i].data, []byte(replace))
+			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
+
+			if matches != nil && len(matches) > 0 {
+				for _, m := range matches {
+					from := Loc{m[0], i}
+					to := Loc{m[1], i}
+
+					deltas = append(deltas, Delta{replace, from, to})
+					// view.Buf.Replace(from, to, replace)
 					found++
-					matchCount := runePos(match[0], bufStr)
-					searchCount = runePos(match[1], bufStr) - matchCount
-					from = from.Move(matchCount-prevMatchCount+adjust, view.Buf)
-					to = from.Move(searchCount, view.Buf)
-					view.Buf.Replace(from, to, replace)
-					prevMatchCount = matchCount
-					adjust = Count(replace) - searchCount
 				}
 			}
 		}
+		view.Buf.MultipleReplace(deltas)
 	}
 	view.Cursor.Relocate()
 
