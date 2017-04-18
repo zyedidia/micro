@@ -164,6 +164,10 @@ view the help files here:
 I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
 a brief introduction to the more powerful configuration features micro offers.
 
+# License 
+
+To know more about the [LICENSE](LICENSE). 
+
 # Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
