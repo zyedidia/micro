@@ -812,7 +812,7 @@ func (v *View) DisplayView() {
 
 		var lastChar *Char
 		cursorSet := false
-		for _, char := range line {
+		for i, char := range line {
 			if char != nil {
 				lineStyle := char.style
 
@@ -837,6 +837,13 @@ func (v *View) DisplayView() {
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
 					style := GetColor("cursor-line")
+					fg, _, _ := style.Decompose()
+					lineStyle = lineStyle.Background(fg)
+				}
+
+				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+				if colorcolumn != 0 && screenX-v.leftCol+i == colorcolumn-1 {
+					style := GetColor("color-column")
 					fg, _, _ := style.Decompose()
 					lineStyle = lineStyle.Background(fg)
 				}
