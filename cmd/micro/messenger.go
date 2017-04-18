@@ -145,6 +145,15 @@ func (m *Messenger) PromptText(msg ...interface{}) {
 	m.AddLog(displayMessage)
 }
 
+// Print prints a message to the status bar. Use it for "printf" debugging
+func (m *Messenger) Print(msg ...interface{}) {
+	buf := new(bytes.Buffer)
+	fmt.Fprint(buf, msg)
+	m.message = buf.String()
+	m.style = defStyle
+	m.hasMessage = true
+}
+
 // YesNoPrompt asks the user a yes or no question (waits for y or n) and returns the result
 func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	m.hasPrompt = true
