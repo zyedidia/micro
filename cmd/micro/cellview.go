@@ -146,7 +146,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 				for i := 1; i < width; i++ {
 					viewCol++
-					if viewCol >= 0 {
+					if viewCol >= 0 && viewCol < width {
 						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
 					}
 				}
@@ -158,7 +158,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 				}
 				for i := 1; i < width; i++ {
 					viewCol++
-					if viewCol >= 0 {
+					if viewCol >= 0 && viewCol < width {
 						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
 					}
 				}
