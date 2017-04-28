@@ -81,6 +81,12 @@ On Windows, you can install micro through Chocolatey:
 choco install micro
 ```
 
+On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
+
+```
+snap install micro --beta
+```
+
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
