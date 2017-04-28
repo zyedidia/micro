@@ -5,12 +5,11 @@ description: |
   Micro is a terminal-based text editor that aims to be easy to use and
   intuitive, while also taking advantage of the full capabilities of modern
   terminals.
-confinement: strict
+confinement: classic
 
 apps:
   micro:
     command: bin/micro
-    plugs: [home]
 
 parts:
   micro:
