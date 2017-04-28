@@ -565,23 +565,25 @@ func Replace(args []string) {
 			}
 		}
 	} else {
-		var deltas []Delta
+		// var deltas []Delta
 		for i := 0; i < view.Buf.LinesNum(); i++ {
 			// view.Buf.lines[i].data = regex.ReplaceAll(view.Buf.lines[i].data, []byte(replace))
-			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
+			for {
+				m := regex.FindIndex(view.Buf.lines[i].data)
 
-			if matches != nil && len(matches) > 0 {
-				for _, m := range matches {
+				if m != nil {
 					from := Loc{m[0], i}
 					to := Loc{m[1], i}
 
-					deltas = append(deltas, Delta{replace, from, to})
-					// view.Buf.Replace(from, to, replace)
+					// deltas = append(deltas, Delta{replace, from, to})
+					view.Buf.Replace(from, to, replace)
 					found++
+				} else {
+					break
 				}
 			}
 		}
-		view.Buf.MultipleReplace(deltas)
+		// view.Buf.MultipleReplace(deltas)
 	}
 	view.Cursor.Relocate()
 
