@@ -11,15 +11,16 @@ import (
 )
 
 type ViewType struct {
+	kind     int
 	readonly bool // The file cannot be edited
 	scratch  bool // The file cannot be saved
 }
 
 var (
-	vtDefault = ViewType{false, false}
-	vtHelp    = ViewType{true, true}
-	vtLog     = ViewType{true, true}
-	vtScratch = ViewType{false, true}
+	vtDefault = ViewType{0, false, false}
+	vtHelp    = ViewType{1, true, true}
+	vtLog     = ViewType{2, true, true}
+	vtScratch = ViewType{3, false, true}
 )
 
 // The View struct stores information about a view into a buffer.
