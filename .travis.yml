@@ -1,2 +1,11 @@
+sudo: required
+
+services:
+  - docker
+
 language: go
+
 script: make test
+
+after_success:
+  - docker run -v $(pwd):/cwd snapcore/snapcraft sh -c 'cd /cwd && snapcraft'
