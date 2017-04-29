@@ -931,7 +931,9 @@ func (v *View) DisplayCursor(x, y int) {
 
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
-	screen.SetTitle("micro: " + v.Buf.GetName())
+	if GetGlobalOption("termtitle").(bool) {
+		screen.SetTitle("micro: " + v.Buf.GetName())
+	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
 	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || v.Cursor.HasSelection() {
