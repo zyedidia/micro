@@ -1,8 +1,5 @@
 local utf8 = require "runtime/plugins/autoclose/utf8/utf8"
 
-utf8.len = function(s) return #s end
-utf8.sub = string.sub
-
 function charAt(str, i)
     if i <= utf8.len(str) then
         return utf8.sub(str, i, i)
