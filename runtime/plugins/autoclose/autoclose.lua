@@ -1,6 +1,8 @@
+local utf8 = require "runtime/plugins/autoclose/utf8/utf8"
+
 function charAt(str, i)
-    if i <= #str then
-        return string.sub(str, i, i)
+    if i <= utf8.len(str) then
+        return utf8.sub(str, i, i)
     else
         return ""
     end
@@ -35,7 +37,7 @@ function onRune(r, v)
         if r == charAt(autoclosePairs[i], 1) then
             local curLine = v.Buf:Line(v.Cursor.Y)
 
-            if v.Cursor.X == #curLine or not IsWordChar(charAt(curLine, v.Cursor.X+1)) then
+            if v.Cursor.X == utf8.len(curLine) or not IsWordChar(charAt(curLine, v.Cursor.X+1)) then
                 -- the '-' here is to derefence the pointer to v.Cursor.Loc which is automatically made
                 -- when converting go structs to lua
                 -- It needs to be dereferenced because the function expects a non pointer struct
