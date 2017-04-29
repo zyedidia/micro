@@ -1483,7 +1483,7 @@ func (v *View) AddTab(usePlugin bool) bool {
 		return false
 	}
 
-	tab := NewTabFromView(NewView(NewBuffer(strings.NewReader(""), "")))
+	tab := NewTabFromView(NewView(NewBufferFromString("", "")))
 	tab.SetNum(len(tabs))
 	tabs = append(tabs, tab)
 	curTab = len(tabs) - 1
@@ -1543,7 +1543,7 @@ func (v *View) VSplitBinding(usePlugin bool) bool {
 		return false
 	}
 
-	v.VSplit(NewBuffer(strings.NewReader(""), ""))
+	v.VSplit(NewBufferFromString("", ""))
 
 	if usePlugin {
 		return PostActionCall("VSplit", v)
@@ -1557,7 +1557,7 @@ func (v *View) HSplitBinding(usePlugin bool) bool {
 		return false
 	}
 
-	v.HSplit(NewBuffer(strings.NewReader(""), ""))
+	v.HSplit(NewBufferFromString("", ""))
 
 	if usePlugin {
 		return PostActionCall("HSplit", v)

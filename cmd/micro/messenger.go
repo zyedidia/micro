@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"strconv"
-	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -79,7 +78,7 @@ func (m *Messenger) AddLog(msg string) {
 
 func (m *Messenger) getBuffer() *Buffer {
 	if m.log == nil {
-		m.log = NewBuffer(strings.NewReader(""), "")
+		m.log = NewBufferFromString("", "")
 		m.log.name = "Log"
 	}
 	return m.log

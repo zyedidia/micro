@@ -320,7 +320,7 @@ func Help(args []string) {
 // If no file is given, it opens an empty buffer in a new split
 func VSplit(args []string) {
 	if len(args) == 0 {
-		CurView().VSplit(NewBuffer(strings.NewReader(""), ""))
+		CurView().VSplit(NewBufferFromString("", ""))
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
@@ -338,9 +338,9 @@ func VSplit(args []string) {
 		var buf *Buffer
 		if err != nil {
 			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer(strings.NewReader(""), filename)
+			buf = NewBufferFromString("", filename)
 		} else {
-			buf = NewBuffer(file, filename)
+			buf = NewBuffer(file, FSize(file), filename)
 		}
 		CurView().VSplit(buf)
 	}
@@ -350,7 +350,7 @@ func VSplit(args []string) {
 // If no file is given, it opens an empty buffer in a new split
 func HSplit(args []string) {
 	if len(args) == 0 {
-		CurView().HSplit(NewBuffer(strings.NewReader(""), ""))
+		CurView().HSplit(NewBufferFromString("", ""))
 	} else {
 		filename := args[0]
 		home, _ := homedir.Dir()
@@ -368,9 +368,9 @@ func HSplit(args []string) {
 		var buf *Buffer
 		if err != nil {
 			// File does not exist -- create an empty buffer with that name
-			buf = NewBuffer(strings.NewReader(""), filename)
+			buf = NewBufferFromString("", filename)
 		} else {
-			buf = NewBuffer(file, filename)
+			buf = NewBuffer(file, FSize(file), filename)
 		}
 		CurView().HSplit(buf)
 	}
@@ -408,9 +408,9 @@ func NewTab(args []string) {
 
 		var buf *Buffer
 		if err != nil {
-			buf = NewBuffer(strings.NewReader(""), filename)
+			buf = NewBufferFromString("", filename)
 		} else {
-			buf = NewBuffer(file, filename)
+			buf = NewBuffer(file, FSize(file), filename)
 		}
 
 		tab := NewTabFromView(NewView(buf))
