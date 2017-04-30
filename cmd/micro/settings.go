@@ -203,6 +203,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"numberedtabs":   true,
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
+		"termtitle":      false,
 		"pluginchannels": []string{
 			"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json",
 		},

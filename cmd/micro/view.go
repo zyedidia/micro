@@ -258,9 +258,9 @@ func (v *View) Open(filename string) {
 	if err != nil {
 		messenger.Message(err.Error())
 		// File does not exist -- create an empty buffer with that name
-		buf = NewBuffer(strings.NewReader(""), filename)
+		buf = NewBufferFromString("", filename)
 	} else {
-		buf = NewBuffer(file, filename)
+		buf = NewBuffer(file, FSize(file), filename)
 	}
 	v.OpenBuffer(buf)
 }
@@ -649,7 +649,7 @@ func (v *View) openHelp(helpPage string) {
 	if data, err := FindRuntimeFile(RTHelp, helpPage).Data(); err != nil {
 		TermMessage("Unable to load help text", helpPage, "\n", err)
 	} else {
-		helpBuffer := NewBuffer(strings.NewReader(string(data)), helpPage+".md")
+		helpBuffer := NewBufferFromString(string(data), helpPage+".md")
 		helpBuffer.name = "Help"
 
 		if v.Type == vtHelp {
@@ -931,6 +931,9 @@ func (v *View) DisplayCursor(x, y int) {
 
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
+	if GetGlobalOption("termtitle").(bool) {
+		screen.SetTitle("micro: " + v.Buf.GetName())
+	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
 	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || v.Cursor.HasSelection() {

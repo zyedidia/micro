@@ -61,11 +61,11 @@ type SerializedBuffer struct {
 }
 
 func NewBufferFromString(text, path string) *Buffer {
-	return NewBuffer(strings.NewReader(text), path)
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
-func NewBuffer(reader io.Reader, path string) *Buffer {
+func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	if path != "" {
 		for _, tab := range tabs {
 			for _, view := range tab.views {
@@ -77,7 +77,7 @@ func NewBuffer(reader io.Reader, path string) *Buffer {
 	}
 
 	b := new(Buffer)
-	b.LineArray = NewLineArray(reader)
+	b.LineArray = NewLineArray(size, reader)
 
 	b.Settings = DefaultLocalSettings()
 	for k, v := range globalSettings {

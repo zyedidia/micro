@@ -59,6 +59,12 @@ func Max(a, b int) int {
 	return b
 }
 
+func FSize(f *os.File) int64 {
+	fi, _ := f.Stat()
+	// get the size
+	return fi.Size()
+}
+
 // IsWordChar returns whether or not the string is a 'word character'
 // If it is a unicode character, then it does not match
 // Word characters are defined as [A-Za-z0-9_]

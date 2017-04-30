@@ -165,6 +165,10 @@ Here are the options that you can set:
 	
 	default value: `off`
 	
+* `termtitle`: defines whether or not your terminal's title will be set by micro when opened.
+
+    default value: `off`
+
 ---
 
 Default plugin options:
