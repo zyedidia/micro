@@ -4,48 +4,100 @@ detect:
     filename: "\\.swift$"
 
 rules:
+ 
+    #preprocessor
+    #- preproc: \b(\#define|\#else|\#elseif|\#endif|\#if|\#selector)\b
+    - preproc: ^[[:space:]]*#[[:space:]]*(define|else|elseif|endif|if|selector)\b
+    #DebugIdentifier
+    - preproc.DebugIdentifier: \b(#column|#file|#function|#line|__COLUMN__|__FILE__|__FUNCTION__|__LINE__)\b
+
+    # Patterns
+    - type: \b(_)\b
+    
     # Operators
-    - statement: "([.:;,+*|=!?\\%]|<|>|/|-|&)"
+    - symbol.operator: ([.:;,+*|=!?\\%]|<|>|/|-|&)
+    
+    # Declaration Keywords
+    - statement.declaration: \b(associatedtype|class|deinit|enum|extension|fileprivate|func|import|init)\b
+    - statement.declaration: \b(inout|internal|let|open|operator|private|protocol|public|static|struct|subscript|typealias|var)\b
+    
+    # Statements Keywords
+    - statement: \b(break|case|continue|default|defer|do|else|fallthrough|for|guard)\b
+    - statement: \b(if|inif|repeat|return|switch|where|while)\b
+    
+    # keyword.reserved
+    - statement.reserved: \b(associativity|convenience|dynamic|didSet|final|get|infix|indirect|lazy|left|mutating)\b
+    - statement.reserved: \b(none|nonmutating|override|postfix|precedence|prefix|Protocol|required)\b
+    - statement.reserved: \b(right|set|Type|unowned|weak|willSet)\b
+    
+    # Expression and types
+    - type: \b(as|as!|as?|Any|catch|false|is|nil|rethrows|super|self|throw|throws|true|try|try!|try?)\b
+    
+    - statement.built_in: \b(abs|advance|alignof|alignofValue|anyGenerator|assert|assertionFailure|bridgeFromObjectiveC)\b
+    - statement.built_in: \b(bridgeFromObjectiveCUnconditional|bridgeToObjectiveC|bridgeToObjectiveCUnconditional|c|contains)\b
+    - statement.built_in: \b(count|countElements|countLeadingZeros|debugPrint|debugPrintln|distance|dropFirst|dropLast|dump|encodeBitsAsWords)\b
+    - statement.built_in: \b(enumerate|equal|fatalError|filter|find|getBridgedObjectiveCType|getVaList|indices|insertionSort)\b
+    - statement.built_in: \b(isBridgedToObjectiveC|isBridgedVerbatimToObjectiveC|isUniquelyReferenced|isUniquelyReferencedNonObjC)\b
+    - statement.built_in: \b(join|lexicographicalCompare|map|max|maxElement|min|minElement|numericCast|overlaps|partition|posix)\b
+    - statement.built_in: \b(precondition|preconditionFailure|print|println|quickSort|readLine|reduce|reflect)\b
+    - statement.built_in: \b(reinterpretCast!reverse|roundUpToAlignment|sizeof|sizeofValue|sort|split|startsWith|stride)\b
+    - statement.built_in: \b(strideof|strideofValue|swap|toString|transcode|underestimateCount|unsafeAddressOf|unsafeBitCast)\b
+    - statement.built_in: \b(unsafeDowncast|unsafeUnwrap|unsafeReflect|withExtendedLifetime|withObjectAtPlusZero|withUnsafePointer)\b
+    - statement.built_in: \b(withUnsafePointerToObject|withUnsafeMutablePointer|withUnsafeMutablePointers|withUnsafePointer)\b
+    - statement.built_in: \b(withUnsafePointers|withVaList|zip)\b
 
-      # Statements
-    - statement:  "(class|import|let|var|struct|enum|func|if|else|switch|case|default|for|in|internal|external|unowned|private|public|throws)\\ "
-    - statement:  "(prefix|postfix|operator|extension|lazy|get|set|self|willSet|didSet|override|super|convenience|weak|strong|mutating|return|guard)\\ "
+    # Meta
+    - statement.meta: (\b(@warn_unused_result|@exported|@lazy|@noescape|@NSCopying|@NSManaged|@objc|@convention|@required)\b)
+    - statement.meta: (\b(@noreturn|@IBAction|@IBDesignable|@IBInspectable|@IBOutlet|@infix|@prefix|@postfix|@autoclosure|@testable|@available)\b)
+    - statement.meta: (\b(@nonobjc|@NSApplicationMain|@UIApplicationMain)\b)
 
-      # Keywords
-    - statement: "(print)"
-    - statement: "(init)"
+   # Numbers
+    - constant.number: ([0-9]+)
+    
+    # Constant
+    # - constant.literal: \b(true|false|nil)\b
+    
+    # Storage Types
+    - type.storage: \b((U)?Int(8|16|32|64))\b
+    - type.storage: \b(Int|UInt|String|Bit|Bool|Character|Double|Optional|Float|Range)\b
+    - type.storage: \b(AnyObject)\b
+    
+    # Collections
+    - type.collections: \b(Array|Dictionary|Set)\b
 
-      # Numbers
-    - constant.number: "([0-9]+)"
-
-      # Standard Types
-    - type: "\\ ((U)?Int(8|16|32|64))"
-    - constant: "(true|false|nil)"
-    - type: "\\ (Double|String|Float|Boolean|Dictionary|Array|Int)"
-    - type: "\\ (AnyObject)"
-
+    # String
     - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+    
+    # Ctypes
+    - type.ctypes: \b(CBool|CChar|CUnsignedChar|CShort|CUnsignedShort|CInt|CUnsignedInt|CLong|CUnsignedLong|CLongLong|CUnsignedLongLong|CWideChar|CChar16|CChar32|CFloat|CDouble)\b
 
-    - comment:
-        start: "//"
-        end: "$"
+    # Shebang Line
+    - comment.shebang: ^(#!).*
+
+    # Todo
+    - todo: "(TODO|XXX|FIXME):?"
+
+    # Doc Comment
+    - comment.doc: (///).*
+    
+    # Line Comment
+    - comment.line: "//.*"
+    
+    # Block Comment
+    - comment.block:
+        start: "/\\*"
+        end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-
-    - comment:
-        start: "///"
-        end: "$"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
-
-    - comment:
+      
+    # Doc Block Comment
+    - comment.block:
         start: "/\\*\\*"
         end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-
