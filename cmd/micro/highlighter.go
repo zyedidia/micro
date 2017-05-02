@@ -2,7 +2,7 @@ package main
 
 import "github.com/zyedidia/micro/cmd/micro/highlight"
 
-var syntaxDefs []*highlight.Def
+var syntaxFiles []*highlight.File
 
 func LoadSyntaxFiles() {
 	InitColorscheme()
@@ -14,17 +14,15 @@ func LoadSyntaxFiles() {
 			LoadSyntaxFile(data, f.Name())
 		}
 	}
-
-	highlight.ResolveIncludes(syntaxDefs)
 }
 
 func LoadSyntaxFile(text []byte, filename string) {
-	def, err := highlight.ParseDef(text)
+	f, err := highlight.ParseFile(text)
 
 	if err != nil {
 		TermMessage("Syntax file error: " + filename + ": " + err.Error())
 		return
 	}
 
-	syntaxDefs = append(syntaxDefs, def)
+	syntaxFiles = append(syntaxFiles, f)
 }

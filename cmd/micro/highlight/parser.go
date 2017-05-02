@@ -30,9 +30,20 @@ func (g Group) String() string {
 // on filename or header (the first line of the file)
 // Then it has the rules which define how to highlight the file
 type Def struct {
+	*Header
+
+	rules *rules
+}
+
+type Header struct {
 	FileType string
-	ftdetect []*regexp.Regexp
-	rules    *rules
+	FtDetect [2]*regexp.Regexp
+}
+
+type File struct {
+	FileType string
+
+	yamlSrc map[interface{}]interface{}
 }
 
 // A Pattern is one simple syntax rule
@@ -70,8 +81,41 @@ func init() {
 	Groups = make(map[string]Group)
 }
 
-// ParseDef parses an input syntax file into a highlight Def
-func ParseDef(input []byte) (s *Def, err error) {
+func ParseFtDetect(file *File) (r [2]*regexp.Regexp, err error) {
+	rules := file.yamlSrc
+
+	loaded := 0
+	for k, v := range rules {
+		if k == "detect" {
+			ftdetect := v.(map[interface{}]interface{})
+			if len(ftdetect) >= 1 {
+				syntax, err := regexp.Compile(ftdetect["filename"].(string))
+				if err != nil {
+					return r, err
+				}
+
+				r[0] = syntax
+			}
+			if len(ftdetect) >= 2 {
+				header, err := regexp.Compile(ftdetect["header"].(string))
+				if err != nil {
+					return r, err
+				}
+
+				r[1] = header
+			}
+			loaded++
+		}
+
+		if loaded >= 2 {
+			break
+		}
+	}
+
+	return r, err
+}
+
+func ParseFile(input []byte) (f *File, err error) {
 	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
 	defer func() {
 		if e := recover(); e != nil {
@@ -84,32 +128,37 @@ func ParseDef(input []byte) (s *Def, err error) {
 		return nil, err
 	}
 
-	s = new(Def)
+	f = new(File)
+	f.yamlSrc = rules
 
 	for k, v := range rules {
 		if k == "filetype" {
 			filetype := v.(string)
 
-			s.FileType = filetype
-		} else if k == "detect" {
-			ftdetect := v.(map[interface{}]interface{})
-			if len(ftdetect) >= 1 {
-				syntax, err := regexp.Compile(ftdetect["filename"].(string))
-				if err != nil {
-					return nil, err
-				}
+			f.FileType = filetype
+			break
+		}
+	}
 
-				s.ftdetect = append(s.ftdetect, syntax)
-			}
-			if len(ftdetect) >= 2 {
-				header, err := regexp.Compile(ftdetect["header"].(string))
-				if err != nil {
-					return nil, err
-				}
+	return f, err
+}
 
-				s.ftdetect = append(s.ftdetect, header)
-			}
-		} else if k == "rules" {
+// ParseDef parses an input syntax file into a highlight Def
+func ParseDef(f *File, header *Header) (s *Def, err error) {
+	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
+	defer func() {
+		if e := recover(); e != nil {
+			err = e.(error)
+		}
+	}()
+
+	rules := f.yamlSrc
+
+	s = new(Def)
+	s.Header = header
+
+	for k, v := range rules {
+		if k == "rules" {
 			inputRules := v.([]interface{})
 
 			rules, err := parseRules(inputRules, nil)
@@ -126,38 +175,38 @@ func ParseDef(input []byte) (s *Def, err error) {
 
 // ResolveIncludes will sort out the rules for including other filetypes
 // You should call this after parsing all the Defs
-func ResolveIncludes(defs []*Def) {
-	for _, d := range defs {
-		resolveIncludesInDef(defs, d)
-	}
+func ResolveIncludes(def *Def, files []*File) {
+	resolveIncludesInDef(files, def)
 }
 
-func resolveIncludesInDef(defs []*Def, d *Def) {
+func resolveIncludesInDef(files []*File, d *Def) {
 	for _, lang := range d.rules.includes {
-		for _, searchDef := range defs {
-			if lang == searchDef.FileType {
+		for _, searchFile := range files {
+			if lang == searchFile.FileType {
+				searchDef, _ := ParseDef(searchFile, nil)
 				d.rules.patterns = append(d.rules.patterns, searchDef.rules.patterns...)
 				d.rules.regions = append(d.rules.regions, searchDef.rules.regions...)
 			}
 		}
 	}
 	for _, r := range d.rules.regions {
-		resolveIncludesInRegion(defs, r)
+		resolveIncludesInRegion(files, r)
 		r.parent = nil
 	}
 }
 
-func resolveIncludesInRegion(defs []*Def, region *region) {
+func resolveIncludesInRegion(files []*File, region *region) {
 	for _, lang := range region.rules.includes {
-		for _, searchDef := range defs {
-			if lang == searchDef.FileType {
+		for _, searchFile := range files {
+			if lang == searchFile.FileType {
+				searchDef, _ := ParseDef(searchFile, nil)
 				region.rules.patterns = append(region.rules.patterns, searchDef.rules.patterns...)
 				region.rules.regions = append(region.rules.regions, searchDef.rules.regions...)
 			}
 		}
 	}
 	for _, r := range region.rules.regions {
-		resolveIncludesInRegion(defs, r)
+		resolveIncludesInRegion(files, r)
 		r.parent = region
 	}
 }

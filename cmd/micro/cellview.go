@@ -70,7 +70,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
 
 	start := buf.Cursor.Y
-	if buf.Settings["syntax"].(bool) {
+	if buf.Settings["syntax"].(bool) && buf.syntaxDef != nil {
 		if start > 0 && buf.lines[start-1].rehighlight {
 			buf.highlighter.ReHighlightLine(buf, start-1)
 			buf.lines[start-1].rehighlight = false

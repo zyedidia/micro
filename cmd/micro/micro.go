@@ -230,7 +230,7 @@ func LoadAll() {
 	InitCommands()
 	InitBindings()
 
-	LoadSyntaxFiles()
+	InitColorscheme()
 
 	for _, tab := range tabs {
 		for _, v := range tab.views {
@@ -306,6 +306,7 @@ func main() {
 	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
+	InitColorscheme()
 
 	// Now we load the input
 	buffers := LoadInput()
@@ -313,6 +314,7 @@ func main() {
 		screen.Fini()
 		os.Exit(1)
 	}
+
 	for _, buf := range buffers {
 		// For each buffer we create a new tab and place the view in that tab
 		tab := NewTabFromView(NewView(buf))
@@ -384,12 +386,8 @@ func main() {
 
 	LoadPlugins()
 
-	// Load the syntax files, including the colorscheme
-	LoadSyntaxFiles()
-
 	for _, t := range tabs {
 		for _, v := range t.views {
-			v.Buf.UpdateRules()
 			for pl := range loadedPlugins {
 				_, err := Call(pl+".onViewOpen", v)
 				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {

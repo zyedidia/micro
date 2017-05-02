@@ -278,7 +278,8 @@ func SetOption(option, value string) error {
 	globalSettings[option] = nativeValue
 
 	if option == "colorscheme" {
-		LoadSyntaxFiles()
+		// LoadSyntaxFiles()
+		InitColorscheme()
 		for _, tab := range tabs {
 			for _, view := range tab.views {
 				view.Buf.UpdateRules()
@@ -342,7 +343,8 @@ func SetLocalOption(option, value string, view *View) error {
 	}
 
 	if option == "filetype" {
-		LoadSyntaxFiles()
+		// LoadSyntaxFiles()
+		InitColorscheme()
 		buf.UpdateRules()
 	}
 
