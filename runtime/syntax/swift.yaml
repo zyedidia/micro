@@ -5,12 +5,6 @@ detect:
 
 rules:
  
-    #preprocessor
-    #- preproc: \b(\#define|\#else|\#elseif|\#endif|\#if|\#selector)\b
-    - preproc: ^[[:space:]]*#[[:space:]]*(define|else|elseif|endif|if|selector)\b
-    #DebugIdentifier
-    - preproc.DebugIdentifier: \b(#column|#file|#function|#line|__COLUMN__|__FILE__|__FUNCTION__|__LINE__)\b
-
     # Patterns
     - type: \b(_)\b
     
@@ -31,10 +25,10 @@ rules:
     - statement.reserved: \b(right|set|Type|unowned|weak|willSet)\b
     
     # Expression and types
-    - type: \b(as|as!|as?|Any|catch|false|is|nil|rethrows|super|self|throw|throws|true|try|try!|try?)\b
+    - type: \b(as|Any|catch|is|rethrows|super|self|throw|throws|try)\b
     
     - statement.built_in: \b(abs|advance|alignof|alignofValue|anyGenerator|assert|assertionFailure|bridgeFromObjectiveC)\b
-    - statement.built_in: \b(bridgeFromObjectiveCUnconditional|bridgeToObjectiveC|bridgeToObjectiveCUnconditional|c|contains)\b
+    - statement.built_in: \b(bridgeFromObjectiveCUnconditional|bridgeToObjectiveC|bridgeToObjectiveCUnconditional|contains)\b
     - statement.built_in: \b(count|countElements|countLeadingZeros|debugPrint|debugPrintln|distance|dropFirst|dropLast|dump|encodeBitsAsWords)\b
     - statement.built_in: \b(enumerate|equal|fatalError|filter|find|getBridgedObjectiveCType|getVaList|indices|insertionSort)\b
     - statement.built_in: \b(isBridgedToObjectiveC|isBridgedVerbatimToObjectiveC|isUniquelyReferenced|isUniquelyReferencedNonObjC)\b
@@ -47,15 +41,18 @@ rules:
     - statement.built_in: \b(withUnsafePointers|withVaList|zip)\b
 
     # Meta
-    - statement.meta: (\b(@warn_unused_result|@exported|@lazy|@noescape|@NSCopying|@NSManaged|@objc|@convention|@required)\b)
-    - statement.meta: (\b(@noreturn|@IBAction|@IBDesignable|@IBInspectable|@IBOutlet|@infix|@prefix|@postfix|@autoclosure|@testable|@available)\b)
-    - statement.meta: (\b(@nonobjc|@NSApplicationMain|@UIApplicationMain)\b)
+    - statement.meta: \@\b(autoclosure|available|convention|exported|IBAction|IBDesignable|IBOutlet|IBInspectable|infix)\b
+    - statement.meta: \@\b(lazy|noreturn|noescape|nonobjc|NSApplicationMain|NSCopying|NSManaged|objc|prefix|postfix)\b
+    - statement.meta: \@\b(required|testable|warn_unused_result|UIApplicationMain)\b
+  
+    #preprocessor
+    - preproc: ^[[:space:]]*#[[:space:]]*(define|else|elseif|endif|if|selector)\b
+    - preproc.DebugIdentifier: \b(__COLUMN__|__FILE__|__FUNCTION__|__LINE__)\b
+    - preproc.DebugIdentifier: ^[[:space:]]*#[[:space:]]*(column|file|function|line)\b
 
-   # Numbers
-    - constant.number: ([0-9]+)
-    
     # Constant
-    # - constant.literal: \b(true|false|nil)\b
+    - constant: \b(true|false|nil)
+    - constant.number: ([0-9]+)
     
     # Storage Types
     - type.storage: \b((U)?Int(8|16|32|64))\b
@@ -65,16 +62,18 @@ rules:
     # Collections
     - type.collections: \b(Array|Dictionary|Set)\b
 
-    # String
-    - constant.string:
-        start: "\""
-        end: "\""
-        skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\."
-    
     # Ctypes
     - type.ctypes: \b(CBool|CChar|CUnsignedChar|CShort|CUnsignedShort|CInt|CUnsignedInt|CLong|CUnsignedLong|CLongLong|CUnsignedLongLong|CWideChar|CChar16|CChar32|CFloat|CDouble)\b
+
+    # String
+    - constant.string:
+        start: \"
+        end: \"
+        skip: \\.
+        rules:
+            - constant.specialChar: (\\0|\\\\|\\t|\\n|\\r|\\"|\\')
+            - constant.interpolation: \\\([[:graph:]]*\)
+            - constant.unicode: \\u\{[[:xdigit:]]+}
 
     # Shebang Line
     - comment.shebang: ^(#!).*
