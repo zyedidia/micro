@@ -84,13 +84,14 @@ func LoadInput() []*Buffer {
 	var filename string
 	var input []byte
 	var err error
-	var buffers []*Buffer
+	args := flag.Args()
+	buffers := make([]*Buffer, 0, len(args))
 
-	if len(flag.Args()) > 0 {
+	if len(args) > 0 {
 		// Option 1
 		// We go through each file and load it
-		for i := 0; i < len(flag.Args()); i++ {
-			filename = flag.Args()[i]
+		for i := 0; i < len(args); i++ {
+			filename = args[i]
 
 			// Check that the file exists
 			var input *os.File

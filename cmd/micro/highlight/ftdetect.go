@@ -6,7 +6,9 @@ import "regexp"
 // to determine the filetype of the file
 // It will return the corresponding syntax definition for the filetype
 func MatchFiletype(ftdetect [2]*regexp.Regexp, filename string, firstLine []byte) bool {
-	return ftdetect[0].MatchString(filename)
+	if ftdetect[0].MatchString(filename) {
+		return true
+	}
 
 	if ftdetect[1] != nil {
 		return ftdetect[1].Match(firstLine)
