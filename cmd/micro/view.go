@@ -662,6 +662,10 @@ func (v *View) openHelp(helpPage string) {
 }
 
 func (v *View) DisplayView() {
+	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
+		v.leftCol = 0
+	}
+
 	if v.Type == vtLog {
 		// Log views should always follow the cursor...
 		v.Relocate()
