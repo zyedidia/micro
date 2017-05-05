@@ -439,25 +439,27 @@ func main() {
 					t.Resize()
 				}
 			case *tcell.EventMouse:
-				if e.Buttons() == tcell.Button1 {
-					// If the user left clicked we check a couple things
-					_, h := screen.Size()
-					x, y := e.Position()
-					if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
-						// If the user clicked in the bottom bar, and there is a message down there
-						// we copy it to the clipboard.
-						// Often error messages are displayed down there so it can be useful to easily
-						// copy the message
-						clipboard.WriteAll(messenger.message, "primary")
-						break
-					}
+				if !searching {
+					if e.Buttons() == tcell.Button1 {
+						// If the user left clicked we check a couple things
+						_, h := screen.Size()
+						x, y := e.Position()
+						if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
+							// If the user clicked in the bottom bar, and there is a message down there
+							// we copy it to the clipboard.
+							// Often error messages are displayed down there so it can be useful to easily
+							// copy the message
+							clipboard.WriteAll(messenger.message, "primary")
+							break
+						}
 
-					if CurView().mouseReleased {
-						// We loop through each view in the current tab and make sure the current view
-						// is the one being clicked in
-						for _, v := range tabs[curTab].views {
-							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
-								tabs[curTab].CurView = v.Num
+						if CurView().mouseReleased {
+							// We loop through each view in the current tab and make sure the current view
+							// is the one being clicked in
+							for _, v := range tabs[curTab].views {
+								if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+									tabs[curTab].CurView = v.Num
+								}
 							}
 						}
 					}

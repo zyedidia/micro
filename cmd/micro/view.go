@@ -929,12 +929,6 @@ func (v *View) DisplayView() {
 	}
 }
 
-// DisplayCursor draws the current buffer's cursor to the screen
-func (v *View) DisplayCursor(x, y int) {
-	// screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, y)
-	screen.ShowCursor(x, y)
-}
-
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	if GetGlobalOption("termtitle").(bool) {
@@ -942,7 +936,7 @@ func (v *View) Display() {
 	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || v.Cursor.HasSelection() {
+	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || (v.Cursor.HasSelection() && v.Num == tabs[curTab].CurView) {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
