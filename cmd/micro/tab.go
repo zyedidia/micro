@@ -89,13 +89,17 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		str += t.views[t.CurView].Buf.GetName()
+		buf := t.views[t.CurView].Buf
+		str += buf.GetName()
+		if buf.IsModified {
+			str += " +"
+		}
 		if i == curTab {
 			str += "]"
 		} else {
 			str += " "
 		}
-		indicies[len(str)-1] = i + 1
+		indicies[Count(str)-1] = i + 1
 		str += " "
 	}
 	return str, indicies

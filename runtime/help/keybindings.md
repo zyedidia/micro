@@ -88,6 +88,7 @@ Delete
 Center
 InsertTab
 Save
+SaveAll
 SaveAs
 Find
 FindNext

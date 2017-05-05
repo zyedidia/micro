@@ -705,6 +705,24 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	return true
 }
 
+// SaveAll saves all open buffers
+func (v *View) SaveAll(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SaveAll", v) {
+		return false
+	}
+
+	for _, t := range tabs {
+		for _, v := range t.views {
+			v.Save(false)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("SaveAll", v)
+	}
+	return false
+}
+
 // Save the buffer to disk
 func (v *View) Save(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Save", v) {
