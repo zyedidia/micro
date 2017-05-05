@@ -111,7 +111,21 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
 	} else {
-		v.Cursor.Left()
+		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
+		tabmovement := v.Buf.Settings["tabmovement"].(bool)
+		if tabstospaces && tabmovement {
+			tabsize := int(v.Buf.Settings["tabsize"].(float64))
+			line := v.Buf.Line(v.Cursor.Y)
+			if v.Cursor.X-tabsize >= 0 && line[v.Cursor.X-tabsize:v.Cursor.X] == Spaces(tabsize) && IsStrWhitespace(line[0:v.Cursor.X-tabsize]) {
+				for i := 0; i < tabsize; i++ {
+					v.Cursor.Left()
+				}
+			} else {
+				v.Cursor.Left()
+			}
+		} else {
+			v.Cursor.Left()
+		}
 	}
 
 	if usePlugin {
@@ -130,7 +144,21 @@ func (v *View) CursorRight(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
 		v.Cursor.ResetSelection()
 	} else {
-		v.Cursor.Right()
+		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
+		tabmovement := v.Buf.Settings["tabmovement"].(bool)
+		if tabstospaces && tabmovement {
+			tabsize := int(v.Buf.Settings["tabsize"].(float64))
+			line := v.Buf.Line(v.Cursor.Y)
+			if v.Cursor.X+tabsize < Count(line) && line[v.Cursor.X:v.Cursor.X+tabsize] == Spaces(tabsize) && IsStrWhitespace(line[0:v.Cursor.X]) {
+				for i := 0; i < tabsize; i++ {
+					v.Cursor.Right()
+				}
+			} else {
+				v.Cursor.Right()
+			}
+		} else {
+			v.Cursor.Right()
+		}
 	}
 
 	if usePlugin {
