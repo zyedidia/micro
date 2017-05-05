@@ -38,7 +38,7 @@ func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsiz
 		lastWidth = width
 		rw = 0
 		if c == '\t' {
-			rw := tabsize - (lineIdx % tabsize)
+			rw = tabsize - (lineIdx % tabsize)
 			width += rw
 		} else {
 			rw = runewidth.RuneWidth(c)
