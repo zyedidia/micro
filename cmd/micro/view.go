@@ -693,9 +693,11 @@ func (v *View) DisplayView() {
 		v.lineNumOffset += 2
 	}
 
+	divider := 0
 	if v.x != 0 {
 		// One space for the extra split divider
 		v.lineNumOffset++
+		divider = 1
 	}
 
 	xOffset := v.x + v.lineNumOffset
@@ -801,25 +803,25 @@ func (v *View) DisplayView() {
 
 			// Write the spaces before the line number if necessary
 			for i := 0; i < maxLineNumLength-len(lineNum); i++ {
-				screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
+				screen.SetContent(screenX+divider, yOffset+visualLineN, ' ', nil, lineNumStyle)
 				screenX++
 			}
 			if softwrapped && visualLineN != 0 {
 				// Pad without the line number because it was written on the visual line before
 				for range lineNum {
-					screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
+					screen.SetContent(screenX+divider, yOffset+visualLineN, ' ', nil, lineNumStyle)
 					screenX++
 				}
 			} else {
 				// Write the actual line number
 				for _, ch := range lineNum {
-					screen.SetContent(screenX, yOffset+visualLineN, ch, nil, lineNumStyle)
+					screen.SetContent(screenX+divider, yOffset+visualLineN, ch, nil, lineNumStyle)
 					screenX++
 				}
 			}
 
 			// Write the extra space
-			screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
+			screen.SetContent(screenX+divider, yOffset+visualLineN, ' ', nil, lineNumStyle)
 			screenX++
 		}
 
@@ -916,12 +918,12 @@ func (v *View) DisplayView() {
 		}
 	}
 
-	if v.x != 0 && visualLineN < v.Height {
+	if divider != 0 {
 		dividerStyle := defStyle
 		if style, ok := colorscheme["divider"]; ok {
 			dividerStyle = style
 		}
-		for i := visualLineN + 1; i < v.Height; i++ {
+		for i := 0; i < v.Height; i++ {
 			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
 		}
 	}
