@@ -204,13 +204,13 @@ func (v *View) CanClose() bool {
 		if v.Buf.Settings["autosave"].(bool) {
 			char = 'y'
 		} else {
-			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.GetName()+" before closing? (y,n,esc) ", 'y', 'n')
+			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.GetName()+" before closing? (y,n,esc) ", 'y', 'n', 'Y', 'N')
 		}
 		if !canceled {
-			if char == 'y' {
+			if char == 'y' || char == 'Y' {
 				v.Save(true)
 				return true
-			} else if char == 'n' {
+			} else if char == 'n' || char == 'N' {
 				return true
 			}
 		}
