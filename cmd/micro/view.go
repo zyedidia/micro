@@ -199,18 +199,19 @@ func (v *View) ScrollDown(n int) {
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
 	if v.Type == vtDefault && v.Buf.IsModified {
-		var char rune
+		var choice bool
 		var canceled bool
 		if v.Buf.Settings["autosave"].(bool) {
-			char = 'y'
+			choice = true
 		} else {
-			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.GetName()+" before closing? (y,n,esc) ", 'y', 'n', 'Y', 'N')
+			choice, canceled = messenger.YesNoPrompt("Save changes to " + v.Buf.GetName() + " before closing? (y,n,esc) ")
 		}
 		if !canceled {
-			if char == 'y' || char == 'Y' {
+			//if char == 'y' {
+			if choice {
 				v.Save(true)
 				return true
-			} else if char == 'n' || char == 'N' {
+			} else {
 				return true
 			}
 		}
