@@ -172,6 +172,8 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 				}
 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
 				m.AddLog("\t--> (cancel)")
+				m.Clear()
+				m.Reset()
 				m.hasPrompt = false
 				return false, true
 			}
