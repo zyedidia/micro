@@ -161,11 +161,11 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyRune:
-				if e.Rune() == 'y' {
+				if e.Rune() == 'y' || e.Rune() == 'Y' {
 					m.AddLog("\t--> y")
 					m.hasPrompt = false
 					return true, false
-				} else if e.Rune() == 'n' {
+				} else if e.Rune() == 'n' || e.Rune() == 'N' {
 					m.AddLog("\t--> n")
 					m.hasPrompt = false
 					return false, false
