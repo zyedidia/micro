@@ -155,6 +155,10 @@ Here are the options that you can set:
 
     default value: `off`
 
+* `indentguides`: enable or disable indentation guides.
+
+    default value: `off`
+
 ---
 
 Default plugin options:

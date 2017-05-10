@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+
 	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/tcell"
 )
@@ -68,6 +70,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	tabsize := int(buf.Settings["tabsize"].(float64))
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
+	indentguides := buf.Settings["indentguides"].(bool)
 
 	start := buf.Cursor.Y
 	if buf.Settings["syntax"].(bool) && buf.syntaxDef != nil {
@@ -87,6 +90,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	lineN := top
 
 	curStyle := defStyle
+	curIndentLevel := 0
+	indentString := buf.IndentString()
+	indentLength := len(indentString)
 	for viewLine < height {
 		if lineN >= len(buf.lines) {
 			break
@@ -102,6 +108,13 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		viewCol := -startOffset
 		if startStyle != nil {
 			curStyle = *startStyle
+		}
+
+		firstCharIndex := len(lineStr) - len(strings.TrimLeft(lineStr, indentString))
+		if firstCharIndex > indentLength*curIndentLevel {
+			curIndentLevel++
+		} else if firstCharIndex <= indentLength*curIndentLevel && firstCharIndex != 0 {
+			curIndentLevel--
 		}
 
 		// We'll either draw the length of the line, or the width of the screen
@@ -130,17 +143,20 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			if viewCol >= 0 {
 				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle, 1}
 			}
+
+			indentStyle := curStyle
+			if group, ok := colorscheme["indent-char"]; ok {
+				indentStyle = group
+			}
+			if indentguides && colN%tabsize == 0 && colN <= curIndentLevel*tabsize && lineStr[colN] == indentString[0] && viewCol >= 0 {
+				c.lines[viewLine][viewCol].drawChar = '|'
+				c.lines[viewLine][viewCol].style = indentStyle
+			}
 			if char == '\t' {
 				charWidth := tabsize - (viewCol+left)%tabsize
 				if viewCol >= 0 {
 					c.lines[viewLine][viewCol].drawChar = indentchar
 					c.lines[viewLine][viewCol].width = charWidth
-
-					indentStyle := curStyle
-					if group, ok := colorscheme["indent-char"]; ok {
-						indentStyle = group
-					}
-
 					c.lines[viewLine][viewCol].style = indentStyle
 				}
 
