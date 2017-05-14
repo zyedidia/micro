@@ -338,7 +338,6 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	dir, _ := homedir.Dir()
-	b.Path = strings.Replace(filename, "~", dir, 1)
 	if b.Settings["rmtrailingws"].(bool) {
 		r, _ := regexp.Compile(`[ \t]+$`)
 		for lineNum, line := range b.Lines(0, b.NumLines) {
@@ -361,6 +360,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
+		b.Path = strings.Replace(filename, "~", dir, 1)
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()

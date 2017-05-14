@@ -931,7 +931,7 @@ func (v *View) DisplayView() {
 
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
-	if GetGlobalOption("termtitle").(bool) {
+	if globalSettings["termtitle"].(bool) {
 		screen.SetTitle("micro: " + v.Buf.GetName())
 	}
 	v.DisplayView()

@@ -764,26 +764,8 @@ func (v *View) Save(usePlugin bool) bool {
 	// If this is an empty buffer, ask for a filename
 	if v.Buf.Path == "" {
 		v.SaveAs(false)
-	}
-	err := v.Buf.Save()
-	if err != nil {
-		if strings.HasSuffix(err.Error(), "permission denied") {
-			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
-			if choice {
-				err = v.Buf.SaveWithSudo()
-				if err != nil {
-					messenger.Error(err.Error())
-					return false
-				}
-				messenger.Message("Saved " + v.Buf.Path)
-			}
-			messenger.Reset()
-			messenger.Clear()
-		} else {
-			messenger.Error(err.Error())
-		}
 	} else {
-		messenger.Message("Saved " + v.Buf.Path)
+		v.saveToFile(v.Buf.Path)
 	}
 
 	if usePlugin {
@@ -792,16 +774,42 @@ func (v *View) Save(usePlugin bool) bool {
 	return false
 }
 
+// This function saves the buffer to `filename` and changes the buffer's path and name
+// to `filename` if the save is successful
+func (v *View) saveToFile(filename string) {
+	err := v.Buf.SaveAs(filename)
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "permission denied") {
+			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
+			if choice {
+				err = v.Buf.SaveAsWithSudo(filename)
+				if err != nil {
+					messenger.Error(err.Error())
+				} else {
+					v.Buf.Path = filename
+					v.Buf.name = filename
+					messenger.Message("Saved " + filename)
+				}
+			}
+			messenger.Reset()
+			messenger.Clear()
+		} else {
+			messenger.Error(err.Error())
+		}
+	} else {
+		v.Buf.Path = filename
+		v.Buf.name = filename
+		messenger.Message("Saved " + filename)
+	}
+}
+
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
 	filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 	if !canceled {
 		// the filename might or might not be quoted, so unquote first then join the strings.
 		filename = strings.Join(SplitCommandArgs(filename), " ")
-		v.Buf.Path = filename
-		v.Buf.name = filename
-
-		v.Save(true)
+		v.saveToFile(filename)
 	}
 
 	return false
