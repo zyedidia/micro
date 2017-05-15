@@ -65,6 +65,11 @@ Here are the options that you can set:
 
 	default value: `off`
 
+* `tabmovement`: navigate spaces at the beginning of lines as if they are tabs (e.g. move over 4 spaces at once).
+   This option only does anything if `tabstospaces` is on.
+
+    default value: `off`
+
 * `autoindent`: when creating a new line use the same indentation as the 
    previous line
 

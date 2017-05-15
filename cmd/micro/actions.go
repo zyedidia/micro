@@ -111,7 +111,21 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
 	} else {
-		v.Cursor.Left()
+		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
+		tabmovement := v.Buf.Settings["tabmovement"].(bool)
+		if tabstospaces && tabmovement {
+			tabsize := int(v.Buf.Settings["tabsize"].(float64))
+			line := v.Buf.Line(v.Cursor.Y)
+			if v.Cursor.X-tabsize >= 0 && line[v.Cursor.X-tabsize:v.Cursor.X] == Spaces(tabsize) && IsStrWhitespace(line[0:v.Cursor.X-tabsize]) {
+				for i := 0; i < tabsize; i++ {
+					v.Cursor.Left()
+				}
+			} else {
+				v.Cursor.Left()
+			}
+		} else {
+			v.Cursor.Left()
+		}
 	}
 
 	if usePlugin {
@@ -130,7 +144,21 @@ func (v *View) CursorRight(usePlugin bool) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
 		v.Cursor.ResetSelection()
 	} else {
-		v.Cursor.Right()
+		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
+		tabmovement := v.Buf.Settings["tabmovement"].(bool)
+		if tabstospaces && tabmovement {
+			tabsize := int(v.Buf.Settings["tabsize"].(float64))
+			line := v.Buf.Line(v.Cursor.Y)
+			if v.Cursor.X+tabsize < Count(line) && line[v.Cursor.X:v.Cursor.X+tabsize] == Spaces(tabsize) && IsStrWhitespace(line[0:v.Cursor.X]) {
+				for i := 0; i < tabsize; i++ {
+					v.Cursor.Right()
+				}
+			} else {
+				v.Cursor.Right()
+			}
+		} else {
+			v.Cursor.Right()
+		}
 	}
 
 	if usePlugin {
@@ -705,39 +733,39 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	return true
 }
 
+// SaveAll saves all open buffers
+func (v *View) SaveAll(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SaveAll", v) {
+		return false
+	}
+
+	for _, t := range tabs {
+		for _, v := range t.views {
+			v.Save(false)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("SaveAll", v)
+	}
+	return false
+}
+
 // Save the buffer to disk
 func (v *View) Save(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Save", v) {
 		return false
 	}
 
-	if v.Type == vtHelp {
-		// We can't save the help text
+	if v.Type.scratch == true {
+		// We can't save any view type with scratch set. eg help and log text
 		return false
 	}
 	// If this is an empty buffer, ask for a filename
 	if v.Buf.Path == "" {
 		v.SaveAs(false)
-	}
-	err := v.Buf.Save()
-	if err != nil {
-		if strings.HasSuffix(err.Error(), "permission denied") {
-			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
-			if choice {
-				err = v.Buf.SaveWithSudo()
-				if err != nil {
-					messenger.Error(err.Error())
-					return false
-				}
-				messenger.Message("Saved " + v.Buf.Path)
-			}
-			messenger.Reset()
-			messenger.Clear()
-		} else {
-			messenger.Error(err.Error())
-		}
 	} else {
-		messenger.Message("Saved " + v.Buf.Path)
+		v.saveToFile(v.Buf.Path)
 	}
 
 	if usePlugin {
@@ -746,16 +774,42 @@ func (v *View) Save(usePlugin bool) bool {
 	return false
 }
 
+// This function saves the buffer to `filename` and changes the buffer's path and name
+// to `filename` if the save is successful
+func (v *View) saveToFile(filename string) {
+	err := v.Buf.SaveAs(filename)
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "permission denied") {
+			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
+			if choice {
+				err = v.Buf.SaveAsWithSudo(filename)
+				if err != nil {
+					messenger.Error(err.Error())
+				} else {
+					v.Buf.Path = filename
+					v.Buf.name = filename
+					messenger.Message("Saved " + filename)
+				}
+			}
+			messenger.Reset()
+			messenger.Clear()
+		} else {
+			messenger.Error(err.Error())
+		}
+	} else {
+		v.Buf.Path = filename
+		v.Buf.name = filename
+		messenger.Message("Saved " + filename)
+	}
+}
+
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
 	filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 	if !canceled {
 		// the filename might or might not be quoted, so unquote first then join the strings.
 		filename = strings.Join(SplitCommandArgs(filename), " ")
-		v.Buf.Path = filename
-		v.Buf.name = filename
-
-		v.Save(true)
+		v.saveToFile(filename)
 	}
 
 	return false

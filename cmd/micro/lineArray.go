@@ -2,31 +2,11 @@ package main
 
 import (
 	"bufio"
-	"bytes"
 	"io"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
-
-func lineCounter(r io.Reader) (int, error) {
-	buf := make([]byte, 32*1024)
-	count := 0
-	lineSep := []byte{'\n'}
-
-	for {
-		c, err := r.Read(buf)
-		count += bytes.Count(buf[:c], lineSep)
-
-		switch {
-		case err == io.EOF:
-			return count, nil
-
-		case err != nil:
-			return count, err
-		}
-	}
-}
 
 func runeToByteIndex(n int, txt []byte) int {
 	if n == 0 {

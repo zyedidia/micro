@@ -199,18 +199,19 @@ func (v *View) ScrollDown(n int) {
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
 	if v.Type == vtDefault && v.Buf.IsModified {
-		var char rune
+		var choice bool
 		var canceled bool
 		if v.Buf.Settings["autosave"].(bool) {
-			char = 'y'
+			choice = true
 		} else {
-			char, canceled = messenger.LetterPrompt("Save changes to "+v.Buf.GetName()+" before closing? (y,n,esc) ", 'y', 'n')
+			choice, canceled = messenger.YesNoPrompt("Save changes to " + v.Buf.GetName() + " before closing? (y,n,esc) ")
 		}
 		if !canceled {
-			if char == 'y' {
+			//if char == 'y' {
+			if choice {
 				v.Save(true)
 				return true
-			} else if char == 'n' {
+			} else {
 				return true
 			}
 		}
@@ -662,6 +663,10 @@ func (v *View) openHelp(helpPage string) {
 }
 
 func (v *View) DisplayView() {
+	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
+		v.leftCol = 0
+	}
+
 	if v.Type == vtLog {
 		// Log views should always follow the cursor...
 		v.Relocate()
@@ -689,9 +694,11 @@ func (v *View) DisplayView() {
 		v.lineNumOffset += 2
 	}
 
+	divider := 0
 	if v.x != 0 {
 		// One space for the extra split divider
 		v.lineNumOffset++
+		divider = 1
 	}
 
 	xOffset := v.x + v.lineNumOffset
@@ -797,25 +804,25 @@ func (v *View) DisplayView() {
 
 			// Write the spaces before the line number if necessary
 			for i := 0; i < maxLineNumLength-len(lineNum); i++ {
-				screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
+				screen.SetContent(screenX+divider, yOffset+visualLineN, ' ', nil, lineNumStyle)
 				screenX++
 			}
 			if softwrapped && visualLineN != 0 {
 				// Pad without the line number because it was written on the visual line before
 				for range lineNum {
-					screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
+					screen.SetContent(screenX+divider, yOffset+visualLineN, ' ', nil, lineNumStyle)
 					screenX++
 				}
 			} else {
 				// Write the actual line number
 				for _, ch := range lineNum {
-					screen.SetContent(screenX, yOffset+visualLineN, ch, nil, lineNumStyle)
+					screen.SetContent(screenX+divider, yOffset+visualLineN, ch, nil, lineNumStyle)
 					screenX++
 				}
 			}
 
 			// Write the extra space
-			screen.SetContent(screenX, yOffset+visualLineN, ' ', nil, lineNumStyle)
+			screen.SetContent(screenX+divider, yOffset+visualLineN, ' ', nil, lineNumStyle)
 			screenX++
 		}
 
@@ -912,7 +919,7 @@ func (v *View) DisplayView() {
 		}
 	}
 
-	if v.x != 0 && visualLineN < v.Height {
+	if divider != 0 {
 		dividerStyle := defStyle
 		if style, ok := colorscheme["divider"]; ok {
 			dividerStyle = style
@@ -923,20 +930,14 @@ func (v *View) DisplayView() {
 	}
 }
 
-// DisplayCursor draws the current buffer's cursor to the screen
-func (v *View) DisplayCursor(x, y int) {
-	// screen.ShowCursor(v.x+v.Cursor.GetVisualX()+v.lineNumOffset-v.leftCol, y)
-	screen.ShowCursor(x, y)
-}
-
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
-	if GetGlobalOption("termtitle").(bool) {
+	if globalSettings["termtitle"].(bool) {
 		screen.SetTitle("micro: " + v.Buf.GetName())
 	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || v.Cursor.HasSelection() {
+	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || (v.Cursor.HasSelection() && v.Num == tabs[curTab].CurView) {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()

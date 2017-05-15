@@ -88,6 +88,7 @@ Delete
 Center
 InsertTab
 Save
+SaveAll
 SaveAs
 Find
 FindNext
@@ -282,7 +283,9 @@ Enter
     "CtrlLeft":       "StartOfLine",
     "CtrlRight":      "EndOfLine",
     "CtrlShiftLeft":  "SelectToStartOfLine",
+    "ShiftHome":      "SelectToStartOfLine",
     "CtrlShiftRight": "SelectToEndOfLine",
+    "ShiftEnd":       "SelectToEndOfLine",
     "CtrlUp":         "CursorStart",
     "CtrlDown":       "CursorEnd",
     "CtrlShiftUp":    "SelectToStart",

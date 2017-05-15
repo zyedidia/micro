@@ -38,7 +38,7 @@ func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsiz
 		lastWidth = width
 		rw = 0
 		if c == '\t' {
-			rw := tabsize - (lineIdx % tabsize)
+			rw = tabsize - (lineIdx % tabsize)
 			width += rw
 		} else {
 			rw = runewidth.RuneWidth(c)
@@ -67,10 +67,15 @@ type CellView struct {
 func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	tabsize := int(buf.Settings["tabsize"].(float64))
 	softwrap := buf.Settings["softwrap"].(bool)
-	indentchar := []rune(buf.Settings["indentchar"].(string))[0]
+	indentrunes := []rune(buf.Settings["indentchar"].(string))
+	// if empty indentchar settings, use space
+	if indentrunes == nil || len(indentrunes) == 0 {
+		indentrunes = []rune(" ")
+	}
+	indentchar := indentrunes[0]
 
 	start := buf.Cursor.Y
-	if buf.Settings["syntax"].(bool) {
+	if buf.Settings["syntax"].(bool) && buf.syntaxDef != nil {
 		if start > 0 && buf.lines[start-1].rehighlight {
 			buf.highlighter.ReHighlightLine(buf, start-1)
 			buf.lines[start-1].rehighlight = false

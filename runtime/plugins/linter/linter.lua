@@ -31,8 +31,10 @@ function runLinter()
         lint("gcc", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
 	  elseif ft == "c++" then
        lint("gcc", "gcc", {"-fsyntax-only","-std=c++14", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")		
-    elseif ft == "swift" then
+    elseif ft == "swift" and OS == "darwin" then 
         lint("switfc", "xcrun", {"swiftc", file}, "%f:%l:%d+:.+: %m")
+    elseif ft == "swift" and OS == "linux" then 
+        lint("switfc", "swiftc", {file}, "%f:%l:%d+:.+: %m")
     elseif ft == "Objective-C" then
         lint("clang", "xcrun", {"clang", "-fsyntax-only", "-Wall", "-Wextra", file}, "%f:%l:%d+:.+: %m")
     elseif ft == "d" then

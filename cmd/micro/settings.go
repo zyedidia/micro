@@ -201,6 +201,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"syntax":         true,
 		"tabbaralways":   false,
 		"numberedtabs":   true,
+		"tabmovement":    false,
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"termtitle":      false,
@@ -236,6 +237,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"splitBottom":    true,
 		"statusline":     true,
 		"syntax":         true,
+		"tabmovement":    false,
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
@@ -283,7 +285,8 @@ func SetOption(option, value string) error {
 	globalSettings[option] = nativeValue
 
 	if option == "colorscheme" {
-		LoadSyntaxFiles()
+		// LoadSyntaxFiles()
+		InitColorscheme()
 		for _, tab := range tabs {
 			for _, view := range tab.views {
 				view.Buf.UpdateRules()
@@ -347,7 +350,8 @@ func SetLocalOption(option, value string, view *View) error {
 	}
 
 	if option == "filetype" {
-		LoadSyntaxFiles()
+		// LoadSyntaxFiles()
+		InitColorscheme()
 		buf.UpdateRules()
 	}
 

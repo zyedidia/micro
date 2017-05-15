@@ -185,12 +185,66 @@ func (b *Buffer) GetName() string {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
-	b.syntaxDef = highlight.DetectFiletype(syntaxDefs, b.Path, []byte(b.Line(0)))
-	if b.highlighter == nil || b.Settings["filetype"].(string) != b.syntaxDef.FileType {
-		b.Settings["filetype"] = b.syntaxDef.FileType
-		b.highlighter = highlight.NewHighlighter(b.syntaxDef)
-		if b.Settings["syntax"].(bool) {
-			b.highlighter.HighlightStates(b)
+	rehighlight := false
+	var files []*highlight.File
+	for _, f := range ListRuntimeFiles(RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+		} else {
+			file, err := highlight.ParseFile(data)
+			if err != nil {
+				TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+			ftdetect, err := highlight.ParseFtDetect(file)
+			if err != nil {
+				TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+
+			ft := b.Settings["filetype"].(string)
+			if ft == "Unknown" || ft == "" {
+				if highlight.MatchFiletype(ftdetect, b.Path, b.lines[0].data) {
+					header := new(highlight.Header)
+					header.FileType = file.FileType
+					header.FtDetect = ftdetect
+					b.syntaxDef, err = highlight.ParseDef(file, header)
+					if err != nil {
+						TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
+					rehighlight = true
+				}
+			} else {
+				if file.FileType == ft {
+					header := new(highlight.Header)
+					header.FileType = file.FileType
+					header.FtDetect = ftdetect
+					b.syntaxDef, err = highlight.ParseDef(file, header)
+					if err != nil {
+						TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
+					rehighlight = true
+				}
+			}
+			files = append(files, file)
+		}
+	}
+
+	if b.syntaxDef != nil {
+		highlight.ResolveIncludes(b.syntaxDef, files)
+	}
+	files = nil
+
+	if b.highlighter == nil || rehighlight {
+		if b.syntaxDef != nil {
+			b.Settings["filetype"] = b.syntaxDef.FileType
+			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
+			if b.Settings["syntax"].(bool) {
+				b.highlighter.HighlightStates(b)
+			}
 		}
 	}
 }
@@ -284,7 +338,6 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	dir, _ := homedir.Dir()
-	b.Path = strings.Replace(filename, "~", dir, 1)
 	if b.Settings["rmtrailingws"].(bool) {
 		r, _ := regexp.Compile(`[ \t]+$`)
 		for lineNum, line := range b.Lines(0, b.NumLines) {
@@ -307,6 +360,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
+		b.Path = strings.Replace(filename, "~", dir, 1)
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()

@@ -82,6 +82,16 @@ func IsWhitespace(c rune) bool {
 	return c == ' ' || c == '\t' || c == '\n'
 }
 
+// IsStrWhitespace returns true if the given string is all whitespace
+func IsStrWhitespace(str string) bool {
+	for _, c := range str {
+		if !IsWhitespace(c) {
+			return false
+		}
+	}
+	return true
+}
+
 // Contains returns whether or not a string array contains a given string
 func Contains(list []string, a string) bool {
 	for _, b := range list {
