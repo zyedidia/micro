@@ -757,8 +757,8 @@ func (v *View) Save(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Type == vtHelp {
-		// We can't save the help text
+	if v.Type.scratch == true {
+		// We can't save any view type with scratch set. eg help and log text
 		return false
 	}
 	// If this is an empty buffer, ask for a filename
