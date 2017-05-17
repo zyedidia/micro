@@ -11,11 +11,11 @@ import (
 const (
 	// Opposite and undoing events must have opposite values
 
-	// TextEventInsert repreasents an insertion event
+	// TextEventInsert represents an insertion event
 	TextEventInsert = 1
 	// TextEventRemove represents a deletion event
 	TextEventRemove = -1
-
+	// TextEventReplace represents a replace event
 	TextEventReplace = 0
 )
 
@@ -117,7 +117,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 	eh.Execute(e)
 }
 
-// Multiple creates an multiple insertions executes them
+// MultipleReplace creates an multiple insertions executes them
 func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 	e := &TextEvent{
 		C:         eh.buf.Cursor,
