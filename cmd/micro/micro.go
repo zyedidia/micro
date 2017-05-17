@@ -309,7 +309,6 @@ func main() {
 	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
 	messenger.history = make(map[string][]string)
-	InitColorscheme()
 
 	// Now we load the input
 	buffers := LoadInput()
@@ -400,6 +399,8 @@ func main() {
 			}
 		}
 	}
+
+	InitColorscheme()
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
