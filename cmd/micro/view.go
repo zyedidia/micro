@@ -488,23 +488,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 		if !isBinding && e.Key() == tcell.KeyRune {
-			// Insert a character
-			if v.Cursor.HasSelection() {
-				v.Cursor.DeleteSelection()
-				v.Cursor.ResetSelection()
-			}
-			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-			v.Cursor.Right()
-
-			for pl := range loadedPlugins {
-				_, err := Call(pl+".onRune", string(e.Rune()), v)
-				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-					TermMessage(err)
+			// Check viewtype is not readonly don't insert a rune (readonly help and log view etc.)
+			if v.Type.readonly == false {
+				// Insert a character
+				if v.Cursor.HasSelection() {
+					v.Cursor.DeleteSelection()
+					v.Cursor.ResetSelection()
 				}
-			}
+				v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+				v.Cursor.Right()
 
-			if recordingMacro {
-				curMacro = append(curMacro, e.Rune())
+				for pl := range loadedPlugins {
+					_, err := Call(pl+".onRune", string(e.Rune()), v)
+					if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+						TermMessage(err)
+					}
+				}
+
+				if recordingMacro {
+					curMacro = append(curMacro, e.Rune())
+				}
 			}
 		}
 	case *tcell.EventPaste:
