@@ -488,7 +488,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 		if !isBinding && e.Key() == tcell.KeyRune {
-			// Check viewtype is not readonly don't insert a rune (readonly help and log view etc.)
+			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.readonly == false {
 				// Insert a character
 				if v.Cursor.HasSelection() {
@@ -511,13 +511,16 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 	case *tcell.EventPaste:
-		if !PreActionCall("Paste", v) {
-			break
+		// Check viewtype if readonly don't paste (readonly help and log view etc.)
+		if v.Type.readonly == false {
+			if !PreActionCall("Paste", v) {
+				break
+			}
+
+			v.paste(e.Text())
+
+			PostActionCall("Paste", v)
 		}
-
-		v.paste(e.Text())
-
-		PostActionCall("Paste", v)
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
@@ -574,9 +577,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 			}
 		case tcell.Button2:
-			// Middle mouse button was clicked,
-			// We should paste primary
-			v.PastePrimary(true)
+			// Check viewtype if readonly don't paste (readonly help and log view etc.)
+			if v.Type.readonly == false {
+				// Middle mouse button was clicked,
+				// We should paste primary
+				v.PastePrimary(true)
+			}
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
