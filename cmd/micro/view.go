@@ -462,6 +462,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
+		readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
 		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
 			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
@@ -474,11 +475,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 						relocate = false
 						isBinding = true
 						for _, action := range actions {
-							relocate = action(v, true) || relocate
-							funcName := FuncName(action)
-							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
-								if recordingMacro {
-									curMacro = append(curMacro, action)
+							readonlyBindingsResult := false
+							funcName := ShortFuncName(action)
+							if v.Type.readonly == true {
+								// check for readonly and if true only let key bindings get called if they do not change the contents.
+								for _, readonlyBindings := range readonlyBindingsList {
+									if strings.Contains(funcName, readonlyBindings) {
+										readonlyBindingsResult = true
+									}
+								}
+							}
+							if !readonlyBindingsResult {
+								// call the key binding
+								relocate = action(v, true) || relocate
+								// Macro
+								if funcName != "ToggleMacro" && funcName != "PlayMacro" {
+									if recordingMacro {
+										curMacro = append(curMacro, action)
+									}
 								}
 							}
 						}
