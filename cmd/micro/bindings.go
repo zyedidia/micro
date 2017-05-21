@@ -90,6 +90,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"HSplit":              (*View).HSplitBinding,
 	"ToggleMacro":         (*View).ToggleMacro,
 	"PlayMacro":           (*View).PlayMacro,
+	"Suspend":             (*View).Suspend,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,

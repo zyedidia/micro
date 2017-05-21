@@ -837,8 +837,6 @@ func (v *View) Find(usePlugin bool) bool {
 	return true
 }
 
-func (v *View) Suspend(usePlugin bool) bool { return false }
-
 // FindNext searches forwards for the last used search term
 func (v *View) FindNext(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("FindNext", v) {
