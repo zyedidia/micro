@@ -2,6 +2,9 @@ package main
 
 import "syscall"
 
+// Suspend sends micro to the background. This is the same as pressing CtrlZ in most unix programs.
+// This only works on linux and has no default binding.
+// This code was adapted from the suspend code in nsf/godit
 func (v *View) Suspend(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Suspend", v) {
 		return false
@@ -19,7 +22,7 @@ func (v *View) Suspend(usePlugin bool) bool {
 	tid := syscall.Gettid()
 	err := syscall.Tgkill(pid, tid, syscall.SIGSTOP)
 	if err != nil {
-		panic(err)
+		TermMessage(err)
 	}
 
 	if !screenWasNil {
