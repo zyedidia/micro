@@ -186,6 +186,12 @@ Default plugin options:
 
 	default value: `on`
 
+* `ftoptions`: by default, micro will set some options based on the filetype. At the moment, micro will
+   use tabs for makefiles and spaces for python files regardless of your settings. If you would like to
+   disable this behavior turn this option off.
+
+	default value: `on`
+
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
