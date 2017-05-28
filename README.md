@@ -99,6 +99,8 @@ cd $GOPATH/src/github.com/zyedidia/micro
 make install
 ```
 
+Please make sure that when you are working with micro's code, you are working on your `GOPATH`.
+
 The binary will then be installed to `$GOPATH/bin` (or your `$GOBIN`).
 
 You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
