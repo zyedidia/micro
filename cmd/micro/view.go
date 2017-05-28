@@ -937,7 +937,7 @@ func (v *View) Display() {
 	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || (v.Cursor.HasSelection() && v.Num == tabs[curTab].CurView) {
+	if v.Num == tabs[curTab].CurView && (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1 || v.Cursor.HasSelection()) {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
