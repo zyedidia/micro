@@ -267,9 +267,14 @@ func Abs(n int) int {
 	return n
 }
 
-// FuncName returns the name of a given function object
+// FuncName returns the full name of a given function object
 func FuncName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
+
+// ShortFuncName returns the name only of a given function object
+func ShortFuncName(i interface{}) string {
+	return strings.TrimPrefix(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), "main.(*View).")
 }
 
 // SplitCommandArgs separates multiple command arguments which may be quoted.
