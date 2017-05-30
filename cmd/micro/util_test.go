@@ -1,7 +1,10 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
 	"reflect"
+	"strings"
 	"testing"
 )
 
@@ -152,5 +155,54 @@ func TestWidthOfLargeRunes(t *testing.T) {
 	}
 	if w := WidthOfLargeRunes("12\t2\t", tabsize); w != 3 {
 		t.Error("WidthOfLargeRunes 5 Failed. Got", w)
+	}
+}
+
+func TestFindProjectRoot(t *testing.T) {
+	root := FindProjectRoot("./util.go")
+
+	if _, err := os.Stat(filepath.Join(root, ".git")); os.IsNotExist(err) {
+		t.Error("FindProjectRoot 1 failed. .git not in path")
+	}
+
+	if _, err := os.Stat(filepath.Join(root, "Makefile")); os.IsNotExist(err) {
+		t.Error("FindProjectRoot 2 failed. Makefile not in path")
+	}
+
+	root = FindProjectRoot("./../../Makefile")
+
+	if _, err := os.Stat(filepath.Join(root, "Makefile")); os.IsNotExist(err) {
+		t.Error("FindProjectRoot 3 failed. Makefile not in path")
+	}
+}
+
+func TestListProjectFiles(t *testing.T) {
+	root := FindProjectRoot("./util.go")
+
+	if files := ListProjectFiles(root, 100); len(files) == 0 {
+		t.Error("ListProjectFiles 1 failed. No files returned.", files)
+	}
+
+	root = FindProjectRoot("/")
+
+	if files := ListProjectFiles(root, 100); len(files) > 100 {
+		t.Error("ListProjectFiles 2 failed. Too many files returned. ", len(files), files)
+	}
+
+}
+
+func TestListProjectFilesRel(t *testing.T) {
+	root := FindProjectRoot("./util.go")
+
+	files := ListProjectFilesRel(root, 100)
+
+	if len(files) == 0 {
+		t.Error("ListProjectFilesRel 1 failed. No files returned.")
+	}
+
+	for _, file := range files {
+		if strings.HasPrefix(file, string(os.PathSeparator)) {
+			t.Error("ListProjectFilesRel Non relative path: ", file)
+		}
 	}
 }
