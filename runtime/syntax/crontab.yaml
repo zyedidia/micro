@@ -1,0 +1,23 @@
+filetype: crontab
+
+detect:
+    filename: "crontab$"
+    header: "^#.*?/etc/crontab"
+
+rules:
+      # Numbers
+    - statement: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(.*)$\\n?"
+    - constant: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)"
+    
+      # Shell Values
+    - type: "^[A-Z]+\\="
+
+      # Conditionals
+    - special: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|^|!|=|&|\\|)"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
