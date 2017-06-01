@@ -128,12 +128,12 @@ by using `CurView().Buf`, which lets you access the `FileType`, `Path`, `Name`..
 
 The possible methods which you can call using the `messenger` variable are:
 
-* `messenger.Message(msg ...interface{})`
-* `messenger.Error(msg ...interface{})`
-* `messenger.YesNoPrompt(prompt string) (bool, bool)`
-* `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
+* `messenger:Message(message String)`
+* `messenger:Error(error String)`
+* `messenger:YesNoPrompt(prompt String) (bool, bool)`
+* `messenger:Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 
-If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+If you want a standard prompt, just use `messenger:Prompt(prompt, "", 0)`
 
 # Adding help files, syntax files, or colorschemes in your plugin
 
