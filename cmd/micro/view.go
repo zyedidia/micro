@@ -462,6 +462,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
+		readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
 		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
 			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
@@ -474,11 +475,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 						relocate = false
 						isBinding = true
 						for _, action := range actions {
-							relocate = action(v, true) || relocate
-							funcName := FuncName(action)
-							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
-								if recordingMacro {
-									curMacro = append(curMacro, action)
+							readonlyBindingsResult := false
+							funcName := ShortFuncName(action)
+							if v.Type.readonly == true {
+								// check for readonly and if true only let key bindings get called if they do not change the contents.
+								for _, readonlyBindings := range readonlyBindingsList {
+									if strings.Contains(funcName, readonlyBindings) {
+										readonlyBindingsResult = true
+									}
+								}
+							}
+							if !readonlyBindingsResult {
+								// call the key binding
+								relocate = action(v, true) || relocate
+								// Macro
+								if funcName != "ToggleMacro" && funcName != "PlayMacro" {
+									if recordingMacro {
+										curMacro = append(curMacro, action)
+									}
 								}
 							}
 						}
@@ -488,33 +502,39 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 		if !isBinding && e.Key() == tcell.KeyRune {
-			// Insert a character
-			if v.Cursor.HasSelection() {
-				v.Cursor.DeleteSelection()
-				v.Cursor.ResetSelection()
-			}
-			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-			v.Cursor.Right()
-
-			for pl := range loadedPlugins {
-				_, err := Call(pl+".onRune", string(e.Rune()), v)
-				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-					TermMessage(err)
+			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
+			if v.Type.readonly == false {
+				// Insert a character
+				if v.Cursor.HasSelection() {
+					v.Cursor.DeleteSelection()
+					v.Cursor.ResetSelection()
 				}
-			}
+				v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+				v.Cursor.Right()
 
-			if recordingMacro {
-				curMacro = append(curMacro, e.Rune())
+				for pl := range loadedPlugins {
+					_, err := Call(pl+".onRune", string(e.Rune()), v)
+					if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+						TermMessage(err)
+					}
+				}
+
+				if recordingMacro {
+					curMacro = append(curMacro, e.Rune())
+				}
 			}
 		}
 	case *tcell.EventPaste:
-		if !PreActionCall("Paste", v) {
-			break
+		// Check viewtype if readonly don't paste (readonly help and log view etc.)
+		if v.Type.readonly == false {
+			if !PreActionCall("Paste", v) {
+				break
+			}
+
+			v.paste(e.Text())
+
+			PostActionCall("Paste", v)
 		}
-
-		v.paste(e.Text())
-
-		PostActionCall("Paste", v)
 	case *tcell.EventMouse:
 		x, y := e.Position()
 		x -= v.lineNumOffset - v.leftCol + v.x
@@ -571,9 +591,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 			}
 		case tcell.Button2:
-			// Middle mouse button was clicked,
-			// We should paste primary
-			v.PastePrimary(true)
+			// Check viewtype if readonly don't paste (readonly help and log view etc.)
+			if v.Type.readonly == false {
+				// Middle mouse button was clicked,
+				// We should paste primary
+				v.PastePrimary(true)
+			}
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -937,7 +960,7 @@ func (v *View) Display() {
 	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || (v.Cursor.HasSelection() && v.Num == tabs[curTab].CurView) {
+	if v.Num == tabs[curTab].CurView && (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1 || v.Cursor.HasSelection()) {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
