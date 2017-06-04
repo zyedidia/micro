@@ -183,6 +183,10 @@ func InitScreen() {
 	screen, err = tcell.NewScreen()
 	if err != nil {
 		fmt.Println(err)
+		if err == tcell.ErrTermNotFound {
+			fmt.Println("Micro does not recognize your terminal:", oldTerm)
+			fmt.Println("Please go to https://github.com/zyedidia/mkinfo to read about how to fix this problem (it should be easy to fix).")
+		}
 		os.Exit(1)
 	}
 	if err = screen.Init(); err != nil {
