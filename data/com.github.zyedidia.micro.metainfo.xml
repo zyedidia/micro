@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
-​<component>
-​  <id>com.github.zyedidia.micro</id>
-​  <name>Micro Text Editor</name>
-​  <summary>A modern and intuitive terminal-based text editor</summary>
-​  <url type="homepage">https://micro-editor.github.io</url>
-​  <url type="bugtracker">https://github.com/zyedidia/micro</url>
-​  <metadata_license>MIT</metadata_license>
+<component>
+  <id>com.github.zyedidia.micro</id>
+  <name>Micro Text Editor</name>
+  <summary>A modern and intuitive terminal-based text editor</summary>
+  <url type="homepage">https://micro-editor.github.io</url>
+  <url type="bugtracker">https://github.com/zyedidia/micro</url>
+  <metadata_license>MIT</metadata_license>
    <categories>
      <category>Development</category>
 	 <category>TextEditor</category>
    </categories>
-​
-​  <provides>
+
+  <provides>
 ​    <binary>micro</binary>
 ​  </provides>
 ​  <releases>
