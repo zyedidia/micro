@@ -931,7 +931,7 @@ func (v *View) DisplayView() {
 
 		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 			!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
-			for i := lastX; i < xOffset+v.Width; i++ {
+			for i := lastX; i < xOffset+v.Width-v.lineNumOffset; i++ {
 				style := GetColor("cursor-line")
 				fg, _, _ := style.Decompose()
 				style = style.Background(fg)
