@@ -5,3 +5,4 @@ tmp.sh
 test/
 .idea/
 packages/
+cmd/micro/vendor
