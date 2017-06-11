@@ -450,6 +450,35 @@ func (v *View) MoveToMouseClick(x, y int) {
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
+func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
+	relocate := false
+	readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
+	for _, action := range actions {
+		readonlyBindingsResult := false
+		funcName := ShortFuncName(action)
+		if v.Type.readonly == true {
+			// check for readonly and if true only let key bindings get called if they do not change the contents.
+			for _, readonlyBindings := range readonlyBindingsList {
+				if strings.Contains(funcName, readonlyBindings) {
+					readonlyBindingsResult = true
+				}
+			}
+		}
+		if !readonlyBindingsResult {
+			// call the key binding
+			relocate = action(v, true) || relocate
+			// Macro
+			if funcName != "ToggleMacro" && funcName != "PlayMacro" {
+				if recordingMacro {
+					curMacro = append(curMacro, action)
+				}
+			}
+		}
+	}
+
+	return relocate
+}
+
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
@@ -462,7 +491,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
-		readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
 		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
 			for key, actions := range bindings {
 				if e.Key() == key.keyCode {
@@ -474,28 +502,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					if e.Modifiers() == key.modifiers {
 						relocate = false
 						isBinding = true
-						for _, action := range actions {
-							readonlyBindingsResult := false
-							funcName := ShortFuncName(action)
-							if v.Type.readonly == true {
-								// check for readonly and if true only let key bindings get called if they do not change the contents.
-								for _, readonlyBindings := range readonlyBindingsList {
-									if strings.Contains(funcName, readonlyBindings) {
-										readonlyBindingsResult = true
-									}
-								}
-							}
-							if !readonlyBindingsResult {
-								// call the key binding
-								relocate = action(v, true) || relocate
-								// Macro
-								if funcName != "ToggleMacro" && funcName != "PlayMacro" {
-									if recordingMacro {
-										curMacro = append(curMacro, action)
-									}
-								}
-							}
-						}
+						relocate = v.ExecuteActions(actions)
 						break
 					}
 				}
@@ -544,59 +551,21 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 		button := e.Buttons()
 
+		for key, actions := range bindings {
+			if button == key.buttons {
+				relocate = v.ExecuteActions(actions)
+			}
+		}
+
+		for key, actions := range mouseBindings {
+			if button == key.buttons {
+				for _, action := range actions {
+					action(v, true, e)
+				}
+			}
+		}
+
 		switch button {
-		case tcell.Button1:
-			// Left click
-			if v.mouseReleased {
-				v.MoveToMouseClick(x, y)
-				if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
-					if v.doubleClick {
-						// Triple click
-						v.lastClickTime = time.Now()
-
-						v.tripleClick = true
-						v.doubleClick = false
-
-						v.Cursor.SelectLine()
-						v.Cursor.CopySelection("primary")
-					} else {
-						// Double click
-						v.lastClickTime = time.Now()
-
-						v.doubleClick = true
-						v.tripleClick = false
-
-						v.Cursor.SelectWord()
-						v.Cursor.CopySelection("primary")
-					}
-				} else {
-					v.doubleClick = false
-					v.tripleClick = false
-					v.lastClickTime = time.Now()
-
-					v.Cursor.OrigSelection[0] = v.Cursor.Loc
-					v.Cursor.CurSelection[0] = v.Cursor.Loc
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
-				}
-				v.mouseReleased = false
-			} else if !v.mouseReleased {
-				v.MoveToMouseClick(x, y)
-				if v.tripleClick {
-					v.Cursor.AddLineToSelection()
-				} else if v.doubleClick {
-					v.Cursor.AddWordToSelection()
-				} else {
-					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
-					v.Cursor.CopySelection("primary")
-				}
-			}
-		case tcell.Button2:
-			// Check viewtype if readonly don't paste (readonly help and log view etc.)
-			if v.Type.readonly == false {
-				// Middle mouse button was clicked,
-				// We should paste primary
-				v.PastePrimary(true)
-			}
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
@@ -615,14 +584,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 				v.mouseReleased = true
 			}
-		case tcell.WheelUp:
-			// Scroll up
-			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
-			v.ScrollUp(scrollspeed)
-		case tcell.WheelDown:
-			// Scroll down
-			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
-			v.ScrollDown(scrollspeed)
 		}
 	}
 

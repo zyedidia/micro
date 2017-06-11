@@ -8,13 +8,14 @@ import (
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/tcell"
 )
 
 // PreActionCall executes the lua pre callback if possible
-func PreActionCall(funcName string, view *View) bool {
+func PreActionCall(funcName string, view *View, args ...interface{}) bool {
 	executeAction := true
 	for pl := range loadedPlugins {
-		ret, err := Call(pl+".pre"+funcName, view)
+		ret, err := Call(pl+".pre"+funcName, append([]interface{}{view}, args...)...)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
 			continue
@@ -27,10 +28,10 @@ func PreActionCall(funcName string, view *View) bool {
 }
 
 // PostActionCall executes the lua plugin callback if possible
-func PostActionCall(funcName string, view *View) bool {
+func PostActionCall(funcName string, view *View, args ...interface{}) bool {
 	relocate := true
 	for pl := range loadedPlugins {
-		ret, err := Call(pl+".on"+funcName, view)
+		ret, err := Call(pl+".on"+funcName, append([]interface{}{view}, args...)...)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
 			continue
@@ -47,6 +48,98 @@ func (v *View) deselect(index int) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[index]
 		v.Cursor.ResetSelection()
 		return true
+	}
+	return false
+}
+
+// MousePress is the event that should happen when a normal click happens
+// This is almost always bound to left click
+func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
+	if usePlugin && !PreActionCall("MousePress", v, e) {
+		return false
+	}
+
+	x, y := e.Position()
+	x -= v.lineNumOffset - v.leftCol + v.x
+	y += v.Topline - v.y
+
+	// This is usually bound to left click
+	if v.mouseReleased {
+		v.MoveToMouseClick(x, y)
+		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
+			if v.doubleClick {
+				// Triple click
+				v.lastClickTime = time.Now()
+
+				v.tripleClick = true
+				v.doubleClick = false
+
+				v.Cursor.SelectLine()
+				v.Cursor.CopySelection("primary")
+			} else {
+				// Double click
+				v.lastClickTime = time.Now()
+
+				v.doubleClick = true
+				v.tripleClick = false
+
+				v.Cursor.SelectWord()
+				v.Cursor.CopySelection("primary")
+			}
+		} else {
+			v.doubleClick = false
+			v.tripleClick = false
+			v.lastClickTime = time.Now()
+
+			v.Cursor.OrigSelection[0] = v.Cursor.Loc
+			v.Cursor.CurSelection[0] = v.Cursor.Loc
+			v.Cursor.CurSelection[1] = v.Cursor.Loc
+		}
+		v.mouseReleased = false
+	} else if !v.mouseReleased {
+		v.MoveToMouseClick(x, y)
+		if v.tripleClick {
+			v.Cursor.AddLineToSelection()
+		} else if v.doubleClick {
+			v.Cursor.AddWordToSelection()
+		} else {
+			v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+			v.Cursor.CopySelection("primary")
+		}
+	}
+
+	if usePlugin {
+		PostActionCall("MousePress", v, e)
+	}
+	return false
+}
+
+// ScrollUpAction scrolls the view up
+func (v *View) ScrollUpAction(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ScrollUp", v) {
+		return false
+	}
+
+	scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
+	v.ScrollUp(scrollspeed)
+
+	if usePlugin {
+		PostActionCall("ScrollUp", v)
+	}
+	return false
+}
+
+// ScrollDownAction scrolls the view up
+func (v *View) ScrollDownAction(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ScrollDown", v) {
+		return false
+	}
+
+	scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
+	v.ScrollDown(scrollspeed)
+
+	if usePlugin {
+		PostActionCall("ScrollDown", v)
 	}
 	return false
 }

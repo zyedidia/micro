@@ -10,7 +10,12 @@ import (
 )
 
 var bindings map[Key][]func(*View, bool) bool
+var mouseBindings map[Key][]func(*View, bool, *tcell.EventMouse) bool
 var helpBinding string
+
+var mouseBindingActions = map[string]func(*View, bool, *tcell.EventMouse) bool{
+	"MousePress": (*View).MousePress,
+}
 
 var bindingActions = map[string]func(*View, bool) bool{
 	"CursorUp":            (*View).CursorUp,
@@ -91,9 +96,21 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"ToggleMacro":         (*View).ToggleMacro,
 	"PlayMacro":           (*View).PlayMacro,
 	"Suspend":             (*View).Suspend,
+	"ScrollUp":            (*View).ScrollUpAction,
+	"ScrollDown":          (*View).ScrollDownAction,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,
+}
+
+var bindingMouse = map[string]tcell.ButtonMask{
+	"MouseLeft":       tcell.Button1,
+	"MouseMiddle":     tcell.Button2,
+	"MouseRight":      tcell.Button3,
+	"MouseWheelUp":    tcell.WheelUp,
+	"MouseWheelDown":  tcell.WheelDown,
+	"MouseWheelLeft":  tcell.WheelLeft,
+	"MouseWheelRight": tcell.WheelRight,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -230,12 +247,14 @@ var bindingKeys = map[string]tcell.Key{
 type Key struct {
 	keyCode   tcell.Key
 	modifiers tcell.ModMask
+	buttons   tcell.ButtonMask
 	r         rune
 }
 
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
 	bindings = make(map[Key][]func(*View, bool) bool)
+	mouseBindings = make(map[Key][]func(*View, bool, *tcell.EventMouse) bool)
 
 	var parsed map[string]string
 	defaults := DefaultBindings()
@@ -301,6 +320,7 @@ modSearch:
 			return Key{
 				keyCode:   code,
 				modifiers: modifiers,
+				buttons:   -1,
 				r:         0,
 			}, true
 		}
@@ -311,6 +331,16 @@ modSearch:
 		return Key{
 			keyCode:   code,
 			modifiers: modifiers,
+			buttons:   -1,
+			r:         0,
+		}, true
+	}
+
+	// See if we can find the key in bindingMouse
+	if code, ok := bindingMouse[k]; ok {
+		return Key{
+			modifiers: modifiers,
+			buttons:   code,
 			r:         0,
 		}, true
 	}
@@ -320,12 +350,13 @@ modSearch:
 		return Key{
 			keyCode:   tcell.KeyRune,
 			modifiers: modifiers,
+			buttons:   -1,
 			r:         rune(k[0]),
 		}, true
 	}
 
 	// We don't know what happened.
-	return Key{}, false
+	return Key{buttons: -1}, false
 }
 
 // findAction will find 'action' using string 'v'
@@ -335,6 +366,16 @@ func findAction(v string) (action func(*View, bool) bool) {
 		// If the user seems to be binding a function that doesn't exist
 		// We hope that it's a lua function that exists and bind it to that
 		action = LuaFunctionBinding(v)
+	}
+	return action
+}
+
+func findMouseAction(v string) func(*View, bool, *tcell.EventMouse) bool {
+	action, ok := mouseBindingActions[v]
+	if !ok {
+		// If the user seems to be binding a function that doesn't exist
+		// We hope that it's a lua function that exists and bind it to that
+		action = LuaFunctionMouseBinding(v)
 	}
 	return action
 }
@@ -356,18 +397,31 @@ func BindKey(k, v string) {
 	actionNames := strings.Split(v, ",")
 	if actionNames[0] == "UnbindKey" {
 		delete(bindings, key)
+		delete(mouseBindings, key)
 		if len(actionNames) == 1 {
-			actionNames = make([]string, 0, 0)
-		} else {
-			actionNames = append(actionNames[:0], actionNames[1:]...)
+			return
 		}
+		actionNames = append(actionNames[:0], actionNames[1:]...)
 	}
 	actions := make([]func(*View, bool) bool, 0, len(actionNames))
+	mouseActions := make([]func(*View, bool, *tcell.EventMouse) bool, 0, len(actionNames))
 	for _, actionName := range actionNames {
-		actions = append(actions, findAction(actionName))
+		if strings.HasPrefix(actionName, "Mouse") {
+			mouseActions = append(mouseActions, findMouseAction(actionName))
+		} else {
+			actions = append(actions, findAction(actionName))
+		}
 	}
 
-	bindings[key] = actions
+	if len(actions) > 0 {
+		// Can't have a binding be both mouse and normal
+		delete(mouseBindings, key)
+		bindings[key] = actions
+	} else if len(mouseActions) > 0 {
+		// Can't have a binding be both mouse and normal
+		delete(bindings, key)
+		mouseBindings[key] = mouseActions
+	}
 }
 
 // DefaultBindings returns a map containing micro's default keybindings
@@ -453,5 +507,11 @@ func DefaultBindings() map[string]string {
 		"F7":  "Find",
 		"F10": "Quit",
 		"Esc": "Escape",
+
+		// Mouse bindings
+		"MouseWheelUp":   "ScrollUp",
+		"MouseWheelDown": "ScrollDown",
+		"MouseLeft":      "MousePress",
+		"MouseMiddle":    "PastePrimary",
 	}
 }
