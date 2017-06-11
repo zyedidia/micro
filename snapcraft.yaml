@@ -15,4 +15,5 @@ parts:
   micro:
     source: .
     plugin: go
-    go-importpath: github.com/zyedidia/micro/cmd/micro
+    go-importpath: github.com/zyedidia/micro
+    go-packages: [github.com/zyedidia/micro/cmd/micro]
