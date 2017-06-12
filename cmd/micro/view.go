@@ -863,7 +863,7 @@ func (v *View) DisplayView() {
 				screen.ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
 				cx, cy = lastX, yOffset+lastChar.visualLoc.Y
 			}
-			realLoc = Loc{lastChar.realLoc.X, realLineN}
+			realLoc = Loc{lastChar.realLoc.X + 1, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
 			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
