@@ -1869,6 +1869,33 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	return false
 }
 
+// MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
+func (v *View) MouseMultiCursor(usePlugin bool, e *tcell.EventMouse) bool {
+	if v.Cursor == &v.Buf.Cursor {
+		if usePlugin && !PreActionCall("SpawnMultiCursorAtMouse", v, e) {
+			return false
+		}
+		x, y := e.Position()
+		x -= v.lineNumOffset - v.leftCol + v.x
+		y += v.Topline - v.y
+
+		c := &Cursor{
+			buf: v.Buf,
+		}
+		v.Cursor = c
+		v.MoveToMouseClick(x, y)
+		v.Relocate()
+		v.Cursor = &v.Buf.Cursor
+
+		v.Buf.cursors = append(v.Buf.cursors, c)
+
+		if usePlugin {
+			PostActionCall("SpawnMultiCursorAtMouse", v)
+		}
+	}
+	return false
+}
+
 // SkipMultiCursor moves the current multiple cursor to the next available position
 func (v *View) SkipMultiCursor(usePlugin bool) bool {
 	cursor := v.Buf.cursors[len(v.Buf.cursors)-1]

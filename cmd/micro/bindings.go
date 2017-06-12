@@ -14,7 +14,8 @@ var mouseBindings map[Key][]func(*View, bool, *tcell.EventMouse) bool
 var helpBinding string
 
 var mouseBindingActions = map[string]func(*View, bool, *tcell.EventMouse) bool{
-	"MousePress": (*View).MousePress,
+	"MousePress":       (*View).MousePress,
+	"MouseMultiCursor": (*View).MouseMultiCursor,
 }
 
 var bindingActions = map[string]func(*View, bool) bool{
@@ -517,6 +518,7 @@ func DefaultBindings() map[string]string {
 		"MouseWheelDown": "ScrollDown",
 		"MouseLeft":      "MousePress",
 		"MouseMiddle":    "PastePrimary",
+		"Ctrl-MouseLeft": "MouseMultiCursor",
 
 		"Alt-n": "SpawnMultiCursor",
 		"Alt-p": "RemoveMultiCursor",

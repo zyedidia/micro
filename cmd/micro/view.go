@@ -561,7 +561,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		button := e.Buttons()
 
 		for key, actions := range bindings {
-			if button == key.buttons {
+			if button == key.buttons && e.Modifiers() == key.modifiers {
 				for _, c := range v.Buf.cursors {
 					v.Cursor = c
 					relocate = v.ExecuteActions(actions) || relocate
@@ -571,7 +571,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 
 		for key, actions := range mouseBindings {
-			if button == key.buttons {
+			if button == key.buttons && e.Modifiers() == key.modifiers {
 				for _, action := range actions {
 					action(v, true, e)
 				}
