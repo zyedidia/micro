@@ -491,20 +491,18 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
-		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
-			for key, actions := range bindings {
-				if e.Key() == key.keyCode {
-					if e.Key() == tcell.KeyRune {
-						if e.Rune() != key.r {
-							continue
-						}
+		for key, actions := range bindings {
+			if e.Key() == key.keyCode {
+				if e.Key() == tcell.KeyRune {
+					if e.Rune() != key.r {
+						continue
 					}
-					if e.Modifiers() == key.modifiers {
-						relocate = false
-						isBinding = true
-						relocate = v.ExecuteActions(actions)
-						break
-					}
+				}
+				if e.Modifiers() == key.modifiers {
+					relocate = false
+					isBinding = true
+					relocate = v.ExecuteActions(actions)
+					break
 				}
 			}
 		}
