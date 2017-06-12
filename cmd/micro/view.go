@@ -865,12 +865,12 @@ func (v *View) DisplayView() {
 
 				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
 
-				for _, c := range v.Buf.cursors {
+				for i, c := range v.Buf.cursors {
 					v.Cursor = c
 					if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-						v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && !cursorSet {
-						ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
-						// cursorSet = true
+						v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && (!cursorSet || i != 0) {
+						ShowMultiCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, i)
+						cursorSet = true
 					}
 				}
 				v.Cursor = &v.Buf.Cursor
@@ -885,11 +885,11 @@ func (v *View) DisplayView() {
 		var cx, cy int
 		if lastChar != nil {
 			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
-			for _, c := range v.Buf.cursors {
+			for i, c := range v.Buf.cursors {
 				v.Cursor = c
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-					ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
+					ShowMultiCursor(lastX, yOffset+lastChar.visualLoc.Y, i)
 					cx, cy = lastX, yOffset+lastChar.visualLoc.Y
 				}
 			}
@@ -897,11 +897,11 @@ func (v *View) DisplayView() {
 			realLoc = Loc{lastChar.realLoc.X + 1, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
-			for _, c := range v.Buf.cursors {
+			for i, c := range v.Buf.cursors {
 				v.Cursor = c
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == realLineN {
-					ShowCursor(xOffset, yOffset+visualLineN)
+					ShowMultiCursor(xOffset, yOffset+visualLineN, i)
 					cx, cy = xOffset, yOffset+visualLineN
 				}
 			}
@@ -947,9 +947,13 @@ func (v *View) DisplayView() {
 	}
 }
 
-func ShowCursor(x, y int) {
-	r, _, _, _ := screen.GetContent(x, y)
-	screen.SetContent(x, y, r, nil, defStyle.Reverse(true))
+func ShowMultiCursor(x, y, i int) {
+	if i == 0 {
+		screen.ShowCursor(x, y)
+	} else {
+		r, _, _, _ := screen.GetContent(x, y)
+		screen.SetContent(x, y, r, nil, defStyle.Reverse(true))
+	}
 }
 
 // Display renders the view, the cursor, and statusline
