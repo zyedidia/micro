@@ -947,6 +947,9 @@ func (v *View) DisplayView() {
 	}
 }
 
+// ShowMultiCursor will display a cursor at a location
+// If i == 0 then the terminal cursor will be used
+// Otherwise a fake cursor will be drawn at the position
 func ShowMultiCursor(x, y, i int) {
 	if i == 0 {
 		screen.ShowCursor(x, y)

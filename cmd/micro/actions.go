@@ -1829,6 +1829,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 	return true
 }
 
+// SpawnMultiCursor creates a new multiple cursor at the next occurence of the current selection or current word
 func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	spawner := v.Buf.cursors[len(v.Buf.cursors)-1]
 	// You can only spawn a cursor from the main cursor
@@ -1868,6 +1869,7 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	return false
 }
 
+// SkipMultiCursor moves the current multiple cursor to the next available position
 func (v *View) SkipMultiCursor(usePlugin bool) bool {
 	cursor := v.Buf.cursors[len(v.Buf.cursors)-1]
 
@@ -1890,6 +1892,7 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 	return false
 }
 
+// RemoveMultiCursor removes the latest multiple cursor
 func (v *View) RemoveMultiCursor(usePlugin bool) bool {
 	end := len(v.Buf.cursors)
 	if end > 1 {
@@ -1916,6 +1919,7 @@ func (v *View) RemoveMultiCursor(usePlugin bool) bool {
 	return false
 }
 
+// RemoveAllMultiCursors removes all cursors except the base cursor
 func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
 	if v.Cursor == &v.Buf.Cursor {
 		if usePlugin && !PreActionCall("RemoveAllMultiCursors", v) {
