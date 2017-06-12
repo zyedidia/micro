@@ -1829,7 +1829,112 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 	return true
 }
 
-// None is no action
-func None() bool {
+func (v *View) SpawnMultiCursor(usePlugin bool) bool {
+	spawner := v.Buf.cursors[len(v.Buf.cursors)-1]
+	// You can only spawn a cursor from the main cursor
+	if v.Cursor == spawner {
+		if usePlugin && !PreActionCall("SpawnMultiCursor", v) {
+			return false
+		}
+
+		if !spawner.HasSelection() {
+			spawner.SelectWord()
+		} else {
+			c := &Cursor{
+				buf: v.Buf,
+			}
+
+			sel := spawner.GetSelection()
+
+			searchStart = ToCharPos(spawner.CurSelection[1], v.Buf)
+			v.Cursor = c
+			Search(sel, v, true)
+			messenger.Message(v.Cursor.Loc)
+
+			for _, cur := range v.Buf.cursors {
+				if c.Loc == cur.Loc {
+					return false
+				}
+			}
+			v.Buf.cursors = append(v.Buf.cursors, c)
+			v.Relocate()
+			v.Cursor = spawner
+		}
+
+		if usePlugin {
+			PostActionCall("SpawnMultiCursor", v)
+		}
+	}
+
+	return false
+}
+
+func (v *View) SkipMultiCursor(usePlugin bool) bool {
+	cursor := v.Buf.cursors[len(v.Buf.cursors)-1]
+
+	if v.Cursor == cursor {
+		messenger.Message("SKIP")
+		if usePlugin && !PreActionCall("SkipMultiCursor", v) {
+			return false
+		}
+		sel := cursor.GetSelection()
+
+		searchStart = ToCharPos(cursor.CurSelection[1], v.Buf)
+		v.Cursor = cursor
+		Search(sel, v, true)
+		v.Relocate()
+		v.Cursor = cursor
+
+		if usePlugin {
+			PostActionCall("SkipMultiCursor", v)
+		}
+	}
+	return false
+}
+
+func (v *View) RemoveMultiCursor(usePlugin bool) bool {
+	end := len(v.Buf.cursors)
+	if end > 1 {
+		nextOne := v.Buf.cursors[len(v.Buf.cursors)-2]
+		if v.Cursor == nextOne {
+			if usePlugin && !PreActionCall("RemoveMultiCursor", v) {
+				return false
+			}
+
+			if end > 1 {
+				v.Buf.cursors[end-1] = nil
+				v.Buf.cursors = v.Buf.cursors[:end-1]
+			}
+			v.Relocate()
+
+			if usePlugin {
+				return PostActionCall("RemoveMultiCursor", v)
+			}
+			return true
+		}
+	} else {
+		v.RemoveAllMultiCursors(usePlugin)
+	}
+	return false
+}
+
+func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
+	if v.Cursor == &v.Buf.Cursor {
+		if usePlugin && !PreActionCall("RemoveAllMultiCursors", v) {
+			return false
+		}
+
+		for i := 1; i < len(v.Buf.cursors); i++ {
+			v.Buf.cursors[i] = nil
+		}
+		v.Buf.cursors = v.Buf.cursors[:1]
+		v.Cursor.ResetSelection()
+		v.Relocate()
+
+		if usePlugin {
+			return PostActionCall("RemoveAllMultiCursors", v)
+		}
+		return true
+	}
 	return false
 }

@@ -499,9 +499,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 					}
 				}
 				if e.Modifiers() == key.modifiers {
-					relocate = false
-					isBinding = true
-					relocate = v.ExecuteActions(actions)
+					for _, c := range v.Buf.cursors {
+						v.Cursor = c
+						relocate = false
+						isBinding = true
+						relocate = v.ExecuteActions(actions) || relocate
+					}
+					v.Cursor = &v.Buf.Cursor
 					break
 				}
 			}
@@ -509,24 +513,29 @@ func (v *View) HandleEvent(event tcell.Event) {
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.readonly == false {
-				// Insert a character
-				if v.Cursor.HasSelection() {
-					v.Cursor.DeleteSelection()
-					v.Cursor.ResetSelection()
-				}
-				v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-				v.Cursor.Right()
+				for _, c := range v.Buf.cursors {
+					v.Cursor = c
 
-				for pl := range loadedPlugins {
-					_, err := Call(pl+".onRune", string(e.Rune()), v)
-					if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-						TermMessage(err)
+					// Insert a character
+					if v.Cursor.HasSelection() {
+						v.Cursor.DeleteSelection()
+						v.Cursor.ResetSelection()
+					}
+					v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+					v.Cursor.Right()
+
+					for pl := range loadedPlugins {
+						_, err := Call(pl+".onRune", string(e.Rune()), v)
+						if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+							TermMessage(err)
+						}
+					}
+
+					if recordingMacro {
+						curMacro = append(curMacro, e.Rune())
 					}
 				}
-
-				if recordingMacro {
-					curMacro = append(curMacro, e.Rune())
-				}
+				v.Cursor = &v.Buf.Cursor
 			}
 		}
 	case *tcell.EventPaste:
@@ -536,14 +545,16 @@ func (v *View) HandleEvent(event tcell.Event) {
 				break
 			}
 
-			v.paste(e.Text())
+			for _, c := range v.Buf.cursors {
+				v.Cursor = c
+				v.paste(e.Text())
+
+			}
+			v.Cursor = &v.Buf.Cursor
 
 			PostActionCall("Paste", v)
 		}
 	case *tcell.EventMouse:
-		x, y := e.Position()
-		x -= v.lineNumOffset - v.leftCol + v.x
-		y += v.Topline - v.y
 		// Don't relocate for mouse events
 		relocate = false
 
@@ -551,7 +562,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 		for key, actions := range bindings {
 			if button == key.buttons {
-				relocate = v.ExecuteActions(actions)
+				for _, c := range v.Buf.cursors {
+					v.Cursor = c
+					relocate = v.ExecuteActions(actions) || relocate
+				}
+				v.Cursor = &v.Buf.Cursor
 			}
 		}
 
@@ -568,6 +583,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Mouse event with no click
 			if !v.mouseReleased {
 				// Mouse was just released
+
+				x, y := e.Position()
+				x -= v.lineNumOffset - v.leftCol + v.x
+				y += v.Topline - v.y
 
 				// Relocating here isn't really necessary because the cursor will
 				// be in the right place from the last mouse event
@@ -822,22 +841,20 @@ func (v *View) DisplayView() {
 				}
 
 				charLoc := char.realLoc
-				if v.Cursor.HasSelection() &&
-					(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
-						charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
-					// The current character is selected
-					lineStyle = defStyle.Reverse(true)
+				for _, c := range v.Buf.cursors {
+					v.Cursor = c
+					if v.Cursor.HasSelection() &&
+						(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
+							charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
+						// The current character is selected
+						lineStyle = defStyle.Reverse(true)
 
-					if style, ok := colorscheme["selection"]; ok {
-						lineStyle = style
+						if style, ok := colorscheme["selection"]; ok {
+							lineStyle = style
+						}
 					}
 				}
-
-				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && !cursorSet {
-					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
-					cursorSet = true
-				}
+				v.Cursor = &v.Buf.Cursor
 
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
@@ -847,6 +864,16 @@ func (v *View) DisplayView() {
 				}
 
 				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
+
+				for _, c := range v.Buf.cursors {
+					v.Cursor = c
+					if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+						v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && !cursorSet {
+						ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
+						// cursorSet = true
+					}
+				}
+				v.Cursor = &v.Buf.Cursor
 
 				lastChar = char
 			}
@@ -858,19 +885,27 @@ func (v *View) DisplayView() {
 		var cx, cy int
 		if lastChar != nil {
 			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-				screen.ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
-				cx, cy = lastX, yOffset+lastChar.visualLoc.Y
+			for _, c := range v.Buf.cursors {
+				v.Cursor = c
+				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+					v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
+					ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
+					cx, cy = lastX, yOffset+lastChar.visualLoc.Y
+				}
 			}
+			v.Cursor = &v.Buf.Cursor
 			realLoc = Loc{lastChar.realLoc.X + 1, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == realLineN {
-				screen.ShowCursor(xOffset, yOffset+visualLineN)
-				cx, cy = xOffset, yOffset+visualLineN
+			for _, c := range v.Buf.cursors {
+				v.Cursor = c
+				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+					v.Cursor.Y == realLineN {
+					ShowCursor(xOffset, yOffset+visualLineN)
+					cx, cy = xOffset, yOffset+visualLineN
+				}
 			}
+			v.Cursor = &v.Buf.Cursor
 			lastX = xOffset
 			realLoc = Loc{0, realLineN}
 			visualLoc = Loc{0, visualLineN}
@@ -910,6 +945,11 @@ func (v *View) DisplayView() {
 			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
 		}
 	}
+}
+
+func ShowCursor(x, y int) {
+	r, _, _, _ := screen.GetContent(x, y)
+	screen.SetContent(x, y, r, nil, defStyle.Reverse(true))
 }
 
 // Display renders the view, the cursor, and statusline

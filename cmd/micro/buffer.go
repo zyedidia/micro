@@ -28,7 +28,8 @@ type Buffer struct {
 	// This stores all the text in the buffer as an array of lines
 	*LineArray
 
-	Cursor Cursor
+	Cursor  Cursor
+	cursors []*Cursor // for multiple cursors
 
 	// Path to the file on disk
 	Path string
@@ -168,6 +169,8 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 		}
 		file.Close()
 	}
+
+	b.cursors = []*Cursor{&b.Cursor}
 
 	return b
 }

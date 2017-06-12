@@ -153,7 +153,7 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 	for {
 		m.Clear()
 		m.Display()
-		screen.ShowCursor(Count(m.message), h-1)
+		ShowCursor(Count(m.message), h-1)
 		screen.Show()
 		event := <-events
 
@@ -190,7 +190,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 	for {
 		m.Clear()
 		m.Display()
-		screen.ShowCursor(Count(m.message), h-1)
+		ShowCursor(Count(m.message), h-1)
 		screen.Show()
 		event := <-events
 
@@ -470,7 +470,7 @@ func (m *Messenger) Display() {
 	}
 
 	if m.hasPrompt {
-		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
+		ShowCursor(Count(m.message)+m.cursorx, h-1)
 		screen.Show()
 	}
 }
