@@ -1849,7 +1849,6 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 			searchStart = ToCharPos(spawner.CurSelection[1], v.Buf)
 			v.Cursor = c
 			Search(sel, v, true)
-			messenger.Message(v.Cursor.Loc)
 
 			for _, cur := range v.Buf.cursors {
 				if c.Loc == cur.Loc {
@@ -1873,7 +1872,6 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 	cursor := v.Buf.cursors[len(v.Buf.cursors)-1]
 
 	if v.Cursor == cursor {
-		messenger.Message("SKIP")
 		if usePlugin && !PreActionCall("SkipMultiCursor", v) {
 			return false
 		}
