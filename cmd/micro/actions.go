@@ -554,7 +554,7 @@ func (v *View) InsertSpace(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 	v.Buf.Insert(v.Cursor.Loc, " ")
-	v.Cursor.Right()
+	// v.Cursor.Right()
 
 	if usePlugin {
 		return PostActionCall("InsertSpace", v)
@@ -574,15 +574,15 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 
-	v.Buf.Insert(v.Cursor.Loc, "\n")
 	ws := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
-	v.Cursor.Right()
+	v.Buf.Insert(v.Cursor.Loc, "\n")
+	// v.Cursor.Right()
 
 	if v.Buf.Settings["autoindent"].(bool) {
 		v.Buf.Insert(v.Cursor.Loc, ws)
-		for i := 0; i < len(ws); i++ {
-			v.Cursor.Right()
-		}
+		// for i := 0; i < len(ws); i++ {
+		// 	v.Cursor.Right()
+		// }
 
 		// Remove the whitespaces if keepautoindent setting is off
 		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y-1)) && !v.Buf.Settings["keepautoindent"].(bool) {
@@ -622,18 +622,10 @@ func (v *View) Backspace(usePlugin bool) bool {
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc
-			v.Cursor.Loc = loc.Move(-tabSize, v.Buf)
-			cx, cy := v.Cursor.X, v.Cursor.Y
-			v.Cursor.Loc = loc
 			v.Buf.Remove(loc.Move(-tabSize, v.Buf), loc)
-			v.Cursor.X, v.Cursor.Y = cx, cy
 		} else {
-			v.Cursor.Left()
-			cx, cy := v.Cursor.X, v.Cursor.Y
-			v.Cursor.Right()
 			loc := v.Cursor.Loc
 			v.Buf.Remove(loc.Move(-1, v.Buf), loc)
-			v.Cursor.X, v.Cursor.Y = cx, cy
 		}
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
@@ -753,7 +745,6 @@ func (v *View) OutdentLine(usePlugin bool) bool {
 			break
 		}
 		v.Buf.Remove(Loc{0, v.Cursor.Y}, Loc{1, v.Cursor.Y})
-		v.Cursor.X -= 1
 	}
 	v.Cursor.Relocate()
 
@@ -816,9 +807,9 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	tabBytes := len(v.Buf.IndentString())
 	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
 	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])
-	for i := 0; i < bytesUntilIndent; i++ {
-		v.Cursor.Right()
-	}
+	// for i := 0; i < bytesUntilIndent; i++ {
+	// 	v.Cursor.Right()
+	// }
 
 	if usePlugin {
 		return PostActionCall("InsertTab", v)
@@ -1088,7 +1079,7 @@ func (v *View) DuplicateLine(usePlugin bool) bool {
 	} else {
 		v.Cursor.End()
 		v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
-		v.Cursor.Right()
+		// v.Cursor.Right()
 	}
 
 	messenger.Message("Duplicated line")
@@ -1810,7 +1801,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 				v.Cursor.ResetSelection()
 			}
 			v.Buf.Insert(v.Cursor.Loc, string(t))
-			v.Cursor.Right()
+			// v.Cursor.Right()
 
 			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(t), v)

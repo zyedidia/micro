@@ -169,7 +169,7 @@ func (v *View) paste(clip string) {
 	}
 	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
 	v.Buf.Insert(v.Cursor.Loc, clip)
-	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+	// v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
 	v.freshClip = false
 	messenger.Message("Pasted clipboard")
 }
@@ -522,7 +522,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.Cursor.ResetSelection()
 					}
 					v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-					v.Cursor.Right()
 
 					for pl := range loadedPlugins {
 						_, err := Call(pl+".onRune", string(e.Rune()), v)

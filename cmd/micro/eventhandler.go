@@ -104,6 +104,16 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 	}
 	eh.Execute(e)
 	e.Deltas[0].End = start.Move(Count(text), eh.buf)
+	end := e.Deltas[0].End
+
+	for _, c := range eh.buf.cursors {
+		if start.Y != end.Y && c.GreaterThan(start) {
+			c.Loc.Y += end.Y - start.Y
+		} else if c.Y == start.Y && c.GreaterEqual(start) {
+			c.Loc = c.Move(Count(text), eh.buf)
+		}
+		c.LastVisualX = c.GetVisualX()
+	}
 }
 
 // Remove creates a remove text event and executes it
@@ -115,6 +125,17 @@ func (eh *EventHandler) Remove(start, end Loc) {
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
+
+	for _, c := range eh.buf.cursors {
+		if start.Y != end.Y && c.GreaterThan(end) {
+			c.Loc.Y -= end.Y - start.Y
+		} else if c.Y == end.Y && c.GreaterEqual(end) {
+			// TermMessage(start, end)
+			c.Loc = c.Move(-Diff(start, end, eh.buf), eh.buf)
+			// c.Loc = c.Move(ToCharPos(start, eh.buf)-ToCharPos(end, eh.buf), eh.buf)
+		}
+		c.LastVisualX = c.GetVisualX()
+	}
 }
 
 // MultipleReplace creates an multiple insertions executes them
