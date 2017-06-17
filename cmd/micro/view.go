@@ -621,6 +621,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 	}
 }
 
+func (v *View) mainCursor() bool {
+	return v.Buf.curCursor == len(v.Buf.cursors)-1
+}
+
 // GutterMessage creates a message in this view's gutter
 func (v *View) GutterMessage(section string, lineN int, msg string, kind int) {
 	lineN--
