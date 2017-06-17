@@ -23,6 +23,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 
 * Easy to use and to install
 * No dependencies or external files are needed -- just the binary you can download further down the page
+* Multiple cursors
 * Common keybindings (ctrl-s, ctrl-c, ctrl-v, ctrl-z...)
     * Keybindings can be rebound to your liking
 * Sane defaults
