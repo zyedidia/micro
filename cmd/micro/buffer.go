@@ -28,7 +28,9 @@ type Buffer struct {
 	// This stores all the text in the buffer as an array of lines
 	*LineArray
 
-	Cursor Cursor
+	Cursor    Cursor
+	cursors   []*Cursor // for multiple cursors
+	curCursor int       // the current cursor
 
 	// Path to the file on disk
 	Path string
@@ -169,6 +171,8 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 		file.Close()
 	}
 
+	b.cursors = []*Cursor{&b.Cursor}
+
 	return b
 }
 
@@ -303,6 +307,30 @@ func (b *Buffer) ReOpen() {
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
 	b.NumLines = len(b.lines)
+}
+
+func (b *Buffer) MergeCursors() {
+	var cursors []*Cursor
+	for i := 0; i < len(b.cursors); i++ {
+		c1 := b.cursors[i]
+		if c1 != nil {
+			for j := 0; j < len(b.cursors); j++ {
+				c2 := b.cursors[j]
+				if i != j && c1.Loc == c2.Loc {
+					b.cursors[j] = nil
+				}
+			}
+			cursors = append(cursors, c1)
+		}
+	}
+
+	b.cursors = cursors
+}
+
+func (b *Buffer) UpdateCursors() {
+	for i, c := range b.cursors {
+		c.Num = i
+	}
 }
 
 // Save saves the buffer to its default path

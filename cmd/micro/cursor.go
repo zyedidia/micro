@@ -21,6 +21,9 @@ type Cursor struct {
 	// This is used for line and word selection where it is necessary
 	// to know what the original selection was
 	OrigSelection [2]Loc
+
+	// Which cursor index is this (for multiple cursors)
+	Num int
 }
 
 // Goto puts the cursor at the given cursor's location and gives the current cursor its selection too

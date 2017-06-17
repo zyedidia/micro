@@ -1,224 +1,126 @@
-#Default Keys
+# Default Keys
 
 Below are simple charts of the default hotkeys and their functions.
 For more information about binding custom hotkeys or changing
-default bindings, please run `>help keybindings`
+default bindings, please run `> help keybindings`
 
 Please remember that *all* keys here are rebindable!
 If you don't like it, you can change it!
 
-(We are not responsible for you forgetting what you bind keys to.
- Do not open an issue because you forgot your keybindings.)
+# Power user
 
-#Power user
-+--------+---------------------------------------------------------+
-| Key    | Description of function                                 |
-+--------+---------------------------------------------------------+
-| Ctrl+E | Switch to the micro command prompt to run a command.    |
-|        | (See `>help commands` for a list of commands. )         |
-+--------+---------------------------------------------------------+
-| Tab    | In command prompt it will auto complete if possible.    |
-+--------+---------------------------------------------------------+
-| Ctrl+B | Run shell commands in micro's current working directory.|
-+--------+---------------------------------------------------------+
+| Key       | Description of function                                                                           |
+|--------   |-------------------------------------------------------------------------------------------------- |
+| Ctrl+E    | Open a command prompt for running commands (see `> help commands` for a list of valid commands).  |
+| Tab       | In command prompt, it will autocomplete if possible.                                              |
+| Ctrl+B    | Run a shell command (this will close micro while your command executes).                          |
 
-#Navigation
-|--------+---------------------------------------------------------+
-| Arrows | Move the cursor around your current document.           |
-|        | (Yes this is rebindable to the vim keys if you want.)   |
-+--------+---------------------------------------------------------+
-| Shift+ | Move and select text.                                   |
-| Arrows |                                                         |
-+--------+---------------------------------------------------------+
-| Home   |                                                         |
-|  or    |                                                         |
-| Ctrl+  | Move to the beginning of the current line. (Naturally.) |
-| Left   |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| End    |                                                         |
-|  or    |                                                         |
-| Ctrl+  | Move to the end of the current line.                    |
-| Right  |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Left   | Move cursor one complete word left.                     |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Right  | Move cursor one complete word right.                    |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| PageUp | Move cursor up lines quickly.                           |
-+--------+---------------------------------------------------------+
-| PageDn | Move cursor down lines quickly.                         |
-+--------+---------------------------------------------------------+
-| Ctrl+  |                                                         |
-| Home   |                                                         |
-|  or    | Move cursor to start of the document                    |
-| Ctrl+  |                                                         |
-| Up     |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Ctrl+  |                                                         |
-| End    |                                                         |
-|  or    | Move cursor to end of the document                      |
-| Ctrl+  |                                                         |
-| Down   |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Ctrl+L | Jump to line in current file. ( Prompts for line # )    |
-+--------+---------------------------------------------------------+
-| Ctrl+W | Move between splits open in current tab.                |
-|        | (See vsplit and hsplit in `>help commands`)             |
-+--------+---------------------------------------------------------+
+# Navigation
 
-#Tabs
-+--------+---------------------------------------------------------+
-| Ctrl+T | Open a new tab.                                         |
-+--------+---------------------------------------------------------+
-| Alt+,  | Move to the previous tab in the tablist.                |
-|        | (This works like moving between file buffers in nano)   |
-+--------+---------------------------------------------------------+
-| Alt+.  | Move to the next tab in the tablist.                    |
-+--------+---------------------------------------------------------+
+| Key                       | Description of function                                                                   |
+|-------------------------- |------------------------------------------------------------------------------------------ |
+| Arrows                    | Move the cursor around                                                                    |
+| Shift+arrows              | Move and select text                                                                      |
+| Home or CtrlLeftArrow     | Move to the beginning of the current line                                                 |
+| End or CtrlRightArrow     | Move to the end of the current line                                                       |
+| AltLeftArrow              | Move cursor one word left                                                                 |
+| AltRightArrow             | Move cursor one word right                                                                |
+| PageUp                    | Move cursor up one page                                                                   |
+| PageDown                  | Move cursor down one page                                                                 |
+| CtrlHome or CtrlUpArrow   | Move cursor to start of document                                                          |
+| CtrlEnd or CtrlDownArrow  | Move cursor to end of document                                                            |
+| Ctrl+L                    | Jump to a line in the file (prompts with #)                                               |
+| Ctrl+W                    | Cycle between splits in the current tab (use `> vsplit` or `> hsplit` to create a split)  |
 
-#Find Operations
-+--------+---------------------------------------------------------+
-| Ctrl+F | Find text in current file. ( Prompts for text to find.) |
-+--------+---------------------------------------------------------+
-| Ctrl+N | Find next instance of current search in current file.   |
-+--------+---------------------------------------------------------+
-| Ctrl+P | Find prev instance of current search in current file.   |
-+--------+---------------------------------------------------------+
+# Tabs
 
-#File Operations
-+--------+---------------------------------------------------------+
-| Ctrl+Q | Close current file. ( Quits micro if last file open. )  |
-+--------+---------------------------------------------------------+
-| Ctrl+O | Open a file. ( Prompts you to input filename. )         |
-+--------+---------------------------------------------------------+
-| Ctrl+S | Save current file.                                      |
-+--------+---------------------------------------------------------+
+| Key     | Description of function   |
+|-------- |-------------------------  |
+| Ctrl+T  | Open a new tab            |
+| Alt+,   | Previous tab              |
+| Alt+.   | Next tab                  |
 
-#Text operations
-+--------+---------------------------------------------------------+
-| Ctrl+A | Select all text in current file.                        |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Shift+ | Select complete word right.                             |
-| Right  |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Shift+ | Select complete word left.                              |
-| Left   |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Shift+ |                                                         |
-| Home   |                                                         |
-|  or    | Select from the current cursor position to the          |
-| Ctrl+  | start of the current line.                              |
-| Shift+ |                                                         |
-| Left   |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Shift+ |                                                         |
-| End    |                                                         |
-|  or    | Select from the current cursor position to the          |
-| Ctrl+  | end of the current line.                                |
-| Shift+ |                                                         |
-| Right  |                                                         |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Ctrl+  |                                                         |
-| Shift+ | Select from the current cursor position to the          |
-| Up     | start of the document.                                  |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Ctrl+  |                                                         |
-| Shift+ | Select from the current cursor position to the          |
-| Down   | end of the document.                                    |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Ctrl+X | Cut selected text.                                      |
-+--------+---------------------------------------------------------+
-| Ctrl+C | Copy selected text.                                     |
-+--------+---------------------------------------------------------+
-| Ctrl+V | Paste selected text.                                    |
-+--------+---------------------------------------------------------+
-| Ctrl+K | Cut current line. ( Can then be pasted with Ctrl+V)     |
-+--------+---------------------------------------------------------+
-| Ctrl+D | Duplicate current line.                                 |
-+--------+---------------------------------------------------------+
-| Ctrl+Z | Undo actions.                                           |
-+--------+---------------------------------------------------------+
-| Ctrl+Y | Redo actions.                                           |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Up     | Move current line or selected lines up.                 |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Down   | Move current line or selected lines down.               |
-| Arrow  |                                                         |
-+--------+---------------------------------------------------------+
-| Alt+   |                                                         |
-| Ctrl+H |                                                         |
-|  or    | Delete complete word left.                              |
-| Alt+   |                                                         |
-| Back-  |                                                         |
-| space  |                                                         |
-+--------+---------------------------------------------------------+
+# Find Operations
 
-#Macros
-+--------+---------------------------------------------------------+
-|        | Toggle ON/OFF macro recording.                          |
-| Ctrl+U | Simply press Ctrl+U to begin recording a macro and      |
-|        | press Ctrl+U to stop recording macro.                   |
-+--------+---------------------------------------------------------+
-| Ctrl+J | Run your recorded macro.                                |
-+--------+---------------------------------------------------------+
+| Key       | Description of function                   |
+|--------   |------------------------------------------ |
+| Ctrl+F    | Find (opens prompt)                       |
+| Ctrl+N    | Find next instance of current search      |
+| Ctrl+P    | Find previous instance of current search  |
 
-#Other
-+--------+---------------------------------------------------------+
-| Ctrl+G | Open the help file.                                     |
-+--------+---------------------------------------------------------+
-| Ctrl+H | Alternate backspace.                                    |
-|        | (Some old terminals don't support the Backspace key .)  |
-+--------+---------------------------------------------------------+
-| Ctrl+R | Toggle the line number ruler. ( On the lefthand side.)  |
-+--------+---------------------------------------------------------+
+# File Operations
 
-#Emacs style actions
-+--------+---------------------------------------------------------+
-| Alt+F  | Move to the end of the next word. (To the next space.)  |
-+--------+---------------------------------------------------------+
-| Alt+B  | Move to the beginning of the previous word.             |
-+--------+---------------------------------------------------------+
-| Alt+A  | Alternate Home key. ( Move to beginning of line. )      |
-+--------+---------------------------------------------------------+
-| Alt+E  | Alternate End key. ( Move to the end of line.)          |
-+--------+---------------------------------------------------------+
-| Alt+P  | Move cursor up. ( Same as up key. )                     |
-+--------+---------------------------------------------------------+
-| Alt+N  | Move cursor down. ( Same as down key. )                 |
-+--------+---------------------------------------------------------+
+| Key       | Description of function                                           |
+|--------   |----------------------------------------------------------------   |
+| Ctrl+Q    | Close current file (quits micro if this is the last file open)    |
+| Ctrl+O    | Open a file (prompts for filename)                                |
+| Ctrl+S    | Save current file                                                 |
 
-#Function keys.
+# Text operations
+
+| Key                               | Description of function                   |
+|---------------------------------  |------------------------------------------ |
+| AltShiftRightArrow                | Select word right                         |
+| AltShiftLeftArrow                 | Select word left                          |
+| ShiftHome or CtrlShiftLeftArrow   | Select to start of current line           |
+| ShiftEnd or CtrlShiftRightArrow   | Select to end of current line             |
+| CtrlShiftUpArrow                  | Select to start of file                   |
+| CtrlShiftDownArrow                | Select to end of file                     |
+| Ctrl+X                            | Cut selected text                         |
+| Ctrl+C                            | Copy selected text                        |
+| Ctrl+V                            | Paste                                     |
+| Ctrl+K                            | Cut current line                          |
+| Ctrl+D                            | Duplicate current line                    |
+| Ctrl+Z                            | Undo                                      |
+| Ctrl+Y                            | Redo                                      |
+| AltUpArrow                        | Move current line or selected lines up    |
+| AltDownArrow                      | Move current line of selected lines down  |
+| AltBackspace or AltCtrl+H         | Delete word left                          |
+| Ctrl+A                            | Select all                                |
+
+# Macros
+
+| Key       | Description of function                                                           |
+|--------   |---------------------------------------------------------------------------------- |
+| Ctrl+U    | Toggle macro recording (press Ctrl+U to start recording and press again to stop)  |
+| Ctrl+J    | Run latest recorded macro                                                         |
+
+# Multiple cursors
+
+| Key               | Description of function                                                                       |
+|----------------   |---------------------------------------------------------------------------------------------- |
+| Alt+N             | Create new multiple cursor from selection (will select current word if no current selection)  |
+| Alt+P             | Remove latest multiple cursor                                                                 |
+| Alt+C             | Remove all multiple cursors (cancel)                                                          |
+| Alt+X             | Skip multiple cursor selection                                                                |
+| Ctrl-MouseLeft    | Place a multiple cursor at any location                                                       |
+
+# Other
+
+| Key       | Description of function                                                               |
+|--------   |-----------------------------------------------------------------------------------    |
+| Ctrl+G    | Open help file                                                                        |
+| Ctrl+H    | Backspace (old terminals do not support the backspace key and use Ctrl+H instead)     |
+| Ctrl+R    | Toggle the line number ruler                                                          |
+
+# Emacs style actions
+
+| Key       | Description of function   |
+|-------    |-------------------------  |
+| Alt+F     | Next word                 |
+| Alt+B     | Previous word             |
+| Alt+A     | Move to start of line     |
+| Alt+E     | Move to end of line       |
+
+# Function keys.
+
 Warning! The function keys may not work in all terminals! 
-+--------+---------------------------------------------------------+
-| F1     | Open help.                                              |
-+--------+---------------------------------------------------------+
-| F2     | Save current file.                                      |
-+--------+---------------------------------------------------------+
-| F3     | Find in current file. ( Same as Ctrl+F )                |
-+--------+---------------------------------------------------------+
-| F4     | Close current file. (Quit if only file.)                |
-+--------+---------------------------------------------------------+
-| F7     | Find in current file. (Same as Ctrl+F)                  |
-+--------+---------------------------------------------------------+
-| F10    | Close current file.                                     |
-+--------+---------------------------------------------------------+
 
+| Key   | Description of function   |
+|-----  |-------------------------  |
+| F1    | Open help                 |
+| F2    | Save                      |
+| F3    | Find                      |
+| F4    | Quit                      |
+| F7    | Find                      |
+| F10   | Quit                      |

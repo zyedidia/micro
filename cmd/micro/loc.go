@@ -54,6 +54,28 @@ type Loc struct {
 	X, Y int
 }
 
+func Diff(a, b Loc, buf *Buffer) int {
+	if a.Y == b.Y {
+		if a.X > b.X {
+			return a.X - b.X
+		}
+		return b.X - a.X
+	}
+
+	// Make sure a is guaranteed to be less than b
+	if b.LessThan(a) {
+		a, b = b, a
+	}
+
+	loc := 0
+	for i := a.Y + 1; i < b.Y; i++ {
+		// + 1 for the newline
+		loc += Count(buf.Line(i)) + 1
+	}
+	loc += Count(buf.Line(a.Y)) - a.X + b.X + 1
+	return loc
+}
+
 // LessThan returns true if b is smaller
 func (l Loc) LessThan(b Loc) bool {
 	if l.Y < b.Y {

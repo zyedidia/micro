@@ -131,7 +131,20 @@ HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
+Suspend (Linux only)
+ScrollUp
+ScrollDown
+SpawnMultiCursor
+RemoveMultiCursor
+RemoveAllMultiCursors
+SkipMultiCursor
 UnbindKey
+```
+
+You can also bind some mouse actions (these must be bound to mouse buttons)
+```
+MousePress
+MouseMultiCursor
 ```
 
 Here is the list of all possible keys you can bind:
@@ -262,6 +275,18 @@ Escape
 Enter
 ```
 
+You can also bind some mouse buttons (they may be bound to normal actions or mouse actions)
+
+```
+MouseLeft
+MouseMiddle
+MouseRight
+MouseWheelUp
+MouseWheelDown
+MouseWheelLeft
+MouseWheelRight
+```
+
 # Default keybinding configuration.
 
 ```json
@@ -276,10 +301,10 @@ Enter
     "ShiftRight":     "SelectRight",
     "AltLeft":        "WordLeft",
     "AltRight":       "WordRight",
-    "AltShiftRight":  "SelectWordRight",
-    "AltShiftLeft":   "SelectWordLeft",
     "AltUp":          "MoveLinesUp",
     "AltDown":        "MoveLinesDown",
+    "AltShiftRight":  "SelectWordRight",
+    "AltShiftLeft":   "SelectWordLeft",
     "CtrlLeft":       "StartOfLine",
     "CtrlRight":      "EndOfLine",
     "CtrlShiftLeft":  "SelectToStartOfLine",
@@ -291,13 +316,12 @@ Enter
     "CtrlShiftUp":    "SelectToStart",
     "CtrlShiftDown":  "SelectToEnd",
     "Enter":          "InsertNewline",
-    "Space":          "InsertSpace",
     "CtrlH":          "Backspace",
     "Backspace":      "Backspace",
     "Alt-CtrlH":      "DeleteWordLeft",
     "Alt-Backspace":  "DeleteWordLeft",
     "Tab":            "IndentSelection,InsertTab",
-    "Backtab":        "OutdentSelection",
+    "Backtab":        "OutdentSelection,OutdentLine",
     "CtrlO":          "OpenFile",
     "CtrlS":          "Save",
     "CtrlF":          "Find",
@@ -336,8 +360,6 @@ Enter
     "Alt-b": "WordLeft",
     "Alt-a": "StartOfLine",
     "Alt-e": "EndOfLine",
-    "Alt-p": "CursorUp",
-    "Alt-n": "CursorDown",
 
     // Integration with file managers
     "F1":  "ToggleHelp",
@@ -347,10 +369,23 @@ Enter
     "F7":  "Find",
     "F10": "Quit",
     "Esc": "Escape",
+
+    // Mouse bindings
+    "MouseWheelUp":   "ScrollUp",
+    "MouseWheelDown": "ScrollDown",
+    "MouseLeft":      "MousePress",
+    "MouseMiddle":    "PastePrimary",
+    "Ctrl-MouseLeft": "MouseMultiCursor",
+
+    // Multiple cursors bindings
+    "Alt-n": "SpawnMultiCursor",
+    "Alt-p": "RemoveMultiCursor",
+    "Alt-c": "RemoveAllMultiCursors",
+    "Alt-x": "SkipMultiCursor",
 }
 ```
 
-#Final notes
+# Final notes
 Note: On some old terminal emulators and on Windows machines, `CtrlH` should be used
 for backspace.
 

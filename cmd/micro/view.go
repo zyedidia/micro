@@ -169,7 +169,7 @@ func (v *View) paste(clip string) {
 	}
 	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
 	v.Buf.Insert(v.Cursor.Loc, clip)
-	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+	// v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
 	v.freshClip = false
 	messenger.Message("Pasted clipboard")
 }
@@ -479,6 +479,11 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	return relocate
 }
 
+func (v *View) SetCursor(c *Cursor) {
+	v.Cursor = c
+	v.Buf.curCursor = c.Num
+}
+
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
@@ -499,9 +504,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 					}
 				}
 				if e.Modifiers() == key.modifiers {
-					relocate = false
-					isBinding = true
-					relocate = v.ExecuteActions(actions)
+					for _, c := range v.Buf.cursors {
+						v.SetCursor(c)
+						relocate = false
+						isBinding = true
+						relocate = v.ExecuteActions(actions) || relocate
+					}
+					v.SetCursor(&v.Buf.Cursor)
+					v.Buf.MergeCursors()
 					break
 				}
 			}
@@ -509,24 +519,28 @@ func (v *View) HandleEvent(event tcell.Event) {
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.readonly == false {
-				// Insert a character
-				if v.Cursor.HasSelection() {
-					v.Cursor.DeleteSelection()
-					v.Cursor.ResetSelection()
-				}
-				v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-				v.Cursor.Right()
+				for _, c := range v.Buf.cursors {
+					v.SetCursor(c)
 
-				for pl := range loadedPlugins {
-					_, err := Call(pl+".onRune", string(e.Rune()), v)
-					if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-						TermMessage(err)
+					// Insert a character
+					if v.Cursor.HasSelection() {
+						v.Cursor.DeleteSelection()
+						v.Cursor.ResetSelection()
+					}
+					v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+
+					for pl := range loadedPlugins {
+						_, err := Call(pl+".onRune", string(e.Rune()), v)
+						if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+							TermMessage(err)
+						}
+					}
+
+					if recordingMacro {
+						curMacro = append(curMacro, e.Rune())
 					}
 				}
-
-				if recordingMacro {
-					curMacro = append(curMacro, e.Rune())
-				}
+				v.SetCursor(&v.Buf.Cursor)
 			}
 		}
 	case *tcell.EventPaste:
@@ -536,27 +550,34 @@ func (v *View) HandleEvent(event tcell.Event) {
 				break
 			}
 
-			v.paste(e.Text())
+			for _, c := range v.Buf.cursors {
+				v.SetCursor(c)
+				v.paste(e.Text())
+
+			}
+			v.SetCursor(&v.Buf.Cursor)
 
 			PostActionCall("Paste", v)
 		}
 	case *tcell.EventMouse:
-		x, y := e.Position()
-		x -= v.lineNumOffset - v.leftCol + v.x
-		y += v.Topline - v.y
 		// Don't relocate for mouse events
 		relocate = false
 
 		button := e.Buttons()
 
 		for key, actions := range bindings {
-			if button == key.buttons {
-				relocate = v.ExecuteActions(actions)
+			if button == key.buttons && e.Modifiers() == key.modifiers {
+				for _, c := range v.Buf.cursors {
+					v.SetCursor(c)
+					relocate = v.ExecuteActions(actions) || relocate
+				}
+				v.SetCursor(&v.Buf.Cursor)
+				v.Buf.MergeCursors()
 			}
 		}
 
 		for key, actions := range mouseBindings {
-			if button == key.buttons {
+			if button == key.buttons && e.Modifiers() == key.modifiers {
 				for _, action := range actions {
 					action(v, true, e)
 				}
@@ -568,6 +589,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Mouse event with no click
 			if !v.mouseReleased {
 				// Mouse was just released
+
+				x, y := e.Position()
+				x -= v.lineNumOffset - v.leftCol + v.x
+				y += v.Topline - v.y
 
 				// Relocating here isn't really necessary because the cursor will
 				// be in the right place from the last mouse event
@@ -594,6 +619,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// This is (hopefully) a temporary solution
 		v.Relocate()
 	}
+}
+
+func (v *View) mainCursor() bool {
+	return v.Buf.curCursor == len(v.Buf.cursors)-1
 }
 
 // GutterMessage creates a message in this view's gutter
@@ -822,22 +851,20 @@ func (v *View) DisplayView() {
 				}
 
 				charLoc := char.realLoc
-				if v.Cursor.HasSelection() &&
-					(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
-						charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
-					// The current character is selected
-					lineStyle = defStyle.Reverse(true)
+				for _, c := range v.Buf.cursors {
+					v.SetCursor(c)
+					if v.Cursor.HasSelection() &&
+						(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
+							charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
+						// The current character is selected
+						lineStyle = defStyle.Reverse(true)
 
-					if style, ok := colorscheme["selection"]; ok {
-						lineStyle = style
+						if style, ok := colorscheme["selection"]; ok {
+							lineStyle = style
+						}
 					}
 				}
-
-				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && !cursorSet {
-					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
-					cursorSet = true
-				}
+				v.SetCursor(&v.Buf.Cursor)
 
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
@@ -847,6 +874,16 @@ func (v *View) DisplayView() {
 				}
 
 				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
+
+				for i, c := range v.Buf.cursors {
+					v.SetCursor(c)
+					if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+						v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && (!cursorSet || i != 0) {
+						ShowMultiCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, i)
+						cursorSet = true
+					}
+				}
+				v.SetCursor(&v.Buf.Cursor)
 
 				lastChar = char
 			}
@@ -858,19 +895,27 @@ func (v *View) DisplayView() {
 		var cx, cy int
 		if lastChar != nil {
 			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-				screen.ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
-				cx, cy = lastX, yOffset+lastChar.visualLoc.Y
+			for i, c := range v.Buf.cursors {
+				v.SetCursor(c)
+				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+					v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
+					ShowMultiCursor(lastX, yOffset+lastChar.visualLoc.Y, i)
+					cx, cy = lastX, yOffset+lastChar.visualLoc.Y
+				}
 			}
+			v.SetCursor(&v.Buf.Cursor)
 			realLoc = Loc{lastChar.realLoc.X + 1, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == realLineN {
-				screen.ShowCursor(xOffset, yOffset+visualLineN)
-				cx, cy = xOffset, yOffset+visualLineN
+			for i, c := range v.Buf.cursors {
+				v.SetCursor(c)
+				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+					v.Cursor.Y == realLineN {
+					ShowMultiCursor(xOffset, yOffset+visualLineN, i)
+					cx, cy = xOffset, yOffset+visualLineN
+				}
 			}
+			v.SetCursor(&v.Buf.Cursor)
 			lastX = xOffset
 			realLoc = Loc{0, realLineN}
 			visualLoc = Loc{0, visualLineN}
@@ -909,6 +954,18 @@ func (v *View) DisplayView() {
 		for i := 0; i < v.Height; i++ {
 			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
 		}
+	}
+}
+
+// ShowMultiCursor will display a cursor at a location
+// If i == 0 then the terminal cursor will be used
+// Otherwise a fake cursor will be drawn at the position
+func ShowMultiCursor(x, y, i int) {
+	if i == 0 {
+		screen.ShowCursor(x, y)
+	} else {
+		r, _, _, _ := screen.GetContent(x, y)
+		screen.SetContent(x, y, r, nil, defStyle.Reverse(true))
 	}
 }
 
