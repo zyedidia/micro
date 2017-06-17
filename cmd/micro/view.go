@@ -511,6 +511,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						relocate = v.ExecuteActions(actions) || relocate
 					}
 					v.SetCursor(&v.Buf.Cursor)
+					v.Buf.MergeCursors()
 					break
 				}
 			}
@@ -571,6 +572,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 					relocate = v.ExecuteActions(actions) || relocate
 				}
 				v.SetCursor(&v.Buf.Cursor)
+				v.Buf.MergeCursors()
 			}
 		}
 

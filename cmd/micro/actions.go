@@ -1916,17 +1916,15 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 func (v *View) RemoveMultiCursor(usePlugin bool) bool {
 	end := len(v.Buf.cursors)
 	if end > 1 {
-		nextOne := v.Buf.cursors[len(v.Buf.cursors)-2]
-		if v.Cursor == nextOne {
+		lastOne := v.Buf.cursors[end-1]
+		if v.Cursor == lastOne {
 			if usePlugin && !PreActionCall("RemoveMultiCursor", v) {
 				return false
 			}
 
-			if end > 1 {
-				v.Buf.cursors[end-1] = nil
-				v.Buf.cursors = v.Buf.cursors[:end-1]
-				v.Buf.UpdateCursors()
-			}
+			v.Buf.cursors[end-1] = nil
+			v.Buf.cursors = v.Buf.cursors[:end-1]
+			v.Buf.UpdateCursors()
 			v.Relocate()
 
 			if usePlugin {
@@ -1942,7 +1940,7 @@ func (v *View) RemoveMultiCursor(usePlugin bool) bool {
 
 // RemoveAllMultiCursors removes all cursors except the base cursor
 func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
-	if v.Cursor == &v.Buf.Cursor {
+	if v.Cursor == v.Buf.cursors[len(v.Buf.cursors)-1] {
 		if usePlugin && !PreActionCall("RemoveAllMultiCursors", v) {
 			return false
 		}

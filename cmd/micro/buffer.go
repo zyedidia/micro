@@ -309,6 +309,24 @@ func (b *Buffer) Update() {
 	b.NumLines = len(b.lines)
 }
 
+func (b *Buffer) MergeCursors() {
+	var cursors []*Cursor
+	for i := 0; i < len(b.cursors); i++ {
+		c1 := b.cursors[i]
+		if c1 != nil {
+			for j := 0; j < len(b.cursors); j++ {
+				c2 := b.cursors[j]
+				if i != j && c1.Loc == c2.Loc {
+					b.cursors[j] = nil
+				}
+			}
+			cursors = append(cursors, c1)
+		}
+	}
+
+	b.cursors = cursors
+}
+
 func (b *Buffer) UpdateCursors() {
 	for i, c := range b.cursors {
 		c.Num = i
