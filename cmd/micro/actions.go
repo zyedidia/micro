@@ -1848,6 +1848,7 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 				}
 			}
 			v.Buf.cursors = append(v.Buf.cursors, c)
+			v.Buf.UpdateCursors()
 			v.Relocate()
 			v.Cursor = spawner
 		}
@@ -1879,6 +1880,7 @@ func (v *View) MouseMultiCursor(usePlugin bool, e *tcell.EventMouse) bool {
 		v.Cursor = &v.Buf.Cursor
 
 		v.Buf.cursors = append(v.Buf.cursors, c)
+		v.Buf.UpdateCursors()
 
 		if usePlugin {
 			PostActionCall("SpawnMultiCursorAtMouse", v)
@@ -1923,6 +1925,7 @@ func (v *View) RemoveMultiCursor(usePlugin bool) bool {
 			if end > 1 {
 				v.Buf.cursors[end-1] = nil
 				v.Buf.cursors = v.Buf.cursors[:end-1]
+				v.Buf.UpdateCursors()
 			}
 			v.Relocate()
 
@@ -1948,6 +1951,7 @@ func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
 			v.Buf.cursors[i] = nil
 		}
 		v.Buf.cursors = v.Buf.cursors[:1]
+		v.Buf.UpdateCursors()
 		v.Cursor.ResetSelection()
 		v.Relocate()
 

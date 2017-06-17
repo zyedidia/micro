@@ -479,6 +479,11 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	return relocate
 }
 
+func (v *View) SetCursor(c *Cursor) {
+	v.Cursor = c
+	v.Buf.curCursor = c.Num
+}
+
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
@@ -500,12 +505,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 				if e.Modifiers() == key.modifiers {
 					for _, c := range v.Buf.cursors {
-						v.Cursor = c
+						v.SetCursor(c)
 						relocate = false
 						isBinding = true
 						relocate = v.ExecuteActions(actions) || relocate
 					}
-					v.Cursor = &v.Buf.Cursor
+					v.SetCursor(&v.Buf.Cursor)
 					break
 				}
 			}
@@ -514,7 +519,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.readonly == false {
 				for _, c := range v.Buf.cursors {
-					v.Cursor = c
+					v.SetCursor(c)
 
 					// Insert a character
 					if v.Cursor.HasSelection() {
@@ -534,7 +539,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 						curMacro = append(curMacro, e.Rune())
 					}
 				}
-				v.Cursor = &v.Buf.Cursor
+				v.SetCursor(&v.Buf.Cursor)
 			}
 		}
 	case *tcell.EventPaste:
@@ -545,11 +550,11 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 
 			for _, c := range v.Buf.cursors {
-				v.Cursor = c
+				v.SetCursor(c)
 				v.paste(e.Text())
 
 			}
-			v.Cursor = &v.Buf.Cursor
+			v.SetCursor(&v.Buf.Cursor)
 
 			PostActionCall("Paste", v)
 		}
@@ -562,10 +567,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 		for key, actions := range bindings {
 			if button == key.buttons && e.Modifiers() == key.modifiers {
 				for _, c := range v.Buf.cursors {
-					v.Cursor = c
+					v.SetCursor(c)
 					relocate = v.ExecuteActions(actions) || relocate
 				}
-				v.Cursor = &v.Buf.Cursor
+				v.SetCursor(&v.Buf.Cursor)
 			}
 		}
 
@@ -841,7 +846,7 @@ func (v *View) DisplayView() {
 
 				charLoc := char.realLoc
 				for _, c := range v.Buf.cursors {
-					v.Cursor = c
+					v.SetCursor(c)
 					if v.Cursor.HasSelection() &&
 						(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
 							charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
@@ -853,7 +858,7 @@ func (v *View) DisplayView() {
 						}
 					}
 				}
-				v.Cursor = &v.Buf.Cursor
+				v.SetCursor(&v.Buf.Cursor)
 
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
@@ -865,14 +870,14 @@ func (v *View) DisplayView() {
 				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
 
 				for i, c := range v.Buf.cursors {
-					v.Cursor = c
+					v.SetCursor(c)
 					if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 						v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && (!cursorSet || i != 0) {
 						ShowMultiCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, i)
 						cursorSet = true
 					}
 				}
-				v.Cursor = &v.Buf.Cursor
+				v.SetCursor(&v.Buf.Cursor)
 
 				lastChar = char
 			}
@@ -885,26 +890,26 @@ func (v *View) DisplayView() {
 		if lastChar != nil {
 			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
 			for i, c := range v.Buf.cursors {
-				v.Cursor = c
+				v.SetCursor(c)
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
 					ShowMultiCursor(lastX, yOffset+lastChar.visualLoc.Y, i)
 					cx, cy = lastX, yOffset+lastChar.visualLoc.Y
 				}
 			}
-			v.Cursor = &v.Buf.Cursor
+			v.SetCursor(&v.Buf.Cursor)
 			realLoc = Loc{lastChar.realLoc.X + 1, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
 			for i, c := range v.Buf.cursors {
-				v.Cursor = c
+				v.SetCursor(c)
 				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
 					v.Cursor.Y == realLineN {
 					ShowMultiCursor(xOffset, yOffset+visualLineN, i)
 					cx, cy = xOffset, yOffset+visualLineN
 				}
 			}
-			v.Cursor = &v.Buf.Cursor
+			v.SetCursor(&v.Buf.Cursor)
 			lastX = xOffset
 			realLoc = Loc{0, realLineN}
 			visualLoc = Loc{0, visualLineN}

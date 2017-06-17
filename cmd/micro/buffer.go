@@ -28,8 +28,9 @@ type Buffer struct {
 	// This stores all the text in the buffer as an array of lines
 	*LineArray
 
-	Cursor  Cursor
-	cursors []*Cursor // for multiple cursors
+	Cursor    Cursor
+	cursors   []*Cursor // for multiple cursors
+	curCursor int       // the current cursor
 
 	// Path to the file on disk
 	Path string
@@ -306,6 +307,12 @@ func (b *Buffer) ReOpen() {
 // Update fetches the string from the rope and updates the `text` and `lines` in the buffer
 func (b *Buffer) Update() {
 	b.NumLines = len(b.lines)
+}
+
+func (b *Buffer) UpdateCursors() {
+	for i, c := range b.cursors {
+		c.Num = i
+	}
 }
 
 // Save saves the buffer to its default path
