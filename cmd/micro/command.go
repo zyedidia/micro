@@ -35,27 +35,28 @@ var commandActions map[string]func([]string)
 
 func init() {
 	commandActions = map[string]func([]string){
-		"Set":       Set,
-		"SetLocal":  SetLocal,
-		"Show":      Show,
-		"Run":       Run,
-		"Bind":      Bind,
-		"Quit":      Quit,
-		"Save":      Save,
-		"Replace":   Replace,
-		"VSplit":    VSplit,
-		"HSplit":    HSplit,
-		"Tab":       NewTab,
-		"Help":      Help,
-		"Eval":      Eval,
-		"ToggleLog": ToggleLog,
-		"Plugin":    PluginCmd,
-		"Reload":    Reload,
-		"Cd":        Cd,
-		"Pwd":       Pwd,
-		"Open":      Open,
-		"TabSwitch": TabSwitch,
-		"MemUsage":  MemUsage,
+		"Set":        Set,
+		"SetLocal":   SetLocal,
+		"Show":       Show,
+		"Run":        Run,
+		"Bind":       Bind,
+		"Quit":       Quit,
+		"Save":       Save,
+		"Replace":    Replace,
+		"ReplaceAll": ReplaceAll,
+		"VSplit":     VSplit,
+		"HSplit":     HSplit,
+		"Tab":        NewTab,
+		"Help":       Help,
+		"Eval":       Eval,
+		"ToggleLog":  ToggleLog,
+		"Plugin":     PluginCmd,
+		"Reload":     Reload,
+		"Cd":         Cd,
+		"Pwd":        Pwd,
+		"Open":       Open,
+		"TabSwitch":  TabSwitch,
+		"MemUsage":   MemUsage,
 	}
 }
 
@@ -89,27 +90,28 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":       {"Set", []Completion{OptionCompletion, NoCompletion}},
-		"setlocal":  {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
-		"show":      {"Show", []Completion{OptionCompletion, NoCompletion}},
-		"bind":      {"Bind", []Completion{NoCompletion}},
-		"run":       {"Run", []Completion{NoCompletion}},
-		"quit":      {"Quit", []Completion{NoCompletion}},
-		"save":      {"Save", []Completion{NoCompletion}},
-		"replace":   {"Replace", []Completion{NoCompletion}},
-		"vsplit":    {"VSplit", []Completion{FileCompletion, NoCompletion}},
-		"hsplit":    {"HSplit", []Completion{FileCompletion, NoCompletion}},
-		"tab":       {"Tab", []Completion{FileCompletion, NoCompletion}},
-		"help":      {"Help", []Completion{HelpCompletion, NoCompletion}},
-		"eval":      {"Eval", []Completion{NoCompletion}},
-		"log":       {"ToggleLog", []Completion{NoCompletion}},
-		"plugin":    {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
-		"reload":    {"Reload", []Completion{NoCompletion}},
-		"cd":        {"Cd", []Completion{FileCompletion}},
-		"pwd":       {"Pwd", []Completion{NoCompletion}},
-		"open":      {"Open", []Completion{FileCompletion}},
-		"tabswitch": {"TabSwitch", []Completion{NoCompletion}},
-		"memusage":  {"MemUsage", []Completion{NoCompletion}},
+		"set":        {"Set", []Completion{OptionCompletion, NoCompletion}},
+		"setlocal":   {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
+		"bind":       {"Bind", []Completion{NoCompletion}},
+		"run":        {"Run", []Completion{NoCompletion}},
+		"quit":       {"Quit", []Completion{NoCompletion}},
+		"save":       {"Save", []Completion{NoCompletion}},
+		"replace":    {"Replace", []Completion{NoCompletion}},
+		"replaceall": {"ReplaceAll", []Completion{NoCompletion}},
+		"vsplit":     {"VSplit", []Completion{FileCompletion, NoCompletion}},
+		"hsplit":     {"HSplit", []Completion{FileCompletion, NoCompletion}},
+		"tab":        {"Tab", []Completion{FileCompletion, NoCompletion}},
+		"help":       {"Help", []Completion{HelpCompletion, NoCompletion}},
+		"eval":       {"Eval", []Completion{NoCompletion}},
+		"log":        {"ToggleLog", []Completion{NoCompletion}},
+		"plugin":     {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
+		"reload":     {"Reload", []Completion{NoCompletion}},
+		"cd":         {"Cd", []Completion{FileCompletion}},
+		"pwd":        {"Pwd", []Completion{NoCompletion}},
+		"open":       {"Open", []Completion{FileCompletion}},
+		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
+		"memusage":   {"MemUsage", []Completion{NoCompletion}},
 	}
 }
 
@@ -506,16 +508,21 @@ func Save(args []string) {
 
 // Replace runs search and replace
 func Replace(args []string) {
-	if len(args) < 2 {
+	if len(args) < 2 || len(args) > 3 {
 		// We need to find both a search and replace expression
 		messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
 		return
 	}
 
-	var flags string
+	allAtOnce := false
 	if len(args) == 3 {
-		// The user included some flags
-		flags = args[2]
+		// user added -a flag
+		if args[2] == "-a" {
+			allAtOnce = true
+		} else {
+			messenger.Error("Invalid replace flag: " + args[2])
+			return
+		}
 	}
 
 	search := string(args[0])
@@ -531,40 +538,7 @@ func Replace(args []string) {
 	view := CurView()
 
 	found := 0
-	if strings.Contains(flags, "c") {
-		for {
-			// The 'check' flag was used
-			Search(search, view, true)
-			if !view.Cursor.HasSelection() {
-				break
-			}
-			view.Relocate()
-			RedrawAll()
-			choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
-			if canceled {
-				if view.Cursor.HasSelection() {
-					view.Cursor.Loc = view.Cursor.CurSelection[0]
-					view.Cursor.ResetSelection()
-				}
-				messenger.Reset()
-				break
-			}
-			if choice {
-				view.Cursor.DeleteSelection()
-				view.Buf.Insert(view.Cursor.Loc, replace)
-				view.Cursor.ResetSelection()
-				messenger.Reset()
-				found++
-			} else {
-				if view.Cursor.HasSelection() {
-					searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
-				} else {
-					searchStart = ToCharPos(view.Cursor.Loc, view.Buf)
-				}
-				continue
-			}
-		}
-	} else {
+	if allAtOnce {
 		// var deltas []Delta
 		for i := 0; i < view.Buf.LinesNum(); i++ {
 			// view.Buf.lines[i].data = regex.ReplaceAll(view.Buf.lines[i].data, []byte(replace))
@@ -584,6 +558,38 @@ func Replace(args []string) {
 			}
 		}
 		// view.Buf.MultipleReplace(deltas)
+
+	} else {
+		for {
+			// The 'check' flag was used
+			Search(search, view, true)
+			if !view.Cursor.HasSelection() {
+				break
+			}
+			view.Relocate()
+			RedrawAll()
+			choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
+			if canceled {
+				if view.Cursor.HasSelection() {
+					view.Cursor.Loc = view.Cursor.CurSelection[0]
+					view.Cursor.ResetSelection()
+				}
+				messenger.Reset()
+				break
+			} else if choice {
+				view.Cursor.DeleteSelection()
+				view.Buf.Insert(view.Cursor.Loc, replace)
+				view.Cursor.ResetSelection()
+				messenger.Reset()
+				found++
+			} else {
+				if view.Cursor.HasSelection() {
+					searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
+				} else {
+					searchStart = ToCharPos(view.Cursor.Loc, view.Buf)
+				}
+			}
+		}
 	}
 	view.Cursor.Relocate()
 
@@ -594,6 +600,12 @@ func Replace(args []string) {
 	} else {
 		messenger.Message("Nothing matched ", search)
 	}
+}
+
+// ReplaceAll replaces search term all at once
+func ReplaceAll(args []string) {
+	// aliased to Replace command
+	Replace(append(args, "-a"))
 }
 
 // RunShellCommand executes a shell command and returns the output/error
