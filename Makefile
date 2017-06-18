@@ -11,7 +11,7 @@ ADDITIONAL_GO_LINKER_FLAGS := $(shell GOOS=$(shell go env GOHOSTOS) \
 GOBIN ?= $(shell go env GOPATH)/bin
 
 # Builds micro after checking dependencies but without updating the runtime
-build:
+build: update
 	go build -ldflags "-s -w -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)' $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 # Builds micro after building the runtime and checking dependencies
@@ -22,7 +22,7 @@ build-quick:
 	go build -ldflags "-s -w -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)' $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 # Same as 'build' but installs to $GOBIN afterward
-install:
+install: update
 	go install -ldflags "-s -w -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)' $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 # Same as 'build-all' but installs to $GOBIN afterward
@@ -31,6 +31,10 @@ install-all: runtime install
 # Same as 'build-quick' but installs to $GOBIN afterward
 install-quick:
 	go install -ldflags "-s -w -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)' $(ADDITIONAL_GO_LINKER_FLAGS)"  ./cmd/micro
+
+update:
+	git pull
+	git submodule update
 
 # Builds the runtime
 runtime:
