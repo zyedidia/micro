@@ -337,6 +337,9 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.buf.Line(c.Y))
 	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	if c.X > len(runes) {
+		c.X = len(runes) - 1
+	}
 	return StringWidth(string(runes[:c.X]), tabSize)
 }
 
