@@ -52,3 +52,6 @@
 [submodule "cmd/micro/vendor/gopkg.in/yaml.v2"]
 	path = cmd/micro/vendor/gopkg.in/yaml.v2
 	url = https://gopkg.in/yaml.v2
+[submodule "cmd/micro/vendor/github.com/npat-efault/poller"]
+	path = cmd/micro/vendor/github.com/npat-efault/poller
+	url = https://github.com/npat-efault/poller
