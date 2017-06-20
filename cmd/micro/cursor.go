@@ -1,6 +1,8 @@
 package main
 
-import "github.com/zyedidia/clipboard"
+import (
+	"github.com/zyedidia/clipboard"
+)
 
 // The Cursor struct stores the location of the cursor in the view
 // The complicated part about the cursor is storing its location.
@@ -340,6 +342,11 @@ func (c *Cursor) GetVisualX() int {
 	if c.X > len(runes) {
 		c.X = len(runes) - 1
 	}
+
+	if c.X < 0 {
+		c.X = 0
+	}
+
 	return StringWidth(string(runes[:c.X]), tabSize)
 }
 
