@@ -229,7 +229,7 @@ func resolveIncludesInRegion(files []*File, region *region) {
 	}
 }
 
-func parseRules(input []interface{}, curRegion *region) (*rules, error) {
+func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -239,7 +239,7 @@ func parseRules(input []interface{}, curRegion *region) (*rules, error) {
 			}
 		}
 	}()
-	rules := new(rules)
+	ru = new(rules)
 
 	for _, v := range input {
 		rule := v.(map[interface{}]interface{})
@@ -249,7 +249,7 @@ func parseRules(input []interface{}, curRegion *region) (*rules, error) {
 			switch object := val.(type) {
 			case string:
 				if k == "include" {
-					rules.includes = append(rules.includes, object)
+					ru.includes = append(ru.includes, object)
 				} else {
 					// Pattern
 					r, err := regexp.Compile(object)
@@ -263,7 +263,7 @@ func parseRules(input []interface{}, curRegion *region) (*rules, error) {
 						Groups[groupStr] = numGroups
 					}
 					groupNum := Groups[groupStr]
-					rules.patterns = append(rules.patterns, &pattern{groupNum, r})
+					ru.patterns = append(ru.patterns, &pattern{groupNum, r})
 				}
 			case map[interface{}]interface{}:
 				// region
@@ -271,17 +271,17 @@ func parseRules(input []interface{}, curRegion *region) (*rules, error) {
 				if err != nil {
 					return nil, err
 				}
-				rules.regions = append(rules.regions, region)
+				ru.regions = append(ru.regions, region)
 			default:
 				return nil, fmt.Errorf("Bad type %T", object)
 			}
 		}
 	}
 
-	return rules, nil
+	return ru, nil
 }
 
-func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (*region, error) {
+func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (r *region, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -291,24 +291,23 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 			}
 		}
 	}()
-	var err error
 
-	region := new(region)
+	r = new(region)
 	if _, ok := Groups[group]; !ok {
 		numGroups++
 		Groups[group] = numGroups
 	}
 	groupNum := Groups[group]
-	region.group = groupNum
-	region.parent = prevRegion
+	r.group = groupNum
+	r.parent = prevRegion
 
-	region.start, err = regexp.Compile(regionInfo["start"].(string))
+	r.start, err = regexp.Compile(regionInfo["start"].(string))
 
 	if err != nil {
 		return nil, err
 	}
 
-	region.end, err = regexp.Compile(regionInfo["end"].(string))
+	r.end, err = regexp.Compile(regionInfo["end"].(string))
 
 	if err != nil {
 		return nil, err
@@ -316,7 +315,7 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 
 	// skip is optional
 	if _, ok := regionInfo["skip"]; ok {
-		region.skip, err = regexp.Compile(regionInfo["skip"].(string))
+		r.skip, err = regexp.Compile(regionInfo["skip"].(string))
 
 		if err != nil {
 			return nil, err
@@ -331,20 +330,20 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 			Groups[groupStr] = numGroups
 		}
 		groupNum := Groups[groupStr]
-		region.limitGroup = groupNum
+		r.limitGroup = groupNum
 
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		region.limitGroup = region.group
+		r.limitGroup = r.group
 	}
 
-	region.rules, err = parseRules(regionInfo["rules"].([]interface{}), region)
+	r.rules, err = parseRules(regionInfo["rules"].([]interface{}), r)
 
 	if err != nil {
 		return nil, err
 	}
 
-	return region, nil
+	return r, nil
 }
