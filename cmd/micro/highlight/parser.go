@@ -82,6 +82,16 @@ func init() {
 }
 
 func ParseFtDetect(file *File) (r [2]*regexp.Regexp, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
 	rules := file.yamlSrc
 
 	loaded := 0
@@ -118,8 +128,12 @@ func ParseFtDetect(file *File) (r [2]*regexp.Regexp, err error) {
 func ParseFile(input []byte) (f *File, err error) {
 	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
 	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
 		}
 	}()
 
@@ -147,8 +161,12 @@ func ParseFile(input []byte) (f *File, err error) {
 func ParseDef(f *File, header *Header) (s *Def, err error) {
 	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
 	defer func() {
-		if e := recover(); e != nil {
-			err = e.(error)
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
 		}
 	}()
 
@@ -212,6 +230,15 @@ func resolveIncludesInRegion(files []*File, region *region) {
 }
 
 func parseRules(input []interface{}, curRegion *region) (*rules, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
 	rules := new(rules)
 
 	for _, v := range input {
@@ -255,6 +282,15 @@ func parseRules(input []interface{}, curRegion *region) (*rules, error) {
 }
 
 func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (*region, error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
 	var err error
 
 	region := new(region)
