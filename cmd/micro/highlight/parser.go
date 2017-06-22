@@ -1,6 +1,7 @@
 package highlight
 
 import (
+	"errors"
 	"fmt"
 	"regexp"
 
@@ -120,6 +121,10 @@ func ParseFtDetect(file *File) (r [2]*regexp.Regexp, err error) {
 		if loaded >= 2 {
 			break
 		}
+	}
+
+	if loaded == 0 {
+		return r, errors.New("No detect regexes found")
 	}
 
 	return r, err
