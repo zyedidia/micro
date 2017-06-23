@@ -1,5 +1,4 @@
 # This script creates releases on Github for micro
-# It assumes that the binaries are in the current directory
 # You must have the correct Github access token to run this script
 
 # $1 is the title, $2 is the description
@@ -18,6 +17,10 @@ github-release release \
     --tag $tag \
     --name "$1" \
     --description "$2" \
+
+echo "Cross compiling binaries"
+./cross-compile.sh $1
+mv ../binaries .
 
 echo "Uploading OSX binary"
 github-release upload \
@@ -115,19 +118,19 @@ github-release upload \
     --name "micro-$1-win32.zip" \
     --file binaries/micro-$1-win32.zip
 
-# echo "Uploading vendored tarball"
-# github-release upload \
-#     --user zyedidia \
-#     --repo micro \
-#     --tag $tag \
-#     --name "micro-$1-src.tar.gz" \
-#     --file binaries/micro-$1-src.tar.gz
-#
-# echo "Uploading vendored zip"
-#
-# github-release upload \
-#     --user zyedidia \
-#     --repo micro \
-#     --tag $tag \
-#     --name "micro-$1-src.zip" \
-#     --file binaries/micro-$1-src.zip
+echo "Uploading vendored tarball"
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag $tag \
+    --name "micro-$1-src.tar.gz" \
+    --file binaries/micro-$1-src.tar.gz
+
+echo "Uploading vendored zip"
+
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag $tag \
+    --name "micro-$1-src.zip" \
+    --file binaries/micro-$1-src.zip

@@ -1,9 +1,4 @@
-cd ../cmd/micro
-
-govendor init
-govendor add +e
-
-cd ../../..
+cd ../..
 
 tar czf "$1".tar.gz micro
 zip -rq "$1".zip micro
