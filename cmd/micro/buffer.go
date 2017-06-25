@@ -316,7 +316,7 @@ func (b *Buffer) MergeCursors() {
 		if c1 != nil {
 			for j := 0; j < len(b.cursors); j++ {
 				c2 := b.cursors[j]
-				if i != j && c1.Loc == c2.Loc {
+				if c2 != nil && i != j && c1.Loc == c2.Loc {
 					b.cursors[j] = nil
 				}
 			}

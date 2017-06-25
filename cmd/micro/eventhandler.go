@@ -107,11 +107,19 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 	end := e.Deltas[0].End
 
 	for _, c := range eh.buf.cursors {
-		if start.Y != end.Y && c.GreaterThan(start) {
-			c.Loc.Y += end.Y - start.Y
-		} else if c.Y == start.Y && c.GreaterEqual(start) {
-			c.Loc = c.Move(Count(text), eh.buf)
+		move := func(loc Loc) Loc {
+			if start.Y != end.Y && loc.GreaterThan(start) {
+				loc.Y += end.Y - start.Y
+			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
+				loc = loc.Move(Count(text), eh.buf)
+			}
+			return loc
 		}
+		c.Loc = move(c.Loc)
+		c.CurSelection[0] = move(c.CurSelection[0])
+		c.CurSelection[1] = move(c.CurSelection[1])
+		c.OrigSelection[0] = move(c.OrigSelection[0])
+		c.OrigSelection[1] = move(c.OrigSelection[1])
 		c.LastVisualX = c.GetVisualX()
 	}
 }
@@ -127,13 +135,19 @@ func (eh *EventHandler) Remove(start, end Loc) {
 	eh.Execute(e)
 
 	for _, c := range eh.buf.cursors {
-		if start.Y != end.Y && c.GreaterThan(end) {
-			c.Loc.Y -= end.Y - start.Y
-		} else if c.Y == end.Y && c.GreaterEqual(end) {
-			// TermMessage(start, end)
-			c.Loc = c.Move(-Diff(start, end, eh.buf), eh.buf)
-			// c.Loc = c.Move(ToCharPos(start, eh.buf)-ToCharPos(end, eh.buf), eh.buf)
+		move := func(loc Loc) Loc {
+			if start.Y != end.Y && loc.GreaterThan(end) {
+				loc.Y -= end.Y - start.Y
+			} else if loc.Y == end.Y && loc.GreaterEqual(end) {
+				loc = loc.Move(-Diff(start, end, eh.buf), eh.buf)
+			}
+			return loc
 		}
+		c.Loc = move(c.Loc)
+		c.CurSelection[0] = move(c.CurSelection[0])
+		c.CurSelection[1] = move(c.CurSelection[1])
+		c.OrigSelection[0] = move(c.OrigSelection[0])
+		c.OrigSelection[1] = move(c.OrigSelection[1])
 		c.LastVisualX = c.GetVisualX()
 	}
 }
