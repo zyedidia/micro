@@ -504,7 +504,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 					}
 				}
 				if e.Modifiers() == key.modifiers {
-					for _, c := range v.Buf.cursors {
+					for i := len(v.Buf.cursors)-1; i >= 0; i-- {
+					    c := v.Buf.cursors[i]
 						v.SetCursor(c)
 						relocate = false
 						isBinding = true
@@ -519,7 +520,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.readonly == false {
-				for _, c := range v.Buf.cursors {
+				for i := len(v.Buf.cursors)-1; i >= 0; i-- {
+				    c := v.Buf.cursors[i]
 					v.SetCursor(c)
 
 					// Insert a character
@@ -550,7 +552,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 				break
 			}
 
-			for _, c := range v.Buf.cursors {
+			for i := len(v.Buf.cursors)-1; i >= 0; i-- {
+			    c := v.Buf.cursors[i]
 				v.SetCursor(c)
 				v.paste(e.Text())
 
@@ -567,7 +570,8 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 		for key, actions := range bindings {
 			if button == key.buttons && e.Modifiers() == key.modifiers {
-				for _, c := range v.Buf.cursors {
+				for i := len(v.Buf.cursors)-1; i >= 0; i-- {
+					c := v.Buf.cursors[i]
 					v.SetCursor(c)
 					relocate = v.ExecuteActions(actions) || relocate
 				}
