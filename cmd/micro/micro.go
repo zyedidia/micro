@@ -252,6 +252,7 @@ func main() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
 		fmt.Print("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n\n")
+		flag.CommandLine.SetOutput(os.Stdout)
 		flag.PrintDefaults()
 	}
 
