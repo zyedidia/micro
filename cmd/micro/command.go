@@ -538,19 +538,20 @@ func Replace(args []string) {
 	view := CurView()
 
 	found := 0
-	if allAtOnce {
+	replaceAll := func() {
 		var deltas []Delta
+		deltaXOffset := Count(replace) - Count(search)
 		for i := 0; i < view.Buf.LinesNum(); i++ {
 			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
 			str := string(view.Buf.lines[i].data)
 
-			xOffset := 0
 			if matches != nil {
+				xOffset := 0
 				for _, m := range matches {
-					from := Loc{runePos(m[0]+xOffset, str), i}
-					to := Loc{runePos(m[1]+xOffset, str), i}
+					from := Loc{runePos(m[0], str) + xOffset, i}
+					to := Loc{runePos(m[1], str) + xOffset, i}
 
-					xOffset += len(replace) - len(search)
+					xOffset += deltaXOffset
 
 					deltas = append(deltas, Delta{replace, from, to})
 					found++
@@ -558,7 +559,10 @@ func Replace(args []string) {
 			}
 		}
 		view.Buf.MultipleReplace(deltas)
+	}
 
+	if allAtOnce {
+		replaceAll()
 	} else {
 		for {
 			// The 'check' flag was used
@@ -568,7 +572,7 @@ func Replace(args []string) {
 			}
 			view.Relocate()
 			RedrawAll()
-			choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
+			choice, canceled := messenger.LetterPrompt("Perform replacement? (y,n,a)", 'y', 'n', 'a')
 			if canceled {
 				if view.Cursor.HasSelection() {
 					view.Cursor.Loc = view.Cursor.CurSelection[0]
@@ -576,7 +580,15 @@ func Replace(args []string) {
 				}
 				messenger.Reset()
 				break
-			} else if choice {
+			} else if choice == 'a' {
+				if view.Cursor.HasSelection() {
+					view.Cursor.Loc = view.Cursor.CurSelection[0]
+					view.Cursor.ResetSelection()
+				}
+				messenger.Reset()
+				replaceAll()
+				break
+			} else if choice == 'y' {
 				view.Cursor.DeleteSelection()
 				view.Buf.Insert(view.Cursor.Loc, replace)
 				view.Cursor.ResetSelection()
