@@ -594,12 +594,11 @@ func Replace(args []string) {
 				view.Cursor.ResetSelection()
 				messenger.Reset()
 				found++
+			}
+			if view.Cursor.HasSelection() {
+				searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
 			} else {
-				if view.Cursor.HasSelection() {
-					searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
-				} else {
-					searchStart = ToCharPos(view.Cursor.Loc, view.Buf)
-				}
+				searchStart = ToCharPos(view.Cursor.Loc, view.Buf)
 			}
 		}
 	}
