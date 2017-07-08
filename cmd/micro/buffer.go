@@ -403,17 +403,9 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	b.UpdateRules()
 	b.Path = filename
 
-	// The user may have already used sudo in which case we won't need the password
-	// It's a bit nicer for them if they don't have to enter the password every time
-	_, err := RunShellCommand("sudo -v")
-	needPassword := err != nil
-
-	// If we need the password, we have to close the screen and ask using the shell
-	if needPassword {
-		// Shut down the screen because we're going to interact directly with the shell
-		screen.Fini()
-		screen = nil
-	}
+	// Shut down the screen because we're going to interact directly with the shell
+	screen.Fini()
+	screen = nil
 
 	// Set up everything for the command
 	cmd := exec.Command("sudo", "tee", filename)
@@ -431,13 +423,10 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 
 	// Start the command
 	cmd.Start()
-	err = cmd.Wait()
+	err := cmd.Wait()
 
-	// If we needed the password, we closed the screen, so we have to initialize it again
-	if needPassword {
-		// Start the screen back up
-		InitScreen()
-	}
+	// Start the screen back up
+	InitScreen()
 	if err == nil {
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
