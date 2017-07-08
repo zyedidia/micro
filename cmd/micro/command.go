@@ -596,9 +596,9 @@ func Replace(args []string) {
 				found++
 			}
 			if view.Cursor.HasSelection() {
-				searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
+				searchStart = view.Cursor.CurSelection[1]
 			} else {
-				searchStart = ToCharPos(view.Cursor.Loc, view.Buf)
+				searchStart = view.Cursor.Loc
 			}
 		}
 	}

@@ -933,11 +933,11 @@ func (v *View) Find(usePlugin bool) bool {
 
 		searchStr := ""
 		if v.Cursor.HasSelection() {
-			searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
-			searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+			searchStart = v.Cursor.CurSelection[1]
+			searchStart = v.Cursor.CurSelection[1]
 			searchStr = v.Cursor.GetSelection()
 		} else {
-			searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+			searchStart = v.Cursor.Loc
 		}
 		BeginSearch(searchStr)
 
@@ -955,10 +955,10 @@ func (v *View) FindNext(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		searchStart = v.Cursor.CurSelection[1]
 		// lastSearch = v.Cursor.GetSelection()
 	} else {
-		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+		searchStart = v.Cursor.Loc
 	}
 	if lastSearch == "" {
 		return true
@@ -979,9 +979,9 @@ func (v *View) FindPrevious(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		searchStart = ToCharPos(v.Cursor.CurSelection[0], v.Buf)
+		searchStart = v.Cursor.CurSelection[0]
 	} else {
-		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+		searchStart = v.Cursor.Loc
 	}
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, false)
@@ -1915,7 +1915,7 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 
 			sel := spawner.GetSelection()
 
-			searchStart = ToCharPos(spawner.CurSelection[1], v.Buf)
+			searchStart = spawner.CurSelection[1]
 			v.Cursor = c
 			Search(sel, v, true)
 
@@ -1976,7 +1976,7 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 		}
 		sel := cursor.GetSelection()
 
-		searchStart = ToCharPos(cursor.CurSelection[1], v.Buf)
+		searchStart = cursor.CurSelection[1]
 		v.Cursor = cursor
 		Search(sel, v, true)
 		v.Relocate()
