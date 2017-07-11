@@ -411,7 +411,9 @@ func main() {
 	// Here is the event loop which runs in a separate thread
 	go func() {
 		for {
-			events <- screen.PollEvent()
+			if screen != nil {
+				events <- screen.PollEvent()
+			}
 		}
 	}()
 
