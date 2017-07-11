@@ -55,3 +55,6 @@
 [submodule "cmd/micro/vendor/github.com/zyedidia/poller"]
 	path = cmd/micro/vendor/github.com/zyedidia/poller
 	url = https://github.com/zyedidia/poller
+[submodule "cmd/micro/vendor/golang.org/x/crypto"]
+	path = cmd/micro/vendor/golang.org/x/crypto
+	url = https://go.googlesource.com/crypto

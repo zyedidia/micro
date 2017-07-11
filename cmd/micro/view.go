@@ -255,13 +255,22 @@ func (v *View) Open(filename string) {
 
 	defer file.Close()
 
+	var password string
+	if Encrypted(filename) {
+		pass, canceled := messenger.Prompt("Password: ", "", "Password", NoCompletion)
+		if !canceled {
+			password = pass
+		}
+	}
+
 	var buf *Buffer
 	if err != nil {
 		messenger.Message(err.Error())
 		// File does not exist -- create an empty buffer with that name
-		buf = NewBufferFromString("", filename)
+		buf = NewBufferFromStringWithPassword("", filename, password)
 	} else {
-		buf = NewBuffer(file, FSize(file), filename)
+		buf = NewBufferWithPassword(file, FSize(file), filename, password)
+		buf.Password = password
 	}
 	v.OpenBuffer(buf)
 }

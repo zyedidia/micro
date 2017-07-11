@@ -69,7 +69,7 @@ var (
 
 // LoadInput determines which files should be loaded into buffers
 // based on the input stored in flag.Args()
-func LoadInput() []*Buffer {
+func LoadInput(passwords []string) []*Buffer {
 	// There are a number of ways micro should start given its input
 
 	// 1. If it is given a files in flag.Args(), it should open those
@@ -109,11 +109,12 @@ func LoadInput() []*Buffer {
 					continue
 				}
 			}
+
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			if input != nil {
-				buffers = append(buffers, NewBuffer(input, FSize(input), filename))
+				buffers = append(buffers, NewBufferWithPassword(input, FSize(input), filename, passwords[i]))
 			} else {
-				buffers = append(buffers, NewBufferFromString("", filename))
+				buffers = append(buffers, NewBufferFromStringWithPassword("", filename, passwords[i]))
 			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
@@ -272,6 +273,8 @@ func main() {
 		os.Exit(0)
 	}
 
+	passwords := TermPasswords(flag.Args())
+
 	// Start the Lua VM for running plugins
 	L = lua.NewState()
 	defer L.Close()
@@ -314,7 +317,7 @@ func main() {
 	messenger.history = make(map[string][]string)
 
 	// Now we load the input
-	buffers := LoadInput()
+	buffers := LoadInput(passwords)
 	if len(buffers) == 0 {
 		screen.Fini()
 		os.Exit(1)

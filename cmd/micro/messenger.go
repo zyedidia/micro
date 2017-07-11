@@ -41,6 +41,20 @@ func TermError(filename string, lineNum int, err string) {
 	TermMessage(filename + ", " + strconv.Itoa(lineNum) + ": " + err)
 }
 
+// TermPasswords gets the passwords for the encrypted files
+func TermPasswords(filenames []string) []string {
+	passwords := make([]string, len(filenames))
+
+	for i, filename := range filenames {
+		if Encrypted(filename) {
+			fmt.Printf("Password for %v: ", filename)
+			fmt.Scanf("%s", &passwords[i])
+		}
+	}
+
+	return passwords
+}
+
 // Messenger is an object that makes it easy to send messages to the user
 // and get input from the user
 type Messenger struct {

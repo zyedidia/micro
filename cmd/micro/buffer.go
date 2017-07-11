@@ -3,6 +3,8 @@ package main
 import (
 	"bytes"
 	"encoding/gob"
+	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -14,6 +16,9 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
+
+	"golang.org/x/crypto/openpgp"
+	"golang.org/x/crypto/openpgp/armor"
 
 	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
@@ -52,6 +57,8 @@ type Buffer struct {
 
 	// Buffer local settings
 	Settings map[string]interface{}
+
+	Password string
 }
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -62,12 +69,25 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
+// NewBufferFromString creates a new buffer from a given string with a given path
 func NewBufferFromString(text, path string) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path)
+	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, "")
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
 func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
+	return NewBufferWithPassword(reader, size, path, "")
+}
+
+// NewBufferFromStringWithPassword creates a new buffer from a given string with a given path
+// and password
+func NewBufferFromStringWithPassword(text, path, password string) *Buffer {
+	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, password)
+}
+
+// NewBufferWithPassword creates a new buffer from a given reader with a given path
+// and password
+func NewBufferWithPassword(reader io.Reader, size int64, path, password string) *Buffer {
 	if path != "" {
 		for _, tab := range tabs {
 			for _, view := range tab.views {
@@ -79,6 +99,11 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	}
 
 	b := new(Buffer)
+	var err error
+	reader, err = b.Decode(reader, path, password)
+	if err != nil {
+		return NewBufferFromString(fmt.Sprintf("%s: %v", path, err), "")
+	}
 	b.LineArray = NewLineArray(size, reader)
 
 	b.Settings = DefaultLocalSettings()
@@ -172,6 +197,8 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	}
 
 	b.cursors = []*Cursor{&b.Cursor}
+
+	b.Password = password
 
 	return b
 }
@@ -289,7 +316,18 @@ func (b *Buffer) CheckModTime() {
 
 // ReOpen reloads the current buffer from disk
 func (b *Buffer) ReOpen() {
-	data, err := ioutil.ReadFile(b.Path)
+	var reader io.Reader
+	reader, err := os.Open(b.Path)
+	if err != nil {
+		messenger.Error(err.Error())
+		return
+	}
+	reader, err = b.Decode(reader, b.Path, b.Password)
+	if err != nil {
+		messenger.Error(err.Error())
+		return
+	}
+	data, err := ioutil.ReadAll(reader)
 	txt := string(data)
 
 	if err != nil {
@@ -362,6 +400,76 @@ func (b *Buffer) Serialize() error {
 	return nil
 }
 
+// Decode decodes a stream for loading the buffer
+func (b *Buffer) Decode(reader io.Reader, path, password string) (io.Reader, error) {
+	if password != "" {
+		if strings.HasSuffix(path, ExtensionArmorGPG) {
+			unarmored, err := armor.Decode(reader)
+			if err != nil {
+				return nil, err
+			}
+			reader = unarmored.Body
+		}
+
+		attempts := 0
+		md, err := openpgp.ReadMessage(reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
+			if attempts > 0 {
+				return []byte{}, errors.New("invalid password")
+			}
+			attempts++
+			return []byte(password), nil
+		}, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		reader = md.UnverifiedBody
+	}
+
+	return reader, nil
+}
+
+// Encode encodes the buffer for writing to disk
+func (b *Buffer) Encode() ([]byte, error) {
+	if b.Password != "" && strings.HasSuffix(b.Path, ExtensionArmorGPG) {
+		buffer := &bytes.Buffer{}
+		w, err := armor.Encode(buffer, "PGP SIGNATURE", nil)
+		if err != nil {
+			return nil, err
+		}
+
+		plaintext, err := openpgp.SymmetricallyEncrypt(w, []byte(b.Password), nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		_, err = plaintext.Write([]byte(b.String()))
+		if err != nil {
+			return nil, err
+		}
+
+		plaintext.Close()
+		w.Close()
+
+		return buffer.Bytes(), nil
+	} else if b.Password != "" {
+		buffer := &bytes.Buffer{}
+		plaintext, err := openpgp.SymmetricallyEncrypt(buffer, []byte(b.Password), nil, nil)
+		if err != nil {
+			return nil, err
+		}
+		_, err = plaintext.Write([]byte(b.String()))
+		if err != nil {
+			return nil, err
+		}
+
+		plaintext.Close()
+
+		return buffer.Bytes(), nil
+	}
+
+	return []byte(b.String()), nil
+}
+
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
@@ -384,9 +492,11 @@ func (b *Buffer) SaveAs(filename string) error {
 			b.Insert(end, "\n")
 		}
 	}
-	str := b.String()
-	data := []byte(str)
-	err := ioutil.WriteFile(filename, data, 0644)
+	data, err := b.Encode()
+	if err != nil {
+		return err
+	}
+	err = ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
 		b.Path = strings.Replace(filename, "~", dir, 1)
 		b.IsModified = false
@@ -400,12 +510,17 @@ func (b *Buffer) SaveAs(filename string) error {
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
 // with tee to use sudo so the user doesn't have to reopen micro with sudo
 func (b *Buffer) SaveAsWithSudo(filename string) error {
+	data, err := b.Encode()
+	if err != nil {
+		return err
+	}
+
 	b.UpdateRules()
 	b.Path = filename
 
 	// The user may have already used sudo in which case we won't need the password
 	// It's a bit nicer for them if they don't have to enter the password every time
-	_, err := RunShellCommand("sudo -v")
+	_, err = RunShellCommand("sudo -v")
 	needPassword := err != nil
 
 	// If we need the password, we have to close the screen and ask using the shell
@@ -417,7 +532,7 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 
 	// Set up everything for the command
 	cmd := exec.Command("sudo", "tee", filename)
-	cmd.Stdin = bytes.NewBufferString(b.String())
+	cmd.Stdin = bytes.NewBuffer(data)
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro
 	// Instead we trap Ctrl-C to kill the program we're running
