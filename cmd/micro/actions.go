@@ -47,6 +47,7 @@ func (v *View) deselect(index int) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[index]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 		return true
 	}
 	return false
@@ -215,6 +216,7 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	} else {
 		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := v.Buf.Settings["tabmovement"].(bool)
@@ -248,6 +250,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	} else {
 		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := v.Buf.Settings["tabmovement"].(bool)
@@ -512,6 +515,7 @@ func (v *View) CursorEnd(usePlugin bool) bool {
 	v.deselect(0)
 
 	v.Cursor.Loc = v.Buf.End()
+	v.Cursor.StoreVisualX()
 
 	if usePlugin {
 		return PostActionCall("CursorEnd", v)
@@ -1373,6 +1377,7 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	}
 	v.Cursor.UpN(v.Height)
 
@@ -1393,6 +1398,7 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	}
 	v.Cursor.DownN(v.Height)
 
