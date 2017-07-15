@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/blang/semver"
+	"./semver"
 )
 
 func getTag(match ...string) (string, *semver.PRVersion) {
