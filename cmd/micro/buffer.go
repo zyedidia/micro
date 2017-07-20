@@ -79,12 +79,6 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	return NewBufferWithPassword(reader, size, path, "")
 }
 
-// NewBufferFromStringWithPassword creates a new buffer from a given string with a given path
-// and password
-func NewBufferFromStringWithPassword(text, path, password string) *Buffer {
-	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, password)
-}
-
 // NewBufferWithPassword creates a new buffer from a given reader with a given path
 // and password
 func NewBufferWithPassword(reader io.Reader, size int64, path, password string) *Buffer {
@@ -402,29 +396,31 @@ func (b *Buffer) Serialize() error {
 
 // Decode decodes a stream for loading the buffer
 func (b *Buffer) Decode(reader io.Reader, path, password string) (io.Reader, error) {
-	if password != "" {
-		if strings.HasSuffix(path, ExtensionArmorGPG) {
-			unarmored, err := armor.Decode(reader)
-			if err != nil {
-				return nil, err
-			}
-			reader = unarmored.Body
-		}
+	if password == "" || reader == nil {
+		return reader, nil
+	}
 
-		attempts := 0
-		md, err := openpgp.ReadMessage(reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
-			if attempts > 0 {
-				return []byte{}, errors.New("invalid password")
-			}
-			attempts++
-			return []byte(password), nil
-		}, nil)
+	if strings.HasSuffix(path, ExtensionArmorGPG) {
+		unarmored, err := armor.Decode(reader)
 		if err != nil {
 			return nil, err
 		}
-
-		reader = md.UnverifiedBody
+		reader = unarmored.Body
 	}
+
+	attempts := 0
+	md, err := openpgp.ReadMessage(reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
+		if attempts > 0 {
+			return []byte{}, errors.New("invalid password")
+		}
+		attempts++
+		return []byte(password), nil
+	}, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	reader = md.UnverifiedBody
 
 	return reader, nil
 }

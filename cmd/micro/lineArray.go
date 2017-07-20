@@ -65,6 +65,11 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 
 	la.lines = make([]Line, 0, 1000)
 
+	if reader == nil {
+		la.lines = Append(la.lines, Line{})
+		return la
+	}
+
 	br := bufio.NewReader(reader)
 	var loaded int
 

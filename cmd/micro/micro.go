@@ -114,7 +114,7 @@ func LoadInput(passwords []string) []*Buffer {
 			if input != nil {
 				buffers = append(buffers, NewBufferWithPassword(input, FSize(input), filename, passwords[i]))
 			} else {
-				buffers = append(buffers, NewBufferFromStringWithPassword("", filename, passwords[i]))
+				buffers = append(buffers, NewBufferWithPassword(nil, 0, filename, passwords[i]))
 			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {

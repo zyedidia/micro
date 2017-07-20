@@ -267,7 +267,7 @@ func (v *View) Open(filename string) {
 	if err != nil {
 		messenger.Message(err.Error())
 		// File does not exist -- create an empty buffer with that name
-		buf = NewBufferFromStringWithPassword("", filename, password)
+		buf = NewBufferWithPassword(nil, 0, filename, password)
 	} else {
 		buf = NewBufferWithPassword(file, FSize(file), filename, password)
 		buf.Password = password
