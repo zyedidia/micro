@@ -9,6 +9,7 @@ import (
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
+	"github.com/mattn/go-runewidth"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -463,8 +464,10 @@ func (m *Messenger) Display() {
 	if m.hasMessage {
 		if m.hasPrompt || globalSettings["infobar"].(bool) {
 			runes := []rune(m.message + m.response)
+			posx = 0
 			for x := 0; x < len(runes); x++ {
-				screen.SetContent(x, h-1, runes[x], nil, m.style)
+				screen.SetContent(posx, h-1, runes[x], nil, m.style)
+				posx += runewidth.RuneWidth(runes[x])
 			}
 		}
 	}
