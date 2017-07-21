@@ -6,6 +6,9 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -46,9 +49,23 @@ func TermPasswords(filenames []string) []string {
 	passwords := make([]string, len(filenames))
 
 	for i, filename := range filenames {
-		if Encrypted(filename) {
+		if !Encrypted(filename) {
+			continue
+		}
+
+		if _, e := os.Stat(filename); e != nil {
+			continue
+		}
+
+		for {
 			fmt.Printf("Password for %v: ", filename)
-			fmt.Scanf("%s", &passwords[i])
+			password, err := terminal.ReadPassword(syscall.Stdin)
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			passwords[i] = string(password)
+			break
 		}
 	}
 
@@ -193,6 +210,54 @@ func (m *Messenger) YesNoPrompt(prompt string) (bool, bool) {
 			}
 		}
 	}
+}
+
+// PasswordPrompt asks the user for a password and returns the result
+func (m *Messenger) PasswordPrompt(verify bool) (string, bool) {
+	passwordPrompt := func(prompt string) (string, bool) {
+		password := ""
+		m.hasPrompt = true
+		m.PromptText(prompt)
+		m.Clear()
+		m.Display()
+		defer func() {
+			m.Clear()
+			m.Reset()
+			m.hasPrompt = false
+		}()
+		for {
+			event := <-events
+			switch e := event.(type) {
+			case *tcell.EventKey:
+				switch e.Key() {
+				case tcell.KeyRune:
+					password += string(e.Rune())
+				case tcell.KeyEnter:
+					m.AddLog("\t--> (enter)")
+					return password, false
+				case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+					m.AddLog("\t--> (cancel)")
+					return "", true
+				}
+			}
+		}
+	}
+
+	for verify {
+		password, canceled := passwordPrompt("Password: ")
+		if canceled {
+			return "", true
+		}
+		verifyPassword, canceled := passwordPrompt("Verify Password: ")
+		if canceled {
+			return "", true
+		}
+		if password == verifyPassword {
+			return password, false
+		}
+	}
+
+	return passwordPrompt("Password: ")
 }
 
 // LetterPrompt gives the user a prompt and waits for a one letter response

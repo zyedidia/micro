@@ -426,8 +426,12 @@ func (b *Buffer) Decode(reader io.Reader, path, password string) (io.Reader, err
 }
 
 // Encode encodes the buffer for writing to disk
-func (b *Buffer) Encode() ([]byte, error) {
-	if b.Password != "" && strings.HasSuffix(b.Path, ExtensionArmorGPG) {
+func (b *Buffer) Encode(filename string) ([]byte, error) {
+	if b.Password == "" {
+		return []byte(b.String()), nil
+	}
+
+	if strings.HasSuffix(filename, ExtensionArmorGPG) {
 		buffer := &bytes.Buffer{}
 		w, err := armor.Encode(buffer, "PGP SIGNATURE", nil)
 		if err != nil {
@@ -447,23 +451,21 @@ func (b *Buffer) Encode() ([]byte, error) {
 		w.Close()
 
 		return buffer.Bytes(), nil
-	} else if b.Password != "" {
-		buffer := &bytes.Buffer{}
-		plaintext, err := openpgp.SymmetricallyEncrypt(buffer, []byte(b.Password), nil, nil)
-		if err != nil {
-			return nil, err
-		}
-		_, err = plaintext.Write([]byte(b.String()))
-		if err != nil {
-			return nil, err
-		}
-
-		plaintext.Close()
-
-		return buffer.Bytes(), nil
 	}
 
-	return []byte(b.String()), nil
+	buffer := &bytes.Buffer{}
+	plaintext, err := openpgp.SymmetricallyEncrypt(buffer, []byte(b.Password), nil, nil)
+	if err != nil {
+		return nil, err
+	}
+	_, err = plaintext.Write([]byte(b.String()))
+	if err != nil {
+		return nil, err
+	}
+
+	plaintext.Close()
+
+	return buffer.Bytes(), nil
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
@@ -488,7 +490,7 @@ func (b *Buffer) SaveAs(filename string) error {
 			b.Insert(end, "\n")
 		}
 	}
-	data, err := b.Encode()
+	data, err := b.Encode(filename)
 	if err != nil {
 		return err
 	}
@@ -506,7 +508,7 @@ func (b *Buffer) SaveAs(filename string) error {
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
 // with tee to use sudo so the user doesn't have to reopen micro with sudo
 func (b *Buffer) SaveAsWithSudo(filename string) error {
-	data, err := b.Encode()
+	data, err := b.Encode(filename)
 	if err != nil {
 		return err
 	}

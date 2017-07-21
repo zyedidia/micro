@@ -878,7 +878,7 @@ func (v *View) Save(usePlugin bool) bool {
 // to `filename` if the save is successful
 func (v *View) saveToFile(filename string) {
 	if Encrypted(filename) && v.Buf.Password == "" {
-		password, canceled := messenger.Prompt("Password: ", "", "Password", NoCompletion)
+		password, canceled := messenger.PasswordPrompt(true)
 		if !canceled {
 			v.Buf.Password = password
 		}
