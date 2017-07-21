@@ -14,6 +14,17 @@ apps:
 parts:
   micro:
     source: .
-    plugin: go
-    go-importpath: github.com/zyedidia/micro
-    go-packages: [github.com/zyedidia/micro/cmd/micro]
+    plugin: nil
+    build-packages: [golang-go, make]
+    prepare: |
+      mkdir -p ../go/src/github.com/zyedidia/micro
+      cp -R . ../go/src/github.com/zyedidia/micro
+    build: |
+      export GOPATH=$(pwd)/../go
+      export GOBIN=$(pwd)/../go/bin
+      cd ../go/src/github.com/zyedidia/micro
+      go get -d ./cmd/micro
+      make  install
+    install: |
+      mkdir $SNAPCRAFT_PART_INSTALL/bin
+      mv ../go/bin/micro $SNAPCRAFT_PART_INSTALL/bin/
