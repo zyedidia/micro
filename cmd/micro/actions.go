@@ -47,6 +47,7 @@ func (v *View) deselect(index int) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[index]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 		return true
 	}
 	return false
@@ -215,6 +216,7 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	} else {
 		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := v.Buf.Settings["tabmovement"].(bool)
@@ -248,6 +250,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	} else {
 		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := v.Buf.Settings["tabmovement"].(bool)
@@ -512,6 +515,7 @@ func (v *View) CursorEnd(usePlugin bool) bool {
 	v.deselect(0)
 
 	v.Cursor.Loc = v.Buf.End()
+	v.Cursor.StoreVisualX()
 
 	if usePlugin {
 		return PostActionCall("CursorEnd", v)
@@ -933,11 +937,11 @@ func (v *View) Find(usePlugin bool) bool {
 
 		searchStr := ""
 		if v.Cursor.HasSelection() {
-			searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
-			searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+			searchStart = v.Cursor.CurSelection[1]
+			searchStart = v.Cursor.CurSelection[1]
 			searchStr = v.Cursor.GetSelection()
 		} else {
-			searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+			searchStart = v.Cursor.Loc
 		}
 		BeginSearch(searchStr)
 
@@ -955,10 +959,10 @@ func (v *View) FindNext(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+		searchStart = v.Cursor.CurSelection[1]
 		// lastSearch = v.Cursor.GetSelection()
 	} else {
-		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+		searchStart = v.Cursor.Loc
 	}
 	if lastSearch == "" {
 		return true
@@ -979,9 +983,9 @@ func (v *View) FindPrevious(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		searchStart = ToCharPos(v.Cursor.CurSelection[0], v.Buf)
+		searchStart = v.Cursor.CurSelection[0]
 	} else {
-		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+		searchStart = v.Cursor.Loc
 	}
 	messenger.Message("Finding: " + lastSearch)
 	Search(lastSearch, v, false)
@@ -1373,6 +1377,7 @@ func (v *View) CursorPageUp(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	}
 	v.Cursor.UpN(v.Height)
 
@@ -1393,6 +1398,7 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 	if v.Cursor.HasSelection() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
+		v.Cursor.StoreVisualX()
 	}
 	v.Cursor.DownN(v.Height)
 
@@ -1936,7 +1942,7 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 
 			sel := spawner.GetSelection()
 
-			searchStart = ToCharPos(spawner.CurSelection[1], v.Buf)
+			searchStart = spawner.CurSelection[1]
 			v.Cursor = c
 			Search(sel, v, true)
 
@@ -1997,7 +2003,7 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 		}
 		sel := cursor.GetSelection()
 
-		searchStart = ToCharPos(cursor.CurSelection[1], v.Buf)
+		searchStart = cursor.CurSelection[1]
 		v.Cursor = cursor
 		Search(sel, v, true)
 		v.Relocate()

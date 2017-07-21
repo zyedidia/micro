@@ -10,7 +10,7 @@ rules:
     - type.extended: "\\b(bool)\\b"
     - statement: "\\b(typename|mutable|volatile|register|explicit)\\b"
     - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
-    - statement: "\\b(try|throw|catch|operator|new|delete)\\b"
+    - statement: "\\b(try|throw|catch|operator|delete)\\b"
     - statement: "\\b(goto|continue|break|return)\\b"
     - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
     - constant: "'([^'\\\\]|(\\\\[\"'abfnrtv\\\\]))'"

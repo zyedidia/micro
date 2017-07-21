@@ -538,27 +538,31 @@ func Replace(args []string) {
 	view := CurView()
 
 	found := 0
-	if allAtOnce {
-		// var deltas []Delta
+	replaceAll := func() {
+		var deltas []Delta
+		deltaXOffset := Count(replace) - Count(search)
 		for i := 0; i < view.Buf.LinesNum(); i++ {
-			// view.Buf.lines[i].data = regex.ReplaceAll(view.Buf.lines[i].data, []byte(replace))
-			for {
-				m := regex.FindIndex(view.Buf.lines[i].data)
+			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
+			str := string(view.Buf.lines[i].data)
 
-				if m != nil {
-					from := Loc{m[0], i}
-					to := Loc{m[1], i}
+			if matches != nil {
+				xOffset := 0
+				for _, m := range matches {
+					from := Loc{runePos(m[0], str) + xOffset, i}
+					to := Loc{runePos(m[1], str) + xOffset, i}
 
-					// deltas = append(deltas, Delta{replace, from, to})
-					view.Buf.Replace(from, to, replace)
+					xOffset += deltaXOffset
+
+					deltas = append(deltas, Delta{replace, from, to})
 					found++
-				} else {
-					break
 				}
 			}
 		}
-		// view.Buf.MultipleReplace(deltas)
+		view.Buf.MultipleReplace(deltas)
+	}
 
+	if allAtOnce {
+		replaceAll()
 	} else {
 		for {
 			// The 'check' flag was used
@@ -568,7 +572,7 @@ func Replace(args []string) {
 			}
 			view.Relocate()
 			RedrawAll()
-			choice, canceled := messenger.YesNoPrompt("Perform replacement? (y,n)")
+			choice, canceled := messenger.LetterPrompt("Perform replacement? (y,n,a)", 'y', 'n', 'a')
 			if canceled {
 				if view.Cursor.HasSelection() {
 					view.Cursor.Loc = view.Cursor.CurSelection[0]
@@ -576,18 +580,25 @@ func Replace(args []string) {
 				}
 				messenger.Reset()
 				break
-			} else if choice {
+			} else if choice == 'a' {
+				if view.Cursor.HasSelection() {
+					view.Cursor.Loc = view.Cursor.CurSelection[0]
+					view.Cursor.ResetSelection()
+				}
+				messenger.Reset()
+				replaceAll()
+				break
+			} else if choice == 'y' {
 				view.Cursor.DeleteSelection()
 				view.Buf.Insert(view.Cursor.Loc, replace)
 				view.Cursor.ResetSelection()
 				messenger.Reset()
 				found++
+			}
+			if view.Cursor.HasSelection() {
+				searchStart = view.Cursor.CurSelection[1]
 			} else {
-				if view.Cursor.HasSelection() {
-					searchStart = ToCharPos(view.Cursor.CurSelection[1], view.Buf)
-				} else {
-					searchStart = ToCharPos(view.Cursor.Loc, view.Buf)
-				}
+				searchStart = view.Cursor.Loc
 			}
 		}
 	}

@@ -350,6 +350,11 @@ func (c *Cursor) GetVisualX() int {
 	return StringWidth(string(runes[:c.X]), tabSize)
 }
 
+// StoreVisualX stores the current visual x value in the cursor
+func (c *Cursor) StoreVisualX() {
+	c.LastVisualX = c.GetVisualX()
+}
+
 // Relocate makes sure that the cursor is inside the bounds of the buffer
 // If it isn't, it moves it to be within the buffer's lines
 func (c *Cursor) Relocate() {

@@ -2,6 +2,7 @@ package main
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/zyedidia/tcell"
 )
@@ -11,7 +12,7 @@ var (
 	lastSearch string
 
 	// Where should we start the search down from (or up from)
-	searchStart int
+	searchStart Loc
 
 	// Is there currently a search in progress
 	searching bool
@@ -43,7 +44,7 @@ func EndSearch() {
 	}
 }
 
-// exit the search mode, reset active search phrase, and clear status bar
+// ExitSearch exits the search mode, reset active search phrase, and clear status bar
 func ExitSearch(v *View) {
 	lastSearch = ""
 	searching = false
@@ -91,21 +92,68 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 	return
 }
 
+func searchDown(r *regexp.Regexp, v *View, start, end Loc) bool {
+	for i := start.Y; i <= end.Y; i++ {
+		var l []byte
+		var charPos int
+		if i == start.Y {
+			runes := []rune(string(v.Buf.lines[i].data))
+			l = []byte(string(runes[start.X:]))
+			charPos = start.X
+
+			if strings.Contains(r.String(), "^") && start.X != 0 {
+				continue
+			}
+		} else {
+			l = v.Buf.lines[i].data
+		}
+
+		match := r.FindIndex(l)
+
+		if match != nil {
+			v.Cursor.SetSelectionStart(Loc{charPos + runePos(match[0], string(l)), i})
+			v.Cursor.SetSelectionEnd(Loc{charPos + runePos(match[1], string(l)), i})
+			v.Cursor.Loc = v.Cursor.CurSelection[1]
+
+			return true
+		}
+	}
+	return false
+}
+
+func searchUp(r *regexp.Regexp, v *View, start, end Loc) bool {
+	for i := start.Y; i >= end.Y; i-- {
+		var l []byte
+		if i == start.Y {
+			runes := []rune(string(v.Buf.lines[i].data))
+			l = []byte(string(runes[:start.X]))
+
+			if strings.Contains(r.String(), "$") && start.X != Count(string(l)) {
+				continue
+			}
+		} else {
+			l = v.Buf.lines[i].data
+		}
+
+		match := r.FindIndex(l)
+
+		if match != nil {
+			v.Cursor.SetSelectionStart(Loc{runePos(match[0], string(l)), i})
+			v.Cursor.SetSelectionEnd(Loc{runePos(match[1], string(l)), i})
+			v.Cursor.Loc = v.Cursor.CurSelection[1]
+
+			return true
+		}
+	}
+	return false
+}
+
 // Search searches in the view for the given regex. The down bool
 // specifies whether it should search down from the searchStart position
 // or up from there
 func Search(searchStr string, v *View, down bool) {
 	if searchStr == "" {
 		return
-	}
-	var str string
-	var charPos int
-	text := v.Buf.String()
-	if down {
-		str = string([]rune(text)[searchStart:])
-		charPos = searchStart
-	} else {
-		str = string([]rune(text)[:searchStart])
 	}
 	r, err := regexp.Compile(searchStr)
 	if v.Buf.Settings["ignorecase"].(bool) {
@@ -114,37 +162,22 @@ func Search(searchStr string, v *View, down bool) {
 	if err != nil {
 		return
 	}
-	matches := r.FindAllStringIndex(str, -1)
-	var match []int
-	if matches == nil {
-		// Search the entire buffer now
-		matches = r.FindAllStringIndex(text, -1)
-		charPos = 0
-		if matches == nil {
-			v.Cursor.ResetSelection()
-			return
-		}
 
-		if !down {
-			match = matches[len(matches)-1]
-		} else {
-			match = matches[0]
+	var found bool
+	if down {
+		found = searchDown(r, v, searchStart, v.Buf.End())
+		if !found {
+			found = searchDown(r, v, v.Buf.Start(), searchStart)
 		}
-		str = text
-	}
-
-	if !down {
-		match = matches[len(matches)-1]
 	} else {
-		match = matches[0]
+		found = searchUp(r, v, searchStart, v.Buf.Start())
+		if !found {
+			found = searchUp(r, v, v.Buf.End(), searchStart)
+		}
 	}
-
-	if match[0] == match[1] {
-		return
+	if found {
+		lastSearch = searchStr
+	} else {
+		v.Cursor.ResetSelection()
 	}
-
-	v.Cursor.SetSelectionStart(FromCharPos(charPos+runePos(match[0], str), v.Buf))
-	v.Cursor.SetSelectionEnd(FromCharPos(charPos+runePos(match[1], str), v.Buf))
-	v.Cursor.Loc = v.Cursor.CurSelection[1]
-	lastSearch = searchStr
 }
