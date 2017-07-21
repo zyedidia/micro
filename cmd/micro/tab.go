@@ -105,9 +105,9 @@ func TabbarString() (string, map[int]int) {
 		}
 		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
 		str += name
-		if buf.IsModified {
-			str += " *"
-		}
+		//if t.views[t.CurView].Buf.IsModified {
+		//	str += "*"
+		//}
 		if i == curTab {
 			str += "]"
 		} else {

@@ -10,11 +10,16 @@ Here are the possible commands that you can use.
 
 * `replace "search" "value" flags`: This will replace `search` with `value`. 
    The `flags` are optional.
-   At this point, there is only one flag: `-c`, which enables `check` mode 
-   which asks if you'd like to perform the replacement each time.
+   At this point, there is only one flag: `-a`, which replaces all occurrences
+   at once.
 
    Note that `search` must be a valid regex.  If one of the arguments
    does not have any spaces in it, you may omit the quotes.
+
+* `replaceall "search" "value"`: This will replace `search` with `value` without
+    user confirmation.
+
+    See `replace` command for more information.
 
 * `set option value`: sets the option to value. See the `options` help topic
    for a list of options you can set.

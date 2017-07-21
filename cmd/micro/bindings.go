@@ -10,92 +10,112 @@ import (
 )
 
 var bindings map[Key][]func(*View, bool) bool
+var mouseBindings map[Key][]func(*View, bool, *tcell.EventMouse) bool
 var helpBinding string
 
+var mouseBindingActions = map[string]func(*View, bool, *tcell.EventMouse) bool{
+	"MousePress":       (*View).MousePress,
+	"MouseMultiCursor": (*View).MouseMultiCursor,
+}
+
 var bindingActions = map[string]func(*View, bool) bool{
-	"CursorUp":            (*View).CursorUp,
-	"CursorDown":          (*View).CursorDown,
-	"CursorPageUp":        (*View).CursorPageUp,
-	"CursorPageDown":      (*View).CursorPageDown,
-	"CursorLeft":          (*View).CursorLeft,
-	"CursorRight":         (*View).CursorRight,
-	"CursorStart":         (*View).CursorStart,
-	"CursorEnd":           (*View).CursorEnd,
-	"SelectToStart":       (*View).SelectToStart,
-	"SelectToEnd":         (*View).SelectToEnd,
-	"SelectUp":            (*View).SelectUp,
-	"SelectDown":          (*View).SelectDown,
-	"SelectLeft":          (*View).SelectLeft,
-	"SelectRight":         (*View).SelectRight,
-	"WordRight":           (*View).WordRight,
-	"WordLeft":            (*View).WordLeft,
-	"SelectWordRight":     (*View).SelectWordRight,
-	"SelectWordLeft":      (*View).SelectWordLeft,
-	"DeleteWordRight":     (*View).DeleteWordRight,
-	"DeleteWordLeft":      (*View).DeleteWordLeft,
-	"SelectToStartOfLine": (*View).SelectToStartOfLine,
-	"SelectToEndOfLine":   (*View).SelectToEndOfLine,
-	"InsertNewline":       (*View).InsertNewline,
-	"InsertSpace":         (*View).InsertSpace,
-	"Backspace":           (*View).Backspace,
-	"Delete":              (*View).Delete,
-	"InsertTab":           (*View).InsertTab,
-	"Save":                (*View).Save,
-	"SaveAll":             (*View).SaveAll,
-	"SaveAs":              (*View).SaveAs,
-	"Find":                (*View).Find,
-	"FindNext":            (*View).FindNext,
-	"FindPrevious":        (*View).FindPrevious,
-	"Replace":             (*View).Replace,
-	"Center":              (*View).Center,
-	"Undo":                (*View).Undo,
-	"Redo":                (*View).Redo,
-	"Copy":                (*View).Copy,
-	"Cut":                 (*View).Cut,
-	"CutLine":             (*View).CutLine,
-	"DuplicateLine":       (*View).DuplicateLine,
-	"DeleteLine":          (*View).DeleteLine,
-	"MoveLinesUp":         (*View).MoveLinesUp,
-	"MoveLinesDown":       (*View).MoveLinesDown,
-	"IndentSelection":     (*View).IndentSelection,
-	"OutdentSelection":    (*View).OutdentSelection,
-	"OutdentLine":         (*View).OutdentLine,
-	"Paste":               (*View).Paste,
-	"PastePrimary":        (*View).PastePrimary,
-	"SelectAll":           (*View).SelectAll,
-	"OpenFile":            (*View).OpenFile,
-	"Start":               (*View).Start,
-	"End":                 (*View).End,
-	"PageUp":              (*View).PageUp,
-	"PageDown":            (*View).PageDown,
-	"HalfPageUp":          (*View).HalfPageUp,
-	"HalfPageDown":        (*View).HalfPageDown,
-	"StartOfLine":         (*View).StartOfLine,
-	"EndOfLine":           (*View).EndOfLine,
-	"ToggleHelp":          (*View).ToggleHelp,
-	"ToggleRuler":         (*View).ToggleRuler,
-	"JumpLine":            (*View).JumpLine,
-	"ClearStatus":         (*View).ClearStatus,
-	"ShellMode":           (*View).ShellMode,
-	"CommandMode":         (*View).CommandMode,
-	"Escape":              (*View).Escape,
-	"Quit":                (*View).Quit,
-	"QuitAll":             (*View).QuitAll,
-	"AddTab":              (*View).AddTab,
-	"PreviousTab":         (*View).PreviousTab,
-	"NextTab":             (*View).NextTab,
-	"Tabswitch":           (*View).Tabswitch,
-	"NextSplit":           (*View).NextSplit,
-	"PreviousSplit":       (*View).PreviousSplit,
-	"Unsplit":             (*View).Unsplit,
-	"VSplit":              (*View).VSplitBinding,
-	"HSplit":              (*View).HSplitBinding,
-	"ToggleMacro":         (*View).ToggleMacro,
-	"PlayMacro":           (*View).PlayMacro,
-	"Suspend":             (*View).Suspend,
+	"CursorUp":              (*View).CursorUp,
+	"CursorDown":            (*View).CursorDown,
+	"CursorPageUp":          (*View).CursorPageUp,
+	"CursorPageDown":        (*View).CursorPageDown,
+	"CursorLeft":            (*View).CursorLeft,
+	"CursorRight":           (*View).CursorRight,
+	"CursorStart":           (*View).CursorStart,
+	"CursorEnd":             (*View).CursorEnd,
+	"SelectToStart":         (*View).SelectToStart,
+	"SelectToEnd":           (*View).SelectToEnd,
+	"SelectUp":              (*View).SelectUp,
+	"SelectDown":            (*View).SelectDown,
+	"SelectLeft":            (*View).SelectLeft,
+	"SelectRight":           (*View).SelectRight,
+	"WordRight":             (*View).WordRight,
+	"WordLeft":              (*View).WordLeft,
+	"SelectWordRight":       (*View).SelectWordRight,
+	"SelectWordLeft":        (*View).SelectWordLeft,
+	"DeleteWordRight":       (*View).DeleteWordRight,
+	"DeleteWordLeft":        (*View).DeleteWordLeft,
+	"SelectToStartOfLine":   (*View).SelectToStartOfLine,
+	"SelectToEndOfLine":     (*View).SelectToEndOfLine,
+	"InsertNewline":         (*View).InsertNewline,
+	"InsertSpace":           (*View).InsertSpace,
+	"Backspace":             (*View).Backspace,
+	"Delete":                (*View).Delete,
+	"InsertTab":             (*View).InsertTab,
+	"Save":                  (*View).Save,
+	"SaveAll":               (*View).SaveAll,
+	"SaveAs":                (*View).SaveAs,
+	"Find":                  (*View).Find,
+	"FindNext":              (*View).FindNext,
+	"FindPrevious":          (*View).FindPrevious,
+	"Center":                (*View).Center,
+	"Undo":                  (*View).Undo,
+	"Redo":                  (*View).Redo,
+	"Copy":                  (*View).Copy,
+	"Cut":                   (*View).Cut,
+	"CutLine":               (*View).CutLine,
+	"DuplicateLine":         (*View).DuplicateLine,
+	"DeleteLine":            (*View).DeleteLine,
+	"MoveLinesUp":           (*View).MoveLinesUp,
+	"MoveLinesDown":         (*View).MoveLinesDown,
+	"IndentSelection":       (*View).IndentSelection,
+	"OutdentSelection":      (*View).OutdentSelection,
+	"OutdentLine":           (*View).OutdentLine,
+	"Paste":                 (*View).Paste,
+	"PastePrimary":          (*View).PastePrimary,
+	"SelectAll":             (*View).SelectAll,
+	"OpenFile":              (*View).OpenFile,
+	"Start":                 (*View).Start,
+	"End":                   (*View).End,
+	"PageUp":                (*View).PageUp,
+	"PageDown":              (*View).PageDown,
+	"HalfPageUp":            (*View).HalfPageUp,
+	"HalfPageDown":          (*View).HalfPageDown,
+	"StartOfLine":           (*View).StartOfLine,
+	"EndOfLine":             (*View).EndOfLine,
+	"ToggleHelp":            (*View).ToggleHelp,
+	"ToggleRuler":           (*View).ToggleRuler,
+	"JumpLine":              (*View).JumpLine,
+	"ClearStatus":           (*View).ClearStatus,
+	"ShellMode":             (*View).ShellMode,
+	"CommandMode":           (*View).CommandMode,
+	"Escape":                (*View).Escape,
+	"Quit":                  (*View).Quit,
+	"QuitAll":               (*View).QuitAll,
+	"AddTab":                (*View).AddTab,
+	"PreviousTab":           (*View).PreviousTab,
+	"NextTab":               (*View).NextTab,
+	"NextSplit":             (*View).NextSplit,
+	"PreviousSplit":         (*View).PreviousSplit,
+	"Unsplit":               (*View).Unsplit,
+	"VSplit":                (*View).VSplitBinding,
+	"HSplit":                (*View).HSplitBinding,
+	"ToggleMacro":           (*View).ToggleMacro,
+	"PlayMacro":             (*View).PlayMacro,
+	"Suspend":               (*View).Suspend,
+	"ScrollUp":              (*View).ScrollUpAction,
+	"ScrollDown":            (*View).ScrollDownAction,
+	"SpawnMultiCursor":      (*View).SpawnMultiCursor,
+	"RemoveMultiCursor":     (*View).RemoveMultiCursor,
+	"RemoveAllMultiCursors": (*View).RemoveAllMultiCursors,
+	"SkipMultiCursor":       (*View).SkipMultiCursor,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,
+}
+
+var bindingMouse = map[string]tcell.ButtonMask{
+	"MouseLeft":       tcell.Button1,
+	"MouseMiddle":     tcell.Button2,
+	"MouseRight":      tcell.Button3,
+	"MouseWheelUp":    tcell.WheelUp,
+	"MouseWheelDown":  tcell.WheelDown,
+	"MouseWheelLeft":  tcell.WheelLeft,
+	"MouseWheelRight": tcell.WheelRight,
 }
 
 var bindingKeys = map[string]tcell.Key{
@@ -217,6 +237,8 @@ var bindingKeys = map[string]tcell.Key{
 	"CtrlRightSq":    tcell.KeyCtrlRightSq,
 	"CtrlCarat":      tcell.KeyCtrlCarat,
 	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
+	"CtrlPageUp":     tcell.KeyCtrlPgUp,
+	"CtrlPageDown":   tcell.KeyCtrlPgDn,
 	"Tab":            tcell.KeyTab,
 	"Esc":            tcell.KeyEsc,
 	"Escape":         tcell.KeyEscape,
@@ -232,12 +254,14 @@ var bindingKeys = map[string]tcell.Key{
 type Key struct {
 	keyCode   tcell.Key
 	modifiers tcell.ModMask
+	buttons   tcell.ButtonMask
 	r         rune
 }
 
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
 	bindings = make(map[Key][]func(*View, bool) bool)
+	mouseBindings = make(map[Key][]func(*View, bool, *tcell.EventMouse) bool)
 
 	var parsed map[string]string
 	defaults := DefaultBindings()
@@ -303,6 +327,7 @@ modSearch:
 			return Key{
 				keyCode:   code,
 				modifiers: modifiers,
+				buttons:   -1,
 				r:         0,
 			}, true
 		}
@@ -313,6 +338,16 @@ modSearch:
 		return Key{
 			keyCode:   code,
 			modifiers: modifiers,
+			buttons:   -1,
+			r:         0,
+		}, true
+	}
+
+	// See if we can find the key in bindingMouse
+	if code, ok := bindingMouse[k]; ok {
+		return Key{
+			modifiers: modifiers,
+			buttons:   code,
 			r:         0,
 		}, true
 	}
@@ -322,12 +357,13 @@ modSearch:
 		return Key{
 			keyCode:   tcell.KeyRune,
 			modifiers: modifiers,
+			buttons:   -1,
 			r:         rune(k[0]),
 		}, true
 	}
 
 	// We don't know what happened.
-	return Key{}, false
+	return Key{buttons: -1}, false
 }
 
 // findAction will find 'action' using string 'v'
@@ -337,6 +373,16 @@ func findAction(v string) (action func(*View, bool) bool) {
 		// If the user seems to be binding a function that doesn't exist
 		// We hope that it's a lua function that exists and bind it to that
 		action = LuaFunctionBinding(v)
+	}
+	return action
+}
+
+func findMouseAction(v string) func(*View, bool, *tcell.EventMouse) bool {
+	action, ok := mouseBindingActions[v]
+	if !ok {
+		// If the user seems to be binding a function that doesn't exist
+		// We hope that it's a lua function that exists and bind it to that
+		action = LuaFunctionMouseBinding(v)
 	}
 	return action
 }
@@ -358,18 +404,31 @@ func BindKey(k, v string) {
 	actionNames := strings.Split(v, ",")
 	if actionNames[0] == "UnbindKey" {
 		delete(bindings, key)
+		delete(mouseBindings, key)
 		if len(actionNames) == 1 {
-			actionNames = make([]string, 0, 0)
-		} else {
-			actionNames = append(actionNames[:0], actionNames[1:]...)
+			return
 		}
+		actionNames = append(actionNames[:0], actionNames[1:]...)
 	}
 	actions := make([]func(*View, bool) bool, 0, len(actionNames))
+	mouseActions := make([]func(*View, bool, *tcell.EventMouse) bool, 0, len(actionNames))
 	for _, actionName := range actionNames {
-		actions = append(actions, findAction(actionName))
+		if strings.HasPrefix(actionName, "Mouse") {
+			mouseActions = append(mouseActions, findMouseAction(actionName))
+		} else {
+			actions = append(actions, findAction(actionName))
+		}
 	}
 
-	bindings[key] = actions
+	if len(actions) > 0 {
+		// Can't have a binding be both mouse and normal
+		delete(mouseBindings, key)
+		bindings[key] = actions
+	} else if len(mouseActions) > 0 {
+		// Can't have a binding be both mouse and normal
+		delete(bindings, key)
+		mouseBindings[key] = mouseActions
+	}
 }
 
 // DefaultBindings returns a map containing micro's default keybindings
@@ -430,6 +489,8 @@ func DefaultBindings() map[string]string {
 		"CtrlEnd":        "CursorEnd",
 		"PageUp":         "CursorPageUp",
 		"PageDown":       "CursorPageDown",
+		"CtrlPageUp":     "PreviousTab",
+		"CtrlPageDown":   "NextTab",
 		"CtrlG":          "ToggleHelp",
 		"Alt-h":          "ToggleHelp",
 		"Altr":           "ToggleRuler",
@@ -449,8 +510,8 @@ func DefaultBindings() map[string]string {
 		"Alt-b": "WordLeft",
 		"Alt-a": "StartOfLine",
 		"Alt-e": "EndOfLine",
-		"Alt-p": "CursorUp",
-		"Alt-n": "CursorDown",
+		// "Alt-p": "CursorUp",
+		// "Alt-n": "CursorDown",
 
 		// Integration with file managers
 		"F1":  "ToggleHelp",
@@ -460,5 +521,17 @@ func DefaultBindings() map[string]string {
 		"F7":  "Find",
 		"F10": "Quit",
 		"Esc": "Escape",
+
+		// Mouse bindings
+		"MouseWheelUp":   "ScrollUp",
+		"MouseWheelDown": "ScrollDown",
+		"MouseLeft":      "MousePress",
+		"MouseMiddle":    "PastePrimary",
+		"Ctrl-MouseLeft": "MouseMultiCursor",
+
+		"Alt-n": "SpawnMultiCursor",
+		"Alt-p": "RemoveMultiCursor",
+		"Alt-c": "RemoveAllMultiCursors",
+		"Alt-x": "SkipMultiCursor",
 	}
 }

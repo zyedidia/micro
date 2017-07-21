@@ -1,6 +1,8 @@
 package main
 
-import "github.com/zyedidia/clipboard"
+import (
+	"github.com/zyedidia/clipboard"
+)
 
 // The Cursor struct stores the location of the cursor in the view
 // The complicated part about the cursor is storing its location.
@@ -21,6 +23,9 @@ type Cursor struct {
 	// This is used for line and word selection where it is necessary
 	// to know what the original selection was
 	OrigSelection [2]Loc
+
+	// Which cursor index is this (for multiple cursors)
+	Num int
 }
 
 // Goto puts the cursor at the given cursor's location and gives the current cursor its selection too
@@ -334,6 +339,14 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.buf.Line(c.Y))
 	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	if c.X > len(runes) {
+		c.X = len(runes) - 1
+	}
+
+	if c.X < 0 {
+		c.X = 0
+	}
+
 	return StringWidth(string(runes[:c.X]), tabSize)
 }
 

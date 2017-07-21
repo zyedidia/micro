@@ -169,7 +169,7 @@ func (v *View) paste(clip string) {
 	}
 	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
 	v.Buf.Insert(v.Cursor.Loc, clip)
-	v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
+	// v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
 	v.freshClip = false
 	messenger.Message("Pasted clipboard")
 }
@@ -450,6 +450,40 @@ func (v *View) MoveToMouseClick(x, y int) {
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
+func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
+	relocate := false
+	readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
+	for _, action := range actions {
+		readonlyBindingsResult := false
+		funcName := ShortFuncName(action)
+		if v.Type.readonly == true {
+			// check for readonly and if true only let key bindings get called if they do not change the contents.
+			for _, readonlyBindings := range readonlyBindingsList {
+				if strings.Contains(funcName, readonlyBindings) {
+					readonlyBindingsResult = true
+				}
+			}
+		}
+		if !readonlyBindingsResult {
+			// call the key binding
+			relocate = action(v, true) || relocate
+			// Macro
+			if funcName != "ToggleMacro" && funcName != "PlayMacro" {
+				if recordingMacro {
+					curMacro = append(curMacro, action)
+				}
+			}
+		}
+	}
+
+	return relocate
+}
+
+func (v *View) SetCursor(c *Cursor) {
+	v.Cursor = c
+	v.Buf.curCursor = c.Num
+}
+
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	// This bool determines whether the view is relocated at the end of the function
@@ -462,122 +496,103 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
-		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
-			for key, actions := range bindings {
-				if e.Key() == key.keyCode {
-					if e.Key() == tcell.KeyRune {
-						if e.Rune() != key.r {
-							continue
-						}
+		for key, actions := range bindings {
+			if e.Key() == key.keyCode {
+				if e.Key() == tcell.KeyRune {
+					if e.Rune() != key.r {
+						continue
 					}
-					if e.Modifiers() == key.modifiers {
+				}
+				if e.Modifiers() == key.modifiers {
+					for _, c := range v.Buf.cursors {
+						v.SetCursor(c)
 						relocate = false
 						isBinding = true
-						for _, action := range actions {
-							relocate = action(v, true) || relocate
-							funcName := FuncName(action)
-							if funcName != "main.(*View).ToggleMacro" && funcName != "main.(*View).PlayMacro" {
-								if recordingMacro {
-									curMacro = append(curMacro, action)
-								}
-							}
-						}
-						break
+						relocate = v.ExecuteActions(actions) || relocate
 					}
+					v.SetCursor(&v.Buf.Cursor)
+					v.Buf.MergeCursors()
+					break
 				}
 			}
 		}
 		if !isBinding && e.Key() == tcell.KeyRune {
-			// Insert a character
-			if v.Cursor.HasSelection() {
-				v.Cursor.DeleteSelection()
-				v.Cursor.ResetSelection()
-			}
-			v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
-			v.Cursor.Right()
+			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
+			if v.Type.readonly == false {
+				for _, c := range v.Buf.cursors {
+					v.SetCursor(c)
 
-			for pl := range loadedPlugins {
-				_, err := Call(pl+".onRune", string(e.Rune()), v)
-				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-					TermMessage(err)
+					// Insert a character
+					if v.Cursor.HasSelection() {
+						v.Cursor.DeleteSelection()
+						v.Cursor.ResetSelection()
+					}
+					v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+
+					for pl := range loadedPlugins {
+						_, err := Call(pl+".onRune", string(e.Rune()), v)
+						if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+							TermMessage(err)
+						}
+					}
+
+					if recordingMacro {
+						curMacro = append(curMacro, e.Rune())
+					}
 				}
-			}
-
-			if recordingMacro {
-				curMacro = append(curMacro, e.Rune())
+				v.SetCursor(&v.Buf.Cursor)
 			}
 		}
 	case *tcell.EventPaste:
-		if !PreActionCall("Paste", v) {
-			break
+		// Check viewtype if readonly don't paste (readonly help and log view etc.)
+		if v.Type.readonly == false {
+			if !PreActionCall("Paste", v) {
+				break
+			}
+
+			for _, c := range v.Buf.cursors {
+				v.SetCursor(c)
+				v.paste(e.Text())
+
+			}
+			v.SetCursor(&v.Buf.Cursor)
+
+			PostActionCall("Paste", v)
 		}
-
-		v.paste(e.Text())
-
-		PostActionCall("Paste", v)
 	case *tcell.EventMouse:
-		x, y := e.Position()
-		x -= v.lineNumOffset - v.leftCol + v.x
-		y += v.Topline - v.y
 		// Don't relocate for mouse events
 		relocate = false
 
 		button := e.Buttons()
 
-		switch button {
-		case tcell.Button1:
-			// Left click
-			if v.mouseReleased {
-				v.MoveToMouseClick(x, y)
-				if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
-					if v.doubleClick {
-						// Triple click
-						v.lastClickTime = time.Now()
-
-						v.tripleClick = true
-						v.doubleClick = false
-
-						v.Cursor.SelectLine()
-						v.Cursor.CopySelection("primary")
-					} else {
-						// Double click
-						v.lastClickTime = time.Now()
-
-						v.doubleClick = true
-						v.tripleClick = false
-
-						v.Cursor.SelectWord()
-						v.Cursor.CopySelection("primary")
-					}
-				} else {
-					v.doubleClick = false
-					v.tripleClick = false
-					v.lastClickTime = time.Now()
-
-					v.Cursor.OrigSelection[0] = v.Cursor.Loc
-					v.Cursor.CurSelection[0] = v.Cursor.Loc
-					v.Cursor.CurSelection[1] = v.Cursor.Loc
+		for key, actions := range bindings {
+			if button == key.buttons && e.Modifiers() == key.modifiers {
+				for _, c := range v.Buf.cursors {
+					v.SetCursor(c)
+					relocate = v.ExecuteActions(actions) || relocate
 				}
-				v.mouseReleased = false
-			} else if !v.mouseReleased {
-				v.MoveToMouseClick(x, y)
-				if v.tripleClick {
-					v.Cursor.AddLineToSelection()
-				} else if v.doubleClick {
-					v.Cursor.AddWordToSelection()
-				} else {
-					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
-					v.Cursor.CopySelection("primary")
+				v.SetCursor(&v.Buf.Cursor)
+				v.Buf.MergeCursors()
+			}
+		}
+
+		for key, actions := range mouseBindings {
+			if button == key.buttons && e.Modifiers() == key.modifiers {
+				for _, action := range actions {
+					action(v, true, e)
 				}
 			}
-		case tcell.Button2:
-			// Middle mouse button was clicked,
-			// We should paste primary
-			v.PastePrimary(true)
+		}
+
+		switch button {
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !v.mouseReleased {
 				// Mouse was just released
+
+				x, y := e.Position()
+				x -= v.lineNumOffset - v.leftCol + v.x
+				y += v.Topline - v.y
 
 				// Relocating here isn't really necessary because the cursor will
 				// be in the right place from the last mouse event
@@ -592,14 +607,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 				v.mouseReleased = true
 			}
-		case tcell.WheelUp:
-			// Scroll up
-			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
-			v.ScrollUp(scrollspeed)
-		case tcell.WheelDown:
-			// Scroll down
-			scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
-			v.ScrollDown(scrollspeed)
 		}
 	}
 
@@ -612,6 +619,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// This is (hopefully) a temporary solution
 		v.Relocate()
 	}
+}
+
+func (v *View) mainCursor() bool {
+	return v.Buf.curCursor == len(v.Buf.cursors)-1
 }
 
 // GutterMessage creates a message in this view's gutter
@@ -840,22 +851,20 @@ func (v *View) DisplayView() {
 				}
 
 				charLoc := char.realLoc
-				if v.Cursor.HasSelection() &&
-					(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
-						charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
-					// The current character is selected
-					lineStyle = defStyle.Reverse(true)
+				for _, c := range v.Buf.cursors {
+					v.SetCursor(c)
+					if v.Cursor.HasSelection() &&
+						(charLoc.GreaterEqual(v.Cursor.CurSelection[0]) && charLoc.LessThan(v.Cursor.CurSelection[1]) ||
+							charLoc.LessThan(v.Cursor.CurSelection[0]) && charLoc.GreaterEqual(v.Cursor.CurSelection[1])) {
+						// The current character is selected
+						lineStyle = defStyle.Reverse(true)
 
-					if style, ok := colorscheme["selection"]; ok {
-						lineStyle = style
+						if style, ok := colorscheme["selection"]; ok {
+							lineStyle = style
+						}
 					}
 				}
-
-				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-					v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && !cursorSet {
-					screen.ShowCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y)
-					cursorSet = true
-				}
+				v.SetCursor(&v.Buf.Cursor)
 
 				if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 					!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
@@ -865,6 +874,16 @@ func (v *View) DisplayView() {
 				}
 
 				screen.SetContent(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, char.drawChar, nil, lineStyle)
+
+				for i, c := range v.Buf.cursors {
+					v.SetCursor(c)
+					if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+						v.Cursor.Y == char.realLoc.Y && v.Cursor.X == char.realLoc.X && (!cursorSet || i != 0) {
+						ShowMultiCursor(xOffset+char.visualLoc.X, yOffset+char.visualLoc.Y, i)
+						cursorSet = true
+					}
+				}
+				v.SetCursor(&v.Buf.Cursor)
 
 				lastChar = char
 			}
@@ -876,19 +895,27 @@ func (v *View) DisplayView() {
 		var cx, cy int
 		if lastChar != nil {
 			lastX = xOffset + lastChar.visualLoc.X + lastChar.width
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
-				screen.ShowCursor(lastX, yOffset+lastChar.visualLoc.Y)
-				cx, cy = lastX, yOffset+lastChar.visualLoc.Y
+			for i, c := range v.Buf.cursors {
+				v.SetCursor(c)
+				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+					v.Cursor.Y == lastChar.realLoc.Y && v.Cursor.X == lastChar.realLoc.X+1 {
+					ShowMultiCursor(lastX, yOffset+lastChar.visualLoc.Y, i)
+					cx, cy = lastX, yOffset+lastChar.visualLoc.Y
+				}
 			}
-			realLoc = Loc{lastChar.realLoc.X, realLineN}
+			v.SetCursor(&v.Buf.Cursor)
+			realLoc = Loc{lastChar.realLoc.X + 1, realLineN}
 			visualLoc = Loc{lastX - xOffset, lastChar.visualLoc.Y}
 		} else if len(line) == 0 {
-			if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
-				v.Cursor.Y == realLineN {
-				screen.ShowCursor(xOffset, yOffset+visualLineN)
-				cx, cy = xOffset, yOffset+visualLineN
+			for i, c := range v.Buf.cursors {
+				v.SetCursor(c)
+				if tabs[curTab].CurView == v.Num && !v.Cursor.HasSelection() &&
+					v.Cursor.Y == realLineN {
+					ShowMultiCursor(xOffset, yOffset+visualLineN, i)
+					cx, cy = xOffset, yOffset+visualLineN
+				}
 			}
+			v.SetCursor(&v.Buf.Cursor)
 			lastX = xOffset
 			realLoc = Loc{0, realLineN}
 			visualLoc = Loc{0, visualLineN}
@@ -930,6 +957,18 @@ func (v *View) DisplayView() {
 	}
 }
 
+// ShowMultiCursor will display a cursor at a location
+// If i == 0 then the terminal cursor will be used
+// Otherwise a fake cursor will be drawn at the position
+func ShowMultiCursor(x, y, i int) {
+	if i == 0 {
+		screen.ShowCursor(x, y)
+	} else {
+		r, _, _, _ := screen.GetContent(x, y)
+		screen.SetContent(x, y, r, nil, defStyle.Reverse(true))
+	}
+}
+
 // Display renders the view, the cursor, and statusline
 func (v *View) Display() {
 	if globalSettings["termtitle"].(bool) {
@@ -937,7 +976,7 @@ func (v *View) Display() {
 	}
 	v.DisplayView()
 	// Don't draw the cursor if it is out of the viewport or if it has a selection
-	if (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1) || (v.Cursor.HasSelection() && v.Num == tabs[curTab].CurView) {
+	if v.Num == tabs[curTab].CurView && (v.Cursor.Y-v.Topline < 0 || v.Cursor.Y-v.Topline > v.Height-1 || v.Cursor.HasSelection()) {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()

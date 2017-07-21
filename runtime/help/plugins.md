@@ -21,6 +21,16 @@ This is almost always the current view, which you can get with `CurView()` as we
 
 All available actions are listed in the keybindings section of the help.
 
+For callbacks to mouse actions, you are also given the event info:
+
+```lua
+function onMousePress(view, event)
+    local x, y = event:Position()
+
+    return false
+end
+```
+
 These functions should also return a boolean specifying whether the view
 should be relocated to the cursor or not after the action is complete.
 
@@ -156,25 +166,25 @@ See this example to learn how to use `MakeCompletion` and `MakeCommand`
 
 ```lua
 local function StartsWith(String,Start)
-  String = String:upper()
-  Start = Start:upper() 
-  return string.sub(String,1,string.len(Start))==Start
+    String = String:upper()
+    Start = Start:upper() 
+    return string.sub(String,1,string.len(Start))==Start
 end
 
 function complete(input)
-  local allCompletions = {"Hello", "World", "Foo", "Bar"}
-  local result = {}
-   
-  for i,v in pairs(allCompletions) do
-  if StartsWith(v, input) then
-       table.insert(result, v)
-     end
-   end
-   return result
+    local allCompletions = {"Hello", "World", "Foo", "Bar"}
+    local result = {}
+
+    for i,v in pairs(allCompletions) do
+        if StartsWith(v, input) then
+            table.insert(result, v)
+        end
+    end
+    return result
 end
 
 function foo(arg)
-  messenger:Message(arg)
+    messenger:Message(arg)
 end
 
 MakeCommand("foo", "example.foo", MakeCompletion("example.complete"))

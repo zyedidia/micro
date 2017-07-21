@@ -36,11 +36,7 @@ func NumOccurrences(s string, c byte) int {
 
 // Spaces returns a string with n spaces
 func Spaces(n int) string {
-	var str string
-	for i := 0; i < n; i++ {
-		str += " "
-	}
-	return str
+	return strings.Repeat(" ", n)
 }
 
 // Min takes the min of two ints
@@ -267,9 +263,14 @@ func Abs(n int) int {
 	return n
 }
 
-// FuncName returns the name of a given function object
+// FuncName returns the full name of a given function object
 func FuncName(i interface{}) string {
 	return runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name()
+}
+
+// ShortFuncName returns the name only of a given function object
+func ShortFuncName(i interface{}) string {
+	return strings.TrimPrefix(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), "main.(*View).")
 }
 
 // SplitCommandArgs separates multiple command arguments which may be quoted.

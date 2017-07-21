@@ -9,6 +9,6 @@ rules:
     - constant.number: "\\b[0-9]+\\b"
     - symbol.operator: "[*:=]"
     - constant.bool: "\\b(true|false)\\b"
-    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - comment: "(^|[[:space:]])!([^{].*)?$"
     - indent-char.whitespace: "[[:space:]]+$"
     - indent-char: "	+ +| +	+"

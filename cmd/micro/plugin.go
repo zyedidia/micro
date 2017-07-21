@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/yuin/gopher-lua"
+	"github.com/zyedidia/tcell"
 	"layeh.com/gopher-luar"
 )
 
@@ -53,6 +54,16 @@ func Call(function string, args ...interface{}) (lua.LValue, error) {
 func LuaFunctionBinding(function string) func(*View, bool) bool {
 	return func(v *View, _ bool) bool {
 		_, err := Call(function, nil)
+		if err != nil {
+			TermMessage(err)
+		}
+		return false
+	}
+}
+
+func LuaFunctionMouseBinding(function string) func(*View, bool, *tcell.EventMouse) bool {
+	return func(v *View, _ bool, e *tcell.EventMouse) bool {
+		_, err := Call(function, e)
 		if err != nil {
 			TermMessage(err)
 		}

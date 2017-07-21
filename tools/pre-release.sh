@@ -1,5 +1,4 @@
 # This script creates releases on Github for micro
-# It assumes that the binaries are in the current directory
 # You must have the correct Github access token to run this script
 
 # $1 is the title, $2 is the description
@@ -19,6 +18,10 @@ github-release release \
     --name "$1" \
     --description "$2" \
     --pre-release
+
+echo "Cross compiling binaries"
+./cross-compile.sh $1
+mv ../binaries .
 
 echo "Uploading OSX binary"
 github-release upload \

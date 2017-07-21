@@ -1,0 +1,36 @@
+filetype: crontab
+
+detect:
+    filename: "crontab$"
+    header: "^#.*?/etc/crontab"
+
+rules:
+      #              The time and date fields are:
+      #              field          allowed values
+      #              -----          --------------
+      #              minute         0-59
+      #              hour           0-23
+      #              day of month   0-31
+      #              month          0-12 (or names, see below)
+      #              day of week    0-7 (0 or 7 is Sun, or use names)
+
+    - statement: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(.*)$\\n?"
+    - constant: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)"
+    
+      # Shell Values
+    - type: "^[A-Z]+\\="
+
+      # Months and weekday keywords
+    - type: "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
+    - constant: "sun|mon|tue|wed|thu|fri|sat"
+    - type: "\\@(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)"
+
+      # Conditionals
+    - special: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|^|!|=|&|\\|)"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

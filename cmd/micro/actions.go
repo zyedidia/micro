@@ -8,13 +8,14 @@ import (
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/tcell"
 )
 
 // PreActionCall executes the lua pre callback if possible
-func PreActionCall(funcName string, view *View) bool {
+func PreActionCall(funcName string, view *View, args ...interface{}) bool {
 	executeAction := true
 	for pl := range loadedPlugins {
-		ret, err := Call(pl+".pre"+funcName, view)
+		ret, err := Call(pl+".pre"+funcName, append([]interface{}{view}, args...)...)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
 			continue
@@ -27,10 +28,10 @@ func PreActionCall(funcName string, view *View) bool {
 }
 
 // PostActionCall executes the lua plugin callback if possible
-func PostActionCall(funcName string, view *View) bool {
+func PostActionCall(funcName string, view *View, args ...interface{}) bool {
 	relocate := true
 	for pl := range loadedPlugins {
-		ret, err := Call(pl+".on"+funcName, view)
+		ret, err := Call(pl+".on"+funcName, append([]interface{}{view}, args...)...)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
 			continue
@@ -47,6 +48,110 @@ func (v *View) deselect(index int) bool {
 		v.Cursor.Loc = v.Cursor.CurSelection[index]
 		v.Cursor.ResetSelection()
 		return true
+	}
+	return false
+}
+
+// MousePress is the event that should happen when a normal click happens
+// This is almost always bound to left click
+func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
+	if usePlugin && !PreActionCall("MousePress", v, e) {
+		return false
+	}
+
+	x, y := e.Position()
+	x -= v.lineNumOffset - v.leftCol + v.x
+	y += v.Topline - v.y
+
+	// This is usually bound to left click
+	v.MoveToMouseClick(x, y)
+	if v.mouseReleased {
+		if len(v.Buf.cursors) > 1 {
+			for i := 1; i < len(v.Buf.cursors); i++ {
+				v.Buf.cursors[i] = nil
+			}
+			v.Buf.cursors = v.Buf.cursors[:1]
+			v.Buf.UpdateCursors()
+			v.Cursor.ResetSelection()
+			v.Relocate()
+		}
+		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
+			if v.doubleClick {
+				// Triple click
+				v.lastClickTime = time.Now()
+
+				v.tripleClick = true
+				v.doubleClick = false
+
+				v.Cursor.SelectLine()
+				v.Cursor.CopySelection("primary")
+			} else {
+				// Double click
+				v.lastClickTime = time.Now()
+
+				v.doubleClick = true
+				v.tripleClick = false
+
+				v.Cursor.SelectWord()
+				v.Cursor.CopySelection("primary")
+			}
+		} else {
+			v.doubleClick = false
+			v.tripleClick = false
+			v.lastClickTime = time.Now()
+
+			v.Cursor.OrigSelection[0] = v.Cursor.Loc
+			v.Cursor.CurSelection[0] = v.Cursor.Loc
+			v.Cursor.CurSelection[1] = v.Cursor.Loc
+		}
+		v.mouseReleased = false
+	} else if !v.mouseReleased {
+		if v.tripleClick {
+			v.Cursor.AddLineToSelection()
+		} else if v.doubleClick {
+			v.Cursor.AddWordToSelection()
+		} else {
+			v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+			v.Cursor.CopySelection("primary")
+		}
+	}
+
+	if usePlugin {
+		PostActionCall("MousePress", v, e)
+	}
+	return false
+}
+
+// ScrollUpAction scrolls the view up
+func (v *View) ScrollUpAction(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ScrollUp", v) {
+			return false
+		}
+
+		scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
+		v.ScrollUp(scrollspeed)
+
+		if usePlugin {
+			PostActionCall("ScrollUp", v)
+		}
+	}
+	return false
+}
+
+// ScrollDownAction scrolls the view up
+func (v *View) ScrollDownAction(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ScrollDown", v) {
+			return false
+		}
+
+		scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
+		v.ScrollDown(scrollspeed)
+
+		if usePlugin {
+			PostActionCall("ScrollDown", v)
+		}
 	}
 	return false
 }
@@ -461,7 +566,7 @@ func (v *View) InsertSpace(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 	v.Buf.Insert(v.Cursor.Loc, " ")
-	v.Cursor.Right()
+	// v.Cursor.Right()
 
 	if usePlugin {
 		return PostActionCall("InsertSpace", v)
@@ -481,15 +586,15 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 		v.Cursor.ResetSelection()
 	}
 
-	v.Buf.Insert(v.Cursor.Loc, "\n")
 	ws := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
-	v.Cursor.Right()
+	v.Buf.Insert(v.Cursor.Loc, "\n")
+	// v.Cursor.Right()
 
 	if v.Buf.Settings["autoindent"].(bool) {
 		v.Buf.Insert(v.Cursor.Loc, ws)
-		for i := 0; i < len(ws); i++ {
-			v.Cursor.Right()
-		}
+		// for i := 0; i < len(ws); i++ {
+		// 	v.Cursor.Right()
+		// }
 
 		// Remove the whitespaces if keepautoindent setting is off
 		if IsSpacesOrTabs(v.Buf.Line(v.Cursor.Y-1)) && !v.Buf.Settings["keepautoindent"].(bool) {
@@ -529,18 +634,10 @@ func (v *View) Backspace(usePlugin bool) bool {
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
 		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc
-			v.Cursor.Loc = loc.Move(-tabSize, v.Buf)
-			cx, cy := v.Cursor.X, v.Cursor.Y
-			v.Cursor.Loc = loc
 			v.Buf.Remove(loc.Move(-tabSize, v.Buf), loc)
-			v.Cursor.X, v.Cursor.Y = cx, cy
 		} else {
-			v.Cursor.Left()
-			cx, cy := v.Cursor.X, v.Cursor.Y
-			v.Cursor.Right()
 			loc := v.Cursor.Loc
 			v.Buf.Remove(loc.Move(-1, v.Buf), loc)
-			v.Cursor.X, v.Cursor.Y = cx, cy
 		}
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
@@ -660,7 +757,6 @@ func (v *View) OutdentLine(usePlugin bool) bool {
 			break
 		}
 		v.Buf.Remove(Loc{0, v.Cursor.Y}, Loc{1, v.Cursor.Y})
-		v.Cursor.X -= 1
 	}
 	v.Cursor.Relocate()
 
@@ -723,9 +819,9 @@ func (v *View) InsertTab(usePlugin bool) bool {
 	tabBytes := len(v.Buf.IndentString())
 	bytesUntilIndent := tabBytes - (v.Cursor.GetVisualX() % tabBytes)
 	v.Buf.Insert(v.Cursor.Loc, v.Buf.IndentString()[:bytesUntilIndent])
-	for i := 0; i < bytesUntilIndent; i++ {
-		v.Cursor.Right()
-	}
+	// for i := 0; i < bytesUntilIndent; i++ {
+	// 	v.Cursor.Right()
+	// }
 
 	if usePlugin {
 		return PostActionCall("InsertTab", v)
@@ -735,41 +831,45 @@ func (v *View) InsertTab(usePlugin bool) bool {
 
 // SaveAll saves all open buffers
 func (v *View) SaveAll(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("SaveAll", v) {
-		return false
-	}
-
-	for _, t := range tabs {
-		for _, v := range t.views {
-			v.Save(false)
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("SaveAll", v) {
+			return false
 		}
-	}
 
-	if usePlugin {
-		return PostActionCall("SaveAll", v)
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.Save(false)
+			}
+		}
+
+		if usePlugin {
+			return PostActionCall("SaveAll", v)
+		}
 	}
 	return false
 }
 
 // Save the buffer to disk
 func (v *View) Save(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("Save", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Save", v) {
+			return false
+		}
 
-	if v.Type.scratch == true {
-		// We can't save any view type with scratch set. eg help and log text
-		return false
-	}
-	// If this is an empty buffer, ask for a filename
-	if v.Buf.Path == "" {
-		v.SaveAs(false)
-	} else {
-		v.saveToFile(v.Buf.Path)
-	}
+		if v.Type.scratch == true {
+			// We can't save any view type with scratch set. eg help and log text
+			return false
+		}
+		// If this is an empty buffer, ask for a filename
+		if v.Buf.Path == "" {
+			v.SaveAs(false)
+		} else {
+			v.saveToFile(v.Buf.Path)
+		}
 
-	if usePlugin {
-		return PostActionCall("Save", v)
+		if usePlugin {
+			return PostActionCall("Save", v)
+		}
 	}
 	return false
 }
@@ -805,34 +905,45 @@ func (v *View) saveToFile(filename string) {
 
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
-	filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
-	if !canceled {
-		// the filename might or might not be quoted, so unquote first then join the strings.
-		filename = strings.Join(SplitCommandArgs(filename), " ")
-		v.saveToFile(filename)
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Find", v) {
+			return false
+		}
 
+		filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
+		if !canceled {
+			// the filename might or might not be quoted, so unquote first then join the strings.
+			filename = strings.Join(SplitCommandArgs(filename), " ")
+			v.saveToFile(filename)
+		}
+
+		if usePlugin {
+			PostActionCall("Find", v)
+		}
+	}
 	return false
 }
 
 // Find opens a prompt and searches forward for the input
 func (v *View) Find(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("Find", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Find", v) {
+			return false
+		}
 
-	searchStr := ""
-	if v.Cursor.HasSelection() {
-		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
-		searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
-		searchStr = v.Cursor.GetSelection()
-	} else {
-		searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
-	}
-	BeginSearch(searchStr)
+		searchStr := ""
+		if v.Cursor.HasSelection() {
+			searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+			searchStart = ToCharPos(v.Cursor.CurSelection[1], v.Buf)
+			searchStr = v.Cursor.GetSelection()
+		} else {
+			searchStart = ToCharPos(v.Cursor.Loc, v.Buf)
+		}
+		BeginSearch(searchStr)
 
-	if usePlugin {
-		return PostActionCall("Find", v)
+		if usePlugin {
+			return PostActionCall("Find", v)
+		}
 	}
 	return true
 }
@@ -913,18 +1024,20 @@ func (v *View) Redo(usePlugin bool) bool {
 
 // Copy the selection to the system clipboard
 func (v *View) Copy(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("Copy", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Copy", v) {
+			return false
+		}
 
-	if v.Cursor.HasSelection() {
-		v.Cursor.CopySelection("clipboard")
-		v.freshClip = true
-		messenger.Message("Copied selection")
-	}
+		if v.Cursor.HasSelection() {
+			v.Cursor.CopySelection("clipboard")
+			v.freshClip = true
+			messenger.Message("Copied selection")
+		}
 
-	if usePlugin {
-		return PostActionCall("Copy", v)
+		if usePlugin {
+			return PostActionCall("Copy", v)
+		}
 	}
 	return true
 }
@@ -995,7 +1108,7 @@ func (v *View) DuplicateLine(usePlugin bool) bool {
 	} else {
 		v.Cursor.End()
 		v.Buf.Insert(v.Cursor.Loc, "\n"+v.Buf.Line(v.Cursor.Y))
-		v.Cursor.Right()
+		// v.Cursor.Right()
 	}
 
 	messenger.Message("Duplicated line")
@@ -1155,16 +1268,18 @@ func (v *View) SelectAll(usePlugin bool) bool {
 
 // OpenFile opens a new file in the buffer
 func (v *View) OpenFile(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("OpenFile", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("OpenFile", v) {
+			return false
+		}
 
-	if v.CanClose() {
-		input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
-		if !canceled {
-			HandleCommand(input)
-			if usePlugin {
-				return PostActionCall("OpenFile", v)
+		if v.CanClose() {
+			input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
+			if !canceled {
+				HandleCommand(input)
+				if usePlugin {
+					return PostActionCall("OpenFile", v)
+				}
 			}
 		}
 	}
@@ -1173,68 +1288,76 @@ func (v *View) OpenFile(usePlugin bool) bool {
 
 // Start moves the viewport to the start of the buffer
 func (v *View) Start(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("Start", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Start", v) {
+			return false
+		}
 
-	v.Topline = 0
+		v.Topline = 0
 
-	if usePlugin {
-		return PostActionCall("Start", v)
+		if usePlugin {
+			return PostActionCall("Start", v)
+		}
 	}
 	return false
 }
 
 // End moves the viewport to the end of the buffer
 func (v *View) End(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("End", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("End", v) {
+			return false
+		}
 
-	if v.Height > v.Buf.NumLines {
-		v.Topline = 0
-	} else {
-		v.Topline = v.Buf.NumLines - v.Height
-	}
+		if v.Height > v.Buf.NumLines {
+			v.Topline = 0
+		} else {
+			v.Topline = v.Buf.NumLines - v.Height
+		}
 
-	if usePlugin {
-		return PostActionCall("End", v)
+		if usePlugin {
+			return PostActionCall("End", v)
+		}
 	}
 	return false
 }
 
 // PageUp scrolls the view up a page
 func (v *View) PageUp(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("PageUp", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("PageUp", v) {
+			return false
+		}
 
-	if v.Topline > v.Height {
-		v.ScrollUp(v.Height)
-	} else {
-		v.Topline = 0
-	}
+		if v.Topline > v.Height {
+			v.ScrollUp(v.Height)
+		} else {
+			v.Topline = 0
+		}
 
-	if usePlugin {
-		return PostActionCall("PageUp", v)
+		if usePlugin {
+			return PostActionCall("PageUp", v)
+		}
 	}
 	return false
 }
 
 // PageDown scrolls the view down a page
 func (v *View) PageDown(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("PageDown", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("PageDown", v) {
+			return false
+		}
 
-	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height {
-		v.ScrollDown(v.Height)
-	} else if v.Buf.NumLines >= v.Height {
-		v.Topline = v.Buf.NumLines - v.Height
-	}
+		if v.Buf.NumLines-(v.Topline+v.Height) > v.Height {
+			v.ScrollDown(v.Height)
+		} else if v.Buf.NumLines >= v.Height {
+			v.Topline = v.Buf.NumLines - v.Height
+		}
 
-	if usePlugin {
-		return PostActionCall("PageDown", v)
+		if usePlugin {
+			return PostActionCall("PageDown", v)
+		}
 	}
 	return false
 }
@@ -1281,58 +1404,64 @@ func (v *View) CursorPageDown(usePlugin bool) bool {
 
 // HalfPageUp scrolls the view up half a page
 func (v *View) HalfPageUp(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("HalfPageUp", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("HalfPageUp", v) {
+			return false
+		}
 
-	if v.Topline > v.Height/2 {
-		v.ScrollUp(v.Height / 2)
-	} else {
-		v.Topline = 0
-	}
+		if v.Topline > v.Height/2 {
+			v.ScrollUp(v.Height / 2)
+		} else {
+			v.Topline = 0
+		}
 
-	if usePlugin {
-		return PostActionCall("HalfPageUp", v)
+		if usePlugin {
+			return PostActionCall("HalfPageUp", v)
+		}
 	}
 	return false
 }
 
 // HalfPageDown scrolls the view down half a page
 func (v *View) HalfPageDown(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("HalfPageDown", v) {
-		return false
-	}
-
-	if v.Buf.NumLines-(v.Topline+v.Height) > v.Height/2 {
-		v.ScrollDown(v.Height / 2)
-	} else {
-		if v.Buf.NumLines >= v.Height {
-			v.Topline = v.Buf.NumLines - v.Height
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("HalfPageDown", v) {
+			return false
 		}
-	}
 
-	if usePlugin {
-		return PostActionCall("HalfPageDown", v)
+		if v.Buf.NumLines-(v.Topline+v.Height) > v.Height/2 {
+			v.ScrollDown(v.Height / 2)
+		} else {
+			if v.Buf.NumLines >= v.Height {
+				v.Topline = v.Buf.NumLines - v.Height
+			}
+		}
+
+		if usePlugin {
+			return PostActionCall("HalfPageDown", v)
+		}
 	}
 	return false
 }
 
 // ToggleRuler turns line numbers off and on
 func (v *View) ToggleRuler(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("ToggleRuler", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ToggleRuler", v) {
+			return false
+		}
 
-	if v.Buf.Settings["ruler"] == false {
-		v.Buf.Settings["ruler"] = true
-		messenger.Message("Enabled ruler")
-	} else {
-		v.Buf.Settings["ruler"] = false
-		messenger.Message("Disabled ruler")
-	}
+		if v.Buf.Settings["ruler"] == false {
+			v.Buf.Settings["ruler"] = true
+			messenger.Message("Enabled ruler")
+		} else {
+			v.Buf.Settings["ruler"] = false
+			messenger.Message("Disabled ruler")
+		}
 
-	if usePlugin {
-		return PostActionCall("ToggleRuler", v)
+		if usePlugin {
+			return PostActionCall("ToggleRuler", v)
+		}
 	}
 	return false
 }
@@ -1370,49 +1499,55 @@ func (v *View) JumpLine(usePlugin bool) bool {
 
 // ClearStatus clears the messenger bar
 func (v *View) ClearStatus(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("ClearStatus", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ClearStatus", v) {
+			return false
+		}
 
-	messenger.Message("")
+		messenger.Message("")
 
-	if usePlugin {
-		return PostActionCall("ClearStatus", v)
+		if usePlugin {
+			return PostActionCall("ClearStatus", v)
+		}
 	}
 	return false
 }
 
 // ToggleHelp toggles the help screen
 func (v *View) ToggleHelp(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("ToggleHelp", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ToggleHelp", v) {
+			return false
+		}
 
-	if v.Type != vtHelp {
-		// Open the default help
-		v.openHelp("help")
-	} else {
-		v.Quit(true)
-	}
+		if v.Type != vtHelp {
+			// Open the default help
+			v.openHelp("help")
+		} else {
+			v.Quit(true)
+		}
 
-	if usePlugin {
-		return PostActionCall("ToggleHelp", v)
+		if usePlugin {
+			return PostActionCall("ToggleHelp", v)
+		}
 	}
 	return true
 }
 
 // ShellMode opens a terminal to run a shell command
 func (v *View) ShellMode(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("ShellMode", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ShellMode", v) {
+			return false
+		}
 
-	input, canceled := messenger.Prompt("$ ", "", "Shell", NoCompletion)
-	if !canceled {
-		// The true here is for openTerm to make the command interactive
-		HandleShellCommand(input, true, true)
-		if usePlugin {
-			return PostActionCall("ShellMode", v)
+		input, canceled := messenger.Prompt("$ ", "", "Shell", NoCompletion)
+		if !canceled {
+			// The true here is for openTerm to make the command interactive
+			HandleShellCommand(input, true, true)
+			if usePlugin {
+				return PostActionCall("ShellMode", v)
+			}
 		}
 	}
 	return false
@@ -1420,15 +1555,17 @@ func (v *View) ShellMode(usePlugin bool) bool {
 
 // CommandMode lets the user enter a command
 func (v *View) CommandMode(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("CommandMode", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("CommandMode", v) {
+			return false
+		}
 
-	input, canceled := messenger.Prompt("> ", "", "Command", CommandCompletion)
-	if !canceled {
-		HandleCommand(input)
-		if usePlugin {
-			return PostActionCall("CommandMode", v)
+		input, canceled := messenger.Prompt("> ", "", "Command", CommandCompletion)
+		if !canceled {
+			HandleCommand(input)
+			if usePlugin {
+				return PostActionCall("CommandMode", v)
+			}
 		}
 	}
 
@@ -1437,15 +1574,17 @@ func (v *View) CommandMode(usePlugin bool) bool {
 
 // Escape leaves current mode
 func (v *View) Escape(usePlugin bool) bool {
-	// check if user is searching, or the last search is still active
-	if searching || lastSearch != "" {
-		ExitSearch(v)
-		return true
-	}
-	// check if a prompt is shown, hide it and don't quit
-	if messenger.hasPrompt {
-		messenger.Reset() // FIXME
-		return true
+	if v.mainCursor() {
+		// check if user is searching, or the last search is still active
+		if searching || lastSearch != "" {
+			ExitSearch(v)
+			return true
+		}
+		// check if a prompt is shown, hide it and don't quit
+		if messenger.hasPrompt {
+			messenger.Reset() // FIXME
+			return true
+		}
 	}
 
 	return false
@@ -1453,78 +1592,82 @@ func (v *View) Escape(usePlugin bool) bool {
 
 // Quit this will close the current tab or view that is open
 func (v *View) Quit(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("Quit", v) {
-		return false
-	}
-
-	// Make sure not to quit if there are unsaved changes
-	if v.CanClose() {
-		v.CloseBuffer()
-		if len(tabs[curTab].views) > 1 {
-			v.splitNode.Delete()
-			tabs[v.TabNum].Cleanup()
-			tabs[v.TabNum].Resize()
-		} else if len(tabs) > 1 {
-			if len(tabs[v.TabNum].views) == 1 {
-				tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
-				for i, t := range tabs {
-					t.SetNum(i)
-				}
-				if curTab >= len(tabs) {
-					curTab--
-				}
-				if curTab == 0 {
-					CurView().ToggleTabbar()
-				}
-			}
-		} else {
-			if usePlugin {
-				PostActionCall("Quit", v)
-			}
-
-			screen.Fini()
-			os.Exit(0)
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Quit", v) {
+			return false
 		}
-	}
 
-	if usePlugin {
-		return PostActionCall("Quit", v)
+		// Make sure not to quit if there are unsaved changes
+		if v.CanClose() {
+			v.CloseBuffer()
+			if len(tabs[curTab].views) > 1 {
+				v.splitNode.Delete()
+				tabs[v.TabNum].Cleanup()
+				tabs[v.TabNum].Resize()
+			} else if len(tabs) > 1 {
+				if len(tabs[v.TabNum].views) == 1 {
+					tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
+					for i, t := range tabs {
+						t.SetNum(i)
+					}
+					if curTab >= len(tabs) {
+						curTab--
+					}
+					if curTab == 0 {
+						CurView().ToggleTabbar()
+					}
+				}
+			} else {
+				if usePlugin {
+					PostActionCall("Quit", v)
+				}
+
+				screen.Fini()
+				os.Exit(0)
+			}
+		}
+
+		if usePlugin {
+			return PostActionCall("Quit", v)
+		}
 	}
 	return false
 }
 
 // QuitAll quits the whole editor; all splits and tabs
 func (v *View) QuitAll(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("QuitAll", v) {
-		return false
-	}
-
-	closeAll := true
-	for _, tab := range tabs {
-		for _, v := range tab.views {
-			if !v.CanClose() {
-				closeAll = false
-			}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("QuitAll", v) {
+			return false
 		}
-	}
 
-	if closeAll {
-		// only quit if all of the buffers can be closed and the user confirms that they actually want to quit everything
-		shouldQuit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
-
-		if shouldQuit {
-			for _, tab := range tabs {
-				for _, v := range tab.views {
-					v.CloseBuffer()
+		closeAll := true
+		for _, tab := range tabs {
+			for _, v := range tab.views {
+				if !v.CanClose() {
+					closeAll = false
 				}
 			}
+		}
 
-			if usePlugin {
-				PostActionCall("QuitAll", v)
+		if closeAll {
+			// only quit if all of the buffers can be closed and the user confirms that they actually want to quit everything
+			shouldQuit, _ := messenger.YesNoPrompt("Do you want to quit micro (all open files will be closed)?")
+
+			if shouldQuit {
+				for _, tab := range tabs {
+					for _, v := range tab.views {
+						v.CloseBuffer()
+					}
+				}
+
+				if usePlugin {
+					PostActionCall("QuitAll", v)
+				}
+
+				screen.Fini()
+				os.Exit(0)
 			}
-
-			screen.Fini()
-			os.Exit(0)
 		}
 	}
 
@@ -1533,147 +1676,163 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 // AddTab adds a new tab with an empty buffer
 func (v *View) AddTab(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("AddTab", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("AddTab", v) {
+			return false
+		}
 
-	tab := NewTabFromView(NewView(NewBufferFromString("", "")))
-	tab.SetNum(len(tabs))
-	tabs = append(tabs, tab)
-	curTab = len(tabs) - 1
-	if len(tabs) == 2 {
-		for _, t := range tabs {
-			for _, v := range t.views {
-				v.ToggleTabbar()
+		tab := NewTabFromView(NewView(NewBufferFromString("", "")))
+		tab.SetNum(len(tabs))
+		tabs = append(tabs, tab)
+		curTab = len(tabs) - 1
+		if len(tabs) == 2 {
+			for _, t := range tabs {
+				for _, v := range t.views {
+					v.ToggleTabbar()
+				}
 			}
 		}
-	}
 
-	if usePlugin {
-		return PostActionCall("AddTab", v)
+		if usePlugin {
+			return PostActionCall("AddTab", v)
+		}
 	}
 	return true
 }
 
 // PreviousTab switches to the previous tab in the tab list
 func (v *View) PreviousTab(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("PreviousTab", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("PreviousTab", v) {
+			return false
+		}
 
-	if curTab > 0 {
-		curTab--
-	} else if curTab == 0 {
-		curTab = len(tabs) - 1
-	}
+		if curTab > 0 {
+			curTab--
+		} else if curTab == 0 {
+			curTab = len(tabs) - 1
+		}
 
-	if usePlugin {
-		return PostActionCall("PreviousTab", v)
+		if usePlugin {
+			return PostActionCall("PreviousTab", v)
+		}
 	}
 	return false
 }
 
 // NextTab switches to the next tab in the tab list
 func (v *View) NextTab(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("NextTab", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("NextTab", v) {
+			return false
+		}
 
-	if curTab < len(tabs)-1 {
-		curTab++
-	} else if curTab == len(tabs)-1 {
-		curTab = 0
-	}
+		if curTab < len(tabs)-1 {
+			curTab++
+		} else if curTab == len(tabs)-1 {
+			curTab = 0
+		}
 
-	if usePlugin {
-		return PostActionCall("NextTab", v)
+		if usePlugin {
+			return PostActionCall("NextTab", v)
+		}
 	}
 	return false
 }
 
 // VSplitBinding opens an empty vertical split
 func (v *View) VSplitBinding(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("VSplit", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("VSplit", v) {
+			return false
+		}
 
-	v.VSplit(NewBufferFromString("", ""))
+		v.VSplit(NewBufferFromString("", ""))
 
-	if usePlugin {
-		return PostActionCall("VSplit", v)
+		if usePlugin {
+			return PostActionCall("VSplit", v)
+		}
 	}
 	return false
 }
 
 // HSplitBinding opens an empty horizontal split
 func (v *View) HSplitBinding(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("HSplit", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("HSplit", v) {
+			return false
+		}
 
-	v.HSplit(NewBufferFromString("", ""))
+		v.HSplit(NewBufferFromString("", ""))
 
-	if usePlugin {
-		return PostActionCall("HSplit", v)
+		if usePlugin {
+			return PostActionCall("HSplit", v)
+		}
 	}
 	return false
 }
 
 // Unsplit closes all splits in the current tab except the active one
 func (v *View) Unsplit(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("Unsplit", v) {
-		return false
-	}
-
-	curView := tabs[curTab].CurView
-	for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
-		view := tabs[curTab].views[i]
-		if view != nil && view.Num != curView {
-			view.Quit(true)
-			// messenger.Message("Quit ", view.Buf.Path)
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Unsplit", v) {
+			return false
 		}
-	}
 
-	if usePlugin {
-		return PostActionCall("Unsplit", v)
+		curView := tabs[curTab].CurView
+		for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
+			view := tabs[curTab].views[i]
+			if view != nil && view.Num != curView {
+				view.Quit(true)
+				// messenger.Message("Quit ", view.Buf.Path)
+			}
+		}
+
+		if usePlugin {
+			return PostActionCall("Unsplit", v)
+		}
 	}
 	return false
 }
 
 // NextSplit changes the view to the next split
 func (v *View) NextSplit(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("NextSplit", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("NextSplit", v) {
+			return false
+		}
 
-	tab := tabs[curTab]
-	if tab.CurView < len(tab.views)-1 {
-		tab.CurView++
-	} else {
-		tab.CurView = 0
-	}
+		tab := tabs[curTab]
+		if tab.CurView < len(tab.views)-1 {
+			tab.CurView++
+		} else {
+			tab.CurView = 0
+		}
 
-	if usePlugin {
-		return PostActionCall("NextSplit", v)
+		if usePlugin {
+			return PostActionCall("NextSplit", v)
+		}
 	}
 	return false
 }
 
 // PreviousSplit changes the view to the previous split
 func (v *View) PreviousSplit(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("PreviousSplit", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("PreviousSplit", v) {
+			return false
+		}
 
-	tab := tabs[curTab]
-	if tab.CurView > 0 {
-		tab.CurView--
-	} else {
-		tab.CurView = len(tab.views) - 1
-	}
+		tab := tabs[curTab]
+		if tab.CurView > 0 {
+			tab.CurView--
+		} else {
+			tab.CurView = len(tab.views) - 1
+		}
 
-	if usePlugin {
-		return PostActionCall("PreviousSplit", v)
+		if usePlugin {
+			return PostActionCall("PreviousSplit", v)
+		}
 	}
 	return false
 }
@@ -1683,21 +1842,23 @@ var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
 func (v *View) ToggleMacro(usePlugin bool) bool {
-	if usePlugin && !PreActionCall("ToggleMacro", v) {
-		return false
-	}
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ToggleMacro", v) {
+			return false
+		}
 
-	recordingMacro = !recordingMacro
+		recordingMacro = !recordingMacro
 
-	if recordingMacro {
-		curMacro = []interface{}{}
-		messenger.Message("Recording")
-	} else {
-		messenger.Message("Stopped recording")
-	}
+		if recordingMacro {
+			curMacro = []interface{}{}
+			messenger.Message("Recording")
+		} else {
+			messenger.Message("Stopped recording")
+		}
 
-	if usePlugin {
-		return PostActionCall("ToggleMacro", v)
+		if usePlugin {
+			return PostActionCall("ToggleMacro", v)
+		}
 	}
 	return true
 }
@@ -1717,7 +1878,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 				v.Cursor.ResetSelection()
 			}
 			v.Buf.Insert(v.Cursor.Loc, string(t))
-			v.Cursor.Right()
+			// v.Cursor.Right()
 
 			for pl := range loadedPlugins {
 				_, err := Call(pl+".onRune", string(t), v)
@@ -1757,6 +1918,145 @@ func (v *View) Tabswitch(usePlugin bool) bool {
 }
 
 
+// SpawnMultiCursor creates a new multiple cursor at the next occurence of the current selection or current word
+func (v *View) SpawnMultiCursor(usePlugin bool) bool {
+	spawner := v.Buf.cursors[len(v.Buf.cursors)-1]
+	// You can only spawn a cursor from the main cursor
+	if v.Cursor == spawner {
+		if usePlugin && !PreActionCall("SpawnMultiCursor", v) {
+			return false
+		}
+
+		if !spawner.HasSelection() {
+			spawner.SelectWord()
+		} else {
+			c := &Cursor{
+				buf: v.Buf,
+			}
+
+			sel := spawner.GetSelection()
+
+			searchStart = ToCharPos(spawner.CurSelection[1], v.Buf)
+			v.Cursor = c
+			Search(sel, v, true)
+
+			for _, cur := range v.Buf.cursors {
+				if c.Loc == cur.Loc {
+					return false
+				}
+			}
+			v.Buf.cursors = append(v.Buf.cursors, c)
+			v.Buf.UpdateCursors()
+			v.Relocate()
+			v.Cursor = spawner
+		}
+
+		if usePlugin {
+			PostActionCall("SpawnMultiCursor", v)
+		}
+	}
+
+	return false
+}
+
+// MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
+func (v *View) MouseMultiCursor(usePlugin bool, e *tcell.EventMouse) bool {
+	if v.Cursor == &v.Buf.Cursor {
+		if usePlugin && !PreActionCall("SpawnMultiCursorAtMouse", v, e) {
+			return false
+		}
+		x, y := e.Position()
+		x -= v.lineNumOffset - v.leftCol + v.x
+		y += v.Topline - v.y
+
+		c := &Cursor{
+			buf: v.Buf,
+		}
+		v.Cursor = c
+		v.MoveToMouseClick(x, y)
+		v.Relocate()
+		v.Cursor = &v.Buf.Cursor
+
+		v.Buf.cursors = append(v.Buf.cursors, c)
+		v.Buf.UpdateCursors()
+
+		if usePlugin {
+			PostActionCall("SpawnMultiCursorAtMouse", v)
+		}
+	}
+	return false
+}
+
+// SkipMultiCursor moves the current multiple cursor to the next available position
+func (v *View) SkipMultiCursor(usePlugin bool) bool {
+	cursor := v.Buf.cursors[len(v.Buf.cursors)-1]
+
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("SkipMultiCursor", v) {
+			return false
+		}
+		sel := cursor.GetSelection()
+
+		searchStart = ToCharPos(cursor.CurSelection[1], v.Buf)
+		v.Cursor = cursor
+		Search(sel, v, true)
+		v.Relocate()
+		v.Cursor = cursor
+
+		if usePlugin {
+			PostActionCall("SkipMultiCursor", v)
+		}
+	}
+	return false
+}
+
+// RemoveMultiCursor removes the latest multiple cursor
+func (v *View) RemoveMultiCursor(usePlugin bool) bool {
+	end := len(v.Buf.cursors)
+	if end > 1 {
+		if v.mainCursor() {
+			if usePlugin && !PreActionCall("RemoveMultiCursor", v) {
+				return false
+			}
+
+			v.Buf.cursors[end-1] = nil
+			v.Buf.cursors = v.Buf.cursors[:end-1]
+			v.Buf.UpdateCursors()
+			v.Relocate()
+
+			if usePlugin {
+				return PostActionCall("RemoveMultiCursor", v)
+			}
+			return true
+		}
+	} else {
+		v.RemoveAllMultiCursors(usePlugin)
+	}
+	return false
+}
+
+// RemoveAllMultiCursors removes all cursors except the base cursor
+func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("RemoveAllMultiCursors", v) {
+			return false
+		}
+
+		for i := 1; i < len(v.Buf.cursors); i++ {
+			v.Buf.cursors[i] = nil
+		}
+		v.Buf.cursors = v.Buf.cursors[:1]
+		v.Buf.UpdateCursors()
+		v.Cursor.ResetSelection()
+		v.Relocate()
+
+		if usePlugin {
+			return PostActionCall("RemoveAllMultiCursors", v)
+		}
+		return true
+	}
+	return false
+}
 // None is no action
 func None() bool {
 	return false

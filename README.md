@@ -23,6 +23,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 
 * Easy to use and to install
 * No dependencies or external files are needed -- just the binary you can download further down the page
+* Multiple cursors
 * Common keybindings (ctrl-s, ctrl-c, ctrl-v, ctrl-z...)
     * Keybindings can be rebound to your liking
 * Sane defaults
@@ -94,12 +95,14 @@ If your operating system does not have a binary release, but does run Go, you ca
 Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommand setting it to `~/go` if you don't have one).
 
 ```
-go get -d github.com/zyedidia/micro/...
+go get -d github.com/zyedidia/micro/cmd/micro
 cd $GOPATH/src/github.com/zyedidia/micro
 make install
 ```
 
 The binary will then be installed to `$GOPATH/bin` (or your `$GOBIN`).
+
+Please make sure that when you are working with micro's code, you are working on your `GOPATH`.
 
 You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
 

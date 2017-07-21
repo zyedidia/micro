@@ -92,6 +92,10 @@ function split(str, sep)
 end
 
 function basename(file)
-    local name = string.gsub(file, "(.*/)(.*)", "%2")
+    local sep = "/"
+    if OS == "windows" then
+        sep = "\\"
+    end
+    local name = string.gsub(file, "(.*" .. sep .. ")(.*)", "%2")
     return name
 end

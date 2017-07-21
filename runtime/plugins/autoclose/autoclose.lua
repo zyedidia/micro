@@ -1085,6 +1085,7 @@ function onRune(r, v)
                 -- when converting go structs to lua
                 -- It needs to be dereferenced because the function expects a non pointer struct
                 v.Buf:Insert(-v.Cursor.Loc, charAt(autoclosePairs[i], 2))
+                v:CursorLeft(false)
                 break
             end
         end
@@ -1107,6 +1108,7 @@ function preInsertNewline(v)
                 v:InsertNewline(false)
                 v:InsertTab(false)
                 v.Buf:Insert(-v.Cursor.Loc, "\n" .. ws)
+                v:CursorLeft(false)
                 return false
             end
         end

@@ -78,9 +78,6 @@ rules:
     # Shebang Line
     - comment.shebang: ^(#!).*
 
-    # Todo
-    - todo: "(TODO|XXX|FIXME):?"
-
     # Doc Comment
     - comment.doc: (///).*
     
@@ -100,3 +97,6 @@ rules:
         end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
+
+    # Todo
+    - todo: "(TODO|XXX|FIXME):?"
