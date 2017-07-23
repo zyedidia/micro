@@ -1,5 +1,21 @@
 .PHONY: runtime
 
+# detect GOPATH if not set
+ifndef $(GOPATH)
+    $(info GOPATH is not set, autodetecting..)
+    TESTPATH := $(dir $(abspath ../../..))
+    DIRS := bin pkg src
+    # create a ; separated line of tests and pass it to shell
+    MISSING_DIRS := $(shell $(foreach entry,$(DIRS),test -d "$(TESTPATH)$(entry)" || echo "$(entry)";))
+    ifeq ($(MISSING_DIRS),)
+        $(info Found GOPATH: $(TESTPATH))
+        export GOPATH := $(TESTPATH)
+    else
+        $(info ..missing dirs "$(MISSING_DIRS)" in "$(TESTDIR)")
+        $(info GOPATH autodetection failed)
+    endif
+endif
+
 VERSION := $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/build-version.go)
 HASH := $(shell git rev-parse --short HEAD)
