@@ -877,11 +877,12 @@ func (v *View) Save(usePlugin bool) bool {
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
 func (v *View) saveToFile(filename string) {
-	if Encrypted(filename) && v.Buf.Password == "" {
+	if Encrypted(filename) && v.Buf.Password == "" && !v.Buf.PasswordPrompted {
 		password, canceled := messenger.PasswordPrompt(true)
 		if !canceled {
 			v.Buf.Password = password
 		}
+		v.Buf.PasswordPrompted = true
 	}
 	err := v.Buf.SaveAs(filename)
 	if err != nil {

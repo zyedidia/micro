@@ -58,7 +58,8 @@ type Buffer struct {
 	// Buffer local settings
 	Settings map[string]interface{}
 
-	Password string
+	Password         string
+	PasswordPrompted bool
 }
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -71,25 +72,19 @@ type SerializedBuffer struct {
 
 // NewBufferFromString creates a new buffer from a given string with a given path
 func NewBufferFromString(text, path string) *Buffer {
-	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, "")
+	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, "", false)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
 func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
-	return NewBufferWithPassword(reader, size, path, "")
+	return NewBufferWithPassword(reader, size, path, "", false)
 }
 
 // NewBufferWithPassword creates a new buffer from a given reader with a given path
 // and password
-func NewBufferWithPassword(reader io.Reader, size int64, path, password string) *Buffer {
-	if path != "" {
-		for _, tab := range tabs {
-			for _, view := range tab.views {
-				if view.Buf.Path == path {
-					return view.Buf
-				}
-			}
-		}
+func NewBufferWithPassword(reader io.Reader, size int64, path, password string, passwordPrompted bool) *Buffer {
+	if buf := FindBuffer(path); buf != nil {
+		return buf
 	}
 
 	b := new(Buffer)
@@ -193,8 +188,26 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string) 
 	b.cursors = []*Cursor{&b.Cursor}
 
 	b.Password = password
+	b.PasswordPrompted = passwordPrompted
 
 	return b
+}
+
+// FindBuffer finds an exsiting buffer
+func FindBuffer(path string) *Buffer {
+	if path == "" {
+		return nil
+	}
+
+	for _, tab := range tabs {
+		for _, view := range tab.views {
+			if view.Buf.Path == path {
+				return view.Buf
+			}
+		}
+	}
+
+	return nil
 }
 
 func (b *Buffer) GetName() string {

@@ -69,7 +69,7 @@ var (
 
 // LoadInput determines which files should be loaded into buffers
 // based on the input stored in flag.Args()
-func LoadInput(passwords []string) []*Buffer {
+func LoadInput(passwords []Password) []*Buffer {
 	// There are a number of ways micro should start given its input
 
 	// 1. If it is given a files in flag.Args(), it should open those
@@ -112,9 +112,10 @@ func LoadInput(passwords []string) []*Buffer {
 
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			if input != nil {
-				buffers = append(buffers, NewBufferWithPassword(input, FSize(input), filename, passwords[i]))
+				buffers = append(buffers, NewBufferWithPassword(input, FSize(input), filename,
+					passwords[i].Secret, passwords[i].Prompted))
 			} else {
-				buffers = append(buffers, NewBufferWithPassword(nil, 0, filename, ""))
+				buffers = append(buffers, NewBufferWithPassword(nil, 0, filename, "", false))
 			}
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {

@@ -44,9 +44,15 @@ func TermError(filename string, lineNum int, err string) {
 	TermMessage(filename + ", " + strconv.Itoa(lineNum) + ": " + err)
 }
 
+// Password a password
+type Password struct {
+	Secret   string
+	Prompted bool
+}
+
 // TermPasswords gets the passwords for the encrypted files
-func TermPasswords(filenames []string) []string {
-	passwords := make([]string, len(filenames))
+func TermPasswords(filenames []string) []Password {
+	passwords := make([]Password, len(filenames))
 
 	for i, filename := range filenames {
 		if !Encrypted(filename) {
@@ -64,7 +70,8 @@ func TermPasswords(filenames []string) []string {
 				fmt.Println(err)
 				continue
 			}
-			passwords[i] = string(password)
+			passwords[i].Secret = string(password)
+			passwords[i].Prompted = true
 			break
 		}
 	}

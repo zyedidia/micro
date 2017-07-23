@@ -318,64 +318,57 @@ func Help(args []string) {
 	}
 }
 
+func split(args []string, splitFunc func(buf *Buffer)) {
+	if len(args) == 0 {
+		splitFunc(NewBufferFromString("", ""))
+		return
+	}
+
+	filename := args[0]
+	if buf := FindBuffer(filename); buf != nil {
+		splitFunc(buf)
+		return
+	}
+
+	home, _ := homedir.Dir()
+	filename = strings.Replace(filename, "~", home, 1)
+	file, err := os.Open(filename)
+	fileInfo, _ := os.Stat(filename)
+
+	if err == nil && fileInfo.IsDir() {
+		messenger.Error(filename, " is a directory")
+		return
+	}
+
+	defer file.Close()
+
+	if err != nil {
+		// File does not exist -- create an empty buffer with that name
+		splitFunc(NewBufferFromString("", filename))
+		return
+	}
+
+	password, passwordPrompted := "", false
+	if Encrypted(filename) {
+		pass, canceled := messenger.PasswordPrompt(false)
+		if !canceled {
+			password = pass
+		}
+		passwordPrompted = true
+	}
+	splitFunc(NewBufferWithPassword(file, FSize(file), filename, password, passwordPrompted))
+}
+
 // VSplit opens a vertical split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
 func VSplit(args []string) {
-	if len(args) == 0 {
-		CurView().VSplit(NewBufferFromString("", ""))
-	} else {
-		filename := args[0]
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
-		file, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
-
-		if err == nil && fileInfo.IsDir() {
-			messenger.Error(filename, " is a directory")
-			return
-		}
-
-		defer file.Close()
-
-		var buf *Buffer
-		if err != nil {
-			// File does not exist -- create an empty buffer with that name
-			buf = NewBufferFromString("", filename)
-		} else {
-			buf = NewBuffer(file, FSize(file), filename)
-		}
-		CurView().VSplit(buf)
-	}
+	split(args, CurView().VSplit)
 }
 
 // HSplit opens a horizontal split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
 func HSplit(args []string) {
-	if len(args) == 0 {
-		CurView().HSplit(NewBufferFromString("", ""))
-	} else {
-		filename := args[0]
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
-		file, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
-
-		if err == nil && fileInfo.IsDir() {
-			messenger.Error(filename, " is a directory")
-			return
-		}
-
-		defer file.Close()
-
-		var buf *Buffer
-		if err != nil {
-			// File does not exist -- create an empty buffer with that name
-			buf = NewBufferFromString("", filename)
-		} else {
-			buf = NewBuffer(file, FSize(file), filename)
-		}
-		CurView().HSplit(buf)
-	}
+	split(args, CurView().HSplit)
 }
 
 // Eval evaluates a lua expression
@@ -412,7 +405,16 @@ func NewTab(args []string) {
 		if err != nil {
 			buf = NewBufferFromString("", filename)
 		} else {
-			buf = NewBuffer(file, FSize(file), filename)
+			password, passwordPrompted := "", false
+			if Encrypted(filename) {
+				pass, canceled := messenger.PasswordPrompt(false)
+				if !canceled {
+					password = pass
+				}
+				passwordPrompted = true
+			}
+
+			buf = NewBufferWithPassword(file, FSize(file), filename, password, passwordPrompted)
 		}
 
 		tab := NewTabFromView(NewView(buf))
