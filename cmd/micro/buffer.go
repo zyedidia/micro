@@ -208,7 +208,7 @@ func (b *Buffer) UpdateRules() {
 			}
 
 			ft := b.Settings["filetype"].(string)
-			if ft == "Unknown" || ft == "" {
+			if (ft == "Unknown" || ft == "") && !rehighlight {
 				if highlight.MatchFiletype(ftdetect, b.Path, b.lines[0].data) {
 					header := new(highlight.Header)
 					header.FileType = file.FileType
@@ -221,7 +221,7 @@ func (b *Buffer) UpdateRules() {
 					rehighlight = true
 				}
 			} else {
-				if file.FileType == ft {
+				if file.FileType == ft && !rehighlight {
 					header := new(highlight.Header)
 					header.FileType = file.FileType
 					header.FtDetect = ftdetect
