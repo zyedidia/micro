@@ -24,7 +24,7 @@ parts:
       export GOPATH=$(pwd)/../go
       export GOBIN=$(pwd)/../go/bin
       cd ../go/src/github.com/zyedidia/micro
-      make  install
+      make install
     install: |
       mkdir $SNAPCRAFT_PART_INSTALL/bin
       mv ../go/bin/micro $SNAPCRAFT_PART_INSTALL/bin/
