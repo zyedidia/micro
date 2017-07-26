@@ -14,6 +14,7 @@ apps:
 parts:
   micro:
     source: .
+    source-type: git
     plugin: nil
     build-packages: [golang-go, make]
     prepare: |
@@ -23,7 +24,6 @@ parts:
       export GOPATH=$(pwd)/../go
       export GOBIN=$(pwd)/../go/bin
       cd ../go/src/github.com/zyedidia/micro
-      go get -d ./cmd/micro
       make  install
     install: |
       mkdir $SNAPCRAFT_PART_INSTALL/bin
