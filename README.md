@@ -85,7 +85,7 @@ choco install micro
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
 ```
-snap install micro --beta
+snap install micro --edge --classic
 ```
 
 ### Building from source
