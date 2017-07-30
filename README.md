@@ -76,10 +76,12 @@ You can install micro using Homebrew on Mac:
 brew install micro
 ```
 
-On Windows, you can install micro through Chocolatey:
+On Windows, you can install micro through [Chocolatey](https://chocolatey.org/) or [Scoop](https://github.com/lukesampson/scoop):
 
 ```
 choco install micro
+or
+scoop install micro
 ```
 
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
