@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -1479,7 +1480,8 @@ func (v *View) JumpLine(usePlugin bool) bool {
 	}
 
 	// Prompt for line number
-	linestring, canceled := messenger.Prompt("Jump to line # ", "", "LineNumber", NoCompletion)
+	message := fmt.Sprintf("Jump to line (1 - %v) # ", v.Buf.NumLines)
+	linestring, canceled := messenger.Prompt(message, "", "LineNumber", NoCompletion)
 	if canceled {
 		return false
 	}
