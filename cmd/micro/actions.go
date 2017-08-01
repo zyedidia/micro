@@ -1963,6 +1963,7 @@ func (v *View) MouseMultiCursor(usePlugin bool, e *tcell.EventMouse) bool {
 		v.Cursor = &v.Buf.Cursor
 
 		v.Buf.cursors = append(v.Buf.cursors, c)
+		v.Buf.MergeCursors()
 		v.Buf.UpdateCursors()
 
 		if usePlugin {
