@@ -1,4 +1,4 @@
-// +build !linux
+// +build android plan9 nacl windows
 
 package main
 
