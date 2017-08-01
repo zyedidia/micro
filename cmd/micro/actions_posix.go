@@ -1,3 +1,4 @@
+// +build linux darwin dragonfly solaris openbsd netbsd freebsd
 package main
 
 import "syscall"
@@ -19,8 +20,7 @@ func (v *View) Suspend(usePlugin bool) bool {
 
 	// suspend the process
 	pid := syscall.Getpid()
-	tid := syscall.Gettid()
-	err := syscall.Tgkill(pid, tid, syscall.SIGSTOP)
+	err := syscall.Kill(pid, syscall.SIGSTOP)
 	if err != nil {
 		TermMessage(err)
 	}
