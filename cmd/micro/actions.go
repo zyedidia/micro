@@ -249,7 +249,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
+		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
 		v.Cursor.StoreVisualX()
 	} else {
