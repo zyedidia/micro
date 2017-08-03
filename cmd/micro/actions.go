@@ -1148,12 +1148,16 @@ func (v *View) MoveLinesUp(usePlugin bool) bool {
 			messenger.Message("Can not move further up")
 			return true
 		}
+		start := v.Cursor.CurSelection[0].Y
+		end := v.Cursor.CurSelection[1].Y
+		if start > end {
+			end, start = start, end
+		}
+
 		v.Buf.MoveLinesUp(
-			v.Cursor.CurSelection[0].Y,
-			v.Cursor.CurSelection[1].Y,
+			start,
+			end,
 		)
-		v.Cursor.UpN(1)
-		v.Cursor.CurSelection[0].Y -= 1
 		v.Cursor.CurSelection[1].Y -= 1
 		messenger.Message("Moved up selected line(s)")
 	} else {
@@ -1186,13 +1190,16 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 			messenger.Message("Can not move further down")
 			return true
 		}
+		start := v.Cursor.CurSelection[0].Y
+		end := v.Cursor.CurSelection[1].Y
+		if start > end {
+			end, start = start, end
+		}
+
 		v.Buf.MoveLinesDown(
-			v.Cursor.CurSelection[0].Y,
-			v.Cursor.CurSelection[1].Y,
+			start,
+			end,
 		)
-		v.Cursor.DownN(1)
-		v.Cursor.CurSelection[0].Y += 1
-		v.Cursor.CurSelection[1].Y += 1
 		messenger.Message("Moved down selected line(s)")
 	} else {
 		if v.Cursor.Loc.Y >= len(v.Buf.lines)-1 {
