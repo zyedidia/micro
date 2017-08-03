@@ -1165,7 +1165,6 @@ func (v *View) MoveLinesUp(usePlugin bool) bool {
 			v.Cursor.Loc.Y,
 			v.Cursor.Loc.Y+1,
 		)
-		v.Cursor.UpN(1)
 		messenger.Message("Moved up current line")
 	}
 	v.Buf.IsModified = true
@@ -1204,7 +1203,6 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 			v.Cursor.Loc.Y,
 			v.Cursor.Loc.Y+1,
 		)
-		v.Cursor.DownN(1)
 		messenger.Message("Moved down current line")
 	}
 	v.Buf.IsModified = true
