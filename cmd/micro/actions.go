@@ -347,7 +347,7 @@ func (v *View) SelectLeft(usePlugin bool) bool {
 	}
 
 	loc := v.Cursor.Loc
-	count := v.Buf.End().Move(-1, v.Buf)
+	count := v.Buf.End().Move(0, v.Buf)
 	if loc.GreaterThan(count) {
 		loc = count
 	}
