@@ -255,9 +255,10 @@ func (c *Cursor) UpN(amount int) {
 		proposedY = c.buf.NumLines - 1
 	}
 
-	// last line: X moved after the last character
-	if proposedY == c.Y {
-		runes := []rune(c.buf.Line(c.Y))
+	runes := []rune(c.buf.Line(c.Y))
+	c.X = c.GetCharPosInLine(proposedY, c.LastVisualX)
+
+	if c.X > len(runes) || proposedY == c.Y {
 		c.X = len(runes)
 	}
 
