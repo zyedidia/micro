@@ -370,7 +370,7 @@ func (v *View) SelectRight(usePlugin bool) bool {
 	}
 
 	loc := v.Cursor.Loc
-	count := v.Buf.End().Move(-1, v.Buf)
+	count := v.Buf.End()
 	if loc.GreaterThan(count) {
 		loc = count
 	}
