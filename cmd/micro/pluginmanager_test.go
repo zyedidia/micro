@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/blang/semver"
 	"testing"
 
-	"github.com/zyedidia/json5/encoding/json5"
+	"github.com/blang/semver"
+
+	"github.com/flynn/json5"
 )
 
 func TestDependencyResolving(t *testing.T) {

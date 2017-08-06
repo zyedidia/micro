@@ -31,9 +31,6 @@
 [submodule "cmd/micro/vendor/github.com/zyedidia/glob"]
 	path = cmd/micro/vendor/github.com/zyedidia/glob
 	url = https://github.com/zyedidia/glob
-[submodule "cmd/micro/vendor/github.com/zyedidia/json5"]
-	path = cmd/micro/vendor/github.com/zyedidia/json5
-	url = https://github.com/zyedidia/json5
 [submodule "cmd/micro/vendor/github.com/zyedidia/tcell"]
 	path = cmd/micro/vendor/github.com/zyedidia/tcell
 	url = https://github.com/zyedidia/tcell
@@ -55,3 +52,6 @@
 [submodule "cmd/micro/vendor/github.com/zyedidia/poller"]
 	path = cmd/micro/vendor/github.com/zyedidia/poller
 	url = https://github.com/zyedidia/poller
+[submodule "cmd/micro/vendor/github.com/flynn/json5"]
+	path = cmd/micro/vendor/github.com/flynn/json5
+	url = https://github.com/flynn/json5
