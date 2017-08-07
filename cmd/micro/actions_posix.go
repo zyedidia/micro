@@ -1,4 +1,5 @@
 // +build linux darwin dragonfly solaris openbsd netbsd freebsd
+
 package main
 
 import "syscall"
