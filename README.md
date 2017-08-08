@@ -80,7 +80,11 @@ On Windows, you can install micro through [Chocolatey](https://chocolatey.org/) 
 
 ```
 choco install micro
+```
+
 or
+
+```
 scoop install micro
 ```
 
