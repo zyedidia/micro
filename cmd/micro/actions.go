@@ -1903,7 +1903,7 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 	return true
 }
 
-// SpawnMultiCursor creates a new multiple cursor at the next occurence of the current selection or current word
+// SpawnMultiCursor creates a new multiple cursor at the next occurrence of the current selection or current word
 func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	spawner := v.Buf.cursors[len(v.Buf.cursors)-1]
 	// You can only spawn a cursor from the main cursor

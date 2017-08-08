@@ -240,7 +240,6 @@ func (b *Buffer) UpdateRules() {
 	if b.syntaxDef != nil {
 		highlight.ResolveIncludes(b.syntaxDef, files)
 	}
-	files = nil
 
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {

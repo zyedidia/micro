@@ -7,9 +7,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
-	"github.com/mattn/go-runewidth"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before

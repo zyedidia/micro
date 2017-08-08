@@ -99,7 +99,7 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 	e := &TextEvent{
 		C:         *eh.buf.cursors[eh.buf.curCursor],
 		EventType: TextEventInsert,
-		Deltas:    []Delta{Delta{text, start, Loc{0, 0}}},
+		Deltas:    []Delta{{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
@@ -129,7 +129,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 	e := &TextEvent{
 		C:         *eh.buf.cursors[eh.buf.curCursor],
 		EventType: TextEventRemove,
-		Deltas:    []Delta{Delta{"", start, end}},
+		Deltas:    []Delta{{"", start, end}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
