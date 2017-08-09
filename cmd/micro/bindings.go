@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/zyedidia/json5/encoding/json5"
+	"github.com/flynn/json5"
 	"github.com/zyedidia/tcell"
 )
 

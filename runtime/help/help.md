@@ -15,9 +15,9 @@ and you can see which commands are available by pressing tab, or by
 viewing the help topic `> help commands`. When I write `> ...` I mean press
 CtrlE and then type whatever is there. 
 
-Move the cursor around with the mouse or the arrow keys. Type `>help defaultkeys` to 
+Move the cursor around with the mouse or the arrow keys. Type `> help defaultkeys` to 
 get a quick, easy overview of the default hotkeys and what they do. For more info
-on rebinding keys, see type `>help keybindings`
+on rebinding keys, see type `> help keybindings`
 
 If the colorscheme doesn't look good, you can change it with `> set colorscheme ...`.
 You can press tab to see the available colorschemes, or see more information with

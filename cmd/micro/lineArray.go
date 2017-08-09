@@ -92,7 +92,7 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 
 		if err != nil {
 			if err == io.EOF {
-				la.lines = Append(la.lines, Line{data[:len(data)], nil, nil, false})
+				la.lines = Append(la.lines, Line{data[:], nil, nil, false})
 				// la.lines = Append(la.lines, Line{data[:len(data)]})
 			}
 			// Last line was read

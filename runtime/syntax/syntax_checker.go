@@ -15,16 +15,24 @@ func main() {
 	for _, f := range files {
 		if strings.HasSuffix(f.Name(), ".yaml") {
 			input, _ := ioutil.ReadFile(f.Name())
-			_, err := highlight.ParseDef(input)
+			//fmt.Println("Checking file -> ", f.Name())
+			file, err := highlight.ParseFile(input)
 			if err != nil {
 				hadErr = true
-				fmt.Printf("%s:\n", f.Name())
+				fmt.Printf("Could not parse file -> %s:\n", f.Name())
 				fmt.Println(err)
+				continue
+			}
+			_, err1 := highlight.ParseDef(file, nil)
+			if err1 != nil {
+				hadErr = true
+				fmt.Printf("Could not parse input file using highlight.ParseDef(%s):\n", f.Name())
+				fmt.Println(err1)
 				continue
 			}
 		}
 	}
 	if !hadErr {
-		fmt.Println("No issues!")
+		fmt.Println("No issues found!")
 	}
 }

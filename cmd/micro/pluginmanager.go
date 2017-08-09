@@ -14,8 +14,8 @@ import (
 	"sync"
 
 	"github.com/blang/semver"
+	"github.com/flynn/json5"
 	"github.com/yuin/gopher-lua"
-	"github.com/zyedidia/json5/encoding/json5"
 )
 
 var (

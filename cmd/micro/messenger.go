@@ -10,6 +10,7 @@ import (
 
 	"golang.org/x/crypto/ssh/terminal"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 )
@@ -549,8 +550,10 @@ func (m *Messenger) Display() {
 	if m.hasMessage {
 		if m.hasPrompt || globalSettings["infobar"].(bool) {
 			runes := []rune(m.message + m.response)
+			posx := 0
 			for x := 0; x < len(runes); x++ {
-				screen.SetContent(x, h-1, runes[x], nil, m.style)
+				screen.SetContent(posx, h-1, runes[x], nil, m.style)
+				posx += runewidth.RuneWidth(runes[x])
 			}
 		}
 	}

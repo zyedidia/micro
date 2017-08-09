@@ -4,7 +4,7 @@ detect:
     filename: "\\.vala$"
 
 rules:
-    - type: "\\b(float|double|bool|char|int|uint|short|long|void|(un)?signed)\\b"
+    - type: "\\b(float|double|bool|u?char|u?int(8|16|32|64)?|u?short|u?long|void|s?size_t|unichar)\\b"
     - identifier.class: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[()]"
     - statement: "\\b(for|if|while|do|else|case|default|switch|try|throw|catch)\\b"
     - statement: "\\b(inline|typedef|struct|enum|union|extern|static|const)\\b"

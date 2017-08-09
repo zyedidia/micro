@@ -34,7 +34,7 @@ install-quick:
 
 update:
 	git pull
-	git submodule update
+	git submodule update --init
 
 # Builds the runtime
 runtime:

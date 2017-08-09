@@ -249,20 +249,20 @@ func (c *Cursor) RuneUnder(x int) rune {
 func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount
 	if proposedY < 0 {
-		proposedY = 0
+		c.X = 0 // first line: X moved before the first character
+		return
 	} else if proposedY >= c.buf.NumLines {
 		proposedY = c.buf.NumLines - 1
 	}
-	if proposedY == c.Y {
-		return
+
+	runes := []rune(c.buf.Line(c.Y))
+	c.X = c.GetCharPosInLine(proposedY, c.LastVisualX)
+
+	if c.X > len(runes) || proposedY == c.Y {
+		c.X = len(runes)
 	}
 
 	c.Y = proposedY
-	runes := []rune(c.buf.Line(c.Y))
-	c.X = c.GetCharPosInLine(c.Y, c.LastVisualX)
-	if c.X > len(runes) {
-		c.X = len(runes)
-	}
 }
 
 // DownN moves the cursor down N lines (if possible)
@@ -348,6 +348,11 @@ func (c *Cursor) GetVisualX() int {
 	}
 
 	return StringWidth(string(runes[:c.X]), tabSize)
+}
+
+// StoreVisualX stores the current visual x value in the cursor
+func (c *Cursor) StoreVisualX() {
+	c.LastVisualX = c.GetVisualX()
 }
 
 // Relocate makes sure that the cursor is inside the bounds of the buffer

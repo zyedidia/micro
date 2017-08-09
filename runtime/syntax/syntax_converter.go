@@ -105,11 +105,9 @@ func parseFile(text, filename string) (filetype, syntax, header string, rules []
 			var start string
 			var end string
 			// Use m and s flags by default
-			flags := "ms"
 			if len(submatch) == 5 {
 				// If len is 5 the user provided some additional flags
 				color = string(submatch[1])
-				flags += string(submatch[2])
 				start = string(submatch[3])
 				end = string(submatch[4])
 			} else if len(submatch) == 4 {
