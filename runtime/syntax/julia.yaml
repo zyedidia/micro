@@ -1,0 +1,53 @@
+filetype: julia
+
+detect:
+    filename: "\\.jl$"
+    header: "^#!.*/(env +)?julia( |$)"
+
+rules:
+
+    # built-in objects
+    - constant.bool: "\\b(true|false)\\b"
+      # built-in attributes
+    - constant: "__[A-Za-z0-9_]+__"
+      # definitions
+    - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
+      # keywords
+    - statement: "\\b(begin|break|catch|continue|function|elseif|else|end|finally|for|global|local|if|include|using|require|macro|println|return|try|type|while|module)\\b"
+      # decorators
+    - identifier.macro: "@[A-Za-z0-9_]+"
+      # operators
+    - symbol.operator: "[-+*/|=%<>&~^]|\\b(and|not|or|is|in)\\b"
+      # parentheses
+    - symbol.brackets: "([(){}]|\\[|\\])"
+      # numbers
+    - constant.number: "\\b[0-9]+\\b"
+
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules: []
+
+    - constant.string:
+        start: "'''"
+        end: "'''"
+        rules: []
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
