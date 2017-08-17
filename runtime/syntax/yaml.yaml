@@ -15,16 +15,16 @@ rules:
     - special:  "(^---|^\\.\\.\\.|^%YAML|^%TAG)"
 
     - constant.string:
-        start: "\""
+        start: "(^| )\""
         end: "\""
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
 
     - constant.string:
-        start: "'"
+        start: "(^| )'"
         end: "'"
-        skip: "\\\\."
+        skip: "(\\\\.)|('')"
         rules:
             - constant.specialChar: "\\\\."
 
