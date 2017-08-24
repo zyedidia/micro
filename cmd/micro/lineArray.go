@@ -71,11 +71,15 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 	n := 0
 	for {
 		data, err := br.ReadBytes('\n')
-		if len(data) > 0 && data[len(data)-2] == '\r' {
+		if len(data) > 1 && data[len(data)-2] == '\r' {
 			data = append(data[:len(data)-2], '\n')
-			fileformat = 2
+			if fileformat == 0 {
+				fileformat = 2
+			}
 		} else if len(data) > 0 {
-			fileformat = 1
+			if fileformat == 0 {
+				fileformat = 1
+			}
 		}
 
 		if n >= 1000 && loaded >= 0 {
