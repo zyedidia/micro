@@ -249,7 +249,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
+		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
 		v.Cursor.StoreVisualX()
 	} else {
@@ -347,7 +347,7 @@ func (v *View) SelectLeft(usePlugin bool) bool {
 	}
 
 	loc := v.Cursor.Loc
-	count := v.Buf.End().Move(-1, v.Buf)
+	count := v.Buf.End()
 	if loc.GreaterThan(count) {
 		loc = count
 	}
@@ -370,7 +370,7 @@ func (v *View) SelectRight(usePlugin bool) bool {
 	}
 
 	loc := v.Cursor.Loc
-	count := v.Buf.End().Move(-1, v.Buf)
+	count := v.Buf.End()
 	if loc.GreaterThan(count) {
 		loc = count
 	}
