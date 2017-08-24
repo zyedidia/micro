@@ -173,6 +173,13 @@ Default plugin options:
 
 	default value: `on`
 
+* `fileformat`: this determines what kind of line endings micro will use for the file. Unix line endings
+   are just `\n` (lf) whereas dos line endings are `\r\n` (crlf). The two possible values for this option
+   are `unix` and `dos`. The fileformat will be automatically detected and displayed on the statusline but
+   this option is useful if you would like to change the line endings or if you are starting a new file.
+
+    default value: `unix`
+
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another

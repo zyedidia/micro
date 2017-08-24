@@ -27,6 +27,7 @@ var optionValidators = map[string]optionValidator{
 	"scrollspeed":  validateNonNegativeValue,
 	"colorscheme":  validateColorscheme,
 	"colorcolumn":  validateNonNegativeValue,
+	"fileformat":   validateLineEnding,
 }
 
 // InitGlobalSettings initializes the options map and sets all options to their default values
@@ -220,6 +221,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		},
 		"pluginrepos": []string{},
 		"useprimary":  true,
+		"fileformat":  "unix",
 	}
 }
 
@@ -251,6 +253,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
+		"fileformat":     "unix",
 	}
 }
 
@@ -365,6 +368,10 @@ func SetLocalOption(option, value string, view *View) error {
 		buf.UpdateRules()
 	}
 
+	if option == "fileformat" {
+		buf.IsModified = true
+	}
+
 	if option == "syntax" {
 		if !nativeValue.(bool) {
 			buf.ClearMatches()
@@ -441,6 +448,20 @@ func validateColorscheme(option string, value interface{}) error {
 
 	if !ColorschemeExists(colorscheme) {
 		return errors.New(colorscheme + " is not a valid colorscheme")
+	}
+
+	return nil
+}
+
+func validateLineEnding(option string, value interface{}) error {
+	endingType, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for file format")
+	}
+
+	if endingType != "unix" && endingType != "dos" {
+		return errors.New("File format must be either 'unix' or 'dos'")
 	}
 
 	return nil
