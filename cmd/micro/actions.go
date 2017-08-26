@@ -62,54 +62,71 @@ func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
 		return false
 	}
 
-	x, y := e.Position()
-	x -= v.lineNumOffset - v.leftCol + v.x
-	y += v.Topline - v.y
+	rawX, rawY := e.Position()
+
+	x := rawX - v.lineNumOffset - v.leftCol + v.x
+	y := rawY + v.Topline - v.y
 
 	// This is usually bound to left click
-	v.MoveToMouseClick(x, y)
+	if !(rawX == v.x+v.Width || rawY == v.y+v.Height || v.resizeX || v.resizeY) {
+		v.MoveToMouseClick(x, y)
+	}
 	if v.mouseReleased {
-		if len(v.Buf.cursors) > 1 {
-			for i := 1; i < len(v.Buf.cursors); i++ {
-				v.Buf.cursors[i] = nil
-			}
-			v.Buf.cursors = v.Buf.cursors[:1]
-			v.Buf.UpdateCursors()
-			v.Cursor.ResetSelection()
-			v.Relocate()
-		}
-		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
-			if v.doubleClick {
-				// Triple click
-				v.lastClickTime = time.Now()
-
-				v.tripleClick = true
-				v.doubleClick = false
-
-				v.Cursor.SelectLine()
-				v.Cursor.CopySelection("primary")
-			} else {
-				// Double click
-				v.lastClickTime = time.Now()
-
-				v.doubleClick = true
-				v.tripleClick = false
-
-				v.Cursor.SelectWord()
-				v.Cursor.CopySelection("primary")
-			}
+		if rawX == v.x+v.Width {
+			v.resizeX = true
+		} else if rawY == v.y+v.Height {
+			v.resizeY = true
 		} else {
-			v.doubleClick = false
-			v.tripleClick = false
-			v.lastClickTime = time.Now()
+			if len(v.Buf.cursors) > 1 {
+				for i := 1; i < len(v.Buf.cursors); i++ {
+					v.Buf.cursors[i] = nil
+				}
+				v.Buf.cursors = v.Buf.cursors[:1]
+				v.Buf.UpdateCursors()
+				v.Cursor.ResetSelection()
+				v.Relocate()
+			}
+			if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
+				if v.doubleClick {
+					// Triple click
+					v.lastClickTime = time.Now()
 
-			v.Cursor.OrigSelection[0] = v.Cursor.Loc
-			v.Cursor.CurSelection[0] = v.Cursor.Loc
-			v.Cursor.CurSelection[1] = v.Cursor.Loc
+					v.tripleClick = true
+					v.doubleClick = false
+
+					v.Cursor.SelectLine()
+					v.Cursor.CopySelection("primary")
+				} else {
+					// Double click
+					v.lastClickTime = time.Now()
+
+					v.doubleClick = true
+					v.tripleClick = false
+
+					v.Cursor.SelectWord()
+					v.Cursor.CopySelection("primary")
+				}
+			} else {
+				v.doubleClick = false
+				v.tripleClick = false
+				v.lastClickTime = time.Now()
+
+				v.Cursor.OrigSelection[0] = v.Cursor.Loc
+				v.Cursor.CurSelection[0] = v.Cursor.Loc
+				v.Cursor.CurSelection[1] = v.Cursor.Loc
+			}
 		}
 		v.mouseReleased = false
 	} else if !v.mouseReleased {
-		if v.tripleClick {
+		if v.resizeX {
+			v.Width = rawX - v.x
+			v.LockWidth = true
+			v.splitNode.parent.ResizeSplits()
+		} else if v.resizeY {
+			v.Height = rawY - v.y
+			v.LockHeight = true
+			v.splitNode.parent.ResizeSplits()
+		} else if v.tripleClick {
 			v.Cursor.AddLineToSelection()
 		} else if v.doubleClick {
 			v.Cursor.AddWordToSelection()

@@ -91,6 +91,9 @@ type View struct {
 	cellview *CellView
 
 	splitNode *LeafNode
+
+	resizeX bool
+	resizeY bool
 }
 
 // NewView returns a new fullscreen view
@@ -599,21 +602,26 @@ func (v *View) HandleEvent(event tcell.Event) {
 			// Mouse event with no click
 			if !v.mouseReleased {
 				// Mouse was just released
+				if v.resizeX || v.resizeY {
+					v.resizeX = false
+					v.resizeY = false
+				} else {
 
-				x, y := e.Position()
-				x -= v.lineNumOffset - v.leftCol + v.x
-				y += v.Topline - v.y
+					x, y := e.Position()
+					x -= v.lineNumOffset - v.leftCol + v.x
+					y += v.Topline - v.y
 
-				// Relocating here isn't really necessary because the cursor will
-				// be in the right place from the last mouse event
-				// However, if we are running in a terminal that doesn't support mouse motion
-				// events, this still allows the user to make selections, except only after they
-				// release the mouse
+					// Relocating here isn't really necessary because the cursor will
+					// be in the right place from the last mouse event
+					// However, if we are running in a terminal that doesn't support mouse motion
+					// events, this still allows the user to make selections, except only after they
+					// release the mouse
 
-				if !v.doubleClick && !v.tripleClick {
-					v.MoveToMouseClick(x, y)
-					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
-					v.Cursor.CopySelection("primary")
+					if !v.doubleClick && !v.tripleClick {
+						v.MoveToMouseClick(x, y)
+						v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+						v.Cursor.CopySelection("primary")
+					}
 				}
 				v.mouseReleased = true
 			}

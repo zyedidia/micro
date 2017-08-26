@@ -476,7 +476,7 @@ func main() {
 							// We loop through each view in the current tab and make sure the current view
 							// is the one being clicked in
 							for _, v := range tabs[curTab].views {
-								if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								if x > v.x && x <= v.x+v.Width && y > v.y && y <= v.y+v.Height {
 									tabs[curTab].CurView = v.Num
 								}
 							}

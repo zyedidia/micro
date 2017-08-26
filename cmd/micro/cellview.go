@@ -112,6 +112,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		// We'll either draw the length of the line, or the width of the screen
 		// whichever is smaller
 		lineLength := min(StringWidth(lineStr, tabsize), width)
+		if lineLength < 0 {
+			return
+		}
 		c.lines = append(c.lines, make([]*Char, lineLength))
 
 		wrap := false
@@ -133,38 +136,50 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			char := line[colN]
 
 			if viewCol >= 0 {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle, 1}
+				if viewCol < len(c.lines[viewLine]) {
+					c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle, 1}
+				}
 			}
 			if char == '\t' {
 				charWidth := tabsize - (viewCol+left)%tabsize
 				if viewCol >= 0 {
-					c.lines[viewLine][viewCol].drawChar = indentchar
-					c.lines[viewLine][viewCol].width = charWidth
+					if viewCol < len(c.lines[viewLine]) {
+						c.lines[viewLine][viewCol].drawChar = indentchar
+						c.lines[viewLine][viewCol].width = charWidth
+					}
 
 					indentStyle := curStyle
 					if group, ok := colorscheme["indent-char"]; ok {
 						indentStyle = group
 					}
 
-					c.lines[viewLine][viewCol].style = indentStyle
+					if viewCol < len(c.lines[viewLine]) {
+						c.lines[viewLine][viewCol].style = indentStyle
+					}
 				}
 
 				for i := 1; i < charWidth; i++ {
 					viewCol++
 					if viewCol >= 0 && viewCol < lineLength {
-						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
+						if viewCol < len(c.lines[viewLine]) {
+							c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
+						}
 					}
 				}
 				viewCol++
 			} else if runewidth.RuneWidth(char) > 1 {
 				charWidth := runewidth.RuneWidth(char)
 				if viewCol >= 0 {
-					c.lines[viewLine][viewCol].width = charWidth
+					if viewCol < len(c.lines[viewLine]) {
+						c.lines[viewLine][viewCol].width = charWidth
+					}
 				}
 				for i := 1; i < charWidth; i++ {
 					viewCol++
 					if viewCol >= 0 && viewCol < lineLength {
-						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
+						if viewCol < len(c.lines[viewLine]) {
+							c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
+						}
 					}
 				}
 				viewCol++
