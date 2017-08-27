@@ -59,6 +59,9 @@ var (
 	// Event channel
 	events   chan tcell.Event
 	autosave chan bool
+
+	// Read events on another thread or wait for a temporary read
+	lockPollEvent bool
 )
 
 // LoadInput determines which files should be loaded into buffers
@@ -419,8 +422,9 @@ func main() {
 	// Here is the event loop which runs in a separate thread
 	go func() {
 		for {
-			if screen != nil {
+			if screen != nil && !lockPollEvent {
 				events <- screen.PollEvent()
+				time.Sleep(1 * time.Millisecond)
 			}
 		}
 	}()

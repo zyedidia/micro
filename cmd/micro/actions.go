@@ -1852,6 +1852,68 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 	return false
 }
 
+func (v *View) WrapBracket(usePlugin bool) bool {
+	if v.Cursor.HasSelection() {
+		lockPollEvent = true
+		event := screen.PollEvent()
+		lockPollEvent = false
+
+		ev, ok := event.(*tcell.EventKey)
+		if !ok {
+			return false
+		}
+		if !strings.Contains("()[]{}\"'", string(ev.Rune())) {
+			return false
+		}
+		start := v.Cursor.CurSelection[0]
+		end := v.Cursor.CurSelection[1]
+		if start.Y != end.Y {
+			return false
+		}
+
+		close := map[string]string{
+			")":  ")",
+			"]":  "]",
+			"}":  "}",
+			"(":  ")",
+			"[":  "]",
+			"{":  "}",
+			"\"": "\"",
+			"'":  "'",
+		}
+
+		open := map[string]string{
+			")":  "(",
+			"]":  "[",
+			"}":  "{",
+			"(":  "(",
+			"[":  "[",
+			"{":  "{",
+			"\"": "\"",
+			"'":  "'",
+		}
+
+		if usePlugin && !PreActionCall("WrapBracket", v) {
+			return false
+		}
+		r := string(ev.Rune())
+		if start.GreaterThan(end) {
+			start, end = end, start
+			v.Buf.Insert(start, open[r])
+			v.Buf.Insert(end.Move(1, v.Buf), close[r])
+			v.Cursor.CurSelection[1] = start
+		} else {
+			v.Buf.Insert(start, open[r])
+			v.Buf.Insert(end.Move(1, v.Buf), close[r])
+			v.Cursor.CurSelection[0] = start
+		}
+		if usePlugin {
+			return PostActionCall("WrapBracket", v)
+		}
+	}
+	return false
+}
+
 var curMacro []interface{}
 var recordingMacro bool
 
