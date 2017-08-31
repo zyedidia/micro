@@ -215,6 +215,11 @@ var bindingKeys = map[string]tcell.Key{
 	"CtrlRightSq":    tcell.KeyCtrlRightSq,
 	"CtrlCarat":      tcell.KeyCtrlCarat,
 	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
+<<<<<<< HEAD
+=======
+//	"CtrlPageUp":     tcell.KeyCtrlPgUp,
+//	"CtrlPageDown":   tcell.KeyCtrlPgDn,
+>>>>>>> 10b9dfe4 (Yes)
 	"Tab":            tcell.KeyTab,
 	"Esc":            tcell.KeyEsc,
 	"Escape":         tcell.KeyEscape,
