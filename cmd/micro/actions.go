@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
 	"strings"
@@ -248,7 +249,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 	}
 
 	if v.Cursor.HasSelection() {
-		v.Cursor.Loc = v.Cursor.CurSelection[1].Move(-1, v.Buf)
+		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
 		v.Cursor.StoreVisualX()
 	} else {
@@ -346,7 +347,7 @@ func (v *View) SelectLeft(usePlugin bool) bool {
 	}
 
 	loc := v.Cursor.Loc
-	count := v.Buf.End().Move(-1, v.Buf)
+	count := v.Buf.End()
 	if loc.GreaterThan(count) {
 		loc = count
 	}
@@ -369,7 +370,7 @@ func (v *View) SelectRight(usePlugin bool) bool {
 	}
 
 	loc := v.Cursor.Loc
-	count := v.Buf.End().Move(-1, v.Buf)
+	count := v.Buf.End()
 	if loc.GreaterThan(count) {
 		loc = count
 	}
@@ -785,19 +786,12 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 
 		startY := start.Y
 		endY := end.Move(-1, v.Buf).Y
-		endX := end.Move(-1, v.Buf).X
 		for y := startY; y <= endY; y++ {
 			for x := 0; x < len(v.Buf.IndentString()); x++ {
 				if len(GetLeadingWhitespace(v.Buf.Line(y))) == 0 {
 					break
 				}
 				v.Buf.Remove(Loc{0, y}, Loc{1, y})
-				if y == startY && start.X > 0 {
-					v.Cursor.SetSelectionStart(start.Move(-1, v.Buf))
-				}
-				if y == endY {
-					v.Cursor.SetSelectionEnd(Loc{endX - x, endY})
-				}
 			}
 		}
 		v.Cursor.Relocate()
@@ -1154,12 +1148,16 @@ func (v *View) MoveLinesUp(usePlugin bool) bool {
 			messenger.Message("Can not move further up")
 			return true
 		}
+		start := v.Cursor.CurSelection[0].Y
+		end := v.Cursor.CurSelection[1].Y
+		if start > end {
+			end, start = start, end
+		}
+
 		v.Buf.MoveLinesUp(
-			v.Cursor.CurSelection[0].Y,
-			v.Cursor.CurSelection[1].Y,
+			start,
+			end,
 		)
-		v.Cursor.UpN(1)
-		v.Cursor.CurSelection[0].Y -= 1
 		v.Cursor.CurSelection[1].Y -= 1
 		messenger.Message("Moved up selected line(s)")
 	} else {
@@ -1171,7 +1169,6 @@ func (v *View) MoveLinesUp(usePlugin bool) bool {
 			v.Cursor.Loc.Y,
 			v.Cursor.Loc.Y+1,
 		)
-		v.Cursor.UpN(1)
 		messenger.Message("Moved up current line")
 	}
 	v.Buf.IsModified = true
@@ -1193,13 +1190,16 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 			messenger.Message("Can not move further down")
 			return true
 		}
+		start := v.Cursor.CurSelection[0].Y
+		end := v.Cursor.CurSelection[1].Y
+		if start > end {
+			end, start = start, end
+		}
+
 		v.Buf.MoveLinesDown(
-			v.Cursor.CurSelection[0].Y,
-			v.Cursor.CurSelection[1].Y,
+			start,
+			end,
 		)
-		v.Cursor.DownN(1)
-		v.Cursor.CurSelection[0].Y += 1
-		v.Cursor.CurSelection[1].Y += 1
 		messenger.Message("Moved down selected line(s)")
 	} else {
 		if v.Cursor.Loc.Y >= len(v.Buf.lines)-1 {
@@ -1210,7 +1210,6 @@ func (v *View) MoveLinesDown(usePlugin bool) bool {
 			v.Cursor.Loc.Y,
 			v.Cursor.Loc.Y+1,
 		)
-		v.Cursor.DownN(1)
 		messenger.Message("Moved down current line")
 	}
 	v.Buf.IsModified = true
@@ -1479,7 +1478,8 @@ func (v *View) JumpLine(usePlugin bool) bool {
 	}
 
 	// Prompt for line number
-	linestring, canceled := messenger.Prompt("Jump to line # ", "", "LineNumber", NoCompletion)
+	message := fmt.Sprintf("Jump to line (1 - %v) # ", v.Buf.NumLines)
+	linestring, canceled := messenger.Prompt(message, "", "LineNumber", NoCompletion)
 	if canceled {
 		return false
 	}
@@ -1984,6 +1984,7 @@ func (v *View) MouseMultiCursor(usePlugin bool, e *tcell.EventMouse) bool {
 		v.Cursor = &v.Buf.Cursor
 
 		v.Buf.cursors = append(v.Buf.cursors, c)
+		v.Buf.MergeCursors()
 		v.Buf.UpdateCursors()
 
 		if usePlugin {

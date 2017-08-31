@@ -19,6 +19,13 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
+var (
+	// 0 - no line type detected
+	// 1 - lf detected
+	// 2 - crlf detected
+	fileformat = 0
+)
+
 // Buffer stores the text for files that are loaded into the text editor
 // It uses a rope to efficiently store the string and contains some
 // simple functions for saving and wrapper functions for modifying the rope
@@ -86,6 +93,12 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 		if _, ok := b.Settings[k]; ok {
 			b.Settings[k] = v
 		}
+	}
+
+	if fileformat == 1 {
+		b.Settings["fileformat"] = "unix"
+	} else if fileformat == 2 {
+		b.Settings["fileformat"] = "dos"
 	}
 
 	absPath, _ := filepath.Abs(path)
@@ -208,7 +221,7 @@ func (b *Buffer) UpdateRules() {
 			}
 
 			ft := b.Settings["filetype"].(string)
-			if ft == "Unknown" || ft == "" {
+			if (ft == "Unknown" || ft == "") && !rehighlight {
 				if highlight.MatchFiletype(ftdetect, b.Path, b.lines[0].data) {
 					header := new(highlight.Header)
 					header.FileType = file.FileType
@@ -221,7 +234,7 @@ func (b *Buffer) UpdateRules() {
 					rehighlight = true
 				}
 			} else {
-				if file.FileType == ft {
+				if file.FileType == ft && !rehighlight {
 					header := new(highlight.Header)
 					header.FileType = file.FileType
 					header.FtDetect = ftdetect
@@ -240,7 +253,6 @@ func (b *Buffer) UpdateRules() {
 	if b.syntaxDef != nil {
 		highlight.ResolveIncludes(b.syntaxDef, files)
 	}
-	files = nil
 
 	if b.highlighter == nil || rehighlight {
 		if b.syntaxDef != nil {
@@ -356,7 +368,7 @@ func (b *Buffer) Serialize() error {
 				b.ModTime,
 			})
 		}
-		file.Close()
+		err = file.Close()
 		return err
 	}
 	return nil
@@ -384,7 +396,7 @@ func (b *Buffer) SaveAs(filename string) error {
 			b.Insert(end, "\n")
 		}
 	}
-	str := b.String()
+	str := b.SaveString(b.Settings["fileformat"] == "dos")
 	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
@@ -409,7 +421,7 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 
 	// Set up everything for the command
 	cmd := exec.Command("sudo", "tee", filename)
-	cmd.Stdin = bytes.NewBufferString(b.String())
+	cmd.Stdin = bytes.NewBufferString(b.SaveString(b.Settings["fileformat"] == "dos"))
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro
 	// Instead we trap Ctrl-C to kill the program we're running

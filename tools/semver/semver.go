@@ -26,7 +26,7 @@ type Version struct {
 	Minor uint64
 	Patch uint64
 	Pre   []PRVersion
-	Build []string //No Precendence
+	Build []string //No Precedence
 }
 
 // Version to string

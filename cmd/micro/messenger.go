@@ -7,9 +7,9 @@ import (
 	"os"
 	"strconv"
 
+	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
-	"github.com/mattn/go-runewidth"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -70,9 +70,11 @@ type Messenger struct {
 	gutterMessage bool
 }
 
-func (m *Messenger) AddLog(msg string) {
+// AddLog sends a message to the log view
+func (m *Messenger) AddLog(msg ...interface{}) {
+	logMessage := fmt.Sprint(msg...)
 	buffer := m.getBuffer()
-	buffer.insert(buffer.End(), []byte(msg+"\n"))
+	buffer.insert(buffer.End(), []byte(logMessage+"\n"))
 	buffer.Cursor.Loc = buffer.End()
 	buffer.Cursor.Relocate()
 }

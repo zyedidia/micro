@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"errors"
 	"io/ioutil"
 	"os"
@@ -8,14 +9,16 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/flynn/json5"
 	"github.com/zyedidia/glob"
-	"github.com/zyedidia/json5/encoding/json5"
 )
 
 type optionValidator func(string, interface{}) error
 
 // The options that the user can set
 var globalSettings map[string]interface{}
+
+var invalidSettings bool
 
 // Options with validators
 var optionValidators = map[string]optionValidator{
@@ -24,10 +27,12 @@ var optionValidators = map[string]optionValidator{
 	"scrollspeed":  validateNonNegativeValue,
 	"colorscheme":  validateColorscheme,
 	"colorcolumn":  validateNonNegativeValue,
+	"fileformat":   validateLineEnding,
 }
 
 // InitGlobalSettings initializes the options map and sets all options to their default values
 func InitGlobalSettings() {
+	invalidSettings = false
 	defaults := DefaultGlobalSettings()
 	var parsed map[string]interface{}
 
@@ -38,12 +43,14 @@ func InitGlobalSettings() {
 		if !strings.HasPrefix(string(input), "null") {
 			if err != nil {
 				TermMessage("Error reading settings.json file: " + err.Error())
+				invalidSettings = true
 				return
 			}
 
 			err = json5.Unmarshal(input, &parsed)
 			if err != nil {
 				TermMessage("Error reading settings.json:", err.Error())
+				invalidSettings = true
 			}
 		} else {
 			writeSettings = true
@@ -71,6 +78,7 @@ func InitGlobalSettings() {
 // InitLocalSettings scans the json in settings.json and sets the options locally based
 // on whether the buffer matches the glob
 func InitLocalSettings(buf *Buffer) {
+	invalidSettings = false
 	var parsed map[string]interface{}
 
 	filename := configDir + "/settings.json"
@@ -78,12 +86,14 @@ func InitLocalSettings(buf *Buffer) {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
 			TermMessage("Error reading settings.json file: " + err.Error())
+			invalidSettings = true
 			return
 		}
 
 		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			TermMessage("Error reading settings.json:", err.Error())
+			invalidSettings = true
 		}
 	}
 
@@ -106,6 +116,11 @@ func InitLocalSettings(buf *Buffer) {
 
 // WriteSettings writes the settings to the specified filename as JSON
 func WriteSettings(filename string) error {
+	if invalidSettings {
+		// Do not write the settings if there was an error when reading them
+		return nil
+	}
+
 	var err error
 	if _, e := os.Stat(configDir); e == nil {
 		parsed := make(map[string]interface{})
@@ -124,6 +139,7 @@ func WriteSettings(filename string) error {
 				err = json5.Unmarshal(input, &parsed)
 				if err != nil {
 					TermMessage("Error reading settings.json:", err.Error())
+					invalidSettings = true
 				}
 
 				for k, v := range parsed {
@@ -136,7 +152,7 @@ func WriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json5.MarshalIndent(parsed, "", "    ")
+		txt, _ := json.MarshalIndent(parsed, "", "    ")
 		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return err
@@ -210,6 +226,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		},
 		"pluginrepos": []string{},
 		"useprimary":  true,
+		"fileformat":  "unix",
 	}
 }
 
@@ -241,6 +258,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
+		"fileformat":     "unix",
 	}
 }
 
@@ -355,6 +373,10 @@ func SetLocalOption(option, value string, view *View) error {
 		buf.UpdateRules()
 	}
 
+	if option == "fileformat" {
+		buf.IsModified = true
+	}
+
 	if option == "syntax" {
 		if !nativeValue.(bool) {
 			buf.ClearMatches()
@@ -431,6 +453,20 @@ func validateColorscheme(option string, value interface{}) error {
 
 	if !ColorschemeExists(colorscheme) {
 		return errors.New(colorscheme + " is not a valid colorscheme")
+	}
+
+	return nil
+}
+
+func validateLineEnding(option string, value interface{}) error {
+	endingType, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for file format")
+	}
+
+	if endingType != "unix" && endingType != "dos" {
+		return errors.New("File format must be either 'unix' or 'dos'")
 	}
 
 	return nil
