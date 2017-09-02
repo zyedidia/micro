@@ -71,9 +71,11 @@ as Go's GOOS variable, so `darwin`, `windows`, `linux`, `freebsd`...)
 
 * `Loc(x, y int) Loc`: returns a new `Loc` struct
 
-* `JoinPaths(dir... string) string` combines multiple directories to a full path
+* `WorkingDirectory() string`: returns a rooted path name to the current working directory
 
-* `DirectoryName(path string)` returns all but the last element of path ,typically the path's directory
+* `JoinPaths(dir... string) string`: combines multiple directories to a full path
+
+* `DirectoryName(path string)`: returns all but the last element of path ,typically the path's directory
 
 * `GetOption(name string)`: returns the value of the requested option
 
