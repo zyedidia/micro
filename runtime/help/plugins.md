@@ -142,10 +142,31 @@ The possible methods which you can call using the `messenger` variable are:
 
 * `messenger.Message(msg ...interface{})`
 * `messenger.Error(msg ...interface{})`
-* `messenger.YesNoPrompt(prompt string) (bool, bool)`
+* `messenger.YesNoPrompt(prompt string) (bool,bool)`
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
+* `messenger.AddLog(msg ...interface{})`
 
-If you want a standard prompt, just use `messenger.Prompt(prompt, "", 0)`
+## Note 
+`golang` function signatures use `.` and lua uses `:` so
+```go
+messenger.Message()
+```
+ turns to
+ ```lua
+ messenger:Message()
+ ```
+
+If you want a standard prompt, just use
+```lua
+messenger:Prompt(prompt, "", 0)
+```
+
+Debug or logging your plugin can be done with below lua example code.
+```lua
+messenger:AddLog("Message goes here ",pluginVariableToPrintHere)
+```
+In Micro Editor to see your plugin logging output press `ctrl E` then type `log`
+A logging window will open and any logging sent from your plugin will be displayed here.
 
 # Adding help files, syntax files, or colorschemes in your plugin
 
