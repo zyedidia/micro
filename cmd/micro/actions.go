@@ -996,6 +996,10 @@ func (v *View) Undo(usePlugin bool) bool {
 		return false
 	}
 
+	if v.Buf.curCursor == 0 {
+		v.Buf.clearCursors()
+	}
+
 	v.Buf.Undo()
 	messenger.Message("Undid action")
 
@@ -1009,6 +1013,10 @@ func (v *View) Undo(usePlugin bool) bool {
 func (v *View) Redo(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Redo", v) {
 		return false
+	}
+
+	if v.Buf.curCursor == 0 {
+		v.Buf.clearCursors()
 	}
 
 	v.Buf.Redo()
@@ -2028,12 +2036,7 @@ func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
 			return false
 		}
 
-		for i := 1; i < len(v.Buf.cursors); i++ {
-			v.Buf.cursors[i] = nil
-		}
-		v.Buf.cursors = v.Buf.cursors[:1]
-		v.Buf.UpdateCursors()
-		v.Cursor.ResetSelection()
+		v.Buf.clearCursors()
 		v.Relocate()
 
 		if usePlugin {

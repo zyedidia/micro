@@ -479,9 +479,14 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	return relocate
 }
 
-func (v *View) SetCursor(c *Cursor) {
+func (v *View) SetCursor(c *Cursor) bool {
+	if c == nil {
+		return false
+	}
 	v.Cursor = c
 	v.Buf.curCursor = c.Num
+
+	return true
 }
 
 // HandleEvent handles an event passed by the main loop
@@ -505,7 +510,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 				if e.Modifiers() == key.modifiers {
 					for _, c := range v.Buf.cursors {
-						v.SetCursor(c)
+						ok := v.SetCursor(c)
+						if !ok {
+							break
+						}
 						relocate = false
 						isBinding = true
 						relocate = v.ExecuteActions(actions) || relocate
@@ -553,7 +561,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			for _, c := range v.Buf.cursors {
 				v.SetCursor(c)
 				v.paste(e.Text())
-
 			}
 			v.SetCursor(&v.Buf.Cursor)
 
@@ -568,7 +575,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 		for key, actions := range bindings {
 			if button == key.buttons && e.Modifiers() == key.modifiers {
 				for _, c := range v.Buf.cursors {
-					v.SetCursor(c)
+					ok := v.SetCursor(c)
+					if !ok {
+						break
+					}
 					relocate = v.ExecuteActions(actions) || relocate
 				}
 				v.SetCursor(&v.Buf.Cursor)
