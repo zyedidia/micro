@@ -36,6 +36,8 @@ func (sline *Statusline) Display() {
 	// Add the filetype
 	file += " " + sline.view.Buf.FileType()
 
+	file += " " + sline.view.Buf.Settings["fileformat"].(string)
+
 	rightText := ""
 	if len(helpBinding) > 0 {
 		rightText = helpBinding + " for help "

@@ -367,6 +367,7 @@ func main() {
 	L.SetGlobal("Loc", luar.New(L, func(x, y int) Loc {
 		return Loc{x, y}
 	}))
+	L.SetGlobal("WorkingDirectory", luar.New(L, os.Getwd))
 	L.SetGlobal("JoinPaths", luar.New(L, filepath.Join))
 	L.SetGlobal("DirectoryName", luar.New(L, filepath.Dir))
 	L.SetGlobal("configDir", luar.New(L, configDir))

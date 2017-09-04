@@ -76,6 +76,16 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 	n := 0
 	for {
 		data, err := br.ReadBytes('\n')
+		if len(data) > 1 && data[len(data)-2] == '\r' {
+			data = append(data[:len(data)-2], '\n')
+			if fileformat == 0 {
+				fileformat = 2
+			}
+		} else if len(data) > 0 {
+			if fileformat == 0 {
+				fileformat = 1
+			}
+		}
 
 		if n >= 1000 && loaded >= 0 {
 			totalLinesNum := int(float64(size) * (float64(n) / float64(loaded)))
@@ -113,6 +123,23 @@ func (la *LineArray) String() string {
 	for i, l := range la.lines {
 		str += string(l.data)
 		if i != len(la.lines)-1 {
+			str += "\n"
+		}
+	}
+	return str
+}
+
+// SaveString returns the string that should be written to disk when
+// the line array is saved
+// It is the same as string but uses crlf or lf line endings depending
+func (la *LineArray) SaveString(useCrlf bool) string {
+	str := ""
+	for i, l := range la.lines {
+		str += string(l.data)
+		if i != len(la.lines)-1 {
+			if useCrlf {
+				str += "\r"
+			}
 			str += "\n"
 		}
 	}

@@ -24,6 +24,13 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
+var (
+	// 0 - no line type detected
+	// 1 - lf detected
+	// 2 - crlf detected
+	fileformat = 0
+)
+
 // Buffer stores the text for files that are loaded into the text editor
 // It uses a rope to efficiently store the string and contains some
 // simple functions for saving and wrapper functions for modifying the rope
@@ -100,6 +107,12 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 		if _, ok := b.Settings[k]; ok {
 			b.Settings[k] = v
 		}
+	}
+
+	if fileformat == 1 {
+		b.Settings["fileformat"] = "unix"
+	} else if fileformat == 2 {
+		b.Settings["fileformat"] = "dos"
 	}
 
 	absPath, _ := filepath.Abs(path)
@@ -400,7 +413,7 @@ func (b *Buffer) Serialize() error {
 				b.ModTime,
 			})
 		}
-		file.Close()
+		err = file.Close()
 		return err
 	}
 	return nil
@@ -439,8 +452,10 @@ func (b *Buffer) Decode(reader io.Reader, path, password string) (io.Reader, err
 
 // Encode encodes the buffer for writing to disk
 func (b *Buffer) Encode(filename string) ([]byte, error) {
+	data := []byte(b.SaveString(b.Settings["fileformat"] == "dos"))
+
 	if b.Password == "" {
-		return []byte(b.String()), nil
+		return data, nil
 	}
 
 	if strings.HasSuffix(filename, ExtensionArmorGPG) {
@@ -454,7 +469,7 @@ func (b *Buffer) Encode(filename string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		_, err = plaintext.Write([]byte(b.String()))
+		_, err = plaintext.Write(data)
 		if err != nil {
 			return nil, err
 		}
@@ -674,4 +689,13 @@ func (b *Buffer) ClearMatches() {
 		b.SetMatch(i, nil)
 		b.SetState(i, nil)
 	}
+}
+
+func (b *Buffer) clearCursors() {
+	for i := 1; i < len(b.cursors); i++ {
+		b.cursors[i] = nil
+	}
+	b.cursors = b.cursors[:1]
+	b.UpdateCursors()
+	b.Cursor.ResetSelection()
 }

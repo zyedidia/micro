@@ -108,9 +108,11 @@ type Messenger struct {
 	gutterMessage bool
 }
 
-func (m *Messenger) AddLog(msg string) {
+// AddLog sends a message to the log view
+func (m *Messenger) AddLog(msg ...interface{}) {
+	logMessage := fmt.Sprint(msg...)
 	buffer := m.getBuffer()
-	buffer.insert(buffer.End(), []byte(msg+"\n"))
+	buffer.insert(buffer.End(), []byte(logMessage+"\n"))
 	buffer.Cursor.Loc = buffer.End()
 	buffer.Cursor.Relocate()
 }
