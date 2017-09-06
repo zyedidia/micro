@@ -198,7 +198,6 @@ func InitScreen() {
 	}
 
 	screen.SetStyle(defStyle)
-	screen.EnableMouse()
 }
 
 // RedrawAll redraws everything -- all the views and the messenger

@@ -155,6 +155,12 @@ Here are the options that you can set:
 
     default value: `off`
 
+* `mouse`: whether to enable mouse support. When mouse support is disabled, usually the terminal will be able
+   to access mouse events which can be useful if you want to copy from the terminal instead of from micro (if
+   over ssh for example, because the terminal has access to the local clipboard and micro does not).
+
+    default value: `on`
+
 ---
 
 Default plugin options:

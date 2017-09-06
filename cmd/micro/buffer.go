@@ -184,6 +184,10 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 		file.Close()
 	}
 
+	if b.Settings["mouse"].(bool) {
+		screen.EnableMouse()
+	}
+
 	b.cursors = []*Cursor{&b.Cursor}
 
 	return b

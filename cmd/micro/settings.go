@@ -222,6 +222,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"pluginrepos": []string{},
 		"useprimary":  true,
 		"fileformat":  "unix",
+		"mouse":       true,
 	}
 }
 
@@ -254,6 +255,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"tabstospaces":   false,
 		"useprimary":     true,
 		"fileformat":     "unix",
+		"mouse":          true,
 	}
 }
 
@@ -377,6 +379,14 @@ func SetLocalOption(option, value string, view *View) error {
 			buf.ClearMatches()
 		} else {
 			buf.highlighter.HighlightStates(buf)
+		}
+	}
+
+	if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.DisableMouse()
+		} else {
+			screen.EnableMouse()
 		}
 	}
 
