@@ -113,6 +113,8 @@ func searchDown(r *regexp.Regexp, v *View, start, end Loc) bool {
 		if match != nil {
 			v.Cursor.SetSelectionStart(Loc{charPos + runePos(match[0], string(l)), i})
 			v.Cursor.SetSelectionEnd(Loc{charPos + runePos(match[1], string(l)), i})
+			v.Cursor.OrigSelection[0] = v.Cursor.CurSelection[0]
+			v.Cursor.OrigSelection[1] = v.Cursor.CurSelection[1]
 			v.Cursor.Loc = v.Cursor.CurSelection[1]
 
 			return true
@@ -140,6 +142,8 @@ func searchUp(r *regexp.Regexp, v *View, start, end Loc) bool {
 		if match != nil {
 			v.Cursor.SetSelectionStart(Loc{runePos(match[0], string(l)), i})
 			v.Cursor.SetSelectionEnd(Loc{runePos(match[1], string(l)), i})
+			v.Cursor.OrigSelection[0] = v.Cursor.CurSelection[0]
+			v.Cursor.OrigSelection[1] = v.Cursor.CurSelection[1]
 			v.Cursor.Loc = v.Cursor.CurSelection[1]
 
 			return true
