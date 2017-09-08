@@ -143,11 +143,11 @@ that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty.
 
-### Plan9, NaCl, Cygwin
+### Plan9, Cygwin
 
 Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
-Plan9, NaCl, and Cygwin (although this may change in the future).
+Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (but NaCl is deprecated anyways).
 
 # Usage
 
