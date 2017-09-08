@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -1931,7 +1932,7 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 
 			searchStart = spawner.CurSelection[1]
 			v.Cursor = c
-			Search(sel, v, true)
+			Search(regexp.QuoteMeta(sel), v, true)
 
 			for _, cur := range v.Buf.cursors {
 				if c.Loc == cur.Loc {
@@ -1993,7 +1994,7 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 
 		searchStart = cursor.CurSelection[1]
 		v.Cursor = cursor
-		Search(sel, v, true)
+		Search(regexp.QuoteMeta(sel), v, true)
 		v.Relocate()
 		v.Cursor = cursor
 
