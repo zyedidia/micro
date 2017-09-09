@@ -48,10 +48,6 @@ var (
 	CommitHash  = "Unknown"
 	CompileDate = "Unknown"
 
-	// L is the lua state
-	// This is the VM that runs the plugins
-	L *lua.LState
-
 	// The list of views
 	tabs []*Tab
 	// This is the currently open tab
@@ -382,6 +378,9 @@ func main() {
 	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
 	L.SetGlobal("AddRuntimeFilesFromDirectory", luar.New(L, PluginAddRuntimeFilesFromDirectory))
 	L.SetGlobal("AddRuntimeFileFromMemory", luar.New(L, PluginAddRuntimeFileFromMemory))
+
+	// Access to Go stdlib
+	L.SetGlobal("import", luar.New(L, Import))
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
