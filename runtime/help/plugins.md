@@ -147,14 +147,17 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.AddLog(msg ...interface{})`
 
 ## Note 
-`golang` function signatures use `.` and lua uses `:` so
+Go function signatures use `.` and lua uses `:` so
+
 ```go
 messenger.Message()
 ```
- turns to
- ```lua
- messenger:Message()
- ```
+
+turns to
+
+```lua
+messenger:Message()
+```
 
 If you want a standard prompt, just use
 ```lua
@@ -165,8 +168,37 @@ Debug or logging your plugin can be done with below lua example code.
 ```lua
 messenger:AddLog("Message goes here ",pluginVariableToPrintHere)
 ```
-In Micro Editor to see your plugin logging output press `ctrl E` then type `log`
+
+In Micro to see your plugin logging output press `CtrlE` then type `log`
 A logging window will open and any logging sent from your plugin will be displayed here.
+
+# Accessing the Go standard library
+
+It is possible for your lua code to access many of the functions in the Go standard library.
+
+Simply import the package you'd like and then you can use it. For example:
+
+```lua
+local ioutil = import("ioutil")
+local fmt = import("fmt")
+
+local data, err = ioutil.ReadFile("SomeFile.txt")
+
+if err ~= nil then
+    messenger:Error("Error reading file: SomeFile.txt")
+else
+    -- Data is returned as an array of bytes
+    -- Using Sprintf will convert it to a string
+    local str = fmt.Sprintf("%s", data)
+
+    -- Do something with the file you just read!
+    -- ...
+end
+```
+
+For a full list of which packages and functions from the standard library
+you can access, look at `lua.go` in the source code (it shouldn't be
+too hard to look through).
 
 # Adding help files, syntax files, or colorschemes in your plugin
 
