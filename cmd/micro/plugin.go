@@ -130,11 +130,9 @@ func luaPluginName(name string) string {
 
 // LoadPlugins loads the pre-installed plugins and the plugins located in ~/.config/micro/plugins
 func LoadPlugins() {
-
 	loadedPlugins = make(map[string]string)
 
 	for _, plugin := range ListRuntimeFiles(RTPlugin) {
-
 		pluginName := plugin.Name()
 		if _, ok := loadedPlugins[pluginName]; ok {
 			continue
@@ -147,9 +145,8 @@ func LoadPlugins() {
 		}
 
 		pluginLuaName := luaPluginName(pluginName)
-		pluginDef := "\nlocal P = {}\n" + pluginLuaName + " = P\nsetmetatable(" + pluginLuaName + ", {__index = _G})\nsetfenv(1, P)\n"
 
-		if err := L.DoString(pluginDef + string(data)); err != nil {
+		if err := LoadFile(pluginName, pluginName, string(data)); err != nil {
 			TermMessage(err)
 			continue
 		}
@@ -159,9 +156,8 @@ func LoadPlugins() {
 	}
 
 	if _, err := os.Stat(configDir + "/init.lua"); err == nil {
-		pluginDef := "\nlocal P = {}\n" + "init" + " = P\nsetmetatable(" + "init" + ", {__index = _G})\nsetfenv(1, P)\n"
 		data, _ := ioutil.ReadFile(configDir + "/init.lua")
-		if err := L.DoString(pluginDef + string(data)); err != nil {
+		if err := LoadFile("init", configDir+"init.lua", string(data)); err != nil {
 			TermMessage(err)
 		}
 		loadedPlugins["init"] = "init"
