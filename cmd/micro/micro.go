@@ -143,6 +143,15 @@ func InitConfigDir() {
 	}
 	configDir = xdgHome + "/micro"
 
+	if len(*flagConfigDir) > 0 {
+		if _, err := os.Stat(*flagConfigDir); os.IsNotExist(err) {
+			TermMessage("Error: " + *flagConfigDir + " does not exist. Defaulting to " + configDir + ".")
+		} else {
+			configDir = *flagConfigDir
+			return
+		}
+	}
+
 	if _, err := os.Stat(xdgHome); os.IsNotExist(err) {
 		// If the xdgHome doesn't exist we should create it
 		err = os.Mkdir(xdgHome, os.ModePerm)
@@ -240,19 +249,24 @@ func LoadAll() {
 // Passing -version as a flag will have micro print out the version number
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
+var flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
+var optionFlagSet = flag.NewFlagSet("option", flag.ExitOnError)
 
 func main() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
-		fmt.Print("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n\n")
 		flag.CommandLine.SetOutput(os.Stdout)
 		flag.PrintDefaults()
+		optionFlagSet.SetOutput(os.Stdout)
+		fmt.Print("\n------------------------------------------------------------------\n")
+		fmt.Print("Micro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the bindings.json\nfile (see 'help options').\n\n")
+		optionFlagSet.PrintDefaults()
 	}
 
 	optionFlags := make(map[string]*string)
 
 	for k, v := range DefaultGlobalSettings() {
-		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
+		optionFlags[k] = optionFlagSet.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
 	}
 
 	flag.Parse()
