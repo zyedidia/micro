@@ -9,7 +9,7 @@ rules:
     - identifier: "[a-zA-Z][_a-zA-Z0-9]*[[:space:]]*"
     - statement: "\\b(assembly|break|continue|do|for|function|if|else|new|return|returns|while)\\b"
     - special: "\\b(\\.send|throw)\\b" # make sure they are very visible
-    - keyword: "\\b(anonymous|constant|indexed|payable|public|private|external|internal)\\b"
+    - type.keyword: "\\b(anonymous|constant|indexed|payable|public|private|external|internal)\\b"
     - constant: "\\b(block(\\.(blockhash|coinbase|difficulty|gaslimit|number|timestamp))?|msg(\\.(data|gas|sender|value))?|now|tx(\\.(gasprice|origin))?)\\b"
     - constant: "\\b(keccak256|sha3|sha256|ripemd160|ecrecover|addmod|mulmod|this|super|selfdestruct|\\.balance)\\b"
     - constant: "\\b(true|false)\\b"
