@@ -50,7 +50,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Macros
 * Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
 
-Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.
+Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)) or a tree view ([#249](https://github.com/zyedidia/micro/issues/249)) in the future.
 
 # Installation
 
