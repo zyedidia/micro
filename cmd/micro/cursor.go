@@ -258,7 +258,7 @@ func (c *Cursor) UpN(amount int) {
 	runes := []rune(c.buf.Line(c.Y))
 	c.X = c.GetCharPosInLine(proposedY, c.LastVisualX)
 
-	if c.X > len(runes) {
+	if c.X > len(runes) || (amount < 0 && proposedY == c.Y) {
 		c.X = len(runes)
 	}
 
