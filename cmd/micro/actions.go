@@ -78,7 +78,7 @@ func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
 			v.Cursor.ResetSelection()
 			v.Relocate()
 		}
-		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
+		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold && (x == v.lastLoc.X && y == v.lastLoc.Y) {
 			if v.doubleClick {
 				// Triple click
 				v.lastClickTime = time.Now()
@@ -118,6 +118,8 @@ func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
 			v.Cursor.CopySelection("primary")
 		}
 	}
+
+	v.lastLoc = Loc{x, y}
 
 	if usePlugin {
 		PostActionCall("MousePress", v, e)

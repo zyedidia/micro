@@ -73,6 +73,7 @@ type View struct {
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
+	lastLoc       Loc
 
 	// lastCutTime stores when the last ctrl+k was issued.
 	// It is used for clearing the clipboard to replace it with fresh cut lines.
