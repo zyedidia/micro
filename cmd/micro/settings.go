@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -198,10 +199,13 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"colorscheme":    "default",
 		"cursorline":     true,
 		"eofnewline":     false,
-		"rmtrailingws":   false,
+		"fastdirty":      true,
+		"fileformat":     "unix",
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"infobar":        true,
+		"mouse":          true,
+		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
 		"saveundo":       false,
@@ -221,8 +225,6 @@ func DefaultGlobalSettings() map[string]interface{} {
 		},
 		"pluginrepos": []string{},
 		"useprimary":  true,
-		"fileformat":  "unix",
-		"mouse":       true,
 	}
 }
 
@@ -236,10 +238,13 @@ func DefaultLocalSettings() map[string]interface{} {
 		"colorcolumn":    float64(0),
 		"cursorline":     true,
 		"eofnewline":     false,
-		"rmtrailingws":   false,
+		"fastdirty":      true,
+		"fileformat":     "unix",
 		"filetype":       "Unknown",
 		"ignorecase":     false,
 		"indentchar":     " ",
+		"mouse":          true,
+		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
 		"saveundo":       false,
@@ -254,8 +259,6 @@ func DefaultLocalSettings() map[string]interface{} {
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
-		"fileformat":     "unix",
-		"mouse":          true,
 	}
 }
 
@@ -356,6 +359,26 @@ func SetLocalOption(option, value string, view *View) error {
 
 	if err := optionIsValid(option, nativeValue); err != nil {
 		return err
+	}
+
+	if option == "fastdirty" {
+		// If it is being turned off, we have to hash every open buffer
+		var empty [16]byte
+		for _, tab := range tabs {
+			for _, v := range tab.views {
+				if !nativeValue.(bool) {
+					if v.Buf.origHash == empty {
+						data, err := ioutil.ReadFile(v.Buf.AbsPath)
+						if err != nil {
+							data = []byte{}
+						}
+						v.Buf.origHash = md5.Sum(data)
+					}
+				} else {
+					v.Buf.IsModified = v.Buf.Modified()
+				}
+			}
+		}
 	}
 
 	buf.Settings[option] = nativeValue

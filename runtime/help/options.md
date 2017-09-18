@@ -161,6 +161,22 @@ Here are the options that you can set:
 
     default value: `on`
 
+* `fileformat`: this determines what kind of line endings micro will use for the file. Unix line endings
+   are just `\n` (lf) whereas dos line endings are `\r\n` (crlf). The two possible values for this option
+   are `unix` and `dos`. The fileformat will be automatically detected and displayed on the statusline but
+   this option is useful if you would like to change the line endings or if you are starting a new file.
+
+    default value: `unix`
+
+* `fastdirty`: this determines what kind of algorithm micro uses to determine if a buffer is modified or
+   not. When `fastdirty` is on, micro just uses a boolean `modified` that is set to `true` as soon as the user
+   makes an edit. This is fast, but can be inaccurate. If `fastdirty` is off, then micro will hash the current
+   buffer against a hash of the original file (created when the buffer was loaded). This is more accurate but
+   obviously more resource intensive. This option is only for people who really care about having accurate
+   modified status.
+
+    default value: `on`
+
 ---
 
 Default plugin options:
@@ -178,13 +194,6 @@ Default plugin options:
    disable this behavior turn this option off.
 
 	default value: `on`
-
-* `fileformat`: this determines what kind of line endings micro will use for the file. Unix line endings
-   are just `\n` (lf) whereas dos line endings are `\r\n` (crlf). The two possible values for this option
-   are `unix` and `dos`. The fileformat will be automatically detected and displayed on the statusline but
-   this option is useful if you would like to change the line endings or if you are starting a new file.
-
-    default value: `unix`
 
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 

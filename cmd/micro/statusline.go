@@ -20,7 +20,7 @@ func (sline *Statusline) Display() {
 	file := sline.view.Buf.GetName()
 
 	// If the buffer is dirty (has been modified) write a little '+'
-	if sline.view.Buf.IsModified {
+	if sline.view.Buf.Modified() {
 		file += " +"
 	}
 
