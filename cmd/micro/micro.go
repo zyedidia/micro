@@ -250,23 +250,31 @@ func LoadAll() {
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
 var flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
-var optionFlagSet = flag.NewFlagSet("option", flag.ExitOnError)
+var flagOptions = flag.Bool("options", false, "Show all option help")
 
 func main() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
-		flag.CommandLine.SetOutput(os.Stdout)
-		flag.PrintDefaults()
-		optionFlagSet.SetOutput(os.Stdout)
-		fmt.Print("\n------------------------------------------------------------------\n")
-		fmt.Print("Micro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the bindings.json\nfile (see 'help options').\n\n")
-		optionFlagSet.PrintDefaults()
+		fmt.Println("-config-dir dir")
+		fmt.Println("    \tSpecify a custom location for the configuration directory")
+		fmt.Println("-startpos LINE,COL")
+		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
+		fmt.Println("-options")
+		fmt.Println("    \tShow all option help")
+		fmt.Println("-version")
+		fmt.Println("    \tShow the version number and information")
+
+		fmt.Print("\nMicro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the bindings.json\nfile (see 'help options').\n\n")
+		fmt.Println("-option value")
+		fmt.Println("    \tSet `option` to `value` for this session")
+		fmt.Println("    \tFor example: `micro -syntax off file.c`")
+		fmt.Println("\nUse `micro -options` to see the full list of configuration options")
 	}
 
 	optionFlags := make(map[string]*string)
 
 	for k, v := range DefaultGlobalSettings() {
-		optionFlags[k] = optionFlagSet.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
+		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
 	}
 
 	flag.Parse()
@@ -276,6 +284,15 @@ func main() {
 		fmt.Println("Version:", Version)
 		fmt.Println("Commit hash:", CommitHash)
 		fmt.Println("Compiled on", CompileDate)
+		os.Exit(0)
+	}
+
+	if *flagOptions {
+		// If -options was passed
+		for k, v := range DefaultGlobalSettings() {
+			fmt.Printf("-%s value\n", k)
+			fmt.Printf("    \tThe %s option. Default value: '%v'\n", k, v)
+		}
 		os.Exit(0)
 	}
 
