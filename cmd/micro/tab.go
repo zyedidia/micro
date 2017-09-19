@@ -91,7 +91,7 @@ func TabbarString() (string, map[int]int) {
 		}
 		buf := t.views[t.CurView].Buf
 		str += buf.GetName()
-		if buf.IsModified {
+		if buf.Modified() {
 			str += " +"
 		}
 		if i == curTab {

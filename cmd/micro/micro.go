@@ -48,10 +48,6 @@ var (
 	CommitHash  = "Unknown"
 	CompileDate = "Unknown"
 
-	// L is the lua state
-	// This is the VM that runs the plugins
-	L *lua.LState
-
 	// The list of views
 	tabs []*Tab
 	// This is the currently open tab
@@ -149,6 +145,15 @@ func InitConfigDir() {
 	}
 	configDir = xdgHome + "/micro"
 
+	if len(*flagConfigDir) > 0 {
+		if _, err := os.Stat(*flagConfigDir); os.IsNotExist(err) {
+			TermMessage("Error: " + *flagConfigDir + " does not exist. Defaulting to " + configDir + ".")
+		} else {
+			configDir = *flagConfigDir
+			return
+		}
+	}
+
 	if _, err := os.Stat(xdgHome); os.IsNotExist(err) {
 		// If the xdgHome doesn't exist we should create it
 		err = os.Mkdir(xdgHome, os.ModePerm)
@@ -200,7 +205,6 @@ func InitScreen() {
 	}
 
 	screen.SetStyle(defStyle)
-	screen.EnableMouse()
 }
 
 // RedrawAll redraws everything -- all the views and the messenger
@@ -247,13 +251,26 @@ func LoadAll() {
 // Passing -version as a flag will have micro print out the version number
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
+var flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
+var flagOptions = flag.Bool("options", false, "Show all option help")
 
 func main() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
-		fmt.Print("Micro's options can be set via command line arguments for quick adjustments. For real configuration, please use the bindings.json file (see 'help options').\n\n")
-		flag.CommandLine.SetOutput(os.Stdout)
-		flag.PrintDefaults()
+		fmt.Println("-config-dir dir")
+		fmt.Println("    \tSpecify a custom location for the configuration directory")
+		fmt.Println("-startpos LINE,COL")
+		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
+		fmt.Println("-options")
+		fmt.Println("    \tShow all option help")
+		fmt.Println("-version")
+		fmt.Println("    \tShow the version number and information")
+
+		fmt.Print("\nMicro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the bindings.json\nfile (see 'help options').\n\n")
+		fmt.Println("-option value")
+		fmt.Println("    \tSet `option` to `value` for this session")
+		fmt.Println("    \tFor example: `micro -syntax off file.c`")
+		fmt.Println("\nUse `micro -options` to see the full list of configuration options")
 	}
 
 	optionFlags := make(map[string]*string)
@@ -273,6 +290,15 @@ func main() {
 	}
 
 	passwords := TermPasswords(flag.Args())
+
+	if *flagOptions {
+		// If -options was passed
+		for k, v := range DefaultGlobalSettings() {
+			fmt.Printf("-%s value\n", k)
+			fmt.Printf("    \tThe %s option. Default value: '%v'\n", k, v)
+		}
+		os.Exit(0)
+	}
 
 	// Start the Lua VM for running plugins
 	L = lua.NewState()
@@ -387,6 +413,9 @@ func main() {
 	L.SetGlobal("AddRuntimeFile", luar.New(L, PluginAddRuntimeFile))
 	L.SetGlobal("AddRuntimeFilesFromDirectory", luar.New(L, PluginAddRuntimeFilesFromDirectory))
 	L.SetGlobal("AddRuntimeFileFromMemory", luar.New(L, PluginAddRuntimeFileFromMemory))
+
+	// Access to Go stdlib
+	L.SetGlobal("import", luar.New(L, Import))
 
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)

@@ -50,7 +50,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Macros
 * Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
 
-Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.
+Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)) or a tree view ([#249](https://github.com/zyedidia/micro/issues/249)) in the future.
 
 # Installation
 
@@ -143,11 +143,11 @@ that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty.
 
-### Plan9, NaCl, Cygwin
+### Plan9, Cygwin
 
 Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
-Plan9, NaCl, and Cygwin (although this may change in the future).
+Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (but NaCl is deprecated anyways).
 
 # Usage
 

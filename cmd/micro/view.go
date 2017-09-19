@@ -73,6 +73,7 @@ type View struct {
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
+	lastLoc       Loc
 
 	// lastCutTime stores when the last ctrl+k was issued.
 	// It is used for clearing the clipboard to replace it with fresh cut lines.
@@ -198,7 +199,7 @@ func (v *View) ScrollDown(n int) {
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
-	if v.Type == vtDefault && v.Buf.IsModified {
+	if v.Type == vtDefault && v.Buf.Modified() {
 		var choice bool
 		var canceled bool
 		if v.Buf.Settings["autosave"].(bool) {

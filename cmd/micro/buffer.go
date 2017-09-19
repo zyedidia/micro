@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/gob"
 	"errors"
 	"fmt"
@@ -61,6 +62,9 @@ type Buffer struct {
 
 	syntaxDef   *highlight.Def
 	highlighter *highlight.Highlighter
+
+	// Hash of the original buffer -- empty if fastdirty is on
+	origHash [16]byte
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -188,7 +192,7 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 			}
 
 			if b.Settings["saveundo"].(bool) {
-				// We should only use last time's eventhandler if the file wasn't by someone else in the meantime
+				// We should only use last time's eventhandler if the file wasn't modified by someone else in the meantime
 				if b.ModTime == buffer.ModTime {
 					b.EventHandler = buffer.EventHandler
 					b.EventHandler.buf = b
@@ -196,6 +200,14 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 			}
 		}
 		file.Close()
+	}
+
+	if b.Settings["mouse"].(bool) {
+		screen.EnableMouse()
+	}
+
+	if !b.Settings["fastdirty"].(bool) {
+		b.origHash = md5.Sum([]byte(b.String()))
 	}
 
 	b.cursors = []*Cursor{&b.Cursor}
@@ -573,6 +585,13 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 		b.Serialize()
 	}
 	return err
+}
+
+func (b *Buffer) Modified() bool {
+	if b.Settings["fastdirty"].(bool) {
+		return b.IsModified
+	}
+	return b.origHash != md5.Sum([]byte(b.String()))
 }
 
 func (b *Buffer) insert(pos Loc, value []byte) {
