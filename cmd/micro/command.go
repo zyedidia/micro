@@ -90,7 +90,7 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":        {"Set", []Completion{OptionCompletion, NoCompletion}},
+		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
 		"setlocal":   {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
