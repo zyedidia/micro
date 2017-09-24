@@ -102,7 +102,8 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 	var err error
 	reader, err = b.Decode(reader, path, password)
 	if err != nil {
-		return NewBufferFromString(fmt.Sprintf("%s: %v", path, err), "")
+		TermMessage(fmt.Sprintf("Error: %s: %v", path, err))
+		return NewBufferFromString("", "")
 	}
 	b.LineArray = NewLineArray(size, reader)
 
