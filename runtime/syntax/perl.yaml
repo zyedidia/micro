@@ -12,7 +12,7 @@ rules:
     - symbol: "(,|\\.)"
 
     - identifier:
-        start: "[\\$\\@\\%]"
+        start: "[\\$@%]"
         end: "\\W"
         rules: []
 
