@@ -18,11 +18,9 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/zyedidia/micro/cmd/micro/highlight"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
-
-	"github.com/mitchellh/go-homedir"
-	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
 var (
@@ -203,12 +201,13 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 		file.Close()
 	}
 
-	if b.Settings["mouse"].(bool) {
-		screen.EnableMouse()
-	}
-
 	if !b.Settings["fastdirty"].(bool) {
-		b.origHash = md5.Sum([]byte(b.String()))
+		if size > 50000 {
+			// If the file is larger than a megabyte fastdirty needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			b.origHash = md5.Sum([]byte(b.String()))
+		}
 	}
 
 	b.cursors = []*Cursor{&b.Cursor}
@@ -511,7 +510,6 @@ func (b *Buffer) Encode(filename string) ([]byte, error) {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
-	dir, _ := homedir.Dir()
 	if b.Settings["rmtrailingws"].(bool) {
 		r, _ := regexp.Compile(`[ \t]+$`)
 		for lineNum, line := range b.Lines(0, b.NumLines) {
@@ -536,7 +534,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	}
 	err = ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
-		b.Path = strings.Replace(filename, "~", dir, 1)
+		b.Path = ReplaceHome(filename)
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()

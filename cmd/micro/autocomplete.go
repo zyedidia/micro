@@ -4,8 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
-	"github.com/mitchellh/go-homedir"
 )
 
 var pluginCompletions []func(string) []string
@@ -22,13 +20,9 @@ func FileComplete(input string) (string, []string) {
 	var files []os.FileInfo
 	var err error
 	if len(dirs) > 1 {
-		home, _ := homedir.Dir()
-
 		directories := strings.Join(dirs[:len(dirs)-1], sep) + sep
 
-		if strings.HasPrefix(directories, "~") {
-			directories = strings.Replace(directories, "~", home, 1)
-		}
+		directories = ReplaceHome(directories)
 		files, err = ioutil.ReadDir(directories)
 	} else {
 		files, err = ioutil.ReadDir(".")
@@ -138,6 +132,55 @@ func OptionComplete(input string) (string, []string) {
 	for option := range localSettings {
 		if strings.HasPrefix(option, input) && !contains(suggestions, option) {
 			suggestions = append(suggestions, option)
+		}
+	}
+
+	var chosen string
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+	return chosen, suggestions
+}
+
+func OptionValueComplete(inputOpt, input string) (string, []string) {
+	inputOpt = strings.TrimSpace(inputOpt)
+	var suggestions []string
+	localSettings := DefaultLocalSettings()
+	var optionVal interface{}
+	for k, option := range globalSettings {
+		if k == inputOpt {
+			optionVal = option
+		}
+	}
+	for k, option := range localSettings {
+		if k == inputOpt {
+			optionVal = option
+		}
+	}
+
+	switch optionVal.(type) {
+	case bool:
+		if strings.HasPrefix("on", input) {
+			suggestions = append(suggestions, "on")
+		} else if strings.HasPrefix("true", input) {
+			suggestions = append(suggestions, "true")
+		}
+		if strings.HasPrefix("off", input) {
+			suggestions = append(suggestions, "off")
+		} else if strings.HasPrefix("false", input) {
+			suggestions = append(suggestions, "false")
+		}
+	case string:
+		switch inputOpt {
+		case "colorscheme":
+			_, suggestions = ColorschemeComplete(input)
+		case "fileformat":
+			if strings.HasPrefix("unix", input) {
+				suggestions = append(suggestions, "unix")
+			}
+			if strings.HasPrefix("dos", input) {
+				suggestions = append(suggestions, "dos")
+			}
 		}
 	}
 

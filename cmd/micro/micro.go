@@ -204,6 +204,10 @@ func InitScreen() {
 		os.Setenv("TERM", oldTerm)
 	}
 
+	if GetGlobalOption("mouse").(bool) {
+		screen.EnableMouse()
+	}
+
 	screen.SetStyle(defStyle)
 }
 

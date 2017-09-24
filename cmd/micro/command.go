@@ -14,7 +14,6 @@ import (
 	"strings"
 
 	humanize "github.com/dustin/go-humanize"
-	"github.com/mitchellh/go-homedir"
 )
 
 // A Command contains a action (a function to call) as well as information about how to autocomplete the command
@@ -90,7 +89,7 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":        {"Set", []Completion{OptionCompletion, NoCompletion}},
+		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
 		"setlocal":   {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
@@ -230,8 +229,7 @@ func TabSwitch(args []string) {
 // Cd changes the current working directory
 func Cd(args []string) {
 	if len(args) > 0 {
-		home, _ := homedir.Dir()
-		path := strings.Replace(args[0], "~", home, 1)
+		path := ReplaceHome(args[0])
 		os.Chdir(path)
 		for _, tab := range tabs {
 			for _, view := range tab.views {
@@ -330,8 +328,7 @@ func split(args []string, splitFunc func(buf *Buffer)) {
 		return
 	}
 
-	home, _ := homedir.Dir()
-	filename = strings.Replace(filename, "~", home, 1)
+	filename = ReplaceHome(filename)
 	file, err := os.Open(filename)
 	fileInfo, _ := os.Stat(filename)
 
@@ -389,8 +386,7 @@ func NewTab(args []string) {
 		CurView().AddTab(true)
 	} else {
 		filename := args[0]
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
+		filename = ReplaceHome(filename)
 		file, err := os.Open(filename)
 		fileInfo, _ := os.Stat(filename)
 

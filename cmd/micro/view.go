@@ -6,7 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/tcell"
 )
 
@@ -244,8 +243,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 
 // Open opens the given file in the view
 func (v *View) Open(filename string) {
-	home, _ := homedir.Dir()
-	filename = strings.Replace(filename, "~", home, 1)
+	filename = ReplaceHome(filename)
 	file, err := os.Open(filename)
 	fileInfo, _ := os.Stat(filename)
 

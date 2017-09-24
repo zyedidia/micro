@@ -243,7 +243,6 @@ func DefaultLocalSettings() map[string]interface{} {
 		"filetype":       "Unknown",
 		"ignorecase":     false,
 		"indentchar":     " ",
-		"mouse":          true,
 		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
@@ -315,6 +314,14 @@ func SetOption(option, value string) error {
 	if option == "infobar" {
 		for _, tab := range tabs {
 			tab.Resize()
+		}
+	}
+
+	if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.DisableMouse()
+		} else {
+			screen.EnableMouse()
 		}
 	}
 
@@ -402,14 +409,6 @@ func SetLocalOption(option, value string, view *View) error {
 			buf.ClearMatches()
 		} else {
 			buf.highlighter.HighlightStates(buf)
-		}
-	}
-
-	if option == "mouse" {
-		if !nativeValue.(bool) {
-			screen.DisableMouse()
-		} else {
-			screen.EnableMouse()
 		}
 	}
 
