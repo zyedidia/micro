@@ -4,8 +4,6 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
-
-	"github.com/mitchellh/go-homedir"
 )
 
 var pluginCompletions []func(string) []string
@@ -22,13 +20,9 @@ func FileComplete(input string) (string, []string) {
 	var files []os.FileInfo
 	var err error
 	if len(dirs) > 1 {
-		home, _ := homedir.Dir()
-
 		directories := strings.Join(dirs[:len(dirs)-1], sep) + sep
 
-		if strings.HasPrefix(directories, "~") {
-			directories = strings.Replace(directories, "~", home, 1)
-		}
+		directories = ReplaceHome(directories)
 		files, err = ioutil.ReadDir(directories)
 	} else {
 		files, err = ioutil.ReadDir(".")

@@ -16,7 +16,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
@@ -385,7 +384,6 @@ func (b *Buffer) Serialize() error {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
-	dir, _ := homedir.Dir()
 	if b.Settings["rmtrailingws"].(bool) {
 		r, _ := regexp.Compile(`[ \t]+$`)
 		for lineNum, line := range b.Lines(0, b.NumLines) {
@@ -408,7 +406,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	data := []byte(str)
 	err := ioutil.WriteFile(filename, data, 0644)
 	if err == nil {
-		b.Path = strings.Replace(filename, "~", dir, 1)
+		b.Path = ReplaceHome(filename)
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
