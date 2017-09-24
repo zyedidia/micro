@@ -188,7 +188,12 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		b.origHash = md5.Sum([]byte(b.String()))
+		if size > 50000 {
+			// If the file is larger than a megabyte fastdirty needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			b.origHash = md5.Sum([]byte(b.String()))
+		}
 	}
 
 	b.cursors = []*Cursor{&b.Cursor}
