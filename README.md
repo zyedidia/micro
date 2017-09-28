@@ -115,7 +115,7 @@ You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd
 
 ### MacOS terminal
 
-If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. The newest versions also support true color.
+If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
 
 ### Linux clipboard support
 
