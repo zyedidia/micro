@@ -25,7 +25,7 @@ Most the the syntax files here have been converted using that tool.
 
 Note that the tool isn't perfect and though it is unlikely, you may run into some small issues that you will have to fix manually
 (about 4 files from this directory had issues after being converted).
-=======
+
 # Micro syntax highlighting files
 
 These are the syntax highlighting files for micro. To install them, just
