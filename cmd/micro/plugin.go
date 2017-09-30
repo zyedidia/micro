@@ -146,7 +146,7 @@ func LoadPlugins() {
 
 		pluginLuaName := luaPluginName(pluginName)
 
-		if err := LoadFile(pluginName, pluginName, string(data)); err != nil {
+		if err := LoadFile(pluginLuaName, pluginLuaName, string(data)); err != nil {
 			TermMessage(err)
 			continue
 		}
