@@ -532,9 +532,9 @@ func (b *Buffer) SaveAs(filename string) error {
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(filename, data, 0644)
+	err = ioutil.WriteFile(ReplaceHome(filename), data, 0644)
 	if err == nil {
-		b.Path = ReplaceHome(filename)
+		b.Path = filename
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
