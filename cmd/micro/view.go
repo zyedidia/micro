@@ -9,6 +9,7 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+// The ViewType defines what kind of view this is
 type ViewType struct {
 	kind     int
 	readonly bool // The file cannot be edited
@@ -210,15 +211,10 @@ func (v *View) CanClose() bool {
 			//if char == 'y' {
 			if choice {
 				v.Save(true)
-				return true
-			} else {
-				return true
 			}
 		}
-	} else {
-		return true
 	}
-	return false
+	return true
 }
 
 // OpenBuffer opens a new buffer in this view.
@@ -449,6 +445,7 @@ func (v *View) MoveToMouseClick(x, y int) {
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
+// Execute actions executes the supplied actions
 func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	relocate := false
 	readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
@@ -478,6 +475,7 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	return relocate
 }
 
+// SetCursor sets the view's and buffer's cursor
 func (v *View) SetCursor(c *Cursor) bool {
 	if c == nil {
 		return false
@@ -682,6 +680,7 @@ func (v *View) openHelp(helpPage string) {
 	}
 }
 
+// DisplayView draws the view to the screen
 func (v *View) DisplayView() {
 	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
 		v.leftCol = 0
