@@ -1,0 +1,7 @@
+# See http://editorconfig.org
+
+# In Go files we indent with tabs but still 
+# set indent_size to control the GitHub web viewer.  
+[*.go]
+indent_size=4
+
