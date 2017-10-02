@@ -181,6 +181,13 @@ func OptionValueComplete(inputOpt, input string) (string, []string) {
 			if strings.HasPrefix("dos", input) {
 				suggestions = append(suggestions, "dos")
 			}
+		case "sucmd":
+			if strings.HasPrefix("sudo", input) {
+				suggestions = append(suggestions, "sudo")
+			}
+			if strings.HasPrefix("doas", input) {
+				suggestions = append(suggestions, "doas")
+			}
 		}
 	}
 

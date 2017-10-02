@@ -177,6 +177,11 @@ Here are the options that you can set:
 
     default value: `on`
 
+* `sucmd`: specifies the super user command. On most systems this is "sudo" but on BSD it can be "doas." This
+   option can be customized and is only used when saving with su.
+
+    default value: `sudo`
+
 ---
 
 Default plugin options:
