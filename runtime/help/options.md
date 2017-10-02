@@ -195,7 +195,7 @@ Default plugin options:
 	default value: `on`
 
 * `ftoptions`: by default, micro will set some options based on the filetype. At the moment, micro will
-   use tabs for makefiles and spaces for python files regardless of your settings. If you would like to
+   use tabs for makefiles and spaces for python and yaml files regardless of your settings. If you would like to
    disable this behavior turn this option off.
 
 	default value: `on`
