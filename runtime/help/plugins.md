@@ -39,7 +39,7 @@ want a callback before the action is executed, use `preAction()`. In this case
 the boolean returned specifies whether or not the action should be executed
 after the lua code completes.
 
-Another useful callback to know about which is not a action is
+Another useful callback to know about which is not an action is
 `onViewOpen(view)` which is called whenever a new view is opened and the new
 view is passed in. This is useful for setting local options based on the filetype,
 for example turning off `tabstospaces` only for Go files when they are opened.
