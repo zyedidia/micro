@@ -1,0 +1,83 @@
+# References
+# https://github.com/zyedidia/micro/blob/master/runtime/syntax/go.yaml
+# https://github.com/vim-scripts/octave.vim--/blob/master/syntax/octave.vim
+#
+# TODO
+# include only needed operators
+# ... highlighting
+# built-in function highlighting?
+# highlight eps/pi/e etc. as functions when followed by ()
+# what are skip and error fields in strings?
+# multiline comments not working
+
+filetype: octave
+
+detect:
+    filename: "\\.m$"
+
+rules:
+    # Statements https://www.gnu.org/software/octave/doc/v4.0.0/Statements.html
+    - statement: "\\b(function|endfunction|return|end|global|persistent)\\b"
+    - statement: "\\b(if|elseif|else|endif|switch|case|otherwise|endswitch)\\b"
+    - statement: "\\b(while|endwhile|do|until|for|endfor|parfor|endparfor|break|continue)\\b"
+    - statement: "\\b(unwind_protect|unwind_protect_cleanup|end_unwind_protect|try|catch|end_try_catch)\\b"
+
+    # Operators
+    - symbol.operator: "[-+/*=<>!~%&|^]|:="
+
+    # Brackets
+    - symbol.brackets: "(\\{|\\})"
+    - symbol.brackets: "(\\(|\\))"
+    - symbol.brackets: "(\\[|\\])"
+
+    # Commas
+    - symbol: ","
+
+    # Numbers https://www.gnu.org/software/octave/doc/v4.0.1/Mathematical-Constants.html
+    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+    - constant.number: "\\b(pi|e|I|Inf|NaN|eps|realmax|realmin)\\b|"
+
+    # Boolean
+    - constant.bool: "\\b(true|false)\\b"
+
+    # Strings https://www.gnu.org/software/octave/doc/v4.0.1/Strings.html
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "%"
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - error: "..+"
+            - constant.specialChar: "%"
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    # Comments https://www.gnu.org/software/octave/doc/v4.2.1/Comments.html
+    - comment:
+        start: "%"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+    - comment:
+        start: "%{"
+        end: "%}"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+    - comment:
+        start: "#{"
+        end: "#}"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
