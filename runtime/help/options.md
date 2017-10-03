@@ -182,6 +182,11 @@ Here are the options that you can set:
 
     default value: `sudo`
 
+* `keymenu`: display the nano-style key menu at the bottom of the screen. Note that ToggleKeyMenu is bound to
+   `Alt-g` by default and this is displayed in the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
+
+    default value: `off`
+
 ---
 
 Default plugin options:

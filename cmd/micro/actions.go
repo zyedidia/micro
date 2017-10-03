@@ -1551,6 +1551,25 @@ func (v *View) ToggleHelp(usePlugin bool) bool {
 	return true
 }
 
+// ToggleKeyMenu toggles the keymenu option and resizes all tabs
+func (v *View) ToggleKeyMenu(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ToggleBindings", v) {
+			return false
+		}
+
+		globalSettings["keymenu"] = !globalSettings["keymenu"].(bool)
+		for _, tab := range tabs {
+			tab.Resize()
+		}
+
+		if usePlugin {
+			return PostActionCall("ToggleBindings", v)
+		}
+	}
+	return true
+}
+
 // ShellMode opens a terminal to run a shell command
 func (v *View) ShellMode(usePlugin bool) bool {
 	if v.mainCursor() {
