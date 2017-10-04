@@ -25,6 +25,8 @@ If you don't like it, you can change it!
 | End or CtrlRightArrow     | Move to the end of the current line                                                       |
 | AltLeftArrow              | Move cursor one word left                                                                 |
 | AltRightArrow             | Move cursor one word right                                                                |
+| Alt+{                     | Move cursor to previous empty line, or beginning of document                              |
+| Alt+}                     | Move cursor to next empty line, or end of document                                        |
 | PageUp                    | Move cursor up one page                                                                   |
 | PageDown                  | Move cursor down one page                                                                 |
 | CtrlHome or CtrlUpArrow   | Move cursor to start of document                                                          |

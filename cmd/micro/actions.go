@@ -493,6 +493,55 @@ func (v *View) SelectToEndOfLine(usePlugin bool) bool {
 	return true
 }
 
+// ParagraphPrevious moves the cursor to the previous empty line, or beginning of the buffer if there's none
+func (v *View) ParagraphPrevious(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ParagraphPrevious", v) {
+		return false
+	}
+	var line int
+	for line = v.Cursor.Y; line > 0; line-- {
+		if len(v.Buf.lines[line].data) == 0 && line != v.Cursor.Y {
+			v.Cursor.X = 0
+			v.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line found. move cursor to end of buffer
+	if line == 0 {
+		v.Cursor.Loc = v.Buf.Start()
+	}
+
+	if usePlugin {
+		return PostActionCall("ParagraphPrevious", v)
+	}
+	return true
+}
+
+// ParagraphNext moves the cursor to the next empty line, or end of the buffer if there's none
+func (v *View) ParagraphNext(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ParagraphNext", v) {
+		return false
+	}
+
+	var line int
+	for line = v.Cursor.Y; line < len(v.Buf.lines); line++ {
+		if len(v.Buf.lines[line].data) == 0 && line != v.Cursor.Y {
+			v.Cursor.X = 0
+			v.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line found. move cursor to end of buffer
+	if line == len(v.Buf.lines) {
+		v.Cursor.Loc = v.Buf.End()
+	}
+
+	if usePlugin {
+		return PostActionCall("ParagraphNext", v)
+	}
+	return true
+}
+
 // CursorStart moves the cursor to the start of the buffer
 func (v *View) CursorStart(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorStart", v) {

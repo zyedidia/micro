@@ -113,6 +113,8 @@ HalfPageUp
 HalfPageDown
 StartOfLine
 EndOfLine
+ParagraphPrevious
+ParagraphNext
 ToggleHelp
 ToggleRuler
 JumpLine
@@ -315,6 +317,8 @@ MouseWheelRight
     "CtrlDown":       "CursorEnd",
     "CtrlShiftUp":    "SelectToStart",
     "CtrlShiftDown":  "SelectToEnd",
+    "Alt-{":          "ParagraphPrevious",
+    "Alt-}":          "ParagraphNext",
     "Enter":          "InsertNewline",
     "CtrlH":          "Backspace",
     "Backspace":      "Backspace",
