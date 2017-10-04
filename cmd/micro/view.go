@@ -212,6 +212,8 @@ func (v *View) CanClose() bool {
 			if choice {
 				v.Save(true)
 			}
+		} else {
+			return false
 		}
 	}
 	return true
