@@ -260,6 +260,7 @@ type Key struct {
 	modifiers tcell.ModMask
 	buttons   tcell.ButtonMask
 	r         rune
+	escape    string
 }
 
 // InitBindings initializes the keybindings for micro
@@ -316,6 +317,14 @@ modSearch:
 		case strings.HasPrefix(k, "Shift"):
 			k = k[5:]
 			modifiers |= tcell.ModShift
+		case strings.HasPrefix(k, "\x1b"):
+			return Key{
+				keyCode:   -1,
+				modifiers: modifiers,
+				buttons:   -1,
+				r:         0,
+				escape:    k,
+			}, true
 		default:
 			break modSearch
 		}

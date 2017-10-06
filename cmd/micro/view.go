@@ -497,6 +497,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
+	case *tcell.EventRaw:
+		for key, actions := range bindings {
+			if key.keyCode == -1 {
+				if e.EscapeCode() == key.escape {
+					for _, c := range v.Buf.cursors {
+						ok := v.SetCursor(c)
+						if !ok {
+							break
+						}
+						relocate = false
+						relocate = v.ExecuteActions(actions) || relocate
+					}
+					v.SetCursor(&v.Buf.Cursor)
+					v.Buf.MergeCursors()
+					break
+				}
+			}
+		}
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
