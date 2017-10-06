@@ -12,6 +12,7 @@ import (
 var bindings map[Key][]func(*View, bool) bool
 var mouseBindings map[Key][]func(*View, bool, *tcell.EventMouse) bool
 var helpBinding string
+var kmenuBinding string
 
 var mouseBindingActions = map[string]func(*View, bool, *tcell.EventMouse) bool{
 	"MousePress":       (*View).MousePress,
@@ -41,6 +42,8 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"DeleteWordLeft":        (*View).DeleteWordLeft,
 	"SelectToStartOfLine":   (*View).SelectToStartOfLine,
 	"SelectToEndOfLine":     (*View).SelectToEndOfLine,
+	"ParagraphPrevious":     (*View).ParagraphPrevious,
+	"ParagraphNext":         (*View).ParagraphNext,
 	"InsertNewline":         (*View).InsertNewline,
 	"InsertSpace":           (*View).InsertSpace,
 	"Backspace":             (*View).Backspace,
@@ -78,6 +81,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"StartOfLine":           (*View).StartOfLine,
 	"EndOfLine":             (*View).EndOfLine,
 	"ToggleHelp":            (*View).ToggleHelp,
+	"ToggleKeyMenu":         (*View).ToggleKeyMenu,
 	"ToggleRuler":           (*View).ToggleRuler,
 	"JumpLine":              (*View).JumpLine,
 	"ClearStatus":           (*View).ClearStatus,
@@ -397,8 +401,14 @@ func BindKey(k, v string) {
 	if v == "ToggleHelp" {
 		helpBinding = k
 	}
+	if v == "ToggleKeyMenu" {
+		kmenuBinding = k
+	}
 	if helpBinding == k && v != "ToggleHelp" {
 		helpBinding = ""
+	}
+	if kmenuBinding == k && v != "ToggleKeyMenu" {
+		kmenuBinding = ""
 	}
 
 	actionNames := strings.Split(v, ",")
@@ -458,6 +468,8 @@ func DefaultBindings() map[string]string {
 		"CtrlDown":       "CursorEnd",
 		"CtrlShiftUp":    "SelectToStart",
 		"CtrlShiftDown":  "SelectToEnd",
+		"Alt-{":          "ParagraphPrevious",
+		"Alt-}":          "ParagraphNext",
 		"Enter":          "InsertNewline",
 		"CtrlH":          "Backspace",
 		"Backspace":      "Backspace",
@@ -490,6 +502,7 @@ func DefaultBindings() map[string]string {
 		"CtrlPageUp":     "PreviousTab",
 		"CtrlPageDown":   "NextTab",
 		"CtrlG":          "ToggleHelp",
+		"Alt-g":          "ToggleKeyMenu",
 		"CtrlR":          "ToggleRuler",
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
@@ -509,7 +522,6 @@ func DefaultBindings() map[string]string {
 		// "Alt-n": "CursorDown",
 
 		// Integration with file managers
-		"F1":  "ToggleHelp",
 		"F2":  "Save",
 		"F3":  "Find",
 		"F4":  "Quit",

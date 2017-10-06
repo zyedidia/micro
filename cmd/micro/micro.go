@@ -227,6 +227,9 @@ func RedrawAll() {
 	}
 	DisplayTabs()
 	messenger.Display()
+	if globalSettings["keymenu"].(bool) {
+		DisplayKeyMenu()
+	}
 	screen.Show()
 }
 

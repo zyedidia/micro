@@ -559,7 +559,7 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	screen = nil
 
 	// Set up everything for the command
-	cmd := exec.Command("sudo", "tee", filename)
+	cmd := exec.Command(globalSettings["sucmd"].(string), "tee", filename)
 	cmd.Stdin = bytes.NewBuffer(data)
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro

@@ -56,6 +56,7 @@ func Max(a, b int) int {
 	return b
 }
 
+// FSize gets the size of a file
 func FSize(f *os.File) int64 {
 	fi, _ := f.Stat()
 	// get the size
@@ -246,6 +247,7 @@ func lcs(a, b string) string {
 	return lcs
 }
 
+// CommonSubstring gets a common substring among the inputs
 func CommonSubstring(arr ...string) string {
 	commonStr := arr[0]
 

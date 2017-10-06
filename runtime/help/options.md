@@ -177,6 +177,16 @@ Here are the options that you can set:
 
     default value: `on`
 
+* `sucmd`: specifies the super user command. On most systems this is "sudo" but on BSD it can be "doas." This
+   option can be customized and is only used when saving with su.
+
+    default value: `sudo`
+
+* `keymenu`: display the nano-style key menu at the bottom of the screen. Note that ToggleKeyMenu is bound to
+   `Alt-g` by default and this is displayed in the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
+
+    default value: `off`
+
 ---
 
 Default plugin options:
@@ -190,7 +200,7 @@ Default plugin options:
 	default value: `on`
 
 * `ftoptions`: by default, micro will set some options based on the filetype. At the moment, micro will
-   use tabs for makefiles and spaces for python files regardless of your settings. If you would like to
+   use tabs for makefiles and spaces for python and yaml files regardless of your settings. If you would like to
    disable this behavior turn this option off.
 
 	default value: `on`

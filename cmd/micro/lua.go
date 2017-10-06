@@ -28,6 +28,7 @@ func init() {
 	L.SetGlobal("import", luar.New(L, Import))
 }
 
+// LoadFile loads a lua file
 func LoadFile(module string, file string, data string) error {
 	pluginDef := "local P = {};" + module + " = P;setmetatable(" + module + ", {__index = _G});setfenv(1, P);"
 
@@ -39,40 +40,43 @@ func LoadFile(module string, file string, data string) error {
 	}
 }
 
+// Import allows a lua plugin to import a package
 func Import(pkg string) *lua.LTable {
 	switch pkg {
 	case "fmt":
-		return ImportFmt()
+		return importFmt()
 	case "io":
-		return ImportIo()
-	case "ioutil":
-		return ImportIoUtil()
+		return importIo()
+	case "io/ioutil":
+		return importIoUtil()
 	case "net":
-		return ImportNet()
+		return importNet()
 	case "math":
-		return ImportMath()
+		return importMath()
+	case "math/rand":
+		return importMathRand()
 	case "os":
-		return ImportOs()
+		return importOs()
 	case "runtime":
-		return ImportRuntime()
+		return importRuntime()
 	case "path":
-		return ImportPath()
+		return importPath()
 	case "filepath":
-		return ImportFilePath()
+		return importFilePath()
 	case "strings":
-		return ImportStrings()
+		return importStrings()
 	case "regexp":
-		return ImportRegexp()
+		return importRegexp()
 	case "errors":
-		return ImportErrors()
+		return importErrors()
 	case "time":
-		return ImportTime()
+		return importTime()
 	default:
 		return nil
 	}
 }
 
-func ImportFmt() *lua.LTable {
+func importFmt() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "tErrorf", luar.New(L, fmt.Errorf))
@@ -98,7 +102,7 @@ func ImportFmt() *lua.LTable {
 	return pkg
 }
 
-func ImportIo() *lua.LTable {
+func importIo() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Copy", luar.New(L, io.Copy))
@@ -122,7 +126,7 @@ func ImportIo() *lua.LTable {
 	return pkg
 }
 
-func ImportIoUtil() *lua.LTable {
+func importIoUtil() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "ReadAll", luar.New(L, ioutil.ReadAll))
@@ -133,7 +137,7 @@ func ImportIoUtil() *lua.LTable {
 	return pkg
 }
 
-func ImportNet() *lua.LTable {
+func importNet() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "CIDRMask", luar.New(L, net.CIDRMask))
@@ -201,7 +205,7 @@ func ImportNet() *lua.LTable {
 	return pkg
 }
 
-func ImportMath() *lua.LTable {
+func importMath() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Abs", luar.New(L, math.Abs))
@@ -269,7 +273,7 @@ func ImportMath() *lua.LTable {
 	return pkg
 }
 
-func ImportMathRand() *lua.LTable {
+func importMathRand() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "ExpFloat64", luar.New(L, rand.ExpFloat64))
@@ -289,7 +293,7 @@ func ImportMathRand() *lua.LTable {
 	return pkg
 }
 
-func ImportOs() *lua.LTable {
+func importOs() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Args", luar.New(L, os.Args))
@@ -380,7 +384,7 @@ func ImportOs() *lua.LTable {
 	return pkg
 }
 
-func ImportRuntime() *lua.LTable {
+func importRuntime() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "GC", luar.New(L, runtime.GC))
@@ -392,7 +396,7 @@ func ImportRuntime() *lua.LTable {
 	return pkg
 }
 
-func ImportPath() *lua.LTable {
+func importPath() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Base", luar.New(L, path.Base))
@@ -408,7 +412,7 @@ func ImportPath() *lua.LTable {
 	return pkg
 }
 
-func ImportFilePath() *lua.LTable {
+func importFilePath() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Join", luar.New(L, filepath.Join))
@@ -434,7 +438,7 @@ func ImportFilePath() *lua.LTable {
 	return pkg
 }
 
-func ImportStrings() *lua.LTable {
+func importStrings() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Contains", luar.New(L, strings.Contains))
@@ -484,7 +488,7 @@ func ImportStrings() *lua.LTable {
 	return pkg
 }
 
-func ImportRegexp() *lua.LTable {
+func importRegexp() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "Match", luar.New(L, regexp.Match))
@@ -499,7 +503,7 @@ func ImportRegexp() *lua.LTable {
 	return pkg
 }
 
-func ImportErrors() *lua.LTable {
+func importErrors() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "New", luar.New(L, errors.New))
@@ -507,7 +511,7 @@ func ImportErrors() *lua.LTable {
 	return pkg
 }
 
-func ImportTime() *lua.LTable {
+func importTime() *lua.LTable {
 	pkg := L.NewTable()
 
 	L.SetField(pkg, "After", luar.New(L, time.After))

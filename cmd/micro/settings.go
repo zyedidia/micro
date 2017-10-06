@@ -204,6 +204,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"infobar":        true,
+		"keymenu":        false,
 		"mouse":          true,
 		"rmtrailingws":   false,
 		"ruler":          true,
@@ -215,6 +216,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"splitRight":     true,
 		"splitBottom":    true,
 		"statusline":     true,
+		"sucmd":          "sudo",
 		"syntax":         true,
 		"tabmovement":    false,
 		"tabsize":        float64(4),
@@ -311,7 +313,7 @@ func SetOption(option, value string) error {
 		}
 	}
 
-	if option == "infobar" {
+	if option == "infobar" || option == "keymenu" {
 		for _, tab := range tabs {
 			tab.Resize()
 		}

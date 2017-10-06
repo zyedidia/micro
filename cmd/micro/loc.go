@@ -54,6 +54,7 @@ type Loc struct {
 	X, Y int
 }
 
+// Diff returns the distance between two locations
 func Diff(a, b Loc, buf *Buffer) int {
 	if a.Y == b.Y {
 		if a.X > b.X {
