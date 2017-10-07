@@ -92,7 +92,7 @@ scoop install micro
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
 ```
-snap install micro --edge --classic
+snap install micro --classic
 ```
 
 ### Building from source
