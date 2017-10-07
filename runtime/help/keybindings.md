@@ -2,11 +2,12 @@
 
 Micro has a plethora of hotkeys that make it easy and powerful to use and all
 hotkeys are fully customizable to your liking.
-Custom keybindings are stored internally in micro if changed with the `>bind` command or
-you can also be added in the file `~/.config/micro/bindings.json` as discussed below.
-For a list of the default keybindings in the json format used by micro, please see
-the end of this file. For a more user-friendly list with explanations of what the default
-hotkeys are and what they do, please see `>help defaultkeys`
+Custom keybindings are stored internally in micro if changed with the `> bind`
+command or you can also be added in the file `~/.config/micro/bindings.json` 
+as discussed below.  For a list of the default keybindings in the json format
+used by micro, please see the end of this file. For a more user-friendly list
+with explanations of what the default hotkeys are and what they do, please
+see `>help defaultkeys`
 
 If `~/.config/micro/bindings.json` does not exist, you can simply create it.
 Micro will know what to do with it.
@@ -35,14 +36,59 @@ following in the `bindings.json` file.
 In addition to editing your `~/.config/micro/bindings.json`, you can run
 `>bind <keycombo> <action>` For a list of bindable actions, see below.
 
-You can also chain commands when rebinding. For example, if you want Alt-s to save
-and quit you can bind it like so:
+You can also chain commands when rebinding. For example, if you want Alt-s to
+save and quit you can bind it like so:
 
 ```json
 {
     "Alt-s": "Save,Quit"
 }
 ```
+
+# Binding raw escape sequences
+
+Only read this section if you are interested in binding keys that aren't on the 
+list of supported keys for binding.
+
+One of the drawbacks of using a terminal-based editor is that the editor must
+get all of its information about key events through the terminal. The terminal
+sends these events in the form of escape sequences often (but not always)
+starting with `0x1b`. 
+
+For example, if micro reads `\x1b[1;5D`, on most terminals this will mean
+the user pressed CtrlLeft.
+
+For many key chords though, the terminal won't send any escape code or will
+send an escape code already in use. For example for `CtrlBackspace`, my
+terminal sends `\u007f` (note this doesn't start with `0x1b`), which it also
+sends for `Backspace` meaning micro can't bind `CtrlBackspace`.
+
+However, some terminals do allow you to bind keys to send specific escape
+sequences you define. Then from micro you can directly bind those escape
+sequences to actions. For example, to bind `CtrlBackspace` you can instruct
+your terminal to send `\x1bctrlback` and then bind it in `bindings.json`:
+
+```json
+{
+    "\u001bctrlback": "DeleteWordLeft"
+}
+```
+
+Here are some instructions for sending raw escapes in different terminals
+
+### iTerm2
+
+In iTerm2, you can do this in 
+`Preferences->Profiles->Keys` then click the `+`, input your keybinding,
+and for the `Action` select `Send Escape Sequence`. For the above example
+your would type `ctrlback` into the box (the `\x1b`) is automatically sent
+by iTerm2.
+
+### Linux using loadkeys
+
+You can do this in linux using the loadkeys program.
+
+Coming soon!
 
 # Unbinding keys
 
@@ -277,7 +323,8 @@ Escape
 Enter
 ```
 
-You can also bind some mouse buttons (they may be bound to normal actions or mouse actions)
+You can also bind some mouse buttons (they may be bound to normal actions or
+mouse actions)
 
 ```
 MouseLeft
@@ -390,11 +437,11 @@ MouseWheelRight
 ```
 
 # Final notes
-Note: On some old terminal emulators and on Windows machines, `CtrlH` should be used
-for backspace.
+Note: On some old terminal emulators and on Windows machines, `CtrlH` should
+be used for backspace.
 
 Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a`
-or `Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and `Ctrl`
-so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings). This is
-why in the default keybindings you can see `AltShiftLeft` instead of `Alt-ShiftLeft` 
-(they are equivalent).
+or `Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and 
+`Ctrl` so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings).
+This is why in the default keybindings you can see `AltShiftLeft` instead of
+`Alt-ShiftLeft` (they are equivalent).
