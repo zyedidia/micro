@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -661,10 +660,10 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		args := SplitCommandArgs(input)[1:]
 
 		// Set up everything for the command
-		var outputBuf bytes.Buffer
+		var output string
 		cmd := exec.Command(inputCmd, args...)
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = io.MultiWriter(os.Stdout, &outputBuf)
+		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
 		// This is a trap for Ctrl-C so that it doesn't kill micro
@@ -680,7 +679,6 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		cmd.Start()
 		err := cmd.Wait()
 
-		output := outputBuf.String()
 		if err != nil {
 			output = err.Error()
 		}
