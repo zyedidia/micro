@@ -89,7 +89,7 @@ func MakeCommand(name, function string, completions ...Completion) {
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
 		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
-		"setlocal":   {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"setlocal":   {"SetLocal", []Completion{OptionCompletion, OptionValueCompletion}},
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
 		"run":        {"Run", []Completion{NoCompletion}},
