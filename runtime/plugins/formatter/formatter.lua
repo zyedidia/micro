@@ -9,10 +9,10 @@ function runFormatter()
 
     local ft = CurView().Buf:FileType()
     local handle
-    if ft == "go" then
-        handle = io.popen("gofmt -s -w " .. CurView().Buf.Path)
-    elseif ft == "fish" then
+    if ft == "fish" then
         handle = io.popen("fish_indent -w " .. CurView().Buf.Path)
+    elseif ft == "go" then
+        handle = io.popen("gofmt -s -w " .. CurView().Buf.Path)
     elseif ft == "shell" then
         handle = io.popen("shfmt -s -w " .. CurView().Buf.Path)
     else
