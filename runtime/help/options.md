@@ -110,12 +110,12 @@ Here are the options that you can set:
 
 	default value: `off`
 
-* `splitRight`: when a vertical split is created, should it be created to the right of
+* `splitright`: when a vertical split is created, should it be created to the right of
    the current split?
 
 	default value: `on`
 
-* `splitBottom`: when a horizontal split is created, should it be created below the
+* `splitbottom`: when a horizontal split is created, should it be created below the
    current split?
 
 	default value: `on`
