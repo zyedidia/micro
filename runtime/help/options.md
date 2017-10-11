@@ -8,6 +8,23 @@ the config directory.
 
 Here are the options that you can set:
 
+* `autoindent`: when creating a new line use the same indentation as the 
+   previous line
+
+	default value: `on`
+
+* `autosave`: micro will save the buffer every 8 seconds automatically.
+   Micro also will automatically save and quit when you exit without asking.
+   Be careful when using this feature, because you might accidentally save a file,
+   overwriting what was there before.
+
+	default value: `off`
+
+* `colorcolumn`: if this is not set to 0, it will display a column at the specified
+   column. This is useful if you want column 80 to be highlighted special for example.
+
+	default value: `0`
+
 * `colorscheme`: loads the colorscheme stored in 
    $(configDir)/colorschemes/`option`.micro
    This setting is `global only`.
@@ -23,22 +40,38 @@ Here are the options that you can set:
     You can read more about micro's colorschemes in the `colors` help topic
     (`help colors`).
 
-* `colorcolumn`: if this is not set to 0, it will display a column at the specified
-   column. This is useful if you want column 80 to be highlighted special for example.
+* `cursorline`: highlight the line that the cursor is on in a different color
+   (the color is defined by the colorscheme you are using)
 
-	default value: `0`
+    default value: `on`
 
 * `eofnewline`: micro will automatically add a newline to the file.
 
 	default value: `false`
 
-* `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
+* `fastdirty`: this determines what kind of algorithm micro uses to determine if a buffer is modified or
+   not. When `fastdirty` is on, micro just uses a boolean `modified` that is set to `true` as soon as the user
+   makes an edit. This is fast, but can be inaccurate. If `fastdirty` is off, then micro will hash the current
+   buffer against a hash of the original file (created when the buffer was loaded). This is more accurate but
+   obviously more resource intensive. This option is only for people who really care about having accurate
+   modified status.
 
-	default value: `false`
+    default value: `on`
 
-* `tabsize`: sets the tab size to `option`
+* `fileformat`: this determines what kind of line endings micro will use for the file. Unix line endings
+   are just `\n` (lf) whereas dos line endings are `\r\n` (crlf). The two possible values for this option
+   are `unix` and `dos`. The fileformat will be automatically detected and displayed on the statusline but
+   this option is useful if you would like to change the line endings or if you are starting a new file.
 
-	default value: `4`
+    default value: `unix`
+
+* `filetype`: sets the filetype for the current buffer. This setting is `local only`
+
+    default value: this will be automatically set depending on the file you have open
+
+* `ignorecase`: perform case-insensitive searches
+
+	default value: `off`
 
 * `indentchar`: sets the indentation character
 
@@ -49,42 +82,41 @@ Here are the options that you can set:
 
 	default value: `on`
 
-* `filetype`: sets the filetype for the current buffer. This setting is `local only`
-
-    default value: this will be automatically set depending on the file you have open
-
-* `ignorecase`: perform case-insensitive searches
-
-	default value: `off`
-
-* `syntax`: turns syntax on or off
-
-	default value: `on`
-
-* `tabstospaces`: use spaces instead of tabs
-
-	default value: `off`
-
-* `tabmovement`: navigate spaces at the beginning of lines as if they are tabs (e.g. move over 4 spaces at once).
-   This option only does anything if `tabstospaces` is on.
+* `keepautoindent`: when using autoindent, whitespace is added for you. This option determines if
+   when you move to the next line without any insertions the whitespace that was added should be deleted.
+   By default the autoindent whitespace is deleted if the line was left empty.
 
     default value: `off`
 
-* `autoindent`: when creating a new line use the same indentation as the 
-   previous line
+* `keymenu`: display the nano-style key menu at the bottom of the screen. Note that ToggleKeyMenu is bound to
+   `Alt-g` by default and this is displayed in the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
 
-	default value: `on`
+    default value: `off`
 
-* `cursorline`: highlight the line that the cursor is on in a different color
-   (the color is defined by the colorscheme you are using)
+* `mouse`: whether to enable mouse support. When mouse support is disabled, usually the terminal will be able
+   to access mouse events which can be useful if you want to copy from the terminal instead of from micro (if
+   over ssh for example, because the terminal has access to the local clipboard and micro does not).
 
-	default value: `on`
+    default value: `on`
+
+* `pluginchannels`: contains all the channels micro's plugin manager will search
+   for plugins in. A channel is simply a list of 'repository' json files which contain
+   metadata about the given plugin. See the `Plugin Manager` section of the `plugins` help topic
+   for more information.
+
+	default value: `https://github.com/micro-editor/plugin-channel`
+
+* `pluginrepos`: contains all the 'repositories' micro's plugin manager will search for
+   plugins in. A repository consists of a `repo.json` file which contains metadata for a
+   single plugin.
+
+	default value: ` `
+
+* `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
+
+	default value: `false`
 
 * `ruler`: display line numbers
-
-	default value: `on`
-
-* `statusline`: display the status line at the bottom of the screen
 
 	default value: `on`
 
@@ -110,82 +142,50 @@ Here are the options that you can set:
 
 	default value: `off`
 
-* `splitright`: when a vertical split is created, should it be created to the right of
-   the current split?
-
-	default value: `on`
-
 * `splitbottom`: when a horizontal split is created, should it be created below the
    current split?
 
 	default value: `on`
 
-* `autosave`: micro will save the buffer every 8 seconds automatically.
-   Micro also will automatically save and quit when you exit without asking.
-   Be careful when using this feature, because you might accidentally save a file,
-   overwriting what was there before.
-
-	default value: `off`
-
-* `pluginchannels`: contains all the channels micro's plugin manager will search
-   for plugins in. A channel is simply a list of 'repository' json files which contain
-   metadata about the given plugin. See the `Plugin Manager` section of the `plugins` help topic
-   for more information.
-
-	default value: `https://github.com/micro-editor/plugin-channel`
-
-* `pluginrepos`: contains all the 'repositories' micro's plugin manager will search for
-   plugins in. A repository consists of a `repo.json` file which contains metadata for a
-   single plugin.
-
-	default value: ` `
-
-* `useprimary` (only useful on Linux): defines whether or not micro will use the primary clipboard to copy selections
-   in the background. This does not affect the normal clipboard using Ctrl-C and Ctrl-V.
+* `splitright`: when a vertical split is created, should it be created to the right of
+   the current split?
 
 	default value: `on`
 
-* `keepautoindent`: when using autoindent, whitespace is added for you. This option determines if
-   when you move to the next line without any insertions the whitespace that was added should be deleted.
-   By default the autoindent whitespace is deleted if the line was left empty.
+* `statusline`: display the status line at the bottom of the screen
 
-    default value: `off`
+	default value: `on`
 
-* `termtitle`: defines whether or not your terminal's title will be set by micro when opened.
+* `syntax`: turns syntax on or off
 
-    default value: `off`
-
-* `mouse`: whether to enable mouse support. When mouse support is disabled, usually the terminal will be able
-   to access mouse events which can be useful if you want to copy from the terminal instead of from micro (if
-   over ssh for example, because the terminal has access to the local clipboard and micro does not).
-
-    default value: `on`
-
-* `fileformat`: this determines what kind of line endings micro will use for the file. Unix line endings
-   are just `\n` (lf) whereas dos line endings are `\r\n` (crlf). The two possible values for this option
-   are `unix` and `dos`. The fileformat will be automatically detected and displayed on the statusline but
-   this option is useful if you would like to change the line endings or if you are starting a new file.
-
-    default value: `unix`
-
-* `fastdirty`: this determines what kind of algorithm micro uses to determine if a buffer is modified or
-   not. When `fastdirty` is on, micro just uses a boolean `modified` that is set to `true` as soon as the user
-   makes an edit. This is fast, but can be inaccurate. If `fastdirty` is off, then micro will hash the current
-   buffer against a hash of the original file (created when the buffer was loaded). This is more accurate but
-   obviously more resource intensive. This option is only for people who really care about having accurate
-   modified status.
-
-    default value: `on`
+	default value: `on`
 
 * `sucmd`: specifies the super user command. On most systems this is "sudo" but on BSD it can be "doas." This
    option can be customized and is only used when saving with su.
 
     default value: `sudo`
 
-* `keymenu`: display the nano-style key menu at the bottom of the screen. Note that ToggleKeyMenu is bound to
-   `Alt-g` by default and this is displayed in the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
+* `tabmovement`: navigate spaces at the beginning of lines as if they are tabs (e.g. move over 4 spaces at once).
+   This option only does anything if `tabstospaces` is on.
 
     default value: `off`
+
+* `tabsize`: sets the tab size to `option`
+
+	default value: `4`
+
+* `tabstospaces`: use spaces instead of tabs
+
+	default value: `off`
+
+* `termtitle`: defines whether or not your terminal's title will be set by micro when opened.
+
+    default value: `off`
+
+* `useprimary` (only useful on Linux): defines whether or not micro will use the primary clipboard to copy selections
+   in the background. This does not affect the normal clipboard using Ctrl-C and Ctrl-V.
+
+	default value: `on`
 
 ---
 
@@ -195,13 +195,13 @@ Default plugin options:
 
 	default value: `on`
 
-* `linter`: Automatically lint when the file is saved. Provided by the `linter` plugin
-
-	default value: `on`
-
 * `ftoptions`: by default, micro will set some options based on the filetype. At the moment, micro will
    use tabs for makefiles and spaces for python and yaml files regardless of your settings. If you would like to
    disable this behavior turn this option off.
+
+	default value: `on`
+
+* `linter`: Automatically lint when the file is saved. Provided by the `linter` plugin
 
 	default value: `on`
 
