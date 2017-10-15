@@ -282,7 +282,7 @@ func (v *View) ReOpen() {
 // HSplit opens a horizontal split with the given buffer
 func (v *View) HSplit(buf *Buffer) {
 	i := 0
-	if v.Buf.Settings["splitBottom"].(bool) {
+	if v.Buf.Settings["splitbottom"].(bool) {
 		i = 1
 	}
 	v.splitNode.HSplit(buf, v.Num+i)
@@ -291,7 +291,7 @@ func (v *View) HSplit(buf *Buffer) {
 // VSplit opens a vertical split with the given buffer
 func (v *View) VSplit(buf *Buffer) {
 	i := 0
-	if v.Buf.Settings["splitRight"].(bool) {
+	if v.Buf.Settings["splitright"].(bool) {
 		i = 1
 	}
 	v.splitNode.VSplit(buf, v.Num+i)
