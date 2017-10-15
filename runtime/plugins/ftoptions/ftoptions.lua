@@ -11,7 +11,7 @@ function onViewOpen(view)
 
     if ft == "makefile" or ft == "go" then
         SetOption("tabstospaces", "off")
-    elseif ft == "python" or ft == "python2" or ft == "python3" or ft == "yaml" then
+    elseif ft == "python" or ft == "python2" or ft == "python3" or ft == "yaml" or ft =="nim" then
         SetOption("tabstospaces", "on")
     end
 end

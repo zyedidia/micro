@@ -8,7 +8,7 @@ We have included a few colorschemes that are for fun:
   Nintendo Entertainment System color palette.
 * symbian-tc: Colorscheme based on SymbOS's GUI.
 * matrix: Pretend it's 1981 with a colorscheme based on a monochrome
-  IBM 5151. ( Does not include the ghosting and trailing. )
+  IBM 5151. (Does not include the ghosting and trailing)
 
-Check the plugin repo periodically for gimmick-color extension packs
-and genuine additional themes.
+Check the plugin repo periodically for gimmick-color extension packs and genuine
+additional themes.
