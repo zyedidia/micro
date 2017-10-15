@@ -14,6 +14,10 @@ type Statusline struct {
 
 // Display draws the statusline to the screen
 func (sline *Statusline) Display() {
+	if messenger.hasPrompt && !GetGlobalOption("infobar").(bool) {
+		return
+	}
+
 	// We'll draw the line at the lowest line in the view
 	y := sline.view.Height + sline.view.y
 
