@@ -46,6 +46,7 @@
 // runtime/plugins/autoclose/utf8/LICENSE
 // runtime/plugins/autoclose/utf8/README.md
 // runtime/plugins/autoclose/utf8/utf8.lua
+// runtime/plugins/formatter/formatter.lua
 // runtime/plugins/ftoptions/ftoptions.lua
 // runtime/plugins/linter/linter.lua
 // runtime/plugins/literate/README.md
@@ -1146,6 +1147,26 @@ func runtimePluginsAutocloseUtf8Utf8Lua() (*asset, error) {
 	}
 
 	info := bindataFileInfo{name: "runtime/plugins/autoclose/utf8/utf8.lua", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _runtimePluginsFormatterFormatterLua = []byte("\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x94\x92\xcb\x6a\xf3\x30\x10\x85\xf7\x7a\x8a\x41\x2b\xeb\x27\x11\xff\x3a\xe0\x45\x1b\x48\x57\x25\xa5\x2d\xdd\x16\x11\x8d\x22\x51\x59\x32\xba\xc4\xf4\xed\x8b\x2c\x27\x4e\x7a\x21\xc4\xe0\x8d\x74\xe6\x3b\x9a\x39\x63\x14\x3c\x60\xda\xf6\xc9\x78\xd7\x50\xe5\x43\x27\x52\xc2\x40\x19\xb4\x2d\x38\x63\x21\x69\x74\x04\x00\xe0\x4e\xca\x9f\xb2\x05\x28\x61\x23\x32\x82\x4e\x12\xf2\x28\x3e\x70\xed\xbb\x4e\x38\x79\x14\xd1\x05\xcc\x72\x1e\xb2\xdb\x9c\xd5\xfe\x67\x84\xa8\xec\x76\x85\x0a\xe7\x77\x0d\x1b\x2d\xd7\x39\xbc\x19\x1c\x1a\xb6\x7a\x11\x07\x6c\x26\xab\xf1\xca\xfa\x9d\xb0\xa0\x12\xb4\xb3\x8a\xdf\x67\xb5\xda\x18\x8b\xaf\x9f\x3d\x4e\x88\xaa\xd3\xc2\x49\x8b\xe3\x81\x51\x63\x55\x0b\x54\x99\xa8\xe9\xdc\x5f\xf9\xaa\x0e\x5a\x30\x9e\xf7\xbe\xc7\xd2\xab\x89\xfa\xdd\x38\x89\x2e\xc1\x72\x00\x0a\x9c\x5f\x3a\xf2\x27\x91\x74\x35\x43\x1b\x71\xe6\xef\xfd\x75\xfa\xde\xab\x2e\xc1\x32\xde\x88\x8e\x1a\xad\xbd\x4e\x8f\xfa\x06\xfa\x09\x14\x30\xe5\x50\xb9\x25\xd5\x79\x8a\x01\x63\xb6\x65\xe2\xd5\x6a\x15\x50\xc8\x86\xfe\x13\xb4\x42\xa6\xd3\x9d\xf5\xb1\x4c\xff\x5b\x82\xcf\xb8\x2d\x6f\x9a\x36\xe5\x94\xba\x77\x63\xb4\x07\x83\x03\x3b\xe6\xf3\xc7\x42\x5e\x74\xfb\xcb\xb6\x14\x70\xf9\xbf\x02\x00\x00\xff\xff\x91\xb4\x28\x18\xd3\x02\x00\x00")
+
+func runtimePluginsFormatterFormatterLuaBytes() ([]byte, error) {
+	return bindataRead(
+		_runtimePluginsFormatterFormatterLua,
+		"runtime/plugins/formatter/formatter.lua",
+	)
+}
+
+func runtimePluginsFormatterFormatterLua() (*asset, error) {
+	bytes, err := runtimePluginsFormatterFormatterLuaBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "runtime/plugins/formatter/formatter.lua", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
 	a := &asset{bytes: bytes, info: info}
 	return a, nil
 }
@@ -3588,6 +3609,7 @@ var _bindata = map[string]func() (*asset, error){
 	"runtime/plugins/autoclose/utf8/LICENSE": runtimePluginsAutocloseUtf8License,
 	"runtime/plugins/autoclose/utf8/README.md": runtimePluginsAutocloseUtf8ReadmeMd,
 	"runtime/plugins/autoclose/utf8/utf8.lua": runtimePluginsAutocloseUtf8Utf8Lua,
+	"runtime/plugins/formatter/formatter.lua": runtimePluginsFormatterFormatterLua,
 	"runtime/plugins/ftoptions/ftoptions.lua": runtimePluginsFtoptionsFtoptionsLua,
 	"runtime/plugins/linter/linter.lua": runtimePluginsLinterLinterLua,
 	"runtime/plugins/literate/README.md": runtimePluginsLiterateReadmeMd,
@@ -3802,6 +3824,9 @@ var _bintree = &bintree{nil, map[string]*bintree{
 					"README.md": &bintree{runtimePluginsAutocloseUtf8ReadmeMd, map[string]*bintree{}},
 					"utf8.lua": &bintree{runtimePluginsAutocloseUtf8Utf8Lua, map[string]*bintree{}},
 				}},
+			}},
+			"formatter": &bintree{nil, map[string]*bintree{
+				"formatter.lua": &bintree{runtimePluginsFormatterFormatterLua, map[string]*bintree{}},
 			}},
 			"ftoptions": &bintree{nil, map[string]*bintree{
 				"ftoptions.lua": &bintree{runtimePluginsFtoptionsFtoptionsLua, map[string]*bintree{}},
