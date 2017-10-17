@@ -95,6 +95,12 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
+On OpenBSD, micro is available in the ports tree. It is also available as a binary package.
+
+```
+pkg_add -v micro
+```
+
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
