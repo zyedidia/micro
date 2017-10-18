@@ -22,7 +22,7 @@ rules:
     - constant: "\\b(false|nil|true)\\b"
     - statement: "(\\b(dofile|require|include)|%q|%!|%Q|%r|%x)\\b"
     - constant.number: "\\b([0-9]+)\\b"
-    - symbol: "(\\(|\\)|\\[|\\]|\\{|\\}|\\*\\*|\\*|/|%|\\+|-|\\^|>|>=|<|<=|~=|=|\\.\\.)"
+    - symbol: "(\\(|\\)|\\[|\\]|\\{|\\}|\\*\\*|\\*|/|%|\\+|-|\\^|>|>=|<|<=|~=|=|\\.\\.|#)"
 
     - constant.string:
         start: "\""
