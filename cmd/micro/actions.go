@@ -1708,6 +1708,7 @@ func (v *View) Quit(usePlugin bool) bool {
 				}
 
 				screen.Fini()
+				messenger.SaveHistory()
 				os.Exit(0)
 			}
 		}
@@ -1751,6 +1752,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 				}
 
 				screen.Fini()
+				messenger.SaveHistory()
 				os.Exit(0)
 			}
 		}

@@ -136,6 +136,11 @@ Here are the options that you can set:
 
 	default value: `off`
 
+* `savehistory`: remember command history between closing and re-opening
+   micro.
+
+    default value: `on`
+
 * `saveundo`: when this option is on, undo is saved even after you close a file
    so if you close and reopen a file, you can keep undoing.
 

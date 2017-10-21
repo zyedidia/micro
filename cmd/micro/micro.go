@@ -342,7 +342,7 @@ func main() {
 	// Create a new messenger
 	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
-	messenger.history = make(map[string][]string)
+	messenger.LoadHistory()
 
 	// Now we load the input
 	buffers := LoadInput()

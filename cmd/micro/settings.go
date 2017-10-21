@@ -211,6 +211,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
+		"savehistory":    true,
 		"saveundo":       false,
 		"scrollmargin":   float64(3),
 		"scrollspeed":    float64(2),
