@@ -497,11 +497,11 @@ func (m *Messenger) LoadHistory() {
 			decoder := gob.NewDecoder(file)
 			err = decoder.Decode(&decodedMap)
 			file.Close()
-		}
 
-		if err != nil {
-			m.Error("Error loading history:", err)
-			return
+			if err != nil {
+				m.Error("Error loading history:", err)
+				return
+			}
 		}
 
 		m.history = decodedMap
