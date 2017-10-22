@@ -501,6 +501,8 @@ func (m *Messenger) LoadHistory() {
 
 		if err != nil {
 			m.Error("Error loading history:", err)
+			SetOption("savehistory", "false")
+			m.history = make(map[string][]string)
 			return
 		}
 

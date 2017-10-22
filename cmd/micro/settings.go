@@ -326,10 +326,12 @@ func SetOption(option, value string) error {
 		}
 	}
 
-	if _, ok := CurView().Buf.Settings[option]; ok {
-		for _, tab := range tabs {
-			for _, view := range tab.views {
-				SetLocalOption(option, value, view)
+	if len(tabs) != 0 {
+		if _, ok := CurView().Buf.Settings[option]; ok {
+			for _, tab := range tabs {
+				for _, view := range tab.views {
+					SetLocalOption(option, value, view)
+				}
 			}
 		}
 	}
