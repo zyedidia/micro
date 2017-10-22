@@ -504,7 +504,11 @@ func (m *Messenger) LoadHistory() {
 			}
 		}
 
-		m.history = decodedMap
+		if decodedMap != nil {
+			m.history = decodedMap
+		} else {
+			m.history = make(map[string][]string)
+		}
 	} else {
 		m.history = make(map[string][]string)
 	}
