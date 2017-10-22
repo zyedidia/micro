@@ -349,6 +349,14 @@ func (b *Buffer) MergeCursors() {
 	}
 
 	b.cursors = cursors
+
+	for i := range b.cursors {
+		b.cursors[i].Num = i
+	}
+
+	if b.curCursor >= len(b.cursors) {
+		b.curCursor = len(b.cursors) - 1
+	}
 }
 
 func (b *Buffer) UpdateCursors() {
