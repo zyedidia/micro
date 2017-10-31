@@ -69,7 +69,19 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
-### Package Managers
+### Installation script
+
+There is a great script which can install micro for you by downloading the latest prebuilt binary. You can find it at https://getmic.ro (the github repo for it is [here](https://github.com/benweissmann/getmic.ro)).
+
+Then you can easily install micro:
+
+    $ curl https://getmic.ro | bash
+
+The script will install the micro binary to the current directory.
+
+See the [Github page](https://github.com/benweissmann/getmic.ro) for more information.
+
+### Package managers
 
 You can install micro using Homebrew on Mac:
 
