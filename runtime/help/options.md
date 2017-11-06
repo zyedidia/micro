@@ -146,6 +146,10 @@ Here are the options that you can set:
 
 	default value: `off`
 
+* `scrollbar`: display a scroll bar
+
+    default value: `off`
+
 * `scrollmargin`: amount of lines you would like to see above and below the
    cursor.
 

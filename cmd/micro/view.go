@@ -62,7 +62,7 @@ type View struct {
 	// The buffer
 	Buf *Buffer
 	// The statusline
-	sline Statusline
+	sline *Statusline
 
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
@@ -92,6 +92,8 @@ type View struct {
 	cellview *CellView
 
 	splitNode *LeafNode
+
+	scrollbar *ScrollBar
 }
 
 // NewView returns a new fullscreen view
@@ -117,7 +119,11 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.messages = make(map[string][]GutterMessage)
 
-	v.sline = Statusline{
+	v.sline = &Statusline{
+		view: v,
+	}
+
+	v.scrollbar = &ScrollBar{
 		view: v,
 	}
 
@@ -1008,6 +1014,11 @@ func (v *View) Display() {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
+
+	if v.Buf.Settings["scrollbar"].(bool) {
+		v.scrollbar.Display()
+	}
+
 	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
 	} else if (v.y + v.Height) != screenH-1 {

@@ -476,6 +476,8 @@ func main() {
 		}
 
 		for event != nil {
+			didAction := false
+
 			switch e := event.(type) {
 			case *tcell.EventResize:
 				for _, t := range tabs {
@@ -505,24 +507,36 @@ func main() {
 								}
 							}
 						}
+					} else if e.Buttons() == tcell.WheelUp || e.Buttons() == tcell.WheelDown {
+						var view *View
+						x, y := e.Position()
+						for _, v := range tabs[curTab].views {
+							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								view = tabs[curTab].views[v.Num]
+							}
+						}
+						view.HandleEvent(e)
+						didAction = true
 					}
 				}
 			}
 
-			// This function checks the mouse event for the possibility of changing the current tab
-			// If the tab was changed it returns true
-			if TabbarHandleMouseEvent(event) {
-				break
-			}
+			if !didAction {
+				// This function checks the mouse event for the possibility of changing the current tab
+				// If the tab was changed it returns true
+				if TabbarHandleMouseEvent(event) {
+					break
+				}
 
-			if searching {
-				// Since searching is done in real time, we need to redraw every time
-				// there is a new event in the search bar so we need a special function
-				// to run instead of the standard HandleEvent.
-				HandleSearchEvent(event, CurView())
-			} else {
-				// Send it to the view
-				CurView().HandleEvent(event)
+				if searching {
+					// Since searching is done in real time, we need to redraw every time
+					// there is a new event in the search bar so we need a special function
+					// to run instead of the standard HandleEvent.
+					HandleSearchEvent(event, CurView())
+				} else {
+					// Send it to the view
+					CurView().HandleEvent(event)
+				}
 			}
 
 			select {
