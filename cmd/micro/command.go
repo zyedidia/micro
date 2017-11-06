@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -14,7 +13,6 @@ import (
 	"strings"
 
 	humanize "github.com/dustin/go-humanize"
-	"github.com/mitchellh/go-homedir"
 )
 
 // A Command contains a action (a function to call) as well as information about how to autocomplete the command
@@ -90,8 +88,8 @@ func MakeCommand(name, function string, completions ...Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":        {"Set", []Completion{OptionCompletion, NoCompletion}},
-		"setlocal":   {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
+		"setlocal":   {"SetLocal", []Completion{OptionCompletion, OptionValueCompletion}},
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
 		"run":        {"Run", []Completion{NoCompletion}},
@@ -230,8 +228,7 @@ func TabSwitch(args []string) {
 // Cd changes the current working directory
 func Cd(args []string) {
 	if len(args) > 0 {
-		home, _ := homedir.Dir()
-		path := strings.Replace(args[0], "~", home, 1)
+		path := ReplaceHome(args[0])
 		os.Chdir(path)
 		for _, tab := range tabs {
 			for _, view := range tab.views {
@@ -325,8 +322,7 @@ func VSplit(args []string) {
 		CurView().VSplit(NewBufferFromString("", ""))
 	} else {
 		filename := args[0]
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
+		filename = ReplaceHome(filename)
 		file, err := os.Open(filename)
 		fileInfo, _ := os.Stat(filename)
 
@@ -355,8 +351,7 @@ func HSplit(args []string) {
 		CurView().HSplit(NewBufferFromString("", ""))
 	} else {
 		filename := args[0]
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
+		filename = ReplaceHome(filename)
 		file, err := os.Open(filename)
 		fileInfo, _ := os.Stat(filename)
 
@@ -396,8 +391,7 @@ func NewTab(args []string) {
 		CurView().AddTab(true)
 	} else {
 		filename := args[0]
-		home, _ := homedir.Dir()
-		filename = strings.Replace(filename, "~", home, 1)
+		filename = ReplaceHome(filename)
 		file, err := os.Open(filename)
 		fileInfo, _ := os.Stat(filename)
 
@@ -666,10 +660,10 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		args := SplitCommandArgs(input)[1:]
 
 		// Set up everything for the command
-		var outputBuf bytes.Buffer
+		var output string
 		cmd := exec.Command(inputCmd, args...)
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = io.MultiWriter(os.Stdout, &outputBuf)
+		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
 		// This is a trap for Ctrl-C so that it doesn't kill micro
@@ -685,7 +679,6 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		cmd.Start()
 		err := cmd.Wait()
 
-		output := outputBuf.String()
 		if err != nil {
 			output = err.Error()
 		}

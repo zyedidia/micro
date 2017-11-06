@@ -44,6 +44,9 @@ func NewTabFromView(v *View) *Tab {
 	if globalSettings["infobar"].(bool) {
 		t.tree.height--
 	}
+	if globalSettings["keymenu"].(bool) {
+		t.tree.height -= 2
+	}
 
 	//Reset the Scroll Offset so that the tabbar centers correctly on the new tab.
 	ScrollOffset = 0
@@ -72,6 +75,9 @@ func (t *Tab) Resize() {
 
 	if globalSettings["infobar"].(bool) {
 		t.tree.height--
+	}
+	if globalSettings["keymenu"].(bool) {
+		t.tree.height -= 2
 	}
 
 	t.tree.ResizeSplits()
@@ -102,6 +108,11 @@ func TabbarString() (string, map[int]int) {
 		}
 		if globalSettings["numberedtabs"].(bool){
 			str += "(" + strconv.Itoa(i + 1) + ")"
+		}
+		buf := t.views[t.CurView].Buf
+		str += buf.GetName()
+		if buf.Modified() {
+			str += " +"
 		}
 		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
 		str += name

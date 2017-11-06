@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
+	homedir "github.com/mitchellh/go-homedir"
 )
 
 // Util.go is a collection of utility functions that are used throughout
@@ -55,6 +56,7 @@ func Max(a, b int) int {
 	return b
 }
 
+// FSize gets the size of a file
 func FSize(f *os.File) int64 {
 	fi, _ := f.Stat()
 	// get the size
@@ -245,6 +247,7 @@ func lcs(a, b string) string {
 	return lcs
 }
 
+// CommonSubstring gets a common substring among the inputs
 func CommonSubstring(arr ...string) string {
 	commonStr := arr[0]
 
@@ -362,4 +365,19 @@ func JoinCommandArgs(args ...string) string {
 	}
 
 	return buf.String()
+}
+
+// ReplaceHome takes a path as input and replaces ~ at the start of the path with the user's
+// home directory. Does nothing if the path does not start with '~'.
+func ReplaceHome(path string) string {
+	if !strings.HasPrefix(path, "~") {
+		return path
+	}
+
+	home, err := homedir.Dir()
+	if err != nil {
+		messenger.Error("Could not find home directory: ", err)
+		return path
+	}
+	return strings.Replace(path, "~", home, 1)
 }

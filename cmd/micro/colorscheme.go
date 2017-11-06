@@ -15,7 +15,7 @@ type Colorscheme map[string]tcell.Style
 // The current colorscheme
 var colorscheme Colorscheme
 
-// This takes in a syntax group and returns the colorscheme's style for that group
+// GetColor takes in a syntax group and returns the colorscheme's style for that group
 func GetColor(color string) tcell.Style {
 	st := defStyle
 	if color == "" {

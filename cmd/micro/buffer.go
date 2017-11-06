@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/md5"
 	"encoding/gob"
 	"io"
 	"io/ioutil"
@@ -15,7 +16,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
@@ -56,6 +56,9 @@ type Buffer struct {
 
 	syntaxDef   *highlight.Def
 	highlighter *highlight.Highlighter
+
+	// Hash of the original buffer -- empty if fastdirty is on
+	origHash [16]byte
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -174,7 +177,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 			}
 
 			if b.Settings["saveundo"].(bool) {
-				// We should only use last time's eventhandler if the file wasn't by someone else in the meantime
+				// We should only use last time's eventhandler if the file wasn't modified by someone else in the meantime
 				if b.ModTime == buffer.ModTime {
 					b.EventHandler = buffer.EventHandler
 					b.EventHandler.buf = b
@@ -182,6 +185,15 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 			}
 		}
 		file.Close()
+	}
+
+	if !b.Settings["fastdirty"].(bool) {
+		if size > 50000 {
+			// If the file is larger than a megabyte fastdirty needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			b.origHash = md5.Sum([]byte(b.String()))
+		}
 	}
 
 	b.cursors = []*Cursor{&b.Cursor}
@@ -337,6 +349,14 @@ func (b *Buffer) MergeCursors() {
 	}
 
 	b.cursors = cursors
+
+	for i := range b.cursors {
+		b.cursors[i].Num = i
+	}
+
+	if b.curCursor >= len(b.cursors) {
+		b.curCursor = len(b.cursors) - 1
+	}
 }
 
 func (b *Buffer) UpdateCursors() {
@@ -377,7 +397,6 @@ func (b *Buffer) Serialize() error {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
-	dir, _ := homedir.Dir()
 	if b.Settings["rmtrailingws"].(bool) {
 		r, _ := regexp.Compile(`[ \t]+$`)
 		for lineNum, line := range b.Lines(0, b.NumLines) {
@@ -398,9 +417,9 @@ func (b *Buffer) SaveAs(filename string) error {
 	}
 	str := b.SaveString(b.Settings["fileformat"] == "dos")
 	data := []byte(str)
-	err := ioutil.WriteFile(filename, data, 0644)
+	err := ioutil.WriteFile(ReplaceHome(filename), data, 0644)
 	if err == nil {
-		b.Path = strings.Replace(filename, "~", dir, 1)
+		b.Path = filename
 		b.IsModified = false
 		b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
@@ -420,7 +439,7 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	screen = nil
 
 	// Set up everything for the command
-	cmd := exec.Command("sudo", "tee", filename)
+	cmd := exec.Command(globalSettings["sucmd"].(string), "tee", filename)
 	cmd.Stdin = bytes.NewBufferString(b.SaveString(b.Settings["fileformat"] == "dos"))
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro
@@ -445,6 +464,13 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 		b.Serialize()
 	}
 	return err
+}
+
+func (b *Buffer) Modified() bool {
+	if b.Settings["fastdirty"].(bool) {
+		return b.IsModified
+	}
+	return b.origHash != md5.Sum([]byte(b.String()))
 }
 
 func (b *Buffer) insert(pos Loc, value []byte) {
@@ -561,4 +587,13 @@ func (b *Buffer) ClearMatches() {
 		b.SetMatch(i, nil)
 		b.SetState(i, nil)
 	}
+}
+
+func (b *Buffer) clearCursors() {
+	for i := 1; i < len(b.cursors); i++ {
+		b.cursors[i] = nil
+	}
+	b.cursors = b.cursors[:1]
+	b.UpdateCursors()
+	b.Cursor.ResetSelection()
 }

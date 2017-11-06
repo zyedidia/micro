@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -77,7 +78,7 @@ func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
 			v.Cursor.ResetSelection()
 			v.Relocate()
 		}
-		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold {
+		if time.Since(v.lastClickTime)/time.Millisecond < doubleClickThreshold && (x == v.lastLoc.X && y == v.lastLoc.Y) {
 			if v.doubleClick {
 				// Triple click
 				v.lastClickTime = time.Now()
@@ -117,6 +118,8 @@ func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
 			v.Cursor.CopySelection("primary")
 		}
 	}
+
+	v.lastLoc = Loc{x, y}
 
 	if usePlugin {
 		PostActionCall("MousePress", v, e)
@@ -486,6 +489,55 @@ func (v *View) SelectToEndOfLine(usePlugin bool) bool {
 
 	if usePlugin {
 		return PostActionCall("SelectToEndOfLine", v)
+	}
+	return true
+}
+
+// ParagraphPrevious moves the cursor to the previous empty line, or beginning of the buffer if there's none
+func (v *View) ParagraphPrevious(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ParagraphPrevious", v) {
+		return false
+	}
+	var line int
+	for line = v.Cursor.Y; line > 0; line-- {
+		if len(v.Buf.lines[line].data) == 0 && line != v.Cursor.Y {
+			v.Cursor.X = 0
+			v.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line found. move cursor to end of buffer
+	if line == 0 {
+		v.Cursor.Loc = v.Buf.Start()
+	}
+
+	if usePlugin {
+		return PostActionCall("ParagraphPrevious", v)
+	}
+	return true
+}
+
+// ParagraphNext moves the cursor to the next empty line, or end of the buffer if there's none
+func (v *View) ParagraphNext(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ParagraphNext", v) {
+		return false
+	}
+
+	var line int
+	for line = v.Cursor.Y; line < len(v.Buf.lines); line++ {
+		if len(v.Buf.lines[line].data) == 0 && line != v.Cursor.Y {
+			v.Cursor.X = 0
+			v.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line found. move cursor to end of buffer
+	if line == len(v.Buf.lines) {
+		v.Cursor.Loc = v.Buf.End()
+	}
+
+	if usePlugin {
+		return PostActionCall("ParagraphNext", v)
 	}
 	return true
 }
@@ -996,6 +1048,10 @@ func (v *View) Undo(usePlugin bool) bool {
 		return false
 	}
 
+	if v.Buf.curCursor == 0 {
+		v.Buf.clearCursors()
+	}
+
 	v.Buf.Undo()
 	messenger.Message("Undid action")
 
@@ -1009,6 +1065,10 @@ func (v *View) Undo(usePlugin bool) bool {
 func (v *View) Redo(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Redo", v) {
 		return false
+	}
+
+	if v.Buf.curCursor == 0 {
+		v.Buf.clearCursors()
 	}
 
 	v.Buf.Redo()
@@ -1540,6 +1600,25 @@ func (v *View) ToggleHelp(usePlugin bool) bool {
 	return true
 }
 
+// ToggleKeyMenu toggles the keymenu option and resizes all tabs
+func (v *View) ToggleKeyMenu(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ToggleBindings", v) {
+			return false
+		}
+
+		globalSettings["keymenu"] = !globalSettings["keymenu"].(bool)
+		for _, tab := range tabs {
+			tab.Resize()
+		}
+
+		if usePlugin {
+			return PostActionCall("ToggleBindings", v)
+		}
+	}
+	return true
+}
+
 // ShellMode opens a terminal to run a shell command
 func (v *View) ShellMode(usePlugin bool) bool {
 	if v.mainCursor() {
@@ -1629,6 +1708,7 @@ func (v *View) Quit(usePlugin bool) bool {
 				}
 
 				screen.Fini()
+				messenger.SaveHistory()
 				os.Exit(0)
 			}
 		}
@@ -1672,6 +1752,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 				}
 
 				screen.Fini()
+				messenger.SaveHistory()
 				os.Exit(0)
 			}
 		}
@@ -1944,7 +2025,7 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 
 			searchStart = spawner.CurSelection[1]
 			v.Cursor = c
-			Search(sel, v, true)
+			Search(regexp.QuoteMeta(sel), v, true)
 
 			for _, cur := range v.Buf.cursors {
 				if c.Loc == cur.Loc {
@@ -2006,7 +2087,7 @@ func (v *View) SkipMultiCursor(usePlugin bool) bool {
 
 		searchStart = cursor.CurSelection[1]
 		v.Cursor = cursor
-		Search(sel, v, true)
+		Search(regexp.QuoteMeta(sel), v, true)
 		v.Relocate()
 		v.Cursor = cursor
 
@@ -2049,12 +2130,7 @@ func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
 			return false
 		}
 
-		for i := 1; i < len(v.Buf.cursors); i++ {
-			v.Buf.cursors[i] = nil
-		}
-		v.Buf.cursors = v.Buf.cursors[:1]
-		v.Buf.UpdateCursors()
-		v.Cursor.ResetSelection()
+		v.Buf.clearCursors()
 		v.Relocate()
 
 		if usePlugin {

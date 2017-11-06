@@ -48,6 +48,11 @@ func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
 		for i, d := range t.Deltas {
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
 			buf.insert(d.Start, []byte(d.Text))
+			t.Deltas[i].Start = d.Start
+			t.Deltas[i].End = Loc{d.Start.X + Count(d.Text), d.Start.Y}
+		}
+		for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
+			t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
 		}
 	}
 }

@@ -50,7 +50,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Macros
 * Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
 
-Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)), and multiple cursors ([#5](https://github.com/zyedidia/micro/issues/5)) in the future.
+Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)) or a tree view ([#249](https://github.com/zyedidia/micro/issues/249)) in the future.
 
 # Installation
 
@@ -69,7 +69,19 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
-### Package Managers
+### Installation script
+
+There is a great script which can install micro for you by downloading the latest prebuilt binary. You can find it at https://getmic.ro (the github repo for it is [here](https://github.com/benweissmann/getmic.ro)).
+
+Then you can easily install micro:
+
+    $ curl https://getmic.ro | bash
+
+The script will install the micro binary to the current directory.
+
+See the [Github page](https://github.com/benweissmann/getmic.ro) for more information.
+
+### Package managers
 
 You can install micro using Homebrew on Mac:
 
@@ -92,14 +104,20 @@ scoop install micro
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
 ```
-snap install micro --edge --classic
+snap install micro --classic
+```
+
+On OpenBSD, micro is available in the ports tree. It is also available as a binary package.
+
+```
+pkg_add -v micro
 ```
 
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommand setting it to `~/go` if you don't have one).
+Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommend setting it to `~/go` if you don't have one).
 
 ```
 go get -d github.com/zyedidia/micro/cmd/micro
@@ -115,7 +133,7 @@ You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd
 
 ### MacOS terminal
 
-If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. The newest versions also support true color.
+If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
 
 ### Linux clipboard support
 
@@ -143,11 +161,11 @@ that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty.
 
-### Plan9, NaCl, Cygwin
+### Plan9, Cygwin
 
 Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
-Plan9, NaCl, and Cygwin (although this may change in the future).
+Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (but NaCl is deprecated anyways).
 
 # Usage
 

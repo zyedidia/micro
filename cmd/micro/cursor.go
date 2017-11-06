@@ -249,8 +249,8 @@ func (c *Cursor) RuneUnder(x int) rune {
 func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount
 	if proposedY < 0 {
-		c.X = 0 // first line: X moved before the first character
-		return
+		proposedY = 0
+		c.LastVisualX = 0
 	} else if proposedY >= c.buf.NumLines {
 		proposedY = c.buf.NumLines - 1
 	}
@@ -258,7 +258,7 @@ func (c *Cursor) UpN(amount int) {
 	runes := []rune(c.buf.Line(c.Y))
 	c.X = c.GetCharPosInLine(proposedY, c.LastVisualX)
 
-	if c.X > len(runes) || proposedY == c.Y {
+	if c.X > len(runes) || (amount < 0 && proposedY == c.Y) {
 		c.X = len(runes)
 	}
 

@@ -1108,6 +1108,7 @@ function preInsertNewline(v)
                 v:InsertNewline(false)
                 v:InsertTab(false)
                 v.Buf:Insert(-v.Cursor.Loc, "\n" .. ws)
+                v:StartOfLine(false)
                 v:CursorLeft(false)
                 return false
             end

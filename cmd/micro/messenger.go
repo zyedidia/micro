@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"os"
 	"strconv"
@@ -231,6 +232,7 @@ const (
 	OptionCompletion
 	PluginCmdCompletion
 	PluginNameCompletion
+	OptionValueCompletion
 )
 
 // Prompt sends the user a message and waits for a response to be typed in
@@ -296,6 +298,10 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 					chosen, suggestions = HelpComplete(currentArg)
 				} else if completionType == OptionCompletion {
 					chosen, suggestions = OptionComplete(currentArg)
+				} else if completionType == OptionValueCompletion {
+					if currentArgNum-1 > 0 {
+						chosen, suggestions = OptionValueComplete(args[currentArgNum-1], currentArg)
+					}
 				} else if completionType == PluginCmdCompletion {
 					chosen, suggestions = PluginCmdComplete(currentArg)
 				} else if completionType == PluginNameCompletion {
@@ -477,6 +483,59 @@ func (m *Messenger) Display() {
 	if m.hasPrompt {
 		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
 		screen.Show()
+	}
+}
+
+// LoadHistory attempts to load user history from configDir/buffers/history
+// into the history map
+// The savehistory option must be on
+func (m *Messenger) LoadHistory() {
+	if GetGlobalOption("savehistory").(bool) {
+		file, err := os.Open(configDir + "/buffers/history")
+		var decodedMap map[string][]string
+		if err == nil {
+			decoder := gob.NewDecoder(file)
+			err = decoder.Decode(&decodedMap)
+			file.Close()
+
+			if err != nil {
+				m.Error("Error loading history:", err)
+				return
+			}
+		}
+
+		if decodedMap != nil {
+			m.history = decodedMap
+		} else {
+			m.history = make(map[string][]string)
+		}
+	} else {
+		m.history = make(map[string][]string)
+	}
+}
+
+// SaveHistory saves the user's command history to configDir/buffers/history
+// only if the savehistory option is on
+func (m *Messenger) SaveHistory() {
+	if GetGlobalOption("savehistory").(bool) {
+		// Don't save history past 100
+		for k, v := range m.history {
+			if len(v) > 100 {
+				m.history[k] = v[0:100]
+			}
+		}
+
+		file, err := os.Create(configDir + "/buffers/history")
+		if err == nil {
+			encoder := gob.NewEncoder(file)
+
+			err = encoder.Encode(m.history)
+			if err != nil {
+				m.Error("Error saving history:", err)
+				return
+			}
+			file.Close()
+		}
 	}
 }
 

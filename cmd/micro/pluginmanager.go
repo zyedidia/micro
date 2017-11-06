@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -434,6 +435,12 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 				return err
 			}
 		} else {
+			basepath := path.Dir(targetName)
+
+			if err := os.MkdirAll(basepath, dirPerm); err != nil {
+				return err
+			}
+
 			content, err := f.Open()
 			if err != nil {
 				return err

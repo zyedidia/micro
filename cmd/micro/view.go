@@ -6,10 +6,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitchellh/go-homedir"
 	"github.com/zyedidia/tcell"
 )
 
+// The ViewType defines what kind of view this is
 type ViewType struct {
 	kind     int
 	readonly bool // The file cannot be edited
@@ -62,7 +62,7 @@ type View struct {
 	// The buffer
 	Buf *Buffer
 	// The statusline
-	sline Statusline
+	sline *Statusline
 
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
@@ -73,6 +73,7 @@ type View struct {
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
+	lastLoc       Loc
 
 	// lastCutTime stores when the last ctrl+k was issued.
 	// It is used for clearing the clipboard to replace it with fresh cut lines.
@@ -91,6 +92,8 @@ type View struct {
 	cellview *CellView
 
 	splitNode *LeafNode
+
+	scrollbar *ScrollBar
 }
 
 // NewView returns a new fullscreen view
@@ -116,7 +119,11 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.messages = make(map[string][]GutterMessage)
 
-	v.sline = Statusline{
+	v.sline = &Statusline{
+		view: v,
+	}
+
+	v.scrollbar = &ScrollBar{
 		view: v,
 	}
 
@@ -198,7 +205,7 @@ func (v *View) ScrollDown(n int) {
 // If there are unsaved changes, the user will be asked if the view can be closed
 // causing them to lose the unsaved changes
 func (v *View) CanClose() bool {
-	if v.Type == vtDefault && v.Buf.IsModified {
+	if v.Type == vtDefault && v.Buf.Modified() {
 		var choice bool
 		var canceled bool
 		if v.Buf.Settings["autosave"].(bool) {
@@ -210,15 +217,12 @@ func (v *View) CanClose() bool {
 			//if char == 'y' {
 			if choice {
 				v.Save(true)
-				return true
-			} else {
-				return true
 			}
+		} else {
+			return false
 		}
-	} else {
-		return true
 	}
-	return false
+	return true
 }
 
 // OpenBuffer opens a new buffer in this view.
@@ -243,8 +247,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 
 // Open opens the given file in the view
 func (v *View) Open(filename string) {
-	home, _ := homedir.Dir()
-	filename = strings.Replace(filename, "~", home, 1)
+	filename = ReplaceHome(filename)
 	file, err := os.Open(filename)
 	fileInfo, _ := os.Stat(filename)
 
@@ -285,7 +288,7 @@ func (v *View) ReOpen() {
 // HSplit opens a horizontal split with the given buffer
 func (v *View) HSplit(buf *Buffer) {
 	i := 0
-	if v.Buf.Settings["splitBottom"].(bool) {
+	if v.Buf.Settings["splitbottom"].(bool) {
 		i = 1
 	}
 	v.splitNode.HSplit(buf, v.Num+i)
@@ -294,7 +297,7 @@ func (v *View) HSplit(buf *Buffer) {
 // VSplit opens a vertical split with the given buffer
 func (v *View) VSplit(buf *Buffer) {
 	i := 0
-	if v.Buf.Settings["splitRight"].(bool) {
+	if v.Buf.Settings["splitright"].(bool) {
 		i = 1
 	}
 	v.splitNode.VSplit(buf, v.Num+i)
@@ -450,6 +453,7 @@ func (v *View) MoveToMouseClick(x, y int) {
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
+// Execute actions executes the supplied actions
 func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	relocate := false
 	readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}
@@ -479,9 +483,15 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	return relocate
 }
 
-func (v *View) SetCursor(c *Cursor) {
+// SetCursor sets the view's and buffer's cursor
+func (v *View) SetCursor(c *Cursor) bool {
+	if c == nil {
+		return false
+	}
 	v.Cursor = c
 	v.Buf.curCursor = c.Num
+
+	return true
 }
 
 // HandleEvent handles an event passed by the main loop
@@ -493,6 +503,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
+	case *tcell.EventRaw:
+		for key, actions := range bindings {
+			if key.keyCode == -1 {
+				if e.EscapeCode() == key.escape {
+					for _, c := range v.Buf.cursors {
+						ok := v.SetCursor(c)
+						if !ok {
+							break
+						}
+						relocate = false
+						relocate = v.ExecuteActions(actions) || relocate
+					}
+					v.SetCursor(&v.Buf.Cursor)
+					v.Buf.MergeCursors()
+					break
+				}
+			}
+		}
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
@@ -505,7 +533,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 				if e.Modifiers() == key.modifiers {
 					for _, c := range v.Buf.cursors {
-						v.SetCursor(c)
+						ok := v.SetCursor(c)
+						if !ok {
+							break
+						}
 						relocate = false
 						isBinding = true
 						relocate = v.ExecuteActions(actions) || relocate
@@ -553,7 +584,6 @@ func (v *View) HandleEvent(event tcell.Event) {
 			for _, c := range v.Buf.cursors {
 				v.SetCursor(c)
 				v.paste(e.Text())
-
 			}
 			v.SetCursor(&v.Buf.Cursor)
 
@@ -568,7 +598,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 		for key, actions := range bindings {
 			if button == key.buttons && e.Modifiers() == key.modifiers {
 				for _, c := range v.Buf.cursors {
-					v.SetCursor(c)
+					ok := v.SetCursor(c)
+					if !ok {
+						break
+					}
 					relocate = v.ExecuteActions(actions) || relocate
 				}
 				v.SetCursor(&v.Buf.Cursor)
@@ -673,6 +706,7 @@ func (v *View) openHelp(helpPage string) {
 	}
 }
 
+// DisplayView draws the view to the screen
 func (v *View) DisplayView() {
 	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
 		v.leftCol = 0
@@ -935,7 +969,7 @@ func (v *View) DisplayView() {
 
 		if v.Buf.Settings["cursorline"].(bool) && tabs[curTab].CurView == v.Num &&
 			!v.Cursor.HasSelection() && v.Cursor.Y == realLineN {
-			for i := lastX; i < xOffset+v.Width; i++ {
+			for i := lastX; i < xOffset+v.Width-v.lineNumOffset; i++ {
 				style := GetColor("cursor-line")
 				fg, _, _ := style.Decompose()
 				style = style.Background(fg)
@@ -980,6 +1014,11 @@ func (v *View) Display() {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
+
+	if v.Buf.Settings["scrollbar"].(bool) {
+		v.scrollbar.Display()
+	}
+
 	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
 	} else if (v.y + v.Height) != screenH-1 {

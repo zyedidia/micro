@@ -2,7 +2,7 @@ package highlight
 
 import "regexp"
 
-// DetectFiletype will use the list of syntax definitions provided and the filename and first line of the file
+// MatchFiletype will use the list of syntax definitions provided and the filename and first line of the file
 // to determine the filetype of the file
 // It will return the corresponding syntax definition for the filetype
 func MatchFiletype(ftdetect [2]*regexp.Regexp, filename string, firstLine []byte) bool {

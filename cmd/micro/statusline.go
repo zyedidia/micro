@@ -16,11 +16,16 @@ type Statusline struct {
 
 // Display draws the statusline to the screen
 func (sline *Statusline) Display() {
+	if messenger.hasPrompt && !GetGlobalOption("infobar").(bool) {
+		return
+	}
+
 	// We'll draw the line at the lowest line in the view
 	y := sline.view.Height + sline.view.y
 
 	file := ""
 
+<<<<<<< HEAD
 	if globalSettings["showclock"].(bool) {
 		t := time.Now()
 		curtime := "["
@@ -79,12 +84,24 @@ func (sline *Statusline) Display() {
 	file += " " + sline.view.Buf.Settings["fileformat"].(string)
 
 	rightText := ""
-	if len(helpBinding) > 0 {
-		rightText = helpBinding + " for help "
-		if sline.view.Type == vtHelp {
-			rightText = helpBinding + " to close help "
+	if len(kmenuBinding) > 0 {
+		if globalSettings["keymenu"].(bool) {
+			rightText += kmenuBinding + ": hide bindings"
+		} else {
+			rightText += kmenuBinding + ": show bindings"
 		}
 	}
+	if len(helpBinding) > 0 {
+		if len(kmenuBinding) > 0 {
+			rightText += ", "
+		}
+		if sline.view.Type == vtHelp {
+			rightText += helpBinding + ": close help"
+		} else {
+			rightText += helpBinding + ": open help"
+		}
+	}
+	rightText += " "
 
 	statusLineStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["statusline"]; ok {

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/md5"
 	"encoding/json"
 	"errors"
 	"io/ioutil"
@@ -192,28 +193,38 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
-		"keepautoindent": false,
 		"autosave":       false,
 		"colorcolumn":    float64(0),
 		"colorscheme":    "default",
 		"cursorline":     true,
 		"eofnewline":     true,
 		"rmtrailingws":   false,
+		"fastdirty":      true,
+		"fileformat":     "unix",
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"infobar":        true,
+		"keepautoindent": false,
+		"keymenu":        false,
+		"mouse":          true,
+		"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
+		"pluginrepos":    []string{},
+		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
+		"savehistory":    true,
 		"saveundo":       false,
-		"scrollspeed":    float64(2),
+		"scrollbar":      false,
 		"scrollmargin":   float64(3),
 		"showclock":      false,
 		"12hourclock":    false,
 		"showseconds":    false,
+		"scrollspeed":    float64(2),
 		"softwrap":       false,
-		"splitRight":     true,
-		"splitBottom":    true,
+		"splitbottom":    true,
+		"splitright":     true,
 		"statusline":     true,
+		"sucmd":          "sudo",
 		"syntax":         true,
 		"tabbaralways":   false,
 		"numberedtabs":   true,
@@ -221,12 +232,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"termtitle":      false,
-		"pluginchannels": []string{
-			"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json",
-		},
-		"pluginrepos": []string{},
-		"useprimary":  true,
-		"fileformat":  "unix",
+		"useprimary":     true,
 	}
 }
 
@@ -235,30 +241,33 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
-		"keepautoindent": false,
 		"autosave":       false,
 		"colorcolumn":    float64(0),
 		"cursorline":     true,
 		"eofnewline":     true,
 		"rmtrailingws":   false,
+		"fastdirty":      true,
+		"fileformat":     "unix",
 		"filetype":       "Unknown",
 		"ignorecase":     false,
 		"indentchar":     " ",
+		"keepautoindent": false,
+		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
 		"saveundo":       false,
-		"scrollspeed":    float64(2),
+		"scrollbar":      false,
 		"scrollmargin":   float64(3),
+		"scrollspeed":    float64(2),
 		"softwrap":       false,
-		"splitRight":     true,
-		"splitBottom":    true,
+		"splitbottom":    true,
+		"splitright":     true,
 		"statusline":     true,
 		"syntax":         true,
 		"tabmovement":    false,
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
-		"fileformat":     "unix",
 	}
 }
 
@@ -312,16 +321,26 @@ func SetOption(option, value string) error {
 		}
 	}
 
-	if option == "infobar" {
+	if option == "infobar" || option == "keymenu" {
 		for _, tab := range tabs {
 			tab.Resize()
 		}
 	}
 
-	if _, ok := CurView().Buf.Settings[option]; ok {
-		for _, tab := range tabs {
-			for _, view := range tab.views {
-				SetLocalOption(option, value, view)
+	if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.DisableMouse()
+		} else {
+			screen.EnableMouse()
+		}
+	}
+
+	if len(tabs) != 0 {
+		if _, ok := CurView().Buf.Settings[option]; ok {
+			for _, tab := range tabs {
+				for _, view := range tab.views {
+					SetLocalOption(option, value, view)
+				}
 			}
 		}
 	}
@@ -359,6 +378,26 @@ func SetLocalOption(option, value string, view *View) error {
 
 	if err := optionIsValid(option, nativeValue); err != nil {
 		return err
+	}
+
+	if option == "fastdirty" {
+		// If it is being turned off, we have to hash every open buffer
+		var empty [16]byte
+		for _, tab := range tabs {
+			for _, v := range tab.views {
+				if !nativeValue.(bool) {
+					if v.Buf.origHash == empty {
+						data, err := ioutil.ReadFile(v.Buf.AbsPath)
+						if err != nil {
+							data = []byte{}
+						}
+						v.Buf.origHash = md5.Sum(data)
+					}
+				} else {
+					v.Buf.IsModified = v.Buf.Modified()
+				}
+			}
+		}
 	}
 
 	buf.Settings[option] = nativeValue

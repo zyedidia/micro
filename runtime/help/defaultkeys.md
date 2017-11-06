@@ -1,13 +1,13 @@
 # Default Keys
 
-Below are simple charts of the default hotkeys and their functions.
-For more information about binding custom hotkeys or changing
-default bindings, please run `> help keybindings`
+Below are simple charts of the default hotkeys and their functions. For more
+information about binding custom hotkeys or changing default bindings, please
+run `> help keybindings`
 
-Please remember that *all* keys here are rebindable!
-If you don't like it, you can change it!
+Please remember that *all* keys here are rebindable! If you don't like it, you
+can change it!
 
-# Power user
+### Power user
 
 | Key       | Description of function                                                                           |
 |--------   |-------------------------------------------------------------------------------------------------- |
@@ -15,7 +15,7 @@ If you don't like it, you can change it!
 | Tab       | In command prompt, it will autocomplete if possible.                                              |
 | Ctrl+B    | Run a shell command (this will close micro while your command executes).                          |
 
-# Navigation
+### Navigation
 
 | Key                       | Description of function                                                                   |
 |-------------------------- |------------------------------------------------------------------------------------------ |
@@ -25,6 +25,8 @@ If you don't like it, you can change it!
 | End or CtrlRightArrow     | Move to the end of the current line                                                       |
 | AltLeftArrow              | Move cursor one word left                                                                 |
 | AltRightArrow             | Move cursor one word right                                                                |
+| Alt+{                     | Move cursor to previous empty line, or beginning of document                              |
+| Alt+}                     | Move cursor to next empty line, or end of document                                        |
 | PageUp                    | Move cursor up one page                                                                   |
 | PageDown                  | Move cursor down one page                                                                 |
 | CtrlHome or CtrlUpArrow   | Move cursor to start of document                                                          |
@@ -32,7 +34,7 @@ If you don't like it, you can change it!
 | Ctrl+L                    | Jump to a line in the file (prompts with #)                                               |
 | Ctrl+W                    | Cycle between splits in the current tab (use `> vsplit` or `> hsplit` to create a split)  |
 
-# Tabs
+### Tabs
 
 | Key     | Description of function   |
 |-------- |-------------------------  |
@@ -40,7 +42,7 @@ If you don't like it, you can change it!
 | Alt+,   | Previous tab              |
 | Alt+.   | Next tab                  |
 
-# Find Operations
+### Find Operations
 
 | Key       | Description of function                   |
 |--------   |------------------------------------------ |
@@ -48,7 +50,7 @@ If you don't like it, you can change it!
 | Ctrl+N    | Find next instance of current search      |
 | Ctrl+P    | Find previous instance of current search  |
 
-# File Operations
+### File Operations
 
 | Key       | Description of function                                           |
 |--------   |----------------------------------------------------------------   |
@@ -56,7 +58,7 @@ If you don't like it, you can change it!
 | Ctrl+O    | Open a file (prompts for filename)                                |
 | Ctrl+S    | Save current file                                                 |
 
-# Text operations
+### Text operations
 
 | Key                               | Description of function                   |
 |---------------------------------  |------------------------------------------ |
@@ -78,14 +80,14 @@ If you don't like it, you can change it!
 | AltBackspace or AltCtrl+H         | Delete word left                          |
 | Ctrl+A                            | Select all                                |
 
-# Macros
+### Macros
 
 | Key       | Description of function                                                           |
 |--------   |---------------------------------------------------------------------------------- |
 | Ctrl+U    | Toggle macro recording (press Ctrl+U to start recording and press again to stop)  |
 | Ctrl+J    | Run latest recorded macro                                                         |
 
-# Multiple cursors
+### Multiple cursors
 
 | Key               | Description of function                                                                       |
 |----------------   |---------------------------------------------------------------------------------------------- |
@@ -95,7 +97,7 @@ If you don't like it, you can change it!
 | Alt+X             | Skip multiple cursor selection                                                                |
 | Ctrl-MouseLeft    | Place a multiple cursor at any location                                                       |
 
-# Other
+### Other
 
 | Key       | Description of function                                                               |
 |--------   |-----------------------------------------------------------------------------------    |
@@ -103,7 +105,7 @@ If you don't like it, you can change it!
 | Ctrl+H    | Backspace (old terminals do not support the backspace key and use Ctrl+H instead)     |
 | Ctrl+R    | Toggle the line number ruler                                                          |
 
-# Emacs style actions
+### Emacs style actions
 
 | Key       | Description of function   |
 |-------    |-------------------------  |
@@ -112,7 +114,7 @@ If you don't like it, you can change it!
 | Alt+A     | Move to start of line     |
 | Alt+E     | Move to end of line       |
 
-# Function keys.
+### Function keys.
 
 Warning! The function keys may not work in all terminals! 
 
