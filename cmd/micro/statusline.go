@@ -75,7 +75,8 @@ func (sline *Statusline) Display() {
 	file += " " + sline.view.Buf.FileType()
 
 	//Support for modifying the statusline
-	file += " " + sline.view.Buf.Settings["fileformat"].(string) + sline.pluginsline pluginsline
+	//file += " " + sline.view.Buf.Settings["fileformat"].(string) + sline.pluginsline + pluginsline
+	file += " " + sline.view.Buf.Settings["fileformat"].(string)
 
 	rightText := ""
 	if len(helpBinding) > 0 {
