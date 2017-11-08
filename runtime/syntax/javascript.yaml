@@ -16,7 +16,7 @@ rules:
     - symbol.brackets: "(\\(|\\))"
     - symbol.brackets: "(\\[|\\])"
     - statement: "\\b(break|case|catch|continue|default|delete|do|else|finally)\\b"
-    - statement: "\\b(for|function|class|extends|get|if|in|instanceof|new|return|set|switch)\\b"
+    - statement: "\\b(for|function|class|extends|get|if|in|instanceof|new|return|set|switch|async|await)\\b"
     - statement: "\\b(switch|this|throw|try|typeof|var|const|let|void|while|with)\\b"
     - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
