@@ -195,7 +195,7 @@ Here's a list of subgroups used in micro's built-in syntax files.
 * identifier.var
 * preproc.shebang (The #! at the beginning of a file that tells the os what
   script interpreter to use)
-* symbol.brackets ({}()[] and sometimes <>)
+* symbol.brackets (`{}()[]` and sometimes `<>`)
 * symbol.operator (Color operator symbols differently)
 * symbol.tag (For html tags, among other things)
 * type.keyword (If you want a special highlight for keywords like `private`)
@@ -210,9 +210,9 @@ languages.
 
 Micro's builtin syntax highlighting tries very hard to be sane, sensible and
 provide ample coverage of the meaningful elements of a language. Micro has
-syntax files built int for over 100 languages now. However, there may be 
+syntax files built in for over 100 languages now! However, there may be 
 situations where you find Micro's highlighting to be insufficient or not to your
-liking. Good news is you can create syntax files (.micro extension), place them
+liking. The good news is that you can create your own syntax files, and place them
 in  `~/.config/micro/syntax` and Micro will use those instead.
 
 ### Filetype definition
