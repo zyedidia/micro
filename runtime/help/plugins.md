@@ -199,7 +199,7 @@ standard library.
 Simply import the package you'd like and then you can use it. For example:
 
 ```lua
-local ioutil = import("ioutil")
+local ioutil = import("io/ioutil")
 local fmt = import("fmt")
 
 local data, err = ioutil.ReadFile("SomeFile.txt")
@@ -216,10 +216,30 @@ else
 end
 ```
 
-For a full list of which packages and functions from the standard library you
-can access, look at `lua.go` in the source code (it shouldn't be too hard to
-look through).
+Here are the packages from the Go standard library that you can access.
+Nearly all functions from these packages are supported. For an exact
+list of which functions are supported you can look through `lua.go`
+(which should be easy to understand).
 
+```
+fmt
+io
+io/ioutil
+net
+math
+math/rand
+os
+runtime
+path
+filepath
+strings
+regexp
+errors
+time
+```
+
+For documentation for each of these functions, you can simply look
+through the Go standard library documentation.
 
 ## Adding help files, syntax files, or colorschemes in your plugin
 
