@@ -47,3 +47,8 @@ test:
 
 clean:
 	rm -f micro
+
+ci: test
+	gem install bundler
+	bundle install
+	danger --verbose

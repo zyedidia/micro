@@ -1,2 +1,4 @@
 language: go
-script: make test
+before_install:
+  - rvm install 2.2
+script: make ci
