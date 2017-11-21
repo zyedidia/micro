@@ -47,7 +47,7 @@ func Import(pkg string) *lua.LTable {
 		return importFmt()
 	case "io":
 		return importIo()
-	case "io/ioutil":
+	case "io/ioutil", "ioutil":
 		return importIoUtil()
 	case "net":
 		return importNet()
