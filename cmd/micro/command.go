@@ -55,6 +55,7 @@ func init() {
 		"Open":       Open,
 		"TabSwitch":  TabSwitch,
 		"MemUsage":   MemUsage,
+		"Retab":      Retab,
 	}
 }
 
@@ -110,6 +111,7 @@ func DefaultCommands() map[string]StrCommand {
 		"open":       {"Open", []Completion{FileCompletion}},
 		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
+		"retab":      {"Retab", []Completion{NoCompletion}},
 	}
 }
 
@@ -194,6 +196,10 @@ func PluginCmd(args []string) {
 	} else {
 		messenger.Error("Not enough arguments")
 	}
+}
+
+func Retab(args []string) {
+	CurView().Retab(true)
 }
 
 // TabSwitch switches to a given tab either by name or by number

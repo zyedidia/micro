@@ -76,6 +76,9 @@ Here are the possible commands that you can use.
 
 * `open filename`: Open a file in the current buffer.
 
+* `retab`: Replaces all leading tabs with spaces or leading spaces with tabs
+   depending on the value of `tabstospaces`.
+
 ---
 
 The following commands are provided by the default plugins:
