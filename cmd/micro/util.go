@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
+	"github.com/mattn/go-shellwords"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -278,92 +279,50 @@ func ShortFuncName(i interface{}) string {
 
 // SplitCommandArgs separates multiple command arguments which may be quoted.
 // The returned slice contains at least one string
-func SplitCommandArgs(input string) []string {
-	var result []string
-	var curQuote *bytes.Buffer
-
-	curArg := new(bytes.Buffer)
-	escape := false
-
-	finishQuote := func() {
-		if curQuote == nil {
-			return
-		}
-		str := curQuote.String()
-		if unquoted, err := strconv.Unquote(str); err == nil {
-			str = unquoted
-		}
-		curArg.WriteString(str)
-		curQuote = nil
-	}
-
-	appendResult := func() {
-		finishQuote()
-		escape = false
-
-		str := curArg.String()
-		result = append(result, str)
-		curArg.Reset()
-	}
-
-	for _, r := range input {
-		if r == ' ' && curQuote == nil {
-			appendResult()
-		} else {
-			runeHandled := false
-			appendRuneToBuff := func() {
-				if curQuote != nil {
-					curQuote.WriteRune(r)
-				} else {
-					curArg.WriteRune(r)
-				}
-				runeHandled = true
-			}
-
-			if r == '"' && curQuote == nil {
-				curQuote = new(bytes.Buffer)
-				appendRuneToBuff()
-			} else {
-				if curQuote != nil && !escape {
-					if r == '"' {
-						appendRuneToBuff()
-						finishQuote()
-					} else if r == '\\' {
-						appendRuneToBuff()
-						escape = true
-						continue
-					}
-				}
-			}
-			if !runeHandled {
-				appendRuneToBuff()
-			}
-		}
-
-		escape = false
-	}
-	appendResult()
-	return result
+func SplitCommandArgs(input string) ([]string, error) {
+	shellwords.ParseEnv = true
+	shellwords.ParseBacktick = true
+	return shellwords.Parse(input)
 }
 
 // JoinCommandArgs joins multiple command arguments and quote the strings if needed.
 func JoinCommandArgs(args ...string) string {
-	buf := new(bytes.Buffer)
-	first := true
-	for _, arg := range args {
-		if first {
-			first = false
-		} else {
-			buf.WriteRune(' ')
+	var buf bytes.Buffer
+	for i, w := range args {
+		if i != 0 {
+			buf.WriteByte(' ')
 		}
-		quoted := strconv.Quote(arg)
-		if quoted[1:len(quoted)-1] != arg || strings.ContainsRune(arg, ' ') {
-			buf.WriteString(quoted)
-		} else {
-			buf.WriteString(arg)
+		if w == "" {
+			buf.WriteString("''")
+			continue
 		}
-	}
 
+		strBytes := []byte(w)
+		for _, b := range strBytes {
+			switch b {
+			case
+				'a', 'b', 'c', 'd', 'e', 'f', 'g',
+				'h', 'i', 'j', 'k', 'l', 'm', 'n',
+				'o', 'p', 'q', 'r', 's', 't', 'u',
+				'v', 'w', 'x', 'y', 'z',
+				'A', 'B', 'C', 'D', 'E', 'F', 'G',
+				'H', 'I', 'J', 'K', 'L', 'M', 'N',
+				'O', 'P', 'Q', 'R', 'S', 'T', 'U',
+				'V', 'W', 'X', 'Y', 'Z',
+				'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
+				'_', '-', '.', ',', ':', '/', '@':
+				buf.WriteByte(b)
+			case '\n':
+				buf.WriteString("'\n'")
+			default:
+				buf.WriteByte('\\')
+				buf.WriteByte(b)
+			}
+		}
+
+		// return buf.String()
+		// buf.WriteString(w)
+	}
 	return buf.String()
 }
 

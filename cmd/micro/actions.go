@@ -997,7 +997,12 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
-			filename = strings.Join(SplitCommandArgs(filename), " ")
+			args, err := SplitCommandArgs(filename)
+			filename = strings.Join(args, " ")
+			if err != nil {
+				messenger.Error("Error parsing arguments: ", err)
+				return false
+			}
 			v.saveToFile(filename)
 		}
 
