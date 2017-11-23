@@ -235,10 +235,18 @@ func TabSwitch(args []string) {
 func Cd(args []string) {
 	if len(args) > 0 {
 		path := ReplaceHome(args[0])
-		os.Chdir(path)
+		err := os.Chdir(path)
+		if err != nil {
+			messenger.Error("Error with cd: ", err)
+			return
+		}
+		wd, _ := os.Getwd()
 		for _, tab := range tabs {
 			for _, view := range tab.views {
-				wd, _ := os.Getwd()
+				if len(view.Buf.name) == 0 {
+					continue
+				}
+
 				view.Buf.Path, _ = MakeRelative(view.Buf.AbsPath, wd)
 				if p, _ := filepath.Abs(view.Buf.Path); !strings.Contains(p, wd) {
 					view.Buf.Path = view.Buf.AbsPath
