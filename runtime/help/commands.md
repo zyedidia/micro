@@ -9,11 +9,12 @@ Here are the possible commands that you can use.
   will 'save as' the filename.
 
 * `replace "search" "value" flags`: This will replace `search` with `value`. 
-   The `flags` are optional. At this point, there is only one flag: `-a`, which
-   replaces all occurrences at once.
+   The `flags` are optional. Possible flags are:
+   * `-a`: Replace all occurrences at once
+   * `-l`: Do a literal search instead of a regex search
 
-   Note that `search` must be a valid regex.  If one of the arguments does not
-   have any spaces in it, you may omit the quotes.
+   Note that `search` must be a valid regex (unless `-l` is passed). If one 
+   of the arguments does not have any spaces in it, you may omit the quotes.
 
 * `replaceall "search" "value"`: This will replace `search` with `value` without
    user confirmation.
@@ -76,8 +77,19 @@ Here are the possible commands that you can use.
 
 * `open filename`: Open a file in the current buffer.
 
+* `retab`: Replaces all leading tabs with spaces or leading spaces with tabs
+   depending on the value of `tabstospaces`.
+
 ---
 
 The following commands are provided by the default plugins:
 
 * `lint`: Lint the current file for errors.
+
+# Command Parsing
+
+When running a command, you can use extra syntax that micro will expand before
+running the command. To use an argument with a space in it, simply put it in
+quotes. You can also use environment variables in the command bar and they
+will be expanded to their value. Finally, you can put an expression in backticks
+and it will be evaluated by the shell beforehand.

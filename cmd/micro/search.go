@@ -64,7 +64,12 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 			// Exit the search mode
 			ExitSearch(v)
 			return
-		case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEnter:
+		case tcell.KeyEnter:
+			// If the user has pressed Enter, they want this to be the lastSearch
+			lastSearch = messenger.response
+			EndSearch()
+			return
+		case tcell.KeyCtrlQ, tcell.KeyCtrlC:
 			// Done
 			EndSearch()
 			return
@@ -179,9 +184,7 @@ func Search(searchStr string, v *View, down bool) {
 			found = searchUp(r, v, v.Buf.End(), searchStart)
 		}
 	}
-	if found {
-		lastSearch = searchStr
-	} else {
+	if !found {
 		v.Cursor.ResetSelection()
 	}
 }

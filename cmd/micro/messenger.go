@@ -272,9 +272,16 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
-				args := SplitCommandArgs(m.response)
-				currentArgNum := len(args) - 1
-				currentArg := args[currentArgNum]
+				args, err := SplitCommandArgs(m.response)
+				if err != nil {
+					break
+				}
+				currentArg := ""
+				currentArgNum := 0
+				if len(args) > 0 {
+					currentArgNum = len(args) - 1
+					currentArg = args[currentArgNum]
+				}
 				var completionType Completion
 
 				if completionTypes[0] == CommandCompletion && currentArgNum > 0 {

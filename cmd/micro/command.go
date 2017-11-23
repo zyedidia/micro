@@ -55,6 +55,7 @@ func init() {
 		"Open":       Open,
 		"TabSwitch":  TabSwitch,
 		"MemUsage":   MemUsage,
+		"Retab":      Retab,
 	}
 }
 
@@ -110,6 +111,7 @@ func DefaultCommands() map[string]StrCommand {
 		"open":       {"Open", []Completion{FileCompletion}},
 		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
+		"retab":      {"Retab", []Completion{NoCompletion}},
 	}
 }
 
@@ -196,6 +198,10 @@ func PluginCmd(args []string) {
 	}
 }
 
+func Retab(args []string) {
+	CurView().Retab(true)
+}
+
 // TabSwitch switches to a given tab either by name or by number
 func TabSwitch(args []string) {
 	if len(args) > 0 {
@@ -271,7 +277,12 @@ func Open(args []string) {
 	if len(args) > 0 {
 		filename := args[0]
 		// the filename might or might not be quoted, so unquote first then join the strings.
-		filename = strings.Join(SplitCommandArgs(filename), " ")
+		args, err := SplitCommandArgs(filename)
+		if err != nil {
+			messenger.Error("Error parsing args ", err)
+			return
+		}
+		filename = strings.Join(args, " ")
 
 		CurView().Open(filename)
 	} else {
@@ -502,24 +513,35 @@ func Save(args []string) {
 
 // Replace runs search and replace
 func Replace(args []string) {
-	if len(args) < 2 || len(args) > 3 {
+	if len(args) < 2 || len(args) > 4 {
 		// We need to find both a search and replace expression
 		messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
 		return
 	}
 
-	allAtOnce := false
-	if len(args) == 3 {
-		// user added -a flag
-		if args[2] == "-a" {
-			allAtOnce = true
-		} else {
-			messenger.Error("Invalid replace flag: " + args[2])
-			return
+	all := false
+	noRegex := false
+
+	if len(args) > 2 {
+		for _, arg := range args[2:] {
+			switch arg {
+			case "-a":
+				all = true
+			case "-l":
+				noRegex = true
+			default:
+				messenger.Error("Invalid flag: " + arg)
+				return
+			}
 		}
 	}
 
 	search := string(args[0])
+
+	if noRegex {
+		search = regexp.QuoteMeta(search)
+	}
+
 	replace := string(args[1])
 
 	regex, err := regexp.Compile("(?m)" + search)
@@ -555,7 +577,7 @@ func Replace(args []string) {
 		view.Buf.MultipleReplace(deltas)
 	}
 
-	if allAtOnce {
+	if all {
 		replaceAll()
 	} else {
 		for {
@@ -615,15 +637,18 @@ func ReplaceAll(args []string) {
 
 // RunShellCommand executes a shell command and returns the output/error
 func RunShellCommand(input string) (string, error) {
-	inputCmd := SplitCommandArgs(input)[0]
-	args := SplitCommandArgs(input)[1:]
+	args, err := SplitCommandArgs(input)
+	if err != nil {
+		return "", err
+	}
+	inputCmd := args[0]
 
-	cmd := exec.Command(inputCmd, args...)
+	cmd := exec.Command(inputCmd, args[1:]...)
 	outputBytes := &bytes.Buffer{}
 	cmd.Stdout = outputBytes
 	cmd.Stderr = outputBytes
 	cmd.Start()
-	err := cmd.Wait() // wait for command to finish
+	err = cmd.Wait() // wait for command to finish
 	outstring := outputBytes.String()
 	return outstring, err
 }
@@ -632,7 +657,11 @@ func RunShellCommand(input string) (string, error) {
 // The openTerm argument specifies whether a terminal should be opened (for viewing output
 // or interacting with stdin)
 func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
-	inputCmd := SplitCommandArgs(input)[0]
+	args, err := SplitCommandArgs(input)
+	if err != nil {
+		return ""
+	}
+	inputCmd := args[0]
 	if !openTerm {
 		// Simply run the command in the background and notify the user when it's done
 		messenger.Message("Running...")
@@ -657,7 +686,7 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		screen.Fini()
 		screen = nil
 
-		args := SplitCommandArgs(input)[1:]
+		args := args[1:]
 
 		// Set up everything for the command
 		var output string
@@ -698,7 +727,12 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 
 // HandleCommand handles input from the user
 func HandleCommand(input string) {
-	args := SplitCommandArgs(input)
+	args, err := SplitCommandArgs(input)
+	if err != nil {
+		messenger.Error("Error parsing args ", err)
+		return
+	}
+
 	inputCmd := args[0]
 
 	if _, ok := commands[inputCmd]; !ok {
