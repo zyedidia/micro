@@ -25,7 +25,6 @@ func (sline *Statusline) Display() {
 
 	file := ""
 
-<<<<<<< HEAD
 	if globalSettings["showclock"].(bool) {
 		t := time.Now()
 		curtime := "["
