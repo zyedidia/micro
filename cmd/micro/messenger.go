@@ -10,6 +10,7 @@ import (
 
 	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/tcell"
 )
 
@@ -272,7 +273,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
-				args, err := SplitCommandArgs(m.response)
+				args, err := shellwords.Split(m.response)
 				if err != nil {
 					break
 				}
@@ -322,7 +323,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 				}
 
 				if chosen != "" {
-					m.response = JoinCommandArgs(append(args[:len(args)-1], chosen)...)
+					m.response = shellwords.Join(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
 			}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -12,7 +11,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
-	"github.com/mattn/go-shellwords"
 	homedir "github.com/mitchellh/go-homedir"
 )
 
@@ -275,55 +273,6 @@ func FuncName(i interface{}) string {
 // ShortFuncName returns the name only of a given function object
 func ShortFuncName(i interface{}) string {
 	return strings.TrimPrefix(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), "main.(*View).")
-}
-
-// SplitCommandArgs separates multiple command arguments which may be quoted.
-// The returned slice contains at least one string
-func SplitCommandArgs(input string) ([]string, error) {
-	shellwords.ParseEnv = true
-	shellwords.ParseBacktick = true
-	return shellwords.Parse(input)
-}
-
-// JoinCommandArgs joins multiple command arguments and quote the strings if needed.
-func JoinCommandArgs(args ...string) string {
-	var buf bytes.Buffer
-	for i, w := range args {
-		if i != 0 {
-			buf.WriteByte(' ')
-		}
-		if w == "" {
-			buf.WriteString("''")
-			continue
-		}
-
-		strBytes := []byte(w)
-		for _, b := range strBytes {
-			switch b {
-			case
-				'a', 'b', 'c', 'd', 'e', 'f', 'g',
-				'h', 'i', 'j', 'k', 'l', 'm', 'n',
-				'o', 'p', 'q', 'r', 's', 't', 'u',
-				'v', 'w', 'x', 'y', 'z',
-				'A', 'B', 'C', 'D', 'E', 'F', 'G',
-				'H', 'I', 'J', 'K', 'L', 'M', 'N',
-				'O', 'P', 'Q', 'R', 'S', 'T', 'U',
-				'V', 'W', 'X', 'Y', 'Z',
-				'0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-				'_', '-', '.', ',', ':', '/', '@':
-				buf.WriteByte(b)
-			case '\n':
-				buf.WriteString("'\n'")
-			default:
-				buf.WriteByte('\\')
-				buf.WriteByte(b)
-			}
-		}
-
-		// return buf.String()
-		// buf.WriteString(w)
-	}
-	return buf.String()
 }
 
 // ReplaceHome takes a path as input and replaces ~ at the start of the path with the user's

@@ -10,6 +10,7 @@ import (
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/tcell"
 )
 
@@ -997,7 +998,7 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
-			args, err := SplitCommandArgs(filename)
+			args, err := shellwords.Split(filename)
 			filename = strings.Join(args, " ")
 			if err != nil {
 				messenger.Error("Error parsing arguments: ", err)

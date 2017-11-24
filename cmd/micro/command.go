@@ -13,6 +13,7 @@ import (
 	"strings"
 
 	humanize "github.com/dustin/go-humanize"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 )
 
 // A Command contains a action (a function to call) as well as information about how to autocomplete the command
@@ -285,7 +286,7 @@ func Open(args []string) {
 	if len(args) > 0 {
 		filename := args[0]
 		// the filename might or might not be quoted, so unquote first then join the strings.
-		args, err := SplitCommandArgs(filename)
+		args, err := shellwords.Split(filename)
 		if err != nil {
 			messenger.Error("Error parsing args ", err)
 			return
@@ -500,7 +501,7 @@ func Bind(args []string) {
 // Run runs a shell command in the background
 func Run(args []string) {
 	// Run a shell command in the background (openTerm is false)
-	HandleShellCommand(JoinCommandArgs(args...), false, true)
+	HandleShellCommand(shellwords.Join(args...), false, true)
 }
 
 // Quit closes the main view
@@ -645,7 +646,7 @@ func ReplaceAll(args []string) {
 
 // RunShellCommand executes a shell command and returns the output/error
 func RunShellCommand(input string) (string, error) {
-	args, err := SplitCommandArgs(input)
+	args, err := shellwords.Split(input)
 	if err != nil {
 		return "", err
 	}
@@ -665,7 +666,7 @@ func RunShellCommand(input string) (string, error) {
 // The openTerm argument specifies whether a terminal should be opened (for viewing output
 // or interacting with stdin)
 func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
-	args, err := SplitCommandArgs(input)
+	args, err := shellwords.Split(input)
 	if err != nil {
 		return ""
 	}
@@ -735,7 +736,7 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 
 // HandleCommand handles input from the user
 func HandleCommand(input string) {
-	args, err := SplitCommandArgs(input)
+	args, err := shellwords.Split(input)
 	if err != nil {
 		messenger.Error("Error parsing args ", err)
 		return
