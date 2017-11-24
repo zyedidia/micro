@@ -28,13 +28,15 @@ type Cursor struct {
 	Num int
 }
 
-// Goto puts the cursor at the given cursor's location and gives the current cursor its selection too
+// Goto puts the cursor at the given cursor's location and gives
+// the current cursor its selection too
 func (c *Cursor) Goto(b Cursor) {
 	c.X, c.Y, c.LastVisualX = b.X, b.Y, b.LastVisualX
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
 }
 
-// CopySelection copies the user's selection to either "primary" or "clipboard"
+// CopySelection copies the user's selection to either "primary"
+// or "clipboard"
 func (c *Cursor) CopySelection(target string) {
 	if c.HasSelection() {
 		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
@@ -151,7 +153,8 @@ func (c *Cursor) SelectWord() {
 	c.Loc = c.CurSelection[1]
 }
 
-// AddWordToSelection adds the word the cursor is currently on to the selection
+// AddWordToSelection adds the word the cursor is currently on
+// to the selection
 func (c *Cursor) AddWordToSelection() {
 	if c.Loc.GreaterThan(c.OrigSelection[0]) && c.Loc.LessThan(c.OrigSelection[1]) {
 		c.CurSelection = c.OrigSelection
@@ -183,7 +186,8 @@ func (c *Cursor) AddWordToSelection() {
 	c.Loc = c.CurSelection[1]
 }
 
-// SelectTo selects from the current cursor location to the given location
+// SelectTo selects from the current cursor location to the given
+// location
 func (c *Cursor) SelectTo(loc Loc) {
 	if loc.GreaterThan(c.OrigSelection[0]) {
 		c.SetSelectionStart(c.OrigSelection[0])
@@ -280,7 +284,8 @@ func (c *Cursor) Down() {
 	c.DownN(1)
 }
 
-// Left moves the cursor left one cell (if possible) or to the last line if it is at the beginning
+// Left moves the cursor left one cell (if possible) or to
+// the previous line if it is at the beginning
 func (c *Cursor) Left() {
 	if c.Loc == c.buf.Start() {
 		return
@@ -294,7 +299,8 @@ func (c *Cursor) Left() {
 	c.LastVisualX = c.GetVisualX()
 }
 
-// Right moves the cursor right one cell (if possible) or to the next line if it is at the end
+// Right moves the cursor right one cell (if possible) or
+// to the next line if it is at the end
 func (c *Cursor) Right() {
 	if c.Loc == c.buf.End() {
 		return
@@ -320,7 +326,9 @@ func (c *Cursor) Start() {
 	c.LastVisualX = c.GetVisualX()
 }
 
-// GetCharPosInLine gets the char position of a visual x y coordinate (this is necessary because tabs are 1 char but 4 visual spaces)
+// GetCharPosInLine gets the char position of a visual x y
+// coordinate (this is necessary because tabs are 1 char but
+// 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
 	tabSize := int(c.buf.Settings["tabsize"].(float64))
@@ -355,8 +363,9 @@ func (c *Cursor) StoreVisualX() {
 	c.LastVisualX = c.GetVisualX()
 }
 
-// Relocate makes sure that the cursor is inside the bounds of the buffer
-// If it isn't, it moves it to be within the buffer's lines
+// Relocate makes sure that the cursor is inside the bounds
+// of the buffer If it isn't, it moves it to be within the
+// buffer's lines
 func (c *Cursor) Relocate() {
 	if c.Y < 0 {
 		c.Y = 0
