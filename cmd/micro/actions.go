@@ -2024,7 +2024,28 @@ func (v *View) PlayMacro(usePlugin bool) bool {
 	return true
 }
 
-// SpawnMultiCursor creates a new multiple cursor at the next occurrence of the current selection or current word
+//Shortcut for the replace command
+func (v *View) Replace(usePlugin bool) bool {
+	input, canceled := messenger.Prompt("> ", "replace ", "", 0)
+	if !canceled {
+		HandleCommand(input)
+		return true
+	}
+	return true
+}
+
+//Shortcut for the tabswitch command
+func (v *View) Tabswitch(usePlugin bool) bool {
+	input, canceled := messenger.Prompt("> ", "tabswitch ", "", 0)
+	if !canceled {
+		HandleCommand(input)
+		return true
+	}
+	return true
+}
+
+
+// SpawnMultiCursor creates a new multiple cursor at the next occurence of the current selection or current word
 func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	spawner := v.Buf.cursors[len(v.Buf.cursors)-1]
 	// You can only spawn a cursor from the main cursor
@@ -2157,5 +2178,9 @@ func (v *View) RemoveAllMultiCursors(usePlugin bool) bool {
 		}
 		return true
 	}
+	return false
+}
+// None is no action
+func None() bool {
 	return false
 }

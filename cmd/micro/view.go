@@ -153,7 +153,7 @@ func (v *View) ToggleStatusLine() {
 
 // ToggleTabbar creates an extra row for the tabbar if necessary
 func (v *View) ToggleTabbar() {
-	if len(tabs) > 1 {
+	if len(tabs) > 1 || globalSettings["tabbaralways"].(bool) {
 		if v.y == 0 {
 			// Include one line for the tab bar at the top
 			v.Height--
@@ -985,8 +985,8 @@ func (v *View) DisplayView() {
 		if style, ok := colorscheme["divider"]; ok {
 			dividerStyle = style
 		}
-		for i := 0; i < v.Height; i++ {
-			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
+		for i := visualLineN + 1; i < v.Height; i++ {
+			screen.SetContent(v.x, yOffset+i, tcell.RuneVLine, nil, dividerStyle.Reverse(true))
 		}
 	}
 }

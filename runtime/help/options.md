@@ -48,7 +48,7 @@ Here are the options that you can set:
 
 * `eofnewline`: micro will automatically add a newline to the file.
 
-	default value: `false`
+	default value: `true`
 
 * `fastdirty`: this determines what kind of algorithm micro uses to determine if
    a buffer is modified or not. When `fastdirty` is on, micro just uses a
@@ -196,6 +196,28 @@ Here are the options that you can set:
 * `tabsize`: sets the tab size to `option`
 
 	default value: `4`
+
+* `numberedtabs`: Display the tab's number beside it in the tab bar.  
+	default value: `on`
+
+* `showclock`: Display a clock in the status line. 
+	(May be off by up to 20 seconds to save on performance. )
+	*Note:* Setting this causes micro to redraw the screen at least 4 times a 
+	minute, instead of just when it receives input. Hence why it is off by default.
+	
+	default value: `off`
+
+* `12hourclock`: Display time in a 12-hour format, rather than the default 24-hour.
+
+	default value: `off`
+	
+* `showseconds`: Display seconds in the status line clock. 
+	(This is a bit more resource intensive as it redraws the screen every second.)
+	
+	default value: `off`
+	
+* `termtitle`: defines whether or not your terminal's title will be set by micro when opened.
+	default value: `off`
 
 * `tabstospaces`: use spaces instead of tabs
 

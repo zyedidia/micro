@@ -2,11 +2,19 @@ package main
 
 import (
 	"sort"
+	"strconv"
+	"path/filepath"
 
 	"github.com/zyedidia/tcell"
 )
 
-var tabBarOffset int
+var (
+	tabBarLen int
+	currentTabOffset int
+	previousTabOffset int
+	tabBarOffset int
+	ScrollOffset int
+)
 
 type Tab struct {
 	// This contains all the views in this tab
@@ -39,6 +47,9 @@ func NewTabFromView(v *View) *Tab {
 	if globalSettings["keymenu"].(bool) {
 		t.tree.height -= 2
 	}
+
+	//Reset the Scroll Offset so that the tabbar centers correctly on the new tab.
+	ScrollOffset = 0
 
 	t.Resize()
 
@@ -95,11 +106,19 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
+		if globalSettings["numberedtabs"].(bool){
+			str += "(" + strconv.Itoa(i + 1) + ")"
+		}
 		buf := t.views[t.CurView].Buf
 		str += buf.GetName()
 		if buf.Modified() {
 			str += " +"
 		}
+		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
+		str += name
+		//if t.views[t.CurView].Buf.IsModified {
+		//	str += "*"
+		//}
 		if i == curTab {
 			str += "]"
 		} else {
@@ -148,15 +167,86 @@ func TabbarHandleMouseEvent(event tcell.Event) bool {
 			curTab = tabnum
 			return true
 		}
+		
+		//Close tab on right click
+		if button == tcell.Button3 {
+			x, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			str, indicies := TabbarString()
+			if x + tabBarOffset >= len(str) {
+				return false
+			}
+			var tabnum int
+			var keys []int
+			for k := range indicies {
+				keys = append(keys, k)
+			}
+			sort.Ints(keys)
+			for _, k := range keys {
+				if x+tabBarOffset <= k {
+					tabnum = indicies[k] - 1
+					break
+				}
+			}
+			c := 0
+			for i := range tabs[tabnum].views {
+				tabs[tabnum].views[i-c].Quit(false)
+				c++
+			}
+			return true
+		}
+		
+		//Scroll left on mousewheel up
+		if button == tcell.WheelUp {
+			_, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			w, _ := screen.Size()
+			if w > tabBarLen {
+				return true
+			}
+			//If there is nothing to the left to scroll to, ignore scroll event completely.
+			//leftBuffer := previousTabOffset + (currentTabOffset - previousTabOffset)/2
+			//if leftBuffer <= 0 {
+			//	return true
+			//}
+			ScrollOffset--
+			return true
+		}
+		
+		//Scroll right on mousewheel down
+		if button == tcell.WheelDown {
+			_, y := e.Position()
+			if y != 0 {
+				return false
+			}
+			w, _ := screen.Size()
+			if w > tabBarLen {
+				return true
+			}
+			//If there is nothing to the right to scroll to, ignore scroll event completely
+			//rightBuffer := currentTabOffset + (currentTabOffset - previousTabOffset)/2
+			//if rightBuffer <= 0 {
+			//	return true
+			//}
+			ScrollOffset++
+			return true
+		}
 	}
-
+	
+	ScrollOffset = 0
 	return false
 }
 
 // DisplayTabs displays the tabbar at the top of the editor if there are multiple tabs
 func DisplayTabs() {
 	if len(tabs) <= 1 {
-		return
+		if !globalSettings["tabbaralways"].(bool) {
+			return
+		}
 	}
 
 	str, indicies := TabbarString()
@@ -168,8 +258,9 @@ func DisplayTabs() {
 
 	// Maybe there is a unicode filename?
 	fileRunes := []rune(str)
+	tabBarLen = len(fileRunes)
 	w, _ := screen.Size()
-	tooWide := (w < len(fileRunes))
+	tooWide := (w < tabBarLen)
 
 	// if the entire tab-bar is longer than the screen is wide,
 	// then it should be truncated appropriately to keep the
@@ -188,8 +279,6 @@ func DisplayTabs() {
 		sort.Ints(keys)
 		// record the offset of each tab and the previous tab so
 		// we can find the position of the tab's hit-box.
-		previousTabOffset := 0
-		currentTabOffset := 0
 		for _, k := range keys {
 			tabIndex := indicies[k] - 1
 			if tabIndex == curTab {
@@ -202,13 +291,14 @@ func DisplayTabs() {
 		}
 		// get the width of the hitbox of the active tab, from there calculate the offsets
 		// to the left and right of it to approximately center it on the tab bar display.
-		centeringOffset := (w - (currentTabOffset - previousTabOffset))
+		centeringOffset := (w - (currentTabOffset - previousTabOffset) + ScrollOffset)
+		//centeringOffset := (w - (currentTabOffset - previousTabOffset) )
 		leftBuffer := previousTabOffset - (centeringOffset / 2)
 		rightBuffer := currentTabOffset + (centeringOffset / 2)
 
 		// check to make sure we haven't overshot the bounds of the string,
 		// if we have, then take that remainder and put it on the left side
-		overshotRight := rightBuffer - len(fileRunes)
+		overshotRight := rightBuffer - tabBarLen
 		if overshotRight > 0 {
 			leftBuffer = leftBuffer + overshotRight
 		}
@@ -221,8 +311,8 @@ func DisplayTabs() {
 			rightBuffer = leftBuffer + (w - 2)
 		}
 
-		if rightBuffer > len(fileRunes)-1 {
-			rightBuffer = len(fileRunes) - 1
+		if rightBuffer > tabBarLen - 1 {
+			rightBuffer = tabBarLen - 1
 		}
 
 		// construct a new buffer of text to put the
@@ -231,9 +321,9 @@ func DisplayTabs() {
 
 		// if the left-side of the tab bar isn't at the start
 		// of the constructed tab bar text, then show that are
-		// more tabs to the left by displaying a "+"
+		// more tabs to the left by displaying a "<"
 		if leftBuffer != 0 {
-			displayText = append(displayText, '+')
+			displayText = append(displayText, '<')
 		}
 		// copy the runes in from the original tab bar text string
 		// into the new display buffer
@@ -242,9 +332,9 @@ func DisplayTabs() {
 		}
 		// if there is more text to the right of the right-most
 		// column in the tab bar text, then indicate there are more
-		// tabs to the right by displaying a "+"
-		if rightBuffer < len(fileRunes)-1 {
-			displayText = append(displayText, '+')
+		// tabs to the right by displaying a ">"
+		if rightBuffer < tabBarLen - 1 {
+			displayText = append(displayText, '>')
 		}
 
 		// now store the offset from zero of the left-most text
