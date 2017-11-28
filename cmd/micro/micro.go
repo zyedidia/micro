@@ -515,8 +515,10 @@ func main() {
 								view = tabs[curTab].views[v.Num]
 							}
 						}
-						view.HandleEvent(e)
-						didAction = true
+						if view != nil {
+							view.HandleEvent(e)
+							didAction = true
+						}
 					}
 				}
 			}
