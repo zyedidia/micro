@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -21,6 +23,7 @@ var (
 	vtHelp    = ViewType{1, true, true}
 	vtLog     = ViewType{2, true, true}
 	vtScratch = ViewType{3, false, true}
+	vtRaw     = ViewType{4, true, true}
 )
 
 // The View struct stores information about a view into a buffer.
@@ -496,6 +499,20 @@ func (v *View) SetCursor(c *Cursor) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	if v.Type == vtRaw {
+		v.Buf.Insert(v.Cursor.Loc, reflect.TypeOf(event).String()[7:])
+		v.Buf.Insert(v.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
+
+		switch e := event.(type) {
+		case *tcell.EventKey:
+			if e.Key() == tcell.KeyCtrlQ {
+				v.Quit(true)
+			}
+		}
+
+		return
+	}
+
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
@@ -506,7 +523,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 	case *tcell.EventRaw:
 		for key, actions := range bindings {
 			if key.keyCode == -1 {
-				if e.EscapeCode() == key.escape {
+				if e.EscSeq() == key.escape {
 					for _, c := range v.Buf.cursors {
 						ok := v.SetCursor(c)
 						if !ok {
@@ -712,8 +729,8 @@ func (v *View) DisplayView() {
 		v.leftCol = 0
 	}
 
-	if v.Type == vtLog {
-		// Log views should always follow the cursor...
+	if v.Type == vtLog || v.Type == vtRaw {
+		// Log or raw views should always follow the cursor...
 		v.Relocate()
 	}
 

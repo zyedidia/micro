@@ -158,7 +158,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 
 	InitLocalSettings(b)
 
-	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+	if len(*flagStartPos) == 0 && (b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool)) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))

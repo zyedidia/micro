@@ -57,6 +57,7 @@ func init() {
 		"TabSwitch":  TabSwitch,
 		"MemUsage":   MemUsage,
 		"Retab":      Retab,
+		"Raw":        Raw,
 	}
 }
 
@@ -113,6 +114,7 @@ func DefaultCommands() map[string]StrCommand {
 		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
 		"retab":      {"Retab", []Completion{NoCompletion}},
+		"raw":        {"Raw", []Completion{NoCompletion}},
 	}
 }
 
@@ -201,6 +203,26 @@ func PluginCmd(args []string) {
 
 func Retab(args []string) {
 	CurView().Retab(true)
+}
+
+func Raw(args []string) {
+	buf := NewBufferFromString("", "Raw events")
+
+	view := NewView(buf)
+	view.Buf.Insert(view.Cursor.Loc, "Warning: Showing raw event escape codes\n")
+	view.Buf.Insert(view.Cursor.Loc, "Use CtrlQ to exit\n")
+	view.Type = vtRaw
+	tab := NewTabFromView(view)
+	tab.SetNum(len(tabs))
+	tabs = append(tabs, tab)
+	curTab = len(tabs) - 1
+	if len(tabs) == 2 {
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.ToggleTabbar()
+			}
+		}
+	}
 }
 
 // TabSwitch switches to a given tab either by name or by number

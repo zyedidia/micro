@@ -253,7 +253,7 @@ func LoadAll() {
 	}
 }
 
-// Passing -version as a flag will have micro print out the version number
+// Command line flags
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
 var flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")

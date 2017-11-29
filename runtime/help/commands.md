@@ -80,6 +80,11 @@ Here are the possible commands that you can use.
 * `retab`: Replaces all leading tabs with spaces or leading spaces with tabs
    depending on the value of `tabstospaces`.
 
+* `raw`: Micro will open a new tab and show the escape sequence for every event
+   it receives from the terminal. This shows you what micro actually sees from
+   the terminal and helps you see which bindings aren't possible and why. This
+   is most useful for debugging keybindings.
+
 ---
 
 The following commands are provided by the default plugins:
