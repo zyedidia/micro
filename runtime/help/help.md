@@ -14,7 +14,7 @@ See the next section for more information about documentation and help.
 
 Press CtrlQ to quit, and CtrlS to save. Press CtrlE to start typing commands and
 you can see which commands are available by pressing tab, or by viewing the help
-topic `> help commands`. When I write `> ...` I mean press Ctrl0E and then type
+topic `> help commands`. When I write `> ...` I mean press CtrlE and then type
 whatever is there. 
 
 Move the cursor around with the mouse or the arrow keys. Type
