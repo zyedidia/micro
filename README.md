@@ -30,6 +30,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Sane defaults
     * You shouldn't have to configure much out of the box (and it is extremely easy to configure)
 * Splits and tabs
+* Nano-like menu to help you remember the keybindings
 * Extremely good mouse support
     * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
 * Cross platform (It should work on all the platforms Go runs on)

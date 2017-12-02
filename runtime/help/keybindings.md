@@ -183,7 +183,7 @@ HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
-Suspend (Linux only)
+Suspend (Unix only)
 ScrollUp
 ScrollDown
 SpawnMultiCursor
