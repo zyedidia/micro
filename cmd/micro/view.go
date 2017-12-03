@@ -18,6 +18,11 @@ type ViewType struct {
 	scratch  bool // The file cannot be saved
 }
 
+// NewViewType creates a new ViewType - useful for plugins
+func NewViewType(kind int, readonly, scratch bool) ViewType {
+	return ViewType{kind, readonly, scratch}
+}
+
 var (
 	vtDefault = ViewType{0, false, false}
 	vtHelp    = ViewType{1, true, true}
