@@ -39,7 +39,7 @@ rules:
             - constant.specialChar: "\\\\."
 
     - constant.string:
-        start: "\\[\\["
+        start: "\\b\\[\\["
         end: "\\]\\]"
         rules:
             - constant.specialChar: "\\\\."
@@ -53,7 +53,7 @@ rules:
             - todo: "(TODO|XXX|FIXME):?"
 
     - comment:
-        start: "\\-\\-\\[\\["
-        end: "\\-\\-\\]\\]"
+        start: "/\\-\\-\\[\\["
+        end: "\\-\\-\\]\\]/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
