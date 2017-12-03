@@ -53,8 +53,8 @@ rules:
             - todo: "(TODO|XXX|FIXME):?"
 
     - comment.block:
-        start: "/\\-\\-\\["
-        end: "\\-\\-\\]/"
+        start: "\\-\\-\\[\\["
+        end: "\\-\\-\\]\\]"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
 
