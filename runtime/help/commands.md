@@ -85,6 +85,11 @@ Here are the possible commands that you can use.
    the terminal and helps you see which bindings aren't possible and why. This
    is most useful for debugging keybindings.
 
+* `showkey`: Show the action(s) bound to a given key. For example
+   running `> showkey CtrlC` will display `main.(*View).Copy`. Unfortuately
+   showkey does not work well for keys bound to plugin actions. For those
+   it just shows "LuaFunctionBinding."
+
 ---
 
 The following commands are provided by the default plugins:

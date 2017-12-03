@@ -4,6 +4,7 @@ import (
 	"io/ioutil"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/flynn/json5"
 	"github.com/zyedidia/tcell"
@@ -335,6 +336,7 @@ modSearch:
 	// first.
 	if modifiers&tcell.ModCtrl != 0 {
 		// see if the key is in bindingKeys with the Ctrl prefix.
+		k = string(unicode.ToUpper(rune(k[0]))) + k[1:]
 		if code, ok := bindingKeys["Ctrl"+k]; ok {
 			// It is, we're done.
 			return Key{

@@ -37,6 +37,7 @@ func init() {
 		"Set":        Set,
 		"SetLocal":   SetLocal,
 		"Show":       Show,
+		"ShowKey":    ShowKey,
 		"Run":        Run,
 		"Bind":       Bind,
 		"Quit":       Quit,
@@ -94,6 +95,7 @@ func DefaultCommands() map[string]StrCommand {
 		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
 		"setlocal":   {"SetLocal", []Completion{OptionCompletion, OptionValueCompletion}},
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
+		"showkey":    {"ShowKey", []Completion{NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
 		"run":        {"Run", []Completion{NoCompletion}},
 		"quit":       {"Quit", []Completion{NoCompletion}},
@@ -509,6 +511,33 @@ func Show(args []string) {
 	}
 
 	messenger.Message(option)
+}
+
+// ShowKey displays the action that a key is bound to
+func ShowKey(args []string) {
+	if len(args) < 1 {
+		messenger.Error("Please provide a key to show")
+		return
+	}
+
+	key, ok := findKey(args[0])
+	if !ok {
+		messenger.Error(args[0], " is not a valid key")
+		return
+	}
+	if _, ok := bindings[key]; !ok {
+		messenger.Message(args[0], " has no binding")
+	} else {
+		actions := bindings[key]
+		msg := ""
+		for i, a := range actions {
+			msg += FuncName(a)
+			if i != len(actions)-1 {
+				msg += ", "
+			}
+		}
+		messenger.Message(msg)
+	}
 }
 
 // Bind creates a new keybinding
