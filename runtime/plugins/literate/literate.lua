@@ -1,4 +1,7 @@
-VERSION = "1.0.0"
+-- VERSION = "1.0.0"
+if GetOption("literate") == nil then
+    AddOption("literate", true)
+end
 
 function startswith(str, start)
    return string.sub(str,1,string.len(start))==start
@@ -16,6 +19,7 @@ function split(string, sep)
 end
 
 function onViewOpen(view)
+    if not GetOption("literate") then return end
     if not endswith(view.Buf.Path, ".lit") then
         return
     end
