@@ -9,7 +9,7 @@ Hopefully you'll find this useful.
 ### Plugins
 
 Micro has a plugin manager which can automatically download plugins for you. To
-see the plugins 'official' plugins, go to github.com/micro-editor/plugin-channel.
+see the 'official' plugins, go to github.com/micro-editor/plugin-channel.
 
 For example, if you'd like to install the snippets plugin (listed in that repo),
 just press `CtrlE` to execute a command, and type `plugin install snippets`.
