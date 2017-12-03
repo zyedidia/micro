@@ -13,14 +13,9 @@ import (
 
 // The ViewType defines what kind of view this is
 type ViewType struct {
-	kind     int
-	readonly bool // The file cannot be edited
-	scratch  bool // The file cannot be saved
-}
-
-// NewViewType creates a new ViewType - useful for plugins
-func NewViewType(kind int, readonly, scratch bool) ViewType {
-	return ViewType{kind, readonly, scratch}
+	Kind     int
+	Readonly bool // The file cannot be edited
+	Scratch  bool // The file cannot be saved
 }
 
 var (

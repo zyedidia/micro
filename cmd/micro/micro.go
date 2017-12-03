@@ -403,7 +403,6 @@ func main() {
 	L.SetGlobal("Reload", luar.New(L, LoadAll))
 	L.SetGlobal("ByteOffset", luar.New(L, ByteOffset))
 	L.SetGlobal("ToCharPos", luar.New(L, ToCharPos))
-	L.SetGlobal("NewViewType", luar.New(L, NewViewType))
 
 	// Used for asynchronous jobs
 	L.SetGlobal("JobStart", luar.New(L, JobStart))
