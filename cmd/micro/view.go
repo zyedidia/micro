@@ -463,7 +463,7 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	for _, action := range actions {
 		readonlyBindingsResult := false
 		funcName := ShortFuncName(action)
-		if v.Type.readonly == true {
+		if v.Type.Readonly == true {
 			// check for readonly and if true only let key bindings get called if they do not change the contents.
 			for _, readonlyBindings := range readonlyBindingsList {
 				if strings.Contains(funcName, readonlyBindings) {
@@ -566,7 +566,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
-			if v.Type.readonly == false {
+			if v.Type.Readonly == false {
 				for _, c := range v.Buf.cursors {
 					v.SetCursor(c)
 
@@ -593,7 +593,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	case *tcell.EventPaste:
 		// Check viewtype if readonly don't paste (readonly help and log view etc.)
-		if v.Type.readonly == false {
+		if v.Type.Readonly == false {
 			if !PreActionCall("Paste", v) {
 				break
 			}

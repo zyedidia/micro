@@ -941,7 +941,7 @@ func (v *View) Save(usePlugin bool) bool {
 			return false
 		}
 
-		if v.Type.scratch == true {
+		if v.Type.Scratch == true {
 			// We can't save any view type with scratch set. eg help and log text
 			return false
 		}
