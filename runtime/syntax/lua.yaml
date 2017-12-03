@@ -49,10 +49,12 @@ rules:
     - comment: 
         start: "\\-\\-"
         end: "$"
-        rules: []
+        rules: 
+            - todo: "(TODO|XXX|FIXME):?"
 
-    - comment: 
-        start: "\\-\\-\\[\\["
-        end: "\\]\\]"
-        rules: []
+        - comment:
+        start: "\\-\\-\\]\\]"
+        end: "\\-\\-\\]\\]"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
 
