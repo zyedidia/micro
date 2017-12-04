@@ -39,8 +39,8 @@ rules:
             - constant.specialChar: "\\\\."
 
     - constant.string:
-        start: "\\[\\["
-        end: "\\]\\]"
+        start: "[["
+        end: "]]"
         rules:
             - constant.specialChar: "\\\\."
 
