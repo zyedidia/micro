@@ -100,15 +100,23 @@ func InitLocalSettings(buf *Buffer) {
 
 	for k, v := range parsed {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-			g, err := glob.Compile(k)
-			if err != nil {
-				TermMessage("Error with glob setting ", k, ": ", err)
-				continue
-			}
+			if strings.HasPrefix(k, "ft:") {
+				if buf.Settings["filetype"].(string) == k[3:] {
+					for k1, v1 := range v.(map[string]interface{}) {
+						buf.Settings[k1] = v1
+					}
+				}
+			} else {
+				g, err := glob.Compile(k)
+				if err != nil {
+					TermMessage("Error with glob setting ", k, ": ", err)
+					continue
+				}
 
-			if g.MatchString(buf.Path) {
-				for k1, v1 := range v.(map[string]interface{}) {
-					buf.Settings[k1] = v1
+				if g.MatchString(buf.Path) {
+					for k1, v1 := range v.(map[string]interface{}) {
+						buf.Settings[k1] = v1
+					}
 				}
 			}
 		}
