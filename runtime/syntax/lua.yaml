@@ -46,13 +46,15 @@ rules:
 
     - special: "\\\\[0-7][0-7][0-7]|\\\\x[0-9a-fA-F][0-9a-fA-F]|\\\\[abefnrs]|(\\\\c|\\\\C-|\\\\M-|\\\\M-\\\\C-)."
 
+    - comment.block:
+        start: "\\-\\-\\[(\\=*|\\#*)\\["
+        end: "\\-\\-\\](\\=*|\\#*)\\]"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+# this has to go after block comment or block comment does not work
     - comment.line: 
         start: "\\-\\-"
         end: "$"
         rules: 
-            - todo: "(TODO|XXX|FIXME):?"
-    - comment:
-        start: "\\*\\*\\*\\*"
-        end: "\\*\\*\\*\\*"
-        rules:
             - todo: "(TODO|XXX|FIXME):?"
