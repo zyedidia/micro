@@ -520,23 +520,10 @@ func ShowKey(args []string) {
 		return
 	}
 
-	key, ok := findKey(args[0])
-	if !ok {
-		messenger.Error(args[0], " is not a valid key")
-		return
-	}
-	if _, ok := bindings[key]; !ok {
-		messenger.Message(args[0], " has no binding")
+	if action, ok := bindingsStr[args[0]]; ok {
+		messenger.Message(action)
 	} else {
-		actions := bindings[key]
-		msg := ""
-		for i, a := range actions {
-			msg += FuncName(a)
-			if i != len(actions)-1 {
-				msg += ", "
-			}
-		}
-		messenger.Message(msg)
+		messenger.Message(args[0], " has no binding")
 	}
 }
 

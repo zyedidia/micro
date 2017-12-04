@@ -606,7 +606,7 @@ func (m *Messenger) SaveHistory() {
 		// Don't save history past 100
 		for k, v := range m.history {
 			if len(v) > 100 {
-				m.history[k] = v[0:100]
+				m.history[k] = v[len(m.history[k])-100:]
 			}
 		}
 
