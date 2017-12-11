@@ -422,14 +422,14 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 			allPrefixed = true
 		}
 	}
-
+	// Install files and directory's
 	for _, f := range z.File {
 		parts := strings.Split(f.Name, "/")
 		if allPrefixed {
 			parts = parts[1:]
 		}
 
-		targetName := filepath.Join(targetDir, filepath.Join(parts...))
+		targetName := path.Join(targetDir, path.Join(parts...))
 		if f.FileInfo().IsDir() {
 			if err := os.MkdirAll(targetName, dirPerm); err != nil {
 				return err
