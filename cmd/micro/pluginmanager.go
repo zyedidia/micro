@@ -429,13 +429,13 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 			parts = parts[1:]
 		}
 
-		targetName := path.Join(targetDir, path.Join(parts...))
+		targetName := filepath.Join(targetDir, filepath.Join(parts...))
 		if f.FileInfo().IsDir() {
 			if err := os.MkdirAll(targetName, dirPerm); err != nil {
 				return err
 			}
 		} else {
-			basepath := path.Dir(targetName)
+			basepath := filepath.Dir(targetName)
 
 			if err := os.MkdirAll(basepath, dirPerm); err != nil {
 				return err
