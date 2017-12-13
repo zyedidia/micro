@@ -471,7 +471,9 @@ func main() {
 			f.function(f.output, f.args...)
 			continue
 		case <-autosave:
-			CurView().Save(true)
+			if CurView().Buf.Path != "" {
+				CurView().Save(true)
+			}
 		case event = <-events:
 		}
 
