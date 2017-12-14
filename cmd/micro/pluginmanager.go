@@ -8,7 +8,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -423,6 +422,7 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 		}
 	}
 
+	// Install files and directory's
 	for _, f := range z.File {
 		parts := strings.Split(f.Name, "/")
 		if allPrefixed {
@@ -435,7 +435,7 @@ func (pv *PluginVersion) DownloadAndInstall() error {
 				return err
 			}
 		} else {
-			basepath := path.Dir(targetName)
+			basepath := filepath.Dir(targetName)
 
 			if err := os.MkdirAll(basepath, dirPerm); err != nil {
 				return err
