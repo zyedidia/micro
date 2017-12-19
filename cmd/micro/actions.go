@@ -1697,6 +1697,22 @@ func (v *View) CommandMode(usePlugin bool) bool {
 	return false
 }
 
+// ToggleOverwriteMode lets the user toggle the text overwrite mode
+func (v *View) ToggleOverwriteMode(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("ToggleOverwriteMode", v) {
+			return false
+		}
+
+		v.isOverwriteMode = !v.isOverwriteMode
+
+		if usePlugin {
+			return PostActionCall("ToggleOverwriteMode", v)
+		}
+	}
+	return false
+}
+
 // Escape leaves current mode
 func (v *View) Escape(usePlugin bool) bool {
 	if v.mainCursor() {

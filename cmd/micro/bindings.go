@@ -90,6 +90,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"ClearStatus":           (*View).ClearStatus,
 	"ShellMode":             (*View).ShellMode,
 	"CommandMode":           (*View).CommandMode,
+	"ToggleOverwriteMode":   (*View).ToggleOverwriteMode,
 	"Escape":                (*View).Escape,
 	"Quit":                  (*View).Quit,
 	"QuitAll":               (*View).QuitAll,
@@ -563,6 +564,7 @@ func DefaultBindings() map[string]string {
 		"CtrlW":          "NextSplit",
 		"CtrlU":          "ToggleMacro",
 		"CtrlJ":          "PlayMacro",
+		"Insert":         "ToggleOverwriteMode",
 
 		// Emacs-style keybindings
 		"Alt-f": "WordRight",
