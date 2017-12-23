@@ -8,7 +8,7 @@ rules:
     - ignore: ".*"
     # Comments
     - comment:
-        start: "#"
+        start: "^#"
         end: "$"
         rules: []
     # File changes
