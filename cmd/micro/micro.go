@@ -255,7 +255,7 @@ func LoadAll() {
 	}
 }
 
-// Passing -version as a flag will have micro print out the version number
+// Command line flags
 var flagVersion = flag.Bool("version", false, "Show the version number and information")
 var flagStartPos = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
 var flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
@@ -346,7 +346,7 @@ func main() {
 	// Create a new messenger
 	// This is used for sending the user messages in the bottom of the editor
 	messenger = new(Messenger)
-	messenger.history = make(map[string][]string)
+	messenger.LoadHistory()
 
 	// Now we load the input
 	buffers := LoadInput(passwords)
@@ -475,11 +475,15 @@ func main() {
 			f.function(f.output, f.args...)
 			continue
 		case <-autosave:
-			CurView().Save(true)
+			if CurView().Buf.Path != "" {
+				CurView().Save(true)
+			}
 		case event = <-events:
 		}
 
 		for event != nil {
+			didAction := false
+
 			switch e := event.(type) {
 			case *tcell.EventResize:
 				for _, t := range tabs {
@@ -509,24 +513,38 @@ func main() {
 								}
 							}
 						}
+					} else if e.Buttons() == tcell.WheelUp || e.Buttons() == tcell.WheelDown {
+						var view *View
+						x, y := e.Position()
+						for _, v := range tabs[curTab].views {
+							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								view = tabs[curTab].views[v.Num]
+							}
+						}
+						if view != nil {
+							view.HandleEvent(e)
+							didAction = true
+						}
 					}
 				}
 			}
 
-			// This function checks the mouse event for the possibility of changing the current tab
-			// If the tab was changed it returns true
-			if TabbarHandleMouseEvent(event) {
-				break
-			}
+			if !didAction {
+				// This function checks the mouse event for the possibility of changing the current tab
+				// If the tab was changed it returns true
+				if TabbarHandleMouseEvent(event) {
+					break
+				}
 
-			if searching {
-				// Since searching is done in real time, we need to redraw every time
-				// there is a new event in the search bar so we need a special function
-				// to run instead of the standard HandleEvent.
-				HandleSearchEvent(event, CurView())
-			} else {
-				// Send it to the view
-				CurView().HandleEvent(event)
+				if searching {
+					// Since searching is done in real time, we need to redraw every time
+					// there is a new event in the search bar so we need a special function
+					// to run instead of the standard HandleEvent.
+					HandleSearchEvent(event, CurView())
+				} else {
+					// Send it to the view
+					CurView().HandleEvent(event)
+				}
 			}
 
 			select {

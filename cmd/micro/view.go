@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"reflect"
 	"strconv"
 	"strings"
 	"time"
@@ -11,9 +13,9 @@ import (
 
 // The ViewType defines what kind of view this is
 type ViewType struct {
-	kind     int
-	readonly bool // The file cannot be edited
-	scratch  bool // The file cannot be saved
+	Kind     int
+	Readonly bool // The file cannot be edited
+	Scratch  bool // The file cannot be saved
 }
 
 var (
@@ -21,6 +23,7 @@ var (
 	vtHelp    = ViewType{1, true, true}
 	vtLog     = ViewType{2, true, true}
 	vtScratch = ViewType{3, false, true}
+	vtRaw     = ViewType{4, true, true}
 )
 
 // The View struct stores information about a view into a buffer.
@@ -62,7 +65,7 @@ type View struct {
 	// The buffer
 	Buf *Buffer
 	// The statusline
-	sline Statusline
+	sline *Statusline
 
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
@@ -92,6 +95,8 @@ type View struct {
 	cellview *CellView
 
 	splitNode *LeafNode
+
+	scrollbar *ScrollBar
 }
 
 // NewView returns a new fullscreen view
@@ -117,7 +122,11 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 
 	v.messages = make(map[string][]GutterMessage)
 
-	v.sline = Statusline{
+	v.sline = &Statusline{
+		view: v,
+	}
+
+	v.scrollbar = &ScrollBar{
 		view: v,
 	}
 
@@ -292,7 +301,7 @@ func (v *View) ReOpen() {
 // HSplit opens a horizontal split with the given buffer
 func (v *View) HSplit(buf *Buffer) {
 	i := 0
-	if v.Buf.Settings["splitBottom"].(bool) {
+	if v.Buf.Settings["splitbottom"].(bool) {
 		i = 1
 	}
 	v.splitNode.HSplit(buf, v.Num+i)
@@ -301,7 +310,7 @@ func (v *View) HSplit(buf *Buffer) {
 // VSplit opens a vertical split with the given buffer
 func (v *View) VSplit(buf *Buffer) {
 	i := 0
-	if v.Buf.Settings["splitRight"].(bool) {
+	if v.Buf.Settings["splitright"].(bool) {
 		i = 1
 	}
 	v.splitNode.VSplit(buf, v.Num+i)
@@ -464,7 +473,7 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	for _, action := range actions {
 		readonlyBindingsResult := false
 		funcName := ShortFuncName(action)
-		if v.Type.readonly == true {
+		if v.Type.Readonly == true {
 			// check for readonly and if true only let key bindings get called if they do not change the contents.
 			for _, readonlyBindings := range readonlyBindingsList {
 				if strings.Contains(funcName, readonlyBindings) {
@@ -500,6 +509,20 @@ func (v *View) SetCursor(c *Cursor) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	if v.Type == vtRaw {
+		v.Buf.Insert(v.Cursor.Loc, reflect.TypeOf(event).String()[7:])
+		v.Buf.Insert(v.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
+
+		switch e := event.(type) {
+		case *tcell.EventKey:
+			if e.Key() == tcell.KeyCtrlQ {
+				v.Quit(true)
+			}
+		}
+
+		return
+	}
+
 	// This bool determines whether the view is relocated at the end of the function
 	// By default it's true because most events should cause a relocate
 	relocate := true
@@ -507,6 +530,24 @@ func (v *View) HandleEvent(event tcell.Event) {
 	v.Buf.CheckModTime()
 
 	switch e := event.(type) {
+	case *tcell.EventRaw:
+		for key, actions := range bindings {
+			if key.keyCode == -1 {
+				if e.EscSeq() == key.escape {
+					for _, c := range v.Buf.cursors {
+						ok := v.SetCursor(c)
+						if !ok {
+							break
+						}
+						relocate = false
+						relocate = v.ExecuteActions(actions) || relocate
+					}
+					v.SetCursor(&v.Buf.Cursor)
+					v.Buf.MergeCursors()
+					break
+				}
+			}
+		}
 	case *tcell.EventKey:
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
@@ -535,7 +576,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
-			if v.Type.readonly == false {
+			if v.Type.Readonly == false {
 				for _, c := range v.Buf.cursors {
 					v.SetCursor(c)
 
@@ -562,7 +603,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	case *tcell.EventPaste:
 		// Check viewtype if readonly don't paste (readonly help and log view etc.)
-		if v.Type.readonly == false {
+		if v.Type.Readonly == false {
 			if !PreActionCall("Paste", v) {
 				break
 			}
@@ -698,8 +739,8 @@ func (v *View) DisplayView() {
 		v.leftCol = 0
 	}
 
-	if v.Type == vtLog {
-		// Log views should always follow the cursor...
+	if v.Type == vtLog || v.Type == vtRaw {
+		// Log or raw views should always follow the cursor...
 		v.Relocate()
 	}
 
@@ -1000,6 +1041,11 @@ func (v *View) Display() {
 		screen.HideCursor()
 	}
 	_, screenH := screen.Size()
+
+	if v.Buf.Settings["scrollbar"].(bool) {
+		v.scrollbar.Display()
+	}
+
 	if v.Buf.Settings["statusline"].(bool) {
 		v.sline.Display()
 	} else if (v.y + v.Height) != screenH-1 {

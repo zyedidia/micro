@@ -61,6 +61,10 @@ func LuaFunctionBinding(function string) func(*View, bool) bool {
 	}
 }
 
+// LuaFunctionMouseBinding is a function generator which takes the name of a lua function
+// and creates a function that will call that lua function
+// Specifically it creates a function that can be called as a mouse binding because this is used
+// to bind mouse actions to lua functions
 func LuaFunctionMouseBinding(function string) func(*View, bool, *tcell.EventMouse) bool {
 	return func(v *View, _ bool, e *tcell.EventMouse) bool {
 		_, err := Call(function, e)
@@ -114,6 +118,9 @@ func LuaFunctionComplete(function string) func(string) []string {
 	}
 }
 
+// LuaFunctionJob returns a function that will call the given lua function
+// structured as a job call i.e. the job output and arguments are provided
+// to the lua function
 func LuaFunctionJob(function string) func(string, ...string) {
 	return func(output string, args ...string) {
 		_, err := Call(function, unpack(append([]string{output}, args...))...)

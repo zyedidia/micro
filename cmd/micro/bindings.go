@@ -1,14 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"strings"
+	"unicode"
 
 	"github.com/flynn/json5"
 	"github.com/zyedidia/tcell"
 )
 
+var bindingsStr map[string]string
 var bindings map[Key][]func(*View, bool) bool
 var mouseBindings map[Key][]func(*View, bool, *tcell.EventMouse) bool
 var helpBinding string
@@ -260,11 +263,13 @@ type Key struct {
 	modifiers tcell.ModMask
 	buttons   tcell.ButtonMask
 	r         rune
+	escape    string
 }
 
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
 	bindings = make(map[Key][]func(*View, bool) bool)
+	bindingsStr = make(map[string]string)
 	mouseBindings = make(map[Key][]func(*View, bool, *tcell.EventMouse) bool)
 
 	var parsed map[string]string
@@ -316,6 +321,14 @@ modSearch:
 		case strings.HasPrefix(k, "Shift"):
 			k = k[5:]
 			modifiers |= tcell.ModShift
+		case strings.HasPrefix(k, "\x1b"):
+			return Key{
+				keyCode:   -1,
+				modifiers: modifiers,
+				buttons:   -1,
+				r:         0,
+				escape:    k,
+			}, true
 		default:
 			break modSearch
 		}
@@ -326,6 +339,7 @@ modSearch:
 	// first.
 	if modifiers&tcell.ModCtrl != 0 {
 		// see if the key is in bindingKeys with the Ctrl prefix.
+		k = string(unicode.ToUpper(rune(k[0]))) + k[1:]
 		if code, ok := bindingKeys["Ctrl"+k]; ok {
 			// It is, we're done.
 			return Key{
@@ -391,6 +405,41 @@ func findMouseAction(v string) func(*View, bool, *tcell.EventMouse) bool {
 	return action
 }
 
+func TryBindKey(k, v string) {
+	filename := configDir + "/bindings.json"
+	if _, e := os.Stat(filename); e == nil {
+		input, err := ioutil.ReadFile(filename)
+		if err != nil {
+			TermMessage("Error reading bindings.json file: " + err.Error())
+			return
+		}
+
+		conflict := -1
+		lines := strings.Split(string(input), "\n")
+		for i, l := range lines {
+			parts := strings.Split(l, ":")
+			if len(parts) >= 2 {
+				if strings.Contains(parts[0], k) {
+					conflict = i
+					TermMessage("Warning: Keybinding conflict:", k, " has been overwritten")
+				}
+			}
+		}
+
+		binding := fmt.Sprintf("    \"%s\": \"%s\",", k, v)
+		if conflict == -1 {
+			lines = append([]string{lines[0], binding}, lines[conflict:]...)
+		} else {
+			lines = append(append(lines[:conflict], binding), lines[conflict+1:]...)
+		}
+		txt := strings.Join(lines, "\n")
+		err = ioutil.WriteFile(filename, []byte(txt), 0644)
+		if err != nil {
+			TermMessage("Error")
+		}
+	}
+}
+
 // BindKey takes a key and an action and binds the two together
 func BindKey(k, v string) {
 	key, ok := findKey(k)
@@ -415,6 +464,7 @@ func BindKey(k, v string) {
 	if actionNames[0] == "UnbindKey" {
 		delete(bindings, key)
 		delete(mouseBindings, key)
+		delete(bindingsStr, k)
 		if len(actionNames) == 1 {
 			return
 		}
@@ -434,6 +484,7 @@ func BindKey(k, v string) {
 		// Can't have a binding be both mouse and normal
 		delete(mouseBindings, key)
 		bindings[key] = actions
+		bindingsStr[k] = v
 	} else if len(mouseActions) > 0 {
 		// Can't have a binding be both mouse and normal
 		delete(bindings, key)

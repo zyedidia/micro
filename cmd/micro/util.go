@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -274,97 +273,6 @@ func FuncName(i interface{}) string {
 // ShortFuncName returns the name only of a given function object
 func ShortFuncName(i interface{}) string {
 	return strings.TrimPrefix(runtime.FuncForPC(reflect.ValueOf(i).Pointer()).Name(), "main.(*View).")
-}
-
-// SplitCommandArgs separates multiple command arguments which may be quoted.
-// The returned slice contains at least one string
-func SplitCommandArgs(input string) []string {
-	var result []string
-	var curQuote *bytes.Buffer
-
-	curArg := new(bytes.Buffer)
-	escape := false
-
-	finishQuote := func() {
-		if curQuote == nil {
-			return
-		}
-		str := curQuote.String()
-		if unquoted, err := strconv.Unquote(str); err == nil {
-			str = unquoted
-		}
-		curArg.WriteString(str)
-		curQuote = nil
-	}
-
-	appendResult := func() {
-		finishQuote()
-		escape = false
-
-		str := curArg.String()
-		result = append(result, str)
-		curArg.Reset()
-	}
-
-	for _, r := range input {
-		if r == ' ' && curQuote == nil {
-			appendResult()
-		} else {
-			runeHandled := false
-			appendRuneToBuff := func() {
-				if curQuote != nil {
-					curQuote.WriteRune(r)
-				} else {
-					curArg.WriteRune(r)
-				}
-				runeHandled = true
-			}
-
-			if r == '"' && curQuote == nil {
-				curQuote = new(bytes.Buffer)
-				appendRuneToBuff()
-			} else {
-				if curQuote != nil && !escape {
-					if r == '"' {
-						appendRuneToBuff()
-						finishQuote()
-					} else if r == '\\' {
-						appendRuneToBuff()
-						escape = true
-						continue
-					}
-				}
-			}
-			if !runeHandled {
-				appendRuneToBuff()
-			}
-		}
-
-		escape = false
-	}
-	appendResult()
-	return result
-}
-
-// JoinCommandArgs joins multiple command arguments and quote the strings if needed.
-func JoinCommandArgs(args ...string) string {
-	buf := new(bytes.Buffer)
-	first := true
-	for _, arg := range args {
-		if first {
-			first = false
-		} else {
-			buf.WriteRune(' ')
-		}
-		quoted := strconv.Quote(arg)
-		if quoted[1:len(quoted)-1] != arg || strings.ContainsRune(arg, ' ') {
-			buf.WriteString(quoted)
-		} else {
-			buf.WriteString(arg)
-		}
-	}
-
-	return buf.String()
 }
 
 // ReplaceHome takes a path as input and replaces ~ at the start of the path with the user's

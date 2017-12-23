@@ -100,15 +100,23 @@ func InitLocalSettings(buf *Buffer) {
 
 	for k, v := range parsed {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-			g, err := glob.Compile(k)
-			if err != nil {
-				TermMessage("Error with glob setting ", k, ": ", err)
-				continue
-			}
+			if strings.HasPrefix(k, "ft:") {
+				if buf.Settings["filetype"].(string) == k[3:] {
+					for k1, v1 := range v.(map[string]interface{}) {
+						buf.Settings[k1] = v1
+					}
+				}
+			} else {
+				g, err := glob.Compile(k)
+				if err != nil {
+					TermMessage("Error with glob setting ", k, ": ", err)
+					continue
+				}
 
-			if g.MatchString(buf.Path) {
-				for k1, v1 := range v.(map[string]interface{}) {
-					buf.Settings[k1] = v1
+				if g.MatchString(buf.Path) {
+					for k1, v1 := range v.(map[string]interface{}) {
+						buf.Settings[k1] = v1
+					}
 				}
 			}
 		}
@@ -193,7 +201,6 @@ func GetOption(name string) interface{} {
 func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
-		"keepautoindent": false,
 		"autosave":       false,
 		"colorcolumn":    float64(0),
 		"colorscheme":    "default",
@@ -204,17 +211,22 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"infobar":        true,
+		"keepautoindent": false,
 		"keymenu":        false,
 		"mouse":          true,
+		"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
+		"pluginrepos":    []string{},
 		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
+		"savehistory":    true,
 		"saveundo":       false,
-		"scrollspeed":    float64(2),
+		"scrollbar":      false,
 		"scrollmargin":   float64(3),
+		"scrollspeed":    float64(2),
 		"softwrap":       false,
-		"splitRight":     true,
-		"splitBottom":    true,
+		"splitbottom":    true,
+		"splitright":     true,
 		"statusline":     true,
 		"sucmd":          "sudo",
 		"syntax":         true,
@@ -222,11 +234,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"termtitle":      false,
-		"pluginchannels": []string{
-			"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json",
-		},
-		"pluginrepos": []string{},
-		"useprimary":  true,
+		"useprimary":     true,
 	}
 }
 
@@ -235,7 +243,6 @@ func DefaultGlobalSettings() map[string]interface{} {
 func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
-		"keepautoindent": false,
 		"autosave":       false,
 		"colorcolumn":    float64(0),
 		"cursorline":     true,
@@ -245,15 +252,17 @@ func DefaultLocalSettings() map[string]interface{} {
 		"filetype":       "Unknown",
 		"ignorecase":     false,
 		"indentchar":     " ",
+		"keepautoindent": false,
 		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
 		"saveundo":       false,
-		"scrollspeed":    float64(2),
+		"scrollbar":      false,
 		"scrollmargin":   float64(3),
+		"scrollspeed":    float64(2),
 		"softwrap":       false,
-		"splitRight":     true,
-		"splitBottom":    true,
+		"splitbottom":    true,
+		"splitright":     true,
 		"statusline":     true,
 		"syntax":         true,
 		"tabmovement":    false,
@@ -327,10 +336,12 @@ func SetOption(option, value string) error {
 		}
 	}
 
-	if _, ok := CurView().Buf.Settings[option]; ok {
-		for _, tab := range tabs {
-			for _, view := range tab.views {
-				SetLocalOption(option, value, view)
+	if len(tabs) != 0 {
+		if _, ok := CurView().Buf.Settings[option]; ok {
+			for _, tab := range tabs {
+				for _, view := range tab.views {
+					SetLocalOption(option, value, view)
+				}
 			}
 		}
 	}

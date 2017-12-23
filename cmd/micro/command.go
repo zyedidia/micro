@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -14,6 +13,7 @@ import (
 	"strings"
 
 	humanize "github.com/dustin/go-humanize"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 )
 
 // A Command contains a action (a function to call) as well as information about how to autocomplete the command
@@ -37,6 +37,7 @@ func init() {
 		"Set":        Set,
 		"SetLocal":   SetLocal,
 		"Show":       Show,
+		"ShowKey":    ShowKey,
 		"Run":        Run,
 		"Bind":       Bind,
 		"Quit":       Quit,
@@ -56,6 +57,8 @@ func init() {
 		"Open":       Open,
 		"TabSwitch":  TabSwitch,
 		"MemUsage":   MemUsage,
+		"Retab":      Retab,
+		"Raw":        Raw,
 	}
 }
 
@@ -90,8 +93,9 @@ func MakeCommand(name, function string, completions ...Completion) {
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
 		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
-		"setlocal":   {"SetLocal", []Completion{OptionCompletion, NoCompletion}},
+		"setlocal":   {"SetLocal", []Completion{OptionCompletion, OptionValueCompletion}},
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
+		"showkey":    {"ShowKey", []Completion{NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
 		"run":        {"Run", []Completion{NoCompletion}},
 		"quit":       {"Quit", []Completion{NoCompletion}},
@@ -111,6 +115,8 @@ func DefaultCommands() map[string]StrCommand {
 		"open":       {"Open", []Completion{FileCompletion}},
 		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
+		"retab":      {"Retab", []Completion{NoCompletion}},
+		"raw":        {"Raw", []Completion{NoCompletion}},
 	}
 }
 
@@ -197,6 +203,30 @@ func PluginCmd(args []string) {
 	}
 }
 
+func Retab(args []string) {
+	CurView().Retab(true)
+}
+
+func Raw(args []string) {
+	buf := NewBufferFromString("", "Raw events")
+
+	view := NewView(buf)
+	view.Buf.Insert(view.Cursor.Loc, "Warning: Showing raw event escape codes\n")
+	view.Buf.Insert(view.Cursor.Loc, "Use CtrlQ to exit\n")
+	view.Type = vtRaw
+	tab := NewTabFromView(view)
+	tab.SetNum(len(tabs))
+	tabs = append(tabs, tab)
+	curTab = len(tabs) - 1
+	if len(tabs) == 2 {
+		for _, t := range tabs {
+			for _, v := range t.views {
+				v.ToggleTabbar()
+			}
+		}
+	}
+}
+
 // TabSwitch switches to a given tab either by name or by number
 func TabSwitch(args []string) {
 	if len(args) > 0 {
@@ -230,10 +260,18 @@ func TabSwitch(args []string) {
 func Cd(args []string) {
 	if len(args) > 0 {
 		path := ReplaceHome(args[0])
-		os.Chdir(path)
+		err := os.Chdir(path)
+		if err != nil {
+			messenger.Error("Error with cd: ", err)
+			return
+		}
+		wd, _ := os.Getwd()
 		for _, tab := range tabs {
 			for _, view := range tab.views {
-				wd, _ := os.Getwd()
+				if len(view.Buf.name) == 0 {
+					continue
+				}
+
 				view.Buf.Path, _ = MakeRelative(view.Buf.AbsPath, wd)
 				if p, _ := filepath.Abs(view.Buf.Path); !strings.Contains(p, wd) {
 					view.Buf.Path = view.Buf.AbsPath
@@ -272,7 +310,12 @@ func Open(args []string) {
 	if len(args) > 0 {
 		filename := args[0]
 		// the filename might or might not be quoted, so unquote first then join the strings.
-		filename = strings.Join(SplitCommandArgs(filename), " ")
+		args, err := shellwords.Split(filename)
+		if err != nil {
+			messenger.Error("Error parsing args ", err)
+			return
+		}
+		filename = strings.Join(args, " ")
 
 		CurView().Open(filename)
 	} else {
@@ -473,6 +516,20 @@ func Show(args []string) {
 	messenger.Message(option)
 }
 
+// ShowKey displays the action that a key is bound to
+func ShowKey(args []string) {
+	if len(args) < 1 {
+		messenger.Error("Please provide a key to show")
+		return
+	}
+
+	if action, ok := bindingsStr[args[0]]; ok {
+		messenger.Message(action)
+	} else {
+		messenger.Message(args[0], " has no binding")
+	}
+}
+
 // Bind creates a new keybinding
 func Bind(args []string) {
 	if len(args) < 2 {
@@ -485,7 +542,7 @@ func Bind(args []string) {
 // Run runs a shell command in the background
 func Run(args []string) {
 	// Run a shell command in the background (openTerm is false)
-	HandleShellCommand(JoinCommandArgs(args...), false, true)
+	HandleShellCommand(shellwords.Join(args...), false, true)
 }
 
 // Quit closes the main view
@@ -506,24 +563,35 @@ func Save(args []string) {
 
 // Replace runs search and replace
 func Replace(args []string) {
-	if len(args) < 2 || len(args) > 3 {
+	if len(args) < 2 || len(args) > 4 {
 		// We need to find both a search and replace expression
 		messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
 		return
 	}
 
-	allAtOnce := false
-	if len(args) == 3 {
-		// user added -a flag
-		if args[2] == "-a" {
-			allAtOnce = true
-		} else {
-			messenger.Error("Invalid replace flag: " + args[2])
-			return
+	all := false
+	noRegex := false
+
+	if len(args) > 2 {
+		for _, arg := range args[2:] {
+			switch arg {
+			case "-a":
+				all = true
+			case "-l":
+				noRegex = true
+			default:
+				messenger.Error("Invalid flag: " + arg)
+				return
+			}
 		}
 	}
 
 	search := string(args[0])
+
+	if noRegex {
+		search = regexp.QuoteMeta(search)
+	}
+
 	replace := string(args[1])
 
 	regex, err := regexp.Compile("(?m)" + search)
@@ -559,7 +627,7 @@ func Replace(args []string) {
 		view.Buf.MultipleReplace(deltas)
 	}
 
-	if allAtOnce {
+	if all {
 		replaceAll()
 	} else {
 		for {
@@ -619,15 +687,18 @@ func ReplaceAll(args []string) {
 
 // RunShellCommand executes a shell command and returns the output/error
 func RunShellCommand(input string) (string, error) {
-	inputCmd := SplitCommandArgs(input)[0]
-	args := SplitCommandArgs(input)[1:]
+	args, err := shellwords.Split(input)
+	if err != nil {
+		return "", err
+	}
+	inputCmd := args[0]
 
-	cmd := exec.Command(inputCmd, args...)
+	cmd := exec.Command(inputCmd, args[1:]...)
 	outputBytes := &bytes.Buffer{}
 	cmd.Stdout = outputBytes
 	cmd.Stderr = outputBytes
 	cmd.Start()
-	err := cmd.Wait() // wait for command to finish
+	err = cmd.Wait() // wait for command to finish
 	outstring := outputBytes.String()
 	return outstring, err
 }
@@ -636,7 +707,11 @@ func RunShellCommand(input string) (string, error) {
 // The openTerm argument specifies whether a terminal should be opened (for viewing output
 // or interacting with stdin)
 func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
-	inputCmd := SplitCommandArgs(input)[0]
+	args, err := shellwords.Split(input)
+	if err != nil {
+		return ""
+	}
+	inputCmd := args[0]
 	if !openTerm {
 		// Simply run the command in the background and notify the user when it's done
 		messenger.Message("Running...")
@@ -661,13 +736,13 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		screen.Fini()
 		screen = nil
 
-		args := SplitCommandArgs(input)[1:]
+		args := args[1:]
 
 		// Set up everything for the command
-		var outputBuf bytes.Buffer
+		var output string
 		cmd := exec.Command(inputCmd, args...)
 		cmd.Stdin = os.Stdin
-		cmd.Stdout = io.MultiWriter(os.Stdout, &outputBuf)
+		cmd.Stdout = os.Stdout
 		cmd.Stderr = os.Stderr
 
 		// This is a trap for Ctrl-C so that it doesn't kill micro
@@ -683,7 +758,6 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		cmd.Start()
 		err := cmd.Wait()
 
-		output := outputBuf.String()
 		if err != nil {
 			output = err.Error()
 		}
@@ -703,7 +777,12 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 
 // HandleCommand handles input from the user
 func HandleCommand(input string) {
-	args := SplitCommandArgs(input)
+	args, err := shellwords.Split(input)
+	if err != nil {
+		messenger.Error("Error parsing args ", err)
+		return
+	}
+
 	inputCmd := args[0]
 
 	if _, ok := commands[inputCmd]; !ok {

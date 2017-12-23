@@ -10,6 +10,7 @@ import (
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/tcell"
 )
 
@@ -542,6 +543,40 @@ func (v *View) ParagraphNext(usePlugin bool) bool {
 	return true
 }
 
+func (v *View) Retab(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("Retab", v) {
+		return false
+	}
+
+	toSpaces := v.Buf.Settings["tabstospaces"].(bool)
+	tabsize := int(v.Buf.Settings["tabsize"].(float64))
+	dirty := false
+
+	for i := 0; i < v.Buf.NumLines; i++ {
+		l := v.Buf.Line(i)
+
+		ws := GetLeadingWhitespace(l)
+		if ws != "" {
+			if toSpaces {
+				ws = strings.Replace(ws, "\t", Spaces(tabsize), -1)
+			} else {
+				ws = strings.Replace(ws, Spaces(tabsize), "\t", -1)
+			}
+		}
+
+		l = strings.TrimLeft(l, " \t")
+		v.Buf.lines[i].data = []byte(ws + l)
+		dirty = true
+	}
+
+	v.Buf.IsModified = dirty
+
+	if usePlugin {
+		return PostActionCall("Retab", v)
+	}
+	return true
+}
+
 // CursorStart moves the cursor to the start of the buffer
 func (v *View) CursorStart(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorStart", v) {
@@ -906,7 +941,7 @@ func (v *View) Save(usePlugin bool) bool {
 			return false
 		}
 
-		if v.Type.scratch == true {
+		if v.Type.Scratch == true {
 			// We can't save any view type with scratch set. eg help and log text
 			return false
 		}
@@ -970,7 +1005,12 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
-			filename = strings.Join(SplitCommandArgs(filename), " ")
+			args, err := shellwords.Split(filename)
+			filename = strings.Join(args, " ")
+			if err != nil {
+				messenger.Error("Error parsing arguments: ", err)
+				return false
+			}
 			v.saveToFile(filename)
 		}
 
@@ -1715,6 +1755,7 @@ func (v *View) Quit(usePlugin bool) bool {
 				}
 
 				screen.Fini()
+				messenger.SaveHistory()
 				os.Exit(0)
 			}
 		}
@@ -1758,6 +1799,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 				}
 
 				screen.Fini()
+				messenger.SaveHistory()
 				os.Exit(0)
 			}
 		}

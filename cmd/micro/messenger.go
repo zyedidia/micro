@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"bytes"
+	"encoding/gob"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,6 +13,7 @@ import (
 
 	"github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/tcell"
 )
 
@@ -357,9 +359,16 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 				response, canceled = m.response, false
 				m.history[historyType][len(m.history[historyType])-1] = response
 			case tcell.KeyTab:
-				args := SplitCommandArgs(m.response)
-				currentArgNum := len(args) - 1
-				currentArg := args[currentArgNum]
+				args, err := shellwords.Split(m.response)
+				if err != nil {
+					break
+				}
+				currentArg := ""
+				currentArgNum := 0
+				if len(args) > 0 {
+					currentArgNum = len(args) - 1
+					currentArg = args[currentArgNum]
+				}
 				var completionType Completion
 
 				if completionTypes[0] == CommandCompletion && currentArgNum > 0 {
@@ -400,7 +409,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 				}
 
 				if chosen != "" {
-					m.response = JoinCommandArgs(append(args[:len(args)-1], chosen)...)
+					m.response = shellwords.Join(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
 			}
@@ -425,62 +434,139 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 	return response, canceled
 }
 
+func (m *Messenger) UpHistory(history []string) {
+	if m.historyNum > 0 {
+		m.historyNum--
+		m.response = history[m.historyNum]
+		m.cursorx = Count(m.response)
+	}
+}
+func (m *Messenger) DownHistory(history []string) {
+	if m.historyNum < len(history)-1 {
+		m.historyNum++
+		m.response = history[m.historyNum]
+		m.cursorx = Count(m.response)
+	}
+}
+func (m *Messenger) CursorLeft() {
+	if m.cursorx > 0 {
+		m.cursorx--
+	}
+}
+func (m *Messenger) CursorRight() {
+	if m.cursorx < Count(m.response) {
+		m.cursorx++
+	}
+}
+func (m *Messenger) Start() {
+	m.cursorx = 0
+}
+func (m *Messenger) End() {
+	m.cursorx = Count(m.response)
+}
+func (m *Messenger) Backspace() {
+	if m.cursorx > 0 {
+		m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
+		m.cursorx--
+	}
+}
+func (m *Messenger) Paste() {
+	clip, _ := clipboard.ReadAll("clipboard")
+	m.response = Insert(m.response, m.cursorx, clip)
+	m.cursorx += Count(clip)
+}
+func (m *Messenger) WordLeft() {
+	response := []rune(m.response)
+	m.CursorLeft()
+	if m.cursorx <= 0 {
+		return
+	}
+	for IsWhitespace(response[m.cursorx]) {
+		if m.cursorx <= 0 {
+			return
+		}
+		m.CursorLeft()
+	}
+	m.CursorLeft()
+	for IsWordChar(string(response[m.cursorx])) {
+		if m.cursorx <= 0 {
+			return
+		}
+		m.CursorLeft()
+	}
+	m.CursorRight()
+}
+func (m *Messenger) WordRight() {
+	response := []rune(m.response)
+	if m.cursorx >= len(response) {
+		return
+	}
+	for IsWhitespace(response[m.cursorx]) {
+		m.CursorRight()
+		if m.cursorx >= len(response) {
+			m.CursorRight()
+			return
+		}
+	}
+	m.CursorRight()
+	if m.cursorx >= len(response) {
+		return
+	}
+	for IsWordChar(string(response[m.cursorx])) {
+		m.CursorRight()
+		if m.cursorx >= len(response) {
+			return
+		}
+	}
+}
+func (m *Messenger) DeleteWordLeft() {
+	m.WordLeft()
+	m.response = string([]rune(m.response)[:m.cursorx])
+}
+
 // HandleEvent handles an event for the prompter
 func (m *Messenger) HandleEvent(event tcell.Event, history []string) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
-		if e.Key() != tcell.KeyRune || e.Modifiers() != 0 {
-			for key, actions := range bindings {
-				if e.Key() == key.keyCode {
-					if e.Key() == tcell.KeyRune {
-						if e.Rune() != key.r {
-							continue
-						}
-					}
-					if e.Modifiers() == key.modifiers {
-						for _, action := range actions {
-							funcName := FuncName(action)
-							switch funcName {
-							case "main.(*View).CursorUp":
-								if m.historyNum > 0 {
-									m.historyNum--
-									m.response = history[m.historyNum]
-									m.cursorx = Count(m.response)
-								}
-							case "main.(*View).CursorDown":
-								if m.historyNum < len(history)-1 {
-									m.historyNum++
-									m.response = history[m.historyNum]
-									m.cursorx = Count(m.response)
-								}
-							case "main.(*View).CursorLeft":
-								if m.cursorx > 0 {
-									m.cursorx--
-								}
-							case "main.(*View).CursorRight":
-								if m.cursorx < Count(m.response) {
-									m.cursorx++
-								}
-							case "main.(*View).CursorStart", "main.(*View).StartOfLine":
-								m.cursorx = 0
-							case "main.(*View).CursorEnd", "main.(*View).EndOfLine":
-								m.cursorx = Count(m.response)
-							case "main.(*View).Backspace":
-								if m.cursorx > 0 {
-									m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
-									m.cursorx--
-								}
-							case "main.(*View).Paste":
-								clip, _ := clipboard.ReadAll("clipboard")
-								m.response = Insert(m.response, m.cursorx, clip)
-								m.cursorx += Count(clip)
-							}
-						}
-					}
-				}
-			}
-		}
 		switch e.Key() {
+		case tcell.KeyCtrlA:
+			m.Start()
+		case tcell.KeyCtrlE:
+			m.End()
+		case tcell.KeyUp:
+			m.UpHistory(history)
+		case tcell.KeyDown:
+			m.DownHistory(history)
+		case tcell.KeyLeft:
+			if e.Modifiers() == tcell.ModCtrl {
+				m.Start()
+			} else if e.Modifiers() == tcell.ModAlt || e.Modifiers() == tcell.ModMeta {
+				m.WordLeft()
+			} else {
+				m.CursorLeft()
+			}
+		case tcell.KeyRight:
+			if e.Modifiers() == tcell.ModCtrl {
+				m.End()
+			} else if e.Modifiers() == tcell.ModAlt || e.Modifiers() == tcell.ModMeta {
+				m.WordRight()
+			} else {
+				m.CursorRight()
+			}
+		case tcell.KeyBackspace2, tcell.KeyBackspace:
+			if e.Modifiers() == tcell.ModCtrl || e.Modifiers() == tcell.ModAlt || e.Modifiers() == tcell.ModMeta {
+				m.DeleteWordLeft()
+			} else {
+				m.Backspace()
+			}
+		case tcell.KeyCtrlW:
+			m.DeleteWordLeft()
+		case tcell.KeyCtrlV:
+			m.Paste()
+		case tcell.KeyCtrlF:
+			m.WordRight()
+		case tcell.KeyCtrlB:
+			m.WordLeft()
 		case tcell.KeyRune:
 			m.response = Insert(m.response, m.cursorx, string(e.Rune()))
 			m.cursorx++
@@ -568,6 +654,59 @@ func (m *Messenger) Display() {
 	if m.hasPrompt {
 		screen.ShowCursor(Count(m.message)+m.cursorx, h-1)
 		screen.Show()
+	}
+}
+
+// LoadHistory attempts to load user history from configDir/buffers/history
+// into the history map
+// The savehistory option must be on
+func (m *Messenger) LoadHistory() {
+	if GetGlobalOption("savehistory").(bool) {
+		file, err := os.Open(configDir + "/buffers/history")
+		var decodedMap map[string][]string
+		if err == nil {
+			decoder := gob.NewDecoder(file)
+			err = decoder.Decode(&decodedMap)
+			file.Close()
+
+			if err != nil {
+				m.Error("Error loading history:", err)
+				return
+			}
+		}
+
+		if decodedMap != nil {
+			m.history = decodedMap
+		} else {
+			m.history = make(map[string][]string)
+		}
+	} else {
+		m.history = make(map[string][]string)
+	}
+}
+
+// SaveHistory saves the user's command history to configDir/buffers/history
+// only if the savehistory option is on
+func (m *Messenger) SaveHistory() {
+	if GetGlobalOption("savehistory").(bool) {
+		// Don't save history past 100
+		for k, v := range m.history {
+			if len(v) > 100 {
+				m.history[k] = v[len(m.history[k])-100:]
+			}
+		}
+
+		file, err := os.Create(configDir + "/buffers/history")
+		if err == nil {
+			encoder := gob.NewEncoder(file)
+
+			err = encoder.Encode(m.history)
+			if err != nil {
+				m.Error("Error saving history:", err)
+				return
+			}
+			file.Close()
+		}
 	}
 }
 

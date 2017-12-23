@@ -172,7 +172,7 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 
 	InitLocalSettings(b)
 
-	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+	if len(*flagStartPos) == 0 && (b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool)) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))
@@ -394,6 +394,14 @@ func (b *Buffer) MergeCursors() {
 	}
 
 	b.cursors = cursors
+
+	for i := range b.cursors {
+		b.cursors[i].Num = i
+	}
+
+	if b.curCursor >= len(b.cursors) {
+		b.curCursor = len(b.cursors) - 1
+	}
 }
 
 func (b *Buffer) UpdateCursors() {

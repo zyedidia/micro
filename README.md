@@ -30,6 +30,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Sane defaults
     * You shouldn't have to configure much out of the box (and it is extremely easy to configure)
 * Splits and tabs
+* Nano-like menu to help you remember the keybindings
 * Extremely good mouse support
     * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
 * Cross platform (It should work on all the platforms Go runs on)
@@ -69,7 +70,19 @@ and you'll see all the stable releases with the corresponding binaries.
 
 If you'd like to see more information after installing micro, run `micro -version`.
 
-### Package Managers
+### Installation script
+
+There is a great script which can install micro for you by downloading the latest prebuilt binary. You can find it at https://getmic.ro (the github repo for it is [here](https://github.com/benweissmann/getmic.ro)).
+
+Then you can easily install micro:
+
+    $ curl https://getmic.ro | bash
+
+The script will install the micro binary to the current directory.
+
+See the [Github page](https://github.com/benweissmann/getmic.ro) for more information.
+
+### Package managers
 
 You can install micro using Homebrew on Mac:
 
@@ -92,14 +105,20 @@ scoop install micro
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
 ```
-snap install micro --edge --classic
+snap install micro --classic
+```
+
+On OpenBSD, micro is available in the ports tree. It is also available as a binary package.
+
+```
+pkg_add -v micro
 ```
 
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommand setting it to `~/go` if you don't have one).
+Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommend setting it to `~/go` if you don't have one).
 
 ```
 go get -d github.com/zyedidia/micro/cmd/micro
