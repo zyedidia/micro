@@ -18,7 +18,7 @@ rules:
     - identifier: "coroutine\\.\\b(create|isyieldable|resume|running|status|wrap|yield)\\b"
     - identifier: "debug\\.\\b(debug|getfenv|gethook|getinfo|getlocal|getmetatable|getregistry|getupvalue|getuservalue|setfenv|sethook|setlocal|setmetatable|setupvalue|setuservalue|traceback|upvalueid|upvaluejoin)\\b"
     - identifier: "bit32\\.\\b(arshift|band|bnot|bor|btest|bxor|extract|replace|lrotate|lshift|rrotate|rshift)\\b"
-    - identifier: "\\:\\b(close|flush|lines|read|seek|setvbuf|write)\\b"
+    - identifier: "\\:\\b(close|flush|lines|read|seek|setvbuf|write|byte|char|dump|find|format|gmatch|gsub|len|lower|match|pack|packsize|rep|reverse|sub|unpack|upper)\\b"
     - constant: "\\b(false|nil|true)\\b"
     - statement: "(\\b(dofile|require|include)|%q|%!|%Q|%r|%x)\\b"
     - constant.number: "\\b([0-9]+)\\b"
