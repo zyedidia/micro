@@ -390,6 +390,25 @@ func (v *View) SelectRight(usePlugin bool) bool {
 	return true
 }
 
+// SelectWordCopy selects the word of the cursor and Copy with lastSearch
+func (v *View) SelectWordCopy(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectWordCopy", v) {
+		return false
+	}
+
+	v.Cursor.SelectWord()
+	if v.Cursor.HasSelection() {
+		v.Copy(true)
+		lastSearch = v.Cursor.GetSelection()
+		v.deselect(1)
+	}
+
+	if usePlugin {
+		return PostActionCall("SelectWordCopy", v)
+	}
+	return true
+}
+
 // SelectWordRight selects the word to the right of the cursor
 func (v *View) SelectWordRight(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("SelectWordRight", v) {
@@ -1368,6 +1387,28 @@ func (v *View) SelectAll(usePlugin bool) bool {
 	}
 	return true
 }
+
+// OpenFileTab opens a new file in the buffer tab
+func (v *View) OpenFileTab(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("OpenFileTab", v) {
+			return false
+		}
+		v.AddTab(true)
+
+		if v.CanClose() {
+			input, canceled := messenger.Prompt("> ", "open ", "Open", CommandCompletion)
+			if !canceled {
+				HandleCommand(input)
+				if usePlugin {
+					return PostActionCall("OpenFile", v)
+				}
+			}
+		}
+	}
+	return false
+}
+
 
 // OpenFile opens a new file in the buffer
 func (v *View) OpenFile(usePlugin bool) bool {
