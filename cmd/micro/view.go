@@ -73,6 +73,8 @@ type View struct {
 	// mouse release events
 	mouseReleased bool
 
+	// We need to keep track of insert key press toggle
+	isOverwriteMode bool
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
@@ -245,6 +247,9 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
 	v.mouseReleased = true
+	// Set isOverwriteMode to false, because we assume we are in the default mode when editor
+	// is opened
+	v.isOverwriteMode = false
 	v.lastClickTime = time.Time{}
 }
 
@@ -564,6 +569,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 			}
 		}
+
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.Readonly == false {
@@ -575,7 +581,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.Cursor.DeleteSelection()
 						v.Cursor.ResetSelection()
 					}
-					v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+
+					if v.isOverwriteMode {
+						next := v.Cursor.Loc
+						next.X++
+						v.Buf.Replace(v.Cursor.Loc, next, string(e.Rune()))
+					} else {
+						v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+					}
 
 					for pl := range loadedPlugins {
 						_, err := Call(pl+".onRune", string(e.Rune()), v)
