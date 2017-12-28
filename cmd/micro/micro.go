@@ -271,7 +271,7 @@ func main() {
 		fmt.Println("-version")
 		fmt.Println("    \tShow the version number and information")
 
-		fmt.Print("\nMicro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the bindings.json\nfile (see 'help options').\n\n")
+		fmt.Print("\nMicro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the settings.json\nfile (see 'help options').\n\n")
 		fmt.Println("-option value")
 		fmt.Println("    \tSet `option` to `value` for this session")
 		fmt.Println("    \tFor example: `micro -syntax off file.c`")
