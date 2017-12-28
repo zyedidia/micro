@@ -1,0 +1,44 @@
+filetype: ada
+
+detect:
+    filename: "(\\.ads$|\\.adb$|\\.ada$)"
+
+rules:   
+    # Operators
+    - symbol.operator: ([.:;,+*|=!?\\%]|<|>|/|-|&)
+    - symbol.brackets: "[(){}]|\\[|\\]"
+    # keyword.reserved
+    - statement.reserved: \b(abort|abs|abstract|accept|access|aliased|all|and|array|at|begin|body|case)\b
+    - statement.reserved: \b(constant|declare|delay|delta|digits|do|else|elsif|end|entry|exception|exit|for|function)\b
+    - statement.reserved: \b(generic|goto|if|in|interface|is|limited|loop|mod|new|not|null|of|or|others|out|overriding)\b
+    - statement.reserved: \b(package|pragma|private|procedure|protected|raise|range|record|rem|renames|return|requeue)\b
+    - statement.reserved: \b(reverse|select|separate|some|subtype|synchronized|tagged|task|terminate|then|type|until)\b
+    - statement.reserved: \b(use|when|while|with|xor)\b
+
+    # Constant
+    - constant.bool: \b(TRUE|FALSE)
+    - constant.number: ([0-9]+)
+    
+    # Storage Types
+    - type.storage: \b(INTEGER|NATURAL|POSITIVE|FLOAT|CHARACTER|STRING)\b
+    - type.storage: \b(LONG_INTEGER|SHORT_INTEGER|LONG_FLOAT|SHORT_FLOAT)\b
+    
+    #Character
+    - constant.string.char: \'.\'
+
+    # String
+    - constant.string:
+        start: \"
+        end: \"
+        skip: \\.
+        rules:
+            - constant.specialChar: (\\0|\\\\|\\t|\\n|\\r|\\"|\\')
+            - constant.interpolation: \\\([[:graph:]]*\)
+            - constant.unicode: \\u\{[[:xdigit:]]+}
+
+    
+    # Line Comment
+    - comment.line: "--.*"
+    
+    # Todo
+    - todo: "(TODO|XXX|FIXME):?"
