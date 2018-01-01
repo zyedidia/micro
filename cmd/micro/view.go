@@ -152,6 +152,7 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		Activators:   []rune{'.', '('},
 		Deactivators: []rune{')'},
 		Provider:     optionprovider.GoCode,
+		Logger:       func(s string, values ...interface{}) { messenger.AddLog(fmt.Sprintf(s, values...)) },
 	}
 
 	return v
@@ -1037,6 +1038,9 @@ func (v *View) DisplayView() {
 			screen.SetContent(v.x, yOffset+i, '|', nil, dividerStyle.Reverse(true))
 		}
 	}
+
+	// Draw the autocomplete display.
+	v.Completer.Display(screen.SetContent)
 }
 
 // ShowMultiCursor will display a cursor at a location
