@@ -555,6 +555,12 @@ func (v *View) HandleEvent(event tcell.Event) {
 			}
 		}
 	case *tcell.EventKey:
+		// See whether the autocomplete should take over the keys.
+		if v.Completer.HandleEvent(e.Key()) {
+			// The completer has taken over the key, so break.
+			break
+		}
+
 		// Check first if input is a key binding, if it is we 'eat' the input and don't insert a rune
 		isBinding := false
 		for key, actions := range bindings {
@@ -1039,7 +1045,7 @@ func (v *View) DisplayView() {
 		}
 	}
 
-	// Draw the autocomplete display.
+	// Draw the autocomplete display on top of everything.
 	v.Completer.Display(screen.SetContent)
 }
 

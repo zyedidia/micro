@@ -16,6 +16,8 @@ type Completer struct {
 	Y int
 	// Options stores the current list of suggestions.
 	Options []optionprovider.Option
+	// ActiveIndex store the index of the active option (the one that will be selected).
+	ActiveIndex int
 	// Activators are insertions that start autocomplete, e.g. a "." or an opening bracket "(".
 	Activators []rune
 	// Deactivators are insertions that stop autocomplete, e.g. a closing bracket, or a semicolon.
@@ -32,7 +34,7 @@ func (c *Completer) Process(v *View, r rune) error {
 	if containsRune(c.Deactivators, r) {
 		c.Logger("completer.Process: deactivating, because received %v", string(r))
 		c.Active = false
-		return c.Hide(v)
+		return nil
 	}
 
 	// Check to work out whether we should activate the autocomplete.
@@ -54,7 +56,42 @@ func (c *Completer) Process(v *View, r rune) error {
 		return err
 	}
 	c.Options = options
+	c.ActiveIndex = -1
 	return err
+}
+
+func (c *Completer) HandleEvent(key tcell.Key) bool {
+	if !c.Active {
+		c.Logger("completer.HandleEvent: not active")
+		return false
+	}
+
+	// Handle selecting various options in the list.
+	switch key {
+	case tcell.KeyUp:
+		if c.ActiveIndex > 0 {
+			c.ActiveIndex--
+		}
+		break
+	case tcell.KeyDown:
+		if c.ActiveIndex < len(c.Options) {
+			c.ActiveIndex++
+		}
+		break
+	case tcell.KeyEsc:
+		c.Active = false
+		break
+	case tcell.KeyTab:
+	case tcell.KeyEnter:
+		//TODO: enter text into the buffer at the current cursor position
+		c.Active = false
+		break
+	default:
+		// Not part of the keys that the autocomplete menu handles.
+		return false
+	}
+
+	return true
 }
 
 func (c *Completer) SetPosition(l Loc) {
@@ -67,7 +104,11 @@ type ContentSetter func(x int, y int, mainc rune, combc []rune, style tcell.Styl
 
 // Display the suggestion box.
 func (c *Completer) Display(setter ContentSetter) {
-	c.Logger("completer.Show: showing %d options", len(c.Options))
+	if !c.Active {
+		c.Logger("completer.Display: not showing because inactive")
+		return
+	}
+	c.Logger("completer.Display: showing %d options", len(c.Options))
 	for iy, o := range c.Options {
 		y := c.Y + iy
 		// Draw the runes.
@@ -76,15 +117,15 @@ func (c *Completer) Display(setter ContentSetter) {
 		// TODO: Draw a box around the options, or restyle.
 		for ix, r := range o.Text() {
 			x := c.X + ix
-			setter(x, y, r, nil, defStyle.Reverse(true))
+
+			// If it's active, show it differently
+			style := defStyle.Reverse(true)
+			if c.ActiveIndex == iy {
+				style = defStyle
+			}
+			setter(x, y, r, nil, style)
 		}
 	}
-}
-
-// Hide the suggestion box.
-func (c *Completer) Hide(v *View) error {
-	//TODO: Hide the box
-	return nil
 }
 
 func containsRune(array []rune, r rune) bool {
