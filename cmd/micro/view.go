@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/zyedidia/micro/cmd/micro/optionprovider"
 	"github.com/zyedidia/tcell"
 )
 
@@ -99,6 +100,8 @@ type View struct {
 	splitNode *LeafNode
 
 	scrollbar *ScrollBar
+
+	Completer *Completer
 }
 
 // NewView returns a new fullscreen view
@@ -142,6 +145,13 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 			TermMessage(err)
 			continue
 		}
+	}
+
+	v.Completer = &Completer{
+		// TODO: Move these to be language specific.
+		Activators:   []rune{'.', '('},
+		Deactivators: []rune{')'},
+		Provider:     optionprovider.GoCode,
 	}
 
 	return v
@@ -572,7 +582,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
-			if v.Type.Readonly == false {
+			if !v.Type.Readonly {
 				for _, c := range v.Buf.cursors {
 					v.SetCursor(c)
 
@@ -588,6 +598,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.Buf.Replace(v.Cursor.Loc, next, string(e.Rune()))
 					} else {
 						v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+					}
+
+					// Enable autocomplete if available.
+					if v.Completer != nil {
+						err := v.Completer.Process(v, e.Rune())
+						if err != nil {
+							TermMessage(err)
+						}
 					}
 
 					for pl := range loadedPlugins {
