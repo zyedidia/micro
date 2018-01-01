@@ -556,7 +556,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	case *tcell.EventKey:
 		// See whether the autocomplete should take over the keys.
-		if v.Completer.HandleEvent(e.Key()) {
+		if v.Completer.HandleEvent(e.Key(), v.Cursor.Loc, v.Buf) {
 			// The completer has taken over the key, so break.
 			break
 		}

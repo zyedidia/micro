@@ -41,7 +41,7 @@ func (c *Completer) Process(v *View, r rune) error {
 	if containsRune(c.Activators, r) {
 		c.Logger("completer.Process: activating, because received %v", string(r))
 		c.Active = true
-		c.SetPosition(v.Cursor.Loc)
+		c.SetStartPosition(v.Cursor.Loc)
 	}
 
 	if !c.Active {
@@ -60,7 +60,7 @@ func (c *Completer) Process(v *View, r rune) error {
 	return err
 }
 
-func (c *Completer) HandleEvent(key tcell.Key) bool {
+func (c *Completer) HandleEvent(key tcell.Key, loc Loc, buf *Buffer) bool {
 	if !c.Active {
 		c.Logger("completer.HandleEvent: not active")
 		return false
@@ -83,7 +83,10 @@ func (c *Completer) HandleEvent(key tcell.Key) bool {
 		break
 	case tcell.KeyTab:
 	case tcell.KeyEnter:
-		//TODO: enter text into the buffer at the current cursor position
+		// Complete the text.
+		if toUse, ok := getOption(c.ActiveIndex, c.Options); ok {
+			buf.Replace(Loc{X: c.X, Y: c.Y}, loc, toUse)
+		}
 		c.Active = false
 		break
 	default:
@@ -94,10 +97,16 @@ func (c *Completer) HandleEvent(key tcell.Key) bool {
 	return true
 }
 
-func (c *Completer) SetPosition(l Loc) {
-	// Draw the suggestions directly under the current cursor position.
-	c.X, c.Y = l.X, l.Y+1
-	c.Logger("completer.SetPosition: %d, %d", c.X, c.Y)
+func getOption(i int, options []optionprovider.Option) (toUse string, ok bool) {
+	if i < 0 || i > len(options) {
+		return "", false
+	}
+	return options[i].Text(), true
+}
+
+func (c *Completer) SetStartPosition(l Loc) {
+	c.X, c.Y = l.X, l.Y
+	c.Logger("completer.SetStartPosition: %d, %d", c.X, c.Y)
 }
 
 type ContentSetter func(x int, y int, mainc rune, combc []rune, style tcell.Style)
@@ -110,7 +119,7 @@ func (c *Completer) Display(setter ContentSetter) {
 	}
 	c.Logger("completer.Display: showing %d options", len(c.Options))
 	for iy, o := range c.Options {
-		y := c.Y + iy
+		y := c.Y + iy + 1 // +1 to draw underneath the start position.
 		// Draw the runes.
 		// TODO: Only draw up to n characters?
 		// TODO: Limit the number of options displayed?
