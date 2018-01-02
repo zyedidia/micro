@@ -476,6 +476,9 @@ func BindKey(k, v string) {
 	for _, actionName := range actionNames {
 		if strings.HasPrefix(actionName, "Mouse") {
 			mouseActions = append(mouseActions, findMouseAction(actionName))
+		} else if strings.HasPrefix(actionName, "command:") {
+			cmd := strings.SplitN(actionName, ":", 2)[1]
+			actions = append(actions, CommandAction(cmd))
 		} else {
 			actions = append(actions, findAction(actionName))
 		}

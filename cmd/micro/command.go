@@ -120,6 +120,13 @@ func DefaultCommands() map[string]StrCommand {
 	}
 }
 
+func CommandAction(cmd string) func(*View, bool) bool {
+	return func(v *View, usePlugin bool) bool {
+		HandleCommand(cmd)
+		return false
+	}
+}
+
 // PluginCmd installs, removes, updates, lists, or searches for given plugins
 func PluginCmd(args []string) {
 	if len(args) >= 1 {
