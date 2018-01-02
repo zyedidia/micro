@@ -415,17 +415,39 @@ func (b *Buffer) SaveAs(filename string) error {
 			b.Insert(end, "\n")
 		}
 	}
-	str := b.SaveString(b.Settings["fileformat"] == "dos")
-	data := []byte(str)
-	err := ioutil.WriteFile(ReplaceHome(filename), data, 0644)
-	if err == nil {
-		b.Path = filename
-		b.IsModified = false
+
+	defer func() {
 		b.ModTime, _ = GetModTime(filename)
-		return b.Serialize()
+	}()
+
+	f, err := os.OpenFile(ReplaceHome(filename), os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
 	}
-	b.ModTime, _ = GetModTime(filename)
-	return err
+	if err := f.Truncate(0); err != nil {
+		return err
+	}
+	useCrlf := b.Settings["fileformat"] == "dos"
+	for i, l := range b.lines {
+		if _, err := f.Write(l.data); err != nil {
+			return err
+		}
+		if i != len(b.lines)-1 {
+			if useCrlf {
+				if _, err := f.Write([]byte{'\r', '\n'}); err != nil {
+					return err
+				}
+			} else {
+				if _, err := f.Write([]byte{'\n'}); err != nil {
+					return err
+				}
+			}
+		}
+	}
+
+	b.Path = filename
+	b.IsModified = false
+	return b.Serialize()
 }
 
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
