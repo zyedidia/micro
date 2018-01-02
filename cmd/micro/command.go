@@ -120,6 +120,16 @@ func DefaultCommands() map[string]StrCommand {
 	}
 }
 
+func CommandEditAction(prompt string) func(*View, bool) bool {
+	return func(v *View, usePlugin bool) bool {
+		input, canceled := messenger.Prompt("> ", prompt, "Command", CommandCompletion)
+		if !canceled {
+			HandleCommand(input)
+		}
+		return false
+	}
+}
+
 func CommandAction(cmd string) func(*View, bool) bool {
 	return func(v *View, usePlugin bool) bool {
 		HandleCommand(cmd)

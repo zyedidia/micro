@@ -47,6 +47,33 @@ save and quit you can bind it like so:
 }
 ```
 
+## Binding commands
+
+You can also bind a key to execute a command in command mode (see 
+`help commands`). Simply prepend the binding with `command:`. For example:
+
+```json
+{
+    "Alt-p": "command:pwd"
+}
+```
+
+Now when you press `Alt-p` the `pwd` command will be executed which will show
+your working directory in the infobar.
+
+You can also bind an "editable" command with `command-edit:`. This means that 
+micro won't immediately execute the command when you press the binding, but
+instead just place the string in the infobar in command mode. For example, 
+you could rebind `CtrlG` to `> help`:
+
+```json
+{
+    "CtrlG": "command-edit:help "
+}
+```
+
+Now when you press `CtrlG`, `help` will appear in the command bar and your cursor will
+be placed after it (note the space in the json that controls the cursor placement).
 
 ## Binding raw escape sequences
 

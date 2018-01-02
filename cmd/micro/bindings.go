@@ -479,6 +479,9 @@ func BindKey(k, v string) {
 		} else if strings.HasPrefix(actionName, "command:") {
 			cmd := strings.SplitN(actionName, ":", 2)[1]
 			actions = append(actions, CommandAction(cmd))
+		} else if strings.HasPrefix(actionName, "command-edit:") {
+			cmd := strings.SplitN(actionName, ":", 2)[1]
+			actions = append(actions, CommandEditAction(cmd))
 		} else {
 			actions = append(actions, findAction(actionName))
 		}
