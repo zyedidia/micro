@@ -10,60 +10,44 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 
 Micro comes with a number of colorschemes by default. Here is the list:
 
-* simple: this is the simplest colorscheme. It uses 16 colors which are set by
-  your terminal
+### 16 color
 
-* mc: A 16-color theme based on the look and feel of GNU Midnight Commander.
-  This will look great used in conjunction with Midnight Commander.
-  
-* nano: A 16-color theme loosely based on GNU nano's syntax highlighting.   
-  
-* monokai: this is the monokai colorscheme; you may recognize it as Sublime
+These may vary widely based on the 16 colors selected for your terminal.
+
+* `simple`: this is the simplest colorscheme. It uses 16 colors which are set by
+  your terminal
+* `solarized`: this is the solarized colorscheme. You should have the solarized
+  color palette in your terminal to use it.
+* `cmc-16`: A very nice 16-color theme. Written by contributor CaptainMcClellan
+  (Collin Warren.) Licensed under the same license as the rest of the themes.
+* `cmc-paper`: Basically cmc-16, but on a white background. (Actually light grey
+  on most ANSI (16-color) terminals)
+* `geany`: Colorscheme based on geany's default highlighting.
+
+### 256 color
+
+These should work and look nice in most terminals. I recommend these
+themes the most.
+
+* `monokai`: this is the monokai colorscheme; you may recognize it as Sublime
   Text's default colorscheme. It requires true color to look perfect, but the
   256 color approximation looks very good as well. It's also the default
   colorscheme.
+* `zenburn`
+* `darcula`
+* `twilight`
+* `bubblegum`: a light colorscheme
 
-* zenburn: The 'zenburn' colorscheme and works well with 256 color terminals
+### True color
 
-* solarized: this is the solarized colorscheme. You should have the solarized
-  color palette in your terminal to use it.
+These require terminals that support true color and require `MICRO_TRUECOLOR=1` (this is an environment variable).
 
-* solarized-tc: this is the solarized colorscheme for true color; just make sure
-  your terminal supports true color before using it and that the MICRO_TRUECOLOR
-  environment variable is set to 1 before starting micro.
-
-* atom-dark-tc: this colorscheme is based off of Atom's "dark" colorscheme. It
-  requires true color to look good.
-
-* cmc-16: A very nice 16-color theme. Written by contributor CaptainMcClellan
-  (Collin Warren.) Licensed under the same license as the rest of the themes.
-
-* cmc-paper: Basically cmc-16, but on a white background. (Actually light grey
-  on most ANSI (16-color) terminals)
-
-* cmc-tc: A true colour variant of the cmc theme.  It requires true color to
+* `solarized-tc`: this is the solarized colorscheme for true color.
+* `atom-dark-tc`: this colorscheme is based off of Atom's "dark" colorscheme.
+* `cmc-tc`: A true colour variant of the cmc theme.  It requires true color to
   look its best. Use cmc-16 if your terminal doesn't support true color.
-
-* codeblocks: A colorscheme based on the Code::Blocks IDE's default syntax
-  highlighting.
-
-* codeblocks-paper: Same as codeblocks, but on a white background. (Actually
-  light grey)
-
-* github-tc: A colorscheme based on Github's syntax highlighting. Requires true
-  color to look its best.
-
-* paper-tc: A nice minimalist theme with a light background, good for editing
-  documents on. Requires true color to look its best. Not to be confused with
-  `-paper` suffixed themes.
-
-* geany: Colorscheme based on geany's default highlighting.
-
-* geany-alt-tc: Based on an alternate theme bundled with geany. 
-
-* flamepoint-tc: A fire inspired, high intensity true color theme written by
-  CaptainMcClellan. As with all the other `-tc` suffixed themes, it looks its
-  best on a
+* `gruvbox-tc`: The true color version of the gruvbox colorscheme
+* `github-tc`: The true color version of the Github colorscheme
 
 To enable one of these colorschemes just press CtrlE in micro and type
 `set colorscheme solarized`. (or whichever one you choose). You can also use
