@@ -31,7 +31,7 @@ following in the `bindings.json` file.
 ```json
 {
 	"CtrlY": "Undo",
-	"CtrlZ": "Redo"
+	"CtrlZ": "Redo",
 }
 ```
 
@@ -43,7 +43,15 @@ save and quit you can bind it like so:
 
 ```json
 {
-    "Alt-s": "Save,Quit"
+	"Alt-s": "Save,Quit",
+}
+```
+
+This is the same as:
+
+```json
+{
+	"Alts": "Save,Quit",
 }
 ```
 
@@ -54,7 +62,7 @@ You can also bind a key to execute a command in command mode (see
 
 ```json
 {
-    "Alt-p": "command:pwd"
+	"Alt-p": "command:pwd",
 }
 ```
 
@@ -68,7 +76,7 @@ you could rebind `CtrlG` to `> help`:
 
 ```json
 {
-    "CtrlG": "command-edit:help "
+    "CtrlG": "command-edit:help",
 }
 ```
 
@@ -100,7 +108,7 @@ terminal to send `\x1bctrlback` and then bind it in `bindings.json`:
 
 ```json
 {
-    "\u001bctrlback": "DeleteWordLeft"
+    "\u001bctrlback": "DeleteWordLeft",
 }
 ```
 
@@ -368,7 +376,7 @@ MouseWheelLeft
 MouseWheelRight
 ```
 
-# Default keybinding configuration.
+# Default keybinding configuration
 
 ```json
 {
@@ -473,8 +481,9 @@ MouseWheelRight
 Note: On some old terminal emulators and on Windows machines, `CtrlH` should be
 used for backspace.
 
-Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or
+Alt keys can be bound by using `Alt-key`. For example `Alt-a` or
 `Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and 
-`Ctrl` so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings).
-This is why in the default keybindings you can see `AltShiftLeft` instead of
-`Alt-ShiftLeft` (they are equivalent).
+`Ctrl` so `Alt-a` could be rewritten as `Alta`.
+
+Case matters for alt bindings only.
+This is why in the default keybindings you can see `AltShiftLeft`. `AltShiftLeft` and `Alt-ShiftLeft` are equivalent.
