@@ -20,6 +20,11 @@ Here are the options that you can set:
 
 	default value: `off`
 
+* `basename`: in the infobar, show only the basename of the file being edited
+   rather than the full path.
+
+    default value: `off`
+
 * `colorcolumn`: if this is not set to 0, it will display a column at the
   specified column. This is useful if you want column 80 to be highlighted
   special for example.

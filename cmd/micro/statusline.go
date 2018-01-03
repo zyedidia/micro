@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path"
 	"strconv"
 )
 
@@ -22,6 +23,9 @@ func (sline *Statusline) Display() {
 	y := sline.view.Height + sline.view.y
 
 	file := sline.view.Buf.GetName()
+	if sline.view.Buf.Settings["basename"].(bool) {
+		file = path.Base(file)
+	}
 
 	// If the buffer is dirty (has been modified) write a little '+'
 	if sline.view.Buf.Modified() {
