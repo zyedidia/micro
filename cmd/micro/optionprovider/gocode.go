@@ -46,52 +46,27 @@ func GoCode(buffer []byte, offset int) (options []Option, err error) {
 	for _, r := range results {
 		m, mok := r.(map[string]interface{})
 		if mok {
-			options = append(options, mapToGcr(m))
+			options = append(options, mapToOption(m))
 		}
 	}
 
 	return
 }
 
-func mapToGcr(m map[string]interface{}) Option {
-	gcr := GoCodeResult{}
-	if cv, ok := m["class"]; ok {
-		if c, cok := cv.(string); cok {
-			gcr.Class = c
-		}
-	}
+func mapToOption(m map[string]interface{}) Option {
+	// Available values are "class", "name", "type" and "package"
+	o := Option{}
 	if nv, ok := m["name"]; ok {
 		if n, nok := nv.(string); nok {
-			gcr.Name = n
+			// text
+			o.T = n
 		}
 	}
 	if tv, ok := m["type"]; ok {
 		if t, tok := tv.(string); tok {
-			gcr.Type = t
+			// hint
+			o.H = t
 		}
 	}
-	if pv, ok := m["package"]; ok {
-		if p, pok := pv.(string); pok {
-			gcr.Package = p
-		}
-	}
-	return Option(gcr)
-}
-
-// GoCodeResult is the JSON output from gocode.
-type GoCodeResult struct {
-	Class   string `json:"class"`
-	Name    string `json:"name"`
-	Type    string `json:"type"`
-	Package string `json:"package"`
-}
-
-// Text is the string that will be inserted.
-func (gcr GoCodeResult) Text() string {
-	return gcr.Name
-}
-
-// Hint describes the text, e.g. if it's a method.
-func (gcr GoCodeResult) Hint() string {
-	return gcr.Type
+	return o
 }

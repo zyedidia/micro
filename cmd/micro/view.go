@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/zyedidia/micro/cmd/micro/optionprovider"
+
 	"github.com/zyedidia/tcell"
 )
 
@@ -147,13 +148,15 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		}
 	}
 
-	v.Completer = &Completer{
-		// TODO: Move these to be language specific.
-		Activators:   []rune{'.', '('},
-		Deactivators: []rune{')'},
-		Provider:     optionprovider.GoCode,
-		Logger:       func(s string, values ...interface{}) { messenger.AddLog(fmt.Sprintf(s, values...)) },
-	}
+	//TODO: Configure based on the filetype.
+	activators := []rune{'.', '('}
+	deactivators := []rune{')'}
+	v.Completer = NewCompleter(activators, deactivators,
+		optionprovider.GoCode,
+		LogToMessenger(),
+		CurrentBytesAndOffsetFromView(v),
+		CurrentLocationFromView(v),
+		ReplaceFromBuffer(v.Buf))
 
 	return v
 }
@@ -556,7 +559,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 		}
 	case *tcell.EventKey:
 		// See whether the autocomplete should take over the keys.
-		if v.Completer.HandleEvent(e.Key(), v.Cursor.Loc, v.Buf) {
+		if v.Completer.HandleEvent(e.Key()) {
 			// The completer has taken over the key, so break.
 			break
 		}
@@ -609,7 +612,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 
 					// Enable autocomplete if available.
 					if v.Completer != nil {
-						err := v.Completer.Process(v, e.Rune())
+						err := v.Completer.Process(e.Rune())
 						if err != nil {
 							TermMessage(err)
 						}
