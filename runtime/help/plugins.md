@@ -160,6 +160,16 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 * `messenger.AddLog(msg ...interface{})`
 
+The Autocompleter is accessible via the `CurView().Completer` variable. To implement an autocompleter as a plugin:
+
+* Handle the `onRune` event to decide whether to set the `Completer.Active` flag to true / false. 
+  * This controls whether the dialog box of options is displayed.
+* Also set the `Completer.X` and `Completer.Y` variables. This sets the beginning of the area which would be replaced by an option selected from the autocomplete.
+* Add options to `Complete.Options`
+* Set the `ActiveIndex` - this sets the highlighed value in the autocomplete list.
+
+This is enough to trigger the display of the option list and allow up/down selection of the options.
+
 #### Note 
 
 Go function signatures use `.` and lua uses `:` so

@@ -235,6 +235,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"tabstospaces":   false,
 		"termtitle":      false,
 		"useprimary":     true,
+		"autocomplete":   false,
 	}
 }
 
@@ -269,6 +270,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
+		"autocomplete":   false,
 	}
 }
 

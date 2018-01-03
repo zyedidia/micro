@@ -8,8 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zyedidia/micro/cmd/micro/optionprovider"
-
 	"github.com/zyedidia/tcell"
 )
 
@@ -148,15 +146,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		}
 	}
 
-	//TODO: Configure based on the filetype.
-	activators := []rune{'.', '('}
-	deactivators := []rune{')'}
-	v.Completer = NewCompleter(activators, deactivators,
-		optionprovider.GoCode,
-		LogToMessenger(),
-		CurrentBytesAndOffsetFromView(v),
-		CurrentLocationFromView(v),
-		ReplaceFromBuffer(v.Buf))
+	// Load the autocompleter, based on the filetype.
+	v.Completer = NewCompleterForView(v)
 
 	return v
 }
@@ -610,12 +601,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
 					}
 
-					// Enable autocomplete if available.
-					if v.Completer != nil {
-						err := v.Completer.Process(e.Rune())
-						if err != nil {
-							TermMessage(err)
-						}
+					// Allow the completer to access the rune.
+					err := v.Completer.Process(e.Rune())
+					if err != nil {
+						TermMessage(err)
 					}
 
 					for pl := range loadedPlugins {
@@ -1049,7 +1038,7 @@ func (v *View) DisplayView() {
 	}
 
 	// Draw the autocomplete display on top of everything.
-	v.Completer.Display(screen.SetContent)
+	v.Completer.Display()
 }
 
 // ShowMultiCursor will display a cursor at a location

@@ -1,13 +1,77 @@
 package main
 
-import "testing"
-import "github.com/zyedidia/micro/cmd/micro/optionprovider"
-import "reflect"
-import "github.com/zyedidia/tcell"
+import (
+	"bytes"
+	"reflect"
+	"testing"
+
+	"github.com/zyedidia/micro/cmd/micro/optionprovider"
+	"github.com/zyedidia/tcell"
+)
 
 var noopReplacer = func(from, to Loc, with string) {}
+var noopContentSetter = func(x int, y int, mainc rune, combc []rune, style tcell.Style) {}
+var enabledFlagSetToTrue = func() bool { return true }
+var enabledFlagSetToFalse = func() bool { return false }
 
-func TestThatTheCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
+var optionStyleInactive = tcell.StyleDefault.Reverse(true)
+
+const optionStyleActive = tcell.StyleDefault
+
+func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
+	var currentBytesAndOffsetCalled, currentLocationCalled, providerCalled bool
+
+	currentBytesAndOffset := func() (bytes []byte, offset int) {
+		currentBytesAndOffsetCalled = true
+		return []byte("fmt.Println("), 3
+	}
+	currentLocation := func() Loc {
+		currentLocationCalled = true
+		return Loc{X: 1, Y: 2}
+	}
+	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+		providerCalled = true
+		return
+	}
+
+	activators := []rune{'('}
+	deactivators := []rune{')', ';'}
+
+	c := NewCompleter(activators,
+		deactivators,
+		provider,
+		t.Logf,
+		currentBytesAndOffset,
+		currentLocation,
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToFalse)
+
+	// It's not enabled, so nothing should be called.
+	err := c.Process('(')
+	if err != nil {
+		t.Fatalf("not enabled: failed to process with error: %v", err)
+	}
+	if currentBytesAndOffsetCalled || currentLocationCalled {
+		t.Errorf("not enabled: when disabled, no functions should be called")
+	}
+
+	// It's enabled, but the provider is nil.
+	c.Enabled = enabledFlagSetToTrue
+	c.Provider = nil
+
+	err = c.Process('(')
+	if err != nil {
+		t.Fatalf("enabled: failed to process with error: %v", err)
+	}
+	if currentBytesAndOffsetCalled || currentLocationCalled || providerCalled {
+		t.Errorf("enabled: when disabled, no functions should be called")
+	}
+}
+
+func TestCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 	activators := []rune{'('}
 	deactivators := []rune{')', ';'}
 	currentBytesAndOffset := func() (bytes []byte, offset int) {
@@ -29,7 +93,11 @@ func TestThatTheCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
-		noopReplacer)
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
 
 	c.Active = true
 
@@ -42,7 +110,7 @@ func TestThatTheCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 	}
 }
 
-func TestThatTheCompleterIsActivatedByActivatorRunes(t *testing.T) {
+func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	var providerReceivedBytes []byte
 	var providerReceivedOffset int
 
@@ -71,7 +139,11 @@ func TestThatTheCompleterIsActivatedByActivatorRunes(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
-		noopReplacer)
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
 
 	err := c.Process('(')
 	if err != nil {
@@ -97,7 +169,7 @@ func TestThatTheCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	}
 }
 
-func TestThatAnInactiveCompleterIsNotTriggeredByOtherRunes(t *testing.T) {
+func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 	activators := []rune{'('}
 	deactivators := []rune{')', ';'}
 	currentBytesAndOffset := func() (bytes []byte, offset int) {
@@ -118,7 +190,11 @@ func TestThatAnInactiveCompleterIsNotTriggeredByOtherRunes(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
-		noopReplacer)
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
 
 	err := c.Process('a')
 	if err != nil {
@@ -129,8 +205,8 @@ func TestThatAnInactiveCompleterIsNotTriggeredByOtherRunes(t *testing.T) {
 	}
 }
 
-func TestHandleEventInactive(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil)
+func TestCompleterHandleEventInactive(t *testing.T) {
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
 
 	handled := c.HandleEvent(tcell.KeyRune)
 	if handled {
@@ -138,8 +214,8 @@ func TestHandleEventInactive(t *testing.T) {
 	}
 }
 
-func TestHandleEventKeyUp(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil)
+func TestCompleterHandleEventKeyUp(t *testing.T) {
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
 
 	c.Active = true
 	c.ActiveIndex = 10
@@ -160,8 +236,8 @@ func TestHandleEventKeyUp(t *testing.T) {
 	}
 }
 
-func TestHandleEventKeyDown(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil)
+func TestCompleterHandleEventKeyDown(t *testing.T) {
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
 
 	c.Active = true
 	c.Options = []optionprovider.Option{
@@ -185,8 +261,8 @@ func TestHandleEventKeyDown(t *testing.T) {
 	}
 }
 
-func TestHandleEventKeyEscape(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil)
+func TestCompleterHandleEventKeyEscape(t *testing.T) {
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
 
 	c.Active = true
 
@@ -199,15 +275,15 @@ func TestHandleEventKeyEscape(t *testing.T) {
 	}
 }
 
-func TestHandleEventKeyTab(t *testing.T) {
-	testHandleEventCompletion(tcell.KeyTab, t)
+func TestCompleterHandleEventKeyTab(t *testing.T) {
+	testCompleterHandleEventCompletion(tcell.KeyTab, t)
 }
 
-func TestHandleEventKeyEnter(t *testing.T) {
-	testHandleEventCompletion(tcell.KeyEnter, t)
+func TestCompleterHandleEventKeyEnter(t *testing.T) {
+	testCompleterHandleEventCompletion(tcell.KeyEnter, t)
 }
 
-func testHandleEventCompletion(key tcell.Key, t *testing.T) {
+func testCompleterHandleEventCompletion(key tcell.Key, t *testing.T) {
 	expectedFrom := Loc{X: 0, Y: 1}
 	expectedTo := Loc{X: 1, Y: 2}
 
@@ -221,7 +297,7 @@ func testHandleEventCompletion(key tcell.Key, t *testing.T) {
 		receivedTo = to
 		receivedWith = with
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, replacer)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, replacer, nil, optionStyleInactive, optionStyleActive, nil)
 
 	c.X = expectedFrom.X
 	c.Y = expectedFrom.Y
@@ -247,8 +323,8 @@ func testHandleEventCompletion(key tcell.Key, t *testing.T) {
 	}
 }
 
-func TestHandleEventKeyWhenActive(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil)
+func TestCompleterHandleEventKeyWhenActive(t *testing.T) {
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
 
 	c.Active = true
 
@@ -258,7 +334,7 @@ func TestHandleEventKeyWhenActive(t *testing.T) {
 	}
 }
 
-func TestGetOption(t *testing.T) {
+func TestCompleterGetOption(t *testing.T) {
 	options := []optionprovider.Option{
 		optionprovider.New("text", "hint"),
 		optionprovider.New("text1", "hint1"),
@@ -299,5 +375,206 @@ func TestGetOption(t *testing.T) {
 		if test.expectedOK != actualOK {
 			t.Errorf("for index %v, expected '%v', but got '%v'", test.index, test.expectedOK, actualOK)
 		}
+	}
+}
+
+func TestCompleterDisplayDoesNotWriteToConsoleWhenInactive(t *testing.T) {
+	var setterCalled bool
+	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
+		setterCalled = true
+	}
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, nil)
+
+	c.Display()
+	if setterCalled {
+		t.Error("when the completer is inactive, expected no content to be written to the screen")
+	}
+}
+
+type rs struct {
+	Rune  rune
+	Style tcell.Style
+}
+
+type displayMap map[Loc]rs
+
+func (a displayMap) Eq(b displayMap) bool {
+	if len(a) != len(b) {
+		return false
+	}
+	for locA, rsA := range a {
+		rsB, ok := b[locA]
+		if !ok {
+			return false
+		}
+		if rsA.Rune != rsB.Rune {
+			return false
+		}
+		if rsA.Style != rsB.Style {
+			return false
+		}
+	}
+	return true
+}
+
+func (a displayMap) String() string {
+	buf := bytes.NewBuffer([]byte{})
+
+	if len(a) == 0 {
+		return ""
+	}
+
+	minX, maxX := a.X()
+	minY, maxY := a.Y()
+
+	for y := minY; y <= maxY; y++ {
+		for x := minX; x <= maxX; x++ {
+			l := Loc{X: x, Y: y}
+			// Get the value of the rune.
+			v, ok := a[l]
+			if ok {
+				buf.WriteRune(v.Rune)
+			} else {
+				buf.WriteRune(' ')
+			}
+		}
+		if y < maxY {
+			buf.WriteRune('\n')
+		}
+	}
+	return buf.String()
+}
+
+func (a displayMap) X() (min, max int) {
+	first := true
+	for k := range a {
+		if first {
+			min = k.X
+			max = k.X
+			first = false
+		}
+		if k.X < min {
+			min = k.X
+		}
+		if k.X > max {
+			max = k.X
+		}
+	}
+	return
+}
+
+func (a displayMap) Y() (min, max int) {
+	first := true
+	for k := range a {
+		if first {
+			min = k.Y
+			max = k.Y
+			first = false
+		}
+		if k.Y < min {
+			min = k.Y
+		}
+		if k.Y > max {
+			max = k.Y
+		}
+	}
+	return
+}
+
+func TestDisplayMapString(t *testing.T) {
+	m := make(displayMap)
+
+	if m.String() != "" {
+		t.Errorf("an empty display should be an empty string, but got '%v'", m.String())
+	}
+
+	m[Loc{Y: 0, X: 0}] = rs{Rune: 'a'}
+	if m.String() != "a" {
+		t.Errorf("expected 'a', got '%v'", m.String())
+	}
+	m[Loc{Y: 0, X: 2}] = rs{Rune: 'c'}
+	if m.String() != "a c" {
+		t.Errorf("expected 'a c', got '%v'", m.String())
+	}
+}
+
+func TestCompleterDisplayRendersOptionsWhenActive(t *testing.T) {
+	acs := optionStyleInactive
+	act := optionStyleActive
+
+	tests := []struct {
+		name                string
+		options             []optionprovider.Option
+		selectedOptionIndex int
+		expected            displayMap
+	}{
+		{
+			name:                "no options",
+			options:             []optionprovider.Option{},
+			selectedOptionIndex: -1,
+			expected:            displayMap{},
+		},
+		{
+			name: "single option",
+			options: []optionprovider.Option{
+				optionprovider.New("Text", "Hint"),
+			},
+			selectedOptionIndex: -1,
+			expected: displayMap{
+				Loc{Y: 1, X: 0}: rs{'T', acs}, Loc{Y: 1, X: 1}: rs{'e', acs}, Loc{Y: 1, X: 2}: rs{'x', acs}, Loc{Y: 1, X: 3}: rs{'t', acs}, Loc{Y: 1, X: 4}: rs{rune(0), acs},
+			},
+		},
+		{
+			name: "multiple options",
+			options: []optionprovider.Option{
+				optionprovider.New("Text", "Hint"),
+				optionprovider.New("Text2", "Hint2"),
+			},
+			selectedOptionIndex: -1,
+			expected: displayMap{
+				Loc{Y: 1, X: 0}: rs{'T', acs}, Loc{Y: 1, X: 1}: rs{'e', acs}, Loc{Y: 1, X: 2}: rs{'x', acs}, Loc{Y: 1, X: 3}: rs{'t', acs}, Loc{Y: 1, X: 4}: rs{0, acs}, Loc{Y: 1, X: 5}: rs{0, acs},
+				Loc{Y: 2, X: 0}: rs{'T', acs}, Loc{Y: 2, X: 1}: rs{'e', acs}, Loc{Y: 2, X: 2}: rs{'x', acs}, Loc{Y: 2, X: 3}: rs{'t', acs}, Loc{Y: 2, X: 4}: rs{'2', acs}, Loc{Y: 2, X: 5}: rs{0, acs},
+			},
+		},
+		{
+			name: "multiple options, last selected",
+			options: []optionprovider.Option{
+				optionprovider.New("Text", "Hint"),
+				optionprovider.New("Text2", "Hint2"),
+			},
+			selectedOptionIndex: 1,
+			expected: displayMap{
+				Loc{Y: 1, X: 0}: rs{'T', acs}, Loc{Y: 1, X: 1}: rs{'e', acs}, Loc{Y: 1, X: 2}: rs{'x', acs}, Loc{Y: 1, X: 3}: rs{'t', acs}, Loc{Y: 1, X: 4}: rs{0, acs}, Loc{Y: 1, X: 5}: rs{0, acs},
+				Loc{Y: 2, X: 0}: rs{'T', act}, Loc{Y: 2, X: 1}: rs{'e', act}, Loc{Y: 2, X: 2}: rs{'x', act}, Loc{Y: 2, X: 3}: rs{'t', act}, Loc{Y: 2, X: 4}: rs{'2', act}, Loc{Y: 2, X: 5}: rs{0, act},
+			},
+		},
+	}
+
+	for _, test := range tests {
+		testCompleterDisplayRendersOptionsWhenActive(test.name, test.options, test.selectedOptionIndex, test.expected, t)
+	}
+}
+
+func testCompleterDisplayRendersOptionsWhenActive(name string,
+	options []optionprovider.Option,
+	activeIndex int,
+	expected displayMap,
+	t *testing.T) {
+	actual := make(displayMap)
+
+	var setterCalled bool
+	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
+		setterCalled = true
+		actual[Loc{X: x, Y: y}] = rs{Rune: mainc, Style: style}
+	}
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, nil)
+	c.Active = true
+	c.ActiveIndex = activeIndex
+	c.Options = options
+
+	c.Display()
+	if !expected.Eq(actual) {
+		t.Errorf("%s: expected characters '%v', got '%v'", name, expected.String(), actual.String())
+		t.Errorf("%s: expected '%v', got '%v'", name, map[Loc]rs(expected), map[Loc]rs(actual))
 	}
 }
