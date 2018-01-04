@@ -55,3 +55,9 @@
 [submodule "cmd/micro/vendor/github.com/flynn/json5"]
 	path = cmd/micro/vendor/github.com/flynn/json5
 	url = https://github.com/flynn/json5
+[submodule "cmd/micro/vendor/github.com/james4k/terminal"]
+	path = cmd/micro/vendor/github.com/james4k/terminal
+	url = https://github.com/james4k/terminal
+[submodule "cmd/micro/vendor/github.com/kr/pty"]
+	path = cmd/micro/vendor/github.com/kr/pty
+	url = https://github.com/kr/pty
