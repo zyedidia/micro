@@ -29,6 +29,8 @@ func runeToByteIndex(n int, txt []byte) int {
 	return count
 }
 
+// A Line contains the data in bytes as well as a highlight state, match
+// and a flag for whether the highlighting needs to be updated
 type Line struct {
 	data []byte
 
@@ -43,10 +45,12 @@ type LineArray struct {
 	lines []Line
 }
 
+// Append efficiently appends lines together
+// It allocates an additional 10000 lines if the original estimate
+// is incorrect
 func Append(slice []Line, data ...Line) []Line {
 	l := len(slice)
 	if l+len(data) > cap(slice) { // reallocate
-		// Allocate double what's needed, for future growth.
 		newSlice := make([]Line, (l+len(data))+10000)
 		// The copy function is predeclared and works for any slice type.
 		copy(newSlice, slice)
@@ -243,18 +247,22 @@ func (la *LineArray) Substr(start, end Loc) string {
 	return str
 }
 
+// State gets the highlight state for the given line number
 func (la *LineArray) State(lineN int) highlight.State {
 	return la.lines[lineN].state
 }
 
+// SetState sets the highlight state at the given line number
 func (la *LineArray) SetState(lineN int, s highlight.State) {
 	la.lines[lineN].state = s
 }
 
+// SetMatch sets the match at the given line number
 func (la *LineArray) SetMatch(lineN int, m highlight.LineMatch) {
 	la.lines[lineN].match = m
 }
 
+// Match retrieves the match for the given line number
 func (la *LineArray) Match(lineN int) highlight.LineMatch {
 	return la.lines[lineN].match
 }

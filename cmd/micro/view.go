@@ -3,11 +3,13 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"reflect"
 	"strconv"
 	"strings"
 	"time"
 
+	"github.com/james4k/terminal"
 	"github.com/zyedidia/tcell"
 )
 
@@ -24,6 +26,7 @@ var (
 	vtLog     = ViewType{2, true, true}
 	vtScratch = ViewType{3, false, true}
 	vtRaw     = ViewType{4, true, true}
+	vtTerm    = ViewType{5, true, true}
 )
 
 // The View struct stores information about a view into a buffer.
@@ -99,6 +102,11 @@ type View struct {
 	splitNode *LeafNode
 
 	scrollbar *ScrollBar
+
+	termState terminal.State
+	pty       *os.File
+	term      *terminal.VT
+	termtitle string
 }
 
 // NewView returns a new fullscreen view
@@ -154,6 +162,46 @@ func (v *View) ToggleStatusLine() {
 	} else {
 		v.Height++
 	}
+}
+
+// StartTerminal execs a command in this view
+func (v *View) StartTerminal(execCmd []string) error {
+	// cmd := exec.Command(os.Getenv("SHELL"), "-i")
+	if len(execCmd) <= 0 {
+		return nil
+	}
+	cmd := exec.Command(execCmd[0], execCmd[1:]...)
+	term, pty, err := terminal.Start(&v.termState, cmd)
+	if err != nil {
+		return err
+	}
+	term.Resize(v.Width, v.Height)
+	v.Type = vtTerm
+	v.term = term
+	v.termtitle = execCmd[0]
+	v.pty = pty
+
+	go func() {
+		for {
+			err := term.Parse()
+			if err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				break
+			}
+			updateterm <- true
+		}
+		closeterm <- v.Num
+	}()
+
+	return nil
+}
+
+// CloseTerminal shuts down the tty running in this view
+// and returns it to the default view type
+func (v *View) CloseTerminal() {
+	v.pty.Close()
+	v.term.Close()
+	v.Type = vtDefault
 }
 
 // ToggleTabbar creates an extra row for the tabbar if necessary
@@ -366,6 +414,10 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	return 0, 0
 }
 
+// Bottomline returns the line number of the lowest line in the view
+// You might think that this is obviously just v.Topline + v.Height
+// but if softwrap is enabled things get complicated since one buffer
+// line can take up multiple lines in the view
 func (v *View) Bottomline() int {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		return v.Topline + v.Height
@@ -504,6 +556,13 @@ func (v *View) SetCursor(c *Cursor) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	if v.Type == vtTerm {
+		if _, ok := event.(*tcell.EventMouse); !ok {
+			v.pty.WriteString(event.EscSeq())
+		}
+		return
+	}
+
 	if v.Type == vtRaw {
 		v.Buf.Insert(v.Cursor.Loc, reflect.TypeOf(event).String()[7:])
 		v.Buf.Insert(v.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
@@ -736,8 +795,53 @@ func (v *View) openHelp(helpPage string) {
 	}
 }
 
+// DisplayTerm draws a terminal in this window
+// The view's type must be vtTerm
+func (v *View) DisplayTerm() {
+	divider := 0
+	if v.x != 0 {
+		divider = 1
+		dividerStyle := defStyle
+		if style, ok := colorscheme["divider"]; ok {
+			dividerStyle = style
+		}
+		for i := 0; i < v.Height; i++ {
+			screen.SetContent(v.x, v.y+i, '|', nil, dividerStyle.Reverse(true))
+		}
+	}
+	v.termState.Lock()
+	defer v.termState.Unlock()
+
+	for y := 0; y < v.Height; y++ {
+		for x := 0; x < v.Width; x++ {
+
+			c, f, b := v.termState.Cell(x, y)
+
+			fg, bg := int(f), int(b)
+			if f == terminal.DefaultFG {
+				fg = int(tcell.ColorDefault)
+			}
+			if b == terminal.DefaultBG {
+				bg = int(tcell.ColorDefault)
+			}
+			st := tcell.StyleDefault.Foreground(GetColor256(int(fg))).Background(GetColor256(int(bg)))
+
+			screen.SetContent(v.x+x+divider, v.y+y, c, nil, st)
+		}
+	}
+	if v.termState.CursorVisible() && tabs[curTab].CurView == v.Num {
+		curx, cury := v.termState.Cursor()
+		screen.ShowCursor(curx+v.x+divider, cury+v.y)
+	}
+}
+
 // DisplayView draws the view to the screen
 func (v *View) DisplayView() {
+	if v.Type == vtTerm {
+		v.DisplayTerm()
+		return
+	}
+
 	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
 		v.leftCol = 0
 	}
@@ -807,11 +911,11 @@ func (v *View) DisplayView() {
 		}
 
 		colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-		if colorcolumn != 0 {
+		if colorcolumn != 0 && xOffset+colorcolumn-v.leftCol < v.Width {
 			style := GetColor("color-column")
 			fg, _, _ := style.Decompose()
 			st := defStyle.Background(fg)
-			screen.SetContent(xOffset+colorcolumn, yOffset+visualLineN, ' ', nil, st)
+			screen.SetContent(xOffset+colorcolumn-v.leftCol, yOffset+visualLineN, ' ', nil, st)
 		}
 
 		screenX = v.x

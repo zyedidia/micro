@@ -56,6 +56,7 @@ func init() {
 		"Pwd":        Pwd,
 		"Open":       Open,
 		"TabSwitch":  TabSwitch,
+		"Term":       Term,
 		"MemUsage":   MemUsage,
 		"Retab":      Retab,
 		"Raw":        Raw,
@@ -114,12 +115,16 @@ func DefaultCommands() map[string]StrCommand {
 		"pwd":        {"Pwd", []Completion{NoCompletion}},
 		"open":       {"Open", []Completion{FileCompletion}},
 		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
+		"term":       {"Term", []Completion{NoCompletion}},
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
 		"retab":      {"Retab", []Completion{NoCompletion}},
 		"raw":        {"Raw", []Completion{NoCompletion}},
 	}
 }
 
+// CommandEditAction returns a bindable function that opens a prompt with
+// the given string and executes the command when the user presses
+// enter
 func CommandEditAction(prompt string) func(*View, bool) bool {
 	return func(v *View, usePlugin bool) bool {
 		input, canceled := messenger.Prompt("> ", prompt, "Command", CommandCompletion)
@@ -130,6 +135,8 @@ func CommandEditAction(prompt string) func(*View, bool) bool {
 	}
 }
 
+// CommandAction returns a bindable function which executes the
+// given command
 func CommandAction(cmd string) func(*View, bool) bool {
 	return func(v *View, usePlugin bool) bool {
 		HandleCommand(cmd)
@@ -697,6 +704,19 @@ func Replace(args []string) {
 func ReplaceAll(args []string) {
 	// aliased to Replace command
 	Replace(append(args, "-a"))
+}
+
+// Term opens a terminal in the current view
+func Term(args []string) {
+	var err error
+	if len(args) == 0 {
+		err = CurView().StartTerminal([]string{os.Getenv("SHELL"), "-i"})
+	} else {
+		err = CurView().StartTerminal(args)
+	}
+	if err != nil {
+		messenger.Error(err)
+	}
 }
 
 // RunShellCommand executes a shell command and returns the output/error

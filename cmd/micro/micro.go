@@ -57,8 +57,10 @@ var (
 	// Channel of jobs running in the background
 	jobs chan JobFunction
 	// Event channel
-	events   chan tcell.Event
-	autosave chan bool
+	events     chan tcell.Event
+	autosave   chan bool
+	updateterm chan bool
+	closeterm  chan int
 )
 
 // LoadInput determines which files should be loaded into buffers
@@ -206,7 +208,7 @@ func InitScreen() {
 		screen.EnableMouse()
 	}
 
-	screen.SetStyle(defStyle)
+	// screen.SetStyle(defStyle)
 }
 
 // RedrawAll redraws everything -- all the views and the messenger
@@ -423,6 +425,8 @@ func main() {
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
 	autosave = make(chan bool)
+	updateterm = make(chan bool)
+	closeterm = make(chan int)
 
 	LoadPlugins()
 
@@ -474,6 +478,10 @@ func main() {
 			if CurView().Buf.Path != "" {
 				CurView().Save(true)
 			}
+		case <-updateterm:
+			continue
+		case vnum := <-closeterm:
+			tabs[curTab].views[vnum].CloseTerminal()
 		case event = <-events:
 		}
 

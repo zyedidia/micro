@@ -52,6 +52,7 @@ type Buffer struct {
 	// Stores the last modification time of the file the buffer is pointing to
 	ModTime time.Time
 
+	// NumLines is the number of lines in the buffer
 	NumLines int
 
 	syntaxDef   *highlight.Def
@@ -72,6 +73,8 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
+// NewBufferFromString creates a new buffer containing the given
+// string
 func NewBufferFromString(text, path string) *Buffer {
 	return NewBuffer(strings.NewReader(text), int64(len(text)), path)
 }
@@ -201,6 +204,8 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	return b
 }
 
+// GetName returns the name that should be displayed in the statusline
+// for this buffer
 func (b *Buffer) GetName() string {
 	if b.name == "" {
 		if b.Path == "" {
@@ -333,6 +338,8 @@ func (b *Buffer) Update() {
 	b.NumLines = len(b.lines)
 }
 
+// MergeCursors merges any cursors that are at the same position
+// into one cursor
 func (b *Buffer) MergeCursors() {
 	var cursors []*Cursor
 	for i := 0; i < len(b.cursors); i++ {
@@ -359,6 +366,7 @@ func (b *Buffer) MergeCursors() {
 	}
 }
 
+// UpdateCursors updates all the cursors indicies
 func (b *Buffer) UpdateCursors() {
 	for i, c := range b.cursors {
 		c.Num = i
@@ -488,6 +496,8 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	return err
 }
 
+// Modified returns if this buffer has been modified since
+// being opened
 func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
 		return b.IsModified
@@ -539,6 +549,7 @@ func (b *Buffer) Line(n int) string {
 	return string(b.lines[n].data)
 }
 
+// LinesNum returns the number of lines in the buffer
 func (b *Buffer) LinesNum() int {
 	return len(b.lines)
 }

@@ -73,6 +73,9 @@ func (t *Tab) Resize() {
 
 	for i, v := range t.views {
 		v.Num = i
+		if v.Type == vtTerm {
+			v.term.Resize(v.Width, v.Height)
+		}
 	}
 }
 
