@@ -205,8 +205,17 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 	}
 }
 
+func TestCompleterHandleEventNotEnabled(t *testing.T) {
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToFalse)
+
+	handled := c.HandleEvent(tcell.KeyRune)
+	if handled {
+		t.Error("when the completer is not enabled, handling events should not take place")
+	}
+}
+
 func TestCompleterHandleEventInactive(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	handled := c.HandleEvent(tcell.KeyRune)
 	if handled {
@@ -215,7 +224,7 @@ func TestCompleterHandleEventInactive(t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyUp(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 	c.ActiveIndex = 10
@@ -237,7 +246,7 @@ func TestCompleterHandleEventKeyUp(t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyDown(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 	c.Options = []optionprovider.Option{
@@ -262,7 +271,7 @@ func TestCompleterHandleEventKeyDown(t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyEscape(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 
@@ -297,7 +306,7 @@ func testCompleterHandleEventCompletion(key tcell.Key, t *testing.T) {
 		receivedTo = to
 		receivedWith = with
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, replacer, nil, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, replacer, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.X = expectedFrom.X
 	c.Y = expectedFrom.Y
@@ -324,7 +333,7 @@ func testCompleterHandleEventCompletion(key tcell.Key, t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyWhenActive(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 
@@ -378,12 +387,25 @@ func TestCompleterGetOption(t *testing.T) {
 	}
 }
 
+func TestCompleterDisplayDoesNotWriteToConsoleWhenNotEnabled(t *testing.T) {
+	var setterCalled bool
+	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
+		setterCalled = true
+	}
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToFalse)
+
+	c.Display()
+	if setterCalled {
+		t.Error("when the completer is not enabled, expected no content to be written to the screen")
+	}
+}
+
 func TestCompleterDisplayDoesNotWriteToConsoleWhenInactive(t *testing.T) {
 	var setterCalled bool
 	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		setterCalled = true
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Display()
 	if setterCalled {
@@ -567,7 +589,7 @@ func testCompleterDisplayRendersOptionsWhenActive(name string,
 		setterCalled = true
 		actual[Loc{X: x, Y: y}] = rs{Rune: mainc, Style: style}
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, nil)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 	c.Active = true
 	c.ActiveIndex = activeIndex
 	c.Options = options

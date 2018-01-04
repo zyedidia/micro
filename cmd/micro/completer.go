@@ -111,7 +111,7 @@ func NewCompleterForView(v *View) *Completer {
 
 	// If no matching provider was found, we can't autocomplete.
 	if provider == nil {
-		return nil
+		provider = optionprovider.Noop
 	}
 
 	return NewCompleter(activators, deactivators,
@@ -201,6 +201,10 @@ func (c *Completer) Process(r rune) error {
 // HandleEvent handles incoming key presses if the completer is active.
 // It returns true if it took over the key action, or false if it didn't.
 func (c *Completer) HandleEvent(key tcell.Key) bool {
+	if !c.Enabled() {
+		c.Logger("completer.HandleEvent: not enabled")
+		return false
+	}
 	if !c.Active {
 		c.Logger("completer.HandleEvent: not active")
 		return false
@@ -246,6 +250,10 @@ func getOption(i int, options []optionprovider.Option) (toUse string, ok bool) {
 
 // Display the suggestion box.
 func (c *Completer) Display() {
+	if !c.Enabled() {
+		c.Logger("completer.Display: not enabled")
+		return
+	}
 	if !c.Active {
 		c.Logger("completer.Display: not showing because inactive")
 		return
