@@ -406,6 +406,8 @@ func findMouseAction(v string) func(*View, bool, *tcell.EventMouse) bool {
 	return action
 }
 
+// TryBindKey tries to bind a key by writing to configDir/bindings.json
+// This function is unused for now
 func TryBindKey(k, v string) {
 	filename := configDir + "/bindings.json"
 	if _, e := os.Stat(filename); e == nil {

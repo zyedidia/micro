@@ -543,6 +543,8 @@ func (v *View) ParagraphNext(usePlugin bool) bool {
 	return true
 }
 
+// Retab changes all tabs to spaces or all spaces to tabs depending
+// on the user's settings
 func (v *View) Retab(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Retab", v) {
 		return false

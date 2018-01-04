@@ -8,6 +8,8 @@ import (
 
 var tabBarOffset int
 
+// A Tab holds an array of views and a splitTree to determine how the
+// views should be arranged
 type Tab struct {
 	// This contains all the views in this tab
 	// There is generally only one view per tab, but you can have
@@ -53,10 +55,13 @@ func (t *Tab) SetNum(num int) {
 	}
 }
 
+// Cleanup cleans up the tree (for example if views have closed)
 func (t *Tab) Cleanup() {
 	t.tree.Cleanup()
 }
 
+// Resize handles a resize event from the terminal and resizes
+// all child views correctly
 func (t *Tab) Resize() {
 	w, h := screen.Size()
 	t.tree.width = w

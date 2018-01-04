@@ -223,6 +223,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 	}
 }
 
+// Completion represents a type of completion
 type Completion int
 
 const (
@@ -348,7 +349,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 	return response, canceled
 }
 
-// DownHistory fetches the previous item in the history
+// UpHistory fetches the previous item in the history
 func (m *Messenger) UpHistory(history []string) {
 	if m.historyNum > 0 {
 		m.historyNum--

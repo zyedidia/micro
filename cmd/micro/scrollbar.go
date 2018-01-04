@@ -1,6 +1,6 @@
 package main
 
-// Scrollbar represents an optional scrollbar that can be used
+// ScrollBar represents an optional scrollbar that can be used
 type ScrollBar struct {
 	view *View
 }

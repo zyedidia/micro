@@ -227,10 +227,14 @@ func PluginCmd(args []string) {
 	}
 }
 
+// Retab changes all spaces to tabs or all tabs to spaces
+// depending on the user's settings
 func Retab(args []string) {
 	CurView().Retab(true)
 }
 
+// Raw opens a new raw view which displays the escape sequences micro
+// is receiving in real-time
 func Raw(args []string) {
 	buf := NewBufferFromString("", "Raw events")
 
