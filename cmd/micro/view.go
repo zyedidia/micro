@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/james4k/terminal"
 	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/terminal"
 )
 
 // The ViewType defines what kind of view this is
@@ -557,7 +557,7 @@ func (v *View) SetCursor(c *Cursor) bool {
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	if v.Type == vtTerm {
-		if _, ok := event.(*tcell.EventMouse); !ok {
+		if _, ok := event.(*tcell.EventMouse); !ok || v.termState.Mode(terminal.ModeMouseMask) {
 			v.pty.WriteString(event.EscSeq())
 		}
 		return
