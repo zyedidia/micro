@@ -20,7 +20,7 @@ To see more screenshots of micro, showcasing all of the default colorschemes, se
 
 You can also check out the website for Micro at https://micro-editor.github.io.
 
-# Table of Content
+# Table of Contents
 - [Features](#features)
 - [Installation](#installation)
   - [Prebuilt binaries](#prebuilt-binaries)
