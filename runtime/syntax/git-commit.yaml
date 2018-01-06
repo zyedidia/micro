@@ -1,29 +1,25 @@
 filetype: git-commit
 
 detect:
-    filename: "COMMIT_EDITMSG|TAG_EDITMSG"
+    filename: "^(.*[\\/])?(COMMIT_EDITMSG|TAG_EDITMSG)$"
 
 rules:
-    # Commit message
-    - ignore: ".*"
-    # Comments
-    - comment:
-        start: "^#"
-        end: "$"
-        rules: []
     # File changes
     - type.keyword: "#[[:space:]](deleted|modified|new file|renamed):[[:space:]].*"
     - type.keyword: "#[[:space:]]deleted:"
     - type.keyword: "#[[:space:]]modified:"
     - type.keyword: "#[[:space:]]new file:"
     - type.keyword: "#[[:space:]]renamed:"
-    # Untracked filenames
-    - error: "^#	[^/?*:;{}\\\\]+\\.[^/?*:;{}\\\\]+$"
     - type.keyword: "^#[[:space:]]Changes.*[:]"
     - type.keyword: "^#[[:space:]]Your branch and '[^']+"
     - type.keyword: "^#[[:space:]]Your branch and '"
     - type.keyword: "^#[[:space:]]On branch [^ ]+"
     - type.keyword: "^#[[:space:]]On branch"
-    # Recolor hash symbols
-    - special: "#"
+    # Color keywords for closing issues (such as on Github)
+    - type.keyword: "\\b(?i)((fix(es|ed)?|close(s|d)?) #[0-9]+)\\b"
 
+    # Comments
+    - comment.line:
+        start: "^#"
+        end: "$"
+        rules: []
