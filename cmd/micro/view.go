@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 	"reflect"
 	"strconv"
 	"strings"
@@ -97,16 +96,16 @@ type View struct {
 	// Same here, just to keep track for mouse move events
 	tripleClick bool
 
+	// The cellview used for displaying and syntax highlighting
 	cellview *CellView
 
 	splitNode *LeafNode
 
+	// The scrollbar
 	scrollbar *ScrollBar
 
-	termState terminal.State
-	pty       *os.File
-	term      *terminal.VT
-	termtitle string
+	// Virtual terminal
+	term *Terminal
 }
 
 // NewView returns a new fullscreen view
@@ -144,6 +143,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		v.Height--
 	}
 
+	v.term = new(Terminal)
+
 	for pl := range loadedPlugins {
 		_, err := Call(pl+".onViewOpen", v)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
@@ -166,42 +167,18 @@ func (v *View) ToggleStatusLine() {
 
 // StartTerminal execs a command in this view
 func (v *View) StartTerminal(execCmd []string) error {
-	// cmd := exec.Command(os.Getenv("SHELL"), "-i")
-	if len(execCmd) <= 0 {
-		return nil
+	err := v.term.Start(execCmd, v)
+	if err == nil {
+		v.term.Resize(v.Width, v.Height)
+		v.Type = vtTerm
 	}
-	cmd := exec.Command(execCmd[0], execCmd[1:]...)
-	term, pty, err := terminal.Start(&v.termState, cmd)
-	if err != nil {
-		return err
-	}
-	term.Resize(v.Width, v.Height)
-	v.Type = vtTerm
-	v.term = term
-	v.termtitle = execCmd[0]
-	v.pty = pty
-
-	go func() {
-		for {
-			err := term.Parse()
-			if err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				break
-			}
-			updateterm <- true
-		}
-		closeterm <- v.Num
-	}()
-
-	return nil
+	return err
 }
 
 // CloseTerminal shuts down the tty running in this view
 // and returns it to the default view type
 func (v *View) CloseTerminal() {
-	v.pty.Close()
-	v.term.Close()
-	v.Type = vtDefault
+	v.term.Stop()
 }
 
 // ToggleTabbar creates an extra row for the tabbar if necessary
@@ -557,8 +534,15 @@ func (v *View) SetCursor(c *Cursor) bool {
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	if v.Type == vtTerm {
-		if _, ok := event.(*tcell.EventMouse); !ok || v.termState.Mode(terminal.ModeMouseMask) {
-			v.pty.WriteString(event.EscSeq())
+		if e, ok := event.(*tcell.EventKey); ok && v.term.status == VTDone {
+			switch e.Key() {
+			case tcell.KeyEscape, tcell.KeyCtrlQ, tcell.KeyEnter:
+				v.term.Close()
+				v.Type = vtDefault
+			default:
+			}
+		} else if _, ok := event.(*tcell.EventMouse); !ok || v.term.state.Mode(terminal.ModeMouseMask) {
+			v.term.WriteString(event.EscSeq())
 		}
 		return
 	}
@@ -795,50 +779,10 @@ func (v *View) openHelp(helpPage string) {
 	}
 }
 
-// DisplayTerm draws a terminal in this window
-// The view's type must be vtTerm
-func (v *View) DisplayTerm() {
-	divider := 0
-	if v.x != 0 {
-		divider = 1
-		dividerStyle := defStyle
-		if style, ok := colorscheme["divider"]; ok {
-			dividerStyle = style
-		}
-		for i := 0; i < v.Height; i++ {
-			screen.SetContent(v.x, v.y+i, '|', nil, dividerStyle.Reverse(true))
-		}
-	}
-	v.termState.Lock()
-	defer v.termState.Unlock()
-
-	for y := 0; y < v.Height; y++ {
-		for x := 0; x < v.Width; x++ {
-
-			c, f, b := v.termState.Cell(x, y)
-
-			fg, bg := int(f), int(b)
-			if f == terminal.DefaultFG {
-				fg = int(tcell.ColorDefault)
-			}
-			if b == terminal.DefaultBG {
-				bg = int(tcell.ColorDefault)
-			}
-			st := tcell.StyleDefault.Foreground(GetColor256(int(fg))).Background(GetColor256(int(bg)))
-
-			screen.SetContent(v.x+x+divider, v.y+y, c, nil, st)
-		}
-	}
-	if v.termState.CursorVisible() && tabs[curTab].CurView == v.Num {
-		curx, cury := v.termState.Cursor()
-		screen.ShowCursor(curx+v.x+divider, cury+v.y)
-	}
-}
-
 // DisplayView draws the view to the screen
 func (v *View) DisplayView() {
 	if v.Type == vtTerm {
-		v.DisplayTerm()
+		v.term.Display(v)
 		return
 	}
 

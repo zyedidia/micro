@@ -75,7 +75,7 @@ func (sline *Statusline) Display() {
 	fileRunes := []rune(file)
 
 	if sline.view.Type == vtTerm {
-		fileRunes = []rune(sline.view.termtitle)
+		fileRunes = []rune(sline.view.term.title)
 		rightText = ""
 	}
 
