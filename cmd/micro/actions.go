@@ -811,13 +811,15 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		end := v.Cursor.CurSelection[1]
 		if end.Y < start.Y {
 			start, end = end, start
+			v.Cursor.SetSelectionStart(start)
+			v.Cursor.SetSelectionEnd(end)
 		}
 
 		startY := start.Y
 		endY := end.Move(-1, v.Buf).Y
 		endX := end.Move(-1, v.Buf).X
+		tabsize := len(v.Buf.IndentString())
 		for y := startY; y <= endY; y++ {
-			tabsize := len(v.Buf.IndentString())
 			v.Buf.Insert(Loc{0, y}, v.Buf.IndentString())
 			if y == startY && start.X > 0 {
 				v.Cursor.SetSelectionStart(start.Move(tabsize, v.Buf))
@@ -871,6 +873,8 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 		end := v.Cursor.CurSelection[1]
 		if end.Y < start.Y {
 			start, end = end, start
+			v.Cursor.SetSelectionStart(start)
+			v.Cursor.SetSelectionEnd(end)
 		}
 
 		startY := start.Y
