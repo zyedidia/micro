@@ -111,6 +111,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"RemoveMultiCursor":     (*View).RemoveMultiCursor,
 	"RemoveAllMultiCursors": (*View).RemoveAllMultiCursors,
 	"SkipMultiCursor":       (*View).SkipMultiCursor,
+	"JumpToMatchingBrace":   (*View).JumpToMatchingBrace,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,

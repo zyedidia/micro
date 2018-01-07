@@ -182,6 +182,10 @@ Here are the options that you can set:
 
 	default value: `on`
 
+* `matchbrace`: highlight matching braces for '()', '{}', '[]'
+
+    default value: `off`
+
 * `syntax`: turns syntax on or off.
 
 	default value: `on`

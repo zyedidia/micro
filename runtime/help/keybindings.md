@@ -218,6 +218,7 @@ RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
 UnbindKey
+JumpToMatchingBrace
 ```
 
 You can also bind some mouse actions (these must be bound to mouse buttons)

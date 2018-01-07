@@ -1357,6 +1357,27 @@ func (v *View) PastePrimary(usePlugin bool) bool {
 	return true
 }
 
+// JumpToMatchingBrace moves the cursor to the matching brace if it is
+// currently on a brace
+func (v *View) JumpToMatchingBrace(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("JumpToMatchingBrace", v) {
+		return false
+	}
+
+	for _, bp := range bracePairs {
+		r := v.Cursor.RuneUnder(v.Cursor.X)
+		if r == bp[0] || r == bp[1] {
+			matchingBrace := v.Buf.FindMatchingBrace(bp, v.Cursor.Loc)
+			v.Cursor.GotoLoc(matchingBrace)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("JumpToMatchingBrace", v)
+	}
+	return true
+}
+
 // SelectAll selects the entire buffer
 func (v *View) SelectAll(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("SelectAll", v) {

@@ -35,6 +35,13 @@ func (c *Cursor) Goto(b Cursor) {
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
 }
 
+// GotoLoc puts the cursor at the given cursor's location and gives
+// the current cursor its selection too
+func (c *Cursor) GotoLoc(l Loc) {
+	c.X, c.Y = l.X, l.Y
+	c.LastVisualX = c.GetVisualX()
+}
+
 // CopySelection copies the user's selection to either "primary"
 // or "clipboard"
 func (c *Cursor) CopySelection(target string) {
