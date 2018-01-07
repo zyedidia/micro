@@ -69,6 +69,17 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		return
 	}
 
+	matchingBrace := Loc{-1, -1}
+	// bracePairs is defined in buffer.go
+	if buf.Settings["matchbrace"].(bool) {
+		for _, bp := range bracePairs {
+			r := buf.Cursor.RuneUnder(buf.Cursor.X)
+			if r == bp[0] || r == bp[1] {
+				matchingBrace = buf.FindMatchingBrace(bp, buf.Cursor.Loc)
+			}
+		}
+	}
+
 	tabsize := int(buf.Settings["tabsize"].(float64))
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentrunes := []rune(buf.Settings["indentchar"].(string))
@@ -137,7 +148,12 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			char := line[colN]
 
 			if viewCol >= 0 {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle, 1}
+				st := curStyle
+				if colN == matchingBrace.X && lineN == matchingBrace.Y {
+					messenger.Message(matchingBrace)
+					st = curStyle.Reverse(true)
+				}
+				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, st, 1}
 			}
 			if char == '\t' {
 				charWidth := tabsize - (viewCol+left)%tabsize

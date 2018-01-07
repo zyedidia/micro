@@ -630,3 +630,58 @@ func (b *Buffer) clearCursors() {
 	b.UpdateCursors()
 	b.Cursor.ResetSelection()
 }
+
+var bracePairs = [][2]rune{
+	[2]rune{'(', ')'},
+	[2]rune{'{', '}'},
+	[2]rune{'[', ']'},
+}
+
+// FindMatchingBrace returns the location in the buffer of the matching bracket
+// It is given a brace type containing the open and closing character, (for example
+// '{' and '}') as well as the location to match from
+func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
+	curLine := []rune(string(b.lines[start.Y].data))
+	startChar := curLine[start.X]
+	var i int
+	if startChar == braceType[0] {
+		for y := start.Y; y < b.NumLines; y++ {
+			l := []rune(string(b.lines[y].data))
+			xInit := 0
+			if y == start.Y {
+				xInit = start.X
+			}
+			for x := xInit; x < len(l); x++ {
+				r := l[x]
+				if r == braceType[0] {
+					i++
+				} else if r == braceType[1] {
+					i--
+					if i == 0 {
+						return Loc{x, y}
+					}
+				}
+			}
+		}
+	} else if startChar == braceType[1] {
+		for y := start.Y; y >= 0; y-- {
+			l := []rune(string(b.lines[y].data))
+			xInit := len(l) - 1
+			if y == start.Y {
+				xInit = start.X
+			}
+			for x := xInit; x >= 0; x-- {
+				r := l[x]
+				if r == braceType[0] {
+					i--
+					if i == 0 {
+						return Loc{x, y}
+					}
+				} else if r == braceType[1] {
+					i++
+				}
+			}
+		}
+	}
+	return start
+}
