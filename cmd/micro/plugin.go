@@ -170,3 +170,15 @@ func LoadPlugins() {
 		loadedPlugins["init"] = "init"
 	}
 }
+
+// GlobalCall makes a call to a function in every plugin that is currently
+// loaded
+func GlobalPluginCall(function string, args ...interface{}) {
+	for pl := range loadedPlugins {
+		_, err := Call(pl+"."+function, args...)
+		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+			TermMessage(err)
+			continue
+		}
+	}
+}

@@ -7,7 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 	"time"
 
 	"github.com/go-errors/errors"
@@ -434,17 +433,13 @@ func main() {
 
 	for _, t := range tabs {
 		for _, v := range t.views {
-			for pl := range loadedPlugins {
-				_, err := Call(pl+".onViewOpen", v)
-				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-					TermMessage(err)
-					continue
-				}
-			}
+			GlobalPluginCall("onViewOpen", v)
+			GlobalPluginCall("onBufferOpen", v.Buf)
 		}
 	}
 
 	InitColorscheme()
+	messenger.style = defStyle
 
 	// Here is the event loop which runs in a separate thread
 	go func() {

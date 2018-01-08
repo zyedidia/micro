@@ -45,6 +45,8 @@ view is passed in. This is useful for setting local options based on the
 filetype, for example turning off `tabstospaces` only for Go files when they are
 opened.
 
+Similar to `onViewOpen(view)` there is also `onBufferOpen(buf)`.
+
 ---
 
 There are a number of functions and variables that are available to you in order
