@@ -467,6 +467,31 @@ func (v *View) Relocate() bool {
 	return ret
 }
 
+// GetMouseClickLocation gets the location in the buffer from a mouse click
+// on the screen
+func (v *View) GetMouseClickLocation(x, y int) (int, int) {
+	x -= v.lineNumOffset - v.leftCol + v.x
+	y += v.Topline - v.y
+
+	if y-v.Topline > v.Height-1 {
+		v.ScrollDown(1)
+		y = v.Height + v.Topline - 1
+	}
+	if y < 0 {
+		y = 0
+	}
+	if x < 0 {
+		x = 0
+	}
+
+	newX, newY := v.GetSoftWrapLocation(x, y)
+	if newX > Count(v.Buf.Line(newY)) {
+		newX = Count(v.Buf.Line(newY))
+	}
+
+	return newX, newY
+}
+
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
 // by a mouse click
 func (v *View) MoveToMouseClick(x, y int) {
@@ -482,7 +507,6 @@ func (v *View) MoveToMouseClick(x, y int) {
 	}
 
 	x, y = v.GetSoftWrapLocation(x, y)
-	// x = v.Cursor.GetCharPosInLine(y, x)
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
