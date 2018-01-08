@@ -10,20 +10,6 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 
 Micro comes with a number of colorschemes by default. Here is the list:
 
-### 16 color
-
-These may vary widely based on the 16 colors selected for your terminal.
-
-* `simple`: this is the simplest colorscheme. It uses 16 colors which are set by
-  your terminal
-* `solarized`: this is the solarized colorscheme. You should have the solarized
-  color palette in your terminal to use it.
-* `cmc-16`: A very nice 16-color theme. Written by contributor CaptainMcClellan
-  (Collin Warren.) Licensed under the same license as the rest of the themes.
-* `cmc-paper`: Basically cmc-16, but on a white background. (Actually light grey
-  on most ANSI (16-color) terminals)
-* `geany`: Colorscheme based on geany's default highlighting.
-
 ### 256 color
 
 These should work and look nice in most terminals. I recommend these
@@ -34,9 +20,23 @@ themes the most.
   256 color approximation looks very good as well. It's also the default
   colorscheme.
 * `zenburn`
+* `gruvbox`
 * `darcula`
 * `twilight`
+* `railscast`
 * `bubblegum`: a light colorscheme
+
+### 16 color
+
+These may vary widely based on the 16 colors selected for your terminal.
+
+* `simple`: this is the simplest colorscheme. It uses 16 colors which are set by
+  your terminal
+* `solarized`: You should have the solarized color palette in your terminal to use this colorscheme properly.
+* `cmc-16`
+* `cmc-paper`: cmc-16, but on a white background. (Actually light grey
+  on most ANSI (16-color) terminals)
+* `geany`: Colorscheme based on geany's default highlighting.
 
 ### True color
 
