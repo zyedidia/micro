@@ -323,7 +323,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 					chosen = chosen + CommonSubstring(suggestions...)
 				}
 
-				if len(suggestions) != 0 {
+				if len(suggestions) != 0 && chosen != "" {
 					m.response = shellwords.Join(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
