@@ -99,7 +99,7 @@ type Completer struct {
 func NewCompleterForView(v *View) *Completer {
 	// Default activators and deactivators.
 	activators := []rune{'.', '(', ' ', '\n'}
-	deactivators := []rune{')'}
+	deactivators := []rune{')', ',', ' ', '\n'}
 
 	var provider OptionProvider
 
@@ -167,7 +167,7 @@ func (c *Completer) Process(r rune) error {
 	}
 
 	// Hide the autocomplete view if needed.
-	if containsRune(c.Deactivators, r) {
+	if c.Active && containsRune(c.Deactivators, r) {
 		c.Logger("completer.Process: deactivating, because received %v", string(r))
 		c.Active = false
 		return nil
