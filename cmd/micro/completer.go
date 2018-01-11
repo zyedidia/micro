@@ -98,7 +98,7 @@ type Completer struct {
 // NewCompleterForView creates a new autocompleter with defaults for writing to the console.
 func NewCompleterForView(v *View) *Completer {
 	// Default activators and deactivators.
-	activators := []rune{'.', '('}
+	activators := []rune{'.', '(', ' ', '\n'}
 	deactivators := []rune{')'}
 
 	var provider OptionProvider
@@ -107,6 +107,8 @@ func NewCompleterForView(v *View) *Completer {
 	fileName := v.Buf.GetName()
 	if strings.HasSuffix(fileName, ".go") {
 		provider = optionprovider.GoCode
+	} else {
+		provider = optionprovider.Generic
 	}
 
 	// If no matching provider was found, we can't autocomplete.
