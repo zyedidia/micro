@@ -161,7 +161,8 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 					c.lines[viewLine][viewCol].width = charWidth
 
 					indentStyle := curStyle
-					if group, ok := colorscheme["indent-char"]; ok {
+					ch := buf.Settings["indentchar"].(string)
+					if group, ok := colorscheme["indent-char"]; ok && !IsStrWhitespace(ch) && ch != "" {
 						indentStyle = group
 					}
 
