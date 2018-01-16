@@ -156,6 +156,7 @@ MoveLinesUp
 MoveLinesDown
 DeleteWordRight
 DeleteWordLeft
+SelectLine
 SelectToStartOfLine
 SelectToEndOfLine
 InsertNewline

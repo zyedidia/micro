@@ -43,6 +43,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"SelectWordLeft":        (*View).SelectWordLeft,
 	"DeleteWordRight":       (*View).DeleteWordRight,
 	"DeleteWordLeft":        (*View).DeleteWordLeft,
+	"SelectLine":            (*View).SelectLine,
 	"SelectToStartOfLine":   (*View).SelectToStartOfLine,
 	"SelectToEndOfLine":     (*View).SelectToEndOfLine,
 	"ParagraphPrevious":     (*View).ParagraphPrevious,
