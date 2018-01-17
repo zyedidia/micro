@@ -695,10 +695,14 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 	}
 
 	ws := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	cx := v.Cursor.X
 	v.Buf.Insert(v.Cursor.Loc, "\n")
 	// v.Cursor.Right()
 
 	if v.Buf.Settings["autoindent"].(bool) {
+		if cx < len(ws) {
+			ws = ws[0:cx]
+		}
 		v.Buf.Insert(v.Cursor.Loc, ws)
 		// for i := 0; i < len(ws); i++ {
 		// 	v.Cursor.Right()
