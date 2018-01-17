@@ -458,6 +458,20 @@ func (v *View) EndOfLine(usePlugin bool) bool {
 	return true
 }
 
+// SelectLine selects the entire current line
+func (v *View) SelectLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectLine", v) {
+		return false
+	}
+
+	v.Cursor.SelectLine()
+
+	if usePlugin {
+		return PostActionCall("SelectLine", v)
+	}
+	return true
+}
+
 // SelectToStartOfLine selects to the start of the current line
 func (v *View) SelectToStartOfLine(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("SelectToStartOfLine", v) {
