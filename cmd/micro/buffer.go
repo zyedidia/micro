@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"encoding/gob"
+	"errors"
 	"io"
 	"io/ioutil"
 	"os"
@@ -428,7 +429,28 @@ func (b *Buffer) SaveAs(filename string) error {
 		b.ModTime, _ = GetModTime(filename)
 	}()
 
-	f, err := os.OpenFile(ReplaceHome(filename), os.O_WRONLY|os.O_CREATE, 0644)
+	// Removes any tilde and replaces with the absolute path to home
+	var absFilename string = ReplaceHome(filename)
+
+	// Get the leading path to the file | "." is returned if there's no leading path provided
+	if dirname := filepath.Dir(absFilename); dirname != "." {
+		// Check if the parent dirs don't exist
+		if _, statErr := os.Stat(dirname); os.IsNotExist(statErr) {
+			// Prompt to make sure they want to create the dirs that are missing
+			if yes, canceled := messenger.YesNoPrompt("Parent folders \"" + dirname + "\" do not exist. Create them? (y,n)"); yes && !canceled {
+				// Create all leading dir(s) since they don't exist
+				if mkdirallErr := os.MkdirAll(dirname, os.ModePerm); mkdirallErr != nil {
+					// If there was an error creating the dirs
+					return mkdirallErr
+				}
+			} else {
+				// If they canceled the creation of leading dirs
+				return errors.New("Save aborted")
+			}
+		}
+	}
+
+	f, err := os.OpenFile(absFilename, os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err
 	}
