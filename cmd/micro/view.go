@@ -8,9 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
-	"github.com/zyedidia/terminal"
 )
 
 // The ViewType defines what kind of view this is
@@ -561,49 +559,7 @@ func (v *View) SetCursor(c *Cursor) bool {
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
 	if v.Type == vtTerm {
-		if e, ok := event.(*tcell.EventKey); ok {
-			if v.term.status == VTDone {
-				switch e.Key() {
-				case tcell.KeyEscape, tcell.KeyCtrlQ, tcell.KeyEnter:
-					v.term.Close()
-					v.Type = vtDefault
-				default:
-				}
-			}
-			if e.Key() == tcell.KeyCtrlC && v.term.HasSelection() {
-				clipboard.WriteAll(v.term.GetSelection(v.Width), "clipboard")
-				messenger.Message("Copied selection to clipboard")
-			} else if v.term.status != VTDone {
-				v.term.WriteString(event.EscSeq())
-			}
-		} else if e, ok := event.(*tcell.EventMouse); !ok || v.term.state.Mode(terminal.ModeMouseMask) {
-			v.term.WriteString(event.EscSeq())
-		} else {
-			x, y := e.Position()
-			x -= v.x
-			y += v.y
-
-			if e.Buttons() == tcell.Button1 {
-				if !v.mouseReleased {
-					// drag
-					v.term.selection[1].X = x
-					v.term.selection[1].Y = y
-				} else {
-					v.term.selection[0].X = x
-					v.term.selection[0].Y = y
-					v.term.selection[1].X = x
-					v.term.selection[1].Y = y
-				}
-
-				v.mouseReleased = false
-			} else if e.Buttons() == tcell.ButtonNone {
-				if !v.mouseReleased {
-					v.term.selection[1].X = x
-					v.term.selection[1].Y = y
-				}
-				v.mouseReleased = true
-			}
-		}
+		v.term.HandleEvent(event)
 		return
 	}
 
@@ -842,7 +798,7 @@ func (v *View) openHelp(helpPage string) {
 // DisplayView draws the view to the screen
 func (v *View) DisplayView() {
 	if v.Type == vtTerm {
-		v.term.Display(v)
+		v.term.Display()
 		return
 	}
 

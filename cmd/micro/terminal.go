@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 
+	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/terminal"
 )
@@ -19,10 +20,13 @@ const (
 // A Terminal holds information for the terminal emulator
 type Terminal struct {
 	state     terminal.State
+	view      *View
+	vtOld     ViewType
 	term      *terminal.VT
 	title     string
 	status    int
 	selection [2]Loc
+	wait      bool
 }
 
 // HasSelection returns whether this terminal has a valid selection
@@ -63,6 +67,8 @@ func (t *Terminal) Start(execCmd []string, view *View) error {
 		return err
 	}
 	t.term = term
+	t.view = view
+	t.vtOld = view.Type
 	t.status = VTRunning
 	t.title = execCmd[0] + ":" + strconv.Itoa(cmd.Process.Pid)
 
@@ -86,12 +92,67 @@ func (t *Terminal) Resize(width, height int) {
 	t.term.Resize(width, height)
 }
 
+// HandleEvent handles a tcell event by forwarding it to the terminal emulator
+// If the event is a mouse event and the program running in the emulator
+// does not have mouse support, the emulator will support selections and
+// copy-paste
+func (t *Terminal) HandleEvent(event tcell.Event) {
+	if e, ok := event.(*tcell.EventKey); ok {
+		if t.status == VTDone {
+			switch e.Key() {
+			case tcell.KeyEscape, tcell.KeyCtrlQ, tcell.KeyEnter:
+				t.Close()
+				t.view.Type = vtDefault
+			default:
+			}
+		}
+		if e.Key() == tcell.KeyCtrlC && t.HasSelection() {
+			clipboard.WriteAll(t.GetSelection(t.view.Width), "clipboard")
+			messenger.Message("Copied selection to clipboard")
+		} else if t.status != VTDone {
+			t.WriteString(event.EscSeq())
+		}
+	} else if e, ok := event.(*tcell.EventMouse); !ok || t.state.Mode(terminal.ModeMouseMask) {
+		t.WriteString(event.EscSeq())
+	} else {
+		x, y := e.Position()
+		x -= t.view.x
+		y += t.view.y
+
+		if e.Buttons() == tcell.Button1 {
+			if !t.view.mouseReleased {
+				// drag
+				t.selection[1].X = x
+				t.selection[1].Y = y
+			} else {
+				t.selection[0].X = x
+				t.selection[0].Y = y
+				t.selection[1].X = x
+				t.selection[1].Y = y
+			}
+
+			t.view.mouseReleased = false
+		} else if e.Buttons() == tcell.ButtonNone {
+			if !t.view.mouseReleased {
+				t.selection[1].X = x
+				t.selection[1].Y = y
+			}
+			t.view.mouseReleased = true
+		}
+	}
+}
+
 // Stop stops execution of the terminal and sets the status
 // to VTDone
 func (t *Terminal) Stop() {
 	t.term.File().Close()
 	t.term.Close()
-	t.status = VTDone
+	if t.wait {
+		t.status = VTDone
+	} else {
+		t.status = VTIdle
+		t.view.Type = t.vtOld
+	}
 }
 
 // Close sets the status to VTIdle indicating that the terminal
@@ -106,24 +167,24 @@ func (t *Terminal) WriteString(str string) {
 }
 
 // Display displays this terminal in a view
-func (t *Terminal) Display(v *View) {
+func (t *Terminal) Display() {
 	divider := 0
-	if v.x != 0 {
+	if t.view.x != 0 {
 		divider = 1
 		dividerStyle := defStyle
 		if style, ok := colorscheme["divider"]; ok {
 			dividerStyle = style
 		}
-		for i := 0; i < v.Height; i++ {
-			screen.SetContent(v.x, v.y+i, '|', nil, dividerStyle.Reverse(true))
+		for i := 0; i < t.view.Height; i++ {
+			screen.SetContent(t.view.x, t.view.y+i, '|', nil, dividerStyle.Reverse(true))
 		}
 	}
 	t.state.Lock()
 	defer t.state.Unlock()
 
 	var l Loc
-	for y := 0; y < v.Height; y++ {
-		for x := 0; x < v.Width; x++ {
+	for y := 0; y < t.view.Height; y++ {
+		for x := 0; x < t.view.Width; x++ {
 			l.X, l.Y = x, y
 			c, f, b := t.state.Cell(x, y)
 
@@ -140,11 +201,11 @@ func (t *Terminal) Display(v *View) {
 				st = st.Reverse(true)
 			}
 
-			screen.SetContent(v.x+x+divider, v.y+y, c, nil, st)
+			screen.SetContent(t.view.x+x+divider, t.view.y+y, c, nil, st)
 		}
 	}
-	if t.state.CursorVisible() && tabs[curTab].CurView == v.Num {
+	if t.state.CursorVisible() && tabs[curTab].CurView == t.view.Num {
 		curx, cury := t.state.Cursor()
-		screen.ShowCursor(curx+v.x+divider, cury+v.y)
+		screen.ShowCursor(curx+t.view.x+divider, cury+t.view.y)
 	}
 }
