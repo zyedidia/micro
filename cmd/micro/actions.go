@@ -458,6 +458,20 @@ func (v *View) EndOfLine(usePlugin bool) bool {
 	return true
 }
 
+// SelectLine selects the entire current line
+func (v *View) SelectLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectLine", v) {
+		return false
+	}
+
+	v.Cursor.SelectLine()
+
+	if usePlugin {
+		return PostActionCall("SelectLine", v)
+	}
+	return true
+}
+
 // SelectToStartOfLine selects to the start of the current line
 func (v *View) SelectToStartOfLine(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("SelectToStartOfLine", v) {
@@ -681,10 +695,14 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 	}
 
 	ws := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	cx := v.Cursor.X
 	v.Buf.Insert(v.Cursor.Loc, "\n")
 	// v.Cursor.Right()
 
 	if v.Buf.Settings["autoindent"].(bool) {
+		if cx < len(ws) {
+			ws = ws[0:cx]
+		}
 		v.Buf.Insert(v.Cursor.Loc, ws)
 		// for i := 0; i < len(ws); i++ {
 		// 	v.Cursor.Right()
@@ -1605,21 +1623,38 @@ func (v *View) JumpLine(usePlugin bool) bool {
 	}
 
 	// Prompt for line number
-	message := fmt.Sprintf("Jump to line (1 - %v) # ", v.Buf.NumLines)
-	linestring, canceled := messenger.Prompt(message, "", "LineNumber", NoCompletion)
+	message := fmt.Sprintf("Jump to line:col (1 - %v) # ", v.Buf.NumLines)
+	input, canceled := messenger.Prompt(message, "", "LineNumber", NoCompletion)
 	if canceled {
 		return false
 	}
-	lineint, err := strconv.Atoi(linestring)
-	lineint = lineint - 1 // fix offset
-	if err != nil {
-		messenger.Error(err) // return errors
-		return false
+	var lineInt int
+	var colInt int
+	var err error
+	if strings.Contains(input, ":") {
+		split := strings.Split(input, ":")
+		lineInt, err = strconv.Atoi(split[0])
+		if err != nil {
+			messenger.Message("Invalid line number")
+			return false
+		}
+		colInt, err = strconv.Atoi(split[1])
+		if err != nil {
+			messenger.Message("Invalid column number")
+			return false
+		}
+	} else {
+		lineInt, err = strconv.Atoi(input)
+		if err != nil {
+			messenger.Message("Invalid line number")
+			return false
+		}
 	}
+	lineInt--
 	// Move cursor and view if possible.
-	if lineint < v.Buf.NumLines && lineint >= 0 {
-		v.Cursor.X = 0
-		v.Cursor.Y = lineint
+	if lineInt < v.Buf.NumLines && lineInt >= 0 {
+		v.Cursor.X = colInt
+		v.Cursor.Y = lineInt
 
 		if usePlugin {
 			return PostActionCall("JumpLine", v)
