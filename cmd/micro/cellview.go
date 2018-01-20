@@ -152,7 +152,9 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 				if colN == matchingBrace.X && lineN == matchingBrace.Y && !buf.Cursor.HasSelection() {
 					st = curStyle.Reverse(true)
 				}
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, st, 1}
+				if viewCol < len(c.lines[viewLine]) {
+					c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, st, 1}
+				}
 			}
 			if char == '\t' {
 				charWidth := tabsize - (viewCol+left)%tabsize
@@ -171,7 +173,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 				for i := 1; i < charWidth; i++ {
 					viewCol++
-					if viewCol >= 0 && viewCol < lineLength {
+					if viewCol >= 0 && viewCol < lineLength && viewCol < len(c.lines[viewLine]) {
 						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
 					}
 				}
@@ -183,7 +185,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 				}
 				for i := 1; i < charWidth; i++ {
 					viewCol++
-					if viewCol >= 0 && viewCol < lineLength {
+					if viewCol >= 0 && viewCol < lineLength && viewCol < len(c.lines[viewLine]) {
 						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
 					}
 				}
