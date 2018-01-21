@@ -124,7 +124,7 @@ func LuaFunctionComplete(function string) func(string) []string {
 func LuaFunctionJob(function string) func(string, ...string) {
 	return func(output string, args ...string) {
 		_, err := Call(function, unpack(append([]string{output}, args...))...)
-		if err != nil {
+		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
 			TermMessage(err)
 		}
 	}
