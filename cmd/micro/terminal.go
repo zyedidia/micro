@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/tcell"
@@ -27,6 +28,8 @@ type Terminal struct {
 	status    int
 	selection [2]Loc
 	wait      bool
+	getOutput bool
+	callback  string
 }
 
 // HasSelection returns whether this terminal has a valid selection
@@ -159,6 +162,11 @@ func (t *Terminal) Stop() {
 // is ready for a new command to execute
 func (t *Terminal) Close() {
 	t.status = VTIdle
+	// call the lua function that the user has given as a callback
+	_, err := Call(t.callback)
+	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+		TermMessage(err)
+	}
 }
 
 // WriteString writes a given string to this terminal's pty
