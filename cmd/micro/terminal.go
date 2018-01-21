@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -29,6 +30,7 @@ type Terminal struct {
 	selection [2]Loc
 	wait      bool
 	getOutput bool
+	output    *bytes.Buffer
 	callback  string
 }
 
@@ -59,18 +61,23 @@ func (t *Terminal) GetSelection(width int) string {
 }
 
 // Start begins a new command in this terminal with a given view
-func (t *Terminal) Start(execCmd []string, view *View) error {
+func (t *Terminal) Start(execCmd []string, view *View, getOutput bool) error {
 	if len(execCmd) <= 0 {
 		return nil
 	}
 
 	cmd := exec.Command(execCmd[0], execCmd[1:]...)
-	term, _, err := terminal.Start(&t.state, cmd)
+	t.output = nil
+	if getOutput {
+		t.output = bytes.NewBuffer([]byte{})
+	}
+	term, _, err := terminal.Start(&t.state, cmd, t.output)
 	if err != nil {
 		return err
 	}
 	t.term = term
 	t.view = view
+	t.getOutput = getOutput
 	t.vtOld = view.Type
 	t.status = VTRunning
 	t.title = execCmd[0] + ":" + strconv.Itoa(cmd.Process.Pid)
@@ -153,7 +160,7 @@ func (t *Terminal) Stop() {
 	if t.wait {
 		t.status = VTDone
 	} else {
-		t.status = VTIdle
+		t.Close()
 		t.view.Type = t.vtOld
 	}
 }
@@ -163,9 +170,11 @@ func (t *Terminal) Stop() {
 func (t *Terminal) Close() {
 	t.status = VTIdle
 	// call the lua function that the user has given as a callback
-	_, err := Call(t.callback)
-	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-		TermMessage(err)
+	if t.getOutput {
+		_, err := Call(t.callback, t.output.String())
+		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+			TermMessage(err)
+		}
 	}
 }
 

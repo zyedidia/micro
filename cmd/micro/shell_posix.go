@@ -8,11 +8,11 @@ import (
 
 const TermEmuSupported = true
 
-func RunTermEmulator(input string, wait bool, getOutput bool) error {
+func RunTermEmulator(input string, wait bool, getOutput bool, callback string) error {
 	args, err := shellwords.Split(input)
 	if err != nil {
 		return err
 	}
-	err = CurView().StartTerminal(args, wait, false, "")
+	err = CurView().StartTerminal(args, wait, getOutput, callback)
 	return err
 }

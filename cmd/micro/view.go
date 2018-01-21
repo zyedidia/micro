@@ -166,9 +166,8 @@ func (v *View) ToggleStatusLine() {
 
 // StartTerminal execs a command in this view
 func (v *View) StartTerminal(execCmd []string, wait bool, getOutput bool, luaCallback string) error {
-	err := v.term.Start(execCmd, v)
+	err := v.term.Start(execCmd, v, getOutput)
 	v.term.wait = wait
-	v.term.getOutput = getOutput
 	v.term.callback = luaCallback
 	if err == nil {
 		v.term.Resize(v.Width, v.Height)
