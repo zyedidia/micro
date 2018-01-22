@@ -1,4 +1,4 @@
-// +build plan9 nacl windows
+// +build !linux,!darwin,!freebsd,!dragonfly,!openbsd
 
 package main
 

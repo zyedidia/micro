@@ -65,10 +65,10 @@ func RunBackgroundShell(input string) {
 	}()
 }
 
-func RunInteractiveShell(input string, wait bool, getOutput bool) string {
+func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error) {
 	args, err := shellwords.Split(input)
 	if err != nil {
-		return ""
+		return "", err
 	}
 	inputCmd := args[0]
 
@@ -103,9 +103,6 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) string {
 	err = cmd.Wait()
 
 	output := outputBytes.String()
-	if err != nil {
-		output = err.Error()
-	}
 
 	if wait {
 		// This is just so we don't return right away and let the user press enter to return
@@ -115,7 +112,7 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) string {
 	// Start the screen back up
 	InitScreen()
 
-	return output
+	return output, err
 }
 
 // HandleShellCommand runs the shell command
