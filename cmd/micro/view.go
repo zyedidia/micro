@@ -279,6 +279,7 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	v.lastClickTime = time.Time{}
 
 	GlobalPluginCall("onBufferOpen", v.Buf)
+	GlobalPluginCall("onViewOpen", v)
 }
 
 // Open opens the given file in the view
