@@ -123,6 +123,7 @@ func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
 		RunBackgroundShell(input)
 		return ""
 	} else {
-		return RunInteractiveShell(input, waitToFinish, false)
+		output, _ := RunInteractiveShell(input, waitToFinish, false)
+		return output
 	}
 }
