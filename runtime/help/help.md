@@ -5,10 +5,12 @@ Thank you for downloading and using micro.
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, 
 while also taking advantage of the full capabilities of modern terminals.
 
-If you want to see all the keybindings press CtrlE and type `help keybindings`.
+
+
+For a list of the default keybindings press CtrlE and type `help defaultkeys`.
+For more information on keybindings see `> help keybindings`.
 
 See the next section for more information about documentation and help.
-
 
 ## Quick-start
 
