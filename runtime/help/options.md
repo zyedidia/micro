@@ -51,6 +51,10 @@ Here are the options that you can set:
 
 	default value: `true`
 
+* `cursorundo`: remove multiple cursors after an undo.
+
+  	default value: `true` 
+
 * `eofnewline`: micro will automatically add a newline to the file.
 
 	default value: `false`
