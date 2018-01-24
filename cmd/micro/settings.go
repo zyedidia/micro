@@ -237,6 +237,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"tabstospaces":   false,
 		"termtitle":      false,
 		"useprimary":     true,
+		"cursorundo":     true,
 	}
 }
 
