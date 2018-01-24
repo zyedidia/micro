@@ -1112,7 +1112,7 @@ func (v *View) Undo(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Buf.curCursor == 0 && GetGlobalOption("cursorundo").(bool) && GetLocalOption("cursorundo", v.Buf).(bool) {
+	if v.Buf.curCursor == 0 && v.Buf.Settings["cursorundo"].(bool) {
 		v.Buf.clearCursors()
 	}
 
