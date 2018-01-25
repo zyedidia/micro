@@ -182,14 +182,42 @@ func (v *View) Center(usePlugin bool) bool {
 	return true
 }
 
+// Toggle "select mode"
+func (v *View) ToggleSelectMode(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("ToggleSelectMode", v) {
+		return false
+	}
+
+	if v.Cursor.SelectMode {
+		v.Cursor.ResetSelection()
+
+	} else {
+		v.Cursor.SelectMode = true
+		v.Cursor.SetSelectionStart(v.Cursor.Loc)
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
+
+	if usePlugin {
+		return PostActionCall("ToggleSelectMode", v)
+	}
+	return true
+}
+
 // CursorUp moves the cursor up
 func (v *View) CursorUp(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorUp", v) {
 		return false
 	}
 
-	v.deselect(0)
+	if !v.Cursor.SelectModeActive() {
+		v.deselect(0)
+	}
+
 	v.Cursor.Up()
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("CursorUp", v)
@@ -203,8 +231,15 @@ func (v *View) CursorDown(usePlugin bool) bool {
 		return false
 	}
 
-	v.deselect(1)
+	if !v.Cursor.SelectModeActive() {
+		v.deselect(1)
+	}
+
 	v.Cursor.Down()
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("CursorDown", v)
@@ -218,7 +253,7 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Cursor.HasSelection() {
+	if v.Cursor.HasSelection() && !v.Cursor.SelectModeActive() {
 		v.Cursor.Loc = v.Cursor.CurSelection[0]
 		v.Cursor.ResetSelection()
 		v.Cursor.StoreVisualX()
@@ -238,6 +273,11 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 		} else {
 			v.Cursor.Left()
 		}
+
+		if v.Cursor.SelectModeActive() {
+			v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+		}
+
 	}
 
 	if usePlugin {
@@ -252,7 +292,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 		return false
 	}
 
-	if v.Cursor.HasSelection() {
+	if v.Cursor.HasSelection() && !v.Cursor.SelectModeActive() {
 		v.Cursor.Loc = v.Cursor.CurSelection[1]
 		v.Cursor.ResetSelection()
 		v.Cursor.StoreVisualX()
@@ -272,6 +312,10 @@ func (v *View) CursorRight(usePlugin bool) bool {
 		} else {
 			v.Cursor.Right()
 		}
+
+		if v.Cursor.SelectModeActive() {
+			v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+		}
 	}
 
 	if usePlugin {
@@ -288,6 +332,10 @@ func (v *View) WordRight(usePlugin bool) bool {
 
 	v.Cursor.WordRight()
 
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
+
 	if usePlugin {
 		return PostActionCall("WordRight", v)
 	}
@@ -301,6 +349,10 @@ func (v *View) WordLeft(usePlugin bool) bool {
 	}
 
 	v.Cursor.WordLeft()
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("WordLeft", v)
@@ -432,9 +484,15 @@ func (v *View) StartOfLine(usePlugin bool) bool {
 		return false
 	}
 
-	v.deselect(0)
+	if !v.Cursor.SelectModeActive() {
+		v.deselect(1)
+	}
 
 	v.Cursor.Start()
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("StartOfLine", v)
@@ -448,9 +506,15 @@ func (v *View) EndOfLine(usePlugin bool) bool {
 		return false
 	}
 
-	v.deselect(0)
+	if !v.Cursor.SelectModeActive() {
+		v.deselect(1)
+	}
 
 	v.Cursor.End()
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("EndOfLine", v)
@@ -599,10 +663,16 @@ func (v *View) CursorStart(usePlugin bool) bool {
 		return false
 	}
 
-	v.deselect(0)
+	if !v.Cursor.SelectModeActive() {
 
+		v.deselect(0)
+	}
 	v.Cursor.X = 0
 	v.Cursor.Y = 0
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionStart(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("CursorStart", v)
@@ -616,10 +686,16 @@ func (v *View) CursorEnd(usePlugin bool) bool {
 		return false
 	}
 
-	v.deselect(0)
+	if !v.Cursor.SelectModeActive() {
+		v.deselect(0)
+	}
 
 	v.Cursor.Loc = v.Buf.End()
 	v.Cursor.StoreVisualX()
+
+	if v.Cursor.SelectModeActive() {
+		v.Cursor.SetSelectionEnd(v.Cursor.Loc)
+	}
 
 	if usePlugin {
 		return PostActionCall("CursorEnd", v)

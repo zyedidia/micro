@@ -26,6 +26,9 @@ type Cursor struct {
 
 	// Which cursor index is this (for multiple cursors)
 	Num int
+
+	// Mark-mode enabled
+	SelectMode bool
 }
 
 // Goto puts the cursor at the given cursor's location and gives
@@ -49,6 +52,9 @@ func (c *Cursor) CopySelection(target string) {
 		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
 			clipboard.WriteAll(c.GetSelection(), target)
 		}
+		if c.SelectModeActive() {
+			c.SelectMode = false
+		}
 	}
 }
 
@@ -56,6 +62,7 @@ func (c *Cursor) CopySelection(target string) {
 func (c *Cursor) ResetSelection() {
 	c.CurSelection[0] = c.buf.Start()
 	c.CurSelection[1] = c.buf.Start()
+	c.SelectMode = false
 }
 
 // SetSelectionStart sets the start of the selection
@@ -71,6 +78,10 @@ func (c *Cursor) SetSelectionEnd(pos Loc) {
 // HasSelection returns whether or not the user has selected anything
 func (c *Cursor) HasSelection() bool {
 	return c.CurSelection[0] != c.CurSelection[1]
+}
+
+func (c *Cursor) SelectModeActive() bool {
+	return c.SelectMode
 }
 
 // DeleteSelection deletes the currently selected text
