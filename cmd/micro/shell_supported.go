@@ -1,4 +1,4 @@
-// +build linux darwin dragonfly openbsd freebsd
+// +build linux darwin dragonfly openbsd_amd64 freebsd
 
 package main
 

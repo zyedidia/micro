@@ -1,4 +1,4 @@
-// +build !linux,!darwin,!freebsd,!dragonfly,!openbsd
+// +build !linux,!darwin,!freebsd,!dragonfly,!openbsd_amd64
 
 package main
 
