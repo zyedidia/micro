@@ -654,9 +654,9 @@ func (b *Buffer) clearCursors() {
 }
 
 var bracePairs = [][2]rune{
-	[2]rune{'(', ')'},
-	[2]rune{'{', '}'},
-	[2]rune{'[', ']'},
+	{'(', ')'},
+	{'{', '}'},
+	{'[', ']'},
 }
 
 // FindMatchingBrace returns the location in the buffer of the matching bracket
