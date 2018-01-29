@@ -57,11 +57,17 @@ var (
 
 	// Channel of jobs running in the background
 	jobs chan JobFunction
+
 	// Event channel
-	events     chan tcell.Event
-	autosave   chan bool
+	events   chan tcell.Event
+	autosave chan bool
+
+	// Channels for the terminal emulator
 	updateterm chan bool
 	closeterm  chan int
+
+	// How many redraws have happened
+	numRedraw uint
 )
 
 // LoadInput determines which files should be loaded into buffers
@@ -232,6 +238,11 @@ func RedrawAll() {
 		DisplayKeyMenu()
 	}
 	screen.Show()
+
+	if numRedraw%50 == 0 {
+		runtime.GC()
+	}
+	numRedraw++
 }
 
 func LoadAll() {
