@@ -89,7 +89,6 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 		if n >= 1000 && loaded >= 0 {
 			totalLinesNum := int(float64(size) * (float64(n) / float64(loaded)))
 			newSlice := make([]Line, len(la.lines), totalLinesNum+10000)
-			// The copy function is predeclared and works for any slice type.
 			copy(newSlice, la.lines)
 			la.lines = newSlice
 			loaded = -1
@@ -147,9 +146,9 @@ func (la *LineArray) SaveString(useCrlf bool) string {
 
 // NewlineBelow adds a newline below the given line number
 func (la *LineArray) NewlineBelow(y int) {
-	la.lines = append(la.lines, Line{[]byte(" "), nil, nil, false})
+	la.lines = append(la.lines, Line{[]byte{' '}, nil, nil, false})
 	copy(la.lines[y+2:], la.lines[y+1:])
-	la.lines[y+1] = Line{[]byte(""), la.lines[y].state, nil, false}
+	la.lines[y+1] = Line{[]byte{}, la.lines[y].state, nil, false}
 }
 
 // inserts a byte array at a given location

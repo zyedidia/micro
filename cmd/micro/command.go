@@ -176,7 +176,7 @@ func PluginCmd(args []string) {
 					continue
 				}
 			}
-			if !IsSpaces(removed) {
+			if !IsSpaces([]byte(removed)) {
 				messenger.Message("Removed ", removed)
 			} else {
 				messenger.Error("The requested plugins do not exist")

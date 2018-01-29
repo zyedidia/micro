@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
@@ -742,9 +743,9 @@ func (v *View) Backspace(usePlugin bool) bool {
 		// If the user is using spaces instead of tabs and they are deleting
 		// whitespace at the start of the line, we should delete as if it's a
 		// tab (tabSize number of spaces)
-		lineStart := v.Buf.Line(v.Cursor.Y)[:v.Cursor.X]
+		lineStart := sliceEnd(v.Buf.LineBytes(v.Cursor.Y), v.Cursor.X)
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
-		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
+		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && utf8.RuneCount(lineStart) != 0 && utf8.RuneCount(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc
 			v.Buf.Remove(loc.Move(-tabSize, v.Buf), loc)
 		} else {
