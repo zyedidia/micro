@@ -556,11 +556,27 @@ func (b *Buffer) End() Loc {
 
 // RuneAt returns the rune at a given location in the buffer
 func (b *Buffer) RuneAt(loc Loc) rune {
-	line := []rune(b.Line(loc.Y))
+	line := b.LineRunes(loc.Y)
 	if len(line) > 0 {
 		return line[loc.X]
 	}
 	return '\n'
+}
+
+// Line returns a single line as an array of runes
+func (b *Buffer) LineBytes(n int) []byte {
+	if n >= len(b.lines) {
+		return []byte{}
+	}
+	return b.lines[n].data
+}
+
+// Line returns a single line as an array of runes
+func (b *Buffer) LineRunes(n int) []rune {
+	if n >= len(b.lines) {
+		return []rune{}
+	}
+	return toRunes(b.lines[n].data)
 }
 
 // Line returns a single line
@@ -663,12 +679,12 @@ var bracePairs = [][2]rune{
 // It is given a brace type containing the open and closing character, (for example
 // '{' and '}') as well as the location to match from
 func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
-	curLine := []rune(string(b.lines[start.Y].data))
+	curLine := b.LineRunes(start.Y)
 	startChar := curLine[start.X]
 	var i int
 	if startChar == braceType[0] {
 		for y := start.Y; y < b.NumLines; y++ {
-			l := []rune(string(b.lines[y].data))
+			l := b.LineRunes(y)
 			xInit := 0
 			if y == start.Y {
 				xInit = start.X

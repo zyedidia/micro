@@ -23,6 +23,20 @@ func Count(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
+// Convert byte array to rune array
+func toRunes(b []byte) []rune {
+	runes := make([]rune, 0, utf8.RuneCount(b))
+
+	for len(b) > 0 {
+		r, size := utf8.DecodeRune(b)
+		runes = append(runes, r)
+
+		b = b[size:]
+	}
+
+	return runes
+}
+
 // NumOccurrences counts the number of occurrences of a byte in a string
 func NumOccurrences(s string, c byte) int {
 	var n int
