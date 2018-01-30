@@ -7,16 +7,13 @@
 .\" See \usr\share\doc\micro\LICENSE for more information.
 .TH micro 1 "2017-03-28"
 .SH NAME
-micro \- An intuitive and modern terminal text editor
-.
+micro \- A modern and intuitive terminal-based text editor
 .SH SYNOPSIS
 .B micro
-.RB []
-[
-.I "filename \&..."
-]
+.RB [OPTIONS]
+[FILE]\&...
+
 .SH DESCRIPTION
-( Copied from the README file. )
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
 of modern terminals. It comes as one single, batteries-included, static binary with no dependencies.
@@ -25,19 +22,39 @@ As the name indicates, micro aims to be somewhat of a successor to the nano edit
 enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
 
 .SH OPTIONS
-.B \-v --version
-Displays the current version of micro and the git commit hash. 
-.TP
-.SH ENVIRONMENT
-Micro's behaviour can be changed by setting environment variables, of which 
-there is currently only one:
-.I MICRO_TRUE_COLOR
+.PP
+\-config-dir dir
+.RS 4
+Specify a custom location for the configuration directory
+.RE
+.PP
+\-startpos LINE,COL
+.RS 4
+Specify a line and column to start the cursor at when opening a buffer
+.RE
+.PP
+\-options
+.RS 4
+Show all option help
+.RE
+.PP
+\-version
+.RS 4
+Show the version number and information
+.RE
 
-When MICRO_TRUE_COLOR is set to 1, micro will attempt to treat your terminal as
-a true-color terminal and will be able to make full use of the true-color colorschemes
-that are included with micro. If MICRO_TRUE_COLOR is not set or is set to 0, then
-micro will only make use of 256 color features and will internally map true-color
-colorschemes to the nearest colors available. For more information see micro's documentation.
+.SH CONFIGURATION
+
+Micro uses
+\fI$XDG_CONFIG_HOME/micro\fR
+for configuration by default. If it is not set, micro uses ~/.config/micro.
+Two main configuration files are settings.json, containing the user's
+settings, and bindings.json, containing the user's custom keybindings.
+
+.SH ENVIRONMENT
+Micro's behaviour can be changed by setting environment variables, of which there is currently only one:
+\fIMICRO_TRUECOLOR\fR.
+When MICRO_TRUECOLOR is set to 1, micro will attempt to treat your terminal as a true-color terminal and will be able to make full use of the true-color colorschemes that are included with micro. If MICRO_TRUECOLOR is not set or is set to 0, then micro will only make use of 256 color features and will internally map true-color colorschemes to the nearest colors available. For more information see micro's documentation.
 
 .SH NOTICE
 This manpage is intended only to serve as a quick guide to the invocation of 
