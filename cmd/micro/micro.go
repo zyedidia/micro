@@ -206,6 +206,10 @@ func InitScreen() {
 				fmt.Println("Fatal: Micro could not initialize a screen.")
 				os.Exit(1)
 			}
+		} else {
+			fmt.Println(err)
+			fmt.Println("Fatal: Micro could not initialize a screen.")
+			os.Exit(1)
 		}
 	}
 	if err = screen.Init(); err != nil {
