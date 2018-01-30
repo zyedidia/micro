@@ -39,8 +39,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-
-	"github.com/zyedidia/mkinfo/terminfo"
 )
 
 type termcap struct {
@@ -202,7 +200,7 @@ func (tc *termcap) setupterm(name string) error {
 // or the unadorned base name, adding the XTerm specific 24-bit color
 // escapes.  We believe that all 24-bit capable terminals use the same
 // escape sequences, and terminfo has yet to evolve to support this.
-func getinfo(name string) (*terminfo.Terminfo, string, error) {
+func getinfo(name string) (*Terminfo, string, error) {
 	var tc termcap
 	addTrueColor := false
 	if err := tc.setupterm(name); err != nil {
@@ -221,7 +219,7 @@ func getinfo(name string) (*terminfo.Terminfo, string, error) {
 			return nil, "", err
 		}
 	}
-	t := &terminfo.Terminfo{}
+	t := &Terminfo{}
 	// If this is an alias record, then just emit the alias
 	t.Name = tc.name
 	if t.Name != name {
@@ -470,7 +468,7 @@ func WriteDB(filename string) error {
 	js := []byte{}
 	args := []string{os.Getenv("TERM")}
 
-	tdata := make(map[string]*terminfo.Terminfo)
+	tdata := make(map[string]*Terminfo)
 	descs := make(map[string]string)
 
 	for _, term := range args {
