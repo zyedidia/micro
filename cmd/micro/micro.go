@@ -14,6 +14,7 @@ import (
 	"github.com/mitchellh/go-homedir"
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/terminfo"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
 	"layeh.com/gopher-luar"
@@ -183,6 +184,9 @@ func InitScreen() {
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
 
+	tcelldb := os.Getenv("TCELLDB")
+	os.Setenv("TCELLDB", configDir+"/.tcelldb")
+
 	// In order to enable true color, we have to set the TERM to `xterm-truecolor` when
 	// initializing tcell, but after that, we can set the TERM back to whatever it was
 	oldTerm := os.Getenv("TERM")
@@ -194,12 +198,15 @@ func InitScreen() {
 	var err error
 	screen, err = tcell.NewScreen()
 	if err != nil {
-		fmt.Println(err)
 		if err == tcell.ErrTermNotFound {
-			fmt.Println("Micro does not recognize your terminal:", oldTerm)
-			fmt.Println("Please go to https://github.com/zyedidia/mkinfo to read about how to fix this problem (it should be easy to fix).")
+			terminfo.WriteDB(configDir + "/.tcelldb")
+			screen, err = tcell.NewScreen()
+			if err != nil {
+				fmt.Println(err)
+				fmt.Println("Fatal: Micro could not initialize a screen.")
+				os.Exit(1)
+			}
 		}
-		os.Exit(1)
 	}
 	if err = screen.Init(); err != nil {
 		fmt.Println(err)
@@ -214,6 +221,8 @@ func InitScreen() {
 	if GetGlobalOption("mouse").(bool) {
 		screen.EnableMouse()
 	}
+
+	os.Setenv("TCELLDB", tcelldb)
 
 	// screen.SetStyle(defStyle)
 }
