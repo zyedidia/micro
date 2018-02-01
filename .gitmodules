@@ -58,3 +58,9 @@
 [submodule "cmd/micro/vendor/github.com/flynn/json5"]
 	path = cmd/micro/vendor/github.com/flynn/json5
 	url = https://github.com/flynn/json5
+[submodule "cmd/micro/vendor/github.com/zyedidia/terminal"]
+	path = cmd/micro/vendor/github.com/zyedidia/terminal
+	url = https://github.com/zyedidia/terminal
+[submodule "cmd/micro/vendor/github.com/zyedidia/pty"]
+	path = cmd/micro/vendor/github.com/zyedidia/pty
+	url = https://github.com/zyedidia/pty

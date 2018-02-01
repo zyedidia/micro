@@ -28,6 +28,7 @@ type TextEvent struct {
 	Time      time.Time
 }
 
+// A Delta is a change to the buffer
 type Delta struct {
 	Text  string
 	Start Loc

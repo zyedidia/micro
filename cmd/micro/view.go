@@ -24,6 +24,7 @@ var (
 	vtLog     = ViewType{2, true, true}
 	vtScratch = ViewType{3, false, true}
 	vtRaw     = ViewType{4, true, true}
+	vtTerm    = ViewType{5, true, true}
 )
 
 // The View struct stores information about a view into a buffer.
@@ -73,6 +74,8 @@ type View struct {
 	// mouse release events
 	mouseReleased bool
 
+	// We need to keep track of insert key press toggle
+	isOverwriteMode bool
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
@@ -92,11 +95,16 @@ type View struct {
 	// Same here, just to keep track for mouse move events
 	tripleClick bool
 
+	// The cellview used for displaying and syntax highlighting
 	cellview *CellView
 
 	splitNode *LeafNode
 
+	// The scrollbar
 	scrollbar *ScrollBar
+
+	// Virtual terminal
+	term *Terminal
 }
 
 // NewView returns a new fullscreen view
@@ -134,6 +142,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		v.Height--
 	}
 
+	v.term = new(Terminal)
+
 	for pl := range loadedPlugins {
 		_, err := Call(pl+".onViewOpen", v)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
@@ -152,6 +162,24 @@ func (v *View) ToggleStatusLine() {
 	} else {
 		v.Height++
 	}
+}
+
+// StartTerminal execs a command in this view
+func (v *View) StartTerminal(execCmd []string, wait bool, getOutput bool, luaCallback string) error {
+	err := v.term.Start(execCmd, v, getOutput)
+	v.term.wait = wait
+	v.term.callback = luaCallback
+	if err == nil {
+		v.term.Resize(v.Width, v.Height)
+		v.Type = vtTerm
+	}
+	return err
+}
+
+// CloseTerminal shuts down the tty running in this view
+// and returns it to the default view type
+func (v *View) CloseTerminal() {
+	v.term.Stop()
 }
 
 // ToggleTabbar creates an extra row for the tabbar if necessary
@@ -245,7 +273,13 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
 	v.mouseReleased = true
+	// Set isOverwriteMode to false, because we assume we are in the default mode when editor
+	// is opened
+	v.isOverwriteMode = false
 	v.lastClickTime = time.Time{}
+
+	GlobalPluginCall("onBufferOpen", v.Buf)
+	GlobalPluginCall("onViewOpen", v)
 }
 
 // Open opens the given file in the view
@@ -371,6 +405,10 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	return 0, 0
 }
 
+// Bottomline returns the line number of the lowest line in the view
+// You might think that this is obviously just v.Topline + v.Height
+// but if softwrap is enabled things get complicated since one buffer
+// line can take up multiple lines in the view
 func (v *View) Bottomline() int {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		return v.Topline + v.Height
@@ -442,6 +480,31 @@ func (v *View) Relocate() bool {
 	return ret
 }
 
+// GetMouseClickLocation gets the location in the buffer from a mouse click
+// on the screen
+func (v *View) GetMouseClickLocation(x, y int) (int, int) {
+	x -= v.lineNumOffset - v.leftCol + v.x
+	y += v.Topline - v.y
+
+	if y-v.Topline > v.Height-1 {
+		v.ScrollDown(1)
+		y = v.Height + v.Topline - 1
+	}
+	if y < 0 {
+		y = 0
+	}
+	if x < 0 {
+		x = 0
+	}
+
+	newX, newY := v.GetSoftWrapLocation(x, y)
+	if newX > Count(v.Buf.Line(newY)) {
+		newX = Count(v.Buf.Line(newY))
+	}
+
+	return newX, newY
+}
+
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
 // by a mouse click
 func (v *View) MoveToMouseClick(x, y int) {
@@ -457,7 +520,6 @@ func (v *View) MoveToMouseClick(x, y int) {
 	}
 
 	x, y = v.GetSoftWrapLocation(x, y)
-	// x = v.Cursor.GetCharPosInLine(y, x)
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
@@ -509,6 +571,11 @@ func (v *View) SetCursor(c *Cursor) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	if v.Type == vtTerm {
+		v.term.HandleEvent(event)
+		return
+	}
+
 	if v.Type == vtRaw {
 		v.Buf.Insert(v.Cursor.Loc, reflect.TypeOf(event).String()[7:])
 		v.Buf.Insert(v.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
@@ -574,6 +641,7 @@ func (v *View) HandleEvent(event tcell.Event) {
 				}
 			}
 		}
+
 		if !isBinding && e.Key() == tcell.KeyRune {
 			// Check viewtype if readonly don't insert a rune (readonly help and log view etc.)
 			if v.Type.Readonly == false {
@@ -585,7 +653,14 @@ func (v *View) HandleEvent(event tcell.Event) {
 						v.Cursor.DeleteSelection()
 						v.Cursor.ResetSelection()
 					}
-					v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+
+					if v.isOverwriteMode {
+						next := v.Cursor.Loc
+						next.X++
+						v.Buf.Replace(v.Cursor.Loc, next, string(e.Rune()))
+					} else {
+						v.Buf.Insert(v.Cursor.Loc, string(e.Rune()))
+					}
 
 					for pl := range loadedPlugins {
 						_, err := Call(pl+".onRune", string(e.Rune()), v)
@@ -735,6 +810,11 @@ func (v *View) openHelp(helpPage string) {
 
 // DisplayView draws the view to the screen
 func (v *View) DisplayView() {
+	if v.Type == vtTerm {
+		v.term.Display()
+		return
+	}
+
 	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
 		v.leftCol = 0
 	}
@@ -804,11 +884,11 @@ func (v *View) DisplayView() {
 		}
 
 		colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-		if colorcolumn != 0 {
+		if colorcolumn != 0 && xOffset+colorcolumn-v.leftCol < v.Width {
 			style := GetColor("color-column")
 			fg, _, _ := style.Decompose()
 			st := defStyle.Background(fg)
-			screen.SetContent(xOffset+colorcolumn, yOffset+visualLineN, ' ', nil, st)
+			screen.SetContent(xOffset+colorcolumn-v.leftCol, yOffset+visualLineN, ' ', nil, st)
 		}
 
 		screenX = v.x

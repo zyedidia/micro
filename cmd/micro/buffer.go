@@ -56,6 +56,7 @@ type Buffer struct {
 	// Stores the last modification time of the file the buffer is pointing to
 	ModTime time.Time
 
+	// NumLines is the number of lines in the buffer
 	NumLines int
 
 	syntaxDef   *highlight.Def
@@ -79,7 +80,8 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
-// NewBufferFromString creates a new buffer from a given string with a given path
+// NewBufferFromString creates a new buffer containing the given
+// string
 func NewBufferFromString(text, path string) *Buffer {
 	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, "", false)
 }
@@ -235,6 +237,8 @@ func FindBuffer(path string) *Buffer {
 	return nil
 }
 
+// GetName returns the name that should be displayed in the statusline
+// for this buffer
 func (b *Buffer) GetName() string {
 	if b.name == "" {
 		if b.Path == "" {
@@ -378,6 +382,8 @@ func (b *Buffer) Update() {
 	b.NumLines = len(b.lines)
 }
 
+// MergeCursors merges any cursors that are at the same position
+// into one cursor
 func (b *Buffer) MergeCursors() {
 	var cursors []*Cursor
 	for i := 0; i < len(b.cursors); i++ {
@@ -404,6 +410,7 @@ func (b *Buffer) MergeCursors() {
 	}
 }
 
+// UpdateCursors updates all the cursors indicies
 func (b *Buffer) UpdateCursors() {
 	for i, c := range b.cursors {
 		c.Num = i
@@ -472,10 +479,27 @@ func (b *Buffer) Decode(reader io.Reader, path, password string) (io.Reader, err
 
 // Encode encodes the buffer for writing to disk
 func (b *Buffer) Encode(filename string) ([]byte, error) {
-	data := []byte(b.SaveString(b.Settings["fileformat"] == "dos"))
+	data := &bytes.Buffer{}
+	useCrlf := b.Settings["fileformat"] == "dos"
+	for i, l := range b.lines {
+		if _, err := data.Write(l.data); err != nil {
+			return nil, err
+		}
+		if i != len(b.lines)-1 {
+			if useCrlf {
+				if _, err := data.Write([]byte{'\r', '\n'}); err != nil {
+					return nil, err
+				}
+			} else {
+				if _, err := data.Write([]byte{'\n'}); err != nil {
+					return nil, err
+				}
+			}
+		}
+	}
 
 	if b.Password == "" {
-		return data, nil
+		return data.Bytes(), nil
 	}
 
 	if strings.HasSuffix(filename, ExtensionArmorGPG) {
@@ -489,7 +513,7 @@ func (b *Buffer) Encode(filename string) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		_, err = plaintext.Write(data)
+		_, err = plaintext.Write(data.Bytes())
 		if err != nil {
 			return nil, err
 		}
@@ -505,7 +529,7 @@ func (b *Buffer) Encode(filename string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	_, err = plaintext.Write([]byte(b.String()))
+	_, err = plaintext.Write(data.Bytes())
 	if err != nil {
 		return nil, err
 	}
@@ -536,19 +560,52 @@ func (b *Buffer) SaveAs(filename string) error {
 			b.Insert(end, "\n")
 		}
 	}
+
+	defer func() {
+		b.ModTime, _ = GetModTime(filename)
+	}()
+
+	// Removes any tilde and replaces with the absolute path to home
+	var absFilename string = ReplaceHome(filename)
+
+	// Get the leading path to the file | "." is returned if there's no leading path provided
+	if dirname := filepath.Dir(absFilename); dirname != "." {
+		// Check if the parent dirs don't exist
+		if _, statErr := os.Stat(dirname); os.IsNotExist(statErr) {
+			// Prompt to make sure they want to create the dirs that are missing
+			if yes, canceled := messenger.YesNoPrompt("Parent folders \"" + dirname + "\" do not exist. Create them? (y,n)"); yes && !canceled {
+				// Create all leading dir(s) since they don't exist
+				if mkdirallErr := os.MkdirAll(dirname, os.ModePerm); mkdirallErr != nil {
+					// If there was an error creating the dirs
+					return mkdirallErr
+				}
+			} else {
+				// If they canceled the creation of leading dirs
+				return errors.New("Save aborted")
+			}
+		}
+	}
+
+	f, err := os.OpenFile(absFilename, os.O_WRONLY|os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	if err := f.Truncate(0); err != nil {
+		return err
+	}
+
 	data, err := b.Encode(filename)
 	if err != nil {
 		return err
 	}
-	err = ioutil.WriteFile(ReplaceHome(filename), data, 0644)
-	if err == nil {
-		b.Path = filename
-		b.IsModified = false
-		b.ModTime, _ = GetModTime(filename)
-		return b.Serialize()
+	_, err = f.Write(data)
+	if err != nil {
+		return err
 	}
-	b.ModTime, _ = GetModTime(filename)
-	return err
+
+	b.Path = filename
+	b.IsModified = false
+	return b.Serialize()
 }
 
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
@@ -594,6 +651,8 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	return err
 }
 
+// Modified returns if this buffer has been modified since
+// being opened
 func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
 		return b.IsModified
@@ -630,11 +689,27 @@ func (b *Buffer) End() Loc {
 
 // RuneAt returns the rune at a given location in the buffer
 func (b *Buffer) RuneAt(loc Loc) rune {
-	line := []rune(b.Line(loc.Y))
+	line := b.LineRunes(loc.Y)
 	if len(line) > 0 {
 		return line[loc.X]
 	}
 	return '\n'
+}
+
+// Line returns a single line as an array of runes
+func (b *Buffer) LineBytes(n int) []byte {
+	if n >= len(b.lines) {
+		return []byte{}
+	}
+	return b.lines[n].data
+}
+
+// Line returns a single line as an array of runes
+func (b *Buffer) LineRunes(n int) []rune {
+	if n >= len(b.lines) {
+		return []rune{}
+	}
+	return toRunes(b.lines[n].data)
 }
 
 // Line returns a single line
@@ -645,6 +720,7 @@ func (b *Buffer) Line(n int) string {
 	return string(b.lines[n].data)
 }
 
+// LinesNum returns the number of lines in the buffer
 func (b *Buffer) LinesNum() int {
 	return len(b.lines)
 }
@@ -724,4 +800,59 @@ func (b *Buffer) clearCursors() {
 	b.cursors = b.cursors[:1]
 	b.UpdateCursors()
 	b.Cursor.ResetSelection()
+}
+
+var bracePairs = [][2]rune{
+	{'(', ')'},
+	{'{', '}'},
+	{'[', ']'},
+}
+
+// FindMatchingBrace returns the location in the buffer of the matching bracket
+// It is given a brace type containing the open and closing character, (for example
+// '{' and '}') as well as the location to match from
+func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
+	curLine := b.LineRunes(start.Y)
+	startChar := curLine[start.X]
+	var i int
+	if startChar == braceType[0] {
+		for y := start.Y; y < b.NumLines; y++ {
+			l := b.LineRunes(y)
+			xInit := 0
+			if y == start.Y {
+				xInit = start.X
+			}
+			for x := xInit; x < len(l); x++ {
+				r := l[x]
+				if r == braceType[0] {
+					i++
+				} else if r == braceType[1] {
+					i--
+					if i == 0 {
+						return Loc{x, y}
+					}
+				}
+			}
+		}
+	} else if startChar == braceType[1] {
+		for y := start.Y; y >= 0; y-- {
+			l := []rune(string(b.lines[y].data))
+			xInit := len(l) - 1
+			if y == start.Y {
+				xInit = start.X
+			}
+			for x := xInit; x >= 0; x-- {
+				r := l[x]
+				if r == braceType[0] {
+					i--
+					if i == 0 {
+						return Loc{x, y}
+					}
+				} else if r == braceType[1] {
+					i++
+				}
+			}
+		}
+	}
+	return start
 }

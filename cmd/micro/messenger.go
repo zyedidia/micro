@@ -309,6 +309,7 @@ func (m *Messenger) LetterPrompt(prompt string, responses ...rune) (rune, bool) 
 	}
 }
 
+// Completion represents a type of completion
 type Completion int
 
 const (
@@ -408,7 +409,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 					chosen = chosen + CommonSubstring(suggestions...)
 				}
 
-				if chosen != "" {
+				if len(suggestions) != 0 && chosen != "" {
 					m.response = shellwords.Join(append(args[:len(args)-1], chosen)...)
 					m.cursorx = Count(m.response)
 				}
@@ -434,6 +435,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 	return response, canceled
 }
 
+// UpHistory fetches the previous item in the history
 func (m *Messenger) UpHistory(history []string) {
 	if m.historyNum > 0 {
 		m.historyNum--
@@ -441,6 +443,8 @@ func (m *Messenger) UpHistory(history []string) {
 		m.cursorx = Count(m.response)
 	}
 }
+
+// DownHistory fetches the next item in the history
 func (m *Messenger) DownHistory(history []string) {
 	if m.historyNum < len(history)-1 {
 		m.historyNum++
@@ -448,33 +452,47 @@ func (m *Messenger) DownHistory(history []string) {
 		m.cursorx = Count(m.response)
 	}
 }
+
+// CursorLeft moves the cursor one character left
 func (m *Messenger) CursorLeft() {
 	if m.cursorx > 0 {
 		m.cursorx--
 	}
 }
+
+// CursorRight moves the cursor one character right
 func (m *Messenger) CursorRight() {
 	if m.cursorx < Count(m.response) {
 		m.cursorx++
 	}
 }
+
+// Start moves the cursor to the start of the line
 func (m *Messenger) Start() {
 	m.cursorx = 0
 }
+
+// End moves the cursor to the end of the line
 func (m *Messenger) End() {
 	m.cursorx = Count(m.response)
 }
+
+// Backspace deletes one character
 func (m *Messenger) Backspace() {
 	if m.cursorx > 0 {
 		m.response = string([]rune(m.response)[:m.cursorx-1]) + string([]rune(m.response)[m.cursorx:])
 		m.cursorx--
 	}
 }
+
+// Paste pastes the clipboard
 func (m *Messenger) Paste() {
 	clip, _ := clipboard.ReadAll("clipboard")
 	m.response = Insert(m.response, m.cursorx, clip)
 	m.cursorx += Count(clip)
 }
+
+// WordLeft moves the cursor one word to the left
 func (m *Messenger) WordLeft() {
 	response := []rune(m.response)
 	m.CursorLeft()
@@ -496,6 +514,8 @@ func (m *Messenger) WordLeft() {
 	}
 	m.CursorRight()
 }
+
+// WordRight moves the cursor one word to the right
 func (m *Messenger) WordRight() {
 	response := []rune(m.response)
 	if m.cursorx >= len(response) {
@@ -519,6 +539,8 @@ func (m *Messenger) WordRight() {
 		}
 	}
 }
+
+// DeleteWordLeft deletes one word to the left
 func (m *Messenger) DeleteWordLeft() {
 	m.WordLeft()
 	m.response = string([]rune(m.response)[:m.cursorx])

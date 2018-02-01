@@ -142,6 +142,7 @@ func OptionComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// OptionValueComplete completes values for various options
 func OptionValueComplete(inputOpt, input string) (string, []string) {
 	inputOpt = strings.TrimSpace(inputOpt)
 	var suggestions []string
@@ -219,6 +220,7 @@ func PluginComplete(complete Completion, input string) (chosen string, suggestio
 	return
 }
 
+// PluginCmdComplete completes with possible choices for the `> plugin` command
 func PluginCmdComplete(input string) (chosen string, suggestions []string) {
 	for _, cmd := range []string{"install", "remove", "search", "update", "list"} {
 		if strings.HasPrefix(cmd, input) {
@@ -232,6 +234,7 @@ func PluginCmdComplete(input string) (chosen string, suggestions []string) {
 	return chosen, suggestions
 }
 
+// PluginnameComplete completes with the names of loaded plugins
 func PluginNameComplete(input string) (chosen string, suggestions []string) {
 	for _, pp := range GetAllPluginPackages() {
 		if strings.HasPrefix(pp.Name, input) {

@@ -108,11 +108,33 @@ functions are given using Go's type system):
 
 * `HandleCommand(cmd string)`: runs the given command
 
-* `HandleShellCommand(shellCmd string, interactive bool, waitToClose bool)`:
-   runs the given shell command. The `interactive` bool specifies whether the
-   command should run in the background. The `waitToClose` bool only applies if
-   `interactive` is true and means that it should wait before returning to the
-   editor.
+* `ExecCommand(name string, args []string) (string, error)`: exec a (shell) command with the
+   given arguments. Returns the command's output and a possible error.
+
+* `RunShellCommand(cmd string) (string, error)`: Run a shell command. This uses `ExecCommand`
+   under the hood but also does some parsing for the arguments (i.e. quoted arguments). The
+   function returns the command's output and a possible error.
+
+* `RunBackgroundShell(cmd string)`: Run a shell command in the background.
+
+* `RunInteractiveShell(cmd string, wait bool, getOutput bool) (string, error)`: Run a shell command
+   by closing micro and running the command interactively. If `wait` is true, a prompt will be
+   used after the process exits to prevent the terminal from immediately returning to micro, allowing
+   the user to view the output of the process. If `getOutput` is true, the command's standard output
+   will be returned. Note that if `getOutput` is true, some interactive commands may not behave
+   normally because `isatty` will return false.
+
+* `RunTermEmulator(cmd string, wait bool, getOutput bool, callback string) error`: Same as
+   `RunInteractiveShell` except the command is run within the current split in a terminal emulator.
+   The `callback` input is a string callback to a lua function which will be called when the process
+   exits. The output of the process will be provided as the first and only argument to the callback
+   (it will be empty if `getOutput` is false).
+   Note that this functionality is only supported on some operating systems (linux, darwin, dragonfly,
+   openbsd, freebsd). Use the `TermEmuSupported` (see below) boolean to determine if the current
+   system is supported.
+
+* `TermEmuSupported`: Boolean specifying if the terminal emulator is supported on the version of
+   micro that is running.
 
 * `ToCharPos(loc Loc, buf *Buffer) int`: returns the character position of a
    given x, y location

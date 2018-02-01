@@ -15,16 +15,20 @@ rules:
     - symbol.brackets: "(\\{|\\})"
     - symbol.brackets: "(\\(|\\))"
     - symbol.brackets: "(\\[|\\])"
-    - statement: "\\b(break|case|catch|continue|default|delete|do|else|finally)\\b"
-    - statement: "\\b(for|function|class|extends|get|if|in|instanceof|new|return|set|switch|async|await)\\b"
-    - statement: "\\b(switch|this|throw|try|typeof|var|const|let|void|while|with)\\b"
+    - symbol.operator: "[-+/*=<>!~%?:&|]"
+    - statement: "\\b(async|await|break|case|catch|const|continue|debugger|default|delete|do|else|export|finally)\\b"
+    - statement: "\\b(for|function|class|extends|get|if|import|in|instanceof|let|new|return|set)\\b"
+    - statement: "\\b(super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"
+    # reserved but unassigned
+    - error: "\\b(enum|implements|interface|package|private|protected|public)"
     - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
     - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Math)\\b"
     - type: "\\b(Number|Object|RegExp|String)\\b"
-    - statement: "[-+/*=<>!~%?:&|]"
-    - constant: "/[^*]([^/]|(\\\\/))*[^\\\\]/[gim]*"
+    # - constant: "/[^*]([^/]|(\\\\/))*[^\\\\]/[gim]*"
     - constant: "\\\\[0-7][0-7]?[0-7]?|\\\\x[0-9a-fA-F]+|\\\\[bfnrt'\"\\?\\\\]"
+    - comment: "^#!.*/(env +)?node( |$)"
+
 
     - constant.string:
         start: "\""
@@ -37,6 +41,12 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "`"
+        end: "`"
         rules:
             - constant.specialChar: "\\\\."
 

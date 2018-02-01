@@ -24,7 +24,6 @@ type MultiRule struct {
 func JoinRule(rule string) string {
 	split := strings.Split(rule, `" "`)
 	joined := strings.Join(split, "|")
-	joined = joined
 	return joined
 }
 

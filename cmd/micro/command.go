@@ -1,11 +1,8 @@
 package main
 
 import (
-	"bytes"
 	"fmt"
 	"os"
-	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"regexp"
 	"runtime"
@@ -56,6 +53,7 @@ func init() {
 		"Pwd":        Pwd,
 		"Open":       Open,
 		"TabSwitch":  TabSwitch,
+		"Term":       Term,
 		"MemUsage":   MemUsage,
 		"Retab":      Retab,
 		"Raw":        Raw,
@@ -114,9 +112,32 @@ func DefaultCommands() map[string]StrCommand {
 		"pwd":        {"Pwd", []Completion{NoCompletion}},
 		"open":       {"Open", []Completion{FileCompletion}},
 		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
+		"term":       {"Term", []Completion{NoCompletion}},
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
 		"retab":      {"Retab", []Completion{NoCompletion}},
 		"raw":        {"Raw", []Completion{NoCompletion}},
+	}
+}
+
+// CommandEditAction returns a bindable function that opens a prompt with
+// the given string and executes the command when the user presses
+// enter
+func CommandEditAction(prompt string) func(*View, bool) bool {
+	return func(v *View, usePlugin bool) bool {
+		input, canceled := messenger.Prompt("> ", prompt, "Command", CommandCompletion)
+		if !canceled {
+			HandleCommand(input)
+		}
+		return false
+	}
+}
+
+// CommandAction returns a bindable function which executes the
+// given command
+func CommandAction(cmd string) func(*View, bool) bool {
+	return func(v *View, usePlugin bool) bool {
+		HandleCommand(cmd)
+		return false
 	}
 }
 
@@ -155,7 +176,7 @@ func PluginCmd(args []string) {
 					continue
 				}
 			}
-			if !IsSpaces(removed) {
+			if !IsSpaces([]byte(removed)) {
 				messenger.Message("Removed ", removed)
 			} else {
 				messenger.Error("The requested plugins do not exist")
@@ -203,10 +224,14 @@ func PluginCmd(args []string) {
 	}
 }
 
+// Retab changes all spaces to tabs or all tabs to spaces
+// depending on the user's settings
 func Retab(args []string) {
 	CurView().Retab(true)
 }
 
+// Raw opens a new raw view which displays the escape sequences micro
+// is receiving in real-time
 func Raw(args []string) {
 	buf := NewBufferFromString("", "Raw events")
 
@@ -685,94 +710,17 @@ func ReplaceAll(args []string) {
 	Replace(append(args, "-a"))
 }
 
-// RunShellCommand executes a shell command and returns the output/error
-func RunShellCommand(input string) (string, error) {
-	args, err := shellwords.Split(input)
-	if err != nil {
-		return "", err
-	}
-	inputCmd := args[0]
-
-	cmd := exec.Command(inputCmd, args[1:]...)
-	outputBytes := &bytes.Buffer{}
-	cmd.Stdout = outputBytes
-	cmd.Stderr = outputBytes
-	cmd.Start()
-	err = cmd.Wait() // wait for command to finish
-	outstring := outputBytes.String()
-	return outstring, err
-}
-
-// HandleShellCommand runs the shell command
-// The openTerm argument specifies whether a terminal should be opened (for viewing output
-// or interacting with stdin)
-func HandleShellCommand(input string, openTerm bool, waitToFinish bool) string {
-	args, err := shellwords.Split(input)
-	if err != nil {
-		return ""
-	}
-	inputCmd := args[0]
-	if !openTerm {
-		// Simply run the command in the background and notify the user when it's done
-		messenger.Message("Running...")
-		go func() {
-			output, err := RunShellCommand(input)
-			totalLines := strings.Split(output, "\n")
-
-			if len(totalLines) < 3 {
-				if err == nil {
-					messenger.Message(inputCmd, " exited without error")
-				} else {
-					messenger.Message(inputCmd, " exited with error: ", err, ": ", output)
-				}
-			} else {
-				messenger.Message(output)
-			}
-			// We have to make sure to redraw
-			RedrawAll()
-		}()
+// Term opens a terminal in the current view
+func Term(args []string) {
+	var err error
+	if len(args) == 0 {
+		err = CurView().StartTerminal([]string{os.Getenv("SHELL"), "-i"}, true, false, "")
 	} else {
-		// Shut down the screen because we're going to interact directly with the shell
-		screen.Fini()
-		screen = nil
-
-		args := args[1:]
-
-		// Set up everything for the command
-		var output string
-		cmd := exec.Command(inputCmd, args...)
-		cmd.Stdin = os.Stdin
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		// This is a trap for Ctrl-C so that it doesn't kill micro
-		// Instead we trap Ctrl-C to kill the program we're running
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, os.Interrupt)
-		go func() {
-			for range c {
-				cmd.Process.Kill()
-			}
-		}()
-
-		cmd.Start()
-		err := cmd.Wait()
-
-		if err != nil {
-			output = err.Error()
-		}
-
-		if waitToFinish {
-			// This is just so we don't return right away and let the user press enter to return
-			TermMessage("")
-		}
-
-		// Start the screen back up
-		InitScreen()
-
-		return output
+		err = CurView().StartTerminal(args, true, false, "")
 	}
-	return ""
+	if err != nil {
+		messenger.Error(err)
+	}
 }
 
 // HandleCommand handles input from the user

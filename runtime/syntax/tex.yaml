@@ -1,7 +1,7 @@
 filetype: tex
 
 detect: 
-    filename: "\\.tex$|bib|\\.bib$|cls|\\.cls$"
+    filename: "\\.tex$|\\.bib$|\\.cls$"
 
 rules:
     # colorize the identifiers of {<identifier>} and [<identifier>]
