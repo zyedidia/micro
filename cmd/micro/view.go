@@ -525,7 +525,8 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	for _, action := range actions {
 		readonlyBindingsResult := false
 		funcName := ShortFuncName(action)
-		if v.Type.Readonly == true {
+		curv := CurView()
+		if curv.Type.Readonly == true {
 			// check for readonly and if true only let key bindings get called if they do not change the contents.
 			for _, readonlyBindings := range readonlyBindingsList {
 				if strings.Contains(funcName, readonlyBindings) {
@@ -535,7 +536,7 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 		}
 		if !readonlyBindingsResult {
 			// call the key binding
-			relocate = action(v, true) || relocate
+			relocate = action(curv, true) || relocate
 			// Macro
 			if funcName != "ToggleMacro" && funcName != "PlayMacro" {
 				if recordingMacro {
