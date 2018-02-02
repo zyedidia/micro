@@ -390,24 +390,10 @@ func VSplit(args []string) {
 	if len(args) == 0 {
 		CurView().VSplit(NewBufferFromString("", ""))
 	} else {
-		filename := args[0]
-		filename = ReplaceHome(filename)
-		file, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
-
-		if err == nil && fileInfo.IsDir() {
-			messenger.Error(filename, " is a directory")
-			return
-		}
-
-		defer file.Close()
-
-		var buf *Buffer
+		buf, err := NewBufferFromFile(args[0])
 		if err != nil {
-			// File does not exist -- create an empty buffer with that name
-			buf = NewBufferFromString("", filename)
-		} else {
-			buf = NewBuffer(file, FSize(file), filename)
+			messenger.Error(err)
+			return
 		}
 		CurView().VSplit(buf)
 	}
@@ -419,24 +405,10 @@ func HSplit(args []string) {
 	if len(args) == 0 {
 		CurView().HSplit(NewBufferFromString("", ""))
 	} else {
-		filename := args[0]
-		filename = ReplaceHome(filename)
-		file, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
-
-		if err == nil && fileInfo.IsDir() {
-			messenger.Error(filename, " is a directory")
-			return
-		}
-
-		defer file.Close()
-
-		var buf *Buffer
+		buf, err := NewBufferFromFile(args[0])
 		if err != nil {
-			// File does not exist -- create an empty buffer with that name
-			buf = NewBufferFromString("", filename)
-		} else {
-			buf = NewBuffer(file, FSize(file), filename)
+			messenger.Error(err)
+			return
 		}
 		CurView().HSplit(buf)
 	}
@@ -459,23 +431,10 @@ func NewTab(args []string) {
 	if len(args) == 0 {
 		CurView().AddTab(true)
 	} else {
-		filename := args[0]
-		filename = ReplaceHome(filename)
-		file, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
-
-		if err == nil && fileInfo.IsDir() {
-			messenger.Error(filename, " is a directory")
-			return
-		}
-
-		defer file.Close()
-
-		var buf *Buffer
+		buf, err := NewBufferFromFile(args[0])
 		if err != nil {
-			buf = NewBufferFromString("", filename)
-		} else {
-			buf = NewBuffer(file, FSize(file), filename)
+			messenger.Error(err)
+			return
 		}
 
 		tab := NewTabFromView(NewView(buf))

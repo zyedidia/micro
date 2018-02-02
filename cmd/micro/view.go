@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -283,25 +282,11 @@ func (v *View) OpenBuffer(buf *Buffer) {
 }
 
 // Open opens the given file in the view
-func (v *View) Open(filename string) {
-	filename = ReplaceHome(filename)
-	file, err := os.Open(filename)
-	fileInfo, _ := os.Stat(filename)
-
-	if err == nil && fileInfo.IsDir() {
-		messenger.Error(filename, " is a directory")
-		return
-	}
-
-	defer file.Close()
-
-	var buf *Buffer
+func (v *View) Open(path string) {
+	buf, err := NewBufferFromFile(path)
 	if err != nil {
-		messenger.Message(err.Error())
-		// File does not exist -- create an empty buffer with that name
-		buf = NewBufferFromString("", filename)
-	} else {
-		buf = NewBuffer(file, FSize(file), filename)
+		messenger.Error(err)
+		return
 	}
 	v.OpenBuffer(buf)
 }

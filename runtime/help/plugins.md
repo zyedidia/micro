@@ -65,6 +65,9 @@ functions are given using Go's type system):
 * `NewBuffer(text, path string) *Buffer`: creates a new buffer from a given
    reader with a given path
 
+* `NewBufferFromFile(path string) *Buffer`: creates a new buffer from a given
+   path
+
 * `GetLeadingWhitespace() bool`: returns the leading whitespace of the given
    string
 

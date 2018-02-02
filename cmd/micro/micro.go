@@ -95,30 +95,13 @@ func LoadInput() []*Buffer {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(args); i++ {
-			filename = args[i]
-
-			// Check that the file exists
-			var input *os.File
-			if _, e := os.Stat(filename); e == nil {
-				// If it exists we load it into a buffer
-				input, err = os.Open(filename)
-				stat, _ := input.Stat()
-				defer input.Close()
-				if err != nil {
-					TermMessage(err)
-					continue
-				}
-				if stat.IsDir() {
-					TermMessage("Cannot read", filename, "because it is a directory")
-					continue
-				}
+			buf, err := NewBufferFromFile(args[i])
+			if err != nil {
+				TermMessage(err)
+				continue
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			if input != nil {
-				buffers = append(buffers, NewBuffer(input, FSize(input), filename))
-			} else {
-				buffers = append(buffers, NewBufferFromString("", filename))
-			}
+			buffers = append(buffers, buf)
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
@@ -423,6 +406,7 @@ func main() {
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
 	L.SetGlobal("NewBuffer", luar.New(L, NewBufferFromString))
+	L.SetGlobal("NewBufferFromFile", luar.New(L, NewBufferFromFile))
 	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
 		return string(r)
 	}))
