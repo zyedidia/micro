@@ -87,8 +87,6 @@ loop:
 				backtick = ""
 				backQuote = !backQuote
 				continue
-				backtick = ""
-				backQuote = !backQuote
 			}
 		case ')':
 			if !singleQuoted && !doubleQuoted && !backQuote {
@@ -102,8 +100,6 @@ loop:
 				backtick = ""
 				dollarQuote = !dollarQuote
 				continue
-				backtick = ""
-				dollarQuote = !dollarQuote
 			}
 		case '(':
 			if !singleQuoted && !doubleQuoted && !backQuote {
