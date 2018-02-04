@@ -23,6 +23,54 @@ func Count(s string) int {
 	return utf8.RuneCountInString(s)
 }
 
+// Convert byte array to rune array
+func toRunes(b []byte) []rune {
+	runes := make([]rune, 0, utf8.RuneCount(b))
+
+	for len(b) > 0 {
+		r, size := utf8.DecodeRune(b)
+		runes = append(runes, r)
+
+		b = b[size:]
+	}
+
+	return runes
+}
+
+func sliceStart(slc []byte, index int) []byte {
+	len := len(slc)
+	i := 0
+	totalSize := 0
+	for totalSize < len {
+		if i >= index {
+			return slc[totalSize:]
+		}
+
+		_, size := utf8.DecodeRune(slc[totalSize:])
+		totalSize += size
+		i++
+	}
+
+	return slc[totalSize:]
+}
+
+func sliceEnd(slc []byte, index int) []byte {
+	len := len(slc)
+	i := 0
+	totalSize := 0
+	for totalSize < len {
+		if i >= index {
+			return slc[:totalSize]
+		}
+
+		_, size := utf8.DecodeRune(slc[totalSize:])
+		totalSize += size
+		i++
+	}
+
+	return slc[:totalSize]
+}
+
 // NumOccurrences counts the number of occurrences of a byte in a string
 func NumOccurrences(s string, c byte) int {
 	var n int
@@ -130,7 +178,7 @@ func GetLeadingWhitespace(str string) string {
 }
 
 // IsSpaces checks if a given string is only spaces
-func IsSpaces(str string) bool {
+func IsSpaces(str []byte) bool {
 	for _, c := range str {
 		if c != ' ' {
 			return false
@@ -288,4 +336,13 @@ func ReplaceHome(path string) string {
 		return path
 	}
 	return strings.Replace(path, "~", home, 1)
+}
+
+// GetPath returns a filename without everything following a `:`
+// This is used for opening files like util.go:10:5 to specify a line and column
+func GetPath(path string) string {
+	if strings.Contains(path, ":") {
+		path = strings.Split(path, ":")[0]
+	}
+	return path
 }

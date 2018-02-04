@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
@@ -458,6 +459,20 @@ func (v *View) EndOfLine(usePlugin bool) bool {
 	return true
 }
 
+// SelectLine selects the entire current line
+func (v *View) SelectLine(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectLine", v) {
+		return false
+	}
+
+	v.Cursor.SelectLine()
+
+	if usePlugin {
+		return PostActionCall("SelectLine", v)
+	}
+	return true
+}
+
 // SelectToStartOfLine selects to the start of the current line
 func (v *View) SelectToStartOfLine(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("SelectToStartOfLine", v) {
@@ -543,6 +558,8 @@ func (v *View) ParagraphNext(usePlugin bool) bool {
 	return true
 }
 
+// Retab changes all tabs to spaces or all spaces to tabs depending
+// on the user's settings
 func (v *View) Retab(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("Retab", v) {
 		return false
@@ -679,10 +696,14 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 	}
 
 	ws := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	cx := v.Cursor.X
 	v.Buf.Insert(v.Cursor.Loc, "\n")
 	// v.Cursor.Right()
 
 	if v.Buf.Settings["autoindent"].(bool) {
+		if cx < len(ws) {
+			ws = ws[0:cx]
+		}
 		v.Buf.Insert(v.Cursor.Loc, ws)
 		// for i := 0; i < len(ws); i++ {
 		// 	v.Cursor.Right()
@@ -728,9 +749,9 @@ func (v *View) Backspace(usePlugin bool) bool {
 		// If the user is using spaces instead of tabs and they are deleting
 		// whitespace at the start of the line, we should delete as if it's a
 		// tab (tabSize number of spaces)
-		lineStart := v.Buf.Line(v.Cursor.Y)[:v.Cursor.X]
+		lineStart := sliceEnd(v.Buf.LineBytes(v.Cursor.Y), v.Cursor.X)
 		tabSize := int(v.Buf.Settings["tabsize"].(float64))
-		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && len(lineStart) != 0 && len(lineStart)%tabSize == 0 {
+		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && utf8.RuneCount(lineStart) != 0 && utf8.RuneCount(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc
 			v.Buf.Remove(loc.Move(-tabSize, v.Buf), loc)
 		} else {
@@ -815,13 +836,15 @@ func (v *View) IndentSelection(usePlugin bool) bool {
 		end := v.Cursor.CurSelection[1]
 		if end.Y < start.Y {
 			start, end = end, start
+			v.Cursor.SetSelectionStart(start)
+			v.Cursor.SetSelectionEnd(end)
 		}
 
 		startY := start.Y
 		endY := end.Move(-1, v.Buf).Y
 		endX := end.Move(-1, v.Buf).X
+		tabsize := len(v.Buf.IndentString())
 		for y := startY; y <= endY; y++ {
-			tabsize := len(v.Buf.IndentString())
 			v.Buf.Insert(Loc{0, y}, v.Buf.IndentString())
 			if y == startY && start.X > 0 {
 				v.Cursor.SetSelectionStart(start.Move(tabsize, v.Buf))
@@ -875,6 +898,8 @@ func (v *View) OutdentSelection(usePlugin bool) bool {
 		end := v.Cursor.CurSelection[1]
 		if end.Y < start.Y {
 			start, end = end, start
+			v.Cursor.SetSelectionStart(start)
+			v.Cursor.SetSelectionEnd(end)
 		}
 
 		startY := start.Y
@@ -1357,6 +1382,27 @@ func (v *View) PastePrimary(usePlugin bool) bool {
 	return true
 }
 
+// JumpToMatchingBrace moves the cursor to the matching brace if it is
+// currently on a brace
+func (v *View) JumpToMatchingBrace(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("JumpToMatchingBrace", v) {
+		return false
+	}
+
+	for _, bp := range bracePairs {
+		r := v.Cursor.RuneUnder(v.Cursor.X)
+		if r == bp[0] || r == bp[1] {
+			matchingBrace := v.Buf.FindMatchingBrace(bp, v.Cursor.Loc)
+			v.Cursor.GotoLoc(matchingBrace)
+		}
+	}
+
+	if usePlugin {
+		return PostActionCall("JumpToMatchingBrace", v)
+	}
+	return true
+}
+
 // SelectAll selects the entire buffer
 func (v *View) SelectAll(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("SelectAll", v) {
@@ -1584,21 +1630,38 @@ func (v *View) JumpLine(usePlugin bool) bool {
 	}
 
 	// Prompt for line number
-	message := fmt.Sprintf("Jump to line (1 - %v) # ", v.Buf.NumLines)
-	linestring, canceled := messenger.Prompt(message, "", "LineNumber", NoCompletion)
+	message := fmt.Sprintf("Jump to line:col (1 - %v) # ", v.Buf.NumLines)
+	input, canceled := messenger.Prompt(message, "", "LineNumber", NoCompletion)
 	if canceled {
 		return false
 	}
-	lineint, err := strconv.Atoi(linestring)
-	lineint = lineint - 1 // fix offset
-	if err != nil {
-		messenger.Error(err) // return errors
-		return false
+	var lineInt int
+	var colInt int
+	var err error
+	if strings.Contains(input, ":") {
+		split := strings.Split(input, ":")
+		lineInt, err = strconv.Atoi(split[0])
+		if err != nil {
+			messenger.Message("Invalid line number")
+			return false
+		}
+		colInt, err = strconv.Atoi(split[1])
+		if err != nil {
+			messenger.Message("Invalid column number")
+			return false
+		}
+	} else {
+		lineInt, err = strconv.Atoi(input)
+		if err != nil {
+			messenger.Message("Invalid line number")
+			return false
+		}
 	}
+	lineInt--
 	// Move cursor and view if possible.
-	if lineint < v.Buf.NumLines && lineint >= 0 {
-		v.Cursor.X = 0
-		v.Cursor.Y = lineint
+	if lineInt < v.Buf.NumLines && lineInt >= 0 {
+		v.Cursor.X = colInt
+		v.Cursor.Y = lineInt
 
 		if usePlugin {
 			return PostActionCall("JumpLine", v)

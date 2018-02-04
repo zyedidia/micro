@@ -15,6 +15,7 @@ import (
 	homedir "github.com/mitchellh/go-homedir"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/terminfo"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
 	luar "layeh.com/gopher-luar"
@@ -44,8 +45,10 @@ var (
 
 	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
-	Version     = "0.0.0-unknown"
-	CommitHash  = "Unknown"
+	Version = "0.0.0-unknown"
+	// CommitHash is the commit this version was built on
+	CommitHash = "Unknown"
+	// CompileDate is the date this binary was compiled on
 	CompileDate = "Unknown"
 
 	// The list of views
@@ -56,9 +59,17 @@ var (
 
 	// Channel of jobs running in the background
 	jobs chan JobFunction
+
 	// Event channel
 	events   chan tcell.Event
 	autosave chan bool
+
+	// Channels for the terminal emulator
+	updateterm chan bool
+	closeterm  chan int
+
+	// How many redraws have happened
+	numRedraw uint
 )
 
 // LoadInput determines which files should be loaded into buffers
@@ -85,30 +96,23 @@ func LoadInput() []*Buffer {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(args); i++ {
-			filename = args[i]
+			if strings.HasPrefix(args[i], "+") {
+				if strings.Contains(args[i], ":") {
+					split := strings.Split(args[i], ":")
+					*flagStartPos = split[0][1:] + "," + split[1]
+				} else {
+					*flagStartPos = args[i][1:] + ",0"
+				}
+				continue
+			}
 
-			// Check that the file exists
-			var input *os.File
-			if _, e := os.Stat(filename); e == nil {
-				// If it exists we load it into a buffer
-				input, err = os.Open(filename)
-				stat, _ := input.Stat()
-				defer input.Close()
-				if err != nil {
-					TermMessage(err)
-					continue
-				}
-				if stat.IsDir() {
-					TermMessage("Cannot read", filename, "because it is a directory")
-					continue
-				}
+			buf, err := NewBufferFromFile(args[i])
+			if err != nil {
+				TermMessage(err)
+				continue
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			if input != nil {
-				buffers = append(buffers, NewBuffer(input, FSize(input), filename))
-			} else {
-				buffers = append(buffers, NewBufferFromString("", filename))
-			}
+			buffers = append(buffers, buf)
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
@@ -174,6 +178,9 @@ func InitScreen() {
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
 
+	tcelldb := os.Getenv("TCELLDB")
+	os.Setenv("TCELLDB", configDir+"/.tcelldb")
+
 	// In order to enable true color, we have to set the TERM to `xterm-truecolor` when
 	// initializing tcell, but after that, we can set the TERM back to whatever it was
 	oldTerm := os.Getenv("TERM")
@@ -185,12 +192,19 @@ func InitScreen() {
 	var err error
 	screen, err = tcell.NewScreen()
 	if err != nil {
-		fmt.Println(err)
 		if err == tcell.ErrTermNotFound {
-			fmt.Println("Micro does not recognize your terminal:", oldTerm)
-			fmt.Println("Please go to https://github.com/zyedidia/mkinfo to read about how to fix this problem (it should be easy to fix).")
+			terminfo.WriteDB(configDir + "/.tcelldb")
+			screen, err = tcell.NewScreen()
+			if err != nil {
+				fmt.Println(err)
+				fmt.Println("Fatal: Micro could not initialize a screen.")
+				os.Exit(1)
+			}
+		} else {
+			fmt.Println(err)
+			fmt.Println("Fatal: Micro could not initialize a screen.")
+			os.Exit(1)
 		}
-		os.Exit(1)
 	}
 	if err = screen.Init(); err != nil {
 		fmt.Println(err)
@@ -206,7 +220,9 @@ func InitScreen() {
 		screen.EnableMouse()
 	}
 
-	screen.SetStyle(defStyle)
+	os.Setenv("TCELLDB", tcelldb)
+
+	// screen.SetStyle(defStyle)
 }
 
 // RedrawAll redraws everything -- all the views and the messenger
@@ -229,6 +245,11 @@ func RedrawAll() {
 		DisplayKeyMenu()
 	}
 	screen.Show()
+
+	if numRedraw%50 == 0 {
+		runtime.GC()
+	}
+	numRedraw++
 }
 
 func LoadAll() {
@@ -265,7 +286,9 @@ func main() {
 		fmt.Println("-config-dir dir")
 		fmt.Println("    \tSpecify a custom location for the configuration directory")
 		fmt.Println("-startpos LINE,COL")
+		fmt.Println("+LINE:COL")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
+		fmt.Println("    \tThis can also be done by opening file:LINE:COL")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all option help")
 		fmt.Println("-version")
@@ -387,9 +410,16 @@ func main() {
 	L.SetGlobal("IsWordChar", luar.New(L, IsWordChar))
 	L.SetGlobal("HandleCommand", luar.New(L, HandleCommand))
 	L.SetGlobal("HandleShellCommand", luar.New(L, HandleShellCommand))
+	L.SetGlobal("ExecCommand", luar.New(L, ExecCommand))
+	L.SetGlobal("RunShellCommand", luar.New(L, RunShellCommand))
+	L.SetGlobal("RunBackgroundShell", luar.New(L, RunBackgroundShell))
+	L.SetGlobal("RunInteractiveShell", luar.New(L, RunInteractiveShell))
+	L.SetGlobal("TermEmuSupported", luar.New(L, TermEmuSupported))
+	L.SetGlobal("RunTermEmulator", luar.New(L, RunTermEmulator))
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
 	L.SetGlobal("NewBuffer", luar.New(L, NewBufferFromString))
+	L.SetGlobal("NewBufferFromFile", luar.New(L, NewBufferFromFile))
 	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
 		return string(r)
 	}))
@@ -423,22 +453,20 @@ func main() {
 	jobs = make(chan JobFunction, 100)
 	events = make(chan tcell.Event, 100)
 	autosave = make(chan bool)
+	updateterm = make(chan bool)
+	closeterm = make(chan int)
 
 	LoadPlugins()
 
 	for _, t := range tabs {
 		for _, v := range t.views {
-			for pl := range loadedPlugins {
-				_, err := Call(pl+".onViewOpen", v)
-				if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-					TermMessage(err)
-					continue
-				}
-			}
+			GlobalPluginCall("onViewOpen", v)
+			GlobalPluginCall("onBufferOpen", v.Buf)
 		}
 	}
 
 	InitColorscheme()
+	messenger.style = defStyle
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
@@ -474,6 +502,10 @@ func main() {
 			if CurView().Buf.Path != "" {
 				CurView().Save(true)
 			}
+		case <-updateterm:
+			continue
+		case vnum := <-closeterm:
+			tabs[curTab].views[vnum].CloseTerminal()
 		case event = <-events:
 		}
 

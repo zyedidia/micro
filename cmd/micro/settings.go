@@ -202,6 +202,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
 		"autosave":       false,
+		"basename":       false,
 		"colorcolumn":    float64(0),
 		"colorscheme":    "default",
 		"cursorline":     true,
@@ -213,6 +214,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"infobar":        true,
 		"keepautoindent": false,
 		"keymenu":        false,
+		"matchbrace":     false,
 		"mouse":          true,
 		"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 		"pluginrepos":    []string{},
@@ -245,6 +247,7 @@ func DefaultLocalSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
 		"autosave":       false,
+		"basename":       false,
 		"colorcolumn":    float64(0),
 		"cursorline":     true,
 		"eofnewline":     false,
@@ -254,6 +257,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"keepautoindent": false,
+		"matchbrace":     false,
 		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
@@ -423,7 +427,9 @@ func SetLocalOption(option, value string, view *View) error {
 		if !nativeValue.(bool) {
 			buf.ClearMatches()
 		} else {
-			buf.highlighter.HighlightStates(buf)
+			if buf.highlighter != nil {
+				buf.highlighter.HighlightStates(buf)
+			}
 		}
 	}
 

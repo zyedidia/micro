@@ -69,12 +69,23 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		return
 	}
 
+	matchingBrace := Loc{-1, -1}
+	// bracePairs is defined in buffer.go
+	if buf.Settings["matchbrace"].(bool) {
+		for _, bp := range bracePairs {
+			r := buf.Cursor.RuneUnder(buf.Cursor.X)
+			if r == bp[0] || r == bp[1] {
+				matchingBrace = buf.FindMatchingBrace(bp, buf.Cursor.Loc)
+			}
+		}
+	}
+
 	tabsize := int(buf.Settings["tabsize"].(float64))
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentrunes := []rune(buf.Settings["indentchar"].(string))
 	// if empty indentchar settings, use space
 	if indentrunes == nil || len(indentrunes) == 0 {
-		indentrunes = []rune(" ")
+		indentrunes = []rune{' '}
 	}
 	indentchar := indentrunes[0]
 
@@ -137,7 +148,13 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			char := line[colN]
 
 			if viewCol >= 0 {
-				c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, curStyle, 1}
+				st := curStyle
+				if colN == matchingBrace.X && lineN == matchingBrace.Y && !buf.Cursor.HasSelection() {
+					st = curStyle.Reverse(true)
+				}
+				if viewCol < len(c.lines[viewLine]) {
+					c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, char, st, 1}
+				}
 			}
 			if char == '\t' {
 				charWidth := tabsize - (viewCol+left)%tabsize
@@ -146,7 +163,8 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 					c.lines[viewLine][viewCol].width = charWidth
 
 					indentStyle := curStyle
-					if group, ok := colorscheme["indent-char"]; ok {
+					ch := buf.Settings["indentchar"].(string)
+					if group, ok := colorscheme["indent-char"]; ok && !IsStrWhitespace(ch) && ch != "" {
 						indentStyle = group
 					}
 
@@ -155,7 +173,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 
 				for i := 1; i < charWidth; i++ {
 					viewCol++
-					if viewCol >= 0 && viewCol < lineLength {
+					if viewCol >= 0 && viewCol < lineLength && viewCol < len(c.lines[viewLine]) {
 						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
 					}
 				}
@@ -167,7 +185,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 				}
 				for i := 1; i < charWidth; i++ {
 					viewCol++
-					if viewCol >= 0 && viewCol < lineLength {
+					if viewCol >= 0 && viewCol < lineLength && viewCol < len(c.lines[viewLine]) {
 						c.lines[viewLine][viewCol] = &Char{Loc{viewCol, viewLine}, Loc{colN, lineN}, char, ' ', curStyle, 1}
 					}
 				}

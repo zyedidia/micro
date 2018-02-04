@@ -43,6 +43,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"SelectWordLeft":        (*View).SelectWordLeft,
 	"DeleteWordRight":       (*View).DeleteWordRight,
 	"DeleteWordLeft":        (*View).DeleteWordLeft,
+	"SelectLine":            (*View).SelectLine,
 	"SelectToStartOfLine":   (*View).SelectToStartOfLine,
 	"SelectToEndOfLine":     (*View).SelectToEndOfLine,
 	"ParagraphPrevious":     (*View).ParagraphPrevious,
@@ -111,6 +112,7 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"RemoveMultiCursor":     (*View).RemoveMultiCursor,
 	"RemoveAllMultiCursors": (*View).RemoveAllMultiCursors,
 	"SkipMultiCursor":       (*View).SkipMultiCursor,
+	"JumpToMatchingBrace":   (*View).JumpToMatchingBrace,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*View).InsertNewline,
@@ -406,6 +408,8 @@ func findMouseAction(v string) func(*View, bool, *tcell.EventMouse) bool {
 	return action
 }
 
+// TryBindKey tries to bind a key by writing to configDir/bindings.json
+// This function is unused for now
 func TryBindKey(k, v string) {
 	filename := configDir + "/bindings.json"
 	if _, e := os.Stat(filename); e == nil {
@@ -476,6 +480,12 @@ func BindKey(k, v string) {
 	for _, actionName := range actionNames {
 		if strings.HasPrefix(actionName, "Mouse") {
 			mouseActions = append(mouseActions, findMouseAction(actionName))
+		} else if strings.HasPrefix(actionName, "command:") {
+			cmd := strings.SplitN(actionName, ":", 2)[1]
+			actions = append(actions, CommandAction(cmd))
+		} else if strings.HasPrefix(actionName, "command-edit:") {
+			cmd := strings.SplitN(actionName, ":", 2)[1]
+			actions = append(actions, CommandEditAction(cmd))
 		} else {
 			actions = append(actions, findAction(actionName))
 		}

@@ -6,6 +6,8 @@ configure micro to your liking.
 
 Hopefully you'll find this useful.
 
+See `> help defaultkeys` for a list an explanation of the default keybindings.
+
 ### Plugins
 
 Micro has a plugin manager which can automatically download plugins for you. To

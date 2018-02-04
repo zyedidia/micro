@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"reflect"
 	"strconv"
 	"strings"
@@ -24,6 +23,7 @@ var (
 	vtLog     = ViewType{2, true, true}
 	vtScratch = ViewType{3, false, true}
 	vtRaw     = ViewType{4, true, true}
+	vtTerm    = ViewType{5, true, true}
 )
 
 // The View struct stores information about a view into a buffer.
@@ -94,13 +94,19 @@ type View struct {
 	// Same here, just to keep track for mouse move events
 	tripleClick bool
 
+	// The cellview used for displaying and syntax highlighting
 	cellview *CellView
 
 	splitNode *LeafNode
 
+	// The scrollbar
 	scrollbar *ScrollBar
 
+	// Autocomplete function
 	Completer *Completer
+
+	// Virtual terminal
+	term *Terminal
 }
 
 // NewView returns a new fullscreen view
@@ -138,6 +144,8 @@ func NewViewWidthHeight(buf *Buffer, w, h int) *View {
 		v.Height--
 	}
 
+	v.term = new(Terminal)
+
 	for pl := range loadedPlugins {
 		_, err := Call(pl+".onViewOpen", v)
 		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
@@ -159,6 +167,24 @@ func (v *View) ToggleStatusLine() {
 	} else {
 		v.Height++
 	}
+}
+
+// StartTerminal execs a command in this view
+func (v *View) StartTerminal(execCmd []string, wait bool, getOutput bool, luaCallback string) error {
+	err := v.term.Start(execCmd, v, getOutput)
+	v.term.wait = wait
+	v.term.callback = luaCallback
+	if err == nil {
+		v.term.Resize(v.Width, v.Height)
+		v.Type = vtTerm
+	}
+	return err
+}
+
+// CloseTerminal shuts down the tty running in this view
+// and returns it to the default view type
+func (v *View) CloseTerminal() {
+	v.term.Stop()
 }
 
 // ToggleTabbar creates an extra row for the tabbar if necessary
@@ -256,28 +282,17 @@ func (v *View) OpenBuffer(buf *Buffer) {
 	// is opened
 	v.isOverwriteMode = false
 	v.lastClickTime = time.Time{}
+
+	GlobalPluginCall("onBufferOpen", v.Buf)
+	GlobalPluginCall("onViewOpen", v)
 }
 
 // Open opens the given file in the view
-func (v *View) Open(filename string) {
-	filename = ReplaceHome(filename)
-	file, err := os.Open(filename)
-	fileInfo, _ := os.Stat(filename)
-
-	if err == nil && fileInfo.IsDir() {
-		messenger.Error(filename, " is a directory")
-		return
-	}
-
-	defer file.Close()
-
-	var buf *Buffer
+func (v *View) Open(path string) {
+	buf, err := NewBufferFromFile(path)
 	if err != nil {
-		messenger.Message(err.Error())
-		// File does not exist -- create an empty buffer with that name
-		buf = NewBufferFromString("", filename)
-	} else {
-		buf = NewBuffer(file, FSize(file), filename)
+		messenger.Error(err)
+		return
 	}
 	v.OpenBuffer(buf)
 }
@@ -371,6 +386,10 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 	return 0, 0
 }
 
+// Bottomline returns the line number of the lowest line in the view
+// You might think that this is obviously just v.Topline + v.Height
+// but if softwrap is enabled things get complicated since one buffer
+// line can take up multiple lines in the view
 func (v *View) Bottomline() int {
 	if !v.Buf.Settings["softwrap"].(bool) {
 		return v.Topline + v.Height
@@ -423,7 +442,7 @@ func (v *View) Relocate() bool {
 	if cy > v.Topline+height-1-scrollmargin && cy < v.Buf.NumLines-scrollmargin {
 		v.Topline = cy - height + 1 + scrollmargin
 		ret = true
-	} else if cy >= v.Buf.NumLines-scrollmargin && cy > height {
+	} else if cy >= v.Buf.NumLines-scrollmargin && cy >= height {
 		v.Topline = v.Buf.NumLines - height
 		ret = true
 	}
@@ -442,6 +461,31 @@ func (v *View) Relocate() bool {
 	return ret
 }
 
+// GetMouseClickLocation gets the location in the buffer from a mouse click
+// on the screen
+func (v *View) GetMouseClickLocation(x, y int) (int, int) {
+	x -= v.lineNumOffset - v.leftCol + v.x
+	y += v.Topline - v.y
+
+	if y-v.Topline > v.Height-1 {
+		v.ScrollDown(1)
+		y = v.Height + v.Topline - 1
+	}
+	if y < 0 {
+		y = 0
+	}
+	if x < 0 {
+		x = 0
+	}
+
+	newX, newY := v.GetSoftWrapLocation(x, y)
+	if newX > Count(v.Buf.Line(newY)) {
+		newX = Count(v.Buf.Line(newY))
+	}
+
+	return newX, newY
+}
+
 // MoveToMouseClick moves the cursor to location x, y assuming x, y were given
 // by a mouse click
 func (v *View) MoveToMouseClick(x, y int) {
@@ -457,7 +501,6 @@ func (v *View) MoveToMouseClick(x, y int) {
 	}
 
 	x, y = v.GetSoftWrapLocation(x, y)
-	// x = v.Cursor.GetCharPosInLine(y, x)
 	if x > Count(v.Buf.Line(y)) {
 		x = Count(v.Buf.Line(y))
 	}
@@ -473,7 +516,8 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	for _, action := range actions {
 		readonlyBindingsResult := false
 		funcName := ShortFuncName(action)
-		if v.Type.Readonly == true {
+		curv := CurView()
+		if curv.Type.Readonly == true {
 			// check for readonly and if true only let key bindings get called if they do not change the contents.
 			for _, readonlyBindings := range readonlyBindingsList {
 				if strings.Contains(funcName, readonlyBindings) {
@@ -483,7 +527,7 @@ func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 		}
 		if !readonlyBindingsResult {
 			// call the key binding
-			relocate = action(v, true) || relocate
+			relocate = action(curv, true) || relocate
 			// Macro
 			if funcName != "ToggleMacro" && funcName != "PlayMacro" {
 				if recordingMacro {
@@ -509,6 +553,11 @@ func (v *View) SetCursor(c *Cursor) bool {
 
 // HandleEvent handles an event passed by the main loop
 func (v *View) HandleEvent(event tcell.Event) {
+	if v.Type == vtTerm {
+		v.term.HandleEvent(event)
+		return
+	}
+
 	if v.Type == vtRaw {
 		v.Buf.Insert(v.Cursor.Loc, reflect.TypeOf(event).String()[7:])
 		v.Buf.Insert(v.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
@@ -755,6 +804,11 @@ func (v *View) openHelp(helpPage string) {
 
 // DisplayView draws the view to the screen
 func (v *View) DisplayView() {
+	if v.Type == vtTerm {
+		v.term.Display()
+		return
+	}
+
 	if v.Buf.Settings["softwrap"].(bool) && v.leftCol != 0 {
 		v.leftCol = 0
 	}
@@ -824,11 +878,11 @@ func (v *View) DisplayView() {
 		}
 
 		colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
-		if colorcolumn != 0 {
+		if colorcolumn != 0 && xOffset+colorcolumn-v.leftCol < v.Width {
 			style := GetColor("color-column")
 			fg, _, _ := style.Decompose()
 			st := defStyle.Background(fg)
-			screen.SetContent(xOffset+colorcolumn, yOffset+visualLineN, ' ', nil, st)
+			screen.SetContent(xOffset+colorcolumn-v.leftCol, yOffset+visualLineN, ' ', nil, st)
 		}
 
 		screenX = v.x
