@@ -261,6 +261,11 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 		event := <-events
 
 		switch e := event.(type) {
+		case *tcell.EventResize:
+			for _, t := range tabs {
+				t.Resize()
+			}
+			RedrawAll()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEscape:
