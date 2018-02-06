@@ -52,8 +52,8 @@ rules:
           - include: "javascript"
 
     - default:
-        start: "<style.*>"
-        end: "</style.*>"
+        start: "<style.*?>"
+        end: "</style.*?>"
         limit-group: symbol.tag
         rules:
           - include: "css"
