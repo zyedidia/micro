@@ -711,12 +711,13 @@ func (v *View) HandleEvent(event tcell.Event) {
 				// events, this still allows the user to make selections, except only after they
 				// release the mouse
 
-				if !v.doubleClick && !v.tripleClick {
+				if !v.doubleClick && !v.tripleClick && !v.scrollbar.Scrolling {
 					v.MoveToMouseClick(x, y)
 					v.Cursor.SetSelectionEnd(v.Cursor.Loc)
 					v.Cursor.CopySelection("primary")
 				}
 				v.mouseReleased = true
+				v.scrollbar.Scrolling = false
 			}
 		}
 	}

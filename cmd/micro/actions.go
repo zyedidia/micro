@@ -65,6 +65,13 @@ func (v *View) MousePress(usePlugin bool, e *tcell.EventMouse) bool {
 	}
 
 	x, y := e.Position()
+
+	if v.Buf.Settings["scrollbar"].(bool) {
+		if v.scrollbar.HandleMousePress(x, y) {
+			return false
+		}
+	}
+
 	x -= v.lineNumOffset - v.leftCol + v.x
 	y += v.Topline - v.y
 
