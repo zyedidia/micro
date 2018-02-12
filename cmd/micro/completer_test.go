@@ -356,8 +356,8 @@ func TestCompleterGetOption(t *testing.T) {
 	}{
 		{
 			index:        -1,
-			expectedText: "",
-			expectedOK:   false,
+			expectedText: "text", // Use the first entry by default.
+			expectedOK:   true,
 		},
 		{
 			index:        0,

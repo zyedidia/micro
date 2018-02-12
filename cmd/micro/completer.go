@@ -255,8 +255,11 @@ func (c *Completer) HandleEvent(key tcell.Key) bool {
 }
 
 func getOption(i int, options []optionprovider.Option) (toUse string, ok bool) {
-	if i < 0 || i > len(options)-1 {
+	if i > len(options)-1 {
 		return "", false
+	}
+	if i < 0 {
+		i = 0
 	}
 	return options[i].Text(), true
 }
