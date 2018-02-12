@@ -2144,6 +2144,54 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	return false
 }
 
+// SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
+func (v *View) SpawnMultiCursorSelect(usePlugin bool) bool {
+	if v.Cursor == &v.Buf.Cursor {
+		if usePlugin && !PreActionCall("SpawnMultiCursorSelect", v) {
+			return false
+		}
+
+		// Avoid cases where multiple cursors already exist, that would create problems
+		if len(v.Buf.cursors) > 1 {
+			return false
+		}
+
+		var startLine int
+		var endLine int
+
+		a, b := v.Cursor.CurSelection[0].Y, v.Cursor.CurSelection[1].Y
+		if a > b {
+			startLine, endLine = b, a
+		} else {
+			startLine, endLine = a, b
+		}
+
+		if v.Cursor.HasSelection() {
+			v.Cursor.ResetSelection()
+			v.Cursor.GotoLoc(Loc{0, startLine})
+
+			for i := startLine; i <= endLine; i++ {
+				c := &Cursor{
+					buf: v.Buf,
+				}
+				c.GotoLoc(Loc{0, i})
+				v.Buf.cursors = append(v.Buf.cursors, c)
+			}
+			v.Buf.MergeCursors()
+			v.Buf.UpdateCursors()
+		} else {
+			return false
+		}
+
+		if usePlugin {
+			PostActionCall("SpawnMultiCursorSelect", v)
+		}
+
+		messenger.Message("Added cursors from selection")
+	}
+	return false
+}
+
 // MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
 func (v *View) MouseMultiCursor(usePlugin bool, e *tcell.EventMouse) bool {
 	if v.Cursor == &v.Buf.Cursor {

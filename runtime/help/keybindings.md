@@ -464,6 +464,7 @@ MouseWheelRight
 
     // Multiple cursors bindings
     "Alt-n": "SpawnMultiCursor",
+    "CtrlM": "SpawnMultiCursorSelect",
     "Alt-p": "RemoveMultiCursor",
     "Alt-c": "RemoveAllMultiCursors",
     "Alt-x": "SkipMultiCursor",
