@@ -509,7 +509,7 @@ func (v *View) MoveToMouseClick(x, y int) {
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 }
 
-// Execute actions executes the supplied actions
+// ExecuteActions executes the supplied actions
 func (v *View) ExecuteActions(actions []func(*View, bool) bool) bool {
 	relocate := false
 	readonlyBindingsList := []string{"Delete", "Insert", "Backspace", "Cut", "Play", "Paste", "Move", "Add", "DuplicateLine", "Macro"}

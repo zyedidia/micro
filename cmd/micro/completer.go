@@ -53,6 +53,16 @@ func ReplaceFromBuffer(buf *Buffer) func(from, to Loc, with string) {
 	}
 }
 
+// ContentSetterForView sets the content of a cell for the x, y coordinate of a document.
+func ContentSetterForView(v *View) ContentSetter {
+	return func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
+		targetY := y - v.Topline
+		targetX := x + v.leftCol
+		LogToMessenger()("completer.ContentSetterForView: doc pos %v:%v drawing '%v' at %v:%v", y, x, string(mainc), targetY, targetX)
+		screen.SetContent(targetX, targetY, mainc, combc, style)
+	}
+}
+
 // LogToMessenger logs to the global messenger.
 func LogToMessenger() func(s string, values ...interface{}) {
 	return func(s string, values ...interface{}) {
@@ -123,7 +133,7 @@ func NewCompleterForView(v *View) *Completer {
 		CurrentBytesAndOffsetFromView(v),
 		CurrentLocationFromView(v),
 		ReplaceFromBuffer(v.Buf),
-		screen.SetContent,
+		ContentSetterForView(v),
 		colorscheme["default"].Reverse(true),
 		colorscheme["default"],
 		CompleterEnabledFlagFromView(v),
