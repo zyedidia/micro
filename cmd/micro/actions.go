@@ -987,7 +987,43 @@ func (v *View) Save(usePlugin bool) bool {
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
 func (v *View) saveToFile(filename string) {
-	err := v.Buf.SaveAs(filename)
+	// Check if the filename supplied is a directory.
+	_, err := os.Open(filename)
+	fileInfo, _ := os.Stat(filename)
+
+	if err == nil && fileInfo.IsDir() {
+		filename, canceled := messenger.Prompt("Filename: ", filename, "Save", NoCompletion)
+
+		if !canceled {
+			// the filename might or might not be quoted, so unquote first then join the strings.
+			args, err := shellwords.Split(filename)
+			filename = strings.Join(args, " ")
+			if err != nil {
+				messenger.Error("Error parsing arguments: ", err)
+				return
+			}
+		}
+
+		_, err := os.Open(filename)
+		fileInfo, _ := os.Stat(filename)
+
+		if err == nil {
+			if fileInfo.IsDir() {
+				messenger.Error(filename + " is a directory")
+				return
+			} else {
+				choice, _ := messenger.YesNoPrompt("Overwrite " + filename + "? (y,n)")
+				messenger.Reset()
+				messenger.Clear()
+				if !choice {
+					return
+				}
+			}
+		}
+	}
+
+	err = v.Buf.SaveAs(filename)
+
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
 			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
