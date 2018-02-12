@@ -49,6 +49,7 @@ func CurrentLocationFromView(v *View) func() Loc {
 func ReplaceFromBuffer(buf *Buffer) func(from, to Loc, with string) {
 	return func(from, to Loc, with string) {
 		buf.Replace(from, to, with)
+		buf.Cursor.GotoLoc(Loc{X: from.X + len(with), Y: to.Y})
 	}
 }
 
@@ -98,7 +99,7 @@ type Completer struct {
 // NewCompleterForView creates a new autocompleter with defaults for writing to the console.
 func NewCompleterForView(v *View) *Completer {
 	// Default activators and deactivators.
-	activators := []rune{'.', '(', ' ', '\n'}
+	activators := []rune{'.', '('}
 	deactivators := []rune{')', ',', ' ', '\n'}
 
 	var provider OptionProvider

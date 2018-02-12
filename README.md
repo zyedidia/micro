@@ -66,8 +66,8 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Easily configurable
 * Macros
 * Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
-* Autocompletion for Go, using `gocode` - beta.
-    * See [#174](https://github.com/zyedidia/micro/issues/174) for other languages
+* Autocomplete
+    * See [#174](https://github.com/zyedidia/micro/issues/174)
     * See instructions for enabling below.
 
 Although not yet implemented, I hope to add more features such as a tree view ([#249](https://github.com/zyedidia/micro/issues/249)) in the future.
@@ -181,12 +181,19 @@ that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty.
 
-### Autocomplete for Go (beta)
+### Autocomplete
 
 * Beta - use at your own risk.
 * Please check for duplicate bugs before reporting anything you find. 
-* Uses `gocode` which must be installed and available on the path.
+
+#### All files
+
+* Works out common words from text being edited.
 * To enable it, press CtrlE to go to command mode, and enter `setlocal autocomplete true`. This will enable autocomplete for the file until closed. The setting will not persist.
+
+#### .go files
+
+* Uses `gocode` which must be installed and available on the path.
 
 ### Plan9, Cygwin
 
