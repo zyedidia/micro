@@ -974,7 +974,9 @@ func (v *View) Save(usePlugin bool) bool {
 		if v.Buf.Path == "" {
 			v.SaveAs(false)
 		} else {
-			v.saveToFile(v.Buf.Path)
+			if !v.saveToFile(v.Buf.Path) {
+				return false
+			}
 		}
 
 		if usePlugin {
@@ -986,13 +988,14 @@ func (v *View) Save(usePlugin bool) bool {
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (v *View) saveToFile(filename string) {
+func (v *View) saveToFile(filename string) bool {
 	// Check if the filename supplied is a directory.
 	_, err := os.Open(filename)
 	fileInfo, _ := os.Stat(filename)
+	canceled := false
 
 	if err == nil && fileInfo.IsDir() {
-		filename, canceled := messenger.Prompt("Filename: ", filename, "Save", NoCompletion)
+		filename, canceled = messenger.Prompt("Filename: ", filename, "Save", NoCompletion)
 
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
@@ -1000,23 +1003,23 @@ func (v *View) saveToFile(filename string) {
 			filename = strings.Join(args, " ")
 			if err != nil {
 				messenger.Error("Error parsing arguments: ", err)
-				return
+				return false
 			}
 		}
 
-		_, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
+		_, err = os.Open(filename)
+		fileInfo, _ = os.Stat(filename)
 
 		if err == nil {
 			if fileInfo.IsDir() {
 				messenger.Error(filename + " is a directory")
-				return
+				return false
 			} else {
 				choice, _ := messenger.YesNoPrompt("Overwrite " + filename + "? (y,n)")
 				messenger.Reset()
 				messenger.Clear()
 				if !choice {
-					return
+					return false
 				}
 			}
 		}
@@ -1047,6 +1050,7 @@ func (v *View) saveToFile(filename string) {
 		v.Buf.name = filename
 		messenger.Message("Saved " + filename)
 	}
+	return true
 }
 
 // SaveAs saves the buffer to disk with the given name
@@ -1065,7 +1069,9 @@ func (v *View) SaveAs(usePlugin bool) bool {
 				messenger.Error("Error parsing arguments: ", err)
 				return false
 			}
-			v.saveToFile(filename)
+			if !v.saveToFile(filename) {
+				return false
+			}
 		}
 
 		if usePlugin {
