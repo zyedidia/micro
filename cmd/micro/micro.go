@@ -107,9 +107,10 @@ func LoadInput() []*Buffer {
 			}
 
 			buf, err := NewBufferFromFile(args[i])
+			// If we have an error, display the error and open an empty buffer anyways
 			if err != nil {
-				TermMessage(err)
-				continue
+				messenger.Error(err)
+				buf = NewBufferFromString("", args[i])
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, buf)
