@@ -1022,7 +1022,7 @@ func (v *View) saveToFile(filename string) {
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
 	if v.mainCursor() {
-		if usePlugin && !PreActionCall("Find", v) {
+		if usePlugin && !PreActionCall("SaveAs", v) {
 			return false
 		}
 
@@ -1039,7 +1039,7 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		}
 
 		if usePlugin {
-			PostActionCall("Find", v)
+			PostActionCall("SaveAs", v)
 		}
 	}
 	return false
