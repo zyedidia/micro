@@ -970,13 +970,17 @@ func (v *View) Save(usePlugin bool) bool {
 			// We can't save any view type with scratch set. eg help and log text
 			return false
 		}
+		_, err := os.Open(v.Buf.Path)
+		fileInfo, _ := os.Stat(v.Buf.Path)
+
 		// If this is an empty buffer, ask for a filename
+		// We'll also ask for a filename if the path is a directory.
 		if v.Buf.Path == "" {
 			v.SaveAs(false)
+		} else if err == nil && fileInfo.IsDir() {
+			v.SaveAs(false)
 		} else {
-			if !v.saveToFile(v.Buf.Path) {
-				return false
-			}
+			v.saveToFile(v.Buf.Path)
 		}
 
 		if usePlugin {
@@ -988,44 +992,8 @@ func (v *View) Save(usePlugin bool) bool {
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (v *View) saveToFile(filename string) bool {
-	// Check if the filename supplied is a directory.
-	_, err := os.Open(filename)
-	fileInfo, _ := os.Stat(filename)
-	canceled := false
-
-	if err == nil && fileInfo.IsDir() {
-		filename, canceled = messenger.Prompt("Filename: ", filename, "Save", NoCompletion)
-
-		if !canceled {
-			// the filename might or might not be quoted, so unquote first then join the strings.
-			args, err := shellwords.Split(filename)
-			filename = strings.Join(args, " ")
-			if err != nil {
-				messenger.Error("Error parsing arguments: ", err)
-				return false
-			}
-		}
-
-		_, err = os.Open(filename)
-		fileInfo, _ = os.Stat(filename)
-
-		if err == nil {
-			if fileInfo.IsDir() {
-				messenger.Error(filename + " is a directory")
-				return false
-			} else {
-				choice, _ := messenger.YesNoPrompt("Overwrite " + filename + "? (y,n)")
-				messenger.Reset()
-				messenger.Clear()
-				if !choice {
-					return false
-				}
-			}
-		}
-	}
-
-	err = v.Buf.SaveAs(filename)
+func (v *View) saveToFile(filename string) {
+	err := v.Buf.SaveAs(filename)
 
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
@@ -1050,7 +1018,6 @@ func (v *View) saveToFile(filename string) bool {
 		v.Buf.name = filename
 		messenger.Message("Saved " + filename)
 	}
-	return true
 }
 
 // SaveAs saves the buffer to disk with the given name
@@ -1059,8 +1026,8 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		if usePlugin && !PreActionCall("SaveAs", v) {
 			return false
 		}
-
-		filename, canceled := messenger.Prompt("Filename: ", "", "Save", NoCompletion)
+		// We'll refer to the path stored as part of the buffer.
+		filename, canceled := messenger.Prompt("Filename: ", v.Buf.Path, "Save", NoCompletion)
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
 			args, err := shellwords.Split(filename)
@@ -1069,9 +1036,24 @@ func (v *View) SaveAs(usePlugin bool) bool {
 				messenger.Error("Error parsing arguments: ", err)
 				return false
 			}
-			if !v.saveToFile(filename) {
-				return false
+
+			_, err = os.Open(filename)
+			fileInfo, _ := os.Stat(filename)
+
+			if err == nil {
+				if fileInfo.IsDir() {
+					messenger.Error(filename + " is a directory")
+					return false
+				} else {
+					choice, _ := messenger.YesNoPrompt("Overwrite " + filename + "? (y,n)")
+					messenger.Reset()
+					messenger.Clear()
+					if !choice {
+						return false
+					}
+				}
 			}
+			v.saveToFile(filename)
 		}
 
 		if usePlugin {
