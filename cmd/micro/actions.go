@@ -976,9 +976,13 @@ func (v *View) Save(usePlugin bool) bool {
 		// If this is an empty buffer, ask for a filename
 		// We'll also ask for a filename if the path is a directory.
 		if v.Buf.Path == "" {
-			v.SaveAs(false)
+			if !v.SaveAs(false) {
+				return false
+			}
 		} else if err == nil && fileInfo.IsDir() {
-			v.SaveAs(false)
+			if !v.SaveAs(false) {
+				return false
+			}
 		} else {
 			v.saveToFile(v.Buf.Path)
 		}
