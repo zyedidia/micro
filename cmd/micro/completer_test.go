@@ -214,6 +214,52 @@ func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
 	}
 }
 
+func TestCompleterIsDeactivatedBySwitchingLines(t *testing.T) {
+	activators := map[rune]int{
+		'(': 0,
+	}
+	deactivators := []rune{')', ';'}
+	currentBytesAndOffset := func() (bytes []byte, offset int) {
+		return []byte("fmt.Print\nnext line"), len("fmt.Print")
+	}
+	// Tell the completer that we're currently on line 1.
+	currentLocation := func() Loc {
+		return Loc{X: 0, Y: 1}
+	}
+	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+		options = []optionprovider.Option{
+			optionprovider.New("text", "hint"),
+			optionprovider.New("text1", "hint1"),
+		}
+		return
+	}
+
+	c := NewCompleter(activators,
+		deactivators,
+		provider,
+		t.Logf,
+		currentBytesAndOffset,
+		currentLocation,
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
+
+	c.Active = true
+
+	// Tell the completer that it was previously on line zero.
+	c.Y = 0
+
+	err := c.Process('l')
+	if err != nil {
+		t.Fatalf("failed to process with error: %v", err)
+	}
+	if c.Active {
+		t.Errorf("expected switching lines to deactivate the completer, but it didn't")
+	}
+}
+
 func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 	activators := map[rune]int{
 		'.': 0,

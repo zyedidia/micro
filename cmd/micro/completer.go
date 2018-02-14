@@ -191,6 +191,11 @@ func (c *Completer) Process(r rune) error {
 		c.Active = false
 	}
 
+	// Disable autocomplete if we've switched lines (e.g. by duplicating a line, or moving the cursor away).
+	if c.Active && c.CurrentLocation().Y != c.Y {
+		c.Active = false
+	}
+
 	if !c.Active {
 		// Check to work out whether we should activate the autocomplete.
 		if indexAdjustment, ok := c.Activators[r]; ok {
