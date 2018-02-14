@@ -50,7 +50,7 @@ func ReplaceFromBuffer(buf *Buffer) func(from, to Loc, with string) {
 	return func(from, to Loc, with string) {
 		LogToMessenger()("replacing from %v to %v with %s", from, to, with)
 		buf.Replace(from, to, with)
-		buf.Cursor.GotoLoc(Loc{X: from.X + len(with), Y: to.Y})
+		buf.Cursor.GotoLoc(Loc{X: from.X + len(with), Y: from.Y})
 	}
 }
 
