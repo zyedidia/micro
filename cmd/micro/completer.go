@@ -105,6 +105,8 @@ type Completer struct {
 	OptionStyleActive tcell.Style
 	// Enabled determines whether the view has the enabled flag set or not.
 	Enabled func() bool
+	// PreviousLocation stores the last known location of the cursor.
+	PreviousLocation Loc
 }
 
 // defaultActivators sets whether the character should start autocompletion. The value of zero means that
@@ -191,15 +193,13 @@ func (c *Completer) Process(r rune) error {
 		c.Active = false
 	}
 
-	// Disable autocomplete if we've switched lines (e.g. by duplicating a line, or moved the cursor away).
-	c.DeactivateIfOutOfBounds()
-
 	if !c.Active {
 		// Check to work out whether we should activate the autocomplete.
 		if indexAdjustment, ok := c.Activators[r]; ok {
 			c.Logger("completer.Process: activating, because received %v", string(r))
 			c.Active = true
 			currentLocation := c.CurrentLocation()
+			c.PreviousLocation = currentLocation
 			c.X, c.Y = currentLocation.X+indexAdjustment, currentLocation.Y
 			c.Logger("completer.Process: SetStartPosition to %d, %d", c.X, c.Y)
 		}
@@ -291,9 +291,23 @@ func (c *Completer) DeactivateIfOutOfBounds() {
 		return
 	}
 	cur := c.CurrentLocation()
-	if cur.X <= c.X || cur.X > c.X+1 || cur.Y != c.Y {
+	beforeStart := cur.X <= c.X
+	movedMoreThanOneXSinceLastCheck := distance(c.PreviousLocation.X, cur.X) > 1
+	movedLine := cur.Y != c.Y
+	if beforeStart || movedMoreThanOneXSinceLastCheck || movedLine {
 		c.Active = false
 	}
+	c.PreviousLocation = cur
+}
+
+func distance(a, b int) int {
+	if a == b {
+		return 0
+	}
+	if a > b {
+		return a - b
+	}
+	return b - a
 }
 
 // Display the suggestion box.
@@ -308,8 +322,9 @@ func (c *Completer) Display() {
 
 	c.Logger("completer.Display: showing %d options", len(c.Options))
 	width := getWidth(c.Options)
+	start := c.CurrentLocation()
 	for iy, o := range c.Options {
-		y := c.Y + iy + 1 // +1 to draw underneath the start position.
+		y := start.Y + iy + 1 // +1 to draw underneath the start position.
 
 		// If it's active, show it differently.
 		style := c.OptionStyleInactive
@@ -319,7 +334,7 @@ func (c *Completer) Display() {
 
 		// Draw the runes.
 		for ix, r := range padRight(o.Text(), width+1) {
-			x := c.X + ix
+			x := start.X + ix
 			c.Setter(x, y, r, nil, style)
 		}
 	}

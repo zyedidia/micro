@@ -214,52 +214,6 @@ func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
 	}
 }
 
-func TestCompleterIsDeactivatedBySwitchingLines(t *testing.T) {
-	activators := map[rune]int{
-		'(': 0,
-	}
-	deactivators := []rune{')', ';'}
-	currentBytesAndOffset := func() (bytes []byte, offset int) {
-		return []byte("fmt.Print\nnext line"), len("fmt.Print")
-	}
-	// Tell the completer that we're currently on line 1.
-	currentLocation := func() Loc {
-		return Loc{X: 0, Y: 1}
-	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
-		options = []optionprovider.Option{
-			optionprovider.New("text", "hint"),
-			optionprovider.New("text1", "hint1"),
-		}
-		return
-	}
-
-	c := NewCompleter(activators,
-		deactivators,
-		provider,
-		t.Logf,
-		currentBytesAndOffset,
-		currentLocation,
-		noopReplacer,
-		noopContentSetter,
-		optionStyleInactive,
-		optionStyleActive,
-		enabledFlagSetToTrue)
-
-	c.Active = true
-
-	// Tell the completer that it was previously on line zero.
-	c.Y = 0
-
-	err := c.Process('l')
-	if err != nil {
-		t.Fatalf("failed to process with error: %v", err)
-	}
-	if c.Active {
-		t.Errorf("expected switching lines to deactivate the completer, but it didn't")
-	}
-}
-
 func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 	activators := map[rune]int{
 		'.': 0,
@@ -732,12 +686,16 @@ func testCompleterDisplayRendersOptionsWhenActive(name string,
 	t *testing.T) {
 	actual := make(displayMap)
 
+	currentLocation := func() Loc {
+		return Loc{X: 0, Y: 0}
+	}
+
 	var setterCalled bool
 	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		setterCalled = true
 		actual[Loc{X: x, Y: y}] = rs{Rune: mainc, Style: style}
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 	c.Active = true
 	c.ActiveIndex = activeIndex
 	c.Options = options
@@ -815,6 +773,7 @@ func TestDeactivateIfOutOfBounds(t *testing.T) {
 		c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 		c.X = test.previousLocation.X
 		c.Y = test.previousLocation.Y
+		c.PreviousLocation = test.previousLocation
 		c.Active = test.currentlyActive
 
 		c.DeactivateIfOutOfBounds()
