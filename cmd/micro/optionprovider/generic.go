@@ -32,18 +32,19 @@ func Generic(buffer []byte, offset int) (options []Option, err error) {
 	counts := wordCounts(words, map[string]interface{}{prefix: false})
 	orderedWords := orderByFrequencyDesc(counts)
 
-	// Write out prefix matches first.
-	for i := 0; i < len(orderedWords) && i < maxSuggestions; i++ {
-		if strings.HasPrefix(orderedWords[i], prefix) {
-			options = append(options, New(orderedWords[i], ""))
+	if len(prefix) > 0 {
+		// We have a prefix, so write out prefix matches.
+		for i := 0; i < len(orderedWords) && i < maxSuggestions; i++ {
+			if strings.HasPrefix(orderedWords[i], prefix) {
+				options = append(options, New(orderedWords[i], ""))
+			}
 		}
+		return options, nil
 	}
 
-	// Then everything else.
+	// Write out all matches.
 	for i := 0; i < len(orderedWords) && i < maxSuggestions; i++ {
-		if !strings.HasPrefix(orderedWords[i], prefix) {
-			options = append(options, New(orderedWords[i], ""))
-		}
+		options = append(options, New(orderedWords[i], ""))
 	}
 
 	return options, nil

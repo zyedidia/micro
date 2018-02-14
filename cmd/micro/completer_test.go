@@ -175,6 +175,45 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	}
 }
 
+func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
+	activators := map[rune]int{
+		'(': 0,
+	}
+	deactivators := []rune{')', ';'}
+	currentBytesAndOffset := func() (bytes []byte, offset int) {
+		return []byte("fmt.Print"), len("fmt.Print")
+	}
+	currentLocation := func() Loc {
+		return Loc{X: len("fmt.Print"), Y: 0}
+	}
+	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+		options = []optionprovider.Option{} // No options.
+		return
+	}
+
+	c := NewCompleter(activators,
+		deactivators,
+		provider,
+		t.Logf,
+		currentBytesAndOffset,
+		currentLocation,
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
+
+	c.Active = true
+
+	err := c.Process('l')
+	if err != nil {
+		t.Fatalf("failed to process with error: %v", err)
+	}
+	if c.Active {
+		t.Errorf("expected receiving no autocomplete options to deactivate the completer, but it didn't")
+	}
+}
+
 func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 	activators := map[rune]int{
 		'.': 0,
@@ -396,40 +435,51 @@ func TestCompleterHandleEventKeyWhenActive(t *testing.T) {
 }
 
 func TestCompleterGetOption(t *testing.T) {
-	options := []optionprovider.Option{
+	defaultOptions := []optionprovider.Option{
 		optionprovider.New("text", "hint"),
 		optionprovider.New("text1", "hint1"),
 	}
 
 	tests := []struct {
 		index        int
+		options      []optionprovider.Option
 		expectedText string
 		expectedOK   bool
 	}{
 		{
 			index:        -1,
+			options:      defaultOptions,
 			expectedText: "text", // Use the first entry by default.
 			expectedOK:   true,
 		},
 		{
+			index:        -1,
+			options:      []optionprovider.Option{},
+			expectedText: "", // If there are no options, don't use anything.
+			expectedOK:   false,
+		},
+		{
 			index:        0,
+			options:      defaultOptions,
 			expectedText: "text",
 			expectedOK:   true,
 		},
 		{
 			index:        1,
+			options:      defaultOptions,
 			expectedText: "text1",
 			expectedOK:   true,
 		},
 		{
 			index:        2,
+			options:      defaultOptions,
 			expectedText: "",
 			expectedOK:   false,
 		},
 	}
 
 	for _, test := range tests {
-		actualText, actualOK := getOption(test.index, options)
+		actualText, actualOK := getOption(test.index, test.options)
 		if test.expectedText != actualText {
 			t.Errorf("for index %v, expected '%v', but got '%v'", test.index, test.expectedText, actualText)
 		}

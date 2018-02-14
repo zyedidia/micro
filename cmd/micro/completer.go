@@ -217,6 +217,10 @@ func (c *Completer) Process(r rune) error {
 	}
 	c.Options = options
 	c.ActiveIndex = -1
+	// If there are no options, just deactivate.
+	if len(options) == 0 {
+		c.Active = false
+	}
 	return err
 }
 
@@ -264,6 +268,9 @@ func (c *Completer) HandleEvent(key tcell.Key) bool {
 }
 
 func getOption(i int, options []optionprovider.Option) (toUse string, ok bool) {
+	if len(options) == 0 {
+		return "", false
+	}
 	if i > len(options)-1 {
 		return "", false
 	}

@@ -14,8 +14,8 @@ func TestGeneric(t *testing.T) {
 	}{
 		{
 			name:     "words are sorted alphabetically if they appear the same number of times",
-			text:     "fish dog cat",
-			leading:  "",
+			text:     "fish dog cat ",
+			leading:  "fish dog cat ",
 			expected: []Option{New("cat", ""), New("dog", ""), New("fish", "")},
 		},
 		{
@@ -49,19 +49,19 @@ func TestGeneric(t *testing.T) {
 			name:     "prefix matches preceed other matches",
 			text:     "common common common something",
 			leading:  "common common common some",
-			expected: []Option{New("something", ""), New("common", "")},
+			expected: []Option{New("something", "")},
 		},
 		{
 			name:     "the autocomplete looks for the previous word boundary to see if you're partway through a word to limit results",
 			text:     `A AB ABC ABCD`,
 			leading:  `A AB AB`,
-			expected: []Option{New("ABC", ""), New("ABCD", ""), New("A", "")},
+			expected: []Option{New("ABC", ""), New("ABCD", "")},
 		},
 		{
 			name:     "realistic example",
 			text:     `fmt.Println("hello") fmt.P`,
 			leading:  `fmt.Println("hello") fmt.P`,
-			expected: []Option{New("Println", ""), New("fmt", ""), New("hello", "")},
+			expected: []Option{New("Println", "")},
 		},
 	}
 
