@@ -48,6 +48,7 @@ func CurrentLocationFromView(v *View) func() Loc {
 // ReplaceFromBuffer replaces text in a buffer.
 func ReplaceFromBuffer(buf *Buffer) func(from, to Loc, with string) {
 	return func(from, to Loc, with string) {
+		LogToMessenger()("replacing from %v to %v with %s", from, to, with)
 		buf.Replace(from, to, with)
 		buf.Cursor.GotoLoc(Loc{X: from.X + len(with), Y: to.Y})
 	}
@@ -83,7 +84,7 @@ type Completer struct {
 	// ActiveIndex store the index of the active option (the one that will be selected).
 	ActiveIndex int
 	// Activators are insertions that start autocomplete, e.g. a "." or an opening bracket "(".
-	Activators []rune
+	Activators map[rune]int
 	// Deactivators are insertions that stop autocomplete, e.g. a closing bracket, or a semicolon.
 	Deactivators []rune
 	// Provider is the provider of completion options, e.g. gocode, or another provider such as a language server.
@@ -106,7 +107,15 @@ type Completer struct {
 	Enabled func() bool
 }
 
-const defaultActivators = ".(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+// defaultActivators sets whether the character should start autocompletion. The value of zero means that
+// the character itself is not included in the replacement, -1 means that it is.
+var defaultActivators = map[rune]int{
+	'.': 0,
+	'(': 0,
+	'a': -1, 'b': -1, 'c': -1, 'd': -1, 'e': -1, 'f': -1, 'g': -1, 'h': -1, 'i': -1, 'j': -1, 'k': -1, 'l': -1, 'm': -1, 'n': -1, 'o': -1, 'p': -1, 'q': -1, 'r': -1, 's': -1, 't': -1, 'u': -1, 'v': -1, 'w': -1, 'x': -1, 'y': -1, 'z': -1,
+	'A': -1, 'B': -1, 'C': -1, 'D': -1, 'E': -1, 'F': -1, 'G': -1, 'H': -1, 'I': -1, 'J': -1, 'K': -1, 'L': -1, 'M': -1, 'N': -1, 'O': -1, 'P': -1, 'Q': -1, 'R': -1, 'S': -1, 'T': -1, 'U': -1, 'V': -1, 'W': -1, 'X': -1, 'Y': -1, 'Z': -1,
+}
+
 const defaultDeactivators = "), \n"
 
 // NewCompleterForView creates a new autocompleter with defaults for writing to the console.
@@ -126,7 +135,7 @@ func NewCompleterForView(v *View) *Completer {
 		provider = optionprovider.Noop
 	}
 
-	return NewCompleter([]rune(defaultActivators), []rune(defaultDeactivators),
+	return NewCompleter(defaultActivators, []rune(defaultDeactivators),
 		provider,
 		LogToMessenger(),
 		CurrentBytesAndOffsetFromView(v),
@@ -140,7 +149,7 @@ func NewCompleterForView(v *View) *Completer {
 }
 
 // NewCompleter creates a new completer with all options exposed. See NewCompleterForView for more common usage.
-func NewCompleter(activators []rune,
+func NewCompleter(activators map[rune]int,
 	deactivators []rune,
 	provider OptionProvider,
 	logger func(s string, values ...interface{}),
@@ -180,16 +189,17 @@ func (c *Completer) Process(r rune) error {
 	if c.Active && containsRune(c.Deactivators, r) {
 		c.Logger("completer.Process: deactivating, because received %v", string(r))
 		c.Active = false
-		return nil
 	}
 
-	// Check to work out whether we should activate the autocomplete.
-	if containsRune(c.Activators, r) {
-		c.Logger("completer.Process: activating, because received %v", string(r))
-		c.Active = true
-		currentLocation := c.CurrentLocation()
-		c.X, c.Y = currentLocation.X, currentLocation.Y
-		c.Logger("completer.Process: SetStartPosition to %d, %d", c.X, c.Y)
+	if !c.Active {
+		// Check to work out whether we should activate the autocomplete.
+		if indexAdjustment, ok := c.Activators[r]; ok {
+			c.Logger("completer.Process: activating, because received %v", string(r))
+			c.Active = true
+			currentLocation := c.CurrentLocation()
+			c.X, c.Y = currentLocation.X+indexAdjustment, currentLocation.Y
+			c.Logger("completer.Process: SetStartPosition to %d, %d", c.X, c.Y)
+		}
 	}
 
 	if !c.Active {
@@ -270,7 +280,6 @@ func (c *Completer) Display() {
 		return
 	}
 	if !c.Active {
-		c.Logger("completer.Display: not showing because inactive")
 		return
 	}
 

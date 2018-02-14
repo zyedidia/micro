@@ -171,13 +171,8 @@ func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 
 // Replace deletes from start to end and replaces it with the given string
 func (eh *EventHandler) Replace(start, end Loc, replace string) {
-	eh.MultipleReplace([]Delta{
-		Delta{
-			Start: start,
-			End:   end,
-			Text:  replace,
-		},
-	})
+	eh.Remove(start, end)
+	eh.Insert(start, replace)
 }
 
 // Execute a textevent and add it to the undo stack

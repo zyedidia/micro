@@ -34,7 +34,9 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 		return
 	}
 
-	activators := []rune{'('}
+	activators := map[rune]int{
+		'(': 0,
+	}
 	deactivators := []rune{')', ';'}
 
 	c := NewCompleter(activators,
@@ -72,7 +74,9 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 }
 
 func TestCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
-	activators := []rune{'('}
+	activators := map[rune]int{
+		'(': 0,
+	}
 	deactivators := []rune{')', ';'}
 	currentBytesAndOffset := func() (bytes []byte, offset int) {
 		return []byte("fmt.Println("), 3
@@ -119,7 +123,9 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 		optionprovider.New("text1", "hint1"),
 	}
 
-	activators := []rune{'('}
+	activators := map[rune]int{
+		'(': 0,
+	}
 	deactivators := []rune{')', ';'}
 	currentBytesAndOffset := func() (bytes []byte, offset int) {
 		return []byte("fmt.Println("), 3
@@ -169,8 +175,54 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	}
 }
 
+func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
+	activators := map[rune]int{
+		'.': 0,
+	}
+	deactivators := []rune{'.'}
+	currentBytesAndOffset := func() (bytes []byte, offset int) {
+		return []byte("test test"), 9
+	}
+	currentLocation := func() Loc {
+		return Loc{X: 9, Y: 0}
+	}
+	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+		options = []optionprovider.Option{
+			optionprovider.New("test", "test"),
+		}
+		return
+	}
+
+	c := NewCompleter(activators,
+		deactivators,
+		provider,
+		t.Logf,
+		currentBytesAndOffset,
+		currentLocation,
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
+
+	c.Active = true
+
+	err := c.Process('.')
+	if err != nil {
+		t.Fatalf("failed to process with error: %v", err)
+	}
+	if !c.Active {
+		t.Errorf("expected '.' to deactivate, then reactivate the completer, but it didn't")
+	}
+	if c.X != 9 {
+		t.Errorf("expected the start position to be reset to x:9, but was %v", c.X)
+	}
+}
+
 func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
-	activators := []rune{'('}
+	activators := map[rune]int{
+		'(': 0,
+	}
 	deactivators := []rune{')', ';'}
 	currentBytesAndOffset := func() (bytes []byte, offset int) {
 		return []byte("fmt.Println("), 3
