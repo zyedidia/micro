@@ -46,6 +46,12 @@ func TestGeneric(t *testing.T) {
 			expected: []Option{New("ccc", ""), New("bb", ""), New("a", "")},
 		},
 		{
+			name:     "prefix matches preceed other matches",
+			text:     "common common common something",
+			leading:  "common common common some",
+			expected: []Option{New("something", ""), New("common", "")},
+		},
+		{
 			name:     "the autocomplete looks for the previous word boundary to see if you're partway through a word to limit results",
 			text:     `A AB ABC ABCD`,
 			leading:  `A AB AB`,

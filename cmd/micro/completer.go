@@ -106,12 +106,11 @@ type Completer struct {
 	Enabled func() bool
 }
 
+const defaultActivators = ".(abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+const defaultDeactivators = "), \n"
+
 // NewCompleterForView creates a new autocompleter with defaults for writing to the console.
 func NewCompleterForView(v *View) *Completer {
-	// Default activators and deactivators.
-	activators := []rune{'.', '('}
-	deactivators := []rune{')', ',', ' ', '\n'}
-
 	var provider OptionProvider
 
 	// Load the provider based on filename.
@@ -127,7 +126,7 @@ func NewCompleterForView(v *View) *Completer {
 		provider = optionprovider.Noop
 	}
 
-	return NewCompleter(activators, deactivators,
+	return NewCompleter([]rune(defaultActivators), []rune(defaultDeactivators),
 		provider,
 		LogToMessenger(),
 		CurrentBytesAndOffsetFromView(v),
