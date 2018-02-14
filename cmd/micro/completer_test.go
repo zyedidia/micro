@@ -748,3 +748,79 @@ func testCompleterDisplayRendersOptionsWhenActive(name string,
 		t.Errorf("%s: expected '%v', got '%v'", name, map[Loc]rs(expected), map[Loc]rs(actual))
 	}
 }
+
+func TestDeactivateIfOutOfBounds(t *testing.T) {
+	tests := []struct {
+		name             string
+		previousLocation Loc
+		currentLocation  Loc
+		currentlyActive  bool
+		expectedActive   bool
+	}{
+		{
+			name:             "No change results in cancellation",
+			previousLocation: Loc{X: 30, Y: 0},
+			currentLocation:  Loc{X: 30, Y: 0},
+			currentlyActive:  true,
+			expectedActive:   false,
+		},
+		{
+			name:             "Moving forward retains active",
+			previousLocation: Loc{X: 30, Y: 0},
+			currentLocation:  Loc{X: 31, Y: 0},
+			currentlyActive:  true,
+			expectedActive:   true,
+		},
+		{
+			name:             "Moving back to the start cancels",
+			previousLocation: Loc{X: 31, Y: 0},
+			currentLocation:  Loc{X: 30, Y: 0},
+			currentlyActive:  true,
+			expectedActive:   false,
+		},
+		{
+			name:             "Moving before the start cancels",
+			previousLocation: Loc{X: 31, Y: 0},
+			currentLocation:  Loc{X: 25, Y: 0},
+			currentlyActive:  true,
+			expectedActive:   false,
+		},
+		{
+			name:             "Moving to the line start cancels",
+			previousLocation: Loc{X: 31, Y: 0},
+			currentLocation:  Loc{X: 0, Y: 0},
+			currentlyActive:  true,
+			expectedActive:   false,
+		},
+		{
+			name:             "Moving more than one character to the right cancels (could be a paste, or mouse click)",
+			previousLocation: Loc{X: 31, Y: 0},
+			currentLocation:  Loc{X: 35, Y: 0},
+			currentlyActive:  true,
+			expectedActive:   false,
+		},
+		{
+			name:             "Switching lines cancels",
+			previousLocation: Loc{X: 30, Y: 0},
+			currentLocation:  Loc{X: 31, Y: 1},
+			currentlyActive:  true,
+			expectedActive:   false,
+		},
+	}
+
+	for _, test := range tests {
+		currentLocation := func() Loc {
+			return test.currentLocation
+		}
+		c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+		c.X = test.previousLocation.X
+		c.Y = test.previousLocation.Y
+		c.Active = test.currentlyActive
+
+		c.DeactivateIfOutOfBounds()
+
+		if c.Active != test.expectedActive {
+			t.Errorf("%s: expected active to now be %v, but was %v", test.name, test.expectedActive, c.Active)
+		}
+	}
+}

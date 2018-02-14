@@ -747,6 +747,10 @@ func (v *View) HandleEvent(event tcell.Event) {
 		// of the terminal and it runs into problems with visual lines vs real lines.
 		// This is (hopefully) a temporary solution
 		v.Relocate()
+
+		// Check to see whether the cursor has moved out of the autocomplete range,
+		// and the completer should exit.
+		v.Completer.DeactivateIfOutOfBounds()
 	}
 }
 

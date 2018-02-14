@@ -191,10 +191,8 @@ func (c *Completer) Process(r rune) error {
 		c.Active = false
 	}
 
-	// Disable autocomplete if we've switched lines (e.g. by duplicating a line, or moving the cursor away).
-	if c.Active && c.CurrentLocation().Y != c.Y {
-		c.Active = false
-	}
+	// Disable autocomplete if we've switched lines (e.g. by duplicating a line, or moved the cursor away).
+	c.DeactivateIfOutOfBounds()
 
 	if !c.Active {
 		// Check to work out whether we should activate the autocomplete.
@@ -283,6 +281,19 @@ func getOption(i int, options []optionprovider.Option) (toUse string, ok bool) {
 		i = 0
 	}
 	return options[i].Text(), true
+}
+
+// DeactivateIfOutOfBounds for example, if duplicating lines or backspacing past the start of the completion.
+func (c *Completer) DeactivateIfOutOfBounds() {
+	// Disable autocomplete if we've switched lines (e.g. by duplicating a line, or moving the cursor away)
+	// of if the X position is equal to or less than current.
+	if !c.Active {
+		return
+	}
+	cur := c.CurrentLocation()
+	if cur.X <= c.X || cur.X > c.X+1 || cur.Y != c.Y {
+		c.Active = false
+	}
 }
 
 // Display the suggestion box.
