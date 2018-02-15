@@ -58,7 +58,7 @@ func ReplaceFromBuffer(buf *Buffer) func(from, to Loc, with string) {
 func ContentSetterForView(v *View) ContentSetter {
 	return func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		targetY := y - v.Topline
-		targetX := x + v.leftCol
+		targetX := x + v.leftCol + v.lineNumOffset
 		screen.SetContent(targetX, targetY, mainc, combc, style)
 	}
 }
@@ -326,7 +326,7 @@ func (c *Completer) Display() {
 	width := getWidth(c.Options)
 	start := c.CurrentLocation()
 	for iy, o := range c.Options {
-		y := start.Y + iy + 1 // +1 to draw underneath the start position.
+		y := start.Y + iy + 1 // +1 to draw a line below the cursor.
 
 		// If it's active, show it differently.
 		style := c.OptionStyleInactive
