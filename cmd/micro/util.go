@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/user"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -9,9 +10,8 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-
+	
 	"github.com/mattn/go-runewidth"
-	homedir "github.com/mitchellh/go-homedir"
 )
 
 // Util.go is a collection of utility functions that are used throughout
@@ -330,11 +330,26 @@ func ReplaceHome(path string) string {
 		return path
 	}
 
-	home, err := homedir.Dir()
-	if err != nil {
-		messenger.Error("Could not find home directory: ", err)
-		return path
+	var foo *user.User
+
+	homeString := strings.Split(path, "/")[0]
+	if homeString == "~" {
+		var err error
+		foo, err = user.Current()
+		if err != nil {
+			messenger.Error("Could not find user: ", err)
+		}
+	} else {
+		userString := homeString[1:]
+		var err error
+		foo, err = user.Lookup(userString)
+		if err != nil {
+			messenger.Error("Could not find user: ", err)
+		}
 	}
+
+	home := foo.HomeDir
+
 	return strings.Replace(path, "~", home, 1)
 }
 
