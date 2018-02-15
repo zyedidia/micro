@@ -59,7 +59,6 @@ func ContentSetterForView(v *View) ContentSetter {
 	return func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		targetY := y - v.Topline
 		targetX := x + v.leftCol
-		LogToMessenger()("completer.ContentSetterForView: doc pos %v:%v drawing '%v' at %v:%v", y, x, string(mainc), targetY, targetX)
 		screen.SetContent(targetX, targetY, mainc, combc, style)
 	}
 }
@@ -222,6 +221,7 @@ func (c *Completer) Process(r rune) error {
 	c.ActiveIndex = -1
 	// If there are no options, just deactivate.
 	if len(options) == 0 {
+		c.Logger("completer.Process: Deactivating because there are no options")
 		c.Active = false
 	}
 	return err
@@ -293,8 +293,10 @@ func (c *Completer) DeactivateIfOutOfBounds() {
 	cur := c.CurrentLocation()
 	beforeStart := cur.X <= c.X
 	movedMoreThanOneXSinceLastCheck := distance(c.PreviousLocation.X, cur.X) > 1
+	c.Logger("completed.DeactivateIfOutOfBounds: Previous loc %v, current loc %v, distance: %v", cur, c.PreviousLocation, distance(c.PreviousLocation.X, cur.X))
 	movedLine := cur.Y != c.Y
 	if beforeStart || movedMoreThanOneXSinceLastCheck || movedLine {
+		c.Logger("completer.DeactivateIfOutOfBounds: deactivating")
 		c.Active = false
 	}
 	c.PreviousLocation = cur

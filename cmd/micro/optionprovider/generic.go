@@ -7,7 +7,7 @@ import (
 	"unicode"
 )
 
-var word = regexp.MustCompile(`[a-zA-Z]+\d?`)
+var word = regexp.MustCompile(`[a-zA-Z]+\d*`)
 var stopList = map[string]interface{}{
 	"for":   false,
 	"if":    false,
@@ -16,6 +16,9 @@ var stopList = map[string]interface{}{
 	"const": false,
 	"when":  false,
 	"while": false,
+	"the":   false,
+	"to":    false,
+	"and":   false,
 }
 var maxSuggestions = 10
 
@@ -28,13 +31,14 @@ func Generic(buffer []byte, offset int) (options []Option, err error) {
 	prefix := prefix(lastCharacters(s, offset, 10))
 	// Calculate common words.
 	words := word.FindAllString(s, -1)
+
 	// Count words, but remove common syntax and the prefix from the autocomplete list.
 	counts := wordCounts(words, map[string]interface{}{prefix: false})
 	orderedWords := orderByFrequencyDesc(counts)
 
 	if len(prefix) > 0 {
 		// We have a prefix, so write out prefix matches.
-		for i := 0; i < len(orderedWords) && i < maxSuggestions; i++ {
+		for i := 0; i < len(orderedWords) && len(options) < maxSuggestions; i++ {
 			if strings.HasPrefix(orderedWords[i], prefix) {
 				options = append(options, New(orderedWords[i], ""))
 			}
@@ -43,7 +47,7 @@ func Generic(buffer []byte, offset int) (options []Option, err error) {
 	}
 
 	// Write out all matches.
-	for i := 0; i < len(orderedWords) && i < maxSuggestions; i++ {
+	for i := 0; i < len(orderedWords) && len(options) < maxSuggestions; i++ {
 		options = append(options, New(orderedWords[i], ""))
 	}
 
