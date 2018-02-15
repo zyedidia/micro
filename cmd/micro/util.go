@@ -331,18 +331,16 @@ func ReplaceHome(path string) string {
 	}
 
 	var userData *user.User
+	var err error
 
 	homeString := strings.Split(path, "/")[0]
 	if homeString == "~" {
-		var err error
 		userData, err = user.Current()
 		if err != nil {
 			messenger.Error("Could not find user: ", err)
 		}
 	} else {
-		userString := homeString[1:]
-		var err error
-		userData, err = user.Lookup(userString)
+		userData, err = user.Lookup(homeString[1:])
 		if err != nil {
 			messenger.Error("Could not find user: ", err)
 		}
