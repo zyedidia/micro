@@ -330,27 +330,27 @@ func ReplaceHome(path string) string {
 		return path
 	}
 
-	var foo *user.User
+	var userData *user.User
 
 	homeString := strings.Split(path, "/")[0]
 	if homeString == "~" {
 		var err error
-		foo, err = user.Current()
+		userData, err = user.Current()
 		if err != nil {
 			messenger.Error("Could not find user: ", err)
 		}
 	} else {
 		userString := homeString[1:]
 		var err error
-		foo, err = user.Lookup(userString)
+		userData, err = user.Lookup(userString)
 		if err != nil {
 			messenger.Error("Could not find user: ", err)
 		}
 	}
 
-	home := foo.HomeDir
+	home := userData.HomeDir
 
-	return strings.Replace(path, "~", home, 1)
+	return strings.Replace(path, homeString, home, 1)
 }
 
 // GetPath returns a filename without everything following a `:`
