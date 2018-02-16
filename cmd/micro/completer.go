@@ -8,8 +8,10 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-// OptionProvider is the signature of a function which returns all of the available options at the given offset.
-type OptionProvider func(buffer []byte, offset int) (options []optionprovider.Option, err error)
+// OptionProvider is the signature of a function which returns all of the available options, potentially using the prefix
+// data. For example, given input "abc\nab", start offset 4 and end offset 5, then the prefix is "ab", and the result
+// should be the option "abc".
+type OptionProvider func(buffer []byte, startOffset, endOffset int) (options []optionprovider.Option, err error)
 
 // ContentSetter is the signature of a function which allows the content of a cell to be set.
 type ContentSetter func(x int, y int, mainc rune, combc []rune, style tcell.Style)
@@ -35,6 +37,13 @@ func CurrentBytesAndOffsetFromView(v *View) func() (bytes []byte, offset int) {
 		bytes = v.Buf.Buffer(false).Bytes()
 		offset = ByteOffset(v.Cursor.Loc, v.Buf)
 		return
+	}
+}
+
+// LocationOffsetFromView provides the offset of a given location.
+func LocationOffsetFromView(v *View) func(Loc) (offset int) {
+	return func(l Loc) (offset int) {
+		return ByteOffset(l, v.Buf)
 	}
 }
 
@@ -94,6 +103,8 @@ type Completer struct {
 	CurrentBytesAndOffset func() (bytes []byte, offset int)
 	// CurrentLocation is a function which returns the current location of the cursor.
 	CurrentLocation func() Loc
+	// LocationOffset is a function which returns the offset of a given location.
+	LocationOffset func(Loc) int
 	// Replacer is a function which replaces text.
 	Replacer func(from, to Loc, with string)
 	// Setter is a function which draws to the console at a given location.
@@ -141,6 +152,7 @@ func NewCompleterForView(v *View) *Completer {
 		LogToMessenger(),
 		CurrentBytesAndOffsetFromView(v),
 		CurrentLocationFromView(v),
+		LocationOffsetFromView(v),
 		ReplaceFromBuffer(v.Buf),
 		ContentSetterForView(v),
 		colorscheme["default"].Reverse(true),
@@ -156,6 +168,7 @@ func NewCompleter(activators map[rune]int,
 	logger func(s string, values ...interface{}),
 	currentBytesAndOffset func() (bytes []byte, offset int),
 	currentLocation func() Loc,
+	locationOffset func(Loc) int,
 	replacer func(from, to Loc, with string),
 	setter ContentSetter,
 	optionStyleInactive tcell.Style,
@@ -168,6 +181,7 @@ func NewCompleter(activators map[rune]int,
 		Logger:                logger,
 		CurrentBytesAndOffset: currentBytesAndOffset,
 		CurrentLocation:       currentLocation,
+		LocationOffset:        locationOffset,
 		Replacer:              replacer,
 		Setter:                setter,
 		OptionStyleInactive:   optionStyleInactive,
@@ -212,8 +226,9 @@ func (c *Completer) Process(r rune) error {
 	// Get options.
 	//TODO: We only need the answer by the time Display is called, so we could let the rest of the
 	// program continue until we're ready to receive the value by using a go routine or channel.
-	bytes, offset := c.CurrentBytesAndOffset()
-	options, err := c.Provider(bytes, offset)
+	bytes, currentOffset := c.CurrentBytesAndOffset()
+	startOffset := c.LocationOffset(Loc{X: c.X, Y: c.Y})
+	options, err := c.Provider(bytes, startOffset, currentOffset)
 	if err != nil {
 		return err
 	}

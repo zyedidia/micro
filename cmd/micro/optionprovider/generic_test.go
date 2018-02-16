@@ -9,19 +9,18 @@ func TestGeneric(t *testing.T) {
 	tests := []struct {
 		name     string
 		text     string
-		leading  string
+		from     string
+		to       string
 		expected []Option
 	}{
 		{
 			name:     "words are sorted alphabetically if they appear the same number of times",
 			text:     "fish dog cat ",
-			leading:  "fish dog cat ",
 			expected: []Option{New("cat", ""), New("dog", ""), New("fish", "")},
 		},
 		{
-			name:    "capitals preceed lowercase",
-			text:    "A a B b C c",
-			leading: "",
+			name: "capitals preceed lowercase",
+			text: "A a B b C c",
 			expected: []Option{
 				New("A", ""), New("B", ""), New("C", ""),
 				New("a", ""), New("b", ""), New("c", ""),
@@ -30,43 +29,43 @@ func TestGeneric(t *testing.T) {
 		{
 			name:     "bare numbers are not included",
 			text:     "1 2 3 1.23 a",
-			leading:  "",
 			expected: []Option{New("a", "")},
 		},
 		{
 			name:     "words that include a number are included",
 			text:     "a1",
-			leading:  "",
 			expected: []Option{New("a1", "")},
 		},
 		{
 			name:     "words are ordered by their frequency descending (most common words are first in the list)",
 			text:     "ccc ccc ccc bb bb a",
-			leading:  "",
 			expected: []Option{New("ccc", ""), New("bb", ""), New("a", "")},
 		},
 		{
 			name:     "prefix matches preceed other matches",
 			text:     "common common common something",
-			leading:  "common common common some",
+			from:     "common common common ",
+			to:       "common common common s",
 			expected: []Option{New("something", "")},
 		},
 		{
 			name:     "the autocomplete looks for the previous word boundary to see if you're partway through a word to limit results",
-			text:     `A AB ABC ABCD`,
-			leading:  `A AB AB`,
+			text:     "A AB ABC ABCD",
+			from:     "A AB ",
+			to:       "A AB AB",
 			expected: []Option{New("ABC", ""), New("ABCD", "")},
 		},
 		{
 			name:     "realistic example",
 			text:     `fmt.Println("hello") fmt.P`,
-			leading:  `fmt.Println("hello") fmt.P`,
+			from:     `fmt.Println("hello") fmt.`,
+			to:       `fmt.Println("hello") fmt.P`,
 			expected: []Option{New("Println", "")},
 		},
 	}
 
 	for _, test := range tests {
-		options, err := Generic([]byte(test.text), len(test.leading))
+		options, err := Generic([]byte(test.text), len(test.from), len(test.to))
 		if err != nil {
 			t.Fatalf("%s: generic complete failed with error %v", test.name, err)
 			continue

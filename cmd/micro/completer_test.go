@@ -19,7 +19,7 @@ var optionStyleInactive = tcell.StyleDefault.Reverse(true)
 const optionStyleActive = tcell.StyleDefault
 
 func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
-	var currentBytesAndOffsetCalled, currentLocationCalled, providerCalled bool
+	var currentBytesAndOffsetCalled, currentLocationCalled, locationOffsetCalled, providerCalled bool
 
 	currentBytesAndOffset := func() (bytes []byte, offset int) {
 		currentBytesAndOffsetCalled = true
@@ -29,7 +29,11 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 		currentLocationCalled = true
 		return Loc{X: 1, Y: 2}
 	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+	locationOffset := func(Loc) int {
+		locationOffsetCalled = true
+		return 0
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
 		providerCalled = true
 		return
 	}
@@ -45,6 +49,7 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
+		locationOffset,
 		noopReplacer,
 		noopContentSetter,
 		optionStyleInactive,
@@ -56,7 +61,7 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("not enabled: failed to process with error: %v", err)
 	}
-	if currentBytesAndOffsetCalled || currentLocationCalled {
+	if currentBytesAndOffsetCalled || currentLocationCalled || locationOffsetCalled {
 		t.Errorf("not enabled: when disabled, no functions should be called")
 	}
 
@@ -68,7 +73,7 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 	if err != nil {
 		t.Fatalf("enabled: failed to process with error: %v", err)
 	}
-	if currentBytesAndOffsetCalled || currentLocationCalled || providerCalled {
+	if currentBytesAndOffsetCalled || currentLocationCalled || locationOffsetCalled || providerCalled {
 		t.Errorf("enabled: when disabled, no functions should be called")
 	}
 }
@@ -84,7 +89,10 @@ func TestCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 	currentLocation := func() Loc {
 		return Loc{X: 1, Y: 2}
 	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+	locationOffset := func(Loc) int {
+		return 3
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("text", "hint"),
 		}
@@ -97,6 +105,7 @@ func TestCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
+		locationOffset,
 		noopReplacer,
 		noopContentSetter,
 		optionStyleInactive,
@@ -133,9 +142,12 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	currentLocation := func() Loc {
 		return Loc{X: 1, Y: 2}
 	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+	locationOffset := func(Loc) int {
+		return 3
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
 		providerReceivedBytes = buffer
-		providerReceivedOffset = offset
+		providerReceivedOffset = currentOffset
 		options = expectedOptions
 		return
 	}
@@ -145,6 +157,7 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
+		locationOffset,
 		noopReplacer,
 		noopContentSetter,
 		optionStyleInactive,
@@ -186,7 +199,10 @@ func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
 	currentLocation := func() Loc {
 		return Loc{X: len("fmt.Print"), Y: 0}
 	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+	locationOffset := func(Loc) int {
+		return 0
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
 		options = []optionprovider.Option{} // No options.
 		return
 	}
@@ -197,6 +213,7 @@ func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
+		locationOffset,
 		noopReplacer,
 		noopContentSetter,
 		optionStyleInactive,
@@ -225,7 +242,10 @@ func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 	currentLocation := func() Loc {
 		return Loc{X: 9, Y: 0}
 	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+	locationOffset := func(Loc) int {
+		return 9
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("test", "test"),
 		}
@@ -238,6 +258,7 @@ func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
+		locationOffset,
 		noopReplacer,
 		noopContentSetter,
 		optionStyleInactive,
@@ -269,7 +290,10 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 	currentLocation := func() Loc {
 		return Loc{X: 1, Y: 2}
 	}
-	provider := func(buffer []byte, offset int) (options []optionprovider.Option, err error) {
+	locationOffset := func(Loc) int {
+		return 0
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("text", "hint"),
 		}
@@ -281,6 +305,7 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 		t.Logf,
 		currentBytesAndOffset,
 		currentLocation,
+		locationOffset,
 		noopReplacer,
 		noopContentSetter,
 		optionStyleInactive,
@@ -297,7 +322,7 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 }
 
 func TestCompleterHandleEventNotEnabled(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToFalse)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToFalse)
 
 	handled := c.HandleEvent(tcell.KeyRune)
 	if handled {
@@ -306,7 +331,7 @@ func TestCompleterHandleEventNotEnabled(t *testing.T) {
 }
 
 func TestCompleterHandleEventInactive(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	handled := c.HandleEvent(tcell.KeyRune)
 	if handled {
@@ -315,7 +340,7 @@ func TestCompleterHandleEventInactive(t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyUp(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 	c.ActiveIndex = 10
@@ -337,7 +362,7 @@ func TestCompleterHandleEventKeyUp(t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyDown(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 	c.Options = []optionprovider.Option{
@@ -362,7 +387,7 @@ func TestCompleterHandleEventKeyDown(t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyEscape(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 
@@ -388,6 +413,9 @@ func testCompleterHandleEventCompletion(key tcell.Key, t *testing.T) {
 	expectedTo := Loc{X: 1, Y: 2}
 
 	currentLocation := func() Loc { return expectedTo }
+	locationOffset := func(Loc) int {
+		return 0
+	}
 
 	var receivedFrom, receivedTo Loc
 	var receivedWith string
@@ -397,7 +425,7 @@ func testCompleterHandleEventCompletion(key tcell.Key, t *testing.T) {
 		receivedTo = to
 		receivedWith = with
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, replacer, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, locationOffset, replacer, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.X = expectedFrom.X
 	c.Y = expectedFrom.Y
@@ -424,7 +452,7 @@ func testCompleterHandleEventCompletion(key tcell.Key, t *testing.T) {
 }
 
 func TestCompleterHandleEventKeyWhenActive(t *testing.T) {
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Active = true
 
@@ -494,7 +522,7 @@ func TestCompleterDisplayDoesNotWriteToConsoleWhenNotEnabled(t *testing.T) {
 	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		setterCalled = true
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToFalse)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToFalse)
 
 	c.Display()
 	if setterCalled {
@@ -507,7 +535,7 @@ func TestCompleterDisplayDoesNotWriteToConsoleWhenInactive(t *testing.T) {
 	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		setterCalled = true
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, nil, nil, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 
 	c.Display()
 	if setterCalled {
@@ -689,13 +717,16 @@ func testCompleterDisplayRendersOptionsWhenActive(name string,
 	currentLocation := func() Loc {
 		return Loc{X: 0, Y: 0}
 	}
+	locationOffset := func(Loc) int {
+		return 0
+	}
 
 	var setterCalled bool
 	setter := func(x int, y int, mainc rune, combc []rune, style tcell.Style) {
 		setterCalled = true
 		actual[Loc{X: x, Y: y}] = rs{Rune: mainc, Style: style}
 	}
-	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+	c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, locationOffset, nil, setter, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 	c.Active = true
 	c.ActiveIndex = activeIndex
 	c.Options = options
@@ -770,7 +801,7 @@ func TestDeactivateIfOutOfBounds(t *testing.T) {
 		currentLocation := func() Loc {
 			return test.currentLocation
 		}
-		c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
+		c := NewCompleter(nil, nil, nil, t.Logf, nil, currentLocation, nil, nil, nil, optionStyleInactive, optionStyleActive, enabledFlagSetToTrue)
 		c.X = test.previousLocation.X
 		c.Y = test.previousLocation.Y
 		c.PreviousLocation = test.previousLocation

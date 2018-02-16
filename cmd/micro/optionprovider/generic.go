@@ -24,11 +24,11 @@ var maxSuggestions = 10
 
 // Generic is an OptionProvider which provides options to the autocompletion system based on the
 // words in the current buffer.
-func Generic(buffer []byte, offset int) (options []Option, err error) {
+func Generic(buffer []byte, startOffset, currentOffset int) (options []Option, err error) {
 	s := string(buffer)
 
 	// Find the best matches.
-	prefix := prefix(lastCharacters(s, offset, 10))
+	prefix := prefix(lastCharacters(s, currentOffset, currentOffset-startOffset))
 	// Calculate common words.
 	words := word.FindAllString(s, -1)
 

@@ -8,8 +8,8 @@ import (
 )
 
 // GoCode is an OptionProvider which provides options to the autocompletion system.
-func GoCode(buffer []byte, offset int) (options []Option, err error) {
-	cmd := exec.Command("gocode", "-f=json", "autocomplete", strconv.Itoa(offset))
+func GoCode(buffer []byte, startOffset, currentOffset int) (options []Option, err error) {
+	cmd := exec.Command("gocode", "-f=json", "autocomplete", strconv.Itoa(currentOffset))
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
 		return
