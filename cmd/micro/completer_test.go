@@ -33,7 +33,7 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 		locationOffsetCalled = true
 		return 0
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		providerCalled = true
 		return
 	}
@@ -92,7 +92,7 @@ func TestCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 3
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("text", "hint"),
 		}
@@ -145,7 +145,7 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 3
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		providerReceivedBytes = buffer
 		providerReceivedOffset = currentOffset
 		options = expectedOptions
@@ -202,7 +202,7 @@ func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 0
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{} // No options.
 		return
 	}
@@ -245,7 +245,7 @@ func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 9
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("test", "test"),
 		}
@@ -293,7 +293,7 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 0
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, err error) {
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("text", "hint"),
 		}
@@ -318,6 +318,52 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 	}
 	if c.Active {
 		t.Errorf("expected 'a' to do nothing to activate the completer, but the completer was activated")
+	}
+}
+
+func TestCompleterAdjustsStartPositionIfOptionProviderMovesIt(t *testing.T) {
+	activators := map[rune]int{
+		'.': 0,
+	}
+	deactivators := []rune{'.'}
+	currentBytesAndOffset := func() (bytes []byte, offset int) {
+		return []byte("test test"), 9
+	}
+	currentLocation := func() Loc {
+		return Loc{X: 9, Y: 0}
+	}
+	locationOffset := func(Loc) int {
+		return 9
+	}
+	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, startPositionDelta int, err error) {
+		options = []optionprovider.Option{
+			optionprovider.New("test", "test"),
+		}
+		startPositionDelta = -1
+		return
+	}
+
+	c := NewCompleter(activators,
+		deactivators,
+		provider,
+		t.Logf,
+		currentBytesAndOffset,
+		currentLocation,
+		locationOffset,
+		noopReplacer,
+		noopContentSetter,
+		optionStyleInactive,
+		optionStyleActive,
+		enabledFlagSetToTrue)
+
+	c.Active = true
+	c.X = 7
+	err := c.Process('e')
+	if err != nil {
+		t.Fatalf("failed to process with error: %v", err)
+	}
+	if c.X != 6 {
+		t.Errorf("expected the start position to shift by the -1 delta returned by the options, but was %v", c.X)
 	}
 }
 

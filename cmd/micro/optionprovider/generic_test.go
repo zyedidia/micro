@@ -7,11 +7,12 @@ import (
 
 func TestGeneric(t *testing.T) {
 	tests := []struct {
-		name     string
-		text     string
-		from     string
-		to       string
-		expected []Option
+		name          string
+		text          string
+		from          string
+		to            string
+		expected      []Option
+		expectedDelta int
 	}{
 		{
 			name:     "words are sorted alphabetically if they appear the same number of times",
@@ -62,16 +63,27 @@ func TestGeneric(t *testing.T) {
 			to:       `fmt.Println("hello") fmt.P`,
 			expected: []Option{New("Println", "")},
 		},
+		{
+			name:          "go back further than the start position",
+			text:          `testing`,
+			from:          `test`,
+			to:            `testi`,
+			expected:      []Option{New("testing", "")},
+			expectedDelta: -4,
+		},
 	}
 
 	for _, test := range tests {
-		options, err := Generic([]byte(test.text), len(test.from), len(test.to))
+		options, delta, err := Generic([]byte(test.text), len(test.from), len(test.to))
 		if err != nil {
 			t.Fatalf("%s: generic complete failed with error %v", test.name, err)
 			continue
 		}
 		if !reflect.DeepEqual(options, test.expected) {
 			t.Errorf("%s: expected '%v', got '%v'", test.name, test.expected, options)
+		}
+		if delta != test.expectedDelta {
+			t.Errorf("%s: expected delta %v, got %v", test.name, test.expectedDelta, delta)
 		}
 	}
 }

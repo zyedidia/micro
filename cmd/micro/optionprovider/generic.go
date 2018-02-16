@@ -23,12 +23,15 @@ var stopList = map[string]interface{}{
 var maxSuggestions = 10
 
 // Generic is an OptionProvider which provides options to the autocompletion system based on the
-// words in the current buffer.
-func Generic(buffer []byte, startOffset, currentOffset int) (options []Option, err error) {
+// words in the current buffer. It returns a delta of the start index if the start position needs
+// to change.
+func Generic(buffer []byte, startOffset, currentOffset int) (options []Option, startDelta int, err error) {
 	s := string(buffer)
 
 	// Find the best matches.
-	prefix := prefix(lastCharacters(s, currentOffset, currentOffset-startOffset))
+	prefix := prefix(lastCharacters(s, currentOffset, 10))
+	startDelta = currentOffset - startOffset - len(prefix)
+
 	// Calculate common words.
 	words := word.FindAllString(s, -1)
 
@@ -43,7 +46,7 @@ func Generic(buffer []byte, startOffset, currentOffset int) (options []Option, e
 				options = append(options, New(orderedWords[i], ""))
 			}
 		}
-		return options, nil
+		return
 	}
 
 	// Write out all matches.
@@ -51,7 +54,7 @@ func Generic(buffer []byte, startOffset, currentOffset int) (options []Option, e
 		options = append(options, New(orderedWords[i], ""))
 	}
 
-	return options, nil
+	return
 }
 
 func lastCharacters(s string, end, charactersBefore int) string {

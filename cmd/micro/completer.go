@@ -11,7 +11,7 @@ import (
 // OptionProvider is the signature of a function which returns all of the available options, potentially using the prefix
 // data. For example, given input "abc\nab", start offset 4 and end offset 5, then the prefix is "ab", and the result
 // should be the option "abc".
-type OptionProvider func(buffer []byte, startOffset, endOffset int) (options []optionprovider.Option, err error)
+type OptionProvider func(buffer []byte, startOffset, endOffset int) (options []optionprovider.Option, startOffsetDelta int, err error)
 
 // ContentSetter is the signature of a function which allows the content of a cell to be set.
 type ContentSetter func(x int, y int, mainc rune, combc []rune, style tcell.Style)
@@ -228,10 +228,11 @@ func (c *Completer) Process(r rune) error {
 	// program continue until we're ready to receive the value by using a go routine or channel.
 	bytes, currentOffset := c.CurrentBytesAndOffset()
 	startOffset := c.LocationOffset(Loc{X: c.X, Y: c.Y})
-	options, err := c.Provider(bytes, startOffset, currentOffset)
+	options, delta, err := c.Provider(bytes, startOffset, currentOffset)
 	if err != nil {
 		return err
 	}
+	c.X += delta
 	c.Options = options
 	c.ActiveIndex = -1
 	// If there are no options, just deactivate.
