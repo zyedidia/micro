@@ -235,7 +235,7 @@ func (c *Completer) Process(r rune) error {
 	}
 	c.X += delta
 	c.Options = options
-	c.ActiveIndex = -1
+	c.ActiveIndex = 0
 	// If there are no options, just deactivate.
 	if len(options) == 0 {
 		c.Logger("completer.Process: Deactivating because there are no options")

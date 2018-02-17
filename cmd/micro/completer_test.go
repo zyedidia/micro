@@ -183,8 +183,8 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	if !reflect.DeepEqual(expectedOptions, c.Options) {
 		t.Errorf("expected options %v, but got %v", expectedOptions, c.Options)
 	}
-	if c.ActiveIndex != -1 {
-		t.Errorf("expected the active index to be reset to -1 after a refresh, but it was set to %v", c.ActiveIndex)
+	if c.ActiveIndex != 0 {
+		t.Errorf("expected the active index to be reset to 0 after a refresh, but it was set to %v", c.ActiveIndex)
 	}
 }
 
