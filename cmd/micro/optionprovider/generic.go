@@ -25,7 +25,7 @@ var maxSuggestions = 10
 // Generic is an OptionProvider which provides options to the autocompletion system based on the
 // words in the current buffer. It returns a delta of the start index if the start position needs
 // to change.
-func Generic(buffer []byte, startOffset, currentOffset int) (options []Option, startDelta int, err error) {
+func Generic(logger func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []Option, startDelta int, err error) {
 	s := string(buffer)
 
 	// Find the best matches.

@@ -74,7 +74,7 @@ func TestGeneric(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		options, delta, err := Generic([]byte(test.text), len(test.from), len(test.to))
+		options, delta, err := Generic(t.Logf, []byte(test.text), len(test.from), len(test.to))
 		if err != nil {
 			t.Fatalf("%s: generic complete failed with error %v", test.name, err)
 			continue

@@ -8,7 +8,7 @@ import (
 )
 
 // GoCode is an OptionProvider which provides options to the autocompletion system.
-func GoCode(buffer []byte, startOffset, currentOffset int) (options []Option, startOffsetDelta int, err error) {
+func GoCode(logger func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []Option, startOffsetDelta int, err error) {
 	cmd := exec.Command("gocode", "-f=json", "autocomplete", strconv.Itoa(currentOffset))
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -24,6 +24,12 @@ func GoCode(buffer []byte, startOffset, currentOffset int) (options []Option, st
 	}
 	stdoutStderr, err := cmd.CombinedOutput()
 	if err != nil {
+		if execErr, isExecError := err.(*exec.Error); isExecError {
+			if execErr.Err.Error() == exec.ErrNotFound.Error() {
+				logger("autocompleter.GoCode: failed to run because GoCode is not on the path, defaulting to Generic")
+				return Generic(logger, buffer, startOffset, currentOffset)
+			}
+		}
 		return
 	}
 
@@ -35,8 +41,12 @@ func GoCode(buffer []byte, startOffset, currentOffset int) (options []Option, st
 		err = fmt.Errorf("gocode: failed to unmarshal output '%v': %v", string(stdoutStderr), err)
 	}
 
-	// Skip the number.
 	if len(results) > 0 {
+		// The number represents how far back the text should go.
+		if startOffsetDeltaFloat, isFloat := results[0].(float64); isFloat {
+			startOffsetDelta = currentOffset - startOffset - int(startOffsetDeltaFloat)
+		}
+
 		if firstElement, isArray := results[1].([]interface{}); isArray {
 			results = firstElement
 		}

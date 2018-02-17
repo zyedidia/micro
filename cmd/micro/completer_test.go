@@ -33,7 +33,7 @@ func TestCompleterDoesNothingWhenNotEnabledOrProviderNotSet(t *testing.T) {
 		locationOffsetCalled = true
 		return 0
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		providerCalled = true
 		return
 	}
@@ -92,7 +92,7 @@ func TestCompleterIsDeactivatedByDeactivatorRunes(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 3
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("text", "hint"),
 		}
@@ -145,7 +145,7 @@ func TestCompleterIsActivatedByActivatorRunes(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 3
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		providerReceivedBytes = buffer
 		providerReceivedOffset = currentOffset
 		options = expectedOptions
@@ -202,7 +202,7 @@ func TestCompleterIsDeactivatedByNotReceivingAnyOptions(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 0
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{} // No options.
 		return
 	}
@@ -245,7 +245,7 @@ func TestCompleterIsRestartedIfARuneIsAnActivatorAndDeactivator(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 9
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("test", "test"),
 		}
@@ -293,7 +293,7 @@ func TestCompleterIsNotTriggeredByOtherRunesWhenInactive(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 0
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, delta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("text", "hint"),
 		}
@@ -335,7 +335,7 @@ func TestCompleterAdjustsStartPositionIfOptionProviderMovesIt(t *testing.T) {
 	locationOffset := func(Loc) int {
 		return 9
 	}
-	provider := func(buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, startPositionDelta int, err error) {
+	provider := func(l func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []optionprovider.Option, startPositionDelta int, err error) {
 		options = []optionprovider.Option{
 			optionprovider.New("test", "test"),
 		}
@@ -793,11 +793,11 @@ func TestDeactivateIfOutOfBounds(t *testing.T) {
 		expectedActive   bool
 	}{
 		{
-			name:             "No change results in cancellation",
+			name:             "No change keeps active",
 			previousLocation: Loc{X: 30, Y: 0},
 			currentLocation:  Loc{X: 30, Y: 0},
 			currentlyActive:  true,
-			expectedActive:   false,
+			expectedActive:   true,
 		},
 		{
 			name:             "Moving forward retains active",

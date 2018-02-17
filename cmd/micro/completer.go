@@ -11,7 +11,8 @@ import (
 // OptionProvider is the signature of a function which returns all of the available options, potentially using the prefix
 // data. For example, given input "abc\nab", start offset 4 and end offset 5, then the prefix is "ab", and the result
 // should be the option "abc".
-type OptionProvider func(buffer []byte, startOffset, endOffset int) (options []optionprovider.Option, startOffsetDelta int, err error)
+// Logger provides logging. Can be satisfied with t.Logf for tests, or LogToMessenger.
+type OptionProvider func(logger func(s string, values ...interface{}), buffer []byte, startOffset, endOffset int) (options []optionprovider.Option, startOffsetDelta int, err error)
 
 // ContentSetter is the signature of a function which allows the content of a cell to be set.
 type ContentSetter func(x int, y int, mainc rune, combc []rune, style tcell.Style)
@@ -228,7 +229,7 @@ func (c *Completer) Process(r rune) error {
 	// program continue until we're ready to receive the value by using a go routine or channel.
 	bytes, currentOffset := c.CurrentBytesAndOffset()
 	startOffset := c.LocationOffset(Loc{X: c.X, Y: c.Y})
-	options, delta, err := c.Provider(bytes, startOffset, currentOffset)
+	options, delta, err := c.Provider(c.Logger, bytes, startOffset, currentOffset)
 	if err != nil {
 		return err
 	}
@@ -307,7 +308,7 @@ func (c *Completer) DeactivateIfOutOfBounds() {
 		return
 	}
 	cur := c.CurrentLocation()
-	beforeStart := cur.X <= c.X
+	beforeStart := cur.X < c.X
 	movedMoreThanOneXSinceLastCheck := distance(c.PreviousLocation.X, cur.X) > 1
 	c.Logger("completed.DeactivateIfOutOfBounds: Previous loc %v, current loc %v, distance: %v", cur, c.PreviousLocation, distance(c.PreviousLocation.X, cur.X))
 	movedLine := cur.Y != c.Y
