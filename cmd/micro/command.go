@@ -38,6 +38,7 @@ func init() {
 		"Run":        Run,
 		"Bind":       Bind,
 		"Quit":       Quit,
+		"QuitAll":    QuitAll,
 		"Save":       Save,
 		"Replace":    Replace,
 		"ReplaceAll": ReplaceAll,
@@ -97,6 +98,7 @@ func DefaultCommands() map[string]StrCommand {
 		"bind":       {"Bind", []Completion{NoCompletion}},
 		"run":        {"Run", []Completion{NoCompletion}},
 		"quit":       {"Quit", []Completion{NoCompletion}},
+		"quitall":    {"QuitAll", []Completion{NoCompletion}},
 		"save":       {"Save", []Completion{NoCompletion}},
 		"replace":    {"Replace", []Completion{NoCompletion}},
 		"replaceall": {"ReplaceAll", []Completion{NoCompletion}},
@@ -528,8 +530,49 @@ func Run(args []string) {
 
 // Quit closes the main view
 func Quit(args []string) {
-	// Close the main view
-	CurView().Quit(true)
+	save := ""
+	if len(args) >= 1 {
+		save = args[0]
+	}
+
+	// Save and quit without prompting if save arg is true
+	if save == "true" {
+		CurView().Save(true)
+		CurView().ForceQuit(true)
+		// Just quit without prompting if save arg is false
+	} else if save == "true" {
+		CurView().ForceQuit(true)
+		// Otherwise prompt user before quitting
+	} else {
+		CurView().Quit(true)
+	}
+}
+
+func QuitAll(args []string) {
+	save := ""
+	if len(args) >= 1 {
+		save = args[0]
+	}
+
+	if save == "true" {
+		// Save and quit without prompting if save arg is true
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				view.Save(true)
+				view.ForceQuit(true)
+			}
+		}
+	} else if save == "false" {
+		// Just quit without prompting if save arg is false
+		for _, tab := range tabs {
+			for _, view := range tab.views {
+				view.ForceQuit(true)
+			}
+		}
+	} else {
+		// Otherwise prompt user before quitting
+		CurView().QuitAll(true)
+	}
 }
 
 // Save saves the buffer in the main view
