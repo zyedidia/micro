@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
@@ -574,6 +575,7 @@ func Replace(args []string) {
 	}
 
 	replace := string(args[1])
+	replaceBytes := []byte(replace)
 
 	regex, err := regexp.Compile("(?m)" + search)
 	if err != nil {
@@ -587,23 +589,14 @@ func Replace(args []string) {
 	found := 0
 	replaceAll := func() {
 		var deltas []Delta
-		deltaXOffset := Count(replace) - Count(search)
 		for i := 0; i < view.Buf.LinesNum(); i++ {
-			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
-			str := string(view.Buf.lines[i].data)
+			newText := regex.ReplaceAll(view.Buf.lines[i].data, replaceBytes)
 
-			if matches != nil {
-				xOffset := 0
-				for _, m := range matches {
-					from := Loc{runePos(m[0], str) + xOffset, i}
-					to := Loc{runePos(m[1], str) + xOffset, i}
+			from := Loc{0, i}
+			to := Loc{utf8.RuneCount(view.Buf.lines[i].data), i}
 
-					xOffset += deltaXOffset
-
-					deltas = append(deltas, Delta{replace, from, to})
-					found++
-				}
-			}
+			deltas = append(deltas, Delta{string(newText), from, to})
+			found++
 		}
 		view.Buf.MultipleReplace(deltas)
 	}
