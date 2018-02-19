@@ -1839,6 +1839,49 @@ func (v *View) Quit(usePlugin bool) bool {
 	return false
 }
 
+// Quit this will close the current tab or view that is open
+func (v *View) ForceQuit(usePlugin bool) bool {
+	if v.mainCursor() {
+		if usePlugin && !PreActionCall("Quit", v) {
+			return false
+		}
+
+		// Close view without prompting
+		v.CloseBuffer()
+		if len(tabs[curTab].views) > 1 {
+			v.splitNode.Delete()
+			tabs[v.TabNum].Cleanup()
+			tabs[v.TabNum].Resize()
+		} else if len(tabs) > 1 {
+			if len(tabs[v.TabNum].views) == 1 {
+				tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
+				for i, t := range tabs {
+					t.SetNum(i)
+				}
+				if curTab >= len(tabs) {
+					curTab--
+				}
+				if curTab == 0 {
+					CurView().ToggleTabbar()
+				}
+			}
+		} else {
+			if usePlugin {
+				PostActionCall("Quit", v)
+			}
+
+			screen.Fini()
+			messenger.SaveHistory()
+			os.Exit(0)
+		}
+
+		if usePlugin {
+			return PostActionCall("Quit", v)
+		}
+	}
+	return false
+}
+
 // QuitAll quits the whole editor; all splits and tabs
 func (v *View) QuitAll(usePlugin bool) bool {
 	if v.mainCursor() {
