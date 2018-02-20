@@ -8,6 +8,13 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 
 ## Colorschemes
 
+To change your colorscheme, press Ctrl-E in micro to bring up the command
+prompt, and type:
+```
+set colorscheme solarized
+```
+(or whichever colorscheme you choose).
+
 Micro comes with a number of colorschemes by default. Here is the list:
 
 ### 256 color
@@ -49,10 +56,12 @@ These require terminals that support true color and require `MICRO_TRUECOLOR=1` 
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
 * `github-tc`: The true color version of the Github colorscheme
 
-To enable one of these colorschemes just press CtrlE in micro and type
-`set colorscheme solarized`. (or whichever one you choose). You can also use
-`set colorscheme monochrome` if you'd prefer to have just the terminal's default
+### Monochrome
+
+You can also use `monochrome` if you'd prefer to have just the terminal's default
 foreground and background colors. Note: This provides no syntax highlighting!
+
+### Other
 
 See `help gimmickcolors` for a list of some true colour themes that are more 
 just for fun than for serious use. (Though feel free if you want!)
@@ -60,7 +69,7 @@ just for fun than for serious use. (Though feel free if you want!)
 
 ## Creating a Colorscheme
 
-Micro's colorschemes are also extremely simple to create. The default ones ca
+Micro's colorschemes are also extremely simple to create. The default ones can
 be found
 [here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
 
