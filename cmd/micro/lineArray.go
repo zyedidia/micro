@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"unicode/utf8"
 
@@ -115,33 +116,31 @@ func NewLineArray(size int64, reader io.Reader) *LineArray {
 	return la
 }
 
-// Returns the String representation of the LineArray
-func (la *LineArray) String() string {
-	str := ""
+// Buffer gets the lineArray as a bytes.Buffer.
+func (la *LineArray) Buffer(useCrlf bool) *bytes.Buffer {
+	buf := bytes.NewBuffer([]byte{})
 	for i, l := range la.lines {
-		str += string(l.data)
+		buf.Write(l.data)
 		if i != len(la.lines)-1 {
-			str += "\n"
+			if useCrlf {
+				buf.WriteRune('\r')
+			}
+			buf.WriteRune('\n')
 		}
 	}
-	return str
+	return buf
 }
 
 // SaveString returns the string that should be written to disk when
 // the line array is saved
 // It is the same as string but uses crlf or lf line endings depending
 func (la *LineArray) SaveString(useCrlf bool) string {
-	str := ""
-	for i, l := range la.lines {
-		str += string(l.data)
-		if i != len(la.lines)-1 {
-			if useCrlf {
-				str += "\r"
-			}
-			str += "\n"
-		}
-	}
-	return str
+	return la.Buffer(useCrlf).String()
+}
+
+// Returns the String representation of the LineArray
+func (la *LineArray) String() string {
+	return la.SaveString(false)
 }
 
 // NewlineBelow adds a newline below the given line number

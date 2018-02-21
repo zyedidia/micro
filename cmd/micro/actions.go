@@ -717,6 +717,12 @@ func (v *View) InsertNewline(usePlugin bool) bool {
 	}
 	v.Cursor.LastVisualX = v.Cursor.GetVisualX()
 
+	// Allow the completer to access the newline.
+	err := v.Completer.Process('\n')
+	if err != nil {
+		TermMessage(err)
+	}
+
 	if usePlugin {
 		return PostActionCall("InsertNewline", v)
 	}

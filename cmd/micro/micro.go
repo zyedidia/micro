@@ -12,13 +12,13 @@ import (
 
 	"github.com/go-errors/errors"
 	"github.com/mattn/go-isatty"
-	"github.com/mitchellh/go-homedir"
-	"github.com/yuin/gopher-lua"
+	homedir "github.com/mitchellh/go-homedir"
+	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/terminfo"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/tcell/encoding"
-	"layeh.com/gopher-luar"
+	luar "layeh.com/gopher-luar"
 )
 
 const (
