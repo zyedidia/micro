@@ -1,12 +1,10 @@
 # Options
 
-Micro stores all of the user configuration in its configuration directory.
-
-Micro uses the `$XDG_CONFIG_HOME/micro` as the configuration directory. As per
-the XDG spec, if `$XDG_CONFIG_HOME` is not set, `~/.config/micro` is used as 
+Micro stores all of the user configuration in its configuration directory, `$XDG_CONFIG_HOME/micro`.
+As per the XDG spec, if `$XDG_CONFIG_HOME` is not set, then `~/.config/micro` is used as 
 the config directory.
 
-Here are the options that you can set:
+Here are the options that you can set (best viewed on [GitHub](https://github.com/zyedidia/micro/blob/master/runtime/help/options.md)):
 
 Option | Default Value | Description
 --- | --- | ---
@@ -29,23 +27,23 @@ Option | Default Value | Description
 `pluginchannels` | `https://github.com/micro-editor/plugin-channel` |  Contains all the channels micro's plugin manager will search for plugins in. A channel is simply a list of 'repository' json files which contain metadata about the given plugin. See the `Plugin Manager` section of the `plugins` help topic for more information.
 `pluginrepos` | ` ` |  Contains all the 'repositories' micro's plugin manager will search for plugins in. A repository consists of a `repo.json` file which contains metadata for a single plugin.
 `rmtrailingws` | `false` |  micro will automatically trim trailing whitespaces at eol.
-`ruler` | `true` |  display line numbers.
+`ruler` | `true` |  Display line numbers.
 `savecursor` | `false` |  Remember where the cursor was last time the file was opened and put it there when you open the file again.
 `savehistory` | `true` |  Remember command history between closing and re-opening micro.
 `saveundo` | `false` |  When this option is on, undo is saved even after you close a file so if you close and reopen a file, you can keep undoing.
-`scrollbar` | `false` |  Display a scroll bar
+`scrollbar` | `false` |  Display a scroll bar.
 `scrollmargin | `3` |  Amount of lines you would like to see above and below the cursor.
 `scrollspeed` | `2` |  Amount of lines to scroll for one scroll event.
 `softwrap` | `false` |  Should micro wrap lines that are too long to fit on the screen.
 `splitbottom` | `true` |  When a horizontal split is created, should it be created below the current split?
 `splitright` | `true` |  When a vertical split is created, should it be created to the right of the current split?
 `statusline` | `true` |  Display the status line at the bottom of the screen.
-`matchbrace` | `false` |  Highlight matching braces for '()', '{}', '[]'
+`matchbrace` | `false` |  Highlight matching braces for `()`, `{}`, `[]`.
 `syntax` | `true` |  Turns syntax on or off.
 `sucmd` | `sudo` |  Specifies the super user command. On most systems this is "sudo" but on BSD it can be "doas." This option can be customized and is only used when saving with su.
 `tabmovement` | `false` |  Navigate spaces at the beginning of lines as if they are tabs (e.g. move over 4 spaces at once). This option only does anything if `tabstospaces` is on.
-`tabsize` | `4` |  Sets the tab size to `option`
-`tabstospaces`: | `false` | Use spaces instead of tabs
+`tabsize` | `4` |  Sets the tab size to `option`.
+`tabstospaces`: | `false` | Use spaces instead of tabs.
 `termtitle` | `false` |  Defines whether or not your terminal's title will be set by micro when opened.
 `useprimary` | `true` | (only useful on *nix) Defines whether or not micro will use the primary clipboard to copy selections in the background. This does not affect the normal clipboard using Ctrl-C and Ctrl-V.
 
