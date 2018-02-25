@@ -9,6 +9,10 @@ import (
 
 // GoCode is an OptionProvider which provides options to the autocompletion system.
 func GoCode(logger func(s string, values ...interface{}), buffer []byte, startOffset, currentOffset int) (options []Option, startOffsetDelta int, err error) {
+	logger("autocompleter.GoCode: received offset %v - '...%v'->'%v'",
+		currentOffset,
+		string(previousX(buffer, startOffset, 10)),
+		string(buffer[startOffset:currentOffset]))
 	cmd := exec.Command("gocode", "-f=json", "autocomplete", strconv.Itoa(currentOffset))
 	stdin, err := cmd.StdinPipe()
 	if err != nil {
@@ -58,9 +62,21 @@ func GoCode(logger func(s string, values ...interface{}), buffer []byte, startOf
 		if mok {
 			options = append(options, mapToOption(m))
 		}
+		// Return 10 results at most.
+		if len(options) > 10 {
+			break
+		}
 	}
 
 	return
+}
+
+func previousX(b []byte, index, x int) []byte {
+	from := 0
+	if index-x > 0 {
+		from = index - x
+	}
+	return b[from:index]
 }
 
 func mapToOption(m map[string]interface{}) Option {
