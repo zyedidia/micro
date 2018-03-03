@@ -947,7 +947,7 @@ func (v *View) SaveAll(usePlugin bool) bool {
 		}
 
 		for _, t := range tabs {
-			for _, v := range t.views {
+			for _, v := range t.Views {
 				v.Save(false)
 			}
 		}
@@ -1804,12 +1804,12 @@ func (v *View) Quit(usePlugin bool) bool {
 		// Make sure not to quit if there are unsaved changes
 		if v.CanClose() {
 			v.CloseBuffer()
-			if len(tabs[curTab].views) > 1 {
+			if len(tabs[curTab].Views) > 1 {
 				v.splitNode.Delete()
 				tabs[v.TabNum].Cleanup()
 				tabs[v.TabNum].Resize()
 			} else if len(tabs) > 1 {
-				if len(tabs[v.TabNum].views) == 1 {
+				if len(tabs[v.TabNum].Views) == 1 {
 					tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
 					for i, t := range tabs {
 						t.SetNum(i)
@@ -1848,7 +1848,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 		closeAll := true
 		for _, tab := range tabs {
-			for _, v := range tab.views {
+			for _, v := range tab.Views {
 				if !v.CanClose() {
 					closeAll = false
 				}
@@ -1861,7 +1861,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 			if shouldQuit {
 				for _, tab := range tabs {
-					for _, v := range tab.views {
+					for _, v := range tab.Views {
 						v.CloseBuffer()
 					}
 				}
@@ -1893,7 +1893,7 @@ func (v *View) AddTab(usePlugin bool) bool {
 		curTab = len(tabs) - 1
 		if len(tabs) == 2 {
 			for _, t := range tabs {
-				for _, v := range t.views {
+				for _, v := range t.Views {
 					v.ToggleTabbar()
 				}
 			}
@@ -1986,8 +1986,8 @@ func (v *View) Unsplit(usePlugin bool) bool {
 		}
 
 		curView := tabs[curTab].CurView
-		for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
-			view := tabs[curTab].views[i]
+		for i := len(tabs[curTab].Views) - 1; i >= 0; i-- {
+			view := tabs[curTab].Views[i]
 			if view != nil && view.Num != curView {
 				view.Quit(true)
 				// messenger.Message("Quit ", view.Buf.Path)
@@ -2009,7 +2009,7 @@ func (v *View) NextSplit(usePlugin bool) bool {
 		}
 
 		tab := tabs[curTab]
-		if tab.CurView < len(tab.views)-1 {
+		if tab.CurView < len(tab.Views)-1 {
 			tab.CurView++
 		} else {
 			tab.CurView = 0
@@ -2033,7 +2033,7 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 		if tab.CurView > 0 {
 			tab.CurView--
 		} else {
-			tab.CurView = len(tab.views) - 1
+			tab.CurView = len(tab.Views) - 1
 		}
 
 		if usePlugin {

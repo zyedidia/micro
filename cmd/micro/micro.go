@@ -236,7 +236,7 @@ func RedrawAll() {
 		}
 	}
 
-	for _, v := range tabs[curTab].views {
+	for _, v := range tabs[curTab].Views {
 		v.Display()
 	}
 	DisplayTabs()
@@ -268,7 +268,7 @@ func LoadAll() {
 	InitColorscheme()
 
 	for _, tab := range tabs {
-		for _, v := range tab.views {
+		for _, v := range tab.Views {
 			v.Buf.UpdateRules()
 		}
 	}
@@ -380,7 +380,7 @@ func main() {
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
 		for _, t := range tabs {
-			for _, v := range t.views {
+			for _, v := range t.Views {
 				v.Center(false)
 			}
 
@@ -459,7 +459,7 @@ func main() {
 	LoadPlugins()
 
 	for _, t := range tabs {
-		for _, v := range t.views {
+		for _, v := range t.Views {
 			GlobalPluginCall("onViewOpen", v)
 			GlobalPluginCall("onBufferOpen", v.Buf)
 		}
@@ -505,7 +505,7 @@ func main() {
 		case <-updateterm:
 			continue
 		case vnum := <-closeterm:
-			tabs[curTab].views[vnum].CloseTerminal()
+			tabs[curTab].Views[vnum].CloseTerminal()
 		case event = <-events:
 		}
 
@@ -535,7 +535,7 @@ func main() {
 						if CurView().mouseReleased {
 							// We loop through each view in the current tab and make sure the current view
 							// is the one being clicked in
-							for _, v := range tabs[curTab].views {
+							for _, v := range tabs[curTab].Views {
 								if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
 									tabs[curTab].CurView = v.Num
 								}
@@ -544,9 +544,9 @@ func main() {
 					} else if e.Buttons() == tcell.WheelUp || e.Buttons() == tcell.WheelDown {
 						var view *View
 						x, y := e.Position()
-						for _, v := range tabs[curTab].views {
+						for _, v := range tabs[curTab].Views {
 							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
-								view = tabs[curTab].views[v.Num]
+								view = tabs[curTab].Views[v.Num]
 							}
 						}
 						if view != nil {

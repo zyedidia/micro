@@ -131,7 +131,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 
 	if path != "" {
 		for _, tab := range tabs {
-			for _, view := range tab.views {
+			for _, view := range tab.Views {
 				if view.Buf.Path == path {
 					return view.Buf
 				}

@@ -338,7 +338,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 		m.HandleEvent(event, m.history[historyType])
 
 		m.Clear()
-		for _, v := range tabs[curTab].views {
+		for _, v := range tabs[curTab].Views {
 			v.Display()
 		}
 		DisplayTabs()

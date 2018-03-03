@@ -70,9 +70,9 @@ func (l *LeafNode) VSplit(buf *Buffer, splitIndex int) {
 		copy(l.parent.children[splitIndex+1:], l.parent.children[splitIndex:])
 		l.parent.children[splitIndex] = NewLeafNode(newView, l.parent)
 
-		tab.views = append(tab.views, nil)
-		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
-		tab.views[splitIndex] = newView
+		tab.Views = append(tab.Views, nil)
+		copy(tab.Views[splitIndex+1:], tab.Views[splitIndex:])
+		tab.Views[splitIndex] = newView
 
 		tab.CurView = splitIndex
 	} else {
@@ -94,9 +94,9 @@ func (l *LeafNode) VSplit(buf *Buffer, splitIndex int) {
 		l.parent.children[search(l.parent.children, l)] = s
 		l.parent = s
 
-		tab.views = append(tab.views, nil)
-		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
-		tab.views[splitIndex] = newView
+		tab.Views = append(tab.Views, nil)
+		copy(tab.Views[splitIndex+1:], tab.Views[splitIndex:])
+		tab.Views[splitIndex] = newView
 
 		tab.CurView = splitIndex
 	}
@@ -123,9 +123,9 @@ func (l *LeafNode) HSplit(buf *Buffer, splitIndex int) {
 		copy(l.parent.children[splitIndex+1:], l.parent.children[splitIndex:])
 		l.parent.children[splitIndex] = NewLeafNode(newView, l.parent)
 
-		tab.views = append(tab.views, nil)
-		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
-		tab.views[splitIndex] = newView
+		tab.Views = append(tab.Views, nil)
+		copy(tab.Views[splitIndex+1:], tab.Views[splitIndex:])
+		tab.Views[splitIndex] = newView
 
 		tab.CurView = splitIndex
 	} else {
@@ -139,7 +139,7 @@ func (l *LeafNode) HSplit(buf *Buffer, splitIndex int) {
 		s.parent = l.parent
 		newView := NewView(buf)
 		newView.TabNum = l.parent.tabNum
-		newView.Num = len(tab.views)
+		newView.Num = len(tab.Views)
 		if splitIndex == 1 {
 			s.children = []Node{l, NewLeafNode(newView, s)}
 		} else {
@@ -148,9 +148,9 @@ func (l *LeafNode) HSplit(buf *Buffer, splitIndex int) {
 		l.parent.children[search(l.parent.children, l)] = s
 		l.parent = s
 
-		tab.views = append(tab.views, nil)
-		copy(tab.views[splitIndex+1:], tab.views[splitIndex:])
-		tab.views[splitIndex] = newView
+		tab.Views = append(tab.Views, nil)
+		copy(tab.Views[splitIndex+1:], tab.Views[splitIndex:])
+		tab.Views[splitIndex] = newView
 
 		tab.CurView = splitIndex
 	}
@@ -167,12 +167,12 @@ func (l *LeafNode) Delete() {
 	l.parent.children = l.parent.children[:len(l.parent.children)-1]
 
 	tab := tabs[l.parent.tabNum]
-	j := findView(tab.views, l.view)
-	copy(tab.views[j:], tab.views[j+1:])
-	tab.views[len(tab.views)-1] = nil // or the zero value of T
-	tab.views = tab.views[:len(tab.views)-1]
+	j := findView(tab.Views, l.view)
+	copy(tab.Views[j:], tab.Views[j+1:])
+	tab.Views[len(tab.Views)-1] = nil // or the zero value of T
+	tab.Views = tab.Views[:len(tab.Views)-1]
 
-	for i, v := range tab.views {
+	for i, v := range tab.Views {
 		v.Num = i
 	}
 	if tab.CurView > 0 {

@@ -320,7 +320,7 @@ func SetOption(option, value string) error {
 		// LoadSyntaxFiles()
 		InitColorscheme()
 		for _, tab := range tabs {
-			for _, view := range tab.views {
+			for _, view := range tab.Views {
 				view.Buf.UpdateRules()
 			}
 		}
@@ -343,7 +343,7 @@ func SetOption(option, value string) error {
 	if len(tabs) != 0 {
 		if _, ok := CurView().Buf.Settings[option]; ok {
 			for _, tab := range tabs {
-				for _, view := range tab.views {
+				for _, view := range tab.Views {
 					SetLocalOption(option, value, view)
 				}
 			}
@@ -389,7 +389,7 @@ func SetLocalOption(option, value string, view *View) error {
 		// If it is being turned off, we have to hash every open buffer
 		var empty [16]byte
 		for _, tab := range tabs {
-			for _, v := range tab.views {
+			for _, v := range tab.Views {
 				if !nativeValue.(bool) {
 					if v.Buf.origHash == empty {
 						data, err := ioutil.ReadFile(v.Buf.AbsPath)
