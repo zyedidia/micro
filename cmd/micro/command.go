@@ -590,13 +590,15 @@ func Replace(args []string) {
 	replaceAll := func() {
 		var deltas []Delta
 		for i := 0; i < view.Buf.LinesNum(); i++ {
-			newText := regex.ReplaceAll(view.Buf.lines[i].data, replaceBytes)
+			newText := regex.ReplaceAllFunc(view.Buf.lines[i].data, func(in []byte) []byte {
+				found++
+				return replaceBytes
+			})
 
 			from := Loc{0, i}
 			to := Loc{utf8.RuneCount(view.Buf.lines[i].data), i}
 
 			deltas = append(deltas, Delta{string(newText), from, to})
-			found++
 		}
 		view.Buf.MultipleReplace(deltas)
 	}
