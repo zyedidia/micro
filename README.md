@@ -6,11 +6,10 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
 
-Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
-of modern terminals. It comes as one single, batteries-included, static binary with no dependencies, and you can download and use it right now.
+Micro is a terminal-based text editor that aims for intuitive usability and takes advantage of the full capabilities
+of modern terminals. It comes as a single, batteries-included, static binary with no dependencies, so you can download and use it right the way.
 
-As the name indicates, micro aims to be somewhat of a successor to the nano editor by being easy to install and use in a pinch, but micro also aims to be
-enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
+As the name indicates, micro aims to be a kind of successor of the nano editor by being easy to install and use. You'd enjoy to use micro full time regardless of you are the person who prefers to work in the terminal (like me) or via a ssh terminal.
 
 Here is a picture of micro editing its source code.
 
@@ -166,14 +165,14 @@ If you don't have xclip or xsel, micro will use an internal clipboard for copy a
 
 ### Colors and syntax highlighting
 
-If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
+If you open micro and find out that syntax highlighting is working, this is probably
 you are using a terminal which does not support 256 color. Try changing the colorscheme to `simple`
-by pressing CtrlE in micro and typing `set colorscheme simple`.
+by pressing `Ctrl + E` in micro and typing `set colorscheme simple`.
 
-If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
+If you are using the default Ubuntu terminal and wish to enable 256, you need to make sure your `TERM` variable is set
 to `xterm-256color`.
 
-Many of the Windows terminals don't support more than 16 colors, which means
+Many Windows terminals don't support more than 16 colors, which means
 that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty.
