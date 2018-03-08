@@ -512,20 +512,33 @@ func (b *Buffer) SaveAs(filename string) error {
 		return err
 	}
 	useCrlf := b.Settings["fileformat"] == "dos"
+	size := 0
 	for i, l := range b.lines {
+		size += len(l.data)
 		if _, err := f.Write(l.data); err != nil {
 			return err
 		}
 		if i != len(b.lines)-1 {
 			if useCrlf {
+				size += 2
 				if _, err := f.Write([]byte{'\r', '\n'}); err != nil {
 					return err
 				}
 			} else {
+				size++
 				if _, err := f.Write([]byte{'\n'}); err != nil {
 					return err
 				}
 			}
+		}
+	}
+
+	if !b.Settings["fastdirty"].(bool) {
+		if size > 50000 {
+			// If the file is larger than a megabyte fastdirty needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			b.origHash = md5.Sum([]byte(b.String()))
 		}
 	}
 
