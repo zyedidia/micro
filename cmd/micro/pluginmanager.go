@@ -541,7 +541,7 @@ func (pv PluginVersions) install() {
 			shouldInstall := true
 			if pv := currentlyInstalled.find(sel.pack.Name); pv != nil {
 				if pv.Version.NE(sel.Version) {
-					messenger.AddLog(fmt.Sprint("Uninstalling %q", sel.pack.Name))
+					messenger.AddLog("Uninstalling", sel.pack.Name)
 					UninstallPlugin(sel.pack.Name)
 				} else {
 					shouldInstall = false

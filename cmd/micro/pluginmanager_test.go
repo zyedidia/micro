@@ -36,7 +36,7 @@ func TestDependencyResolving(t *testing.T) {
 		if v == nil {
 			t.Errorf("Failed to resolve %s", name)
 		} else if expected.NE(v.Version) {
-			t.Errorf("%s resolved in wrong version got %s", name, v)
+			t.Errorf("%s resolved in wrong version %v", name, v)
 		}
 	}
 
