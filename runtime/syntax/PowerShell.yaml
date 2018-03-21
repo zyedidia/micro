@@ -1,0 +1,129 @@
+# PowerShell syntax highlighting file for micro - https://micro-editor.github.io/
+# PowerShell syntax taken from: https://github.com/PowerShell/EditorSyntax
+
+filetype: powershell
+
+detect:
+    filename: "\\.ps(1|m1|d1)$"
+    #header: ""
+
+rules:
+    # - comment.block:           # Block Comment
+    # - comment.doc:             # Doc Comment
+    # - comment.line:            # Line Comment
+    # - comment.shebang:         # Shebang Line
+
+    # - constant:                # Constant
+    # - constant.bool:           # Constant (true, false)
+    # - constant.interpolation:
+    # - constant.number:         # Constant (null)
+    # - constant.specialChar:
+    # - constant.string:         # String
+    # - constant.string.char:
+    # - constant.string.url:     # Uri
+    # - constant.unicode:
+
+    # - identifier:              # Also used for functions
+    # - identifier.class:        # Also used for functions
+    # - identifier.macro:
+    # - identifier.var:
+
+    # - preproc:                 # Preprocessor
+    # - preproc.DebugIdentifier: # Preprocessor
+    # - preproc.shebang:         # The #! at the beginning of a file that tells the os what script interpreter to use
+
+    # - special:                 # Special (global|local|private|script|using|workflow)
+
+    # - statement:               # Statements Keywords
+    # - statement.built_in:
+    # - statement.declaration:   # Declaration Keywords
+    # - statement.meta:          # Meta
+    # - statement.reserved:      # Reserved Keywords
+
+    # - symbol
+    # - symbol.brackets:         # {}()[] and sometimes <>
+    # - symbol.operator:         # Operators
+    # - symbol.tag:              # For html tags, among other things
+
+    # - type
+    # - type.collections:        # Collections (array, hashtable)
+    # - type.ctypes:             # CTypes (CBool, CChar, etc.)
+    # - type.keyword:            # If you want a special highlight for keywords like 'private'
+    # - type.storage:            # Storage Types (int, uint, string, etc.)
+
+    # Class
+    - identifier.class: "class +[A-Za-z0-9]+ *((:) +[A-Za-z0-9.]+)?"
+    - identifier.class: "(function)(?:([[:space:]][A-Za-z0-9]+[[:space:]]*))"
+
+    # Verbs taken from PwSh 6.0.2
+    - identifier: "(Add|Approve|Assert|Backup|Block|Build|Checkpoint|Clear|Close|Compare|Complete|Compress|Confirm|Connect|Convert|ConvertFrom|ConvertTo|Copy)[-][A-Za-z0-9]+"
+    - identifier: "(Debug|Deny|Deploy|Disable|Disconnect|Dismount|Edit|Enable|Enter|Exit|Expand|Export|Find|Format|Get|Grant|Group|Hide)[-][A-Za-z0-9]+"
+    - identifier: "(Import|Initialize|Install|Invoke|Join|Limit|Lock|Measure|Merge|Mount|Move|New|Open|Optimize|Out|Ping|Pop|Protect|Publish|Push)[-][A-Za-z0-9]+"
+    - identifier: "(Read|Receive|Redo|Register|Remove|Rename|Repair|Request|Reset|Resize|Resolve|Restart|Restore|Resume|Revoke)[-][A-Za-z0-9]+"
+    - identifier: "(Save|Search|Select|Send|Set|Show|Skip|Split|Start|Step|Stop|Submit|Suspend|Switch|Sync|Test|Trace)[-][A-Za-z0-9]+"
+    - identifier: "(Unblock|Undo|Uninstall|Unlock|Unprotect|Unpublish|Unregister|Update|Use|Wait|Watch|Write)[-][A-Za-z0-9]+"
+    - identifier.var: "\\$(?i)((Global|Local|Private|Script|Using|Workflow)[:])?[A-Za-z0-9]*"
+
+
+    # Expression and types
+    - type: "\\[\\b([A-Za-z]+|[A-Za-z]+[0-9]+)\\b\\]"
+
+    # Keywords
+    - statement: "\\b(alias|as|begin|break|catch|continue|data|default|define|do|dynamicparam)\\b"
+    - statement: "\\b(else|elseif|end|exit|finally|for|foreach|foreach-object|from|if|in|inlinescript)\\b"
+    - statement: "\\b(parallel|param|process|return|switch|throw|trap|try|until|using|var|where|where-object|while)\\b"
+
+    # Special Keywords
+    - special: "\\b(break|continue|exit)\\b"
+
+    - symbol.brackets: "(\\{|\\})"
+    - symbol.brackets: "(\\(|\\))"
+    - symbol.brackets: "(\\[|\\])"
+    - symbol.operator: "[\\-+/*=<>?:!~%&|]"
+    - symbol.operator: "[[:space:]][-](ne|eq|gt|ge|lt|le|like|notlike|match|notmatch|contains|notcontains|in|notin|replace|is|isnot)[[:space:]]"
+
+    # Constants
+    - constant.bool: "\\b\\$(true|false|null)\\b"
+    - constant.number: "\\b([0-9._]+|0x[A-Fa-f0-9_]+|0b[0-1_]+)[FL]?\\b"
+
+    # Expression Mode String
+    - constant.string:
+        start: "\""
+        end: "\""
+        #skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
+            - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
+
+    # Argument Mode String
+    - constant.string:
+        start: "'"
+        end: "'"
+        #skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
+            - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
+
+    # Line Comment
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME|BUG):?"
+
+    # Block Comment
+    - comment:
+        start: "<#"
+        end: "#>"
+        rules:
+            - todo: "(TODO|XXX|FIXME|BUG):?"
+
+    # Embedded C#
+    - default:
+        start: "@\""
+        end: "\"@"
+        rules:
+            - include: "csharp"
+
+    # Todo
+    - todo: "(TODO|XXX|FIXME|BUG):?"
