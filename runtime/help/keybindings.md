@@ -215,6 +215,7 @@ Suspend (Unix only)
 ScrollUp
 ScrollDown
 SpawnMultiCursor
+SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
@@ -464,7 +465,7 @@ MouseWheelRight
 
     // Multiple cursors bindings
     "Alt-n": "SpawnMultiCursor",
-    "CtrlM": "SpawnMultiCursorSelect",
+    "Alt-m": "SpawnMultiCursorSelect",
     "Alt-p": "RemoveMultiCursor",
     "Alt-c": "RemoveAllMultiCursors",
     "Alt-x": "SkipMultiCursor",
