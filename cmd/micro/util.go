@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 	"unicode/utf8"
-	
+
 	"github.com/mattn/go-runewidth"
 )
 
@@ -342,7 +342,12 @@ func ReplaceHome(path string) string {
 	} else {
 		userData, err = user.Lookup(homeString[1:])
 		if err != nil {
-			messenger.Error("Could not find user: ", err)
+			if messeger != nil {
+				messenger.Error("Could not find user: ", err)
+			} else {
+				TermMessage("Could not find user: ", err)
+			}
+			return ""
 		}
 	}
 
