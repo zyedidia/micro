@@ -220,6 +220,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))
+		defer file.Close()
 		if err == nil {
 			var buffer SerializedBuffer
 			decoder := gob.NewDecoder(file)
@@ -242,7 +243,6 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 				}
 			}
 		}
-		file.Close()
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
@@ -505,6 +505,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	}
 
 	f, err := os.OpenFile(absFilename, os.O_WRONLY|os.O_CREATE, 0644)
+	defer f.Close()
 	if err != nil {
 		return err
 	}

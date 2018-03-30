@@ -604,11 +604,11 @@ func (m *Messenger) Display() {
 func (m *Messenger) LoadHistory() {
 	if GetGlobalOption("savehistory").(bool) {
 		file, err := os.Open(configDir + "/buffers/history")
+		defer file.Close()
 		var decodedMap map[string][]string
 		if err == nil {
 			decoder := gob.NewDecoder(file)
 			err = decoder.Decode(&decodedMap)
-			file.Close()
 
 			if err != nil {
 				m.Error("Error loading history:", err)
@@ -638,6 +638,7 @@ func (m *Messenger) SaveHistory() {
 		}
 
 		file, err := os.Create(configDir + "/buffers/history")
+		defer file.Close()
 		if err == nil {
 			encoder := gob.NewEncoder(file)
 
@@ -646,7 +647,6 @@ func (m *Messenger) SaveHistory() {
 				m.Error("Error saving history:", err)
 				return
 			}
-			file.Close()
 		}
 	}
 }
