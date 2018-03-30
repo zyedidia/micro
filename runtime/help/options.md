@@ -186,6 +186,12 @@ Here are the options that you can set:
 
     default value: `false`
 
+* `matchbraceleft`: when matching a closing brace, should matching match the
+   brace directly under the cursor, or the character to the left? only matters
+   if `matchbrace` is true
+
+    default value: `false`
+
 * `syntax`: turns syntax on or off.
 
 	default value: `true`
