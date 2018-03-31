@@ -342,7 +342,7 @@ func ReplaceHome(path string) string {
 	} else {
 		userData, err = user.Lookup(homeString[1:])
 		if err != nil {
-			if messeger != nil {
+			if messenger != nil {
 				messenger.Error("Could not find user: ", err)
 			} else {
 				TermMessage("Could not find user: ", err)
