@@ -12,10 +12,13 @@ apps:
     command: bin/micro
 
 parts:
+  go:
+    source-tag: go1.10
   micro:
+    after: [go]
     source: .
     source-type: git
-    plugin: go
+    plugin: nil
     build-packages: [make]
     prepare: |
       mkdir -p ../go/src/github.com/zyedidia/micro
