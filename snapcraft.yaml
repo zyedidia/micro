@@ -15,8 +15,8 @@ parts:
   micro:
     source: .
     source-type: git
-    plugin: nil
-    build-packages: [go, make]
+    plugin: go
+    build-packages: [make]
     prepare: |
       mkdir -p ../go/src/github.com/zyedidia/micro
       cp -R . ../go/src/github.com/zyedidia/micro
