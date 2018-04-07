@@ -128,7 +128,7 @@ func TabbarString() (string, map[int]int) {
 		}
 		str += " "
 
-		indicies[Count(str)-1] = i + 1
+		indicies[Count(str)-2] = i + 1
 	}
 	return str, indicies
 }
