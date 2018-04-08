@@ -435,7 +435,11 @@ func (v *View) StartOfLine(usePlugin bool) bool {
 
 	v.deselect(0)
 
-	v.Cursor.Start()
+	if v.Cursor.X != 0 {
+		v.Cursor.Start()
+	} else {
+		v.Cursor.StartOfText()
+	}
 
 	if usePlugin {
 		return PostActionCall("StartOfLine", v)
