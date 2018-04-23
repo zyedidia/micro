@@ -1222,8 +1222,6 @@ func (v *View) Cut(usePlugin bool) bool {
 	} else {
 		return CutLine(usePlugin)
 	}
-
-	return false
 }
 
 // DuplicateLine duplicates the current line or selection
