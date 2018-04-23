@@ -1219,9 +1219,9 @@ func (v *View) Cut(usePlugin bool) bool {
 			return PostActionCall("Cut", v)
 		}
 		return true
+	} else {
+		return CutLine(usePlugin)
 	}
-
-	return false
 }
 
 // DuplicateLine duplicates the current line or selection
