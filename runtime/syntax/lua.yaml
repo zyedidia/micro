@@ -4,6 +4,7 @@ detect:
     filename: "\\.lua$"
 
 rules:
+    - preproc.shebang: "^(#!).*"
     - statement: "\\b(do|end|while|repeat|until|if|elseif|then|else|for|in|function|local|return)\\b"
     - statement: "\\b(not|and|or)\\b"
     - statement: "\\b(debug|string|math|table|io|coroutine|os|utf8|bit32)\\b\\."
