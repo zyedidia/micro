@@ -1220,7 +1220,7 @@ func (v *View) Cut(usePlugin bool) bool {
 		}
 		return true
 	} else {
-		return CutLine(usePlugin)
+		return v.CutLine(usePlugin)
 	}
 }
 
