@@ -614,7 +614,7 @@ func Replace(args []string) {
 			}
 			view.Relocate()
 			RedrawAll()
-			choice, canceled := messenger.LetterPrompt("Perform replacement? (y,n,a)", 'y', 'n', 'a')
+			choice, canceled := messenger.LetterPrompt("Perform replacement? (y,n,a)", 'y', 'n', 'a', 'Y', 'N', 'A')
 			if canceled {
 				if view.Cursor.HasSelection() {
 					view.Cursor.Loc = view.Cursor.CurSelection[0]
