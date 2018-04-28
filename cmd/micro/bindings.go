@@ -338,6 +338,10 @@ modSearch:
 		}
 	}
 
+	if len(k) == 0 {
+		return Key{buttons: -1}, false
+	}
+
 	// Control is handled specially, since some character codes in bindingKeys
 	// are different when Control is depressed. We should check for Control keys
 	// first.
