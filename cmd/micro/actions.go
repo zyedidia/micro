@@ -435,7 +435,11 @@ func (v *View) StartOfLine(usePlugin bool) bool {
 
 	v.deselect(0)
 
-	v.Cursor.Start()
+	if v.Cursor.X != 0 {
+		v.Cursor.Start()
+	} else {
+		v.Cursor.StartOfText()
+	}
 
 	if usePlugin {
 		return PostActionCall("StartOfLine", v)
@@ -1215,9 +1219,9 @@ func (v *View) Cut(usePlugin bool) bool {
 			return PostActionCall("Cut", v)
 		}
 		return true
+	} else {
+		return v.CutLine(usePlugin)
 	}
-
-	return false
 }
 
 // DuplicateLine duplicates the current line or selection

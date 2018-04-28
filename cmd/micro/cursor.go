@@ -333,6 +333,18 @@ func (c *Cursor) Start() {
 	c.LastVisualX = c.GetVisualX()
 }
 
+// StartOfText moves the cursor to the first non-whitespace rune of 
+// the line it is on
+func (c *Cursor) StartOfText() {
+	c.Start()
+	for IsWhitespace(c.RuneUnder(c.X)) {
+		if c.X == Count(c.buf.Line(c.Y)) {
+			break
+		}
+		c.Right()
+	}
+}
+
 // GetCharPosInLine gets the char position of a visual x y
 // coordinate (this is necessary because tabs are 1 char but
 // 4 visual spaces)
