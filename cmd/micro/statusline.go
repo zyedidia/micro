@@ -47,24 +47,26 @@ func (sline *Statusline) Display() {
 	file += " " + sline.view.Buf.Settings["fileformat"].(string)
 
 	rightText := ""
-	if len(kmenuBinding) > 0 {
-		if globalSettings["keymenu"].(bool) {
-			rightText += kmenuBinding + ": hide bindings"
-		} else {
-			rightText += kmenuBinding + ": show bindings"
-		}
-	}
-	if len(helpBinding) > 0 {
+	if !sline.view.Buf.Settings["hidehelp"].(bool) {
 		if len(kmenuBinding) > 0 {
-			rightText += ", "
+			if globalSettings["keymenu"].(bool) {
+				rightText += kmenuBinding + ": hide bindings"
+			} else {
+				rightText += kmenuBinding + ": show bindings"
+			}
 		}
-		if sline.view.Type == vtHelp {
-			rightText += helpBinding + ": close help"
-		} else {
-			rightText += helpBinding + ": open help"
+		if len(helpBinding) > 0 {
+			if len(kmenuBinding) > 0 {
+				rightText += ", "
+			}
+			if sline.view.Type == vtHelp {
+				rightText += helpBinding + ": close help"
+			} else {
+				rightText += helpBinding + ": open help"
+			}
 		}
+		rightText += " "
 	}
-	rightText += " "
 
 	statusLineStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["statusline"]; ok {
