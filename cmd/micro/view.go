@@ -198,7 +198,10 @@ func (v *View) ToggleTabbar() {
 }
 
 func (v *View) paste(clip string) {
-	leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	leadingWS := ""
+	if v.Cursor.X > 0 {
+		leadingWS = GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	}
 
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
