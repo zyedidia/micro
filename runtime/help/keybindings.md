@@ -187,6 +187,8 @@ Start
 End
 PageUp
 PageDown
+SelectPageUp
+SelectPageDown
 HalfPageUp
 HalfPageDown
 StartOfLine

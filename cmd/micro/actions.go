@@ -1515,6 +1515,42 @@ func (v *View) PageDown(usePlugin bool) bool {
 	return false
 }
 
+// SelectPageUp selects up one page
+func (v *View) SelectPageUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectPageUp", v) {
+		return false
+	}
+
+	if !v.Cursor.HasSelection() {
+		v.Cursor.OrigSelection[0] = v.Cursor.Loc
+	}
+	v.Cursor.UpN(v.Height)
+	v.Cursor.SelectTo(v.Cursor.Loc)
+
+	if usePlugin {
+		return PostActionCall("SelectPageUp", v)
+	}
+	return true
+}
+
+// SelectPageDown selects down one page
+func (v *View) SelectPageDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectPageDown", v) {
+		return false
+	}
+
+	if !v.Cursor.HasSelection() {
+		v.Cursor.OrigSelection[0] = v.Cursor.Loc
+	}
+	v.Cursor.DownN(v.Height)
+	v.Cursor.SelectTo(v.Cursor.Loc)
+
+	if usePlugin {
+		return PostActionCall("SelectPageDown", v)
+	}
+	return true
+}
+
 // CursorPageUp places the cursor a page up
 func (v *View) CursorPageUp(usePlugin bool) bool {
 	if usePlugin && !PreActionCall("CursorPageUp", v) {

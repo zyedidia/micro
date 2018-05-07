@@ -80,6 +80,8 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"End":                    (*View).End,
 	"PageUp":                 (*View).PageUp,
 	"PageDown":               (*View).PageDown,
+	"SelectPageUp":           (*View).SelectPageUp,
+	"SelectPageDown":         (*View).SelectPageDown,
 	"HalfPageUp":             (*View).HalfPageUp,
 	"HalfPageDown":           (*View).HalfPageDown,
 	"StartOfLine":            (*View).StartOfLine,
