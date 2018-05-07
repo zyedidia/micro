@@ -76,8 +76,8 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 			curX := buf.Cursor.X
 			curLoc := buf.Cursor.Loc
 			if buf.Settings["matchbraceleft"].(bool) {
-				curX--
 				if curX > 0 {
+					curX--
 					curLoc = curLoc.Move(-1, buf)
 				}
 			}
