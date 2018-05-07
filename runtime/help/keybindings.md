@@ -352,6 +352,7 @@ CtrlRightSq
 CtrlCarat
 CtrlUnderscore
 Backspace
+OldBackspace
 Tab
 Esc
 Escape

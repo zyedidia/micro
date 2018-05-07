@@ -255,6 +255,7 @@ var bindingKeys = map[string]tcell.Key{
 	"Escape":         tcell.KeyEscape,
 	"Enter":          tcell.KeyEnter,
 	"Backspace":      tcell.KeyBackspace2,
+	"OldBackspace":   tcell.KeyBackspace,
 
 	// I renamed these keys to PageUp and PageDown but I don't want to break someone's keybindings
 	"PgUp":   tcell.KeyPgUp,
