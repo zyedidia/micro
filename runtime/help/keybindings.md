@@ -187,6 +187,8 @@ Start
 End
 PageUp
 PageDown
+SelectPageUp
+SelectPageDown
 HalfPageUp
 HalfPageDown
 StartOfLine
@@ -352,6 +354,7 @@ CtrlRightSq
 CtrlCarat
 CtrlUnderscore
 Backspace
+OldBackspace
 Tab
 Esc
 Escape
