@@ -10,5 +10,15 @@ rules:
     - identifier: "^[[:space:]]*[^=]*="
     - special: "^[[:space:]]*\\[.*\\]$"
     - statement: "[=;]"
-    - comment: "(^|[[:space:]])#([^{].*)?$"
     - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+    - comment:
+        start: ";"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
