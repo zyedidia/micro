@@ -60,7 +60,7 @@ type Buffer struct {
 	highlighter *highlight.Highlighter
 
 	// Hash of the original buffer -- empty if fastdirty is on
-	origHash [16]byte
+	origHash [md5.Size]byte
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -250,7 +250,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 			// If the file is larger than a megabyte fastdirty needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			b.origHash = md5.Sum([]byte(b.String()))
+			calcHash(b, &b.origHash)
 		}
 	}
 
@@ -440,28 +440,31 @@ func (b *Buffer) SaveWithSudo() error {
 
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
-	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-		file, err := os.Create(configDir + "/buffers/" + EscapePath(b.AbsPath))
-		if err == nil {
-			enc := gob.NewEncoder(file)
-			gob.Register(TextEvent{})
-			err = enc.Encode(SerializedBuffer{
-				b.EventHandler,
-				b.Cursor,
-				b.ModTime,
-			})
-		}
-		err = file.Close()
-		return err
+	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
+		return nil
 	}
-	return nil
+
+	name := configDir + "/buffers/" + EscapePath(b.AbsPath)
+
+	return overwriteFile(name, func(file *os.File) error {
+		return gob.NewEncoder(file).Encode(SerializedBuffer{
+			b.EventHandler,
+			b.Cursor,
+			b.ModTime,
+		})
+	})
+}
+
+func init() {
+	gob.Register(TextEvent{})
+	gob.Register(SerializedBuffer{})
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	if b.Settings["rmtrailingws"].(bool) {
-		r, _ := regexp.Compile(`[ \t]+$`)
+		r := regexp.MustCompile(`[ \t]+$`)
 		for lineNum, line := range b.Lines(0, b.NumLines) {
 			indices := r.FindStringIndex(line)
 			if indices == nil {
@@ -484,7 +487,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	}()
 
 	// Removes any tilde and replaces with the absolute path to home
-	var absFilename string = ReplaceHome(filename)
+	absFilename := ReplaceHome(filename)
 
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
@@ -504,48 +507,93 @@ func (b *Buffer) SaveAs(filename string) error {
 		}
 	}
 
-	f, err := os.OpenFile(absFilename, os.O_WRONLY|os.O_CREATE, 0644)
-	defer f.Close()
+	var fileSize int
+
+	err := overwriteFile(absFilename, func(file *os.File) (e error) {
+		if len(b.lines) == 0 {
+			return
+		}
+
+		// end of line
+		var eol []byte
+
+		if b.Settings["fileformat"] == "dos" {
+			eol = []byte{'\r', '\n'}
+		} else {
+			eol = []byte{'\n'}
+		}
+
+		// write lines
+		if fileSize, e = file.Write(b.lines[0].data); e != nil {
+			return
+		}
+
+		for _, l := range b.lines[1:] {
+			if _, e = file.Write(eol); e != nil {
+				return
+			}
+
+			if _, e = file.Write(l.data); e != nil {
+				return
+			}
+
+			fileSize += len(eol) + len(l.data)
+		}
+
+		return
+	})
+
 	if err != nil {
 		return err
 	}
-	if err := f.Truncate(0); err != nil {
-		return err
-	}
-	useCrlf := b.Settings["fileformat"] == "dos"
-	size := 0
-	for i, l := range b.lines {
-		size += len(l.data)
-		if _, err := f.Write(l.data); err != nil {
-			return err
-		}
-		if i != len(b.lines)-1 {
-			if useCrlf {
-				size += 2
-				if _, err := f.Write([]byte{'\r', '\n'}); err != nil {
-					return err
-				}
-			} else {
-				size++
-				if _, err := f.Write([]byte{'\n'}); err != nil {
-					return err
-				}
-			}
-		}
-	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if size > 50000 {
-			// If the file is larger than a megabyte fastdirty needs to be on
+		if fileSize > 50000 {
+			// For large files 'fastdirty' needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			b.origHash = md5.Sum([]byte(b.String()))
+			calcHash(b, &b.origHash)
 		}
 	}
 
 	b.Path = filename
 	b.IsModified = false
 	return b.Serialize()
+}
+
+// overwriteFile opens the given file for writing, truncating if one exists, and then calls
+// the supplied function with the file object, also making sure the file is closed afterwards.
+func overwriteFile(name string, fn func(*os.File) error) (err error) {
+	var file *os.File
+
+	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+		return
+	}
+
+	defer func() {
+		if e := file.Close(); e != nil && err == nil {
+			err = e
+		}
+	}()
+
+	err = fn(file)
+	return
+}
+
+// calcHash calculates md5 hash of all lines in the buffer
+func calcHash(b *Buffer, out *[md5.Size]byte) {
+	h := md5.New()
+
+	if len(b.lines) > 0 {
+		h.Write(b.lines[0].data)
+
+		for _, l := range b.lines[1:] {
+			h.Write([]byte{'\n'})
+			h.Write(l.data)
+		}
+	}
+
+	h.Sum((*out)[:0])
 }
 
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
@@ -592,7 +640,11 @@ func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
 		return b.IsModified
 	}
-	return b.origHash != md5.Sum([]byte(b.String()))
+
+	var buff [md5.Size]byte
+
+	calcHash(b, &buff)
+	return buff != b.origHash
 }
 
 func (b *Buffer) insert(pos Loc, value []byte) {
