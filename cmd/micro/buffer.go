@@ -723,8 +723,16 @@ func (b *Buffer) Lines(start, end int) []string {
 }
 
 // Len gives the length of the buffer
-func (b *Buffer) Len() int {
-	return Count(b.String())
+func (b *Buffer) Len() (n int) {
+	for _, l := range b.lines {
+		n += utf8.RuneCount(l.data)
+	}
+
+	if len(b.lines) > 1 {
+		n += len(b.lines) - 1 // account for newlines
+	}
+
+	return
 }
 
 // MoveLinesUp moves the range of lines up one row
