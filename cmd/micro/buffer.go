@@ -20,6 +20,8 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
 
+const LargeFileThreshold = 50000
+
 var (
 	// 0 - no line type detected
 	// 1 - lf detected
@@ -246,7 +248,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if size > 50000 {
+		if size > LargeFileThreshold {
 			// If the file is larger than a megabyte fastdirty needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
@@ -475,6 +477,7 @@ func (b *Buffer) SaveAs(filename string) error {
 		}
 		b.Cursor.Relocate()
 	}
+
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
@@ -548,7 +551,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if fileSize > 50000 {
+		if fileSize > LargeFileThreshold {
 			// For large files 'fastdirty' needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
@@ -683,7 +686,7 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 	return '\n'
 }
 
-// Line returns a single line as an array of runes
+// LineBytes returns a single line as an array of runes
 func (b *Buffer) LineBytes(n int) []byte {
 	if n >= len(b.lines) {
 		return []byte{}
@@ -691,7 +694,7 @@ func (b *Buffer) LineBytes(n int) []byte {
 	return b.lines[n].data
 }
 
-// Line returns a single line as an array of runes
+// LineRunes returns a single line as an array of runes
 func (b *Buffer) LineRunes(n int) []rune {
 	if n >= len(b.lines) {
 		return []rune{}
