@@ -11,10 +11,10 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
@@ -466,15 +466,14 @@ func init() {
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	if b.Settings["rmtrailingws"].(bool) {
-		r := regexp.MustCompile(`[ \t]+$`)
-		for lineNum, line := range b.Lines(0, b.NumLines) {
-			indices := r.FindStringIndex(line)
-			if indices == nil {
-				continue
+		for i, l := range b.lines {
+			pos := len(bytes.TrimRightFunc(l.data, unicode.IsSpace))
+
+			if pos < len(l.data) {
+				b.deleteToEnd(Loc{pos, i})
 			}
-			startLoc := Loc{indices[0], lineNum}
-			b.deleteToEnd(startLoc)
 		}
+
 		b.Cursor.Relocate()
 	}
 
