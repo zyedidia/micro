@@ -4,7 +4,7 @@ detect:
     filename: "\\.ex$|\\.exs$"
 
 rules:
-    - statement: "\\b(abs|trunc|rem|div|round|max|min|and|or|not|throw|raise|reraise|hd|tl|in|length|elem|put_elem|destructure|to_(string|charlist)|is_(atom|binary|bitstring|boolean|float|function|integer|list|map|nil|number|pid|port|reference|tuple)|(bit|byte|map|tuple)_size|binary_part|def(delegate|exception|guard|guardp|impl|macro|macrop|module|overridable|p|protocol|struct)?|sigil_[crswCRSWDNT]|if|else|unless|cond|binding|node|self|spawn|spawn_link|spawn_monitor|send|exit|struct|get_and_update_in|get_in|put_in|pop_in|update_in|apply|inspect|make_ref|use|do)\\b"
+    - statement: "\\b(abs|trunc|rem|div|round|max|min|and|or|not|throw|raise|reraise|hd|tl|in|length|elem|put_elem|destructure|to_(string|charlist)|is_(atom|binary|bitstring|boolean|float|function|integer|list|map|nil|number|pid|port|reference|tuple)|(bit|byte|map|tuple)_size|binary_part|def(delegate|exception|guard|guardp|impl|macro|macrop|module|overridable|p|protocol|struct)?|sigil_[crswCRSWDNT]|if|else|unless|cond|binding|node|self|spawn|spawn_link|spawn_monitor|send|exit|struct|get_and_update_in|get_in|put_in|pop_in|update_in|apply|inspect|make_ref|use|do|end)\\b"
     - statement: "\\b(alias|import|require|case|fn|receive|after|try|catch|rescue|super|quote|unquote|unquote_splicing|for|with)\\b"
 
     - constant: "\\b\\[A-Z]+\\b"
