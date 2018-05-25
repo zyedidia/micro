@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"encoding/gob"
@@ -448,7 +449,7 @@ func (b *Buffer) Serialize() error {
 
 	name := configDir + "/buffers/" + EscapePath(b.AbsPath)
 
-	return overwriteFile(name, func(file *os.File) error {
+	return overwriteFile(name, func(file io.Writer) error {
 		return gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.Cursor,
@@ -511,7 +512,7 @@ func (b *Buffer) SaveAs(filename string) error {
 
 	var fileSize int
 
-	err := overwriteFile(absFilename, func(file *os.File) (e error) {
+	err := overwriteFile(absFilename, func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
 			return
 		}
@@ -564,8 +565,9 @@ func (b *Buffer) SaveAs(filename string) error {
 }
 
 // overwriteFile opens the given file for writing, truncating if one exists, and then calls
-// the supplied function with the file object, also making sure the file is closed afterwards.
-func overwriteFile(name string, fn func(*os.File) error) (err error) {
+// the supplied function with the file as io.Writer object, also making sure the file is
+// closed afterwards.
+func overwriteFile(name string, fn func(io.Writer) error) (err error) {
 	var file *os.File
 
 	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
@@ -578,7 +580,13 @@ func overwriteFile(name string, fn func(*os.File) error) (err error) {
 		}
 	}()
 
-	err = fn(file)
+	w := bufio.NewWriter(file)
+
+	if err = fn(w); err != nil {
+		return
+	}
+
+	err = w.Flush()
 	return
 }
 
