@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"encoding/gob"
@@ -11,14 +12,16 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 )
+
+const LargeFileThreshold = 50000
 
 var (
 	// 0 - no line type detected
@@ -60,7 +63,7 @@ type Buffer struct {
 	highlighter *highlight.Highlighter
 
 	// Hash of the original buffer -- empty if fastdirty is on
-	origHash [16]byte
+	origHash [md5.Size]byte
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -246,11 +249,11 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if size > 50000 {
+		if size > LargeFileThreshold {
 			// If the file is larger than a megabyte fastdirty needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			b.origHash = md5.Sum([]byte(b.String()))
+			calcHash(b, &b.origHash)
 		}
 	}
 
@@ -440,38 +443,41 @@ func (b *Buffer) SaveWithSudo() error {
 
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
-	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-		file, err := os.Create(configDir + "/buffers/" + EscapePath(b.AbsPath))
-		if err == nil {
-			enc := gob.NewEncoder(file)
-			gob.Register(TextEvent{})
-			err = enc.Encode(SerializedBuffer{
-				b.EventHandler,
-				b.Cursor,
-				b.ModTime,
-			})
-		}
-		err = file.Close()
-		return err
+	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
+		return nil
 	}
-	return nil
+
+	name := configDir + "/buffers/" + EscapePath(b.AbsPath)
+
+	return overwriteFile(name, func(file io.Writer) error {
+		return gob.NewEncoder(file).Encode(SerializedBuffer{
+			b.EventHandler,
+			b.Cursor,
+			b.ModTime,
+		})
+	})
+}
+
+func init() {
+	gob.Register(TextEvent{})
+	gob.Register(SerializedBuffer{})
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	if b.Settings["rmtrailingws"].(bool) {
-		r, _ := regexp.Compile(`[ \t]+$`)
-		for lineNum, line := range b.Lines(0, b.NumLines) {
-			indices := r.FindStringIndex(line)
-			if indices == nil {
-				continue
+		for i, l := range b.lines {
+			pos := len(bytes.TrimRightFunc(l.data, unicode.IsSpace))
+
+			if pos < len(l.data) {
+				b.deleteToEnd(Loc{pos, i})
 			}
-			startLoc := Loc{indices[0], lineNum}
-			b.deleteToEnd(startLoc)
 		}
+
 		b.Cursor.Relocate()
 	}
+
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
@@ -484,7 +490,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	}()
 
 	// Removes any tilde and replaces with the absolute path to home
-	var absFilename string = ReplaceHome(filename)
+	absFilename := ReplaceHome(filename)
 
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
@@ -504,48 +510,100 @@ func (b *Buffer) SaveAs(filename string) error {
 		}
 	}
 
-	f, err := os.OpenFile(absFilename, os.O_WRONLY|os.O_CREATE, 0644)
-	defer f.Close()
+	var fileSize int
+
+	err := overwriteFile(absFilename, func(file io.Writer) (e error) {
+		if len(b.lines) == 0 {
+			return
+		}
+
+		// end of line
+		var eol []byte
+
+		if b.Settings["fileformat"] == "dos" {
+			eol = []byte{'\r', '\n'}
+		} else {
+			eol = []byte{'\n'}
+		}
+
+		// write lines
+		if fileSize, e = file.Write(b.lines[0].data); e != nil {
+			return
+		}
+
+		for _, l := range b.lines[1:] {
+			if _, e = file.Write(eol); e != nil {
+				return
+			}
+
+			if _, e = file.Write(l.data); e != nil {
+				return
+			}
+
+			fileSize += len(eol) + len(l.data)
+		}
+
+		return
+	})
+
 	if err != nil {
 		return err
 	}
-	if err := f.Truncate(0); err != nil {
-		return err
-	}
-	useCrlf := b.Settings["fileformat"] == "dos"
-	size := 0
-	for i, l := range b.lines {
-		size += len(l.data)
-		if _, err := f.Write(l.data); err != nil {
-			return err
-		}
-		if i != len(b.lines)-1 {
-			if useCrlf {
-				size += 2
-				if _, err := f.Write([]byte{'\r', '\n'}); err != nil {
-					return err
-				}
-			} else {
-				size++
-				if _, err := f.Write([]byte{'\n'}); err != nil {
-					return err
-				}
-			}
-		}
-	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if size > 50000 {
-			// If the file is larger than a megabyte fastdirty needs to be on
+		if fileSize > LargeFileThreshold {
+			// For large files 'fastdirty' needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			b.origHash = md5.Sum([]byte(b.String()))
+			calcHash(b, &b.origHash)
 		}
 	}
 
 	b.Path = filename
 	b.IsModified = false
 	return b.Serialize()
+}
+
+// overwriteFile opens the given file for writing, truncating if one exists, and then calls
+// the supplied function with the file as io.Writer object, also making sure the file is
+// closed afterwards.
+func overwriteFile(name string, fn func(io.Writer) error) (err error) {
+	var file *os.File
+
+	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+		return
+	}
+
+	defer func() {
+		if e := file.Close(); e != nil && err == nil {
+			err = e
+		}
+	}()
+
+	w := bufio.NewWriter(file)
+
+	if err = fn(w); err != nil {
+		return
+	}
+
+	err = w.Flush()
+	return
+}
+
+// calcHash calculates md5 hash of all lines in the buffer
+func calcHash(b *Buffer, out *[md5.Size]byte) {
+	h := md5.New()
+
+	if len(b.lines) > 0 {
+		h.Write(b.lines[0].data)
+
+		for _, l := range b.lines[1:] {
+			h.Write([]byte{'\n'})
+			h.Write(l.data)
+		}
+	}
+
+	h.Sum((*out)[:0])
 }
 
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
@@ -592,7 +650,11 @@ func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
 		return b.IsModified
 	}
-	return b.origHash != md5.Sum([]byte(b.String()))
+
+	var buff [md5.Size]byte
+
+	calcHash(b, &buff)
+	return buff != b.origHash
 }
 
 func (b *Buffer) insert(pos Loc, value []byte) {
@@ -631,7 +693,7 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 	return '\n'
 }
 
-// Line returns a single line as an array of runes
+// LineBytes returns a single line as an array of runes
 func (b *Buffer) LineBytes(n int) []byte {
 	if n >= len(b.lines) {
 		return []byte{}
@@ -639,7 +701,7 @@ func (b *Buffer) LineBytes(n int) []byte {
 	return b.lines[n].data
 }
 
-// Line returns a single line as an array of runes
+// LineRunes returns a single line as an array of runes
 func (b *Buffer) LineRunes(n int) []rune {
 	if n >= len(b.lines) {
 		return []rune{}
@@ -671,8 +733,16 @@ func (b *Buffer) Lines(start, end int) []string {
 }
 
 // Len gives the length of the buffer
-func (b *Buffer) Len() int {
-	return Count(b.String())
+func (b *Buffer) Len() (n int) {
+	for _, l := range b.lines {
+		n += utf8.RuneCount(l.data)
+	}
+
+	if len(b.lines) > 1 {
+		n += len(b.lines) - 1 // account for newlines
+	}
+
+	return
 }
 
 // MoveLinesUp moves the range of lines up one row

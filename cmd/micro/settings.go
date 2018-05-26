@@ -4,11 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/flynn/json5"
 	"github.com/zyedidia/glob"
@@ -391,22 +393,36 @@ func SetLocalOption(option, value string, view *View) error {
 
 	if option == "fastdirty" {
 		// If it is being turned off, we have to hash every open buffer
-		var empty [16]byte
+		var empty [md5.Size]byte
+		var wg sync.WaitGroup
+
 		for _, tab := range tabs {
 			for _, v := range tab.Views {
 				if !nativeValue.(bool) {
 					if v.Buf.origHash == empty {
-						data, err := ioutil.ReadFile(v.Buf.AbsPath)
-						if err != nil {
-							data = []byte{}
-						}
-						v.Buf.origHash = md5.Sum(data)
+						wg.Add(1)
+
+						go func(b *Buffer) { // calculate md5 hash of the file
+							defer wg.Done()
+
+							if file, e := os.Open(b.AbsPath); e == nil {
+								defer file.Close()
+
+								h := md5.New()
+
+								if _, e = io.Copy(h, file); e == nil {
+									h.Sum(b.origHash[:0])
+								}
+							}
+						}(v.Buf)
 					}
 				} else {
 					v.Buf.IsModified = v.Buf.Modified()
 				}
 			}
 		}
+
+		wg.Wait()
 	}
 
 	buf.Settings[option] = nativeValue
