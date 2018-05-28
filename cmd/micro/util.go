@@ -359,7 +359,8 @@ func ReplaceHome(path string) string {
 // GetPath returns a filename without everything following a `:`
 // This is used for opening files like util.go:10:5 to specify a line and column
 func GetPath(path string) string {
-	if strings.Contains(path, ":") {
+	// FIXME -> this breaks the line/column functionality on windows
+	if runtime.GOOS != "windows" && strings.Contains(path, ":") {
 		path = strings.Split(path, ":")[0]
 	}
 	return path

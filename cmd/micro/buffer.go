@@ -19,6 +19,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
+	"runtime"
 )
 
 const LargeFileThreshold = 50000
@@ -114,7 +115,7 @@ func NewBufferFromString(text, path string) *Buffer {
 func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	startpos := Loc{0, 0}
 	startposErr := true
-	if strings.Contains(path, ":") {
+	if runtime.GOOS != "windows" && strings.Contains(path, ":") {
 		var err error
 		split := strings.Split(path, ":")
 		path = split[0]
