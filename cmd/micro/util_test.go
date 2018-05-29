@@ -106,7 +106,13 @@ func TestWidthOfLargeRunes(t *testing.T) {
 
 func assertEqual(t *testing.T, expected interface{}, result interface{}) {
 	if expected != result {
-		t.Fatalf("Expected: %s != Got: %s", expected, result)
+		t.Fatalf("Expected: %d != Got: %d", expected, result)
+	}
+}
+
+func assertTrue(t *testing.T, condition bool) {
+	if !condition {
+		t.Fatalf("Condition was not true. Got false")
 	}
 }
 
@@ -293,4 +299,43 @@ func TestGetPathAbsoluteUnixOnlyLine(t *testing.T) {
 	assertEqual(t, path, "/home/user/myfile")
 	assertEqual(t, "10", cursorPosition[0])
 	assertEqual(t, "0", cursorPosition[1])
+}
+func TestParseCursorLocationOneArg(t *testing.T) {
+	location, err := ParseCursorLocation([]string{"3"})
+
+	assertEqual(t, 3, location.Y)
+	assertEqual(t, 0, location.X)
+	assertEqual(t, nil, err)
+}
+func TestParseCursorLocationTwoArgs(t *testing.T) {
+	location, err := ParseCursorLocation([]string{"3", "15"})
+
+	assertEqual(t, 3, location.Y)
+	assertEqual(t, 15, location.X)
+	assertEqual(t, nil, err)
+}
+func TestParseCursorLocationNoArgs(t *testing.T) {
+	location, err := ParseCursorLocation([]string{})
+	// the expected result is the start position - 0, 0
+	assertEqual(t, 0, location.Y)
+	assertEqual(t, 0, location.X)
+	assertEqual(t, nil, err)
+}
+func TestParseCursorLocationFirstArgNotValidNumber(t *testing.T) {
+	// the messenger is necessary as ParseCursorLocation
+	// puts a message in it on error
+	messenger = new(Messenger)
+	_, err := ParseCursorLocation([]string{"apples", "1"})
+	// the expected result is the start position - 0, 0
+	assertTrue(t, messenger.hasMessage)
+	assertTrue(t, err != nil)
+}
+func TestParseCursorLocationSecondArgNotValidNumber(t *testing.T) {
+	// the messenger is necessary as ParseCursorLocation
+	// puts a message in it on error
+	messenger = new(Messenger)
+	_, err := ParseCursorLocation([]string{"1", "apples"})
+	// the expected result is the start position - 0, 0
+	assertTrue(t, messenger.hasMessage)
+	assertTrue(t, err != nil)
 }
