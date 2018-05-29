@@ -19,7 +19,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
-	"runtime"
 )
 
 const LargeFileThreshold = 50000
@@ -83,7 +82,7 @@ type SerializedBuffer struct {
 // It will return an empty buffer if the filepath does not exist
 // and an error if the file is a directory
 func NewBufferFromFile(path string) (*Buffer, error) {
-	filename := GetPath(path)
+	filename, _ := GetPath(path)
 	filename = ReplaceHome(filename)
 	file, err := os.Open(filename)
 	fileInfo, _ := os.Stat(filename)
@@ -111,21 +110,25 @@ func NewBufferFromString(text, path string) *Buffer {
 	return NewBuffer(strings.NewReader(text), int64(len(text)), path)
 }
 
+// TODO move the cursor position code into GetPath and change the signature of NewBuffer to take a Loc
+// this will require changing NewBufferFromString to pass in Loc{0, 0}
+
 // NewBuffer creates a new buffer from a given reader with a given path
 func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	startpos := Loc{0, 0}
 	startposErr := true
-	if runtime.GOOS != "windows" && strings.Contains(path, ":") {
+	if strings.Contains(path, ":") {
 		var err error
-		split := strings.Split(path, ":")
-		path = split[0]
-		startpos.Y, err = strconv.Atoi(split[1])
+		var cursorPosition []string
+
+		path, cursorPosition = GetPath(path)
+		startpos.Y, err = strconv.Atoi(cursorPosition[0])
 		if err != nil {
 			messenger.Error("Error opening file: ", err)
 		} else {
 			startposErr = false
-			if len(split) > 2 {
-				startpos.X, err = strconv.Atoi(split[2])
+			if len(cursorPosition) > 1 {
+				startpos.X, err = strconv.Atoi(cursorPosition[1])
 				if err != nil {
 					messenger.Error("Error opening file: ", err)
 				}
