@@ -1,0 +1,48 @@
+filetype: fsharp
+
+detect:
+    filename: "\\.fs?$"
+
+rules:
+    - identifier: "\\b[A-Z][0-9a-z_]{2,}\\b"
+      #declarations
+    - statement: "\\b(let|val|method|in|and|rec|private|virtual|constraint)\\b"
+      #structure items
+    - type: "\\b(type|open|class|module|exception|external)\\b"
+      #patterns
+    - statement: "\\b(fun|function|functor|match|try|with)\\b"
+      #patterns-modifiers
+    - statement: "\\b(as|when|of)\\b" 
+      #conditions
+    - statement: "\\b(if|then|else)\\b"
+      #blocs
+    - type: "\\b(begin|end|object|struct|sig|for|while|do|done|to|downto)\\b"
+      #constantes
+    - constant.bool: "\\b(true|false)\\b"
+      #modules/classes
+    - special: "\\b(include|inherit|initializer)\\b"
+      #expr modifiers
+    - special: "\\b(new|ref|mutable|lazy|assert|raise)\\b"
+      #keywords which don't exist in ocaml
+    - type: "\\b(base|delegate|downcast|extern|finally|fixed|global|inline|interface|internal|let!|member|namespace|null|override|private|public)\\b"
+    - type: "\\b(return|return!|select|static|upcast|use|use!|void|yield|yield!)\\b"
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+    - comment:
+        start: "\\(\\*"
+        end: "\\*\\)"
+        rules: []
