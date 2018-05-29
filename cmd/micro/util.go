@@ -360,8 +360,38 @@ func ReplaceHome(path string) string {
 // This is used for opening files like util.go:10:5 to specify a line and column
 func GetPath(path string) string {
 	// FIXME -> this breaks the line/column functionality on windows
-	if runtime.GOOS != "windows" && strings.Contains(path, ":") {
-		path = strings.Split(path, ":")[0]
+	// so what's possible
+	// -> Relative file no dot (any OS): myfile:10:5
+	// -> Relative file (any OS): ./myfile:10:5
+	// -> Absolute file (Windows): W:/myfile:10:5
+	// -> Absolute file (Unix): /home/dtasev/myfile:10:5
+	// naive => string[1] == :
+	//		- fails when filename is length of 1 -> file "f" => f:5
+
+	// if current OS is Windows and the absolute path is provided this will be a string of the type C:\dir\files...
+	// if the user has passed a line/column then the last index of the colon will NOT be at position ^ after the drive
+	// letter, but somewhere else. The exception is a single letter file
+	if runtime.GOOS == "windows" {
+		// TODO handle single letter file later
+		lastColonIndex := strings.LastIndex(path, ":")
+
+		// if the colon index is after the position of the drive letter,
+		// that it is possible that there is more than one colon
+		if lastColonIndex > 1 {
+			// if the drive letter colon is present correctly cuts the filename out
+			if path[1] == ':' {
+				// capture the drive letter with the [:2]. We cannot use the lastColonIndex variable
+				// as the syntax supports two colons at the end - for line and column (:10:5)
+				path = path[:2] + strings.Split(path[2:], ":")[0]
+			} else {
+				// the drive letter is not present, just retrieve the filename
+				path = strings.Split(path, ":")[0]
+			}
+		}
+	} else {
+		if strings.Contains(path, ":") {
+			path = strings.Split(path, ":")[0]
+		}
 	}
 	return path
 }
