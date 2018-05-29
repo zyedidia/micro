@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/mattn/go-runewidth"
+	"regexp"
 )
 
 // Util.go is a collection of utility functions that are used throughout
@@ -356,50 +357,43 @@ func ReplaceHome(path string) string {
 	return strings.Replace(path, homeString, home, 1)
 }
 
-// GetPath returns a filename without everything following a `:`
+// GetPathAndCursorPosition returns a filename without everything following a `:`
 // This is used for opening files like util.go:10:5 to specify a line and column
-func GetPath(path string) (string, []string) {
-	// so what's possible
-	// -> Relative file no dot (any OS): myfile:10:5
-	// -> Relative file (any OS): ./myfile:10:5
-	// -> Absolute file (Windows): W:/myfile:10:5
-	// -> Absolute file (Unix): /home/dtasev/myfile:10:5
-	// naive => string[1] == :
-	//		- fails when filename is length of 1 -> file "f" => f:5
+// Special cases like Windows Absolute path (C:\myfile.txt:10:5) are handled correctly.
+func GetPathAndCursorPosition(path string) (string, []string) {
+	re := regexp.MustCompile(`([\s\S]+?)(?::(\d+))(?::(\d+))?`)
+	match := re.FindStringSubmatch(path)
+	// no lines/columns were specified in the path, return just the path with cursor at 0, 0
+	if len(match) == 0 {
+		return path, []string{"0", "0"}
+	} else if match[len(match)-1] != "" {
+		// if the last capture group match isn't empty then both line and column were provided
+		return match[1], match[2:]
+	}
+	// if it was empty, then only a line was provided, so default to column 0
+	return match[1], []string{match[2], "0"}
+}
 
-	var cursorPosition []string
-	// TODO maybe make easier with strings.Count(path, ":") or maybe not
-	if strings.Contains(path, ":") {
-		// if current OS is Windows and the absolute path is provided this will be a string of the type C:\dir\files...
-		// if the user has passed a line/column then the last index of the colon will NOT be at position ^ after the drive
-		var driveLetter = ""
-		var pathSplit []string
-		if runtime.GOOS == "windows" {
-			// TODO handle single letter file later
-			lastColonIndex := strings.LastIndex(path, ":")
+func ParseCursorLocation(cursorPositions []string) (Loc, error) {
+	startpos := Loc{0, 0}
+	var err error
 
-			// if the colon index is after the position of the drive letter,
-			// that it is possible that there is more than one colon
-			if lastColonIndex > 1 {
-				// if the drive letter colon is present correctly cuts the filename out
-				if path[1] == ':' {
-					// capture the drive letter with the [:2]. We cannot use the lastColonIndex variable
-					// as the syntax supports two colons at the end - for line and column (:10:5)
-					driveLetter = path[:2]
-					pathSplit = strings.Split(path[2:], ":")
-				} else {
-					// the drive letter is not present, just retrieve the filename
-					pathSplit = strings.Split(path, ":")
-				}
-			}
-		} else {
-			pathSplit = strings.Split(path, ":")
-		}
-		path = driveLetter + pathSplit[0]
-		cursorPosition = pathSplit[1:]
-	} else {
-		cursorPosition = []string{"0", "0"}
+	// if no positions are available exit early
+	if len(cursorPositions) == 0 {
+		return startpos, err
 	}
 
-	return path, cursorPosition
+	startpos.Y, err = strconv.Atoi(cursorPositions[0])
+	if err != nil {
+		messenger.Error("Error parsing cursor position: ", err)
+	} else {
+		if len(cursorPositions) > 1 {
+			startpos.X, err = strconv.Atoi(cursorPositions[1])
+			if err != nil {
+				messenger.Error("Error parsing cursor position: ", err)
+			}
+		}
+	}
+
+	return startpos, err
 }

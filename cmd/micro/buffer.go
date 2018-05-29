@@ -82,7 +82,7 @@ type SerializedBuffer struct {
 // It will return an empty buffer if the filepath does not exist
 // and an error if the file is a directory
 func NewBufferFromFile(path string) (*Buffer, error) {
-	filename, _ := GetPath(path)
+	filename, cursorPosition := GetPathAndCursorPosition(path)
 	filename = ReplaceHome(filename)
 	file, err := os.Open(filename)
 	fileInfo, _ := os.Stat(filename)
@@ -98,7 +98,7 @@ func NewBufferFromFile(path string) (*Buffer, error) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", path)
 	} else {
-		buf = NewBuffer(file, FSize(file), path)
+		buf = NewBuffer(file, FSize(file), path, cursorPosition)
 	}
 
 	return buf, nil
@@ -107,34 +107,12 @@ func NewBufferFromFile(path string) (*Buffer, error) {
 // NewBufferFromString creates a new buffer containing the given
 // string
 func NewBufferFromString(text, path string) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path)
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, []string{"0", "0"})
 }
 
-// TODO move the cursor position code into GetPath and change the signature of NewBuffer to take a Loc
-// this will require changing NewBufferFromString to pass in Loc{0, 0}
-
 // NewBuffer creates a new buffer from a given reader with a given path
-func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
-	startpos := Loc{0, 0}
-	startposErr := true
-	if strings.Contains(path, ":") {
-		var err error
-		var cursorPosition []string
-
-		path, cursorPosition = GetPath(path)
-		startpos.Y, err = strconv.Atoi(cursorPosition[0])
-		if err != nil {
-			messenger.Error("Error opening file: ", err)
-		} else {
-			startposErr = false
-			if len(cursorPosition) > 1 {
-				startpos.X, err = strconv.Atoi(cursorPosition[1])
-				if err != nil {
-					messenger.Error("Error opening file: ", err)
-				}
-			}
-		}
-	}
+func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string) *Buffer {
+	cursorLocation, cursorLocationError := ParseCursorLocation(cursorPosition)
 
 	if path != "" {
 		for _, tab := range tabs {
@@ -182,15 +160,15 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	// Put the cursor at the first spot
 	cursorStartX := 0
 	cursorStartY := 0
-	// If -startpos LINE,COL was passed, use start position LINE,COL
-	if len(*flagStartPos) > 0 || !startposErr {
+	// If -cursorLocation LINE,COL was passed, use start position LINE,COL
+	if len(*flagStartPos) > 0 || cursorLocationError == nil {
 		positions := strings.Split(*flagStartPos, ",")
-		if len(positions) == 2 || !startposErr {
+		if len(positions) == 2 || cursorLocationError == nil {
 			var lineNum, colNum int
 			var errPos1, errPos2 error
-			if !startposErr {
-				lineNum = startpos.Y
-				colNum = startpos.X
+			if cursorLocationError == nil {
+				lineNum = cursorLocation.Y
+				colNum = cursorLocation.X
 			} else {
 				lineNum, errPos1 = strconv.Atoi(positions[0])
 				colNum, errPos2 = strconv.Atoi(positions[1])
@@ -223,7 +201,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 
 	InitLocalSettings(b)
 
-	if startposErr && len(*flagStartPos) == 0 && (b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool)) {
+	if cursorLocationError != nil && len(*flagStartPos) == 0 && (b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool)) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))
