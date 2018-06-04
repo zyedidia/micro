@@ -106,7 +106,7 @@ func TestWidthOfLargeRunes(t *testing.T) {
 
 func assertEqual(t *testing.T, expected interface{}, result interface{}) {
 	if expected != result {
-		t.Fatalf("Expected: %d != Got: %d", expected, result)
+		t.Fatalf("Expected: %s != Got: %s", expected, result)
 	}
 }
 
@@ -150,64 +150,56 @@ func TestGetPathAbsoluteWindows(t *testing.T) {
 
 	assertEqual(t, path, "C:/myfile")
 	assertEqual(t, "10", cursorPosition[0])
-
-	assertEqual(t, cursorPosition[1], "5")
+	assertEqual(t, "5", cursorPosition[1])
 }
+
 func TestGetPathAbsoluteUnix(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("/home/user/myfile:10:5")
 
 	assertEqual(t, path, "/home/user/myfile")
 	assertEqual(t, "10", cursorPosition[0])
-
-	assertEqual(t, cursorPosition[1], "5")
+	assertEqual(t, "5", cursorPosition[1])
 }
 
 func TestGetPathRelativeWithDotWithoutLineAndColumn(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("./myfile")
 
 	assertEqual(t, path, "./myfile")
-	assertEqual(t, "0", cursorPosition[0])
-
-	assertEqual(t, "0", cursorPosition[1])
+	// no cursor position in filename, nil should be returned
+	assertTrue(t, cursorPosition == nil)
 }
 func TestGetPathRelativeWithDotWindowsWithoutLineAndColumn(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition(".\\myfile")
 
 	assertEqual(t, path, ".\\myfile")
-	assertEqual(t, "0", cursorPosition[0])
+	assertTrue(t, cursorPosition == nil)
 
-	assertEqual(t, "0", cursorPosition[1])
 }
 func TestGetPathRelativeNoDotWithoutLineAndColumn(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("myfile")
 
 	assertEqual(t, path, "myfile")
-	assertEqual(t, "0", cursorPosition[0])
+	assertTrue(t, cursorPosition == nil)
 
-	assertEqual(t, "0", cursorPosition[1])
 }
 func TestGetPathAbsoluteWindowsWithoutLineAndColumn(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("C:\\myfile")
 
 	assertEqual(t, path, "C:\\myfile")
-	assertEqual(t, "0", cursorPosition[0])
-
-	assertEqual(t, "0", cursorPosition[1])
+	assertTrue(t, cursorPosition == nil)
 
 	path, cursorPosition = GetPathAndCursorPosition("C:/myfile")
 
 	assertEqual(t, path, "C:/myfile")
-	assertEqual(t, "0", cursorPosition[0])
+	assertTrue(t, cursorPosition == nil)
 
-	assertEqual(t, "0", cursorPosition[1])
 }
 func TestGetPathAbsoluteUnixWithoutLineAndColumn(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("/home/user/myfile")
 
 	assertEqual(t, path, "/home/user/myfile")
-	assertEqual(t, "0", cursorPosition[0])
+	assertTrue(t, cursorPosition == nil)
 
-	assertEqual(t, "0", cursorPosition[1])
 }
 func TestGetPathSingleLetterFileRelativePath(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("a:5:6")
@@ -240,25 +232,22 @@ func TestGetPathSingleLetterFileAbsolutePathWindowsWithoutLineAndColumn(t *testi
 	path, cursorPosition := GetPathAndCursorPosition("C:\\a")
 
 	assertEqual(t, path, "C:\\a")
-	assertEqual(t, "0", cursorPosition[0])
-
-	assertEqual(t, "0", cursorPosition[1])
+	assertTrue(t, cursorPosition == nil)
 
 	path, cursorPosition = GetPathAndCursorPosition("C:/a")
 
 	assertEqual(t, path, "C:/a")
-	assertEqual(t, "0", cursorPosition[0])
-	assertEqual(t, "0", cursorPosition[1])
+	assertTrue(t, cursorPosition == nil)
+
 }
 func TestGetPathSingleLetterFileAbsolutePathUnixWithoutLineAndColumn(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("/home/user/a")
 
 	assertEqual(t, path, "/home/user/a")
-	assertEqual(t, "0", cursorPosition[0])
-	assertEqual(t, "0", cursorPosition[1])
+	assertTrue(t, cursorPosition == nil)
+
 }
 
-// TODO test for only line without a column
 func TestGetPathRelativeWithDotOnlyLine(t *testing.T) {
 	path, cursorPosition := GetPathAndCursorPosition("./myfile:10")
 
@@ -315,11 +304,12 @@ func TestParseCursorLocationTwoArgs(t *testing.T) {
 	assertEqual(t, nil, err)
 }
 func TestParseCursorLocationNoArgs(t *testing.T) {
-	location, err := ParseCursorLocation([]string{})
+	location, err := ParseCursorLocation(nil)
 	// the expected result is the start position - 0, 0
 	assertEqual(t, 0, location.Y)
 	assertEqual(t, 0, location.X)
-	assertEqual(t, nil, err)
+	// an error will be present here as the positions we're parsing are a nil
+	assertTrue(t, err != nil)
 }
 func TestParseCursorLocationFirstArgNotValidNumber(t *testing.T) {
 	// the messenger is necessary as ParseCursorLocation
