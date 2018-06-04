@@ -13,6 +13,7 @@ import (
 
 	"github.com/mattn/go-runewidth"
 	"regexp"
+	"github.com/go-errors/errors"
 )
 
 // Util.go is a collection of utility functions that are used throughout
@@ -363,9 +364,9 @@ func ReplaceHome(path string) string {
 func GetPathAndCursorPosition(path string) (string, []string) {
 	re := regexp.MustCompile(`([\s\S]+?)(?::(\d+))(?::(\d+))?`)
 	match := re.FindStringSubmatch(path)
-	// no lines/columns were specified in the path, return just the path with cursor at 0, 0
+	// no lines/columns were specified in the path, return just the path with no cursor location
 	if len(match) == 0 {
-		return path, []string{"0", "0"}
+		return path, nil
 	} else if match[len(match)-1] != "" {
 		// if the last capture group match isn't empty then both line and column were provided
 		return match[1], match[2:]
@@ -379,8 +380,8 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 	var err error
 
 	// if no positions are available exit early
-	if len(cursorPositions) == 0 {
-		return startpos, err
+	if cursorPositions == nil {
+		return startpos, errors.New("No cursor positions were provided.")
 	}
 
 	startpos.Y, err = strconv.Atoi(cursorPositions[0])
