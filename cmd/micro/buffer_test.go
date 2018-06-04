@@ -24,7 +24,8 @@ func TestGetBufferCursorLocationStartposFlag(t *testing.T) {
 
 	location, err := GetBufferCursorLocation(nil, buf)
 
-	assertTrue(t, 1 == location.Y)
+	// note: 1 is subtracted from the line to get the correct index in the buffer
+	assertTrue(t, 0 == location.Y)
 	assertTrue(t, 2 == location.X)
 
 	// an error is present due to the cursorLocation being nil
@@ -54,7 +55,8 @@ func TestGetBufferCursorLocationStartposFlagAndCursorPosition(t *testing.T) {
 
 	location, err := GetBufferCursorLocation(cursorPosition, buf)
 	// expect to have the flag positions, not the cursor position
-	assertEqual(t, 1, location.Y)
+	// note: 1 is subtracted from the line to get the correct index in the buffer
+	assertEqual(t, 0, location.Y)
 	assertEqual(t, 2, location.X)
 
 	assertTrue(t, err == nil)
@@ -69,7 +71,8 @@ func TestGetBufferCursorLocationCursorPositionAndInvalidStartposFlag(t *testing.
 
 	location, err := GetBufferCursorLocation(cursorPosition, buf)
 	// expect to have the flag positions, not the cursor position
-	assertEqual(t, 3, location.Y)
+	// note: 1 is subtracted from the line to get the correct index in the buffer
+	assertEqual(t, 2, location.Y)
 	assertEqual(t, 1, location.X)
 
 	// no errors this time as cursorPosition is not nil
