@@ -224,28 +224,29 @@ func GetBufferCursorLocation(cursorPosition []string, b *Buffer) (Loc, error) {
 		if len(positions) == 2 {
 			lineNum, errPos1 = strconv.Atoi(positions[0])
 			colNum, errPos2 = strconv.Atoi(positions[1])
-		} else if cursorLocationError == nil {
+		}
+		// if -startpos has invalid arguments, use the arguments from filename.
+		// This will have a default value (0, 0) even when the filename arguments are invalid
+		if errPos1 != nil || errPos2 != nil {
 			// otherwise check if there are any arguments after the filename and use them
 			lineNum = cursorLocation.Y
 			colNum = cursorLocation.X
 		}
 
 		// if some arguments were found make sure they don't go outside the file and cause overflows
-		if errPos1 == nil && errPos2 == nil {
-			cursorLocation.X = colNum
-			cursorLocation.Y = lineNum - 1
-			// Check to avoid line overflow
-			if cursorLocation.Y > b.NumLines - 1 {
-				cursorLocation.Y = b.NumLines - 1
-			} else if cursorLocation.Y < 0 {
-				cursorLocation.Y = 0
-			}
-			// Check to avoid column overflow
-			if cursorLocation.X > len(b.Line(cursorLocation.Y)) {
-				cursorLocation.X = len(b.Line(cursorLocation.Y))
-			} else if cursorLocation.X < 0 {
-				cursorLocation.X = 0
-			}
+		cursorLocation.X = colNum
+		cursorLocation.Y = lineNum - 1
+		// Check to avoid line overflow
+		if cursorLocation.Y > b.NumLines-1 {
+			cursorLocation.Y = b.NumLines - 1
+		} else if cursorLocation.Y < 0 {
+			cursorLocation.Y = 0
+		}
+		// Check to avoid column overflow
+		if cursorLocation.X > len(b.Line(cursorLocation.Y)) {
+			cursorLocation.X = len(b.Line(cursorLocation.Y))
+		} else if cursorLocation.X < 0 {
+			cursorLocation.X = 0
 		}
 	}
 	return cursorLocation, cursorLocationError
