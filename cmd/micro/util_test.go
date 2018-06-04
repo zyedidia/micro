@@ -106,7 +106,7 @@ func TestWidthOfLargeRunes(t *testing.T) {
 
 func assertEqual(t *testing.T, expected interface{}, result interface{}) {
 	if expected != result {
-		t.Fatalf("Expected: %s != Got: %s", expected, result)
+		t.Fatalf("Expected: %d != Got: %d", expected, result)
 	}
 }
 
