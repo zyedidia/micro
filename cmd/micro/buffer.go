@@ -106,13 +106,12 @@ func NewBufferFromFile(path string) (*Buffer, error) {
 
 // NewBufferFromString creates a new buffer containing the given string
 func NewBufferFromString(text, path string) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path, []string{"0", "0"})
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, nil)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
 func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string) *Buffer {
-	cursorLocation, cursorLocationError := ParseCursorLocation(cursorPosition)
-
+	// check if the file is already open in a tab. If it's open return the buffer to that tab
 	if path != "" {
 		for _, tab := range tabs {
 			for _, view := range tab.Views {
@@ -156,45 +155,9 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 		os.Mkdir(configDir+"/buffers/", os.ModePerm)
 	}
 
-	// Put the cursor at the first spot
-	cursorStartX := 0
-	cursorStartY := 0
-	// If -cursorLocation LINE,COL was passed, use start position LINE,COL
-	if len(*flagStartPos) > 0 || cursorLocationError == nil {
-		positions := strings.Split(*flagStartPos, ",")
-		if len(positions) == 2 || cursorLocationError == nil {
-			var lineNum, colNum int
-			var errPos1, errPos2 error
-			if cursorLocationError == nil {
-				lineNum = cursorLocation.Y
-				colNum = cursorLocation.X
-			} else {
-				lineNum, errPos1 = strconv.Atoi(positions[0])
-				colNum, errPos2 = strconv.Atoi(positions[1])
-			}
-			if errPos1 == nil && errPos2 == nil {
-				cursorStartX = colNum
-				cursorStartY = lineNum - 1
-				// Check to avoid line overflow
-				if cursorStartY > b.NumLines {
-					cursorStartY = b.NumLines - 1
-				} else if cursorStartY < 0 {
-					cursorStartY = 0
-				}
-				// Check to avoid column overflow
-				if cursorStartX > len(b.Line(cursorStartY)) {
-					cursorStartX = len(b.Line(cursorStartY))
-				} else if cursorStartX < 0 {
-					cursorStartX = 0
-				}
-			}
-		}
-	}
+	cursorLocation, cursorLocationError := GetBufferCursorLocation(cursorPosition, b)
 	b.Cursor = Cursor{
-		Loc: Loc{
-			X: cursorStartX,
-			Y: cursorStartY,
-		},
+		Loc: cursorLocation,
 		buf: b,
 	}
 
@@ -241,6 +204,51 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	b.cursors = []*Cursor{&b.Cursor}
 
 	return b
+}
+
+func GetBufferCursorLocation(cursorPosition []string, b *Buffer) (Loc, error) {
+	// parse the cursor position. The cursor location is ALWAYS initialised to 0, 0 even when
+	// an error occurs due to lack of arguments or because the arguments are not numbers
+	cursorLocation, cursorLocationError := ParseCursorLocation(cursorPosition)
+
+	// Put the cursor at the first spot. In the logic for cursor position the -startpos
+	// flag is processed first and will overwrite any line/col parameters with colons after the filename
+	if len(*flagStartPos) > 0 || cursorLocationError == nil {
+		var lineNum, colNum int
+		var errPos1, errPos2 error
+
+		positions := strings.Split(*flagStartPos, ",")
+
+		// if the -startpos flag contains enough args use them for the cursor location.
+		// In this case args passed at the end of the filename will be ignored
+		if len(positions) == 2 {
+			lineNum, errPos1 = strconv.Atoi(positions[0])
+			colNum, errPos2 = strconv.Atoi(positions[1])
+		} else if cursorLocationError == nil {
+			// otherwise check if there are any arguments after the filename and use them
+			lineNum = cursorLocation.Y
+			colNum = cursorLocation.X
+		}
+
+		// if some arguments were found make sure they don't go outside the file and cause overflows
+		if errPos1 == nil && errPos2 == nil {
+			cursorLocation.X = colNum
+			cursorLocation.Y = lineNum - 1
+			// Check to avoid line overflow
+			if cursorLocation.Y > b.NumLines - 1 {
+				cursorLocation.Y = b.NumLines - 1
+			} else if cursorLocation.Y < 0 {
+				cursorLocation.Y = 0
+			}
+			// Check to avoid column overflow
+			if cursorLocation.X > len(b.Line(cursorLocation.Y)) {
+				cursorLocation.X = len(b.Line(cursorLocation.Y))
+			} else if cursorLocation.X < 0 {
+				cursorLocation.X = 0
+			}
+		}
+	}
+	return cursorLocation, cursorLocationError
 }
 
 // GetName returns the name that should be displayed in the statusline
