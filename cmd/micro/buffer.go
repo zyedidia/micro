@@ -227,7 +227,7 @@ func GetBufferCursorLocation(cursorPosition []string, b *Buffer) (Loc, error) {
 		}
 		// if -startpos has invalid arguments, use the arguments from filename.
 		// This will have a default value (0, 0) even when the filename arguments are invalid
-		if errPos1 != nil || errPos2 != nil {
+		if errPos1 != nil || errPos2 != nil || len(*flagStartPos) == 0 {
 			// otherwise check if there are any arguments after the filename and use them
 			lineNum = cursorLocation.Y
 			colNum = cursorLocation.X
