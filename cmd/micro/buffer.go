@@ -234,8 +234,8 @@ func GetBufferCursorLocation(cursorPosition []string, b *Buffer) (Loc, error) {
 		}
 
 		// if some arguments were found make sure they don't go outside the file and cause overflows
+		cursorLocation.Y = lineNum
 		cursorLocation.X = colNum
-		cursorLocation.Y = lineNum - 1
 		// Check to avoid line overflow
 		if cursorLocation.Y > b.NumLines-1 {
 			cursorLocation.Y = b.NumLines - 1
