@@ -11,9 +11,9 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/go-errors/errors"
 	"github.com/mattn/go-runewidth"
 	"regexp"
-	"github.com/go-errors/errors"
 )
 
 // Util.go is a collection of utility functions that are used throughout
