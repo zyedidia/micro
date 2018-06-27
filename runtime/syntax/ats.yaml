@@ -84,7 +84,7 @@ rules:
     # "////" comments everything until EOF
     - comment.block:
         start: ////
-        end: (m)$
+        end: $a
         rules:
             - todo: (TODO|XXX|FIXME)
 
