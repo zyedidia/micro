@@ -11,14 +11,14 @@ rules:
     - preproc: ^[[:space:]]*#[[:space:]]*(codegen2|codegen3|elifdef|elifndef|prerr|print|require|then|staload|dynload)\b
 
     # Operators
-    - symbol.operator: "[.:;+`|~<>?='\\&]|/|%|-|,|!|\\*"
+    - symbol.operator: "[.:;+`|~<>?='\\&]|/|%|-|,|!|\\*|@|\\#"
     - symbol.operator: \^
 
     # Types, abstract types and some predefined sorts
     - type: \b(addr|age?z|bool|char|cls|schar|uchar|double|eff|exn|float|int(ptr)?|lincloptr|uint)\b
     - type: \b(lint|ulint|llint|ullint|nat|prop|ptr|prf|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|view|v?t0p|vt|void)\b
     - type: \b(fun[01]|cloptr(0|1)?|cloref(0|1)?|clo(0|1)?)\b
-    - type: \b(prop[+-]|t[@0]ype[+-]?|type[+-]?|viewt[@0]ype[+-]?|viewtype[+-]?|vt[@0]ype[+-]?|vtype[+-]?|view[+-]w)
+    - type: \b(prop[+-]|t[@0]ype[+-]?|type[+-]?|viewt[@0]ype[+-]?|viewtype[+-]?|vt[@0]ype[+-]?|vtype[+-]?|view[+-]?)
 
     # Statements
     - statement: \b(abstype|abst|absprop|absviewt|absvt(ype)?|absview|and|andalso|as|(re)?assume|begin|(pr)?csase|s?case)\b
