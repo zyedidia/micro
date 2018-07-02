@@ -333,7 +333,7 @@ func (c *Cursor) Start() {
 	c.LastVisualX = c.GetVisualX()
 }
 
-// StartOfText moves the cursor to the first non-whitespace rune of 
+// StartOfText moves the cursor to the first non-whitespace rune of
 // the line it is on
 func (c *Cursor) StartOfText() {
 	c.Start()
