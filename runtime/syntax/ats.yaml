@@ -12,8 +12,9 @@ rules:
 
     # Types, abstract types and some predefined sorts
     - type: \b(addr|age?z|bool|char|cls|schar|uchar|double|eff|exn|float|int(ptr)?|lincloptr|uint)\b
-    - type: \b(lint|ulint|llint|ullint|nat|prop|ptr|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|v?t0p|vt|void)\b
-    - type: \b(prop[+-]|t[@0]ype[+-]?|type[+-]?|t|viewt[@0]ype[+-]?|viewtype[+-]?|vt[@0]ype[+-]?|vtype[+-]?|view[+-]?)
+    - type: \b(lint|ulint|llint|ullint|nat|ptr|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|v?t0p|vt|void)\b
+    - type: \b(prop|t[@0]ype|type|viewt[@0]ype|viewtype|vt[@0]ype|vtype|view)\b
+    - type: \b(prop[+-]|t[@0]ype[+-]|type[+-]|t|viewt[@0]ype[+-]|viewtype[+-]|vt[@0]ype[+-]|vtype[+-]|view[+-])
 
     # Statements
     - statement: \b(abstype|abst|absprop|absviewt|absvt(ype)?|absview|and|andalso|as|(re)?assume|begin|(pr)?case|s?case)\b
