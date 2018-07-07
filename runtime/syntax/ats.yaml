@@ -6,32 +6,25 @@ detect:
 rules:
     - default: \b[[:alnum:]]+[^0-9A-Za-z]
 
-    # Some C macros and other ATS macros
-    - preproc: ^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error|assert)\b
-    - preproc: ^[[:space:]]*#[[:space:]]*(codegen2|codegen3|elifdef|elifndef|prerr|print|require|then|staload|dynload)\b
-
     # Operators
     - symbol.operator: "[.:;+`|~<>?='\\&]|/|%|-|,|!|\\*|@|\\#"
     - symbol.operator: \^
 
     # Types, abstract types and some predefined sorts
     - type: \b(addr|age?z|bool|char|cls|schar|uchar|double|eff|exn|float|int(ptr)?|lincloptr|uint)\b
-    - type: \b(lint|ulint|llint|ullint|nat|prop|ptr|prf|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|view|v?t0p|vt|void)\b
-    - type: \b(fun[01]|cloptr(0|1)?|cloref(0|1)?|clo(0|1)?)\b
-    - type: \b(prop[+-]|t[@0]ype[+-]?|type[+-]?|viewt[@0]ype[+-]?|viewtype[+-]?|vt[@0]ype[+-]?|vtype[+-]?|view[+-]?)
+    - type: \b(lint|ulint|llint|ullint|nat|prop|ptr|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|v?t0p|vt|void)\b
+    - type: \b(prop[+-]|t[@0]ype[+-]?|type[+-]?|t|viewt[@0]ype[+-]?|viewtype[+-]?|vt[@0]ype[+-]?|vtype[+-]?|view[+-]?)
 
     # Statements
-    - statement: \b(abstype|abst|absprop|absviewt|absvt(ype)?|absview|and|andalso|as|(re)?assume|begin|(pr)?csase|s?case)\b
-    - statement: \b(classdec|dataprop|data(v|view)?type|dataview|datasort|else|end|exception|extype|extvar|s?if)\b
+    - statement: \b(abstype|abst|absprop|absviewt|absvt(ype)?|absview|and|andalso|as|(re)?assume|begin|(pr)?case|s?case)\b
+    - statement: \b(classdec|dataprop|data(v|view)?type|dataview|datasort|do|else|end|exception|extype|extva(r|l)|s?if)\b
     - statement: \b(ifcase|for|in|infix(l|r)?|let|local|macrodef|macdef|not|of|op|or|orelse|overload|(pre|post|non)fix)\b
-    - statement: \b(propdef|rec|sortdef|stacst|stadef|stavar|sta|symelim|symintr|tkindef|then|try|viewdef|v?typedef)\b
+    - statement: \b(propdef|rec|sortdef|stacst|stadef|stavar|sta(tic)?|symelim|symintr|tkindef|then|try|viewdef|v?typedef)\b
     - statement: \b(viewtypedef|(pr)?va(l|r)|when|where|while|with|withtype|withprop|withv(iew)?type|withview)\b
-    - statement: \b(abst[@0]ype|absviewt[@0]ype|absviewtype|absvt[@0]ype)\b
+    - statement: \b(abst[@0]ype|absviewt[@0]?ype|absvt[@0]ype)\b
     - statement: \b(import|staload|dynload)\b
     - statement: \b(case[+-]|(pr)?va(l|r)[+-]|for\*|while\*)
-    # Added in ATS2 0.3.11
-    - statement: \b(abstbox|abstflat|absvtbox|absvtflat)\b
-    - statement: \b(absimpl|absreimpl)\b
+    - statement: \b(abstbox|abstflat|absvtbox|absvtflat|absimpl|absreimpl|abs)\b
 
     # Numbers
     - constant.number: (\b[0-9]+\b|\b0(x|b)[0-9A-Fa-f]+\b)
@@ -50,7 +43,12 @@ rules:
     - special: (\$(rec(ord)?_t|rec(ord)?|(r|l)par|sep|showtype|solver_assert|solver_verify|tempenver))\b
     - special: (\$(tup(le)?_vt|tup(le)?_t|tup(le)?|tyrep|vararg|vcopyenv_vt|vcopyenv_v))\b
     - special: \!(wrt|exnref|exnwrt|exn|refwrt|ref|all|ntm|laz)\b
-    - special: \b(f?print(ln)?!|prerrln!)
+    - special: \b(fun[01]|(lin)?cloptr(0|1)?|cloref(0|1)?|clo(0|1)?|lin|prf)\b
+    - special: \b(f?print(ln)?!|prerr(ln)?!|tupz!)
+
+    # Some C macros and other ATS macros
+    - preproc: ^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error|assert)\b
+    - preproc: ^[[:space:]]*#[[:space:]]*(codegen2|codegen3|elifdef|elifndef|prerr|print|require|then|staload|dynload)\b
 
     # Boolean values
     - constant.bool: \b(true|false|null)\b
