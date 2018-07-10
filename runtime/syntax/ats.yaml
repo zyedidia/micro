@@ -70,13 +70,12 @@ rules:
         end: \"
         skip: \\.
         rules:
-            - constant.specialChar: \\.
+            - constant.specialChar: \\[[:alpha:]]
 
-    - constant.char: ('\\?.')
+    - constant.char: ('\\?.*')
 
 
     # Comments
-
     # "////" comments everything until EOF
     - comment.block:
         start: ////
