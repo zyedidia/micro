@@ -26,8 +26,9 @@ rules:
     - statement: \b(case[+-]|(pr)?va(l|r)[+-]|for\*|while\*)
 
     # Numbers
-    - constant.number: (\b[0-9]+\b|\b0(x|b)[0-9A-Fa-f]+\b)
-    - constant.number: \b[0-9]+(u|U|l|L|ul|UL|f|F|b|B)?\b
+    - constant.number: \b[0-9.]+([eE][+-]?[0-9]+)?[fFlL]?\b
+    - constant.number: \b0[xX][0-9A-Fa-f]*(\.[0-9A-Fa-f]*)?[pP][+-]?[0-9]+[fFlL]?\b
+    - constant.number: \b([0-9]+|0[xX][0-9A-Fa-f]+)[lLuU]*\b
 
     # Function-related keywords, special functions and namespaces. Not really identifiers
     - identifier: \b(fix|(pr)?fu?n|fnx|castfn|praxi|extern|lam|llam|(pr)?implement|(pr)?implmnt)\b
@@ -72,7 +73,11 @@ rules:
         rules:
             - constant.specialChar: \\[[:alpha:]]
 
-    - constant.char: ('\\?.*')
+    - constant.char:
+            start: \'
+            end: \'
+            skip: \\.
+            rules: []
 
 
     # Comments
