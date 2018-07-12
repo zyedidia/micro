@@ -69,15 +69,14 @@ rules:
     - constant.string:
         start: \"
         end: \"
-        skip: \\.
         rules:
-            - constant.specialChar: \\[[:alpha:]]
+            - constant.specialChar: "\\\\."
 
-    - constant.char:
-            start: \'
-            end: \'
-            skip: \\.
-            rules: []
+    - constant.string:
+        start: \'
+        end: \'
+        rules:
+            - constant.specialChar: "\\\\."
 
 
     # Comments
