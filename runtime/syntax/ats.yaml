@@ -54,7 +54,7 @@ rules:
 
 
     # The "%{ ... %}" block inserts foreign code into ATS at compile-time
-    # Code inside it is generally C or JavaScript
+    # Code inside of it is generally C or JavaScript
     - default:
         start: "%{[#^$]?"
         end: "%}"
@@ -66,21 +66,12 @@ rules:
 
 
     # Strings and chars
-    - constant.string:
-        start: \"
-        end: \"
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - constant.string:
-        start: \'
-        end: \'
-        rules:
-            - constant.specialChar: "\\\\."
+    - constant.string: \"[^"]*\"
+    - constant.string: \'[^']*\'
 
 
     # Comments
-    # "////" comments everything until EOF
+    # "////" comments everything until it reaches EOF
     - comment.block:
         start: ////
         end: $a
