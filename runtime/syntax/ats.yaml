@@ -11,7 +11,7 @@ rules:
     - symbol.operator: \^
 
     # Types, abstract types and some predefined sorts
-    - type: \b(addr|age?z|bool|char|cls|schar|uchar|double|eff|exn|float|int(ptr)?|lincloptr|uint)\b
+    - type: \b(addr|age?z|bool|char|cls|schar|uchar|double|ldouble|eff|exn|float|int(ptr)?|lincloptr|uint)\b
     - type: \b(lint|ulint|llint|ullint|nat|ptr|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|v?t0p|vt|void)\b
     - type: \b(prop|t[@0]ype|type|viewt[@0]ype|viewtype|vt[@0]ype|vtype|view)\b
     - type: \b(prop[+-]|t[@0]ype[+-]|type[+-]|viewt[@0]ype[+-]|viewtype[+-]|vt[@0]ype[+-]|vtype[+-]|view[+-])
