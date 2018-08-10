@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path/filepath"
 	"sort"
 
 	"github.com/zyedidia/tcell"
@@ -97,14 +98,26 @@ func CurView() *View {
 func TabbarString() (string, map[int]int) {
 	str := ""
 	indicies := make(map[int]int)
+	unique := make(map[string]int)
+
+	for _, t := range tabs {
+		unique[filepath.Base(t.Views[t.CurView].Buf.GetName())]++
+	}
+
 	for i, t := range tabs {
+		buf := t.Views[t.CurView].Buf
+		name := filepath.Base(buf.GetName())
+
 		if i == curTab {
 			str += "["
 		} else {
 			str += " "
 		}
-		buf := t.Views[t.CurView].Buf
-		str += buf.GetName()
+		if unique[name] == 1 {
+			str += name
+		} else {
+			str += buf.GetName()
+		}
 		if buf.Modified() {
 			str += " +"
 		}
@@ -113,8 +126,9 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		indicies[Count(str)-1] = i + 1
 		str += " "
+
+		indicies[Count(str)-2] = i + 1
 	}
 	return str, indicies
 }
