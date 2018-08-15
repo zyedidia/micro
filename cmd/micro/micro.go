@@ -398,6 +398,9 @@ func main() {
 	// We give plugins access to a bunch of variables here which could be useful to them
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
 	L.SetGlobal("tabs", luar.New(L, tabs))
+	L.SetGlobal("GetTabs", luar.New(L, func() []*Tab {
+		return tabs
+	}))
 	L.SetGlobal("curTab", luar.New(L, curTab))
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
