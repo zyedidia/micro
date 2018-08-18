@@ -198,16 +198,18 @@ func (v *View) ToggleTabbar() {
 }
 
 func (v *View) paste(clip string) {
-	leadingWS := ""
-	if v.Cursor.X > 0 {
-		leadingWS = GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+	if v.Buf.Settings["smartpaste"].(bool) {
+		if v.Cursor.X > 0 && GetLeadingWhitespace(strings.TrimLeft(clip, "\r\n")) == "" {
+			leadingWS := GetLeadingWhitespace(v.Buf.Line(v.Cursor.Y))
+			clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
+		}
 	}
 
 	if v.Cursor.HasSelection() {
 		v.Cursor.DeleteSelection()
 		v.Cursor.ResetSelection()
 	}
-	clip = strings.Replace(clip, "\n", "\n"+leadingWS, -1)
+	
 	v.Buf.Insert(v.Cursor.Loc, clip)
 	// v.Cursor.Loc = v.Cursor.Loc.Move(Count(clip), v.Buf)
 	v.freshClip = false

@@ -164,6 +164,12 @@ Here are the options that you can set:
 
 	default value: `2`
 
+* `smartpaste`: should micro add leading whitespace when pasting multiple lines?
+   This will attempt to preserve the current indentation level when pasting an
+   unindented block.
+
+	default value: `true`
+
 * `softwrap`: should micro wrap lines that are too long to fit on the screen.
 
 	default value: `false`
