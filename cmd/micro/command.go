@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
@@ -590,15 +589,15 @@ func Replace(args []string) {
 	replaceAll := func() {
 		var deltas []Delta
 		for i := 0; i < view.Buf.LinesNum(); i++ {
-			newText := regex.ReplaceAllFunc(view.Buf.lines[i].data, func(in []byte) []byte {
+			for _, submatches := range regex.FindAllSubmatchIndex(view.Buf.lines[i].data, -1) {
+				newText := regex.Expand([]byte{}, replaceBytes, view.Buf.lines[i].data, submatches)
+
+				from := Loc{submatches[0], i}
+				to := Loc{submatches[1], i}
+
+				deltas = append(deltas, Delta{string(newText), from, to})
 				found++
-				return replaceBytes
-			})
-
-			from := Loc{0, i}
-			to := Loc{utf8.RuneCount(view.Buf.lines[i].data), i}
-
-			deltas = append(deltas, Delta{string(newText), from, to})
+			}
 		}
 		view.Buf.MultipleReplace(deltas)
 	}
@@ -631,8 +630,11 @@ func Replace(args []string) {
 				replaceAll()
 				break
 			} else if choice == 'y' {
+				selected := view.Cursor.GetSelection()
+				submatches := regex.FindStringSubmatchIndex(selected)
+				newText := regex.ExpandString([]byte{}, replace, selected, submatches)
 				view.Cursor.DeleteSelection()
-				view.Buf.Insert(view.Cursor.Loc, replace)
+				view.Buf.Insert(view.Cursor.Loc, string(newText))
 				view.Cursor.ResetSelection()
 				messenger.Reset()
 				found++

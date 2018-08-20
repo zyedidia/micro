@@ -43,6 +43,7 @@ func (p *Parser) Parse(line string) ([]string, error) {
 
 	pos := -1
 	got := false
+	wasLiteralQuote := false
 
 loop:
 	for i, r := range line {
@@ -66,10 +67,13 @@ loop:
 				buf += string(r)
 				backtick += string(r)
 			} else if got {
-				buf = replaceEnv(buf)
+				if !wasLiteralQuote {
+					buf = replaceEnv(buf)
+				}
 				args = append(args, buf)
 				buf = ""
 				got = false
+				wasLiteralQuote = false
 			}
 			continue
 		}
@@ -87,8 +91,6 @@ loop:
 				backtick = ""
 				backQuote = !backQuote
 				continue
-				backtick = ""
-				backQuote = !backQuote
 			}
 		case ')':
 			if !singleQuoted && !doubleQuoted && !backQuote {
@@ -102,8 +104,6 @@ loop:
 				backtick = ""
 				dollarQuote = !dollarQuote
 				continue
-				backtick = ""
-				dollarQuote = !dollarQuote
 			}
 		case '(':
 			if !singleQuoted && !doubleQuoted && !backQuote {
@@ -123,6 +123,7 @@ loop:
 		case '\'':
 			if !doubleQuoted && !dollarQuote {
 				singleQuoted = !singleQuoted
+				wasLiteralQuote = true
 				continue
 			}
 		case ';', '&', '|', '<', '>':
@@ -139,7 +140,9 @@ loop:
 		}
 	}
 
-	buf = replaceEnv(buf)
+	if !wasLiteralQuote {
+		buf = replaceEnv(buf)
+	}
 	args = append(args, buf)
 
 	if escaped || singleQuoted || doubleQuoted || backQuote || dollarQuote {
