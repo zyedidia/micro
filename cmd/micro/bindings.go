@@ -17,6 +17,8 @@ var mouseBindings map[Key][]func(*View, bool, *tcell.EventMouse) bool
 var helpBinding string
 var kmenuBinding string
 
+var reverseBindingKeys map[tcell.Key]string
+
 var mouseBindingActions = map[string]func(*View, bool, *tcell.EventMouse) bool{
 	"MousePress":       (*View).MousePress,
 	"MouseMultiCursor": (*View).MouseMultiCursor,
@@ -278,6 +280,11 @@ func InitBindings() {
 	bindings = make(map[Key][]func(*View, bool) bool)
 	bindingsStr = make(map[string]string)
 	mouseBindings = make(map[Key][]func(*View, bool, *tcell.EventMouse) bool)
+
+	reverseBindingKeys = make(map[tcell.Key]string)
+	for k, v := range bindingKeys {
+		reverseBindingKeys[v] = k
+	}
 
 	var parsed map[string]string
 	defaults := DefaultBindings()
