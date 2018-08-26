@@ -1,13 +1,16 @@
 package main
 
 import (
-	"fmt"
+	"errors"
 	"regexp"
 	"strconv"
 	"strings"
 
 	"github.com/zyedidia/tcell"
 )
+
+// Micro's default style
+var defStyle tcell.Style = tcell.StyleDefault
 
 // Colorscheme is a map from string to style -- it represents a colorscheme
 type Colorscheme map[string]tcell.Style
@@ -48,42 +51,41 @@ func ColorschemeExists(colorschemeName string) bool {
 }
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
-func InitColorscheme() {
+func InitColorscheme() error {
 	colorscheme = make(Colorscheme)
-	defStyle = tcell.StyleDefault.
-		Foreground(tcell.ColorDefault).
-		Background(tcell.ColorDefault)
-	if screen != nil {
-		// screen.SetStyle(defStyle)
-	}
+	defStyle = tcell.StyleDefault
 
-	LoadDefaultColorscheme()
+	return LoadDefaultColorscheme()
 }
 
 // LoadDefaultColorscheme loads the default colorscheme from $(configDir)/colorschemes
-func LoadDefaultColorscheme() {
-	LoadColorscheme(globalSettings["colorscheme"].(string))
+func LoadDefaultColorscheme() error {
+	return LoadColorscheme(globalSettings["colorscheme"].(string))
 }
 
 // LoadColorscheme loads the given colorscheme from a directory
-func LoadColorscheme(colorschemeName string) {
+func LoadColorscheme(colorschemeName string) error {
 	file := FindRuntimeFile(RTColorscheme, colorschemeName)
 	if file == nil {
-		TermMessage(colorschemeName, "is not a valid colorscheme")
+		return errors.New(colorschemeName + " is not a valid colorscheme")
+	}
+	if data, err := file.Data(); err != nil {
+		return errors.New("Error loading colorscheme: " + err.Error())
 	} else {
-		if data, err := file.Data(); err != nil {
-			TermMessage("Error loading colorscheme:", err)
-		} else {
-			colorscheme = ParseColorscheme(string(data))
+		colorscheme, err = ParseColorscheme(string(data))
+		if err != nil {
+			return err
 		}
 	}
+	return nil
 }
 
 // ParseColorscheme parses the text definition for a colorscheme and returns the corresponding object
 // Colorschemes are made up of color-link statements linking a color group to a list of colors
 // For example, color-link keyword (blue,red) makes all keywords have a blue foreground and
 // red background
-func ParseColorscheme(text string) Colorscheme {
+func ParseColorscheme(text string) (Colorscheme, error) {
+	var err error
 	parser := regexp.MustCompile(`color-link\s+(\S*)\s+"(.*)"`)
 
 	lines := strings.Split(text, "\n")
@@ -108,15 +110,12 @@ func ParseColorscheme(text string) Colorscheme {
 			if link == "default" {
 				defStyle = style
 			}
-			if screen != nil {
-				// screen.SetStyle(defStyle)
-			}
 		} else {
-			fmt.Println("Color-link statement is not valid:", line)
+			err = errors.New("Color-link statement is not valid: " + line)
 		}
 	}
 
-	return c
+	return c, err
 }
 
 // StringToStyle returns a style from a string

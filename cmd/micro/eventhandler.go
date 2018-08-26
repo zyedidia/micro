@@ -1,11 +1,10 @@
 package main
 
 import (
-	"strings"
 	"time"
+	"unicode/utf8"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
-	"github.com/yuin/gopher-lua"
 )
 
 const (
@@ -30,7 +29,7 @@ type TextEvent struct {
 
 // A Delta is a change to the buffer
 type Delta struct {
-	Text  string
+	Text  []byte
 	Start Loc
 	End   Loc
 }
@@ -39,7 +38,7 @@ type Delta struct {
 func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
 	if t.EventType == TextEventInsert {
 		for _, d := range t.Deltas {
-			buf.insert(d.Start, []byte(d.Text))
+			buf.insert(d.Start, d.Text)
 		}
 	} else if t.EventType == TextEventRemove {
 		for i, d := range t.Deltas {
@@ -48,9 +47,9 @@ func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
 	} else if t.EventType == TextEventReplace {
 		for i, d := range t.Deltas {
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
-			buf.insert(d.Start, []byte(d.Text))
+			buf.insert(d.Start, d.Text)
 			t.Deltas[i].Start = d.Start
-			t.Deltas[i].End = Loc{d.Start.X + Count(d.Text), d.Start.Y}
+			t.Deltas[i].End = Loc{d.Start.X + utf8.RuneCount(d.Text), d.Start.Y}
 		}
 		for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
 			t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
@@ -67,15 +66,15 @@ func UndoTextEvent(t *TextEvent, buf *Buffer) {
 // EventHandler executes text manipulations and allows undoing and redoing
 type EventHandler struct {
 	buf       *Buffer
-	UndoStack *Stack
-	RedoStack *Stack
+	UndoStack *TEStack
+	RedoStack *TEStack
 }
 
 // NewEventHandler returns a new EventHandler
 func NewEventHandler(buf *Buffer) *EventHandler {
 	eh := new(EventHandler)
-	eh.UndoStack = new(Stack)
-	eh.RedoStack = new(Stack)
+	eh.UndoStack = new(TEStack)
+	eh.RedoStack = new(TEStack)
 	eh.buf = buf
 	return eh
 }
@@ -86,38 +85,39 @@ func NewEventHandler(buf *Buffer) *EventHandler {
 // through insert and delete events
 func (eh *EventHandler) ApplyDiff(new string) {
 	differ := dmp.New()
-	diff := differ.DiffMain(eh.buf.String(), new, false)
+	diff := differ.DiffMain(string(eh.buf.Bytes()), new, false)
 	loc := eh.buf.Start()
 	for _, d := range diff {
 		if d.Type == dmp.DiffDelete {
-			eh.Remove(loc, loc.Move(Count(d.Text), eh.buf))
+			eh.Remove(loc, loc.Move(utf8.RuneCountInString(d.Text), eh.buf))
 		} else {
 			if d.Type == dmp.DiffInsert {
 				eh.Insert(loc, d.Text)
 			}
-			loc = loc.Move(Count(d.Text), eh.buf)
+			loc = loc.Move(utf8.RuneCountInString(d.Text), eh.buf)
 		}
 	}
 }
 
 // Insert creates an insert text event and executes it
-func (eh *EventHandler) Insert(start Loc, text string) {
+func (eh *EventHandler) Insert(start Loc, textStr string) {
+	text := []byte(textStr)
 	e := &TextEvent{
-		C:         *eh.buf.cursors[eh.buf.curCursor],
+		C:         *eh.buf.GetActiveCursor(),
 		EventType: TextEventInsert,
 		Deltas:    []Delta{{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
-	e.Deltas[0].End = start.Move(Count(text), eh.buf)
+	e.Deltas[0].End = start.Move(utf8.RuneCount(text), eh.buf)
 	end := e.Deltas[0].End
 
-	for _, c := range eh.buf.cursors {
+	for _, c := range eh.buf.GetCursors() {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-				loc = loc.Move(Count(text), eh.buf)
+				loc = loc.Move(utf8.RuneCount(text), eh.buf)
 			}
 			return loc
 		}
@@ -133,14 +133,14 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 // Remove creates a remove text event and executes it
 func (eh *EventHandler) Remove(start, end Loc) {
 	e := &TextEvent{
-		C:         *eh.buf.cursors[eh.buf.curCursor],
+		C:         *eh.buf.GetActiveCursor(),
 		EventType: TextEventRemove,
-		Deltas:    []Delta{{"", start, end}},
+		Deltas:    []Delta{{[]byte{}, start, end}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
 
-	for _, c := range eh.buf.cursors {
+	for _, c := range eh.buf.GetCursors() {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(end) {
 				loc.Y -= end.Y - start.Y
@@ -161,7 +161,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 // MultipleReplace creates an multiple insertions executes them
 func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 	e := &TextEvent{
-		C:         *eh.buf.cursors[eh.buf.curCursor],
+		C:         *eh.buf.GetActiveCursor(),
 		EventType: TextEventReplace,
 		Deltas:    deltas,
 		Time:      time.Now(),
@@ -178,19 +178,20 @@ func (eh *EventHandler) Replace(start, end Loc, replace string) {
 // Execute a textevent and add it to the undo stack
 func (eh *EventHandler) Execute(t *TextEvent) {
 	if eh.RedoStack.Len() > 0 {
-		eh.RedoStack = new(Stack)
+		eh.RedoStack = new(TEStack)
 	}
 	eh.UndoStack.Push(t)
 
-	for pl := range loadedPlugins {
-		ret, err := Call(pl+".onBeforeTextEvent", t)
-		if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-			TermMessage(err)
-		}
-		if val, ok := ret.(lua.LBool); ok && val == lua.LFalse {
-			return
-		}
-	}
+	// TODO: Call plugins on text events
+	// for pl := range loadedPlugins {
+	// 	ret, err := Call(pl+".onBeforeTextEvent", t)
+	// 	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
+	// 		TermMessage(err)
+	// 	}
+	// 	if val, ok := ret.(lua.LBool); ok && val == lua.LFalse {
+	// 		return
+	// 	}
+	// }
 
 	ExecuteTextEvent(t, eh.buf)
 }
@@ -236,9 +237,9 @@ func (eh *EventHandler) UndoOneEvent() {
 
 	// Set the cursor in the right place
 	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.buf.cursors) {
-		t.C = *eh.buf.cursors[teCursor.Num]
-		eh.buf.cursors[teCursor.Num].Goto(teCursor)
+	if teCursor.Num >= 0 && teCursor.Num < eh.buf.NumCursors() {
+		t.C = *eh.buf.GetCursor(teCursor.Num)
+		eh.buf.GetCursor(teCursor.Num).Goto(teCursor)
 	} else {
 		teCursor.Num = -1
 	}
@@ -283,9 +284,9 @@ func (eh *EventHandler) RedoOneEvent() {
 	UndoTextEvent(t, eh.buf)
 
 	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.buf.cursors) {
-		t.C = *eh.buf.cursors[teCursor.Num]
-		eh.buf.cursors[teCursor.Num].Goto(teCursor)
+	if teCursor.Num >= 0 && teCursor.Num < eh.buf.NumCursors() {
+		t.C = *eh.buf.GetCursor(teCursor.Num)
+		eh.buf.GetCursor(teCursor.Num).Goto(teCursor)
 	} else {
 		teCursor.Num = -1
 	}

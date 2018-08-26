@@ -1,98 +1,116 @@
 package main
 
 import (
+	"bytes"
+	"fmt"
 	"path"
+	"regexp"
 	"strconv"
+	"unicode/utf8"
 )
 
-// Statusline represents the information line at the bottom
-// of each view
+// StatusLine represents the information line at the bottom
+// of each window
 // It gives information such as filename, whether the file has been
 // modified, filetype, cursor location
-type Statusline struct {
-	view *View
+type StatusLine struct {
+	FormatLeft  string
+	FormatRight string
+	Info        map[string]func(*Buffer) string
+
+	win *Window
 }
 
+// TODO: plugin modify status line formatter
+
+// NewStatusLine returns a statusline bound to a window
+func NewStatusLine(win *Window) *StatusLine {
+	s := new(StatusLine)
+	// s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
+	s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
+	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): open help"
+	s.Info = map[string]func(*Buffer) string{
+		"filename": func(b *Buffer) string {
+			if b.Settings["basename"].(bool) {
+				return path.Base(b.GetName())
+			}
+			return b.GetName()
+		},
+		"line": func(b *Buffer) string {
+			return strconv.Itoa(b.GetActiveCursor().Y)
+		},
+		"col": func(b *Buffer) string {
+			return strconv.Itoa(b.GetActiveCursor().X)
+		},
+		"modified": func(b *Buffer) string {
+			if b.Modified() {
+				return "+ "
+			}
+			return ""
+		},
+	}
+	s.win = win
+	return s
+}
+
+// FindOpt finds a given option in the current buffer's settings
+func (s *StatusLine) FindOpt(opt string) interface{} {
+	if val, ok := s.win.Buf.Settings[opt]; ok {
+		return val
+	}
+	return "null"
+}
+
+var formatParser = regexp.MustCompile(`\$\(.+?\)`)
+
 // Display draws the statusline to the screen
-func (sline *Statusline) Display() {
-	if messenger.hasPrompt && !GetGlobalOption("infobar").(bool) {
-		return
-	}
+func (s *StatusLine) Display() {
+	// TODO: don't display if infobar off and has message
+	// if !GetGlobalOption("infobar").(bool) {
+	// 	return
+	// }
 
-	// We'll draw the line at the lowest line in the view
-	y := sline.view.Height + sline.view.y
+	// We'll draw the line at the lowest line in the window
+	y := s.win.Height + s.win.Y
 
-	file := sline.view.Buf.GetName()
-	if sline.view.Buf.Settings["basename"].(bool) {
-		file = path.Base(file)
-	}
-
-	// If the buffer is dirty (has been modified) write a little '+'
-	if sline.view.Buf.Modified() {
-		file += " +"
-	}
-
-	// Add one to cursor.x and cursor.y because (0,0) is the top left,
-	// but users will be used to (1,1) (first line,first column)
-	// We use GetVisualX() here because otherwise we get the column number in runes
-	// so a '\t' is only 1, when it should be tabSize
-	columnNum := strconv.Itoa(sline.view.Cursor.GetVisualX() + 1)
-	lineNum := strconv.Itoa(sline.view.Cursor.Y + 1)
-
-	file += " (" + lineNum + "," + columnNum + ")"
-
-	// Add the filetype
-	file += " " + sline.view.Buf.FileType()
-
-	file += " " + sline.view.Buf.Settings["fileformat"].(string)
-
-	rightText := ""
-	if !sline.view.Buf.Settings["hidehelp"].(bool) {
-		if len(kmenuBinding) > 0 {
-			if globalSettings["keymenu"].(bool) {
-				rightText += kmenuBinding + ": hide bindings"
-			} else {
-				rightText += kmenuBinding + ": show bindings"
-			}
+	formatter := func(match []byte) []byte {
+		name := match[2 : len(match)-1]
+		if bytes.HasPrefix(name, []byte("opt")) {
+			option := name[4:]
+			return []byte(fmt.Sprint(s.FindOpt(string(option))))
+		} else if bytes.HasPrefix(name, []byte("bind")) {
+			// TODO: status line bindings
+			return []byte("TODO")
+		} else {
+			return []byte(s.Info[string(name)](s.win.Buf))
 		}
-		if len(helpBinding) > 0 {
-			if len(kmenuBinding) > 0 {
-				rightText += ", "
-			}
-			if sline.view.Type == vtHelp {
-				rightText += helpBinding + ": close help"
-			} else {
-				rightText += helpBinding + ": open help"
-			}
-		}
-		rightText += " "
 	}
+
+	leftText := []byte(s.FormatLeft)
+	leftText = formatParser.ReplaceAllFunc([]byte(s.FormatLeft), formatter)
+	rightText := []byte(s.FormatRight)
+	rightText = formatParser.ReplaceAllFunc([]byte(s.FormatRight), formatter)
 
 	statusLineStyle := defStyle.Reverse(true)
 	if style, ok := colorscheme["statusline"]; ok {
 		statusLineStyle = style
 	}
 
-	// Maybe there is a unicode filename?
-	fileRunes := []rune(file)
+	leftLen := utf8.RuneCount(leftText)
+	rightLen := utf8.RuneCount(rightText)
 
-	if sline.view.Type == vtTerm {
-		fileRunes = []rune(sline.view.term.title)
-		rightText = ""
-	}
-
-	viewX := sline.view.x
-	if viewX != 0 {
-		screen.SetContent(viewX, y, ' ', nil, statusLineStyle)
-		viewX++
-	}
-	for x := 0; x < sline.view.Width; x++ {
-		if x < len(fileRunes) {
-			screen.SetContent(viewX+x, y, fileRunes[x], nil, statusLineStyle)
-		} else if x >= sline.view.Width-len(rightText) && x < len(rightText)+sline.view.Width-len(rightText) {
-			screen.SetContent(viewX+x, y, []rune(rightText)[x-sline.view.Width+len(rightText)], nil, statusLineStyle)
+	winX := s.win.X
+	for x := 0; x < s.win.Width; x++ {
+		if x < leftLen {
+			r, size := utf8.DecodeRune(leftText)
+			leftText = leftText[size:]
+			screen.SetContent(winX+x, y, r, nil, statusLineStyle)
+		} else if x >= s.win.Width-rightLen && x < rightLen+s.win.Width-rightLen {
+			r, size := utf8.DecodeRune(rightText)
+			rightText = rightText[size:]
+			screen.SetContent(winX+x, y, r, nil, statusLineStyle)
 		} else {
-			screen.SetContent(viewX+x, y, ' ', nil, statusLineStyle)
+			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
 		}
 	}
 }
