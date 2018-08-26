@@ -1,15 +1,23 @@
 package main
 
 import (
+	"unicode/utf8"
+
+	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
 )
 
-// The Cursor struct stores the location of the cursor in the view
-// The complicated part about the cursor is storing its location.
-// The cursor must be displayed at an x, y location, but since the buffer
-// uses a rope to store text, to insert text we must have an index. It
-// is also simpler to use character indicies for other tasks such as
-// selection.
+// InBounds returns whether the given location is a valid character position in the given buffer
+func InBounds(pos Loc, buf *Buffer) bool {
+	if pos.Y < 0 || pos.Y >= len(buf.lines) || pos.X < 0 || pos.X > utf8.RuneCount(buf.LineBytes(pos.Y)) {
+		return false
+	}
+
+	return true
+}
+
+// The Cursor struct stores the location of the cursor in the buffer
+// as well as the selection
 type Cursor struct {
 	buf *Buffer
 	Loc
@@ -42,12 +50,72 @@ func (c *Cursor) GotoLoc(l Loc) {
 	c.LastVisualX = c.GetVisualX()
 }
 
+// GetVisualX returns the x value of the cursor in visual spaces
+func (c *Cursor) GetVisualX() int {
+	if c.X <= 0 {
+		c.X = 0
+		return 0
+	}
+
+	bytes := c.buf.LineBytes(c.Y)
+	tabsize := int(c.buf.Settings["tabsize"].(float64))
+	if c.X > utf8.RuneCount(bytes) {
+		c.X = utf8.RuneCount(bytes) - 1
+	}
+
+	return StringWidth(bytes, c.X, tabsize)
+}
+
+// GetCharPosInLine gets the char position of a visual x y
+// coordinate (this is necessary because tabs are 1 char but
+// 4 visual spaces)
+func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
+	tabsize := int(c.buf.Settings["tabsize"].(float64))
+
+	// Scan rune by rune until we exceed the visual width that we are
+	// looking for. Then we can return the character position we have found
+	i := 0     // char pos
+	width := 0 // string visual width
+	for len(b) > 0 {
+		r, size := utf8.DecodeRune(b)
+		b = b[size:]
+
+		switch r {
+		case '\t':
+			ts := tabsize - (width % tabsize)
+			width += ts
+		default:
+			width += runewidth.RuneWidth(r)
+		}
+
+		i++
+
+		if width >= visualPos {
+			break
+		}
+	}
+
+	return i
+}
+
+// Start moves the cursor to the start of the line it is on
+func (c *Cursor) Start() {
+	c.X = 0
+	c.LastVisualX = c.GetVisualX()
+}
+
+// End moves the cursor to the end of the line it is on
+func (c *Cursor) End() {
+	c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
+	c.LastVisualX = c.GetVisualX()
+}
+
 // CopySelection copies the user's selection to either "primary"
 // or "clipboard"
 func (c *Cursor) CopySelection(target string) {
 	if c.HasSelection() {
 		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
-			clipboard.WriteAll(c.GetSelection(), target)
+			clipboard.WriteAll(string(c.GetSelection()), target)
 		}
 	}
 }
@@ -87,14 +155,14 @@ func (c *Cursor) DeleteSelection() {
 }
 
 // GetSelection returns the cursor's selection
-func (c *Cursor) GetSelection() string {
+func (c *Cursor) GetSelection() []byte {
 	if InBounds(c.CurSelection[0], c.buf) && InBounds(c.CurSelection[1], c.buf) {
 		if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
 			return c.buf.Substr(c.CurSelection[1], c.CurSelection[0])
 		}
 		return c.buf.Substr(c.CurSelection[0], c.CurSelection[1])
 	}
-	return ""
+	return []byte{}
 }
 
 // SelectLine selects the current line
@@ -102,7 +170,7 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.SetSelectionStart(c.Loc)
 	c.End()
-	if c.buf.NumLines-1 > c.Y {
+	if len(c.buf.lines)-1 > c.Y {
 		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
 	} else {
 		c.SetSelectionEnd(c.Loc)
@@ -129,146 +197,20 @@ func (c *Cursor) AddLineToSelection() {
 	}
 }
 
-// SelectWord selects the word the cursor is currently on
-func (c *Cursor) SelectWord() {
-	if len(c.buf.Line(c.Y)) == 0 {
-		return
-	}
-
-	if !IsWordChar(string(c.RuneUnder(c.X))) {
-		c.SetSelectionStart(c.Loc)
-		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
-		c.OrigSelection = c.CurSelection
-		return
-	}
-
-	forward, backward := c.X, c.X
-
-	for backward > 0 && IsWordChar(string(c.RuneUnder(backward-1))) {
-		backward--
-	}
-
-	c.SetSelectionStart(Loc{backward, c.Y})
-	c.OrigSelection[0] = c.CurSelection[0]
-
-	for forward < Count(c.buf.Line(c.Y))-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
-		forward++
-	}
-
-	c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
-	c.OrigSelection[1] = c.CurSelection[1]
-	c.Loc = c.CurSelection[1]
-}
-
-// AddWordToSelection adds the word the cursor is currently on
-// to the selection
-func (c *Cursor) AddWordToSelection() {
-	if c.Loc.GreaterThan(c.OrigSelection[0]) && c.Loc.LessThan(c.OrigSelection[1]) {
-		c.CurSelection = c.OrigSelection
-		return
-	}
-
-	if c.Loc.LessThan(c.OrigSelection[0]) {
-		backward := c.X
-
-		for backward > 0 && IsWordChar(string(c.RuneUnder(backward-1))) {
-			backward--
-		}
-
-		c.SetSelectionStart(Loc{backward, c.Y})
-		c.SetSelectionEnd(c.OrigSelection[1])
-	}
-
-	if c.Loc.GreaterThan(c.OrigSelection[1]) {
-		forward := c.X
-
-		for forward < Count(c.buf.Line(c.Y))-1 && IsWordChar(string(c.RuneUnder(forward+1))) {
-			forward++
-		}
-
-		c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
-		c.SetSelectionStart(c.OrigSelection[0])
-	}
-
-	c.Loc = c.CurSelection[1]
-}
-
-// SelectTo selects from the current cursor location to the given
-// location
-func (c *Cursor) SelectTo(loc Loc) {
-	if loc.GreaterThan(c.OrigSelection[0]) {
-		c.SetSelectionStart(c.OrigSelection[0])
-		c.SetSelectionEnd(loc)
-	} else {
-		c.SetSelectionStart(loc)
-		c.SetSelectionEnd(c.OrigSelection[0])
-	}
-}
-
-// WordRight moves the cursor one word to the right
-func (c *Cursor) WordRight() {
-	for IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == Count(c.buf.Line(c.Y)) {
-			c.Right()
-			return
-		}
-		c.Right()
-	}
-	c.Right()
-	for IsWordChar(string(c.RuneUnder(c.X))) {
-		if c.X == Count(c.buf.Line(c.Y)) {
-			return
-		}
-		c.Right()
-	}
-}
-
-// WordLeft moves the cursor one word to the left
-func (c *Cursor) WordLeft() {
-	c.Left()
-	for IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == 0 {
-			return
-		}
-		c.Left()
-	}
-	c.Left()
-	for IsWordChar(string(c.RuneUnder(c.X))) {
-		if c.X == 0 {
-			return
-		}
-		c.Left()
-	}
-	c.Right()
-}
-
-// RuneUnder returns the rune under the given x position
-func (c *Cursor) RuneUnder(x int) rune {
-	line := []rune(c.buf.Line(c.Y))
-	if len(line) == 0 {
-		return '\n'
-	}
-	if x >= len(line) {
-		return '\n'
-	} else if x < 0 {
-		x = 0
-	}
-	return line[x]
-}
 // UpN moves the cursor up N lines (if possible)
 func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount
 	if proposedY < 0 {
 		proposedY = 0
-		c.LastVisualX = 0
-	} else if proposedY >= c.buf.NumLines {
-		proposedY = c.buf.NumLines - 1
+	} else if proposedY >= len(c.buf.lines) {
+		proposedY = len(c.buf.lines) - 1
 	}
 
-	runes := []rune(c.buf.Line(proposedY))
-	c.X = c.GetCharPosInLine(proposedY, c.LastVisualX)
-	if c.X > len(runes) || (amount < 0 && proposedY == c.Y) {
-		c.X = len(runes)
+	bytes := c.buf.LineBytes(proposedY)
+	c.X = c.GetCharPosInLine(bytes, c.LastVisualX)
+
+	if c.X > utf8.RuneCount(bytes) || (amount < 0 && proposedY == c.Y) {
+		c.X = utf8.RuneCount(bytes)
 	}
 
 	c.Y = proposedY
@@ -310,73 +252,12 @@ func (c *Cursor) Right() {
 	if c.Loc == c.buf.End() {
 		return
 	}
-	if c.X < Count(c.buf.Line(c.Y)) {
+	if c.X < utf8.RuneCount(c.buf.LineBytes(c.Y)) {
 		c.X++
 	} else {
 		c.Down()
 		c.Start()
 	}
-	c.LastVisualX = c.GetVisualX()
-}
-
-// End moves the cursor to the end of the line it is on
-func (c *Cursor) End() {
-	c.X = Count(c.buf.Line(c.Y))
-	c.LastVisualX = c.GetVisualX()
-}
-
-// Start moves the cursor to the start of the line it is on
-func (c *Cursor) Start() {
-	c.X = 0
-	c.LastVisualX = c.GetVisualX()
-}
-
-// StartOfText moves the cursor to the first non-whitespace rune of
-// the line it is on
-func (c *Cursor) StartOfText() {
-	c.Start()
-	for IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == Count(c.buf.Line(c.Y)) {
-			break
-		}
-		c.Right()
-	}
-}
-
-// GetCharPosInLine gets the char position of a visual x y
-// coordinate (this is necessary because tabs are 1 char but
-// 4 visual spaces)
-func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
-	// Get the tab size
-	tabSize := int(c.buf.Settings["tabsize"].(float64))
-	visualLineLen := StringWidth(c.buf.Line(lineNum), tabSize)
-	if visualPos > visualLineLen {
-		visualPos = visualLineLen
-	}
-	width := WidthOfLargeRunes(c.buf.Line(lineNum), tabSize)
-	if visualPos >= width {
-		return visualPos - width
-	}
-	return visualPos / tabSize
-}
-
-// GetVisualX returns the x value of the cursor in visual spaces
-func (c *Cursor) GetVisualX() int {
-	runes := []rune(c.buf.Line(c.Y))
-	tabSize := int(c.buf.Settings["tabsize"].(float64))
-	if c.X > len(runes) {
-		c.X = len(runes) - 1
-	}
-
-	if c.X < 0 {
-		c.X = 0
-	}
-
-	return StringWidth(string(runes[:c.X]), tabSize)
-}
-
-// StoreVisualX stores the current visual x value in the cursor
-func (c *Cursor) StoreVisualX() {
 	c.LastVisualX = c.GetVisualX()
 }
 
@@ -386,13 +267,13 @@ func (c *Cursor) StoreVisualX() {
 func (c *Cursor) Relocate() {
 	if c.Y < 0 {
 		c.Y = 0
-	} else if c.Y >= c.buf.NumLines {
-		c.Y = c.buf.NumLines - 1
+	} else if c.Y >= len(c.buf.lines) {
+		c.Y = len(c.buf.lines) - 1
 	}
 
 	if c.X < 0 {
 		c.X = 0
-	} else if c.X > Count(c.buf.Line(c.Y)) {
-		c.X = Count(c.buf.Line(c.Y))
+	} else if c.X > utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+		c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
 	}
 }

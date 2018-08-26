@@ -8,11 +8,14 @@ import (
 )
 
 const (
-	RTColorscheme = "colorscheme"
-	RTSyntax      = "syntax"
-	RTHelp        = "help"
-	RTPlugin      = "plugin"
+	RTColorscheme = 0
+	RTSyntax      = 1
+	RTHelp        = 2
+	RTPlugin      = 3
+	NumTypes      = 4 // How many filetypes are there
 )
+
+type RTFiletype byte
 
 // RuntimeFile allows the program to read runtime data like colorschemes or syntax files
 type RuntimeFile interface {
@@ -23,7 +26,7 @@ type RuntimeFile interface {
 }
 
 // allFiles contains all available files, mapped by filetype
-var allFiles map[string][]RuntimeFile
+var allFiles [NumTypes][]RuntimeFile
 
 // some file on filesystem
 type realFile string
@@ -73,16 +76,13 @@ func (nf namedFile) Name() string {
 }
 
 // AddRuntimeFile registers a file for the given filetype
-func AddRuntimeFile(fileType string, file RuntimeFile) {
-	if allFiles == nil {
-		allFiles = make(map[string][]RuntimeFile)
-	}
+func AddRuntimeFile(fileType RTFiletype, file RuntimeFile) {
 	allFiles[fileType] = append(allFiles[fileType], file)
 }
 
 // AddRuntimeFilesFromDirectory registers each file from the given directory for
 // the filetype which matches the file-pattern
-func AddRuntimeFilesFromDirectory(fileType, directory, pattern string) {
+func AddRuntimeFilesFromDirectory(fileType RTFiletype, directory, pattern string) {
 	files, _ := ioutil.ReadDir(directory)
 	for _, f := range files {
 		if ok, _ := filepath.Match(pattern, f.Name()); !f.IsDir() && ok {
@@ -94,7 +94,7 @@ func AddRuntimeFilesFromDirectory(fileType, directory, pattern string) {
 
 // AddRuntimeFilesFromAssets registers each file from the given asset-directory for
 // the filetype which matches the file-pattern
-func AddRuntimeFilesFromAssets(fileType, directory, pattern string) {
+func AddRuntimeFilesFromAssets(fileType RTFiletype, directory, pattern string) {
 	files, err := AssetDir(directory)
 	if err != nil {
 		return
@@ -108,7 +108,7 @@ func AddRuntimeFilesFromAssets(fileType, directory, pattern string) {
 
 // FindRuntimeFile finds a runtime file of the given filetype and name
 // will return nil if no file was found
-func FindRuntimeFile(fileType, name string) RuntimeFile {
+func FindRuntimeFile(fileType RTFiletype, name string) RuntimeFile {
 	for _, f := range ListRuntimeFiles(fileType) {
 		if f.Name() == name {
 			return f
@@ -118,16 +118,13 @@ func FindRuntimeFile(fileType, name string) RuntimeFile {
 }
 
 // ListRuntimeFiles lists all known runtime files for the given filetype
-func ListRuntimeFiles(fileType string) []RuntimeFile {
-	if files, ok := allFiles[fileType]; ok {
-		return files
-	}
-	return []RuntimeFile{}
+func ListRuntimeFiles(fileType RTFiletype) []RuntimeFile {
+	return allFiles[fileType]
 }
 
 // InitRuntimeFiles initializes all assets file and the config directory
 func InitRuntimeFiles() {
-	add := func(fileType, dir, pattern string) {
+	add := func(fileType RTFiletype, dir, pattern string) {
 		AddRuntimeFilesFromDirectory(fileType, filepath.Join(configDir, dir), pattern)
 		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
 	}
@@ -160,7 +157,7 @@ func InitRuntimeFiles() {
 }
 
 // PluginReadRuntimeFile allows plugin scripts to read the content of a runtime file
-func PluginReadRuntimeFile(fileType, name string) string {
+func PluginReadRuntimeFile(fileType RTFiletype, name string) string {
 	if file := FindRuntimeFile(fileType, name); file != nil {
 		if data, err := file.Data(); err == nil {
 			return string(data)
@@ -170,7 +167,7 @@ func PluginReadRuntimeFile(fileType, name string) string {
 }
 
 // PluginListRuntimeFiles allows plugins to lists all runtime files of the given type
-func PluginListRuntimeFiles(fileType string) []string {
+func PluginListRuntimeFiles(fileType RTFiletype) []string {
 	files := ListRuntimeFiles(fileType)
 	result := make([]string, len(files))
 	for i, f := range files {
@@ -180,7 +177,7 @@ func PluginListRuntimeFiles(fileType string) []string {
 }
 
 // PluginAddRuntimeFile adds a file to the runtime files for a plugin
-func PluginAddRuntimeFile(plugin, filetype, filePath string) {
+func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) {
 	fullpath := filepath.Join(configDir, "plugins", plugin, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
@@ -191,7 +188,7 @@ func PluginAddRuntimeFile(plugin, filetype, filePath string) {
 }
 
 // PluginAddRuntimeFilesFromDirectory adds files from a directory to the runtime files for a plugin
-func PluginAddRuntimeFilesFromDirectory(plugin, filetype, directory, pattern string) {
+func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, directory, pattern string) {
 	fullpath := filepath.Join(configDir, "plugins", plugin, directory)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFilesFromDirectory(filetype, fullpath, pattern)
@@ -202,6 +199,6 @@ func PluginAddRuntimeFilesFromDirectory(plugin, filetype, directory, pattern str
 }
 
 // PluginAddRuntimeFileFromMemory adds a file to the runtime files for a plugin from a given string
-func PluginAddRuntimeFileFromMemory(plugin, filetype, filename, data string) {
+func PluginAddRuntimeFileFromMemory(plugin string, filetype RTFiletype, filename, data string) {
 	AddRuntimeFile(filetype, memoryFile{filename, []byte(data)})
 }

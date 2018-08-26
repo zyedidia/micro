@@ -16,9 +16,8 @@ import (
 	"strings"
 	"time"
 
-	luar "layeh.com/gopher-luar"
-
 	lua "github.com/yuin/gopher-lua"
+	luar "layeh.com/gopher-luar"
 )
 
 var L *lua.LState
