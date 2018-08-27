@@ -150,7 +150,7 @@ func main() {
 
 	for {
 		// Display everything
-		w.Clear()
+		screen.Screen.Fill(' ', config.DefStyle)
 		w.DisplayBuffer()
 		w.DisplayStatusLine()
 		screen.Screen.Show()

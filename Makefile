@@ -40,9 +40,9 @@ update:
 # Builds the runtime
 runtime:
 	go get -u github.com/jteeuwen/go-bindata/...
-	$(GOBIN)/go-bindata -nometadata -o runtime.go runtime/...
-	mv runtime.go cmd/micro
-	gofmt -w cmd/micro/runtime.go
+	$(GOBIN)/go-bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
+	mv runtime.go cmd/micro/config
+	gofmt -w cmd/micro/config/runtime.go
 
 test:
 	go test ./cmd/micro

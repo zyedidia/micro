@@ -74,6 +74,7 @@ func NewBufActionHandler(buf *buffer.Buffer, win *Window) *BufActionHandler {
 		Buf: buf,
 		Loc: buf.StartCursor,
 	}}
+	a.Cursor = a.cursors[0]
 
 	buf.SetCursors(a.cursors)
 	return a

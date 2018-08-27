@@ -82,6 +82,15 @@ func (w *Window) GetStyle(style tcell.Style, bloc buffer.Loc, r rune) tcell.Styl
 	return style
 }
 
+func (w *Window) ShowCursor(x, y int, main bool) {
+	if main {
+		screen.Screen.ShowCursor(x, y)
+	} else {
+		r, _, _, _ := screen.Screen.GetContent(x, y)
+		screen.Screen.SetContent(x, y, r, nil, config.DefStyle.Reverse(true))
+	}
+}
+
 // DisplayBuffer draws the buffer being shown in this window on the screen.Screen
 func (w *Window) DisplayBuffer() {
 	b := w.Buf
@@ -134,6 +143,10 @@ func (w *Window) DisplayBuffer() {
 		line, nColsBeforeStart := util.SliceVisualEnd(line, bloc.X, tabsize)
 		totalwidth := bloc.X - nColsBeforeStart
 		for len(line) > 0 {
+			if w.Buf.GetActiveCursor().X == bloc.X && w.Buf.GetActiveCursor().Y == bloc.Y {
+				w.ShowCursor(vloc.X, vloc.Y, true)
+			}
+
 			r, size := utf8.DecodeRune(line)
 
 			curStyle = w.GetStyle(curStyle, bloc, r)
@@ -185,6 +198,9 @@ func (w *Window) DisplayBuffer() {
 					w.DrawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
 				}
 			}
+		}
+		if w.Buf.GetActiveCursor().X == bloc.X && w.Buf.GetActiveCursor().Y == bloc.Y {
+			w.ShowCursor(vloc.X, vloc.Y, true)
 		}
 		bloc.X = w.StartCol
 		bloc.Y++
