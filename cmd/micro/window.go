@@ -5,6 +5,10 @@ import (
 	"unicode/utf8"
 
 	runewidth "github.com/mattn/go-runewidth"
+	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/config"
+	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -23,12 +27,12 @@ type Window struct {
 	StartCol int
 
 	// Buffer being shown in this window
-	Buf *Buffer
+	Buf *buffer.Buffer
 
 	sline *StatusLine
 }
 
-func NewWindow(x, y, width, height int, buf *Buffer) *Window {
+func NewWindow(x, y, width, height int, buf *buffer.Buffer) *Window {
 	w := new(Window)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
 
@@ -37,40 +41,48 @@ func NewWindow(x, y, width, height int, buf *Buffer) *Window {
 	return w
 }
 
-func (w *Window) DrawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *Loc, bloc *Loc) {
+func (w *Window) Clear() {
+	for y := 0; y < w.Height; y++ {
+		for x := 0; x < w.Width; x++ {
+			screen.Screen.SetContent(w.X+x, w.Y+y, ' ', nil, config.DefStyle)
+		}
+	}
+}
+
+func (w *Window) DrawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
 	lineNum := strconv.Itoa(bloc.Y + 1)
 
 	// Write the spaces before the line number if necessary
 	for i := 0; i < maxLineNumLength-len(lineNum); i++ {
-		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+		screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		vloc.X++
 	}
 	// Write the actual line number
 	for _, ch := range lineNum {
 		if softwrapped {
-			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+			screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		} else {
-			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ch, nil, lineNumStyle)
+			screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ch, nil, lineNumStyle)
 		}
 		vloc.X++
 	}
 
 	// Write the extra space
-	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+	screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 	vloc.X++
 }
 
 // GetStyle returns the highlight style for the given character position
 // If there is no change to the current highlight style it just returns that
-func (w *Window) GetStyle(style tcell.Style, bloc Loc, r rune) tcell.Style {
+func (w *Window) GetStyle(style tcell.Style, bloc buffer.Loc, r rune) tcell.Style {
 	if group, ok := w.Buf.Match(bloc.Y)[bloc.X]; ok {
-		s := GetColor(group.String())
+		s := config.GetColor(group.String())
 		return s
 	}
 	return style
 }
 
-// DisplayBuffer draws the buffer being shown in this window on the screen
+// DisplayBuffer draws the buffer being shown in this window on the screen.Screen
 func (w *Window) DisplayBuffer() {
 	b := w.Buf
 
@@ -81,7 +93,7 @@ func (w *Window) DisplayBuffer() {
 
 	// TODO: Rehighlighting
 	// start := w.StartLine
-	if b.Settings["syntax"].(bool) && b.syntaxDef != nil {
+	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 		// 	if start > 0 && b.lines[start-1].rehighlight {
 		// 		b.highlighter.ReHighlightLine(b, start-1)
 		// 		b.lines[start-1].rehighlight = false
@@ -89,29 +101,29 @@ func (w *Window) DisplayBuffer() {
 		//
 		// 	b.highlighter.ReHighlightStates(b, start)
 		//
-		b.highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
+		b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
 	}
 
-	lineNumStyle := defStyle
-	if style, ok := colorscheme["line-number"]; ok {
+	lineNumStyle := config.DefStyle
+	if style, ok := config.Colorscheme["line-number"]; ok {
 		lineNumStyle = style
 	}
 
 	// We need to know the string length of the largest line number
 	// so we can pad appropriately when displaying line numbers
-	maxLineNumLength := len(strconv.Itoa(len(b.lines)))
+	maxLineNumLength := len(strconv.Itoa(b.LinesNum()))
 
 	tabsize := int(b.Settings["tabsize"].(float64))
 	softwrap := b.Settings["softwrap"].(bool)
 
 	// this represents the current draw position
 	// within the current window
-	vloc := Loc{0, 0}
+	vloc := buffer.Loc{0, 0}
 
 	// this represents the current draw position in the buffer (char positions)
-	bloc := Loc{w.StartCol, w.StartLine}
+	bloc := buffer.Loc{w.StartCol, w.StartLine}
 
-	curStyle := defStyle
+	curStyle := config.DefStyle
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 		if b.Settings["ruler"].(bool) {
@@ -119,7 +131,7 @@ func (w *Window) DisplayBuffer() {
 		}
 
 		line := b.LineBytes(bloc.Y)
-		line, nColsBeforeStart := SliceVisualEnd(line, bloc.X, tabsize)
+		line, nColsBeforeStart := util.SliceVisualEnd(line, bloc.X, tabsize)
 		totalwidth := bloc.X - nColsBeforeStart
 		for len(line) > 0 {
 			r, size := utf8.DecodeRune(line)
@@ -127,7 +139,7 @@ func (w *Window) DisplayBuffer() {
 			curStyle = w.GetStyle(curStyle, bloc, r)
 
 			if nColsBeforeStart <= 0 {
-				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, curStyle)
+				screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, curStyle)
 				vloc.X++
 			}
 			nColsBeforeStart--
@@ -151,7 +163,7 @@ func (w *Window) DisplayBuffer() {
 			if width > 1 {
 				for i := 1; i < width; i++ {
 					if nColsBeforeStart <= 0 {
-						screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, curStyle)
+						screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, curStyle)
 						vloc.X++
 					}
 					nColsBeforeStart--
@@ -176,7 +188,7 @@ func (w *Window) DisplayBuffer() {
 		}
 		bloc.X = w.StartCol
 		bloc.Y++
-		if bloc.Y >= len(b.lines) {
+		if bloc.Y >= b.LinesNum() {
 			break
 		}
 	}

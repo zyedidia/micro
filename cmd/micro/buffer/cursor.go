@@ -1,10 +1,11 @@
-package main
+package buffer
 
 import (
 	"unicode/utf8"
 
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/cmd/micro/util"
 )
 
 // InBounds returns whether the given location is a valid character position in the given buffer
@@ -19,7 +20,7 @@ func InBounds(pos Loc, buf *Buffer) bool {
 // The Cursor struct stores the location of the cursor in the buffer
 // as well as the selection
 type Cursor struct {
-	buf *Buffer
+	Buf *Buffer
 	Loc
 
 	// Last cursor x position
@@ -57,20 +58,20 @@ func (c *Cursor) GetVisualX() int {
 		return 0
 	}
 
-	bytes := c.buf.LineBytes(c.Y)
-	tabsize := int(c.buf.Settings["tabsize"].(float64))
+	bytes := c.Buf.LineBytes(c.Y)
+	tabsize := int(c.Buf.Settings["tabsize"].(float64))
 	if c.X > utf8.RuneCount(bytes) {
 		c.X = utf8.RuneCount(bytes) - 1
 	}
 
-	return StringWidth(bytes, c.X, tabsize)
+	return util.StringWidth(bytes, c.X, tabsize)
 }
 
 // GetCharPosInLine gets the char position of a visual x y
 // coordinate (this is necessary because tabs are 1 char but
 // 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
-	tabsize := int(c.buf.Settings["tabsize"].(float64))
+	tabsize := int(c.Buf.Settings["tabsize"].(float64))
 
 	// Scan rune by rune until we exceed the visual width that we are
 	// looking for. Then we can return the character position we have found
@@ -106,7 +107,7 @@ func (c *Cursor) Start() {
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
-	c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
+	c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
 	c.LastVisualX = c.GetVisualX()
 }
 
@@ -114,7 +115,7 @@ func (c *Cursor) End() {
 // or "clipboard"
 func (c *Cursor) CopySelection(target string) {
 	if c.HasSelection() {
-		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
+		if target != "primary" || c.Buf.Settings["useprimary"].(bool) {
 			clipboard.WriteAll(string(c.GetSelection()), target)
 		}
 	}
@@ -122,8 +123,8 @@ func (c *Cursor) CopySelection(target string) {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.CurSelection[0] = c.buf.Start()
-	c.CurSelection[1] = c.buf.Start()
+	c.CurSelection[0] = c.Buf.Start()
+	c.CurSelection[1] = c.Buf.Start()
 }
 
 // SetSelectionStart sets the start of the selection
@@ -144,23 +145,23 @@ func (c *Cursor) HasSelection() bool {
 // DeleteSelection deletes the currently selected text
 func (c *Cursor) DeleteSelection() {
 	if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
-		c.buf.Remove(c.CurSelection[1], c.CurSelection[0])
+		c.Buf.Remove(c.CurSelection[1], c.CurSelection[0])
 		c.Loc = c.CurSelection[1]
 	} else if !c.HasSelection() {
 		return
 	} else {
-		c.buf.Remove(c.CurSelection[0], c.CurSelection[1])
+		c.Buf.Remove(c.CurSelection[0], c.CurSelection[1])
 		c.Loc = c.CurSelection[0]
 	}
 }
 
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() []byte {
-	if InBounds(c.CurSelection[0], c.buf) && InBounds(c.CurSelection[1], c.buf) {
+	if InBounds(c.CurSelection[0], c.Buf) && InBounds(c.CurSelection[1], c.Buf) {
 		if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
-			return c.buf.Substr(c.CurSelection[1], c.CurSelection[0])
+			return c.Buf.Substr(c.CurSelection[1], c.CurSelection[0])
 		}
-		return c.buf.Substr(c.CurSelection[0], c.CurSelection[1])
+		return c.Buf.Substr(c.CurSelection[0], c.CurSelection[1])
 	}
 	return []byte{}
 }
@@ -170,8 +171,8 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.SetSelectionStart(c.Loc)
 	c.End()
-	if len(c.buf.lines)-1 > c.Y {
-		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
+	if len(c.Buf.lines)-1 > c.Y {
+		c.SetSelectionEnd(c.Loc.Move(1, c.Buf))
 	} else {
 		c.SetSelectionEnd(c.Loc)
 	}
@@ -188,7 +189,7 @@ func (c *Cursor) AddLineToSelection() {
 	}
 	if c.Loc.GreaterThan(c.OrigSelection[1]) {
 		c.End()
-		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
+		c.SetSelectionEnd(c.Loc.Move(1, c.Buf))
 		c.SetSelectionStart(c.OrigSelection[0])
 	}
 
@@ -202,11 +203,11 @@ func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount
 	if proposedY < 0 {
 		proposedY = 0
-	} else if proposedY >= len(c.buf.lines) {
-		proposedY = len(c.buf.lines) - 1
+	} else if proposedY >= len(c.Buf.lines) {
+		proposedY = len(c.Buf.lines) - 1
 	}
 
-	bytes := c.buf.LineBytes(proposedY)
+	bytes := c.Buf.LineBytes(proposedY)
 	c.X = c.GetCharPosInLine(bytes, c.LastVisualX)
 
 	if c.X > utf8.RuneCount(bytes) || (amount < 0 && proposedY == c.Y) {
@@ -234,7 +235,7 @@ func (c *Cursor) Down() {
 // Left moves the cursor left one cell (if possible) or to
 // the previous line if it is at the beginning
 func (c *Cursor) Left() {
-	if c.Loc == c.buf.Start() {
+	if c.Loc == c.Buf.Start() {
 		return
 	}
 	if c.X > 0 {
@@ -249,10 +250,10 @@ func (c *Cursor) Left() {
 // Right moves the cursor right one cell (if possible) or
 // to the next line if it is at the end
 func (c *Cursor) Right() {
-	if c.Loc == c.buf.End() {
+	if c.Loc == c.Buf.End() {
 		return
 	}
-	if c.X < utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+	if c.X < utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
 		c.X++
 	} else {
 		c.Down()
@@ -267,13 +268,13 @@ func (c *Cursor) Right() {
 func (c *Cursor) Relocate() {
 	if c.Y < 0 {
 		c.Y = 0
-	} else if c.Y >= len(c.buf.lines) {
-		c.Y = len(c.buf.lines) - 1
+	} else if c.Y >= len(c.Buf.lines) {
+		c.Y = len(c.Buf.lines) - 1
 	}
 
 	if c.X < 0 {
 		c.X = 0
-	} else if c.X > utf8.RuneCount(c.buf.LineBytes(c.Y)) {
-		c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
+	} else if c.X > utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+		c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
 	}
 }

@@ -4,29 +4,21 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/go-errors/errors"
-	homedir "github.com/mitchellh/go-homedir"
-	"github.com/zyedidia/micro/cmd/micro/terminfo"
+	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/config"
+	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
 const (
 	doubleClickThreshold = 400 // How many milliseconds to wait before a second click is not a double click
-	undoThreshold        = 500 // If two events are less than n milliseconds apart, undo both of them
 	autosaveTime         = 8   // Number of seconds to wait before autosaving
 )
 
 var (
-	// The main screen
-	screen tcell.Screen
-
-	// Where the user's configuration is
-	// This should be $XDG_CONFIG_HOME/micro
-	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
-	configDir string
-
 	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
 	Version = "0.0.0-unknown"
@@ -51,104 +43,6 @@ var (
 	flagOptions   = flag.Bool("options", false, "Show all option help")
 )
 
-// InitConfigDir finds the configuration directory for micro according to the XDG spec.
-// If no directory is found, it creates one.
-func InitConfigDir() {
-	xdgHome := os.Getenv("XDG_CONFIG_HOME")
-	if xdgHome == "" {
-		// The user has not set $XDG_CONFIG_HOME so we should act like it was set to ~/.config
-		home, err := homedir.Dir()
-		if err != nil {
-			TermMessage("Error finding your home directory\nCan't load config files")
-			return
-		}
-		xdgHome = home + "/.config"
-	}
-	configDir = xdgHome + "/micro"
-
-	if len(*flagConfigDir) > 0 {
-		if _, err := os.Stat(*flagConfigDir); os.IsNotExist(err) {
-			TermMessage("Error: " + *flagConfigDir + " does not exist. Defaulting to " + configDir + ".")
-		} else {
-			configDir = *flagConfigDir
-			return
-		}
-	}
-
-	if _, err := os.Stat(xdgHome); os.IsNotExist(err) {
-		// If the xdgHome doesn't exist we should create it
-		err = os.Mkdir(xdgHome, os.ModePerm)
-		if err != nil {
-			TermMessage("Error creating XDG_CONFIG_HOME directory: " + err.Error())
-		}
-	}
-
-	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		// If the micro specific config directory doesn't exist we should create that too
-		err = os.Mkdir(configDir, os.ModePerm)
-		if err != nil {
-			TermMessage("Error creating configuration directory: " + err.Error())
-		}
-	}
-}
-
-// InitScreen creates and initializes the tcell screen
-func InitScreen() {
-	// Should we enable true color?
-	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
-
-	tcelldb := os.Getenv("TCELLDB")
-	os.Setenv("TCELLDB", configDir+"/.tcelldb")
-
-	// In order to enable true color, we have to set the TERM to `xterm-truecolor` when
-	// initializing tcell, but after that, we can set the TERM back to whatever it was
-	oldTerm := os.Getenv("TERM")
-	if truecolor {
-		os.Setenv("TERM", "xterm-truecolor")
-	}
-
-	// Initilize tcell
-	var err error
-	screen, err = tcell.NewScreen()
-	if err != nil {
-		if err == tcell.ErrTermNotFound {
-			err = terminfo.WriteDB(configDir + "/.tcelldb")
-			if err != nil {
-				fmt.Println(err)
-				fmt.Println("Fatal: Micro could not create tcelldb")
-				os.Exit(1)
-			}
-			screen, err = tcell.NewScreen()
-			if err != nil {
-				fmt.Println(err)
-				fmt.Println("Fatal: Micro could not initialize a screen.")
-				os.Exit(1)
-			}
-		} else {
-			fmt.Println(err)
-			fmt.Println("Fatal: Micro could not initialize a screen.")
-			os.Exit(1)
-		}
-	}
-	if err = screen.Init(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
-	}
-
-	// Now we can put the TERM back to what it was before
-	if truecolor {
-		os.Setenv("TERM", oldTerm)
-	}
-
-	if GetGlobalOption("mouse").(bool) {
-		screen.EnableMouse()
-	}
-
-	os.Setenv("TCELLDB", tcelldb)
-
-	// screen.SetStyle(defStyle)
-}
-
 func InitFlags() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
@@ -172,7 +66,7 @@ func InitFlags() {
 
 	optionFlags := make(map[string]*string)
 
-	for k, v := range DefaultGlobalSettings() {
+	for k, v := range config.DefaultGlobalSettings() {
 		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'", k, v))
 	}
 
@@ -188,7 +82,7 @@ func InitFlags() {
 
 	if *flagOptions {
 		// If -options was passed
-		for k, v := range DefaultGlobalSettings() {
+		for k, v := range config.DefaultGlobalSettings() {
 			fmt.Printf("-%s value\n", k)
 			fmt.Printf("    \tDefault value: '%v'\n", v)
 		}
@@ -201,26 +95,30 @@ func main() {
 
 	InitLog()
 	InitFlags()
-	InitConfigDir()
-	InitRuntimeFiles()
-	err = ReadSettings()
+	err = config.InitConfigDir(*flagConfigDir)
 	if err != nil {
-		TermMessage(err)
+		util.TermMessage(err)
 	}
-	InitGlobalSettings()
-	err = InitColorscheme()
+	config.InitRuntimeFiles()
+	err = config.ReadSettings()
 	if err != nil {
-		TermMessage(err)
+		util.TermMessage(err)
+	}
+	config.InitGlobalSettings()
+	InitBindings()
+	err = config.InitColorscheme()
+	if err != nil {
+		util.TermMessage(err)
 	}
 
-	InitScreen()
+	screen.Init()
 
 	// If we have an error, we can exit cleanly and not completely
 	// mess up the terminal being worked in
 	// In other words we need to shut down tcell before the program crashes
 	defer func() {
 		if err := recover(); err != nil {
-			screen.Fini()
+			screen.Screen.Fini()
 			fmt.Println("Micro encountered an error:", err)
 			// Print the stack trace too
 			fmt.Print(errors.Wrap(err, 2).ErrorStack())
@@ -228,26 +126,46 @@ func main() {
 		}
 	}()
 
-	b, err := NewBufferFromFile(os.Args[1])
+	TryBindKey("Ctrl-z", "Undo", true)
+
+	b, err := buffer.NewBufferFromFile(os.Args[1])
 
 	if err != nil {
-		TermMessage(err)
+		util.TermMessage(err)
 	}
 
-	width, height := screen.Size()
+	width, height := screen.Screen.Size()
+	w := NewWindow(0, 0, width, height-1, b)
 
-	w := NewWindow(0, 0, width/2, height/2, b)
+	a := NewBufActionHandler(b, w)
 
-	for i := 0; i < 5; i++ {
-		screen.Clear()
+	// Here is the event loop which runs in a separate thread
+	go func() {
+		events = make(chan tcell.Event)
+		for {
+			// TODO: fix race condition with screen.Screen = nil
+			events <- screen.Screen.PollEvent()
+		}
+	}()
+
+	for {
+		// Display everything
+		w.Clear()
 		w.DisplayBuffer()
 		w.DisplayStatusLine()
-		screen.Show()
-		time.Sleep(200 * time.Millisecond)
-		w.StartLine++
+		screen.Screen.Show()
+
+		var event tcell.Event
+
+		// Check for new events
+		select {
+		case event = <-events:
+		}
+
+		if event != nil {
+			a.HandleEvent(event)
+		}
 	}
 
-	// time.Sleep(2 * time.Second)
-
-	screen.Fini()
+	screen.Screen.Fini()
 }

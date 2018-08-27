@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"errors"
@@ -10,17 +10,14 @@ import (
 )
 
 // Micro's default style
-var defStyle tcell.Style = tcell.StyleDefault
-
-// Colorscheme is a map from string to style -- it represents a colorscheme
-type Colorscheme map[string]tcell.Style
+var DefStyle tcell.Style = tcell.StyleDefault
 
 // The current colorscheme
-var colorscheme Colorscheme
+var Colorscheme map[string]tcell.Style
 
 // GetColor takes in a syntax group and returns the colorscheme's style for that group
 func GetColor(color string) tcell.Style {
-	st := defStyle
+	st := DefStyle
 	if color == "" {
 		return st
 	}
@@ -32,11 +29,11 @@ func GetColor(color string) tcell.Style {
 				curGroup += "."
 			}
 			curGroup += g
-			if style, ok := colorscheme[curGroup]; ok {
+			if style, ok := Colorscheme[curGroup]; ok {
 				st = style
 			}
 		}
-	} else if style, ok := colorscheme[color]; ok {
+	} else if style, ok := Colorscheme[color]; ok {
 		st = style
 	} else {
 		st = StringToStyle(color)
@@ -52,15 +49,15 @@ func ColorschemeExists(colorschemeName string) bool {
 
 // InitColorscheme picks and initializes the colorscheme when micro starts
 func InitColorscheme() error {
-	colorscheme = make(Colorscheme)
-	defStyle = tcell.StyleDefault
+	Colorscheme = make(map[string]tcell.Style)
+	DefStyle = tcell.StyleDefault
 
 	return LoadDefaultColorscheme()
 }
 
-// LoadDefaultColorscheme loads the default colorscheme from $(configDir)/colorschemes
+// LoadDefaultColorscheme loads the default colorscheme from $(ConfigDir)/colorschemes
 func LoadDefaultColorscheme() error {
-	return LoadColorscheme(globalSettings["colorscheme"].(string))
+	return LoadColorscheme(GlobalSettings["colorscheme"].(string))
 }
 
 // LoadColorscheme loads the given colorscheme from a directory
@@ -72,7 +69,7 @@ func LoadColorscheme(colorschemeName string) error {
 	if data, err := file.Data(); err != nil {
 		return errors.New("Error loading colorscheme: " + err.Error())
 	} else {
-		colorscheme, err = ParseColorscheme(string(data))
+		Colorscheme, err = ParseColorscheme(string(data))
 		if err != nil {
 			return err
 		}
@@ -84,13 +81,13 @@ func LoadColorscheme(colorschemeName string) error {
 // Colorschemes are made up of color-link statements linking a color group to a list of colors
 // For example, color-link keyword (blue,red) makes all keywords have a blue foreground and
 // red background
-func ParseColorscheme(text string) (Colorscheme, error) {
+func ParseColorscheme(text string) (map[string]tcell.Style, error) {
 	var err error
 	parser := regexp.MustCompile(`color-link\s+(\S*)\s+"(.*)"`)
 
 	lines := strings.Split(text, "\n")
 
-	c := make(Colorscheme)
+	c := make(map[string]tcell.Style)
 
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" ||
@@ -108,7 +105,7 @@ func ParseColorscheme(text string) (Colorscheme, error) {
 			c[link] = style
 
 			if link == "default" {
-				defStyle = style
+				DefStyle = style
 			}
 		} else {
 			err = errors.New("Color-link statement is not valid: " + line)
@@ -140,17 +137,17 @@ func StringToStyle(str string) tcell.Style {
 
 	var fgColor, bgColor tcell.Color
 	if fg == "" {
-		fgColor, _, _ = defStyle.Decompose()
+		fgColor, _, _ = DefStyle.Decompose()
 	} else {
 		fgColor = StringToColor(fg)
 	}
 	if bg == "" {
-		_, bgColor, _ = defStyle.Decompose()
+		_, bgColor, _ = DefStyle.Decompose()
 	} else {
 		bgColor = StringToColor(bg)
 	}
 
-	style := defStyle.Foreground(fgColor).Background(bgColor)
+	style := DefStyle.Foreground(fgColor).Background(bgColor)
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
 	}

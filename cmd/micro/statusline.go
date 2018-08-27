@@ -7,6 +7,10 @@ import (
 	"regexp"
 	"strconv"
 	"unicode/utf8"
+
+	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/config"
+	"github.com/zyedidia/micro/cmd/micro/screen"
 )
 
 // StatusLine represents the information line at the bottom
@@ -16,7 +20,7 @@ import (
 type StatusLine struct {
 	FormatLeft  string
 	FormatRight string
-	Info        map[string]func(*Buffer) string
+	Info        map[string]func(*buffer.Buffer) string
 
 	win *Window
 }
@@ -29,20 +33,20 @@ func NewStatusLine(win *Window) *StatusLine {
 	// s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
 	s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
 	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): open help"
-	s.Info = map[string]func(*Buffer) string{
-		"filename": func(b *Buffer) string {
+	s.Info = map[string]func(*buffer.Buffer) string{
+		"filename": func(b *buffer.Buffer) string {
 			if b.Settings["basename"].(bool) {
 				return path.Base(b.GetName())
 			}
 			return b.GetName()
 		},
-		"line": func(b *Buffer) string {
+		"line": func(b *buffer.Buffer) string {
 			return strconv.Itoa(b.GetActiveCursor().Y)
 		},
-		"col": func(b *Buffer) string {
+		"col": func(b *buffer.Buffer) string {
 			return strconv.Itoa(b.GetActiveCursor().X)
 		},
-		"modified": func(b *Buffer) string {
+		"modified": func(b *buffer.Buffer) string {
 			if b.Modified() {
 				return "+ "
 			}
@@ -71,7 +75,7 @@ func (s *StatusLine) Display() {
 	// }
 
 	// We'll draw the line at the lowest line in the window
-	y := s.win.Height + s.win.Y
+	y := s.win.Height + s.win.Y - 1
 
 	formatter := func(match []byte) []byte {
 		name := match[2 : len(match)-1]
@@ -79,8 +83,13 @@ func (s *StatusLine) Display() {
 			option := name[4:]
 			return []byte(fmt.Sprint(s.FindOpt(string(option))))
 		} else if bytes.HasPrefix(name, []byte("bind")) {
-			// TODO: status line bindings
-			return []byte("TODO")
+			binding := string(name[5:])
+			for k, v := range bindings {
+				if v == binding {
+					return []byte(k)
+				}
+			}
+			return []byte("null")
 		} else {
 			return []byte(s.Info[string(name)](s.win.Buf))
 		}
@@ -91,8 +100,8 @@ func (s *StatusLine) Display() {
 	rightText := []byte(s.FormatRight)
 	rightText = formatParser.ReplaceAllFunc([]byte(s.FormatRight), formatter)
 
-	statusLineStyle := defStyle.Reverse(true)
-	if style, ok := colorscheme["statusline"]; ok {
+	statusLineStyle := config.DefStyle.Reverse(true)
+	if style, ok := config.Colorscheme["statusline"]; ok {
 		statusLineStyle = style
 	}
 
@@ -104,13 +113,13 @@ func (s *StatusLine) Display() {
 		if x < leftLen {
 			r, size := utf8.DecodeRune(leftText)
 			leftText = leftText[size:]
-			screen.SetContent(winX+x, y, r, nil, statusLineStyle)
+			screen.Screen.SetContent(winX+x, y, r, nil, statusLineStyle)
 		} else if x >= s.win.Width-rightLen && x < rightLen+s.win.Width-rightLen {
 			r, size := utf8.DecodeRune(rightText)
 			rightText = rightText[size:]
-			screen.SetContent(winX+x, y, r, nil, statusLineStyle)
+			screen.Screen.SetContent(winX+x, y, r, nil, statusLineStyle)
 		} else {
-			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
+			screen.Screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
 		}
 	}
 }

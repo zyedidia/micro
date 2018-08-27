@@ -1,6 +1,10 @@
-package main
+package buffer
 
-import "unicode/utf8"
+import (
+	"unicode/utf8"
+
+	"github.com/zyedidia/micro/cmd/micro/util"
+)
 
 // Loc stores a location
 type Loc struct {
@@ -107,7 +111,7 @@ func (l Loc) Move(n int, buf *Buffer) Loc {
 		}
 		return l
 	}
-	for i := 0; i < Abs(n); i++ {
+	for i := 0; i < util.Abs(n); i++ {
 		l = l.left(buf)
 	}
 	return l

@@ -1,4 +1,4 @@
-package main
+package buffer
 
 import (
 	"time"
@@ -16,6 +16,8 @@ const (
 	TextEventRemove = -1
 	// TextEventReplace represents a replace event
 	TextEventReplace = 0
+
+	undoThreshold = 500 // If two events are less than n milliseconds apart, undo both of them
 )
 
 // TextEvent holds data for a manipulation on some text that can be undone
@@ -186,7 +188,7 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	// for pl := range loadedPlugins {
 	// 	ret, err := Call(pl+".onBeforeTextEvent", t)
 	// 	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-	// 		TermMessage(err)
+	// 		util.TermMessage(err)
 	// 	}
 	// 	if val, ok := ret.(lua.LBool); ok && val == lua.LFalse {
 	// 		return

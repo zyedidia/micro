@@ -1,40 +1,38 @@
 package main
 
-import "time"
+import (
+	"github.com/zyedidia/tcell"
+)
 
-// The ActionHandler connects the buffer and the window
-// It provides a cursor (or multiple) and defines a set of actions
-// that can be taken on the buffer
-// The ActionHandler can access the window for necessary info about
-// visual positions for mouse clicks and scrolling
-type ActionHandler struct {
-	Buf *Buffer
-	Win *Window
+type Event interface{}
 
-	// Since tcell doesn't differentiate between a mouse release event
-	// and a mouse move event with no keys pressed, we need to keep
-	// track of whether or not the mouse was pressed (or not released) last event to determine
-	// mouse release events
-	mouseReleased bool
+// RawEvent is simply an escape code
+// We allow users to directly bind escape codes
+// to get around some of a limitations of terminals
+type RawEvent struct {
+	esc string
+}
 
-	// We need to keep track of insert key press toggle
-	isOverwriteMode bool
-	// This stores when the last click was
-	// This is useful for detecting double and triple clicks
-	lastClickTime time.Time
-	lastLoc       Loc
+// KeyEvent is a key event containing a key code,
+// some possible modifiers (alt, ctrl, etc...) and
+// a rune if it was simply a character press
+// Note: to be compatible with tcell events,
+// for ctrl keys r=code
+type KeyEvent struct {
+	code tcell.Key
+	mod  tcell.ModMask
+	r    rune
+}
 
-	// lastCutTime stores when the last ctrl+k was issued.
-	// It is used for clearing the clipboard to replace it with fresh cut lines.
-	lastCutTime time.Time
+// MouseEvent is a mouse event with a mouse button and
+// any possible key modifiers
+type MouseEvent struct {
+	btn tcell.ButtonMask
+	mod tcell.ModMask
+}
 
-	// freshClip returns true if the clipboard has never been pasted.
-	freshClip bool
-
-	// Was the last mouse event actually a double click?
-	// Useful for detecting triple clicks -- if a double click is detected
-	// but the last mouse event was actually a double click, it's a triple click
-	doubleClick bool
-	// Same here, just to keep track for mouse move events
-	tripleClick bool
+// An ActionHandler will take a tcell event and execute it
+// appropriately
+type ActionHandler interface {
+	HandleEvent(tcell.Event)
 }

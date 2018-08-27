@@ -1,13 +1,13 @@
-package main
+package buffer
 
 import (
 	"bufio"
 	"bytes"
 	"crypto/md5"
+	"encoding/gob"
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -16,12 +16,41 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
+
+	. "github.com/zyedidia/micro/cmd/micro/util"
 )
 
 // LargeFileThreshold is the number of bytes when fastdirty is forced
 // because hashing is too slow
 const LargeFileThreshold = 50000
+
+// overwriteFile opens the given file for writing, truncating if one exists, and then calls
+// the supplied function with the file as io.Writer object, also making sure the file is
+// closed afterwards.
+func overwriteFile(name string, fn func(io.Writer) error) (err error) {
+	var file *os.File
+
+	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+		return
+	}
+
+	defer func() {
+		if e := file.Close(); e != nil && err == nil {
+			err = e
+		}
+	}()
+
+	w := bufio.NewWriter(file)
+
+	if err = fn(w); err != nil {
+		return
+	}
+
+	err = w.Flush()
+	return
+}
 
 // The BufType defines what kind of buffer this is
 type BufType struct {
@@ -31,16 +60,19 @@ type BufType struct {
 }
 
 var (
-	btDefault = BufType{0, false, false}
-	btHelp    = BufType{1, true, true}
-	btLog     = BufType{2, true, true}
-	btScratch = BufType{3, false, true}
-	btRaw     = BufType{4, true, true}
+	BTDefault = BufType{0, false, false}
+	BTHelp    = BufType{1, true, true}
+	BTLog     = BufType{2, true, true}
+	BTScratch = BufType{3, false, true}
+	BTRaw     = BufType{4, true, true}
 )
 
 type Buffer struct {
 	*LineArray
 	*EventHandler
+
+	cursors     []*Cursor
+	StartCursor Loc
 
 	// Path to the file on disk
 	Path string
@@ -55,8 +87,8 @@ type Buffer struct {
 	// Stores the last modification time of the file the buffer is pointing to
 	ModTime time.Time
 
-	syntaxDef   *highlight.Def
-	highlighter *highlight.Highlighter
+	SyntaxDef   *highlight.Def
+	Highlighter *highlight.Highlighter
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
@@ -66,6 +98,14 @@ type Buffer struct {
 
 	// Type of the buffer (e.g. help, raw, scratch etc..)
 	Type BufType
+}
+
+// The SerializedBuffer holds the types that get serialized when a buffer is saved
+// These are used for the savecursor and saveundo options
+type SerializedBuffer struct {
+	EventHandler *EventHandler
+	Cursor       Loc
+	ModTime      time.Time
 }
 
 // NewBufferFromFile opens a new buffer using the given path
@@ -111,13 +151,13 @@ func NewBufferFromString(text, path string) *Buffer {
 func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string) *Buffer {
 	b := new(Buffer)
 
-	b.Settings = DefaultLocalSettings()
-	for k, v := range globalSettings {
+	b.Settings = config.DefaultLocalSettings()
+	for k, v := range config.GlobalSettings {
 		if _, ok := b.Settings[k]; ok {
 			b.Settings[k] = v
 		}
 	}
-	InitLocalSettings(b)
+	config.InitLocalSettings(b.Settings, b.Path)
 
 	b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
 
@@ -132,7 +172,23 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	b.EventHandler = NewEventHandler(b)
 
 	b.UpdateRules()
-	log.Println("Filetype detected: ", b.Settings["filetype"])
+
+	if _, err := os.Stat(config.ConfigDir + "/buffers/"); os.IsNotExist(err) {
+		os.Mkdir(config.ConfigDir+"/buffers/", os.ModePerm)
+	}
+
+	// cursorLocation, err := GetBufferCursorLocation(cursorPosition, b)
+	// b.startcursor = Cursor{
+	// 	Loc: cursorLocation,
+	// 	buf: b,
+	// }
+	// TODO flagstartpos
+	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+		err := b.Unserialize()
+		if err != nil {
+			TermMessage(err)
+		}
+	}
 
 	if !b.Settings["fastdirty"].(bool) {
 		if size > LargeFileThreshold {
@@ -286,35 +342,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	absPath, _ := filepath.Abs(filename)
 	b.AbsPath = absPath
 	b.isModified = false
-	// TODO: serialize
-	// return b.Serialize()
-	return nil
-}
-
-// overwriteFile opens the given file for writing, truncating if one exists, and then calls
-// the supplied function with the file as io.Writer object, also making sure the file is
-// closed afterwards.
-func overwriteFile(name string, fn func(io.Writer) error) (err error) {
-	var file *os.File
-
-	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
-		return
-	}
-
-	defer func() {
-		if e := file.Close(); e != nil && err == nil {
-			err = e
-		}
-	}()
-
-	w := bufio.NewWriter(file)
-
-	if err = fn(w); err != nil {
-		return
-	}
-
-	err = w.Flush()
-	return
+	return b.Serialize()
 }
 
 // SaveWithSudo saves the buffer to the default path with sudo
@@ -331,7 +359,7 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	b.AbsPath = absPath
 
 	// Set up everything for the command
-	cmd := exec.Command(globalSettings["sucmd"].(string), "tee", filename)
+	cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "tee", filename)
 	cmd.Stdin = bytes.NewBuffer(b.Bytes())
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro
@@ -351,25 +379,29 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	if err == nil {
 		b.isModified = false
 		b.ModTime, _ = GetModTime(filename)
-		// TODO: serialize
+		return b.Serialize()
 	}
 	return err
 }
 
+func (b *Buffer) SetCursors(c []*Cursor) {
+	b.cursors = c
+}
+
 func (b *Buffer) GetActiveCursor() *Cursor {
-	return nil
+	return b.cursors[0]
 }
 
 func (b *Buffer) GetCursor(n int) *Cursor {
-	return nil
+	return b.cursors[n]
 }
 
 func (b *Buffer) GetCursors() []*Cursor {
-	return nil
+	return b.cursors
 }
 
 func (b *Buffer) NumCursors() int {
-	return 0
+	return len(b.cursors)
 }
 
 func (b *Buffer) LineBytes(n int) []byte {
@@ -440,12 +472,62 @@ func calcHash(b *Buffer, out *[md5.Size]byte) {
 	h.Sum((*out)[:0])
 }
 
+func init() {
+	gob.Register(TextEvent{})
+	gob.Register(SerializedBuffer{})
+}
+
+// Serialize serializes the buffer to config.ConfigDir/buffers
+func (b *Buffer) Serialize() error {
+	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
+		return nil
+	}
+
+	name := config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath)
+
+	return overwriteFile(name, func(file io.Writer) error {
+		return gob.NewEncoder(file).Encode(SerializedBuffer{
+			b.EventHandler,
+			b.GetActiveCursor().Loc,
+			b.ModTime,
+		})
+	})
+}
+
+func (b *Buffer) Unserialize() error {
+	// If either savecursor or saveundo is turned on, we need to load the serialized information
+	// from ~/.config/micro/buffers
+	file, err := os.Open(config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath))
+	defer file.Close()
+	if err == nil {
+		var buffer SerializedBuffer
+		decoder := gob.NewDecoder(file)
+		gob.Register(TextEvent{})
+		err = decoder.Decode(&buffer)
+		if err != nil {
+			return errors.New(err.Error() + "\nYou may want to remove the files in ~/.config/micro/buffers (these files store the information for the 'saveundo' and 'savecursor' options) if this problem persists.")
+		}
+		if b.Settings["savecursor"].(bool) {
+			b.StartCursor = buffer.Cursor
+		}
+
+		if b.Settings["saveundo"].(bool) {
+			// We should only use last time's eventhandler if the file wasn't modified by someone else in the meantime
+			if b.ModTime == buffer.ModTime {
+				b.EventHandler = buffer.EventHandler
+				b.EventHandler.buf = b
+			}
+		}
+	}
+	return err
+}
+
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
 	rehighlight := false
 	var files []*highlight.File
-	for _, f := range ListRuntimeFiles(RTSyntax) {
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
 		data, err := f.Data()
 		if err != nil {
 			TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
@@ -467,7 +549,7 @@ func (b *Buffer) UpdateRules() {
 					header := new(highlight.Header)
 					header.FileType = file.FileType
 					header.FtDetect = ftdetect
-					b.syntaxDef, err = highlight.ParseDef(file, header)
+					b.SyntaxDef, err = highlight.ParseDef(file, header)
 					if err != nil {
 						TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 						continue
@@ -479,7 +561,7 @@ func (b *Buffer) UpdateRules() {
 					header := new(highlight.Header)
 					header.FileType = file.FileType
 					header.FtDetect = ftdetect
-					b.syntaxDef, err = highlight.ParseDef(file, header)
+					b.SyntaxDef, err = highlight.ParseDef(file, header)
 					if err != nil {
 						TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 						continue
@@ -491,16 +573,16 @@ func (b *Buffer) UpdateRules() {
 		}
 	}
 
-	if b.syntaxDef != nil {
-		highlight.ResolveIncludes(b.syntaxDef, files)
+	if b.SyntaxDef != nil {
+		highlight.ResolveIncludes(b.SyntaxDef, files)
 	}
 
-	if b.highlighter == nil || rehighlight {
-		if b.syntaxDef != nil {
-			b.Settings["filetype"] = b.syntaxDef.FileType
-			b.highlighter = highlight.NewHighlighter(b.syntaxDef)
+	if b.Highlighter == nil || rehighlight {
+		if b.SyntaxDef != nil {
+			b.Settings["filetype"] = b.SyntaxDef.FileType
+			b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
 			if b.Settings["syntax"].(bool) {
-				b.highlighter.HighlightStates(b)
+				b.Highlighter.HighlightStates(b)
 			}
 		}
 	}
