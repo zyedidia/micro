@@ -1,8 +1,8 @@
 // +build plan9 nacl windows
 
-package main
+package action
 
-func (*BufActionHandler) Suspend() bool {
+func (*BufHandler) Suspend() bool {
 	// TODO: error message
 	return false
 }

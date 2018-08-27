@@ -1,6 +1,6 @@
 // +build linux darwin dragonfly solaris openbsd netbsd freebsd
 
-package main
+package action
 
 import (
 	"syscall"
@@ -12,7 +12,7 @@ import (
 // Suspend sends micro to the background. This is the same as pressing CtrlZ in most unix programs.
 // This only works on linux and has no default binding.
 // This code was adapted from the suspend code in nsf/godit
-func (*BufActionHandler) Suspend() bool {
+func (*BufHandler) Suspend() bool {
 	screenWasNil := screen.Screen == nil
 
 	if !screenWasNil {

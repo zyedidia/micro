@@ -1,4 +1,4 @@
-package main
+package action
 
 import (
 	"os"
@@ -9,450 +9,450 @@ import (
 
 // MousePress is the event that should happen when a normal click happens
 // This is almost always bound to left click
-func (a *BufActionHandler) MousePress(e *tcell.EventMouse) bool {
+func (a *BufHandler) MousePress(e *tcell.EventMouse) bool {
 	return false
 }
 
 // ScrollUpAction scrolls the view up
-func (a *BufActionHandler) ScrollUpAction() bool {
+func (a *BufHandler) ScrollUpAction() bool {
 	return false
 }
 
 // ScrollDownAction scrolls the view up
-func (a *BufActionHandler) ScrollDownAction() bool {
+func (a *BufHandler) ScrollDownAction() bool {
 	return false
 }
 
 // Center centers the view on the cursor
-func (a *BufActionHandler) Center() bool {
+func (a *BufHandler) Center() bool {
 	return true
 }
 
 // CursorUp moves the cursor up
-func (a *BufActionHandler) CursorUp() bool {
+func (a *BufHandler) CursorUp() bool {
 	a.Cursor.Deselect(true)
 	a.Cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
-func (a *BufActionHandler) CursorDown() bool {
+func (a *BufHandler) CursorDown() bool {
 	a.Cursor.Deselect(true)
 	a.Cursor.Down()
 	return true
 }
 
 // CursorLeft moves the cursor left
-func (a *BufActionHandler) CursorLeft() bool {
+func (a *BufHandler) CursorLeft() bool {
 	a.Cursor.Deselect(true)
 	a.Cursor.Left()
 	return true
 }
 
 // CursorRight moves the cursor right
-func (a *BufActionHandler) CursorRight() bool {
+func (a *BufHandler) CursorRight() bool {
 	a.Cursor.Deselect(true)
 	a.Cursor.Right()
 	return true
 }
 
 // WordRight moves the cursor one word to the right
-func (a *BufActionHandler) WordRight() bool {
+func (a *BufHandler) WordRight() bool {
 	return true
 }
 
 // WordLeft moves the cursor one word to the left
-func (a *BufActionHandler) WordLeft() bool {
+func (a *BufHandler) WordLeft() bool {
 	return true
 }
 
 // SelectUp selects up one line
-func (a *BufActionHandler) SelectUp() bool {
+func (a *BufHandler) SelectUp() bool {
 	return true
 }
 
 // SelectDown selects down one line
-func (a *BufActionHandler) SelectDown() bool {
+func (a *BufHandler) SelectDown() bool {
 	return true
 }
 
 // SelectLeft selects the character to the left of the cursor
-func (a *BufActionHandler) SelectLeft() bool {
+func (a *BufHandler) SelectLeft() bool {
 	return true
 }
 
 // SelectRight selects the character to the right of the cursor
-func (a *BufActionHandler) SelectRight() bool {
+func (a *BufHandler) SelectRight() bool {
 	return true
 }
 
 // SelectWordRight selects the word to the right of the cursor
-func (a *BufActionHandler) SelectWordRight() bool {
+func (a *BufHandler) SelectWordRight() bool {
 	return true
 }
 
 // SelectWordLeft selects the word to the left of the cursor
-func (a *BufActionHandler) SelectWordLeft() bool {
+func (a *BufHandler) SelectWordLeft() bool {
 	return true
 }
 
 // StartOfLine moves the cursor to the start of the line
-func (a *BufActionHandler) StartOfLine() bool {
+func (a *BufHandler) StartOfLine() bool {
 	return true
 }
 
 // EndOfLine moves the cursor to the end of the line
-func (a *BufActionHandler) EndOfLine() bool {
+func (a *BufHandler) EndOfLine() bool {
 	return true
 }
 
 // SelectLine selects the entire current line
-func (a *BufActionHandler) SelectLine() bool {
+func (a *BufHandler) SelectLine() bool {
 	return true
 }
 
 // SelectToStartOfLine selects to the start of the current line
-func (a *BufActionHandler) SelectToStartOfLine() bool {
+func (a *BufHandler) SelectToStartOfLine() bool {
 	return true
 }
 
 // SelectToEndOfLine selects to the end of the current line
-func (a *BufActionHandler) SelectToEndOfLine() bool {
+func (a *BufHandler) SelectToEndOfLine() bool {
 	return true
 }
 
 // ParagraphPrevious moves the cursor to the previous empty line, or beginning of the buffer if there's none
-func (a *BufActionHandler) ParagraphPrevious() bool {
+func (a *BufHandler) ParagraphPrevious() bool {
 	return true
 }
 
 // ParagraphNext moves the cursor to the next empty line, or end of the buffer if there's none
-func (a *BufActionHandler) ParagraphNext() bool {
+func (a *BufHandler) ParagraphNext() bool {
 	return true
 }
 
 // Retab changes all tabs to spaces or all spaces to tabs depending
 // on the user's settings
-func (a *BufActionHandler) Retab() bool {
+func (a *BufHandler) Retab() bool {
 	return true
 }
 
 // CursorStart moves the cursor to the start of the buffer
-func (a *BufActionHandler) CursorStart() bool {
+func (a *BufHandler) CursorStart() bool {
 	return true
 }
 
 // CursorEnd moves the cursor to the end of the buffer
-func (a *BufActionHandler) CursorEnd() bool {
+func (a *BufHandler) CursorEnd() bool {
 	return true
 }
 
 // SelectToStart selects the text from the cursor to the start of the buffer
-func (a *BufActionHandler) SelectToStart() bool {
+func (a *BufHandler) SelectToStart() bool {
 	return true
 }
 
 // SelectToEnd selects the text from the cursor to the end of the buffer
-func (a *BufActionHandler) SelectToEnd() bool {
+func (a *BufHandler) SelectToEnd() bool {
 	return true
 }
 
 // InsertSpace inserts a space
-func (a *BufActionHandler) InsertSpace() bool {
+func (a *BufHandler) InsertSpace() bool {
 	return true
 }
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
-func (a *BufActionHandler) InsertNewline() bool {
+func (a *BufHandler) InsertNewline() bool {
 	return true
 }
 
 // Backspace deletes the previous character
-func (a *BufActionHandler) Backspace() bool {
+func (a *BufHandler) Backspace() bool {
 	return true
 }
 
 // DeleteWordRight deletes the word to the right of the cursor
-func (a *BufActionHandler) DeleteWordRight() bool {
+func (a *BufHandler) DeleteWordRight() bool {
 	return true
 }
 
 // DeleteWordLeft deletes the word to the left of the cursor
-func (a *BufActionHandler) DeleteWordLeft() bool {
+func (a *BufHandler) DeleteWordLeft() bool {
 	return true
 }
 
 // Delete deletes the next character
-func (a *BufActionHandler) Delete() bool {
+func (a *BufHandler) Delete() bool {
 	return true
 }
 
 // IndentSelection indents the current selection
-func (a *BufActionHandler) IndentSelection() bool {
+func (a *BufHandler) IndentSelection() bool {
 	return false
 }
 
 // OutdentLine moves the current line back one indentation
-func (a *BufActionHandler) OutdentLine() bool {
+func (a *BufHandler) OutdentLine() bool {
 	return true
 }
 
 // OutdentSelection takes the current selection and moves it back one indent level
-func (a *BufActionHandler) OutdentSelection() bool {
+func (a *BufHandler) OutdentSelection() bool {
 	return false
 }
 
 // InsertTab inserts a tab or spaces
-func (a *BufActionHandler) InsertTab() bool {
+func (a *BufHandler) InsertTab() bool {
 	return true
 }
 
 // SaveAll saves all open buffers
-func (a *BufActionHandler) SaveAll() bool {
+func (a *BufHandler) SaveAll() bool {
 	return false
 }
 
 // Save the buffer to disk
-func (a *BufActionHandler) Save() bool {
+func (a *BufHandler) Save() bool {
 	return false
 }
 
 // SaveAs saves the buffer to disk with the given name
-func (a *BufActionHandler) SaveAs() bool {
+func (a *BufHandler) SaveAs() bool {
 	return false
 }
 
 // Find opens a prompt and searches forward for the input
-func (a *BufActionHandler) Find() bool {
+func (a *BufHandler) Find() bool {
 	return true
 }
 
 // FindNext searches forwards for the last used search term
-func (a *BufActionHandler) FindNext() bool {
+func (a *BufHandler) FindNext() bool {
 	return true
 }
 
 // FindPrevious searches backwards for the last used search term
-func (a *BufActionHandler) FindPrevious() bool {
+func (a *BufHandler) FindPrevious() bool {
 	return true
 }
 
 // Undo undoes the last action
-func (a *BufActionHandler) Undo() bool {
+func (a *BufHandler) Undo() bool {
 	return true
 }
 
 // Redo redoes the last action
-func (a *BufActionHandler) Redo() bool {
+func (a *BufHandler) Redo() bool {
 	return true
 }
 
 // Copy the selection to the system clipboard
-func (a *BufActionHandler) Copy() bool {
+func (a *BufHandler) Copy() bool {
 	return true
 }
 
 // CutLine cuts the current line to the clipboard
-func (a *BufActionHandler) CutLine() bool {
+func (a *BufHandler) CutLine() bool {
 	return true
 }
 
 // Cut the selection to the system clipboard
-func (a *BufActionHandler) Cut() bool {
+func (a *BufHandler) Cut() bool {
 	return true
 }
 
 // DuplicateLine duplicates the current line or selection
-func (a *BufActionHandler) DuplicateLine() bool {
+func (a *BufHandler) DuplicateLine() bool {
 	return true
 }
 
 // DeleteLine deletes the current line
-func (a *BufActionHandler) DeleteLine() bool {
+func (a *BufHandler) DeleteLine() bool {
 	return true
 }
 
 // MoveLinesUp moves up the current line or selected lines if any
-func (a *BufActionHandler) MoveLinesUp() bool {
+func (a *BufHandler) MoveLinesUp() bool {
 	return true
 }
 
 // MoveLinesDown moves down the current line or selected lines if any
-func (a *BufActionHandler) MoveLinesDown() bool {
+func (a *BufHandler) MoveLinesDown() bool {
 	return true
 }
 
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
-func (a *BufActionHandler) Paste() bool {
+func (a *BufHandler) Paste() bool {
 	return true
 }
 
 // PastePrimary pastes from the primary clipboard (only use on linux)
-func (a *BufActionHandler) PastePrimary() bool {
+func (a *BufHandler) PastePrimary() bool {
 	return true
 }
 
 // JumpToMatchingBrace moves the cursor to the matching brace if it is
 // currently on a brace
-func (a *BufActionHandler) JumpToMatchingBrace() bool {
+func (a *BufHandler) JumpToMatchingBrace() bool {
 	return true
 }
 
 // SelectAll selects the entire buffer
-func (a *BufActionHandler) SelectAll() bool {
+func (a *BufHandler) SelectAll() bool {
 	return true
 }
 
 // OpenFile opens a new file in the buffer
-func (a *BufActionHandler) OpenFile() bool {
+func (a *BufHandler) OpenFile() bool {
 	return false
 }
 
 // Start moves the viewport to the start of the buffer
-func (a *BufActionHandler) Start() bool {
+func (a *BufHandler) Start() bool {
 	return false
 }
 
 // End moves the viewport to the end of the buffer
-func (a *BufActionHandler) End() bool {
+func (a *BufHandler) End() bool {
 	return false
 }
 
 // PageUp scrolls the view up a page
-func (a *BufActionHandler) PageUp() bool {
+func (a *BufHandler) PageUp() bool {
 	return false
 }
 
 // PageDown scrolls the view down a page
-func (a *BufActionHandler) PageDown() bool {
+func (a *BufHandler) PageDown() bool {
 	return false
 }
 
 // SelectPageUp selects up one page
-func (a *BufActionHandler) SelectPageUp() bool {
+func (a *BufHandler) SelectPageUp() bool {
 	return true
 }
 
 // SelectPageDown selects down one page
-func (a *BufActionHandler) SelectPageDown() bool {
+func (a *BufHandler) SelectPageDown() bool {
 	return true
 }
 
 // CursorPageUp places the cursor a page up
-func (a *BufActionHandler) CursorPageUp() bool {
+func (a *BufHandler) CursorPageUp() bool {
 	return true
 }
 
 // CursorPageDown places the cursor a page up
-func (a *BufActionHandler) CursorPageDown() bool {
+func (a *BufHandler) CursorPageDown() bool {
 	return true
 }
 
 // HalfPageUp scrolls the view up half a page
-func (a *BufActionHandler) HalfPageUp() bool {
+func (a *BufHandler) HalfPageUp() bool {
 	return false
 }
 
 // HalfPageDown scrolls the view down half a page
-func (a *BufActionHandler) HalfPageDown() bool {
+func (a *BufHandler) HalfPageDown() bool {
 	return false
 }
 
 // ToggleRuler turns line numbers off and on
-func (a *BufActionHandler) ToggleRuler() bool {
+func (a *BufHandler) ToggleRuler() bool {
 	return false
 }
 
 // JumpLine jumps to a line and moves the view accordingly.
-func (a *BufActionHandler) JumpLine() bool {
+func (a *BufHandler) JumpLine() bool {
 	return false
 }
 
 // ClearStatus clears the messenger bar
-func (a *BufActionHandler) ClearStatus() bool {
+func (a *BufHandler) ClearStatus() bool {
 	return false
 }
 
 // ToggleHelp toggles the help screen
-func (a *BufActionHandler) ToggleHelp() bool {
+func (a *BufHandler) ToggleHelp() bool {
 	return true
 }
 
 // ToggleKeyMenu toggles the keymenu option and resizes all tabs
-func (a *BufActionHandler) ToggleKeyMenu() bool {
+func (a *BufHandler) ToggleKeyMenu() bool {
 	return true
 }
 
 // ShellMode opens a terminal to run a shell command
-func (a *BufActionHandler) ShellMode() bool {
+func (a *BufHandler) ShellMode() bool {
 	return false
 }
 
 // CommandMode lets the user enter a command
-func (a *BufActionHandler) CommandMode() bool {
+func (a *BufHandler) CommandMode() bool {
 	return false
 }
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
-func (a *BufActionHandler) ToggleOverwriteMode() bool {
+func (a *BufHandler) ToggleOverwriteMode() bool {
 	return false
 }
 
 // Escape leaves current mode
-func (a *BufActionHandler) Escape() bool {
+func (a *BufHandler) Escape() bool {
 	return false
 }
 
 // Quit this will close the current tab or view that is open
-func (a *BufActionHandler) Quit() bool {
+func (a *BufHandler) Quit() bool {
 	screen.Screen.Fini()
 	os.Exit(0)
 	return false
 }
 
 // QuitAll quits the whole editor; all splits and tabs
-func (a *BufActionHandler) QuitAll() bool {
+func (a *BufHandler) QuitAll() bool {
 	return false
 }
 
 // AddTab adds a new tab with an empty buffer
-func (a *BufActionHandler) AddTab() bool {
+func (a *BufHandler) AddTab() bool {
 	return true
 }
 
 // PreviousTab switches to the previous tab in the tab list
-func (a *BufActionHandler) PreviousTab() bool {
+func (a *BufHandler) PreviousTab() bool {
 	return false
 }
 
 // NextTab switches to the next tab in the tab list
-func (a *BufActionHandler) NextTab() bool {
+func (a *BufHandler) NextTab() bool {
 	return false
 }
 
 // VSplitBinding opens an empty vertical split
-func (a *BufActionHandler) VSplitBinding() bool {
+func (a *BufHandler) VSplitBinding() bool {
 	return false
 }
 
 // HSplitBinding opens an empty horizontal split
-func (a *BufActionHandler) HSplitBinding() bool {
+func (a *BufHandler) HSplitBinding() bool {
 	return false
 }
 
 // Unsplit closes all splits in the current tab except the active one
-func (a *BufActionHandler) Unsplit() bool {
+func (a *BufHandler) Unsplit() bool {
 	return false
 }
 
 // NextSplit changes the view to the next split
-func (a *BufActionHandler) NextSplit() bool {
+func (a *BufHandler) NextSplit() bool {
 	return false
 }
 
 // PreviousSplit changes the view to the previous split
-func (a *BufActionHandler) PreviousSplit() bool {
+func (a *BufHandler) PreviousSplit() bool {
 	return false
 }
 
@@ -460,41 +460,41 @@ var curMacro []interface{}
 var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
-func (a *BufActionHandler) ToggleMacro() bool {
+func (a *BufHandler) ToggleMacro() bool {
 	return true
 }
 
 // PlayMacro plays back the most recently recorded macro
-func (a *BufActionHandler) PlayMacro() bool {
+func (a *BufHandler) PlayMacro() bool {
 	return true
 }
 
 // SpawnMultiCursor creates a new multiple cursor at the next occurrence of the current selection or current word
-func (a *BufActionHandler) SpawnMultiCursor() bool {
+func (a *BufHandler) SpawnMultiCursor() bool {
 	return false
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
-func (a *BufActionHandler) SpawnMultiCursorSelect() bool {
+func (a *BufHandler) SpawnMultiCursorSelect() bool {
 	return false
 }
 
 // MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
-func (a *BufActionHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
+func (a *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
 	return false
 }
 
 // SkipMultiCursor moves the current multiple cursor to the next available position
-func (a *BufActionHandler) SkipMultiCursor() bool {
+func (a *BufHandler) SkipMultiCursor() bool {
 	return false
 }
 
 // RemoveMultiCursor removes the latest multiple cursor
-func (a *BufActionHandler) RemoveMultiCursor() bool {
+func (a *BufHandler) RemoveMultiCursor() bool {
 	return false
 }
 
 // RemoveAllMultiCursors removes all cursors except the base cursor
-func (a *BufActionHandler) RemoveAllMultiCursors() bool {
+func (a *BufHandler) RemoveAllMultiCursors() bool {
 	return false
 }

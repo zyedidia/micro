@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/go-errors/errors"
+	"github.com/zyedidia/micro/cmd/micro/action"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
@@ -105,7 +106,7 @@ func main() {
 		util.TermMessage(err)
 	}
 	config.InitGlobalSettings()
-	InitBindings()
+	action.InitBindings()
 	err = config.InitColorscheme()
 	if err != nil {
 		util.TermMessage(err)
@@ -126,7 +127,7 @@ func main() {
 		}
 	}()
 
-	TryBindKey("Ctrl-z", "Undo", true)
+	action.TryBindKey("Ctrl-z", "Undo", true)
 
 	b, err := buffer.NewBufferFromFile(os.Args[1])
 
@@ -137,7 +138,7 @@ func main() {
 	width, height := screen.Screen.Size()
 	w := NewWindow(0, 0, width, height-1, b)
 
-	a := NewBufActionHandler(b, w)
+	a := action.NewBufHandler(b)
 
 	// Here is the event loop which runs in a separate thread
 	go func() {

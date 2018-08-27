@@ -1,4 +1,4 @@
-package main
+package action
 
 import (
 	"encoding/json"
@@ -14,7 +14,7 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-var bindings = DefaultBindings()
+var Bindings = DefaultBindings()
 
 func InitBindings() {
 	var parsed map[string]string
@@ -57,7 +57,7 @@ func BindKey(k, v string) {
 		util.TermMessage("Raw events not supported yet")
 	}
 
-	bindings[k] = v
+	Bindings[k] = v
 }
 
 // findKeyEvent will find binding Key 'b' using string 'k'

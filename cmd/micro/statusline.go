@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/zyedidia/micro/cmd/micro/action"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
@@ -84,7 +85,7 @@ func (s *StatusLine) Display() {
 			return []byte(fmt.Sprint(s.FindOpt(string(option))))
 		} else if bytes.HasPrefix(name, []byte("bind")) {
 			binding := string(name[5:])
-			for k, v := range bindings {
+			for k, v := range action.Bindings {
 				if v == binding {
 					return []byte(k)
 				}
