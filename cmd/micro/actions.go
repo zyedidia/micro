@@ -30,21 +30,29 @@ func (a *BufActionHandler) Center() bool {
 
 // CursorUp moves the cursor up
 func (a *BufActionHandler) CursorUp() bool {
+	a.Cursor.Deselect(true)
+	a.Cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
 func (a *BufActionHandler) CursorDown() bool {
+	a.Cursor.Deselect(true)
+	a.Cursor.Down()
 	return true
 }
 
 // CursorLeft moves the cursor left
 func (a *BufActionHandler) CursorLeft() bool {
+	a.Cursor.Deselect(true)
+	a.Cursor.Left()
 	return true
 }
 
 // CursorRight moves the cursor right
 func (a *BufActionHandler) CursorRight() bool {
+	a.Cursor.Deselect(true)
+	a.Cursor.Right()
 	return true
 }
 

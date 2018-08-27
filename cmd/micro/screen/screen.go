@@ -40,12 +40,12 @@ func Init() {
 			Screen, err = tcell.NewScreen()
 			if err != nil {
 				fmt.Println(err)
-				fmt.Println("Fatal: Micro could not initialize a screen.")
+				fmt.Println("Fatal: Micro could not initialize a Screen.")
 				os.Exit(1)
 			}
 		} else {
 			fmt.Println(err)
-			fmt.Println("Fatal: Micro could not initialize a screen.")
+			fmt.Println("Fatal: Micro could not initialize a Screen.")
 			os.Exit(1)
 		}
 	}
@@ -64,4 +64,6 @@ func Init() {
 	}
 
 	os.Setenv("TCELLDB", tcelldb)
+
+	// Screen.SetStyle(defStyle)
 }

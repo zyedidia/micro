@@ -48,7 +48,7 @@ func (c *Cursor) Goto(b Cursor) {
 // the current cursor its selection too
 func (c *Cursor) GotoLoc(l Loc) {
 	c.X, c.Y = l.X, l.Y
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // GetVisualX returns the x value of the cursor in visual spaces
@@ -89,11 +89,13 @@ func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
 			width += runewidth.RuneWidth(r)
 		}
 
-		i++
-
 		if width >= visualPos {
+			if width == visualPos {
+				i++
+			}
 			break
 		}
+		i++
 	}
 
 	return i
@@ -152,6 +154,21 @@ func (c *Cursor) DeleteSelection() {
 	} else {
 		c.Buf.Remove(c.CurSelection[0], c.CurSelection[1])
 		c.Loc = c.CurSelection[0]
+	}
+}
+
+// Deselect closes the cursor's current selection
+// Start indicates whether the cursor should be placed
+// at the start or end of the selection
+func (c *Cursor) Deselect(start bool) {
+	if c.HasSelection() {
+		if start {
+			c.Loc = c.CurSelection[0]
+		} else {
+			c.Loc = c.CurSelection[1]
+		}
+		c.ResetSelection()
+		c.StoreVisualX()
 	}
 }
 
@@ -244,7 +261,7 @@ func (c *Cursor) Left() {
 		c.Up()
 		c.End()
 	}
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // Right moves the cursor right one cell (if possible) or
@@ -259,7 +276,7 @@ func (c *Cursor) Right() {
 		c.Down()
 		c.Start()
 	}
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // Relocate makes sure that the cursor is inside the bounds
@@ -277,4 +294,8 @@ func (c *Cursor) Relocate() {
 	} else if c.X > utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
 		c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
 	}
+}
+
+func (c *Cursor) StoreVisualX() {
+	c.LastVisualX = c.GetVisualX()
 }

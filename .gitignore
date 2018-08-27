@@ -10,3 +10,4 @@ packages/
 todo.txt
 test.txt
 log.txt
+*.old

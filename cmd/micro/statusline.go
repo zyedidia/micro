@@ -30,8 +30,8 @@ type StatusLine struct {
 // NewStatusLine returns a statusline bound to a window
 func NewStatusLine(win *Window) *StatusLine {
 	s := new(StatusLine)
-	// s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
-	s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
+	s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
+	// s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
 	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): open help"
 	s.Info = map[string]func(*buffer.Buffer) string{
 		"filename": func(b *buffer.Buffer) string {
@@ -41,10 +41,10 @@ func NewStatusLine(win *Window) *StatusLine {
 			return b.GetName()
 		},
 		"line": func(b *buffer.Buffer) string {
-			return strconv.Itoa(b.GetActiveCursor().Y)
+			return strconv.Itoa(b.GetActiveCursor().Y + 1)
 		},
 		"col": func(b *buffer.Buffer) string {
-			return strconv.Itoa(b.GetActiveCursor().X)
+			return strconv.Itoa(b.GetActiveCursor().X + 1)
 		},
 		"modified": func(b *buffer.Buffer) string {
 			if b.Modified() {
