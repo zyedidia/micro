@@ -1,4 +1,4 @@
-package main
+package action
 
 import (
 	"github.com/zyedidia/tcell"
@@ -31,8 +31,8 @@ type MouseEvent struct {
 	mod tcell.ModMask
 }
 
-// An ActionHandler will take a tcell event and execute it
+// A Handler will take a tcell event and execute it
 // appropriately
-type ActionHandler interface {
+type Handler interface {
 	HandleEvent(tcell.Event)
 }
