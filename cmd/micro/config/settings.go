@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"encoding/json"
@@ -15,7 +15,7 @@ import (
 type optionValidator func(string, interface{}) error
 
 // The options that the user can set
-var globalSettings map[string]interface{}
+var GlobalSettings map[string]interface{}
 
 // This is the raw parsed json
 var parsedSettings map[string]interface{}
@@ -31,7 +31,7 @@ var optionValidators = map[string]optionValidator{
 }
 
 func ReadSettings() error {
-	filename := configDir + "/settings.json"
+	filename := ConfigDir + "/settings.json"
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -51,26 +51,26 @@ func ReadSettings() error {
 // InitGlobalSettings initializes the options map and sets all options to their default values
 // Must be called after ReadSettings
 func InitGlobalSettings() {
-	globalSettings = DefaultGlobalSettings()
+	GlobalSettings = DefaultGlobalSettings()
 
 	for k, v := range parsedSettings {
 		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-			globalSettings[k] = v
+			GlobalSettings[k] = v
 		}
 	}
 }
 
 // InitLocalSettings scans the json in settings.json and sets the options locally based
-// on whether the buffer matches the glob
+// on whether the filetype or path matches ft or glob local settings
 // Must be called after ReadSettings
-func InitLocalSettings(buf *Buffer) error {
+func InitLocalSettings(settings map[string]interface{}, path string) error {
 	var parseError error
 	for k, v := range parsedSettings {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 			if strings.HasPrefix(k, "ft:") {
-				if buf.Settings["filetype"].(string) == k[3:] {
+				if settings["filetype"].(string) == k[3:] {
 					for k1, v1 := range v.(map[string]interface{}) {
-						buf.Settings[k1] = v1
+						settings[k1] = v1
 					}
 				}
 			} else {
@@ -80,9 +80,9 @@ func InitLocalSettings(buf *Buffer) error {
 					continue
 				}
 
-				if g.MatchString(buf.Path) {
+				if g.MatchString(path) {
 					for k1, v1 := range v.(map[string]interface{}) {
-						buf.Settings[k1] = v1
+						settings[k1] = v1
 					}
 				}
 			}
@@ -94,8 +94,8 @@ func InitLocalSettings(buf *Buffer) error {
 // WriteSettings writes the settings to the specified filename as JSON
 func WriteSettings(filename string) error {
 	var err error
-	if _, e := os.Stat(configDir); e == nil {
-		for k, v := range globalSettings {
+	if _, e := os.Stat(ConfigDir); e == nil {
+		for k, v := range GlobalSettings {
 			parsedSettings[k] = v
 		}
 
@@ -107,8 +107,8 @@ func WriteSettings(filename string) error {
 
 // AddOption creates a new option. This is meant to be called by plugins to add options.
 func AddOption(name string, value interface{}) error {
-	globalSettings[name] = value
-	err := WriteSettings(configDir + "/settings.json")
+	GlobalSettings[name] = value
+	err := WriteSettings(ConfigDir + "/settings.json")
 	if err != nil {
 		return errors.New("Error writing settings.json file: " + err.Error())
 	}
@@ -117,13 +117,13 @@ func AddOption(name string, value interface{}) error {
 
 // GetGlobalOption returns the global value of the given option
 func GetGlobalOption(name string) interface{} {
-	return globalSettings[name]
+	return GlobalSettings[name]
 }
 
 // GetLocalOption returns the local value of the given option
-func GetLocalOption(name string, buf *Buffer) interface{} {
-	return buf.Settings[name]
-}
+// func GetLocalOption(name string, buf *Buffer) interface{} {
+// 	return buf.Settings[name]
+// }
 
 // TODO: get option for current buffer
 // GetOption returns the value of the given option
@@ -203,7 +203,7 @@ func DefaultLocalSettings() map[string]interface{} {
 // is local only it will set the local version
 // Use setlocal to force an option to be set locally
 // func SetOption(option, value string) error {
-// 	if _, ok := globalSettings[option]; !ok {
+// 	if _, ok := GlobalSettings[option]; !ok {
 // 		if _, ok := CurView().Buf.Settings[option]; !ok {
 // 			return errors.New("Invalid option")
 // 		}
@@ -213,7 +213,7 @@ func DefaultLocalSettings() map[string]interface{} {
 //
 // 	var nativeValue interface{}
 //
-// 	kind := reflect.TypeOf(globalSettings[option]).Kind()
+// 	kind := reflect.TypeOf(GlobalSettings[option]).Kind()
 // 	if kind == reflect.Bool {
 // 		b, err := ParseBool(value)
 // 		if err != nil {
@@ -236,7 +236,7 @@ func DefaultLocalSettings() map[string]interface{} {
 // 		return err
 // 	}
 //
-// 	globalSettings[option] = nativeValue
+// 	GlobalSettings[option] = nativeValue
 //
 // 	if option == "colorscheme" {
 // 		// LoadSyntaxFiles()
@@ -372,7 +372,7 @@ func DefaultLocalSettings() map[string]interface{} {
 //
 // // SetOptionAndSettings sets the given option and saves the option setting to the settings config file
 // func SetOptionAndSettings(option, value string) {
-// 	filename := configDir + "/settings.json"
+// 	filename := ConfigDir + "/settings.json"
 //
 // 	err := SetOption(option, value)
 //

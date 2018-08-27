@@ -5,12 +5,15 @@ import (
 	"os"
 )
 
+// NullWriter simply sends writes into the void
 type NullWriter struct{}
 
+// Write is empty
 func (NullWriter) Write(data []byte) (n int, err error) {
 	return 0, nil
 }
 
+// InitLog sets up the debug log system for micro if it has been enabled by compile-time variables
 func InitLog() {
 	if Debug == "ON" {
 		f, err := os.OpenFile("log.txt", os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0666)
@@ -22,6 +25,5 @@ func InitLog() {
 		log.Println("Micro started")
 	} else {
 		log.SetOutput(NullWriter{})
-		log.Println("Micro started")
 	}
 }

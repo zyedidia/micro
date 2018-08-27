@@ -1,9 +1,10 @@
-package main
+package util
 
 import (
 	"errors"
 	"os"
 	"os/user"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -212,4 +213,10 @@ func GetModTime(path string) (time.Time, error) {
 		return time.Now(), err
 	}
 	return info.ModTime(), nil
+}
+
+// EscapePath replaces every path separator in a given path with a %
+func EscapePath(path string) string {
+	path = filepath.ToSlash(path)
+	return strings.Replace(path, "/", "%", -1)
 }

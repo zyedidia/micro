@@ -1,4 +1,4 @@
-package main
+package config
 
 import (
 	"io/ioutil"
@@ -125,7 +125,7 @@ func ListRuntimeFiles(fileType RTFiletype) []RuntimeFile {
 // InitRuntimeFiles initializes all assets file and the config directory
 func InitRuntimeFiles() {
 	add := func(fileType RTFiletype, dir, pattern string) {
-		AddRuntimeFilesFromDirectory(fileType, filepath.Join(configDir, dir), pattern)
+		AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
 		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
 	}
 
@@ -133,13 +133,13 @@ func InitRuntimeFiles() {
 	add(RTSyntax, "syntax", "*.yaml")
 	add(RTHelp, "help", "*.md")
 
-	// Search configDir for plugin-scripts
-	files, _ := ioutil.ReadDir(filepath.Join(configDir, "plugins"))
+	// Search ConfigDir for plugin-scripts
+	files, _ := ioutil.ReadDir(filepath.Join(ConfigDir, "plugins"))
 	for _, f := range files {
-		realpath, _ := filepath.EvalSymlinks(filepath.Join(configDir, "plugins", f.Name()))
+		realpath, _ := filepath.EvalSymlinks(filepath.Join(ConfigDir, "plugins", f.Name()))
 		realpathStat, _ := os.Stat(realpath)
 		if realpathStat.IsDir() {
-			scriptPath := filepath.Join(configDir, "plugins", f.Name(), f.Name()+".lua")
+			scriptPath := filepath.Join(ConfigDir, "plugins", f.Name(), f.Name()+".lua")
 			if _, err := os.Stat(scriptPath); err == nil {
 				AddRuntimeFile(RTPlugin, realFile(scriptPath))
 			}
@@ -178,7 +178,7 @@ func PluginListRuntimeFiles(fileType RTFiletype) []string {
 
 // PluginAddRuntimeFile adds a file to the runtime files for a plugin
 func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) {
-	fullpath := filepath.Join(configDir, "plugins", plugin, filePath)
+	fullpath := filepath.Join(ConfigDir, "plugins", plugin, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
 	} else {
@@ -189,7 +189,7 @@ func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) {
 
 // PluginAddRuntimeFilesFromDirectory adds files from a directory to the runtime files for a plugin
 func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, directory, pattern string) {
-	fullpath := filepath.Join(configDir, "plugins", plugin, directory)
+	fullpath := filepath.Join(ConfigDir, "plugins", plugin, directory)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFilesFromDirectory(filetype, fullpath, pattern)
 	} else {

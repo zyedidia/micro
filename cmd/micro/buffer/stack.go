@@ -1,4 +1,4 @@
-package main
+package buffer
 
 // TEStack is a simple implementation of a LIFO stack for text events
 type TEStack struct {

@@ -1,23 +1,25 @@
-package main
+package util
 
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"strconv"
+
+	"github.com/zyedidia/micro/cmd/micro/screen"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
 // micro has been fully initialized -- ie if there is an error in the syntax highlighting
 // regular expressions
-// The function must be called when the screen is not initialized
+// The function must be called when the Screen is not initialized
 // This will write the message, and wait for the user
 // to press and key to continue
 func TermMessage(msg ...interface{}) {
-	screenWasNil := screen == nil
+	screenWasNil := screen.Screen == nil
 	if !screenWasNil {
-		screen.Fini()
-		screen = nil
+		screen.Screen.Fini()
+		screen.Screen = nil
 	}
 
 	fmt.Println(msg...)
@@ -27,7 +29,7 @@ func TermMessage(msg ...interface{}) {
 	reader.ReadString('\n')
 
 	if !screenWasNil {
-		InitScreen()
+		screen.Init()
 	}
 }
 
