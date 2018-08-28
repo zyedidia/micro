@@ -3,9 +3,12 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"os"
+	"strings"
 
 	"github.com/go-errors/errors"
+	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/cmd/micro/action"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
@@ -20,8 +23,9 @@ const (
 )
 
 var (
-	// Version is the version number or commit hash
 	// These variables should be set by the linker when compiling
+
+	// Version is the version number or commit hash
 	Version = "0.0.0-unknown"
 	// CommitHash is the commit this version was built on
 	CommitHash = "Unknown"
@@ -33,9 +37,6 @@ var (
 	// Event channel
 	events   chan tcell.Event
 	autosave chan bool
-
-	// How many redraws have happened
-	numRedraw uint
 
 	// Command line flags
 	flagVersion   = flag.Bool("version", false, "Show the version number and information")
@@ -91,6 +92,66 @@ func InitFlags() {
 	}
 }
 
+// LoadInput determines which files should be loaded into buffers
+// based on the input stored in flag.Args()
+func LoadInput() []*buffer.Buffer {
+	// There are a number of ways micro should start given its input
+
+	// 1. If it is given a files in flag.Args(), it should open those
+
+	// 2. If there is no input file and the input is not a terminal, that means
+	// something is being piped in and the stdin should be opened in an
+	// empty buffer
+
+	// 3. If there is no input file and the input is a terminal, an empty buffer
+	// should be opened
+
+	var filename string
+	var input []byte
+	var err error
+	args := flag.Args()
+	buffers := make([]*buffer.Buffer, 0, len(args))
+
+	if len(args) > 0 {
+		// Option 1
+		// We go through each file and load it
+		for i := 0; i < len(args); i++ {
+			if strings.HasPrefix(args[i], "+") {
+				if strings.Contains(args[i], ":") {
+					split := strings.Split(args[i], ":")
+					*flagStartPos = split[0][1:] + "," + split[1]
+				} else {
+					*flagStartPos = args[i][1:] + ",0"
+				}
+				continue
+			}
+
+			buf, err := buffer.NewBufferFromFile(args[i])
+			if err != nil {
+				util.TermMessage(err)
+				continue
+			}
+			// If the file didn't exist, input will be empty, and we'll open an empty buffer
+			buffers = append(buffers, buf)
+		}
+	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
+		// Option 2
+		// The input is not a terminal, so something is being piped in
+		// and we should read from stdin
+		input, err = ioutil.ReadAll(os.Stdin)
+		if err != nil {
+			util.TermMessage("Error reading from stdin: ", err)
+			input = []byte{}
+		}
+		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename))
+	} else {
+		// Option 3, just open an empty buffer
+		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename))
+	}
+
+	return buffers
+}
+
 func main() {
 	var err error
 
@@ -127,18 +188,9 @@ func main() {
 		}
 	}()
 
-	action.TryBindKey("Ctrl-z", "Undo", true)
-
-	b, err := buffer.NewBufferFromFile(os.Args[1])
-
-	if err != nil {
-		util.TermMessage(err)
-	}
-
+	b := LoadInput()[0]
 	width, height := screen.Screen.Size()
-	w := NewWindow(0, 0, width, height-1, b)
-
-	a := action.NewBufHandler(b)
+	ep := NewBufEditPane(0, 0, width, height-1, b)
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
@@ -153,8 +205,7 @@ func main() {
 	for {
 		// Display everything
 		screen.Screen.Fill(' ', config.DefStyle)
-		w.DisplayBuffer()
-		w.DisplayStatusLine()
+		ep.Display()
 		screen.Screen.Show()
 
 		var event tcell.Event
@@ -165,7 +216,7 @@ func main() {
 		}
 
 		if event != nil {
-			a.HandleEvent(event)
+			ep.HandleEvent(event)
 		}
 	}
 

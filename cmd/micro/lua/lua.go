@@ -78,7 +78,7 @@ func Import(pkg string) *lua.LTable {
 func importFmt() *lua.LTable {
 	pkg := L.NewTable()
 
-	L.SetField(pkg, "tErrorf", luar.New(L, fmt.Errorf))
+	L.SetField(pkg, "Errorf", luar.New(L, fmt.Errorf))
 	L.SetField(pkg, "Fprint", luar.New(L, fmt.Fprint))
 	L.SetField(pkg, "Fprintf", luar.New(L, fmt.Fprintf))
 	L.SetField(pkg, "Fprintln", luar.New(L, fmt.Fprintln))

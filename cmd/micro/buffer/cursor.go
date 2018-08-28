@@ -107,6 +107,18 @@ func (c *Cursor) Start() {
 	c.LastVisualX = c.GetVisualX()
 }
 
+// StartOfText moves the cursor to the first non-whitespace rune of
+// the line it is on
+func (c *Cursor) StartOfText() {
+	c.Start()
+	for util.IsWhitespace(c.RuneUnder(c.X)) {
+		if c.X == utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+			break
+		}
+		c.Right()
+	}
+}
+
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
 	c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
@@ -294,6 +306,143 @@ func (c *Cursor) Relocate() {
 	} else if c.X > utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
 		c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
 	}
+}
+
+// SelectWord selects the word the cursor is currently on
+func (c *Cursor) SelectWord() {
+	if len(c.Buf.LineBytes(c.Y)) == 0 {
+		return
+	}
+
+	if !util.IsWordChar(c.RuneUnder(c.X)) {
+		c.SetSelectionStart(c.Loc)
+		c.SetSelectionEnd(c.Loc.Move(1, c.Buf))
+		c.OrigSelection = c.CurSelection
+		return
+	}
+
+	forward, backward := c.X, c.X
+
+	for backward > 0 && util.IsWordChar(c.RuneUnder(backward-1)) {
+		backward--
+	}
+
+	c.SetSelectionStart(Loc{backward, c.Y})
+	c.OrigSelection[0] = c.CurSelection[0]
+
+	lineLen := utf8.RuneCount(c.Buf.LineBytes(c.Y)) - 1
+	for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
+		forward++
+	}
+
+	c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.Buf))
+	c.OrigSelection[1] = c.CurSelection[1]
+	c.Loc = c.CurSelection[1]
+}
+
+// AddWordToSelection adds the word the cursor is currently on
+// to the selection
+func (c *Cursor) AddWordToSelection() {
+	if c.Loc.GreaterThan(c.OrigSelection[0]) && c.Loc.LessThan(c.OrigSelection[1]) {
+		c.CurSelection = c.OrigSelection
+		return
+	}
+
+	if c.Loc.LessThan(c.OrigSelection[0]) {
+		backward := c.X
+
+		for backward > 0 && util.IsWordChar(c.RuneUnder(backward-1)) {
+			backward--
+		}
+
+		c.SetSelectionStart(Loc{backward, c.Y})
+		c.SetSelectionEnd(c.OrigSelection[1])
+	}
+
+	if c.Loc.GreaterThan(c.OrigSelection[1]) {
+		forward := c.X
+
+		lineLen := utf8.RuneCount(c.Buf.LineBytes(c.Y)) - 1
+		for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
+			forward++
+		}
+
+		c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.Buf))
+		c.SetSelectionStart(c.OrigSelection[0])
+	}
+
+	c.Loc = c.CurSelection[1]
+}
+
+// SelectTo selects from the current cursor location to the given
+// location
+func (c *Cursor) SelectTo(loc Loc) {
+	if loc.GreaterThan(c.OrigSelection[0]) {
+		c.SetSelectionStart(c.OrigSelection[0])
+		c.SetSelectionEnd(loc)
+	} else {
+		c.SetSelectionStart(loc)
+		c.SetSelectionEnd(c.OrigSelection[0])
+	}
+}
+
+// WordRight moves the cursor one word to the right
+func (c *Cursor) WordRight() {
+	for util.IsWhitespace(c.RuneUnder(c.X)) {
+		if c.X == utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+			c.Right()
+			return
+		}
+		c.Right()
+	}
+	c.Right()
+	for util.IsWordChar(c.RuneUnder(c.X)) {
+		if c.X == utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+			return
+		}
+		c.Right()
+	}
+}
+
+// WordLeft moves the cursor one word to the left
+func (c *Cursor) WordLeft() {
+	c.Left()
+	for util.IsWhitespace(c.RuneUnder(c.X)) {
+		if c.X == 0 {
+			return
+		}
+		c.Left()
+	}
+	c.Left()
+	for util.IsWordChar(c.RuneUnder(c.X)) {
+		if c.X == 0 {
+			return
+		}
+		c.Left()
+	}
+	c.Right()
+}
+
+// RuneUnder returns the rune under the given x position
+func (c *Cursor) RuneUnder(x int) rune {
+	line := c.Buf.LineBytes(c.Y)
+	if len(line) == 0 || x >= utf8.RuneCount(line) {
+		return '\n'
+	} else if x < 0 {
+		x = 0
+	}
+	i := 0
+	for len(line) > 0 {
+		r, size := utf8.DecodeRune(line)
+		line = line[size:]
+
+		if i == x {
+			return r
+		}
+
+		i++
+	}
+	return '\n'
 }
 
 func (c *Cursor) StoreVisualX() {

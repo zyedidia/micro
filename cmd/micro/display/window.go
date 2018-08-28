@@ -1,4 +1,4 @@
-package main
+package display
 
 import (
 	"strconv"
@@ -12,7 +12,12 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-type Window struct {
+type Window interface {
+	Display()
+	Clear()
+}
+
+type BufWindow struct {
 	// X and Y coordinates for the top left of the window
 	X int
 	Y int
@@ -32,8 +37,8 @@ type Window struct {
 	sline *StatusLine
 }
 
-func NewWindow(x, y, width, height int, buf *buffer.Buffer) *Window {
-	w := new(Window)
+func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
+	w := new(BufWindow)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
 
 	w.sline = NewStatusLine(w)
@@ -41,7 +46,7 @@ func NewWindow(x, y, width, height int, buf *buffer.Buffer) *Window {
 	return w
 }
 
-func (w *Window) Clear() {
+func (w *BufWindow) Clear() {
 	for y := 0; y < w.Height; y++ {
 		for x := 0; x < w.Width; x++ {
 			screen.Screen.SetContent(w.X+x, w.Y+y, ' ', nil, config.DefStyle)
@@ -49,7 +54,7 @@ func (w *Window) Clear() {
 	}
 }
 
-func (w *Window) DrawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
+func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
 	lineNum := strconv.Itoa(bloc.Y + 1)
 
 	// Write the spaces before the line number if necessary
@@ -72,9 +77,9 @@ func (w *Window) DrawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLine
 	vloc.X++
 }
 
-// GetStyle returns the highlight style for the given character position
+// getStyle returns the highlight style for the given character position
 // If there is no change to the current highlight style it just returns that
-func (w *Window) GetStyle(style tcell.Style, bloc buffer.Loc, r rune) tcell.Style {
+func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) tcell.Style {
 	if group, ok := w.Buf.Match(bloc.Y)[bloc.X]; ok {
 		s := config.GetColor(group.String())
 		return s
@@ -82,7 +87,7 @@ func (w *Window) GetStyle(style tcell.Style, bloc buffer.Loc, r rune) tcell.Styl
 	return style
 }
 
-func (w *Window) ShowCursor(x, y int, main bool) {
+func (w *BufWindow) showCursor(x, y int, main bool) {
 	if main {
 		screen.Screen.ShowCursor(x, y)
 	} else {
@@ -91,8 +96,8 @@ func (w *Window) ShowCursor(x, y int, main bool) {
 	}
 }
 
-// DisplayBuffer draws the buffer being shown in this window on the screen.Screen
-func (w *Window) DisplayBuffer() {
+// displayBuffer draws the buffer being shown in this window on the screen.Screen
+func (w *BufWindow) displayBuffer() {
 	b := w.Buf
 
 	bufHeight := w.Height
@@ -132,30 +137,48 @@ func (w *Window) DisplayBuffer() {
 	// this represents the current draw position in the buffer (char positions)
 	bloc := buffer.Loc{w.StartCol, w.StartLine}
 
+	activeC := w.Buf.GetActiveCursor()
+
 	curStyle := config.DefStyle
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 		if b.Settings["ruler"].(bool) {
-			w.DrawLineNum(lineNumStyle, false, maxLineNumLength, &vloc, &bloc)
+			w.drawLineNum(lineNumStyle, false, maxLineNumLength, &vloc, &bloc)
 		}
 
 		line := b.LineBytes(bloc.Y)
 		line, nColsBeforeStart := util.SliceVisualEnd(line, bloc.X, tabsize)
-		totalwidth := bloc.X - nColsBeforeStart
-		for len(line) > 0 {
-			if w.Buf.GetActiveCursor().X == bloc.X && w.Buf.GetActiveCursor().Y == bloc.Y {
-				w.ShowCursor(vloc.X, vloc.Y, true)
-			}
 
-			r, size := utf8.DecodeRune(line)
-
-			curStyle = w.GetStyle(curStyle, bloc, r)
-
+		draw := func(r rune, style tcell.Style) {
 			if nColsBeforeStart <= 0 {
-				screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, curStyle)
+				if activeC.HasSelection() &&
+					(bloc.GreaterEqual(activeC.CurSelection[0]) && bloc.LessThan(activeC.CurSelection[1]) ||
+						bloc.LessThan(activeC.CurSelection[0]) && bloc.GreaterEqual(activeC.CurSelection[1])) {
+					// The current character is selected
+					style = config.DefStyle.Reverse(true)
+
+					if s, ok := config.Colorscheme["selection"]; ok {
+						style = s
+					}
+
+				}
+
+				screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, style)
 				vloc.X++
 			}
 			nColsBeforeStart--
+		}
+
+		totalwidth := bloc.X - nColsBeforeStart
+		for len(line) > 0 {
+			if activeC.X == bloc.X && activeC.Y == bloc.Y {
+				w.showCursor(vloc.X, vloc.Y, true)
+			}
+
+			r, size := utf8.DecodeRune(line)
+			curStyle = w.getStyle(curStyle, bloc, r)
+
+			draw(r, curStyle)
 
 			width := 0
 
@@ -175,11 +198,7 @@ func (w *Window) DisplayBuffer() {
 			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 			if width > 1 {
 				for i := 1; i < width; i++ {
-					if nColsBeforeStart <= 0 {
-						screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, curStyle)
-						vloc.X++
-					}
-					nColsBeforeStart--
+					draw(char, curStyle)
 				}
 			}
 			totalwidth += width
@@ -195,12 +214,12 @@ func (w *Window) DisplayBuffer() {
 					}
 					vloc.X = 0
 					// This will draw an empty line number because the current line is wrapped
-					w.DrawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
+					w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
 				}
 			}
 		}
-		if w.Buf.GetActiveCursor().X == bloc.X && w.Buf.GetActiveCursor().Y == bloc.Y {
-			w.ShowCursor(vloc.X, vloc.Y, true)
+		if activeC.X == bloc.X && activeC.Y == bloc.Y {
+			w.showCursor(vloc.X, vloc.Y, true)
 		}
 		bloc.X = w.StartCol
 		bloc.Y++
@@ -210,6 +229,11 @@ func (w *Window) DisplayBuffer() {
 	}
 }
 
-func (w *Window) DisplayStatusLine() {
+func (w *BufWindow) displayStatusLine() {
 	w.sline.Display()
+}
+
+func (w *BufWindow) Display() {
+	w.displayBuffer()
+	w.displayStatusLine()
 }
