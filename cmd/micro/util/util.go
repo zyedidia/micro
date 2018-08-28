@@ -135,13 +135,8 @@ func FSize(f *os.File) int64 {
 // IsWordChar returns whether or not the string is a 'word character'
 // If it is a unicode character, then it does not match
 // Word characters are defined as [A-Za-z0-9_]
-func IsWordChar(str string) bool {
-	if len(str) > 1 {
-		// Unicode
-		return true
-	}
-	c := str[0]
-	return (c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c == '_')
+func IsWordChar(r rune) bool {
+	return (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r == '_')
 }
 
 // IsWhitespace returns true if the given rune is a space, tab, or newline

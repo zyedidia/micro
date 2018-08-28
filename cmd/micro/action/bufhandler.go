@@ -36,6 +36,9 @@ type BufHandler struct {
 	cursors []*buffer.Cursor
 	Cursor  *buffer.Cursor // the active cursor
 
+	StartLine int // Vertical scrolling
+	StartCol  int // Horizontal scrolling
+
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
 	// track of whether or not the mouse was pressed (or not released) last event to determine
@@ -65,22 +68,22 @@ type BufHandler struct {
 }
 
 func NewBufHandler(buf *buffer.Buffer) *BufHandler {
-	a := new(BufHandler)
-	a.Buf = buf
+	h := new(BufHandler)
+	h.Buf = buf
 
-	a.cursors = []*buffer.Cursor{&buffer.Cursor{
+	h.cursors = []*buffer.Cursor{&buffer.Cursor{
 		Buf: buf,
 		Loc: buf.StartCursor,
 	}}
-	a.Cursor = a.cursors[0]
+	h.Cursor = h.cursors[0]
 
-	buf.SetCursors(a.cursors)
-	return a
+	buf.SetCursors(h.cursors)
+	return h
 }
 
 // HandleEvent executes the tcell event properly
 // TODO: multiple actions bound to one key
-func (a *BufHandler) HandleEvent(event tcell.Event) {
+func (h *BufHandler) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
 		ke := KeyEvent{
@@ -88,18 +91,30 @@ func (a *BufHandler) HandleEvent(event tcell.Event) {
 			mod:  e.Modifiers(),
 			r:    e.Rune(),
 		}
-		if action, ok := BufKeyBindings[ke]; ok {
-			action(a)
-		}
+		h.DoKeyEvent(ke)
 	case *tcell.EventMouse:
 		me := MouseEvent{
 			btn: e.Buttons(),
 			mod: e.Modifiers(),
 		}
-		if action, ok := BufMouseBindings[me]; ok {
-			action(a, e)
-		}
+		h.DoMouseEvent(me, e)
 	}
+}
+
+func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
+	if action, ok := BufKeyBindings[e]; ok {
+		action(h)
+		return true
+	}
+	return false
+}
+
+func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
+	if action, ok := BufMouseBindings[e]; ok {
+		action(h, te)
+		return true
+	}
+	return false
 }
 
 var BufKeyActions = map[string]BufKeyAction{

@@ -1,4 +1,4 @@
-package main
+package display
 
 import (
 	"bytes"
@@ -23,13 +23,13 @@ type StatusLine struct {
 	FormatRight string
 	Info        map[string]func(*buffer.Buffer) string
 
-	win *Window
+	win *BufWindow
 }
 
 // TODO: plugin modify status line formatter
 
 // NewStatusLine returns a statusline bound to a window
-func NewStatusLine(win *Window) *StatusLine {
+func NewStatusLine(win *BufWindow) *StatusLine {
 	s := new(StatusLine)
 	s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
 	// s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
