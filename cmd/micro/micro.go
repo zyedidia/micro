@@ -144,8 +144,9 @@ func main() {
 	go func() {
 		events = make(chan tcell.Event)
 		for {
-			// TODO: fix race condition with screen.Screen = nil
+			screen.Lock()
 			events <- screen.Screen.PollEvent()
+			screen.Unlock()
 		}
 	}()
 

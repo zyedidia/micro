@@ -13,12 +13,7 @@ import (
 // This only works on linux and has no default binding.
 // This code was adapted from the suspend code in nsf/godit
 func (*BufHandler) Suspend() bool {
-	screenWasNil := screen.Screen == nil
-
-	if !screenWasNil {
-		screen.Screen.Fini()
-		screen.Screen = nil
-	}
+	screen.TempFini()
 
 	// suspend the process
 	pid := syscall.Getpid()
@@ -27,9 +22,7 @@ func (*BufHandler) Suspend() bool {
 		util.TermMessage(err)
 	}
 
-	if !screenWasNil {
-		screen.Init()
-	}
+	screen.TempStart()
 
 	return false
 }
