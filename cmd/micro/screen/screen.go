@@ -3,6 +3,7 @@ package screen
 import (
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/terminfo"
@@ -10,6 +11,34 @@ import (
 )
 
 var Screen tcell.Screen
+var lock sync.Mutex
+
+func Lock() {
+	lock.Lock()
+}
+
+func Unlock() {
+	lock.Unlock()
+}
+
+var screenWasNil bool
+
+func TempFini() {
+	screenWasNil := Screen == nil
+
+	if !screenWasNil {
+		Lock()
+		Screen.Fini()
+		Screen = nil
+	}
+}
+
+func TempStart() {
+	if !screenWasNil {
+		Init()
+		Unlock()
+	}
+}
 
 // Init creates and initializes the tcell screen
 func Init() {
@@ -64,6 +93,4 @@ func Init() {
 	}
 
 	os.Setenv("TCELLDB", tcelldb)
-
-	// Screen.SetStyle(defStyle)
 }
