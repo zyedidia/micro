@@ -183,8 +183,7 @@ func (tc *termcap) setupterm(name string) error {
 				} else {
 					tc.nums[k[0]] = int(u)
 				}
-			}
-			if u, err := strconv.ParseUint(k[1], 10, 0); err != nil {
+			} else if u, err := strconv.ParseUint(k[1], 10, 0); err != nil {
 				return (err)
 			} else {
 				tc.nums[k[0]] = int(u)
