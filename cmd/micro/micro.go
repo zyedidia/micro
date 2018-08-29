@@ -193,7 +193,12 @@ func InitScreen() {
 	screen, err = tcell.NewScreen()
 	if err != nil {
 		if err == tcell.ErrTermNotFound {
-			terminfo.WriteDB(configDir + "/.tcelldb")
+			err = terminfo.WriteDB(configDir + "/.tcelldb")
+			if err != nil {
+				fmt.Println(err)
+				fmt.Println("Fatal: Micro could not create tcelldb")
+				os.Exit(1)
+			}
 			screen, err = tcell.NewScreen()
 			if err != nil {
 				fmt.Println(err)
