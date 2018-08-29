@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -19,10 +20,23 @@ func init() {
 }
 
 func BufMapKey(k KeyEvent, action string) {
-	BufKeyBindings[k] = BufKeyActions[action]
+	if f, ok := BufKeyActions[action]; ok {
+		BufKeyBindings[k] = f
+	} else {
+		util.TermMessage("Error:", action, "does not exist")
+	}
 }
 func BufMapMouse(k MouseEvent, action string) {
-	BufMouseBindings[k] = BufMouseActions[action]
+	if f, ok := BufMouseActions[action]; ok {
+		BufMouseBindings[k] = f
+	} else if f, ok := BufKeyActions[action]; ok {
+		// allowed to map mouse buttons to key actions
+		BufMouseBindings[k] = func(h *BufHandler, e *tcell.EventMouse) bool {
+			return f(h)
+		}
+	} else {
+		util.TermMessage("Error:", action, "does not exist")
+	}
 }
 
 // The BufHandler connects the buffer and the window
@@ -91,7 +105,10 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 			mod:  e.Modifiers(),
 			r:    e.Rune(),
 		}
-		h.DoKeyEvent(ke)
+		done := h.DoKeyEvent(ke)
+		if !done && e.Key() == tcell.KeyRune {
+			h.DoRuneInsert(e.Rune())
+		}
 	case *tcell.EventMouse:
 		me := MouseEvent{
 			btn: e.Buttons(),
@@ -115,6 +132,22 @@ func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 		return true
 	}
 	return false
+}
+
+func (h *BufHandler) DoRuneInsert(r rune) {
+	// Insert a character
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+
+	if h.isOverwriteMode {
+		next := h.Cursor.Loc
+		next.X++
+		h.Buf.Replace(h.Cursor.Loc, next, string(r))
+	} else {
+		h.Buf.Insert(h.Cursor.Loc, string(r))
+	}
 }
 
 var BufKeyActions = map[string]BufKeyAction{
