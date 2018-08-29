@@ -2,8 +2,10 @@ package action
 
 import (
 	"os"
+	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -262,6 +264,11 @@ func (h *BufHandler) SelectToEnd() bool {
 
 // InsertSpace inserts a space
 func (h *BufHandler) InsertSpace() bool {
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+	h.Buf.Insert(h.Cursor.Loc, " ")
 	return true
 }
 
@@ -272,6 +279,30 @@ func (h *BufHandler) InsertNewline() bool {
 
 // Backspace deletes the previous character
 func (h *BufHandler) Backspace() bool {
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	} else if h.Cursor.Loc.GreaterThan(h.Buf.Start()) {
+		// We have to do something a bit hacky here because we want to
+		// delete the line by first moving left and then deleting backwards
+		// but the undo redo would place the cursor in the wrong place
+		// So instead we move left, save the position, move back, delete
+		// and restore the position
+
+		// If the user is using spaces instead of tabs and they are deleting
+		// whitespace at the start of the line, we should delete as if it's a
+		// tab (tabSize number of spaces)
+		lineStart := util.SliceStart(h.Buf.LineBytes(h.Cursor.Y), h.Cursor.X)
+		tabSize := int(h.Buf.Settings["tabsize"].(float64))
+		if h.Buf.Settings["tabstospaces"].(bool) && util.IsSpaces(lineStart) && len(lineStart) != 0 && utf8.RuneCount(lineStart)%tabSize == 0 {
+			loc := h.Cursor.Loc
+			h.Buf.Remove(loc.Move(-tabSize, h.Buf), loc)
+		} else {
+			loc := h.Cursor.Loc
+			h.Buf.Remove(loc.Move(-1, h.Buf), loc)
+		}
+	}
+	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
 	return true
 }
 

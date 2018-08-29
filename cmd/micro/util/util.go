@@ -139,6 +139,17 @@ func IsWordChar(r rune) bool {
 	return (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r == '_')
 }
 
+// IsSpaces checks if a given string is only spaces
+func IsSpaces(str []byte) bool {
+	for _, c := range str {
+		if c != ' ' {
+			return false
+		}
+	}
+
+	return true
+}
+
 // IsWhitespace returns true if the given rune is a space, tab, or newline
 func IsWhitespace(c rune) bool {
 	return c == ' ' || c == '\t' || c == '\n'

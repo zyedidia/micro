@@ -320,6 +320,20 @@ func calcHash(b *Buffer, out *[md5.Size]byte) {
 	h.Sum((*out)[:0])
 }
 
+func (b *Buffer) insert(pos Loc, value []byte) {
+	b.isModified = true
+	b.LineArray.insert(pos, value)
+}
+func (b *Buffer) remove(start, end Loc) []byte {
+	b.isModified = true
+	sub := b.LineArray.remove(start, end)
+	return sub
+}
+func (b *Buffer) deleteToEnd(start Loc) {
+	b.isModified = true
+	b.LineArray.deleteToEnd(start)
+}
+
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {

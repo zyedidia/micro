@@ -24,7 +24,7 @@ func Unlock() {
 var screenWasNil bool
 
 func TempFini() {
-	screenWasNil := Screen == nil
+	screenWasNil = Screen == nil
 
 	if !screenWasNil {
 		Lock()

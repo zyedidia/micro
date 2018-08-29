@@ -102,21 +102,29 @@ modSearch:
 		// see if the key is in bindingKeys with the Ctrl prefix.
 		k = string(unicode.ToUpper(rune(k[0]))) + k[1:]
 		if code, ok := keyEvents["Ctrl"+k]; ok {
+			var r tcell.Key
+			if code < 256 {
+				r = code
+			}
 			// It is, we're done.
 			return KeyEvent{
 				code: code,
 				mod:  modifiers,
-				r:    rune(code),
+				r:    rune(r),
 			}, true
 		}
 	}
 
 	// See if we can find the key in bindingKeys
 	if code, ok := keyEvents[k]; ok {
+		var r tcell.Key
+		if code < 256 {
+			r = code
+		}
 		return KeyEvent{
 			code: code,
 			mod:  modifiers,
-			r:    0,
+			r:    rune(r),
 		}, true
 	}
 
