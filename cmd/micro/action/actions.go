@@ -348,6 +348,7 @@ func (h *BufHandler) SaveAll() bool {
 
 // Save the buffer to disk
 func (h *BufHandler) Save() bool {
+	h.Buf.Save()
 	return false
 }
 

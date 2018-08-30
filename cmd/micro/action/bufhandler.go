@@ -85,10 +85,7 @@ func NewBufHandler(buf *buffer.Buffer) *BufHandler {
 	h := new(BufHandler)
 	h.Buf = buf
 
-	h.cursors = []*buffer.Cursor{&buffer.Cursor{
-		Buf: buf,
-		Loc: buf.StartCursor,
-	}}
+	h.cursors = []*buffer.Cursor{buffer.NewCursor(buf, buf.StartCursor)}
 	h.Cursor = h.cursors[0]
 
 	buf.SetCursors(h.cursors)

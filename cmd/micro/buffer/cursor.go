@@ -20,7 +20,7 @@ func InBounds(pos Loc, buf *Buffer) bool {
 // The Cursor struct stores the location of the cursor in the buffer
 // as well as the selection
 type Cursor struct {
-	Buf *Buffer
+	buf *Buffer
 	Loc
 
 	// Last cursor x position
@@ -35,6 +35,23 @@ type Cursor struct {
 
 	// Which cursor index is this (for multiple cursors)
 	Num int
+}
+
+func NewCursor(b *Buffer, l Loc) *Cursor {
+	c := &Cursor{
+		buf: b,
+		Loc: l,
+	}
+	c.StoreVisualX()
+	return c
+}
+
+func (c *Cursor) SetBuf(b *Buffer) {
+	c.buf = b
+}
+
+func (c *Cursor) Buf() *Buffer {
+	return c.buf
 }
 
 // Goto puts the cursor at the given cursor's location and gives
@@ -58,8 +75,8 @@ func (c *Cursor) GetVisualX() int {
 		return 0
 	}
 
-	bytes := c.Buf.LineBytes(c.Y)
-	tabsize := int(c.Buf.Settings["tabsize"].(float64))
+	bytes := c.buf.LineBytes(c.Y)
+	tabsize := int(c.buf.Settings["tabsize"].(float64))
 	if c.X > utf8.RuneCount(bytes) {
 		c.X = utf8.RuneCount(bytes) - 1
 	}
@@ -71,7 +88,7 @@ func (c *Cursor) GetVisualX() int {
 // coordinate (this is necessary because tabs are 1 char but
 // 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
-	tabsize := int(c.Buf.Settings["tabsize"].(float64))
+	tabsize := int(c.buf.Settings["tabsize"].(float64))
 
 	// Scan rune by rune until we exceed the visual width that we are
 	// looking for. Then we can return the character position we have found
@@ -112,7 +129,7 @@ func (c *Cursor) Start() {
 func (c *Cursor) StartOfText() {
 	c.Start()
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+		if c.X == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
 			break
 		}
 		c.Right()
@@ -121,7 +138,7 @@ func (c *Cursor) StartOfText() {
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
-	c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
+	c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
 	c.LastVisualX = c.GetVisualX()
 }
 
@@ -129,7 +146,7 @@ func (c *Cursor) End() {
 // or "clipboard"
 func (c *Cursor) CopySelection(target string) {
 	if c.HasSelection() {
-		if target != "primary" || c.Buf.Settings["useprimary"].(bool) {
+		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
 			clipboard.WriteAll(string(c.GetSelection()), target)
 		}
 	}
@@ -137,8 +154,8 @@ func (c *Cursor) CopySelection(target string) {
 
 // ResetSelection resets the user's selection
 func (c *Cursor) ResetSelection() {
-	c.CurSelection[0] = c.Buf.Start()
-	c.CurSelection[1] = c.Buf.Start()
+	c.CurSelection[0] = c.buf.Start()
+	c.CurSelection[1] = c.buf.Start()
 }
 
 // SetSelectionStart sets the start of the selection
@@ -159,12 +176,12 @@ func (c *Cursor) HasSelection() bool {
 // DeleteSelection deletes the currently selected text
 func (c *Cursor) DeleteSelection() {
 	if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
-		c.Buf.Remove(c.CurSelection[1], c.CurSelection[0])
+		c.buf.Remove(c.CurSelection[1], c.CurSelection[0])
 		c.Loc = c.CurSelection[1]
 	} else if !c.HasSelection() {
 		return
 	} else {
-		c.Buf.Remove(c.CurSelection[0], c.CurSelection[1])
+		c.buf.Remove(c.CurSelection[0], c.CurSelection[1])
 		c.Loc = c.CurSelection[0]
 	}
 }
@@ -186,11 +203,11 @@ func (c *Cursor) Deselect(start bool) {
 
 // GetSelection returns the cursor's selection
 func (c *Cursor) GetSelection() []byte {
-	if InBounds(c.CurSelection[0], c.Buf) && InBounds(c.CurSelection[1], c.Buf) {
+	if InBounds(c.CurSelection[0], c.buf) && InBounds(c.CurSelection[1], c.buf) {
 		if c.CurSelection[0].GreaterThan(c.CurSelection[1]) {
-			return c.Buf.Substr(c.CurSelection[1], c.CurSelection[0])
+			return c.buf.Substr(c.CurSelection[1], c.CurSelection[0])
 		}
-		return c.Buf.Substr(c.CurSelection[0], c.CurSelection[1])
+		return c.buf.Substr(c.CurSelection[0], c.CurSelection[1])
 	}
 	return []byte{}
 }
@@ -200,8 +217,8 @@ func (c *Cursor) SelectLine() {
 	c.Start()
 	c.SetSelectionStart(c.Loc)
 	c.End()
-	if len(c.Buf.lines)-1 > c.Y {
-		c.SetSelectionEnd(c.Loc.Move(1, c.Buf))
+	if len(c.buf.lines)-1 > c.Y {
+		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
 	} else {
 		c.SetSelectionEnd(c.Loc)
 	}
@@ -218,7 +235,7 @@ func (c *Cursor) AddLineToSelection() {
 	}
 	if c.Loc.GreaterThan(c.OrigSelection[1]) {
 		c.End()
-		c.SetSelectionEnd(c.Loc.Move(1, c.Buf))
+		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
 		c.SetSelectionStart(c.OrigSelection[0])
 	}
 
@@ -232,11 +249,11 @@ func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount
 	if proposedY < 0 {
 		proposedY = 0
-	} else if proposedY >= len(c.Buf.lines) {
-		proposedY = len(c.Buf.lines) - 1
+	} else if proposedY >= len(c.buf.lines) {
+		proposedY = len(c.buf.lines) - 1
 	}
 
-	bytes := c.Buf.LineBytes(proposedY)
+	bytes := c.buf.LineBytes(proposedY)
 	c.X = c.GetCharPosInLine(bytes, c.LastVisualX)
 
 	if c.X > utf8.RuneCount(bytes) || (amount < 0 && proposedY == c.Y) {
@@ -264,7 +281,7 @@ func (c *Cursor) Down() {
 // Left moves the cursor left one cell (if possible) or to
 // the previous line if it is at the beginning
 func (c *Cursor) Left() {
-	if c.Loc == c.Buf.Start() {
+	if c.Loc == c.buf.Start() {
 		return
 	}
 	if c.X > 0 {
@@ -279,10 +296,10 @@ func (c *Cursor) Left() {
 // Right moves the cursor right one cell (if possible) or
 // to the next line if it is at the end
 func (c *Cursor) Right() {
-	if c.Loc == c.Buf.End() {
+	if c.Loc == c.buf.End() {
 		return
 	}
-	if c.X < utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+	if c.X < utf8.RuneCount(c.buf.LineBytes(c.Y)) {
 		c.X++
 	} else {
 		c.Down()
@@ -297,26 +314,26 @@ func (c *Cursor) Right() {
 func (c *Cursor) Relocate() {
 	if c.Y < 0 {
 		c.Y = 0
-	} else if c.Y >= len(c.Buf.lines) {
-		c.Y = len(c.Buf.lines) - 1
+	} else if c.Y >= len(c.buf.lines) {
+		c.Y = len(c.buf.lines) - 1
 	}
 
 	if c.X < 0 {
 		c.X = 0
-	} else if c.X > utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
-		c.X = utf8.RuneCount(c.Buf.LineBytes(c.Y))
+	} else if c.X > utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+		c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
 	}
 }
 
 // SelectWord selects the word the cursor is currently on
 func (c *Cursor) SelectWord() {
-	if len(c.Buf.LineBytes(c.Y)) == 0 {
+	if len(c.buf.LineBytes(c.Y)) == 0 {
 		return
 	}
 
 	if !util.IsWordChar(c.RuneUnder(c.X)) {
 		c.SetSelectionStart(c.Loc)
-		c.SetSelectionEnd(c.Loc.Move(1, c.Buf))
+		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
 		c.OrigSelection = c.CurSelection
 		return
 	}
@@ -330,12 +347,12 @@ func (c *Cursor) SelectWord() {
 	c.SetSelectionStart(Loc{backward, c.Y})
 	c.OrigSelection[0] = c.CurSelection[0]
 
-	lineLen := utf8.RuneCount(c.Buf.LineBytes(c.Y)) - 1
+	lineLen := utf8.RuneCount(c.buf.LineBytes(c.Y)) - 1
 	for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
 		forward++
 	}
 
-	c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.Buf))
+	c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
 	c.OrigSelection[1] = c.CurSelection[1]
 	c.Loc = c.CurSelection[1]
 }
@@ -362,12 +379,12 @@ func (c *Cursor) AddWordToSelection() {
 	if c.Loc.GreaterThan(c.OrigSelection[1]) {
 		forward := c.X
 
-		lineLen := utf8.RuneCount(c.Buf.LineBytes(c.Y)) - 1
+		lineLen := utf8.RuneCount(c.buf.LineBytes(c.Y)) - 1
 		for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
 			forward++
 		}
 
-		c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.Buf))
+		c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
 		c.SetSelectionStart(c.OrigSelection[0])
 	}
 
@@ -389,7 +406,7 @@ func (c *Cursor) SelectTo(loc Loc) {
 // WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+		if c.X == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
 			c.Right()
 			return
 		}
@@ -397,7 +414,7 @@ func (c *Cursor) WordRight() {
 	}
 	c.Right()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
-		if c.X == utf8.RuneCount(c.Buf.LineBytes(c.Y)) {
+		if c.X == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
 			return
 		}
 		c.Right()
@@ -425,7 +442,7 @@ func (c *Cursor) WordLeft() {
 
 // RuneUnder returns the rune under the given x position
 func (c *Cursor) RuneUnder(x int) rune {
-	line := c.Buf.LineBytes(c.Y)
+	line := c.buf.LineBytes(c.Y)
 	if len(line) == 0 || x >= utf8.RuneCount(line) {
 		return '\n'
 	} else if x < 0 {

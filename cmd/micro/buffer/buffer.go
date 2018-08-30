@@ -96,14 +96,6 @@ type Buffer struct {
 	Type BufType
 }
 
-// The SerializedBuffer holds the types that get serialized when a buffer is saved
-// These are used for the savecursor and saveundo options
-type SerializedBuffer struct {
-	EventHandler *EventHandler
-	Cursor       Loc
-	ModTime      time.Time
-}
-
 // NewBufferFromFile opens a new buffer using the given path
 // It will also automatically handle `~`, and line/column with filename:l:c
 // It will return an empty buffer if the path does not exist
