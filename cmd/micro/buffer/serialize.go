@@ -5,10 +5,19 @@ import (
 	"errors"
 	"io"
 	"os"
+	"time"
 
 	"github.com/zyedidia/micro/cmd/micro/config"
 	. "github.com/zyedidia/micro/cmd/micro/util"
 )
+
+// The SerializedBuffer holds the types that get serialized when a buffer is saved
+// These are used for the savecursor and saveundo options
+type SerializedBuffer struct {
+	EventHandler *EventHandler
+	Cursor       Loc
+	ModTime      time.Time
+}
 
 func init() {
 	gob.Register(TextEvent{})
@@ -24,11 +33,12 @@ func (b *Buffer) Serialize() error {
 	name := config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath)
 
 	return overwriteFile(name, func(file io.Writer) error {
-		return gob.NewEncoder(file).Encode(SerializedBuffer{
+		err := gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.GetActiveCursor().Loc,
 			b.ModTime,
 		})
+		return err
 	})
 }
 
@@ -57,5 +67,5 @@ func (b *Buffer) Unserialize() error {
 			}
 		}
 	}
-	return err
+	return nil
 }
