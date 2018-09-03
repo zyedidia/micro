@@ -391,3 +391,10 @@ func (b *Buffer) UpdateRules() {
 		}
 	}
 }
+
+func (b *Buffer) IndentString(tabsize int) string {
+	if b.Settings["tabstospaces"].(bool) {
+		return Spaces(tabsize)
+	}
+	return "\t"
+}

@@ -4,6 +4,7 @@ import (
 	"os"
 	"unicode/utf8"
 
+	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
@@ -308,21 +309,68 @@ func (h *BufHandler) Backspace() bool {
 
 // DeleteWordRight deletes the word to the right of the cursor
 func (h *BufHandler) DeleteWordRight() bool {
+	h.SelectWordRight()
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
 	return true
 }
 
 // DeleteWordLeft deletes the word to the left of the cursor
 func (h *BufHandler) DeleteWordLeft() bool {
+	h.SelectWordLeft()
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
 	return true
 }
 
 // Delete deletes the next character
 func (h *BufHandler) Delete() bool {
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	} else {
+		loc := h.Cursor.Loc
+		if loc.LessThan(h.Buf.End()) {
+			h.Buf.Remove(loc, loc.Move(1, h.Buf))
+		}
+	}
 	return true
 }
 
 // IndentSelection indents the current selection
 func (h *BufHandler) IndentSelection() bool {
+	if h.Cursor.HasSelection() {
+		start := h.Cursor.CurSelection[0]
+		end := h.Cursor.CurSelection[1]
+		if end.Y < start.Y {
+			start, end = end, start
+			h.Cursor.SetSelectionStart(start)
+			h.Cursor.SetSelectionEnd(end)
+		}
+
+		startY := start.Y
+		endY := end.Move(-1, h.Buf).Y
+		endX := end.Move(-1, h.Buf).X
+		tabsize := int(h.Buf.Settings["tabsize"].(float64))
+		indentsize := len(h.Buf.IndentString(tabsize))
+		for y := startY; y <= endY; y++ {
+			h.Buf.Insert(buffer.Loc{0, y}, h.Buf.IndentString(tabsize))
+			if y == startY && start.X > 0 {
+				h.Cursor.SetSelectionStart(start.Move(indentsize, h.Buf))
+			}
+			if y == endY {
+				h.Cursor.SetSelectionEnd(buffer.Loc{endX + indentsize + 1, endY})
+			}
+		}
+		h.Cursor.Relocate()
+
+		return true
+	}
+	return false
 	return false
 }
 
@@ -333,7 +381,7 @@ func (h *BufHandler) OutdentLine() bool {
 
 // OutdentSelection takes the current selection and moves it back one indent level
 func (h *BufHandler) OutdentSelection() bool {
-	return false
+	return true
 }
 
 // InsertTab inserts a tab or spaces
