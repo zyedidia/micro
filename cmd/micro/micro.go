@@ -1,5 +1,5 @@
 package main
-//asdf
+
 import (
 	"flag"
 	"fmt"

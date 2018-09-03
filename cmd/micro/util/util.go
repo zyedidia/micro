@@ -139,6 +139,11 @@ func IsWordChar(r rune) bool {
 	return (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r == '_')
 }
 
+// Spaces returns a string with n spaces
+func Spaces(n int) string {
+	return strings.Repeat(" ", n)
+}
+
 // IsSpaces checks if a given string is only spaces
 func IsSpaces(str []byte) bool {
 	for _, c := range str {
