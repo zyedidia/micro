@@ -7,7 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/flynn/json5"
+	"gopkg.in/yaml.v2"
 	"github.com/zyedidia/tcell"
 )
 
@@ -282,22 +282,36 @@ func InitBindings() {
 	var parsed map[string]string
 	defaults := DefaultBindings()
 
-	filename := configDir + "/bindings.json"
-	if _, e := os.Stat(filename); e == nil {
+	if filename, found := searchForBindingsFile(configDir); found {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
-			TermMessage("Error reading bindings.json file: " + err.Error())
+			TermMessage(fmt.Sprintf("Error reading bindings file %s: %v", filename, err.Error()))
 			return
 		}
 
-		err = json5.Unmarshal(input, &parsed)
+		err = yaml.Unmarshal(input, &parsed)
 		if err != nil {
-			TermMessage("Error reading bindings.json:", err.Error())
+			TermMessage(fmt.Sprintf("Error reading bindings file %s: %v", filename, err.Error()))
 		}
 	}
 
 	parseBindings(defaults)
 	parseBindings(parsed)
+}
+
+// searchForBindings locates any supported bindings file in configDir
+// and returns the matching path and whether a file was found.
+// If no match is found the path is an empty string.
+func searchForBindingsFile(configDir string) (string, bool) {
+	filename := configDir + "/bindings.yaml"
+	if _, e := os.Stat(filename); e == nil {
+		return filename, true
+	}
+	filename = configDir + "/bindings.json"
+	if _, e := os.Stat(filename); e == nil {
+		return filename, true
+	}
+	return "", false
 }
 
 func parseBindings(userBindings map[string]string) {
