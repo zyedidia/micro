@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"io/ioutil"
 	"os"
 	"strings"
@@ -273,45 +274,75 @@ type Key struct {
 	escape    string
 }
 
+// filesystem defines the functions used by bindingsFile.
+type filesystem interface {
+	Open(name string) (io.ReadCloser, error)
+	Stat(name string) (interface{}, error)
+}
+
+// osFileSystem is the filesystem implementation using the os package.
+type osFilesystem struct {}
+
+func (osFilesystem) Open(name string) (io.ReadCloser, error) {
+	return os.Open(name)
+}
+func (osFilesystem) Stat(name string) (interface{}, error) {
+	return os.Stat(name)
+}
+
+// bindingsFile references the file containing the key bindings and
+// provides the methods to interact with that file.
+type bindingsFile struct {
+	// fs is an injected filsystem to facilitate testing.
+	fs filesystem
+	// Path is the name of the file where bindings are stored.
+	Path string
+}
+
+// Load reads and unmarshals the bindings from f and returns
+// them as a general map. Errors will result in corresponding 
+// terminal messages being printed and an uninitialized map being returned.
+func (f bindingsFile) Load() (map[string]string) {
+	var parsed map[string]string
+	file, e := f.fs.Open(f.Path)
+	if e != nil {
+		TermMessage(fmt.Sprintf("Error reading bindings file %s: %s", f.Path, e.Error()))
+		return parsed
+	}
+	defer file.Close()
+	e = yaml.NewDecoder(file).Decode(&parsed)
+	if e != nil {
+		TermMessage(fmt.Sprintf("Error reading bindings file %s: %v", f.Path, e.Error()))
+	}
+	return parsed
+}
+
+// locateBindingsFile determines the bindingsFile based on the files present in
+// fs in configDir. If a file is found the bindingsFile is returned along with true.
+// If no such file is found the second value is false and the first should be ignored.
+// Currently bindings.yaml will be prefered with bindings.json being the second choice.
+func locateBindingsFile(fs filesystem, configDir string) (*bindingsFile, bool) {
+	filename := configDir + "/bindings.yaml"
+	if _, e := fs.Stat(filename); e == nil {
+		return &bindingsFile{fs, filename}, true
+	}
+	filename = configDir + "/bindings.json"
+	if _, e := fs.Stat(filename); e == nil {
+		return &bindingsFile{fs, filename}, true
+	}
+	return nil, false
+}
+
 // InitBindings initializes the keybindings for micro
 func InitBindings() {
 	bindings = make(map[Key][]func(*View, bool) bool)
 	bindingsStr = make(map[string]string)
 	mouseBindings = make(map[Key][]func(*View, bool, *tcell.EventMouse) bool)
 
-	var parsed map[string]string
-	defaults := DefaultBindings()
-
-	if filename, found := searchForBindingsFile(configDir); found {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			TermMessage(fmt.Sprintf("Error reading bindings file %s: %v", filename, err.Error()))
-			return
-		}
-
-		err = yaml.Unmarshal(input, &parsed)
-		if err != nil {
-			TermMessage(fmt.Sprintf("Error reading bindings file %s: %v", filename, err.Error()))
-		}
+	parseBindings(DefaultBindings())
+	if bf, found := locateBindingsFile(osFilesystem{}, configDir); found {
+		parseBindings(bf.Load())
 	}
-
-	parseBindings(defaults)
-	parseBindings(parsed)
-}
-
-// searchForBindings locates any supported bindings file in configDir
-// and returns the matching path and whether a file was found.
-// If no match is found the path is an empty string.
-func searchForBindingsFile(configDir string) (string, bool) {
-	filename := configDir + "/bindings.yaml"
-	if _, e := os.Stat(filename); e == nil {
-		return filename, true
-	}
-	filename = configDir + "/bindings.json"
-	if _, e := os.Stat(filename); e == nil {
-		return filename, true
-	}
-	return "", false
 }
 
 func parseBindings(userBindings map[string]string) {
