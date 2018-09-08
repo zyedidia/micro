@@ -106,15 +106,15 @@ func (w *BufWindow) displayBuffer() {
 	}
 
 	// TODO: Rehighlighting
-	// start := w.StartLine
+	start := w.StartLine
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
-		// 	if start > 0 && b.lines[start-1].rehighlight {
-		// 		b.highlighter.ReHighlightLine(b, start-1)
-		// 		b.lines[start-1].rehighlight = false
-		// 	}
-		//
-		// 	b.highlighter.ReHighlightStates(b, start)
-		//
+		if start > 0 && b.Rehighlight(start-1) {
+			b.Highlighter.ReHighlightLine(b, start-1)
+			b.SetRehighlight(start-1, false)
+		}
+
+		b.Highlighter.ReHighlightStates(b, start)
+
 		b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
 	}
 
