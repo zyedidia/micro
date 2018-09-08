@@ -274,3 +274,11 @@ func (la *LineArray) SetMatch(lineN int, m highlight.LineMatch) {
 func (la *LineArray) Match(lineN int) highlight.LineMatch {
 	return la.lines[lineN].match
 }
+
+func (la *LineArray) Rehighlight(lineN int) bool {
+	return la.lines[lineN].rehighlight
+}
+
+func (la *LineArray) SetRehighlight(lineN int, on bool) {
+	la.lines[lineN].rehighlight = on
+}
