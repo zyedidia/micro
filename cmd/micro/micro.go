@@ -271,6 +271,7 @@ func LoadAll() {
 	InitBindings()
 
 	InitColorscheme()
+	LoadPlugins()
 
 	for _, tab := range tabs {
 		for _, v := range tab.Views {
