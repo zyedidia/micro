@@ -327,7 +327,7 @@ plugins that are stored in the official channel
 Micro also has a built in plugin manager which you can invoke with the
 `> plugin ...` command.
 
-For the valid commands you can use, see the `command` help topic.
+For the valid commands you can use, see the `commands` help topic.
 
 The manager fetches plugins from the channels (which is simply a list of plugin
 metadata) which it knows about. By default, micro only knows about the official
