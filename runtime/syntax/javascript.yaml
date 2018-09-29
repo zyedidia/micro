@@ -17,7 +17,7 @@ rules:
     - symbol.brackets: "(\\[|\\])"
     - symbol.operator: "[-+/*=<>!~%?:&|]"
     - statement: "\\b(async|await|break|case|catch|const|continue|debugger|default|delete|do|else|export|finally)\\b"
-    - statement: "\\b(for|function|class|extends|get|if|import|in|instanceof|let|new|return|set)\\b"
+    - statement: "\\b(for|function|class|extends|get|if|import|from|in|instanceof|let|new|return|set)\\b"
     - statement: "\\b(super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"
     # reserved but unassigned
     - error: "\\b(enum|implements|interface|package|private|protected|public)"
