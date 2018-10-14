@@ -98,11 +98,23 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 }
 
 func searchDown(r *regexp.Regexp, v *View, start, end Loc) bool {
+	if start.Y >= v.Buf.NumLines {
+		start.Y = v.Buf.NumLines - 1
+	}
+	if start.Y < 0 {
+		start.Y = 0
+	}
 	for i := start.Y; i <= end.Y; i++ {
 		var l []byte
 		var charPos int
 		if i == start.Y {
 			runes := []rune(string(v.Buf.lines[i].data))
+			if start.X >= len(runes) {
+				start.X = len(runes) - 1
+			}
+			if start.X < 0 {
+				start.X = 0
+			}
 			l = []byte(string(runes[start.X:]))
 			charPos = start.X
 
@@ -129,10 +141,22 @@ func searchDown(r *regexp.Regexp, v *View, start, end Loc) bool {
 }
 
 func searchUp(r *regexp.Regexp, v *View, start, end Loc) bool {
+	if start.Y >= v.Buf.NumLines {
+		start.Y = v.Buf.NumLines - 1
+	}
+	if start.Y < 0 {
+		start.Y = 0
+	}
 	for i := start.Y; i >= end.Y; i-- {
 		var l []byte
 		if i == start.Y {
 			runes := []rune(string(v.Buf.lines[i].data))
+			if start.X >= len(runes) {
+				start.X = len(runes) - 1
+			}
+			if start.X < 0 {
+				start.X = 0
+			}
 			l = []byte(string(runes[:start.X]))
 
 			if strings.Contains(r.String(), "$") && start.X != Count(string(l)) {
