@@ -1,7 +1,7 @@
 filetype: clojure
 
 detect:
-    filename: "\\.(clj[sc]?)$"
+    filename: "\\.(clj[sc]?|edn)$"
 
 rules:
 
