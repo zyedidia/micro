@@ -427,6 +427,7 @@ func main() {
 	L.SetGlobal("RunTermEmulator", luar.New(L, RunTermEmulator))
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
+	L.SetGlobal("NewView", luar.New(L, NewView))
 	L.SetGlobal("NewBuffer", luar.New(L, NewBufferFromString))
 	L.SetGlobal("NewBufferFromFile", luar.New(L, NewBufferFromFile))
 	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
