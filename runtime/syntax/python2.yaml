@@ -29,7 +29,7 @@ rules:
       # numbers
     - constant.number: "\\b[0-9]+\\b"
 
-    - comment:
+    - constant.string:
         start: "\"\"\""
         end: "\"\"\""
         rules: []
