@@ -198,7 +198,7 @@ Here are the options that you can set:
 
     default value: `false`
 
-* `syntax`: turns syntax on or off.
+* `syntax`: turns syntax highlighting on or off.
 
 	default value: `true`
 
