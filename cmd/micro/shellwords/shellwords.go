@@ -65,6 +65,9 @@ loop:
 			if singleQuoted || doubleQuoted || backQuote || dollarQuote {
 				buf += string(r)
 				backtick += string(r)
+			} else if buf == "\"\"" {
+				args = append(args, buf)
+				buf = ""
 			} else if got {
 				buf = replaceEnv(buf)
 				args = append(args, buf)
@@ -117,6 +120,9 @@ loop:
 			}
 		case '"':
 			if !singleQuoted && !dollarQuote {
+				if doubleQuoted && buf == "" {
+					args = append(args, buf)
+				}
 				doubleQuoted = !doubleQuoted
 				continue
 			}
