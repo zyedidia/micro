@@ -327,7 +327,7 @@ func expandWildcardVersion(parts [][]string) ([][]string, error) {
 	for _, p := range parts {
 		var newParts []string
 		for _, ap := range p {
-			if strings.Index(ap, "x") != -1 {
+			if strings.Contains(ap, "x") {
 				opStr, vStr, err := splitComparatorVersion(ap)
 				if err != nil {
 					return nil, err
