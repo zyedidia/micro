@@ -3,7 +3,10 @@
 micro
 !cmd/micro
 binaries/
+bin/
 tmp.sh
 test/
 .idea/
 packages/
+pkg/
+.vscode/
