@@ -5,7 +5,7 @@ import (
 	"time"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
-	"github.com/yuin/gopher-lua"
+	lua "github.com/yuin/gopher-lua"
 )
 
 const (
@@ -116,6 +116,9 @@ func (eh *EventHandler) Insert(start Loc, text string) {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
+				if loc.Y == end.Y {
+					loc.X += end.X - start.X
+				}
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
 				loc = loc.Move(Count(text), eh.buf)
 			}
