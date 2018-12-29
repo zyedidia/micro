@@ -124,6 +124,12 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
+or, if on Solus, you can install micro through its package manager:
+
+```
+eopkg install micro
+```
+
 On OpenBSD, micro is available in the ports tree. It is also available as a binary package.
 
 ```
