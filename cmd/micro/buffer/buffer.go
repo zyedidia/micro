@@ -63,6 +63,13 @@ var (
 	BTRaw     = BufType{4, true, true}
 )
 
+// Buffer stores the main information about a currently open file including
+// the actual text (in a LineArray), the undo/redo stack (in an EventHandler)
+// all the cursors, the syntax highlighting info, the settings for the buffer
+// and some misc info about modification time and path location.
+// The syntax highlighting info must be stored with the buffer because the syntax
+// highlighter attaches information to each line of the buffer for optimization
+// purposes so it doesn't have to rehighlight everything on every update.
 type Buffer struct {
 	*LineArray
 	*EventHandler
@@ -224,26 +231,32 @@ func (b *Buffer) ReOpen() error {
 	// b.Cursor.Relocate()
 }
 
+// SetCursors resets this buffer's cursors to a new list
 func (b *Buffer) SetCursors(c []*Cursor) {
 	b.cursors = c
 }
 
+// GetActiveCursor returns the main cursor in this buffer
 func (b *Buffer) GetActiveCursor() *Cursor {
 	return b.cursors[0]
 }
 
+// GetCursor returns the nth cursor
 func (b *Buffer) GetCursor(n int) *Cursor {
 	return b.cursors[n]
 }
 
+// GetCursors returns the list of cursors in this buffer
 func (b *Buffer) GetCursors() []*Cursor {
 	return b.cursors
 }
 
+// NumCursors returns the number of cursors
 func (b *Buffer) NumCursors() int {
 	return len(b.cursors)
 }
 
+// LineBytes returns line n as an array of bytes
 func (b *Buffer) LineBytes(n int) []byte {
 	if n >= len(b.lines) || n < 0 {
 		return []byte{}
@@ -251,10 +264,12 @@ func (b *Buffer) LineBytes(n int) []byte {
 	return b.lines[n].data
 }
 
+// LinesNum returns the number of lines in the buffer
 func (b *Buffer) LinesNum() int {
 	return len(b.lines)
 }
 
+// Start returns the start of the buffer
 func (b *Buffer) Start() Loc {
 	return Loc{0, 0}
 }
@@ -392,6 +407,8 @@ func (b *Buffer) UpdateRules() {
 	}
 }
 
+// IndentString returns this buffer's indent method (a tabstop or n spaces
+// depending on the settings)
 func (b *Buffer) IndentString(tabsize int) string {
 	if b.Settings["tabstospaces"].(bool) {
 		return Spaces(tabsize)

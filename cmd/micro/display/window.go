@@ -17,6 +17,8 @@ type Window interface {
 	Clear()
 }
 
+// The BufWindow provides a way of displaying a certain section
+// of a buffer
 type BufWindow struct {
 	// X and Y coordinates for the top left of the window
 	X int
@@ -37,6 +39,7 @@ type BufWindow struct {
 	sline *StatusLine
 }
 
+// NewBufWindow creates a new window at a location in the screen with a width and height
 func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w := new(BufWindow)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
@@ -46,6 +49,7 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	return w
 }
 
+// Clear resets all cells in this window to the default style
 func (w *BufWindow) Clear() {
 	for y := 0; y < w.Height; y++ {
 		for x := 0; x < w.Width; x++ {
@@ -132,10 +136,10 @@ func (w *BufWindow) displayBuffer() {
 
 	// this represents the current draw position
 	// within the current window
-	vloc := buffer.Loc{0, 0}
+	vloc := buffer.Loc{X: 0, Y: 0}
 
 	// this represents the current draw position in the buffer (char positions)
-	bloc := buffer.Loc{w.StartCol, w.StartLine}
+	bloc := buffer.Loc{X: w.StartCol, Y: w.StartLine}
 
 	activeC := w.Buf.GetActiveCursor()
 
@@ -233,6 +237,7 @@ func (w *BufWindow) displayStatusLine() {
 	w.sline.Display()
 }
 
+// Display displays the buffer and the statusline
 func (w *BufWindow) Display() {
 	w.displayBuffer()
 	w.displayStatusLine()
