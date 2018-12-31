@@ -11,6 +11,8 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+// The InfoBar displays messages and other info at the bottom of the screen.
+// It is respresented as a buffer and a message with a style.
 type InfoBar struct {
 	*buffer.Buffer
 

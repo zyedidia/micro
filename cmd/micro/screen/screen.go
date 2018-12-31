@@ -10,6 +10,12 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+// Screen is the tcell screen we use to draw to the terminal
+// Synchronization is used because we poll the screen on a separate
+// thread and sometimes the screen is shut down by the main thread
+// (for example on TermMessage) so we don't want to poll a nil/shutdown
+// screen. TODO: maybe we should worry about polling and drawing at the
+// same time too.
 var Screen tcell.Screen
 var lock sync.Mutex
 
@@ -23,6 +29,7 @@ func Unlock() {
 
 var screenWasNil bool
 
+// TempFini shuts the screen down temporarily
 func TempFini() {
 	screenWasNil = Screen == nil
 
@@ -33,6 +40,7 @@ func TempFini() {
 	}
 }
 
+// TempStart restarts the screen after it was temporarily disabled
 func TempStart() {
 	if !screenWasNil {
 		Init()

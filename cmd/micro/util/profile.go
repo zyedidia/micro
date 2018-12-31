@@ -9,6 +9,7 @@ import (
 	humanize "github.com/dustin/go-humanize"
 )
 
+// GetMemStats returns a string describing the memory usage and gc time used so far
 func GetMemStats() string {
 	var memstats runtime.MemStats
 	runtime.ReadMemStats(&memstats)
