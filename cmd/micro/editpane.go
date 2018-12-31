@@ -13,8 +13,10 @@ type EditPane struct {
 
 func NewBufEditPane(x, y, width, height int, b *buffer.Buffer) *EditPane {
 	e := new(EditPane)
-	e.Window = display.NewBufWindow(x, y, width, height, b)
-	e.Handler = action.NewBufHandler(b)
+	// TODO: can probably replace editpane with bufhandler entirely
+	w := display.NewBufWindow(x, y, width, height, b)
+	e.Window = w
+	e.Handler = action.NewBufHandler(b, w)
 
 	return e
 }

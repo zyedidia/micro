@@ -2,8 +2,10 @@ package action
 
 import (
 	"os"
+	"time"
 	"unicode/utf8"
 
+	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
@@ -18,11 +20,21 @@ func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
 
 // ScrollUpAction scrolls the view up
 func (h *BufHandler) ScrollUpAction() bool {
+	b := h.Buf
+	sspeed := b.Settings["scrollspeed"].(int)
+	if h.Win.StartLine >= sspeed {
+		h.Win.StartLine -= sspeed
+	}
 	return false
 }
 
 // ScrollDownAction scrolls the view up
 func (h *BufHandler) ScrollDownAction() bool {
+	b := h.Buf
+	sspeed := b.Settings["scrollspeed"].(int)
+	if h.Win.StartLine <= h.Buf.LinesNum()-1-sspeed {
+		h.Win.StartLine += sspeed
+	}
 	return false
 }
 
@@ -358,12 +370,12 @@ func (h *BufHandler) IndentSelection() bool {
 		tabsize := int(h.Buf.Settings["tabsize"].(float64))
 		indentsize := len(h.Buf.IndentString(tabsize))
 		for y := startY; y <= endY; y++ {
-			h.Buf.Insert(buffer.Loc{0, y}, h.Buf.IndentString(tabsize))
+			h.Buf.Insert(buffer.Loc{X: 0, Y: y}, h.Buf.IndentString(tabsize))
 			if y == startY && start.X > 0 {
 				h.Cursor.SetSelectionStart(start.Move(indentsize, h.Buf))
 			}
 			if y == endY {
-				h.Cursor.SetSelectionEnd(buffer.Loc{endX + indentsize + 1, endY})
+				h.Cursor.SetSelectionEnd(buffer.Loc{X: endX + indentsize + 1, Y: endY})
 			}
 		}
 		h.Cursor.Relocate()
@@ -371,21 +383,58 @@ func (h *BufHandler) IndentSelection() bool {
 		return true
 	}
 	return false
-	return false
 }
 
 // OutdentLine moves the current line back one indentation
 func (h *BufHandler) OutdentLine() bool {
+	if h.Cursor.HasSelection() {
+		return false
+	}
+
+	for x := 0; x < len(h.Buf.IndentString(h.Buf.Settings["tabsize"].(int))); x++ {
+		if len(util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))) == 0 {
+			break
+		}
+		h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y}, buffer.Loc{X: 1, Y: h.Cursor.Y})
+	}
+	h.Cursor.Relocate()
 	return true
 }
 
 // OutdentSelection takes the current selection and moves it back one indent level
 func (h *BufHandler) OutdentSelection() bool {
-	return true
+	if h.Cursor.HasSelection() {
+		start := h.Cursor.CurSelection[0]
+		end := h.Cursor.CurSelection[1]
+		if end.Y < start.Y {
+			start, end = end, start
+			h.Cursor.SetSelectionStart(start)
+			h.Cursor.SetSelectionEnd(end)
+		}
+
+		startY := start.Y
+		endY := end.Move(-1, h.Buf).Y
+		for y := startY; y <= endY; y++ {
+			for x := 0; x < len(h.Buf.IndentString(h.Buf.Settings["tabsize"].(int))); x++ {
+				if len(util.GetLeadingWhitespace(h.Buf.LineBytes(y))) == 0 {
+					break
+				}
+				h.Buf.Remove(buffer.Loc{X: 0, Y: y}, buffer.Loc{X: 1, Y: y})
+			}
+		}
+		h.Cursor.Relocate()
+
+		return true
+	}
+	return false
 }
 
 // InsertTab inserts a tab or spaces
 func (h *BufHandler) InsertTab() bool {
+	indent := h.Buf.IndentString(h.Buf.Settings["tabsize"].(int))
+	tabBytes := len(indent)
+	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
+	h.Buf.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
 	return true
 }
 
@@ -422,36 +471,91 @@ func (h *BufHandler) FindPrevious() bool {
 
 // Undo undoes the last action
 func (h *BufHandler) Undo() bool {
+	// TODO: clear cursors and message
+	h.Buf.Undo()
 	return true
 }
 
 // Redo redoes the last action
 func (h *BufHandler) Redo() bool {
+	// TODO: clear cursors and message
+	h.Buf.Redo()
 	return true
 }
 
 // Copy the selection to the system clipboard
 func (h *BufHandler) Copy() bool {
+	if h.Cursor.HasSelection() {
+		h.Cursor.CopySelection("clipboard")
+		h.freshClip = true
+		// TODO: message
+	}
 	return true
 }
 
 // CutLine cuts the current line to the clipboard
 func (h *BufHandler) CutLine() bool {
+	h.Cursor.SelectLine()
+	if !h.Cursor.HasSelection() {
+		return false
+	}
+	if h.freshClip == true {
+		if h.Cursor.HasSelection() {
+			if clip, err := clipboard.ReadAll("clipboard"); err != nil {
+				// messenger.Error(err)
+			} else {
+				clipboard.WriteAll(clip+string(h.Cursor.GetSelection()), "clipboard")
+			}
+		}
+	} else if time.Since(h.lastCutTime)/time.Second > 10*time.Second || h.freshClip == false {
+		h.Copy()
+	}
+	h.freshClip = true
+	h.lastCutTime = time.Now()
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	// messenger.Message("Cut line")
 	return true
 }
 
 // Cut the selection to the system clipboard
 func (h *BufHandler) Cut() bool {
-	return true
+	if h.Cursor.HasSelection() {
+		h.Cursor.CopySelection("clipboard")
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+		h.freshClip = true
+		// messenger.Message("Cut selection")
+
+		return true
+	} else {
+		return h.CutLine()
+	}
 }
 
 // DuplicateLine duplicates the current line or selection
 func (h *BufHandler) DuplicateLine() bool {
+	if h.Cursor.HasSelection() {
+		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
+	} else {
+		h.Cursor.End()
+		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
+		// h.Cursor.Right()
+	}
+
+	// messenger.Message("Duplicated line")
 	return true
 }
 
 // DeleteLine deletes the current line
 func (h *BufHandler) DeleteLine() bool {
+	h.Cursor.SelectLine()
+	if !h.Cursor.HasSelection() {
+		return false
+	}
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	// messenger.Message("Deleted line")
 	return true
 }
 
@@ -484,6 +588,11 @@ func (h *BufHandler) JumpToMatchingBrace() bool {
 
 // SelectAll selects the entire buffer
 func (h *BufHandler) SelectAll() bool {
+	h.Cursor.SetSelectionStart(h.Buf.Start())
+	h.Cursor.SetSelectionEnd(h.Buf.End())
+	// Put the cursor at the beginning
+	h.Cursor.X = 0
+	h.Cursor.Y = 0
 	return true
 }
 
@@ -494,11 +603,18 @@ func (h *BufHandler) OpenFile() bool {
 
 // Start moves the viewport to the start of the buffer
 func (h *BufHandler) Start() bool {
+	h.Win.StartLine = 0
 	return false
 }
 
 // End moves the viewport to the end of the buffer
 func (h *BufHandler) End() bool {
+	// TODO: softwrap problems?
+	if h.Win.Height > h.Buf.LinesNum() {
+		h.Win.StartLine = 0
+	} else {
+		h.StartLine = h.Buf.LinesNum() - h.Win.Height
+	}
 	return false
 }
 
@@ -544,6 +660,13 @@ func (h *BufHandler) HalfPageDown() bool {
 
 // ToggleRuler turns line numbers off and on
 func (h *BufHandler) ToggleRuler() bool {
+	if !h.Buf.Settings["ruler"].(bool) {
+		h.Buf.Settings["ruler"] = true
+		// messenger.Message("Enabled ruler")
+	} else {
+		h.Buf.Settings["ruler"] = false
+		// messenger.Message("Disabled ruler")
+	}
 	return false
 }
 
