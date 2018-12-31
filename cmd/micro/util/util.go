@@ -231,3 +231,19 @@ func EscapePath(path string) string {
 	path = filepath.ToSlash(path)
 	return strings.Replace(path, "/", "%", -1)
 }
+
+// GetLeadingWhitespace returns the leading whitespace of the given byte array
+func GetLeadingWhitespace(b []byte) []byte {
+	ws := []byte{}
+	for len(b) > 0 {
+		r, size := utf8.DecodeRune(b)
+		if r == ' ' || r == '\t' {
+			ws = append(ws, byte(r))
+		} else {
+			break
+		}
+
+		b = b[size:]
+	}
+	return ws
+}

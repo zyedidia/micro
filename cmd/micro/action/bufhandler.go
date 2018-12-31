@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
@@ -46,6 +47,7 @@ func BufMapMouse(k MouseEvent, action string) {
 // visual positions for mouse clicks and scrolling
 type BufHandler struct {
 	Buf *buffer.Buffer
+	Win *display.BufWindow
 
 	cursors []*buffer.Cursor
 	Cursor  *buffer.Cursor // the active cursor
@@ -81,9 +83,10 @@ type BufHandler struct {
 	tripleClick bool
 }
 
-func NewBufHandler(buf *buffer.Buffer) *BufHandler {
+func NewBufHandler(buf *buffer.Buffer, win *display.BufWindow) *BufHandler {
 	h := new(BufHandler)
 	h.Buf = buf
+	h.Win = win
 
 	h.cursors = []*buffer.Cursor{buffer.NewCursor(buf, buf.StartCursor)}
 	h.Cursor = h.cursors[0]
@@ -117,7 +120,9 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 
 func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 	if action, ok := BufKeyBindings[e]; ok {
-		action(h)
+		if action(h) {
+			h.Win.Relocate()
+		}
 		return true
 	}
 	return false
@@ -125,7 +130,9 @@ func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 
 func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 	if action, ok := BufMouseBindings[e]; ok {
-		action(h, te)
+		if action(h, te) {
+			h.Win.Relocate()
+		}
 		return true
 	}
 	return false

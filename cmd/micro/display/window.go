@@ -1,6 +1,7 @@
 package display
 
 import (
+	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -37,12 +38,15 @@ type BufWindow struct {
 	Buf *buffer.Buffer
 
 	sline *StatusLine
+
+	lineHeight []int
 }
 
 // NewBufWindow creates a new window at a location in the screen with a width and height
 func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w := new(BufWindow)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
+	w.lineHeight = make([]int, height)
 
 	w.sline = NewStatusLine(w)
 
@@ -56,6 +60,71 @@ func (w *BufWindow) Clear() {
 			screen.Screen.SetContent(w.X+x, w.Y+y, ' ', nil, config.DefStyle)
 		}
 	}
+}
+
+// Bottomline returns the line number of the lowest line in the view
+// You might think that this is obviously just v.StartLine + v.Height
+// but if softwrap is enabled things get complicated since one buffer
+// line can take up multiple lines in the view
+func (w *BufWindow) Bottomline() int {
+	// b := w.Buf
+
+	// if !b.Settings["softwrap"].(bool) {
+	// 	return w.StartLine + w.Height
+	// }
+
+	prev := 0
+	for i, l := range w.lineHeight {
+		if l >= prev {
+			log.Println("lineHeight[", i, "] = ", l)
+			prev = l
+		} else {
+			break
+		}
+	}
+	return prev
+}
+
+// Relocate moves the view window so that the cursor is in view
+// This is useful if the user has scrolled far away, and then starts typing
+// Returns true if the window location is moved
+func (w *BufWindow) Relocate() bool {
+	b := w.Buf
+	height := w.Bottomline() + 1 - w.StartLine
+	log.Println("Height: ", height)
+	ret := false
+	activeC := w.Buf.GetActiveCursor()
+	cy := activeC.Y
+	scrollmargin := int(b.Settings["scrollmargin"].(float64))
+	if cy < w.StartLine+scrollmargin && cy > scrollmargin-1 {
+		w.StartLine = cy - scrollmargin
+		ret = true
+	} else if cy < w.StartLine {
+		w.StartLine = cy
+		ret = true
+	}
+	if cy > w.StartLine+height-1-scrollmargin && cy < b.LinesNum()-scrollmargin {
+		w.StartLine = cy - height + 1 + scrollmargin
+		ret = true
+	} else if cy >= b.LinesNum()-scrollmargin && cy >= height {
+		w.StartLine = b.LinesNum() - height
+		log.Println(w.StartLine)
+		ret = true
+	}
+
+	// TODO: horizontal scroll
+	// if !b.Settings["softwrap"].(bool) {
+	// 	cx := activeC.GetVisualX()
+	// 	if cx < w.StartCol {
+	// 		w.StartCol = cx
+	// 		ret = true
+	// 	}
+	// 	if cx+v.lineNumOffset+1 > v.leftCol+v.Width {
+	// 		v.leftCol = cx - v.Width + v.lineNumOffset + 1
+	// 		ret = true
+	// 	}
+	// }
+	return ret
 }
 
 func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
@@ -173,6 +242,8 @@ func (w *BufWindow) displayBuffer() {
 			nColsBeforeStart--
 		}
 
+		w.lineHeight[vloc.Y] = bloc.Y
+
 		totalwidth := bloc.X - nColsBeforeStart
 		for len(line) > 0 {
 			if activeC.X == bloc.X && activeC.Y == bloc.Y {
@@ -217,6 +288,7 @@ func (w *BufWindow) displayBuffer() {
 						break
 					}
 					vloc.X = 0
+					w.lineHeight[vloc.Y] = bloc.Y
 					// This will draw an empty line number because the current line is wrapped
 					w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
 				}
