@@ -2,6 +2,7 @@ package info
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 )
@@ -30,13 +31,15 @@ type Bar struct {
 
 	// Is the current message a message from the gutter
 	GutterMessage bool
+
+	PromptCallback func(resp string, canceled bool)
 }
 
 func NewBar() *Bar {
 	ib := new(Bar)
 	ib.History = make(map[string][]string)
 
-	ib.Buffer = buffer.NewBufferFromString("", "infobar", buffer.BTScratch)
+	ib.Buffer = buffer.NewBufferFromString("", "infobar", buffer.BTInfo)
 
 	return ib
 }
@@ -60,7 +63,23 @@ func (i *Bar) Error(msg ...interface{}) {
 	if i.HasPrompt == false {
 		// if there is no active prompt then style and display the message as normal
 		i.Msg = fmt.Sprint(msg...)
-		i.HasError = true
+		i.HasMessage, i.HasError = false, true
 	}
 	// TODO: add to log?
+}
+
+func (i *Bar) Prompt(msg string, callback func(string, bool)) {
+	i.Msg = msg
+	i.HasPrompt = true
+	i.HasMessage, i.HasError = false, false
+	i.PromptCallback = callback
+}
+
+func (i *Bar) DonePrompt(canceled bool) {
+	i.HasPrompt = false
+	if canceled {
+		i.PromptCallback("", true)
+	} else {
+		i.PromptCallback(strings.TrimSpace(string(i.LineBytes(0))), false)
+	}
 }

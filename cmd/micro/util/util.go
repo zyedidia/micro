@@ -155,6 +155,17 @@ func IsSpaces(str []byte) bool {
 	return true
 }
 
+// IsSpacesOrTabs checks if a given string contains only spaces and tabs
+func IsSpacesOrTabs(str []byte) bool {
+	for _, c := range str {
+		if c != ' ' && c != '\t' {
+			return false
+		}
+	}
+
+	return true
+}
+
 // IsWhitespace returns true if the given rune is a space, tab, or newline
 func IsWhitespace(c rune) bool {
 	return c == ' ' || c == '\t' || c == '\n'
@@ -246,4 +257,9 @@ func GetLeadingWhitespace(b []byte) []byte {
 		b = b[size:]
 	}
 	return ws
+}
+
+// IntOpt turns a float64 setting to an int
+func IntOpt(opt interface{}) int {
+	return int(opt.(float64))
 }

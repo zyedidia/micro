@@ -62,6 +62,7 @@ var (
 	BTLog     = BufType{2, true, true, false}
 	BTScratch = BufType{3, false, true, false}
 	BTRaw     = BufType{4, true, true, false}
+	BTInfo    = BufType{5, false, true, false}
 )
 
 // Buffer stores the main information about a currently open file including

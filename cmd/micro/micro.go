@@ -212,6 +212,7 @@ func main() {
 	for {
 		// Display everything
 		screen.Screen.Fill(' ', config.DefStyle)
+		screen.Screen.HideCursor()
 		ep.Display()
 		infowindow.Display()
 		screen.Screen.Show()

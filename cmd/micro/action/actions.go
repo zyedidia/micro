@@ -34,18 +34,18 @@ func (h *BufHandler) ScrollDown(n int) {
 // MousePress is the event that should happen when a normal click happens
 // This is almost always bound to left click
 func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
-	h.ScrollUp(h.Buf.Settings["scrollspeed"].(int))
 	return false
 }
 
 // ScrollUpAction scrolls the view up
 func (h *BufHandler) ScrollUpAction() bool {
+	h.ScrollUp(util.IntOpt(h.Buf.Settings["scrollspeed"]))
 	return false
 }
 
 // ScrollDownAction scrolls the view up
 func (h *BufHandler) ScrollDownAction() bool {
-	h.ScrollDown(h.Buf.Settings["scrollspeed"].(int))
+	h.ScrollDown(util.IntOpt(h.Buf.Settings["scrollspeed"]))
 	return false
 }
 
@@ -298,6 +298,38 @@ func (h *BufHandler) InsertSpace() bool {
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
 func (h *BufHandler) InsertNewline() bool {
+	if h.Buf.Type == buffer.BTInfo {
+		info.MainBar.DonePrompt(false)
+		return false
+	}
+
+	// Insert a newline
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+
+	ws := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
+	cx := h.Cursor.X
+	h.Buf.Insert(h.Cursor.Loc, "\n")
+	// h.Cursor.Right()
+
+	if h.Buf.Settings["autoindent"].(bool) {
+		if cx < len(ws) {
+			ws = ws[0:cx]
+		}
+		h.Buf.Insert(h.Cursor.Loc, string(ws))
+		// for i := 0; i < len(ws); i++ {
+		// 	h.Cursor.Right()
+		// }
+
+		// Remove the whitespaces if keepautoindent setting is off
+		if util.IsSpacesOrTabs(h.Buf.LineBytes(h.Cursor.Y-1)) && !h.Buf.Settings["keepautoindent"].(bool) {
+			line := h.Buf.LineBytes(h.Cursor.Y - 1)
+			h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y - 1}, buffer.Loc{X: utf8.RuneCount(line), Y: h.Cursor.Y - 1})
+		}
+	}
+	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
 	return true
 }
 
@@ -402,7 +434,7 @@ func (h *BufHandler) OutdentLine() bool {
 		return false
 	}
 
-	for x := 0; x < len(h.Buf.IndentString(h.Buf.Settings["tabsize"].(int))); x++ {
+	for x := 0; x < len(h.Buf.IndentString(util.IntOpt(h.Buf.Settings["tabsize"]))); x++ {
 		if len(util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))) == 0 {
 			break
 		}
@@ -426,7 +458,7 @@ func (h *BufHandler) OutdentSelection() bool {
 		startY := start.Y
 		endY := end.Move(-1, h.Buf).Y
 		for y := startY; y <= endY; y++ {
-			for x := 0; x < len(h.Buf.IndentString(h.Buf.Settings["tabsize"].(int))); x++ {
+			for x := 0; x < len(h.Buf.IndentString(util.IntOpt(h.Buf.Settings["tabsize"]))); x++ {
 				if len(util.GetLeadingWhitespace(h.Buf.LineBytes(y))) == 0 {
 					break
 				}
@@ -442,7 +474,7 @@ func (h *BufHandler) OutdentSelection() bool {
 
 // InsertTab inserts a tab or spaces
 func (h *BufHandler) InsertTab() bool {
-	indent := h.Buf.IndentString(h.Buf.Settings["tabsize"].(int))
+	indent := h.Buf.IndentString(util.IntOpt(h.Buf.Settings["tabsize"]))
 	tabBytes := len(indent)
 	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
 	h.Buf.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
@@ -609,6 +641,14 @@ func (h *BufHandler) SelectAll() bool {
 
 // OpenFile opens a new file in the buffer
 func (h *BufHandler) OpenFile() bool {
+	cb := func(resp string, canceled bool) {
+		if !canceled {
+			info.MainBar.Message("Opening", resp)
+		} else {
+			info.MainBar.Error("Canceled")
+		}
+	}
+	info.MainBar.Prompt("Open file: ", cb)
 	return false
 }
 
