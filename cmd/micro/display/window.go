@@ -13,26 +13,24 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+type View struct {
+	X, Y                int // X,Y location of the view
+	Width, Height       int // Width and height of the view
+	StartLine, StartCol int // Start line and start column of the view (vertical/horizontal scroll)
+}
+
 type Window interface {
 	Display()
 	Clear()
+	Relocate() bool
+	GetView() *View
+	SetView(v *View)
 }
 
 // The BufWindow provides a way of displaying a certain section
 // of a buffer
 type BufWindow struct {
-	// X and Y coordinates for the top left of the window
-	X int
-	Y int
-
-	// Width and Height for the window
-	Width  int
-	Height int
-
-	// Which line in the buffer to start displaying at (vertical scroll)
-	StartLine int
-	// Which visual column in the to start displaying at (horizontal scroll)
-	StartCol int
+	*View
 
 	// Buffer being shown in this window
 	Buf *buffer.Buffer
@@ -45,12 +43,21 @@ type BufWindow struct {
 // NewBufWindow creates a new window at a location in the screen with a width and height
 func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w := new(BufWindow)
+	w.View = new(View)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
 	w.lineHeight = make([]int, height)
 
 	w.sline = NewStatusLine(w)
 
 	return w
+}
+
+func (v *View) GetView() *View {
+	return v
+}
+
+func (v *View) SetView(view *View) {
+	v = view
 }
 
 // Clear resets all cells in this window to the default style

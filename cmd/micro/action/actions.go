@@ -7,34 +7,45 @@ import (
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
+// ScrollUp is not an action
+func (h *BufHandler) ScrollUp(n int) {
+	v := h.Win.GetView()
+	if v.StartLine >= n {
+		v.StartLine -= n
+		h.Win.SetView(v)
+	}
+}
+
+// ScrollDown is not an action
+func (h *BufHandler) ScrollDown(n int) {
+	v := h.Win.GetView()
+	if v.StartLine <= h.Buf.LinesNum()-1-n {
+		v.StartLine += n
+		h.Win.SetView(v)
+	}
+}
+
 // MousePress is the event that should happen when a normal click happens
 // This is almost always bound to left click
 func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
+	h.ScrollUp(h.Buf.Settings["scrollspeed"].(int))
 	return false
 }
 
 // ScrollUpAction scrolls the view up
 func (h *BufHandler) ScrollUpAction() bool {
-	b := h.Buf
-	sspeed := b.Settings["scrollspeed"].(int)
-	if h.Win.StartLine >= sspeed {
-		h.Win.StartLine -= sspeed
-	}
 	return false
 }
 
 // ScrollDownAction scrolls the view up
 func (h *BufHandler) ScrollDownAction() bool {
-	b := h.Buf
-	sspeed := b.Settings["scrollspeed"].(int)
-	if h.Win.StartLine <= h.Buf.LinesNum()-1-sspeed {
-		h.Win.StartLine += sspeed
-	}
+	h.ScrollDown(h.Buf.Settings["scrollspeed"].(int))
 	return false
 }
 
@@ -514,7 +525,7 @@ func (h *BufHandler) CutLine() bool {
 	h.lastCutTime = time.Now()
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
-	// messenger.Message("Cut line")
+	info.MainBar.Message("Cut line")
 	return true
 }
 
@@ -525,7 +536,7 @@ func (h *BufHandler) Cut() bool {
 		h.Cursor.DeleteSelection()
 		h.Cursor.ResetSelection()
 		h.freshClip = true
-		// messenger.Message("Cut selection")
+		info.MainBar.Message("Cut selection")
 
 		return true
 	} else {
@@ -543,7 +554,7 @@ func (h *BufHandler) DuplicateLine() bool {
 		// h.Cursor.Right()
 	}
 
-	// messenger.Message("Duplicated line")
+	info.MainBar.Message("Duplicated line")
 	return true
 }
 
@@ -555,7 +566,7 @@ func (h *BufHandler) DeleteLine() bool {
 	}
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
-	// messenger.Message("Deleted line")
+	info.MainBar.Message("Deleted line")
 	return true
 }
 
@@ -603,17 +614,21 @@ func (h *BufHandler) OpenFile() bool {
 
 // Start moves the viewport to the start of the buffer
 func (h *BufHandler) Start() bool {
-	h.Win.StartLine = 0
+	v := h.Win.GetView()
+	v.StartLine = 0
+	h.Win.SetView(v)
 	return false
 }
 
 // End moves the viewport to the end of the buffer
 func (h *BufHandler) End() bool {
 	// TODO: softwrap problems?
-	if h.Win.Height > h.Buf.LinesNum() {
-		h.Win.StartLine = 0
+	v := h.Win.GetView()
+	if v.Height > h.Buf.LinesNum() {
+		v.StartLine = 0
+		h.Win.SetView(v)
 	} else {
-		h.StartLine = h.Buf.LinesNum() - h.Win.Height
+		h.StartLine = h.Buf.LinesNum() - v.Height
 	}
 	return false
 }
@@ -662,10 +677,10 @@ func (h *BufHandler) HalfPageDown() bool {
 func (h *BufHandler) ToggleRuler() bool {
 	if !h.Buf.Settings["ruler"].(bool) {
 		h.Buf.Settings["ruler"] = true
-		// messenger.Message("Enabled ruler")
+		info.MainBar.Message("Enabled ruler")
 	} else {
 		h.Buf.Settings["ruler"] = false
-		// messenger.Message("Disabled ruler")
+		info.MainBar.Message("Disabled ruler")
 	}
 	return false
 }

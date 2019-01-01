@@ -47,7 +47,7 @@ func BufMapMouse(k MouseEvent, action string) {
 // visual positions for mouse clicks and scrolling
 type BufHandler struct {
 	Buf *buffer.Buffer
-	Win *display.BufWindow
+	Win display.Window
 
 	cursors []*buffer.Cursor
 	Cursor  *buffer.Cursor // the active cursor
@@ -83,7 +83,7 @@ type BufHandler struct {
 	tripleClick bool
 }
 
-func NewBufHandler(buf *buffer.Buffer, win *display.BufWindow) *BufHandler {
+func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
 	h := new(BufHandler)
 	h.Buf = buf
 	h.Win = win

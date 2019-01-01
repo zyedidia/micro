@@ -12,6 +12,8 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/action"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
+	"github.com/zyedidia/micro/cmd/micro/display"
+	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
@@ -126,7 +128,7 @@ func LoadInput() []*buffer.Buffer {
 				continue
 			}
 
-			buf, err := buffer.NewBufferFromFile(args[i])
+			buf, err := buffer.NewBufferFromFile(args[i], buffer.BTDefault)
 			if err != nil {
 				util.TermMessage(err)
 				continue
@@ -143,10 +145,10 @@ func LoadInput() []*buffer.Buffer {
 			util.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
-		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename))
+		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, buffer.BTDefault))
 	} else {
 		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename))
+		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, buffer.BTDefault))
 	}
 
 	return buffers
@@ -168,6 +170,7 @@ func main() {
 	}
 	config.InitGlobalSettings()
 	action.InitBindings()
+
 	err = config.InitColorscheme()
 	if err != nil {
 		util.TermMessage(err)
@@ -192,6 +195,10 @@ func main() {
 	width, height := screen.Screen.Size()
 	ep := NewBufEditPane(0, 0, width, height-1, b)
 
+	info.InitInfoBar()
+	infowindow := display.NewInfoWindow(info.MainBar)
+	infobar := action.NewBufHandler(info.MainBar.Buffer, infowindow)
+
 	// Here is the event loop which runs in a separate thread
 	go func() {
 		events = make(chan tcell.Event)
@@ -206,6 +213,7 @@ func main() {
 		// Display everything
 		screen.Screen.Fill(' ', config.DefStyle)
 		ep.Display()
+		infowindow.Display()
 		screen.Screen.Show()
 
 		var event tcell.Event
@@ -216,7 +224,11 @@ func main() {
 		}
 
 		if event != nil {
-			ep.HandleEvent(event)
+			if info.MainBar.HasPrompt {
+				infobar.HandleEvent(event)
+			} else {
+				ep.HandleEvent(event)
+			}
 		}
 	}
 
