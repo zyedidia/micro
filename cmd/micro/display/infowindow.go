@@ -48,6 +48,35 @@ func NewInfoWindow(b *info.Bar) *InfoWindow {
 	return iw
 }
 
+// func (i *InfoWindow) YesNoPrompt() (bool, bool) {
+// 	for {
+// 		i.Clear()
+// 		i.Display()
+// 		screen.Screen.ShowCursor(utf8.RuneCountInString(i.Msg), i.y)
+// 		screen.Show()
+// 		event := <-events
+//
+// 		switch e := event.(type) {
+// 		case *tcell.EventKey:
+// 			switch e.Key() {
+// 			case tcell.KeyRune:
+// 				if e.Rune() == 'y' || e.Rune() == 'Y' {
+// 					i.HasPrompt = false
+// 					return true, false
+// 				} else if e.Rune() == 'n' || e.Rune() == 'N' {
+// 					i.HasPrompt = false
+// 					return false, false
+// 				}
+// 			case tcell.KeyCtrlC, tcell.KeyCtrlQ, tcell.KeyEscape:
+// 				i.Clear()
+// 				i.Reset()
+// 				i.HasPrompt = false
+// 				return false, true
+// 			}
+// 		}
+// 	}
+// }
+
 func (i *InfoWindow) Relocate() bool  { return false }
 func (i *InfoWindow) GetView() *View  { return i.View }
 func (i *InfoWindow) SetView(v *View) {}

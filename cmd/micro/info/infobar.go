@@ -69,6 +69,11 @@ func (i *Bar) Error(msg ...interface{}) {
 }
 
 func (i *Bar) Prompt(msg string, callback func(string, bool)) {
+	// If we get another prompt mid-prompt we cancel the one getting overwritten
+	if i.HasPrompt {
+		i.DonePrompt(true)
+	}
+
 	i.Msg = msg
 	i.HasPrompt = true
 	i.HasMessage, i.HasError = false, false
@@ -82,4 +87,11 @@ func (i *Bar) DonePrompt(canceled bool) {
 	} else {
 		i.PromptCallback(strings.TrimSpace(string(i.LineBytes(0))), false)
 	}
+	i.Replace(i.Start(), i.End(), "")
+}
+
+// Reset resets the messenger's cursor, message and response
+func (i *Bar) Reset() {
+	i.Msg = ""
+	i.HasPrompt, i.HasMessage, i.HasError = false, false, false
 }
