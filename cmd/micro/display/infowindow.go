@@ -1,12 +1,14 @@
 package display
 
 import (
-	"strings"
+	"unicode/utf8"
 
 	runewidth "github.com/mattn/go-runewidth"
+	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -56,19 +58,99 @@ func (i *InfoWindow) Clear() {
 	}
 }
 
+func (i *InfoWindow) displayBuffer() {
+	b := i.Buffer
+	line := b.LineBytes(0)
+	activeC := b.GetActiveCursor()
+
+	blocX := 0
+	vlocX := utf8.RuneCountInString(i.Msg)
+
+	tabsize := 4
+	line, nColsBeforeStart := util.SliceVisualEnd(line, blocX, tabsize)
+
+	draw := func(r rune, style tcell.Style) {
+		if nColsBeforeStart <= 0 {
+			bloc := buffer.Loc{X: blocX, Y: 0}
+			if activeC.HasSelection() &&
+				(bloc.GreaterEqual(activeC.CurSelection[0]) && bloc.LessThan(activeC.CurSelection[1]) ||
+					bloc.LessThan(activeC.CurSelection[0]) && bloc.GreaterEqual(activeC.CurSelection[1])) {
+				// The current character is selected
+				style = config.DefStyle.Reverse(true)
+
+				if s, ok := config.Colorscheme["selection"]; ok {
+					style = s
+				}
+
+			}
+
+			screen.Screen.SetContent(vlocX, i.y, r, nil, style)
+			vlocX++
+		}
+		nColsBeforeStart--
+	}
+
+	totalwidth := blocX - nColsBeforeStart
+	for len(line) > 0 {
+		if activeC.X == blocX {
+			screen.Screen.ShowCursor(vlocX, i.y)
+		}
+
+		r, size := utf8.DecodeRune(line)
+
+		draw(r, i.defStyle)
+
+		width := 0
+
+		char := ' '
+		switch r {
+		case '\t':
+			ts := tabsize - (totalwidth % tabsize)
+			width = ts
+		default:
+			width = runewidth.RuneWidth(r)
+			char = '@'
+		}
+
+		blocX++
+		line = line[size:]
+
+		// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
+		if width > 1 {
+			for j := 1; j < width; j++ {
+				draw(char, i.defStyle)
+			}
+		}
+		totalwidth += width
+		if vlocX >= i.width {
+			break
+		}
+	}
+	if activeC.X == blocX {
+		screen.Screen.ShowCursor(vlocX, i.y)
+	}
+}
+
 func (i *InfoWindow) Display() {
 	x := 0
 	if i.HasPrompt || config.GlobalSettings["infobar"].(bool) {
+		if !i.HasPrompt && !i.HasMessage && !i.HasError {
+			return
+		}
 		style := i.defStyle
 
 		if i.HasError {
 			style = i.errStyle
 		}
 
-		display := i.Msg + strings.TrimSpace(string(i.Bytes()))
+		display := i.Msg
 		for _, c := range display {
 			screen.Screen.SetContent(x, i.y, c, nil, style)
 			x += runewidth.RuneWidth(c)
+		}
+
+		if i.HasPrompt {
+			i.displayBuffer()
 		}
 	}
 }

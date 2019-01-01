@@ -1,7 +1,6 @@
 package display
 
 import (
-	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -81,9 +80,8 @@ func (w *BufWindow) Bottomline() int {
 	// }
 
 	prev := 0
-	for i, l := range w.lineHeight {
+	for _, l := range w.lineHeight {
 		if l >= prev {
-			log.Println("lineHeight[", i, "] = ", l)
 			prev = l
 		} else {
 			break
@@ -98,7 +96,6 @@ func (w *BufWindow) Bottomline() int {
 func (w *BufWindow) Relocate() bool {
 	b := w.Buf
 	height := w.Bottomline() + 1 - w.StartLine
-	log.Println("Height: ", height)
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	cy := activeC.Y
@@ -115,7 +112,6 @@ func (w *BufWindow) Relocate() bool {
 		ret = true
 	} else if cy >= b.LinesNum()-scrollmargin && cy >= height {
 		w.StartLine = b.LinesNum() - height
-		log.Println(w.StartLine)
 		ret = true
 	}
 
@@ -217,7 +213,7 @@ func (w *BufWindow) displayBuffer() {
 	// this represents the current draw position in the buffer (char positions)
 	bloc := buffer.Loc{X: w.StartCol, Y: w.StartLine}
 
-	activeC := w.Buf.GetActiveCursor()
+	activeC := b.GetActiveCursor()
 
 	curStyle := config.DefStyle
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
