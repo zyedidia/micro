@@ -53,14 +53,15 @@ type BufType struct {
 	Kind     int
 	Readonly bool // The file cannot be edited
 	Scratch  bool // The file cannot be saved
+	Syntax   bool // Syntax highlighting is enabled
 }
 
 var (
-	BTDefault = BufType{0, false, false}
-	BTHelp    = BufType{1, true, true}
-	BTLog     = BufType{2, true, true}
-	BTScratch = BufType{3, false, true}
-	BTRaw     = BufType{4, true, true}
+	BTDefault = BufType{0, false, false, true}
+	BTHelp    = BufType{1, true, true, true}
+	BTLog     = BufType{2, true, true, false}
+	BTScratch = BufType{3, false, true, false}
+	BTRaw     = BufType{4, true, true, false}
 )
 
 // Buffer stores the main information about a currently open file including
@@ -107,7 +108,7 @@ type Buffer struct {
 // It will also automatically handle `~`, and line/column with filename:l:c
 // It will return an empty buffer if the path does not exist
 // and an error if the file is a directory
-func NewBufferFromFile(path string) (*Buffer, error) {
+func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 	var err error
 	filename, cursorPosition := GetPathAndCursorPosition(path)
 	filename, err = ReplaceHome(filename)
@@ -127,24 +128,25 @@ func NewBufferFromFile(path string) (*Buffer, error) {
 	var buf *Buffer
 	if err != nil {
 		// File does not exist -- create an empty buffer with that name
-		buf = NewBufferFromString("", filename)
+		buf = NewBufferFromString("", filename, btype)
 	} else {
-		buf = NewBuffer(file, FSize(file), filename, cursorPosition)
+		buf = NewBuffer(file, FSize(file), filename, cursorPosition, btype)
 	}
 
 	return buf, nil
 }
 
 // NewBufferFromString creates a new buffer containing the given string
-func NewBufferFromString(text, path string) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path, nil)
+func NewBufferFromString(text, path string, btype BufType) *Buffer {
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, nil, btype)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
 // Ensure that ReadSettings and InitGlobalSettings have been called before creating
 // a new buffer
-func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string) *Buffer {
+func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string, btype BufType) *Buffer {
 	b := new(Buffer)
+	b.Type = btype
 
 	b.Settings = config.DefaultLocalSettings()
 	for k, v := range config.GlobalSettings {
@@ -344,6 +346,9 @@ func (b *Buffer) deleteToEnd(start Loc) {
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
+	if !b.Type.Syntax {
+		return
+	}
 	rehighlight := false
 	var files []*highlight.File
 	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {

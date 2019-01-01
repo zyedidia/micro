@@ -18,12 +18,12 @@ func GetMemStats() string {
 
 var start time.Time
 
-func tic(s string) {
+func Tic(s string) {
 	log.Println("START:", s)
 	start = time.Now()
 }
 
-func toc() {
+func Toc() {
 	end := time.Now()
 	log.Println("END: ElapsedTime in seconds:", end.Sub(start))
 }
