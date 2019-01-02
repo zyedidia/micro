@@ -751,6 +751,11 @@ func (h *BufHandler) ShellMode() bool {
 
 // CommandMode lets the user enter a command
 func (h *BufHandler) CommandMode() bool {
+	InfoBar.Prompt("> ", func(resp string, canceled bool) {
+		if !canceled {
+			HandleCommand(resp)
+		}
+	})
 	return false
 }
 

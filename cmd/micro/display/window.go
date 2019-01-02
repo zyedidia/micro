@@ -198,6 +198,10 @@ func (w *BufWindow) displayBuffer() {
 	if style, ok := config.Colorscheme["line-number"]; ok {
 		lineNumStyle = style
 	}
+	curNumStyle := config.DefStyle
+	if style, ok := config.Colorscheme["current-line-number"]; ok {
+		curNumStyle = style
+	}
 
 	// We need to know the string length of the largest line number
 	// so we can pad appropriately when displaying line numbers
@@ -219,7 +223,11 @@ func (w *BufWindow) displayBuffer() {
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 		if b.Settings["ruler"].(bool) {
-			w.drawLineNum(lineNumStyle, false, maxLineNumLength, &vloc, &bloc)
+			s := lineNumStyle
+			if bloc.Y == activeC.Y {
+				s = curNumStyle
+			}
+			w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
 		}
 
 		line := b.LineBytes(bloc.Y)
@@ -236,7 +244,14 @@ func (w *BufWindow) displayBuffer() {
 					if s, ok := config.Colorscheme["selection"]; ok {
 						style = s
 					}
+				}
 
+				if b.Settings["cursorline"].(bool) &&
+					!activeC.HasSelection() && activeC.Y == bloc.Y {
+					if s, ok := config.Colorscheme["cursor-line"]; ok {
+						fg, _, _ := s.Decompose()
+						style = style.Background(fg)
+					}
 				}
 
 				screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, style)
@@ -300,6 +315,19 @@ func (w *BufWindow) displayBuffer() {
 		if activeC.X == bloc.X && activeC.Y == bloc.Y {
 			w.showCursor(vloc.X, vloc.Y, true)
 		}
+
+		if b.Settings["cursorline"].(bool) &&
+			!activeC.HasSelection() && activeC.Y == bloc.Y {
+			style := config.DefStyle
+			if s, ok := config.Colorscheme["cursor-line"]; ok {
+				fg, _, _ := s.Decompose()
+				style = style.Background(fg)
+			}
+			for i := vloc.X; i < w.Width; i++ {
+				screen.Screen.SetContent(i, vloc.Y, ' ', nil, style)
+			}
+		}
+
 		bloc.X = w.StartCol
 		bloc.Y++
 		if bloc.Y >= b.LinesNum() {

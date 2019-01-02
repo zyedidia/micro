@@ -168,6 +168,7 @@ func main() {
 	}
 	config.InitGlobalSettings()
 	action.InitBindings()
+	action.InitCommands()
 
 	err = config.InitColorscheme()
 	if err != nil {
@@ -228,6 +229,4 @@ func main() {
 			}
 		}
 	}
-
-	screen.Screen.Fini()
 }
