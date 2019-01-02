@@ -7,7 +7,6 @@ import (
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
-	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
@@ -299,7 +298,7 @@ func (h *BufHandler) InsertSpace() bool {
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
 func (h *BufHandler) InsertNewline() bool {
 	if h.Buf.Type == buffer.BTInfo {
-		info.MainBar.DonePrompt(false)
+		InfoBar.DonePrompt(false)
 		return false
 	}
 
@@ -557,7 +556,7 @@ func (h *BufHandler) CutLine() bool {
 	h.lastCutTime = time.Now()
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
-	info.MainBar.Message("Cut line")
+	InfoBar.Message("Cut line")
 	return true
 }
 
@@ -568,7 +567,7 @@ func (h *BufHandler) Cut() bool {
 		h.Cursor.DeleteSelection()
 		h.Cursor.ResetSelection()
 		h.freshClip = true
-		info.MainBar.Message("Cut selection")
+		InfoBar.Message("Cut selection")
 
 		return true
 	} else {
@@ -586,7 +585,7 @@ func (h *BufHandler) DuplicateLine() bool {
 		// h.Cursor.Right()
 	}
 
-	info.MainBar.Message("Duplicated line")
+	InfoBar.Message("Duplicated line")
 	return true
 }
 
@@ -598,7 +597,7 @@ func (h *BufHandler) DeleteLine() bool {
 	}
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
-	info.MainBar.Message("Deleted line")
+	InfoBar.Message("Deleted line")
 	return true
 }
 
@@ -643,12 +642,12 @@ func (h *BufHandler) SelectAll() bool {
 func (h *BufHandler) OpenFile() bool {
 	cb := func(resp string, canceled bool) {
 		if !canceled {
-			info.MainBar.Message("Opening", resp)
+			InfoBar.Message("Opening", resp)
 		} else {
-			info.MainBar.Error("Canceled")
+			InfoBar.Error("Canceled")
 		}
 	}
-	info.MainBar.Prompt("Open file: ", cb)
+	InfoBar.Prompt("Open file: ", cb)
 	return false
 }
 
@@ -717,10 +716,10 @@ func (h *BufHandler) HalfPageDown() bool {
 func (h *BufHandler) ToggleRuler() bool {
 	if !h.Buf.Settings["ruler"].(bool) {
 		h.Buf.Settings["ruler"] = true
-		info.MainBar.Message("Enabled ruler")
+		InfoBar.Message("Enabled ruler")
 	} else {
 		h.Buf.Settings["ruler"] = false
-		info.MainBar.Message("Disabled ruler")
+		InfoBar.Message("Disabled ruler")
 	}
 	return false
 }

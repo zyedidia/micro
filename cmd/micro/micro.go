@@ -12,8 +12,6 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/action"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
-	"github.com/zyedidia/micro/cmd/micro/display"
-	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
@@ -193,11 +191,9 @@ func main() {
 
 	b := LoadInput()[0]
 	width, height := screen.Screen.Size()
-	ep := NewBufEditPane(0, 0, width, height-1, b)
+	ep := action.NewBufEditPane(0, 0, width, height-1, b)
 
-	info.InitInfoBar()
-	infowindow := display.NewInfoWindow(info.MainBar)
-	infobar := action.NewBufHandler(info.MainBar.Buffer, infowindow)
+	action.InitGlobals()
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
@@ -214,7 +210,7 @@ func main() {
 		screen.Screen.Fill(' ', config.DefStyle)
 		screen.Screen.HideCursor()
 		ep.Display()
-		infowindow.Display()
+		action.InfoBar.Display()
 		screen.Screen.Show()
 
 		var event tcell.Event
@@ -225,8 +221,8 @@ func main() {
 		}
 
 		if event != nil {
-			if info.MainBar.HasPrompt {
-				infobar.HandleEvent(event)
+			if action.InfoBar.HasPrompt {
+				action.InfoBar.HandleEvent(event)
 			} else {
 				ep.HandleEvent(event)
 			}

@@ -10,7 +10,7 @@ import (
 // LoadHistory attempts to load user history from configDir/buffers/history
 // into the history map
 // The savehistory option must be on
-func (i *Bar) LoadHistory() {
+func (i *InfoBuf) LoadHistory() {
 	if config.GetGlobalOption("savehistory").(bool) {
 		file, err := os.Open(config.ConfigDir + "/buffers/history")
 		defer file.Close()
@@ -37,7 +37,7 @@ func (i *Bar) LoadHistory() {
 
 // SaveHistory saves the user's command history to configDir/buffers/history
 // only if the savehistory option is on
-func (i *Bar) SaveHistory() {
+func (i *InfoBuf) SaveHistory() {
 	if config.GetGlobalOption("savehistory").(bool) {
 		// Don't save history past 100
 		for k, v := range i.History {

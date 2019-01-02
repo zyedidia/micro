@@ -7,15 +7,9 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 )
 
-var MainBar *Bar
-
-func InitInfoBar() {
-	MainBar = NewBar()
-}
-
-// The Bar displays messages and other info at the bottom of the screen.
+// The InfoBuf displays messages and other info at the bottom of the screen.
 // It is respresented as a buffer and a message with a style.
-type Bar struct {
+type InfoBuf struct {
 	*buffer.Buffer
 
 	HasPrompt  bool
@@ -35,8 +29,8 @@ type Bar struct {
 	PromptCallback func(resp string, canceled bool)
 }
 
-func NewBar() *Bar {
-	ib := new(Bar)
+func NewBuffer() *InfoBuf {
+	ib := new(InfoBuf)
 	ib.History = make(map[string][]string)
 
 	ib.Buffer = buffer.NewBufferFromString("", "infobar", buffer.BTInfo)
@@ -45,7 +39,7 @@ func NewBar() *Bar {
 }
 
 // Message sends a message to the user
-func (i *Bar) Message(msg ...interface{}) {
+func (i *InfoBuf) Message(msg ...interface{}) {
 	// only display a new message if there isn't an active prompt
 	// this is to prevent overwriting an existing prompt to the user
 	if i.HasPrompt == false {
@@ -57,7 +51,7 @@ func (i *Bar) Message(msg ...interface{}) {
 }
 
 // Error sends an error message to the user
-func (i *Bar) Error(msg ...interface{}) {
+func (i *InfoBuf) Error(msg ...interface{}) {
 	// only display a new message if there isn't an active prompt
 	// this is to prevent overwriting an existing prompt to the user
 	if i.HasPrompt == false {
@@ -68,7 +62,7 @@ func (i *Bar) Error(msg ...interface{}) {
 	// TODO: add to log?
 }
 
-func (i *Bar) Prompt(msg string, callback func(string, bool)) {
+func (i *InfoBuf) Prompt(msg string, callback func(string, bool)) {
 	// If we get another prompt mid-prompt we cancel the one getting overwritten
 	if i.HasPrompt {
 		i.DonePrompt(true)
@@ -80,7 +74,7 @@ func (i *Bar) Prompt(msg string, callback func(string, bool)) {
 	i.PromptCallback = callback
 }
 
-func (i *Bar) DonePrompt(canceled bool) {
+func (i *InfoBuf) DonePrompt(canceled bool) {
 	i.HasPrompt = false
 	if canceled {
 		i.PromptCallback("", true)
@@ -91,7 +85,7 @@ func (i *Bar) DonePrompt(canceled bool) {
 }
 
 // Reset resets the messenger's cursor, message and response
-func (i *Bar) Reset() {
+func (i *InfoBuf) Reset() {
 	i.Msg = ""
 	i.HasPrompt, i.HasMessage, i.HasError = false, false, false
 }
