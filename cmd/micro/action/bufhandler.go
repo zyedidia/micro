@@ -90,6 +90,7 @@ func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
 
 	h.cursors = []*buffer.Cursor{buffer.NewCursor(buf, buf.StartCursor)}
 	h.Cursor = h.cursors[0]
+	h.mouseReleased = true
 
 	buf.SetCursors(h.cursors)
 	return h
@@ -105,16 +106,51 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 			mod:  e.Modifiers(),
 			r:    e.Rune(),
 		}
-		done := h.DoKeyEvent(ke)
-		if !done && e.Key() == tcell.KeyRune {
-			h.DoRuneInsert(e.Rune())
+		cursors := h.Buf.GetCursors()
+		for _, c := range cursors {
+			h.Buf.SetCurCursor(c.Num)
+			h.Cursor = c
+			done := h.DoKeyEvent(ke)
+			if !done && e.Key() == tcell.KeyRune {
+				h.DoRuneInsert(e.Rune())
+			}
 		}
+		// TODO: maybe reset curcursor to 0
 	case *tcell.EventMouse:
+		switch e.Buttons() {
+		case tcell.ButtonNone:
+			// Mouse event with no click
+			if !h.mouseReleased {
+				// Mouse was just released
+
+				mx, my := e.Position()
+				mouseLoc := h.Win.GetMouseLoc(buffer.Loc{X: mx, Y: my})
+
+				// Relocating here isn't really necessary because the cursor will
+				// be in the right place from the last mouse event
+				// However, if we are running in a terminal that doesn't support mouse motion
+				// events, this still allows the user to make selections, except only after they
+				// release the mouse
+
+				if !h.doubleClick && !h.tripleClick {
+					h.Cursor.Loc = mouseLoc
+					h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+					h.Cursor.CopySelection("primary")
+				}
+				h.mouseReleased = true
+			}
+		}
+
 		me := MouseEvent{
 			btn: e.Buttons(),
 			mod: e.Modifiers(),
 		}
-		h.DoMouseEvent(me, e)
+		cursors := h.Buf.GetCursors()
+		for _, c := range cursors {
+			h.Buf.SetCurCursor(c.Num)
+			h.Cursor = c
+			h.DoMouseEvent(me, e)
+		}
 	}
 }
 

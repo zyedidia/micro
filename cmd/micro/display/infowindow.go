@@ -81,6 +81,13 @@ func (i *InfoWindow) Relocate() bool  { return false }
 func (i *InfoWindow) GetView() *View  { return i.View }
 func (i *InfoWindow) SetView(v *View) {}
 
+func (i *InfoWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
+	c := i.Buffer.GetActiveCursor()
+	l := i.Buffer.LineBytes(0)
+	n := utf8.RuneCountInString(i.Msg)
+	return buffer.Loc{c.GetCharPosInLine(l, vloc.X-n), 0}
+}
+
 func (i *InfoWindow) Clear() {
 	for x := 0; x < i.width; x++ {
 		screen.Screen.SetContent(x, i.y, ' ', nil, config.DefStyle)

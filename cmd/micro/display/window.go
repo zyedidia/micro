@@ -24,6 +24,7 @@ type Window interface {
 	Relocate() bool
 	GetView() *View
 	SetView(v *View)
+	GetMouseLoc(vloc buffer.Loc) buffer.Loc
 }
 
 // The BufWindow provides a way of displaying a certain section
@@ -75,6 +76,7 @@ func (w *BufWindow) Clear() {
 func (w *BufWindow) Bottomline() int {
 	// b := w.Buf
 
+	// TODO: possible non-softwrap optimization
 	// if !b.Settings["softwrap"].(bool) {
 	// 	return w.StartLine + w.Height
 	// }
@@ -128,6 +130,118 @@ func (w *BufWindow) Relocate() bool {
 	// 	}
 	// }
 	return ret
+}
+
+func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
+	b := w.Buf
+
+	// TODO: possible non-softwrap optimization
+	// if !b.Settings["softwrap"].(bool) {
+	// 	l := b.LineBytes(svloc.Y)
+	// 	return buffer.Loc{b.GetActiveCursor().GetCharPosInLine(l, svloc.X), svloc.Y}
+	// }
+
+	bufHeight := w.Height
+	if b.Settings["statusline"].(bool) {
+		bufHeight--
+	}
+
+	// We need to know the string length of the largest line number
+	// so we can pad appropriately when displaying line numbers
+	maxLineNumLength := len(strconv.Itoa(b.LinesNum()))
+
+	tabsize := int(b.Settings["tabsize"].(float64))
+	softwrap := b.Settings["softwrap"].(bool)
+
+	// this represents the current draw position
+	// within the current window
+	vloc := buffer.Loc{X: 0, Y: 0}
+
+	// this represents the current draw position in the buffer (char positions)
+	bloc := buffer.Loc{X: w.StartCol, Y: w.StartLine}
+
+	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
+		vloc.X = 0
+		if b.Settings["ruler"].(bool) {
+			vloc.X += maxLineNumLength + 1
+		}
+
+		if svloc.X <= vloc.X && vloc.Y == svloc.Y {
+			return bloc
+		}
+
+		line := b.LineBytes(bloc.Y)
+		line, nColsBeforeStart := util.SliceVisualEnd(line, bloc.X, tabsize)
+
+		draw := func() {
+			if nColsBeforeStart <= 0 {
+				vloc.X++
+			}
+			nColsBeforeStart--
+		}
+
+		w.lineHeight[vloc.Y] = bloc.Y
+
+		totalwidth := bloc.X - nColsBeforeStart
+		for len(line) > 0 {
+			if vloc.X == svloc.X && vloc.Y == svloc.Y {
+				return bloc
+			}
+
+			r, size := utf8.DecodeRune(line)
+			draw()
+			width := 0
+
+			switch r {
+			case '\t':
+				ts := tabsize - (totalwidth % tabsize)
+				width = ts
+			default:
+				width = runewidth.RuneWidth(r)
+			}
+
+			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
+			if width > 1 {
+				for i := 1; i < width; i++ {
+					if vloc.X == svloc.X && vloc.Y == svloc.Y {
+						return bloc
+					}
+					draw()
+				}
+			}
+			bloc.X++
+			line = line[size:]
+
+			totalwidth += width
+
+			// If we reach the end of the window then we either stop or we wrap for softwrap
+			if vloc.X >= w.Width {
+				if !softwrap {
+					break
+				} else {
+					vloc.Y++
+					if vloc.Y >= bufHeight {
+						break
+					}
+					vloc.X = 0
+					w.lineHeight[vloc.Y] = bloc.Y
+					// This will draw an empty line number because the current line is wrapped
+					vloc.X += maxLineNumLength + 1
+				}
+			}
+		}
+		if vloc.Y == svloc.Y {
+			return bloc
+		}
+
+		bloc.X = w.StartCol
+		bloc.Y++
+		if bloc.Y >= b.LinesNum() {
+			break
+		}
+	}
+
+	return buffer.Loc{X: -1, Y: -1}
 }
 
 func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {

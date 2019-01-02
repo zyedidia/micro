@@ -8,6 +8,7 @@ import (
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
@@ -34,6 +35,57 @@ func (h *BufHandler) ScrollDown(n int) {
 // MousePress is the event that should happen when a normal click happens
 // This is almost always bound to left click
 func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
+	b := h.Buf
+	mx, my := e.Position()
+	mouseLoc := h.Win.GetMouseLoc(buffer.Loc{mx, my})
+	h.Cursor.Loc = mouseLoc
+	if h.mouseReleased {
+		if b.NumCursors() > 1 {
+			b.ClearCursors()
+			h.Win.Relocate()
+		}
+		if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
+			if h.doubleClick {
+				// Triple click
+				h.lastClickTime = time.Now()
+
+				h.tripleClick = true
+				h.doubleClick = false
+
+				h.Cursor.SelectLine()
+				h.Cursor.CopySelection("primary")
+			} else {
+				// Double click
+				h.lastClickTime = time.Now()
+
+				h.doubleClick = true
+				h.tripleClick = false
+
+				h.Cursor.SelectWord()
+				h.Cursor.CopySelection("primary")
+			}
+		} else {
+			h.doubleClick = false
+			h.tripleClick = false
+			h.lastClickTime = time.Now()
+
+			h.Cursor.OrigSelection[0] = h.Cursor.Loc
+			h.Cursor.CurSelection[0] = h.Cursor.Loc
+			h.Cursor.CurSelection[1] = h.Cursor.Loc
+		}
+		h.mouseReleased = false
+	} else if !h.mouseReleased {
+		if h.tripleClick {
+			h.Cursor.AddLineToSelection()
+		} else if h.doubleClick {
+			h.Cursor.AddWordToSelection()
+		} else {
+			h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+			h.Cursor.CopySelection("primary")
+		}
+	}
+
+	h.lastLoc = mouseLoc
 	return false
 }
 

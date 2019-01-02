@@ -17,11 +17,6 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-const (
-	doubleClickThreshold = 400 // How many milliseconds to wait before a second click is not a double click
-	autosaveTime         = 8   // Number of seconds to wait before autosaving
-)
-
 var (
 	// These variables should be set by the linker when compiling
 

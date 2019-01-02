@@ -77,6 +77,7 @@ type Buffer struct {
 	*EventHandler
 
 	cursors     []*Cursor
+	curCursor   int
 	StartCursor Loc
 
 	// Path to the file on disk
@@ -229,9 +230,10 @@ func (b *Buffer) ReOpen() error {
 
 	b.ModTime, err = GetModTime(b.Path)
 	b.isModified = false
+	for _, c := range b.cursors {
+		c.Relocate()
+	}
 	return err
-	// TODO: buffer cursor
-	// b.Cursor.Relocate()
 }
 
 // SetCursors resets this buffer's cursors to a new list
@@ -239,9 +241,14 @@ func (b *Buffer) SetCursors(c []*Cursor) {
 	b.cursors = c
 }
 
+// SetCurCursor sets the current cursor
+func (b *Buffer) SetCurCursor(n int) {
+	b.curCursor = n
+}
+
 // GetActiveCursor returns the main cursor in this buffer
 func (b *Buffer) GetActiveCursor() *Cursor {
-	return b.cursors[0]
+	return b.cursors[b.curCursor]
 }
 
 // GetCursor returns the nth cursor
@@ -420,4 +427,50 @@ func (b *Buffer) IndentString(tabsize int) string {
 		return Spaces(tabsize)
 	}
 	return "\t"
+}
+
+// MergeCursors merges any cursors that are at the same position
+// into one cursor
+func (b *Buffer) MergeCursors() {
+	var cursors []*Cursor
+	for i := 0; i < len(b.cursors); i++ {
+		c1 := b.cursors[i]
+		if c1 != nil {
+			for j := 0; j < len(b.cursors); j++ {
+				c2 := b.cursors[j]
+				if c2 != nil && i != j && c1.Loc == c2.Loc {
+					b.cursors[j] = nil
+				}
+			}
+			cursors = append(cursors, c1)
+		}
+	}
+
+	b.cursors = cursors
+
+	for i := range b.cursors {
+		b.cursors[i].Num = i
+	}
+
+	if b.curCursor >= len(b.cursors) {
+		b.curCursor = len(b.cursors) - 1
+	}
+}
+
+// UpdateCursors updates all the cursors indicies
+func (b *Buffer) UpdateCursors() {
+	for i, c := range b.cursors {
+		c.Num = i
+	}
+}
+
+// ClearCursors removes all extra cursors
+func (b *Buffer) ClearCursors() {
+	for i := 1; i < len(b.cursors); i++ {
+		b.cursors[i] = nil
+	}
+	b.cursors = b.cursors[:1]
+	b.UpdateCursors()
+	b.curCursor = 0
+	b.GetActiveCursor().ResetSelection()
 }
