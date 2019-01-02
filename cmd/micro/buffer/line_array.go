@@ -242,7 +242,10 @@ func (la *LineArray) Substr(start, end Loc) []byte {
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
 	if start.Y == end.Y {
-		return la.lines[start.Y].data[startX:endX]
+		src := la.lines[start.Y].data[startX:endX]
+		dest := make([]byte, len(src))
+		copy(dest, src)
+		return dest
 	}
 	str := make([]byte, 0, len(la.lines[start.Y+1].data)*(end.Y-start.Y))
 	str = append(str, la.lines[start.Y].data[startX:]...)
