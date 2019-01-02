@@ -2,6 +2,7 @@ package action
 
 import (
 	"os"
+	"strings"
 	"time"
 	"unicode/utf8"
 
@@ -50,6 +51,15 @@ func (h *BufHandler) ScrollDownAction() bool {
 
 // Center centers the view on the cursor
 func (h *BufHandler) Center() bool {
+	v := h.Win.GetView()
+	v.StartLine = h.Cursor.Y - v.Height/2
+	if v.StartLine+v.Height > h.Buf.LinesNum() {
+		v.StartLine = h.Buf.LinesNum() - v.Height
+	}
+	if v.StartLine < 0 {
+		v.StartLine = 0
+	}
+	h.Win.SetView(v)
 	return true
 }
 
@@ -530,7 +540,7 @@ func (h *BufHandler) Copy() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.CopySelection("clipboard")
 		h.freshClip = true
-		// TODO: message
+		InfoBar.Message("Copied selection")
 	}
 	return true
 }
@@ -614,12 +624,35 @@ func (h *BufHandler) MoveLinesDown() bool {
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
 func (h *BufHandler) Paste() bool {
+	clip, _ := clipboard.ReadAll("clipboard")
+	h.paste(clip)
 	return true
 }
 
 // PastePrimary pastes from the primary clipboard (only use on linux)
 func (h *BufHandler) PastePrimary() bool {
+	clip, _ := clipboard.ReadAll("primary")
+	h.paste(clip)
 	return true
+}
+
+func (h *BufHandler) paste(clip string) {
+	if h.Buf.Settings["smartpaste"].(bool) {
+		if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
+			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
+			clip = strings.Replace(clip, "\n", "\n"+string(leadingWS), -1)
+		}
+	}
+
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+
+	h.Buf.Insert(h.Cursor.Loc, clip)
+	// h.Cursor.Loc = h.Cursor.Loc.Move(Count(clip), h.Buf)
+	h.freshClip = false
+	InfoBar.Message("Pasted clipboard")
 }
 
 // JumpToMatchingBrace moves the cursor to the matching brace if it is
@@ -640,14 +673,11 @@ func (h *BufHandler) SelectAll() bool {
 
 // OpenFile opens a new file in the buffer
 func (h *BufHandler) OpenFile() bool {
-	cb := func(resp string, canceled bool) {
+	InfoBar.Prompt("> open ", func(resp string, canceled bool) {
 		if !canceled {
-			InfoBar.Message("Opening", resp)
-		} else {
-			InfoBar.Error("Canceled")
+			HandleCommand(resp)
 		}
-	}
-	InfoBar.Prompt("Open file: ", cb)
+	})
 	return false
 }
 
@@ -674,41 +704,96 @@ func (h *BufHandler) End() bool {
 
 // PageUp scrolls the view up a page
 func (h *BufHandler) PageUp() bool {
+	v := h.Win.GetView()
+	if v.StartLine > v.Height {
+		h.ScrollUp(v.Height)
+	} else {
+		v.StartLine = 0
+	}
+	h.Win.SetView(v)
 	return false
 }
 
 // PageDown scrolls the view down a page
 func (h *BufHandler) PageDown() bool {
+	v := h.Win.GetView()
+	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height {
+		h.ScrollDown(v.Height)
+	} else if h.Buf.LinesNum() >= v.Height {
+		v.StartLine = h.Buf.LinesNum() - v.Height
+	}
 	return false
 }
 
 // SelectPageUp selects up one page
 func (h *BufHandler) SelectPageUp() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	h.Cursor.UpN(h.Win.GetView().Height)
+	h.Cursor.SelectTo(h.Cursor.Loc)
 	return true
 }
 
 // SelectPageDown selects down one page
 func (h *BufHandler) SelectPageDown() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	h.Cursor.DownN(h.Win.GetView().Height)
+	h.Cursor.SelectTo(h.Cursor.Loc)
 	return true
 }
 
 // CursorPageUp places the cursor a page up
 func (h *BufHandler) CursorPageUp() bool {
+	h.Cursor.Deselect(true)
+
+	if h.Cursor.HasSelection() {
+		h.Cursor.Loc = h.Cursor.CurSelection[0]
+		h.Cursor.ResetSelection()
+		h.Cursor.StoreVisualX()
+	}
+	h.Cursor.UpN(h.Win.GetView().Height)
 	return true
 }
 
 // CursorPageDown places the cursor a page up
 func (h *BufHandler) CursorPageDown() bool {
+	h.Cursor.Deselect(false)
+
+	if h.Cursor.HasSelection() {
+		h.Cursor.Loc = h.Cursor.CurSelection[1]
+		h.Cursor.ResetSelection()
+		h.Cursor.StoreVisualX()
+	}
+	h.Cursor.DownN(h.Win.GetView().Height)
 	return true
 }
 
 // HalfPageUp scrolls the view up half a page
 func (h *BufHandler) HalfPageUp() bool {
+	v := h.Win.GetView()
+	if v.StartLine > v.Height/2 {
+		h.ScrollUp(v.Height / 2)
+	} else {
+		v.StartLine = 0
+	}
+	h.Win.SetView(v)
 	return false
 }
 
 // HalfPageDown scrolls the view down half a page
 func (h *BufHandler) HalfPageDown() bool {
+	v := h.Win.GetView()
+	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height/2 {
+		h.ScrollDown(v.Height / 2)
+	} else {
+		if h.Buf.LinesNum() >= v.Height {
+			v.StartLine = h.Buf.LinesNum() - v.Height
+		}
+	}
+	h.Win.SetView(v)
 	return false
 }
 
@@ -731,6 +816,7 @@ func (h *BufHandler) JumpLine() bool {
 
 // ClearStatus clears the messenger bar
 func (h *BufHandler) ClearStatus() bool {
+	InfoBar.Message("")
 	return false
 }
 
@@ -761,6 +847,7 @@ func (h *BufHandler) CommandMode() bool {
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
 func (h *BufHandler) ToggleOverwriteMode() bool {
+	h.isOverwriteMode = !h.isOverwriteMode
 	return false
 }
 
