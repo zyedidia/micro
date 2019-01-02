@@ -13,7 +13,7 @@ import (
 )
 
 type InfoWindow struct {
-	*info.Bar
+	*info.InfoBuf
 	*View
 
 	defStyle tcell.Style
@@ -23,9 +23,9 @@ type InfoWindow struct {
 	y     int
 }
 
-func NewInfoWindow(b *info.Bar) *InfoWindow {
+func NewInfoWindow(b *info.InfoBuf) *InfoWindow {
 	iw := new(InfoWindow)
-	iw.Bar = b
+	iw.InfoBuf = b
 	iw.View = new(View)
 
 	iw.defStyle = config.DefStyle
