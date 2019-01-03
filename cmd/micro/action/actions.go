@@ -985,6 +985,13 @@ func (h *BufHandler) SpawnMultiCursorSelect() bool {
 
 // MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
 func (h *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
+	b := h.Buf
+	mx, my := e.Position()
+	mouseLoc := h.Win.GetMouseLoc(buffer.Loc{mx, my})
+	c := buffer.NewCursor(b, mouseLoc)
+	b.AddCursor(c)
+	b.MergeCursors()
+
 	return false
 }
 
@@ -995,10 +1002,15 @@ func (h *BufHandler) SkipMultiCursor() bool {
 
 // RemoveMultiCursor removes the latest multiple cursor
 func (h *BufHandler) RemoveMultiCursor() bool {
+	if h.Buf.NumCursors() > 1 {
+		h.Buf.RemoveCursor(h.Buf.NumCursors() - 1)
+		h.Buf.UpdateCursors()
+	}
 	return false
 }
 
 // RemoveAllMultiCursors removes all cursors except the base cursor
 func (h *BufHandler) RemoveAllMultiCursors() bool {
-	return false
+	h.Buf.ClearCursors()
+	return true
 }

@@ -13,15 +13,18 @@ type BufKeyAction func(*BufHandler) bool
 type BufMouseAction func(*BufHandler, *tcell.EventMouse) bool
 
 var BufKeyBindings map[KeyEvent]BufKeyAction
+var BufKeyStrings map[KeyEvent]string
 var BufMouseBindings map[MouseEvent]BufMouseAction
 
 func init() {
 	BufKeyBindings = make(map[KeyEvent]BufKeyAction)
+	BufKeyStrings = make(map[KeyEvent]string)
 	BufMouseBindings = make(map[MouseEvent]BufMouseAction)
 }
 
 func BufMapKey(k KeyEvent, action string) {
 	if f, ok := BufKeyActions[action]; ok {
+		BufKeyStrings[k] = action
 		BufKeyBindings[k] = f
 	} else {
 		util.TermMessage("Error:", action, "does not exist")
@@ -106,16 +109,11 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 			mod:  e.Modifiers(),
 			r:    e.Rune(),
 		}
-		cursors := h.Buf.GetCursors()
-		for _, c := range cursors {
-			h.Buf.SetCurCursor(c.Num)
-			h.Cursor = c
-			done := h.DoKeyEvent(ke)
-			if !done && e.Key() == tcell.KeyRune {
-				h.DoRuneInsert(e.Rune())
-			}
+
+		done := h.DoKeyEvent(ke)
+		if !done && e.Key() == tcell.KeyRune {
+			h.DoRuneInsert(e.Rune())
 		}
-		// TODO: maybe reset curcursor to 0
 	case *tcell.EventMouse:
 		switch e.Buttons() {
 		case tcell.ButtonNone:
@@ -145,17 +143,25 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 			btn: e.Buttons(),
 			mod: e.Modifiers(),
 		}
-		cursors := h.Buf.GetCursors()
-		for _, c := range cursors {
-			h.Buf.SetCurCursor(c.Num)
-			h.Cursor = c
-			h.DoMouseEvent(me, e)
-		}
+		h.DoMouseEvent(me, e)
 	}
 }
 
 func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 	if action, ok := BufKeyBindings[e]; ok {
+		for _, a := range MultiActions {
+			if a == BufKeyStrings[e] {
+				cursors := h.Buf.GetCursors()
+				for _, c := range cursors {
+					h.Buf.SetCurCursor(c.Num)
+					h.Cursor = c
+					if action(h) {
+						h.Win.Relocate()
+					}
+				}
+				return true
+			}
+		}
 		if action(h) {
 			h.Win.Relocate()
 		}
@@ -175,18 +181,21 @@ func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 }
 
 func (h *BufHandler) DoRuneInsert(r rune) {
-	// Insert a character
-	if h.Cursor.HasSelection() {
-		h.Cursor.DeleteSelection()
-		h.Cursor.ResetSelection()
-	}
+	cursors := h.Buf.GetCursors()
+	for _, c := range cursors {
+		// Insert a character
+		if c.HasSelection() {
+			c.DeleteSelection()
+			c.ResetSelection()
+		}
 
-	if h.isOverwriteMode {
-		next := h.Cursor.Loc
-		next.X++
-		h.Buf.Replace(h.Cursor.Loc, next, string(r))
-	} else {
-		h.Buf.Insert(h.Cursor.Loc, string(r))
+		if h.isOverwriteMode {
+			next := c.Loc
+			next.X++
+			h.Buf.Replace(c.Loc, next, string(r))
+		} else {
+			h.Buf.Insert(c.Loc, string(r))
+		}
 	}
 }
 
@@ -291,4 +300,61 @@ var BufKeyActions = map[string]BufKeyAction{
 var BufMouseActions = map[string]BufMouseAction{
 	"MousePress":       (*BufHandler).MousePress,
 	"MouseMultiCursor": (*BufHandler).MouseMultiCursor,
+}
+
+const funcPrefixLen = 21 // length of "action.(*BufHandler)."
+
+// MultiActions is a list of actions that should be executed multiple
+// times if there are multiple cursors (one per cursor)
+// Generally actions that modify global editor state like quitting or
+// saving should not be included in this list
+var MultiActions = []string{
+	"CursorUp",
+	"CursorDown",
+	"CursorPageUp",
+	"CursorPageDown",
+	"CursorLeft",
+	"CursorRight",
+	"CursorStart",
+	"CursorEnd",
+	"SelectToStart",
+	"SelectToEnd",
+	"SelectUp",
+	"SelectDown",
+	"SelectLeft",
+	"SelectRight",
+	"WordRight",
+	"WordLeft",
+	"SelectWordRight",
+	"SelectWordLeft",
+	"DeleteWordRight",
+	"DeleteWordLeft",
+	"SelectLine",
+	"SelectToStartOfLine",
+	"SelectToEndOfLine",
+	"ParagraphPrevious",
+	"ParagraphNext",
+	"InsertNewline",
+	"InsertSpace",
+	"Backspace",
+	"Delete",
+	"InsertTab",
+	"FindNext",
+	"FindPrevious",
+	"Cut",
+	"CutLine",
+	"DuplicateLine",
+	"DeleteLine",
+	"MoveLinesUp",
+	"MoveLinesDown",
+	"IndentSelection",
+	"OutdentSelection",
+	"OutdentLine",
+	"Paste",
+	"PastePrimary",
+	"SelectPageUp",
+	"SelectPageDown",
+	"StartOfLine",
+	"EndOfLine",
+	"JumpToMatchingBrace",
 }

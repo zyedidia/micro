@@ -317,7 +317,7 @@ func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.
 }
 
 func (w *BufWindow) showCursor(x, y int, main bool) {
-	if main {
+	if !main {
 		screen.Screen.ShowCursor(x, y)
 	} else {
 		r, _, _, _ := screen.Screen.GetContent(x, y)
@@ -370,15 +370,18 @@ func (w *BufWindow) displayBuffer() {
 	// this represents the current draw position in the buffer (char positions)
 	bloc := buffer.Loc{X: -1, Y: w.StartLine}
 
-	activeC := b.GetActiveCursor()
+	cursors := b.GetCursors()
 
 	curStyle := config.DefStyle
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 		if b.Settings["ruler"].(bool) {
 			s := lineNumStyle
-			if bloc.Y == activeC.Y {
-				s = curNumStyle
+			for _, c := range cursors {
+				if bloc.Y == c.Y {
+					s = curNumStyle
+					break
+				}
 			}
 			w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
 		}
@@ -391,28 +394,38 @@ func (w *BufWindow) displayBuffer() {
 		}
 		bloc.X = bslice
 
-		draw := func(r rune, style tcell.Style) {
+		draw := func(r rune, style tcell.Style, showcursor bool) {
 			if nColsBeforeStart <= 0 {
-				if activeC.HasSelection() &&
-					(bloc.GreaterEqual(activeC.CurSelection[0]) && bloc.LessThan(activeC.CurSelection[1]) ||
-						bloc.LessThan(activeC.CurSelection[0]) && bloc.GreaterEqual(activeC.CurSelection[1])) {
-					// The current character is selected
-					style = config.DefStyle.Reverse(true)
+				for _, c := range cursors {
+					if c.HasSelection() &&
+						(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
+							bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
+						// The current character is selected
+						style = config.DefStyle.Reverse(true)
 
-					if s, ok := config.Colorscheme["selection"]; ok {
-						style = s
+						if s, ok := config.Colorscheme["selection"]; ok {
+							style = s
+						}
 					}
-				}
 
-				if b.Settings["cursorline"].(bool) &&
-					!activeC.HasSelection() && activeC.Y == bloc.Y {
-					if s, ok := config.Colorscheme["cursor-line"]; ok {
-						fg, _, _ := s.Decompose()
-						style = style.Background(fg)
+					if b.Settings["cursorline"].(bool) &&
+						!c.HasSelection() && c.Y == bloc.Y {
+						if s, ok := config.Colorscheme["cursor-line"]; ok {
+							fg, _, _ := s.Decompose()
+							style = style.Background(fg)
+						}
 					}
 				}
 
 				screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, style)
+
+				if showcursor {
+					for _, c := range cursors {
+						if c.X == bloc.X && c.Y == bloc.Y {
+							w.showCursor(w.X+vloc.X, w.Y+vloc.Y, true)
+						}
+					}
+				}
 				vloc.X++
 			}
 			nColsBeforeStart--
@@ -422,14 +435,10 @@ func (w *BufWindow) displayBuffer() {
 
 		totalwidth := w.StartCol - nColsBeforeStart
 		for len(line) > 0 {
-			if activeC.X == bloc.X && activeC.Y == bloc.Y {
-				w.showCursor(vloc.X, vloc.Y, true)
-			}
-
 			r, size := utf8.DecodeRune(line)
 			curStyle, _ = w.getStyle(curStyle, bloc, r)
 
-			draw(r, curStyle)
+			draw(r, curStyle, true)
 
 			width := 0
 
@@ -443,15 +452,15 @@ func (w *BufWindow) displayBuffer() {
 				char = '@'
 			}
 
-			bloc.X++
-			line = line[size:]
-
 			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 			if width > 1 {
 				for i := 1; i < width; i++ {
-					draw(char, curStyle)
+					draw(char, curStyle, false)
 				}
 			}
+			bloc.X++
+			line = line[size:]
+
 			totalwidth += width
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
@@ -470,19 +479,24 @@ func (w *BufWindow) displayBuffer() {
 				}
 			}
 		}
-		if activeC.X == bloc.X && activeC.Y == bloc.Y {
-			w.showCursor(vloc.X, vloc.Y, true)
+
+		for _, c := range cursors {
+			if b.Settings["cursorline"].(bool) &&
+				!c.HasSelection() && c.Y == bloc.Y {
+				style := config.DefStyle
+				if s, ok := config.Colorscheme["cursor-line"]; ok {
+					fg, _, _ := s.Decompose()
+					style = style.Background(fg)
+				}
+				for i := vloc.X; i < w.Width; i++ {
+					screen.Screen.SetContent(i, vloc.Y, ' ', nil, style)
+				}
+			}
 		}
 
-		if b.Settings["cursorline"].(bool) &&
-			!activeC.HasSelection() && activeC.Y == bloc.Y {
-			style := config.DefStyle
-			if s, ok := config.Colorscheme["cursor-line"]; ok {
-				fg, _, _ := s.Decompose()
-				style = style.Background(fg)
-			}
-			for i := vloc.X; i < w.Width; i++ {
-				screen.Screen.SetContent(i, vloc.Y, ' ', nil, style)
+		for _, c := range cursors {
+			if c.X == bloc.X && c.Y == bloc.Y {
+				w.showCursor(w.X+vloc.X, w.Y+vloc.Y, true)
 			}
 		}
 
