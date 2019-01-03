@@ -103,7 +103,8 @@ func (i *InfoWindow) displayBuffer() {
 	vlocX := utf8.RuneCountInString(i.Msg)
 
 	tabsize := 4
-	line, nColsBeforeStart := util.SliceVisualEnd(line, blocX, tabsize)
+	line, nColsBeforeStart, bslice := util.SliceVisualEnd(line, blocX, tabsize)
+	blocX = bslice
 
 	draw := func(r rune, style tcell.Style) {
 		if nColsBeforeStart <= 0 {

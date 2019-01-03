@@ -3,7 +3,6 @@ package buffer
 import (
 	"unicode/utf8"
 
-	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
@@ -89,33 +88,7 @@ func (c *Cursor) GetVisualX() int {
 // 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
 	tabsize := int(c.buf.Settings["tabsize"].(float64))
-
-	// Scan rune by rune until we exceed the visual width that we are
-	// looking for. Then we can return the character position we have found
-	i := 0     // char pos
-	width := 0 // string visual width
-	for len(b) > 0 {
-		r, size := utf8.DecodeRune(b)
-		b = b[size:]
-
-		switch r {
-		case '\t':
-			ts := tabsize - (width % tabsize)
-			width += ts
-		default:
-			width += runewidth.RuneWidth(r)
-		}
-
-		if width >= visualPos {
-			if width == visualPos {
-				i++
-			}
-			break
-		}
-		i++
-	}
-
-	return i
+	return util.GetCharPosInLine(b, visualPos, tabsize)
 }
 
 // Start moves the cursor to the start of the line it is on

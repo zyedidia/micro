@@ -13,9 +13,13 @@ import (
 )
 
 type View struct {
-	X, Y                int // X,Y location of the view
-	Width, Height       int // Width and height of the view
-	StartLine, StartCol int // Start line and start column of the view (vertical/horizontal scroll)
+	X, Y          int // X,Y location of the view
+	Width, Height int // Width and height of the view
+
+	// Start line and start column of the view (vertical/horizontal scroll)
+	// note that since the starting column of every line is different if the view
+	// is scrolled, StartCol is a visual index (will be the same for every line)
+	StartLine, StartCol int
 }
 
 type Window interface {
@@ -37,7 +41,8 @@ type BufWindow struct {
 
 	sline *StatusLine
 
-	lineHeight []int
+	lineHeight   []int
+	gutterOffset int
 }
 
 // NewBufWindow creates a new window at a location in the screen with a width and height
@@ -58,6 +63,39 @@ func (v *View) GetView() *View {
 
 func (v *View) SetView(view *View) {
 	v = view
+}
+
+func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) {
+	tabsize := util.IntOpt(w.Buf.Settings["tabsize"])
+	width := 0
+	bloc := buffer.Loc{0, lineN}
+	b := w.Buf.LineBytes(lineN)
+	curStyle := config.DefStyle
+	var s *tcell.Style
+	for len(b) > 0 {
+		r, size := utf8.DecodeRune(b)
+
+		curStyle, found := w.getStyle(curStyle, bloc, r)
+		if found {
+			s = &curStyle
+		}
+
+		w := 0
+		switch r {
+		case '\t':
+			ts := tabsize - (width % tabsize)
+			w = ts
+		default:
+			w = runewidth.RuneWidth(r)
+		}
+		if width+w > n {
+			return b, n - width, bloc.X, s
+		}
+		width += w
+		b = b[size:]
+		bloc.X++
+	}
+	return b, n - width, bloc.X, s
 }
 
 // Clear resets all cells in this window to the default style
@@ -117,18 +155,18 @@ func (w *BufWindow) Relocate() bool {
 		ret = true
 	}
 
-	// TODO: horizontal scroll
-	// if !b.Settings["softwrap"].(bool) {
-	// 	cx := activeC.GetVisualX()
-	// 	if cx < w.StartCol {
-	// 		w.StartCol = cx
-	// 		ret = true
-	// 	}
-	// 	if cx+v.lineNumOffset+1 > v.leftCol+v.Width {
-	// 		v.leftCol = cx - v.Width + v.lineNumOffset + 1
-	// 		ret = true
-	// 	}
-	// }
+	// horizontal relocation (scrolling)
+	if !b.Settings["softwrap"].(bool) {
+		cx := activeC.GetVisualX()
+		if cx < w.StartCol {
+			w.StartCol = cx
+			ret = true
+		}
+		if cx+w.gutterOffset+1 > w.StartCol+w.Width {
+			w.StartCol = cx - w.Width + w.gutterOffset + 1
+			ret = true
+		}
+	}
 	return ret
 }
 
@@ -158,7 +196,7 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 	vloc := buffer.Loc{X: 0, Y: 0}
 
 	// this represents the current draw position in the buffer (char positions)
-	bloc := buffer.Loc{X: w.StartCol, Y: w.StartLine}
+	bloc := buffer.Loc{X: -1, Y: w.StartLine}
 
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
@@ -166,12 +204,9 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 			vloc.X += maxLineNumLength + 1
 		}
 
-		if svloc.X <= vloc.X && vloc.Y == svloc.Y {
-			return bloc
-		}
-
 		line := b.LineBytes(bloc.Y)
-		line, nColsBeforeStart := util.SliceVisualEnd(line, bloc.X, tabsize)
+		line, nColsBeforeStart, bslice := util.SliceVisualEnd(line, w.StartCol, tabsize)
+		bloc.X = bslice
 
 		draw := func() {
 			if nColsBeforeStart <= 0 {
@@ -182,7 +217,11 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 
 		w.lineHeight[vloc.Y] = bloc.Y
 
-		totalwidth := bloc.X - nColsBeforeStart
+		totalwidth := w.StartCol - nColsBeforeStart
+
+		if svloc.X <= vloc.X && vloc.Y == svloc.Y {
+			return bloc
+		}
 		for len(line) > 0 {
 			if vloc.X == svloc.X && vloc.Y == svloc.Y {
 				return bloc
@@ -269,12 +308,12 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxL
 
 // getStyle returns the highlight style for the given character position
 // If there is no change to the current highlight style it just returns that
-func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) tcell.Style {
+func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.Style, bool) {
 	if group, ok := w.Buf.Match(bloc.Y)[bloc.X]; ok {
 		s := config.GetColor(group.String())
-		return s
+		return s, true
 	}
-	return style
+	return style, false
 }
 
 func (w *BufWindow) showCursor(x, y int, main bool) {
@@ -329,7 +368,7 @@ func (w *BufWindow) displayBuffer() {
 	vloc := buffer.Loc{X: 0, Y: 0}
 
 	// this represents the current draw position in the buffer (char positions)
-	bloc := buffer.Loc{X: w.StartCol, Y: w.StartLine}
+	bloc := buffer.Loc{X: -1, Y: w.StartLine}
 
 	activeC := b.GetActiveCursor()
 
@@ -344,8 +383,13 @@ func (w *BufWindow) displayBuffer() {
 			w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
 		}
 
-		line := b.LineBytes(bloc.Y)
-		line, nColsBeforeStart := util.SliceVisualEnd(line, bloc.X, tabsize)
+		w.gutterOffset = vloc.X
+
+		line, nColsBeforeStart, bslice, startStyle := w.getStartInfo(w.StartCol, bloc.Y)
+		if startStyle != nil {
+			curStyle = *startStyle
+		}
+		bloc.X = bslice
 
 		draw := func(r rune, style tcell.Style) {
 			if nColsBeforeStart <= 0 {
@@ -376,14 +420,14 @@ func (w *BufWindow) displayBuffer() {
 
 		w.lineHeight[vloc.Y] = bloc.Y
 
-		totalwidth := bloc.X - nColsBeforeStart
+		totalwidth := w.StartCol - nColsBeforeStart
 		for len(line) > 0 {
 			if activeC.X == bloc.X && activeC.Y == bloc.Y {
 				w.showCursor(vloc.X, vloc.Y, true)
 			}
 
 			r, size := utf8.DecodeRune(line)
-			curStyle = w.getStyle(curStyle, bloc, r)
+			curStyle, _ = w.getStyle(curStyle, bloc, r)
 
 			draw(r, curStyle)
 
