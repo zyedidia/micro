@@ -54,8 +54,10 @@ func SliceStart(slc []byte, index int) []byte {
 // SliceVisualEnd will take a byte slice and slice off the start
 // up to a given visual index. If the index is in the middle of a
 // rune the number of visual columns into the rune will be returned
-func SliceVisualEnd(b []byte, n, tabsize int) ([]byte, int) {
+// It will also return the char pos of the first character of the slice
+func SliceVisualEnd(b []byte, n, tabsize int) ([]byte, int, int) {
 	width := 0
+	i := 0
 	for len(b) > 0 {
 		r, size := utf8.DecodeRune(b)
 
@@ -68,12 +70,13 @@ func SliceVisualEnd(b []byte, n, tabsize int) ([]byte, int) {
 			w = runewidth.RuneWidth(r)
 		}
 		if width+w > n {
-			return b, n - width
+			return b, n - width, i
 		}
 		width += w
 		b = b[size:]
+		i++
 	}
-	return b, width
+	return b, n - width, i
 }
 
 // Abs is a simple absolute value function for ints
@@ -87,6 +90,9 @@ func Abs(n int) int {
 // StringWidth returns the visual width of a byte array indexed from 0 to n (rune index)
 // with a given tabsize
 func StringWidth(b []byte, n, tabsize int) int {
+	if n <= 0 {
+		return 0
+	}
 	i := 0
 	width := 0
 	for len(b) > 0 {
@@ -262,4 +268,37 @@ func GetLeadingWhitespace(b []byte) []byte {
 // IntOpt turns a float64 setting to an int
 func IntOpt(opt interface{}) int {
 	return int(opt.(float64))
+}
+
+// GetCharPosInLine gets the char position of a visual x y
+// coordinate (this is necessary because tabs are 1 char but
+// 4 visual spaces)
+func GetCharPosInLine(b []byte, visualPos int, tabsize int) int {
+
+	// Scan rune by rune until we exceed the visual width that we are
+	// looking for. Then we can return the character position we have found
+	i := 0     // char pos
+	width := 0 // string visual width
+	for len(b) > 0 {
+		r, size := utf8.DecodeRune(b)
+		b = b[size:]
+
+		switch r {
+		case '\t':
+			ts := tabsize - (width % tabsize)
+			width += ts
+		default:
+			width += runewidth.RuneWidth(r)
+		}
+
+		if width >= visualPos {
+			if width == visualPos {
+				i++
+			}
+			break
+		}
+		i++
+	}
+
+	return i
 }
