@@ -1,7 +1,6 @@
 package action
 
 import (
-	"log"
 	"os"
 	"strings"
 	"time"
@@ -562,6 +561,7 @@ func (h *BufHandler) SaveAs() bool {
 // Find opens a prompt and searches forward for the input
 func (h *BufHandler) Find() bool {
 	InfoBar.Prompt("Find: ", "", func(resp string) {
+		// Event callback
 		match, found, _ := h.Buf.FindNext(resp, h.Cursor.Loc, true)
 		if found {
 			h.Cursor.SetSelectionStart(match[0])
@@ -569,10 +569,10 @@ func (h *BufHandler) Find() bool {
 			h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 			h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 		} else {
-			log.Println("RESET")
 			h.Cursor.ResetSelection()
 		}
 	}, func(resp string, canceled bool) {
+		// Finished callback
 		if !canceled {
 			match, found, err := h.Buf.FindNext(resp, h.Cursor.Loc, true)
 			if err != nil {
@@ -584,8 +584,10 @@ func (h *BufHandler) Find() bool {
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 				h.Cursor.Loc = h.Cursor.CurSelection[1]
+				h.lastSearch = resp
 			} else {
 				h.Cursor.ResetSelection()
+				InfoBar.Message("No matches found")
 			}
 		} else {
 			h.Cursor.ResetSelection()
@@ -597,11 +599,53 @@ func (h *BufHandler) Find() bool {
 
 // FindNext searches forwards for the last used search term
 func (h *BufHandler) FindNext() bool {
+	// If the cursor is at the start of a selection and we search we want
+	// to search from the end of the selection in the case that
+	// the selection is a search result in which case we wouldn't move at
+	// at all which would be bad
+	searchLoc := h.Cursor.Loc
+	if h.Cursor.HasSelection() {
+		searchLoc = h.Cursor.CurSelection[1]
+	}
+	match, found, err := h.Buf.FindNext(h.lastSearch, searchLoc, true)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+	if found {
+		h.Cursor.SetSelectionStart(match[0])
+		h.Cursor.SetSelectionEnd(match[1])
+		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+		h.Cursor.Loc = h.Cursor.CurSelection[1]
+	} else {
+		h.Cursor.ResetSelection()
+	}
 	return true
 }
 
 // FindPrevious searches backwards for the last used search term
 func (h *BufHandler) FindPrevious() bool {
+	// If the cursor is at the end of a selection and we search we want
+	// to search from the beginning of the selection in the case that
+	// the selection is a search result in which case we wouldn't move at
+	// at all which would be bad
+	searchLoc := h.Cursor.Loc
+	if h.Cursor.HasSelection() {
+		searchLoc = h.Cursor.CurSelection[0]
+	}
+	match, found, err := h.Buf.FindNext(h.lastSearch, searchLoc, false)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+	if found {
+		h.Cursor.SetSelectionStart(match[0])
+		h.Cursor.SetSelectionEnd(match[1])
+		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+		h.Cursor.Loc = h.Cursor.CurSelection[1]
+	} else {
+		h.Cursor.ResetSelection()
+	}
 	return true
 }
 

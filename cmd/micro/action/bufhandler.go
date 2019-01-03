@@ -87,6 +87,9 @@ type BufHandler struct {
 	doubleClick bool
 	// Same here, just to keep track for mouse move events
 	tripleClick bool
+
+	// Last search stores the last successful search for FindNext and FindPrev
+	lastSearch string
 }
 
 func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
