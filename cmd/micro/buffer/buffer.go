@@ -236,36 +236,6 @@ func (b *Buffer) ReOpen() error {
 	return err
 }
 
-// SetCursors resets this buffer's cursors to a new list
-func (b *Buffer) SetCursors(c []*Cursor) {
-	b.cursors = c
-}
-
-// SetCurCursor sets the current cursor
-func (b *Buffer) SetCurCursor(n int) {
-	b.curCursor = n
-}
-
-// GetActiveCursor returns the main cursor in this buffer
-func (b *Buffer) GetActiveCursor() *Cursor {
-	return b.cursors[b.curCursor]
-}
-
-// GetCursor returns the nth cursor
-func (b *Buffer) GetCursor(n int) *Cursor {
-	return b.cursors[n]
-}
-
-// GetCursors returns the list of cursors in this buffer
-func (b *Buffer) GetCursors() []*Cursor {
-	return b.cursors
-}
-
-// NumCursors returns the number of cursors
-func (b *Buffer) NumCursors() int {
-	return len(b.cursors)
-}
-
 // LineBytes returns line n as an array of bytes
 func (b *Buffer) LineBytes(n int) []byte {
 	if n >= len(b.lines) || n < 0 {
@@ -429,6 +399,42 @@ func (b *Buffer) IndentString(tabsize int) string {
 	return "\t"
 }
 
+// SetCursors resets this buffer's cursors to a new list
+func (b *Buffer) SetCursors(c []*Cursor) {
+	b.cursors = c
+}
+
+// AddCursor adds a new cursor to the list
+func (b *Buffer) AddCursor(c *Cursor) {
+	b.cursors = append(b.cursors, c)
+	b.UpdateCursors()
+}
+
+// SetCurCursor sets the current cursor
+func (b *Buffer) SetCurCursor(n int) {
+	b.curCursor = n
+}
+
+// GetActiveCursor returns the main cursor in this buffer
+func (b *Buffer) GetActiveCursor() *Cursor {
+	return b.cursors[b.curCursor]
+}
+
+// GetCursor returns the nth cursor
+func (b *Buffer) GetCursor(n int) *Cursor {
+	return b.cursors[n]
+}
+
+// GetCursors returns the list of cursors in this buffer
+func (b *Buffer) GetCursors() []*Cursor {
+	return b.cursors
+}
+
+// NumCursors returns the number of cursors
+func (b *Buffer) NumCursors() int {
+	return len(b.cursors)
+}
+
 // MergeCursors merges any cursors that are at the same position
 // into one cursor
 func (b *Buffer) MergeCursors() {
@@ -462,6 +468,12 @@ func (b *Buffer) UpdateCursors() {
 	for i, c := range b.cursors {
 		c.Num = i
 	}
+}
+
+func (b *Buffer) RemoveCursor(i int) {
+	copy(b.cursors[i:], b.cursors[i+1:])
+	b.cursors[len(b.cursors)-1] = nil
+	b.cursors = b.cursors[:len(b.cursors)-1]
 }
 
 // ClearCursors removes all extra cursors
