@@ -651,8 +651,8 @@ func (h *BufHandler) FindPrevious() bool {
 
 // Undo undoes the last action
 func (h *BufHandler) Undo() bool {
-	// TODO: clear cursors and message
 	h.Buf.Undo()
+	InfoBar.Message("Undid action")
 	return true
 }
 
@@ -660,6 +660,7 @@ func (h *BufHandler) Undo() bool {
 func (h *BufHandler) Redo() bool {
 	// TODO: clear cursors and message
 	h.Buf.Redo()
+	InfoBar.Message("Redid action")
 	return true
 }
 
@@ -1051,11 +1052,67 @@ func (h *BufHandler) PlayMacro() bool {
 
 // SpawnMultiCursor creates a new multiple cursor at the next occurrence of the current selection or current word
 func (h *BufHandler) SpawnMultiCursor() bool {
+	spawner := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	if !spawner.HasSelection() {
+		spawner.SelectWord()
+	} else {
+		sel := spawner.GetSelection()
+		searchStart := spawner.CurSelection[1]
+
+		match, found, err := h.Buf.FindNext(string(sel), searchStart, true)
+		if err != nil {
+			InfoBar.Error(err)
+		}
+		if found {
+			c := buffer.NewCursor(h.Buf, buffer.Loc{})
+			c.SetSelectionStart(match[0])
+			c.SetSelectionEnd(match[1])
+			c.OrigSelection[0] = c.CurSelection[0]
+			c.OrigSelection[1] = c.CurSelection[1]
+			c.Loc = c.CurSelection[1]
+
+			h.Buf.AddCursor(c)
+			h.Buf.MergeCursors()
+			h.Win.Relocate()
+		} else {
+			InfoBar.Message("No matches found")
+		}
+	}
+
 	return false
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
 func (h *BufHandler) SpawnMultiCursorSelect() bool {
+	// Avoid cases where multiple cursors already exist, that would create problems
+	if h.Buf.NumCursors() > 1 {
+		return false
+	}
+
+	var startLine int
+	var endLine int
+
+	a, b := h.Cursor.CurSelection[0].Y, h.Cursor.CurSelection[1].Y
+	if a > b {
+		startLine, endLine = b, a
+	} else {
+		startLine, endLine = a, b
+	}
+
+	if h.Cursor.HasSelection() {
+		h.Cursor.ResetSelection()
+		h.Cursor.GotoLoc(buffer.Loc{0, startLine})
+
+		for i := startLine; i <= endLine; i++ {
+			c := buffer.NewCursor(h.Buf, buffer.Loc{0, i})
+			c.StoreVisualX()
+			h.Buf.AddCursor(c)
+		}
+		h.Buf.MergeCursors()
+	} else {
+		return false
+	}
+	InfoBar.Message("Added cursors from selection")
 	return false
 }
 
@@ -1063,7 +1120,7 @@ func (h *BufHandler) SpawnMultiCursorSelect() bool {
 func (h *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
-	mouseLoc := h.Win.GetMouseLoc(buffer.Loc{mx, my})
+	mouseLoc := h.Win.GetMouseLoc(buffer.Loc{X: mx, Y: my})
 	c := buffer.NewCursor(b, mouseLoc)
 	b.AddCursor(c)
 	b.MergeCursors()
@@ -1073,6 +1130,26 @@ func (h *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
 
 // SkipMultiCursor moves the current multiple cursor to the next available position
 func (h *BufHandler) SkipMultiCursor() bool {
+	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	sel := lastC.GetSelection()
+	searchStart := lastC.CurSelection[1]
+
+	match, found, err := h.Buf.FindNext(string(sel), searchStart, true)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+	if found {
+		lastC.SetSelectionStart(match[0])
+		lastC.SetSelectionEnd(match[1])
+		lastC.OrigSelection[0] = lastC.CurSelection[0]
+		lastC.OrigSelection[1] = lastC.CurSelection[1]
+		lastC.Loc = lastC.CurSelection[1]
+
+		h.Buf.MergeCursors()
+		h.Win.Relocate()
+	} else {
+		InfoBar.Message("No matches found")
+	}
 	return false
 }
 
