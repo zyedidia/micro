@@ -35,6 +35,15 @@ func (h *InfoHandler) HandleEvent(event tcell.Event) {
 		done := h.DoKeyEvent(ke)
 		if !done && e.Key() == tcell.KeyRune {
 			h.DoRuneInsert(e.Rune())
+			done = true
+		}
+		if done && h.HasPrompt {
+			resp := strings.TrimSpace(string(h.LineBytes(0)))
+			hist := h.History[h.PromptType]
+			hist[h.HistoryNum] = resp
+			if h.EventCallback != nil {
+				h.EventCallback(resp)
+			}
 		}
 	case *tcell.EventMouse:
 		h.BufHandler.HandleEvent(event)
@@ -61,17 +70,7 @@ func (h *InfoHandler) DoKeyEvent(e KeyEvent) bool {
 			done = action(h.BufHandler)
 		}
 	}
-	if done && h.EventCallback != nil {
-		h.EventCallback(strings.TrimSpace(string(h.LineBytes(0))))
-	}
 	return done
-}
-
-func (h *InfoHandler) DoRuneInsert(r rune) {
-	h.BufHandler.DoRuneInsert(r)
-	if h.EventCallback != nil {
-		h.EventCallback(strings.TrimSpace(string(h.LineBytes(0))))
-	}
 }
 
 // InfoNones is a list of actions that should have no effect when executed
@@ -136,10 +135,10 @@ var InfoOverrides = map[string]InfoKeyAction{
 }
 
 func (h *InfoHandler) CursorUp() {
-	// TODO: history
+	h.UpHistory(h.History[h.PromptType])
 }
 func (h *InfoHandler) CursorDown() {
-	// TODO: history
+	h.DownHistory(h.History[h.PromptType])
 }
 func (h *InfoHandler) InsertTab() {
 	// TODO: autocomplete

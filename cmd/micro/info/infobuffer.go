@@ -16,6 +16,8 @@ type InfoBuf struct {
 	HasMessage bool
 	HasError   bool
 
+	PromptType string
+
 	Msg string
 
 	// This map stores the history for all the different kinds of uses Prompt has
@@ -36,8 +38,14 @@ func NewBuffer() *InfoBuf {
 	ib.History = make(map[string][]string)
 
 	ib.Buffer = buffer.NewBufferFromString("", "infobar", buffer.BTInfo)
+	ib.LoadHistory()
 
 	return ib
+}
+
+// Close performs any cleanup necessary when shutting down the infobuffer
+func (i *InfoBuf) Close() {
+	i.SaveHistory()
 }
 
 // Message sends a message to the user
@@ -68,12 +76,20 @@ func (i *InfoBuf) Error(msg ...interface{}) {
 // and callbacks executed when the user executes an event and when the user finishes the prompt
 // The eventcb passes the current user response as the argument and donecb passes the user's message
 // and a boolean indicating if the prompt was canceled
-func (i *InfoBuf) Prompt(prompt string, msg string, eventcb func(string), donecb func(string, bool)) {
+func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(string), donecb func(string, bool)) {
 	// If we get another prompt mid-prompt we cancel the one getting overwritten
 	if i.HasPrompt {
 		i.DonePrompt(true)
 	}
 
+	if _, ok := i.History[ptype]; !ok {
+		i.History[ptype] = []string{""}
+	} else {
+		i.History[ptype] = append(i.History[ptype], "")
+	}
+	i.HistoryNum = len(i.History[ptype]) - 1
+
+	i.PromptType = ptype
 	i.Msg = prompt
 	i.HasPrompt = true
 	i.HasMessage, i.HasError = false, false
@@ -88,8 +104,13 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 	if i.PromptCallback != nil {
 		if canceled {
 			i.PromptCallback("", true)
+			h := i.History[i.PromptType]
+			i.History[i.PromptType] = h[:len(h)-1]
 		} else {
-			i.PromptCallback(strings.TrimSpace(string(i.LineBytes(0))), false)
+			resp := strings.TrimSpace(string(i.LineBytes(0)))
+			i.PromptCallback(resp, false)
+			h := i.History[i.PromptType]
+			h[len(h)-1] = resp
 		}
 	}
 	i.PromptCallback = nil
