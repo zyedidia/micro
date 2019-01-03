@@ -725,7 +725,7 @@ func (h *BufHandler) SelectAll() bool {
 
 // OpenFile opens a new file in the buffer
 func (h *BufHandler) OpenFile() bool {
-	InfoBar.Prompt("> open ", func(resp string, canceled bool) {
+	InfoBar.Prompt("> ", "open ", func(resp string, canceled bool) {
 		if !canceled {
 			HandleCommand(resp)
 		}
@@ -889,7 +889,7 @@ func (h *BufHandler) ShellMode() bool {
 
 // CommandMode lets the user enter a command
 func (h *BufHandler) CommandMode() bool {
-	InfoBar.Prompt("> ", func(resp string, canceled bool) {
+	InfoBar.Prompt("> ", "", func(resp string, canceled bool) {
 		if !canceled {
 			HandleCommand(resp)
 		}

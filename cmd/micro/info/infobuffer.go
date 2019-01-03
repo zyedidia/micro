@@ -62,16 +62,17 @@ func (i *InfoBuf) Error(msg ...interface{}) {
 	// TODO: add to log?
 }
 
-func (i *InfoBuf) Prompt(msg string, callback func(string, bool)) {
+func (i *InfoBuf) Prompt(prompt string, msg string, callback func(string, bool)) {
 	// If we get another prompt mid-prompt we cancel the one getting overwritten
 	if i.HasPrompt {
 		i.DonePrompt(true)
 	}
 
-	i.Msg = msg
+	i.Msg = prompt
 	i.HasPrompt = true
 	i.HasMessage, i.HasError = false, false
 	i.PromptCallback = callback
+	i.Buffer.Insert(i.Buffer.Start(), msg)
 }
 
 func (i *InfoBuf) DonePrompt(canceled bool) {
