@@ -317,7 +317,7 @@ func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.
 }
 
 func (w *BufWindow) showCursor(x, y int, main bool) {
-	if !main {
+	if main {
 		screen.Screen.ShowCursor(x, y)
 	} else {
 		r, _, _, _ := screen.Screen.GetContent(x, y)
@@ -421,8 +421,8 @@ func (w *BufWindow) displayBuffer() {
 
 				if showcursor {
 					for _, c := range cursors {
-						if c.X == bloc.X && c.Y == bloc.Y {
-							w.showCursor(w.X+vloc.X, w.Y+vloc.Y, true)
+						if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
+							w.showCursor(w.X+vloc.X, w.Y+vloc.Y, c.Num == 0)
 						}
 					}
 				}
@@ -495,8 +495,8 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		for _, c := range cursors {
-			if c.X == bloc.X && c.Y == bloc.Y {
-				w.showCursor(w.X+vloc.X, w.Y+vloc.Y, true)
+			if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
+				w.showCursor(w.X+vloc.X, w.Y+vloc.Y, c.Num == 0)
 			}
 		}
 

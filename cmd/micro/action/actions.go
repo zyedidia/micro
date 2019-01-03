@@ -1,6 +1,7 @@
 package action
 
 import (
+	"log"
 	"os"
 	"strings"
 	"time"
@@ -560,6 +561,37 @@ func (h *BufHandler) SaveAs() bool {
 
 // Find opens a prompt and searches forward for the input
 func (h *BufHandler) Find() bool {
+	InfoBar.Prompt("Find: ", "", func(resp string) {
+		match, found, _ := h.Buf.FindNext(resp, h.Cursor.Loc, true)
+		if found {
+			h.Cursor.SetSelectionStart(match[0])
+			h.Cursor.SetSelectionEnd(match[1])
+			h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+			h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+		} else {
+			log.Println("RESET")
+			h.Cursor.ResetSelection()
+		}
+	}, func(resp string, canceled bool) {
+		if !canceled {
+			match, found, err := h.Buf.FindNext(resp, h.Cursor.Loc, true)
+			if err != nil {
+				InfoBar.Error(err)
+			}
+			if found {
+				h.Cursor.SetSelectionStart(match[0])
+				h.Cursor.SetSelectionEnd(match[1])
+				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+				h.Cursor.Loc = h.Cursor.CurSelection[1]
+			} else {
+				h.Cursor.ResetSelection()
+			}
+		} else {
+			h.Cursor.ResetSelection()
+		}
+	})
+
 	return true
 }
 
@@ -725,7 +757,7 @@ func (h *BufHandler) SelectAll() bool {
 
 // OpenFile opens a new file in the buffer
 func (h *BufHandler) OpenFile() bool {
-	InfoBar.Prompt("> ", "open ", func(resp string, canceled bool) {
+	InfoBar.Prompt("> ", "open ", nil, func(resp string, canceled bool) {
 		if !canceled {
 			HandleCommand(resp)
 		}
@@ -889,7 +921,7 @@ func (h *BufHandler) ShellMode() bool {
 
 // CommandMode lets the user enter a command
 func (h *BufHandler) CommandMode() bool {
-	InfoBar.Prompt("> ", "", func(resp string, canceled bool) {
+	InfoBar.Prompt("> ", "", nil, func(resp string, canceled bool) {
 		if !canceled {
 			HandleCommand(resp)
 		}

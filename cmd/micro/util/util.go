@@ -188,6 +188,12 @@ func IsStrWhitespace(str string) bool {
 	return true
 }
 
+// RunePos returns the rune index of a given byte index
+// Make sure the byte index is not between code points
+func RunePos(b []byte, i int) int {
+	return utf8.RuneCount(b[:i])
+}
+
 // TODO: consider changing because of snap segfault
 // ReplaceHome takes a path as input and replaces ~ at the start of the path with the user's
 // home directory. Does nothing if the path does not start with '~'.
@@ -301,4 +307,13 @@ func GetCharPosInLine(b []byte, visualPos int, tabsize int) int {
 	}
 
 	return i
+}
+
+func Clamp(val, min, max int) int {
+	if val < min {
+		val = min
+	} else if val > max {
+		val = max
+	}
+	return val
 }
