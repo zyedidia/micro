@@ -119,7 +119,7 @@ func DefaultCommands() map[string]StrCommand {
 // enter
 func CommandEditAction(prompt string) BufKeyAction {
 	return func(h *BufHandler) bool {
-		InfoBar.Prompt("> ", prompt, func(resp string, canceled bool) {
+		InfoBar.Prompt("> ", prompt, nil, func(resp string, canceled bool) {
 			if !canceled {
 				HandleCommand(resp)
 			}

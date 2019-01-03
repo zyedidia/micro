@@ -22,6 +22,7 @@ func init() {
 	BufMouseBindings = make(map[MouseEvent]BufMouseAction)
 }
 
+// BufMapKey maps a key event to an action
 func BufMapKey(k KeyEvent, action string) {
 	if f, ok := BufKeyActions[action]; ok {
 		BufKeyStrings[k] = action
@@ -30,6 +31,8 @@ func BufMapKey(k KeyEvent, action string) {
 		util.TermMessage("Error:", action, "does not exist")
 	}
 }
+
+// BufMapMouse maps a mouse event to an action
 func BufMapMouse(k MouseEvent, action string) {
 	if f, ok := BufMouseActions[action]; ok {
 		BufMouseBindings[k] = f
@@ -147,10 +150,13 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 	}
 }
 
+// DoKeyEvent executes a key event by finding the action it is bound
+// to and executing it (possibly multiple times for multiple cursors)
 func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 	if action, ok := BufKeyBindings[e]; ok {
-		for _, a := range MultiActions {
-			if a == BufKeyStrings[e] {
+		estr := BufKeyStrings[e]
+		for _, s := range MultiActions {
+			if s == estr {
 				cursors := h.Buf.GetCursors()
 				for _, c := range cursors {
 					h.Buf.SetCurCursor(c.Num)
@@ -170,6 +176,8 @@ func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 	return false
 }
 
+// DoMouseEvent executes a mouse event by finding the action it is bound
+// to and executing it
 func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 	if action, ok := BufMouseBindings[e]; ok {
 		if action(h, te) {
@@ -180,6 +188,8 @@ func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 	return false
 }
 
+// DoRuneInsert inserts a given rune into the current buffer
+// (possibly multiple times for multiple cursors)
 func (h *BufHandler) DoRuneInsert(r rune) {
 	cursors := h.Buf.GetCursors()
 	for _, c := range cursors {
@@ -199,6 +209,7 @@ func (h *BufHandler) DoRuneInsert(r rune) {
 	}
 }
 
+// BufKeyActions contains the list of all possible key actions the bufhandler could execute
 var BufKeyActions = map[string]BufKeyAction{
 	"CursorUp":               (*BufHandler).CursorUp,
 	"CursorDown":             (*BufHandler).CursorDown,
@@ -297,12 +308,12 @@ var BufKeyActions = map[string]BufKeyAction{
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*BufHandler).InsertNewline,
 }
+
+// BufMouseActions contains the list of all possible mouse actions the bufhandler could execute
 var BufMouseActions = map[string]BufMouseAction{
 	"MousePress":       (*BufHandler).MousePress,
 	"MouseMultiCursor": (*BufHandler).MouseMultiCursor,
 }
-
-const funcPrefixLen = 21 // length of "action.(*BufHandler)."
 
 // MultiActions is a list of actions that should be executed multiple
 // times if there are multiple cursors (one per cursor)
