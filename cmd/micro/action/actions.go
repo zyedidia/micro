@@ -560,7 +560,7 @@ func (h *BufHandler) SaveAs() bool {
 
 // Find opens a prompt and searches forward for the input
 func (h *BufHandler) Find() bool {
-	InfoBar.Prompt("Find: ", "", func(resp string) {
+	InfoBar.Prompt("Find: ", "", "Find", func(resp string) {
 		// Event callback
 		match, found, _ := h.Buf.FindNext(resp, h.Cursor.Loc, true)
 		if found {
@@ -802,7 +802,7 @@ func (h *BufHandler) SelectAll() bool {
 
 // OpenFile opens a new file in the buffer
 func (h *BufHandler) OpenFile() bool {
-	InfoBar.Prompt("> ", "open ", nil, func(resp string, canceled bool) {
+	InfoBar.Prompt("> ", "open ", "Open", nil, func(resp string, canceled bool) {
 		if !canceled {
 			HandleCommand(resp)
 		}
@@ -966,7 +966,7 @@ func (h *BufHandler) ShellMode() bool {
 
 // CommandMode lets the user enter a command
 func (h *BufHandler) CommandMode() bool {
-	InfoBar.Prompt("> ", "", nil, func(resp string, canceled bool) {
+	InfoBar.Prompt("> ", "", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {
 			HandleCommand(resp)
 		}

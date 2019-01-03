@@ -1,4 +1,4 @@
-package info
+package action
 
 import (
 	"io/ioutil"
@@ -76,20 +76,20 @@ func FileComplete(input string) (string, []string) {
 }
 
 // CommandComplete autocompletes commands
-// func CommandComplete(input string) (string, []string) {
-// 	var suggestions []string
-// 	for cmd := range commands {
-// 		if strings.HasPrefix(cmd, input) {
-// 			suggestions = append(suggestions, cmd)
-// 		}
-// 	}
-//
-// 	var chosen string
-// 	if len(suggestions) == 1 {
-// 		chosen = suggestions[0]
-// 	}
-// 	return chosen, suggestions
-// }
+func CommandComplete(input string) (string, []string) {
+	var suggestions []string
+	for cmd := range commands {
+		if strings.HasPrefix(cmd, input) {
+			suggestions = append(suggestions, cmd)
+		}
+	}
+
+	var chosen string
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+	return chosen, suggestions
+}
 
 // HelpComplete autocompletes help topics
 func HelpComplete(input string) (string, []string) {

@@ -3,7 +3,6 @@ package action
 import (
 	"os"
 
-	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
@@ -11,13 +10,13 @@ import (
 // A Command contains an action (a function to call) as well as information about how to autocomplete the command
 type Command struct {
 	action      func([]string)
-	completions []info.Completion
+	completions []Completion
 }
 
 // A StrCommand is similar to a command but keeps the name of the action
 type StrCommand struct {
 	action      string
-	completions []info.Completion
+	completions []Completion
 }
 
 var commands map[string]Command
@@ -71,7 +70,7 @@ func parseCommands(userCommands map[string]StrCommand) {
 
 // MakeCommand is a function to easily create new commands
 // This can be called by plugins in Lua so that plugins can define their own commands
-func MakeCommand(name, function string, completions ...info.Completion) {
+func MakeCommand(name, function string, completions ...Completion) {
 	action := commandActions[function]
 	// if _, ok := commandActions[function]; !ok {
 	// If the user seems to be binding a function that doesn't exist
@@ -85,32 +84,32 @@ func MakeCommand(name, function string, completions ...info.Completion) {
 // DefaultCommands returns a map containing micro's default commands
 func DefaultCommands() map[string]StrCommand {
 	return map[string]StrCommand{
-		"set":        {"Set", []info.Completion{info.OptionCompletion, info.OptionValueCompletion}},
-		"setlocal":   {"SetLocal", []info.Completion{info.OptionCompletion, info.OptionValueCompletion}},
-		"show":       {"Show", []info.Completion{info.OptionCompletion, info.NoCompletion}},
-		"showkey":    {"ShowKey", []info.Completion{info.NoCompletion}},
-		"bind":       {"Bind", []info.Completion{info.NoCompletion}},
-		"run":        {"Run", []info.Completion{info.NoCompletion}},
-		"quit":       {"Quit", []info.Completion{info.NoCompletion}},
-		"save":       {"Save", []info.Completion{info.NoCompletion}},
-		"replace":    {"Replace", []info.Completion{info.NoCompletion}},
-		"replaceall": {"ReplaceAll", []info.Completion{info.NoCompletion}},
-		"vsplit":     {"VSplit", []info.Completion{info.FileCompletion, info.NoCompletion}},
-		"hsplit":     {"HSplit", []info.Completion{info.FileCompletion, info.NoCompletion}},
-		"tab":        {"Tab", []info.Completion{info.FileCompletion, info.NoCompletion}},
-		"help":       {"Help", []info.Completion{info.HelpCompletion, info.NoCompletion}},
-		"eval":       {"Eval", []info.Completion{info.NoCompletion}},
-		"log":        {"ToggleLog", []info.Completion{info.NoCompletion}},
-		"plugin":     {"Plugin", []info.Completion{info.PluginCmdCompletion, info.PluginNameCompletion}},
-		"reload":     {"Reload", []info.Completion{info.NoCompletion}},
-		"cd":         {"Cd", []info.Completion{info.FileCompletion}},
-		"pwd":        {"Pwd", []info.Completion{info.NoCompletion}},
-		"open":       {"Open", []info.Completion{info.FileCompletion}},
-		"tabswitch":  {"TabSwitch", []info.Completion{info.NoCompletion}},
-		"term":       {"Term", []info.Completion{info.NoCompletion}},
-		"memusage":   {"MemUsage", []info.Completion{info.NoCompletion}},
-		"retab":      {"Retab", []info.Completion{info.NoCompletion}},
-		"raw":        {"Raw", []info.Completion{info.NoCompletion}},
+		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
+		"setlocal":   {"SetLocal", []Completion{OptionCompletion, OptionValueCompletion}},
+		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
+		"showkey":    {"ShowKey", []Completion{NoCompletion}},
+		"bind":       {"Bind", []Completion{NoCompletion}},
+		"run":        {"Run", []Completion{NoCompletion}},
+		"quit":       {"Quit", []Completion{NoCompletion}},
+		"save":       {"Save", []Completion{NoCompletion}},
+		"replace":    {"Replace", []Completion{NoCompletion}},
+		"replaceall": {"ReplaceAll", []Completion{NoCompletion}},
+		"vsplit":     {"VSplit", []Completion{FileCompletion, NoCompletion}},
+		"hsplit":     {"HSplit", []Completion{FileCompletion, NoCompletion}},
+		"tab":        {"Tab", []Completion{FileCompletion, NoCompletion}},
+		"help":       {"Help", []Completion{HelpCompletion, NoCompletion}},
+		"eval":       {"Eval", []Completion{NoCompletion}},
+		"log":        {"ToggleLog", []Completion{NoCompletion}},
+		"plugin":     {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
+		"reload":     {"Reload", []Completion{NoCompletion}},
+		"cd":         {"Cd", []Completion{FileCompletion}},
+		"pwd":        {"Pwd", []Completion{NoCompletion}},
+		"open":       {"Open", []Completion{FileCompletion}},
+		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
+		"term":       {"Term", []Completion{NoCompletion}},
+		"memusage":   {"MemUsage", []Completion{NoCompletion}},
+		"retab":      {"Retab", []Completion{NoCompletion}},
+		"raw":        {"Raw", []Completion{NoCompletion}},
 	}
 }
 
@@ -119,7 +118,7 @@ func DefaultCommands() map[string]StrCommand {
 // enter
 func CommandEditAction(prompt string) BufKeyAction {
 	return func(h *BufHandler) bool {
-		InfoBar.Prompt("> ", prompt, nil, func(resp string, canceled bool) {
+		InfoBar.Prompt("> ", prompt, "Command", nil, func(resp string, canceled bool) {
 			if !canceled {
 				HandleCommand(resp)
 			}

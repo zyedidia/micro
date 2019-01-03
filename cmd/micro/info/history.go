@@ -59,3 +59,21 @@ func (i *InfoBuf) SaveHistory() {
 		}
 	}
 }
+
+// UpHistory fetches the previous item in the history
+func (i *InfoBuf) UpHistory(history []string) {
+	if i.HistoryNum > 0 {
+		i.HistoryNum--
+		i.Replace(i.Start(), i.End(), history[i.HistoryNum])
+		i.Buffer.GetActiveCursor().GotoLoc(i.End())
+	}
+}
+
+// DownHistory fetches the next item in the history
+func (i *InfoBuf) DownHistory(history []string) {
+	if i.HistoryNum < len(history)-1 {
+		i.HistoryNum++
+		i.Replace(i.Start(), i.End(), history[i.HistoryNum])
+		i.Buffer.GetActiveCursor().GotoLoc(i.End())
+	}
+}
