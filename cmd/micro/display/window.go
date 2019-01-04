@@ -1,6 +1,7 @@
 package display
 
 import (
+	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -29,6 +30,7 @@ type Window interface {
 	GetView() *View
 	SetView(v *View)
 	GetMouseLoc(vloc buffer.Loc) buffer.Loc
+	Resize(w, h int)
 }
 
 // The BufWindow provides a way of displaying a certain section
@@ -63,6 +65,11 @@ func (v *View) GetView() *View {
 
 func (v *View) SetView(view *View) {
 	v = view
+}
+
+func (w *BufWindow) Resize(width, height int) {
+	w.Width, w.Height = width, height
+	w.lineHeight = make([]int, height)
 }
 
 func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) {
@@ -431,6 +438,7 @@ func (w *BufWindow) displayBuffer() {
 			nColsBeforeStart--
 		}
 
+		log.Println(len(w.lineHeight), vloc.Y)
 		w.lineHeight[vloc.Y] = bloc.Y
 
 		totalwidth := w.StartCol - nColsBeforeStart

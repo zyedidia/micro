@@ -187,7 +187,8 @@ func main() {
 
 	b := LoadInput()[0]
 	width, height := screen.Screen.Size()
-	ep := action.NewBufEditPane(0, 0, width, height-1, b)
+
+	action.MainTab = action.NewTabPane(width, height-1, b)
 
 	action.InitGlobals()
 
@@ -205,7 +206,9 @@ func main() {
 		// Display everything
 		screen.Screen.Fill(' ', config.DefStyle)
 		screen.Screen.HideCursor()
-		ep.Display()
+		for _, ep := range action.MainTab.Panes {
+			ep.Display()
+		}
 		action.InfoBar.Display()
 		screen.Screen.Show()
 
@@ -220,7 +223,7 @@ func main() {
 			if action.InfoBar.HasPrompt {
 				action.InfoBar.HandleEvent(event)
 			} else {
-				ep.HandleEvent(event)
+				action.MainTab.Panes[0].HandleEvent(event)
 			}
 		}
 	}
