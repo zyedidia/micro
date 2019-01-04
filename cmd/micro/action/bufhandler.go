@@ -219,12 +219,14 @@ func (h *BufHandler) vsplit(buf *buffer.Buffer) {
 	e.splitID = MainTab.GetNode(h.splitID).VSplit(h.Buf.Settings["splitright"].(bool))
 	MainTab.Panes = append(MainTab.Panes, e)
 	MainTab.Resize()
+	MainTab.SetActive(len(MainTab.Panes) - 1)
 }
 func (h *BufHandler) hsplit(buf *buffer.Buffer) {
 	e := NewBufEditPane(0, 0, 0, 0, buf)
 	e.splitID = MainTab.GetNode(h.splitID).HSplit(h.Buf.Settings["splitbottom"].(bool))
 	MainTab.Panes = append(MainTab.Panes, e)
 	MainTab.Resize()
+	MainTab.SetActive(len(MainTab.Panes) - 1)
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute

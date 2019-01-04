@@ -81,9 +81,10 @@ func (i *InfoWindow) Resize(w, h int) {
 // 	}
 // }
 
-func (i *InfoWindow) Relocate() bool  { return false }
-func (i *InfoWindow) GetView() *View  { return i.View }
-func (i *InfoWindow) SetView(v *View) {}
+func (i *InfoWindow) Relocate() bool   { return false }
+func (i *InfoWindow) GetView() *View   { return i.View }
+func (i *InfoWindow) SetView(v *View)  {}
+func (i *InfoWindow) SetActive(b bool) {}
 
 func (i *InfoWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
 	c := i.Buffer.GetActiveCursor()
