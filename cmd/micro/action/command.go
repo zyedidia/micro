@@ -3,6 +3,7 @@ package action
 import (
 	"os"
 
+	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
@@ -198,11 +199,25 @@ func Help(args []string) {
 // VSplit opens a vertical split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
 func VSplit(args []string) {
+	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	MainTab.CurPane().vsplit(buf)
 }
 
 // HSplit opens a horizontal split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
 func HSplit(args []string) {
+	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	MainTab.CurPane().hsplit(buf)
 }
 
 // Eval evaluates a lua expression

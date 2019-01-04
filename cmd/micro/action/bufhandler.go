@@ -90,6 +90,8 @@ type BufHandler struct {
 
 	// Last search stores the last successful search for FindNext and FindPrev
 	lastSearch string
+
+	splitID uint64
 }
 
 func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
@@ -210,6 +212,19 @@ func (h *BufHandler) DoRuneInsert(r rune) {
 			h.Buf.Insert(c.Loc, string(r))
 		}
 	}
+}
+
+func (h *BufHandler) vsplit(buf *buffer.Buffer) {
+	e := NewBufEditPane(0, 0, 0, 0, buf)
+	e.splitID = MainTab.GetNode(h.splitID).VSplit(h.Buf.Settings["splitright"].(bool))
+	MainTab.Panes = append(MainTab.Panes, e)
+	MainTab.Resize()
+}
+func (h *BufHandler) hsplit(buf *buffer.Buffer) {
+	e := NewBufEditPane(0, 0, 0, 0, buf)
+	e.splitID = MainTab.GetNode(h.splitID).HSplit(h.Buf.Settings["splitbottom"].(bool))
+	MainTab.Panes = append(MainTab.Panes, e)
+	MainTab.Resize()
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute

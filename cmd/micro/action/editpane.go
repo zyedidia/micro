@@ -4,6 +4,7 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/info"
+	"github.com/zyedidia/micro/cmd/micro/views"
 )
 
 type EditPane struct {
@@ -25,6 +26,17 @@ func NewBufEditPane(x, y, width, height int, b *buffer.Buffer) *EditPane {
 	e.BufHandler = NewBufHandler(b, w)
 
 	return e
+}
+
+func NewTabPane(width, height int, b *buffer.Buffer) *TabPane {
+	t := new(TabPane)
+	t.Node = views.NewRoot(0, 0, width, height)
+
+	e := NewBufEditPane(0, 0, width, height, b)
+	e.splitID = t.ID()
+
+	t.Panes = append(t.Panes, e)
+	return t
 }
 
 func NewInfoBar() *InfoPane {
