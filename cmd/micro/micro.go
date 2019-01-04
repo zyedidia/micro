@@ -223,7 +223,7 @@ func main() {
 			if action.InfoBar.HasPrompt {
 				action.InfoBar.HandleEvent(event)
 			} else {
-				action.MainTab.Panes[0].HandleEvent(event)
+				action.MainTab.HandleEvent(event)
 			}
 		}
 	}

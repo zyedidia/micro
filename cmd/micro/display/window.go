@@ -1,7 +1,6 @@
 package display
 
 import (
-	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -31,6 +30,7 @@ type Window interface {
 	SetView(v *View)
 	GetMouseLoc(vloc buffer.Loc) buffer.Loc
 	Resize(w, h int)
+	SetActive(b bool)
 }
 
 // The BufWindow provides a way of displaying a certain section
@@ -40,6 +40,8 @@ type BufWindow struct {
 
 	// Buffer being shown in this window
 	Buf *buffer.Buffer
+
+	active bool
 
 	sline *StatusLine
 
@@ -53,6 +55,7 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w.View = new(View)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
 	w.lineHeight = make([]int, height)
+	w.active = true
 
 	w.sline = NewStatusLine(w)
 
@@ -70,6 +73,10 @@ func (v *View) SetView(view *View) {
 func (w *BufWindow) Resize(width, height int) {
 	w.Width, w.Height = width, height
 	w.lineHeight = make([]int, height)
+}
+
+func (w *BufWindow) SetActive(b bool) {
+	w.active = b
 }
 
 func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) {
@@ -226,11 +233,11 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 
 		totalwidth := w.StartCol - nColsBeforeStart
 
-		if svloc.X <= vloc.X && vloc.Y == svloc.Y {
+		if svloc.X <= vloc.X+w.X && vloc.Y+w.Y == svloc.Y {
 			return bloc
 		}
 		for len(line) > 0 {
-			if vloc.X == svloc.X && vloc.Y == svloc.Y {
+			if vloc.X+w.X == svloc.X && vloc.Y+w.Y == svloc.Y {
 				return bloc
 			}
 
@@ -249,7 +256,7 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 			if width > 1 {
 				for i := 1; i < width; i++ {
-					if vloc.X == svloc.X && vloc.Y == svloc.Y {
+					if vloc.X+w.X == svloc.X && vloc.Y+w.Y == svloc.Y {
 						return bloc
 					}
 					draw()
@@ -276,7 +283,7 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 				}
 			}
 		}
-		if vloc.Y == svloc.Y {
+		if vloc.Y+w.Y == svloc.Y {
 			return bloc
 		}
 
@@ -287,7 +294,7 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 		}
 	}
 
-	return buffer.Loc{X: -1, Y: -1}
+	return buffer.Loc{}
 }
 
 func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
@@ -324,11 +331,13 @@ func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.
 }
 
 func (w *BufWindow) showCursor(x, y int, main bool) {
-	if main {
-		screen.Screen.ShowCursor(x, y)
-	} else {
-		r, _, _, _ := screen.Screen.GetContent(x, y)
-		screen.Screen.SetContent(x, y, r, nil, config.DefStyle.Reverse(true))
+	if w.active {
+		if main {
+			screen.Screen.ShowCursor(x, y)
+		} else {
+			r, _, _, _ := screen.Screen.GetContent(x, y)
+			screen.Screen.SetContent(x, y, r, nil, config.DefStyle.Reverse(true))
+		}
 	}
 }
 
@@ -385,7 +394,7 @@ func (w *BufWindow) displayBuffer() {
 		if b.Settings["ruler"].(bool) {
 			s := lineNumStyle
 			for _, c := range cursors {
-				if bloc.Y == c.Y {
+				if bloc.Y == c.Y && w.active {
 					s = curNumStyle
 					break
 				}
@@ -415,7 +424,7 @@ func (w *BufWindow) displayBuffer() {
 						}
 					}
 
-					if b.Settings["cursorline"].(bool) &&
+					if b.Settings["cursorline"].(bool) && w.active &&
 						!c.HasSelection() && c.Y == bloc.Y {
 						if s, ok := config.Colorscheme["cursor-line"]; ok {
 							fg, _, _ := s.Decompose()
@@ -438,7 +447,6 @@ func (w *BufWindow) displayBuffer() {
 			nColsBeforeStart--
 		}
 
-		log.Println(len(w.lineHeight), vloc.Y)
 		w.lineHeight[vloc.Y] = bloc.Y
 
 		totalwidth := w.StartCol - nColsBeforeStart
@@ -489,7 +497,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		for _, c := range cursors {
-			if b.Settings["cursorline"].(bool) &&
+			if b.Settings["cursorline"].(bool) && w.active &&
 				!c.HasSelection() && c.Y == bloc.Y {
 				style := config.DefStyle
 				if s, ok := config.Colorscheme["cursor-line"]; ok {
@@ -497,7 +505,7 @@ func (w *BufWindow) displayBuffer() {
 					style = style.Background(fg)
 				}
 				for i := vloc.X; i < w.Width; i++ {
-					screen.Screen.SetContent(i, vloc.Y, ' ', nil, style)
+					screen.Screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, style)
 				}
 			}
 		}
