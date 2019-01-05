@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -112,30 +113,28 @@ func (n *Node) vResizeSplit(i int, size int) bool {
 	if i < 0 || i >= len(n.children)-1 {
 		return false
 	}
-	v1, v2 := n.children[i].GetView(), n.children[i+1].GetView()
-	toth := v1.H + v2.H
+	c1, c2 := n.children[i], n.children[i+1]
+	toth := c1.H + c2.H
 	if size >= toth {
 		return false
 	}
-	v1.H, v2.H = size, toth-size
-	v2.Y = size
-	n.children[i].SetView(v1)
-	n.children[i+1].SetView(v2)
+	c2.Y = size
+	c1.Resize(c1.W, size)
+	c2.Resize(c2.W, toth-size)
 	return true
 }
 func (n *Node) hResizeSplit(i int, size int) bool {
 	if i < 0 || i >= len(n.children)-1 {
 		return false
 	}
-	v1, v2 := n.children[i].GetView(), n.children[i+1].GetView()
-	totw := v1.W + v2.W
+	c1, c2 := n.children[i], n.children[i+1]
+	totw := c1.W + c2.W
 	if size >= totw {
 		return false
 	}
-	v1.W, v2.W = size, totw-size
-	v2.X = size
-	n.children[i].SetView(v1)
-	n.children[i+1].SetView(v2)
+	c2.X = size
+	c1.Resize(size, c1.H)
+	c2.Resize(totw-size, c2.H)
 	return true
 }
 
@@ -180,15 +179,15 @@ func (n *Node) vHSplit(i int, right bool) uint64 {
 		}
 
 		n.children = append(n.children, hn1, hn2)
+		n.alignSize()
 		return newid
 	} else {
 		numr := 0
 		numnr := 0
 		nonrh := 0
 		for _, c := range n.children {
-			view := c.GetView()
 			if !c.CanResize() {
-				nonrh += view.H
+				nonrh += c.H
 				numnr++
 			} else {
 				numr++
@@ -212,18 +211,15 @@ func (n *Node) vHSplit(i int, right bool) uint64 {
 		copy(n.children[inspos+1:], n.children[inspos:])
 		n.children[inspos] = hn
 
-		y := 0
+		y := n.Y
 		for _, c := range n.children {
-			view := c.GetView()
+			c.Y = y
 			if c.CanResize() {
-				view.H = height
-				view.Y = y
-			} else {
-				view.Y = y
+				c.Resize(c.W, height)
 			}
-			y += view.H
-			c.SetView(view)
+			y += c.H
 		}
+		n.alignSize()
 		return newid
 	}
 }
@@ -237,15 +233,15 @@ func (n *Node) hVSplit(i int, right bool) uint64 {
 		}
 
 		n.children = append(n.children, vn1, vn2)
+		n.alignSize()
 		return newid
 	} else {
 		numr := 0
 		numnr := 0
 		nonrw := 0
 		for _, c := range n.children {
-			view := c.GetView()
 			if !c.CanResize() {
-				nonrw += view.W
+				nonrw += c.W
 				numnr++
 			} else {
 				numr++
@@ -269,18 +265,15 @@ func (n *Node) hVSplit(i int, right bool) uint64 {
 		copy(n.children[inspos+1:], n.children[inspos:])
 		n.children[inspos] = vn
 
-		x := 0
+		x := n.X
 		for _, c := range n.children {
-			view := c.GetView()
+			c.X = x
 			if c.CanResize() {
-				view.W = width
-				view.X = x
-			} else {
-				view.X = x
+				c.Resize(width, c.H)
 			}
-			x += view.W
-			c.SetView(view)
+			x += c.W
 		}
+		n.alignSize()
 		return newid
 	}
 }
@@ -326,7 +319,32 @@ func (n *Node) Resize(w, h int) {
 			y += cH
 		}
 	}
+	n.alignSize()
 	n.W, n.H = w, h
+}
+
+func (n *Node) alignSize() {
+	if len(n.children) == 0 {
+		return
+	}
+
+	totw, toth := 0, 0
+	for _, c := range n.children {
+		if n.kind == STHoriz {
+			totw += c.W
+		} else {
+			toth += c.H
+		}
+	}
+	if n.kind == STVert && toth != n.H {
+		last := n.children[len(n.children)-1]
+		last.Resize(last.W, last.H+n.H-toth)
+		log.Println("bad height")
+	} else if n.kind == STHoriz && totw != n.W {
+		last := n.children[len(n.children)-1]
+		last.Resize(last.W+n.W-totw, last.H)
+		log.Println("bad width")
+	}
 }
 
 func (n *Node) Unsplit() {
