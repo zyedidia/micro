@@ -15,10 +15,12 @@ type InfoBuf struct {
 	HasPrompt  bool
 	HasMessage bool
 	HasError   bool
+	HasYN      bool
 
 	PromptType string
 
-	Msg string
+	Msg    string
+	YNResp bool
 
 	// This map stores the history for all the different kinds of uses Prompt has
 	// It's a map of history type -> history array
@@ -30,6 +32,7 @@ type InfoBuf struct {
 
 	PromptCallback func(resp string, canceled bool)
 	EventCallback  func(resp string)
+	YNCallback     func(yes bool, canceled bool)
 }
 
 // NewBuffer returns a new infobuffer
@@ -92,16 +95,27 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 	i.PromptType = ptype
 	i.Msg = prompt
 	i.HasPrompt = true
-	i.HasMessage, i.HasError = false, false
+	i.HasMessage, i.HasError, i.HasYN = false, false, false
 	i.PromptCallback = donecb
 	i.EventCallback = eventcb
 	i.Buffer.Insert(i.Buffer.Start(), msg)
 }
 
+func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
+	if i.HasPrompt {
+		i.DonePrompt(true)
+	}
+
+	i.Msg = prompt
+	i.HasPrompt = true
+	i.HasYN = true
+	i.HasMessage, i.HasError = false, false
+	i.YNCallback = donecb
+}
+
 // DonePrompt finishes the current prompt and indicates whether or not it was canceled
 func (i *InfoBuf) DonePrompt(canceled bool) {
-	i.HasPrompt = false
-	if i.PromptCallback != nil {
+	if i.PromptCallback != nil && !i.HasYN {
 		if canceled {
 			i.PromptCallback("", true)
 			h := i.History[i.PromptType]
@@ -113,8 +127,14 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 			h[len(h)-1] = resp
 		}
 	}
+	if i.YNCallback != nil && i.HasYN {
+		i.YNCallback(i.YNResp, canceled)
+	}
+	i.HasPrompt = false
+	i.HasYN = false
 	i.PromptCallback = nil
 	i.EventCallback = nil
+	i.YNCallback = nil
 	i.Replace(i.Start(), i.End(), "")
 }
 
