@@ -29,7 +29,7 @@ type View struct {
 type Node struct {
 	View
 
-	kind SplitType
+	Kind SplitType
 
 	parent   *Node
 	children []*Node
@@ -69,6 +69,9 @@ func (n *Node) GetView() View {
 func (n *Node) SetView(v View) {
 	n.X, n.Y, n.W, n.H = v.X, v.Y, v.W, v.H
 }
+func (n *Node) Children() []*Node {
+	return n.children
+}
 
 func (n *Node) GetNode(id uint64) *Node {
 	if n.id == id && n.IsLeaf() {
@@ -86,9 +89,9 @@ func (n *Node) GetNode(id uint64) *Node {
 	return nil
 }
 
-func NewNode(kind SplitType, x, y, w, h int, parent *Node, id uint64) *Node {
+func NewNode(Kind SplitType, x, y, w, h int, parent *Node, id uint64) *Node {
 	n := new(Node)
-	n.kind = kind
+	n.Kind = Kind
 	n.canResize = true
 	n.propScale = true
 	n.X, n.Y, n.W, n.H = x, y, w, h
@@ -145,7 +148,7 @@ func (n *Node) ResizeSplit(size int) bool {
 			ind = i
 		}
 	}
-	if n.parent.kind == STVert {
+	if n.parent.Kind == STVert {
 		return n.parent.vResizeSplit(ind, size)
 	}
 	return n.parent.hResizeSplit(ind, size)
@@ -282,10 +285,10 @@ func (n *Node) HSplit(bottom bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.kind == STUndef {
-		n.kind = STVert
+	if n.Kind == STUndef {
+		n.Kind = STVert
 	}
-	if n.kind == STVert {
+	if n.Kind == STVert {
 		return n.vHSplit(0, bottom)
 	}
 	return n.hHSplit(bottom)
@@ -295,32 +298,41 @@ func (n *Node) VSplit(right bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.kind == STUndef {
-		n.kind = STHoriz
+	if n.Kind == STUndef {
+		n.Kind = STHoriz
 	}
-	if n.kind == STVert {
+	if n.Kind == STVert {
 		return n.vVSplit(right)
 	}
 	return n.hVSplit(0, right)
 }
 
 func (n *Node) Resize(w, h int) {
-	propW, propH := float64(w)/float64(n.W), float64(h)/float64(n.H)
-	x, y := n.X, n.Y
-	for _, c := range n.children {
-		cW := int(float64(c.W) * propW)
-		cH := int(float64(c.H) * propH)
-		c.Resize(cW, cH)
-		c.X = x
-		c.Y = y
-		if n.kind == STHoriz {
-			x += cW
-		} else {
-			y += cH
+	if n.IsLeaf() {
+		n.W, n.H = w, h
+	} else {
+		propW, propH := float64(w)/float64(n.W), float64(h)/float64(n.H)
+		log.Println(w, h, n.W, n.H, propW, propH)
+		x, y := n.X, n.Y
+		for i, c := range n.children {
+			cW := int(float64(c.W) * propW)
+			// if c.IsLeaf() && i != len(n.children)-1 {
+			// 	cW++
+			// }
+			log.Println("WIDTH:", cW, c.W)
+			cH := int(float64(c.H) * propH)
+			c.Resize(cW, cH)
+			c.X = x
+			c.Y = y
+			if n.Kind == STHoriz {
+				x += cW
+			} else {
+				y += cH
+			}
 		}
+		n.alignSize()
+		n.W, n.H = w, h
 	}
-	n.alignSize()
-	n.W, n.H = w, h
 }
 
 func (n *Node) alignSize() {
@@ -329,21 +341,22 @@ func (n *Node) alignSize() {
 	}
 
 	totw, toth := 0, 0
-	for _, c := range n.children {
-		if n.kind == STHoriz {
+	for i, c := range n.children {
+		if n.Kind == STHoriz {
+			if i != len(n.children)-1 {
+				c.Resize(c.W-1, c.H)
+			}
 			totw += c.W
 		} else {
 			toth += c.H
 		}
 	}
-	if n.kind == STVert && toth != n.H {
+	if n.Kind == STVert && toth != n.H {
 		last := n.children[len(n.children)-1]
 		last.Resize(last.W, last.H+n.H-toth)
-		log.Println("bad height")
-	} else if n.kind == STHoriz && totw != n.W {
+	} else if n.Kind == STHoriz && totw != n.W {
 		last := n.children[len(n.children)-1]
 		last.Resize(last.W+n.W-totw, last.H)
-		log.Println("bad width")
 	}
 }
 
@@ -355,7 +368,7 @@ func (n *Node) String() string {
 	var strf func(n *Node, ident int) string
 	strf = func(n *Node, ident int) string {
 		marker := "|"
-		if n.kind == STHoriz {
+		if n.Kind == STHoriz {
 			marker = "-"
 		}
 		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id)

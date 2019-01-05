@@ -50,6 +50,7 @@ func NewInfoWindow(b *info.InfoBuf) *InfoWindow {
 
 func (i *InfoWindow) Resize(w, h int) {
 	i.width = w
+	i.y = h
 }
 
 // func (i *InfoWindow) YesNoPrompt() (bool, bool) {

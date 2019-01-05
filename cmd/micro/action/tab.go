@@ -1,6 +1,8 @@
 package action
 
 import (
+	"github.com/zyedidia/micro/cmd/micro/display"
+	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/views"
 	"github.com/zyedidia/tcell"
 )
@@ -9,12 +11,20 @@ var MainTab *TabPane
 
 type TabPane struct {
 	*views.Node
+	display.Window
 	Panes  []*EditPane
 	active int
+
+	resizing bool
 }
 
 func (t *TabPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
+	case *tcell.EventResize:
+		w, h := screen.Screen.Size()
+		InfoBar.Resize(w, h-1)
+		t.Node.Resize(w, h-1)
+		t.Resize()
 	case *tcell.EventMouse:
 		switch e.Buttons() {
 		case tcell.Button1:

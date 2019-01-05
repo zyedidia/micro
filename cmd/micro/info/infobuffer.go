@@ -115,7 +115,10 @@ func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
 
 // DonePrompt finishes the current prompt and indicates whether or not it was canceled
 func (i *InfoBuf) DonePrompt(canceled bool) {
-	if i.PromptCallback != nil && !i.HasYN {
+	hadYN := i.HasYN
+	i.HasPrompt = false
+	i.HasYN = false
+	if i.PromptCallback != nil && !hadYN {
 		if canceled {
 			i.PromptCallback("", true)
 			h := i.History[i.PromptType]
@@ -127,11 +130,9 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 			h[len(h)-1] = resp
 		}
 	}
-	if i.YNCallback != nil && i.HasYN {
+	if i.YNCallback != nil && hadYN {
 		i.YNCallback(i.YNResp, canceled)
 	}
-	i.HasPrompt = false
-	i.HasYN = false
 	i.PromptCallback = nil
 	i.EventCallback = nil
 	i.YNCallback = nil
