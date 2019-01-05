@@ -209,6 +209,7 @@ func main() {
 		for _, ep := range action.MainTab.Panes {
 			ep.Display()
 		}
+		action.MainTab.Display()
 		action.InfoBar.Display()
 		screen.Screen.Show()
 
