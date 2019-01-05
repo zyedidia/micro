@@ -138,14 +138,14 @@ func (h *BufHandler) CursorLeft() bool {
 
 // CursorRight moves the cursor right
 func (h *BufHandler) CursorRight() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(false)
 	h.Cursor.Right()
 	return true
 }
 
 // WordRight moves the cursor one word to the right
 func (h *BufHandler) WordRight() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(false)
 	h.Cursor.WordRight()
 	return true
 }
@@ -987,8 +987,17 @@ func (h *BufHandler) Escape() bool {
 
 // Quit this will close the current tab or view that is open
 func (h *BufHandler) Quit() bool {
-	screen.Screen.Fini()
-	os.Exit(0)
+	if h.Buf.Modified() {
+		InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
+			if !canceled && !yes {
+				screen.Screen.Fini()
+				os.Exit(0)
+			}
+		})
+	} else {
+		screen.Screen.Fini()
+		os.Exit(0)
+	}
 	return false
 }
 
@@ -1055,31 +1064,36 @@ func (h *BufHandler) SpawnMultiCursor() bool {
 	spawner := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
 	if !spawner.HasSelection() {
 		spawner.SelectWord()
-	} else {
-		sel := spawner.GetSelection()
-		searchStart := spawner.CurSelection[1]
-
-		match, found, err := h.Buf.FindNext(string(sel), searchStart, true)
-		if err != nil {
-			InfoBar.Error(err)
-		}
-		if found {
-			c := buffer.NewCursor(h.Buf, buffer.Loc{})
-			c.SetSelectionStart(match[0])
-			c.SetSelectionEnd(match[1])
-			c.OrigSelection[0] = c.CurSelection[0]
-			c.OrigSelection[1] = c.CurSelection[1]
-			c.Loc = c.CurSelection[1]
-
-			h.Buf.AddCursor(c)
-			h.Buf.MergeCursors()
-			h.Win.Relocate()
-		} else {
-			InfoBar.Message("No matches found")
-		}
+		h.multiWord = true
+		return true
 	}
 
-	return false
+	sel := spawner.GetSelection()
+	searchStart := spawner.CurSelection[1]
+
+	search := string(sel)
+	if h.multiWord {
+		search = "\\b" + search + "\\b"
+	}
+	match, found, err := h.Buf.FindNext(search, searchStart, true)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+	if found {
+		c := buffer.NewCursor(h.Buf, buffer.Loc{})
+		c.SetSelectionStart(match[0])
+		c.SetSelectionEnd(match[1])
+		c.OrigSelection[0] = c.CurSelection[0]
+		c.OrigSelection[1] = c.CurSelection[1]
+		c.Loc = c.CurSelection[1]
+
+		h.Buf.AddCursor(c)
+		h.Buf.MergeCursors()
+	} else {
+		InfoBar.Message("No matches found")
+	}
+
+	return true
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
@@ -1158,6 +1172,8 @@ func (h *BufHandler) RemoveMultiCursor() bool {
 	if h.Buf.NumCursors() > 1 {
 		h.Buf.RemoveCursor(h.Buf.NumCursors() - 1)
 		h.Buf.UpdateCursors()
+	} else {
+		h.multiWord = false
 	}
 	return false
 }
@@ -1165,5 +1181,6 @@ func (h *BufHandler) RemoveMultiCursor() bool {
 // RemoveAllMultiCursors removes all cursors except the base cursor
 func (h *BufHandler) RemoveAllMultiCursors() bool {
 	h.Buf.ClearCursors()
+	h.multiWord = false
 	return true
 }

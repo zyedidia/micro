@@ -167,7 +167,7 @@ func (c *Cursor) Deselect(start bool) {
 		if start {
 			c.Loc = c.CurSelection[0]
 		} else {
-			c.Loc = c.CurSelection[1]
+			c.Loc = c.CurSelection[1].Move(-1, c.buf)
 		}
 		c.ResetSelection()
 		c.StoreVisualX()

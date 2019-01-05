@@ -90,6 +90,9 @@ type BufHandler struct {
 
 	// Last search stores the last successful search for FindNext and FindPrev
 	lastSearch string
+	// Should the current multiple cursor selection search based on word or
+	// based on selection (false for selection, true for word)
+	multiWord bool
 
 	splitID uint64
 }
