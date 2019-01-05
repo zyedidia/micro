@@ -156,6 +156,7 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 		}
 		h.DoMouseEvent(me, e)
 	}
+	h.Buf.MergeCursors()
 }
 
 // DoKeyEvent executes a key event by finding the action it is bound
