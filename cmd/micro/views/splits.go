@@ -42,7 +42,8 @@ type Node struct {
 	// the window is resized the split maintains its proportions
 	propScale bool
 
-	id uint64
+	propW, propH float64
+	id           uint64
 }
 
 func (n *Node) ID() uint64 {
@@ -98,6 +99,11 @@ func NewNode(Kind SplitType, x, y, w, h int, parent *Node, id uint64) *Node {
 	n.children = make([]*Node, 0)
 	n.parent = parent
 	n.id = id
+	if parent != nil {
+		n.propW, n.propH = float64(w)/float64(parent.W), float64(h)/float64(parent.H)
+	} else {
+		n.propW, n.propH = 1, 1
+	}
 
 	return n
 }
@@ -124,6 +130,7 @@ func (n *Node) vResizeSplit(i int, size int) bool {
 	c2.Y = size
 	c1.Resize(c1.W, size)
 	c2.Resize(c2.W, toth-size)
+	n.propW = float64(size) / float64(n.parent.W)
 	return true
 }
 func (n *Node) hResizeSplit(i int, size int) bool {
@@ -138,6 +145,7 @@ func (n *Node) hResizeSplit(i int, size int) bool {
 	c2.X = size
 	c1.Resize(size, c1.H)
 	c2.Resize(totw-size, c2.H)
+	n.propH = float64(size) / float64(n.parent.H)
 	return true
 }
 
@@ -311,16 +319,14 @@ func (n *Node) Resize(w, h int) {
 	if n.IsLeaf() {
 		n.W, n.H = w, h
 	} else {
-		propW, propH := float64(w)/float64(n.W), float64(h)/float64(n.H)
-		log.Println(w, h, n.W, n.H, propW, propH)
 		x, y := n.X, n.Y
 		for i, c := range n.children {
-			cW := int(float64(c.W) * propW)
-			// if c.IsLeaf() && i != len(n.children)-1 {
-			// 	cW++
-			// }
-			log.Println("WIDTH:", cW, c.W)
-			cH := int(float64(c.H) * propH)
+			cW := int(float64(w) * c.propW)
+			if c.IsLeaf() && i != len(n.children)-1 {
+				cW++
+			}
+			cH := int(float64(h) * c.propH)
+			log.Println(c.id, c.propW, c.propH, cW, cH, w, h)
 			c.Resize(cW, cH)
 			c.X = x
 			c.Y = y

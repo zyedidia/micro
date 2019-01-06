@@ -193,14 +193,14 @@ func main() {
 	action.InitGlobals()
 
 	// Here is the event loop which runs in a separate thread
-	go func() {
-		events = make(chan tcell.Event)
-		for {
-			screen.Lock()
-			events <- screen.Screen.PollEvent()
-			screen.Unlock()
-		}
-	}()
+	// go func() {
+	// 	events = make(chan tcell.Event)
+	// 	for {
+	// 		screen.Lock()
+	// 		events <- screen.Screen.PollEvent()
+	// 		screen.Unlock()
+	// 	}
+	// }()
 
 	for {
 		// Display everything
@@ -216,9 +216,12 @@ func main() {
 		var event tcell.Event
 
 		// Check for new events
-		select {
-		case event = <-events:
-		}
+		screen.Lock()
+		event = screen.Screen.PollEvent()
+		screen.Unlock()
+		// select {
+		// case event = <-events:
+		// }
 
 		if event != nil {
 			if action.InfoBar.HasPrompt {

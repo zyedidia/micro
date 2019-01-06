@@ -3,6 +3,7 @@ package util
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 
@@ -16,7 +17,9 @@ import (
 // This will write the message, and wait for the user
 // to press and key to continue
 func TermMessage(msg ...interface{}) {
+	log.Println(msg)
 	screen.TempFini()
+	log.Println("fini")
 
 	fmt.Println(msg...)
 	fmt.Print("\nPress enter to continue")
