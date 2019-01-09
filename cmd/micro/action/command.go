@@ -244,6 +244,16 @@ func Show(args []string) {
 
 // ShowKey displays the action that a key is bound to
 func ShowKey(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Please provide a key to show")
+		return
+	}
+
+	if action, ok := Bindings[args[0]]; ok {
+		InfoBar.Message(action)
+	} else {
+		InfoBar.Message(args[0], " has no binding")
+	}
 }
 
 // Bind creates a new keybinding
