@@ -987,16 +987,22 @@ func (h *BufHandler) Escape() bool {
 
 // Quit this will close the current tab or view that is open
 func (h *BufHandler) Quit() bool {
+	quit := func() {
+		if len(MainTab.Panes) > 1 {
+			h.Unsplit()
+		} else {
+			screen.Screen.Fini()
+			os.Exit(0)
+		}
+	}
 	if h.Buf.Modified() {
 		InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 			if !canceled && !yes {
-				screen.Screen.Fini()
-				os.Exit(0)
+				quit()
 			}
 		})
 	} else {
-		screen.Screen.Fini()
-		os.Exit(0)
+		quit()
 	}
 	return false
 }
@@ -1033,6 +1039,12 @@ func (h *BufHandler) HSplitBinding() bool {
 
 // Unsplit closes all splits in the current tab except the active one
 func (h *BufHandler) Unsplit() bool {
+	n := MainTab.GetNode(h.splitID)
+	n.Unsplit()
+
+	MainTab.RemovePane(MainTab.GetPane(h.splitID))
+	MainTab.Resize()
+	MainTab.SetActive(len(MainTab.Panes) - 1)
 	return false
 }
 
