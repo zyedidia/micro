@@ -2,6 +2,7 @@ package views
 
 import (
 	"fmt"
+	"log"
 	"strings"
 )
 
@@ -154,10 +155,11 @@ func (n *Node) vResizeSplit(i int, size int) bool {
 	if size >= toth {
 		return false
 	}
-	c2.Y = size
+	c2.Y = c1.Y + size
 	c1.Resize(c1.W, size)
 	c2.Resize(c2.W, toth-size)
 	n.markSizes()
+	n.alignSizes(n.W, n.H)
 	return true
 }
 func (n *Node) hResizeSplit(i int, size int) bool {
@@ -174,17 +176,18 @@ func (n *Node) hResizeSplit(i int, size int) bool {
 	if size >= totw {
 		return false
 	}
-	c2.X = size
+	c2.X = c1.X + size
 	c1.Resize(size, c1.H)
 	c2.Resize(totw-size, c2.H)
 	n.markSizes()
+	n.alignSizes(n.W, n.H)
 	return true
 }
 
 // ResizeSplit resizes a certain split to a given size
 func (n *Node) ResizeSplit(size int) bool {
-	if !n.IsLeaf() || len(n.parent.children) <= 1 {
-		// cannot resize a non leaf or a lone node
+	if len(n.parent.children) <= 1 {
+		// cannot resize a lone node
 		return false
 	}
 	ind := 0
@@ -224,6 +227,10 @@ func (n *Node) Resize(w, h int) {
 		}
 	}
 
+	n.alignSizes(totw, toth)
+}
+
+func (n *Node) alignSizes(totw, toth int) {
 	// Make sure that there are no off-by-one problems with the rounding
 	// of the sizes by making the final split fill the screen
 	if n.Kind == STVert && toth != n.H {
@@ -242,6 +249,10 @@ func (n *Node) markSizes() {
 		c.propH = float64(c.H) / float64(n.H)
 		c.markSizes()
 	}
+}
+
+func (n *Node) markResize() {
+	n.markSizes()
 	n.Resize(n.W, n.H)
 }
 
@@ -318,7 +329,7 @@ func (n *Node) applyNewSize(size int, h bool) {
 			a += c.H
 		}
 	}
-	n.markSizes()
+	n.markResize()
 }
 
 // hsplits a vertical split
@@ -332,7 +343,7 @@ func (n *Node) vHSplit(i int, right bool) uint64 {
 		}
 
 		n.children = append(n.children, hn1, hn2)
-		n.markSizes()
+		n.markResize()
 		return newid
 	} else {
 		nonrh, numr := n.getResizeInfo(true)
@@ -368,7 +379,7 @@ func (n *Node) hVSplit(i int, right bool) uint64 {
 		}
 
 		n.children = append(n.children, vn1, vn2)
-		n.markSizes()
+		n.markResize()
 		return newid
 	} else {
 		nonrw, numr := n.getResizeInfo(false)
@@ -429,8 +440,15 @@ func (n *Node) unsplit(i int, h bool) {
 	copy(n.children[i:], n.children[i+1:])
 	n.children[len(n.children)-1] = nil
 	n.children = n.children[:len(n.children)-1]
+	log.Println(len(n.children))
 
 	nonrs, numr := n.getResizeInfo(h)
+	if numr == 0 {
+		// This means that this was the last child
+		// The parent will get cleaned up in the next iteration and
+		// will resolve all sizing issues with its parent
+		return
+	}
 	size := (n.W - nonrs) / numr
 	if h {
 		size = (n.H - nonrs) / numr
@@ -441,7 +459,7 @@ func (n *Node) unsplit(i int, h bool) {
 // Unsplit deletes this split and resizes everything
 // else accordingly
 func (n *Node) Unsplit() {
-	if !n.IsLeaf() || len(n.parent.children) <= 1 {
+	if !n.IsLeaf() {
 		return
 	}
 	ind := 0
@@ -452,9 +470,14 @@ func (n *Node) Unsplit() {
 	}
 	if n.parent.Kind == STVert {
 		n.parent.unsplit(ind, true)
-		return
+	} else {
+		n.parent.unsplit(ind, false)
 	}
-	n.parent.unsplit(ind, false)
+
+	if n.parent.IsLeaf() {
+		log.Println("destroy parent")
+		n.parent.Unsplit()
+	}
 }
 
 // String returns the string form of the node and all children (used for debugging)
