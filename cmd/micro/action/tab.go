@@ -56,13 +56,28 @@ func (t *TabPane) SetActive(i int) {
 	}
 }
 
+func (t *TabPane) GetPane(splitid uint64) int {
+	for i, p := range t.Panes {
+		if p.splitID == splitid {
+			return i
+		}
+	}
+	return 0
+}
+
+func (t *TabPane) RemovePane(i int) {
+	copy(t.Panes[i:], t.Panes[i+1:])
+	t.Panes[len(t.Panes)-1] = nil // or the zero value of T
+	t.Panes = t.Panes[:len(t.Panes)-1]
+}
+
 func (t *TabPane) Resize() {
 	for _, p := range t.Panes {
-		v := t.GetNode(p.splitID).GetView()
+		n := t.GetNode(p.splitID)
 		pv := p.GetView()
-		pv.X, pv.Y = v.X, v.Y
+		pv.X, pv.Y = n.X, n.Y
 		p.SetView(pv)
-		p.Resize(v.W, v.H)
+		p.Resize(n.W, n.H)
 	}
 }
 

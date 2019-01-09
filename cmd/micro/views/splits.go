@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -16,16 +15,22 @@ const (
 
 var idcounter uint64
 
+// NewID returns a new unique id
 func NewID() uint64 {
 	idcounter++
 	return idcounter
 }
 
+// A View is a size and location of a split
 type View struct {
 	X, Y int
 	W, H int
 }
 
+// A Node describes a split in the tree
+// If a node is a leaf node then it corresponds to a buffer that is being
+// displayed otherwise it has a number of children of the opposite type
+// (vertical splits have horizontal children and vice versa)
 type Node struct {
 	View
 
@@ -42,54 +47,15 @@ type Node struct {
 	// the window is resized the split maintains its proportions
 	propScale bool
 
+	// Defines the proportion of the screen this node should take up if propScale is
+	// on
 	propW, propH float64
-	id           uint64
+	// The id is unique for each leaf node and provides a way to keep track of a split
+	// The id cannot be 0
+	id uint64
 }
 
-func (n *Node) ID() uint64 {
-	if n.IsLeaf() {
-		return n.id
-	}
-	return 0
-}
-func (n *Node) CanResize() bool {
-	return n.canResize
-}
-func (n *Node) PropScale() bool {
-	return n.propScale
-}
-func (n *Node) SetResize(b bool) {
-	n.canResize = b
-}
-func (n *Node) SetPropScale(b bool) {
-	n.propScale = b
-}
-func (n *Node) GetView() View {
-	return n.View
-}
-func (n *Node) SetView(v View) {
-	n.X, n.Y, n.W, n.H = v.X, v.Y, v.W, v.H
-}
-func (n *Node) Children() []*Node {
-	return n.children
-}
-
-func (n *Node) GetNode(id uint64) *Node {
-	if n.id == id && n.IsLeaf() {
-		return n
-	}
-	for _, c := range n.children {
-		if c.id == id && c.IsLeaf() {
-			return c
-		}
-		gc := c.GetNode(id)
-		if gc != nil {
-			return gc
-		}
-	}
-	return nil
-}
-
+// NewNode returns a new node with the given specifications
 func NewNode(Kind SplitType, x, y, w, h int, parent *Node, id uint64) *Node {
 	n := new(Node)
 	n.Kind = Kind
@@ -108,21 +74,82 @@ func NewNode(Kind SplitType, x, y, w, h int, parent *Node, id uint64) *Node {
 	return n
 }
 
+// NewRoot returns an empty Node with a size and location
+// The type of the node will be determined by the first action on the node
+// In other words, a lone split is neither horizontal nor vertical, it only
+// becomes one or the other after a vsplit or hsplit is made
 func NewRoot(x, y, w, h int) *Node {
 	n1 := NewNode(STUndef, x, y, w, h, nil, NewID())
 
 	return n1
 }
 
+// IsLeaf returns if this node is a leaf node
 func (n *Node) IsLeaf() bool {
 	return len(n.children) == 0
 }
 
+// ID returns this node's id or 0 if it is not viewable
+func (n *Node) ID() uint64 {
+	if n.IsLeaf() {
+		return n.id
+	}
+	return 0
+}
+
+// CanResize returns if this node can be resized
+func (n *Node) CanResize() bool {
+	return n.canResize
+}
+
+// PropScale returns if this node is proportionally scaled
+func (n *Node) PropScale() bool {
+	return n.propScale
+}
+
+// SetResize sets the resize flag
+func (n *Node) SetResize(b bool) {
+	n.canResize = b
+}
+
+// SetPropScale sets the propScale flag
+func (n *Node) SetPropScale(b bool) {
+	n.propScale = b
+}
+
+// Children returns this node's children
+func (n *Node) Children() []*Node {
+	return n.children
+}
+
+// GetNode returns the node with the given id in the tree of children
+// that this node has access to or nil if the node with that id cannot be found
+func (n *Node) GetNode(id uint64) *Node {
+	if n.id == id && n.IsLeaf() {
+		return n
+	}
+	for _, c := range n.children {
+		if c.id == id && c.IsLeaf() {
+			return c
+		}
+		gc := c.GetNode(id)
+		if gc != nil {
+			return gc
+		}
+	}
+	return nil
+}
+
 func (n *Node) vResizeSplit(i int, size int) bool {
-	if i < 0 || i >= len(n.children)-1 {
+	if i < 0 || i >= len(n.children) {
 		return false
 	}
-	c1, c2 := n.children[i], n.children[i+1]
+	var c1, c2 *Node
+	if i == len(n.children)-1 {
+		c1, c2 = n.children[i-1], n.children[i]
+	} else {
+		c1, c2 = n.children[i], n.children[i+1]
+	}
 	toth := c1.H + c2.H
 	if size >= toth {
 		return false
@@ -130,14 +157,19 @@ func (n *Node) vResizeSplit(i int, size int) bool {
 	c2.Y = size
 	c1.Resize(c1.W, size)
 	c2.Resize(c2.W, toth-size)
-	n.propW = float64(size) / float64(n.parent.W)
+	n.markSizes()
 	return true
 }
 func (n *Node) hResizeSplit(i int, size int) bool {
-	if i < 0 || i >= len(n.children)-1 {
+	if i < 0 || i >= len(n.children) {
 		return false
 	}
-	c1, c2 := n.children[i], n.children[i+1]
+	var c1, c2 *Node
+	if i == len(n.children)-1 {
+		c1, c2 = n.children[i-1], n.children[i]
+	} else {
+		c1, c2 = n.children[i], n.children[i+1]
+	}
 	totw := c1.W + c2.W
 	if size >= totw {
 		return false
@@ -145,11 +177,16 @@ func (n *Node) hResizeSplit(i int, size int) bool {
 	c2.X = size
 	c1.Resize(size, c1.H)
 	c2.Resize(totw-size, c2.H)
-	n.propH = float64(size) / float64(n.parent.H)
+	n.markSizes()
 	return true
 }
 
+// ResizeSplit resizes a certain split to a given size
 func (n *Node) ResizeSplit(size int) bool {
+	if !n.IsLeaf() || len(n.parent.children) <= 1 {
+		// cannot resize a non leaf or a lone node
+		return false
+	}
 	ind := 0
 	for i, c := range n.parent.children {
 		if c.id == n.id {
@@ -162,6 +199,53 @@ func (n *Node) ResizeSplit(size int) bool {
 	return n.parent.hResizeSplit(ind, size)
 }
 
+// Resize sets this node's size and resizes all children accordlingly
+func (n *Node) Resize(w, h int) {
+	n.W, n.H = w, h
+
+	if n.IsLeaf() {
+		return
+	}
+
+	x, y := n.X, n.Y
+	totw, toth := 0, 0
+	for _, c := range n.children {
+		cW := int(float64(w) * c.propW)
+		cH := int(float64(h) * c.propH)
+
+		c.X, c.Y = x, y
+		c.Resize(cW, cH)
+		if n.Kind == STHoriz {
+			x += cW
+			totw += cW
+		} else {
+			y += cH
+			toth += cH
+		}
+	}
+
+	// Make sure that there are no off-by-one problems with the rounding
+	// of the sizes by making the final split fill the screen
+	if n.Kind == STVert && toth != n.H {
+		last := n.children[len(n.children)-1]
+		last.Resize(last.W, last.H+n.H-toth)
+	} else if n.Kind == STHoriz && totw != n.W {
+		last := n.children[len(n.children)-1]
+		last.Resize(last.W+n.W-totw, last.H)
+	}
+}
+
+// Resets all proportions for children
+func (n *Node) markSizes() {
+	for _, c := range n.children {
+		c.propW = float64(c.W) / float64(n.W)
+		c.propH = float64(c.H) / float64(n.H)
+		c.markSizes()
+	}
+	n.Resize(n.W, n.H)
+}
+
+// vsplits a vertical split and returns the id of the new split
 func (n *Node) vVSplit(right bool) uint64 {
 	ind := 0
 	for i, c := range n.parent.children {
@@ -171,6 +255,8 @@ func (n *Node) vVSplit(right bool) uint64 {
 	}
 	return n.parent.hVSplit(ind, right)
 }
+
+// hsplits a horizontal split
 func (n *Node) hHSplit(bottom bool) uint64 {
 	ind := 0
 	for i, c := range n.parent.children {
@@ -180,6 +266,62 @@ func (n *Node) hHSplit(bottom bool) uint64 {
 	}
 	return n.parent.vHSplit(ind, bottom)
 }
+
+// Returns the size of the non-resizable area and the number of resizable
+// splits
+func (n *Node) getResizeInfo(h bool) (int, int) {
+	numr := 0
+	numnr := 0
+	nonr := 0
+	for _, c := range n.children {
+		if !c.CanResize() {
+			if h {
+				nonr += c.H
+			} else {
+				nonr += c.W
+			}
+			numnr++
+		} else {
+			numr++
+		}
+	}
+
+	// if there are no resizable splits make them all resizable
+	if numr == 0 {
+		numr = numnr
+	}
+
+	return nonr, numr
+}
+
+func (n *Node) applyNewSize(size int, h bool) {
+	a := n.X
+	if h {
+		a = n.Y
+	}
+	for _, c := range n.children {
+		if h {
+			c.Y = a
+		} else {
+			c.X = a
+		}
+		if c.CanResize() {
+			if h {
+				c.Resize(c.W, size)
+			} else {
+				c.Resize(size, c.H)
+			}
+		}
+		if h {
+			a += c.H
+		} else {
+			a += c.H
+		}
+	}
+	n.markSizes()
+}
+
+// hsplits a vertical split
 func (n *Node) vHSplit(i int, right bool) uint64 {
 	if n.IsLeaf() {
 		newid := NewID()
@@ -190,30 +332,18 @@ func (n *Node) vHSplit(i int, right bool) uint64 {
 		}
 
 		n.children = append(n.children, hn1, hn2)
-		n.alignSize()
+		n.markSizes()
 		return newid
 	} else {
-		numr := 0
-		numnr := 0
-		nonrh := 0
-		for _, c := range n.children {
-			if !c.CanResize() {
-				nonrh += c.H
-				numnr++
-			} else {
-				numr++
-			}
-		}
+		nonrh, numr := n.getResizeInfo(true)
 
-		// if there are no resizable splits make them all resizable
-		if numr == 0 {
-			numr = numnr
-		}
-
+		// size of resizable area
 		height := (n.H - nonrh) / (numr + 1)
 
 		newid := NewID()
 		hn := NewNode(STHoriz, n.X, 0, n.W, height, n, newid)
+
+		// insert the node into the correct slot
 		n.children = append(n.children, nil)
 		inspos := i
 		if right {
@@ -222,18 +352,12 @@ func (n *Node) vHSplit(i int, right bool) uint64 {
 		copy(n.children[inspos+1:], n.children[inspos:])
 		n.children[inspos] = hn
 
-		y := n.Y
-		for _, c := range n.children {
-			c.Y = y
-			if c.CanResize() {
-				c.Resize(c.W, height)
-			}
-			y += c.H
-		}
-		n.alignSize()
+		n.applyNewSize(height, true)
 		return newid
 	}
 }
+
+// vsplits a horizontal split
 func (n *Node) hVSplit(i int, right bool) uint64 {
 	if n.IsLeaf() {
 		newid := NewID()
@@ -244,30 +368,17 @@ func (n *Node) hVSplit(i int, right bool) uint64 {
 		}
 
 		n.children = append(n.children, vn1, vn2)
-		n.alignSize()
+		n.markSizes()
 		return newid
 	} else {
-		numr := 0
-		numnr := 0
-		nonrw := 0
-		for _, c := range n.children {
-			if !c.CanResize() {
-				nonrw += c.W
-				numnr++
-			} else {
-				numr++
-			}
-		}
-
-		// if there are no resizable splits make them all resizable
-		if numr == 0 {
-			numr = numnr
-		}
+		nonrw, numr := n.getResizeInfo(false)
 
 		width := (n.W - nonrw) / (numr + 1)
 
 		newid := NewID()
 		vn := NewNode(STVert, 0, n.Y, width, n.H, n, newid)
+
+		// Inser the node into the correct slot
 		n.children = append(n.children, nil)
 		inspos := i
 		if right {
@@ -276,19 +387,14 @@ func (n *Node) hVSplit(i int, right bool) uint64 {
 		copy(n.children[inspos+1:], n.children[inspos:])
 		n.children[inspos] = vn
 
-		x := n.X
-		for _, c := range n.children {
-			c.X = x
-			if c.CanResize() {
-				c.Resize(width, c.H)
-			}
-			x += c.W
-		}
-		n.alignSize()
+		n.applyNewSize(width, false)
 		return newid
 	}
 }
 
+// HSplit creates a horizontal split and returns the id of the new split
+// bottom specifies if the new split should be created on the top or bottom
+// of the current split
 func (n *Node) HSplit(bottom bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
@@ -302,6 +408,9 @@ func (n *Node) HSplit(bottom bool) uint64 {
 	return n.hHSplit(bottom)
 }
 
+// VSplit creates a vertical split and returns the id of the new split
+// right specifies if the new split should be created on the right or left
+// of the current split
 func (n *Node) VSplit(right bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
@@ -315,61 +424,40 @@ func (n *Node) VSplit(right bool) uint64 {
 	return n.hVSplit(0, right)
 }
 
-func (n *Node) Resize(w, h int) {
-	if n.IsLeaf() {
-		n.W, n.H = w, h
-	} else {
-		x, y := n.X, n.Y
-		for i, c := range n.children {
-			cW := int(float64(w) * c.propW)
-			if c.IsLeaf() && i != len(n.children)-1 {
-				cW++
-			}
-			cH := int(float64(h) * c.propH)
-			log.Println(c.id, c.propW, c.propH, cW, cH, w, h)
-			c.Resize(cW, cH)
-			c.X = x
-			c.Y = y
-			if n.Kind == STHoriz {
-				x += cW
-			} else {
-				y += cH
-			}
-		}
-		n.alignSize()
-		n.W, n.H = w, h
+// unsplits the child of a split
+func (n *Node) unsplit(i int, h bool) {
+	copy(n.children[i:], n.children[i+1:])
+	n.children[len(n.children)-1] = nil
+	n.children = n.children[:len(n.children)-1]
+
+	nonrs, numr := n.getResizeInfo(h)
+	size := (n.W - nonrs) / numr
+	if h {
+		size = (n.H - nonrs) / numr
 	}
+	n.applyNewSize(size, h)
 }
 
-func (n *Node) alignSize() {
-	if len(n.children) == 0 {
+// Unsplit deletes this split and resizes everything
+// else accordingly
+func (n *Node) Unsplit() {
+	if !n.IsLeaf() || len(n.parent.children) <= 1 {
 		return
 	}
-
-	totw, toth := 0, 0
-	for i, c := range n.children {
-		if n.Kind == STHoriz {
-			if i != len(n.children)-1 {
-				c.Resize(c.W-1, c.H)
-			}
-			totw += c.W
-		} else {
-			toth += c.H
+	ind := 0
+	for i, c := range n.parent.children {
+		if c.id == n.id {
+			ind = i
 		}
 	}
-	if n.Kind == STVert && toth != n.H {
-		last := n.children[len(n.children)-1]
-		last.Resize(last.W, last.H+n.H-toth)
-	} else if n.Kind == STHoriz && totw != n.W {
-		last := n.children[len(n.children)-1]
-		last.Resize(last.W+n.W-totw, last.H)
+	if n.parent.Kind == STVert {
+		n.parent.unsplit(ind, true)
+		return
 	}
+	n.parent.unsplit(ind, false)
 }
 
-func (n *Node) Unsplit() {
-
-}
-
+// String returns the string form of the node and all children (used for debugging)
 func (n *Node) String() string {
 	var strf func(n *Node, ident int) string
 	strf = func(n *Node, ident int) string {
