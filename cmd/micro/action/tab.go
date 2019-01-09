@@ -1,6 +1,7 @@
 package action
 
 import (
+	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/views"
@@ -15,7 +16,7 @@ type TabPane struct {
 	Panes  []*EditPane
 	active int
 
-	resizing bool
+	resizing *views.Node // node currently being resized
 }
 
 func (t *TabPane) HandleEvent(event tcell.Event) {
@@ -30,6 +31,24 @@ func (t *TabPane) HandleEvent(event tcell.Event) {
 		case tcell.Button1:
 			mx, my := e.Position()
 
+			resizeID := t.GetMouseLoc(buffer.Loc{mx, my}).X
+			if t.resizing != nil {
+				var size int
+				if t.resizing.Kind == views.STVert {
+					size = mx - t.resizing.X
+				} else {
+					size = my - t.resizing.Y + 1
+				}
+				t.resizing.ResizeSplit(size)
+				t.Resize()
+				return
+			}
+
+			if resizeID != -1 {
+				t.resizing = t.GetNode(uint64(resizeID))
+				return
+			}
+
 			for i, p := range t.Panes {
 				v := p.GetView()
 				inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
@@ -40,7 +59,10 @@ func (t *TabPane) HandleEvent(event tcell.Event) {
 					p.SetActive(false)
 				}
 			}
+		case tcell.ButtonNone:
+			t.resizing = nil
 		}
+
 	}
 	t.Panes[t.active].HandleEvent(event)
 }
@@ -72,12 +94,16 @@ func (t *TabPane) RemovePane(i int) {
 }
 
 func (t *TabPane) Resize() {
-	for _, p := range t.Panes {
+	for i, p := range t.Panes {
 		n := t.GetNode(p.splitID)
 		pv := p.GetView()
-		pv.X, pv.Y = n.X, n.Y
+		offset := 0
+		if i != 0 {
+			offset = 1
+		}
+		pv.X, pv.Y = n.X+offset, n.Y
 		p.SetView(pv)
-		p.Resize(n.W, n.H)
+		p.Resize(n.W-offset, n.H)
 	}
 }
 

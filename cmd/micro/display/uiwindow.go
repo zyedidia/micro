@@ -45,17 +45,27 @@ func (w *UIWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
 	mouseLoc = func(n *views.Node) buffer.Loc {
 		cs := n.Children()
 		for i, c := range cs {
-			if c.IsLeaf() && c.Kind == views.STVert {
+			if c.Kind == views.STVert {
 				if i != len(cs)-1 {
-					if vloc.X == c.X+c.W {
-						return vloc
+					if vloc.X == c.X+c.W && vloc.Y >= c.Y && vloc.Y < c.Y+c.H {
+						return buffer.Loc{int(c.ID()), 0}
 					}
 				}
-			} else {
-				return mouseLoc(c)
+			} else if c.Kind == views.STHoriz {
+				if i != len(cs)-1 {
+					if vloc.Y == c.Y+c.H-1 && vloc.X >= c.X && vloc.X < c.X+c.W {
+						return buffer.Loc{int(c.ID()), 0}
+					}
+				}
 			}
 		}
-		return buffer.Loc{}
+		for _, c := range cs {
+			m := mouseLoc(c)
+			if m.X != -1 {
+				return m
+			}
+		}
+		return buffer.Loc{-1, 0}
 	}
 	return mouseLoc(w.root)
 }
