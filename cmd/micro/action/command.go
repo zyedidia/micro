@@ -4,6 +4,8 @@ import (
 	"os"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/cmd/micro/shell"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
@@ -260,6 +262,15 @@ func Bind(args []string) {
 
 // Run runs a shell command in the background
 func Run(args []string) {
+	runf, err := shell.RunBackgroundShell(shellwords.Join(args...))
+	if err != nil {
+		InfoBar.Error(err)
+	} else {
+		go func() {
+			InfoBar.Message(runf())
+			screen.Redraw()
+		}()
+	}
 }
 
 // Quit closes the main view
