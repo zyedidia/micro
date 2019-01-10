@@ -10,8 +10,7 @@ import (
 
 type TabList struct {
 	*display.TabWindow
-	List   []*TabPane
-	Active int
+	List []*TabPane
 }
 
 func NewTabList(bufs []*buffer.Buffer) *TabList {
@@ -50,14 +49,28 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 				p.Resize()
 			}
 		} else {
-			t.List[0].Node.Resize(w, h-2)
+			t.List[0].Node.Resize(w, h-1)
 			t.List[0].Resize()
 		}
 	case *tcell.EventMouse:
+		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
+			ind := t.GetMouseLoc(buffer.Loc{mx, my})
+			if ind != -1 {
+				t.Active = ind
+			}
+		case tcell.WheelUp:
+			if my == t.Y {
+				t.Scroll(4)
+				return
+			}
+		case tcell.WheelDown:
+			if my == t.Y {
+				t.Scroll(-4)
+				return
+			}
 		}
-
 	}
 	t.List[t.Active].HandleEvent(event)
 }
@@ -99,10 +112,9 @@ type TabPane struct {
 func (t *TabPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventMouse:
+		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
-			mx, my := e.Position()
-
 			resizeID := t.GetMouseSplitID(buffer.Loc{mx, my})
 			if t.resizing != nil {
 				var size int
@@ -133,6 +145,15 @@ func (t *TabPane) HandleEvent(event tcell.Event) {
 			}
 		case tcell.ButtonNone:
 			t.resizing = nil
+		default:
+			for _, p := range t.Panes {
+				v := p.GetView()
+				inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
+				if inpane {
+					p.HandleEvent(event)
+					return
+				}
+			}
 		}
 
 	}
@@ -170,11 +191,11 @@ func (t *TabPane) RemovePane(i int) {
 
 // Resize resizes all panes according to their corresponding split nodes
 func (t *TabPane) Resize() {
-	for i, p := range t.Panes {
+	for _, p := range t.Panes {
 		n := t.GetNode(p.splitID)
 		pv := p.GetView()
 		offset := 0
-		if i != 0 {
+		if n.X != 0 {
 			offset = 1
 		}
 		pv.X, pv.Y = n.X+offset, n.Y
