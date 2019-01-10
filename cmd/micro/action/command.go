@@ -1,7 +1,6 @@
 package action
 
 import (
-	"log"
 	"os"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
@@ -206,7 +205,6 @@ func VSplit(args []string) {
 		return
 	}
 
-	log.Println("loaded")
 	MainTab().CurPane().vsplit(buf)
 }
 
