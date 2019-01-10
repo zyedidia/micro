@@ -26,7 +26,6 @@ func NewTabList(bufs []*buffer.Buffer) *TabList {
 	}
 	tl.TabWindow = display.NewTabWindow(w, 0)
 	tl.Names = make([]string, len(bufs))
-	tl.UpdateNames()
 
 	return tl
 }
@@ -38,27 +37,58 @@ func (t *TabList) UpdateNames() {
 	}
 }
 
+func (t *TabList) AddTab(p *TabPane) {
+	t.List = append(t.List, p)
+	t.Resize()
+	t.UpdateNames()
+}
+
+func (t *TabList) RemoveTab(id uint64) {
+	for i, p := range t.List {
+		if len(p.Panes) == 0 {
+			continue
+		}
+		if p.Panes[0].splitID == id {
+			copy(t.List[i:], t.List[i+1:])
+			t.List[len(t.List)-1] = nil
+			t.List = t.List[:len(t.List)-1]
+			if t.Active() >= len(t.List) {
+				t.SetActive(len(t.List) - 1)
+			}
+			t.Resize()
+			t.UpdateNames()
+			return
+		}
+	}
+}
+
+func (t *TabList) Resize() {
+	w, h := screen.Screen.Size()
+	InfoBar.Resize(w, h-1)
+	if len(t.List) > 1 {
+		for _, p := range t.List {
+			p.Y = 1
+			p.Node.Resize(w, h-2)
+			p.Resize()
+		}
+	} else if len(t.List) == 1 {
+		t.List[0].Y = 0
+		t.List[0].Node.Resize(w, h-1)
+		t.List[0].Resize()
+	}
+}
+
 func (t *TabList) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventResize:
-		w, h := screen.Screen.Size()
-		InfoBar.Resize(w, h-1)
-		if len(t.List) > 1 {
-			for _, p := range t.List {
-				p.Node.Resize(w, h-2)
-				p.Resize()
-			}
-		} else {
-			t.List[0].Node.Resize(w, h-1)
-			t.List[0].Resize()
-		}
+		t.Resize()
 	case *tcell.EventMouse:
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
 			ind := t.GetMouseLoc(buffer.Loc{mx, my})
 			if ind != -1 {
-				t.Active = ind
+				t.SetActive(ind)
 			}
 		case tcell.WheelUp:
 			if my == t.Y {
@@ -72,10 +102,11 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 			}
 		}
 	}
-	t.List[t.Active].HandleEvent(event)
+	t.List[t.Active()].HandleEvent(event)
 }
 
 func (t *TabList) Display() {
+	t.UpdateNames()
 	if len(t.List) > 1 {
 		t.TabWindow.Display()
 	}
@@ -88,7 +119,7 @@ func InitTabs(bufs []*buffer.Buffer) {
 }
 
 func MainTab() *TabPane {
-	return Tabs.List[Tabs.Active]
+	return Tabs.List[Tabs.Active()]
 }
 
 // A TabPane represents a single tab
@@ -185,7 +216,7 @@ func (t *TabPane) GetPane(splitid uint64) int {
 // Remove pane removes the pane with the given index
 func (t *TabPane) RemovePane(i int) {
 	copy(t.Panes[i:], t.Panes[i+1:])
-	t.Panes[len(t.Panes)-1] = nil // or the zero value of T
+	t.Panes[len(t.Panes)-1] = nil
 	t.Panes = t.Panes[:len(t.Panes)-1]
 }
 

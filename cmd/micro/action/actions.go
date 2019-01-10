@@ -308,6 +308,29 @@ func (h *BufHandler) ParagraphNext() bool {
 // Retab changes all tabs to spaces or all spaces to tabs depending
 // on the user's settings
 func (h *BufHandler) Retab() bool {
+	// b := h.Buf
+	// toSpaces := b.Settings["tabstospaces"].(bool)
+	// tabsize := util.IntOpt(b.Settings["tabsize"])
+	// dirty := false
+	//
+	// for i := 0; i < b.LinesNum(); i++ {
+	// 	l := b.LineBytes(i)
+	//
+	// 	ws := util.GetLeadingWhitespace(l)
+	// 	if len(ws) != 0 {
+	// 		if toSpaces {
+	// 			ws = bytes.Replace(ws, []byte("\t"), []byte(util.Spaces(tabsize)), -1)
+	// 		} else {
+	// 			ws = bytes.Replace(ws, []byte(util.Spaces(tabsize)), []byte("\t"), -1)
+	// 		}
+	// 	}
+	//
+	// 	l = bytes.TrimLeft(l, " \t")
+	// 	b.lines[i].data = append(ws, l...)
+	// 	dirty = true
+	// }
+	//
+	// b.IsModified = dirty
 	return true
 }
 
@@ -990,8 +1013,11 @@ func (h *BufHandler) Quit() bool {
 	quit := func() {
 		if len(MainTab().Panes) > 1 {
 			h.Unsplit()
+		} else if len(Tabs.List) > 1 {
+			Tabs.RemoveTab(h.splitID)
 		} else {
 			screen.Screen.Fini()
+			InfoBar.Close()
 			os.Exit(0)
 		}
 	}
@@ -1014,26 +1040,41 @@ func (h *BufHandler) QuitAll() bool {
 
 // AddTab adds a new tab with an empty buffer
 func (h *BufHandler) AddTab() bool {
+	width, height := screen.Screen.Size()
+	b := buffer.NewBufferFromString("", "", buffer.BTDefault)
+	tp := NewTabPane(0, 0, width, height-1, b)
+	Tabs.AddTab(tp)
+	Tabs.SetActive(len(Tabs.List) - 1)
+
 	return true
 }
 
 // PreviousTab switches to the previous tab in the tab list
 func (h *BufHandler) PreviousTab() bool {
+	a := Tabs.Active()
+	Tabs.SetActive(util.Clamp(a-1, 0, len(Tabs.List)-1))
+
 	return false
 }
 
 // NextTab switches to the next tab in the tab list
 func (h *BufHandler) NextTab() bool {
+	a := Tabs.Active()
+	Tabs.SetActive(util.Clamp(a+1, 0, len(Tabs.List)-1))
 	return false
 }
 
 // VSplitBinding opens an empty vertical split
 func (h *BufHandler) VSplitBinding() bool {
+	h.vsplit(buffer.NewBufferFromString("", "", buffer.BTDefault))
+
 	return false
 }
 
 // HSplitBinding opens an empty horizontal split
 func (h *BufHandler) HSplitBinding() bool {
+	h.hsplit(buffer.NewBufferFromString("", "", buffer.BTDefault))
+
 	return false
 }
 
@@ -1050,11 +1091,19 @@ func (h *BufHandler) Unsplit() bool {
 
 // NextSplit changes the view to the next split
 func (h *BufHandler) NextSplit() bool {
+	a := MainTab().active
+	a = util.Clamp(a+1, 0, len(MainTab().Panes))
+	MainTab().SetActive(a)
+
 	return false
 }
 
 // PreviousSplit changes the view to the previous split
 func (h *BufHandler) PreviousSplit() bool {
+	a := MainTab().active
+	a = util.Clamp(a-1, 0, len(MainTab().Panes))
+	MainTab().SetActive(a)
+
 	return false
 }
 

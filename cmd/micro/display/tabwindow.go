@@ -11,7 +11,7 @@ import (
 
 type TabWindow struct {
 	Names   []string
-	Active  int
+	active  int
 	Y       int
 	width   int
 	hscroll int
@@ -55,6 +55,28 @@ func (w *TabWindow) TotalSize() int {
 	return sum - 4
 }
 
+func (w *TabWindow) Active() int {
+	return w.active
+}
+
+func (w *TabWindow) SetActive(a int) {
+	w.active = a
+	x := 2
+	s := w.TotalSize()
+	for i, n := range w.Names {
+		c := utf8.RuneCountInString(n)
+		if i == a {
+			if x+c >= w.hscroll+w.width {
+				w.hscroll = util.Clamp(x+c+1-w.width, 0, s-w.width)
+			} else if x < w.hscroll {
+				w.hscroll = util.Clamp(x-4, 0, s-w.width)
+			}
+			break
+		}
+		x += c + 4
+	}
+}
+
 // TODO: handle files with character width >=2
 
 func (w *TabWindow) Display() {
@@ -77,7 +99,7 @@ func (w *TabWindow) Display() {
 	}
 
 	for i, n := range w.Names {
-		if i == w.Active {
+		if i == w.active {
 			draw('[', 1)
 		} else {
 			draw(' ', 1)
@@ -88,7 +110,7 @@ func (w *TabWindow) Display() {
 		if i == len(w.Names)-1 {
 			done = true
 		}
-		if i == w.Active {
+		if i == w.active {
 			draw(']', 1)
 			draw(' ', 2)
 		} else {
