@@ -185,11 +185,8 @@ func main() {
 		}
 	}()
 
-	b := LoadInput()[0]
-	width, height := screen.Screen.Size()
-
-	action.MainTab = action.NewTabPane(width, height-1, b)
-
+	b := LoadInput()
+	action.InitTabs(b)
 	action.InitGlobals()
 
 	// Here is the event loop which runs in a separate thread
@@ -206,10 +203,11 @@ func main() {
 		// Display everything
 		screen.Screen.Fill(' ', config.DefStyle)
 		screen.Screen.HideCursor()
-		for _, ep := range action.MainTab.Panes {
+		action.Tabs.Display()
+		for _, ep := range action.MainTab().Panes {
 			ep.Display()
 		}
-		action.MainTab.Display()
+		action.MainTab().Display()
 		action.InfoBar.Display()
 		screen.Screen.Show()
 
@@ -227,7 +225,7 @@ func main() {
 			if action.InfoBar.HasPrompt {
 				action.InfoBar.HandleEvent(event)
 			} else {
-				action.MainTab.HandleEvent(event)
+				action.MainTab().HandleEvent(event)
 			}
 		}
 	}

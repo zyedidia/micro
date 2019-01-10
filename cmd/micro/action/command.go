@@ -207,7 +207,7 @@ func VSplit(args []string) {
 	}
 
 	log.Println("loaded")
-	MainTab.CurPane().vsplit(buf)
+	MainTab().CurPane().vsplit(buf)
 }
 
 // HSplit opens a horizontal split with file given in the first argument
@@ -219,7 +219,7 @@ func HSplit(args []string) {
 		return
 	}
 
-	MainTab.CurPane().hsplit(buf)
+	MainTab().CurPane().hsplit(buf)
 }
 
 // Eval evaluates a lua expression
