@@ -28,12 +28,12 @@ func NewBufEditPane(x, y, width, height int, b *buffer.Buffer) *EditPane {
 	return e
 }
 
-func NewTabPane(width, height int, b *buffer.Buffer) *TabPane {
+func NewTabPane(x, y, width, height int, b *buffer.Buffer) *TabPane {
 	t := new(TabPane)
-	t.Node = views.NewRoot(0, 0, width, height)
-	t.Window = display.NewUIWindow(t.Node)
+	t.Node = views.NewRoot(x, y, width, height)
+	t.UIWindow = display.NewUIWindow(t.Node)
 
-	e := NewBufEditPane(0, 0, width, height, b)
+	e := NewBufEditPane(x, y, width, height, b)
 	e.splitID = t.ID()
 
 	t.Panes = append(t.Panes, e)
