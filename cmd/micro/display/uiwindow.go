@@ -19,11 +19,16 @@ func NewUIWindow(n *views.Node) *UIWindow {
 
 func (w *UIWindow) drawNode(n *views.Node) {
 	cs := n.Children()
+	dividerStyle := config.DefStyle
+	if style, ok := config.Colorscheme["divider"]; ok {
+		dividerStyle = style
+	}
+
 	for i, c := range cs {
 		if c.IsLeaf() && c.Kind == views.STVert {
 			if i != len(cs)-1 {
 				for h := 0; h < c.H; h++ {
-					screen.Screen.SetContent(c.X+c.W, c.Y+h, '|', nil, config.DefStyle.Reverse(true))
+					screen.Screen.SetContent(c.X+c.W, c.Y+h, '|', nil, dividerStyle.Reverse(true))
 				}
 			}
 		} else {

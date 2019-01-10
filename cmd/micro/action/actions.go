@@ -10,6 +10,7 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/cmd/micro/shell"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
@@ -367,16 +368,6 @@ func (h *BufHandler) SelectToEnd() bool {
 	}
 	h.CursorEnd()
 	h.Cursor.SelectTo(h.Buf.End())
-	return true
-}
-
-// InsertSpace inserts a space
-func (h *BufHandler) InsertSpace() bool {
-	if h.Cursor.HasSelection() {
-		h.Cursor.DeleteSelection()
-		h.Cursor.ResetSelection()
-	}
-	h.Buf.Insert(h.Cursor.Loc, " ")
 	return true
 }
 
@@ -984,6 +975,13 @@ func (h *BufHandler) ToggleKeyMenu() bool {
 
 // ShellMode opens a terminal to run a shell command
 func (h *BufHandler) ShellMode() bool {
+	InfoBar.Prompt("$ ", "", "Shell", nil, func(resp string, canceled bool) {
+		if !canceled {
+			// The true here is for openTerm to make the command interactive
+			shell.RunInteractiveShell(resp, true, false)
+		}
+	})
+
 	return false
 }
 

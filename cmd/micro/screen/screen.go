@@ -18,6 +18,7 @@ import (
 // same time too.
 var Screen tcell.Screen
 var lock sync.Mutex
+var DrawChan chan bool
 
 func Lock() {
 	lock.Lock()
@@ -27,21 +28,24 @@ func Unlock() {
 	lock.Unlock()
 }
 
-var screenWasNil bool
+func Redraw() {
+	DrawChan <- true
+}
 
 // TempFini shuts the screen down temporarily
-func TempFini() {
-	screenWasNil = Screen == nil
+func TempFini() bool {
+	screenWasNil := Screen == nil
 
 	if !screenWasNil {
-		Lock()
 		Screen.Fini()
+		Lock()
 		Screen = nil
 	}
+	return screenWasNil
 }
 
 // TempStart restarts the screen after it was temporarily disabled
-func TempStart() {
+func TempStart(screenWasNil bool) {
 	if !screenWasNil {
 		Init()
 		Unlock()
@@ -50,6 +54,8 @@ func TempStart() {
 
 // Init creates and initializes the tcell screen
 func Init() {
+	DrawChan = make(chan bool)
+
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
 
