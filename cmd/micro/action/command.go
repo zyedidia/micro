@@ -4,6 +4,7 @@ import (
 	"os"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/shell"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
@@ -263,7 +264,7 @@ func (h *BufHandler) ShowKeyCmd(args []string) {
 		return
 	}
 
-	if action, ok := Bindings[args[0]]; ok {
+	if action, ok := config.Bindings[args[0]]; ok {
 		InfoBar.Message(action)
 	} else {
 		InfoBar.Message(args[0], " has no binding")

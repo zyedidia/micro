@@ -83,13 +83,13 @@ func (s *StatusLine) Display() {
 			option := name[4:]
 			return []byte(fmt.Sprint(s.FindOpt(string(option))))
 		} else if bytes.HasPrefix(name, []byte("bind")) {
-			// binding := string(name[5:])
+			binding := string(name[5:])
 			// TODO: search bindings
-			// for k, v := range action.Bindings {
-			// 	if v == binding {
-			// 		return []byte(k)
-			// 	}
-			// }
+			for k, v := range config.Bindings {
+				if v == binding {
+					return []byte(k)
+				}
+			}
 			return []byte("null")
 		} else {
 			return []byte(s.Info[string(name)](s.win.Buf))
