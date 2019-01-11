@@ -14,9 +14,9 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-var Bindings = DefaultBindings()
-
 func InitBindings() {
+	config.Bindings = DefaultBindings()
+
 	var parsed map[string]string
 	defaults := DefaultBindings()
 
@@ -57,7 +57,7 @@ func BindKey(k, v string) {
 		util.TermMessage("Raw events not supported yet")
 	}
 
-	Bindings[k] = v
+	config.Bindings[k] = v
 }
 
 // findKeyEvent will find binding Key 'b' using string 'k'
