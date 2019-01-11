@@ -52,8 +52,9 @@ func BufMapMouse(k MouseEvent, action string) {
 // The ActionHandler can access the window for necessary info about
 // visual positions for mouse clicks and scrolling
 type BufHandler struct {
+	display.Window
+
 	Buf *buffer.Buffer
-	Win display.Window
 
 	cursors []*buffer.Cursor
 	Cursor  *buffer.Cursor // the active cursor
@@ -100,7 +101,7 @@ type BufHandler struct {
 func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
 	h := new(BufHandler)
 	h.Buf = buf
-	h.Win = win
+	h.Window = win
 
 	h.cursors = []*buffer.Cursor{buffer.NewCursor(buf, buf.StartCursor)}
 	h.Cursor = h.cursors[0]
@@ -133,7 +134,7 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 				// Mouse was just released
 
 				mx, my := e.Position()
-				mouseLoc := h.Win.GetMouseLoc(buffer.Loc{X: mx, Y: my})
+				mouseLoc := h.GetMouseLoc(buffer.Loc{X: mx, Y: my})
 
 				// Relocating here isn't really necessary because the cursor will
 				// be in the right place from the last mouse event
@@ -171,14 +172,14 @@ func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 					h.Buf.SetCurCursor(c.Num)
 					h.Cursor = c
 					if action(h) {
-						h.Win.Relocate()
+						h.Relocate()
 					}
 				}
 				return true
 			}
 		}
 		if action(h) {
-			h.Win.Relocate()
+			h.Relocate()
 		}
 		return true
 	}
@@ -190,7 +191,7 @@ func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 	if action, ok := BufMouseBindings[e]; ok {
 		if action(h, te) {
-			h.Win.Relocate()
+			h.Relocate()
 		}
 		return true
 	}

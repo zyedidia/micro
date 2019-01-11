@@ -7,6 +7,12 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/views"
 )
 
+type Pane interface {
+	Handler
+	display.Window
+	ID() uint64
+}
+
 type EditPane struct {
 	display.Window
 	*BufHandler
