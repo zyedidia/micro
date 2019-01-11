@@ -8,11 +8,15 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+// The TabList is a list of tabs and a window to display the tab bar
+// at the top of the screen
 type TabList struct {
 	*display.TabWindow
 	List []*Tab
 }
 
+// NewTabList creates a TabList from a list of buffers by creating a Tab
+// for each buffer
 func NewTabList(bufs []*buffer.Buffer) *TabList {
 	w, h := screen.Screen.Size()
 	tl := new(TabList)
@@ -30,6 +34,8 @@ func NewTabList(bufs []*buffer.Buffer) *TabList {
 	return tl
 }
 
+// UpdateNames makes sure that the list of names the tab window has access to is
+// correct
 func (t *TabList) UpdateNames() {
 	t.Names = t.Names[:0]
 	for _, p := range t.List {
@@ -37,12 +43,14 @@ func (t *TabList) UpdateNames() {
 	}
 }
 
+// AddTab adds a new tab to this TabList
 func (t *TabList) AddTab(p *Tab) {
 	t.List = append(t.List, p)
 	t.Resize()
 	t.UpdateNames()
 }
 
+// RemoveTab removes a tab with the given id from the TabList
 func (t *TabList) RemoveTab(id uint64) {
 	for i, p := range t.List {
 		if len(p.Panes) == 0 {
@@ -62,6 +70,10 @@ func (t *TabList) RemoveTab(id uint64) {
 	}
 }
 
+// Resize resizes all elements within the tab list
+// One thing to note is that when there is only 1 tab
+// the tab bar should not be drawn so resizing must take
+// that into account
 func (t *TabList) Resize() {
 	w, h := screen.Screen.Size()
 	InfoBar.Resize(w, h-1)
@@ -78,6 +90,8 @@ func (t *TabList) Resize() {
 	}
 }
 
+// HandleEvent checks for a resize event or a mouse event on the tab bar
+// otherwise it will forward the event to the currently active tab
 func (t *TabList) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventResize:
@@ -105,6 +119,7 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 	t.List[t.Active()].HandleEvent(event)
 }
 
+// Display updates the names and then displays the tab bar
 func (t *TabList) Display() {
 	t.UpdateNames()
 	if len(t.List) > 1 {
@@ -112,6 +127,7 @@ func (t *TabList) Display() {
 	}
 }
 
+// Tabs is the global tab list
 var Tabs *TabList
 
 func InitTabs(bufs []*buffer.Buffer) {
@@ -135,6 +151,7 @@ type Tab struct {
 	resizing *views.Node // node currently being resized
 }
 
+// NewTabFromBuffer creates a new tab from the given buffer
 func NewTabFromBuffer(x, y, width, height int, b *buffer.Buffer) *Tab {
 	t := new(Tab)
 	t.Node = views.NewRoot(x, y, width, height)
@@ -180,10 +197,8 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 				v := p.GetView()
 				inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
 				if inpane {
-					t.active = i
-					p.SetActive(true)
-				} else {
-					p.SetActive(false)
+					t.SetActive(i)
+					return
 				}
 			}
 		case tcell.ButtonNone:
