@@ -37,7 +37,5 @@ type MouseAction func(Handler, tcell.EventMouse) bool
 // A Handler will take a tcell event and execute it
 // appropriately
 type Handler interface {
-	// DoKeyEvent(KeyEvent) bool
-	// DoMouseEvent(MouseEvent, *tcell.EventMouse) (MouseAction, bool)
 	HandleEvent(tcell.Event)
 }

@@ -17,19 +17,19 @@ import (
 
 // ScrollUp is not an action
 func (h *BufHandler) ScrollUp(n int) {
-	v := h.Win.GetView()
+	v := h.GetView()
 	if v.StartLine >= n {
 		v.StartLine -= n
-		h.Win.SetView(v)
+		h.SetView(v)
 	}
 }
 
 // ScrollDown is not an action
 func (h *BufHandler) ScrollDown(n int) {
-	v := h.Win.GetView()
+	v := h.GetView()
 	if v.StartLine <= h.Buf.LinesNum()-1-n {
 		v.StartLine += n
-		h.Win.SetView(v)
+		h.SetView(v)
 	}
 }
 
@@ -38,12 +38,12 @@ func (h *BufHandler) ScrollDown(n int) {
 func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
-	mouseLoc := h.Win.GetMouseLoc(buffer.Loc{mx, my})
+	mouseLoc := h.GetMouseLoc(buffer.Loc{mx, my})
 	h.Cursor.Loc = mouseLoc
 	if h.mouseReleased {
 		if b.NumCursors() > 1 {
 			b.ClearCursors()
-			h.Win.Relocate()
+			h.Relocate()
 		}
 		if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
 			if h.doubleClick {
@@ -104,7 +104,7 @@ func (h *BufHandler) ScrollDownAction() bool {
 
 // Center centers the view on the cursor
 func (h *BufHandler) Center() bool {
-	v := h.Win.GetView()
+	v := h.GetView()
 	v.StartLine = h.Cursor.Y - v.Height/2
 	if v.StartLine+v.Height > h.Buf.LinesNum() {
 		v.StartLine = h.Buf.LinesNum() - v.Height
@@ -112,7 +112,7 @@ func (h *BufHandler) Center() bool {
 	if v.StartLine < 0 {
 		v.StartLine = 0
 	}
-	h.Win.SetView(v)
+	h.SetView(v)
 	return true
 }
 
@@ -826,19 +826,19 @@ func (h *BufHandler) OpenFile() bool {
 
 // Start moves the viewport to the start of the buffer
 func (h *BufHandler) Start() bool {
-	v := h.Win.GetView()
+	v := h.GetView()
 	v.StartLine = 0
-	h.Win.SetView(v)
+	h.SetView(v)
 	return false
 }
 
 // End moves the viewport to the end of the buffer
 func (h *BufHandler) End() bool {
 	// TODO: softwrap problems?
-	v := h.Win.GetView()
+	v := h.GetView()
 	if v.Height > h.Buf.LinesNum() {
 		v.StartLine = 0
-		h.Win.SetView(v)
+		h.SetView(v)
 	} else {
 		h.StartLine = h.Buf.LinesNum() - v.Height
 	}
@@ -847,19 +847,19 @@ func (h *BufHandler) End() bool {
 
 // PageUp scrolls the view up a page
 func (h *BufHandler) PageUp() bool {
-	v := h.Win.GetView()
+	v := h.GetView()
 	if v.StartLine > v.Height {
 		h.ScrollUp(v.Height)
 	} else {
 		v.StartLine = 0
 	}
-	h.Win.SetView(v)
+	h.SetView(v)
 	return false
 }
 
 // PageDown scrolls the view down a page
 func (h *BufHandler) PageDown() bool {
-	v := h.Win.GetView()
+	v := h.GetView()
 	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height {
 		h.ScrollDown(v.Height)
 	} else if h.Buf.LinesNum() >= v.Height {
@@ -873,7 +873,7 @@ func (h *BufHandler) SelectPageUp() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.UpN(h.Win.GetView().Height)
+	h.Cursor.UpN(h.GetView().Height)
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	return true
 }
@@ -883,7 +883,7 @@ func (h *BufHandler) SelectPageDown() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.DownN(h.Win.GetView().Height)
+	h.Cursor.DownN(h.GetView().Height)
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	return true
 }
@@ -897,7 +897,7 @@ func (h *BufHandler) CursorPageUp() bool {
 		h.Cursor.ResetSelection()
 		h.Cursor.StoreVisualX()
 	}
-	h.Cursor.UpN(h.Win.GetView().Height)
+	h.Cursor.UpN(h.GetView().Height)
 	return true
 }
 
@@ -910,25 +910,25 @@ func (h *BufHandler) CursorPageDown() bool {
 		h.Cursor.ResetSelection()
 		h.Cursor.StoreVisualX()
 	}
-	h.Cursor.DownN(h.Win.GetView().Height)
+	h.Cursor.DownN(h.GetView().Height)
 	return true
 }
 
 // HalfPageUp scrolls the view up half a page
 func (h *BufHandler) HalfPageUp() bool {
-	v := h.Win.GetView()
+	v := h.GetView()
 	if v.StartLine > v.Height/2 {
 		h.ScrollUp(v.Height / 2)
 	} else {
 		v.StartLine = 0
 	}
-	h.Win.SetView(v)
+	h.SetView(v)
 	return false
 }
 
 // HalfPageDown scrolls the view down half a page
 func (h *BufHandler) HalfPageDown() bool {
-	v := h.Win.GetView()
+	v := h.GetView()
 	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height/2 {
 		h.ScrollDown(v.Height / 2)
 	} else {
@@ -936,7 +936,7 @@ func (h *BufHandler) HalfPageDown() bool {
 			v.StartLine = h.Buf.LinesNum() - v.Height
 		}
 	}
-	h.Win.SetView(v)
+	h.SetView(v)
 	return false
 }
 
@@ -1193,7 +1193,7 @@ func (h *BufHandler) SpawnMultiCursorSelect() bool {
 func (h *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
-	mouseLoc := h.Win.GetMouseLoc(buffer.Loc{X: mx, Y: my})
+	mouseLoc := h.GetMouseLoc(buffer.Loc{X: mx, Y: my})
 	c := buffer.NewCursor(b, mouseLoc)
 	b.AddCursor(c)
 	b.MergeCursors()
@@ -1219,7 +1219,7 @@ func (h *BufHandler) SkipMultiCursor() bool {
 		lastC.Loc = lastC.CurSelection[1]
 
 		h.Buf.MergeCursors()
-		h.Win.Relocate()
+		h.Relocate()
 	} else {
 		InfoBar.Message("No matches found")
 	}
