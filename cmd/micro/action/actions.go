@@ -1047,7 +1047,7 @@ func (h *BufHandler) AddTab() bool {
 	Tabs.AddTab(tp)
 	Tabs.SetActive(len(Tabs.List) - 1)
 
-	return true
+	return false
 }
 
 // PreviousTab switches to the previous tab in the tab list
