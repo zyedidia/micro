@@ -15,7 +15,7 @@ import (
 type TermType int
 
 const (
-	TTIdle    = iota // Waiting for a new command
+	TTClose   = iota // Should be closed
 	TTRunning        // Currently running a command
 	TTDone           // Finished running a command
 )
@@ -36,6 +36,10 @@ type Terminal struct {
 // HasSelection returns whether this terminal has a valid selection
 func (t *Terminal) HasSelection() bool {
 	return t.Selection[0] != t.Selection[1]
+}
+
+func (t *Terminal) Name() string {
+	return t.title
 }
 
 // GetSelection returns the selected text
@@ -60,7 +64,7 @@ func (t *Terminal) GetSelection(width int) string {
 }
 
 // Start begins a new command in this terminal with a given view
-func (t *Terminal) Start(execCmd []string, getOutput bool) error {
+func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool) error {
 	if len(execCmd) <= 0 {
 		return nil
 	}
@@ -78,6 +82,7 @@ func (t *Terminal) Start(execCmd []string, getOutput bool) error {
 	t.getOutput = getOutput
 	t.Status = TTRunning
 	t.title = execCmd[0] + ":" + strconv.Itoa(cmd.Process.Pid)
+	t.wait = wait
 
 	go func() {
 		for {
@@ -88,6 +93,7 @@ func (t *Terminal) Start(execCmd []string, getOutput bool) error {
 			}
 			screen.Redraw()
 		}
+		t.Stop()
 		// TODO: close Term
 		// closeterm <- view.Num
 	}()
@@ -107,10 +113,10 @@ func (t *Terminal) Stop() {
 	}
 }
 
-// Close sets the Status to TTIdle indicating that the terminal
-// is ready for a new command to execute
+// Close sets the Status to TTClose indicating that the terminal
+// is done and should be closed
 func (t *Terminal) Close() {
-	t.Status = TTIdle
+	t.Status = TTClose
 	// call the lua function that the user has given as a callback
 	if t.getOutput {
 		// TODO: plugin callback on Term emulator

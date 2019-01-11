@@ -111,6 +111,14 @@ func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
 	return h
 }
 
+func (h *BufHandler) ID() uint64 {
+	return h.splitID
+}
+
+func (h *BufHandler) Name() string {
+	return h.Buf.GetName()
+}
+
 // HandleEvent executes the tcell event properly
 // TODO: multiple actions bound to one key
 func (h *BufHandler) HandleEvent(event tcell.Event) {

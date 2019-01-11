@@ -38,4 +38,5 @@ type MouseAction func(Handler, tcell.EventMouse) bool
 // appropriately
 type Handler interface {
 	HandleEvent(tcell.Event)
+	HandleCommand(string)
 }

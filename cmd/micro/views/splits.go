@@ -2,7 +2,6 @@ package views
 
 import (
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -440,7 +439,6 @@ func (n *Node) unsplit(i int, h bool) {
 	copy(n.children[i:], n.children[i+1:])
 	n.children[len(n.children)-1] = nil
 	n.children = n.children[:len(n.children)-1]
-	log.Println(len(n.children))
 
 	nonrs, numr := n.getResizeInfo(h)
 	if numr == 0 {
@@ -475,7 +473,6 @@ func (n *Node) Unsplit() {
 	}
 
 	if n.parent.IsLeaf() {
-		log.Println("destroy parent")
 		n.parent.Unsplit()
 	}
 }

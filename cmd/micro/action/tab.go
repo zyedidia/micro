@@ -10,19 +10,19 @@ import (
 
 type TabList struct {
 	*display.TabWindow
-	List []*TabPane
+	List []*Tab
 }
 
 func NewTabList(bufs []*buffer.Buffer) *TabList {
 	w, h := screen.Screen.Size()
 	tl := new(TabList)
-	tl.List = make([]*TabPane, len(bufs))
+	tl.List = make([]*Tab, len(bufs))
 	if len(bufs) > 1 {
 		for i, b := range bufs {
-			tl.List[i] = NewTabPane(0, 1, w, h-2, b)
+			tl.List[i] = NewTabFromBuffer(0, 1, w, h-2, b)
 		}
 	} else {
-		tl.List[0] = NewTabPane(0, 0, w, h-1, bufs[0])
+		tl.List[0] = NewTabFromBuffer(0, 0, w, h-1, bufs[0])
 	}
 	tl.TabWindow = display.NewTabWindow(w, 0)
 	tl.Names = make([]string, len(bufs))
@@ -33,11 +33,11 @@ func NewTabList(bufs []*buffer.Buffer) *TabList {
 func (t *TabList) UpdateNames() {
 	t.Names = t.Names[:0]
 	for _, p := range t.List {
-		t.Names = append(t.Names, p.Panes[p.active].Buf.GetName())
+		t.Names = append(t.Names, p.Panes[p.active].Name())
 	}
 }
 
-func (t *TabList) AddTab(p *TabPane) {
+func (t *TabList) AddTab(p *Tab) {
 	t.List = append(t.List, p)
 	t.Resize()
 	t.UpdateNames()
@@ -48,7 +48,7 @@ func (t *TabList) RemoveTab(id uint64) {
 		if len(p.Panes) == 0 {
 			continue
 		}
-		if p.Panes[0].splitID == id {
+		if p.Panes[0].ID() == id {
 			copy(t.List[i:], t.List[i+1:])
 			t.List[len(t.List)-1] = nil
 			t.List = t.List[:len(t.List)-1]
@@ -118,21 +118,33 @@ func InitTabs(bufs []*buffer.Buffer) {
 	Tabs = NewTabList(bufs)
 }
 
-func MainTab() *TabPane {
+func MainTab() *Tab {
 	return Tabs.List[Tabs.Active()]
 }
 
-// A TabPane represents a single tab
+// A Tab represents a single tab
 // It consists of a list of edit panes (the open buffers),
 // a split tree (stored as just the root node), and a uiwindow
 // to display the UI elements like the borders between splits
-type TabPane struct {
+type Tab struct {
 	*views.Node
 	*display.UIWindow
-	Panes  []*EditPane
+	Panes  []Pane
 	active int
 
 	resizing *views.Node // node currently being resized
+}
+
+func NewTabFromBuffer(x, y, width, height int, b *buffer.Buffer) *Tab {
+	t := new(Tab)
+	t.Node = views.NewRoot(x, y, width, height)
+	t.UIWindow = display.NewUIWindow(t.Node)
+
+	e := NewBufEditPane(x, y, width, height, b)
+	e.splitID = t.ID()
+
+	t.Panes = append(t.Panes, e)
+	return t
 }
 
 // HandleEvent takes a tcell event and usually dispatches it to the current
@@ -140,7 +152,7 @@ type TabPane struct {
 // is interacting with the UI (resizing splits) then the event is consumed here
 // If the event is a mouse event in a pane, that pane will become active and get
 // the event
-func (t *TabPane) HandleEvent(event tcell.Event) {
+func (t *Tab) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventMouse:
 		mx, my := e.Position()
@@ -192,7 +204,7 @@ func (t *TabPane) HandleEvent(event tcell.Event) {
 }
 
 // SetActive changes the currently active pane to the specified index
-func (t *TabPane) SetActive(i int) {
+func (t *Tab) SetActive(i int) {
 	t.active = i
 	for j, p := range t.Panes {
 		if j == i {
@@ -204,9 +216,9 @@ func (t *TabPane) SetActive(i int) {
 }
 
 // GetPane returns the pane with the given split index
-func (t *TabPane) GetPane(splitid uint64) int {
+func (t *Tab) GetPane(splitid uint64) int {
 	for i, p := range t.Panes {
-		if p.splitID == splitid {
+		if p.ID() == splitid {
 			return i
 		}
 	}
@@ -214,16 +226,16 @@ func (t *TabPane) GetPane(splitid uint64) int {
 }
 
 // Remove pane removes the pane with the given index
-func (t *TabPane) RemovePane(i int) {
+func (t *Tab) RemovePane(i int) {
 	copy(t.Panes[i:], t.Panes[i+1:])
 	t.Panes[len(t.Panes)-1] = nil
 	t.Panes = t.Panes[:len(t.Panes)-1]
 }
 
 // Resize resizes all panes according to their corresponding split nodes
-func (t *TabPane) Resize() {
+func (t *Tab) Resize() {
 	for _, p := range t.Panes {
-		n := t.GetNode(p.splitID)
+		n := t.GetNode(p.ID())
 		pv := p.GetView()
 		offset := 0
 		if n.X != 0 {
@@ -236,6 +248,6 @@ func (t *TabPane) Resize() {
 }
 
 // CurPane returns the currently active pane
-func (t *TabPane) CurPane() *EditPane {
+func (t *Tab) CurPane() Pane {
 	return t.Panes[t.active]
 }

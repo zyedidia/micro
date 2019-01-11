@@ -818,7 +818,7 @@ func (h *BufHandler) SelectAll() bool {
 func (h *BufHandler) OpenFile() bool {
 	InfoBar.Prompt("> ", "open ", "Open", nil, func(resp string, canceled bool) {
 		if !canceled {
-			HandleCommand(resp)
+			h.HandleCommand(resp)
 		}
 	})
 	return false
@@ -989,7 +989,7 @@ func (h *BufHandler) ShellMode() bool {
 func (h *BufHandler) CommandMode() bool {
 	InfoBar.Prompt("> ", "", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {
-			HandleCommand(resp)
+			h.HandleCommand(resp)
 		}
 	})
 	return false
@@ -1023,6 +1023,9 @@ func (h *BufHandler) Quit() bool {
 		InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 			if !canceled && !yes {
 				quit()
+			} else if !canceled && yes {
+				h.Save()
+				quit()
 			}
 		})
 	} else {
@@ -1040,7 +1043,7 @@ func (h *BufHandler) QuitAll() bool {
 func (h *BufHandler) AddTab() bool {
 	width, height := screen.Screen.Size()
 	b := buffer.NewBufferFromString("", "", buffer.BTDefault)
-	tp := NewTabPane(0, 0, width, height-1, b)
+	tp := NewTabFromBuffer(0, 0, width, height-1, b)
 	Tabs.AddTab(tp)
 	Tabs.SetActive(len(Tabs.List) - 1)
 
