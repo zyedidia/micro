@@ -12,7 +12,7 @@ import (
 
 // A Command contains an action (a function to call) as well as information about how to autocomplete the command
 type Command struct {
-	action      func([]string)
+	action      func(*BufHandler, []string)
 	completions []Completion
 }
 
@@ -24,37 +24,33 @@ type StrCommand struct {
 
 var commands map[string]Command
 
-var commandActions map[string]func([]string)
-
-func init() {
-	commandActions = map[string]func([]string){
-		"Set":        Set,
-		"SetLocal":   SetLocal,
-		"Show":       Show,
-		"ShowKey":    ShowKey,
-		"Run":        Run,
-		"Bind":       Bind,
-		"Quit":       Quit,
-		"Save":       Save,
-		"Replace":    Replace,
-		"ReplaceAll": ReplaceAll,
-		"VSplit":     VSplit,
-		"HSplit":     HSplit,
-		"Tab":        NewTab,
-		"Help":       Help,
-		"Eval":       Eval,
-		"ToggleLog":  ToggleLog,
-		"Plugin":     PluginCmd,
-		"Reload":     Reload,
-		"Cd":         Cd,
-		"Pwd":        Pwd,
-		"Open":       Open,
-		"TabSwitch":  TabSwitch,
-		"Term":       Term,
-		"MemUsage":   MemUsage,
-		"Retab":      Retab,
-		"Raw":        Raw,
-	}
+var commandActions = map[string]func(*BufHandler, []string){
+	"Set":        (*BufHandler).SetCmd,
+	"SetLocal":   (*BufHandler).SetLocalCmd,
+	"Show":       (*BufHandler).ShowCmd,
+	"ShowKey":    (*BufHandler).ShowKeyCmd,
+	"Run":        (*BufHandler).RunCmd,
+	"Bind":       (*BufHandler).BindCmd,
+	"Quit":       (*BufHandler).QuitCmd,
+	"Save":       (*BufHandler).SaveCmd,
+	"Replace":    (*BufHandler).ReplaceCmd,
+	"ReplaceAll": (*BufHandler).ReplaceAllCmd,
+	"VSplit":     (*BufHandler).VSplitCmd,
+	"HSplit":     (*BufHandler).HSplitCmd,
+	"Tab":        (*BufHandler).NewTabCmd,
+	"Help":       (*BufHandler).HelpCmd,
+	"Eval":       (*BufHandler).EvalCmd,
+	"ToggleLog":  (*BufHandler).ToggleLogCmd,
+	"Plugin":     (*BufHandler).PluginCmd,
+	"Reload":     (*BufHandler).ReloadCmd,
+	"Cd":         (*BufHandler).CdCmd,
+	"Pwd":        (*BufHandler).PwdCmd,
+	"Open":       (*BufHandler).OpenCmd,
+	"TabSwitch":  (*BufHandler).TabSwitchCmd,
+	"Term":       (*BufHandler).TermCmd,
+	"MemUsage":   (*BufHandler).MemUsageCmd,
+	"Retab":      (*BufHandler).RetabCmd,
+	"Raw":        (*BufHandler).RawCmd,
 }
 
 // InitCommands initializes the default commands
@@ -123,7 +119,7 @@ func CommandEditAction(prompt string) BufKeyAction {
 	return func(h *BufHandler) bool {
 		InfoBar.Prompt("> ", prompt, "Command", nil, func(resp string, canceled bool) {
 			if !canceled {
-				HandleCommand(resp)
+				MainTab().CurPane().HandleCommand(resp)
 			}
 		})
 		return false
@@ -134,46 +130,46 @@ func CommandEditAction(prompt string) BufKeyAction {
 // given command
 func CommandAction(cmd string) BufKeyAction {
 	return func(h *BufHandler) bool {
-		HandleCommand(cmd)
+		MainTab().CurPane().HandleCommand(cmd)
 		return false
 	}
 }
 
 // PluginCmd installs, removes, updates, lists, or searches for given plugins
-func PluginCmd(args []string) {
+func (h *BufHandler) PluginCmd(args []string) {
 }
 
-// Retab changes all spaces to tabs or all tabs to spaces
+// RetabCmd changes all spaces to tabs or all tabs to spaces
 // depending on the user's settings
-func Retab(args []string) {
+func (h *BufHandler) RetabCmd(args []string) {
 }
 
-// Raw opens a new raw view which displays the escape sequences micro
+// RawCmd opens a new raw view which displays the escape sequences micro
 // is receiving in real-time
-func Raw(args []string) {
+func (h *BufHandler) RawCmd(args []string) {
 }
 
-// TabSwitch switches to a given tab either by name or by number
-func TabSwitch(args []string) {
+// TabSwitchCmd switches to a given tab either by name or by number
+func (h *BufHandler) TabSwitchCmd(args []string) {
 }
 
-// Cd changes the current working directory
-func Cd(args []string) {
+// CdCmd changes the current working directory
+func (h *BufHandler) CdCmd(args []string) {
 }
 
-// MemUsage prints micro's memory usage
+// MemUsageCmd prints micro's memory usage
 // Alloc shows how many bytes are currently in use
 // Sys shows how many bytes have been requested from the operating system
 // NumGC shows how many times the GC has been run
 // Note that Go commonly reserves more memory from the OS than is currently in-use/required
 // Additionally, even if Go returns memory to the OS, the OS does not always claim it because
 // there may be plenty of memory to spare
-func MemUsage(args []string) {
+func (h *BufHandler) MemUsageCmd(args []string) {
 	InfoBar.Message(util.GetMemStats())
 }
 
-// Pwd prints the current working directory
-func Pwd(args []string) {
+// PwdCmd prints the current working directory
+func (h *BufHandler) PwdCmd(args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		InfoBar.Message(err.Error())
@@ -182,68 +178,86 @@ func Pwd(args []string) {
 	}
 }
 
-// Open opens a new buffer with a given filename
-func Open(args []string) {
+// OpenCmd opens a new buffer with a given filename
+func (h *BufHandler) OpenCmd(args []string) {
 }
 
-// ToggleLog toggles the log view
-func ToggleLog(args []string) {
+// ToggleLogCmd toggles the log view
+func (h *BufHandler) ToggleLogCmd(args []string) {
 }
 
-// Reload reloads all files (syntax files, colorschemes...)
-func Reload(args []string) {
+// ReloadCmd reloads all files (syntax files, colorschemes...)
+func (h *BufHandler) ReloadCmd(args []string) {
 }
 
-// Help tries to open the given help page in a horizontal split
-func Help(args []string) {
+// HelpCmd tries to open the given help page in a horizontal split
+func (h *BufHandler) HelpCmd(args []string) {
 }
 
-// VSplit opens a vertical split with file given in the first argument
+// VSplitCmd opens a vertical split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
-func VSplit(args []string) {
+func (h *BufHandler) VSplitCmd(args []string) {
 	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
 	if err != nil {
 		InfoBar.Error(err)
 		return
 	}
 
-	MainTab().CurPane().vsplit(buf)
+	h.vsplit(buf)
 }
 
-// HSplit opens a horizontal split with file given in the first argument
+// HSplitCmd opens a horizontal split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
-func HSplit(args []string) {
+func (h *BufHandler) HSplitCmd(args []string) {
 	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
 	if err != nil {
 		InfoBar.Error(err)
 		return
 	}
 
-	MainTab().CurPane().hsplit(buf)
+	h.hsplit(buf)
 }
 
-// Eval evaluates a lua expression
-func Eval(args []string) {
+// EvalCmd evaluates a lua expression
+func (h *BufHandler) EvalCmd(args []string) {
 }
 
-// NewTab opens the given file in a new tab
-func NewTab(args []string) {
+// NewTabCmd opens the given file in a new tab
+func (h *BufHandler) NewTabCmd(args []string) {
+	width, height := screen.Screen.Size()
+	if len(args) > 0 {
+		for _, a := range args {
+			b, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			tp := NewTabFromBuffer(0, 0, width, height-1, b)
+			Tabs.AddTab(tp)
+			Tabs.SetActive(len(Tabs.List) - 1)
+		}
+	} else {
+		b := buffer.NewBufferFromString("", "", buffer.BTDefault)
+		tp := NewTabFromBuffer(0, 0, width, height-1, b)
+		Tabs.AddTab(tp)
+		Tabs.SetActive(len(Tabs.List) - 1)
+	}
 }
 
-// Set sets an option
-func Set(args []string) {
+// SetCmd sets an option
+func (h *BufHandler) SetCmd(args []string) {
 }
 
-// SetLocal sets an option local to the buffer
-func SetLocal(args []string) {
+// SetLocalCmd sets an option local to the buffer
+func (h *BufHandler) SetLocalCmd(args []string) {
 }
 
-// Show shows the value of the given option
-func Show(args []string) {
+// ShowCmd shows the value of the given option
+func (h *BufHandler) ShowCmd(args []string) {
 }
 
-// ShowKey displays the action that a key is bound to
-func ShowKey(args []string) {
+// ShowKeyCmd displays the action that a key is bound to
+func (h *BufHandler) ShowKeyCmd(args []string) {
 	if len(args) < 1 {
 		InfoBar.Error("Please provide a key to show")
 		return
@@ -256,12 +270,12 @@ func ShowKey(args []string) {
 	}
 }
 
-// Bind creates a new keybinding
-func Bind(args []string) {
+// BindCmd creates a new keybinding
+func (h *BufHandler) BindCmd(args []string) {
 }
 
-// Run runs a shell command in the background
-func Run(args []string) {
+// RunCmd runs a shell command in the background
+func (h *BufHandler) RunCmd(args []string) {
 	runf, err := shell.RunBackgroundShell(shellwords.Join(args...))
 	if err != nil {
 		InfoBar.Error(err)
@@ -273,28 +287,54 @@ func Run(args []string) {
 	}
 }
 
-// Quit closes the main view
-func Quit(args []string) {
+// QuitCmd closes the main view
+func (h *BufHandler) QuitCmd(args []string) {
 }
 
-// Save saves the buffer in the main view
-func Save(args []string) {
+// SaveCmd saves the buffer in the main view
+func (h *BufHandler) SaveCmd(args []string) {
 }
 
-// Replace runs search and replace
-func Replace(args []string) {
+// ReplaceCmd runs search and replace
+func (h *BufHandler) ReplaceCmd(args []string) {
 }
 
-// ReplaceAll replaces search term all at once
-func ReplaceAll(args []string) {
+// ReplaceAllCmd replaces search term all at once
+func (h *BufHandler) ReplaceAllCmd(args []string) {
 }
 
-// Term opens a terminal in the current view
-func Term(args []string) {
+// TermCmd opens a terminal in the current view
+func (h *BufHandler) TermCmd(args []string) {
+	ps := MainTab().Panes
+
+	term := func(i int) {
+		v := h.GetView()
+		t := new(shell.Terminal)
+		t.Start(args, false, true)
+		MainTab().Panes[i] = NewTermHandler(v.X, v.Y, v.Width, v.Height, t, h.ID())
+		MainTab().SetActive(i)
+	}
+
+	for i, p := range ps {
+		if p.ID() == h.ID() {
+			if h.Buf.Modified() {
+				InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
+					if !canceled && !yes {
+						term(i)
+					} else if !canceled && yes {
+						h.Save()
+						term(i)
+					}
+				})
+			} else {
+				term(i)
+			}
+		}
+	}
 }
 
 // HandleCommand handles input from the user
-func HandleCommand(input string) {
+func (h *BufHandler) HandleCommand(input string) {
 	args, err := shellwords.Split(input)
 	if err != nil {
 		InfoBar.Error("Error parsing args ", err)
@@ -306,6 +346,6 @@ func HandleCommand(input string) {
 	if _, ok := commands[inputCmd]; !ok {
 		InfoBar.Error("Unknown command ", inputCmd)
 	} else {
-		commands[inputCmd].action(args[1:])
+		commands[inputCmd].action(h, args[1:])
 	}
 }

@@ -1,8 +1,11 @@
 package action
 
 import (
+	"os"
+
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/cmd/micro/display"
+	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/shell"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/terminal"
@@ -13,6 +16,40 @@ type TermHandler struct {
 	display.Window
 
 	mouseReleased bool
+	id            uint64
+}
+
+func NewTermHandler(x, y, w, h int, t *shell.Terminal, id uint64) *TermHandler {
+	th := new(TermHandler)
+	th.Terminal = t
+	th.id = id
+	th.Window = display.NewTermWindow(x, y, w, h, t)
+	return th
+}
+
+func (t *TermHandler) ID() uint64 {
+	return t.id
+}
+
+func (t *TermHandler) Quit() {
+	if len(MainTab().Panes) > 1 {
+		t.Unsplit()
+	} else if len(Tabs.List) > 1 {
+		Tabs.RemoveTab(t.id)
+	} else {
+		screen.Screen.Fini()
+		InfoBar.Close()
+		os.Exit(0)
+	}
+}
+
+func (t *TermHandler) Unsplit() {
+	n := MainTab().GetNode(t.id)
+	n.Unsplit()
+
+	MainTab().RemovePane(MainTab().GetPane(t.id))
+	MainTab().Resize()
+	MainTab().SetActive(len(MainTab().Panes) - 1)
 }
 
 // HandleEvent handles a tcell event by forwarding it to the terminal emulator
@@ -25,6 +62,7 @@ func (t *TermHandler) HandleEvent(event tcell.Event) {
 			switch e.Key() {
 			case tcell.KeyEscape, tcell.KeyCtrlQ, tcell.KeyEnter:
 				t.Close()
+				t.Quit()
 			default:
 			}
 		}
@@ -63,4 +101,8 @@ func (t *TermHandler) HandleEvent(event tcell.Event) {
 			t.mouseReleased = true
 		}
 	}
+}
+
+func (t *TermHandler) HandleCommand(input string) {
+	InfoBar.Error("Commands are unsupported in term for now")
 }

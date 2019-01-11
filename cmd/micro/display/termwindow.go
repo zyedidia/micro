@@ -18,9 +18,11 @@ type TermWindow struct {
 
 func NewTermWindow(x, y, w, h int, term *shell.Terminal) *TermWindow {
 	tw := new(TermWindow)
+	tw.View = new(View)
 	tw.Terminal = term
 	tw.X, tw.Y = x, y
 	tw.Width, tw.Height = w, h
+	tw.Resize(w, h)
 	return tw
 }
 
