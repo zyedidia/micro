@@ -9,14 +9,9 @@ rules:
         start: "<!DOCTYPE"
         end: "[/]?>"
         rules: []
-    - comment:
-        start: "<!--"
-        end: "-->"
-        rules: []
-    - special:
-        start: "&"
-        end: ";"
-        rules: []
+    - comment: "<!--.+?-->"
+    # next line for highlighting of character entities doesn’t work as of now
+    - special: "&(#[[:digit:]]{1,4}|#x[[:xdigit:]]{1,4}|[^[[:space:]]]+);"
     - symbol.tag:
         start: "<\\??"
         end: "\\??>"
