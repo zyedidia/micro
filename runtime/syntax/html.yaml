@@ -1,6 +1,6 @@
 filetype: html
 
-detect: 
+detect:
     filename: "\\.htm[l]?$"
 
 rules:
@@ -41,4 +41,3 @@ rules:
         limit-group: symbol.tag
         rules:
             - include: "css"
-
