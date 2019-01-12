@@ -13,7 +13,10 @@ rules:
         start: "<!--"
         end: "-->"
         rules: []
-    - special: "&[^;]*;"
+    - special:
+        start: "&"
+        end: ";"
+        rules: []
     - symbol.tag:
         start: "<\\??"
         end: "\\??>"
