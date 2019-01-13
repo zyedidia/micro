@@ -28,7 +28,7 @@ type InfoBuf struct {
 	HistoryNum int
 
 	// Is the current message a message from the gutter
-	GutterMessage bool
+	HasGutter bool
 
 	PromptCallback func(resp string, canceled bool)
 	EventCallback  func(resp string)
@@ -61,6 +61,18 @@ func (i *InfoBuf) Message(msg ...interface{}) {
 		i.Msg = displayMessage
 		i.HasMessage = true
 	}
+}
+
+// GutterMessage displays a message and marks it as a gutter message
+func (i *InfoBuf) GutterMessage(msg ...interface{}) {
+	i.Message(msg...)
+	i.HasGutter = true
+}
+
+// ClearGutter clears the info bar and unmarks the message
+func (i *InfoBuf) ClearGutter() {
+	i.HasGutter = false
+	i.Message("")
 }
 
 // Error sends an error message to the user
@@ -96,6 +108,7 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 	i.Msg = prompt
 	i.HasPrompt = true
 	i.HasMessage, i.HasError, i.HasYN = false, false, false
+	i.HasGutter = false
 	i.PromptCallback = donecb
 	i.EventCallback = eventcb
 	i.Buffer.Insert(i.Buffer.Start(), msg)
@@ -110,6 +123,7 @@ func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
 	i.HasPrompt = true
 	i.HasYN = true
 	i.HasMessage, i.HasError = false, false
+	i.HasGutter = false
 	i.YNCallback = donecb
 }
 
@@ -118,6 +132,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 	hadYN := i.HasYN
 	i.HasPrompt = false
 	i.HasYN = false
+	i.HasGutter = false
 	if i.PromptCallback != nil && !hadYN {
 		if canceled {
 			i.PromptCallback("", true)
@@ -143,4 +158,5 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 func (i *InfoBuf) Reset() {
 	i.Msg = ""
 	i.HasPrompt, i.HasMessage, i.HasError = false, false, false
+	i.HasGutter = false
 }
