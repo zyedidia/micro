@@ -12,18 +12,18 @@ import (
 type BufKeyAction func(*BufHandler) bool
 type BufMouseAction func(*BufHandler, *tcell.EventMouse) bool
 
-var BufKeyBindings map[KeyEvent]BufKeyAction
-var BufKeyStrings map[KeyEvent]string
+var BufKeyBindings map[Event]BufKeyAction
+var BufKeyStrings map[Event]string
 var BufMouseBindings map[MouseEvent]BufMouseAction
 
 func init() {
-	BufKeyBindings = make(map[KeyEvent]BufKeyAction)
-	BufKeyStrings = make(map[KeyEvent]string)
+	BufKeyBindings = make(map[Event]BufKeyAction)
+	BufKeyStrings = make(map[Event]string)
 	BufMouseBindings = make(map[MouseEvent]BufMouseAction)
 }
 
 // BufMapKey maps a key event to an action
-func BufMapKey(k KeyEvent, action string) {
+func BufMapKey(k Event, action string) {
 	if f, ok := BufKeyActions[action]; ok {
 		BufKeyStrings[k] = action
 		BufKeyBindings[k] = f
@@ -38,9 +38,10 @@ func BufMapMouse(k MouseEvent, action string) {
 		BufMouseBindings[k] = f
 	} else if f, ok := BufKeyActions[action]; ok {
 		// allowed to map mouse buttons to key actions
-		BufMouseBindings[k] = func(h *BufHandler, e *tcell.EventMouse) bool {
-			return f(h)
-		}
+		BufKeyStrings[k] = action
+		BufKeyBindings[k] = f
+		// ensure we don't double bind a key
+		delete(BufMouseBindings, k)
 	} else {
 		util.TermMessage("Error:", action, "does not exist")
 	}
@@ -123,6 +124,11 @@ func (h *BufHandler) Name() string {
 // TODO: multiple actions bound to one key
 func (h *BufHandler) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
+	case *tcell.EventRaw:
+		re := RawEvent{
+			esc: e.EscSeq(),
+		}
+		h.DoKeyEvent(re)
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),
@@ -184,7 +190,7 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 
 // DoKeyEvent executes a key event by finding the action it is bound
 // to and executing it (possibly multiple times for multiple cursors)
-func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
+func (h *BufHandler) DoKeyEvent(e Event) bool {
 	if action, ok := BufKeyBindings[e]; ok {
 		estr := BufKeyStrings[e]
 		for _, s := range MultiActions {
@@ -208,6 +214,11 @@ func (h *BufHandler) DoKeyEvent(e KeyEvent) bool {
 	return false
 }
 
+func (h *BufHandler) HasKeyEvent(e Event) bool {
+	_, ok := BufKeyBindings[e]
+	return ok
+}
+
 // DoMouseEvent executes a mouse event by finding the action it is bound
 // to and executing it
 func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
@@ -216,6 +227,8 @@ func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 			h.Relocate()
 		}
 		return true
+	} else if h.HasKeyEvent(e) {
+		return h.DoKeyEvent(e)
 	}
 	return false
 }
