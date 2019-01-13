@@ -129,6 +129,9 @@ func (w *BufWindow) Bottomline() int {
 func (w *BufWindow) Relocate() bool {
 	b := w.Buf
 	height := w.Bottomline() + 1 - w.StartLine
+	if b.LinesNum() < w.Height {
+		height = w.Height - 1
+	}
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	cy := activeC.Y
