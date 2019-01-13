@@ -254,14 +254,14 @@ func (h *BufHandler) DoRuneInsert(r rune) {
 	}
 }
 
-func (h *BufHandler) vsplit(buf *buffer.Buffer) {
+func (h *BufHandler) VSplitBuf(buf *buffer.Buffer) {
 	e := NewBufEditPane(0, 0, 0, 0, buf)
 	e.splitID = MainTab().GetNode(h.splitID).VSplit(h.Buf.Settings["splitright"].(bool))
 	MainTab().Panes = append(MainTab().Panes, e)
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
 }
-func (h *BufHandler) hsplit(buf *buffer.Buffer) {
+func (h *BufHandler) HSplitBuf(buf *buffer.Buffer) {
 	e := NewBufEditPane(0, 0, 0, 0, buf)
 	e.splitID = MainTab().GetNode(h.splitID).HSplit(h.Buf.Settings["splitbottom"].(bool))
 	MainTab().Panes = append(MainTab().Panes, e)
@@ -350,8 +350,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"NextSplit":              (*BufHandler).NextSplit,
 	"PreviousSplit":          (*BufHandler).PreviousSplit,
 	"Unsplit":                (*BufHandler).Unsplit,
-	"VSplit":                 (*BufHandler).VSplitBinding,
-	"HSplit":                 (*BufHandler).HSplitBinding,
+	"VSplit":                 (*BufHandler).VSplitAction,
+	"HSplit":                 (*BufHandler).HSplitAction,
 	"ToggleMacro":            (*BufHandler).ToggleMacro,
 	"PlayMacro":              (*BufHandler).PlayMacro,
 	"Suspend":                (*BufHandler).Suspend,

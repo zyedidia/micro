@@ -198,25 +198,37 @@ func (h *BufHandler) HelpCmd(args []string) {
 // VSplitCmd opens a vertical split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufHandler) VSplitCmd(args []string) {
+	if len(args) == 0 {
+		// Open an empty vertical split
+		h.VSplitAction()
+		return
+	}
+
 	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
 	if err != nil {
 		InfoBar.Error(err)
 		return
 	}
 
-	h.vsplit(buf)
+	h.VSplitBuf(buf)
 }
 
 // HSplitCmd opens a horizontal split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufHandler) HSplitCmd(args []string) {
+	if len(args) == 0 {
+		// Open an empty horizontal split
+		h.HSplitAction()
+		return
+	}
+
 	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
 	if err != nil {
 		InfoBar.Error(err)
 		return
 	}
 
-	h.hsplit(buf)
+	h.HSplitBuf(buf)
 }
 
 // EvalCmd evaluates a lua expression
@@ -318,10 +330,21 @@ func (h *BufHandler) TermCmd(args []string) {
 	}
 
 	term := func(i int) {
-		v := h.GetView()
+		// If there is only one open file we make a new tab instead of overwriting it
+		newtab := len(MainTab().Panes) == 1 && len(Tabs.List) == 1
+
 		t := new(shell.Terminal)
 		t.Start(args, false, true)
-		MainTab().Panes[i] = NewTermHandler(v.X, v.Y, v.Width, v.Height, t, h.ID())
+
+		id := h.ID()
+		if newtab {
+			h.AddTab()
+			i = 0
+			id = MainTab().Panes[0].ID()
+		}
+
+		v := h.GetView()
+		MainTab().Panes[i] = NewTermHandler(v.X, v.Y, v.Width, v.Height, t, id)
 		MainTab().SetActive(i)
 	}
 
