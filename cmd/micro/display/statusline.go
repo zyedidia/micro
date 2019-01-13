@@ -70,9 +70,9 @@ var formatParser = regexp.MustCompile(`\$\(.+?\)`)
 // Display draws the statusline to the screen
 func (s *StatusLine) Display() {
 	// TODO: don't display if infobar off and has message
-	// if !GetGlobalOption("infobar").(bool) {
-	// 	return
-	// }
+	if !config.GetGlobalOption("infobar").(bool) {
+		return
+	}
 
 	// We'll draw the line at the lowest line in the window
 	y := s.win.Height + s.win.Y - 1
@@ -84,7 +84,6 @@ func (s *StatusLine) Display() {
 			return []byte(fmt.Sprint(s.FindOpt(string(option))))
 		} else if bytes.HasPrefix(name, []byte("bind")) {
 			binding := string(name[5:])
-			// TODO: search bindings
 			for k, v := range config.Bindings {
 				if v == binding {
 					return []byte(k)

@@ -3,6 +3,6 @@
 package action
 
 func (*BufHandler) Suspend() bool {
-	// TODO: error message
+	InfoBar.Error("Suspend is only supported on BSD/Linux")
 	return false
 }

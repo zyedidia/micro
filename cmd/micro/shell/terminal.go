@@ -94,8 +94,6 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool) error {
 			screen.Redraw()
 		}
 		t.Stop()
-		// TODO: close Term
-		// closeterm <- view.Num
 	}()
 
 	return nil

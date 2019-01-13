@@ -1065,16 +1065,16 @@ func (h *BufHandler) NextTab() bool {
 	return false
 }
 
-// VSplitBinding opens an empty vertical split
-func (h *BufHandler) VSplitBinding() bool {
-	h.vsplit(buffer.NewBufferFromString("", "", buffer.BTDefault))
+// VSplitAction opens an empty vertical split
+func (h *BufHandler) VSplitAction() bool {
+	h.VSplitBuf(buffer.NewBufferFromString("", "", buffer.BTDefault))
 
 	return false
 }
 
-// HSplitBinding opens an empty horizontal split
-func (h *BufHandler) HSplitBinding() bool {
-	h.hsplit(buffer.NewBufferFromString("", "", buffer.BTDefault))
+// HSplitAction opens an empty horizontal split
+func (h *BufHandler) HSplitAction() bool {
+	h.HSplitBuf(buffer.NewBufferFromString("", "", buffer.BTDefault))
 
 	return false
 }
