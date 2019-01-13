@@ -1,6 +1,8 @@
 package display
 
 import (
+	"unicode/utf8"
+
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
@@ -21,8 +23,8 @@ func NewTermWindow(x, y, w, h int, term *shell.Terminal) *TermWindow {
 	tw.View = new(View)
 	tw.Terminal = term
 	tw.X, tw.Y = x, y
-	tw.Width, tw.Height = w, h
-	tw.Resize(w, h)
+	tw.Width, tw.Height = w, h-1
+	tw.Resize(tw.Width, tw.Height)
 	return tw
 }
 
@@ -80,6 +82,24 @@ func (w *TermWindow) Display() {
 			}
 
 			screen.Screen.SetContent(w.X+x, w.Y+y, c, nil, st)
+		}
+	}
+	if config.GetGlobalOption("statusline").(bool) {
+		statusLineStyle := config.DefStyle.Reverse(true)
+		if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
+
+		text := []byte(w.Name())
+		textLen := utf8.RuneCount(text)
+		for x := 0; x < w.Width; x++ {
+			if x < textLen {
+				r, size := utf8.DecodeRune(text)
+				text = text[size:]
+				screen.Screen.SetContent(w.X+x, w.Y+w.Height, r, nil, statusLineStyle)
+			} else {
+				screen.Screen.SetContent(w.X+x, w.Y+w.Height, ' ', nil, statusLineStyle)
+			}
 		}
 	}
 	if w.State.CursorVisible() && w.active {
