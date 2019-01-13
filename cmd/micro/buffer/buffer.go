@@ -104,6 +104,8 @@ type Buffer struct {
 
 	// Type of the buffer (e.g. help, raw, scratch etc..)
 	Type BufType
+
+	Messages []*Message
 }
 
 // NewBufferFromFile opens a new buffer using the given path

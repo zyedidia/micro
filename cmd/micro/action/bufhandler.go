@@ -166,6 +166,20 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 		h.DoMouseEvent(me, e)
 	}
 	h.Buf.MergeCursors()
+
+	// Display any gutter messages for this line
+	c := h.Buf.GetActiveCursor()
+	none := true
+	for _, m := range h.Buf.Messages {
+		if c.Y == m.Start.Y || c.Y == m.End.Y {
+			InfoBar.GutterMessage(m.Msg)
+			none = false
+			break
+		}
+	}
+	if none && InfoBar.HasGutter {
+		InfoBar.ClearGutter()
+	}
 }
 
 // DoKeyEvent executes a key event by finding the action it is bound
