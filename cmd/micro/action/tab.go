@@ -198,7 +198,7 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 				inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
 				if inpane {
 					t.SetActive(i)
-					return
+					break
 				}
 			}
 		case tcell.ButtonNone:
