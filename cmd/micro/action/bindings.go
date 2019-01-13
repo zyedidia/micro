@@ -54,7 +54,7 @@ func BindKey(k, v string) {
 	case MouseEvent:
 		BufMapMouse(e, v)
 	case RawEvent:
-		util.TermMessage("Raw events not supported yet")
+		BufMapKey(e, v)
 	}
 
 	config.Bindings[k] = v
