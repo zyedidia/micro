@@ -308,6 +308,15 @@ func (h *BufHandler) ReplaceAllCmd(args []string) {
 func (h *BufHandler) TermCmd(args []string) {
 	ps := MainTab().Panes
 
+	if len(args) == 0 {
+		sh := os.Getenv("SHELL")
+		if sh == "" {
+			InfoBar.Error("Shell environment not found")
+			return
+		}
+		args = []string{sh}
+	}
+
 	term := func(i int) {
 		v := h.GetView()
 		t := new(shell.Terminal)
