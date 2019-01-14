@@ -13,7 +13,6 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
-	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -123,7 +122,7 @@ func LoadInput() []*buffer.Buffer {
 
 			buf, err := buffer.NewBufferFromFile(args[i], buffer.BTDefault)
 			if err != nil {
-				util.TermMessage(err)
+				screen.TermMessage(err)
 				continue
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
@@ -135,7 +134,7 @@ func LoadInput() []*buffer.Buffer {
 		// and we should read from stdin
 		input, err = ioutil.ReadAll(os.Stdin)
 		if err != nil {
-			util.TermMessage("Error reading from stdin: ", err)
+			screen.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
 		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, buffer.BTDefault))
@@ -154,12 +153,12 @@ func main() {
 	InitFlags()
 	err = config.InitConfigDir(*flagConfigDir)
 	if err != nil {
-		util.TermMessage(err)
+		screen.TermMessage(err)
 	}
 	config.InitRuntimeFiles()
 	err = config.ReadSettings()
 	if err != nil {
-		util.TermMessage(err)
+		screen.TermMessage(err)
 	}
 	config.InitGlobalSettings()
 	action.InitBindings()
@@ -167,7 +166,7 @@ func main() {
 
 	err = config.InitColorscheme()
 	if err != nil {
-		util.TermMessage(err)
+		screen.TermMessage(err)
 	}
 
 	screen.Init()

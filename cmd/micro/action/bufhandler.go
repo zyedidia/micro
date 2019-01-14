@@ -5,7 +5,7 @@ import (
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/display"
-	"github.com/zyedidia/micro/cmd/micro/util"
+	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/tcell"
 )
 
@@ -28,7 +28,7 @@ func BufMapKey(k Event, action string) {
 		BufKeyStrings[k] = action
 		BufKeyBindings[k] = f
 	} else {
-		util.TermMessage("Error:", action, "does not exist")
+		screen.TermMessage("Error:", action, "does not exist")
 	}
 }
 
@@ -43,7 +43,7 @@ func BufMapMouse(k MouseEvent, action string) {
 		// ensure we don't double bind a key
 		delete(BufMouseBindings, k)
 	} else {
-		util.TermMessage("Error:", action, "does not exist")
+		screen.TermMessage("Error:", action, "does not exist")
 	}
 }
 
@@ -267,6 +267,9 @@ func (h *BufHandler) HSplitBuf(buf *buffer.Buffer) {
 	MainTab().Panes = append(MainTab().Panes, e)
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
+}
+func (h *BufHandler) Close() {
+	h.Buf.Close()
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute

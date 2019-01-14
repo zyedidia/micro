@@ -257,12 +257,86 @@ func (h *BufHandler) NewTabCmd(args []string) {
 	}
 }
 
+func SetGlobalOption(option, value string) error {
+	if _, ok := config.GlobalSettings[option]; !ok {
+		return config.ErrInvalidOption
+	}
+
+	nativeValue, err := config.GetNativeValue(option, config.GlobalSettings[option], value)
+	if err != nil {
+		return err
+	}
+
+	config.GlobalSettings[option] = nativeValue
+
+	if option == "colorscheme" {
+		// LoadSyntaxFiles()
+		config.InitColorscheme()
+		for _, b := range buffer.OpenBuffers {
+			b.UpdateRules()
+		}
+	}
+
+	// TODO: info and keymenu option change
+	// if option == "infobar" || option == "keymenu" {
+	// 	for _, tab := range tabs {
+	// 		tab.Resize()
+	// 	}
+	// }
+
+	if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.Screen.DisableMouse()
+		} else {
+			screen.Screen.EnableMouse()
+		}
+	}
+
+	for _, b := range buffer.OpenBuffers {
+		b.SetOption(option, value)
+	}
+
+	config.WriteSettings(config.ConfigDir + "/settings.json")
+
+	return nil
+}
+
 // SetCmd sets an option
 func (h *BufHandler) SetCmd(args []string) {
+	if len(args) < 2 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	option := args[0]
+	value := args[1]
+
+	err := SetGlobalOption(option, value)
+	if err == config.ErrInvalidOption {
+		err := h.Buf.SetOption(option, value)
+		if err != nil {
+			InfoBar.Error(err)
+		}
+	} else if err != nil {
+		InfoBar.Error(err)
+	}
 }
 
 // SetLocalCmd sets an option local to the buffer
 func (h *BufHandler) SetLocalCmd(args []string) {
+	if len(args) < 2 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	option := args[0]
+	value := args[1]
+
+	err := h.Buf.SetOption(option, value)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+
 }
 
 // ShowCmd shows the value of the given option
@@ -341,6 +415,8 @@ func (h *BufHandler) TermCmd(args []string) {
 			h.AddTab()
 			i = 0
 			id = MainTab().Panes[0].ID()
+		} else {
+			MainTab().Panes[i].Close()
 		}
 
 		v := h.GetView()

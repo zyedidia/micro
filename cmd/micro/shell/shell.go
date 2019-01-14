@@ -11,7 +11,6 @@ import (
 
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
-	"github.com/zyedidia/micro/cmd/micro/util"
 )
 
 // ExecCommand executes a command using exec
@@ -108,7 +107,7 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 
 	if wait {
 		// This is just so we don't return right away and let the user press enter to return
-		util.TermMessage("")
+		screen.TermMessage("")
 	}
 
 	// Start the screen back up

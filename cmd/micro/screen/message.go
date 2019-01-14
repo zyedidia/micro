@@ -1,12 +1,10 @@
-package util
+package screen
 
 import (
 	"bufio"
 	"fmt"
 	"os"
 	"strconv"
-
-	"github.com/zyedidia/micro/cmd/micro/screen"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -16,7 +14,7 @@ import (
 // This will write the message, and wait for the user
 // to press and key to continue
 func TermMessage(msg ...interface{}) {
-	screenb := screen.TempFini()
+	screenb := TempFini()
 
 	fmt.Println(msg...)
 	fmt.Print("\nPress enter to continue")
@@ -24,7 +22,7 @@ func TermMessage(msg ...interface{}) {
 	reader := bufio.NewReader(os.Stdin)
 	reader.ReadString('\n')
 
-	screen.TempStart(screenb)
+	TempStart(screenb)
 }
 
 // TermError sends an error to the user in the terminal. Like TermMessage except formatted

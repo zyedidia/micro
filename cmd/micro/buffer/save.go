@@ -1,6 +1,7 @@
 package buffer
 
 import (
+	"bufio"
 	"bytes"
 	"io"
 	"os"
@@ -8,10 +9,39 @@ import (
 	"os/signal"
 	"path/filepath"
 
-	. "github.com/zyedidia/micro/cmd/micro/util"
-
 	"github.com/zyedidia/micro/cmd/micro/config"
+	. "github.com/zyedidia/micro/cmd/micro/util"
 )
+
+// LargeFileThreshold is the number of bytes when fastdirty is forced
+// because hashing is too slow
+const LargeFileThreshold = 50000
+
+// overwriteFile opens the given file for writing, truncating if one exists, and then calls
+// the supplied function with the file as io.Writer object, also making sure the file is
+// closed afterwards.
+func overwriteFile(name string, fn func(io.Writer) error) (err error) {
+	var file *os.File
+
+	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+		return
+	}
+
+	defer func() {
+		if e := file.Close(); e != nil && err == nil {
+			err = e
+		}
+	}()
+
+	w := bufio.NewWriter(file)
+
+	if err = fn(w); err != nil {
+		return
+	}
+
+	err = w.Flush()
+	return
+}
 
 // Save saves the buffer to its default path
 func (b *Buffer) Save() error {
