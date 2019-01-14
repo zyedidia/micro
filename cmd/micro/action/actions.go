@@ -967,6 +967,7 @@ func (h *BufHandler) ClearStatus() bool {
 
 // ToggleHelp toggles the help screen
 func (h *BufHandler) ToggleHelp() bool {
+	h.openHelp("help")
 	return true
 }
 

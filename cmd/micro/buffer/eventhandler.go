@@ -1,6 +1,7 @@
 package buffer
 
 import (
+	"log"
 	"time"
 	"unicode/utf8"
 
@@ -37,7 +38,7 @@ type Delta struct {
 }
 
 // ExecuteTextEvent runs a text event
-func ExecuteTextEvent(t *TextEvent, buf *LineArray) {
+func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 	if t.EventType == TextEventInsert {
 		for _, d := range t.Deltas {
 			buf.insert(d.Start, d.Text)
@@ -60,25 +61,25 @@ func ExecuteTextEvent(t *TextEvent, buf *LineArray) {
 }
 
 // UndoTextEvent undoes a text event
-func UndoTextEvent(t *TextEvent, buf *LineArray) {
+func UndoTextEvent(t *TextEvent, buf *SharedBuffer) {
 	t.EventType = -t.EventType
 	ExecuteTextEvent(t, buf)
 }
 
 // EventHandler executes text manipulations and allows undoing and redoing
 type EventHandler struct {
-	buf       *LineArray
+	buf       *SharedBuffer
 	cursors   []*Cursor
 	UndoStack *TEStack
 	RedoStack *TEStack
 }
 
 // NewEventHandler returns a new EventHandler
-func NewEventHandler(la *LineArray, cursors []*Cursor) *EventHandler {
+func NewEventHandler(buf *SharedBuffer, cursors []*Cursor) *EventHandler {
 	eh := new(EventHandler)
 	eh.UndoStack = new(TEStack)
 	eh.RedoStack = new(TEStack)
-	eh.buf = la
+	eh.buf = buf
 	eh.cursors = cursors
 	return eh
 }
@@ -93,12 +94,12 @@ func (eh *EventHandler) ApplyDiff(new string) {
 	loc := eh.buf.Start()
 	for _, d := range diff {
 		if d.Type == dmp.DiffDelete {
-			eh.Remove(loc, loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf))
+			eh.Remove(loc, loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf.LineArray))
 		} else {
 			if d.Type == dmp.DiffInsert {
 				eh.Insert(loc, d.Text)
 			}
-			loc = loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf)
+			loc = loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf.LineArray)
 		}
 	}
 }
@@ -113,15 +114,16 @@ func (eh *EventHandler) Insert(start Loc, textStr string) {
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
-	e.Deltas[0].End = start.MoveLA(utf8.RuneCount(text), eh.buf)
+	e.Deltas[0].End = start.MoveLA(utf8.RuneCount(text), eh.buf.LineArray)
 	end := e.Deltas[0].End
 
+	log.Println(eh.cursors)
 	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-				loc = loc.MoveLA(utf8.RuneCount(text), eh.buf)
+				loc = loc.MoveLA(utf8.RuneCount(text), eh.buf.LineArray)
 			}
 			return loc
 		}
@@ -149,7 +151,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 			if start.Y != end.Y && loc.GreaterThan(end) {
 				loc.Y -= end.Y - start.Y
 			} else if loc.Y == end.Y && loc.GreaterEqual(end) {
-				loc = loc.MoveLA(-DiffLA(start, end, eh.buf), eh.buf)
+				loc = loc.MoveLA(-DiffLA(start, end, eh.buf.LineArray), eh.buf.LineArray)
 			}
 			return loc
 		}

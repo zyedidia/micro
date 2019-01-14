@@ -1,6 +1,8 @@
 package action
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -274,8 +276,37 @@ func (h *BufHandler) ToggleLogCmd(args []string) {
 func (h *BufHandler) ReloadCmd(args []string) {
 }
 
+func (h *BufHandler) openHelp(page string) error {
+	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
+		return errors.New(fmt.Sprint("Unable to load help text", page, "\n", err))
+	} else {
+		helpBuffer := buffer.NewBufferFromString(string(data), page+".md", buffer.BTHelp)
+		helpBuffer.SetName("Help " + page)
+
+		if h.Buf.Type == buffer.BTHelp {
+			h.OpenBuffer(helpBuffer)
+		} else {
+			h.HSplitBuf(helpBuffer)
+		}
+	}
+	return nil
+}
+
 // HelpCmd tries to open the given help page in a horizontal split
 func (h *BufHandler) HelpCmd(args []string) {
+	if len(args) < 1 {
+		// Open the default help if the user just typed "> help"
+		h.openHelp("help")
+	} else {
+		if config.FindRuntimeFile(config.RTHelp, args[0]) != nil {
+			err := h.openHelp(args[0])
+			if err != nil {
+				InfoBar.Error(err)
+			}
+		} else {
+			InfoBar.Error("Sorry, no help for ", args[0])
+		}
+	}
 }
 
 // VSplitCmd opens a vertical split with file given in the first argument

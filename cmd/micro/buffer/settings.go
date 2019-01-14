@@ -30,7 +30,7 @@ func (b *Buffer) SetOption(option, value string) error {
 	} else if option == "filetype" {
 		b.UpdateRules()
 	} else if option == "fileformat" {
-		*b.isModified = true
+		b.isModified = true
 	} else if option == "syntax" {
 		if !nativeValue.(bool) {
 			b.ClearMatches()
