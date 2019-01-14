@@ -201,6 +201,50 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	return false, e
 }
 
+// UnbindKey removes the binding for a key from the bindings.json file
+func UnbindKey(k string) error {
+	var e error
+	var parsed map[string]string
+
+	filename := config.ConfigDir + "/bindings.json"
+	if _, e = os.Stat(filename); e == nil {
+		input, err := ioutil.ReadFile(filename)
+		if err != nil {
+			return errors.New("Error reading bindings.json file: " + err.Error())
+		}
+
+		err = json5.Unmarshal(input, &parsed)
+		if err != nil {
+			return errors.New("Error reading bindings.json: " + err.Error())
+		}
+
+		key, ok := findEvent(k)
+		if !ok {
+			return errors.New("Invalid event " + k)
+		}
+
+		for ev := range parsed {
+			if e, ok := findEvent(ev); ok {
+				if e == key {
+					delete(parsed, ev)
+					break
+				}
+			}
+		}
+
+		defaults := DefaultBindings()
+		if a, ok := defaults[k]; ok {
+			BindKey(k, a)
+		} else if _, ok := config.Bindings[k]; ok {
+			delete(config.Bindings, k)
+		}
+
+		txt, _ := json.MarshalIndent(parsed, "", "    ")
+		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+	}
+	return e
+}
+
 var mouseEvents = map[string]tcell.ButtonMask{
 	"MouseLeft":       tcell.Button1,
 	"MouseMiddle":     tcell.Button2,

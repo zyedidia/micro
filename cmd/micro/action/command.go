@@ -35,6 +35,7 @@ var commandActions = map[string]func(*BufHandler, []string){
 	"ShowKey":    (*BufHandler).ShowKeyCmd,
 	"Run":        (*BufHandler).RunCmd,
 	"Bind":       (*BufHandler).BindCmd,
+	"Unbind":     (*BufHandler).UnbindCmd,
 	"Quit":       (*BufHandler).QuitCmd,
 	"Save":       (*BufHandler).SaveCmd,
 	"Replace":    (*BufHandler).ReplaceCmd,
@@ -92,6 +93,7 @@ func DefaultCommands() map[string]StrCommand {
 		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
 		"showkey":    {"ShowKey", []Completion{NoCompletion}},
 		"bind":       {"Bind", []Completion{NoCompletion}},
+		"unbind":     {"Unbind", []Completion{NoCompletion}},
 		"run":        {"Run", []Completion{NoCompletion}},
 		"quit":       {"Quit", []Completion{NoCompletion}},
 		"save":       {"Save", []Completion{NoCompletion}},
@@ -458,6 +460,28 @@ func (h *BufHandler) ShowKeyCmd(args []string) {
 
 // BindCmd creates a new keybinding
 func (h *BufHandler) BindCmd(args []string) {
+	if len(args) < 2 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	_, err := TryBindKey(args[0], args[1], true)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+}
+
+// UnbindCmd binds a key to its default action
+func (h *BufHandler) UnbindCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguements")
+		return
+	}
+
+	err := UnbindKey(args[0])
+	if err != nil {
+		InfoBar.Error(err)
+	}
 }
 
 // RunCmd runs a shell command in the background

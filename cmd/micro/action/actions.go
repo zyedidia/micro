@@ -558,6 +558,9 @@ func (h *BufHandler) InsertTab() bool {
 
 // SaveAll saves all open buffers
 func (h *BufHandler) SaveAll() bool {
+	for _, b := range buffer.OpenBuffers {
+		b.Save()
+	}
 	return false
 }
 
@@ -672,7 +675,6 @@ func (h *BufHandler) Undo() bool {
 
 // Redo redoes the last action
 func (h *BufHandler) Redo() bool {
-	// TODO: clear cursors and message
 	h.Buf.Redo()
 	InfoBar.Message("Redid action")
 	return true
