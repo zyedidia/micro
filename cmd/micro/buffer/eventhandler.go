@@ -37,7 +37,7 @@ type Delta struct {
 }
 
 // ExecuteTextEvent runs a text event
-func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
+func ExecuteTextEvent(t *TextEvent, buf *LineArray) {
 	if t.EventType == TextEventInsert {
 		for _, d := range t.Deltas {
 			buf.insert(d.Start, d.Text)
@@ -60,24 +60,26 @@ func ExecuteTextEvent(t *TextEvent, buf *Buffer) {
 }
 
 // UndoTextEvent undoes a text event
-func UndoTextEvent(t *TextEvent, buf *Buffer) {
+func UndoTextEvent(t *TextEvent, buf *LineArray) {
 	t.EventType = -t.EventType
 	ExecuteTextEvent(t, buf)
 }
 
 // EventHandler executes text manipulations and allows undoing and redoing
 type EventHandler struct {
-	buf       *Buffer
+	buf       *LineArray
+	cursors   []*Cursor
 	UndoStack *TEStack
 	RedoStack *TEStack
 }
 
 // NewEventHandler returns a new EventHandler
-func NewEventHandler(buf *Buffer) *EventHandler {
+func NewEventHandler(la *LineArray, cursors []*Cursor) *EventHandler {
 	eh := new(EventHandler)
 	eh.UndoStack = new(TEStack)
 	eh.RedoStack = new(TEStack)
-	eh.buf = buf
+	eh.buf = la
+	eh.cursors = cursors
 	return eh
 }
 
@@ -91,12 +93,12 @@ func (eh *EventHandler) ApplyDiff(new string) {
 	loc := eh.buf.Start()
 	for _, d := range diff {
 		if d.Type == dmp.DiffDelete {
-			eh.Remove(loc, loc.Move(utf8.RuneCountInString(d.Text), eh.buf))
+			eh.Remove(loc, loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf))
 		} else {
 			if d.Type == dmp.DiffInsert {
 				eh.Insert(loc, d.Text)
 			}
-			loc = loc.Move(utf8.RuneCountInString(d.Text), eh.buf)
+			loc = loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf)
 		}
 	}
 }
@@ -105,21 +107,21 @@ func (eh *EventHandler) ApplyDiff(new string) {
 func (eh *EventHandler) Insert(start Loc, textStr string) {
 	text := []byte(textStr)
 	e := &TextEvent{
-		C:         *eh.buf.GetActiveCursor(),
+		C:         *eh.cursors[0],
 		EventType: TextEventInsert,
 		Deltas:    []Delta{{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
-	e.Deltas[0].End = start.Move(utf8.RuneCount(text), eh.buf)
+	e.Deltas[0].End = start.MoveLA(utf8.RuneCount(text), eh.buf)
 	end := e.Deltas[0].End
 
-	for _, c := range eh.buf.GetCursors() {
+	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-				loc = loc.Move(utf8.RuneCount(text), eh.buf)
+				loc = loc.MoveLA(utf8.RuneCount(text), eh.buf)
 			}
 			return loc
 		}
@@ -135,19 +137,19 @@ func (eh *EventHandler) Insert(start Loc, textStr string) {
 // Remove creates a remove text event and executes it
 func (eh *EventHandler) Remove(start, end Loc) {
 	e := &TextEvent{
-		C:         *eh.buf.GetActiveCursor(),
+		C:         *eh.cursors[0],
 		EventType: TextEventRemove,
 		Deltas:    []Delta{{[]byte{}, start, end}},
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
 
-	for _, c := range eh.buf.GetCursors() {
+	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(end) {
 				loc.Y -= end.Y - start.Y
 			} else if loc.Y == end.Y && loc.GreaterEqual(end) {
-				loc = loc.Move(-Diff(start, end, eh.buf), eh.buf)
+				loc = loc.MoveLA(-DiffLA(start, end, eh.buf), eh.buf)
 			}
 			return loc
 		}
@@ -163,7 +165,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 // MultipleReplace creates an multiple insertions executes them
 func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 	e := &TextEvent{
-		C:         *eh.buf.GetActiveCursor(),
+		C:         *eh.cursors[0],
 		EventType: TextEventReplace,
 		Deltas:    deltas,
 		Time:      time.Now(),
@@ -239,9 +241,9 @@ func (eh *EventHandler) UndoOneEvent() {
 
 	// Set the cursor in the right place
 	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < eh.buf.NumCursors() {
-		t.C = *eh.buf.GetCursor(teCursor.Num)
-		eh.buf.GetCursor(teCursor.Num).Goto(teCursor)
+	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
+		t.C = *eh.cursors[teCursor.Num]
+		eh.cursors[teCursor.Num].Goto(teCursor)
 	} else {
 		teCursor.Num = -1
 	}
@@ -286,9 +288,9 @@ func (eh *EventHandler) RedoOneEvent() {
 	UndoTextEvent(t, eh.buf)
 
 	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < eh.buf.NumCursors() {
-		t.C = *eh.buf.GetCursor(teCursor.Num)
-		eh.buf.GetCursor(teCursor.Num).Goto(teCursor)
+	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
+		t.C = *eh.cursors[teCursor.Num]
+		eh.cursors[teCursor.Num].Goto(teCursor)
 	} else {
 		teCursor.Num = -1
 	}

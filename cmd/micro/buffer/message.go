@@ -1,8 +1,6 @@
 package buffer
 
 import (
-	"log"
-
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/tcell"
 )
@@ -50,7 +48,6 @@ func (m *Message) Style() tcell.Style {
 		}
 	case MTError:
 		if style, ok := config.Colorscheme["gutter-error"]; ok {
-			log.Println("Return error")
 			return style
 		}
 	}

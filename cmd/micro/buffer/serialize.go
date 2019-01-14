@@ -36,7 +36,7 @@ func (b *Buffer) Serialize() error {
 		err := gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.GetActiveCursor().Loc,
-			b.ModTime,
+			*b.ModTime,
 		})
 		return err
 	})
@@ -61,9 +61,10 @@ func (b *Buffer) Unserialize() error {
 
 		if b.Settings["saveundo"].(bool) {
 			// We should only use last time's eventhandler if the file wasn't modified by someone else in the meantime
-			if b.ModTime == buffer.ModTime {
+			if *b.ModTime == buffer.ModTime {
 				b.EventHandler = buffer.EventHandler
-				b.EventHandler.buf = b
+				b.EventHandler.cursors = b.cursors
+				b.EventHandler.buf = b.LineArray
 			}
 		}
 	}
