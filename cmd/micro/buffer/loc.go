@@ -52,7 +52,7 @@ func (l Loc) LessEqual(b Loc) bool {
 // The following functions require a buffer to know where newlines are
 
 // Diff returns the distance between two locations
-func Diff(a, b Loc, buf *Buffer) int {
+func DiffLA(a, b Loc, buf *LineArray) int {
 	if a.Y == b.Y {
 		if a.X > b.X {
 			return a.X - b.X
@@ -75,7 +75,7 @@ func Diff(a, b Loc, buf *Buffer) int {
 }
 
 // This moves the location one character to the right
-func (l Loc) right(buf *Buffer) Loc {
+func (l Loc) right(buf *LineArray) Loc {
 	if l == buf.End() {
 		return Loc{l.X + 1, l.Y}
 	}
@@ -89,7 +89,7 @@ func (l Loc) right(buf *Buffer) Loc {
 }
 
 // This moves the given location one character to the left
-func (l Loc) left(buf *Buffer) Loc {
+func (l Loc) left(buf *LineArray) Loc {
 	if l == buf.Start() {
 		return Loc{l.X - 1, l.Y}
 	}
@@ -104,7 +104,7 @@ func (l Loc) left(buf *Buffer) Loc {
 
 // Move moves the cursor n characters to the left or right
 // It moves the cursor left if n is negative
-func (l Loc) Move(n int, buf *Buffer) Loc {
+func (l Loc) MoveLA(n int, buf *LineArray) Loc {
 	if n > 0 {
 		for i := 0; i < n; i++ {
 			l = l.right(buf)
@@ -115,4 +115,11 @@ func (l Loc) Move(n int, buf *Buffer) Loc {
 		l = l.left(buf)
 	}
 	return l
+}
+
+func (l Loc) Diff(a, b Loc, buf *Buffer) int {
+	return DiffLA(a, b, buf.LineArray)
+}
+func (l Loc) Move(n int, buf *Buffer) Loc {
+	return l.MoveLA(n, buf.LineArray)
 }

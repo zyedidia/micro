@@ -52,9 +52,10 @@ type FileFormat byte
 // A LineArray simply stores and array of lines and makes it easy to insert
 // and delete in it
 type LineArray struct {
-	lines    []Line
-	endings  FileFormat
-	initsize uint64
+	lines      []Line
+	endings    FileFormat
+	initsize   uint64
+	isModified *bool
 }
 
 // Append efficiently appends lines together
@@ -161,6 +162,7 @@ func (la *LineArray) newlineBelow(y int) {
 
 // Inserts a byte array at a given location
 func (la *LineArray) insert(pos Loc, value []byte) {
+	*la.isModified = true
 	x, y := runeToByteIndex(pos.X, la.lines[pos.Y].data), pos.Y
 	for i := 0; i < len(value); i++ {
 		if value[i] == '\n' {
@@ -201,6 +203,7 @@ func (la *LineArray) split(pos Loc) {
 
 // removes from start to end
 func (la *LineArray) remove(start, end Loc) []byte {
+	*la.isModified = true
 	sub := la.Substr(start, end)
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
@@ -219,6 +222,7 @@ func (la *LineArray) remove(start, end Loc) []byte {
 
 // deleteToEnd deletes from the end of a line to the position
 func (la *LineArray) deleteToEnd(pos Loc) {
+	*la.isModified = true
 	la.lines[pos.Y].data = la.lines[pos.Y].data[:pos.X]
 }
 
@@ -256,6 +260,30 @@ func (la *LineArray) Substr(start, end Loc) []byte {
 	}
 	str = append(str, la.lines[end.Y].data[:endX]...)
 	return str
+}
+
+// LinesNum returns the number of lines in the buffer
+func (la *LineArray) LinesNum() int {
+	return len(la.lines)
+}
+
+// Start returns the start of the buffer
+func (la *LineArray) Start() Loc {
+	return Loc{0, 0}
+}
+
+// End returns the location of the last character in the buffer
+func (la *LineArray) End() Loc {
+	numlines := len(la.lines)
+	return Loc{utf8.RuneCount(la.lines[numlines-1].data), numlines - 1}
+}
+
+// LineBytes returns line n as an array of bytes
+func (la *LineArray) LineBytes(n int) []byte {
+	if n >= len(la.lines) || n < 0 {
+		return []byte{}
+	}
+	return la.lines[n].data
 }
 
 // State gets the highlight state for the given line number

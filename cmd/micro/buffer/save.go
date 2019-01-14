@@ -73,7 +73,7 @@ func (b *Buffer) SaveAs(filename string) error {
 
 	// Update the last time this file was updated after saving
 	defer func() {
-		b.ModTime, _ = GetModTime(filename)
+		*b.ModTime, _ = GetModTime(filename)
 	}()
 
 	// Removes any tilde and replaces with the absolute path to home
@@ -146,7 +146,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	b.Path = filename
 	absPath, _ := filepath.Abs(filename)
 	b.AbsPath = absPath
-	b.isModified = false
+	*b.isModified = false
 	return b.Serialize()
 }
 
@@ -182,8 +182,8 @@ func (b *Buffer) SaveAsWithSudo(filename string) error {
 	err := cmd.Wait()
 
 	if err == nil {
-		b.isModified = false
-		b.ModTime, _ = GetModTime(filename)
+		*b.isModified = false
+		*b.ModTime, _ = GetModTime(filename)
 		return b.Serialize()
 	}
 	return err

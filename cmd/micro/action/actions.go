@@ -1094,7 +1094,12 @@ func (h *BufHandler) Unsplit() bool {
 // NextSplit changes the view to the next split
 func (h *BufHandler) NextSplit() bool {
 	a := MainTab().active
-	a = util.Clamp(a+1, 0, len(MainTab().Panes))
+	if a < len(MainTab().Panes)-1 {
+		a++
+	} else {
+		a = 0
+	}
+
 	MainTab().SetActive(a)
 
 	return false
@@ -1103,7 +1108,11 @@ func (h *BufHandler) NextSplit() bool {
 // PreviousSplit changes the view to the previous split
 func (h *BufHandler) PreviousSplit() bool {
 	a := MainTab().active
-	a = util.Clamp(a-1, 0, len(MainTab().Panes))
+	if a > 0 {
+		a--
+	} else {
+		a = len(MainTab().Panes) - 1
+	}
 	MainTab().SetActive(a)
 
 	return false

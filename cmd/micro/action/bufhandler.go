@@ -57,8 +57,7 @@ type BufHandler struct {
 
 	Buf *buffer.Buffer
 
-	cursors []*buffer.Cursor
-	Cursor  *buffer.Cursor // the active cursor
+	Cursor *buffer.Cursor // the active cursor
 
 	StartLine int // Vertical scrolling
 	StartCol  int // Horizontal scrolling
@@ -104,11 +103,9 @@ func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
 	h.Buf = buf
 	h.Window = win
 
-	h.cursors = []*buffer.Cursor{buffer.NewCursor(buf, buf.StartCursor)}
-	h.Cursor = h.cursors[0]
+	h.Cursor = h.Buf.GetActiveCursor()
 	h.mouseReleased = true
 
-	buf.SetCursors(h.cursors)
 	return h
 }
 

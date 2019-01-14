@@ -60,11 +60,8 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	name string
 
-	// Whether or not the buffer has been modified since it was opened
-	isModified bool
-
 	// Stores the last modification time of the file the buffer is pointing to
-	ModTime time.Time
+	ModTime *time.Time
 
 	SyntaxDef   *highlight.Def
 	Highlighter *highlight.Highlighter
@@ -135,15 +132,31 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	}
 	config.InitLocalSettings(b.Settings, b.Path)
 
-	b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
+	found := false
+	for _, buf := range OpenBuffers {
+		if buf.AbsPath == absPath {
+			found = true
+			b.LineArray = buf.LineArray
+			b.EventHandler = buf.EventHandler
+			b.ModTime = buf.ModTime
+			b.isModified = buf.isModified
+		}
+	}
+
+	if !found {
+		b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
+		b.EventHandler = NewEventHandler(b.LineArray, b.cursors)
+		b.ModTime = new(time.Time)
+		b.isModified = new(bool)
+		*b.isModified = false
+		*b.ModTime = time.Time{}
+	}
 
 	b.Path = path
 	b.AbsPath = absPath
 
 	// The last time this file was modified
-	b.ModTime, _ = GetModTime(b.Path)
-
-	b.EventHandler = NewEventHandler(b)
+	*b.ModTime, _ = GetModTime(b.Path)
 
 	b.UpdateRules()
 
@@ -163,6 +176,8 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 			screen.TermMessage(err)
 		}
 	}
+
+	b.AddCursor(NewCursor(b, b.StartCursor))
 
 	if !b.Settings["fastdirty"].(bool) {
 		if size > LargeFileThreshold {
@@ -217,36 +232,12 @@ func (b *Buffer) ReOpen() error {
 	}
 	b.EventHandler.ApplyDiff(txt)
 
-	b.ModTime, err = GetModTime(b.Path)
-	b.isModified = false
+	*b.ModTime, err = GetModTime(b.Path)
+	*b.isModified = false
 	for _, c := range b.cursors {
 		c.Relocate()
 	}
 	return err
-}
-
-// LineBytes returns line n as an array of bytes
-func (b *Buffer) LineBytes(n int) []byte {
-	if n >= len(b.lines) || n < 0 {
-		return []byte{}
-	}
-	return b.lines[n].data
-}
-
-// LinesNum returns the number of lines in the buffer
-func (b *Buffer) LinesNum() int {
-	return len(b.lines)
-}
-
-// Start returns the start of the buffer
-func (b *Buffer) Start() Loc {
-	return Loc{0, 0}
-}
-
-// End returns the location of the last character in the buffer
-func (b *Buffer) End() Loc {
-	numlines := len(b.lines)
-	return Loc{utf8.RuneCount(b.lines[numlines-1].data), numlines - 1}
 }
 
 // RuneAt returns the rune at a given location in the buffer
@@ -271,7 +262,7 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 // being opened
 func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
-		return b.isModified
+		return *b.isModified
 	}
 
 	var buff [md5.Size]byte
@@ -312,20 +303,6 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 
 	h.Sum((*out)[:0])
 	return nil
-}
-
-func (b *Buffer) insert(pos Loc, value []byte) {
-	b.isModified = true
-	b.LineArray.insert(pos, value)
-}
-func (b *Buffer) remove(start, end Loc) []byte {
-	b.isModified = true
-	sub := b.LineArray.remove(start, end)
-	return sub
-}
-func (b *Buffer) deleteToEnd(start Loc) {
-	b.isModified = true
-	b.LineArray.deleteToEnd(start)
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
@@ -422,6 +399,7 @@ func (b *Buffer) SetCursors(c []*Cursor) {
 // AddCursor adds a new cursor to the list
 func (b *Buffer) AddCursor(c *Cursor) {
 	b.cursors = append(b.cursors, c)
+	b.EventHandler.cursors = b.cursors
 	b.UpdateCursors()
 }
 
