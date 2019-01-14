@@ -41,6 +41,10 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	return w
 }
 
+func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
+	w.Buf = b
+}
+
 func (v *View) GetView() *View {
 	return v
 }

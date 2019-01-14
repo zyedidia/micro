@@ -133,13 +133,15 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	config.InitLocalSettings(b.Settings, b.Path)
 
 	found := false
-	for _, buf := range OpenBuffers {
-		if buf.AbsPath == absPath {
-			found = true
-			b.LineArray = buf.LineArray
-			b.EventHandler = buf.EventHandler
-			b.ModTime = buf.ModTime
-			b.isModified = buf.isModified
+	if len(path) > 0 {
+		for _, buf := range OpenBuffers {
+			if buf.AbsPath == absPath {
+				found = true
+				b.LineArray = buf.LineArray
+				b.EventHandler = buf.EventHandler
+				b.ModTime = buf.ModTime
+				b.isModified = buf.isModified
+			}
 		}
 	}
 

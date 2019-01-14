@@ -53,7 +53,7 @@ func BufMapMouse(k MouseEvent, action string) {
 // The ActionHandler can access the window for necessary info about
 // visual positions for mouse clicks and scrolling
 type BufHandler struct {
-	display.Window
+	display.BWindow
 
 	Buf *buffer.Buffer
 
@@ -98,15 +98,32 @@ type BufHandler struct {
 	splitID uint64
 }
 
-func NewBufHandler(buf *buffer.Buffer, win display.Window) *BufHandler {
+func NewBufHandler(buf *buffer.Buffer, win display.BWindow) *BufHandler {
 	h := new(BufHandler)
 	h.Buf = buf
-	h.Window = win
+	h.BWindow = win
 
 	h.Cursor = h.Buf.GetActiveCursor()
 	h.mouseReleased = true
 
 	return h
+}
+
+func (h *BufHandler) OpenBuffer(b *buffer.Buffer) {
+	h.Buf.Close()
+	h.Buf = b
+	h.BWindow.SetBuffer(b)
+	h.Cursor = b.GetActiveCursor()
+	v := new(display.View)
+	h.SetView(v)
+	h.Relocate()
+	// Set mouseReleased to true because we assume the mouse is not being pressed when
+	// the editor is opened
+	h.mouseReleased = true
+	// Set isOverwriteMode to false, because we assume we are in the default mode when editor
+	// is opened
+	h.isOverwriteMode = false
+	h.lastClickTime = time.Time{}
 }
 
 func (h *BufHandler) ID() uint64 {

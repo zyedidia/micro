@@ -195,6 +195,18 @@ func RunePos(b []byte, i int) int {
 	return utf8.RuneCount(b[:i])
 }
 
+// MakeRelative will attempt to make a relative path between path and base
+func MakeRelative(path, base string) (string, error) {
+	if len(path) > 0 {
+		rel, err := filepath.Rel(base, path)
+		if err != nil {
+			return path, err
+		}
+		return rel, nil
+	}
+	return path, nil
+}
+
 // TODO: consider changing because of snap segfault
 // ReplaceHome takes a path as input and replaces ~ at the start of the path with the user's
 // home directory. Does nothing if the path does not start with '~'.
