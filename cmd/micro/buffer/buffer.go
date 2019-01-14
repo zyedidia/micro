@@ -5,7 +5,6 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -233,6 +232,16 @@ func (b *Buffer) SetName(s string) {
 	b.name = s
 }
 
+func (b *Buffer) Insert(start Loc, text string) {
+	b.EventHandler.cursors = b.cursors
+	b.EventHandler.Insert(start, text)
+}
+
+func (b *Buffer) Remove(start, end Loc) {
+	b.EventHandler.cursors = b.cursors
+	b.EventHandler.Remove(start, end)
+}
+
 // FileType returns the buffer's filetype
 func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)
@@ -415,8 +424,6 @@ func (b *Buffer) SetCursors(c []*Cursor) {
 // AddCursor adds a new cursor to the list
 func (b *Buffer) AddCursor(c *Cursor) {
 	b.cursors = append(b.cursors, c)
-	b.EventHandler.cursors = b.cursors
-	log.Println(b.cursors)
 	b.UpdateCursors()
 }
 
