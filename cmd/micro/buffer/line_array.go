@@ -52,10 +52,9 @@ type FileFormat byte
 // A LineArray simply stores and array of lines and makes it easy to insert
 // and delete in it
 type LineArray struct {
-	lines      []Line
-	endings    FileFormat
-	initsize   uint64
-	isModified *bool
+	lines    []Line
+	endings  FileFormat
+	initsize uint64
 }
 
 // Append efficiently appends lines together
@@ -162,7 +161,6 @@ func (la *LineArray) newlineBelow(y int) {
 
 // Inserts a byte array at a given location
 func (la *LineArray) insert(pos Loc, value []byte) {
-	*la.isModified = true
 	x, y := runeToByteIndex(pos.X, la.lines[pos.Y].data), pos.Y
 	for i := 0; i < len(value); i++ {
 		if value[i] == '\n' {
@@ -203,7 +201,6 @@ func (la *LineArray) split(pos Loc) {
 
 // removes from start to end
 func (la *LineArray) remove(start, end Loc) []byte {
-	*la.isModified = true
 	sub := la.Substr(start, end)
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
@@ -222,7 +219,6 @@ func (la *LineArray) remove(start, end Loc) []byte {
 
 // deleteToEnd deletes from the end of a line to the position
 func (la *LineArray) deleteToEnd(pos Loc) {
-	*la.isModified = true
 	la.lines[pos.Y].data = la.lines[pos.Y].data[:pos.X]
 }
 

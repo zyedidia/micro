@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -38,6 +39,25 @@ var (
 	ErrFileTooLarge = errors.New("File is too large to hash")
 )
 
+type SharedBuffer struct {
+	*LineArray
+	// Stores the last modification time of the file the buffer is pointing to
+	ModTime time.Time
+	// Type of the buffer (e.g. help, raw, scratch etc..)
+	Type BufType
+
+	isModified bool
+}
+
+func (b *SharedBuffer) insert(pos Loc, value []byte) {
+	b.isModified = true
+	b.LineArray.insert(pos, value)
+}
+func (b *SharedBuffer) remove(start, end Loc) []byte {
+	b.isModified = true
+	return b.LineArray.remove(start, end)
+}
+
 // Buffer stores the main information about a currently open file including
 // the actual text (in a LineArray), the undo/redo stack (in an EventHandler)
 // all the cursors, the syntax highlighting info, the settings for the buffer
@@ -46,8 +66,8 @@ var (
 // highlighter attaches information to each line of the buffer for optimization
 // purposes so it doesn't have to rehighlight everything on every update.
 type Buffer struct {
-	*LineArray
 	*EventHandler
+	*SharedBuffer
 
 	cursors     []*Cursor
 	curCursor   int
@@ -60,9 +80,6 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	name string
 
-	// Stores the last modification time of the file the buffer is pointing to
-	ModTime *time.Time
-
 	SyntaxDef   *highlight.Def
 	Highlighter *highlight.Highlighter
 
@@ -71,9 +88,6 @@ type Buffer struct {
 
 	// Settings customized by the user
 	Settings map[string]interface{}
-
-	// Type of the buffer (e.g. help, raw, scratch etc..)
-	Type BufType
 
 	Messages []*Message
 }
@@ -122,7 +136,6 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	absPath, _ := filepath.Abs(path)
 
 	b := new(Buffer)
-	b.Type = btype
 
 	b.Settings = config.DefaultLocalSettings()
 	for k, v := range config.GlobalSettings {
@@ -137,28 +150,24 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 		for _, buf := range OpenBuffers {
 			if buf.AbsPath == absPath {
 				found = true
-				b.LineArray = buf.LineArray
+				b.SharedBuffer = buf.SharedBuffer
 				b.EventHandler = buf.EventHandler
-				b.ModTime = buf.ModTime
-				b.isModified = buf.isModified
 			}
 		}
 	}
 
 	if !found {
+		b.SharedBuffer = new(SharedBuffer)
+		b.Type = btype
 		b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
-		b.EventHandler = NewEventHandler(b.LineArray, b.cursors)
-		b.ModTime = new(time.Time)
-		b.isModified = new(bool)
-		*b.isModified = false
-		*b.ModTime = time.Time{}
+		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
 	b.Path = path
 	b.AbsPath = absPath
 
 	// The last time this file was modified
-	*b.ModTime, _ = GetModTime(b.Path)
+	b.ModTime, _ = GetModTime(b.Path)
 
 	b.UpdateRules()
 
@@ -219,6 +228,11 @@ func (b *Buffer) GetName() string {
 	return b.name
 }
 
+//SetName changes the name for this buffer
+func (b *Buffer) SetName(s string) {
+	b.name = s
+}
+
 // FileType returns the buffer's filetype
 func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)
@@ -234,8 +248,8 @@ func (b *Buffer) ReOpen() error {
 	}
 	b.EventHandler.ApplyDiff(txt)
 
-	*b.ModTime, err = GetModTime(b.Path)
-	*b.isModified = false
+	b.ModTime, err = GetModTime(b.Path)
+	b.isModified = false
 	for _, c := range b.cursors {
 		c.Relocate()
 	}
@@ -264,7 +278,7 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 // being opened
 func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
-		return *b.isModified
+		return b.isModified
 	}
 
 	var buff [md5.Size]byte
@@ -402,6 +416,7 @@ func (b *Buffer) SetCursors(c []*Cursor) {
 func (b *Buffer) AddCursor(c *Cursor) {
 	b.cursors = append(b.cursors, c)
 	b.EventHandler.cursors = b.cursors
+	log.Println(b.cursors)
 	b.UpdateCursors()
 }
 
