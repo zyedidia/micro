@@ -2,6 +2,9 @@ package action
 
 import (
 	"os"
+	"path/filepath"
+	"strconv"
+	"strings"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
@@ -152,10 +155,55 @@ func (h *BufHandler) RawCmd(args []string) {
 
 // TabSwitchCmd switches to a given tab either by name or by number
 func (h *BufHandler) TabSwitchCmd(args []string) {
+	if len(args) > 0 {
+		num, err := strconv.Atoi(args[0])
+		if err != nil {
+			// Check for tab with this name
+
+			found := false
+			for i, t := range Tabs.List {
+				if t.Panes[t.active].Name() == args[0] {
+					Tabs.SetActive(i)
+					found = true
+				}
+			}
+			if !found {
+				InfoBar.Error("Could not find tab: ", err)
+			}
+		} else {
+			num--
+			if num >= 0 && num < len(Tabs.List) {
+				Tabs.SetActive(num)
+			} else {
+				InfoBar.Error("Invalid tab index")
+			}
+		}
+	}
 }
 
 // CdCmd changes the current working directory
 func (h *BufHandler) CdCmd(args []string) {
+	if len(args) > 0 {
+		path, err := util.ReplaceHome(args[0])
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
+		err = os.Chdir(path)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
+		wd, _ := os.Getwd()
+		for _, b := range buffer.OpenBuffers {
+			if len(b.Path) > 0 {
+				b.Path, _ = util.MakeRelative(b.AbsPath, wd)
+				if p, _ := filepath.Abs(b.Path); !strings.Contains(p, wd) {
+					b.Path = b.AbsPath
+				}
+			}
+		}
+	}
 }
 
 // MemUsageCmd prints micro's memory usage
@@ -181,6 +229,39 @@ func (h *BufHandler) PwdCmd(args []string) {
 
 // OpenCmd opens a new buffer with a given filename
 func (h *BufHandler) OpenCmd(args []string) {
+	if len(args) > 0 {
+		filename := args[0]
+		// the filename might or might not be quoted, so unquote first then join the strings.
+		args, err := shellwords.Split(filename)
+		if err != nil {
+			InfoBar.Error("Error parsing args ", err)
+			return
+		}
+		filename = strings.Join(args, " ")
+
+		open := func() {
+			b, err := buffer.NewBufferFromFile(filename, buffer.BTDefault)
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			h.OpenBuffer(b)
+		}
+		if h.Buf.Modified() {
+			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
+				if !canceled && !yes {
+					open()
+				} else if !canceled && yes {
+					h.Save()
+					open()
+				}
+			})
+		} else {
+			open()
+		}
+	} else {
+		InfoBar.Error("No filename")
+	}
 }
 
 // ToggleLogCmd toggles the log view
@@ -341,6 +422,24 @@ func (h *BufHandler) SetLocalCmd(args []string) {
 
 // ShowCmd shows the value of the given option
 func (h *BufHandler) ShowCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Please provide an option to show")
+		return
+	}
+
+	var option interface{}
+	if opt, ok := h.Buf.Settings[args[0]]; ok {
+		option = opt
+	} else if opt, ok := config.GlobalSettings[args[0]]; ok {
+		option = opt
+	}
+
+	if option == nil {
+		InfoBar.Error(args[0], " is not a valid option")
+		return
+	}
+
+	InfoBar.Message(option)
 }
 
 // ShowKeyCmd displays the action that a key is bound to
@@ -376,10 +475,12 @@ func (h *BufHandler) RunCmd(args []string) {
 
 // QuitCmd closes the main view
 func (h *BufHandler) QuitCmd(args []string) {
+	h.Quit()
 }
 
 // SaveCmd saves the buffer in the main view
 func (h *BufHandler) SaveCmd(args []string) {
+	h.Save()
 }
 
 // ReplaceCmd runs search and replace

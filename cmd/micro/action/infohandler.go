@@ -15,7 +15,7 @@ type InfoHandler struct {
 	*info.InfoBuf
 }
 
-func NewInfoHandler(ib *info.InfoBuf, w display.Window) *InfoHandler {
+func NewInfoHandler(ib *info.InfoBuf, w display.BWindow) *InfoHandler {
 	ih := new(InfoHandler)
 	ih.InfoBuf = ib
 	ih.BufHandler = NewBufHandler(ib.Buffer, w)

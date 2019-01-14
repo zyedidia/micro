@@ -53,6 +53,10 @@ func (i *InfoWindow) Resize(w, h int) {
 	i.y = h
 }
 
+func (i *InfoWindow) SetBuffer(b *buffer.Buffer) {
+	i.InfoBuf.Buffer = b
+}
+
 // func (i *InfoWindow) YesNoPrompt() (bool, bool) {
 // 	for {
 // 		i.Clear()

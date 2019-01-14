@@ -24,3 +24,8 @@ type Window interface {
 	Resize(w, h int)
 	SetActive(b bool)
 }
+
+type BWindow interface {
+	Window
+	SetBuffer(b *buffer.Buffer)
+}

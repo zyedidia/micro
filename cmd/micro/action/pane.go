@@ -15,12 +15,12 @@ type Pane interface {
 }
 
 type EditPane struct {
-	display.Window
+	display.BWindow
 	*BufHandler
 }
 
 type InfoPane struct {
-	display.Window
+	display.BWindow
 	*InfoHandler
 	*info.InfoBuf
 }
@@ -29,7 +29,7 @@ func NewBufEditPane(x, y, width, height int, b *buffer.Buffer) *EditPane {
 	e := new(EditPane)
 	// TODO: can probably replace editpane with bufhandler entirely
 	w := display.NewBufWindow(x, y, width, height, b)
-	e.Window = w
+	e.BWindow = w
 	e.BufHandler = NewBufHandler(b, w)
 
 	return e
@@ -39,7 +39,7 @@ func NewInfoBar() *InfoPane {
 	e := new(InfoPane)
 	ib := info.NewBuffer()
 	w := display.NewInfoWindow(ib)
-	e.Window = w
+	e.BWindow = w
 	e.InfoHandler = NewInfoHandler(ib, w)
 	e.InfoBuf = ib
 
