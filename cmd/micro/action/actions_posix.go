@@ -6,7 +6,6 @@ import (
 	"syscall"
 
 	"github.com/zyedidia/micro/cmd/micro/screen"
-	"github.com/zyedidia/micro/cmd/micro/util"
 )
 
 // Suspend sends micro to the background. This is the same as pressing CtrlZ in most unix programs.
@@ -19,7 +18,7 @@ func (*BufHandler) Suspend() bool {
 	pid := syscall.Getpid()
 	err := syscall.Kill(pid, syscall.SIGSTOP)
 	if err != nil {
-		util.TermMessage(err)
+		screen.TermMessage(err)
 	}
 
 	screen.TempStart(screenb)

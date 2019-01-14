@@ -1009,6 +1009,7 @@ func (h *BufHandler) Escape() bool {
 // Quit this will close the current tab or view that is open
 func (h *BufHandler) Quit() bool {
 	quit := func() {
+		h.Buf.Close()
 		if len(MainTab().Panes) > 1 {
 			h.Unsplit()
 		} else if len(Tabs.List) > 1 {

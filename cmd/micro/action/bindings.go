@@ -10,7 +10,7 @@ import (
 
 	"github.com/flynn/json5"
 	"github.com/zyedidia/micro/cmd/micro/config"
-	"github.com/zyedidia/micro/cmd/micro/util"
+	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/tcell"
 )
 
@@ -24,13 +24,13 @@ func InitBindings() {
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
-			util.TermMessage("Error reading bindings.json file: " + err.Error())
+			screen.TermMessage("Error reading bindings.json file: " + err.Error())
 			return
 		}
 
 		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
-			util.TermMessage("Error reading bindings.json:", err.Error())
+			screen.TermMessage("Error reading bindings.json:", err.Error())
 		}
 	}
 
@@ -45,7 +45,7 @@ func InitBindings() {
 func BindKey(k, v string) {
 	event, ok := findEvent(k)
 	if !ok {
-		util.TermMessage(k, "is not a bindable event")
+		screen.TermMessage(k, "is not a bindable event")
 	}
 
 	switch e := event.(type) {

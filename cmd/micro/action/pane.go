@@ -11,6 +11,7 @@ type Pane interface {
 	display.Window
 	ID() uint64
 	Name() string
+	Close()
 }
 
 type EditPane struct {

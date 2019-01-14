@@ -31,7 +31,10 @@ func (t *TermHandler) ID() uint64 {
 	return t.id
 }
 
+func (t *TermHandler) Close() {}
+
 func (t *TermHandler) Quit() {
+	t.Close()
 	if len(MainTab().Panes) > 1 {
 		t.Unsplit()
 	} else if len(Tabs.List) > 1 {

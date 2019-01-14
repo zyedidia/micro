@@ -1,7 +1,6 @@
 package buffer
 
 import (
-	"bufio"
 	"crypto/md5"
 	"errors"
 	"io"
@@ -14,39 +13,11 @@ import (
 
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
-
+	"github.com/zyedidia/micro/cmd/micro/screen"
 	. "github.com/zyedidia/micro/cmd/micro/util"
 )
 
-// LargeFileThreshold is the number of bytes when fastdirty is forced
-// because hashing is too slow
-const LargeFileThreshold = 50000
-
-// overwriteFile opens the given file for writing, truncating if one exists, and then calls
-// the supplied function with the file as io.Writer object, also making sure the file is
-// closed afterwards.
-func overwriteFile(name string, fn func(io.Writer) error) (err error) {
-	var file *os.File
-
-	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
-		return
-	}
-
-	defer func() {
-		if e := file.Close(); e != nil && err == nil {
-			err = e
-		}
-	}()
-
-	w := bufio.NewWriter(file)
-
-	if err = fn(w); err != nil {
-		return
-	}
-
-	err = w.Flush()
-	return
-}
+var OpenBuffers []*Buffer
 
 // The BufType defines what kind of buffer this is
 type BufType struct {
@@ -63,6 +34,8 @@ var (
 	BTScratch = BufType{3, false, true, false}
 	BTRaw     = BufType{4, true, true, false}
 	BTInfo    = BufType{5, false, true, false}
+
+	ErrFileTooLarge = errors.New("File is too large to hash")
 )
 
 // Buffer stores the main information about a currently open file including
@@ -149,6 +122,8 @@ func NewBufferFromString(text, path string, btype BufType) *Buffer {
 // Ensure that ReadSettings and InitGlobalSettings have been called before creating
 // a new buffer
 func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string, btype BufType) *Buffer {
+	absPath, _ := filepath.Abs(path)
+
 	b := new(Buffer)
 	b.Type = btype
 
@@ -161,8 +136,6 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	config.InitLocalSettings(b.Settings, b.Path)
 
 	b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
-
-	absPath, _ := filepath.Abs(path)
 
 	b.Path = path
 	b.AbsPath = absPath
@@ -187,7 +160,7 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		err := b.Unserialize()
 		if err != nil {
-			TermMessage(err)
+			screen.TermMessage(err)
 		}
 	}
 
@@ -200,7 +173,21 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 		}
 	}
 
+	OpenBuffers = append(OpenBuffers, b)
+
 	return b
+}
+
+// Close removes this buffer from the list of open buffers
+func (b *Buffer) Close() {
+	for i, buf := range OpenBuffers {
+		if b == buf {
+			copy(OpenBuffers[i:], OpenBuffers[i+1:])
+			OpenBuffers[len(OpenBuffers)-1] = nil
+			OpenBuffers = OpenBuffers[:len(OpenBuffers)-1]
+			return
+		}
+	}
 }
 
 // GetName returns the name that should be displayed in the statusline
@@ -294,19 +281,37 @@ func (b *Buffer) Modified() bool {
 }
 
 // calcHash calculates md5 hash of all lines in the buffer
-func calcHash(b *Buffer, out *[md5.Size]byte) {
+func calcHash(b *Buffer, out *[md5.Size]byte) error {
 	h := md5.New()
 
+	size := 0
 	if len(b.lines) > 0 {
-		h.Write(b.lines[0].data)
+		n, e := h.Write(b.lines[0].data)
+		if e != nil {
+			return e
+		}
+		size += n
 
 		for _, l := range b.lines[1:] {
-			h.Write([]byte{'\n'})
-			h.Write(l.data)
+			n, e = h.Write([]byte{'\n'})
+			if e != nil {
+				return e
+			}
+			size += n
+			n, e = h.Write(l.data)
+			if e != nil {
+				return e
+			}
+			size += n
 		}
 	}
 
+	if size > LargeFileThreshold {
+		return ErrFileTooLarge
+	}
+
 	h.Sum((*out)[:0])
+	return nil
 }
 
 func (b *Buffer) insert(pos Loc, value []byte) {
@@ -334,16 +339,16 @@ func (b *Buffer) UpdateRules() {
 	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
 		data, err := f.Data()
 		if err != nil {
-			TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 		} else {
 			file, err := highlight.ParseFile(data)
 			if err != nil {
-				TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
 			ftdetect, err := highlight.ParseFtDetect(file)
 			if err != nil {
-				TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
 
@@ -355,7 +360,7 @@ func (b *Buffer) UpdateRules() {
 					header.FtDetect = ftdetect
 					b.SyntaxDef, err = highlight.ParseDef(file, header)
 					if err != nil {
-						TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+						screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 						continue
 					}
 					rehighlight = true
@@ -367,7 +372,7 @@ func (b *Buffer) UpdateRules() {
 					header.FtDetect = ftdetect
 					b.SyntaxDef, err = highlight.ParseDef(file, header)
 					if err != nil {
-						TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+						screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 						continue
 					}
 					rehighlight = true
@@ -389,6 +394,14 @@ func (b *Buffer) UpdateRules() {
 				b.Highlighter.HighlightStates(b)
 			}
 		}
+	}
+}
+
+// ClearMatches clears all of the syntax highlighting for the buffer
+func (b *Buffer) ClearMatches() {
+	for i := range b.lines {
+		b.SetMatch(i, nil)
+		b.SetState(i, nil)
 	}
 }
 

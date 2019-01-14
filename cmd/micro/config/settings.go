@@ -6,19 +6,26 @@ import (
 	"io/ioutil"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 
 	"github.com/flynn/json5"
 	"github.com/zyedidia/glob"
+	"github.com/zyedidia/micro/cmd/micro/util"
 )
 
 type optionValidator func(string, interface{}) error
 
-// The options that the user can set
-var GlobalSettings map[string]interface{}
+var (
+	ErrInvalidOption = errors.New("Invalid option")
+	ErrInvalidValue  = errors.New("Invalid value")
 
-// This is the raw parsed json
-var parsedSettings map[string]interface{}
+	// The options that the user can set
+	GlobalSettings map[string]interface{}
+
+	// This is the raw parsed json
+	parsedSettings map[string]interface{}
+)
 
 // Options with validators
 var optionValidators = map[string]optionValidator{
@@ -120,22 +127,6 @@ func GetGlobalOption(name string) interface{} {
 	return GlobalSettings[name]
 }
 
-// GetLocalOption returns the local value of the given option
-// func GetLocalOption(name string, buf *Buffer) interface{} {
-// 	return buf.Settings[name]
-// }
-
-// TODO: get option for current buffer
-// GetOption returns the value of the given option
-// If there is a local version of the option, it returns that
-// otherwise it will return the global version
-// func GetOption(name string) interface{} {
-// 	if GetLocalOption(name, CurView().Buf) != nil {
-// 		return GetLocalOption(name, CurView().Buf)
-// 	}
-// 	return GetGlobalOption(name)
-// }
-
 func DefaultCommonSettings() map[string]interface{} {
 	return map[string]interface{}{
 		"autoindent":     true,
@@ -196,199 +187,35 @@ func DefaultLocalSettings() map[string]interface{} {
 	return common
 }
 
-// TODO: everything else
+func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {
+	var native interface{}
+	kind := reflect.TypeOf(realValue).Kind()
+	if kind == reflect.Bool {
+		b, err := util.ParseBool(value)
+		if err != nil {
+			return nil, ErrInvalidValue
+		}
+		native = b
+	} else if kind == reflect.String {
+		native = value
+	} else if kind == reflect.Float64 {
+		i, err := strconv.Atoi(value)
+		if err != nil {
+			return nil, ErrInvalidValue
+		}
+		native = float64(i)
+	} else {
+		return nil, ErrInvalidValue
+	}
 
-// SetOption attempts to set the given option to the value
-// By default it will set the option as global, but if the option
-// is local only it will set the local version
-// Use setlocal to force an option to be set locally
-// func SetOption(option, value string) error {
-// 	if _, ok := GlobalSettings[option]; !ok {
-// 		if _, ok := CurView().Buf.Settings[option]; !ok {
-// 			return errors.New("Invalid option")
-// 		}
-// 		SetLocalOption(option, value, CurView())
-// 		return nil
-// 	}
-//
-// 	var nativeValue interface{}
-//
-// 	kind := reflect.TypeOf(GlobalSettings[option]).Kind()
-// 	if kind == reflect.Bool {
-// 		b, err := ParseBool(value)
-// 		if err != nil {
-// 			return errors.New("Invalid value")
-// 		}
-// 		nativeValue = b
-// 	} else if kind == reflect.String {
-// 		nativeValue = value
-// 	} else if kind == reflect.Float64 {
-// 		i, err := strconv.Atoi(value)
-// 		if err != nil {
-// 			return errors.New("Invalid value")
-// 		}
-// 		nativeValue = float64(i)
-// 	} else {
-// 		return errors.New("Option has unsupported value type")
-// 	}
-//
-// 	if err := optionIsValid(option, nativeValue); err != nil {
-// 		return err
-// 	}
-//
-// 	GlobalSettings[option] = nativeValue
-//
-// 	if option == "colorscheme" {
-// 		// LoadSyntaxFiles()
-// 		InitColorscheme()
-// 		for _, tab := range tabs {
-// 			for _, view := range tab.Views {
-// 				view.Buf.UpdateRules()
-// 			}
-// 		}
-// 	}
-//
-// 	if option == "infobar" || option == "keymenu" {
-// 		for _, tab := range tabs {
-// 			tab.Resize()
-// 		}
-// 	}
-//
-// 	if option == "mouse" {
-// 		if !nativeValue.(bool) {
-// 			screen.DisableMouse()
-// 		} else {
-// 			screen.EnableMouse()
-// 		}
-// 	}
-//
-// 	if len(tabs) != 0 {
-// 		if _, ok := CurView().Buf.Settings[option]; ok {
-// 			for _, tab := range tabs {
-// 				for _, view := range tab.Views {
-// 					SetLocalOption(option, value, view)
-// 				}
-// 			}
-// 		}
-// 	}
-//
-// 	return nil
-// }
-//
-// // SetLocalOption sets the local version of this option
-// func SetLocalOption(option, value string, view *View) error {
-// 	buf := view.Buf
-// 	if _, ok := buf.Settings[option]; !ok {
-// 		return errors.New("Invalid option")
-// 	}
-//
-// 	var nativeValue interface{}
-//
-// 	kind := reflect.TypeOf(buf.Settings[option]).Kind()
-// 	if kind == reflect.Bool {
-// 		b, err := ParseBool(value)
-// 		if err != nil {
-// 			return errors.New("Invalid value")
-// 		}
-// 		nativeValue = b
-// 	} else if kind == reflect.String {
-// 		nativeValue = value
-// 	} else if kind == reflect.Float64 {
-// 		i, err := strconv.Atoi(value)
-// 		if err != nil {
-// 			return errors.New("Invalid value")
-// 		}
-// 		nativeValue = float64(i)
-// 	} else {
-// 		return errors.New("Option has unsupported value type")
-// 	}
-//
-// 	if err := optionIsValid(option, nativeValue); err != nil {
-// 		return err
-// 	}
-//
-// 	if option == "fastdirty" {
-// 		// If it is being turned off, we have to hash every open buffer
-// 		var empty [md5.Size]byte
-// 		var wg sync.WaitGroup
-//
-// 		for _, tab := range tabs {
-// 			for _, v := range tab.Views {
-// 				if !nativeValue.(bool) {
-// 					if v.Buf.origHash == empty {
-// 						wg.Add(1)
-//
-// 						go func(b *Buffer) { // calculate md5 hash of the file
-// 							defer wg.Done()
-//
-// 							if file, e := os.Open(b.AbsPath); e == nil {
-// 								defer file.Close()
-//
-// 								h := md5.New()
-//
-// 								if _, e = io.Copy(h, file); e == nil {
-// 									h.Sum(b.origHash[:0])
-// 								}
-// 							}
-// 						}(v.Buf)
-// 					}
-// 				} else {
-// 					v.Buf.IsModified = v.Buf.Modified()
-// 				}
-// 			}
-// 		}
-//
-// 		wg.Wait()
-// 	}
-//
-// 	buf.Settings[option] = nativeValue
-//
-// 	if option == "statusline" {
-// 		view.ToggleStatusLine()
-// 	}
-//
-// 	if option == "filetype" {
-// 		// LoadSyntaxFiles()
-// 		InitColorscheme()
-// 		buf.UpdateRules()
-// 	}
-//
-// 	if option == "fileformat" {
-// 		buf.IsModified = true
-// 	}
-//
-// 	if option == "syntax" {
-// 		if !nativeValue.(bool) {
-// 			buf.ClearMatches()
-// 		} else {
-// 			if buf.highlighter != nil {
-// 				buf.highlighter.HighlightStates(buf)
-// 			}
-// 		}
-// 	}
-//
-// 	return nil
-// }
-//
-// // SetOptionAndSettings sets the given option and saves the option setting to the settings config file
-// func SetOptionAndSettings(option, value string) {
-// 	filename := ConfigDir + "/settings.json"
-//
-// 	err := SetOption(option, value)
-//
-// 	if err != nil {
-// 		messenger.Error(err.Error())
-// 		return
-// 	}
-//
-// 	err = WriteSettings(filename)
-// 	if err != nil {
-// 		messenger.Error("Error writing to settings.json: " + err.Error())
-// 		return
-// 	}
-// }
+	if err := OptionIsValid(option, native); err != nil {
+		return nil, err
+	}
+	return native, nil
+}
 
-func optionIsValid(option string, value interface{}) error {
+// OptionIsValid checks if a value is valid for a certain option
+func OptionIsValid(option string, value interface{}) error {
 	if validator, ok := optionValidators[option]; ok {
 		return validator(option, value)
 	}
