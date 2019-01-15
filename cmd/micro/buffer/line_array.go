@@ -53,7 +53,7 @@ type FileFormat byte
 // and delete in it
 type LineArray struct {
 	lines    []Line
-	endings  FileFormat
+	Endings  FileFormat
 	initsize uint64
 }
 
@@ -95,11 +95,12 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 		if dlen > 1 && data[dlen-2] == '\r' {
 			data = append(data[:dlen-2], '\n')
 			if endings == FFAuto {
-				la.endings = FFDos
+				la.Endings = FFDos
 			}
+			dlen = len(data)
 		} else if dlen > 0 {
 			if endings == FFAuto {
-				la.endings = FFUnix
+				la.Endings = FFUnix
 			}
 		}
 
@@ -143,7 +144,7 @@ func (la *LineArray) Bytes() []byte {
 	for i, l := range la.lines {
 		str = append(str, l.data...)
 		if i != len(la.lines)-1 {
-			if la.endings == FFDos {
+			if la.Endings == FFDos {
 				str = append(str, '\r')
 			}
 			str = append(str, '\n')
