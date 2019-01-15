@@ -69,11 +69,6 @@ var formatParser = regexp.MustCompile(`\$\(.+?\)`)
 
 // Display draws the statusline to the screen
 func (s *StatusLine) Display() {
-	// TODO: don't display if infobar off and has message
-	if !config.GetGlobalOption("infobar").(bool) {
-		return
-	}
-
 	// We'll draw the line at the lowest line in the window
 	y := s.win.Height + s.win.Y - 1
 

@@ -352,6 +352,7 @@ func (h *BufHandler) EvalCmd(args []string) {
 // NewTabCmd opens the given file in a new tab
 func (h *BufHandler) NewTabCmd(args []string) {
 	width, height := screen.Screen.Size()
+	iOffset := config.GetInfoBarOffset()
 	if len(args) > 0 {
 		for _, a := range args {
 			b, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
@@ -359,13 +360,13 @@ func (h *BufHandler) NewTabCmd(args []string) {
 				InfoBar.Error(err)
 				return
 			}
-			tp := NewTabFromBuffer(0, 0, width, height-1, b)
+			tp := NewTabFromBuffer(0, 0, width, height-1-iOffset, b)
 			Tabs.AddTab(tp)
 			Tabs.SetActive(len(Tabs.List) - 1)
 		}
 	} else {
 		b := buffer.NewBufferFromString("", "", buffer.BTDefault)
-		tp := NewTabFromBuffer(0, 0, width, height-1, b)
+		tp := NewTabFromBuffer(0, 0, width, height-iOffset, b)
 		Tabs.AddTab(tp)
 		Tabs.SetActive(len(Tabs.List) - 1)
 	}
@@ -392,11 +393,9 @@ func SetGlobalOption(option, value string) error {
 	}
 
 	// TODO: info and keymenu option change
-	// if option == "infobar" || option == "keymenu" {
-	// 	for _, tab := range tabs {
-	// 		tab.Resize()
-	// 	}
-	// }
+	if option == "infobar" || option == "keymenu" {
+		Tabs.Resize()
+	}
 
 	if option == "mouse" {
 		if !nativeValue.(bool) {

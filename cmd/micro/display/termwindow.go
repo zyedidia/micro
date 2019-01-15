@@ -23,14 +23,17 @@ func NewTermWindow(x, y, w, h int, term *shell.Terminal) *TermWindow {
 	tw.View = new(View)
 	tw.Terminal = term
 	tw.X, tw.Y = x, y
-	tw.Width, tw.Height = w, h-1
-	tw.Resize(tw.Width, tw.Height)
+	tw.Resize(w, h)
 	return tw
 }
 
 // Resize informs the terminal of a resize event
 func (w *TermWindow) Resize(width, height int) {
+	if config.GetGlobalOption("statusline").(bool) {
+		height--
+	}
 	w.Term.Resize(width, height)
+	w.Width, w.Height = width, height
 }
 
 func (w *TermWindow) SetActive(b bool) {

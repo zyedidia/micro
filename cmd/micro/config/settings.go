@@ -163,6 +163,13 @@ func DefaultCommonSettings() map[string]interface{} {
 	}
 }
 
+func GetInfoBarOffset() int {
+	if GetGlobalOption("infobar").(bool) {
+		return 1
+	}
+	return 0
+}
+
 // DefaultGlobalSettings returns the default global settings for micro
 // Note that colorscheme is a global only option
 func DefaultGlobalSettings() map[string]interface{} {

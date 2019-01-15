@@ -2,6 +2,7 @@ package action
 
 import (
 	"github.com/zyedidia/micro/cmd/micro/buffer"
+	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/views"
@@ -19,14 +20,15 @@ type TabList struct {
 // for each buffer
 func NewTabList(bufs []*buffer.Buffer) *TabList {
 	w, h := screen.Screen.Size()
+	iOffset := config.GetInfoBarOffset()
 	tl := new(TabList)
 	tl.List = make([]*Tab, len(bufs))
 	if len(bufs) > 1 {
 		for i, b := range bufs {
-			tl.List[i] = NewTabFromBuffer(0, 1, w, h-2, b)
+			tl.List[i] = NewTabFromBuffer(0, 1, w, h-1-iOffset, b)
 		}
 	} else {
-		tl.List[0] = NewTabFromBuffer(0, 0, w, h-1, bufs[0])
+		tl.List[0] = NewTabFromBuffer(0, 0, w, h-iOffset, bufs[0])
 	}
 	tl.TabWindow = display.NewTabWindow(w, 0)
 	tl.Names = make([]string, len(bufs))
@@ -76,16 +78,17 @@ func (t *TabList) RemoveTab(id uint64) {
 // that into account
 func (t *TabList) Resize() {
 	w, h := screen.Screen.Size()
+	iOffset := config.GetInfoBarOffset()
 	InfoBar.Resize(w, h-1)
 	if len(t.List) > 1 {
 		for _, p := range t.List {
 			p.Y = 1
-			p.Node.Resize(w, h-2)
+			p.Node.Resize(w, h-1-iOffset)
 			p.Resize()
 		}
 	} else if len(t.List) == 1 {
 		t.List[0].Y = 0
-		t.List[0].Node.Resize(w, h-1)
+		t.List[0].Node.Resize(w, h-iOffset)
 		t.List[0].Resize()
 	}
 }
