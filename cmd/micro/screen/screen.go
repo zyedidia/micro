@@ -54,7 +54,7 @@ func TempStart(screenWasNil bool) {
 
 // Init creates and initializes the tcell screen
 func Init() {
-	DrawChan = make(chan bool)
+	DrawChan = make(chan bool, 8)
 
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"

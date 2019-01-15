@@ -1,7 +1,6 @@
 package buffer
 
 import (
-	"log"
 	"time"
 	"unicode/utf8"
 
@@ -117,7 +116,6 @@ func (eh *EventHandler) Insert(start Loc, textStr string) {
 	e.Deltas[0].End = start.MoveLA(utf8.RuneCount(text), eh.buf.LineArray)
 	end := e.Deltas[0].End
 
-	log.Println(eh.cursors)
 	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
 			if start.Y != end.Y && loc.GreaterThan(start) {
