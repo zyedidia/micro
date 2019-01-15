@@ -133,25 +133,30 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 	i.HasPrompt = false
 	i.HasYN = false
 	i.HasGutter = false
-	if i.PromptCallback != nil && !hadYN {
-		if canceled {
-			i.PromptCallback("", true)
-			h := i.History[i.PromptType]
-			i.History[i.PromptType] = h[:len(h)-1]
-		} else {
-			resp := strings.TrimSpace(string(i.LineBytes(0)))
-			i.PromptCallback(resp, false)
-			h := i.History[i.PromptType]
-			h[len(h)-1] = resp
+	if !hadYN {
+		if i.PromptCallback != nil {
+			if canceled {
+				i.PromptCallback("", true)
+				h := i.History[i.PromptType]
+				i.History[i.PromptType] = h[:len(h)-1]
+			} else {
+				resp := strings.TrimSpace(string(i.LineBytes(0)))
+				i.PromptCallback(resp, false)
+				h := i.History[i.PromptType]
+				h[len(h)-1] = resp
+			}
+			i.PromptCallback = nil
+			i.EventCallback = nil
 		}
+		if i.EventCallback != nil {
+			i.EventCallback = nil
+		}
+		i.Replace(i.Start(), i.End(), []byte{})
 	}
 	if i.YNCallback != nil && hadYN {
 		i.YNCallback(i.YNResp, canceled)
+		i.YNCallback = nil
 	}
-	i.PromptCallback = nil
-	i.EventCallback = nil
-	i.YNCallback = nil
-	i.Replace(i.Start(), i.End(), []byte{})
 }
 
 // Reset resets the infobuffer's msg and info

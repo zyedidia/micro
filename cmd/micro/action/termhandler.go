@@ -23,6 +23,7 @@ func NewTermHandler(x, y, w, h int, t *shell.Terminal, id uint64) *TermHandler {
 	th := new(TermHandler)
 	th.Terminal = t
 	th.id = id
+	th.mouseReleased = true
 	th.Window = display.NewTermWindow(x, y, w, h, t)
 	return th
 }
@@ -81,7 +82,7 @@ func (t *TermHandler) HandleEvent(event tcell.Event) {
 		x, y := e.Position()
 		v := t.GetView()
 		x -= v.X
-		y += v.Y
+		y -= v.Y
 
 		if e.Buttons() == tcell.Button1 {
 			if !t.mouseReleased {

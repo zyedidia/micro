@@ -559,9 +559,7 @@ func (h *BufHandler) TermCmd(args []string) {
 		args = []string{sh}
 	}
 
-	term := func(i int) {
-		// If there is only one open file we make a new tab instead of overwriting it
-		newtab := len(MainTab().Panes) == 1 && len(Tabs.List) == 1
+	term := func(i int, newtab bool) {
 
 		t := new(shell.Terminal)
 		t.Start(args, false, true)
@@ -580,19 +578,27 @@ func (h *BufHandler) TermCmd(args []string) {
 		MainTab().SetActive(i)
 	}
 
+	// If there is only one open file we make a new tab instead of overwriting it
+	newtab := len(MainTab().Panes) == 1 && len(Tabs.List) == 1
+
+	if newtab {
+		term(0, true)
+		return
+	}
+
 	for i, p := range ps {
 		if p.ID() == h.ID() {
 			if h.Buf.Modified() {
 				InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 					if !canceled && !yes {
-						term(i)
+						term(i, false)
 					} else if !canceled && yes {
 						h.Save()
-						term(i)
+						term(i, false)
 					}
 				})
 			} else {
-				term(i)
+				term(i, false)
 			}
 		}
 	}
