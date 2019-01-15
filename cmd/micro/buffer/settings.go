@@ -30,6 +30,12 @@ func (b *Buffer) SetOption(option, value string) error {
 	} else if option == "filetype" {
 		b.UpdateRules()
 	} else if option == "fileformat" {
+		switch b.Settings["fileformat"].(string) {
+		case "unix":
+			b.Endings = FFUnix
+		case "dos":
+			b.Endings = FFDos
+		}
 		b.isModified = true
 	} else if option == "syntax" {
 		if !nativeValue.(bool) {

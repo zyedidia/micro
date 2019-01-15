@@ -107,7 +107,7 @@ func (b *Buffer) SaveAs(filename string) error {
 
 		// end of line
 		var eol []byte
-		if b.Settings["fileformat"] == "dos" {
+		if b.Endings == FFDos {
 			eol = []byte{'\r', '\n'}
 		} else {
 			eol = []byte{'\n'}

@@ -163,6 +163,13 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
+	switch b.Endings {
+	case FFUnix:
+		b.Settings["fileformat"] = "unix"
+	case FFDos:
+		b.Settings["fileformat"] = "dos"
+	}
+
 	b.Path = path
 	b.AbsPath = absPath
 
