@@ -758,11 +758,64 @@ func (h *BufHandler) DeleteLine() bool {
 
 // MoveLinesUp moves up the current line or selected lines if any
 func (h *BufHandler) MoveLinesUp() bool {
+	if h.Cursor.HasSelection() {
+		if h.Cursor.CurSelection[0].Y == 0 {
+			InfoBar.Message("Can not move further up")
+			return true
+		}
+		start := h.Cursor.CurSelection[0].Y
+		end := h.Cursor.CurSelection[1].Y
+		if start > end {
+			end, start = start, end
+		}
+
+		h.Buf.MoveLinesUp(
+			start,
+			end,
+		)
+		h.Cursor.CurSelection[1].Y -= 1
+	} else {
+		if h.Cursor.Loc.Y == 0 {
+			InfoBar.Message("Can not move further up")
+			return true
+		}
+		h.Buf.MoveLinesUp(
+			h.Cursor.Loc.Y,
+			h.Cursor.Loc.Y+1,
+		)
+	}
+
 	return true
 }
 
 // MoveLinesDown moves down the current line or selected lines if any
 func (h *BufHandler) MoveLinesDown() bool {
+	if h.Cursor.HasSelection() {
+		if h.Cursor.CurSelection[1].Y >= h.Buf.LinesNum() {
+			InfoBar.Message("Can not move further down")
+			return true
+		}
+		start := h.Cursor.CurSelection[0].Y
+		end := h.Cursor.CurSelection[1].Y
+		if start > end {
+			end, start = start, end
+		}
+
+		h.Buf.MoveLinesDown(
+			start,
+			end,
+		)
+	} else {
+		if h.Cursor.Loc.Y >= h.Buf.LinesNum()-1 {
+			InfoBar.Message("Can not move further down")
+			return true
+		}
+		h.Buf.MoveLinesDown(
+			h.Cursor.Loc.Y,
+			h.Cursor.Loc.Y+1,
+		)
+	}
+
 	return true
 }
 
@@ -803,6 +856,14 @@ func (h *BufHandler) paste(clip string) {
 // JumpToMatchingBrace moves the cursor to the matching brace if it is
 // currently on a brace
 func (h *BufHandler) JumpToMatchingBrace() bool {
+	for _, bp := range buffer.BracePairs {
+		r := h.Cursor.RuneUnder(h.Cursor.X)
+		if r == bp[0] || r == bp[1] {
+			matchingBrace := h.Buf.FindMatchingBrace(bp, h.Cursor.Loc)
+			h.Cursor.GotoLoc(matchingBrace)
+		}
+	}
+
 	return true
 }
 
