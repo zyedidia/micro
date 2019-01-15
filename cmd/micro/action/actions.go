@@ -1001,13 +1001,17 @@ func (h *BufHandler) ClearStatus() bool {
 
 // ToggleHelp toggles the help screen
 func (h *BufHandler) ToggleHelp() bool {
-	h.openHelp("help")
-	return true
+	if h.Buf.Type == buffer.BTHelp {
+		h.Quit()
+	} else {
+		h.openHelp("help")
+	}
+	return false
 }
 
 // ToggleKeyMenu toggles the keymenu option and resizes all tabs
 func (h *BufHandler) ToggleKeyMenu() bool {
-	return true
+	return false
 }
 
 // ShellMode opens a terminal to run a shell command

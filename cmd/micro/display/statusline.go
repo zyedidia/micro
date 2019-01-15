@@ -32,7 +32,7 @@ func NewStatusLine(win *BufWindow) *StatusLine {
 	s := new(StatusLine)
 	s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
 	// s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
-	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): open help"
+	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help"
 	s.Info = map[string]func(*buffer.Buffer) string{
 		"filename": func(b *buffer.Buffer) string {
 			if b.Settings["basename"].(bool) {
