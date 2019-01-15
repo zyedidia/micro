@@ -87,16 +87,16 @@ func NewEventHandler(buf *SharedBuffer, cursors []*Cursor) *EventHandler {
 // the buffer equal to that string
 // This means that we can transform the buffer into any string and still preserve undo/redo
 // through insert and delete events
-func (eh *EventHandler) ApplyDiff(new string) {
+func (eh *EventHandler) ApplyDiff(str string) {
 	differ := dmp.New()
-	diff := differ.DiffMain(string(eh.buf.Bytes()), new, false)
+	diff := differ.DiffMain(string(eh.buf.Bytes()), str, false)
 	loc := eh.buf.Start()
 	for _, d := range diff {
 		if d.Type == dmp.DiffDelete {
 			eh.Remove(loc, loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf.LineArray))
 		} else {
 			if d.Type == dmp.DiffInsert {
-				eh.Insert(loc, d.Text)
+				eh.Insert(loc, []byte(d.Text))
 			}
 			loc = loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf.LineArray)
 		}
@@ -104,8 +104,7 @@ func (eh *EventHandler) ApplyDiff(new string) {
 }
 
 // Insert creates an insert text event and executes it
-func (eh *EventHandler) Insert(start Loc, textStr string) {
-	text := []byte(textStr)
+func (eh *EventHandler) Insert(start Loc, text []byte) {
 	e := &TextEvent{
 		C:         *eh.cursors[0],
 		EventType: TextEventInsert,
@@ -174,7 +173,7 @@ func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 }
 
 // Replace deletes from start to end and replaces it with the given string
-func (eh *EventHandler) Replace(start, end Loc, replace string) {
+func (eh *EventHandler) Replace(start, end Loc, replace []byte) {
 	eh.Remove(start, end)
 	eh.Insert(start, replace)
 }

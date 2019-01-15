@@ -67,7 +67,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
-			b.Insert(end, "\n")
+			b.Insert(end, []byte{'\n'})
 		}
 	}
 

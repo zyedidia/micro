@@ -386,14 +386,14 @@ func (h *BufHandler) InsertNewline() bool {
 
 	ws := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
 	cx := h.Cursor.X
-	h.Buf.Insert(h.Cursor.Loc, "\n")
+	h.Buf.Insert(h.Cursor.Loc, []byte{'\n'})
 	// h.Cursor.Right()
 
 	if h.Buf.Settings["autoindent"].(bool) {
 		if cx < len(ws) {
 			ws = ws[0:cx]
 		}
-		h.Buf.Insert(h.Cursor.Loc, string(ws))
+		h.Buf.Insert(h.Cursor.Loc, ws)
 		// for i := 0; i < len(ws); i++ {
 		// 	h.Cursor.Right()
 		// }
@@ -733,10 +733,10 @@ func (h *BufHandler) Cut() bool {
 // DuplicateLine duplicates the current line or selection
 func (h *BufHandler) DuplicateLine() bool {
 	if h.Cursor.HasSelection() {
-		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
+		h.Buf.Insert(h.Cursor.CurSelection[1], h.Cursor.GetSelection())
 	} else {
 		h.Cursor.End()
-		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
+		h.Buf.Insert(h.Cursor.Loc, append([]byte{'\n'}, h.Buf.LineBytes(h.Cursor.Y)...))
 		// h.Cursor.Right()
 	}
 
@@ -794,7 +794,7 @@ func (h *BufHandler) paste(clip string) {
 		h.Cursor.ResetSelection()
 	}
 
-	h.Buf.Insert(h.Cursor.Loc, clip)
+	h.Buf.Insert(h.Cursor.Loc, []byte(clip))
 	// h.Cursor.Loc = h.Cursor.Loc.Move(Count(clip), h.Buf)
 	h.freshClip = false
 	InfoBar.Message("Pasted clipboard")
