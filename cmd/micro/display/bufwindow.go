@@ -57,6 +57,8 @@ func (v *View) SetView(view *View) {
 func (w *BufWindow) Resize(width, height int) {
 	w.Width, w.Height = width, height
 	w.lineHeight = make([]int, height)
+	// This recalculates lineHeight
+	w.GetMouseLoc(buffer.Loc{width, height})
 }
 
 func (w *BufWindow) SetActive(b bool) {
