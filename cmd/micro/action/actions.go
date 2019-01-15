@@ -351,11 +351,6 @@ func (h *BufHandler) SelectToEnd() bool {
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
 func (h *BufHandler) InsertNewline() bool {
-	if h.Buf.Type == buffer.BTInfo {
-		InfoBar.DonePrompt(false)
-		return false
-	}
-
 	// Insert a newline
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()

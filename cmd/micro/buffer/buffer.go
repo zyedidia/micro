@@ -427,11 +427,13 @@ func (b *Buffer) IndentString(tabsize int) []byte {
 // SetCursors resets this buffer's cursors to a new list
 func (b *Buffer) SetCursors(c []*Cursor) {
 	b.cursors = c
+	b.EventHandler.cursors = b.cursors
 }
 
 // AddCursor adds a new cursor to the list
 func (b *Buffer) AddCursor(c *Cursor) {
 	b.cursors = append(b.cursors, c)
+	b.EventHandler.cursors = b.cursors
 	b.UpdateCursors()
 }
 
@@ -486,6 +488,7 @@ func (b *Buffer) MergeCursors() {
 	if b.curCursor >= len(b.cursors) {
 		b.curCursor = len(b.cursors) - 1
 	}
+	b.EventHandler.cursors = b.cursors
 }
 
 // UpdateCursors updates all the cursors indicies
