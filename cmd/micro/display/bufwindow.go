@@ -26,6 +26,7 @@ type BufWindow struct {
 
 	lineHeight   []int
 	gutterOffset int
+	drawStatus   bool
 }
 
 // NewBufWindow creates a new window at a location in the screen with a width and height
@@ -133,8 +134,12 @@ func (w *BufWindow) Bottomline() int {
 func (w *BufWindow) Relocate() bool {
 	b := w.Buf
 	height := w.Bottomline() + 1 - w.StartLine
-	if b.LinesNum() < w.Height {
-		height = w.Height - 1
+	h := w.Height
+	if w.drawStatus {
+		h--
+	}
+	if b.LinesNum() <= h {
+		height = w.Height
 	}
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
@@ -181,7 +186,7 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 
 	hasMessage := len(b.Messages) > 0
 	bufHeight := w.Height
-	if b.Settings["statusline"].(bool) {
+	if w.drawStatus {
 		bufHeight--
 	}
 
@@ -353,7 +358,7 @@ func (w *BufWindow) displayBuffer() {
 
 	hasMessage := len(b.Messages) > 0
 	bufHeight := w.Height
-	if b.Settings["statusline"].(bool) {
+	if w.drawStatus {
 		bufHeight--
 	}
 
@@ -537,11 +542,27 @@ func (w *BufWindow) displayBuffer() {
 }
 
 func (w *BufWindow) displayStatusLine() {
-	w.sline.Display()
+	_, h := screen.Screen.Size()
+	infoY := h
+	if config.GetGlobalOption("infobar").(bool) {
+		infoY--
+	}
+
+	if w.Buf.Settings["statusline"].(bool) {
+		w.drawStatus = true
+		w.sline.Display()
+	} else if w.Y+w.Height != infoY {
+		w.drawStatus = true
+		for x := w.X; x < w.X+w.Width; x++ {
+			screen.Screen.SetContent(x, w.Y+w.Height-1, '-', nil, config.DefStyle.Reverse(true))
+		}
+	} else {
+		w.drawStatus = false
+	}
 }
 
 // Display displays the buffer and the statusline
 func (w *BufWindow) Display() {
-	w.displayBuffer()
 	w.displayStatusLine()
+	w.displayBuffer()
 }

@@ -1046,8 +1046,9 @@ func (h *BufHandler) QuitAll() bool {
 // AddTab adds a new tab with an empty buffer
 func (h *BufHandler) AddTab() bool {
 	width, height := screen.Screen.Size()
+	iOffset := config.GetInfoBarOffset()
 	b := buffer.NewBufferFromString("", "", buffer.BTDefault)
-	tp := NewTabFromBuffer(0, 0, width, height-1, b)
+	tp := NewTabFromBuffer(0, 0, width, height-iOffset, b)
 	Tabs.AddTab(tp)
 	Tabs.SetActive(len(Tabs.List) - 1)
 
