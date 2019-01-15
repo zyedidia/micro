@@ -150,6 +150,7 @@ func (h *BufHandler) PluginCmd(args []string) {
 // RetabCmd changes all spaces to tabs or all tabs to spaces
 // depending on the user's settings
 func (h *BufHandler) RetabCmd(args []string) {
+	h.Buf.Retab()
 }
 
 // RawCmd opens a new raw view which displays the escape sequences micro
