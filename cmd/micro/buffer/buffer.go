@@ -504,3 +504,100 @@ func (b *Buffer) ClearCursors() {
 	b.curCursor = 0
 	b.GetActiveCursor().ResetSelection()
 }
+
+// MoveLinesUp moves the range of lines up one row
+func (b *Buffer) MoveLinesUp(start int, end int) {
+	if start < 1 || start >= end || end > len(b.lines) {
+		return
+	}
+	if end == len(b.lines) {
+		b.Insert(
+			Loc{
+				utf8.RuneCount(b.lines[end-1].data),
+				end - 1,
+			},
+			append([]byte{'\n'}, b.LineBytes(start-1)...),
+		)
+	} else {
+		b.Insert(
+			Loc{0, end},
+			append(b.LineBytes(start-1), '\n'),
+		)
+	}
+	b.Remove(
+		Loc{0, start - 1},
+		Loc{0, start},
+	)
+}
+
+// MoveLinesDown moves the range of lines down one row
+func (b *Buffer) MoveLinesDown(start int, end int) {
+	if start < 0 || start >= end || end >= len(b.lines)-1 {
+		return
+	}
+	b.Insert(
+		Loc{0, start},
+		append(b.LineBytes(end), '\n'),
+	)
+	end++
+	b.Remove(
+		Loc{0, end},
+		Loc{0, end + 1},
+	)
+}
+
+var BracePairs = [][2]rune{
+	{'(', ')'},
+	{'{', '}'},
+	{'[', ']'},
+}
+
+// FindMatchingBrace returns the location in the buffer of the matching bracket
+// It is given a brace type containing the open and closing character, (for example
+// '{' and '}') as well as the location to match from
+// TODO: maybe can be more efficient with utf8 package
+func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
+	curLine := []rune(string(b.LineBytes(start.Y)))
+	startChar := curLine[start.X]
+	var i int
+	if startChar == braceType[0] {
+		for y := start.Y; y < b.LinesNum(); y++ {
+			l := []rune(string(b.LineBytes(y)))
+			xInit := 0
+			if y == start.Y {
+				xInit = start.X
+			}
+			for x := xInit; x < len(l); x++ {
+				r := l[x]
+				if r == braceType[0] {
+					i++
+				} else if r == braceType[1] {
+					i--
+					if i == 0 {
+						return Loc{x, y}
+					}
+				}
+			}
+		}
+	} else if startChar == braceType[1] {
+		for y := start.Y; y >= 0; y-- {
+			l := []rune(string(b.lines[y].data))
+			xInit := len(l) - 1
+			if y == start.Y {
+				xInit = start.X
+			}
+			for x := xInit; x >= 0; x-- {
+				r := l[x]
+				if r == braceType[0] {
+					i--
+					if i == 0 {
+						return Loc{x, y}
+					}
+				} else if r == braceType[1] {
+					i++
+				}
+			}
+		}
+	}
+	return start
+}
