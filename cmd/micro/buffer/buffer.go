@@ -601,3 +601,29 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
 	}
 	return start
 }
+
+// Retab changes all tabs to spaces or vice versa
+func (b *Buffer) Retab() {
+	toSpaces := b.Settings["tabstospaces"].(bool)
+	tabsize := IntOpt(b.Settings["tabsize"])
+	dirty := false
+
+	for i := 0; i < b.LinesNum(); i++ {
+		l := b.LineBytes(i)
+
+		ws := GetLeadingWhitespace(l)
+		if len(ws) != 0 {
+			if toSpaces {
+				ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
+			} else {
+				ws = bytes.Replace(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'}, -1)
+			}
+		}
+
+		l = bytes.TrimLeft(l, " \t")
+		b.lines[i].data = append(ws, l...)
+		dirty = true
+	}
+
+	b.isModified = dirty
+}

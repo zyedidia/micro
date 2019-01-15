@@ -309,29 +309,7 @@ func (h *BufHandler) ParagraphNext() bool {
 // Retab changes all tabs to spaces or all spaces to tabs depending
 // on the user's settings
 func (h *BufHandler) Retab() bool {
-	// b := h.Buf
-	// toSpaces := b.Settings["tabstospaces"].(bool)
-	// tabsize := util.IntOpt(b.Settings["tabsize"])
-	// dirty := false
-	//
-	// for i := 0; i < b.LinesNum(); i++ {
-	// 	l := b.LineBytes(i)
-	//
-	// 	ws := util.GetLeadingWhitespace(l)
-	// 	if len(ws) != 0 {
-	// 		if toSpaces {
-	// 			ws = bytes.Replace(ws, []byte("\t"), []byte(util.Spaces(tabsize)), -1)
-	// 		} else {
-	// 			ws = bytes.Replace(ws, []byte(util.Spaces(tabsize)), []byte("\t"), -1)
-	// 		}
-	// 	}
-	//
-	// 	l = bytes.TrimLeft(l, " \t")
-	// 	b.lines[i].data = append(ws, l...)
-	// 	dirty = true
-	// }
-	//
-	// b.IsModified = dirty
+	h.Buf.Retab()
 	return true
 }
 
