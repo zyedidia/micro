@@ -111,7 +111,7 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 	i.HasGutter = false
 	i.PromptCallback = donecb
 	i.EventCallback = eventcb
-	i.Buffer.Insert(i.Buffer.Start(), msg)
+	i.Buffer.Insert(i.Buffer.Start(), []byte(msg))
 }
 
 func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
@@ -151,7 +151,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 	i.PromptCallback = nil
 	i.EventCallback = nil
 	i.YNCallback = nil
-	i.Replace(i.Start(), i.End(), "")
+	i.Replace(i.Start(), i.End(), []byte{})
 }
 
 // Reset resets the infobuffer's msg and info

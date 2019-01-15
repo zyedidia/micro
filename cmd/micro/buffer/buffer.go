@@ -1,6 +1,7 @@
 package buffer
 
 import (
+	"bytes"
 	"crypto/md5"
 	"errors"
 	"io"
@@ -232,7 +233,7 @@ func (b *Buffer) SetName(s string) {
 	b.name = s
 }
 
-func (b *Buffer) Insert(start Loc, text string) {
+func (b *Buffer) Insert(start Loc, text []byte) {
 	b.EventHandler.cursors = b.cursors
 	b.EventHandler.Insert(start, text)
 }
@@ -409,11 +410,11 @@ func (b *Buffer) ClearMatches() {
 
 // IndentString returns this buffer's indent method (a tabstop or n spaces
 // depending on the settings)
-func (b *Buffer) IndentString(tabsize int) string {
+func (b *Buffer) IndentString(tabsize int) []byte {
 	if b.Settings["tabstospaces"].(bool) {
-		return Spaces(tabsize)
+		return bytes.Repeat([]byte{' '}, tabsize)
 	}
-	return "\t"
+	return []byte{'\t'}
 }
 
 // SetCursors resets this buffer's cursors to a new list
