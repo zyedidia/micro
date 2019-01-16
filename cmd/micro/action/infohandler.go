@@ -33,20 +33,21 @@ func (h *InfoHandler) HandleEvent(event tcell.Event) {
 		}
 
 		done := h.DoKeyEvent(ke)
-		if e.Key() == tcell.KeyRune && h.HasYN {
-			if e.Rune() == 'y' && h.HasYN {
+		hasYN := h.HasYN
+		if e.Key() == tcell.KeyRune && hasYN {
+			if e.Rune() == 'y' && hasYN {
 				h.YNResp = true
 				h.DonePrompt(false)
-			} else if e.Rune() == 'n' && h.HasYN {
+			} else if e.Rune() == 'n' && hasYN {
 				h.YNResp = false
 				h.DonePrompt(false)
 			}
 		}
-		if e.Key() == tcell.KeyRune && !done && !h.HasYN {
+		if e.Key() == tcell.KeyRune && !done && !hasYN {
 			h.DoRuneInsert(e.Rune())
 			done = true
 		}
-		if done && h.HasPrompt && !h.HasYN {
+		if done && h.HasPrompt && !hasYN {
 			resp := strings.TrimSpace(string(h.LineBytes(0)))
 			hist := h.History[h.PromptType]
 			hist[h.HistoryNum] = resp

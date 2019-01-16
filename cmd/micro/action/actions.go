@@ -552,7 +552,7 @@ func (h *BufHandler) SaveAs() bool {
 func (h *BufHandler) Find() bool {
 	InfoBar.Prompt("Find: ", "", "Find", func(resp string) {
 		// Event callback
-		match, found, _ := h.Buf.FindNext(resp, h.Cursor.Loc, true)
+		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, true, true)
 		if found {
 			h.Cursor.SetSelectionStart(match[0])
 			h.Cursor.SetSelectionEnd(match[1])
@@ -564,7 +564,7 @@ func (h *BufHandler) Find() bool {
 	}, func(resp string, canceled bool) {
 		// Finished callback
 		if !canceled {
-			match, found, err := h.Buf.FindNext(resp, h.Cursor.Loc, true)
+			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, true, true)
 			if err != nil {
 				InfoBar.Error(err)
 			}
@@ -597,7 +597,7 @@ func (h *BufHandler) FindNext() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[1]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, searchLoc, true)
+	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -623,7 +623,7 @@ func (h *BufHandler) FindPrevious() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[0]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, searchLoc, false)
+	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -1189,7 +1189,7 @@ func (h *BufHandler) SpawnMultiCursor() bool {
 	if h.multiWord {
 		search = "\\b" + search + "\\b"
 	}
-	match, found, err := h.Buf.FindNext(search, searchStart, true)
+	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, true, false)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -1262,7 +1262,7 @@ func (h *BufHandler) SkipMultiCursor() bool {
 	sel := lastC.GetSelection()
 	searchStart := lastC.CurSelection[1]
 
-	match, found, err := h.Buf.FindNext(string(sel), searchStart, true)
+	match, found, err := h.Buf.FindNext(string(sel), h.Buf.Start(), h.Buf.End(), searchStart, true, false)
 	if err != nil {
 		InfoBar.Error(err)
 	}
