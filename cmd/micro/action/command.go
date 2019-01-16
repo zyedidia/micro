@@ -395,7 +395,6 @@ func SetGlobalOption(option, value string) error {
 		}
 	}
 
-	// TODO: info and keymenu option change
 	if option == "infobar" || option == "keymenu" {
 		Tabs.Resize()
 	}
