@@ -164,10 +164,14 @@ func DefaultCommonSettings() map[string]interface{} {
 }
 
 func GetInfoBarOffset() int {
+	offset := 0
 	if GetGlobalOption("infobar").(bool) {
-		return 1
+		offset++
 	}
-	return 0
+	if GetGlobalOption("keymenu").(bool) {
+		offset += 2
+	}
+	return offset
 }
 
 // DefaultGlobalSettings returns the default global settings for micro

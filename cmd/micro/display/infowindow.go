@@ -1,6 +1,7 @@
 package display
 
 import (
+	"log"
 	"unicode/utf8"
 
 	runewidth "github.com/mattn/go-runewidth"
@@ -18,9 +19,6 @@ type InfoWindow struct {
 
 	defStyle tcell.Style
 	errStyle tcell.Style
-
-	width int
-	y     int
 }
 
 func NewInfoWindow(b *info.InfoBuf) *InfoWindow {
@@ -42,15 +40,15 @@ func NewInfoWindow(b *info.InfoBuf) *InfoWindow {
 		iw.errStyle = config.Colorscheme["error-message"]
 	}
 
-	iw.width, iw.y = screen.Screen.Size()
-	iw.y--
+	iw.Width, iw.Y = screen.Screen.Size()
+	iw.Y--
 
 	return iw
 }
 
 func (i *InfoWindow) Resize(w, h int) {
-	i.width = w
-	i.y = h
+	i.Width = w
+	i.Y = h
 }
 
 func (i *InfoWindow) SetBuffer(b *buffer.Buffer) {
@@ -70,8 +68,8 @@ func (i *InfoWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
 }
 
 func (i *InfoWindow) Clear() {
-	for x := 0; x < i.width; x++ {
-		screen.Screen.SetContent(x, i.y, ' ', nil, config.DefStyle)
+	for x := 0; x < i.Width; x++ {
+		screen.Screen.SetContent(x, i.Y, ' ', nil, config.DefStyle)
 	}
 }
 
@@ -102,7 +100,7 @@ func (i *InfoWindow) displayBuffer() {
 
 			}
 
-			screen.Screen.SetContent(vlocX, i.y, r, nil, style)
+			screen.Screen.SetContent(vlocX, i.Y, r, nil, style)
 			vlocX++
 		}
 		nColsBeforeStart--
@@ -111,7 +109,7 @@ func (i *InfoWindow) displayBuffer() {
 	totalwidth := blocX - nColsBeforeStart
 	for len(line) > 0 {
 		if activeC.X == blocX {
-			screen.Screen.ShowCursor(vlocX, i.y)
+			screen.Screen.ShowCursor(vlocX, i.Y)
 		}
 
 		r, size := utf8.DecodeRune(line)
@@ -140,17 +138,38 @@ func (i *InfoWindow) displayBuffer() {
 			}
 		}
 		totalwidth += width
-		if vlocX >= i.width {
+		if vlocX >= i.Width {
 			break
 		}
 	}
 	if activeC.X == blocX {
-		screen.Screen.ShowCursor(vlocX, i.y)
+		screen.Screen.ShowCursor(vlocX, i.Y)
+	}
+}
+
+func (i *InfoWindow) displayKeyMenu() {
+	// TODO: maybe make this based on the actual keybindings
+	display := []string{"^Q Quit, ^S Save, ^O Open, ^G Help, ^E Command Bar, ^K Cut Line", "^F Find, ^Z Undo, ^Y Redo, ^A Select All, ^D Duplicate Line, ^T New Tab"}
+
+	log.Println("hi", len(display), i.Width)
+	for y := 0; y < len(display); y++ {
+		for x := 0; x < i.Width; x++ {
+			log.Println(x, i.Y-len(display)+y)
+			if x < len(display[y]) {
+				screen.Screen.SetContent(x, i.Y-len(display)+y, rune(display[y][x]), nil, config.DefStyle)
+			} else {
+				screen.Screen.SetContent(x, i.Y-len(display)+y, ' ', nil, config.DefStyle)
+			}
+		}
 	}
 }
 
 func (i *InfoWindow) Display() {
 	x := 0
+	if config.GetGlobalOption("keymenu").(bool) {
+		i.displayKeyMenu()
+	}
+
 	if i.HasPrompt || config.GlobalSettings["infobar"].(bool) {
 		if !i.HasPrompt && !i.HasMessage && !i.HasError {
 			return
@@ -164,7 +183,7 @@ func (i *InfoWindow) Display() {
 
 		display := i.Msg
 		for _, c := range display {
-			screen.Screen.SetContent(x, i.y, c, nil, style)
+			screen.Screen.SetContent(x, i.Y, c, nil, style)
 			x += runewidth.RuneWidth(c)
 		}
 

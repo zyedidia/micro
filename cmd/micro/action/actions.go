@@ -1012,6 +1012,8 @@ func (h *BufHandler) ToggleHelp() bool {
 
 // ToggleKeyMenu toggles the keymenu option and resizes all tabs
 func (h *BufHandler) ToggleKeyMenu() bool {
+	config.GlobalSettings["keymenu"] = !config.GetGlobalOption("keymenu").(bool)
+	Tabs.Resize()
 	return false
 }
 
