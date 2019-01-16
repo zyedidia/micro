@@ -1,8 +1,6 @@
 package action
 
 import (
-	"strings"
-
 	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/info"
 	"github.com/zyedidia/tcell"
@@ -48,7 +46,7 @@ func (h *InfoHandler) HandleEvent(event tcell.Event) {
 			done = true
 		}
 		if done && h.HasPrompt && !hasYN {
-			resp := strings.TrimSpace(string(h.LineBytes(0)))
+			resp := string(h.LineBytes(0))
 			hist := h.History[h.PromptType]
 			hist[h.HistoryNum] = resp
 			if h.EventCallback != nil {

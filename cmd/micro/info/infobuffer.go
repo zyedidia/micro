@@ -2,7 +2,6 @@ package info
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 )
@@ -140,7 +139,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 				h := i.History[i.PromptType]
 				i.History[i.PromptType] = h[:len(h)-1]
 			} else {
-				resp := strings.TrimSpace(string(i.LineBytes(0)))
+				resp := string(i.LineBytes(0))
 				i.PromptCallback(resp, false)
 				h := i.History[i.PromptType]
 				h[len(h)-1] = resp
