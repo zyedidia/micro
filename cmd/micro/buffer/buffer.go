@@ -242,11 +242,13 @@ func (b *Buffer) SetName(s string) {
 
 func (b *Buffer) Insert(start Loc, text []byte) {
 	b.EventHandler.cursors = b.cursors
+	b.EventHandler.active = b.curCursor
 	b.EventHandler.Insert(start, text)
 }
 
 func (b *Buffer) Remove(start, end Loc) {
 	b.EventHandler.cursors = b.cursors
+	b.EventHandler.active = b.curCursor
 	b.EventHandler.Remove(start, end)
 }
 
@@ -428,12 +430,14 @@ func (b *Buffer) IndentString(tabsize int) []byte {
 func (b *Buffer) SetCursors(c []*Cursor) {
 	b.cursors = c
 	b.EventHandler.cursors = b.cursors
+	b.EventHandler.active = b.curCursor
 }
 
 // AddCursor adds a new cursor to the list
 func (b *Buffer) AddCursor(c *Cursor) {
 	b.cursors = append(b.cursors, c)
 	b.EventHandler.cursors = b.cursors
+	b.EventHandler.active = b.curCursor
 	b.UpdateCursors()
 }
 
@@ -489,10 +493,13 @@ func (b *Buffer) MergeCursors() {
 		b.curCursor = len(b.cursors) - 1
 	}
 	b.EventHandler.cursors = b.cursors
+	b.EventHandler.active = b.curCursor
 }
 
 // UpdateCursors updates all the cursors indicies
 func (b *Buffer) UpdateCursors() {
+	b.EventHandler.cursors = b.cursors
+	b.EventHandler.active = b.curCursor
 	for i, c := range b.cursors {
 		c.Num = i
 	}
@@ -502,6 +509,8 @@ func (b *Buffer) RemoveCursor(i int) {
 	copy(b.cursors[i:], b.cursors[i+1:])
 	b.cursors[len(b.cursors)-1] = nil
 	b.cursors = b.cursors[:len(b.cursors)-1]
+	b.curCursor = Clamp(b.curCursor, 0, len(b.cursors)-1)
+	b.UpdateCursors()
 }
 
 // ClearCursors removes all extra cursors

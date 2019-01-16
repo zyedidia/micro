@@ -69,6 +69,7 @@ func UndoTextEvent(t *TextEvent, buf *SharedBuffer) {
 type EventHandler struct {
 	buf       *SharedBuffer
 	cursors   []*Cursor
+	active    int
 	UndoStack *TEStack
 	RedoStack *TEStack
 }
@@ -106,7 +107,7 @@ func (eh *EventHandler) ApplyDiff(str string) {
 // Insert creates an insert text event and executes it
 func (eh *EventHandler) Insert(start Loc, text []byte) {
 	e := &TextEvent{
-		C:         *eh.cursors[0],
+		C:         *eh.cursors[eh.active],
 		EventType: TextEventInsert,
 		Deltas:    []Delta{{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
@@ -136,7 +137,7 @@ func (eh *EventHandler) Insert(start Loc, text []byte) {
 // Remove creates a remove text event and executes it
 func (eh *EventHandler) Remove(start, end Loc) {
 	e := &TextEvent{
-		C:         *eh.cursors[0],
+		C:         *eh.cursors[eh.active],
 		EventType: TextEventRemove,
 		Deltas:    []Delta{{[]byte{}, start, end}},
 		Time:      time.Now(),
@@ -164,7 +165,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 // MultipleReplace creates an multiple insertions executes them
 func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 	e := &TextEvent{
-		C:         *eh.cursors[0],
+		C:         *eh.cursors[eh.active],
 		EventType: TextEventReplace,
 		Deltas:    deltas,
 		Time:      time.Now(),

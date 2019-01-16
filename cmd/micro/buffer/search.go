@@ -144,7 +144,6 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 		l := b.lines[i].data
 		charpos := 0
 
-		// TODO: replace within X coords of selection
 		if start.Y == end.Y && i == start.Y {
 			l = util.SliceStart(l, end.X)
 			l = util.SliceEnd(l, start.X)

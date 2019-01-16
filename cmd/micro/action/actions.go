@@ -2,6 +2,7 @@ package action
 
 import (
 	"os"
+	"regexp"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -1186,10 +1187,11 @@ func (h *BufHandler) SpawnMultiCursor() bool {
 	searchStart := spawner.CurSelection[1]
 
 	search := string(sel)
+	search = regexp.QuoteMeta(search)
 	if h.multiWord {
 		search = "\\b" + search + "\\b"
 	}
-	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, true, false)
+	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, true, true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -1202,6 +1204,7 @@ func (h *BufHandler) SpawnMultiCursor() bool {
 		c.Loc = c.CurSelection[1]
 
 		h.Buf.AddCursor(c)
+		h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 		h.Buf.MergeCursors()
 	} else {
 		InfoBar.Message("No matches found")
@@ -1262,7 +1265,13 @@ func (h *BufHandler) SkipMultiCursor() bool {
 	sel := lastC.GetSelection()
 	searchStart := lastC.CurSelection[1]
 
-	match, found, err := h.Buf.FindNext(string(sel), h.Buf.Start(), h.Buf.End(), searchStart, true, false)
+	search := string(sel)
+	search = regexp.QuoteMeta(search)
+	if h.multiWord {
+		search = "\\b" + search + "\\b"
+	}
+
+	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, true, true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -1274,22 +1283,23 @@ func (h *BufHandler) SkipMultiCursor() bool {
 		lastC.Loc = lastC.CurSelection[1]
 
 		h.Buf.MergeCursors()
-		h.Relocate()
+		h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 	} else {
 		InfoBar.Message("No matches found")
 	}
-	return false
+	return true
 }
 
 // RemoveMultiCursor removes the latest multiple cursor
 func (h *BufHandler) RemoveMultiCursor() bool {
 	if h.Buf.NumCursors() > 1 {
 		h.Buf.RemoveCursor(h.Buf.NumCursors() - 1)
+		h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 		h.Buf.UpdateCursors()
 	} else {
 		h.multiWord = false
 	}
-	return false
+	return true
 }
 
 // RemoveAllMultiCursors removes all cursors except the base cursor
