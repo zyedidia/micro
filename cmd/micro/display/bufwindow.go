@@ -364,7 +364,6 @@ func (w *BufWindow) displayBuffer() {
 		bufHeight--
 	}
 
-	// TODO: Rehighlighting
 	start := w.StartLine
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 		if start > 0 && b.Rehighlight(start-1) {

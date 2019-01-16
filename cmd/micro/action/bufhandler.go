@@ -253,6 +253,7 @@ func (h *BufHandler) DoRuneInsert(r rune) {
 	cursors := h.Buf.GetCursors()
 	for _, c := range cursors {
 		// Insert a character
+		h.Buf.SetCurCursor(c.Num)
 		if c.HasSelection() {
 			c.DeleteSelection()
 			c.ResetSelection()
