@@ -146,16 +146,11 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 				h[len(h)-1] = resp
 			}
 			i.PromptCallback = nil
-			i.EventCallback = nil
-		}
-		if i.EventCallback != nil {
-			i.EventCallback = nil
 		}
 		i.Replace(i.Start(), i.End(), []byte{})
 	}
 	if i.YNCallback != nil && hadYN {
 		i.YNCallback(i.YNResp, canceled)
-		i.YNCallback = nil
 	}
 }
 

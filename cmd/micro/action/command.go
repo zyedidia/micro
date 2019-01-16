@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
@@ -540,6 +542,115 @@ func (h *BufHandler) SaveCmd(args []string) {
 
 // ReplaceCmd runs search and replace
 func (h *BufHandler) ReplaceCmd(args []string) {
+	if len(args) < 2 || len(args) > 4 {
+		// We need to find both a search and replace expression
+		InfoBar.Error("Invalid replace statement: " + strings.Join(args, " "))
+		return
+	}
+
+	all := false
+	noRegex := false
+
+	if len(args) > 2 {
+		for _, arg := range args[2:] {
+			switch arg {
+			case "-a":
+				all = true
+			case "-l":
+				noRegex = true
+			default:
+				InfoBar.Error("Invalid flag: " + arg)
+				return
+			}
+		}
+	}
+
+	search := args[0]
+
+	if noRegex {
+		search = regexp.QuoteMeta(search)
+	}
+
+	replace := []byte(args[1])
+
+	var regex *regexp.Regexp
+	var err error
+	if h.Buf.Settings["ignorecase"].(bool) {
+		regex, err = regexp.Compile("(?im)" + search)
+	} else {
+		regex, err = regexp.Compile("(?m)" + search)
+	}
+	if err != nil {
+		// There was an error with the user's regex
+		InfoBar.Error(err)
+		return
+	}
+
+	nreplaced := 0
+	start := h.Buf.Start()
+	end := h.Buf.End()
+	if h.Cursor.HasSelection() {
+		start = h.Cursor.CurSelection[0]
+		end = h.Cursor.CurSelection[1]
+	}
+	if all {
+		nreplaced = h.Buf.ReplaceRegex(start, end, regex, replace)
+	} else {
+		inRange := func(l buffer.Loc) bool {
+			return l.GreaterEqual(start) && l.LessThan(end)
+		}
+
+		searchLoc := start
+		searching := true
+		var doReplacement func()
+		doReplacement = func() {
+			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, !noRegex)
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			if !found || !inRange(locs[0]) || !inRange(locs[1]) {
+				h.Cursor.ResetSelection()
+				h.Cursor.Relocate()
+				return
+			}
+
+			h.Cursor.SetSelectionStart(locs[0])
+			h.Cursor.SetSelectionEnd(locs[1])
+
+			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
+				if !canceled && yes {
+					h.Buf.Replace(locs[0], locs[1], replace)
+					searchLoc = locs[0]
+					searchLoc.X += utf8.RuneCount(replace)
+					h.Cursor.Loc = searchLoc
+					nreplaced++
+				} else if !canceled && !yes {
+					searchLoc = locs[0]
+					searchLoc.X += utf8.RuneCount(replace)
+				} else if canceled {
+					h.Cursor.ResetSelection()
+					h.Cursor.Relocate()
+					return
+				}
+				if searching {
+					doReplacement()
+				}
+			})
+		}
+		doReplacement()
+	}
+
+	// TODO: relocate all cursors?
+	h.Cursor.Relocate()
+
+	if nreplaced > 1 {
+		InfoBar.Message("Replaced ", nreplaced, " occurrences of ", search)
+	} else if nreplaced == 1 {
+		InfoBar.Message("Replaced ", nreplaced, " occurrence of ", search)
+	} else {
+		InfoBar.Message("Nothing matched ", search)
+	}
 }
 
 // ReplaceAllCmd replaces search term all at once
