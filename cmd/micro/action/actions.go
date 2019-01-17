@@ -12,6 +12,7 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	"github.com/zyedidia/micro/cmd/micro/shell"
+	"github.com/zyedidia/micro/cmd/micro/shellwords"
 	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
@@ -540,13 +541,60 @@ func (h *BufHandler) SaveAll() bool {
 
 // Save the buffer to disk
 func (h *BufHandler) Save() bool {
-	h.Buf.Save()
+	// If this is an empty buffer, ask for a filename
+	if h.Buf.Path == "" {
+		h.SaveAs()
+	} else {
+		h.saveBufToFile(h.Buf.Path)
+	}
+
 	return false
 }
 
 // SaveAs saves the buffer to disk with the given name
 func (h *BufHandler) SaveAs() bool {
+	InfoBar.Prompt("Filename: ", "", "Save", nil, func(resp string, canceled bool) {
+		if !canceled {
+			// the filename might or might not be quoted, so unquote first then join the strings.
+			args, err := shellwords.Split(resp)
+			filename := strings.Join(args, " ")
+			if err != nil {
+				InfoBar.Error("Error parsing arguments: ", err)
+				return
+			}
+			h.saveBufToFile(filename)
+
+		}
+	})
 	return false
+}
+
+// This function saves the buffer to `filename` and changes the buffer's path and name
+// to `filename` if the save is successful
+func (h *BufHandler) saveBufToFile(filename string) {
+	err := h.Buf.SaveAs(filename)
+	if err != nil {
+		if strings.HasSuffix(err.Error(), "permission denied") {
+			InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
+				if yes && !canceled {
+					err = h.Buf.SaveAsWithSudo(filename)
+					if err != nil {
+						InfoBar.Error(err)
+					} else {
+						h.Buf.Path = filename
+						h.Buf.SetName(filename)
+						InfoBar.Message("Saved " + filename)
+					}
+				}
+			})
+		} else {
+			InfoBar.Error(err)
+		}
+	} else {
+		h.Buf.Path = filename
+		h.Buf.SetName(filename)
+		InfoBar.Message("Saved " + filename)
+	}
 }
 
 // Find opens a prompt and searches forward for the input
