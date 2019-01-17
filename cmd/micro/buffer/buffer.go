@@ -240,7 +240,7 @@ func (b *Buffer) SetName(s string) {
 	b.name = s
 }
 
-func (b *Buffer) Insert(start Loc, text []byte) {
+func (b *Buffer) Insert(start Loc, text string) {
 	b.EventHandler.cursors = b.cursors
 	b.EventHandler.active = b.curCursor
 	b.EventHandler.Insert(start, text)
@@ -419,11 +419,11 @@ func (b *Buffer) ClearMatches() {
 
 // IndentString returns this buffer's indent method (a tabstop or n spaces
 // depending on the settings)
-func (b *Buffer) IndentString(tabsize int) []byte {
+func (b *Buffer) IndentString(tabsize int) string {
 	if b.Settings["tabstospaces"].(bool) {
-		return bytes.Repeat([]byte{' '}, tabsize)
+		return Spaces(tabsize)
 	}
-	return []byte{'\t'}
+	return "\t"
 }
 
 // SetCursors resets this buffer's cursors to a new list
@@ -529,18 +529,19 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	if start < 1 || start >= end || end > len(b.lines) {
 		return
 	}
+	l := string(b.LineBytes(start - 1))
 	if end == len(b.lines) {
 		b.Insert(
 			Loc{
 				utf8.RuneCount(b.lines[end-1].data),
 				end - 1,
 			},
-			append([]byte{'\n'}, b.LineBytes(start-1)...),
+			"\n"+l,
 		)
 	} else {
 		b.Insert(
 			Loc{0, end},
-			append(b.LineBytes(start-1), '\n'),
+			l+"\n",
 		)
 	}
 	b.Remove(
@@ -554,9 +555,10 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 	if start < 0 || start >= end || end >= len(b.lines)-1 {
 		return
 	}
+	l := string(b.LineBytes(end))
 	b.Insert(
 		Loc{0, start},
-		append(b.LineBytes(end), '\n'),
+		l+"\n",
 	)
 	end++
 	b.Remove(
