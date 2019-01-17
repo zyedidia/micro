@@ -64,7 +64,7 @@ func (i *InfoBuf) SaveHistory() {
 func (i *InfoBuf) UpHistory(history []string) {
 	if i.HistoryNum > 0 {
 		i.HistoryNum--
-		i.Replace(i.Start(), i.End(), []byte(history[i.HistoryNum]))
+		i.Replace(i.Start(), i.End(), history[i.HistoryNum])
 		i.Buffer.GetActiveCursor().GotoLoc(i.End())
 	}
 }
@@ -73,7 +73,7 @@ func (i *InfoBuf) UpHistory(history []string) {
 func (i *InfoBuf) DownHistory(history []string) {
 	if i.HistoryNum < len(history)-1 {
 		i.HistoryNum++
-		i.Replace(i.Start(), i.End(), []byte(history[i.HistoryNum]))
+		i.Replace(i.Start(), i.End(), history[i.HistoryNum])
 		i.Buffer.GetActiveCursor().GotoLoc(i.End())
 	}
 }

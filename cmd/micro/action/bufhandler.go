@@ -262,9 +262,9 @@ func (h *BufHandler) DoRuneInsert(r rune) {
 		if h.isOverwriteMode {
 			next := c.Loc
 			next.X++
-			h.Buf.Replace(c.Loc, next, []byte{byte(r)})
+			h.Buf.Replace(c.Loc, next, string(r))
 		} else {
-			h.Buf.Insert(c.Loc, []byte{byte(r)})
+			h.Buf.Insert(c.Loc, string(r))
 		}
 	}
 }

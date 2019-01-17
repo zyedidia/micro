@@ -571,6 +571,7 @@ func (h *BufHandler) ReplaceCmd(args []string) {
 	}
 
 	replace := []byte(args[1])
+	replaceStr := args[1]
 
 	var regex *regexp.Regexp
 	var err error
@@ -619,7 +620,7 @@ func (h *BufHandler) ReplaceCmd(args []string) {
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
-					h.Buf.Replace(locs[0], locs[1], replace)
+					h.Buf.Replace(locs[0], locs[1], replaceStr)
 					searchLoc = locs[0]
 					searchLoc.X += utf8.RuneCount(replace)
 					h.Cursor.Loc = searchLoc

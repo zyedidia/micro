@@ -110,7 +110,7 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 	i.HasGutter = false
 	i.PromptCallback = donecb
 	i.EventCallback = eventcb
-	i.Buffer.Insert(i.Buffer.Start(), []byte(msg))
+	i.Buffer.Insert(i.Buffer.Start(), msg)
 }
 
 func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
@@ -146,7 +146,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 			}
 			i.PromptCallback = nil
 		}
-		i.Replace(i.Start(), i.End(), []byte{})
+		i.Replace(i.Start(), i.End(), "")
 	}
 	if i.YNCallback != nil && hadYN {
 		i.YNCallback(i.YNResp, canceled)
