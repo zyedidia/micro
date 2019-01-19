@@ -1,6 +1,7 @@
 package action
 
 import (
+	"strings"
 	"time"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
@@ -24,7 +25,15 @@ func init() {
 
 // BufMapKey maps a key event to an action
 func BufMapKey(k Event, action string) {
-	if f, ok := BufKeyActions[action]; ok {
+	if strings.HasPrefix(action, "command:") {
+		action = strings.SplitN(action, ":", 2)[1]
+		BufKeyStrings[k] = action
+		BufKeyBindings[k] = CommandAction(action)
+	} else if strings.HasPrefix(action, "command-edit:") {
+		action = strings.SplitN(action, ":", 2)[1]
+		BufKeyStrings[k] = action
+		BufKeyBindings[k] = CommandEditAction(action)
+	} else if f, ok := BufKeyActions[action]; ok {
 		BufKeyStrings[k] = action
 		BufKeyBindings[k] = f
 	} else {
@@ -36,14 +45,9 @@ func BufMapKey(k Event, action string) {
 func BufMapMouse(k MouseEvent, action string) {
 	if f, ok := BufMouseActions[action]; ok {
 		BufMouseBindings[k] = f
-	} else if f, ok := BufKeyActions[action]; ok {
-		// allowed to map mouse buttons to key actions
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = f
-		// ensure we don't double bind a key
-		delete(BufMouseBindings, k)
 	} else {
-		screen.TermMessage("Error:", action, "does not exist")
+		delete(BufMouseBindings, k)
+		BufMapKey(k, action)
 	}
 }
 
