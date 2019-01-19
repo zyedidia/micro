@@ -660,6 +660,8 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 // ReplaceAllCmd replaces search term all at once
 func (h *BufPane) ReplaceAllCmd(args []string) {
+	// aliased to Replace command
+	h.ReplaceCmd(append(args, "-a"))
 }
 
 // TermCmd opens a terminal in the current view
