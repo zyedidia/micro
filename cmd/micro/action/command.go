@@ -20,7 +20,7 @@ import (
 
 // A Command contains an action (a function to call) as well as information about how to autocomplete the command
 type Command struct {
-	action      func(*BufHandler, []string)
+	action      func(*BufPane, []string)
 	completions []Completion
 }
 
@@ -32,34 +32,34 @@ type StrCommand struct {
 
 var commands map[string]Command
 
-var commandActions = map[string]func(*BufHandler, []string){
-	"Set":        (*BufHandler).SetCmd,
-	"SetLocal":   (*BufHandler).SetLocalCmd,
-	"Show":       (*BufHandler).ShowCmd,
-	"ShowKey":    (*BufHandler).ShowKeyCmd,
-	"Run":        (*BufHandler).RunCmd,
-	"Bind":       (*BufHandler).BindCmd,
-	"Unbind":     (*BufHandler).UnbindCmd,
-	"Quit":       (*BufHandler).QuitCmd,
-	"Save":       (*BufHandler).SaveCmd,
-	"Replace":    (*BufHandler).ReplaceCmd,
-	"ReplaceAll": (*BufHandler).ReplaceAllCmd,
-	"VSplit":     (*BufHandler).VSplitCmd,
-	"HSplit":     (*BufHandler).HSplitCmd,
-	"Tab":        (*BufHandler).NewTabCmd,
-	"Help":       (*BufHandler).HelpCmd,
-	"Eval":       (*BufHandler).EvalCmd,
-	"ToggleLog":  (*BufHandler).ToggleLogCmd,
-	"Plugin":     (*BufHandler).PluginCmd,
-	"Reload":     (*BufHandler).ReloadCmd,
-	"Cd":         (*BufHandler).CdCmd,
-	"Pwd":        (*BufHandler).PwdCmd,
-	"Open":       (*BufHandler).OpenCmd,
-	"TabSwitch":  (*BufHandler).TabSwitchCmd,
-	"Term":       (*BufHandler).TermCmd,
-	"MemUsage":   (*BufHandler).MemUsageCmd,
-	"Retab":      (*BufHandler).RetabCmd,
-	"Raw":        (*BufHandler).RawCmd,
+var commandActions = map[string]func(*BufPane, []string){
+	"Set":        (*BufPane).SetCmd,
+	"SetLocal":   (*BufPane).SetLocalCmd,
+	"Show":       (*BufPane).ShowCmd,
+	"ShowKey":    (*BufPane).ShowKeyCmd,
+	"Run":        (*BufPane).RunCmd,
+	"Bind":       (*BufPane).BindCmd,
+	"Unbind":     (*BufPane).UnbindCmd,
+	"Quit":       (*BufPane).QuitCmd,
+	"Save":       (*BufPane).SaveCmd,
+	"Replace":    (*BufPane).ReplaceCmd,
+	"ReplaceAll": (*BufPane).ReplaceAllCmd,
+	"VSplit":     (*BufPane).VSplitCmd,
+	"HSplit":     (*BufPane).HSplitCmd,
+	"Tab":        (*BufPane).NewTabCmd,
+	"Help":       (*BufPane).HelpCmd,
+	"Eval":       (*BufPane).EvalCmd,
+	"ToggleLog":  (*BufPane).ToggleLogCmd,
+	"Plugin":     (*BufPane).PluginCmd,
+	"Reload":     (*BufPane).ReloadCmd,
+	"Cd":         (*BufPane).CdCmd,
+	"Pwd":        (*BufPane).PwdCmd,
+	"Open":       (*BufPane).OpenCmd,
+	"TabSwitch":  (*BufPane).TabSwitchCmd,
+	"Term":       (*BufPane).TermCmd,
+	"MemUsage":   (*BufPane).MemUsageCmd,
+	"Retab":      (*BufPane).RetabCmd,
+	"Raw":        (*BufPane).RawCmd,
 }
 
 // InitCommands initializes the default commands
@@ -126,7 +126,7 @@ func DefaultCommands() map[string]StrCommand {
 // the given string and executes the command when the user presses
 // enter
 func CommandEditAction(prompt string) BufKeyAction {
-	return func(h *BufHandler) bool {
+	return func(h *BufPane) bool {
 		InfoBar.Prompt("> ", prompt, "Command", nil, func(resp string, canceled bool) {
 			if !canceled {
 				MainTab().CurPane().HandleCommand(resp)
@@ -139,29 +139,34 @@ func CommandEditAction(prompt string) BufKeyAction {
 // CommandAction returns a bindable function which executes the
 // given command
 func CommandAction(cmd string) BufKeyAction {
-	return func(h *BufHandler) bool {
+	return func(h *BufPane) bool {
 		MainTab().CurPane().HandleCommand(cmd)
 		return false
 	}
 }
 
 // PluginCmd installs, removes, updates, lists, or searches for given plugins
-func (h *BufHandler) PluginCmd(args []string) {
+func (h *BufPane) PluginCmd(args []string) {
 }
 
 // RetabCmd changes all spaces to tabs or all tabs to spaces
 // depending on the user's settings
-func (h *BufHandler) RetabCmd(args []string) {
+func (h *BufPane) RetabCmd(args []string) {
 	h.Buf.Retab()
 }
 
 // RawCmd opens a new raw view which displays the escape sequences micro
 // is receiving in real-time
-func (h *BufHandler) RawCmd(args []string) {
+func (h *BufPane) RawCmd(args []string) {
+	width, height := screen.Screen.Size()
+	iOffset := config.GetInfoBarOffset()
+	tp := NewTabFromPane(0, 0, width, height-iOffset, NewRawPane())
+	Tabs.AddTab(tp)
+	Tabs.SetActive(len(Tabs.List) - 1)
 }
 
 // TabSwitchCmd switches to a given tab either by name or by number
-func (h *BufHandler) TabSwitchCmd(args []string) {
+func (h *BufPane) TabSwitchCmd(args []string) {
 	if len(args) > 0 {
 		num, err := strconv.Atoi(args[0])
 		if err != nil {
@@ -189,7 +194,7 @@ func (h *BufHandler) TabSwitchCmd(args []string) {
 }
 
 // CdCmd changes the current working directory
-func (h *BufHandler) CdCmd(args []string) {
+func (h *BufPane) CdCmd(args []string) {
 	if len(args) > 0 {
 		path, err := util.ReplaceHome(args[0])
 		if err != nil {
@@ -220,12 +225,12 @@ func (h *BufHandler) CdCmd(args []string) {
 // Note that Go commonly reserves more memory from the OS than is currently in-use/required
 // Additionally, even if Go returns memory to the OS, the OS does not always claim it because
 // there may be plenty of memory to spare
-func (h *BufHandler) MemUsageCmd(args []string) {
+func (h *BufPane) MemUsageCmd(args []string) {
 	InfoBar.Message(util.GetMemStats())
 }
 
 // PwdCmd prints the current working directory
-func (h *BufHandler) PwdCmd(args []string) {
+func (h *BufPane) PwdCmd(args []string) {
 	wd, err := os.Getwd()
 	if err != nil {
 		InfoBar.Message(err.Error())
@@ -235,7 +240,7 @@ func (h *BufHandler) PwdCmd(args []string) {
 }
 
 // OpenCmd opens a new buffer with a given filename
-func (h *BufHandler) OpenCmd(args []string) {
+func (h *BufPane) OpenCmd(args []string) {
 	if len(args) > 0 {
 		filename := args[0]
 		// the filename might or might not be quoted, so unquote first then join the strings.
@@ -272,14 +277,14 @@ func (h *BufHandler) OpenCmd(args []string) {
 }
 
 // ToggleLogCmd toggles the log view
-func (h *BufHandler) ToggleLogCmd(args []string) {
+func (h *BufPane) ToggleLogCmd(args []string) {
 }
 
 // ReloadCmd reloads all files (syntax files, colorschemes...)
-func (h *BufHandler) ReloadCmd(args []string) {
+func (h *BufPane) ReloadCmd(args []string) {
 }
 
-func (h *BufHandler) openHelp(page string) error {
+func (h *BufPane) openHelp(page string) error {
 	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
 		return errors.New(fmt.Sprint("Unable to load help text", page, "\n", err))
 	} else {
@@ -296,7 +301,7 @@ func (h *BufHandler) openHelp(page string) error {
 }
 
 // HelpCmd tries to open the given help page in a horizontal split
-func (h *BufHandler) HelpCmd(args []string) {
+func (h *BufPane) HelpCmd(args []string) {
 	if len(args) < 1 {
 		// Open the default help if the user just typed "> help"
 		h.openHelp("help")
@@ -314,7 +319,7 @@ func (h *BufHandler) HelpCmd(args []string) {
 
 // VSplitCmd opens a vertical split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
-func (h *BufHandler) VSplitCmd(args []string) {
+func (h *BufPane) VSplitCmd(args []string) {
 	if len(args) == 0 {
 		// Open an empty vertical split
 		h.VSplitAction()
@@ -332,7 +337,7 @@ func (h *BufHandler) VSplitCmd(args []string) {
 
 // HSplitCmd opens a horizontal split with file given in the first argument
 // If no file is given, it opens an empty buffer in a new split
-func (h *BufHandler) HSplitCmd(args []string) {
+func (h *BufPane) HSplitCmd(args []string) {
 	if len(args) == 0 {
 		// Open an empty horizontal split
 		h.HSplitAction()
@@ -349,11 +354,11 @@ func (h *BufHandler) HSplitCmd(args []string) {
 }
 
 // EvalCmd evaluates a lua expression
-func (h *BufHandler) EvalCmd(args []string) {
+func (h *BufPane) EvalCmd(args []string) {
 }
 
 // NewTabCmd opens the given file in a new tab
-func (h *BufHandler) NewTabCmd(args []string) {
+func (h *BufPane) NewTabCmd(args []string) {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
 	if len(args) > 0 {
@@ -417,7 +422,7 @@ func SetGlobalOption(option, value string) error {
 }
 
 // SetCmd sets an option
-func (h *BufHandler) SetCmd(args []string) {
+func (h *BufPane) SetCmd(args []string) {
 	if len(args) < 2 {
 		InfoBar.Error("Not enough arguments")
 		return
@@ -438,7 +443,7 @@ func (h *BufHandler) SetCmd(args []string) {
 }
 
 // SetLocalCmd sets an option local to the buffer
-func (h *BufHandler) SetLocalCmd(args []string) {
+func (h *BufPane) SetLocalCmd(args []string) {
 	if len(args) < 2 {
 		InfoBar.Error("Not enough arguments")
 		return
@@ -455,7 +460,7 @@ func (h *BufHandler) SetLocalCmd(args []string) {
 }
 
 // ShowCmd shows the value of the given option
-func (h *BufHandler) ShowCmd(args []string) {
+func (h *BufPane) ShowCmd(args []string) {
 	if len(args) < 1 {
 		InfoBar.Error("Please provide an option to show")
 		return
@@ -477,7 +482,7 @@ func (h *BufHandler) ShowCmd(args []string) {
 }
 
 // ShowKeyCmd displays the action that a key is bound to
-func (h *BufHandler) ShowKeyCmd(args []string) {
+func (h *BufPane) ShowKeyCmd(args []string) {
 	if len(args) < 1 {
 		InfoBar.Error("Please provide a key to show")
 		return
@@ -491,7 +496,7 @@ func (h *BufHandler) ShowKeyCmd(args []string) {
 }
 
 // BindCmd creates a new keybinding
-func (h *BufHandler) BindCmd(args []string) {
+func (h *BufPane) BindCmd(args []string) {
 	if len(args) < 2 {
 		InfoBar.Error("Not enough arguments")
 		return
@@ -504,7 +509,7 @@ func (h *BufHandler) BindCmd(args []string) {
 }
 
 // UnbindCmd binds a key to its default action
-func (h *BufHandler) UnbindCmd(args []string) {
+func (h *BufPane) UnbindCmd(args []string) {
 	if len(args) < 1 {
 		InfoBar.Error("Not enough arguements")
 		return
@@ -517,7 +522,7 @@ func (h *BufHandler) UnbindCmd(args []string) {
 }
 
 // RunCmd runs a shell command in the background
-func (h *BufHandler) RunCmd(args []string) {
+func (h *BufPane) RunCmd(args []string) {
 	runf, err := shell.RunBackgroundShell(shellwords.Join(args...))
 	if err != nil {
 		InfoBar.Error(err)
@@ -530,17 +535,17 @@ func (h *BufHandler) RunCmd(args []string) {
 }
 
 // QuitCmd closes the main view
-func (h *BufHandler) QuitCmd(args []string) {
+func (h *BufPane) QuitCmd(args []string) {
 	h.Quit()
 }
 
 // SaveCmd saves the buffer in the main view
-func (h *BufHandler) SaveCmd(args []string) {
+func (h *BufPane) SaveCmd(args []string) {
 	h.Save()
 }
 
 // ReplaceCmd runs search and replace
-func (h *BufHandler) ReplaceCmd(args []string) {
+func (h *BufPane) ReplaceCmd(args []string) {
 	if len(args) < 2 || len(args) > 4 {
 		// We need to find both a search and replace expression
 		InfoBar.Error("Invalid replace statement: " + strings.Join(args, " "))
@@ -654,11 +659,11 @@ func (h *BufHandler) ReplaceCmd(args []string) {
 }
 
 // ReplaceAllCmd replaces search term all at once
-func (h *BufHandler) ReplaceAllCmd(args []string) {
+func (h *BufPane) ReplaceAllCmd(args []string) {
 }
 
 // TermCmd opens a terminal in the current view
-func (h *BufHandler) TermCmd(args []string) {
+func (h *BufPane) TermCmd(args []string) {
 	ps := MainTab().Panes
 
 	if len(args) == 0 {
@@ -685,7 +690,7 @@ func (h *BufHandler) TermCmd(args []string) {
 		}
 
 		v := h.GetView()
-		MainTab().Panes[i] = NewTermHandler(v.X, v.Y, v.Width, v.Height, t, id)
+		MainTab().Panes[i] = NewTermPane(v.X, v.Y, v.Width, v.Height, t, id)
 		MainTab().SetActive(i)
 	}
 
@@ -716,7 +721,7 @@ func (h *BufHandler) TermCmd(args []string) {
 }
 
 // HandleCommand handles input from the user
-func (h *BufHandler) HandleCommand(input string) {
+func (h *BufPane) HandleCommand(input string) {
 	args, err := shellwords.Split(input)
 	if err != nil {
 		InfoBar.Error("Error parsing args ", err)

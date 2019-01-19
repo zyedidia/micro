@@ -3,6 +3,7 @@ package buffer
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"io"
 	"os"
 	"os/exec"
@@ -50,6 +51,10 @@ func (b *Buffer) Save() error {
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
+	if b.Type.Scratch {
+		return errors.New("Cannot save scratch buffer")
+	}
+
 	// TODO: rmtrailingws and updaterules
 	b.UpdateRules()
 	// if b.Settings["rmtrailingws"].(bool) {
@@ -158,6 +163,10 @@ func (b *Buffer) SaveWithSudo() error {
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
 // with tee to use sudo so the user doesn't have to reopen micro with sudo
 func (b *Buffer) SaveAsWithSudo(filename string) error {
+	if b.Type.Scratch {
+		return errors.New("Cannot save scratch buffer")
+	}
+
 	b.UpdateRules()
 	b.Path = filename
 	absPath, _ := filepath.Abs(filename)

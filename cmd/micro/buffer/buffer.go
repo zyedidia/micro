@@ -23,8 +23,8 @@ var OpenBuffers []*Buffer
 // The BufType defines what kind of buffer this is
 type BufType struct {
 	Kind     int
-	Readonly bool // The file cannot be edited
-	Scratch  bool // The file cannot be saved
+	Readonly bool // The buffer cannot be edited
+	Scratch  bool // The buffer cannot be saved
 	Syntax   bool // Syntax highlighting is enabled
 }
 
@@ -33,7 +33,7 @@ var (
 	BTHelp    = BufType{1, true, true, true}
 	BTLog     = BufType{2, true, true, false}
 	BTScratch = BufType{3, false, true, false}
-	BTRaw     = BufType{4, true, true, false}
+	BTRaw     = BufType{4, false, true, false}
 	BTInfo    = BufType{5, false, true, false}
 
 	ErrFileTooLarge = errors.New("File is too large to hash")
@@ -241,15 +241,19 @@ func (b *Buffer) SetName(s string) {
 }
 
 func (b *Buffer) Insert(start Loc, text string) {
-	b.EventHandler.cursors = b.cursors
-	b.EventHandler.active = b.curCursor
-	b.EventHandler.Insert(start, text)
+	if !b.Type.Readonly {
+		b.EventHandler.cursors = b.cursors
+		b.EventHandler.active = b.curCursor
+		b.EventHandler.Insert(start, text)
+	}
 }
 
 func (b *Buffer) Remove(start, end Loc) {
-	b.EventHandler.cursors = b.cursors
-	b.EventHandler.active = b.curCursor
-	b.EventHandler.Remove(start, end)
+	if !b.Type.Readonly {
+		b.EventHandler.cursors = b.cursors
+		b.EventHandler.active = b.curCursor
+		b.EventHandler.Remove(start, end)
+	}
 }
 
 // FileType returns the buffer's filetype
@@ -296,6 +300,10 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 // Modified returns if this buffer has been modified since
 // being opened
 func (b *Buffer) Modified() bool {
+	if b.Type.Scratch {
+		return false
+	}
+
 	if b.Settings["fastdirty"].(bool) {
 		return b.isModified
 	}

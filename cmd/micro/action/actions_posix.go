@@ -11,7 +11,7 @@ import (
 // Suspend sends micro to the background. This is the same as pressing CtrlZ in most unix programs.
 // This only works on linux and has no default binding.
 // This code was adapted from the suspend code in nsf/godit
-func (*BufHandler) Suspend() bool {
+func (*BufPane) Suspend() bool {
 	screenb := screen.TempFini()
 
 	// suspend the process
