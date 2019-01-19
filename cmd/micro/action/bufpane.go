@@ -9,8 +9,8 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-type BufKeyAction func(*BufHandler) bool
-type BufMouseAction func(*BufHandler, *tcell.EventMouse) bool
+type BufKeyAction func(*BufPane) bool
+type BufMouseAction func(*BufPane, *tcell.EventMouse) bool
 
 var BufKeyBindings map[Event]BufKeyAction
 var BufKeyStrings map[Event]string
@@ -47,12 +47,12 @@ func BufMapMouse(k MouseEvent, action string) {
 	}
 }
 
-// The BufHandler connects the buffer and the window
+// The BufPane connects the buffer and the window
 // It provides a cursor (or multiple) and defines a set of actions
 // that can be taken on the buffer
 // The ActionHandler can access the window for necessary info about
 // visual positions for mouse clicks and scrolling
-type BufHandler struct {
+type BufPane struct {
 	display.BWindow
 
 	Buf *buffer.Buffer
@@ -98,8 +98,8 @@ type BufHandler struct {
 	splitID uint64
 }
 
-func NewBufHandler(buf *buffer.Buffer, win display.BWindow) *BufHandler {
-	h := new(BufHandler)
+func NewBufPane(buf *buffer.Buffer, win display.BWindow) *BufPane {
+	h := new(BufPane)
 	h.Buf = buf
 	h.BWindow = win
 
@@ -109,7 +109,12 @@ func NewBufHandler(buf *buffer.Buffer, win display.BWindow) *BufHandler {
 	return h
 }
 
-func (h *BufHandler) OpenBuffer(b *buffer.Buffer) {
+func NewBufPaneFromBuf(buf *buffer.Buffer) *BufPane {
+	w := display.NewBufWindow(0, 0, 0, 0, buf)
+	return NewBufPane(buf, w)
+}
+
+func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.Buf.Close()
 	h.Buf = b
 	h.BWindow.SetBuffer(b)
@@ -126,17 +131,21 @@ func (h *BufHandler) OpenBuffer(b *buffer.Buffer) {
 	h.lastClickTime = time.Time{}
 }
 
-func (h *BufHandler) ID() uint64 {
+func (h *BufPane) ID() uint64 {
 	return h.splitID
 }
 
-func (h *BufHandler) Name() string {
+func (h *BufPane) SetID(i uint64) {
+	h.splitID = i
+}
+
+func (h *BufPane) Name() string {
 	return h.Buf.GetName()
 }
 
 // HandleEvent executes the tcell event properly
 // TODO: multiple actions bound to one key
-func (h *BufHandler) HandleEvent(event tcell.Event) {
+func (h *BufPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventRaw:
 		re := RawEvent{
@@ -204,7 +213,7 @@ func (h *BufHandler) HandleEvent(event tcell.Event) {
 
 // DoKeyEvent executes a key event by finding the action it is bound
 // to and executing it (possibly multiple times for multiple cursors)
-func (h *BufHandler) DoKeyEvent(e Event) bool {
+func (h *BufPane) DoKeyEvent(e Event) bool {
 	if action, ok := BufKeyBindings[e]; ok {
 		estr := BufKeyStrings[e]
 		for _, s := range MultiActions {
@@ -228,14 +237,14 @@ func (h *BufHandler) DoKeyEvent(e Event) bool {
 	return false
 }
 
-func (h *BufHandler) HasKeyEvent(e Event) bool {
+func (h *BufPane) HasKeyEvent(e Event) bool {
 	_, ok := BufKeyBindings[e]
 	return ok
 }
 
 // DoMouseEvent executes a mouse event by finding the action it is bound
 // to and executing it
-func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
+func (h *BufPane) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 	if action, ok := BufMouseBindings[e]; ok {
 		if action(h, te) {
 			h.Relocate()
@@ -249,7 +258,7 @@ func (h *BufHandler) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 
 // DoRuneInsert inserts a given rune into the current buffer
 // (possibly multiple times for multiple cursors)
-func (h *BufHandler) DoRuneInsert(r rune) {
+func (h *BufPane) DoRuneInsert(r rune) {
 	cursors := h.Buf.GetCursors()
 	for _, c := range cursors {
 		// Insert a character
@@ -269,127 +278,127 @@ func (h *BufHandler) DoRuneInsert(r rune) {
 	}
 }
 
-func (h *BufHandler) VSplitBuf(buf *buffer.Buffer) {
-	e := NewBufEditPane(0, 0, 0, 0, buf)
+func (h *BufPane) VSplitBuf(buf *buffer.Buffer) {
+	e := NewBufPaneFromBuf(buf)
 	e.splitID = MainTab().GetNode(h.splitID).VSplit(h.Buf.Settings["splitright"].(bool))
 	MainTab().Panes = append(MainTab().Panes, e)
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
 }
-func (h *BufHandler) HSplitBuf(buf *buffer.Buffer) {
-	e := NewBufEditPane(0, 0, 0, 0, buf)
+func (h *BufPane) HSplitBuf(buf *buffer.Buffer) {
+	e := NewBufPaneFromBuf(buf)
 	e.splitID = MainTab().GetNode(h.splitID).HSplit(h.Buf.Settings["splitbottom"].(bool))
 	MainTab().Panes = append(MainTab().Panes, e)
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
 }
-func (h *BufHandler) Close() {
+func (h *BufPane) Close() {
 	h.Buf.Close()
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute
 var BufKeyActions = map[string]BufKeyAction{
-	"CursorUp":               (*BufHandler).CursorUp,
-	"CursorDown":             (*BufHandler).CursorDown,
-	"CursorPageUp":           (*BufHandler).CursorPageUp,
-	"CursorPageDown":         (*BufHandler).CursorPageDown,
-	"CursorLeft":             (*BufHandler).CursorLeft,
-	"CursorRight":            (*BufHandler).CursorRight,
-	"CursorStart":            (*BufHandler).CursorStart,
-	"CursorEnd":              (*BufHandler).CursorEnd,
-	"SelectToStart":          (*BufHandler).SelectToStart,
-	"SelectToEnd":            (*BufHandler).SelectToEnd,
-	"SelectUp":               (*BufHandler).SelectUp,
-	"SelectDown":             (*BufHandler).SelectDown,
-	"SelectLeft":             (*BufHandler).SelectLeft,
-	"SelectRight":            (*BufHandler).SelectRight,
-	"WordRight":              (*BufHandler).WordRight,
-	"WordLeft":               (*BufHandler).WordLeft,
-	"SelectWordRight":        (*BufHandler).SelectWordRight,
-	"SelectWordLeft":         (*BufHandler).SelectWordLeft,
-	"DeleteWordRight":        (*BufHandler).DeleteWordRight,
-	"DeleteWordLeft":         (*BufHandler).DeleteWordLeft,
-	"SelectLine":             (*BufHandler).SelectLine,
-	"SelectToStartOfLine":    (*BufHandler).SelectToStartOfLine,
-	"SelectToEndOfLine":      (*BufHandler).SelectToEndOfLine,
-	"ParagraphPrevious":      (*BufHandler).ParagraphPrevious,
-	"ParagraphNext":          (*BufHandler).ParagraphNext,
-	"InsertNewline":          (*BufHandler).InsertNewline,
-	"Backspace":              (*BufHandler).Backspace,
-	"Delete":                 (*BufHandler).Delete,
-	"InsertTab":              (*BufHandler).InsertTab,
-	"Save":                   (*BufHandler).Save,
-	"SaveAll":                (*BufHandler).SaveAll,
-	"SaveAs":                 (*BufHandler).SaveAs,
-	"Find":                   (*BufHandler).Find,
-	"FindNext":               (*BufHandler).FindNext,
-	"FindPrevious":           (*BufHandler).FindPrevious,
-	"Center":                 (*BufHandler).Center,
-	"Undo":                   (*BufHandler).Undo,
-	"Redo":                   (*BufHandler).Redo,
-	"Copy":                   (*BufHandler).Copy,
-	"Cut":                    (*BufHandler).Cut,
-	"CutLine":                (*BufHandler).CutLine,
-	"DuplicateLine":          (*BufHandler).DuplicateLine,
-	"DeleteLine":             (*BufHandler).DeleteLine,
-	"MoveLinesUp":            (*BufHandler).MoveLinesUp,
-	"MoveLinesDown":          (*BufHandler).MoveLinesDown,
-	"IndentSelection":        (*BufHandler).IndentSelection,
-	"OutdentSelection":       (*BufHandler).OutdentSelection,
-	"OutdentLine":            (*BufHandler).OutdentLine,
-	"Paste":                  (*BufHandler).Paste,
-	"PastePrimary":           (*BufHandler).PastePrimary,
-	"SelectAll":              (*BufHandler).SelectAll,
-	"OpenFile":               (*BufHandler).OpenFile,
-	"Start":                  (*BufHandler).Start,
-	"End":                    (*BufHandler).End,
-	"PageUp":                 (*BufHandler).PageUp,
-	"PageDown":               (*BufHandler).PageDown,
-	"SelectPageUp":           (*BufHandler).SelectPageUp,
-	"SelectPageDown":         (*BufHandler).SelectPageDown,
-	"HalfPageUp":             (*BufHandler).HalfPageUp,
-	"HalfPageDown":           (*BufHandler).HalfPageDown,
-	"StartOfLine":            (*BufHandler).StartOfLine,
-	"EndOfLine":              (*BufHandler).EndOfLine,
-	"ToggleHelp":             (*BufHandler).ToggleHelp,
-	"ToggleKeyMenu":          (*BufHandler).ToggleKeyMenu,
-	"ToggleRuler":            (*BufHandler).ToggleRuler,
-	"JumpLine":               (*BufHandler).JumpLine,
-	"ClearStatus":            (*BufHandler).ClearStatus,
-	"ShellMode":              (*BufHandler).ShellMode,
-	"CommandMode":            (*BufHandler).CommandMode,
-	"ToggleOverwriteMode":    (*BufHandler).ToggleOverwriteMode,
-	"Escape":                 (*BufHandler).Escape,
-	"Quit":                   (*BufHandler).Quit,
-	"QuitAll":                (*BufHandler).QuitAll,
-	"AddTab":                 (*BufHandler).AddTab,
-	"PreviousTab":            (*BufHandler).PreviousTab,
-	"NextTab":                (*BufHandler).NextTab,
-	"NextSplit":              (*BufHandler).NextSplit,
-	"PreviousSplit":          (*BufHandler).PreviousSplit,
-	"Unsplit":                (*BufHandler).Unsplit,
-	"VSplit":                 (*BufHandler).VSplitAction,
-	"HSplit":                 (*BufHandler).HSplitAction,
-	"ToggleMacro":            (*BufHandler).ToggleMacro,
-	"PlayMacro":              (*BufHandler).PlayMacro,
-	"Suspend":                (*BufHandler).Suspend,
-	"ScrollUp":               (*BufHandler).ScrollUpAction,
-	"ScrollDown":             (*BufHandler).ScrollDownAction,
-	"SpawnMultiCursor":       (*BufHandler).SpawnMultiCursor,
-	"SpawnMultiCursorSelect": (*BufHandler).SpawnMultiCursorSelect,
-	"RemoveMultiCursor":      (*BufHandler).RemoveMultiCursor,
-	"RemoveAllMultiCursors":  (*BufHandler).RemoveAllMultiCursors,
-	"SkipMultiCursor":        (*BufHandler).SkipMultiCursor,
-	"JumpToMatchingBrace":    (*BufHandler).JumpToMatchingBrace,
+	"CursorUp":               (*BufPane).CursorUp,
+	"CursorDown":             (*BufPane).CursorDown,
+	"CursorPageUp":           (*BufPane).CursorPageUp,
+	"CursorPageDown":         (*BufPane).CursorPageDown,
+	"CursorLeft":             (*BufPane).CursorLeft,
+	"CursorRight":            (*BufPane).CursorRight,
+	"CursorStart":            (*BufPane).CursorStart,
+	"CursorEnd":              (*BufPane).CursorEnd,
+	"SelectToStart":          (*BufPane).SelectToStart,
+	"SelectToEnd":            (*BufPane).SelectToEnd,
+	"SelectUp":               (*BufPane).SelectUp,
+	"SelectDown":             (*BufPane).SelectDown,
+	"SelectLeft":             (*BufPane).SelectLeft,
+	"SelectRight":            (*BufPane).SelectRight,
+	"WordRight":              (*BufPane).WordRight,
+	"WordLeft":               (*BufPane).WordLeft,
+	"SelectWordRight":        (*BufPane).SelectWordRight,
+	"SelectWordLeft":         (*BufPane).SelectWordLeft,
+	"DeleteWordRight":        (*BufPane).DeleteWordRight,
+	"DeleteWordLeft":         (*BufPane).DeleteWordLeft,
+	"SelectLine":             (*BufPane).SelectLine,
+	"SelectToStartOfLine":    (*BufPane).SelectToStartOfLine,
+	"SelectToEndOfLine":      (*BufPane).SelectToEndOfLine,
+	"ParagraphPrevious":      (*BufPane).ParagraphPrevious,
+	"ParagraphNext":          (*BufPane).ParagraphNext,
+	"InsertNewline":          (*BufPane).InsertNewline,
+	"Backspace":              (*BufPane).Backspace,
+	"Delete":                 (*BufPane).Delete,
+	"InsertTab":              (*BufPane).InsertTab,
+	"Save":                   (*BufPane).Save,
+	"SaveAll":                (*BufPane).SaveAll,
+	"SaveAs":                 (*BufPane).SaveAs,
+	"Find":                   (*BufPane).Find,
+	"FindNext":               (*BufPane).FindNext,
+	"FindPrevious":           (*BufPane).FindPrevious,
+	"Center":                 (*BufPane).Center,
+	"Undo":                   (*BufPane).Undo,
+	"Redo":                   (*BufPane).Redo,
+	"Copy":                   (*BufPane).Copy,
+	"Cut":                    (*BufPane).Cut,
+	"CutLine":                (*BufPane).CutLine,
+	"DuplicateLine":          (*BufPane).DuplicateLine,
+	"DeleteLine":             (*BufPane).DeleteLine,
+	"MoveLinesUp":            (*BufPane).MoveLinesUp,
+	"MoveLinesDown":          (*BufPane).MoveLinesDown,
+	"IndentSelection":        (*BufPane).IndentSelection,
+	"OutdentSelection":       (*BufPane).OutdentSelection,
+	"OutdentLine":            (*BufPane).OutdentLine,
+	"Paste":                  (*BufPane).Paste,
+	"PastePrimary":           (*BufPane).PastePrimary,
+	"SelectAll":              (*BufPane).SelectAll,
+	"OpenFile":               (*BufPane).OpenFile,
+	"Start":                  (*BufPane).Start,
+	"End":                    (*BufPane).End,
+	"PageUp":                 (*BufPane).PageUp,
+	"PageDown":               (*BufPane).PageDown,
+	"SelectPageUp":           (*BufPane).SelectPageUp,
+	"SelectPageDown":         (*BufPane).SelectPageDown,
+	"HalfPageUp":             (*BufPane).HalfPageUp,
+	"HalfPageDown":           (*BufPane).HalfPageDown,
+	"StartOfLine":            (*BufPane).StartOfLine,
+	"EndOfLine":              (*BufPane).EndOfLine,
+	"ToggleHelp":             (*BufPane).ToggleHelp,
+	"ToggleKeyMenu":          (*BufPane).ToggleKeyMenu,
+	"ToggleRuler":            (*BufPane).ToggleRuler,
+	"JumpLine":               (*BufPane).JumpLine,
+	"ClearStatus":            (*BufPane).ClearStatus,
+	"ShellMode":              (*BufPane).ShellMode,
+	"CommandMode":            (*BufPane).CommandMode,
+	"ToggleOverwriteMode":    (*BufPane).ToggleOverwriteMode,
+	"Escape":                 (*BufPane).Escape,
+	"Quit":                   (*BufPane).Quit,
+	"QuitAll":                (*BufPane).QuitAll,
+	"AddTab":                 (*BufPane).AddTab,
+	"PreviousTab":            (*BufPane).PreviousTab,
+	"NextTab":                (*BufPane).NextTab,
+	"NextSplit":              (*BufPane).NextSplit,
+	"PreviousSplit":          (*BufPane).PreviousSplit,
+	"Unsplit":                (*BufPane).Unsplit,
+	"VSplit":                 (*BufPane).VSplitAction,
+	"HSplit":                 (*BufPane).HSplitAction,
+	"ToggleMacro":            (*BufPane).ToggleMacro,
+	"PlayMacro":              (*BufPane).PlayMacro,
+	"Suspend":                (*BufPane).Suspend,
+	"ScrollUp":               (*BufPane).ScrollUpAction,
+	"ScrollDown":             (*BufPane).ScrollDownAction,
+	"SpawnMultiCursor":       (*BufPane).SpawnMultiCursor,
+	"SpawnMultiCursorSelect": (*BufPane).SpawnMultiCursorSelect,
+	"RemoveMultiCursor":      (*BufPane).RemoveMultiCursor,
+	"RemoveAllMultiCursors":  (*BufPane).RemoveAllMultiCursors,
+	"SkipMultiCursor":        (*BufPane).SkipMultiCursor,
+	"JumpToMatchingBrace":    (*BufPane).JumpToMatchingBrace,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
-	"InsertEnter": (*BufHandler).InsertNewline,
+	"InsertEnter": (*BufPane).InsertNewline,
 }
 
 // BufMouseActions contains the list of all possible mouse actions the bufhandler could execute
 var BufMouseActions = map[string]BufMouseAction{
-	"MousePress":       (*BufHandler).MousePress,
-	"MouseMultiCursor": (*BufHandler).MouseMultiCursor,
+	"MousePress":       (*BufPane).MousePress,
+	"MouseMultiCursor": (*BufPane).MouseMultiCursor,
 }
 
 // MultiActions is a list of actions that should be executed multiple

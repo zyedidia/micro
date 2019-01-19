@@ -6,22 +6,33 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
-type InfoKeyAction func(*InfoHandler)
+type InfoKeyAction func(*InfoPane)
 
-type InfoHandler struct {
-	*BufHandler
+type InfoPane struct {
+	*BufPane
 	*info.InfoBuf
 }
 
-func NewInfoHandler(ib *info.InfoBuf, w display.BWindow) *InfoHandler {
-	ih := new(InfoHandler)
-	ih.InfoBuf = ib
-	ih.BufHandler = NewBufHandler(ib.Buffer, w)
+func NewInfoPane(ib *info.InfoBuf, w display.BWindow) *InfoPane {
+	ip := new(InfoPane)
+	ip.InfoBuf = ib
+	ip.BufPane = NewBufPane(ib.Buffer, w)
 
-	return ih
+	return ip
 }
 
-func (h *InfoHandler) HandleEvent(event tcell.Event) {
+func NewInfoBar() *InfoPane {
+	ib := info.NewBuffer()
+	w := display.NewInfoWindow(ib)
+	return NewInfoPane(ib, w)
+}
+
+func (h *InfoPane) Close() {
+	h.InfoBuf.Close()
+	h.BufPane.Close()
+}
+
+func (h *InfoPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
 		ke := KeyEvent{
@@ -54,11 +65,11 @@ func (h *InfoHandler) HandleEvent(event tcell.Event) {
 			}
 		}
 	case *tcell.EventMouse:
-		h.BufHandler.HandleEvent(event)
+		h.BufPane.HandleEvent(event)
 	}
 }
 
-func (h *InfoHandler) DoKeyEvent(e KeyEvent) bool {
+func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	done := false
 	if action, ok := BufKeyBindings[e]; ok {
 		estr := BufKeyStrings[e]
@@ -75,7 +86,7 @@ func (h *InfoHandler) DoKeyEvent(e KeyEvent) bool {
 			}
 		}
 		if !done {
-			done = action(h.BufHandler)
+			done = action(h.BufPane)
 		}
 	}
 	return done
@@ -133,35 +144,35 @@ var InfoNones = []string{
 // InfoOverrides is the list of actions which have been overriden
 // by the infohandler
 var InfoOverrides = map[string]InfoKeyAction{
-	"CursorUp":      (*InfoHandler).CursorUp,
-	"CursorDown":    (*InfoHandler).CursorDown,
-	"InsertNewline": (*InfoHandler).InsertNewline,
-	"InsertTab":     (*InfoHandler).InsertTab,
-	"Escape":        (*InfoHandler).Escape,
-	"Quit":          (*InfoHandler).Quit,
-	"QuitAll":       (*InfoHandler).QuitAll,
+	"CursorUp":      (*InfoPane).CursorUp,
+	"CursorDown":    (*InfoPane).CursorDown,
+	"InsertNewline": (*InfoPane).InsertNewline,
+	"InsertTab":     (*InfoPane).InsertTab,
+	"Escape":        (*InfoPane).Escape,
+	"Quit":          (*InfoPane).Quit,
+	"QuitAll":       (*InfoPane).QuitAll,
 }
 
-func (h *InfoHandler) CursorUp() {
+func (h *InfoPane) CursorUp() {
 	h.UpHistory(h.History[h.PromptType])
 }
-func (h *InfoHandler) CursorDown() {
+func (h *InfoPane) CursorDown() {
 	h.DownHistory(h.History[h.PromptType])
 }
-func (h *InfoHandler) InsertTab() {
+func (h *InfoPane) InsertTab() {
 	// TODO: autocomplete
 }
-func (h *InfoHandler) InsertNewline() {
+func (h *InfoPane) InsertNewline() {
 	if !h.HasYN {
 		h.DonePrompt(false)
 	}
 }
-func (h *InfoHandler) Quit() {
+func (h *InfoPane) Quit() {
 	h.DonePrompt(true)
 }
-func (h *InfoHandler) QuitAll() {
+func (h *InfoPane) QuitAll() {
 	h.DonePrompt(true)
 }
-func (h *InfoHandler) Escape() {
+func (h *InfoPane) Escape() {
 	h.DonePrompt(true)
 }

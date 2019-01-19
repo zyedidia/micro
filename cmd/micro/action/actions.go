@@ -18,7 +18,7 @@ import (
 )
 
 // ScrollUp is not an action
-func (h *BufHandler) ScrollUp(n int) {
+func (h *BufPane) ScrollUp(n int) {
 	v := h.GetView()
 	if v.StartLine >= n {
 		v.StartLine -= n
@@ -27,7 +27,7 @@ func (h *BufHandler) ScrollUp(n int) {
 }
 
 // ScrollDown is not an action
-func (h *BufHandler) ScrollDown(n int) {
+func (h *BufPane) ScrollDown(n int) {
 	v := h.GetView()
 	if v.StartLine <= h.Buf.LinesNum()-1-n {
 		v.StartLine += n
@@ -37,7 +37,7 @@ func (h *BufHandler) ScrollDown(n int) {
 
 // MousePress is the event that should happen when a normal click happens
 // This is almost always bound to left click
-func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
+func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
 	mouseLoc := h.GetMouseLoc(buffer.Loc{mx, my})
@@ -93,19 +93,19 @@ func (h *BufHandler) MousePress(e *tcell.EventMouse) bool {
 }
 
 // ScrollUpAction scrolls the view up
-func (h *BufHandler) ScrollUpAction() bool {
+func (h *BufPane) ScrollUpAction() bool {
 	h.ScrollUp(util.IntOpt(h.Buf.Settings["scrollspeed"]))
 	return false
 }
 
 // ScrollDownAction scrolls the view up
-func (h *BufHandler) ScrollDownAction() bool {
+func (h *BufPane) ScrollDownAction() bool {
 	h.ScrollDown(util.IntOpt(h.Buf.Settings["scrollspeed"]))
 	return false
 }
 
 // Center centers the view on the cursor
-func (h *BufHandler) Center() bool {
+func (h *BufPane) Center() bool {
 	v := h.GetView()
 	v.StartLine = h.Cursor.Y - v.Height/2
 	if v.StartLine+v.Height > h.Buf.LinesNum() {
@@ -119,49 +119,49 @@ func (h *BufHandler) Center() bool {
 }
 
 // CursorUp moves the cursor up
-func (h *BufHandler) CursorUp() bool {
+func (h *BufPane) CursorUp() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Up()
 	return true
 }
 
 // CursorDown moves the cursor down
-func (h *BufHandler) CursorDown() bool {
+func (h *BufPane) CursorDown() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Down()
 	return true
 }
 
 // CursorLeft moves the cursor left
-func (h *BufHandler) CursorLeft() bool {
+func (h *BufPane) CursorLeft() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Left()
 	return true
 }
 
 // CursorRight moves the cursor right
-func (h *BufHandler) CursorRight() bool {
+func (h *BufPane) CursorRight() bool {
 	h.Cursor.Deselect(false)
 	h.Cursor.Right()
 	return true
 }
 
 // WordRight moves the cursor one word to the right
-func (h *BufHandler) WordRight() bool {
+func (h *BufPane) WordRight() bool {
 	h.Cursor.Deselect(false)
 	h.Cursor.WordRight()
 	return true
 }
 
 // WordLeft moves the cursor one word to the left
-func (h *BufHandler) WordLeft() bool {
+func (h *BufPane) WordLeft() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.WordLeft()
 	return true
 }
 
 // SelectUp selects up one line
-func (h *BufHandler) SelectUp() bool {
+func (h *BufPane) SelectUp() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -171,7 +171,7 @@ func (h *BufHandler) SelectUp() bool {
 }
 
 // SelectDown selects down one line
-func (h *BufHandler) SelectDown() bool {
+func (h *BufPane) SelectDown() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -181,7 +181,7 @@ func (h *BufHandler) SelectDown() bool {
 }
 
 // SelectLeft selects the character to the left of the cursor
-func (h *BufHandler) SelectLeft() bool {
+func (h *BufPane) SelectLeft() bool {
 	loc := h.Cursor.Loc
 	count := h.Buf.End()
 	if loc.GreaterThan(count) {
@@ -196,7 +196,7 @@ func (h *BufHandler) SelectLeft() bool {
 }
 
 // SelectRight selects the character to the right of the cursor
-func (h *BufHandler) SelectRight() bool {
+func (h *BufPane) SelectRight() bool {
 	loc := h.Cursor.Loc
 	count := h.Buf.End()
 	if loc.GreaterThan(count) {
@@ -211,7 +211,7 @@ func (h *BufHandler) SelectRight() bool {
 }
 
 // SelectWordRight selects the word to the right of the cursor
-func (h *BufHandler) SelectWordRight() bool {
+func (h *BufPane) SelectWordRight() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -221,7 +221,7 @@ func (h *BufHandler) SelectWordRight() bool {
 }
 
 // SelectWordLeft selects the word to the left of the cursor
-func (h *BufHandler) SelectWordLeft() bool {
+func (h *BufPane) SelectWordLeft() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -231,7 +231,7 @@ func (h *BufHandler) SelectWordLeft() bool {
 }
 
 // StartOfLine moves the cursor to the start of the line
-func (h *BufHandler) StartOfLine() bool {
+func (h *BufPane) StartOfLine() bool {
 	h.Cursor.Deselect(true)
 	if h.Cursor.X != 0 {
 		h.Cursor.Start()
@@ -242,20 +242,20 @@ func (h *BufHandler) StartOfLine() bool {
 }
 
 // EndOfLine moves the cursor to the end of the line
-func (h *BufHandler) EndOfLine() bool {
+func (h *BufPane) EndOfLine() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.End()
 	return true
 }
 
 // SelectLine selects the entire current line
-func (h *BufHandler) SelectLine() bool {
+func (h *BufPane) SelectLine() bool {
 	h.Cursor.SelectLine()
 	return true
 }
 
 // SelectToStartOfLine selects to the start of the current line
-func (h *BufHandler) SelectToStartOfLine() bool {
+func (h *BufPane) SelectToStartOfLine() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -265,7 +265,7 @@ func (h *BufHandler) SelectToStartOfLine() bool {
 }
 
 // SelectToEndOfLine selects to the end of the current line
-func (h *BufHandler) SelectToEndOfLine() bool {
+func (h *BufPane) SelectToEndOfLine() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -275,7 +275,7 @@ func (h *BufHandler) SelectToEndOfLine() bool {
 }
 
 // ParagraphPrevious moves the cursor to the previous empty line, or beginning of the buffer if there's none
-func (h *BufHandler) ParagraphPrevious() bool {
+func (h *BufPane) ParagraphPrevious() bool {
 	var line int
 	for line = h.Cursor.Y; line > 0; line-- {
 		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
@@ -292,7 +292,7 @@ func (h *BufHandler) ParagraphPrevious() bool {
 }
 
 // ParagraphNext moves the cursor to the next empty line, or end of the buffer if there's none
-func (h *BufHandler) ParagraphNext() bool {
+func (h *BufPane) ParagraphNext() bool {
 	var line int
 	for line = h.Cursor.Y; line < h.Buf.LinesNum(); line++ {
 		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
@@ -310,13 +310,13 @@ func (h *BufHandler) ParagraphNext() bool {
 
 // Retab changes all tabs to spaces or all spaces to tabs depending
 // on the user's settings
-func (h *BufHandler) Retab() bool {
+func (h *BufPane) Retab() bool {
 	h.Buf.Retab()
 	return true
 }
 
 // CursorStart moves the cursor to the start of the buffer
-func (h *BufHandler) CursorStart() bool {
+func (h *BufPane) CursorStart() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.X = 0
 	h.Cursor.Y = 0
@@ -324,7 +324,7 @@ func (h *BufHandler) CursorStart() bool {
 }
 
 // CursorEnd moves the cursor to the end of the buffer
-func (h *BufHandler) CursorEnd() bool {
+func (h *BufPane) CursorEnd() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Loc = h.Buf.End()
 	h.Cursor.StoreVisualX()
@@ -332,7 +332,7 @@ func (h *BufHandler) CursorEnd() bool {
 }
 
 // SelectToStart selects the text from the cursor to the start of the buffer
-func (h *BufHandler) SelectToStart() bool {
+func (h *BufPane) SelectToStart() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -342,7 +342,7 @@ func (h *BufHandler) SelectToStart() bool {
 }
 
 // SelectToEnd selects the text from the cursor to the end of the buffer
-func (h *BufHandler) SelectToEnd() bool {
+func (h *BufPane) SelectToEnd() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -352,7 +352,7 @@ func (h *BufHandler) SelectToEnd() bool {
 }
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
-func (h *BufHandler) InsertNewline() bool {
+func (h *BufPane) InsertNewline() bool {
 	// Insert a newline
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()
@@ -384,7 +384,7 @@ func (h *BufHandler) InsertNewline() bool {
 }
 
 // Backspace deletes the previous character
-func (h *BufHandler) Backspace() bool {
+func (h *BufPane) Backspace() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()
 		h.Cursor.ResetSelection()
@@ -413,7 +413,7 @@ func (h *BufHandler) Backspace() bool {
 }
 
 // DeleteWordRight deletes the word to the right of the cursor
-func (h *BufHandler) DeleteWordRight() bool {
+func (h *BufPane) DeleteWordRight() bool {
 	h.SelectWordRight()
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()
@@ -423,7 +423,7 @@ func (h *BufHandler) DeleteWordRight() bool {
 }
 
 // DeleteWordLeft deletes the word to the left of the cursor
-func (h *BufHandler) DeleteWordLeft() bool {
+func (h *BufPane) DeleteWordLeft() bool {
 	h.SelectWordLeft()
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()
@@ -433,7 +433,7 @@ func (h *BufHandler) DeleteWordLeft() bool {
 }
 
 // Delete deletes the next character
-func (h *BufHandler) Delete() bool {
+func (h *BufPane) Delete() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()
 		h.Cursor.ResetSelection()
@@ -447,7 +447,7 @@ func (h *BufHandler) Delete() bool {
 }
 
 // IndentSelection indents the current selection
-func (h *BufHandler) IndentSelection() bool {
+func (h *BufPane) IndentSelection() bool {
 	if h.Cursor.HasSelection() {
 		start := h.Cursor.CurSelection[0]
 		end := h.Cursor.CurSelection[1]
@@ -479,7 +479,7 @@ func (h *BufHandler) IndentSelection() bool {
 }
 
 // OutdentLine moves the current line back one indentation
-func (h *BufHandler) OutdentLine() bool {
+func (h *BufPane) OutdentLine() bool {
 	if h.Cursor.HasSelection() {
 		return false
 	}
@@ -495,7 +495,7 @@ func (h *BufHandler) OutdentLine() bool {
 }
 
 // OutdentSelection takes the current selection and moves it back one indent level
-func (h *BufHandler) OutdentSelection() bool {
+func (h *BufPane) OutdentSelection() bool {
 	if h.Cursor.HasSelection() {
 		start := h.Cursor.CurSelection[0]
 		end := h.Cursor.CurSelection[1]
@@ -523,7 +523,7 @@ func (h *BufHandler) OutdentSelection() bool {
 }
 
 // InsertTab inserts a tab or spaces
-func (h *BufHandler) InsertTab() bool {
+func (h *BufPane) InsertTab() bool {
 	indent := h.Buf.IndentString(util.IntOpt(h.Buf.Settings["tabsize"]))
 	tabBytes := len(indent)
 	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
@@ -532,7 +532,7 @@ func (h *BufHandler) InsertTab() bool {
 }
 
 // SaveAll saves all open buffers
-func (h *BufHandler) SaveAll() bool {
+func (h *BufPane) SaveAll() bool {
 	for _, b := range buffer.OpenBuffers {
 		b.Save()
 	}
@@ -540,7 +540,7 @@ func (h *BufHandler) SaveAll() bool {
 }
 
 // Save the buffer to disk
-func (h *BufHandler) Save() bool {
+func (h *BufPane) Save() bool {
 	// If this is an empty buffer, ask for a filename
 	if h.Buf.Path == "" {
 		h.SaveAs()
@@ -552,7 +552,7 @@ func (h *BufHandler) Save() bool {
 }
 
 // SaveAs saves the buffer to disk with the given name
-func (h *BufHandler) SaveAs() bool {
+func (h *BufPane) SaveAs() bool {
 	InfoBar.Prompt("Filename: ", "", "Save", nil, func(resp string, canceled bool) {
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
@@ -571,7 +571,7 @@ func (h *BufHandler) SaveAs() bool {
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (h *BufHandler) saveBufToFile(filename string) {
+func (h *BufPane) saveBufToFile(filename string) {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
@@ -598,7 +598,7 @@ func (h *BufHandler) saveBufToFile(filename string) {
 }
 
 // Find opens a prompt and searches forward for the input
-func (h *BufHandler) Find() bool {
+func (h *BufPane) Find() bool {
 	InfoBar.Prompt("Find: ", "", "Find", func(resp string) {
 		// Event callback
 		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, true, true)
@@ -637,7 +637,7 @@ func (h *BufHandler) Find() bool {
 }
 
 // FindNext searches forwards for the last used search term
-func (h *BufHandler) FindNext() bool {
+func (h *BufPane) FindNext() bool {
 	// If the cursor is at the start of a selection and we search we want
 	// to search from the end of the selection in the case that
 	// the selection is a search result in which case we wouldn't move at
@@ -663,7 +663,7 @@ func (h *BufHandler) FindNext() bool {
 }
 
 // FindPrevious searches backwards for the last used search term
-func (h *BufHandler) FindPrevious() bool {
+func (h *BufPane) FindPrevious() bool {
 	// If the cursor is at the end of a selection and we search we want
 	// to search from the beginning of the selection in the case that
 	// the selection is a search result in which case we wouldn't move at
@@ -689,21 +689,21 @@ func (h *BufHandler) FindPrevious() bool {
 }
 
 // Undo undoes the last action
-func (h *BufHandler) Undo() bool {
+func (h *BufPane) Undo() bool {
 	h.Buf.Undo()
 	InfoBar.Message("Undid action")
 	return true
 }
 
 // Redo redoes the last action
-func (h *BufHandler) Redo() bool {
+func (h *BufPane) Redo() bool {
 	h.Buf.Redo()
 	InfoBar.Message("Redid action")
 	return true
 }
 
 // Copy the selection to the system clipboard
-func (h *BufHandler) Copy() bool {
+func (h *BufPane) Copy() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.CopySelection("clipboard")
 		h.freshClip = true
@@ -713,7 +713,7 @@ func (h *BufHandler) Copy() bool {
 }
 
 // CutLine cuts the current line to the clipboard
-func (h *BufHandler) CutLine() bool {
+func (h *BufPane) CutLine() bool {
 	h.Cursor.SelectLine()
 	if !h.Cursor.HasSelection() {
 		return false
@@ -738,7 +738,7 @@ func (h *BufHandler) CutLine() bool {
 }
 
 // Cut the selection to the system clipboard
-func (h *BufHandler) Cut() bool {
+func (h *BufPane) Cut() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.CopySelection("clipboard")
 		h.Cursor.DeleteSelection()
@@ -753,7 +753,7 @@ func (h *BufHandler) Cut() bool {
 }
 
 // DuplicateLine duplicates the current line or selection
-func (h *BufHandler) DuplicateLine() bool {
+func (h *BufPane) DuplicateLine() bool {
 	if h.Cursor.HasSelection() {
 		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
 	} else {
@@ -767,7 +767,7 @@ func (h *BufHandler) DuplicateLine() bool {
 }
 
 // DeleteLine deletes the current line
-func (h *BufHandler) DeleteLine() bool {
+func (h *BufPane) DeleteLine() bool {
 	h.Cursor.SelectLine()
 	if !h.Cursor.HasSelection() {
 		return false
@@ -779,7 +779,7 @@ func (h *BufHandler) DeleteLine() bool {
 }
 
 // MoveLinesUp moves up the current line or selected lines if any
-func (h *BufHandler) MoveLinesUp() bool {
+func (h *BufPane) MoveLinesUp() bool {
 	if h.Cursor.HasSelection() {
 		if h.Cursor.CurSelection[0].Y == 0 {
 			InfoBar.Message("Can not move further up")
@@ -811,7 +811,7 @@ func (h *BufHandler) MoveLinesUp() bool {
 }
 
 // MoveLinesDown moves down the current line or selected lines if any
-func (h *BufHandler) MoveLinesDown() bool {
+func (h *BufPane) MoveLinesDown() bool {
 	if h.Cursor.HasSelection() {
 		if h.Cursor.CurSelection[1].Y >= h.Buf.LinesNum() {
 			InfoBar.Message("Can not move further down")
@@ -843,20 +843,20 @@ func (h *BufHandler) MoveLinesDown() bool {
 
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
-func (h *BufHandler) Paste() bool {
+func (h *BufPane) Paste() bool {
 	clip, _ := clipboard.ReadAll("clipboard")
 	h.paste(clip)
 	return true
 }
 
 // PastePrimary pastes from the primary clipboard (only use on linux)
-func (h *BufHandler) PastePrimary() bool {
+func (h *BufPane) PastePrimary() bool {
 	clip, _ := clipboard.ReadAll("primary")
 	h.paste(clip)
 	return true
 }
 
-func (h *BufHandler) paste(clip string) {
+func (h *BufPane) paste(clip string) {
 	if h.Buf.Settings["smartpaste"].(bool) {
 		if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
 			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
@@ -877,7 +877,7 @@ func (h *BufHandler) paste(clip string) {
 
 // JumpToMatchingBrace moves the cursor to the matching brace if it is
 // currently on a brace
-func (h *BufHandler) JumpToMatchingBrace() bool {
+func (h *BufPane) JumpToMatchingBrace() bool {
 	for _, bp := range buffer.BracePairs {
 		r := h.Cursor.RuneUnder(h.Cursor.X)
 		if r == bp[0] || r == bp[1] {
@@ -890,7 +890,7 @@ func (h *BufHandler) JumpToMatchingBrace() bool {
 }
 
 // SelectAll selects the entire buffer
-func (h *BufHandler) SelectAll() bool {
+func (h *BufPane) SelectAll() bool {
 	h.Cursor.SetSelectionStart(h.Buf.Start())
 	h.Cursor.SetSelectionEnd(h.Buf.End())
 	// Put the cursor at the beginning
@@ -900,7 +900,7 @@ func (h *BufHandler) SelectAll() bool {
 }
 
 // OpenFile opens a new file in the buffer
-func (h *BufHandler) OpenFile() bool {
+func (h *BufPane) OpenFile() bool {
 	InfoBar.Prompt("> ", "open ", "Open", nil, func(resp string, canceled bool) {
 		if !canceled {
 			h.HandleCommand(resp)
@@ -910,7 +910,7 @@ func (h *BufHandler) OpenFile() bool {
 }
 
 // Start moves the viewport to the start of the buffer
-func (h *BufHandler) Start() bool {
+func (h *BufPane) Start() bool {
 	v := h.GetView()
 	v.StartLine = 0
 	h.SetView(v)
@@ -918,7 +918,7 @@ func (h *BufHandler) Start() bool {
 }
 
 // End moves the viewport to the end of the buffer
-func (h *BufHandler) End() bool {
+func (h *BufPane) End() bool {
 	// TODO: softwrap problems?
 	v := h.GetView()
 	if v.Height > h.Buf.LinesNum() {
@@ -931,7 +931,7 @@ func (h *BufHandler) End() bool {
 }
 
 // PageUp scrolls the view up a page
-func (h *BufHandler) PageUp() bool {
+func (h *BufPane) PageUp() bool {
 	v := h.GetView()
 	if v.StartLine > v.Height {
 		h.ScrollUp(v.Height)
@@ -943,7 +943,7 @@ func (h *BufHandler) PageUp() bool {
 }
 
 // PageDown scrolls the view down a page
-func (h *BufHandler) PageDown() bool {
+func (h *BufPane) PageDown() bool {
 	v := h.GetView()
 	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height {
 		h.ScrollDown(v.Height)
@@ -954,7 +954,7 @@ func (h *BufHandler) PageDown() bool {
 }
 
 // SelectPageUp selects up one page
-func (h *BufHandler) SelectPageUp() bool {
+func (h *BufPane) SelectPageUp() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -964,7 +964,7 @@ func (h *BufHandler) SelectPageUp() bool {
 }
 
 // SelectPageDown selects down one page
-func (h *BufHandler) SelectPageDown() bool {
+func (h *BufPane) SelectPageDown() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
@@ -974,7 +974,7 @@ func (h *BufHandler) SelectPageDown() bool {
 }
 
 // CursorPageUp places the cursor a page up
-func (h *BufHandler) CursorPageUp() bool {
+func (h *BufPane) CursorPageUp() bool {
 	h.Cursor.Deselect(true)
 
 	if h.Cursor.HasSelection() {
@@ -987,7 +987,7 @@ func (h *BufHandler) CursorPageUp() bool {
 }
 
 // CursorPageDown places the cursor a page up
-func (h *BufHandler) CursorPageDown() bool {
+func (h *BufPane) CursorPageDown() bool {
 	h.Cursor.Deselect(false)
 
 	if h.Cursor.HasSelection() {
@@ -1000,7 +1000,7 @@ func (h *BufHandler) CursorPageDown() bool {
 }
 
 // HalfPageUp scrolls the view up half a page
-func (h *BufHandler) HalfPageUp() bool {
+func (h *BufPane) HalfPageUp() bool {
 	v := h.GetView()
 	if v.StartLine > v.Height/2 {
 		h.ScrollUp(v.Height / 2)
@@ -1012,7 +1012,7 @@ func (h *BufHandler) HalfPageUp() bool {
 }
 
 // HalfPageDown scrolls the view down half a page
-func (h *BufHandler) HalfPageDown() bool {
+func (h *BufPane) HalfPageDown() bool {
 	v := h.GetView()
 	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height/2 {
 		h.ScrollDown(v.Height / 2)
@@ -1026,7 +1026,7 @@ func (h *BufHandler) HalfPageDown() bool {
 }
 
 // ToggleRuler turns line numbers off and on
-func (h *BufHandler) ToggleRuler() bool {
+func (h *BufPane) ToggleRuler() bool {
 	if !h.Buf.Settings["ruler"].(bool) {
 		h.Buf.Settings["ruler"] = true
 		InfoBar.Message("Enabled ruler")
@@ -1038,18 +1038,18 @@ func (h *BufHandler) ToggleRuler() bool {
 }
 
 // JumpLine jumps to a line and moves the view accordingly.
-func (h *BufHandler) JumpLine() bool {
+func (h *BufPane) JumpLine() bool {
 	return false
 }
 
 // ClearStatus clears the messenger bar
-func (h *BufHandler) ClearStatus() bool {
+func (h *BufPane) ClearStatus() bool {
 	InfoBar.Message("")
 	return false
 }
 
 // ToggleHelp toggles the help screen
-func (h *BufHandler) ToggleHelp() bool {
+func (h *BufPane) ToggleHelp() bool {
 	if h.Buf.Type == buffer.BTHelp {
 		h.Quit()
 	} else {
@@ -1059,14 +1059,14 @@ func (h *BufHandler) ToggleHelp() bool {
 }
 
 // ToggleKeyMenu toggles the keymenu option and resizes all tabs
-func (h *BufHandler) ToggleKeyMenu() bool {
+func (h *BufPane) ToggleKeyMenu() bool {
 	config.GlobalSettings["keymenu"] = !config.GetGlobalOption("keymenu").(bool)
 	Tabs.Resize()
 	return false
 }
 
 // ShellMode opens a terminal to run a shell command
-func (h *BufHandler) ShellMode() bool {
+func (h *BufPane) ShellMode() bool {
 	InfoBar.Prompt("$ ", "", "Shell", nil, func(resp string, canceled bool) {
 		if !canceled {
 			// The true here is for openTerm to make the command interactive
@@ -1078,7 +1078,7 @@ func (h *BufHandler) ShellMode() bool {
 }
 
 // CommandMode lets the user enter a command
-func (h *BufHandler) CommandMode() bool {
+func (h *BufPane) CommandMode() bool {
 	InfoBar.Prompt("> ", "", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {
 			h.HandleCommand(resp)
@@ -1088,18 +1088,18 @@ func (h *BufHandler) CommandMode() bool {
 }
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
-func (h *BufHandler) ToggleOverwriteMode() bool {
+func (h *BufPane) ToggleOverwriteMode() bool {
 	h.isOverwriteMode = !h.isOverwriteMode
 	return false
 }
 
 // Escape leaves current mode
-func (h *BufHandler) Escape() bool {
+func (h *BufPane) Escape() bool {
 	return false
 }
 
 // Quit this will close the current tab or view that is open
-func (h *BufHandler) Quit() bool {
+func (h *BufPane) Quit() bool {
 	quit := func() {
 		h.Buf.Close()
 		if len(MainTab().Panes) > 1 {
@@ -1128,12 +1128,12 @@ func (h *BufHandler) Quit() bool {
 }
 
 // QuitAll quits the whole editor; all splits and tabs
-func (h *BufHandler) QuitAll() bool {
+func (h *BufPane) QuitAll() bool {
 	return false
 }
 
 // AddTab adds a new tab with an empty buffer
-func (h *BufHandler) AddTab() bool {
+func (h *BufPane) AddTab() bool {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
 	b := buffer.NewBufferFromString("", "", buffer.BTDefault)
@@ -1145,7 +1145,7 @@ func (h *BufHandler) AddTab() bool {
 }
 
 // PreviousTab switches to the previous tab in the tab list
-func (h *BufHandler) PreviousTab() bool {
+func (h *BufPane) PreviousTab() bool {
 	a := Tabs.Active()
 	Tabs.SetActive(util.Clamp(a-1, 0, len(Tabs.List)-1))
 
@@ -1153,28 +1153,28 @@ func (h *BufHandler) PreviousTab() bool {
 }
 
 // NextTab switches to the next tab in the tab list
-func (h *BufHandler) NextTab() bool {
+func (h *BufPane) NextTab() bool {
 	a := Tabs.Active()
 	Tabs.SetActive(util.Clamp(a+1, 0, len(Tabs.List)-1))
 	return false
 }
 
 // VSplitAction opens an empty vertical split
-func (h *BufHandler) VSplitAction() bool {
+func (h *BufPane) VSplitAction() bool {
 	h.VSplitBuf(buffer.NewBufferFromString("", "", buffer.BTDefault))
 
 	return false
 }
 
 // HSplitAction opens an empty horizontal split
-func (h *BufHandler) HSplitAction() bool {
+func (h *BufPane) HSplitAction() bool {
 	h.HSplitBuf(buffer.NewBufferFromString("", "", buffer.BTDefault))
 
 	return false
 }
 
 // Unsplit closes all splits in the current tab except the active one
-func (h *BufHandler) Unsplit() bool {
+func (h *BufPane) Unsplit() bool {
 	n := MainTab().GetNode(h.splitID)
 	n.Unsplit()
 
@@ -1185,7 +1185,7 @@ func (h *BufHandler) Unsplit() bool {
 }
 
 // NextSplit changes the view to the next split
-func (h *BufHandler) NextSplit() bool {
+func (h *BufPane) NextSplit() bool {
 	a := MainTab().active
 	if a < len(MainTab().Panes)-1 {
 		a++
@@ -1199,7 +1199,7 @@ func (h *BufHandler) NextSplit() bool {
 }
 
 // PreviousSplit changes the view to the previous split
-func (h *BufHandler) PreviousSplit() bool {
+func (h *BufPane) PreviousSplit() bool {
 	a := MainTab().active
 	if a > 0 {
 		a--
@@ -1215,17 +1215,17 @@ var curMacro []interface{}
 var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
-func (h *BufHandler) ToggleMacro() bool {
+func (h *BufPane) ToggleMacro() bool {
 	return true
 }
 
 // PlayMacro plays back the most recently recorded macro
-func (h *BufHandler) PlayMacro() bool {
+func (h *BufPane) PlayMacro() bool {
 	return true
 }
 
 // SpawnMultiCursor creates a new multiple cursor at the next occurrence of the current selection or current word
-func (h *BufHandler) SpawnMultiCursor() bool {
+func (h *BufPane) SpawnMultiCursor() bool {
 	spawner := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
 	if !spawner.HasSelection() {
 		spawner.SelectWord()
@@ -1264,7 +1264,7 @@ func (h *BufHandler) SpawnMultiCursor() bool {
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
-func (h *BufHandler) SpawnMultiCursorSelect() bool {
+func (h *BufPane) SpawnMultiCursorSelect() bool {
 	// Avoid cases where multiple cursors already exist, that would create problems
 	if h.Buf.NumCursors() > 1 {
 		return false
@@ -1298,7 +1298,7 @@ func (h *BufHandler) SpawnMultiCursorSelect() bool {
 }
 
 // MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
-func (h *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
+func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
 	mouseLoc := h.GetMouseLoc(buffer.Loc{X: mx, Y: my})
@@ -1310,7 +1310,7 @@ func (h *BufHandler) MouseMultiCursor(e *tcell.EventMouse) bool {
 }
 
 // SkipMultiCursor moves the current multiple cursor to the next available position
-func (h *BufHandler) SkipMultiCursor() bool {
+func (h *BufPane) SkipMultiCursor() bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
 	sel := lastC.GetSelection()
 	searchStart := lastC.CurSelection[1]
@@ -1341,7 +1341,7 @@ func (h *BufHandler) SkipMultiCursor() bool {
 }
 
 // RemoveMultiCursor removes the latest multiple cursor
-func (h *BufHandler) RemoveMultiCursor() bool {
+func (h *BufPane) RemoveMultiCursor() bool {
 	if h.Buf.NumCursors() > 1 {
 		h.Buf.RemoveCursor(h.Buf.NumCursors() - 1)
 		h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
@@ -1353,7 +1353,7 @@ func (h *BufHandler) RemoveMultiCursor() bool {
 }
 
 // RemoveAllMultiCursors removes all cursors except the base cursor
-func (h *BufHandler) RemoveAllMultiCursors() bool {
+func (h *BufPane) RemoveAllMultiCursors() bool {
 	h.Buf.ClearCursors()
 	h.multiWord = false
 	return true

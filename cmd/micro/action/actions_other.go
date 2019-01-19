@@ -2,7 +2,7 @@
 
 package action
 
-func (*BufHandler) Suspend() bool {
+func (*BufPane) Suspend() bool {
 	InfoBar.Error("Suspend is only supported on BSD/Linux")
 	return false
 }

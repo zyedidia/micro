@@ -11,7 +11,7 @@ import (
 	"github.com/zyedidia/terminal"
 )
 
-type TermHandler struct {
+type TermPane struct {
 	*shell.Terminal
 	display.Window
 
@@ -19,8 +19,8 @@ type TermHandler struct {
 	id            uint64
 }
 
-func NewTermHandler(x, y, w, h int, t *shell.Terminal, id uint64) *TermHandler {
-	th := new(TermHandler)
+func NewTermPane(x, y, w, h int, t *shell.Terminal, id uint64) *TermPane {
+	th := new(TermPane)
 	th.Terminal = t
 	th.id = id
 	th.mouseReleased = true
@@ -28,13 +28,17 @@ func NewTermHandler(x, y, w, h int, t *shell.Terminal, id uint64) *TermHandler {
 	return th
 }
 
-func (t *TermHandler) ID() uint64 {
+func (t *TermPane) ID() uint64 {
 	return t.id
 }
 
-func (t *TermHandler) Close() {}
+func (t *TermPane) SetID(i uint64) {
+	t.id = i
+}
 
-func (t *TermHandler) Quit() {
+func (t *TermPane) Close() {}
+
+func (t *TermPane) Quit() {
 	t.Close()
 	if len(MainTab().Panes) > 1 {
 		t.Unsplit()
@@ -47,7 +51,7 @@ func (t *TermHandler) Quit() {
 	}
 }
 
-func (t *TermHandler) Unsplit() {
+func (t *TermPane) Unsplit() {
 	n := MainTab().GetNode(t.id)
 	n.Unsplit()
 
@@ -60,7 +64,7 @@ func (t *TermHandler) Unsplit() {
 // If the event is a mouse event and the program running in the emulator
 // does not have mouse support, the emulator will support selections and
 // copy-paste
-func (t *TermHandler) HandleEvent(event tcell.Event) {
+func (t *TermPane) HandleEvent(event tcell.Event) {
 	if e, ok := event.(*tcell.EventKey); ok {
 		if t.Status == shell.TTDone {
 			switch e.Key() {
@@ -107,6 +111,6 @@ func (t *TermHandler) HandleEvent(event tcell.Event) {
 	}
 }
 
-func (t *TermHandler) HandleCommand(input string) {
+func (t *TermPane) HandleCommand(input string) {
 	InfoBar.Error("Commands are unsupported in term for now")
 }

@@ -160,10 +160,21 @@ func NewTabFromBuffer(x, y, width, height int, b *buffer.Buffer) *Tab {
 	t.Node = views.NewRoot(x, y, width, height)
 	t.UIWindow = display.NewUIWindow(t.Node)
 
-	e := NewBufEditPane(x, y, width, height, b)
-	e.splitID = t.ID()
+	e := NewBufPaneFromBuf(b)
+	e.SetID(t.ID())
 
 	t.Panes = append(t.Panes, e)
+	return t
+}
+
+func NewTabFromPane(x, y, width, height int, pane Pane) *Tab {
+	t := new(Tab)
+	t.Node = views.NewRoot(x, y, width, height)
+	t.UIWindow = display.NewUIWindow(t.Node)
+
+	pane.SetID(t.ID())
+
+	t.Panes = append(t.Panes, pane)
 	return t
 }
 
