@@ -539,9 +539,13 @@ func (h *BufPane) QuitCmd(args []string) {
 	h.Quit()
 }
 
-// SaveCmd saves the buffer in the main view
+// SaveCmd saves the buffer optionally with an argument file name
 func (h *BufPane) SaveCmd(args []string) {
-	h.Save()
+	if len(args) == 0 {
+		h.Save()
+	} else {
+		h.Buf.SaveAs(args[0])
+	}
 }
 
 // ReplaceCmd runs search and replace
