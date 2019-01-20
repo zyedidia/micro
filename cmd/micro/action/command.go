@@ -18,109 +18,59 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
 
-// A Command contains an action (a function to call) as well as information about how to autocomplete the command
+// A Command contains information about how to execute a command
+// It has the action for that command as well as a completer function
 type Command struct {
-	action      func(*BufPane, []string)
-	completions []Completion
-}
-
-// A StrCommand is similar to a command but keeps the name of the action
-type StrCommand struct {
-	action      string
-	completions []Completion
+	action    func(*BufPane, []string)
+	completer buffer.Completer
 }
 
 var commands map[string]Command
 
-var commandActions = map[string]func(*BufPane, []string){
-	"Set":        (*BufPane).SetCmd,
-	"SetLocal":   (*BufPane).SetLocalCmd,
-	"Show":       (*BufPane).ShowCmd,
-	"ShowKey":    (*BufPane).ShowKeyCmd,
-	"Run":        (*BufPane).RunCmd,
-	"Bind":       (*BufPane).BindCmd,
-	"Unbind":     (*BufPane).UnbindCmd,
-	"Quit":       (*BufPane).QuitCmd,
-	"Save":       (*BufPane).SaveCmd,
-	"Replace":    (*BufPane).ReplaceCmd,
-	"ReplaceAll": (*BufPane).ReplaceAllCmd,
-	"VSplit":     (*BufPane).VSplitCmd,
-	"HSplit":     (*BufPane).HSplitCmd,
-	"Tab":        (*BufPane).NewTabCmd,
-	"Help":       (*BufPane).HelpCmd,
-	"Eval":       (*BufPane).EvalCmd,
-	"ToggleLog":  (*BufPane).ToggleLogCmd,
-	"Plugin":     (*BufPane).PluginCmd,
-	"Reload":     (*BufPane).ReloadCmd,
-	"Cd":         (*BufPane).CdCmd,
-	"Pwd":        (*BufPane).PwdCmd,
-	"Open":       (*BufPane).OpenCmd,
-	"TabSwitch":  (*BufPane).TabSwitchCmd,
-	"Term":       (*BufPane).TermCmd,
-	"MemUsage":   (*BufPane).MemUsageCmd,
-	"Retab":      (*BufPane).RetabCmd,
-	"Raw":        (*BufPane).RawCmd,
-}
-
-// InitCommands initializes the default commands
 func InitCommands() {
-	commands = make(map[string]Command)
-
-	defaults := DefaultCommands()
-	parseCommands(defaults)
-}
-
-func parseCommands(userCommands map[string]StrCommand) {
-	for k, v := range userCommands {
-		MakeCommand(k, v.action, v.completions...)
+	commands = map[string]Command{
+		"set":        Command{(*BufPane).SetCmd, nil},
+		"setlocal":   Command{(*BufPane).SetLocalCmd, nil},
+		"show":       Command{(*BufPane).ShowCmd, nil},
+		"showkey":    Command{(*BufPane).ShowKeyCmd, nil},
+		"run":        Command{(*BufPane).RunCmd, nil},
+		"bind":       Command{(*BufPane).BindCmd, nil},
+		"unbind":     Command{(*BufPane).UnbindCmd, nil},
+		"quit":       Command{(*BufPane).QuitCmd, nil},
+		"save":       Command{(*BufPane).SaveCmd, nil},
+		"replace":    Command{(*BufPane).ReplaceCmd, nil},
+		"replaceall": Command{(*BufPane).ReplaceAllCmd, nil},
+		"vsplit":     Command{(*BufPane).VSplitCmd, buffer.FileComplete},
+		"hsplit":     Command{(*BufPane).HSplitCmd, buffer.FileComplete},
+		"tab":        Command{(*BufPane).NewTabCmd, buffer.FileComplete},
+		"help":       Command{(*BufPane).HelpCmd, nil},
+		"eval":       Command{(*BufPane).EvalCmd, nil},
+		"togglelog":  Command{(*BufPane).ToggleLogCmd, nil},
+		"plugin":     Command{(*BufPane).PluginCmd, nil},
+		"reload":     Command{(*BufPane).ReloadCmd, nil},
+		"cd":         Command{(*BufPane).CdCmd, buffer.FileComplete},
+		"pwd":        Command{(*BufPane).PwdCmd, nil},
+		"open":       Command{(*BufPane).OpenCmd, buffer.FileComplete},
+		"tabswitch":  Command{(*BufPane).TabSwitchCmd, nil},
+		"term":       Command{(*BufPane).TermCmd, nil},
+		"memusage":   Command{(*BufPane).MemUsageCmd, nil},
+		"retab":      Command{(*BufPane).RetabCmd, nil},
+		"raw":        Command{(*BufPane).RawCmd, nil},
 	}
 }
 
 // MakeCommand is a function to easily create new commands
 // This can be called by plugins in Lua so that plugins can define their own commands
-func MakeCommand(name, function string, completions ...Completion) {
-	action := commandActions[function]
-	// if _, ok := commandActions[function]; !ok {
-	// If the user seems to be binding a function that doesn't exist
-	// We hope that it's a lua function that exists and bind it to that
-	// action = LuaFunctionCommand(function)
-	// }
-
-	commands[name] = Command{action, completions}
-}
-
-// DefaultCommands returns a map containing micro's default commands
-func DefaultCommands() map[string]StrCommand {
-	return map[string]StrCommand{
-		"set":        {"Set", []Completion{OptionCompletion, OptionValueCompletion}},
-		"setlocal":   {"SetLocal", []Completion{OptionCompletion, OptionValueCompletion}},
-		"show":       {"Show", []Completion{OptionCompletion, NoCompletion}},
-		"showkey":    {"ShowKey", []Completion{NoCompletion}},
-		"bind":       {"Bind", []Completion{NoCompletion}},
-		"unbind":     {"Unbind", []Completion{NoCompletion}},
-		"run":        {"Run", []Completion{NoCompletion}},
-		"quit":       {"Quit", []Completion{NoCompletion}},
-		"save":       {"Save", []Completion{NoCompletion}},
-		"replace":    {"Replace", []Completion{NoCompletion}},
-		"replaceall": {"ReplaceAll", []Completion{NoCompletion}},
-		"vsplit":     {"VSplit", []Completion{FileCompletion, NoCompletion}},
-		"hsplit":     {"HSplit", []Completion{FileCompletion, NoCompletion}},
-		"tab":        {"Tab", []Completion{FileCompletion, NoCompletion}},
-		"help":       {"Help", []Completion{HelpCompletion, NoCompletion}},
-		"eval":       {"Eval", []Completion{NoCompletion}},
-		"log":        {"ToggleLog", []Completion{NoCompletion}},
-		"plugin":     {"Plugin", []Completion{PluginCmdCompletion, PluginNameCompletion}},
-		"reload":     {"Reload", []Completion{NoCompletion}},
-		"cd":         {"Cd", []Completion{FileCompletion}},
-		"pwd":        {"Pwd", []Completion{NoCompletion}},
-		"open":       {"Open", []Completion{FileCompletion}},
-		"tabswitch":  {"TabSwitch", []Completion{NoCompletion}},
-		"term":       {"Term", []Completion{NoCompletion}},
-		"memusage":   {"MemUsage", []Completion{NoCompletion}},
-		"retab":      {"Retab", []Completion{NoCompletion}},
-		"raw":        {"Raw", []Completion{NoCompletion}},
-	}
-}
+// func MakeCommand(name, function string, completions ...Completion) {
+// 	action := commandActions[function]
+// 	// if _, ok := commandActions[function]; !ok {
+// 	// If the user seems to be binding a function that doesn't exist
+// 	// We hope that it's a lua function that exists and bind it to that
+// 	// action = LuaFunctionCommand(function)
+// 	// }
+//
+// 	commands[name] = Command{action, completions}
+// }
 
 // CommandEditAction returns a bindable function that opens a prompt with
 // the given string and executes the command when the user presses
