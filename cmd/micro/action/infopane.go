@@ -1,8 +1,12 @@
 package action
 
 import (
+	"bytes"
+	"log"
+
 	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/info"
+	"github.com/zyedidia/micro/cmd/micro/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -161,6 +165,32 @@ func (h *InfoPane) CursorDown() {
 }
 func (h *InfoPane) InsertTab() {
 	// TODO: autocomplete
+	b := h.Buf
+	c := b.GetActiveCursor()
+	l := b.LineBytes(0)
+	l = util.SliceStart(l, c.X)
+
+	args := bytes.Split(l, []byte{' '})
+	cmd := string(args[0])
+
+	var ins string
+	var suggestions []string
+	if len(args) == 1 {
+		ins, suggestions = CommandComplete(b)
+	} else {
+		if action, ok := commands[cmd]; ok {
+			if action.completer != nil {
+				ins, suggestions = action.completer(b)
+			}
+		}
+	}
+	log.Println(ins, suggestions)
+
+	if len(suggestions) == 1 {
+		b.Insert(c.Loc, ins)
+	} else if len(suggestions) > 1 {
+		h.MakeSuggestions(suggestions)
+	}
 }
 func (h *InfoPane) InsertNewline() {
 	if !h.HasYN {

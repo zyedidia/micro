@@ -33,6 +33,24 @@ func SliceEnd(slc []byte, index int) []byte {
 	return slc[totalSize:]
 }
 
+// SliceEndStr is the same as SliceEnd but for strings
+func SliceEndStr(str string, index int) string {
+	len := len(str)
+	i := 0
+	totalSize := 0
+	for totalSize < len {
+		if i >= index {
+			return str[totalSize:]
+		}
+
+		_, size := utf8.DecodeRuneInString(str[totalSize:])
+		totalSize += size
+		i++
+	}
+
+	return str[totalSize:]
+}
+
 // SliceStart returns a byte slice where the index is a rune index
 // Slices off the end of the slice
 func SliceStart(slc []byte, index int) []byte {
@@ -50,6 +68,24 @@ func SliceStart(slc []byte, index int) []byte {
 	}
 
 	return slc[:totalSize]
+}
+
+// SliceStartStr is the same as SliceStart but for strings
+func SliceStartStr(str string, index int) string {
+	len := len(str)
+	i := 0
+	totalSize := 0
+	for totalSize < len {
+		if i >= index {
+			return str[:totalSize]
+		}
+
+		_, size := utf8.DecodeRuneInString(str[totalSize:])
+		totalSize += size
+		i++
+	}
+
+	return str[:totalSize]
 }
 
 // SliceVisualEnd will take a byte slice and slice off the start

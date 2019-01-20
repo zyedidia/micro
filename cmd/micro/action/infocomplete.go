@@ -1,10 +1,11 @@
 package action
 
 import (
-	"io/ioutil"
-	"os"
+	"bytes"
 	"strings"
+	"unicode/utf8"
 
+	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
@@ -29,54 +30,22 @@ var pluginCompletions []func(string) []string
 // while coding. This helps micro autocomplete commands and then filenames
 // for example with `vsplit filename`.
 
-// FileComplete autocompletes filenames
-func FileComplete(input string) (string, []string) {
-	var sep string = string(os.PathSeparator)
-	dirs := strings.Split(input, sep)
-
-	var files []os.FileInfo
-	var err error
-	if len(dirs) > 1 {
-		directories := strings.Join(dirs[:len(dirs)-1], sep) + sep
-
-		directories, _ = util.ReplaceHome(directories)
-		files, err = ioutil.ReadDir(directories)
-	} else {
-		files, err = ioutil.ReadDir(".")
-	}
-
-	var suggestions []string
-	if err != nil {
-		return "", suggestions
-	}
-	for _, f := range files {
-		name := f.Name()
-		if f.IsDir() {
-			name += sep
-		}
-		if strings.HasPrefix(name, dirs[len(dirs)-1]) {
-			suggestions = append(suggestions, name)
-		}
-	}
-
-	var chosen string
-	if len(suggestions) == 1 {
-		if len(dirs) > 1 {
-			chosen = strings.Join(dirs[:len(dirs)-1], sep) + sep + suggestions[0]
-		} else {
-			chosen = suggestions[0]
-		}
-	} else {
-		if len(dirs) > 1 {
-			chosen = strings.Join(dirs[:len(dirs)-1], sep) + sep
-		}
-	}
-
-	return chosen, suggestions
-}
-
 // CommandComplete autocompletes commands
-func CommandComplete(input string) (string, []string) {
+func CommandComplete(b *buffer.Buffer) (string, []string) {
+	c := b.GetActiveCursor()
+	l := b.LineBytes(c.Y)
+	l = util.SliceStart(l, c.X)
+
+	args := bytes.Split(l, []byte{' '})
+	input := string(args[len(args)-1])
+	argstart := 0
+	for i, a := range args {
+		if i == len(args)-1 {
+			break
+		}
+		argstart += utf8.RuneCount(a) + 1
+	}
+
 	var suggestions []string
 	for cmd := range commands {
 		if strings.HasPrefix(cmd, input) {
@@ -86,7 +55,7 @@ func CommandComplete(input string) (string, []string) {
 
 	var chosen string
 	if len(suggestions) == 1 {
-		chosen = suggestions[0]
+		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
 	}
 	return chosen, suggestions
 }

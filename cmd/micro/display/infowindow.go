@@ -147,18 +147,19 @@ func (i *InfoWindow) displayBuffer() {
 	}
 }
 
+var keydisplay = []string{"^Q Quit, ^S Save, ^O Open, ^G Help, ^E Command Bar, ^K Cut Line", "^F Find, ^Z Undo, ^Y Redo, ^A Select All, ^D Duplicate Line, ^T New Tab"}
+
 func (i *InfoWindow) displayKeyMenu() {
 	// TODO: maybe make this based on the actual keybindings
-	display := []string{"^Q Quit, ^S Save, ^O Open, ^G Help, ^E Command Bar, ^K Cut Line", "^F Find, ^Z Undo, ^Y Redo, ^A Select All, ^D Duplicate Line, ^T New Tab"}
 
-	log.Println("hi", len(display), i.Width)
-	for y := 0; y < len(display); y++ {
+	log.Println("hi", len(keydisplay), i.Width)
+	for y := 0; y < len(keydisplay); y++ {
 		for x := 0; x < i.Width; x++ {
-			log.Println(x, i.Y-len(display)+y)
-			if x < len(display[y]) {
-				screen.Screen.SetContent(x, i.Y-len(display)+y, rune(display[y][x]), nil, config.DefStyle)
+			log.Println(x, i.Y-len(keydisplay)+y)
+			if x < len(keydisplay[y]) {
+				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, config.DefStyle)
 			} else {
-				screen.Screen.SetContent(x, i.Y-len(display)+y, ' ', nil, config.DefStyle)
+				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, ' ', nil, config.DefStyle)
 			}
 		}
 	}
@@ -189,6 +190,38 @@ func (i *InfoWindow) Display() {
 
 		if i.HasPrompt {
 			i.displayBuffer()
+		}
+	}
+
+	if i.HasSuggestions {
+		i.HasSuggestions = false
+		statusLineStyle := config.DefStyle.Reverse(true)
+		if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
+		keymenuOffset := 0
+		if config.GetGlobalOption("keymenu").(bool) {
+			keymenuOffset = len(keydisplay)
+		}
+		x := 0
+		for _, s := range i.Suggestions {
+			for _, r := range s {
+				screen.Screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, statusLineStyle)
+				x++
+				if x >= i.Width {
+					return
+				}
+			}
+			screen.Screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
+			x++
+			if x >= i.Width {
+				return
+			}
+		}
+
+		for x < i.Width {
+			screen.Screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
+			x++
 		}
 	}
 }
