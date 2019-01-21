@@ -20,8 +20,7 @@ func (b *Buffer) Autocomplete(c Completer) {
 
 }
 
-// FileComplete autocompletes filenames
-func FileComplete(b *Buffer) (string, []string) {
+func GetArg(b *Buffer) (string, int) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -35,6 +34,14 @@ func FileComplete(b *Buffer) (string, []string) {
 		}
 		argstart += utf8.RuneCount(a) + 1
 	}
+
+	return input, argstart
+}
+
+// FileComplete autocompletes filenames
+func FileComplete(b *Buffer) (string, []string) {
+	c := b.GetActiveCursor()
+	input, argstart := GetArg(b)
 
 	sep := string(os.PathSeparator)
 	dirs := strings.Split(input, sep)

@@ -3,28 +3,11 @@ package action
 import (
 	"bytes"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
-
-// Completion represents a type of completion
-type Completion int
-
-const (
-	NoCompletion Completion = iota
-	FileCompletion
-	CommandCompletion
-	HelpCompletion
-	OptionCompletion
-	PluginCmdCompletion
-	PluginNameCompletion
-	OptionValueCompletion
-)
-
-var pluginCompletions []func(string) []string
 
 // This file is meant (for now) for autocompletion in command mode, not
 // while coding. This helps micro autocomplete commands and then filenames
@@ -33,18 +16,7 @@ var pluginCompletions []func(string) []string
 // CommandComplete autocompletes commands
 func CommandComplete(b *buffer.Buffer) (string, []string) {
 	c := b.GetActiveCursor()
-	l := b.LineBytes(c.Y)
-	l = util.SliceStart(l, c.X)
-
-	args := bytes.Split(l, []byte{' '})
-	input := string(args[len(args)-1])
-	argstart := 0
-	for i, a := range args {
-		if i == len(args)-1 {
-			break
-		}
-		argstart += utf8.RuneCount(a) + 1
-	}
+	input, argstart := buffer.GetArg(b)
 
 	var suggestions []string
 	for cmd := range commands {
@@ -61,7 +33,10 @@ func CommandComplete(b *buffer.Buffer) (string, []string) {
 }
 
 // HelpComplete autocompletes help topics
-func HelpComplete(input string) (string, []string) {
+func HelpComplete(b *buffer.Buffer) (string, []string) {
+	c := b.GetActiveCursor()
+	input, argstart := buffer.GetArg(b)
+
 	var suggestions []string
 
 	for _, file := range config.ListRuntimeFiles(config.RTHelp) {
@@ -73,12 +48,13 @@ func HelpComplete(input string) (string, []string) {
 
 	var chosen string
 	if len(suggestions) == 1 {
-		chosen = suggestions[0]
+		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
 	}
 	return chosen, suggestions
 }
 
 // ColorschemeComplete tab-completes names of colorschemes.
+// This is just a heper value for OptionValueComplete
 func ColorschemeComplete(input string) (string, []string) {
 	var suggestions []string
 	files := config.ListRuntimeFiles(config.RTColorscheme)
@@ -107,7 +83,10 @@ func contains(s []string, e string) bool {
 }
 
 // OptionComplete autocompletes options
-func OptionComplete(input string) (string, []string) {
+func OptionComplete(b *buffer.Buffer) (string, []string) {
+	c := b.GetActiveCursor()
+	input, argstart := buffer.GetArg(b)
+
 	var suggestions []string
 	localSettings := config.DefaultLocalSettings()
 	for option := range config.GlobalSettings {
@@ -123,13 +102,41 @@ func OptionComplete(input string) (string, []string) {
 
 	var chosen string
 	if len(suggestions) == 1 {
-		chosen = suggestions[0]
+		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
 	}
 	return chosen, suggestions
 }
 
 // OptionValueComplete completes values for various options
-func OptionValueComplete(inputOpt, input string) (string, []string) {
+func OptionValueComplete(b *buffer.Buffer) (string, []string) {
+	c := b.GetActiveCursor()
+	l := b.LineBytes(c.Y)
+	l = util.SliceStart(l, c.X)
+	input, argstart := buffer.GetArg(b)
+
+	completeValue := false
+	args := bytes.Split(l, []byte{' '})
+	if len(args) >= 2 {
+		localSettings := config.DefaultLocalSettings()
+		for option := range config.GlobalSettings {
+			if option == string(args[len(args)-2]) {
+				completeValue = true
+				break
+			}
+		}
+		for option := range localSettings {
+			if option == string(args[len(args)-2]) {
+				completeValue = true
+				break
+			}
+		}
+	}
+	if !completeValue {
+		return OptionComplete(b)
+	}
+
+	inputOpt := string(args[len(args)-2])
+
 	inputOpt = strings.TrimSpace(inputOpt)
 	var suggestions []string
 	localSettings := config.DefaultLocalSettings()
@@ -180,7 +187,7 @@ func OptionValueComplete(inputOpt, input string) (string, []string) {
 
 	var chosen string
 	if len(suggestions) == 1 {
-		chosen = suggestions[0]
+		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
 	}
 	return chosen, suggestions
 }
