@@ -29,9 +29,9 @@ var commands map[string]Command
 
 func InitCommands() {
 	commands = map[string]Command{
-		"set":        Command{(*BufPane).SetCmd, nil},
-		"setlocal":   Command{(*BufPane).SetLocalCmd, nil},
-		"show":       Command{(*BufPane).ShowCmd, nil},
+		"set":        Command{(*BufPane).SetCmd, OptionValueComplete},
+		"setlocal":   Command{(*BufPane).SetLocalCmd, OptionValueComplete},
+		"show":       Command{(*BufPane).ShowCmd, OptionComplete},
 		"showkey":    Command{(*BufPane).ShowKeyCmd, nil},
 		"run":        Command{(*BufPane).RunCmd, nil},
 		"bind":       Command{(*BufPane).BindCmd, nil},
@@ -43,7 +43,7 @@ func InitCommands() {
 		"vsplit":     Command{(*BufPane).VSplitCmd, buffer.FileComplete},
 		"hsplit":     Command{(*BufPane).HSplitCmd, buffer.FileComplete},
 		"tab":        Command{(*BufPane).NewTabCmd, buffer.FileComplete},
-		"help":       Command{(*BufPane).HelpCmd, nil},
+		"help":       Command{(*BufPane).HelpCmd, HelpComplete},
 		"eval":       Command{(*BufPane).EvalCmd, nil},
 		"togglelog":  Command{(*BufPane).ToggleLogCmd, nil},
 		"plugin":     Command{(*BufPane).PluginCmd, nil},
