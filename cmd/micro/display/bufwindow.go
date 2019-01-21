@@ -1,6 +1,7 @@
 package display
 
 import (
+	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -389,8 +390,9 @@ func (w *BufWindow) displayBuffer() {
 	// so we can pad appropriately when displaying line numbers
 	maxLineNumLength := len(strconv.Itoa(b.LinesNum()))
 
-	tabsize := int(b.Settings["tabsize"].(float64))
 	softwrap := b.Settings["softwrap"].(bool)
+	tabsize := util.IntOpt(b.Settings["tabsize"])
+	colorcolumn := util.IntOpt(b.Settings["colorcolumn"])
 
 	// this represents the current draw position
 	// within the current window
@@ -448,6 +450,15 @@ func (w *BufWindow) displayBuffer() {
 							fg, _, _ := s.Decompose()
 							style = style.Background(fg)
 						}
+					}
+				}
+
+				if s, ok := config.Colorscheme["color-column"]; ok {
+					log.Println(vloc.X - w.gutterOffset)
+					if colorcolumn != 0 && vloc.X-w.gutterOffset == colorcolumn {
+						log.Println("display colorcolumn")
+						fg, _, _ := s.Decompose()
+						style = style.Background(fg)
 					}
 				}
 
@@ -514,18 +525,25 @@ func (w *BufWindow) displayBuffer() {
 			}
 		}
 
+		style := config.DefStyle
 		for _, c := range cursors {
 			if b.Settings["cursorline"].(bool) && w.active &&
 				!c.HasSelection() && c.Y == bloc.Y {
-				style := config.DefStyle
 				if s, ok := config.Colorscheme["cursor-line"]; ok {
 					fg, _, _ := s.Decompose()
 					style = style.Background(fg)
 				}
-				for i := vloc.X; i < w.Width; i++ {
-					screen.Screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, style)
+			}
+		}
+		for i := vloc.X; i < w.Width; i++ {
+			curStyle := style
+			if s, ok := config.Colorscheme["color-column"]; ok {
+				if colorcolumn != 0 && i-w.gutterOffset == colorcolumn {
+					fg, _, _ := s.Decompose()
+					curStyle = style.Background(fg)
 				}
 			}
+			screen.Screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, curStyle)
 		}
 
 		for _, c := range cursors {
