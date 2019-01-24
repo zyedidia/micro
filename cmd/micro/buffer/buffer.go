@@ -12,13 +12,24 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/saintfish/chardet"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 	"github.com/zyedidia/micro/cmd/micro/screen"
 	. "github.com/zyedidia/micro/cmd/micro/util"
+	"golang.org/x/text/encoding/htmlindex"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
 )
 
-var OpenBuffers []*Buffer
+var (
+	OpenBuffers []*Buffer
+	detector    *chardet.Detector // encoding detector
+)
+
+func init() {
+	detector = chardet.NewTextDetector()
+}
 
 // The BufType defines what kind of buffer this is
 type BufType struct {
@@ -89,6 +100,8 @@ type Buffer struct {
 	// Settings customized by the user
 	Settings map[string]interface{}
 
+	Suggestions []string
+
 	Messages []*Message
 }
 
@@ -132,7 +145,7 @@ func NewBufferFromString(text, path string, btype BufType) *Buffer {
 // NewBuffer creates a new buffer from a given reader with a given path
 // Ensure that ReadSettings and InitGlobalSettings have been called before creating
 // a new buffer
-func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []string, btype BufType) *Buffer {
+func NewBuffer(r io.Reader, size int64, path string, cursorPosition []string, btype BufType) *Buffer {
 	absPath, _ := filepath.Abs(path)
 
 	b := new(Buffer)
@@ -144,6 +157,14 @@ func NewBuffer(reader io.Reader, size int64, path string, cursorPosition []strin
 		}
 	}
 	config.InitLocalSettings(b.Settings, b.Path)
+
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		enc = unicode.UTF8
+		b.Settings["encoding"] = "utf-8"
+	}
+
+	reader := transform.NewReader(r, enc.NewDecoder())
 
 	found := false
 	if len(path) > 0 {
@@ -263,7 +284,18 @@ func (b *Buffer) FileType() string {
 
 // ReOpen reloads the current buffer from disk
 func (b *Buffer) ReOpen() error {
-	data, err := ioutil.ReadFile(b.Path)
+	file, err := os.Open(b.Path)
+	if err != nil {
+		return err
+	}
+
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return err
+	}
+
+	reader := transform.NewReader(file, enc.NewDecoder())
+	data, err := ioutil.ReadAll(reader)
 	txt := string(data)
 
 	if err != nil {

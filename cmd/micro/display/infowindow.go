@@ -1,7 +1,6 @@
 package display
 
 import (
-	"log"
 	"unicode/utf8"
 
 	runewidth "github.com/mattn/go-runewidth"
@@ -152,10 +151,8 @@ var keydisplay = []string{"^Q Quit, ^S Save, ^O Open, ^G Help, ^E Command Bar, ^
 func (i *InfoWindow) displayKeyMenu() {
 	// TODO: maybe make this based on the actual keybindings
 
-	log.Println("hi", len(keydisplay), i.Width)
 	for y := 0; y < len(keydisplay); y++ {
 		for x := 0; x < i.Width; x++ {
-			log.Println(x, i.Y-len(keydisplay)+y)
 			if x < len(keydisplay[y]) {
 				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, config.DefStyle)
 			} else {

@@ -12,6 +12,7 @@ import (
 	"github.com/flynn/json5"
 	"github.com/zyedidia/glob"
 	"github.com/zyedidia/micro/cmd/micro/util"
+	"golang.org/x/text/encoding/htmlindex"
 )
 
 type optionValidator func(string, interface{}) error
@@ -35,6 +36,7 @@ var optionValidators = map[string]optionValidator{
 	"colorscheme":  validateColorscheme,
 	"colorcolumn":  validateNonNegativeValue,
 	"fileformat":   validateLineEnding,
+	"encoding":     validateEncoding,
 }
 
 func ReadSettings() error {
@@ -134,6 +136,7 @@ func DefaultCommonSettings() map[string]interface{} {
 		"basename":       false,
 		"colorcolumn":    float64(0),
 		"cursorline":     true,
+		"encoding":       "utf-8",
 		"eofnewline":     false,
 		"fastdirty":      true,
 		"fileformat":     "unix",
@@ -290,4 +293,9 @@ func validateLineEnding(option string, value interface{}) error {
 	}
 
 	return nil
+}
+
+func validateEncoding(option string, value interface{}) error {
+	_, err := htmlindex.Get(value.(string))
+	return err
 }

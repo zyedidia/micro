@@ -17,7 +17,6 @@ type InfoBuf struct {
 	HasYN      bool
 
 	HasSuggestions bool
-	Suggestions    []string
 
 	PromptType string
 

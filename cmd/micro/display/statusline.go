@@ -30,7 +30,7 @@ type StatusLine struct {
 // NewStatusLine returns a statusline bound to a window
 func NewStatusLine(win *BufWindow) *StatusLine {
 	s := new(StatusLine)
-	s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat)"
+	s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)"
 	// s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
 	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help"
 	s.Info = map[string]func(*buffer.Buffer) string{
