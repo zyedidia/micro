@@ -190,8 +190,7 @@ func (i *InfoWindow) Display() {
 		}
 	}
 
-	if i.HasSuggestions {
-		i.HasSuggestions = false
+	if i.HasSuggestions && len(i.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
 		if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
@@ -201,9 +200,13 @@ func (i *InfoWindow) Display() {
 			keymenuOffset = len(keydisplay)
 		}
 		x := 0
-		for _, s := range i.Suggestions {
+		for j, s := range i.Suggestions {
+			style := statusLineStyle
+			if i.CurSuggestion == j {
+				style = style.Reverse(true)
+			}
 			for _, r := range s {
-				screen.Screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, statusLineStyle)
+				screen.Screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, style)
 				x++
 				if x >= i.Width {
 					return

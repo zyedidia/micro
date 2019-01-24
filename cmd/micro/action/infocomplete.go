@@ -14,7 +14,7 @@ import (
 // for example with `vsplit filename`.
 
 // CommandComplete autocompletes commands
-func CommandComplete(b *buffer.Buffer) (string, []string) {
+func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -25,15 +25,16 @@ func CommandComplete(b *buffer.Buffer) (string, []string) {
 		}
 	}
 
-	var chosen string
-	if len(suggestions) == 1 {
-		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return chosen, suggestions
+
+	return completions, suggestions
 }
 
 // HelpComplete autocompletes help topics
-func HelpComplete(b *buffer.Buffer) (string, []string) {
+func HelpComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -46,16 +47,16 @@ func HelpComplete(b *buffer.Buffer) (string, []string) {
 		}
 	}
 
-	var chosen string
-	if len(suggestions) == 1 {
-		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return chosen, suggestions
+	return completions, suggestions
 }
 
-// ColorschemeComplete tab-completes names of colorschemes.
+// colorschemeComplete tab-completes names of colorschemes.
 // This is just a heper value for OptionValueComplete
-func ColorschemeComplete(input string) (string, []string) {
+func colorschemeComplete(input string) (string, []string) {
 	var suggestions []string
 	files := config.ListRuntimeFiles(config.RTColorscheme)
 
@@ -83,7 +84,7 @@ func contains(s []string, e string) bool {
 }
 
 // OptionComplete autocompletes options
-func OptionComplete(b *buffer.Buffer) (string, []string) {
+func OptionComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -100,15 +101,15 @@ func OptionComplete(b *buffer.Buffer) (string, []string) {
 		}
 	}
 
-	var chosen string
-	if len(suggestions) == 1 {
-		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return chosen, suggestions
+	return completions, suggestions
 }
 
 // OptionValueComplete completes values for various options
-func OptionValueComplete(b *buffer.Buffer) (string, []string) {
+func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -167,7 +168,7 @@ func OptionValueComplete(b *buffer.Buffer) (string, []string) {
 	case string:
 		switch inputOpt {
 		case "colorscheme":
-			_, suggestions = ColorschemeComplete(input)
+			_, suggestions = colorschemeComplete(input)
 		case "fileformat":
 			if strings.HasPrefix("unix", input) {
 				suggestions = append(suggestions, "unix")
@@ -185,11 +186,11 @@ func OptionValueComplete(b *buffer.Buffer) (string, []string) {
 		}
 	}
 
-	var chosen string
-	if len(suggestions) == 1 {
-		chosen = util.SliceEndStr(suggestions[0], c.X-argstart)
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return chosen, suggestions
+	return completions, suggestions
 }
 
 // // MakeCompletion registers a function from a plugin for autocomplete commands

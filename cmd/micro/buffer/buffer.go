@@ -52,14 +52,19 @@ type SharedBuffer struct {
 	Type BufType
 
 	isModified bool
+	// Whether or not suggestions can be autocompleted must be shared because
+	// it changes based on how the buffer has changed
+	HasSuggestions bool
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
 	b.isModified = true
+	b.HasSuggestions = false
 	b.LineArray.insert(pos, value)
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
+	b.HasSuggestions = false
 	return b.LineArray.remove(start, end)
 }
 
@@ -94,7 +99,9 @@ type Buffer struct {
 	// Settings customized by the user
 	Settings map[string]interface{}
 
-	Suggestions []string
+	Suggestions   []string
+	Completions   []string
+	CurSuggestion int
 
 	Messages []*Message
 }

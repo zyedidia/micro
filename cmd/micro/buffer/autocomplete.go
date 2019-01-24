@@ -10,14 +10,47 @@ import (
 	"github.com/zyedidia/micro/cmd/micro/util"
 )
 
-type Completer func(*Buffer) (string, []string)
+// A Completer is a function that takes a buffer and returns info
+// describing what autocompletions should be inserted at the current
+// cursor location
+// It returns a list of string suggestions which will be inserted at
+// the current cursor location if selected as well as a list of
+// suggestion names which can be displayed in a autocomplete box or
+// other UI element
+type Completer func(*Buffer) ([]string, []string)
 
 func (b *Buffer) GetSuggestions() {
 
 }
 
 func (b *Buffer) Autocomplete(c Completer) {
+	b.Completions, b.Suggestions = c(b)
+	if len(b.Completions) != len(b.Suggestions) || len(b.Completions) == 0 {
+		return
+	}
+	b.CurSuggestion = -1
+	b.CycleAutocomplete()
+}
 
+func (b *Buffer) CycleAutocomplete() {
+	prevSuggestion := b.CurSuggestion
+
+	b.CurSuggestion++
+	if b.CurSuggestion >= len(b.Suggestions) || b.CurSuggestion < 0 {
+		b.CurSuggestion = 0
+	}
+
+	c := b.GetActiveCursor()
+	start := c.Loc
+	end := c.Loc
+	if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
+		start = end.Move(-utf8.RuneCountInString(b.Completions[prevSuggestion]), b)
+	} else {
+		end = start.Move(1, b)
+	}
+
+	b.Replace(start, end, b.Completions[b.CurSuggestion])
+	b.HasSuggestions = true
 }
 
 func GetArg(b *Buffer) (string, int) {
@@ -39,7 +72,7 @@ func GetArg(b *Buffer) (string, int) {
 }
 
 // FileComplete autocompletes filenames
-func FileComplete(b *Buffer) (string, []string) {
+func FileComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	input, argstart := GetArg(b)
 
@@ -57,10 +90,11 @@ func FileComplete(b *Buffer) (string, []string) {
 		files, err = ioutil.ReadDir(".")
 	}
 
-	var suggestions []string
 	if err != nil {
-		return "", suggestions
+		return nil, nil
 	}
+
+	var suggestions []string
 	for _, f := range files {
 		name := f.Name()
 		if f.IsDir() {
@@ -71,19 +105,16 @@ func FileComplete(b *Buffer) (string, []string) {
 		}
 	}
 
-	var chosen string
-	if len(suggestions) == 1 {
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		var complete string
 		if len(dirs) > 1 {
-			chosen = strings.Join(dirs[:len(dirs)-1], sep) + sep + suggestions[0]
+			complete = strings.Join(dirs[:len(dirs)-1], sep) + sep + suggestions[i]
 		} else {
-			chosen = suggestions[0]
+			complete = suggestions[i]
 		}
-	} else {
-		if len(dirs) > 1 {
-			chosen = strings.Join(dirs[:len(dirs)-1], sep) + sep
-		}
+		completions[i] = util.SliceEndStr(complete, c.X-argstart)
 	}
-	chosen = util.SliceEndStr(chosen, c.X-argstart)
 
-	return chosen, suggestions
+	return completions, suggestions
 }

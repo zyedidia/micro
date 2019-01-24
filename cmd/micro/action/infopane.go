@@ -163,8 +163,12 @@ func (h *InfoPane) CursorDown() {
 	h.DownHistory(h.History[h.PromptType])
 }
 func (h *InfoPane) InsertTab() {
-	// TODO: autocomplete
 	b := h.Buf
+	if b.HasSuggestions {
+		b.CycleAutocomplete()
+		return
+	}
+
 	c := b.GetActiveCursor()
 	l := b.LineBytes(0)
 	l = util.SliceStart(l, c.X)
@@ -172,22 +176,14 @@ func (h *InfoPane) InsertTab() {
 	args := bytes.Split(l, []byte{' '})
 	cmd := string(args[0])
 
-	var ins string
-	var suggestions []string
 	if len(args) == 1 {
-		ins, suggestions = CommandComplete(b)
+		b.Autocomplete(CommandComplete)
 	} else {
 		if action, ok := commands[cmd]; ok {
 			if action.completer != nil {
-				ins, suggestions = action.completer(b)
+				b.Autocomplete(action.completer)
 			}
 		}
-	}
-
-	if len(suggestions) == 1 {
-		b.Insert(c.Loc, ins)
-	} else if len(suggestions) > 1 {
-		h.MakeSuggestions(suggestions)
 	}
 }
 func (h *InfoPane) InsertNewline() {
