@@ -471,7 +471,7 @@ func (h *BufPane) IndentSelection() bool {
 				h.Cursor.SetSelectionEnd(buffer.Loc{X: endX + indentsize + 1, Y: endY})
 			}
 		}
-		h.Cursor.Relocate()
+		h.Buf.RelocateCursors()
 
 		return true
 	}
@@ -490,7 +490,7 @@ func (h *BufPane) OutdentLine() bool {
 		}
 		h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y}, buffer.Loc{X: 1, Y: h.Cursor.Y})
 	}
-	h.Cursor.Relocate()
+	h.Buf.RelocateCursors()
 	return true
 }
 
@@ -515,7 +515,7 @@ func (h *BufPane) OutdentSelection() bool {
 				h.Buf.Remove(buffer.Loc{X: 0, Y: y}, buffer.Loc{X: 1, Y: y})
 			}
 		}
-		h.Cursor.Relocate()
+		h.Buf.RelocateCursors()
 
 		return true
 	}

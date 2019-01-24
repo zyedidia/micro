@@ -8,6 +8,8 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/config"
 	. "github.com/zyedidia/micro/cmd/micro/util"
@@ -58,19 +60,17 @@ func (b *Buffer) SaveAs(filename string) error {
 		return errors.New("Cannot save scratch buffer")
 	}
 
-	// TODO: rmtrailingws and updaterules
 	b.UpdateRules()
-	// if b.Settings["rmtrailingws"].(bool) {
-	// 	for i, l := range b.lines {
-	// 		pos := len(bytes.TrimRightFunc(l.data, unicode.IsSpace))
-	//
-	// 		if pos < len(l.data) {
-	// 			b.deleteToEnd(Loc{pos, i})
-	// 		}
-	// 	}
-	//
-	// 	b.Cursor.Relocate()
-	// }
+	if b.Settings["rmtrailingws"].(bool) {
+		for i, l := range b.lines {
+			leftover := utf8.RuneCount(bytes.TrimRightFunc(l.data, unicode.IsSpace))
+
+			linelen := utf8.RuneCount(l.data)
+			b.Remove(Loc{leftover, i}, Loc{linelen, i})
+		}
+
+		b.RelocateCursors()
+	}
 
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
