@@ -306,10 +306,14 @@ func (b *Buffer) ReOpen() error {
 
 	b.ModTime, err = GetModTime(b.Path)
 	b.isModified = false
+	b.RelocateCursors()
+	return err
+}
+
+func (b *Buffer) RelocateCursors() {
 	for _, c := range b.cursors {
 		c.Relocate()
 	}
-	return err
 }
 
 // RuneAt returns the rune at a given location in the buffer

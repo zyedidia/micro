@@ -587,7 +587,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			}
 			if !found || !inRange(locs[0]) || !inRange(locs[1]) {
 				h.Cursor.ResetSelection()
-				h.Cursor.Relocate()
+				h.Buf.RelocateCursors()
 				return
 			}
 
@@ -606,7 +606,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					searchLoc.X += utf8.RuneCount(replace)
 				} else if canceled {
 					h.Cursor.ResetSelection()
-					h.Cursor.Relocate()
+					h.Buf.RelocateCursors()
 					return
 				}
 				if searching {
@@ -617,8 +617,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		doReplacement()
 	}
 
-	// TODO: relocate all cursors?
-	h.Cursor.Relocate()
+	h.Buf.RelocateCursors()
 
 	if nreplaced > 1 {
 		InfoBar.Message("Replaced ", nreplaced, " occurrences of ", search)
