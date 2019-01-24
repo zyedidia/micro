@@ -12,7 +12,6 @@ import (
 	"time"
 	"unicode/utf8"
 
-	"github.com/saintfish/chardet"
 	"github.com/zyedidia/micro/cmd/micro/config"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 	"github.com/zyedidia/micro/cmd/micro/screen"
@@ -24,12 +23,7 @@ import (
 
 var (
 	OpenBuffers []*Buffer
-	detector    *chardet.Detector // encoding detector
 )
-
-func init() {
-	detector = chardet.NewTextDetector()
-}
 
 // The BufType defines what kind of buffer this is
 type BufType struct {
