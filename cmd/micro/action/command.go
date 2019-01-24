@@ -48,6 +48,7 @@ func InitCommands() {
 		"togglelog":  Command{(*BufPane).ToggleLogCmd, nil},
 		"plugin":     Command{(*BufPane).PluginCmd, nil},
 		"reload":     Command{(*BufPane).ReloadCmd, nil},
+		"reopen":     Command{(*BufPane).ReopenCmd, nil},
 		"cd":         Command{(*BufPane).CdCmd, buffer.FileComplete},
 		"pwd":        Command{(*BufPane).PwdCmd, nil},
 		"open":       Command{(*BufPane).OpenCmd, buffer.FileComplete},
@@ -232,6 +233,22 @@ func (h *BufPane) ToggleLogCmd(args []string) {
 
 // ReloadCmd reloads all files (syntax files, colorschemes...)
 func (h *BufPane) ReloadCmd(args []string) {
+}
+
+// ReopenCmd reopens the buffer (reload from disk)
+func (h *BufPane) ReopenCmd(args []string) {
+	if h.Buf.Modified() {
+		InfoBar.YNPrompt("Save file before reopen?", func(yes, canceled bool) {
+			if !canceled && yes {
+				h.Save()
+				h.Buf.ReOpen()
+			} else if !canceled {
+				h.Buf.ReOpen()
+			}
+		})
+	} else {
+		h.Buf.ReOpen()
+	}
 }
 
 func (h *BufPane) openHelp(page string) error {

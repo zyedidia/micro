@@ -1,7 +1,6 @@
 package buffer
 
 import (
-	"bufio"
 	"bytes"
 	"errors"
 	"io"
@@ -12,6 +11,9 @@ import (
 
 	"github.com/zyedidia/micro/cmd/micro/config"
 	. "github.com/zyedidia/micro/cmd/micro/util"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/htmlindex"
+	"golang.org/x/text/transform"
 )
 
 // LargeFileThreshold is the number of bytes when fastdirty is forced
@@ -21,7 +23,7 @@ const LargeFileThreshold = 50000
 // overwriteFile opens the given file for writing, truncating if one exists, and then calls
 // the supplied function with the file as io.Writer object, also making sure the file is
 // closed afterwards.
-func overwriteFile(name string, fn func(io.Writer) error) (err error) {
+func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error) (err error) {
 	var file *os.File
 
 	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
@@ -34,13 +36,14 @@ func overwriteFile(name string, fn func(io.Writer) error) (err error) {
 		}
 	}()
 
-	w := bufio.NewWriter(file)
+	w := transform.NewWriter(file, enc.NewEncoder())
+	// w := bufio.NewWriter(file)
 
 	if err = fn(w); err != nil {
 		return
 	}
 
-	err = w.Flush()
+	// err = w.Flush()
 	return
 }
 
@@ -105,7 +108,12 @@ func (b *Buffer) SaveAs(filename string) error {
 
 	var fileSize int
 
-	err := overwriteFile(absFilename, func(file io.Writer) (e error) {
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return err
+	}
+
+	err = overwriteFile(absFilename, enc, func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
 			return
 		}

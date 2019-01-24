@@ -2,7 +2,6 @@ package action
 
 import (
 	"bytes"
-	"log"
 
 	"github.com/zyedidia/micro/cmd/micro/display"
 	"github.com/zyedidia/micro/cmd/micro/info"
@@ -184,7 +183,6 @@ func (h *InfoPane) InsertTab() {
 			}
 		}
 	}
-	log.Println(ins, suggestions)
 
 	if len(suggestions) == 1 {
 		b.Insert(c.Loc, ins)

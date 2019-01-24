@@ -1,7 +1,6 @@
 package display
 
 import (
-	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -454,9 +453,7 @@ func (w *BufWindow) displayBuffer() {
 				}
 
 				if s, ok := config.Colorscheme["color-column"]; ok {
-					log.Println(vloc.X - w.gutterOffset)
 					if colorcolumn != 0 && vloc.X-w.gutterOffset == colorcolumn {
-						log.Println("display colorcolumn")
 						fg, _, _ := s.Decompose()
 						style = style.Background(fg)
 					}

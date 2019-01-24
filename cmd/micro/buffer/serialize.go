@@ -9,6 +9,7 @@ import (
 
 	"github.com/zyedidia/micro/cmd/micro/config"
 	. "github.com/zyedidia/micro/cmd/micro/util"
+	"golang.org/x/text/encoding/unicode"
 )
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -32,7 +33,7 @@ func (b *Buffer) Serialize() error {
 
 	name := config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath)
 
-	return overwriteFile(name, func(file io.Writer) error {
+	return overwriteFile(name, unicode.UTF8, func(file io.Writer) error {
 		err := gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.GetActiveCursor().Loc,

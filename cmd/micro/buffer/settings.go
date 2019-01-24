@@ -43,6 +43,8 @@ func (b *Buffer) SetOption(option, value string) error {
 		} else {
 			b.UpdateRules()
 		}
+	} else if option == "encoding" {
+		b.isModified = true
 	}
 
 	return nil
