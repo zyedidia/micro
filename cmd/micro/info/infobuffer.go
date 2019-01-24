@@ -16,8 +16,6 @@ type InfoBuf struct {
 	HasError   bool
 	HasYN      bool
 
-	HasSuggestions bool
-
 	PromptType string
 
 	Msg    string
@@ -160,9 +158,4 @@ func (i *InfoBuf) Reset() {
 	i.Msg = ""
 	i.HasPrompt, i.HasMessage, i.HasError = false, false, false
 	i.HasGutter = false
-}
-
-func (i *InfoBuf) MakeSuggestions(s []string) {
-	i.HasSuggestions = true
-	i.Suggestions = s
 }
