@@ -151,6 +151,7 @@ var InfoOverrides = map[string]InfoKeyAction{
 	"CursorDown":    (*InfoPane).CursorDown,
 	"InsertNewline": (*InfoPane).InsertNewline,
 	"InsertTab":     (*InfoPane).InsertTab,
+	"OutdentLine":   (*InfoPane).CycleBack,
 	"Escape":        (*InfoPane).Escape,
 	"Quit":          (*InfoPane).Quit,
 	"QuitAll":       (*InfoPane).QuitAll,
@@ -165,7 +166,7 @@ func (h *InfoPane) CursorDown() {
 func (h *InfoPane) InsertTab() {
 	b := h.Buf
 	if b.HasSuggestions {
-		b.CycleAutocomplete()
+		b.CycleAutocomplete(true)
 		return
 	}
 
@@ -184,6 +185,11 @@ func (h *InfoPane) InsertTab() {
 				b.Autocomplete(action.completer)
 			}
 		}
+	}
+}
+func (h *InfoPane) CycleBack() {
+	if h.Buf.HasSuggestions {
+		h.Buf.CycleAutocomplete(false)
 	}
 }
 func (h *InfoPane) InsertNewline() {
