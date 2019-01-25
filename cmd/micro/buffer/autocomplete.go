@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 	"unicode/utf8"
 
@@ -29,15 +30,21 @@ func (b *Buffer) Autocomplete(c Completer) {
 		return
 	}
 	b.CurSuggestion = -1
-	b.CycleAutocomplete()
+	b.CycleAutocomplete(true)
 }
 
-func (b *Buffer) CycleAutocomplete() {
+func (b *Buffer) CycleAutocomplete(forward bool) {
 	prevSuggestion := b.CurSuggestion
 
-	b.CurSuggestion++
-	if b.CurSuggestion >= len(b.Suggestions) || b.CurSuggestion < 0 {
+	if forward {
+		b.CurSuggestion++
+	} else {
+		b.CurSuggestion--
+	}
+	if b.CurSuggestion >= len(b.Suggestions) {
 		b.CurSuggestion = 0
+	} else if b.CurSuggestion < 0 {
+		b.CurSuggestion = len(b.Suggestions) - 1
 	}
 
 	c := b.GetActiveCursor()
@@ -105,6 +112,7 @@ func FileComplete(b *Buffer) ([]string, []string) {
 		}
 	}
 
+	sort.Strings(suggestions)
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
 		var complete string

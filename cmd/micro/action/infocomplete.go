@@ -2,6 +2,7 @@ package action
 
 import (
 	"bytes"
+	"sort"
 	"strings"
 
 	"github.com/zyedidia/micro/cmd/micro/buffer"
@@ -25,6 +26,7 @@ func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 		}
 	}
 
+	sort.Strings(suggestions)
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
@@ -47,6 +49,7 @@ func HelpComplete(b *buffer.Buffer) ([]string, []string) {
 		}
 	}
 
+	sort.Strings(suggestions)
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
@@ -101,6 +104,7 @@ func OptionComplete(b *buffer.Buffer) ([]string, []string) {
 		}
 	}
 
+	sort.Strings(suggestions)
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
@@ -185,6 +189,7 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 			}
 		}
 	}
+	sort.Strings(suggestions)
 
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
