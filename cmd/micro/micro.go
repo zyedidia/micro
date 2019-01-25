@@ -84,6 +84,16 @@ func InitFlags() {
 		}
 		os.Exit(0)
 	}
+	for k, v := range optionFlags {
+		if *v != "" {
+			nativeValue, err := config.GetNativeValue(k, config.GlobalSettings[k], *v)
+			if err != nil {
+				screen.TermMessage(err)
+				continue
+			}
+			config.GlobalSettings[k] = nativeValue
+		}
+	}
 }
 
 // LoadInput determines which files should be loaded into buffers
@@ -150,17 +160,21 @@ func main() {
 	var err error
 
 	InitLog()
-	InitFlags()
-	err = config.InitConfigDir(*flagConfigDir)
-	if err != nil {
-		screen.TermMessage(err)
-	}
+
 	config.InitRuntimeFiles()
 	err = config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
 	}
 	config.InitGlobalSettings()
+
+	InitFlags()
+
+	err = config.InitConfigDir(*flagConfigDir)
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
 	action.InitBindings()
 	action.InitCommands()
 
