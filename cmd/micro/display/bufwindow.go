@@ -24,9 +24,10 @@ type BufWindow struct {
 
 	sline *StatusLine
 
-	lineHeight   []int
-	gutterOffset int
-	drawStatus   bool
+	lineHeight    []int
+	hasCalcHeight bool
+	gutterOffset  int
+	drawStatus    bool
 }
 
 // NewBufWindow creates a new window at a location in the screen with a width and height
@@ -57,6 +58,7 @@ func (v *View) SetView(view *View) {
 func (w *BufWindow) Resize(width, height int) {
 	w.Width, w.Height = width, height
 	w.lineHeight = make([]int, height)
+	w.hasCalcHeight = false
 	// This recalculates lineHeight
 	w.GetMouseLoc(buffer.Loc{width, height})
 }
@@ -135,12 +137,13 @@ func (w *BufWindow) Bottomline() int {
 // Returns true if the window location is moved
 func (w *BufWindow) Relocate() bool {
 	b := w.Buf
+	// how many buffer lines are in the view
 	height := w.Bottomline() + 1 - w.StartLine
 	h := w.Height
 	if w.drawStatus {
 		h--
 	}
-	if b.LinesNum() <= h {
+	if b.LinesNum() <= h || !w.hasCalcHeight {
 		height = w.Height
 	}
 	ret := false
@@ -226,8 +229,6 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 			nColsBeforeStart--
 		}
 
-		w.lineHeight[vloc.Y] = bloc.Y
-
 		totalwidth := w.StartCol - nColsBeforeStart
 
 		if svloc.X <= vloc.X+w.X && vloc.Y+w.Y == svloc.Y {
@@ -274,7 +275,6 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 						break
 					}
 					vloc.X = 0
-					w.lineHeight[vloc.Y] = bloc.Y
 					// This will draw an empty line number because the current line is wrapped
 					vloc.X += maxLineNumLength + 1
 				}
@@ -364,6 +364,7 @@ func (w *BufWindow) displayBuffer() {
 		bufHeight--
 	}
 
+	w.hasCalcHeight = true
 	start := w.StartLine
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 		if start > 0 && b.Rehighlight(start-1) {
