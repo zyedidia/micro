@@ -1,6 +1,7 @@
 package lua
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"io"
@@ -28,10 +29,10 @@ func init() {
 }
 
 // LoadFile loads a lua file
-func LoadFile(module string, file string, data string) error {
-	pluginDef := "local P = {};" + module + " = P;setmetatable(" + module + ", {__index = _G});setfenv(1, P);"
+func LoadFile(module string, file string, data []byte) error {
+	pluginDef := []byte("module(\"" + module + "\", package.seeall)")
 
-	if fn, err := L.Load(strings.NewReader(pluginDef+data), file); err != nil {
+	if fn, err := L.Load(bytes.NewReader(append(pluginDef, data...)), file); err != nil {
 		return err
 	} else {
 		L.Push(fn)
