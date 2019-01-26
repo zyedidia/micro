@@ -22,12 +22,25 @@ var (
 	ErrMissingRequire  = errors.New("Missing or empty require field")
 )
 
+const (
+	infojson    = "plugin.json"
+	versionfile = "version.lock"
+)
+
 type Plugin struct {
-	info *PluginInfo
-	dir  string
-	repo *git.Repository
-	// Index into info.Versions showing the current version of this plugin
-	Version int
+	info    *PluginInfo
+	dir     string
+	repo    *git.Repository
+	version semver.Version // currently installed version
+}
+
+func (p *Plugin) GetRequires() *PluginVersion {
+	for _, v := range p.info.Versions {
+		if p.version.Equals(v.Vers) {
+			return &v
+		}
+	}
+	return nil
 }
 
 // PluginVersion describes a version for a plugin as well as any dependencies that
@@ -98,7 +111,7 @@ func (i *PluginInfo) makeVersions() error {
 	return nil
 }
 
-// InstalledPlugins searches the config directory for all installed plugins
+// ListInstalledPlugins searches the config directory for all installed plugins
 // and returns the list of plugin infos corresponding to them
 func ListInstalledPlugins() ([]*Plugin, error) {
 	pdir := path.Join(config.ConfigDir, "plugin")
@@ -118,12 +131,21 @@ func ListInstalledPlugins() ([]*Plugin, error) {
 			}
 
 			for _, f := range files {
-				if f.Name() == "repo.json" {
-					dat, err := ioutil.ReadFile(path.Join(pdir, dir.Name(), "repo.json"))
+				if f.Name() == infojson {
+					dat, err := ioutil.ReadFile(path.Join(pdir, dir.Name(), infojson))
 					if err != nil {
 						return nil, err
 					}
 					info, err := NewPluginInfo(dat)
+					if err != nil {
+						return nil, err
+					}
+
+					versiondat, err := ioutil.ReadFile(path.Join(pdir, dir.Name(), versionfile))
+					if err != nil {
+						return nil, err
+					}
+					sv, err := semver.Make(string(versiondat))
 					if err != nil {
 						return nil, err
 					}
@@ -135,9 +157,10 @@ func ListInstalledPlugins() ([]*Plugin, error) {
 					}
 
 					p := &Plugin{
-						info: info,
-						dir:  dirname,
-						repo: r,
+						info:    info,
+						dir:     dirname,
+						repo:    r,
+						version: sv,
 					}
 
 					plugins = append(plugins, p)

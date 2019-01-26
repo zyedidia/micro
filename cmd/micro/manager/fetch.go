@@ -3,6 +3,7 @@ package manager
 import (
 	"io/ioutil"
 	"net/http"
+	"os"
 	"path"
 
 	"github.com/zyedidia/micro/cmd/micro/config"
@@ -29,18 +30,48 @@ func NewPluginInfoFromUrl(url string) (*PluginInfo, error) {
 
 // FetchRepo downloads this plugin's git repository
 func (i *PluginInfo) FetchRepo() error {
-	_, err := git.PlainClone(path.Join(config.ConfigDir, "plugin", i.Name), false, &git.CloneOptions{
+	dir := path.Join(config.ConfigDir, "plugin", i.Name)
+	r, err := git.PlainClone(dir, false, &git.CloneOptions{
 		URL:      i.Repo,
 		Progress: nil,
 	})
 
+	if err != nil {
+		return err
+	}
+
+	p := &Plugin{
+		info: i,
+		dir:  dir,
+		repo: r,
+	}
+
+	err = p.ResolveVersion()
+	if err != nil {
+		return err
+	}
+	err = p.WriteVersion()
+
 	return err
 }
 
-func (i *PluginInfo) FetchDeps() error {
+func (p *Plugin) ResolveVersion() error {
 	return nil
 }
 
-func (i *PluginInfo) PostInstallHooks() error {
+func (p *Plugin) WriteVersion() error {
+	return ioutil.WriteFile(path.Join(p.dir, versionfile), []byte(p.version.String()), os.ModePerm)
+}
+
+func (p *Plugin) FetchDeps() error {
+	_, err := ListInstalledPlugins()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (p *Plugin) PostInstallHooks() error {
 	return nil
 }
