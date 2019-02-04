@@ -1,0 +1,3 @@
+[submodule "tools/go-bindata"]
+	path = tools/go-bindata
+	url = https://github.com/zyedidia/go-bindata

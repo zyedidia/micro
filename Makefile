@@ -12,7 +12,7 @@ GOBIN ?= $(shell go env GOPATH)/bin
 GOVARS := -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)' -X main.Debug=OFF
 
 # Builds micro after checking dependencies but without updating the runtime
-build: update
+build:
 	go build -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 # Builds micro after building the runtime and checking dependencies
@@ -23,7 +23,7 @@ build-quick:
 	go build -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 # Same as 'build' but installs to $GOBIN afterward
-install: update
+install:
 	go install -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 # Same as 'build-all' but installs to $GOBIN afterward
@@ -33,13 +33,11 @@ install-all: runtime install
 install-quick:
 	go install -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)"  ./cmd/micro
 
-update:
-	git pull
-
 # Builds the runtime
 runtime:
-	go get -u github.com/jteeuwen/go-bindata/...
-	$(GOBIN)/go-bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
+	git submodule update --init
+	go build -o tools/ ./tools/go-bindata
+	tools/go-bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
 	mv runtime.go internal/config
 	gofmt -w internal/config/runtime.go
 
