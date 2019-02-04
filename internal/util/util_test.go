@@ -15,19 +15,19 @@ func TestStringWidth(t *testing.T) {
 
 func TestSliceVisualEnd(t *testing.T) {
 	s := []byte("\thello")
-	slc, n := SliceVisualEnd(s, 2, 4)
+	slc, n, _ := SliceVisualEnd(s, 2, 4)
 	assert.Equal(t, []byte("\thello"), slc)
 	assert.Equal(t, 2, n)
 
-	slc, n = SliceVisualEnd(s, 1, 4)
+	slc, n, _ = SliceVisualEnd(s, 1, 4)
 	assert.Equal(t, []byte("\thello"), slc)
 	assert.Equal(t, 1, n)
 
-	slc, n = SliceVisualEnd(s, 4, 4)
+	slc, n, _ = SliceVisualEnd(s, 4, 4)
 	assert.Equal(t, []byte("hello"), slc)
 	assert.Equal(t, 0, n)
 
-	slc, n = SliceVisualEnd(s, 5, 4)
+	slc, n, _ = SliceVisualEnd(s, 5, 4)
 	assert.Equal(t, []byte("ello"), slc)
 	assert.Equal(t, 0, n)
 }

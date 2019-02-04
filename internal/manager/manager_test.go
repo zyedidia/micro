@@ -1,7 +1,6 @@
 package manager
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/zyedidia/micro/internal/config"
@@ -60,13 +59,13 @@ func TestParse(t *testing.T) {
 // 	}
 // }
 
-func TestList(t *testing.T) {
-	is, err := ListInstalledPlugins()
-	if err != nil {
-		t.Error(err)
-	}
-
-	for _, i := range is {
-		fmt.Println(i.Name)
-	}
-}
+// func TestList(t *testing.T) {
+// 	is, err := ListInstalledPlugins()
+// 	if err != nil {
+// 		t.Error(err)
+// 	}
+//
+// 	for _, i := range is {
+// 		fmt.Println(i.dir)
+// 	}
+// }
