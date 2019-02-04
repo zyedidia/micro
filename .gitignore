@@ -11,3 +11,6 @@ todo.txt
 test.txt
 log.txt
 *.old
+tools/build-version
+tools/build-date
+tools/info-plist

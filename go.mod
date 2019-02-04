@@ -1,10 +1,12 @@
 module github.com/zyedidia/micro
 
 require (
+	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/go-errors/errors v1.0.1
+	github.com/jteeuwen/go-bindata v3.0.7+incompatible
 	github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08 // indirect
 	github.com/mattn/go-isatty v0.0.4
 	github.com/mattn/go-runewidth v0.0.4
