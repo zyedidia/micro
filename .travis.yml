@@ -1,2 +1,7 @@
 language: go
-script: make test
+os:
+    - linux
+    - osx
+script:
+    - env GO111MODULE=on make build
+    - env GO111MODULE=on make test

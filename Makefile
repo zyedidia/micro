@@ -41,5 +41,8 @@ runtime:
 	mv runtime.go internal/config
 	gofmt -w internal/config/runtime.go
 
+test:
+	go test ./internal/...
+
 clean:
 	rm -f micro
