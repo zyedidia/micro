@@ -1,4 +1,6 @@
 language: go
+go:
+    - "1.11.x"
 os:
     - linux
     - osx
