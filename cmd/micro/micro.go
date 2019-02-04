@@ -9,10 +9,10 @@ import (
 
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
-	"github.com/zyedidia/micro/cmd/micro/action"
-	"github.com/zyedidia/micro/cmd/micro/buffer"
-	"github.com/zyedidia/micro/cmd/micro/config"
-	"github.com/zyedidia/micro/cmd/micro/screen"
+	"github.com/zyedidia/micro/internal/action"
+	"github.com/zyedidia/micro/internal/buffer"
+	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/tcell"
 )
 
