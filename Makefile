@@ -36,8 +36,8 @@ install-quick:
 # Builds the runtime
 runtime:
 	git submodule update --init
-	go build -o tools/ ./tools/go-bindata
-	tools/go-bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
+	go build -o tools/bindata ./tools/go-bindata
+	tools/bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
 	mv runtime.go internal/config
 	gofmt -w internal/config/runtime.go
 
