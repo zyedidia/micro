@@ -14,3 +14,4 @@ log.txt
 tools/build-version
 tools/build-date
 tools/info-plist
+tools/bindata
