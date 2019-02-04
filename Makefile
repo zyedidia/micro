@@ -35,17 +35,13 @@ install-quick:
 
 update:
 	git pull
-	git submodule update --init
 
 # Builds the runtime
 runtime:
 	go get -u github.com/jteeuwen/go-bindata/...
 	$(GOBIN)/go-bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
-	mv runtime.go cmd/micro/config
-	gofmt -w cmd/micro/config/runtime.go
-
-test:
-	go test ./cmd/micro
+	mv runtime.go internal/config
+	gofmt -w internal/config/runtime.go
 
 clean:
 	rm -f micro
