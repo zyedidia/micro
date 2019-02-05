@@ -13,21 +13,11 @@ import (
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/internal/util"
 	"github.com/zyedidia/tcell"
 )
 
 var (
-	// These variables should be set by the linker when compiling
-
-	// Version is the version number or commit hash
-	Version = "0.0.0-unknown"
-	// CommitHash is the commit this version was built on
-	CommitHash = "Unknown"
-	// CompileDate is the date this binary was compiled on
-	CompileDate = "Unknown"
-	// Debug logging
-	Debug = "ON"
-
 	// Event channel
 	events   chan tcell.Event
 	autosave chan bool
@@ -70,9 +60,9 @@ func InitFlags() {
 
 	if *flagVersion {
 		// If -version was passed
-		fmt.Println("Version:", Version)
-		fmt.Println("Commit hash:", CommitHash)
-		fmt.Println("Compiled on", CompileDate)
+		fmt.Println("Version:", util.Version)
+		fmt.Println("Commit hash:", util.CommitHash)
+		fmt.Println("Compiled on", util.CompileDate)
 		os.Exit(0)
 	}
 

@@ -1,12 +1,14 @@
 package manager
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
-	"os"
 	"path"
 
+	"github.com/blang/semver"
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/util"
 	git "gopkg.in/src-d/go-git.v4"
 )
 
@@ -56,11 +58,26 @@ func (i *PluginInfo) FetchRepo() error {
 }
 
 func (p *Plugin) ResolveVersion() error {
-	return nil
+	i := p.info
+	vs := i.Versions
+
+	for _, v := range vs {
+		microrange, err := semver.ParseRange(v.Require["micro"])
+		if err != nil {
+			return err
+		}
+		if microrange(util.SemVersion) {
+			p.version = v.Vers
+			fmt.Println("resolve version to ", v.Vstr)
+			return nil
+		}
+	}
+
+	return ErrRequireUnsat
 }
 
 func (p *Plugin) WriteVersion() error {
-	return ioutil.WriteFile(path.Join(p.dir, versionfile), []byte(p.version.String()), os.ModePerm)
+	return ioutil.WriteFile(path.Join(p.dir, versionfile), []byte(p.version.String()), 0644)
 }
 
 func (p *Plugin) FetchDeps() error {
