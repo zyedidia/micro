@@ -3,11 +3,15 @@ package manager
 import (
 	"testing"
 
+	"github.com/blang/semver"
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/util"
 )
 
 func init() {
 	config.InitConfigDir("./")
+	util.Version = "1.3.1"
+	util.SemVersion, _ = semver.Make(util.Version)
 }
 
 var sampleJson = []byte(`{
@@ -47,17 +51,17 @@ func TestParse(t *testing.T) {
 	}
 }
 
-// func TestFetch(t *testing.T) {
-// 	i, err := NewPluginInfoFromUrl("http://zbyedidia.webfactional.com/micro/test.json")
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-//
-// 	err = i.FetchRepo()
-// 	if err != nil {
-// 		t.Error(err)
-// 	}
-// }
+func TestFetch(t *testing.T) {
+	i, err := NewPluginInfoFromUrl("http://zbyedidia.webfactional.com/micro/test.json")
+	if err != nil {
+		t.Error(err)
+	}
+
+	err = i.FetchRepo()
+	if err != nil {
+		t.Error(err)
+	}
+}
 
 // func TestList(t *testing.T) {
 // 	is, err := ListInstalledPlugins()

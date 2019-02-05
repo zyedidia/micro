@@ -2,6 +2,7 @@ package util
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -11,8 +12,32 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/blang/semver"
 	runewidth "github.com/mattn/go-runewidth"
 )
+
+var (
+	// These variables should be set by the linker when compiling
+
+	// Version is the version number or commit hash
+	Version = "0.0.0-unknown"
+	// Semantic version
+	SemVersion semver.Version
+	// CommitHash is the commit this version was built on
+	CommitHash = "Unknown"
+	// CompileDate is the date this binary was compiled on
+	CompileDate = "Unknown"
+	// Debug logging
+	Debug = "ON"
+)
+
+func init() {
+	var err error
+	SemVersion, err = semver.Make(Version)
+	if err != nil {
+		fmt.Println("Invalid version: ", Version, err)
+	}
+}
 
 // SliceEnd returns a byte slice where the index is a rune index
 // Slices off the start of the slice

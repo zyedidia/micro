@@ -20,6 +20,7 @@ var (
 	ErrMissingVersions = errors.New("Missing or empty versions field")
 	ErrMissingTag      = errors.New("Missing or empty tag field")
 	ErrMissingRequire  = errors.New("Missing or empty require field")
+	ErrRequireUnsat    = errors.New("Version require could not be satisfied")
 )
 
 const (
@@ -95,12 +96,12 @@ func (i *PluginInfo) makeVersions() error {
 		return ErrMissingVersions
 	}
 
-	for _, v := range i.Versions {
+	for j, v := range i.Versions {
 		sv, err := semver.Make(v.Vstr)
 		if err != nil {
 			return err
 		}
-		v.Vers = sv
+		i.Versions[j].Vers = sv
 		if len(v.Tag) == 0 {
 			return ErrMissingTag
 		} else if v.Require == nil {

@@ -9,7 +9,7 @@ ADDITIONAL_GO_LINKER_FLAGS := $(shell GOOS=$(shell go env GOHOSTOS) \
 	GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/info-plist.go "$(VERSION)")
 GOBIN ?= $(shell go env GOPATH)/bin
-GOVARS := -X main.Version=$(VERSION) -X main.CommitHash=$(HASH) -X 'main.CompileDate=$(DATE)' -X main.Debug=OFF
+GOVARS := -X github.com/zyedidia/micro/internal/util.Version=$(VERSION) -X github.com/zyedidia/micro/internal/util.CommitHash=$(HASH) -X 'github.com/zyedidia/micro/internal/util.CompileDate=$(DATE)' -X github.com/zyedidia/micro/internal/util.Debug=OFF
 
 # Builds micro after checking dependencies but without updating the runtime
 build:
