@@ -28,6 +28,9 @@ var (
 	// 1 - lf detected
 	// 2 - crlf detected
 	fileformat = 0
+
+	// If true, do not prompt to reload buffer
+	disableReload = false
 )
 
 // Buffer stores the text for files that are loaded into the text editor
@@ -347,12 +350,19 @@ func (b *Buffer) IndentString() string {
 // by an external program since it was last read
 // If it has, we ask the user if they would like to reload the file
 func (b *Buffer) CheckModTime() {
+
+	if disableReload {
+		// User chose not to promt again
+		return
+	}
+
 	modTime, ok := GetModTime(b.Path)
 	if ok {
 		if modTime != b.ModTime {
-			choice, canceled := messenger.YesNoPrompt("The file has changed since it was last read. Reload file? (y,n)")
+			choice, canceled := messenger.YesNoPrompt("The file has changed since it was last read. Reload file? (y,n,esc)")
 			messenger.Reset()
 			messenger.Clear()
+			disableReload = canceled
 			if !choice || canceled {
 				// Don't load new changes -- do nothing
 				b.ModTime, _ = GetModTime(b.Path)
