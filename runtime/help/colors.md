@@ -55,6 +55,7 @@ These require terminals that support true color and require `MICRO_TRUECOLOR=1` 
   look its best. Use cmc-16 if your terminal doesn't support true color.
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
 * `github-tc`: The true color version of the Github colorscheme
+* `material-tc`: Colorscheme based off of Google's Material Design palette
 
 ### Monochrome
 
