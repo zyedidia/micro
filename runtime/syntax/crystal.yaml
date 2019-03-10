@@ -36,7 +36,11 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
-            - special: "#\\{[^}]*\\}"
+            - symbol.brackets:
+                start: "#\\{"
+                end: "\\}"
+                rules:
+                    - default: ".*"
 
     - constant.string:
         start: "'"
