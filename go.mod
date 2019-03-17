@@ -2,12 +2,14 @@ module github.com/zyedidia/micro
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/dustin/go-humanize v1.0.0
 	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/go-errors/errors v1.0.1
 	github.com/gopherjs/gopherjs v0.0.0-20181103185306-d547d1d9531e // indirect
 	github.com/jtolds/gls v4.2.1+incompatible // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kylelemons/godebug v0.0.0-20170820004349-d65d576e9348 // indirect
 	github.com/lucasb-eyer/go-colorful v0.0.0-20181028223441-12d3b2882a08 // indirect
 	github.com/mattn/go-isatty v0.0.4
@@ -26,10 +28,11 @@ require (
 	github.com/zyedidia/pty v1.1.2-0.20180126010845-30364665a244 // indirect
 	github.com/zyedidia/tcell v0.0.0-20190204041104-518c15c24302
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
+	golang.org/x/sys v0.0.0-20180903190138-2b024373dcd9 // indirect
 	golang.org/x/text v0.3.0
 	gopkg.in/DATA-DOG/go-sqlmock.v1 v1.3.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
-	gopkg.in/src-d/go-git.v4 v4.9.1
 	gopkg.in/yaml.v2 v2.2.2
 	layeh.com/gopher-luar v1.0.4
 )
