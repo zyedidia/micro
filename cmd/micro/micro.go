@@ -12,6 +12,7 @@ import (
 	"github.com/zyedidia/micro/internal/action"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/manager"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
 	"github.com/zyedidia/tcell"
@@ -27,6 +28,7 @@ var (
 	flagStartPos  = flag.String("startpos", "", "LINE,COL to start the cursor at when opening a buffer.")
 	flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
 	flagOptions   = flag.Bool("options", false, "Show all option help")
+	flagPlugin    = flag.String("plugin", "", "Run a plugin manager action")
 )
 
 func InitFlags() {
@@ -38,6 +40,9 @@ func InitFlags() {
 		fmt.Println("+LINE:COL")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
 		fmt.Println("    \tThis can also be done by opening file:LINE:COL")
+		fmt.Println("-plugin ACTION")
+		fmt.Println("    \tRun a plugin manager action")
+		fmt.Println("    \tActions include: list, add, remove")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all option help")
 		fmt.Println("-version")
@@ -58,11 +63,32 @@ func InitFlags() {
 
 	flag.Parse()
 
+	err := config.InitConfigDir(*flagConfigDir)
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
 	if *flagVersion {
 		// If -version was passed
 		fmt.Println("Version:", util.Version)
 		fmt.Println("Commit hash:", util.CommitHash)
 		fmt.Println("Compiled on", util.CompileDate)
+		os.Exit(0)
+	}
+
+	if len(*flagPlugin) != 0 {
+		action := *flagPlugin
+		// args := flag.Args()
+		if action == "list" {
+			plugins, err := manager.ListInstalledPlugins()
+			if err != nil {
+				fmt.Println(err)
+			} else {
+				for _, p := range plugins {
+					fmt.Println(p.Info.Name, p.Version)
+				}
+			}
+		}
 		os.Exit(0)
 	}
 
@@ -158,12 +184,8 @@ func main() {
 	}
 	config.InitGlobalSettings()
 
+	// InitConfigDir happens in InitFlags
 	InitFlags()
-
-	err = config.InitConfigDir(*flagConfigDir)
-	if err != nil {
-		screen.TermMessage(err)
-	}
 
 	action.InitBindings()
 	action.InitCommands()

@@ -29,15 +29,15 @@ const (
 )
 
 type Plugin struct {
-	info    *PluginInfo
-	dir     string
-	repo    *git.Repository
-	version semver.Version // currently installed version
+	Info    *PluginInfo
+	Dir     string
+	Repo    *git.Repository
+	Version semver.Version // currently installed version
 }
 
 func (p *Plugin) GetRequires() *PluginVersion {
-	for _, v := range p.info.Versions {
-		if p.version.Equals(v.Vers) {
+	for _, v := range p.Info.Versions {
+		if p.Version.Equals(v.Vers) {
 			return &v
 		}
 	}
@@ -146,7 +146,7 @@ func ListInstalledPlugins() ([]*Plugin, error) {
 					if err != nil {
 						return nil, err
 					}
-					sv, err := semver.Make(string(versiondat))
+					sv, err := semver.Make(string(bytes.TrimSpace(versiondat)))
 					if err != nil {
 						return nil, err
 					}
@@ -158,10 +158,10 @@ func ListInstalledPlugins() ([]*Plugin, error) {
 					}
 
 					p := &Plugin{
-						info:    info,
-						dir:     dirname,
-						repo:    r,
-						version: sv,
+						Info:    info,
+						Dir:     dirname,
+						Repo:    r,
+						Version: sv,
 					}
 
 					plugins = append(plugins, p)
