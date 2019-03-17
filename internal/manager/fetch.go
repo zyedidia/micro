@@ -43,9 +43,9 @@ func (i *PluginInfo) FetchRepo() error {
 	}
 
 	p := &Plugin{
-		info: i,
-		dir:  dir,
-		repo: r,
+		Info: i,
+		Dir:  dir,
+		Repo: r,
 	}
 
 	err = p.ResolveVersion()
@@ -58,7 +58,7 @@ func (i *PluginInfo) FetchRepo() error {
 }
 
 func (p *Plugin) ResolveVersion() error {
-	i := p.info
+	i := p.Info
 	vs := i.Versions
 
 	for _, v := range vs {
@@ -67,7 +67,7 @@ func (p *Plugin) ResolveVersion() error {
 			return err
 		}
 		if microrange(util.SemVersion) {
-			p.version = v.Vers
+			p.Version = v.Vers
 			fmt.Println("resolve version to ", v.Vstr)
 			return nil
 		}
@@ -77,16 +77,7 @@ func (p *Plugin) ResolveVersion() error {
 }
 
 func (p *Plugin) WriteVersion() error {
-	return ioutil.WriteFile(path.Join(p.dir, versionfile), []byte(p.version.String()), 0644)
-}
-
-func (p *Plugin) FetchDeps() error {
-	_, err := ListInstalledPlugins()
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return ioutil.WriteFile(path.Join(p.Dir, versionfile), []byte(p.Version.String()), 0644)
 }
 
 func (p *Plugin) PostInstallHooks() error {
