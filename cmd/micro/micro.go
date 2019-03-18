@@ -173,6 +173,8 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	config.LoadAllPlugins()
+
 	screen.Init()
 
 	// If we have an error, we can exit cleanly and not completely
