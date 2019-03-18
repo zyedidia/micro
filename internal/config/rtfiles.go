@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strings"
 )
 
 const (
@@ -134,23 +135,38 @@ func InitRuntimeFiles() {
 	add(RTHelp, "help", "*.md")
 
 	// Search ConfigDir for plugin-scripts
-	files, _ := ioutil.ReadDir(filepath.Join(ConfigDir, "plugins"))
-	for _, f := range files {
-		realpath, _ := filepath.EvalSymlinks(filepath.Join(ConfigDir, "plugins", f.Name()))
-		realpathStat, _ := os.Stat(realpath)
-		if realpathStat.IsDir() {
-			scriptPath := filepath.Join(ConfigDir, "plugins", f.Name(), f.Name()+".lua")
-			if _, err := os.Stat(scriptPath); err == nil {
-				AddRuntimeFile(RTPlugin, realFile(scriptPath))
+	plugdir := filepath.Join(ConfigDir, "plugins")
+	files, _ := ioutil.ReadDir(plugdir)
+	for _, d := range files {
+		if d.IsDir() {
+			srcs, _ := ioutil.ReadDir(filepath.Join(plugdir, d.Name()))
+			p := new(Plugin)
+			p.Name = d.Name()
+			for _, f := range srcs {
+				if strings.HasSuffix(f.Name(), ".lua") {
+					p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
+				} else if f.Name() == "info.json" {
+					p.Info = realFile(filepath.Join(plugdir, d.Name(), "info.json"))
+				}
 			}
+			Plugins = append(Plugins, p)
 		}
 	}
 
-	if files, err := AssetDir("runtime/plugins"); err == nil {
-		for _, f := range files {
-			scriptPath := path.Join("runtime/plugins", f, f+".lua")
-			if _, err := AssetInfo(scriptPath); err == nil {
-				AddRuntimeFile(RTPlugin, assetFile(scriptPath))
+	plugdir = filepath.Join("runtime", "plugins")
+	if files, err := AssetDir(plugdir); err == nil {
+		for _, d := range files {
+			if srcs, err := AssetDir(filepath.Join(plugdir, d)); err == nil {
+				p := new(Plugin)
+				p.Name = d
+				for _, f := range srcs {
+					if strings.HasSuffix(f, ".lua") {
+						p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, d, f)))
+					} else if f == "info.json" {
+						p.Info = assetFile(filepath.Join(plugdir, d, "info.json"))
+					}
+				}
+				Plugins = append(Plugins, p)
 			}
 		}
 	}
