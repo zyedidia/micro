@@ -4,8 +4,12 @@ import (
 	"strings"
 	"time"
 
+	luar "layeh.com/gopher-luar"
+
 	"github.com/zyedidia/micro/internal/buffer"
+	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/display"
+	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/tcell"
 )
@@ -109,6 +113,8 @@ func NewBufPane(buf *buffer.Buffer, win display.BWindow) *BufPane {
 
 	h.Cursor = h.Buf.GetActiveCursor()
 	h.mouseReleased = true
+
+	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
 
 	return h
 }

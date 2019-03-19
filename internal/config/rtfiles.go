@@ -2,6 +2,7 @@ package config
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -137,6 +138,7 @@ func InitRuntimeFiles() {
 	// Search ConfigDir for plugin-scripts
 	plugdir := filepath.Join(ConfigDir, "plugins")
 	files, _ := ioutil.ReadDir(plugdir)
+	log.Println("reading", plugdir)
 	for _, d := range files {
 		if d.IsDir() {
 			srcs, _ := ioutil.ReadDir(filepath.Join(plugdir, d.Name()))
