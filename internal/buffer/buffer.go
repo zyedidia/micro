@@ -12,10 +12,13 @@ import (
 	"time"
 	"unicode/utf8"
 
+	luar "layeh.com/gopher-luar"
+
 	"github.com/zyedidia/micro/internal/config"
-	"github.com/zyedidia/micro/pkg/highlight"
+	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	. "github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/pkg/highlight"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -226,6 +229,11 @@ func NewBuffer(r io.Reader, size int64, path string, cursorPosition []string, bt
 		} else {
 			calcHash(b, &b.origHash)
 		}
+	}
+
+	err = config.RunPluginFn("onBufferOpen", luar.New(ulua.L, b))
+	if err != nil {
+		screen.TermMessage(err)
 	}
 
 	OpenBuffers = append(OpenBuffers, b)

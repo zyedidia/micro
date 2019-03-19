@@ -23,11 +23,6 @@ import (
 
 var L *lua.LState
 
-func init() {
-	L = lua.NewState()
-	L.SetGlobal("import", luar.New(L, Import))
-}
-
 // LoadFile loads a lua file
 func LoadFile(module string, file string, data []byte) error {
 	pluginDef := []byte("module(\"" + module + "\", package.seeall)")
