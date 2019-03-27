@@ -43,24 +43,38 @@ func InitBindings() {
 }
 
 func BindKey(k, v string) {
-	event, ok := findEvent(k)
+	events, ok := findEvents(k)
 	if !ok {
 		screen.TermMessage(k, "is not a bindable event")
 	}
 
-	switch e := event.(type) {
+	switch e := events[len(events)-1].(type) {
 	case KeyEvent:
-		BufMapKey(e, v)
+		BufMapKey(events, v)
 	case MouseEvent:
 		BufMapMouse(e, v)
 	case RawEvent:
-		BufMapKey(e, v)
+		BufMapKey(events, v)
 	}
 
 	config.Bindings[k] = v
 }
 
-// findKeyEvent will find binding Key 'b' using string 'k'
+// findEvents will find binding Keys 'events' using string 'k'
+func findEvents(keys string) (events []Event, ok bool) {
+	if len(keys) == 0 {
+		return []Event{KeyEvent{}}, false
+	}
+	for _, key := range strings.Split(keys, " ") {
+		event, ok := findEvent(key)
+		events = append(events, event)
+		if !ok {
+			return events, ok
+		}
+	}
+	return events, true
+}
+
 func findEvent(k string) (b Event, ok bool) {
 	modifiers := tcell.ModNone
 
@@ -151,6 +165,21 @@ modSearch:
 	return KeyEvent{}, false
 }
 
+func equals(a, b []Event) bool {
+	if (a == nil) != (b == nil) {
+		return false
+	}
+	if len(a) != len(b) {
+		return false
+	}
+	for i := range a {
+		if a[i] != b[i] {
+			return false
+		}
+	}
+	return true
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
@@ -169,15 +198,15 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 			return false, errors.New("Error reading bindings.json: " + err.Error())
 		}
 
-		key, ok := findEvent(k)
+		keys, ok := findEvents(k)
 		if !ok {
 			return false, errors.New("Invalid event " + k)
 		}
 
 		found := false
 		for ev := range parsed {
-			if e, ok := findEvent(ev); ok {
-				if e == key {
+			if e, ok := findEvents(ev); ok {
+				if equals(e, keys) {
 					if overwrite {
 						parsed[ev] = v
 					}
@@ -218,14 +247,14 @@ func UnbindKey(k string) error {
 			return errors.New("Error reading bindings.json: " + err.Error())
 		}
 
-		key, ok := findEvent(k)
+		keys, ok := findEvents(k)
 		if !ok {
 			return errors.New("Invalid event " + k)
 		}
 
 		for ev := range parsed {
-			if e, ok := findEvent(ev); ok {
-				if e == key {
+			if e, ok := findEvents(ev); ok {
+				if equals(e, keys) {
 					delete(parsed, ev)
 					break
 				}

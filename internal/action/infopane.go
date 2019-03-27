@@ -14,6 +14,8 @@ type InfoKeyAction func(*InfoPane)
 type InfoPane struct {
 	*BufPane
 	*info.InfoBuf
+
+	nextBinding *BufKeyBinding
 }
 
 func NewInfoPane(ib *info.InfoBuf, w display.BWindow) *InfoPane {
@@ -73,9 +75,21 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 }
 
 func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
+	var binding *BufKeyBinding
+	if nil != h.nextBinding && nil != h.nextBinding.Next {
+		binding = h.nextBinding.Next[e]
+	}
+	if nil == binding {
+		binding = BufKeyBindings[e]
+	}
 	done := false
-	if action, ok := BufKeyBindings[e]; ok {
-		estr := BufKeyStrings[e]
+	if nil != binding {
+		estr := binding.Name
+		if nil == binding.Action {
+			h.nextBinding = binding
+			return true
+		}
+		h.nextBinding = nil
 		for _, s := range InfoNones {
 			if s == estr {
 				return false
@@ -89,7 +103,7 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 			}
 		}
 		if !done {
-			done = action(h.BufPane)
+			done = binding.Action(h.BufPane)
 		}
 	}
 	return done

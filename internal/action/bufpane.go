@@ -16,30 +16,52 @@ import (
 
 type BufKeyAction func(*BufPane) bool
 type BufMouseAction func(*BufPane, *tcell.EventMouse) bool
+type BufKeyBinding struct {
+	Action BufKeyAction
+	Name   string
+	Next   map[Event]*BufKeyBinding
+}
 
-var BufKeyBindings map[Event]BufKeyAction
-var BufKeyStrings map[Event]string
+var BufKeyBindings map[Event]*BufKeyBinding
 var BufMouseBindings map[MouseEvent]BufMouseAction
 
 func init() {
-	BufKeyBindings = make(map[Event]BufKeyAction)
-	BufKeyStrings = make(map[Event]string)
+	BufKeyBindings = make(map[Event]*BufKeyBinding)
 	BufMouseBindings = make(map[MouseEvent]BufMouseAction)
 }
 
 // BufMapKey maps a key event to an action
-func BufMapKey(k Event, action string) {
+func BufMapKey(keys []Event, action string) {
+	bindings := BufKeyBindings
+	var binding *BufKeyBinding
+	for i := 0; ; i++ {
+		binding = bindings[keys[i]]
+		if nil == binding {
+			binding = new(BufKeyBinding)
+			bindings[keys[i]] = binding
+		}
+		if i >= len(keys)-1 {
+			break
+		}
+		binding.Action = nil
+		binding.Name = ""
+		bindings = binding.Next
+		if nil == bindings {
+			bindings = make(map[Event]*BufKeyBinding)
+			binding.Next = bindings
+		}
+	}
 	if strings.HasPrefix(action, "command:") {
 		action = strings.SplitN(action, ":", 2)[1]
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = CommandAction(action)
+		binding.Name = action
+		binding.Action = CommandAction(action)
 	} else if strings.HasPrefix(action, "command-edit:") {
 		action = strings.SplitN(action, ":", 2)[1]
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = CommandEditAction(action)
+		binding.Name = action
+		binding.Action = CommandEditAction(action)
 	} else if f, ok := BufKeyActions[action]; ok {
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = f
+		binding.Name = action
+		binding.Action = f
 	} else {
 		screen.TermMessage("Error:", action, "does not exist")
 	}
@@ -51,7 +73,7 @@ func BufMapMouse(k MouseEvent, action string) {
 		BufMouseBindings[k] = f
 	} else {
 		delete(BufMouseBindings, k)
-		BufMapKey(k, action)
+		BufMapKey([]Event{k}, action)
 	}
 }
 
@@ -104,6 +126,9 @@ type BufPane struct {
 	multiWord bool
 
 	splitID uint64
+
+	// If non-null, the next key binding:
+	nextBinding *BufKeyBinding
 }
 
 func NewBufPane(buf *buffer.Buffer, win display.BWindow) *BufPane {
@@ -224,22 +249,34 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 // DoKeyEvent executes a key event by finding the action it is bound
 // to and executing it (possibly multiple times for multiple cursors)
 func (h *BufPane) DoKeyEvent(e Event) bool {
-	if action, ok := BufKeyBindings[e]; ok {
-		estr := BufKeyStrings[e]
+	var binding *BufKeyBinding
+	if nil != h.nextBinding && nil != h.nextBinding.Next {
+		binding = h.nextBinding.Next[e]
+	}
+	if nil == binding {
+		binding = BufKeyBindings[e]
+	}
+	if nil != binding {
+		estr := binding.Name
+		if nil == binding.Action {
+			h.nextBinding = binding
+			return true
+		}
+		h.nextBinding = nil
 		for _, s := range MultiActions {
 			if s == estr {
 				cursors := h.Buf.GetCursors()
 				for _, c := range cursors {
 					h.Buf.SetCurCursor(c.Num)
 					h.Cursor = c
-					if action(h) {
+					if binding.Action(h) {
 						h.Relocate()
 					}
 				}
 				return true
 			}
 		}
-		if action(h) {
+		if binding.Action(h) {
 			h.Relocate()
 		}
 		return true
@@ -248,8 +285,14 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 }
 
 func (h *BufPane) HasKeyEvent(e Event) bool {
-	_, ok := BufKeyBindings[e]
-	return ok
+	var binding *BufKeyBinding
+	if nil != h.nextBinding && nil != h.nextBinding.Next {
+		binding = h.nextBinding.Next[e]
+	}
+	if nil == binding {
+		binding = BufKeyBindings[e]
+	}
+	return nil != binding
 }
 
 // DoMouseEvent executes a mouse event by finding the action it is bound
