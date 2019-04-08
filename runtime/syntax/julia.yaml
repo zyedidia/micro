@@ -18,7 +18,7 @@ rules:
       # decorators
     - identifier.macro: "@[A-Za-z0-9_]+"
       # operators
-    - symbol.operator: "[-+*/|=%<>&~^]|\\b(and|not|or|is|in)\\b"
+    - symbol.operator: "[-+*/|=%<>&~^]|\\b(in|isa|where)\\b"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
