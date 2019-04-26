@@ -1,0 +1,38 @@
+filetype: elm
+
+detect:
+    filename: "\\.elm$"
+
+rules:
+    - statement: "\\b(as|alias|case|else|exposing|if|import|in|let|module|of|port|then|type|)\\b"
+    - statement: "(\\=|\\:|\\->)"
+    - type: "\\b([A-Z][A-Za-z\\d]*)\\b"
+    - identifier: "^([a-z][A-Za-z\\d]*)\\b"
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string: 
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+    - comment:
+        start: "--"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+    - comment:
+        start: "\\{-"
+        end: "-\\}"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
