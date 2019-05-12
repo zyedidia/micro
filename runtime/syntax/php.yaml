@@ -19,7 +19,7 @@ rules:
     - default: "<\\?(php|=)\" end=\"\\?>"
     - identifier.class: "([a-zA-Z0-9_-]+)\\("
     - preproc: "\\b(require|include)(_once)?\\b"
-    - type: "\\b(var|class|extends|function|echo|case|default|exit|switch|extends|as|define|do|declare|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)\\b"
+    - type: "\\b(var|class|extends|fn|function|echo|case|default|exit|switch|extends|as|define|do|declare|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)\\b"
     - identifier.class: "[a-zA-Z\\\\]+::"
     - identifier: "\\b([A-Z][a-zA-Z0-9_]+)\\b"
     - identifier: "([A-Z0-9_]+)[;|\\s|\\)|,]"
