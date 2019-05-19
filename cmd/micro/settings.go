@@ -25,12 +25,12 @@ var invalidSettings bool
 
 // Options with validators
 var optionValidators = map[string]optionValidator{
-	"tabsize":      validatePositiveValue,
-	"scrollmargin": validateNonNegativeValue,
-	"scrollspeed":  validateNonNegativeValue,
+	"colorcolumn":  validateNonNegativeInt,
 	"colorscheme":  validateColorscheme,
-	"colorcolumn":  validateNonNegativeValue,
 	"fileformat":   validateLineEnding,
+	"scrollmargin": validateNonNegativeFloat,
+	"scrollspeed":  validateNonNegativeInt,
+	"tabsize":      validatePositiveInt,
 }
 
 // InitGlobalSettings initializes the options map and sets all options to their default values
@@ -67,6 +67,16 @@ func InitGlobalSettings() {
 	for k, v := range parsed {
 		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 			globalSettings[k] = v
+			
+			if defaultValue, hasDefault := defaults[k]; hasDefault {
+				switch defaultValue.(type) {
+				case int:
+					switch t := v.(type) {
+					case float64:
+						globalSettings[k] = int(t)
+					}
+				}
+			}
 		}
 	}
 
@@ -116,8 +126,19 @@ func InitLocalSettings(buf *Buffer) {
 				}
 
 				if g.MatchString(buf.Path) {
+					defaults := DefaultGlobalSettings()
 					for k1, v1 := range v.(map[string]interface{}) {
 						buf.Settings[k1] = v1
+						
+						if defaultValue, hasDefault := defaults[k1]; hasDefault {
+							switch defaultValue.(type) {
+							case int:
+								switch t := v1.(type) {
+								case float64:
+									buf.Settings[k1] = int(t)
+								}
+							}
+						}
 					}
 				}
 			}
@@ -205,7 +226,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"autoindent":     true,
 		"autosave":       false,
 		"basename":       false,
-		"colorcolumn":    float64(0),
+		"colorcolumn":    int(0),
 		"colorscheme":    "default",
 		"cursorline":     true,
 		"eofnewline":     false,
@@ -229,7 +250,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"saveundo":       false,
 		"scrollbar":      false,
 		"scrollmargin":   float64(3),
-		"scrollspeed":    float64(2),
+		"scrollspeed":    int(2),
 		"softwrap":       false,
 		"smartpaste":     true,
 		"splitbottom":    true,
@@ -238,7 +259,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"sucmd":          "sudo",
 		"syntax":         true,
 		"tabmovement":    false,
-		"tabsize":        float64(4),
+		"tabsize":        int(4),
 		"tabstospaces":   false,
 		"termtitle":      false,
 		"useprimary":     true,
@@ -252,7 +273,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"autoindent":     true,
 		"autosave":       false,
 		"basename":       false,
-		"colorcolumn":    float64(0),
+		"colorcolumn":    int(0),
 		"cursorline":     true,
 		"eofnewline":     false,
 		"fastdirty":      true,
@@ -269,8 +290,8 @@ func DefaultLocalSettings() map[string]interface{} {
 		"savecursor":     false,
 		"saveundo":       false,
 		"scrollbar":      false,
-		"scrollmargin":   float64(3),
-		"scrollspeed":    float64(2),
+		"scrollmargin":   int(3),
+		"scrollspeed":    int(2),
 		"softwrap":       false,
 		"smartpaste":     true,
 		"splitbottom":    true,
@@ -278,7 +299,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"statusline":     true,
 		"syntax":         true,
 		"tabmovement":    false,
-		"tabsize":        float64(4),
+		"tabsize":        int(4),
 		"tabstospaces":   false,
 		"useprimary":     true,
 	}
@@ -308,8 +329,14 @@ func SetOption(option, value string) error {
 		nativeValue = b
 	} else if kind == reflect.String {
 		nativeValue = value
-	} else if kind == reflect.Float64 {
+	} else if kind == reflect.Int {
 		i, err := strconv.Atoi(value)
+		if err != nil {
+			return errors.New("Invalid value")
+		}
+		nativeValue = int(i)
+	} else if kind == reflect.Float64 {
+		i, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
@@ -379,8 +406,14 @@ func SetLocalOption(option, value string, view *View) error {
 		nativeValue = b
 	} else if kind == reflect.String {
 		nativeValue = value
-	} else if kind == reflect.Float64 {
+	} else if kind == reflect.Int {
 		i, err := strconv.Atoi(value)
+		if err != nil {
+			return errors.New("Invalid value")
+		}
+		nativeValue = int(i)
+	} else if kind == reflect.Float64 {
+		i, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return errors.New("Invalid value")
 		}
@@ -484,21 +517,35 @@ func optionIsValid(option string, value interface{}) error {
 
 // Option validators
 
-func validatePositiveValue(option string, value interface{}) error {
-	tabsize, ok := value.(float64)
+func validatePositiveInt(option string, value interface{}) error {
+	nativeValue, ok := value.(int)
 
 	if !ok {
 		return errors.New("Expected numeric type for " + option)
 	}
 
-	if tabsize < 1 {
+	if nativeValue < 1 {
 		return errors.New(option + " must be greater than 0")
 	}
 
 	return nil
 }
 
-func validateNonNegativeValue(option string, value interface{}) error {
+func validateNonNegativeInt(option string, value interface{}) error {
+	nativeValue, ok := value.(int)
+
+	if !ok {
+		return errors.New("Expected numeric type for " + option)
+	}
+
+	if nativeValue < 0 {
+		return errors.New(option + " must be non-negative")
+	}
+
+	return nil
+}
+
+func validateNonNegativeFloat(option string, value interface{}) error {
 	nativeValue, ok := value.(float64)
 
 	if !ok {

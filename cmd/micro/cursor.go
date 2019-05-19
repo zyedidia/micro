@@ -348,7 +348,7 @@ func (c *Cursor) StartOfText() {
 // 4 visual spaces)
 func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 	// Get the tab size
-	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	tabSize := c.buf.Settings["tabsize"].(int)
 	visualLineLen := StringWidth(c.buf.Line(lineNum), tabSize)
 	if visualPos > visualLineLen {
 		visualPos = visualLineLen
@@ -363,7 +363,7 @@ func (c *Cursor) GetCharPosInLine(lineNum, visualPos int) int {
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
 	runes := []rune(c.buf.Line(c.Y))
-	tabSize := int(c.buf.Settings["tabsize"].(float64))
+	tabSize := c.buf.Settings["tabsize"].(int)
 	if c.X > len(runes) {
 		c.X = len(runes) - 1
 	}

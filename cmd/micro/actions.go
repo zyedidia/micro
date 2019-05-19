@@ -136,7 +136,7 @@ func (v *View) ScrollUpAction(usePlugin bool) bool {
 			return false
 		}
 
-		scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
+		scrollspeed := v.Buf.Settings["scrollspeed"].(int)
 		v.ScrollUp(scrollspeed)
 
 		if usePlugin {
@@ -153,7 +153,7 @@ func (v *View) ScrollDownAction(usePlugin bool) bool {
 			return false
 		}
 
-		scrollspeed := int(v.Buf.Settings["scrollspeed"].(float64))
+		scrollspeed := v.Buf.Settings["scrollspeed"].(int)
 		v.ScrollDown(scrollspeed)
 
 		if usePlugin {
@@ -227,7 +227,7 @@ func (v *View) CursorLeft(usePlugin bool) bool {
 		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := v.Buf.Settings["tabmovement"].(bool)
 		if tabstospaces && tabmovement {
-			tabsize := int(v.Buf.Settings["tabsize"].(float64))
+			tabsize := v.Buf.Settings["tabsize"].(int)
 			line := v.Buf.Line(v.Cursor.Y)
 			if v.Cursor.X-tabsize >= 0 && line[v.Cursor.X-tabsize:v.Cursor.X] == Spaces(tabsize) && IsStrWhitespace(line[0:v.Cursor.X-tabsize]) {
 				for i := 0; i < tabsize; i++ {
@@ -261,7 +261,7 @@ func (v *View) CursorRight(usePlugin bool) bool {
 		tabstospaces := v.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := v.Buf.Settings["tabmovement"].(bool)
 		if tabstospaces && tabmovement {
-			tabsize := int(v.Buf.Settings["tabsize"].(float64))
+			tabsize := v.Buf.Settings["tabsize"].(int)
 			line := v.Buf.Line(v.Cursor.Y)
 			if v.Cursor.X+tabsize < Count(line) && line[v.Cursor.X:v.Cursor.X+tabsize] == Spaces(tabsize) && IsStrWhitespace(line[0:v.Cursor.X]) {
 				for i := 0; i < tabsize; i++ {
@@ -570,7 +570,7 @@ func (v *View) Retab(usePlugin bool) bool {
 	}
 
 	toSpaces := v.Buf.Settings["tabstospaces"].(bool)
-	tabsize := int(v.Buf.Settings["tabsize"].(float64))
+	tabsize := v.Buf.Settings["tabsize"].(int)
 	dirty := false
 
 	for i := 0; i < v.Buf.NumLines; i++ {
@@ -748,7 +748,7 @@ func (v *View) Backspace(usePlugin bool) bool {
 		// whitespace at the start of the line, we should delete as if it's a
 		// tab (tabSize number of spaces)
 		lineStart := sliceEnd(v.Buf.LineBytes(v.Cursor.Y), v.Cursor.X)
-		tabSize := int(v.Buf.Settings["tabsize"].(float64))
+		tabSize := v.Buf.Settings["tabsize"].(int)
 		if v.Buf.Settings["tabstospaces"].(bool) && IsSpaces(lineStart) && utf8.RuneCount(lineStart) != 0 && utf8.RuneCount(lineStart)%tabSize == 0 {
 			loc := v.Cursor.Loc
 			v.Buf.Remove(loc.Move(-tabSize, v.Buf), loc)

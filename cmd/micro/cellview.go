@@ -89,7 +89,7 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 		}
 	}
 
-	tabsize := int(buf.Settings["tabsize"].(float64))
+	tabsize := buf.Settings["tabsize"].(int)
 	softwrap := buf.Settings["softwrap"].(bool)
 	indentrunes := []rune(buf.Settings["indentchar"].(string))
 	// if empty indentchar settings, use space

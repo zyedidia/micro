@@ -369,7 +369,7 @@ func (v *View) GetSoftWrapLocation(vx, vy int) (int, int) {
 			}
 
 			if ch == '\t' {
-				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
+				screenX += v.Buf.Settings["tabsize"].(int) - 1
 			}
 
 			screenX++
@@ -407,7 +407,7 @@ func (v *View) Bottomline() int {
 			}
 
 			if ch == '\t' {
-				screenX += int(v.Buf.Settings["tabsize"].(float64)) - 1
+				screenX += v.Buf.Settings["tabsize"].(int) - 1
 			}
 
 			screenX++
@@ -424,13 +424,23 @@ func (v *View) Bottomline() int {
 	return numLines + v.Topline
 }
 
+func (v *View) ScrollMarginLines() int {
+	setting := v.Buf.Settings["scrollmargin"].(float64)
+	if setting < 1 {
+		height := v.Bottomline() - v.Topline
+		return int(float64(height) * setting)
+	}
+	return int(setting)
+}
+
+
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 func (v *View) Relocate() bool {
 	height := v.Bottomline() - v.Topline
 	ret := false
 	cy := v.Cursor.Y
-	scrollmargin := int(v.Buf.Settings["scrollmargin"].(float64))
+	scrollmargin := v.ScrollMarginLines()
 	if cy < v.Topline+scrollmargin && cy > scrollmargin-1 {
 		v.Topline = cy - scrollmargin
 		ret = true
@@ -864,7 +874,7 @@ func (v *View) DisplayView() {
 			realLineN++
 		}
 
-		colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+		colorcolumn := v.Buf.Settings["colorcolumn"].(int)
 		if colorcolumn != 0 && xOffset+colorcolumn-v.leftCol < v.Width {
 			style := GetColor("color-column")
 			fg, _, _ := style.Decompose()
@@ -965,7 +975,7 @@ func (v *View) DisplayView() {
 			if char != nil {
 				lineStyle := char.style
 
-				colorcolumn := int(v.Buf.Settings["colorcolumn"].(float64))
+				colorcolumn := v.Buf.Settings["colorcolumn"].(int)
 				if colorcolumn != 0 && char.visualLoc.X == colorcolumn {
 					style := GetColor("color-column")
 					fg, _, _ := style.Decompose()

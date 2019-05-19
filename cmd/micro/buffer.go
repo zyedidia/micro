@@ -338,7 +338,7 @@ func (b *Buffer) FileType() string {
 // IndentString returns a string representing one level of indentation
 func (b *Buffer) IndentString() string {
 	if b.Settings["tabstospaces"].(bool) {
-		return Spaces(int(b.Settings["tabsize"].(float64)))
+		return Spaces(b.Settings["tabsize"].(int))
 	}
 	return "\t"
 }
