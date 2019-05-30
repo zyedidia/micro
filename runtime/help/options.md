@@ -8,7 +8,7 @@ the config directory.
 
 Here are the options that you can set:
 
-* `autoindent`: when creating a new line use the same indentation as the 
+* `autoindent`: when creating a new line, use the same indentation as the 
    previous line.
 
 	default value: `true`
@@ -51,7 +51,8 @@ Here are the options that you can set:
 
 	default value: `true`
 
-* `eofnewline`: micro will automatically add a newline to the file.
+* `eofnewline`: micro will automatically add a newline to the end of the file
+   when saving.
 
 	default value: `false`
 
@@ -67,11 +68,12 @@ Here are the options that you can set:
 	default value: `true`
 
 * `fileformat`: this determines what kind of line endings micro will use for the
-   file. UNIX line endings are just `\n` (lf) whereas dos line endings are
-   `\r\n` (crlf). The two possible values for this option are `unix` and `dos`.
-   The fileformat will be automatically detected and displayed on the statusline
-   but this option is useful if you would like to change the line endings or if
-   you are starting a new file.
+   file. UNIX line endings are just `\n` (linefeed) whereas dos line endings are
+   `\r\n` (carriage return + linefeed). The two possible values for this option
+   are `unix` and `dos`. The fileformat will be automatically detected (when you
+   open an existing file) and displayed on the statusline, but this option is
+   useful if you would like to change the line endings or if you are starting a
+   new file.
 
 	default value: `unix`
 
@@ -87,7 +89,7 @@ Here are the options that you can set:
 
 * `indentchar`: sets the indentation character.
 
-	default value: ` `
+	default value: ` ` (space)
 
 * `infobar`: enables the line at the bottom of the editor where messages are
    printed. This option is `global only`.
@@ -96,8 +98,8 @@ Here are the options that you can set:
 
 * `keepautoindent`: when using autoindent, whitespace is added for you. This
    option determines if when you move to the next line without any insertions
-   the whitespace that was added should be deleted. By default the autoindent
-   whitespace is deleted if the line was left empty.
+   the whitespace that was added should be deleted to remove trailing whitespace.
+   By default, the autoindent whitespace is deleted if the line was left empty.
 
 	default value: `false`
 
@@ -198,7 +200,7 @@ Here are the options that you can set:
 
     default value: `false`
 
-* `syntax`: turns syntax on or off.
+* `syntax`: turns syntax highlighting on or off.
 
 	default value: `true`
 
