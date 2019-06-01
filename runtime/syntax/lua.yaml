@@ -23,7 +23,8 @@ rules:
     - constant: "\\b(false|nil|true)\\b"
     - statement: "(\\b(dofile|require|include)|%q|%!|%Q|%r|%x)\\b"
     - constant.number: "\\b([0-9]+)\\b"
-    - symbol: "(\\(|\\)|\\[|\\]|\\{|\\}|\\*\\*|\\*|/|%|\\+|-|\\^|>|>=|<|<=|~=|=|[\\.]{2,3}|#)"
+    - symbol.brackets: "[(){}\\[\\]]"
+    - symbol: "(\\*|//|/|%|\\+|-|\\^|>|>=|<|<=|~=|=|[\\.]{2,3}|#)"
 
     - constant.string:
         start: "\""
@@ -45,11 +46,64 @@ rules:
         rules:
             - constant.specialChar: "\\\\."
 
+# support first few lengths of "long brackets" explicitly
+# brackets longer than that will give false positives
+
+    - constant.string:
+        start: "\\[=\\["
+        end: "\\]=\\]"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "\\[==\\["
+        end: "\\]==\\]"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "\\[===\\["
+        end: "\\]===\\]"
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "\\[====+\\["
+        end: "\\]====+\\]"
+        rules:
+            - constant.specialChar: "\\\\."
+
     - special: "\\\\[0-7][0-7][0-7]|\\\\x[0-9a-fA-F][0-9a-fA-F]|\\\\[abefnrs]|(\\\\c|\\\\C-|\\\\M-|\\\\M-\\\\C-)."
 
     - comment.block:
-        start: "\\-\\-\\[(\\=*|\\#*)\\["
-        end: "\\-\\-\\](\\=*|\\#*)\\]"
+        start: "\\-\\-\\[\\["
+        end: "\\]\\]"
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
+
+# support long brackets, same as with multiline strings
+
+    - comment.block:
+        start: "\\-\\-\\[=\\["
+        end: "\\]=\\]"
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
+
+    - comment.block:
+        start: "\\-\\-\\[==\\["
+        end: "\\]==\\]"
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
+
+    - comment.block:
+        start: "\\-\\-\\[===\\["
+        end: "\\]===\\]"
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
+
+    - comment.block:
+        start: "\\-\\-\\[====+\\["
+        end: "\\]====+\\]"
         rules:
             - todo: "(TODO|NOTE|FIXME):?"
 
@@ -59,4 +113,4 @@ rules:
         start: "\\-\\-"
         end: "$"
         rules:
-          - todo: "(TODO|NOTE|FIXME):?"
+            - todo: "(TODO|NOTE|FIXME):?"

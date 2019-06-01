@@ -73,9 +73,18 @@ func (c *CellView) Draw(buf *Buffer, top, height, left, width int) {
 	// bracePairs is defined in buffer.go
 	if buf.Settings["matchbrace"].(bool) {
 		for _, bp := range bracePairs {
-			r := buf.Cursor.RuneUnder(buf.Cursor.X)
+			curX := buf.Cursor.X
+			curLoc := buf.Cursor.Loc
+			if buf.Settings["matchbraceleft"].(bool) {
+				if curX > 0 {
+					curX--
+					curLoc = curLoc.Move(-1, buf)
+				}
+			}
+
+			r := buf.Cursor.RuneUnder(curX)
 			if r == bp[0] || r == bp[1] {
-				matchingBrace = buf.FindMatchingBrace(bp, buf.Cursor.Loc)
+				matchingBrace = buf.FindMatchingBrace(bp, curLoc)
 			}
 		}
 	}

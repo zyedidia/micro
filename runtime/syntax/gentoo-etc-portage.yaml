@@ -1,7 +1,7 @@
 filetype: etc-portage
 
 detect:
-    filename: "\\.(keywords|mask|unmask|use)$"
+    filename: "\\.(keywords|mask|unmask|use)(/.+)?$"
 
 rules:
     # Use flags:

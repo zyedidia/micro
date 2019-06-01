@@ -4,31 +4,27 @@ detect:
     filename: "\\.gd$"
 
 rules:
-    # built-in objects
-    - constant: "\\b(null|self|true|false)\\b"
-      # built-in attributes
-      # color constant "\\b()\\b"
-      # built-in functions
+    # Built-in constants
+    - constant: "\\b(INF|NAN|PI|TAU)\\b"
+    - constant.bool: "\\b(null|true|false)\\b"
+    # Built-in functions
     - identifier: "\\b(abs|acos|asin|atan|atan2|ceil|clamp|convert|cos|cosh|db2linear|decimals|deg2rad|ease|exp|float|floor|fmod|fposmod|hash|int|isinf|isnan|lerp|linear2db|load|log|max|min|nearest_po2|pow|preload|print|printerr|printraw|prints|printt|rad2deg|rand_range|rand_seed|randomize|randi|randf|range|round|seed|sin|slerp|sqrt|str|str2var|tan|typeof|var2str|weakref)\\b"
-      # special method names
-    - identifier: "\\b(AnimationPlayer|AnimationTreePlayer|Button|Control|HTTPClient|HTTPRequest|Input|InputEvent|MainLoop|Node|Node2D|SceneTree|Spatial|SteamPeer|PacketPeer|PacketPeerUDP|Timer|Tween)\\b"
-      # types
-    - type: "\\b(Vector2|Vector3)\\b"
-      # definitions
-    - identifier: "func [a-zA-Z_0-9]+" 
-      # keywords
-    - statement: "\\b(and|as|assert|break|breakpoint|class|const|continue|elif|else|export|extends|for|func|if|in|map|not|onready|or|pass|return|signal|var|while|yield)\\b" 
+    # Built-in node names
+    - identifier: "\\b(AnimationPlayer|AnimationTreePlayer|Button|Control|Engine|HTTPClient|HTTPRequest|Input|InputEvent|MainLoop|Node|Node2D|OS|SceneTree|Spatial|StreamPeer|PacketPeer|PacketPeerUDP|Timer|Tween)\\b"
+    # Types
+    - type: "\\b(AABB|Array|Basis|Color|Dictionary|NodePath|Object|Plane|PoolByteArray|PoolColorArray|PoolIntArray|PoolRealArray|PoolVector2Array|PoolVector3Array|Quat|Rect2|RID|String|Transform|Transform2D|Vector2|Vector3)\\b"
+    # Definitions
+    - identifier: "func [a-zA-Z_0-9]+"
+    # Keywords
+    - statement: "\\b(and|as|assert|break|breakpoint|class|const|continue|elif|else|enum|export|extends|for|func|if|in|is|map|master|mastersync|match|not|onready|or|pass|remote|remotesync|return|self|setget|slave|slavesync|signal|sync|tool|var|while|yield)\\b"
 
-      # decorators
-    - special: "@.*[(]"
-
-      # operators
+    # Operators
     - statement: "[.:;,+*|=!\\%@]|<|>|/|-|&"
 
-      # parentheses
+    # Parentheses
     - statement: "[(){}]|\\[|\\]"
 
-      # numbers
+    # Numbers
     - constant: "\\b[0-9]+\\b"
     - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
 
@@ -58,14 +54,8 @@ rules:
         rules:
             - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
 
-    - constant.string:
-        start: "`"
-        end: "`"
-        rules: []
-
     - comment:
         start: "#"
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-

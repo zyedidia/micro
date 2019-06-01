@@ -187,6 +187,8 @@ Start
 End
 PageUp
 PageDown
+SelectPageUp
+SelectPageDown
 HalfPageUp
 HalfPageDown
 StartOfLine
@@ -215,6 +217,7 @@ Suspend (Unix only)
 ScrollUp
 ScrollDown
 SpawnMultiCursor
+SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
@@ -351,6 +354,7 @@ CtrlRightSq
 CtrlCarat
 CtrlUnderscore
 Backspace
+OldBackspace
 Tab
 Esc
 Escape
@@ -464,6 +468,7 @@ MouseWheelRight
 
     // Multiple cursors bindings
     "Alt-n": "SpawnMultiCursor",
+    "Alt-m": "SpawnMultiCursorSelect",
     "Alt-p": "RemoveMultiCursor",
     "Alt-c": "RemoveAllMultiCursors",
     "Alt-x": "SkipMultiCursor",

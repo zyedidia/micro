@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"time"
 
 	"github.com/go-errors/errors"
@@ -95,32 +96,23 @@ func LoadInput(passwords []Password) []*Buffer {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(args); i++ {
-			filename = args[i]
-
-			// Check that the file exists
-			var input *os.File
-			if _, e := os.Stat(filename); e == nil {
-				// If it exists we load it into a buffer
-				input, err = os.Open(filename)
-				stat, _ := input.Stat()
-				defer input.Close()
-				if err != nil {
-					TermMessage(err)
-					continue
+			if strings.HasPrefix(args[i], "+") {
+				if strings.Contains(args[i], ":") {
+					split := strings.Split(args[i], ":")
+					*flagStartPos = split[0][1:] + "," + split[1]
+				} else {
+					*flagStartPos = args[i][1:] + ",0"
 				}
-				if stat.IsDir() {
-					TermMessage("Cannot read", filename, "because it is a directory")
-					continue
-				}
+				continue
 			}
 
+			buf, err := NewBufferFromFile(args[i], passwords[i])
+			if err != nil {
+				TermMessage(err)
+				continue
+			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			if input != nil {
-				buffers = append(buffers, NewBufferWithPassword(input, FSize(input), filename,
-					passwords[i].Secret, passwords[i].Prompted))
-			} else {
-				buffers = append(buffers, NewBufferWithPassword(nil, 0, filename, "", false))
-			}
+			buffers = append(buffers, buf)
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
@@ -201,7 +193,12 @@ func InitScreen() {
 	screen, err = tcell.NewScreen()
 	if err != nil {
 		if err == tcell.ErrTermNotFound {
-			terminfo.WriteDB(configDir + "/.tcelldb")
+			err = terminfo.WriteDB(configDir + "/.tcelldb")
+			if err != nil {
+				fmt.Println(err)
+				fmt.Println("Fatal: Micro could not create tcelldb")
+				os.Exit(1)
+			}
 			screen, err = tcell.NewScreen()
 			if err != nil {
 				fmt.Println(err)
@@ -244,7 +241,7 @@ func RedrawAll() {
 		}
 	}
 
-	for _, v := range tabs[curTab].views {
+	for _, v := range tabs[curTab].Views {
 		v.Display()
 	}
 	DisplayTabs()
@@ -274,9 +271,10 @@ func LoadAll() {
 	InitBindings()
 
 	InitColorscheme()
+	LoadPlugins()
 
 	for _, tab := range tabs {
-		for _, v := range tab.views {
+		for _, v := range tab.Views {
 			v.Buf.UpdateRules()
 		}
 	}
@@ -294,7 +292,9 @@ func main() {
 		fmt.Println("-config-dir dir")
 		fmt.Println("    \tSpecify a custom location for the configuration directory")
 		fmt.Println("-startpos LINE,COL")
+		fmt.Println("+LINE:COL")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
+		fmt.Println("    \tThis can also be done by opening file:LINE:COL")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all option help")
 		fmt.Println("-version")
@@ -388,7 +388,7 @@ func main() {
 		tab.SetNum(len(tabs))
 		tabs = append(tabs, tab)
 		for _, t := range tabs {
-			for _, v := range t.views {
+			for _, v := range t.Views {
 				v.Center(false)
 			}
 
@@ -406,6 +406,9 @@ func main() {
 	// We give plugins access to a bunch of variables here which could be useful to them
 	L.SetGlobal("OS", luar.New(L, runtime.GOOS))
 	L.SetGlobal("tabs", luar.New(L, tabs))
+	L.SetGlobal("GetTabs", luar.New(L, func() []*Tab {
+		return tabs
+	}))
 	L.SetGlobal("curTab", luar.New(L, curTab))
 	L.SetGlobal("messenger", luar.New(L, messenger))
 	L.SetGlobal("GetOption", luar.New(L, GetOption))
@@ -427,6 +430,7 @@ func main() {
 	L.SetGlobal("GetLeadingWhitespace", luar.New(L, GetLeadingWhitespace))
 	L.SetGlobal("MakeCompletion", luar.New(L, MakeCompletion))
 	L.SetGlobal("NewBuffer", luar.New(L, NewBufferFromString))
+	L.SetGlobal("NewBufferFromFile", luar.New(L, NewBufferFromFile))
 	L.SetGlobal("RuneStr", luar.New(L, func(r rune) string {
 		return string(r)
 	}))
@@ -466,7 +470,7 @@ func main() {
 	LoadPlugins()
 
 	for _, t := range tabs {
-		for _, v := range t.views {
+		for _, v := range t.Views {
 			GlobalPluginCall("onViewOpen", v)
 			GlobalPluginCall("onBufferOpen", v.Buf)
 		}
@@ -512,7 +516,7 @@ func main() {
 		case <-updateterm:
 			continue
 		case vnum := <-closeterm:
-			tabs[curTab].views[vnum].CloseTerminal()
+			tabs[curTab].Views[vnum].CloseTerminal()
 		case event = <-events:
 		}
 
@@ -542,7 +546,7 @@ func main() {
 						if CurView().mouseReleased {
 							// We loop through each view in the current tab and make sure the current view
 							// is the one being clicked in
-							for _, v := range tabs[curTab].views {
+							for _, v := range tabs[curTab].Views {
 								if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
 									tabs[curTab].CurView = v.Num
 								}
@@ -551,9 +555,9 @@ func main() {
 					} else if e.Buttons() == tcell.WheelUp || e.Buttons() == tcell.WheelDown {
 						var view *View
 						x, y := e.Position()
-						for _, v := range tabs[curTab].views {
+						for _, v := range tabs[curTab].Views {
 							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
-								view = tabs[curTab].views[v.Num]
+								view = tabs[curTab].Views[v.Num]
 							}
 						}
 						if view != nil {

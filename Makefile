@@ -41,6 +41,7 @@ runtime:
 	go get -u github.com/jteeuwen/go-bindata/...
 	$(GOBIN)/go-bindata -nometadata -o runtime.go runtime/...
 	mv runtime.go cmd/micro
+	gofmt -w cmd/micro/runtime.go
 
 test:
 	go test ./cmd/micro

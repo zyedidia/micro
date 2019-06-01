@@ -347,6 +347,11 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 		event := <-events
 
 		switch e := event.(type) {
+		case *tcell.EventResize:
+			for _, t := range tabs {
+				t.Resize()
+			}
+			RedrawAll()
 		case *tcell.EventKey:
 			switch e.Key() {
 			case tcell.KeyCtrlQ, tcell.KeyCtrlC, tcell.KeyEscape:
@@ -419,7 +424,7 @@ func (m *Messenger) Prompt(prompt, placeholder, historyType string, completionTy
 		m.HandleEvent(event, m.history[historyType])
 
 		m.Clear()
-		for _, v := range tabs[curTab].views {
+		for _, v := range tabs[curTab].Views {
 			v.Display()
 		}
 		DisplayTabs()
@@ -685,11 +690,11 @@ func (m *Messenger) Display() {
 func (m *Messenger) LoadHistory() {
 	if GetGlobalOption("savehistory").(bool) {
 		file, err := os.Open(configDir + "/buffers/history")
+		defer file.Close()
 		var decodedMap map[string][]string
 		if err == nil {
 			decoder := gob.NewDecoder(file)
 			err = decoder.Decode(&decodedMap)
-			file.Close()
 
 			if err != nil {
 				m.Error("Error loading history:", err)
@@ -719,6 +724,7 @@ func (m *Messenger) SaveHistory() {
 		}
 
 		file, err := os.Create(configDir + "/buffers/history")
+		defer file.Close()
 		if err == nil {
 			encoder := gob.NewEncoder(file)
 
@@ -727,7 +733,6 @@ func (m *Messenger) SaveHistory() {
 				m.Error("Error saving history:", err)
 				return
 			}
-			file.Close()
 		}
 	}
 }

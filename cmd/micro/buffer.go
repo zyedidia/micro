@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"encoding/gob"
@@ -12,16 +13,18 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/cmd/micro/highlight"
 	"golang.org/x/crypto/openpgp"
 	"golang.org/x/crypto/openpgp/armor"
 )
+
+const LargeFileThreshold = 50000
 
 var (
 	// 0 - no line type detected
@@ -63,7 +66,7 @@ type Buffer struct {
 	highlighter *highlight.Highlighter
 
 	// Hash of the original buffer -- empty if fastdirty is on
-	origHash [16]byte
+	origHash [md5.Size]byte
 
 	// Buffer local settings
 	Settings map[string]interface{}
@@ -80,20 +83,58 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
-// NewBufferFromString creates a new buffer containing the given
-// string
+// NewBufferFromFile opens a new buffer using the given path
+// It will also automatically handle `~`, and line/column with filename:l:c
+// It will return an empty buffer if the path does not exist
+// and an error if the file is a directory
+func NewBufferFromFile(path string, passwords ...Password) (*Buffer, error) {
+	filename, cursorPosition := GetPathAndCursorPosition(path)
+	filename = ReplaceHome(filename)
+	file, err := os.Open(filename)
+	fileInfo, _ := os.Stat(filename)
+
+	if err == nil && fileInfo.IsDir() {
+		return nil, errors.New(filename + " is a directory")
+	}
+
+	defer file.Close()
+
+	var buf *Buffer
+	if err != nil {
+		// File does not exist -- create an empty buffer with that name
+		buf = NewBufferFromString("", filename)
+	} else if len(passwords) == 1 {
+		buf = NewBufferWithPassword(file, FSize(file), filename, passwords[0].Secret, passwords[0].Prompted, cursorPosition)
+	} else {
+		password, passwordPrompted := "", false
+		if Encrypted(filename) {
+			pass, canceled := messenger.PasswordPrompt(false)
+			if !canceled {
+				password = pass
+			}
+			passwordPrompted = true
+		}
+
+		buf = NewBufferWithPassword(file, FSize(file), filename, password, passwordPrompted, cursorPosition)
+	}
+
+	return buf, nil
+}
+
+// NewBufferFromString creates a new buffer containing the given string
 func NewBufferFromString(text, path string) *Buffer {
-	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, "", false)
+	return NewBufferWithPassword(strings.NewReader(text), int64(len(text)), path, "", false, nil)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
 func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
-	return NewBufferWithPassword(reader, size, path, "", false)
+	return NewBufferWithPassword(reader, size, path, "", false, nil)
 }
 
-// NewBufferWithPassword creates a new buffer from a given reader with a given path
+// NewBuffer creates a new buffer from a given reader with a given path
 // and password
-func NewBufferWithPassword(reader io.Reader, size int64, path, password string, passwordPrompted bool) *Buffer {
+func NewBufferWithPassword(reader io.Reader, size int64, path, password string, passwordPrompted bool, cursorPosition []string) *Buffer {
+	// check if the file is already open in a tab. If it's open return the buffer to that tab
 	if buf := FindBuffer(path); buf != nil {
 		return buf
 	}
@@ -137,47 +178,19 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 		os.Mkdir(configDir+"/buffers/", os.ModePerm)
 	}
 
-	// Put the cursor at the first spot
-	cursorStartX := 0
-	cursorStartY := 0
-	// If -startpos LINE,COL was passed, use start position LINE,COL
-	if len(*flagStartPos) > 0 {
-		positions := strings.Split(*flagStartPos, ",")
-		if len(positions) == 2 {
-			lineNum, errPos1 := strconv.Atoi(positions[0])
-			colNum, errPos2 := strconv.Atoi(positions[1])
-			if errPos1 == nil && errPos2 == nil {
-				cursorStartX = colNum
-				cursorStartY = lineNum - 1
-				// Check to avoid line overflow
-				if cursorStartY > b.NumLines {
-					cursorStartY = b.NumLines - 1
-				} else if cursorStartY < 0 {
-					cursorStartY = 0
-				}
-				// Check to avoid column overflow
-				if cursorStartX > len(b.Line(cursorStartY)) {
-					cursorStartX = len(b.Line(cursorStartY))
-				} else if cursorStartX < 0 {
-					cursorStartX = 0
-				}
-			}
-		}
-	}
+	cursorLocation, cursorLocationError := GetBufferCursorLocation(cursorPosition, b)
 	b.Cursor = Cursor{
-		Loc: Loc{
-			X: cursorStartX,
-			Y: cursorStartY,
-		},
+		Loc: cursorLocation,
 		buf: b,
 	}
 
 	InitLocalSettings(b)
 
-	if len(*flagStartPos) == 0 && (b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool)) {
+	if cursorLocationError != nil && len(*flagStartPos) == 0 && (b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool)) {
 		// If either savecursor or saveundo is turned on, we need to load the serialized information
 		// from ~/.config/micro/buffers
 		file, err := os.Open(configDir + "/buffers/" + EscapePath(b.AbsPath))
+		defer file.Close()
 		if err == nil {
 			var buffer SerializedBuffer
 			decoder := gob.NewDecoder(file)
@@ -200,15 +213,14 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 				}
 			}
 		}
-		file.Close()
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if size > 50000 {
+		if size > LargeFileThreshold {
 			// If the file is larger than a megabyte fastdirty needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			b.origHash = md5.Sum([]byte(b.String()))
+			calcHash(b, &b.origHash)
 		}
 	}
 
@@ -227,7 +239,7 @@ func FindBuffer(path string) *Buffer {
 	}
 
 	for _, tab := range tabs {
-		for _, view := range tab.views {
+		for _, view := range tab.Views {
 			if view.Buf.Path == path {
 				return view.Buf
 			}
@@ -235,6 +247,52 @@ func FindBuffer(path string) *Buffer {
 	}
 
 	return nil
+}
+
+func GetBufferCursorLocation(cursorPosition []string, b *Buffer) (Loc, error) {
+	// parse the cursor position. The cursor location is ALWAYS initialised to 0, 0 even when
+	// an error occurs due to lack of arguments or because the arguments are not numbers
+	cursorLocation, cursorLocationError := ParseCursorLocation(cursorPosition)
+
+	// Put the cursor at the first spot. In the logic for cursor position the -startpos
+	// flag is processed first and will overwrite any line/col parameters with colons after the filename
+	if len(*flagStartPos) > 0 || cursorLocationError == nil {
+		var lineNum, colNum int
+		var errPos1, errPos2 error
+
+		positions := strings.Split(*flagStartPos, ",")
+
+		// if the -startpos flag contains enough args use them for the cursor location.
+		// In this case args passed at the end of the filename will be ignored
+		if len(positions) == 2 {
+			lineNum, errPos1 = strconv.Atoi(positions[0])
+			colNum, errPos2 = strconv.Atoi(positions[1])
+		}
+		// if -startpos has invalid arguments, use the arguments from filename.
+		// This will have a default value (0, 0) even when the filename arguments are invalid
+		if errPos1 != nil || errPos2 != nil || len(*flagStartPos) == 0 {
+			// otherwise check if there are any arguments after the filename and use them
+			lineNum = cursorLocation.Y
+			colNum = cursorLocation.X
+		}
+
+		// if some arguments were found make sure they don't go outside the file and cause overflows
+		cursorLocation.Y = lineNum - 1
+		cursorLocation.X = colNum
+		// Check to avoid line overflow
+		if cursorLocation.Y > b.NumLines-1 {
+			cursorLocation.Y = b.NumLines - 1
+		} else if cursorLocation.Y < 0 {
+			cursorLocation.Y = 0
+		}
+		// Check to avoid column overflow
+		if cursorLocation.X > len(b.Line(cursorLocation.Y)) {
+			cursorLocation.X = len(b.Line(cursorLocation.Y))
+		} else if cursorLocation.X < 0 {
+			cursorLocation.X = 0
+		}
+	}
+	return cursorLocation, cursorLocationError
 }
 
 // GetName returns the name that should be displayed in the statusline
@@ -429,21 +487,24 @@ func (b *Buffer) SaveWithSudo() error {
 
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
-	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-		file, err := os.Create(configDir + "/buffers/" + EscapePath(b.AbsPath))
-		if err == nil {
-			enc := gob.NewEncoder(file)
-			gob.Register(TextEvent{})
-			err = enc.Encode(SerializedBuffer{
-				b.EventHandler,
-				b.Cursor,
-				b.ModTime,
-			})
-		}
-		err = file.Close()
-		return err
+	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
+		return nil
 	}
-	return nil
+
+	name := configDir + "/buffers/" + EscapePath(b.AbsPath)
+
+	return b.overwriteFile(name, func(file io.Writer) error {
+		return gob.NewEncoder(file).Encode(SerializedBuffer{
+			b.EventHandler,
+			b.Cursor,
+			b.ModTime,
+		})
+	})
+}
+
+func init() {
+	gob.Register(TextEvent{})
+	gob.Register(SerializedBuffer{})
 }
 
 // Decode decodes a stream for loading the buffer
@@ -543,17 +604,17 @@ func (b *Buffer) Encode(filename string) ([]byte, error) {
 func (b *Buffer) SaveAs(filename string) error {
 	b.UpdateRules()
 	if b.Settings["rmtrailingws"].(bool) {
-		r, _ := regexp.Compile(`[ \t]+$`)
-		for lineNum, line := range b.Lines(0, b.NumLines) {
-			indices := r.FindStringIndex(line)
-			if indices == nil {
-				continue
+		for i, l := range b.lines {
+			pos := len(bytes.TrimRightFunc(l.data, unicode.IsSpace))
+
+			if pos < len(l.data) {
+				b.deleteToEnd(Loc{pos, i})
 			}
-			startLoc := Loc{indices[0], lineNum}
-			b.deleteToEnd(startLoc)
 		}
+
 		b.Cursor.Relocate()
 	}
+
 	if b.Settings["eofnewline"].(bool) {
 		end := b.End()
 		if b.RuneAt(Loc{end.X - 1, end.Y}) != '\n' {
@@ -566,7 +627,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	}()
 
 	// Removes any tilde and replaces with the absolute path to home
-	var absFilename string = ReplaceHome(filename)
+	absFilename := ReplaceHome(filename)
 
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
@@ -586,26 +647,140 @@ func (b *Buffer) SaveAs(filename string) error {
 		}
 	}
 
-	f, err := os.OpenFile(absFilename, os.O_WRONLY|os.O_CREATE, 0644)
+	var fileSize int
+
+	err := b.overwriteFile(absFilename, func(file io.Writer) (e error) {
+		if len(b.lines) == 0 {
+			return
+		}
+
+		// end of line
+		var eol []byte
+
+		if b.Settings["fileformat"] == "dos" {
+			eol = []byte{'\r', '\n'}
+		} else {
+			eol = []byte{'\n'}
+		}
+
+		// write lines
+		if fileSize, e = file.Write(b.lines[0].data); e != nil {
+			return
+		}
+
+		for _, l := range b.lines[1:] {
+			if _, e = file.Write(eol); e != nil {
+				return
+			}
+
+			if _, e = file.Write(l.data); e != nil {
+				return
+			}
+
+			fileSize += len(eol) + len(l.data)
+		}
+
+		return
+	})
+
 	if err != nil {
-		return err
-	}
-	if err := f.Truncate(0); err != nil {
 		return err
 	}
 
-	data, err := b.Encode(filename)
-	if err != nil {
-		return err
-	}
-	_, err = f.Write(data)
-	if err != nil {
-		return err
+	if !b.Settings["fastdirty"].(bool) {
+		if fileSize > LargeFileThreshold {
+			// For large files 'fastdirty' needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
 	}
 
 	b.Path = filename
 	b.IsModified = false
 	return b.Serialize()
+}
+
+// overwriteFile opens the given file for writing, truncating if one exists, and then calls
+// the supplied function with the file as io.Writer object, also making sure the file is
+// closed afterwards.
+func (b *Buffer) overwriteFile(name string, fn func(io.Writer) error) (err error) {
+	var file *os.File
+
+	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+		return
+	}
+
+	defer func() {
+		if e := file.Close(); e != nil && err == nil {
+			err = e
+		}
+	}()
+
+	if b.Password == "" {
+		w := bufio.NewWriter(file)
+
+		if err = fn(w); err != nil {
+			return
+		}
+
+		err = w.Flush()
+		return
+	}
+
+	data := bytes.Buffer{}
+	if err = fn(&data); err != nil {
+		return
+	}
+	if strings.HasSuffix(name, ExtensionArmorGPG) {
+		w, err := armor.Encode(file, "PGP SIGNATURE", nil)
+		if err != nil {
+			return err
+		}
+
+		plaintext, err := openpgp.SymmetricallyEncrypt(w, []byte(b.Password), nil, nil)
+		if err != nil {
+			return err
+		}
+		_, err = plaintext.Write(data.Bytes())
+		if err != nil {
+			return err
+		}
+
+		plaintext.Close()
+		w.Close()
+
+		return nil
+	}
+
+	plaintext, err := openpgp.SymmetricallyEncrypt(file, []byte(b.Password), nil, nil)
+	if err != nil {
+		return err
+	}
+	_, err = plaintext.Write(data.Bytes())
+	if err != nil {
+		return err
+	}
+
+	plaintext.Close()
+
+	return nil
+}
+
+// calcHash calculates md5 hash of all lines in the buffer
+func calcHash(b *Buffer, out *[md5.Size]byte) {
+	h := md5.New()
+
+	if len(b.lines) > 0 {
+		h.Write(b.lines[0].data)
+
+		for _, l := range b.lines[1:] {
+			h.Write([]byte{'\n'})
+			h.Write(l.data)
+		}
+	}
+
+	h.Sum((*out)[:0])
 }
 
 // SaveAsWithSudo is the same as SaveAs except it uses a neat trick
@@ -657,7 +832,11 @@ func (b *Buffer) Modified() bool {
 	if b.Settings["fastdirty"].(bool) {
 		return b.IsModified
 	}
-	return b.origHash != md5.Sum([]byte(b.String()))
+
+	var buff [md5.Size]byte
+
+	calcHash(b, &buff)
+	return buff != b.origHash
 }
 
 func (b *Buffer) insert(pos Loc, value []byte) {
@@ -696,7 +875,7 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 	return '\n'
 }
 
-// Line returns a single line as an array of runes
+// LineBytes returns a single line as an array of runes
 func (b *Buffer) LineBytes(n int) []byte {
 	if n >= len(b.lines) {
 		return []byte{}
@@ -704,7 +883,7 @@ func (b *Buffer) LineBytes(n int) []byte {
 	return b.lines[n].data
 }
 
-// Line returns a single line as an array of runes
+// LineRunes returns a single line as an array of runes
 func (b *Buffer) LineRunes(n int) []rune {
 	if n >= len(b.lines) {
 		return []rune{}
@@ -736,8 +915,16 @@ func (b *Buffer) Lines(start, end int) []string {
 }
 
 // Len gives the length of the buffer
-func (b *Buffer) Len() int {
-	return Count(b.String())
+func (b *Buffer) Len() (n int) {
+	for _, l := range b.lines {
+		n += utf8.RuneCount(l.data)
+	}
+
+	if len(b.lines) > 1 {
+		n += len(b.lines) - 1 // account for newlines
+	}
+
+	return
 }
 
 // MoveLinesUp moves the range of lines up one row

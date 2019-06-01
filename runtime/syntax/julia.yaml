@@ -13,7 +13,7 @@ rules:
       # definitions
     - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
       # keywords
-    - statement: "\\b(begin|break|catch|continue|function|elseif|else|end|finally|for|global|local|const|if|include|using|require|macro|println|return|try|type|while|module)\\b"
+    - statement: "\\b(begin|break|catch|continue|function|elseif|struct|else|end|finally|for|global|local|const|if|include|import|using|require|macro|println|return|try|type|while|module)\\b"
       # decorators
     - identifier.macro: "@[A-Za-z0-9_]+"
       # operators
