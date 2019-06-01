@@ -1,3 +1,5 @@
+// +build phat
+
 package encoding
 
 import (
