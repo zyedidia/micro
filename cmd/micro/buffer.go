@@ -668,7 +668,6 @@ func (b *Buffer) overwriteFile(name string, encode bool, fn func(io.Writer) erro
 
 	defer func() {
 		if e := file.Close(); e != nil && !strings.Contains(e.Error(), "file already closed") && err == nil {
-			panic(e)
 			err = e
 		}
 	}()
