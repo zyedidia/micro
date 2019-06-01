@@ -19,9 +19,8 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	"github.com/zyedidia/micro/cmd/micro/encoding"
 	"github.com/zyedidia/micro/cmd/micro/highlight"
-	"golang.org/x/crypto/openpgp"
-	"golang.org/x/crypto/openpgp/armor"
 )
 
 const LargeFileThreshold = 50000
@@ -71,7 +70,6 @@ type Buffer struct {
 	// Buffer local settings
 	Settings map[string]interface{}
 
-	Password         string
 	PasswordPrompted bool
 }
 
@@ -131,7 +129,7 @@ func NewBuffer(reader io.Reader, size int64, path string) *Buffer {
 	return NewBufferWithPassword(reader, size, path, "", false, nil)
 }
 
-// NewBuffer creates a new buffer from a given reader with a given path
+// NewBufferWithPassword creates a new buffer from a given reader with a given path
 // and password
 func NewBufferWithPassword(reader io.Reader, size int64, path, password string, passwordPrompted bool, cursorPosition []string) *Buffer {
 	// check if the file is already open in a tab. If it's open return the buffer to that tab
@@ -140,14 +138,6 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 	}
 
 	b := new(Buffer)
-	var err error
-	reader, err = b.Decode(reader, path, password)
-	if err != nil {
-		TermMessage(fmt.Sprintf("Error: %s: %v", path, err))
-		return NewBufferFromString("", "")
-	}
-	b.LineArray = NewLineArray(size, reader)
-
 	b.Settings = DefaultLocalSettings()
 	for k, v := range globalSettings {
 		if _, ok := b.Settings[k]; ok {
@@ -160,6 +150,17 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 	} else if fileformat == 2 {
 		b.Settings["fileformat"] = "dos"
 	}
+
+	b.Settings["password"] = password
+	b.PasswordPrompted = passwordPrompted
+
+	var err error
+	reader, err = b.Decode(reader, path)
+	if err != nil {
+		TermMessage(fmt.Sprintf("Error: %s: %v", path, err))
+		return NewBufferFromString("", "")
+	}
+	b.LineArray = NewLineArray(size, reader)
 
 	absPath, _ := filepath.Abs(path)
 
@@ -225,9 +226,6 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 	}
 
 	b.cursors = []*Cursor{&b.Cursor}
-
-	b.Password = password
-	b.PasswordPrompted = passwordPrompted
 
 	return b
 }
@@ -415,7 +413,7 @@ func (b *Buffer) ReOpen() {
 		messenger.Error(err.Error())
 		return
 	}
-	reader, err = b.Decode(reader, b.Path, b.Password)
+	reader, err = b.Decode(reader, b.Path)
 	if err != nil {
 		messenger.Error(err.Error())
 		return
@@ -493,7 +491,7 @@ func (b *Buffer) Serialize() error {
 
 	name := configDir + "/buffers/" + EscapePath(b.AbsPath)
 
-	return b.overwriteFile(name, func(file io.Writer) error {
+	return b.overwriteFile(name, false, func(file io.Writer) error {
 		return gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.Cursor,
@@ -508,96 +506,53 @@ func init() {
 }
 
 // Decode decodes a stream for loading the buffer
-func (b *Buffer) Decode(reader io.Reader, path, password string) (io.Reader, error) {
-	if password == "" || reader == nil {
+func (b *Buffer) Decode(reader io.Reader, path string) (io.Reader, error) {
+	if reader == nil {
 		return reader, nil
 	}
 
-	if strings.HasSuffix(path, ExtensionArmorGPG) {
-		unarmored, err := armor.Decode(reader)
-		if err != nil {
-			return nil, err
-		}
-		reader = unarmored.Body
-	}
+	return encoding.Decoder(reader, path, b.Settings)
+}
 
-	attempts := 0
-	md, err := openpgp.ReadMessage(reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
-		if attempts > 0 {
-			return []byte{}, errors.New("invalid password")
-		}
-		attempts++
-		return []byte(password), nil
-	}, nil)
-	if err != nil {
-		return nil, err
-	}
+type buffer struct {
+	bytes.Buffer
+}
 
-	reader = md.UnverifiedBody
+func (b *buffer) Write(p []byte) (n int, err error) {
+	return b.Buffer.Write(p)
+}
 
-	return reader, nil
+func (b *buffer) Close() error {
+	return nil
 }
 
 // Encode encodes the buffer for writing to disk
 func (b *Buffer) Encode(filename string) ([]byte, error) {
-	data := &bytes.Buffer{}
+	data := buffer{}
+	writer, err := encoding.Encoder(&data, filename, b.Settings)
+	if err != nil {
+		return nil, err
+	}
+
 	useCrlf := b.Settings["fileformat"] == "dos"
 	for i, l := range b.lines {
-		if _, err := data.Write(l.data); err != nil {
+		if _, err := writer.Write(l.data); err != nil {
 			return nil, err
 		}
 		if i != len(b.lines)-1 {
 			if useCrlf {
-				if _, err := data.Write([]byte{'\r', '\n'}); err != nil {
+				if _, err := writer.Write([]byte{'\r', '\n'}); err != nil {
 					return nil, err
 				}
 			} else {
-				if _, err := data.Write([]byte{'\n'}); err != nil {
+				if _, err := writer.Write([]byte{'\n'}); err != nil {
 					return nil, err
 				}
 			}
 		}
 	}
 
-	if b.Password == "" {
-		return data.Bytes(), nil
-	}
-
-	if strings.HasSuffix(filename, ExtensionArmorGPG) {
-		buffer := &bytes.Buffer{}
-		w, err := armor.Encode(buffer, "PGP SIGNATURE", nil)
-		if err != nil {
-			return nil, err
-		}
-
-		plaintext, err := openpgp.SymmetricallyEncrypt(w, []byte(b.Password), nil, nil)
-		if err != nil {
-			return nil, err
-		}
-		_, err = plaintext.Write(data.Bytes())
-		if err != nil {
-			return nil, err
-		}
-
-		plaintext.Close()
-		w.Close()
-
-		return buffer.Bytes(), nil
-	}
-
-	buffer := &bytes.Buffer{}
-	plaintext, err := openpgp.SymmetricallyEncrypt(buffer, []byte(b.Password), nil, nil)
-	if err != nil {
-		return nil, err
-	}
-	_, err = plaintext.Write(data.Bytes())
-	if err != nil {
-		return nil, err
-	}
-
-	plaintext.Close()
-
-	return buffer.Bytes(), nil
+	return data.Bytes(), nil
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
@@ -649,7 +604,7 @@ func (b *Buffer) SaveAs(filename string) error {
 
 	var fileSize int
 
-	err := b.overwriteFile(absFilename, func(file io.Writer) (e error) {
+	err := b.overwriteFile(absFilename, true, func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
 			return
 		}
@@ -704,7 +659,7 @@ func (b *Buffer) SaveAs(filename string) error {
 // overwriteFile opens the given file for writing, truncating if one exists, and then calls
 // the supplied function with the file as io.Writer object, also making sure the file is
 // closed afterwards.
-func (b *Buffer) overwriteFile(name string, fn func(io.Writer) error) (err error) {
+func (b *Buffer) overwriteFile(name string, encode bool, fn func(io.Writer) error) (err error) {
 	var file *os.File
 
 	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
@@ -712,59 +667,29 @@ func (b *Buffer) overwriteFile(name string, fn func(io.Writer) error) (err error
 	}
 
 	defer func() {
-		if e := file.Close(); e != nil && err == nil {
+		if e := file.Close(); e != nil && !strings.Contains(e.Error(), "file already closed") && err == nil {
+			panic(e)
 			err = e
 		}
 	}()
 
-	if b.Password == "" {
-		w := bufio.NewWriter(file)
-
-		if err = fn(w); err != nil {
-			return
+	if encode {
+		writer, err := encoding.Encoder(file, name, b.Settings)
+		if err != nil {
+			return err
 		}
+		defer func() {
+			writer.Close()
+		}()
+		return fn(writer)
+	}
 
-		err = w.Flush()
+	w := bufio.NewWriter(file)
+	if err = fn(w); err != nil {
 		return
 	}
-
-	data := bytes.Buffer{}
-	if err = fn(&data); err != nil {
-		return
-	}
-	if strings.HasSuffix(name, ExtensionArmorGPG) {
-		w, err := armor.Encode(file, "PGP SIGNATURE", nil)
-		if err != nil {
-			return err
-		}
-
-		plaintext, err := openpgp.SymmetricallyEncrypt(w, []byte(b.Password), nil, nil)
-		if err != nil {
-			return err
-		}
-		_, err = plaintext.Write(data.Bytes())
-		if err != nil {
-			return err
-		}
-
-		plaintext.Close()
-		w.Close()
-
-		return nil
-	}
-
-	plaintext, err := openpgp.SymmetricallyEncrypt(file, []byte(b.Password), nil, nil)
-	if err != nil {
-		return err
-	}
-	_, err = plaintext.Write(data.Bytes())
-	if err != nil {
-		return err
-	}
-
-	plaintext.Close()
-
-	return nil
+	err = w.Flush()
+	return
 }
 
 // calcHash calculates md5 hash of all lines in the buffer

@@ -69,6 +69,7 @@ func TermPasswords(filenames []string) []Password {
 		for {
 			fmt.Printf("Password for %v: ", filename)
 			password, err := terminal.ReadPassword(syscall.Stdin)
+			fmt.Printf("\n")
 			if err != nil {
 				fmt.Println(err)
 				continue
