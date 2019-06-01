@@ -552,6 +552,11 @@ func (b *Buffer) Encode(filename string) ([]byte, error) {
 		}
 	}
 
+	err = writer.Close()
+	if err != nil {
+		return nil, err
+	}
+
 	return data.Bytes(), nil
 }
 
