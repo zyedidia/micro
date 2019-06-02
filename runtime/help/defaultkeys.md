@@ -95,6 +95,7 @@ can change it!
 | Alt+P             | Remove latest multiple cursor                                                                 |
 | Alt+C             | Remove all multiple cursors (cancel)                                                          |
 | Alt+X             | Skip multiple cursor selection                                                                |
+| Alt+M             | Spawn a new cursor at the beginning of every line in the current selection                    |
 | Ctrl-MouseLeft    | Place a multiple cursor at any location                                                       |
 
 ### Other

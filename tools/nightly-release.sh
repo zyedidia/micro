@@ -1,13 +1,19 @@
 # This script creates the nightly release on Github for micro
 # You must have the correct Github access token to run this script
 
+commitID=$(git rev-parse HEAD)
+info=$(github-release info -u zyedidia -r micro -t nightly)
+
+if [[ $info = *$commitID* ]]; then
+    echo "No new commits since last nightly"
+    exit 1
+fi
+
 echo "Deleting old release"
 github-release delete \
     --user zyedidia \
     --repo micro \
     --tag nightly
-
-commitID=$(git rev-parse HEAD)
 
 echo "Moving tag"
 git tag --force nightly $commitID

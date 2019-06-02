@@ -255,7 +255,6 @@ func (c *Cursor) RuneUnder(x int) rune {
 	}
 	return line[x]
 }
-
 // UpN moves the cursor up N lines (if possible)
 func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount
@@ -266,9 +265,8 @@ func (c *Cursor) UpN(amount int) {
 		proposedY = c.buf.NumLines - 1
 	}
 
-	runes := []rune(c.buf.Line(c.Y))
+	runes := []rune(c.buf.Line(proposedY))
 	c.X = c.GetCharPosInLine(proposedY, c.LastVisualX)
-
 	if c.X > len(runes) || (amount < 0 && proposedY == c.Y) {
 		c.X = len(runes)
 	}
@@ -331,6 +329,18 @@ func (c *Cursor) End() {
 func (c *Cursor) Start() {
 	c.X = 0
 	c.LastVisualX = c.GetVisualX()
+}
+
+// StartOfText moves the cursor to the first non-whitespace rune of
+// the line it is on
+func (c *Cursor) StartOfText() {
+	c.Start()
+	for IsWhitespace(c.RuneUnder(c.X)) {
+		if c.X == Count(c.buf.Line(c.Y)) {
+			break
+		}
+		c.Right()
+	}
 }
 
 // GetCharPosInLine gets the char position of a visual x y

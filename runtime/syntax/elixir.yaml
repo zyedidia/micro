@@ -1,0 +1,30 @@
+filetype: elixir
+
+detect:
+    filename: "\\.ex$|\\.exs$"
+
+rules:
+    - statement: "\\b(abs|trunc|rem|div|round|max|min|and|or|not|throw|raise|reraise|hd|tl|in|length|elem|put_elem|destructure|to_(string|charlist)|is_(atom|binary|bitstring|boolean|float|function|integer|list|map|nil|number|pid|port|reference|tuple)|(bit|byte|map|tuple)_size|binary_part|def(delegate|exception|guard|guardp|impl|macro|macrop|module|overridable|p|protocol|struct)?|sigil_[crswCRSWDNT]|if|else|unless|cond|binding|node|self|spawn|spawn_link|spawn_monitor|send|exit|struct|get_and_update_in|get_in|put_in|pop_in|update_in|apply|inspect|make_ref|use|do|end)\\b"
+    - statement: "\\b(alias|import|require|case|fn|receive|after|try|catch|rescue|super|quote|unquote|unquote_splicing|for|with)\\b"
+
+    - constant: "\\b\\[A-Z]+\\b"
+    - constant.number: "\\b[0-9]+\\b"
+
+    - constant.string: "`[^`]*`|%x\\{[^}]*\\}"
+    - constant.string: "\"([^\"]|(\\\\\"))*\"|%[QW]?\\{[^}]*\\}|%[QW]?\\([^)]*\\)|%[QW]?<[^>]*>|%[QW]?\\[[^]]*\\]|%[QW]?\\$[^$]*\\$|%[QW]?\\^[^^]*\\^|%[QW]?![^!]*!"
+    - constant.string: "'([^']|(\\\\'))*'|%[qw]\\{[^}]*\\}|%[qw]\\([^)]*\\)|%[qw]<[^>]*>|%[qw]\\[[^]]*\\]|%[qw]\\$[^$]*\\$|%[qw]\\^[^^]*\\^|%[qw]![^!]*!"
+
+    - symbol.brackets: "\\{|\\}|\\[|\\]|\\(|\\)"
+
+    - comment: "#[^{].*$|#$"
+    - comment.bright: "##[^{].*$|##$"
+
+    - type.keyword: "\\:[a-zA-Z][a-zA-Z0-9_]*"
+    - type.keyword: "\\b(describe|test)"
+    - statement: "\\b(expected|assert|assert_raise|assert_in_delta|assert_received|catch_error|catch_throw|flunk|refute|refute_in_delta|refute_received)\\b"
+    - symbol.tag: "^\\s*\\@[a-zA-Z][a-zA-Z0-9_]*\\b"
+
+    - identifier.macro: "\\b(__CALLER__|__DIR__|__ENV__|__MODULE__|__aliases__|__block__|defmacro)\\b"
+
+    - todo: "(XXX|TODO|FIXME|\\?\\?\\?)"
+    - preproc.shebang: "\\W*#!.+?( |$)"

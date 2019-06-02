@@ -4,11 +4,13 @@ import (
 	"crypto/md5"
 	"encoding/json"
 	"errors"
+	"io"
 	"io/ioutil"
 	"os"
 	"reflect"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/flynn/json5"
 	"github.com/zyedidia/glob"
@@ -209,12 +211,14 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"eofnewline":     false,
 		"fastdirty":      true,
 		"fileformat":     "unix",
+		"hidehelp":       false,
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"infobar":        true,
 		"keepautoindent": false,
 		"keymenu":        false,
 		"matchbrace":     false,
+		"matchbraceleft": false,
 		"mouse":          true,
 		"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 		"pluginrepos":    []string{},
@@ -227,6 +231,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"scrollmargin":   float64(3),
 		"scrollspeed":    float64(2),
 		"softwrap":       false,
+		"smartpaste":     true,
 		"splitbottom":    true,
 		"splitright":     true,
 		"statusline":     true,
@@ -253,10 +258,12 @@ func DefaultLocalSettings() map[string]interface{} {
 		"fastdirty":      true,
 		"fileformat":     "unix",
 		"filetype":       "Unknown",
+		"hidehelp":       false,
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"keepautoindent": false,
 		"matchbrace":     false,
+		"matchbraceleft": false,
 		"rmtrailingws":   false,
 		"ruler":          true,
 		"savecursor":     false,
@@ -265,6 +272,7 @@ func DefaultLocalSettings() map[string]interface{} {
 		"scrollmargin":   float64(3),
 		"scrollspeed":    float64(2),
 		"softwrap":       false,
+		"smartpaste":     true,
 		"splitbottom":    true,
 		"splitright":     true,
 		"statusline":     true,
@@ -320,7 +328,7 @@ func SetOption(option, value string) error {
 		// LoadSyntaxFiles()
 		InitColorscheme()
 		for _, tab := range tabs {
-			for _, view := range tab.views {
+			for _, view := range tab.Views {
 				view.Buf.UpdateRules()
 			}
 		}
@@ -343,7 +351,7 @@ func SetOption(option, value string) error {
 	if len(tabs) != 0 {
 		if _, ok := CurView().Buf.Settings[option]; ok {
 			for _, tab := range tabs {
-				for _, view := range tab.views {
+				for _, view := range tab.Views {
 					SetLocalOption(option, value, view)
 				}
 			}
@@ -387,22 +395,36 @@ func SetLocalOption(option, value string, view *View) error {
 
 	if option == "fastdirty" {
 		// If it is being turned off, we have to hash every open buffer
-		var empty [16]byte
+		var empty [md5.Size]byte
+		var wg sync.WaitGroup
+
 		for _, tab := range tabs {
-			for _, v := range tab.views {
+			for _, v := range tab.Views {
 				if !nativeValue.(bool) {
 					if v.Buf.origHash == empty {
-						data, err := ioutil.ReadFile(v.Buf.AbsPath)
-						if err != nil {
-							data = []byte{}
-						}
-						v.Buf.origHash = md5.Sum(data)
+						wg.Add(1)
+
+						go func(b *Buffer) { // calculate md5 hash of the file
+							defer wg.Done()
+
+							if file, e := os.Open(b.AbsPath); e == nil {
+								defer file.Close()
+
+								h := md5.New()
+
+								if _, e = io.Copy(h, file); e == nil {
+									h.Sum(b.origHash[:0])
+								}
+							}
+						}(v.Buf)
 					}
 				} else {
 					v.Buf.IsModified = v.Buf.Modified()
 				}
 			}
 		}
+
+		wg.Wait()
 	}
 
 	buf.Settings[option] = nativeValue

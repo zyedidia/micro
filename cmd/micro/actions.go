@@ -435,7 +435,11 @@ func (v *View) StartOfLine(usePlugin bool) bool {
 
 	v.deselect(0)
 
-	v.Cursor.Start()
+	if v.Cursor.X != 0 {
+		v.Cursor.Start()
+	} else {
+		v.Cursor.StartOfText()
+	}
 
 	if usePlugin {
 		return PostActionCall("StartOfLine", v)
@@ -947,7 +951,7 @@ func (v *View) SaveAll(usePlugin bool) bool {
 		}
 
 		for _, t := range tabs {
-			for _, v := range t.views {
+			for _, v := range t.Views {
 				v.Save(false)
 			}
 		}
@@ -987,12 +991,20 @@ func (v *View) Save(usePlugin bool) bool {
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
 func (v *View) saveToFile(filename string) {
-	if Encrypted(filename) && v.Buf.Password == "" && !v.Buf.PasswordPrompted {
+	var password string
+	if value, ok := v.Buf.Settings["password"]; ok {
+		password = value.(string)
+	}
+	var passwordPrompted bool
+	if value, ok := v.Buf.Settings["passwordPrompted"]; ok {
+		passwordPrompted = value.(bool)
+	}
+	if Encrypted(filename) && password == "" && !passwordPrompted {
 		password, canceled := messenger.PasswordPrompt(true)
 		if !canceled {
-			v.Buf.Password = password
+			v.Buf.Settings["password"] = password
 		}
-		v.Buf.PasswordPrompted = true
+		v.Buf.Settings["passwordPrompted"] = true
 	}
 	err := v.Buf.SaveAs(filename)
 	if err != nil {
@@ -1023,7 +1035,7 @@ func (v *View) saveToFile(filename string) {
 // SaveAs saves the buffer to disk with the given name
 func (v *View) SaveAs(usePlugin bool) bool {
 	if v.mainCursor() {
-		if usePlugin && !PreActionCall("Find", v) {
+		if usePlugin && !PreActionCall("SaveAs", v) {
 			return false
 		}
 
@@ -1040,7 +1052,7 @@ func (v *View) SaveAs(usePlugin bool) bool {
 		}
 
 		if usePlugin {
-			PostActionCall("Find", v)
+			PostActionCall("SaveAs", v)
 		}
 	}
 	return false
@@ -1222,9 +1234,9 @@ func (v *View) Cut(usePlugin bool) bool {
 			return PostActionCall("Cut", v)
 		}
 		return true
+	} else {
+		return v.CutLine(usePlugin)
 	}
-
-	return false
 }
 
 // DuplicateLine duplicates the current line or selection
@@ -1516,6 +1528,42 @@ func (v *View) PageDown(usePlugin bool) bool {
 		}
 	}
 	return false
+}
+
+// SelectPageUp selects up one page
+func (v *View) SelectPageUp(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectPageUp", v) {
+		return false
+	}
+
+	if !v.Cursor.HasSelection() {
+		v.Cursor.OrigSelection[0] = v.Cursor.Loc
+	}
+	v.Cursor.UpN(v.Height)
+	v.Cursor.SelectTo(v.Cursor.Loc)
+
+	if usePlugin {
+		return PostActionCall("SelectPageUp", v)
+	}
+	return true
+}
+
+// SelectPageDown selects down one page
+func (v *View) SelectPageDown(usePlugin bool) bool {
+	if usePlugin && !PreActionCall("SelectPageDown", v) {
+		return false
+	}
+
+	if !v.Cursor.HasSelection() {
+		v.Cursor.OrigSelection[0] = v.Cursor.Loc
+	}
+	v.Cursor.DownN(v.Height)
+	v.Cursor.SelectTo(v.Cursor.Loc)
+
+	if usePlugin {
+		return PostActionCall("SelectPageDown", v)
+	}
+	return true
 }
 
 // CursorPageUp places the cursor a page up
@@ -1811,12 +1859,12 @@ func (v *View) Quit(usePlugin bool) bool {
 		// Make sure not to quit if there are unsaved changes
 		if v.CanClose() {
 			v.CloseBuffer()
-			if len(tabs[curTab].views) > 1 {
+			if len(tabs[curTab].Views) > 1 {
 				v.splitNode.Delete()
 				tabs[v.TabNum].Cleanup()
 				tabs[v.TabNum].Resize()
 			} else if len(tabs) > 1 {
-				if len(tabs[v.TabNum].views) == 1 {
+				if len(tabs[v.TabNum].Views) == 1 {
 					tabs = tabs[:v.TabNum+copy(tabs[v.TabNum:], tabs[v.TabNum+1:])]
 					for i, t := range tabs {
 						t.SetNum(i)
@@ -1855,7 +1903,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 		closeAll := true
 		for _, tab := range tabs {
-			for _, v := range tab.views {
+			for _, v := range tab.Views {
 				if !v.CanClose() {
 					closeAll = false
 				}
@@ -1868,7 +1916,7 @@ func (v *View) QuitAll(usePlugin bool) bool {
 
 			if shouldQuit {
 				for _, tab := range tabs {
-					for _, v := range tab.views {
+					for _, v := range tab.Views {
 						v.CloseBuffer()
 					}
 				}
@@ -1900,7 +1948,7 @@ func (v *View) AddTab(usePlugin bool) bool {
 		curTab = len(tabs) - 1
 		if len(tabs) == 2 {
 			for _, t := range tabs {
-				for _, v := range t.views {
+				for _, v := range t.Views {
 					v.ToggleTabbar()
 				}
 			}
@@ -1993,8 +2041,8 @@ func (v *View) Unsplit(usePlugin bool) bool {
 		}
 
 		curView := tabs[curTab].CurView
-		for i := len(tabs[curTab].views) - 1; i >= 0; i-- {
-			view := tabs[curTab].views[i]
+		for i := len(tabs[curTab].Views) - 1; i >= 0; i-- {
+			view := tabs[curTab].Views[i]
 			if view != nil && view.Num != curView {
 				view.Quit(true)
 				// messenger.Message("Quit ", view.Buf.Path)
@@ -2016,7 +2064,7 @@ func (v *View) NextSplit(usePlugin bool) bool {
 		}
 
 		tab := tabs[curTab]
-		if tab.CurView < len(tab.views)-1 {
+		if tab.CurView < len(tab.Views)-1 {
 			tab.CurView++
 		} else {
 			tab.CurView = 0
@@ -2040,7 +2088,7 @@ func (v *View) PreviousSplit(usePlugin bool) bool {
 		if tab.CurView > 0 {
 			tab.CurView--
 		} else {
-			tab.CurView = len(tab.views) - 1
+			tab.CurView = len(tab.Views) - 1
 		}
 
 		if usePlugin {
@@ -2148,6 +2196,54 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 		}
 	}
 
+	return false
+}
+
+// SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
+func (v *View) SpawnMultiCursorSelect(usePlugin bool) bool {
+	if v.Cursor == &v.Buf.Cursor {
+		if usePlugin && !PreActionCall("SpawnMultiCursorSelect", v) {
+			return false
+		}
+
+		// Avoid cases where multiple cursors already exist, that would create problems
+		if len(v.Buf.cursors) > 1 {
+			return false
+		}
+
+		var startLine int
+		var endLine int
+
+		a, b := v.Cursor.CurSelection[0].Y, v.Cursor.CurSelection[1].Y
+		if a > b {
+			startLine, endLine = b, a
+		} else {
+			startLine, endLine = a, b
+		}
+
+		if v.Cursor.HasSelection() {
+			v.Cursor.ResetSelection()
+			v.Cursor.GotoLoc(Loc{0, startLine})
+
+			for i := startLine; i <= endLine; i++ {
+				c := &Cursor{
+					buf: v.Buf,
+				}
+				c.GotoLoc(Loc{0, i})
+				v.Buf.cursors = append(v.Buf.cursors, c)
+			}
+			v.Buf.MergeCursors()
+			v.Buf.UpdateCursors()
+		} else {
+			return false
+		}
+
+		if usePlugin {
+			PostActionCall("SpawnMultiCursorSelect", v)
+		}
+
+		messenger.Message("Added cursors from selection")
+	}
 	return false
 }
 

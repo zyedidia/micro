@@ -1,6 +1,7 @@
 package main
 
 import (
+	"path/filepath"
 	"sort"
 
 	"github.com/zyedidia/tcell"
@@ -14,7 +15,7 @@ type Tab struct {
 	// This contains all the views in this tab
 	// There is generally only one view per tab, but you can have
 	// multiple views with splits
-	views []*View
+	Views []*View
 	// This is the current view for this tab
 	CurView int
 
@@ -24,12 +25,12 @@ type Tab struct {
 // NewTabFromView creates a new tab and puts the given view in the tab
 func NewTabFromView(v *View) *Tab {
 	t := new(Tab)
-	t.views = append(t.views, v)
-	t.views[0].Num = 0
+	t.Views = append(t.Views, v)
+	t.Views[0].Num = 0
 
 	t.tree = new(SplitTree)
 	t.tree.kind = VerticalSplit
-	t.tree.children = []Node{NewLeafNode(t.views[0], t.tree)}
+	t.tree.children = []Node{NewLeafNode(t.Views[0], t.tree)}
 
 	w, h := screen.Size()
 	t.tree.width = w
@@ -50,7 +51,7 @@ func NewTabFromView(v *View) *Tab {
 // SetNum sets all this tab's views to have the correct tab number
 func (t *Tab) SetNum(num int) {
 	t.tree.tabNum = num
-	for _, v := range t.views {
+	for _, v := range t.Views {
 		v.TabNum = num
 	}
 }
@@ -76,7 +77,7 @@ func (t *Tab) Resize() {
 
 	t.tree.ResizeSplits()
 
-	for i, v := range t.views {
+	for i, v := range t.Views {
 		v.Num = i
 		if v.Type == vtTerm {
 			v.term.Resize(v.Width, v.Height)
@@ -87,7 +88,7 @@ func (t *Tab) Resize() {
 // CurView returns the current view
 func CurView() *View {
 	curTab := tabs[curTab]
-	return curTab.views[curTab.CurView]
+	return curTab.Views[curTab.CurView]
 }
 
 // TabbarString returns the string that should be displayed in the tabbar
@@ -97,14 +98,26 @@ func CurView() *View {
 func TabbarString() (string, map[int]int) {
 	str := ""
 	indicies := make(map[int]int)
+	unique := make(map[string]int)
+
+	for _, t := range tabs {
+		unique[filepath.Base(t.Views[t.CurView].Buf.GetName())]++
+	}
+
 	for i, t := range tabs {
+		buf := t.Views[t.CurView].Buf
+		name := filepath.Base(buf.GetName())
+
 		if i == curTab {
 			str += "["
 		} else {
 			str += " "
 		}
-		buf := t.views[t.CurView].Buf
-		str += buf.GetName()
+		if unique[name] == 1 {
+			str += name
+		} else {
+			str += buf.GetName()
+		}
 		if buf.Modified() {
 			str += " +"
 		}
@@ -113,8 +126,9 @@ func TabbarString() (string, map[int]int) {
 		} else {
 			str += " "
 		}
-		indicies[Count(str)-1] = i + 1
 		str += " "
+
+		indicies[Count(str)-2] = i + 1
 	}
 	return str, indicies
 }

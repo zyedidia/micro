@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"unicode/utf8"
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
@@ -245,7 +246,7 @@ func Raw(args []string) {
 	curTab = len(tabs) - 1
 	if len(tabs) == 2 {
 		for _, t := range tabs {
-			for _, v := range t.views {
+			for _, v := range t.Views {
 				v.ToggleTabbar()
 			}
 		}
@@ -261,7 +262,7 @@ func TabSwitch(args []string) {
 
 			found := false
 			for _, t := range tabs {
-				v := t.views[t.CurView]
+				v := t.Views[t.CurView]
 				if v.Buf.GetName() == args[0] {
 					curTab = v.TabNum
 					found = true
@@ -292,7 +293,7 @@ func Cd(args []string) {
 		}
 		wd, _ := os.Getwd()
 		for _, tab := range tabs {
-			for _, view := range tab.views {
+			for _, view := range tab.Views {
 				if len(view.Buf.name) == 0 {
 					continue
 				}
@@ -390,38 +391,12 @@ func split(args []string, splitFunc func(buf *Buffer)) {
 		return
 	}
 
-	filename := args[0]
-	if buf := FindBuffer(filename); buf != nil {
-		splitFunc(buf)
-		return
-	}
-
-	filename = ReplaceHome(filename)
-	file, err := os.Open(filename)
-	fileInfo, _ := os.Stat(filename)
-
-	if err == nil && fileInfo.IsDir() {
-		messenger.Error(filename, " is a directory")
-		return
-	}
-
-	defer file.Close()
-
+	buf, err := NewBufferFromFile(args[0])
 	if err != nil {
-		// File does not exist -- create an empty buffer with that name
-		splitFunc(NewBufferFromString("", filename))
+		messenger.Error(err)
 		return
 	}
-
-	password, passwordPrompted := "", false
-	if Encrypted(filename) {
-		pass, canceled := messenger.PasswordPrompt(false)
-		if !canceled {
-			password = pass
-		}
-		passwordPrompted = true
-	}
-	splitFunc(NewBufferWithPassword(file, FSize(file), filename, password, passwordPrompted))
+	splitFunc(buf)
 }
 
 // VSplit opens a vertical split with file given in the first argument
@@ -453,32 +428,10 @@ func NewTab(args []string) {
 	if len(args) == 0 {
 		CurView().AddTab(true)
 	} else {
-		filename := args[0]
-		filename = ReplaceHome(filename)
-		file, err := os.Open(filename)
-		fileInfo, _ := os.Stat(filename)
-
-		if err == nil && fileInfo.IsDir() {
-			messenger.Error(filename, " is a directory")
-			return
-		}
-
-		defer file.Close()
-
-		var buf *Buffer
+		buf, err := NewBufferFromFile(args[0])
 		if err != nil {
-			buf = NewBufferFromString("", filename)
-		} else {
-			password, passwordPrompted := "", false
-			if Encrypted(filename) {
-				pass, canceled := messenger.PasswordPrompt(false)
-				if !canceled {
-					password = pass
-				}
-				passwordPrompted = true
-			}
-
-			buf = NewBufferWithPassword(file, FSize(file), filename, password, passwordPrompted)
+			messenger.Error(err)
+			return
 		}
 
 		tab := NewTabFromView(NewView(buf))
@@ -487,7 +440,7 @@ func NewTab(args []string) {
 		curTab = len(tabs) - 1
 		if len(tabs) == 2 {
 			for _, t := range tabs {
-				for _, v := range t.views {
+				for _, v := range t.Views {
 					v.ToggleTabbar()
 				}
 			}
@@ -618,6 +571,7 @@ func Replace(args []string) {
 	}
 
 	replace := string(args[1])
+	replaceBytes := []byte(replace)
 
 	regex, err := regexp.Compile("(?m)" + search)
 	if err != nil {
@@ -631,23 +585,16 @@ func Replace(args []string) {
 	found := 0
 	replaceAll := func() {
 		var deltas []Delta
-		deltaXOffset := Count(replace) - Count(search)
 		for i := 0; i < view.Buf.LinesNum(); i++ {
-			matches := regex.FindAllIndex(view.Buf.lines[i].data, -1)
-			str := string(view.Buf.lines[i].data)
+			newText := regex.ReplaceAllFunc(view.Buf.lines[i].data, func(in []byte) []byte {
+				found++
+				return replaceBytes
+			})
 
-			if matches != nil {
-				xOffset := 0
-				for _, m := range matches {
-					from := Loc{runePos(m[0], str) + xOffset, i}
-					to := Loc{runePos(m[1], str) + xOffset, i}
+			from := Loc{0, i}
+			to := Loc{utf8.RuneCount(view.Buf.lines[i].data), i}
 
-					xOffset += deltaXOffset
-
-					deltas = append(deltas, Delta{replace, from, to})
-					found++
-				}
-			}
+			deltas = append(deltas, Delta{string(newText), from, to})
 		}
 		view.Buf.MultipleReplace(deltas)
 	}

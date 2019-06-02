@@ -17,7 +17,7 @@ Here is a picture of micro editing its source code.
 ![Screenshot](./assets/micro-solarized.png)
 
 To see more screenshots of micro, showcasing all of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
-
+ 
 You can also check out the website for Micro at https://micro-editor.github.io.
 
 # Table of Contents

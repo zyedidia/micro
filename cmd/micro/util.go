@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"os/user"
 	"path/filepath"
 	"reflect"
 	"runtime"
@@ -10,8 +11,9 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/go-errors/errors"
 	"github.com/mattn/go-runewidth"
-	homedir "github.com/mitchellh/go-homedir"
+	"regexp"
 )
 
 // Util.go is a collection of utility functions that are used throughout
@@ -330,10 +332,69 @@ func ReplaceHome(path string) string {
 		return path
 	}
 
-	home, err := homedir.Dir()
-	if err != nil {
-		messenger.Error("Could not find home directory: ", err)
-		return path
+	var userData *user.User
+	var err error
+
+	homeString := strings.Split(path, "/")[0]
+	if homeString == "~" {
+		userData, err = user.Current()
+		if err != nil {
+			messenger.Error("Could not find user: ", err)
+		}
+	} else {
+		userData, err = user.Lookup(homeString[1:])
+		if err != nil {
+			if messenger != nil {
+				messenger.Error("Could not find user: ", err)
+			} else {
+				TermMessage("Could not find user: ", err)
+			}
+			return ""
+		}
 	}
-	return strings.Replace(path, "~", home, 1)
+
+	home := userData.HomeDir
+
+	return strings.Replace(path, homeString, home, 1)
+}
+
+// GetPathAndCursorPosition returns a filename without everything following a `:`
+// This is used for opening files like util.go:10:5 to specify a line and column
+// Special cases like Windows Absolute path (C:\myfile.txt:10:5) are handled correctly.
+func GetPathAndCursorPosition(path string) (string, []string) {
+	re := regexp.MustCompile(`([\s\S]+?)(?::(\d+))(?::(\d+))?`)
+	match := re.FindStringSubmatch(path)
+	// no lines/columns were specified in the path, return just the path with no cursor location
+	if len(match) == 0 {
+		return path, nil
+	} else if match[len(match)-1] != "" {
+		// if the last capture group match isn't empty then both line and column were provided
+		return match[1], match[2:]
+	}
+	// if it was empty, then only a line was provided, so default to column 0
+	return match[1], []string{match[2], "0"}
+}
+
+func ParseCursorLocation(cursorPositions []string) (Loc, error) {
+	startpos := Loc{0, 0}
+	var err error
+
+	// if no positions are available exit early
+	if cursorPositions == nil {
+		return startpos, errors.New("No cursor positions were provided.")
+	}
+
+	startpos.Y, err = strconv.Atoi(cursorPositions[0])
+	if err != nil {
+		messenger.Error("Error parsing cursor position: ", err)
+	} else {
+		if len(cursorPositions) > 1 {
+			startpos.X, err = strconv.Atoi(cursorPositions[1])
+			if err != nil {
+				messenger.Error("Error parsing cursor position: ", err)
+			}
+		}
+	}
+
+	return startpos, err
 }

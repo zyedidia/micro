@@ -164,6 +164,12 @@ Here are the options that you can set:
 
 	default value: `2`
 
+* `smartpaste`: should micro add leading whitespace when pasting multiple lines?
+   This will attempt to preserve the current indentation level when pasting an
+   unindented block.
+
+	default value: `true`
+
 * `softwrap`: should micro wrap lines that are too long to fit on the screen.
 
 	default value: `false`
@@ -183,6 +189,12 @@ Here are the options that you can set:
 	default value: `true`
 
 * `matchbrace`: highlight matching braces for '()', '{}', '[]'
+
+    default value: `false`
+
+* `matchbraceleft`: when matching a closing brace, should matching match the
+   brace directly under the cursor, or the character to the left? only matters
+   if `matchbrace` is true
 
     default value: `false`
 
