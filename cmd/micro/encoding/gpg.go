@@ -12,7 +12,7 @@ import (
 func init() {
 	entry := Entry{
 		Extensions: []string{"gpg"},
-		Settings:   []string{"password"},
+		Settings:   []string{"password", "size"},
 		Encoding:   &gpg{},
 	}
 	Add(entry)
@@ -40,6 +40,9 @@ func (w *gpgWriter) Close() error {
 
 func (a *gpg) Encode(writer io.WriteCloser, settings map[string]interface{}) (io.WriteCloser, error) {
 	password := settings["password"].(string)
+	if password == "" {
+		return writer, nil
+	}
 
 	plaintext, err := openpgp.SymmetricallyEncrypt(writer, []byte(password), nil, nil)
 	if err != nil {
@@ -56,6 +59,9 @@ func (a *gpg) Encode(writer io.WriteCloser, settings map[string]interface{}) (io
 
 func (a *gpg) Decode(reader io.Reader, settings map[string]interface{}) (io.Reader, error) {
 	password := settings["password"].(string)
+	if settings["size"].(int64) == 0 || password == "" {
+		return reader, nil
+	}
 
 	attempts := 0
 	md, err := openpgp.ReadMessage(reader, nil, func(keys []openpgp.Key, symmetric bool) ([]byte, error) {
@@ -66,9 +72,6 @@ func (a *gpg) Decode(reader io.Reader, settings map[string]interface{}) (io.Read
 		return []byte(password), nil
 	}, nil)
 	if err != nil {
-		if err == io.EOF {
-			return reader, nil
-		}
 		return reader, err
 	}
 	reader = md.UnverifiedBody

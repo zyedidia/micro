@@ -995,12 +995,16 @@ func (v *View) saveToFile(filename string) {
 	if value, ok := v.Buf.Settings["password"]; ok {
 		password = value.(string)
 	}
-	if Encrypted(filename) && password == "" && !v.Buf.PasswordPrompted {
+	var passwordPrompted bool
+	if value, ok := v.Buf.Settings["passwordPrompted"]; ok {
+		passwordPrompted = value.(bool)
+	}
+	if Encrypted(filename) && password == "" && !passwordPrompted {
 		password, canceled := messenger.PasswordPrompt(true)
 		if !canceled {
 			v.Buf.Settings["password"] = password
 		}
-		v.Buf.PasswordPrompted = true
+		v.Buf.Settings["passwordPrompted"] = true
 	}
 	err := v.Buf.SaveAs(filename)
 	if err != nil {

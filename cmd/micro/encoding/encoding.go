@@ -67,8 +67,6 @@ func Encoder(writer io.WriteCloser, name string, settings map[string]interface{}
 			chain = append(chain, encoding)
 		} else if len(chain) > 0 {
 			return writer, fmt.Errorf("%s format is unsupported", part)
-		} else {
-			return writer, nil
 		}
 	}
 	for _, encoding := range chain {
@@ -89,14 +87,15 @@ func Decoder(reader io.Reader, name string, settings map[string]interface{}) (io
 		return reader, nil
 	}
 	var chain []Encoding
+	if find(parts[length-1], settings) == nil {
+		return reader, nil
+	}
 	for i := range parts[1:] {
 		part := parts[length-1-i]
 		if encoding := find(part, settings); encoding != nil {
 			chain = append(chain, encoding)
-		} else if len(chain) > 0 {
-			return reader, fmt.Errorf("%s format is unsupported", part)
 		} else {
-			return reader, nil
+			break
 		}
 	}
 	for _, encoding := range chain {

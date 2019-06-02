@@ -13,7 +13,7 @@ import (
 func init() {
 	entry := Entry{
 		Extensions: []string{"asc"},
-		Settings:   []string{"password"},
+		Settings:   []string{"password", "size"},
 		Encoding:   &armorgpg{},
 	}
 	Add(entry)
@@ -46,6 +46,9 @@ func (w *armorgpgWriter) Close() error {
 
 func (a *armorgpg) Encode(writer io.WriteCloser, settings map[string]interface{}) (io.WriteCloser, error) {
 	password := settings["password"].(string)
+	if password == "" {
+		return writer, nil
+	}
 
 	arm, err := armor.Encode(writer, "PGP SIGNATURE", nil)
 	if err != nil {
@@ -68,12 +71,12 @@ func (a *armorgpg) Encode(writer io.WriteCloser, settings map[string]interface{}
 
 func (a *armorgpg) Decode(reader io.Reader, settings map[string]interface{}) (io.Reader, error) {
 	password := settings["password"].(string)
+	if settings["size"].(int64) == 0 || password == "" {
+		return reader, nil
+	}
 
 	unarmored, err := armor.Decode(reader)
 	if err != nil {
-		if err == io.EOF {
-			return reader, nil
-		}
 		return reader, err
 	}
 	reader = unarmored.Body

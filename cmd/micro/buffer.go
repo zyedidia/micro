@@ -69,8 +69,6 @@ type Buffer struct {
 
 	// Buffer local settings
 	Settings map[string]interface{}
-
-	PasswordPrompted bool
 }
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -152,7 +150,8 @@ func NewBufferWithPassword(reader io.Reader, size int64, path, password string, 
 	}
 
 	b.Settings["password"] = password
-	b.PasswordPrompted = passwordPrompted
+	b.Settings["passwordPrompted"] = passwordPrompted
+	b.Settings["size"] = size
 
 	var err error
 	reader, err = b.Decode(reader, path)
