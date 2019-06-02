@@ -4,13 +4,20 @@ import "strings"
 
 const (
 	// ExtensionArmorGPG armored gpg encrypted file extension
-	ExtensionArmorGPG = ".asc"
+	ExtensionArmorGPG = "asc"
 	// ExtensionGPG gpg encrypted file extension
-	ExtensionGPG = ".gpg"
+	ExtensionGPG = "gpg"
 )
 
 // Encrypted determines if a file is encrypted
 func Encrypted(filename string) bool {
-	return strings.HasSuffix(filename, ExtensionArmorGPG) ||
-		strings.HasSuffix(filename, ExtensionGPG)
+	parts := strings.Split(filename, ".")
+	if len(parts) > 1 {
+		for _, part := range parts[1:] {
+			if part == ExtensionArmorGPG || part == ExtensionGPG {
+				return true
+			}
+		}
+	}
+	return false
 }

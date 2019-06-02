@@ -1,7 +1,6 @@
 package encoding
 
 import (
-	"fmt"
 	"io"
 	"strings"
 )
@@ -58,15 +57,20 @@ type Encoding interface {
 // Encoder builds an encoder for a file name
 func Encoder(writer io.WriteCloser, name string, settings map[string]interface{}) (io.WriteCloser, error) {
 	parts := strings.Split(name, ".")
-	if len(parts) < 2 {
+	length := len(parts)
+	if length < 2 {
 		return writer, nil
 	}
 	var chain []Encoding
-	for _, part := range parts[1:] {
+	if find(parts[length-1], settings) == nil {
+		return writer, nil
+	}
+	for i := range parts[1:] {
+		part := parts[length-1-i]
 		if encoding := find(part, settings); encoding != nil {
 			chain = append(chain, encoding)
-		} else if len(chain) > 0 {
-			return writer, fmt.Errorf("%s format is unsupported", part)
+		} else {
+			break
 		}
 	}
 	for _, encoding := range chain {

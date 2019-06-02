@@ -45,7 +45,7 @@ runtime:
 	gofmt -w cmd/micro/runtime.go
 
 test:
-	go test ./cmd/micro
+	go test -tags $(TAGS) ./cmd/micro/...
 
 clean:
 	rm -f micro
