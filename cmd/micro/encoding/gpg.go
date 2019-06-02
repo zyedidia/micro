@@ -22,7 +22,7 @@ type gpg struct {
 }
 
 type gpgWriter struct {
-	armor     io.Closer
+	out       io.Closer
 	plaintext io.WriteCloser
 }
 
@@ -35,13 +35,23 @@ func (w *gpgWriter) Close() error {
 	if err != nil {
 		return err
 	}
-	return w.armor.Close()
+	return w.out.Close()
 }
 
 func (a *gpg) Encode(writer io.WriteCloser, settings map[string]interface{}) (io.WriteCloser, error) {
 	password := settings["password"].(string)
 
-	return openpgp.SymmetricallyEncrypt(writer, []byte(password), nil, nil)
+	plaintext, err := openpgp.SymmetricallyEncrypt(writer, []byte(password), nil, nil)
+	if err != nil {
+		return plaintext, err
+	}
+
+	plaintext = &gpgWriter{
+		out:       writer,
+		plaintext: plaintext,
+	}
+
+	return plaintext, nil
 }
 
 func (a *gpg) Decode(reader io.Reader, settings map[string]interface{}) (io.Reader, error) {

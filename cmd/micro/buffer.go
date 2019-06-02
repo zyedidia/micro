@@ -665,30 +665,27 @@ func (b *Buffer) SaveAs(filename string) error {
 // the supplied function with the file as io.Writer object, also making sure the file is
 // closed afterwards.
 func (b *Buffer) overwriteFile(name string, encode bool, fn func(io.Writer) error) (err error) {
-	var file *os.File
+	var writer io.WriteCloser
 
-	if file, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+	if writer, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
 		return
 	}
 
 	defer func() {
-		if e := file.Close(); e != nil && !strings.Contains(e.Error(), "file already closed") && err == nil {
+		if e := writer.Close(); e != nil && err == nil {
 			err = e
 		}
 	}()
 
 	if encode {
-		writer, err := encoding.Encoder(file, name, b.Settings)
+		writer, err = encoding.Encoder(writer, name, b.Settings)
 		if err != nil {
 			return err
 		}
-		defer func() {
-			writer.Close()
-		}()
 		return fn(writer)
 	}
 
-	w := bufio.NewWriter(file)
+	w := bufio.NewWriter(writer)
 	if err = fn(w); err != nil {
 		return
 	}

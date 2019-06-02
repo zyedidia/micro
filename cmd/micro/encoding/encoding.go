@@ -40,6 +40,15 @@ func (e Entry) Matches(extension string, settings map[string]interface{}) bool {
 	return true
 }
 
+func find(extension string, settings map[string]interface{}) Encoding {
+	for _, entry := range registry {
+		if entry.Matches(extension, settings) {
+			return entry.Encoding
+		}
+	}
+	return nil
+}
+
 // Encoding is a type of encoding
 type Encoding interface {
 	Encode(writer io.WriteCloser, settings map[string]interface{}) (io.WriteCloser, error)
@@ -53,17 +62,13 @@ func Encoder(writer io.WriteCloser, name string, settings map[string]interface{}
 		return writer, nil
 	}
 	var chain []Encoding
-search:
 	for _, part := range parts[1:] {
-		for _, entry := range registry {
-			if !entry.Matches(part, settings) {
-				if len(chain) > 0 {
-					return writer, fmt.Errorf("%s format is unsupported", part)
-				}
-				return writer, nil
-			}
-			chain = append(chain, entry.Encoding)
-			continue search
+		if encoding := find(part, settings); encoding != nil {
+			chain = append(chain, encoding)
+		} else if len(chain) > 0 {
+			return writer, fmt.Errorf("%s format is unsupported", part)
+		} else {
+			return writer, nil
 		}
 	}
 	for _, encoding := range chain {
@@ -84,18 +89,14 @@ func Decoder(reader io.Reader, name string, settings map[string]interface{}) (io
 		return reader, nil
 	}
 	var chain []Encoding
-search:
 	for i := range parts[1:] {
 		part := parts[length-1-i]
-		for _, entry := range registry {
-			if !entry.Matches(part, settings) {
-				if len(chain) > 0 {
-					return reader, fmt.Errorf("%s format is unsupported", part)
-				}
-				return reader, nil
-			}
-			chain = append(chain, entry.Encoding)
-			continue search
+		if encoding := find(part, settings); encoding != nil {
+			chain = append(chain, encoding)
+		} else if len(chain) > 0 {
+			return reader, fmt.Errorf("%s format is unsupported", part)
+		} else {
+			return reader, nil
 		}
 	}
 	for _, encoding := range chain {

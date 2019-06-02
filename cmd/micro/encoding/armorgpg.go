@@ -23,6 +23,7 @@ type armorgpg struct {
 }
 
 type armorgpgWriter struct {
+	out       io.Closer
 	armor     io.Closer
 	plaintext io.WriteCloser
 }
@@ -36,24 +37,29 @@ func (w *armorgpgWriter) Close() error {
 	if err != nil {
 		return err
 	}
-	return w.armor.Close()
+	err = w.armor.Close()
+	if err != nil {
+		return err
+	}
+	return w.out.Close()
 }
 
 func (a *armorgpg) Encode(writer io.WriteCloser, settings map[string]interface{}) (io.WriteCloser, error) {
 	password := settings["password"].(string)
 
-	writer, err := armor.Encode(writer, "PGP SIGNATURE", nil)
+	arm, err := armor.Encode(writer, "PGP SIGNATURE", nil)
 	if err != nil {
-		return writer, err
+		return arm, err
 	}
 
-	plaintext, err := openpgp.SymmetricallyEncrypt(writer, []byte(password), nil, nil)
+	plaintext, err := openpgp.SymmetricallyEncrypt(arm, []byte(password), nil, nil)
 	if err != nil {
-		return writer, err
+		return plaintext, err
 	}
 
 	plaintext = &armorgpgWriter{
-		armor:     writer,
+		out:       writer,
+		armor:     arm,
 		plaintext: plaintext,
 	}
 
