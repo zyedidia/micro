@@ -4,7 +4,6 @@ import (
 	"encoding/gob"
 	"errors"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -39,7 +38,6 @@ func (b *Buffer) Serialize() error {
 			b.GetActiveCursor().Loc,
 			b.ModTime,
 		})
-		log.Println("save mod time", b.ModTime)
 		return err
 	})
 }
@@ -66,12 +64,9 @@ func (b *Buffer) Unserialize() error {
 		if b.Settings["saveundo"].(bool) {
 			// We should only use last time's eventhandler if the file wasn't modified by someone else in the meantime
 			if b.ModTime == buffer.ModTime {
-				log.Println("good mod time")
 				b.EventHandler = buffer.EventHandler
 				b.EventHandler.cursors = b.cursors
 				b.EventHandler.buf = b.SharedBuffer
-			} else {
-				log.Println("bad mod time", b.ModTime, buffer.ModTime)
 			}
 		}
 	}

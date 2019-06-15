@@ -1,6 +1,7 @@
 package display
 
 import (
+	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -149,21 +150,27 @@ func (w *BufWindow) Relocate() bool {
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	cy := activeC.Y
+	log.Println("RELOCATE", w.StartLine, cy, height)
 	scrollmargin := int(b.Settings["scrollmargin"].(float64))
 	if cy < w.StartLine+scrollmargin && cy > scrollmargin-1 {
+		log.Println("a")
 		w.StartLine = cy - scrollmargin
 		ret = true
 	} else if cy < w.StartLine {
+		log.Println("b")
 		w.StartLine = cy
 		ret = true
 	}
 	if cy > w.StartLine+height-1-scrollmargin && cy < b.LinesNum()-scrollmargin {
+		log.Println("c")
 		w.StartLine = cy - height + 1 + scrollmargin
 		ret = true
 	} else if cy >= b.LinesNum()-scrollmargin && cy >= height {
+		log.Println("d")
 		w.StartLine = b.LinesNum() - height
 		ret = true
 	}
+	log.Println("RELOCATE DONE", w.StartLine)
 
 	// horizontal relocation (scrolling)
 	if !b.Settings["softwrap"].(bool) {
@@ -356,6 +363,7 @@ func (w *BufWindow) showCursor(x, y int, main bool) {
 
 // displayBuffer draws the buffer being shown in this window on the screen.Screen
 func (w *BufWindow) displayBuffer() {
+	log.Println("STARTLINE", w.StartLine)
 	b := w.Buf
 
 	hasMessage := len(b.Messages) > 0

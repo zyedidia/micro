@@ -966,7 +966,8 @@ func (h *BufPane) End() bool {
 		v.StartLine = 0
 		h.SetView(v)
 	} else {
-		h.StartLine = h.Buf.LinesNum() - v.Height
+		v.StartLine = h.Buf.LinesNum() - v.Height
+		h.SetView(v)
 	}
 	return false
 }

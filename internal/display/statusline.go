@@ -3,7 +3,6 @@ package display
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"path"
 	"regexp"
 	"strconv"
@@ -113,7 +112,6 @@ func (s *StatusLine) Display() {
 					c = ' '
 					x++
 				}
-				log.Println(x, string(c))
 				screen.Screen.SetContent(winX+x, y, c, nil, statusLineStyle)
 			}
 		} else if x >= s.win.Width-rightLen && x < rightLen+s.win.Width-rightLen {

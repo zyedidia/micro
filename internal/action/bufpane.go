@@ -67,9 +67,6 @@ type BufPane struct {
 
 	Cursor *buffer.Cursor // the active cursor
 
-	StartLine int // Vertical scrolling
-	StartCol  int // Horizontal scrolling
-
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
 	// track of whether or not the mouse was pressed (or not released) last event to determine
@@ -132,6 +129,7 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.Buf = b
 	h.BWindow.SetBuffer(b)
 	h.Cursor = b.GetActiveCursor()
+	h.Resize(h.GetView().Width, h.GetView().Height)
 	v := new(display.View)
 	h.SetView(v)
 	h.Relocate()
