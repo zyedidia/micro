@@ -365,13 +365,9 @@ func SetGlobalOption(option, value string) error {
 		for _, b := range buffer.OpenBuffers {
 			b.UpdateRules()
 		}
-	}
-
-	if option == "infobar" || option == "keymenu" {
+	} else if option == "infobar" || option == "keymenu" {
 		Tabs.Resize()
-	}
-
-	if option == "mouse" {
+	} else if option == "mouse" {
 		if !nativeValue.(bool) {
 			screen.Screen.DisableMouse()
 		} else {

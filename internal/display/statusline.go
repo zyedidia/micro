@@ -18,9 +18,7 @@ import (
 // It gives information such as filename, whether the file has been
 // modified, filetype, cursor location
 type StatusLine struct {
-	FormatLeft  string
-	FormatRight string
-	Info        map[string]func(*buffer.Buffer) string
+	Info map[string]func(*buffer.Buffer) string
 
 	win *BufWindow
 }
@@ -30,9 +28,6 @@ type StatusLine struct {
 // NewStatusLine returns a statusline bound to a window
 func NewStatusLine(win *BufWindow) *StatusLine {
 	s := new(StatusLine)
-	s.FormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)"
-	// s.FormatLeft = "$(filename) $(modified)(line,col) $(opt:filetype) $(opt:fileformat)"
-	s.FormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help"
 	s.Info = map[string]func(*buffer.Buffer) string{
 		"filename": func(b *buffer.Buffer) string {
 			if b.Settings["basename"].(bool) {
@@ -90,10 +85,10 @@ func (s *StatusLine) Display() {
 		}
 	}
 
-	leftText := []byte(s.FormatLeft)
-	leftText = formatParser.ReplaceAllFunc([]byte(s.FormatLeft), formatter)
-	rightText := []byte(s.FormatRight)
-	rightText = formatParser.ReplaceAllFunc([]byte(s.FormatRight), formatter)
+	leftText := []byte(s.win.Buf.StatusFormatLeft)
+	leftText = formatParser.ReplaceAllFunc(leftText, formatter)
+	rightText := []byte(s.win.Buf.StatusFormatRight)
+	rightText = formatParser.ReplaceAllFunc(rightText, formatter)
 
 	statusLineStyle := config.DefStyle.Reverse(true)
 	if style, ok := config.Colorscheme["statusline"]; ok {

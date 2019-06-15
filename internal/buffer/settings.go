@@ -45,6 +45,8 @@ func (b *Buffer) SetOption(option, value string) error {
 		}
 	} else if option == "encoding" {
 		b.isModified = true
+	} else if option == "hidehelp" {
+		b.SetStatusFormat()
 	}
 
 	return nil
