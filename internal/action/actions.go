@@ -599,21 +599,25 @@ func (h *BufPane) saveBufToFile(filename string) {
 
 // Find opens a prompt and searches forward for the input
 func (h *BufPane) Find() bool {
+	h.searchOrig = h.Cursor.Loc
 	InfoBar.Prompt("Find: ", "", "Find", func(resp string) {
 		// Event callback
-		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, true, true)
+		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, true)
 		if found {
 			h.Cursor.SetSelectionStart(match[0])
 			h.Cursor.SetSelectionEnd(match[1])
 			h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 			h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+			h.Cursor.GotoLoc(match[1])
 		} else {
+			h.Cursor.GotoLoc(h.searchOrig)
 			h.Cursor.ResetSelection()
 		}
+		h.Relocate()
 	}, func(resp string, canceled bool) {
 		// Finished callback
 		if !canceled {
-			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, true, true)
+			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, true)
 			if err != nil {
 				InfoBar.Error(err)
 			}
@@ -622,7 +626,7 @@ func (h *BufPane) Find() bool {
 				h.Cursor.SetSelectionEnd(match[1])
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-				h.Cursor.Loc = h.Cursor.CurSelection[1]
+				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
 				h.lastSearch = resp
 			} else {
 				h.Cursor.ResetSelection()
@@ -631,9 +635,10 @@ func (h *BufPane) Find() bool {
 		} else {
 			h.Cursor.ResetSelection()
 		}
+		h.Relocate()
 	})
 
-	return true
+	return false
 }
 
 // FindNext searches forwards for the last used search term

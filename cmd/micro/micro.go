@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"sort"
 	"strings"
 
 	"github.com/go-errors/errors"
@@ -69,7 +70,14 @@ func InitFlags() {
 
 	if *flagOptions {
 		// If -options was passed
-		for k, v := range config.DefaultGlobalSettings() {
+		var keys []string
+		m := config.DefaultGlobalSettings()
+		for k, _ := range m {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+		for _, k := range keys {
+			v := m[k]
 			fmt.Printf("-%s value\n", k)
 			fmt.Printf("    \tDefault value: '%v'\n", v)
 		}

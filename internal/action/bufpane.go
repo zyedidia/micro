@@ -104,6 +104,9 @@ type BufPane struct {
 	multiWord bool
 
 	splitID uint64
+
+	// remember original location of a search in case the search is canceled
+	searchOrig buffer.Loc
 }
 
 func NewBufPane(buf *buffer.Buffer, win display.BWindow) *BufPane {

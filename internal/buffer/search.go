@@ -21,19 +21,19 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 
 		if i == start.Y && start.Y == end.Y {
 			nchars := utf8.RuneCount(l)
-			start.X = util.Clamp(start.X, 0, nchars-1)
-			end.X = util.Clamp(end.X, 0, nchars-1)
+			start.X = util.Clamp(start.X, 0, nchars)
+			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == start.Y {
 			nchars := utf8.RuneCount(l)
-			start.X = util.Clamp(start.X, 0, nchars-1)
+			start.X = util.Clamp(start.X, 0, nchars)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == end.Y {
 			nchars := utf8.RuneCount(l)
-			end.X = util.Clamp(end.X, 0, nchars-1)
+			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 		}
 
@@ -62,19 +62,19 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 
 		if i == start.Y && start.Y == end.Y {
 			nchars := utf8.RuneCount(l)
-			start.X = util.Clamp(start.X, 0, nchars-1)
-			end.X = util.Clamp(end.X, 0, nchars-1)
+			start.X = util.Clamp(start.X, 0, nchars)
+			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == start.Y {
 			nchars := utf8.RuneCount(l)
-			start.X = util.Clamp(start.X, 0, nchars-1)
+			start.X = util.Clamp(start.X, 0, nchars)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == end.Y {
 			nchars := utf8.RuneCount(l)
-			end.X = util.Clamp(end.X, 0, nchars-1)
+			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 		}
 
