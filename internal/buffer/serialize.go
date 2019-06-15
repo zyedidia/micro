@@ -4,12 +4,14 @@ import (
 	"encoding/gob"
 	"errors"
 	"io"
+	"log"
 	"os"
 	"time"
 
+	"golang.org/x/text/encoding"
+
 	"github.com/zyedidia/micro/internal/config"
 	. "github.com/zyedidia/micro/internal/util"
-	"golang.org/x/text/encoding/unicode"
 )
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -20,25 +22,24 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
-func init() {
-	gob.Register(TextEvent{})
-	gob.Register(SerializedBuffer{})
-}
-
 // Serialize serializes the buffer to config.ConfigDir/buffers
 func (b *Buffer) Serialize() error {
 	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
 		return nil
 	}
+	if b.Path == "" {
+		return nil
+	}
 
 	name := config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath)
 
-	return overwriteFile(name, unicode.UTF8, func(file io.Writer) error {
+	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
 		err := gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.GetActiveCursor().Loc,
 			b.ModTime,
 		})
+		log.Println("save mod time", b.ModTime)
 		return err
 	})
 }
@@ -46,12 +47,14 @@ func (b *Buffer) Serialize() error {
 func (b *Buffer) Unserialize() error {
 	// If either savecursor or saveundo is turned on, we need to load the serialized information
 	// from ~/.config/micro/buffers
+	if b.Path == "" {
+		return nil
+	}
 	file, err := os.Open(config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath))
 	defer file.Close()
 	if err == nil {
 		var buffer SerializedBuffer
 		decoder := gob.NewDecoder(file)
-		gob.Register(TextEvent{})
 		err = decoder.Decode(&buffer)
 		if err != nil {
 			return errors.New(err.Error() + "\nYou may want to remove the files in ~/.config/micro/buffers (these files store the information for the 'saveundo' and 'savecursor' options) if this problem persists.")
@@ -63,9 +66,12 @@ func (b *Buffer) Unserialize() error {
 		if b.Settings["saveundo"].(bool) {
 			// We should only use last time's eventhandler if the file wasn't modified by someone else in the meantime
 			if b.ModTime == buffer.ModTime {
+				log.Println("good mod time")
 				b.EventHandler = buffer.EventHandler
 				b.EventHandler.cursors = b.cursors
 				b.EventHandler.buf = b.SharedBuffer
+			} else {
+				log.Println("bad mod time", b.ModTime, buffer.ModTime)
 			}
 		}
 	}

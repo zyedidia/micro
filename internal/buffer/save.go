@@ -55,7 +55,7 @@ func (b *Buffer) Save() error {
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
-func (b *Buffer) SaveAs(filename string) error {
+func (b *Buffer) SaveAs(filename string) (err error) {
 	if b.Type.Scratch {
 		return errors.New("Cannot save scratch buffer")
 	}
@@ -82,6 +82,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	// Update the last time this file was updated after saving
 	defer func() {
 		b.ModTime, _ = GetModTime(filename)
+		err = b.Serialize()
 	}()
 
 	// Removes any tilde and replaces with the absolute path to home
@@ -160,7 +161,7 @@ func (b *Buffer) SaveAs(filename string) error {
 	absPath, _ := filepath.Abs(filename)
 	b.AbsPath = absPath
 	b.isModified = false
-	return b.Serialize()
+	return
 }
 
 // SaveWithSudo saves the buffer to the default path with sudo

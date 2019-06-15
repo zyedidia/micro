@@ -39,7 +39,7 @@ func NewBuffer() *InfoBuf {
 	ib := new(InfoBuf)
 	ib.History = make(map[string][]string)
 
-	ib.Buffer = buffer.NewBufferFromString("", "infobar", buffer.BTInfo)
+	ib.Buffer = buffer.NewBufferFromString("", "", buffer.BTInfo)
 	ib.LoadHistory()
 
 	return ib

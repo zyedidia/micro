@@ -173,7 +173,7 @@ func NewBuffer(r io.Reader, size int64, path string, cursorPosition []string, bt
 	found := false
 	if len(path) > 0 {
 		for _, buf := range OpenBuffers {
-			if buf.AbsPath == absPath {
+			if buf.AbsPath == absPath && buf.Type != BTInfo {
 				found = true
 				b.SharedBuffer = buf.SharedBuffer
 				b.EventHandler = buf.EventHandler
@@ -245,11 +245,20 @@ func NewBuffer(r io.Reader, size int64, path string, cursorPosition []string, bt
 func (b *Buffer) Close() {
 	for i, buf := range OpenBuffers {
 		if b == buf {
+			b.Fini()
 			copy(OpenBuffers[i:], OpenBuffers[i+1:])
 			OpenBuffers[len(OpenBuffers)-1] = nil
 			OpenBuffers = OpenBuffers[:len(OpenBuffers)-1]
 			return
 		}
+	}
+}
+
+// Fini should be called when a buffer is closed and performs
+// some cleanup
+func (b *Buffer) Fini() {
+	if !b.Modified() {
+		b.Serialize()
 	}
 }
 
