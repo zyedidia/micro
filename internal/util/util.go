@@ -239,11 +239,10 @@ func IsWhitespace(c rune) bool {
 	return c == ' ' || c == '\t' || c == '\n'
 }
 
-// IsStrWhitespace returns true if the given string is all whitespace
-func IsStrWhitespace(str string) bool {
-	// Range loop for unicode correctness
-	for _, c := range str {
-		if !IsWhitespace(c) {
+// IsBytesWhitespace returns true if the given bytes are all whitespace
+func IsBytesWhitespace(b []byte) bool {
+	for _, c := range b {
+		if !IsWhitespace(rune(c)) {
 			return false
 		}
 	}

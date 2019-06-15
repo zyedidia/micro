@@ -134,15 +134,51 @@ func (h *BufPane) CursorDown() bool {
 
 // CursorLeft moves the cursor left
 func (h *BufPane) CursorLeft() bool {
-	h.Cursor.Deselect(true)
-	h.Cursor.Left()
+	if h.Cursor.HasSelection() {
+		h.Cursor.Deselect(true)
+	} else {
+		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
+		tabmovement := h.Buf.Settings["tabmovement"].(bool)
+		if tabstospaces && tabmovement {
+			tabsize := int(h.Buf.Settings["tabsize"].(float64))
+			line := h.Buf.LineBytes(h.Cursor.Y)
+			if h.Cursor.X-tabsize >= 0 && util.IsSpaces(line[h.Cursor.X-tabsize:h.Cursor.X]) && util.IsBytesWhitespace(line[0:h.Cursor.X-tabsize]) {
+				for i := 0; i < tabsize; i++ {
+					h.Cursor.Left()
+				}
+			} else {
+				h.Cursor.Left()
+			}
+		} else {
+			h.Cursor.Left()
+		}
+	}
 	return true
 }
 
 // CursorRight moves the cursor right
 func (h *BufPane) CursorRight() bool {
-	h.Cursor.Deselect(false)
-	h.Cursor.Right()
+	if h.Cursor.HasSelection() {
+		h.Cursor.Deselect(false)
+		h.Cursor.Loc = h.Cursor.Loc.Move(1, h.Buf)
+	} else {
+		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
+		tabmovement := h.Buf.Settings["tabmovement"].(bool)
+		if tabstospaces && tabmovement {
+			tabsize := int(h.Buf.Settings["tabsize"].(float64))
+			line := h.Buf.LineBytes(h.Cursor.Y)
+			if h.Cursor.X+tabsize < utf8.RuneCount(line) && util.IsSpaces(line[h.Cursor.X:h.Cursor.X+tabsize]) && util.IsBytesWhitespace(line[0:h.Cursor.X]) {
+				for i := 0; i < tabsize; i++ {
+					h.Cursor.Right()
+				}
+			} else {
+				h.Cursor.Right()
+			}
+		} else {
+			h.Cursor.Right()
+		}
+	}
+
 	return true
 }
 
