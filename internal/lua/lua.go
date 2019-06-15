@@ -66,20 +66,9 @@ func Import(pkg string) *lua.LTable {
 		return importErrors()
 	case "time":
 		return importTime()
-	case "micro/plugin":
-		return importMicroPlugin()
 	default:
 		return nil
 	}
-}
-
-func importMicroPlugin() *lua.LTable {
-	pkg := L.NewTable()
-
-	L.SetField(pkg, "RegisterCallback", luar.New(L, (*Plugin).RegisterCallback))
-	L.SetField(pkg, "GetPlugin", luar.New(L, GetPlugin))
-
-	return pkg
 }
 
 func importFmt() *lua.LTable {
