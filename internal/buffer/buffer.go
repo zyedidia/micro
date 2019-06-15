@@ -8,6 +8,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -118,7 +119,7 @@ type Buffer struct {
 // and an error if the file is a directory
 func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 	var err error
-	filename, cursorPosition := GetPathAndCursorPosition(path)
+	filename, cursorPos := GetPathAndCursorPosition(path)
 	filename, err = ReplaceHome(filename)
 	if err != nil {
 		return nil, err
@@ -133,12 +134,17 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 
 	defer file.Close()
 
+	cursorLoc, err := ParseCursorLocation(cursorPos)
+	if err != nil {
+		cursorLoc = Loc{-1, -1}
+	}
+
 	var buf *Buffer
 	if err != nil {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else {
-		buf = NewBuffer(file, FSize(file), filename, cursorPosition, btype)
+		buf = NewBuffer(file, FSize(file), filename, cursorLoc, btype)
 	}
 
 	return buf, nil
@@ -146,13 +152,13 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 
 // NewBufferFromString creates a new buffer containing the given string
 func NewBufferFromString(text, path string, btype BufType) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path, nil, btype)
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, Loc{-1, -1}, btype)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
 // Ensure that ReadSettings and InitGlobalSettings have been called before creating
 // a new buffer
-func NewBuffer(r io.Reader, size int64, path string, cursorPosition []string, btype BufType) *Buffer {
+func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufType) *Buffer {
 	absPath, _ := filepath.Abs(path)
 
 	b := new(Buffer)
@@ -210,20 +216,19 @@ func NewBuffer(r io.Reader, size int64, path string, cursorPosition []string, bt
 		os.Mkdir(config.ConfigDir+"/buffers/", os.ModePerm)
 	}
 
-	// cursorLocation, err := GetBufferCursorLocation(cursorPosition, b)
-	// b.startcursor = Cursor{
-	// 	Loc: cursorLocation,
-	// 	buf: b,
-	// }
-	// TODO flagstartpos
-	if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-		err := b.Unserialize()
-		if err != nil {
-			screen.TermMessage(err)
+	if startcursor.X != -1 && startcursor.Y != -1 {
+		b.StartCursor = startcursor
+	} else {
+		if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+			err := b.Unserialize()
+			if err != nil {
+				screen.TermMessage(err)
+			}
 		}
 	}
 
 	b.AddCursor(NewCursor(b, b.StartCursor))
+	b.GetActiveCursor().Relocate()
 
 	if !b.Settings["fastdirty"].(bool) {
 		if size > LargeFileThreshold {
@@ -726,4 +731,29 @@ func (b *Buffer) Retab() {
 	}
 
 	b.isModified = dirty
+}
+
+// ParseCursorLocation turns a cursor location like 10:5 (LINE:COL)
+// into a loc
+func ParseCursorLocation(cursorPositions []string) (Loc, error) {
+	startpos := Loc{0, 0}
+	var err error
+
+	// if no positions are available exit early
+	if cursorPositions == nil {
+		return startpos, errors.New("No cursor positions were provided.")
+	}
+
+	startpos.Y, err = strconv.Atoi(cursorPositions[0])
+	startpos.Y -= 1
+	if err == nil {
+		if len(cursorPositions) > 1 {
+			startpos.X, err = strconv.Atoi(cursorPositions[1])
+			if startpos.X > 0 {
+				startpos.X -= 1
+			}
+		}
+	}
+
+	return startpos, err
 }
