@@ -3,14 +3,17 @@ package display
 import (
 	"bytes"
 	"fmt"
+	"log"
 	"path"
 	"regexp"
 	"strconv"
 	"unicode/utf8"
 
+	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/internal/util"
 )
 
 // StatusLine represents the information line at the bottom
@@ -95,19 +98,36 @@ func (s *StatusLine) Display() {
 		statusLineStyle = style
 	}
 
-	leftLen := utf8.RuneCount(leftText)
-	rightLen := utf8.RuneCount(rightText)
+	leftLen := util.StringWidth(leftText, utf8.RuneCount(leftText), 1)
+	rightLen := util.StringWidth(rightText, utf8.RuneCount(rightText), 1)
 
 	winX := s.win.X
 	for x := 0; x < s.win.Width; x++ {
 		if x < leftLen {
 			r, size := utf8.DecodeRune(leftText)
 			leftText = leftText[size:]
-			screen.Screen.SetContent(winX+x, y, r, nil, statusLineStyle)
+			rw := runewidth.RuneWidth(r)
+			for j := 0; j < rw; j++ {
+				c := r
+				if j > 0 {
+					c = ' '
+					x++
+				}
+				log.Println(x, string(c))
+				screen.Screen.SetContent(winX+x, y, c, nil, statusLineStyle)
+			}
 		} else if x >= s.win.Width-rightLen && x < rightLen+s.win.Width-rightLen {
 			r, size := utf8.DecodeRune(rightText)
 			rightText = rightText[size:]
-			screen.Screen.SetContent(winX+x, y, r, nil, statusLineStyle)
+			rw := runewidth.RuneWidth(r)
+			for j := 0; j < rw; j++ {
+				c := r
+				if j > 0 {
+					c = ' '
+					x++
+				}
+				screen.Screen.SetContent(winX+x, y, c, nil, statusLineStyle)
+			}
 		} else {
 			screen.Screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
 		}

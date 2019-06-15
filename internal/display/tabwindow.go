@@ -3,6 +3,7 @@ package display
 import (
 	"unicode/utf8"
 
+	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
@@ -77,24 +78,29 @@ func (w *TabWindow) SetActive(a int) {
 	}
 }
 
-// TODO: handle files with character width >=2
-
 func (w *TabWindow) Display() {
 	x := -w.hscroll
 	done := false
 
 	draw := func(r rune, n int) {
 		for i := 0; i < n; i++ {
-			if x == w.width-1 && !done {
-				screen.Screen.SetContent(w.width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
+			rw := runewidth.RuneWidth(r)
+			for j := 0; j < rw; j++ {
+				c := r
+				if j > 0 {
+					c = ' '
+				}
+				if x == w.width-1 && !done {
+					screen.Screen.SetContent(w.width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
+					x++
+					break
+				} else if x == 0 && w.hscroll > 0 {
+					screen.Screen.SetContent(0, w.Y, '<', nil, config.DefStyle.Reverse(true))
+				} else if x >= 0 && x < w.width {
+					screen.Screen.SetContent(x, w.Y, c, nil, config.DefStyle.Reverse(true))
+				}
 				x++
-				break
-			} else if x == 0 && w.hscroll > 0 {
-				screen.Screen.SetContent(0, w.Y, '<', nil, config.DefStyle.Reverse(true))
-			} else if x >= 0 && x < w.width {
-				screen.Screen.SetContent(x, w.Y, r, nil, config.DefStyle.Reverse(true))
 			}
-			x++
 		}
 	}
 
