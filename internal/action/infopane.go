@@ -157,12 +157,17 @@ var InfoOverrides = map[string]InfoKeyAction{
 	"QuitAll":       (*InfoPane).QuitAll,
 }
 
+// CursorUp cycles history up
 func (h *InfoPane) CursorUp() {
 	h.UpHistory(h.History[h.PromptType])
 }
+
+// CursorDown cycles history down
 func (h *InfoPane) CursorDown() {
 	h.DownHistory(h.History[h.PromptType])
 }
+
+// InsertTab begins autocompletion
 func (h *InfoPane) InsertTab() {
 	b := h.Buf
 	if b.HasSuggestions {
@@ -187,22 +192,32 @@ func (h *InfoPane) InsertTab() {
 		}
 	}
 }
+
+// CycleBack cycles back in the autocomplete suggestion list
 func (h *InfoPane) CycleBack() {
 	if h.Buf.HasSuggestions {
 		h.Buf.CycleAutocomplete(false)
 	}
 }
+
+// InsertNewline completes the prompt
 func (h *InfoPane) InsertNewline() {
 	if !h.HasYN {
 		h.DonePrompt(false)
 	}
 }
+
+// Quit cancels the prompt
 func (h *InfoPane) Quit() {
 	h.DonePrompt(true)
 }
+
+// QuitAll cancels the prompt
 func (h *InfoPane) QuitAll() {
 	h.DonePrompt(true)
 }
+
+// Escape cancels the prompt
 func (h *InfoPane) Escape() {
 	h.DonePrompt(true)
 }

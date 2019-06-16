@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
 	"unicode/utf8"
 
 	"github.com/blang/semver"
@@ -402,4 +403,8 @@ func Clamp(val, min, max int) int {
 		val = max
 	}
 	return val
+}
+
+func IsNonAlphaNumeric(c rune) bool {
+	return !unicode.IsLetter(c) && !unicode.IsNumber(c)
 }

@@ -227,6 +227,9 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	if action, ok := BufKeyBindings[e]; ok {
 		estr := BufKeyStrings[e]
+		if estr != "InsertTab" {
+			h.Buf.HasSuggestions = false
+		}
 		for _, s := range MultiActions {
 			if s == estr {
 				cursors := h.Buf.GetCursors()

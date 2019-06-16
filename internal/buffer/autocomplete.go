@@ -16,7 +16,7 @@ import (
 // cursor location
 // It returns a list of string suggestions which will be inserted at
 // the current cursor location if selected as well as a list of
-// suggestion names which can be displayed in a autocomplete box or
+// suggestion names which can be displayed in an autocomplete box or
 // other UI element
 type Completer func(*Buffer) ([]string, []string)
 
@@ -24,15 +24,18 @@ func (b *Buffer) GetSuggestions() {
 
 }
 
-func (b *Buffer) Autocomplete(c Completer) {
+// Autocomplete starts the autocomplete process
+func (b *Buffer) Autocomplete(c Completer) bool {
 	b.Completions, b.Suggestions = c(b)
 	if len(b.Completions) != len(b.Suggestions) || len(b.Completions) == 0 {
-		return
+		return false
 	}
 	b.CurSuggestion = -1
 	b.CycleAutocomplete(true)
+	return true
 }
 
+// CycleAutocomplete moves to the next suggestion
 func (b *Buffer) CycleAutocomplete(forward bool) {
 	prevSuggestion := b.CurSuggestion
 
@@ -53,7 +56,7 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
 		start = end.Move(-utf8.RuneCountInString(b.Completions[prevSuggestion]), b)
 	} else {
-		end = start.Move(1, b)
+		// end = start.Move(1, b)
 	}
 
 	b.Replace(start, end, b.Completions[b.CurSuggestion])
@@ -62,6 +65,27 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	}
 }
 
+// GetWord gets the most recent word separated by any separator
+// (whitespace, punctuation, any non alphanumeric character)
+func GetWord(b *Buffer) ([]byte, int) {
+	c := b.GetActiveCursor()
+	l := b.LineBytes(c.Y)
+	l = util.SliceStart(l, c.X)
+
+	if c.X == 0 || util.IsWhitespace(b.RuneAt(c.Loc)) {
+		return []byte{}, -1
+	}
+
+	if util.IsNonAlphaNumeric(b.RuneAt(c.Loc)) {
+		return []byte{}, c.X
+	}
+
+	args := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+	input := args[len(args)-1]
+	return input, c.X - utf8.RuneCount(input)
+}
+
+// GetArg gets the most recent word (separated by ' ' only)
 func GetArg(b *Buffer) (string, int) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
@@ -124,6 +148,58 @@ func FileComplete(b *Buffer) ([]string, []string) {
 			complete = suggestions[i]
 		}
 		completions[i] = util.SliceEndStr(complete, c.X-argstart)
+	}
+
+	return completions, suggestions
+}
+
+// BufferComplete autocompletes based on previous words in the buffer
+func BufferComplete(b *Buffer) ([]string, []string) {
+	c := b.GetActiveCursor()
+	input, argstart := GetWord(b)
+
+	if argstart == -1 {
+		return []string{}, []string{}
+	}
+
+	inputLen := utf8.RuneCount(input)
+
+	suggestionsSet := make(map[string]struct{})
+
+	var suggestions []string
+	for i := c.Y; i >= 0; i-- {
+		l := b.LineBytes(i)
+		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		for _, w := range words {
+			if bytes.HasPrefix(w, input) && utf8.RuneCount(w) > inputLen {
+				strw := string(w)
+				if _, ok := suggestionsSet[strw]; !ok {
+					suggestionsSet[strw] = struct{}{}
+					suggestions = append(suggestions, strw)
+				}
+			}
+		}
+	}
+	for i := c.Y + 1; i < b.LinesNum(); i++ {
+		l := b.LineBytes(i)
+		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		for _, w := range words {
+			if bytes.HasPrefix(w, input) && utf8.RuneCount(w) > inputLen {
+				strw := string(w)
+				if _, ok := suggestionsSet[strw]; !ok {
+					suggestionsSet[strw] = struct{}{}
+					suggestions = append(suggestions, strw)
+				}
+			}
+		}
+	}
+	if len(suggestions) > 1 {
+		suggestions = append(suggestions, string(input))
+	}
+
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
 
 	return completions, suggestions

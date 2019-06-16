@@ -69,6 +69,43 @@ func (s *StatusLine) Display() {
 	// We'll draw the line at the lowest line in the window
 	y := s.win.Height + s.win.Y - 1
 
+	b := s.win.Buf
+	if b.HasSuggestions && len(b.Suggestions) > 1 {
+		statusLineStyle := config.DefStyle.Reverse(true)
+		if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
+		keymenuOffset := 0
+		if config.GetGlobalOption("keymenu").(bool) {
+			keymenuOffset = len(keydisplay)
+		}
+		x := 0
+		for j, sug := range b.Suggestions {
+			style := statusLineStyle
+			if b.CurSuggestion == j {
+				style = style.Reverse(true)
+			}
+			for _, r := range sug {
+				screen.Screen.SetContent(x, y-keymenuOffset, r, nil, style)
+				x++
+				if x >= s.win.Width {
+					return
+				}
+			}
+			screen.Screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			x++
+			if x >= s.win.Width {
+				return
+			}
+		}
+
+		for x < s.win.Width {
+			screen.Screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			x++
+		}
+		return
+	}
+
 	formatter := func(match []byte) []byte {
 		name := match[2 : len(match)-1]
 		if bytes.HasPrefix(name, []byte("opt")) {

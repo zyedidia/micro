@@ -560,10 +560,22 @@ func (h *BufPane) OutdentSelection() bool {
 
 // InsertTab inserts a tab or spaces
 func (h *BufPane) InsertTab() bool {
-	indent := h.Buf.IndentString(util.IntOpt(h.Buf.Settings["tabsize"]))
-	tabBytes := len(indent)
-	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
-	h.Buf.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
+	b := h.Buf
+	if b.HasSuggestions {
+		b.CycleAutocomplete(true)
+		return true
+	}
+
+	l := b.LineBytes(h.Cursor.Y)
+	l = util.SliceStart(l, h.Cursor.X)
+	hasComplete := b.Autocomplete(buffer.BufferComplete)
+	if !hasComplete {
+		indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
+		tabBytes := len(indent)
+		bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
+		b.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
+		return true
+	}
 	return true
 }
 
