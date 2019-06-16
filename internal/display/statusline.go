@@ -70,6 +70,7 @@ func (s *StatusLine) Display() {
 	y := s.win.Height + s.win.Y - 1
 
 	b := s.win.Buf
+	// autocomplete suggestions (for the buffer, not for the infowindow)
 	if b.HasSuggestions && len(b.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
 		if style, ok := config.Colorscheme["statusline"]; ok {
@@ -124,9 +125,9 @@ func (s *StatusLine) Display() {
 		}
 	}
 
-	leftText := []byte(s.win.Buf.StatusFormatLeft)
+	leftText := []byte(s.win.Buf.Settings["statusformatl"].(string))
 	leftText = formatParser.ReplaceAllFunc(leftText, formatter)
-	rightText := []byte(s.win.Buf.StatusFormatRight)
+	rightText := []byte(s.win.Buf.Settings["statusformatr"].(string))
 	rightText = formatParser.ReplaceAllFunc(rightText, formatter)
 
 	statusLineStyle := config.DefStyle.Reverse(true)

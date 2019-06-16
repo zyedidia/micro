@@ -108,9 +108,6 @@ type Buffer struct {
 	CurSuggestion int
 
 	Messages []*Message
-
-	StatusFormatLeft  string
-	StatusFormatRight string
 }
 
 // NewBufferFromFile opens a new buffer using the given path
@@ -244,23 +241,9 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		screen.TermMessage(err)
 	}
 
-	b.SetStatusFormat()
-
 	OpenBuffers = append(OpenBuffers, b)
 
 	return b
-}
-
-// SetStatusFormat will correctly set the format string for the
-// status line
-func (b *Buffer) SetStatusFormat() {
-	if b.Settings["hidehelp"].(bool) {
-		b.StatusFormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)"
-		b.StatusFormatRight = ""
-	} else {
-		b.StatusFormatLeft = "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)"
-		b.StatusFormatRight = "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help"
-	}
 }
 
 // Close removes this buffer from the list of open buffers

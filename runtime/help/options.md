@@ -200,6 +200,21 @@ Here are the options that you can set:
 
 	default value: `true`
 
+* `statusformatl`: format string definition for the left-justified part of the
+   statusline. Special directives should be placed inside `$()`. Special
+   directives include: `filename`, `modified`, `line`, `col`, `opt`, `bind`.
+   The `opt` and `bind` directives take either an option or an action afterward
+   and fill in the value of the option or the key bound to the action.
+
+    default value: `$(filename) $(modified)($(line),$(col)) $(opt:filetype)
+                    $(opt:fileformat) $(opt:encoding)`
+
+* `statusformatl`: format string definition for the left-justified part of the
+   statusline.
+
+    default value: `$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp):
+                    toggle help`
+
 * `statusline`: display the status line at the bottom of the screen.
 
 	default value: `true`

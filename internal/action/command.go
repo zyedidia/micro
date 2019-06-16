@@ -30,6 +30,7 @@ var commands map[string]Command
 func InitCommands() {
 	commands = map[string]Command{
 		"set":        Command{(*BufPane).SetCmd, OptionValueComplete},
+		"reset":      Command{(*BufPane).ResetCmd, OptionValueComplete},
 		"setlocal":   Command{(*BufPane).SetLocalCmd, OptionValueComplete},
 		"show":       Command{(*BufPane).ShowCmd, OptionComplete},
 		"showkey":    Command{(*BufPane).ShowKeyCmd, nil},
@@ -347,16 +348,7 @@ func (h *BufPane) NewTabCmd(args []string) {
 	}
 }
 
-func SetGlobalOption(option, value string) error {
-	if _, ok := config.GlobalSettings[option]; !ok {
-		return config.ErrInvalidOption
-	}
-
-	nativeValue, err := config.GetNativeValue(option, config.GlobalSettings[option], value)
-	if err != nil {
-		return err
-	}
-
+func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 	config.GlobalSettings[option] = nativeValue
 
 	if option == "colorscheme" {
@@ -376,12 +368,46 @@ func SetGlobalOption(option, value string) error {
 	}
 
 	for _, b := range buffer.OpenBuffers {
-		b.SetOption(option, value)
+		b.SetOptionNative(option, nativeValue)
 	}
 
-	config.WriteSettings(config.ConfigDir + "/settings.json")
+	return config.WriteSettings(config.ConfigDir + "/settings.json")
+}
 
-	return nil
+func SetGlobalOption(option, value string) error {
+	if _, ok := config.GlobalSettings[option]; !ok {
+		return config.ErrInvalidOption
+	}
+
+	nativeValue, err := config.GetNativeValue(option, config.GlobalSettings[option], value)
+	if err != nil {
+		return err
+	}
+
+	return SetGlobalOptionNative(option, nativeValue)
+}
+
+// ResetCmd resets a setting to its default value
+func (h *BufPane) ResetCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	option := args[0]
+
+	defaultGlobals := config.DefaultGlobalSettings()
+	defaultLocals := config.DefaultLocalSettings()
+
+	if _, ok := defaultGlobals[option]; ok {
+		SetGlobalOptionNative(option, defaultGlobals[option])
+		return
+	}
+	if _, ok := defaultLocals[option]; ok {
+		h.Buf.SetOptionNative(option, defaultLocals[option])
+		return
+	}
+	InfoBar.Error(config.ErrInvalidOption)
 }
 
 // SetCmd sets an option

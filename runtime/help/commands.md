@@ -77,6 +77,8 @@ Here are the possible commands that you can use.
 
 * `open filename`: Open a file in the current buffer.
 
+* `reset option`: resets the given option to its default value
+
 * `retab`: Replaces all leading tabs with spaces or leading spaces with tabs
    depending on the value of `tabstospaces`.
 
