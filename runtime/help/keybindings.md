@@ -8,7 +8,8 @@ command or you can also be added in the file `~/.config/micro/bindings.json` as
 discussed below.  For a list of the default keybindings in the json format used
 by micro, please see the end of this file. For a more user-friendly list with
 explanations of what the default hotkeys are and what they do, please see
-`>help defaultkeys`
+`> help defaultkeys` (a json formatted list of default keys is included
+at the end of this document).
 
 If `~/.config/micro/bindings.json` does not exist, you can simply create it.
 Micro will know what to do with it.
