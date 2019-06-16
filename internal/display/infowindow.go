@@ -15,29 +15,34 @@ import (
 type InfoWindow struct {
 	*info.InfoBuf
 	*View
+}
 
-	defStyle tcell.Style
-	errStyle tcell.Style
+func (i *InfoWindow) errStyle() tcell.Style {
+	errStyle := config.DefStyle.
+		Foreground(tcell.ColorBlack).
+		Background(tcell.ColorMaroon)
+
+	if _, ok := config.Colorscheme["error-message"]; ok {
+		errStyle = config.Colorscheme["error-message"]
+	}
+
+	return errStyle
+}
+
+func (i *InfoWindow) defStyle() tcell.Style {
+	defStyle := config.DefStyle
+
+	if _, ok := config.Colorscheme["message"]; ok {
+		defStyle = config.Colorscheme["message"]
+	}
+
+	return defStyle
 }
 
 func NewInfoWindow(b *info.InfoBuf) *InfoWindow {
 	iw := new(InfoWindow)
 	iw.InfoBuf = b
 	iw.View = new(View)
-
-	iw.defStyle = config.DefStyle
-
-	if _, ok := config.Colorscheme["message"]; ok {
-		iw.defStyle = config.Colorscheme["message"]
-	}
-
-	iw.errStyle = config.DefStyle.
-		Foreground(tcell.ColorBlack).
-		Background(tcell.ColorMaroon)
-
-	if _, ok := config.Colorscheme["error-message"]; ok {
-		iw.errStyle = config.Colorscheme["error-message"]
-	}
 
 	iw.Width, iw.Y = screen.Screen.Size()
 	iw.Y--
@@ -68,7 +73,7 @@ func (i *InfoWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
 
 func (i *InfoWindow) Clear() {
 	for x := 0; x < i.Width; x++ {
-		screen.Screen.SetContent(x, i.Y, ' ', nil, config.DefStyle)
+		screen.Screen.SetContent(x, i.Y, ' ', nil, i.defStyle())
 	}
 }
 
@@ -91,7 +96,7 @@ func (i *InfoWindow) displayBuffer() {
 				(bloc.GreaterEqual(activeC.CurSelection[0]) && bloc.LessThan(activeC.CurSelection[1]) ||
 					bloc.LessThan(activeC.CurSelection[0]) && bloc.GreaterEqual(activeC.CurSelection[1])) {
 				// The current character is selected
-				style = config.DefStyle.Reverse(true)
+				style = i.defStyle().Reverse(true)
 
 				if s, ok := config.Colorscheme["selection"]; ok {
 					style = s
@@ -120,7 +125,7 @@ func (i *InfoWindow) displayBuffer() {
 
 		r, size := utf8.DecodeRune(line)
 
-		draw(r, i.defStyle)
+		draw(r, i.defStyle())
 
 		width := 0
 
@@ -140,7 +145,7 @@ func (i *InfoWindow) displayBuffer() {
 		// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 		if width > 1 {
 			for j := 1; j < width; j++ {
-				draw(char, i.defStyle)
+				draw(char, i.defStyle())
 			}
 		}
 		totalwidth += width
@@ -161,9 +166,9 @@ func (i *InfoWindow) displayKeyMenu() {
 	for y := 0; y < len(keydisplay); y++ {
 		for x := 0; x < i.Width; x++ {
 			if x < len(keydisplay[y]) {
-				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, config.DefStyle)
+				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, i.defStyle())
 			} else {
-				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, ' ', nil, config.DefStyle)
+				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, ' ', nil, i.defStyle())
 			}
 		}
 	}
@@ -180,10 +185,10 @@ func (i *InfoWindow) Display() {
 			return
 		}
 		i.Clear()
-		style := i.defStyle
+		style := i.defStyle()
 
 		if i.HasError {
-			style = i.errStyle
+			style = i.errStyle()
 		}
 
 		display := i.Msg
