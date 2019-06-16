@@ -134,8 +134,8 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 
 	defer file.Close()
 
-	cursorLoc, err := ParseCursorLocation(cursorPos)
-	if err != nil {
+	cursorLoc, cursorerr := ParseCursorLocation(cursorPos)
+	if cursorerr != nil {
 		cursorLoc = Loc{-1, -1}
 	}
 
@@ -449,7 +449,7 @@ func (b *Buffer) UpdateRules() {
 			}
 
 			ft := b.Settings["filetype"].(string)
-			if (ft == "Unknown" || ft == "") && !rehighlight {
+			if (ft == "unknown" || ft == "") && !rehighlight {
 				if highlight.MatchFiletype(ftdetect, b.Path, b.lines[0].data) {
 					header := new(highlight.Header)
 					header.FileType = file.FileType

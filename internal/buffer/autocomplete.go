@@ -57,7 +57,9 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	}
 
 	b.Replace(start, end, b.Completions[b.CurSuggestion])
-	b.HasSuggestions = true
+	if len(b.Suggestions) > 1 {
+		b.HasSuggestions = true
+	}
 }
 
 func GetArg(b *Buffer) (string, int) {

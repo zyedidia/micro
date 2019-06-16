@@ -197,7 +197,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 // Note that filetype is a local only option
 func DefaultLocalSettings() map[string]interface{} {
 	common := DefaultCommonSettings()
-	common["filetype"] = "Unknown"
+	common["filetype"] = "unknown"
 	return common
 }
 
