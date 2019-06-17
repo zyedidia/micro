@@ -155,6 +155,8 @@ func NewBufferFromString(text, path string, btype BufType) *Buffer {
 // NewBuffer creates a new buffer from a given reader with a given path
 // Ensure that ReadSettings and InitGlobalSettings have been called before creating
 // a new buffer
+// Places the cursor at startcursor. If startcursor is -1, -1 places the
+// cursor at an autodetected location (based on savecursor or :LINE:COL)
 func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufType) *Buffer {
 	absPath, _ := filepath.Abs(path)
 
@@ -166,7 +168,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			b.Settings[k] = v
 		}
 	}
-	config.InitLocalSettings(b.Settings, b.Path)
+	config.InitLocalSettings(b.Settings, path)
 
 	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
 	if err != nil {
@@ -194,6 +196,12 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
+	b.Path = path
+	b.AbsPath = absPath
+
+	// The last time this file was modified
+	b.ModTime, _ = GetModTime(b.Path)
+
 	switch b.Endings {
 	case FFUnix:
 		b.Settings["fileformat"] = "unix"
@@ -201,13 +209,8 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.Settings["fileformat"] = "dos"
 	}
 
-	b.Path = path
-	b.AbsPath = absPath
-
-	// The last time this file was modified
-	b.ModTime, _ = GetModTime(b.Path)
-
 	b.UpdateRules()
+	config.InitLocalSettings(b.Settings, b.Path)
 
 	if _, err := os.Stat(config.ConfigDir + "/buffers/"); os.IsNotExist(err) {
 		os.Mkdir(config.ConfigDir+"/buffers/", os.ModePerm)
