@@ -62,7 +62,7 @@ func (i *InfoBuf) SaveHistory() {
 
 // UpHistory fetches the previous item in the history
 func (i *InfoBuf) UpHistory(history []string) {
-	if i.HistoryNum > 0 {
+	if i.HistoryNum > 0 && i.HasPrompt && !i.HasYN {
 		i.HistoryNum--
 		i.Replace(i.Start(), i.End(), history[i.HistoryNum])
 		i.Buffer.GetActiveCursor().GotoLoc(i.End())
@@ -71,7 +71,7 @@ func (i *InfoBuf) UpHistory(history []string) {
 
 // DownHistory fetches the next item in the history
 func (i *InfoBuf) DownHistory(history []string) {
-	if i.HistoryNum < len(history)-1 {
+	if i.HistoryNum < len(history)-1 && i.HasPrompt && !i.HasYN {
 		i.HistoryNum++
 		i.Replace(i.Start(), i.End(), history[i.HistoryNum])
 		i.Buffer.GetActiveCursor().GotoLoc(i.End())
