@@ -196,6 +196,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
+	if b.Settings["readonly"].(bool) {
+		b.Type.Readonly = true
+	}
+
 	b.Path = path
 	b.AbsPath = absPath
 

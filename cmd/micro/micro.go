@@ -51,10 +51,9 @@ func InitFlags() {
 
 	optionFlags = make(map[string]*string)
 
-	for k, v := range config.DefaultGlobalSettings() {
+	for k, v := range config.DefaultAllSettings() {
 		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'.", k, v))
 	}
-	optionFlags["filetype"] = flag.String("filetype", "", fmt.Sprintf("The filetype option. Autodetected by default."))
 
 	flag.Parse()
 
@@ -69,7 +68,7 @@ func InitFlags() {
 	if *flagOptions {
 		// If -options was passed
 		var keys []string
-		m := config.DefaultGlobalSettings()
+		m := config.DefaultAllSettings()
 		for k, _ := range m {
 			keys = append(keys, k)
 		}
@@ -154,15 +153,13 @@ func main() {
 
 	// flag options
 	for k, v := range optionFlags {
-		if *v != "" && k != "filetype" {
-			nativeValue, err := config.GetNativeValue(k, config.GlobalSettings[k], *v)
+		if *v != "" {
+			nativeValue, err := config.GetNativeValue(k, config.DefaultAllSettings()[k], *v)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
 			}
 			config.GlobalSettings[k] = nativeValue
-		} else if k == "filetype" && *v != "" {
-			config.GlobalSettings[k] = *v
 		}
 	}
 
@@ -199,8 +196,10 @@ func main() {
 	action.InitTabs(b)
 	action.InitGlobals()
 
-	if _, ok := config.GlobalSettings["filetype"]; ok {
-		delete(config.GlobalSettings, "filetype")
+	for _, s := range config.LocalSettings {
+		if _, ok := config.GlobalSettings[s]; ok {
+			delete(config.GlobalSettings, s)
+		}
 	}
 
 	// Here is the event loop which runs in a separate thread

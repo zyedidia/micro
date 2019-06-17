@@ -194,12 +194,25 @@ func DefaultGlobalSettings() map[string]interface{} {
 	return common
 }
 
+// LocalSettings is a list of the local only settings
+var LocalSettings = []string{"filetype", "readonly"}
+
 // DefaultLocalSettings returns the default local settings
 // Note that filetype is a local only option
 func DefaultLocalSettings() map[string]interface{} {
 	common := DefaultCommonSettings()
 	common["filetype"] = "unknown"
+	common["readonly"] = false
 	return common
+}
+
+func DefaultAllSettings() map[string]interface{} {
+	global := DefaultGlobalSettings()
+	local := DefaultLocalSettings()
+	for k, v := range global {
+		local[k] = v
+	}
+	return local
 }
 
 func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {
