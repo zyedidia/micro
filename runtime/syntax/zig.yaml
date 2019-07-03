@@ -7,7 +7,7 @@ rules:
     # function definition
     - identifier: "fn [a-z0-9_]+"
       # Reserved words
-    - statement: "\\b(align|and|or|orelse|var|volatile|const|if|for|else|comptime|struct|return|test|pub|union|enum|true|false|unreachable|catch|try)\\b"
+    - statement: "\\b(align|and|or|orelse|var|volatile|const|if|for|else|fn|comptime|struct|return|test|pub|union|enum|true|false|unreachable|catch|try)\\b"
       # builtin functions
     - special: "@+[a-z_]+"
       # Constants
