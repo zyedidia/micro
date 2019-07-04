@@ -7,7 +7,7 @@ rules:
     # function definition
     - identifier: "fn [a-z0-9_]+"
       # Reserved words
-    - statement: "\\b(align|and|or|orelse|var|volatile|const|if|for|else|fn|comptime|struct|return|test|pub|union|enum|true|false|unreachable|catch|try|while|break|continue|switch)\\b"
+    - statement: "\\b(align|and|allowzero|anyerror|asm|async|await|break|cancel|catch|comptime|const|continue|defer|else|enum|errdefer|error|export|extern|false|fn|for|if|inline|nakedcc|noalias|null|or|orelse|packed|promise|pub|resume|return|linksection|stdcallcc|struct|suspend|switch|test|threadlocal|true|try|undefined|union|unreachable|use|var|volatile|while)\\b"
       # builtin functions
     - special: "@+[a-z_]+"
       # Constants
