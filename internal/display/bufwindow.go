@@ -461,6 +461,19 @@ func (w *BufWindow) displayBuffer() {
 					}
 				}
 
+				if r == '\t' {
+					if s, ok := config.Colorscheme["indent-char"]; ok {
+						style = s
+
+						indentrunes := []rune(b.Settings["indentchar"].(string))
+						// if empty indentchar settings, use space
+						if indentrunes == nil || len(indentrunes) == 0 {
+							indentrunes = []rune{' '}
+						}
+						r = indentrunes[0]
+					}
+				}
+
 				if s, ok := config.Colorscheme["color-column"]; ok {
 					if colorcolumn != 0 && vloc.X-w.gutterOffset == colorcolumn {
 						fg, _, _ := s.Decompose()
