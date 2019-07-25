@@ -9,8 +9,7 @@ rules:
         end: "</template.*?>"
         rules: 
             - include: "html5"
-        
-    
+            
     - default: 
         start: "<script.*?>"
         end: "</script.*?>"
