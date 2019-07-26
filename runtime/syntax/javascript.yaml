@@ -20,7 +20,7 @@ rules:
     - statement: "\\b(for|function|class|extends|get|if|import|from|in|of|instanceof|let|new|return|set)\\b"
     - statement: "\\b(super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"
     # reserved but unassigned
-    - error: "\\b(enum|implements|interface|package|private|protected|public)"
+    - error: "\\b(enum|implements|interface|package|private|protected|public|TODO)"
     - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
     - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Math)\\b"
