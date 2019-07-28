@@ -6,11 +6,16 @@ import (
 	"path"
 	"regexp"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 
+	luar "layeh.com/gopher-luar"
+
 	runewidth "github.com/mattn/go-runewidth"
+	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
+	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
 )
@@ -25,31 +30,59 @@ type StatusLine struct {
 	win *BufWindow
 }
 
+var statusInfo = map[string]func(*buffer.Buffer) string{
+	"filename": func(b *buffer.Buffer) string {
+		if b.Settings["basename"].(bool) {
+			return path.Base(b.GetName())
+		}
+		return b.GetName()
+	},
+	"line": func(b *buffer.Buffer) string {
+		return strconv.Itoa(b.GetActiveCursor().Y + 1)
+	},
+	"col": func(b *buffer.Buffer) string {
+		return strconv.Itoa(b.GetActiveCursor().X + 1)
+	},
+	"modified": func(b *buffer.Buffer) string {
+		if b.Modified() {
+			return "+ "
+		}
+		return ""
+	},
+}
+
+func SetStatusInfoFnLua(s string, fn string) {
+	luaFn := strings.Split(fn, ".")
+	plName, plFn := luaFn[0], luaFn[1]
+	var pl *config.Plugin
+	for _, p := range config.Plugins {
+		if p.Name == plName {
+			pl = p
+			break
+		}
+	}
+	statusInfo[s] = func(b *buffer.Buffer) string {
+		if pl == nil {
+			return ""
+		}
+		val, err := pl.Call(plFn, luar.New(ulua.L, b))
+		if err == nil {
+			if v, ok := val.(lua.LString); !ok {
+				screen.TermMessage(plFn, "should return a string")
+				return ""
+			} else {
+				return string(v)
+			}
+		}
+		return ""
+	}
+}
+
 // TODO: plugin modify status line formatter
 
 // NewStatusLine returns a statusline bound to a window
 func NewStatusLine(win *BufWindow) *StatusLine {
 	s := new(StatusLine)
-	s.Info = map[string]func(*buffer.Buffer) string{
-		"filename": func(b *buffer.Buffer) string {
-			if b.Settings["basename"].(bool) {
-				return path.Base(b.GetName())
-			}
-			return b.GetName()
-		},
-		"line": func(b *buffer.Buffer) string {
-			return strconv.Itoa(b.GetActiveCursor().Y + 1)
-		},
-		"col": func(b *buffer.Buffer) string {
-			return strconv.Itoa(b.GetActiveCursor().X + 1)
-		},
-		"modified": func(b *buffer.Buffer) string {
-			if b.Modified() {
-				return "+ "
-			}
-			return ""
-		},
-	}
 	s.win = win
 	return s
 }
@@ -121,7 +154,10 @@ func (s *StatusLine) Display() {
 			}
 			return []byte("null")
 		} else {
-			return []byte(s.Info[string(name)](s.win.Buf))
+			if fn, ok := statusInfo[string(name)]; ok {
+				return []byte(fn(s.win.Buf))
+			}
+			return []byte{}
 		}
 	}
 
