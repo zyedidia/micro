@@ -62,7 +62,7 @@ func SetStatusInfoFnLua(s string, fn string) {
 		}
 	}
 	statusInfo[s] = func(b *buffer.Buffer) string {
-		if pl == nil {
+		if pl == nil || !pl.IsEnabled() {
 			return ""
 		}
 		val, err := pl.Call(plFn, luar.New(ulua.L, b))

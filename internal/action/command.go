@@ -365,6 +365,12 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		} else {
 			screen.Screen.EnableMouse()
 		}
+	} else {
+		for _, pl := range config.Plugins {
+			if option == pl.Name && nativeValue.(bool) && !pl.Loaded {
+				pl.Load()
+			}
+		}
 	}
 
 	for _, b := range buffer.OpenBuffers {

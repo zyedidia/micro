@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"log"
 
 	lua "github.com/yuin/gopher-lua"
 	ulua "github.com/zyedidia/micro/internal/lua"
@@ -21,7 +20,9 @@ func LoadAllPlugins() {
 func RunPluginFn(fn string, args ...lua.LValue) error {
 	var reterr error
 	for _, p := range Plugins {
-		log.Println(p.Name, fn)
+		if !p.IsEnabled() {
+			continue
+		}
 		_, err := p.Call(fn, args...)
 		if err != nil && err != ErrNoSuchFunction {
 			reterr = errors.New("Plugin " + p.Name + ": " + err.Error())
@@ -31,15 +32,26 @@ func RunPluginFn(fn string, args ...lua.LValue) error {
 }
 
 type Plugin struct {
-	Name string        // name of plugin
-	Info RuntimeFile   // json file containing info
-	Srcs []RuntimeFile // lua files
+	Name   string        // name of plugin
+	Info   RuntimeFile   // json file containing info
+	Srcs   []RuntimeFile // lua files
+	Loaded bool
+}
+
+func (p *Plugin) IsEnabled() bool {
+	if v, ok := GlobalSettings[p.Name]; ok {
+		return v.(bool)
+	}
+	return true
 }
 
 var Plugins []*Plugin
 
 func (p *Plugin) Load() error {
 	for _, f := range p.Srcs {
+		if !p.IsEnabled() {
+			return nil
+		}
 		dat, err := f.Data()
 		if err != nil {
 			return err
@@ -47,6 +59,10 @@ func (p *Plugin) Load() error {
 		err = ulua.LoadFile(p.Name, f.Name(), dat)
 		if err != nil {
 			return err
+		}
+		p.Loaded = true
+		if _, ok := GlobalSettings[p.Name]; !ok {
+			AddOption(p.Name, true)
 		}
 	}
 	return nil
