@@ -11,6 +11,7 @@ import (
 	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
+	"github.com/zyedidia/micro/internal/util"
 )
 
 func init() {
@@ -24,6 +25,8 @@ func LuaImport(pkg string) *lua.LTable {
 		return luaImportMicro()
 	case "micro/shell":
 		return luaImportMicroShell()
+	case "micro/util":
+		return luaImportMicroUtil()
 	default:
 		return ulua.Import(pkg)
 	}
@@ -49,6 +52,16 @@ func luaImportMicroShell() *lua.LTable {
 	ulua.L.SetField(pkg, "RunCommand", luar.New(ulua.L, shell.RunCommand))
 	ulua.L.SetField(pkg, "RunBackgroundShell", luar.New(ulua.L, shell.RunBackgroundShell))
 	ulua.L.SetField(pkg, "RunInteractiveShell", luar.New(ulua.L, shell.RunInteractiveShell))
+
+	return pkg
+}
+
+func luaImportMicroUtil() *lua.LTable {
+	pkg := ulua.L.NewTable()
+
+	ulua.L.SetField(pkg, "RuneAt", luar.New(ulua.L, util.LuaRuneAt))
+	ulua.L.SetField(pkg, "GetLeadingWhitespace", luar.New(ulua.L, util.LuaGetLeadingWhitespace))
+	ulua.L.SetField(pkg, "IsWordChar", luar.New(ulua.L, util.LuaIsWordChar))
 
 	return pkg
 }

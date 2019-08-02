@@ -16,6 +16,7 @@ import (
 	"runtime"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
@@ -66,6 +67,8 @@ func Import(pkg string) *lua.LTable {
 		return importErrors()
 	case "time":
 		return importTime()
+	case "utf8":
+		return importUtf8()
 	default:
 		return nil
 	}
@@ -529,6 +532,27 @@ func importTime() *lua.LTable {
 	L.SetField(pkg, "Second", luar.New(L, time.Second))
 	L.SetField(pkg, "Minute", luar.New(L, time.Minute))
 	L.SetField(pkg, "Hour", luar.New(L, time.Hour))
+
+	return pkg
+}
+
+func importUtf8() *lua.LTable {
+	pkg := L.NewTable()
+
+	L.SetField(pkg, "DecodeLastRune", luar.New(L, utf8.DecodeLastRune))
+	L.SetField(pkg, "DecodeLastRuneInString", luar.New(L, utf8.DecodeLastRuneInString))
+	L.SetField(pkg, "DecodeRune", luar.New(L, utf8.DecodeRune))
+	L.SetField(pkg, "DecodeRuneInString", luar.New(L, utf8.DecodeRuneInString))
+	L.SetField(pkg, "EncodeRune", luar.New(L, utf8.EncodeRune))
+	L.SetField(pkg, "FullRune", luar.New(L, utf8.FullRune))
+	L.SetField(pkg, "FullRuneInString", luar.New(L, utf8.FullRuneInString))
+	L.SetField(pkg, "RuneCount", luar.New(L, utf8.RuneCount))
+	L.SetField(pkg, "RuneCountInString", luar.New(L, utf8.RuneCountInString))
+	L.SetField(pkg, "RuneLen", luar.New(L, utf8.RuneLen))
+	L.SetField(pkg, "RuneStart", luar.New(L, utf8.RuneStart))
+	L.SetField(pkg, "Valid", luar.New(L, utf8.Valid))
+	L.SetField(pkg, "ValidRune", luar.New(L, utf8.ValidRune))
+	L.SetField(pkg, "ValidString", luar.New(L, utf8.ValidString))
 
 	return pkg
 }

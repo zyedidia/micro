@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -293,6 +294,7 @@ func (b *Buffer) SetName(s string) {
 
 func (b *Buffer) Insert(start Loc, text string) {
 	if !b.Type.Readonly {
+		log.Println("INSERT", start, text)
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
@@ -746,4 +748,8 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 	}
 
 	return startpos, err
+}
+
+func (b *Buffer) Line(i int) string {
+	return string(b.LineBytes(i))
 }

@@ -17,6 +17,7 @@ func LoadAllPlugins() {
 }
 
 // RunPluginFn runs a given function in all plugins
+// returns an error if any of the plugins had an error
 func RunPluginFn(fn string, args ...lua.LValue) error {
 	var reterr error
 	for _, p := range Plugins {
@@ -29,6 +30,33 @@ func RunPluginFn(fn string, args ...lua.LValue) error {
 		}
 	}
 	return reterr
+}
+
+// RunPluginFnBool runs a function in all plugins and returns
+// false if any one of them returned false
+// also returns an error if any of the plugins had an error
+func RunPluginFnBool(fn string, args ...lua.LValue) (bool, error) {
+	var reterr error
+	retbool := true
+	for _, p := range Plugins {
+		if !p.IsEnabled() {
+			continue
+		}
+		val, err := p.Call(fn, args...)
+		if err == ErrNoSuchFunction {
+			continue
+		}
+		if err != nil {
+			reterr = errors.New("Plugin " + p.Name + ": " + err.Error())
+			continue
+		}
+		if v, ok := val.(lua.LBool); !ok {
+			reterr = errors.New(p.Name + "." + fn + " should return a boolean")
+		} else {
+			retbool = retbool && bool(v)
+		}
+	}
+	return retbool, reterr
 }
 
 type Plugin struct {

@@ -124,6 +124,27 @@ func NewBufPaneFromBuf(buf *buffer.Buffer) *BufPane {
 	return NewBufPane(buf, w)
 }
 
+// PluginCB calls all plugin callbacks with a certain name and
+// displays an error if there is one and returns the aggregrate
+// boolean response
+func (h *BufPane) PluginCB(cb string) bool {
+	b, err := config.RunPluginFnBool(cb, luar.New(ulua.L, h))
+	if err != nil {
+		screen.TermMessage(err)
+	}
+	return b
+}
+
+// PluginCBRune is the same as PluginCB but also passes a rune to
+// the plugins
+func (h *BufPane) PluginCBRune(cb string, r rune) bool {
+	b, err := config.RunPluginFnBool(cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
+	if err != nil {
+		screen.TermMessage(err)
+	}
+	return b
+}
+
 func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.Buf.Close()
 	h.Buf = b
@@ -236,14 +257,21 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 				for _, c := range cursors {
 					h.Buf.SetCurCursor(c.Num)
 					h.Cursor = c
-					if action(h) {
+					if !h.PluginCB("pre" + estr) {
+						// canceled by plugin
+						continue
+					}
+					if action(h) && h.PluginCB("on"+estr) {
 						h.Relocate()
 					}
 				}
 				return true
 			}
 		}
-		if action(h) {
+		if !h.PluginCB("pre" + estr) {
+			return false
+		}
+		if action(h) && h.PluginCB("on"+estr) {
 			h.Relocate()
 		}
 		return true
@@ -277,6 +305,9 @@ func (h *BufPane) DoRuneInsert(r rune) {
 	for _, c := range cursors {
 		// Insert a character
 		h.Buf.SetCurCursor(c.Num)
+		if !h.PluginCBRune("preRune", r) {
+			continue
+		}
 		if c.HasSelection() {
 			c.DeleteSelection()
 			c.ResetSelection()
@@ -289,6 +320,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		} else {
 			h.Buf.Insert(c.Loc, string(r))
 		}
+		h.PluginCBRune("onRune", r)
 	}
 }
 
