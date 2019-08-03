@@ -451,7 +451,7 @@ func DefaultBindings() map[string]string {
 		"CtrlG":          "ToggleHelp",
 		"Alt-g":          "ToggleKeyMenu",
 		"CtrlR":          "ToggleRuler",
-		"CtrlL":          "JumpLine",
+		"CtrlL":          "command-edit:goto ",
 		"Delete":         "Delete",
 		"CtrlB":          "ShellMode",
 		"CtrlQ":          "Quit",

@@ -435,7 +435,6 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleHelp":             (*BufPane).ToggleHelp,
 	"ToggleKeyMenu":          (*BufPane).ToggleKeyMenu,
 	"ToggleRuler":            (*BufPane).ToggleRuler,
-	"JumpLine":               (*BufPane).JumpLine,
 	"ClearStatus":            (*BufPane).ClearStatus,
 	"ShellMode":              (*BufPane).ShellMode,
 	"CommandMode":            (*BufPane).CommandMode,

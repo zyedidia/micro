@@ -42,6 +42,7 @@ func InitCommands() {
 		"bind":       Command{(*BufPane).BindCmd, nil},
 		"unbind":     Command{(*BufPane).UnbindCmd, nil},
 		"quit":       Command{(*BufPane).QuitCmd, nil},
+		"goto":       Command{(*BufPane).GotoCmd, nil},
 		"save":       Command{(*BufPane).SaveCmd, nil},
 		"replace":    Command{(*BufPane).ReplaceCmd, nil},
 		"replaceall": Command{(*BufPane).ReplaceAllCmd, nil},
@@ -553,6 +554,41 @@ func (h *BufPane) RunCmd(args []string) {
 // QuitCmd closes the main view
 func (h *BufPane) QuitCmd(args []string) {
 	h.Quit()
+}
+
+// GotoCmd is a command that will send the cursor to a certain
+// position in the buffer
+// For example: `goto line`, or `goto line:col`
+func (h *BufPane) GotoCmd(args []string) {
+	if len(args) <= 0 {
+		InfoBar.Error("Not enough arguments")
+	} else {
+		h.RemoveAllMultiCursors()
+		if strings.Contains(args[0], ":") {
+			parts := strings.SplitN(args[0], ":", 2)
+			line, err := strconv.Atoi(parts[0])
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			col, err := strconv.Atoi(parts[1])
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+			col = util.Clamp(col-1, 0, utf8.RuneCount(h.Buf.LineBytes(line)))
+			h.Cursor.GotoLoc(buffer.Loc{col, line})
+		} else {
+			line, err := strconv.Atoi(args[0])
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+			h.Cursor.GotoLoc(buffer.Loc{0, line})
+		}
+	}
 }
 
 // SaveCmd saves the buffer optionally with an argument file name

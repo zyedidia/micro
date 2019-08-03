@@ -1091,11 +1091,6 @@ func (h *BufPane) ToggleRuler() bool {
 	return false
 }
 
-// JumpLine jumps to a line and moves the view accordingly.
-func (h *BufPane) JumpLine() bool {
-	return false
-}
-
 // ClearStatus clears the messenger bar
 func (h *BufPane) ClearStatus() bool {
 	InfoBar.Message("")
