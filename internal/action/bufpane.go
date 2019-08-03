@@ -7,6 +7,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/display"
@@ -28,6 +29,23 @@ func init() {
 	BufMouseBindings = make(map[MouseEvent]BufMouseAction)
 }
 
+func LuaAction(fn string) func(*BufPane) bool {
+	luaFn := strings.Split(fn, ".")
+	plName, plFn := luaFn[0], luaFn[1]
+	pl := config.FindPlugin(plName)
+	return func(h *BufPane) bool {
+		val, err := pl.Call(plFn, luar.New(ulua.L, h))
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		if v, ok := val.(lua.LBool); !ok {
+			return false
+		} else {
+			return bool(v)
+		}
+	}
+}
+
 // BufMapKey maps a key event to an action
 func BufMapKey(k Event, action string) {
 	if strings.HasPrefix(action, "command:") {
@@ -38,6 +56,10 @@ func BufMapKey(k Event, action string) {
 		action = strings.SplitN(action, ":", 2)[1]
 		BufKeyStrings[k] = action
 		BufKeyBindings[k] = CommandEditAction(action)
+	} else if strings.HasPrefix(action, "lua:") {
+		action = strings.SplitN(action, ":", 2)[1]
+		BufKeyStrings[k] = action
+		BufKeyBindings[k] = LuaAction(action)
 	} else if f, ok := BufKeyActions[action]; ok {
 		BufKeyStrings[k] = action
 		BufKeyBindings[k] = f

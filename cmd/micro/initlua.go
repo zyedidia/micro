@@ -86,6 +86,9 @@ func luaImportMicroBuffer() *lua.LTable {
 	ulua.L.SetField(pkg, "MTInfo", luar.New(ulua.L, buffer.MTInfo))
 	ulua.L.SetField(pkg, "MTWarning", luar.New(ulua.L, buffer.MTWarning))
 	ulua.L.SetField(pkg, "MTError", luar.New(ulua.L, buffer.MTError))
+	ulua.L.SetField(pkg, "Loc", luar.New(ulua.L, func(x, y int) buffer.Loc {
+		return buffer.Loc{x, y}
+	}))
 
 	return pkg
 }
