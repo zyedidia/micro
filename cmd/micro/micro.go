@@ -13,6 +13,7 @@ import (
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
 	"github.com/zyedidia/tcell"
 )
@@ -231,6 +232,9 @@ func main() {
 
 		// Check for new events
 		select {
+		case f := <-shell.Jobs:
+			// If a new job has finished while running in the background we should execute the callback
+			f.Function(f.Output, f.Args...)
 		case event = <-events:
 		case <-screen.DrawChan:
 		}

@@ -54,13 +54,7 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 func SetStatusInfoFnLua(s string, fn string) {
 	luaFn := strings.Split(fn, ".")
 	plName, plFn := luaFn[0], luaFn[1]
-	var pl *config.Plugin
-	for _, p := range config.Plugins {
-		if p.Name == plName {
-			pl = p
-			break
-		}
-	}
+	pl := config.FindPlugin(plName)
 	statusInfo[s] = func(b *buffer.Buffer) string {
 		if pl == nil || !pl.IsEnabled() {
 			return ""

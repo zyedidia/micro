@@ -114,3 +114,14 @@ func (p *Plugin) Call(fn string, args ...lua.LValue) (lua.LValue, error) {
 	ulua.L.Pop(1)
 	return ret, nil
 }
+
+func FindPlugin(name string) *Plugin {
+	var pl *Plugin
+	for _, p := range Plugins {
+		if p.Name == name {
+			pl = p
+			break
+		}
+	}
+	return pl
+}
