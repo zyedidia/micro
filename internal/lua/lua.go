@@ -57,7 +57,7 @@ func Import(pkg string) *lua.LTable {
 		return importRuntime()
 	case "path":
 		return importPath()
-	case "filepath":
+	case "path/filepath", "filepath":
 		return importFilePath()
 	case "strings":
 		return importStrings()
@@ -67,7 +67,7 @@ func Import(pkg string) *lua.LTable {
 		return importErrors()
 	case "time":
 		return importTime()
-	case "utf8":
+	case "unicode/utf8", "utf8":
 		return importUtf8()
 	default:
 		return nil

@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"sort"
 
@@ -172,7 +173,10 @@ func main() {
 		screen.TermMessage(err)
 	}
 
-	config.LoadAllPlugins()
+	err = config.LoadAllPlugins()
+	if err != nil {
+		screen.TermMessage(err)
+	}
 	err = config.RunPluginFn("init")
 	if err != nil {
 		screen.TermMessage(err)
@@ -234,6 +238,7 @@ func main() {
 		select {
 		case f := <-shell.Jobs:
 			// If a new job has finished while running in the background we should execute the callback
+			log.Println("OUTPUT:", f.Output)
 			f.Function(f.Output, f.Args...)
 		case event = <-events:
 		case <-screen.DrawChan:

@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"log"
 
 	lua "github.com/yuin/gopher-lua"
 	ulua "github.com/zyedidia/micro/internal/lua"
@@ -10,10 +11,15 @@ import (
 var ErrNoSuchFunction = errors.New("No such function exists")
 
 // LoadAllPlugins loads all detected plugins (in runtime/plugins and ConfigDir/plugins)
-func LoadAllPlugins() {
+func LoadAllPlugins() error {
+	var reterr error
 	for _, p := range Plugins {
-		p.Load()
+		err := p.Load()
+		if err != nil {
+			reterr = err
+		}
 	}
+	return reterr
 }
 
 // RunPluginFn runs a given function in all plugins
@@ -68,7 +74,7 @@ type Plugin struct {
 
 func (p *Plugin) IsEnabled() bool {
 	if v, ok := GlobalSettings[p.Name]; ok {
-		return v.(bool)
+		return v.(bool) && p.Loaded
 	}
 	return true
 }
@@ -77,7 +83,7 @@ var Plugins []*Plugin
 
 func (p *Plugin) Load() error {
 	for _, f := range p.Srcs {
-		if !p.IsEnabled() {
+		if v, ok := GlobalSettings[p.Name]; ok && !v.(bool) {
 			return nil
 		}
 		dat, err := f.Data()
@@ -98,6 +104,7 @@ func (p *Plugin) Load() error {
 
 func (p *Plugin) Call(fn string, args ...lua.LValue) (lua.LValue, error) {
 	plug := ulua.L.GetGlobal(p.Name)
+	log.Println(p.Name, fn, plug)
 	luafn := ulua.L.GetField(plug, fn)
 	if luafn == lua.LNil {
 		return nil, ErrNoSuchFunction

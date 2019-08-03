@@ -367,8 +367,13 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		}
 	} else {
 		for _, pl := range config.Plugins {
-			if option == pl.Name && nativeValue.(bool) && !pl.Loaded {
-				pl.Load()
+			if option == pl.Name {
+				if nativeValue.(bool) && !pl.Loaded {
+					pl.Load()
+					pl.Call("init")
+				} else if !nativeValue.(bool) && pl.Loaded {
+					pl.Call("deinit")
+				}
 			}
 		}
 	}

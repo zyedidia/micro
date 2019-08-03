@@ -32,17 +32,17 @@ func init() {
 // JobFunction is a representation of a job (this data structure is what is loaded
 // into the jobs channel)
 type JobFunction struct {
-	Function func(string, ...string)
+	Function func(string, ...interface{})
 	Output   string
-	Args     []string
+	Args     []interface{}
 }
 
 // A CallbackFile is the data structure that makes it possible to catch stderr and stdout write events
 type CallbackFile struct {
 	io.Writer
 
-	callback func(string, ...string)
-	args     []string
+	callback func(string, ...interface{})
+	args     []interface{}
 }
 
 func (f *CallbackFile) Write(data []byte) (int, error) {
@@ -55,13 +55,13 @@ func (f *CallbackFile) Write(data []byte) (int, error) {
 
 // JobStart starts a shell command in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...string) *exec.Cmd {
+func JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...interface{}) *exec.Cmd {
 	return JobSpawn("sh", []string{"-c", cmd}, onStdout, onStderr, onExit, userargs...)
 }
 
 // JobSpawn starts a process with args in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...string) *exec.Cmd {
+func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...interface{}) *exec.Cmd {
 	// Set up everything correctly if the functions have been provided
 	proc := exec.Command(cmdName, cmdArgs...)
 	var outbuf bytes.Buffer
@@ -104,12 +104,13 @@ func JobSend(cmd *exec.Cmd, data string) {
 // luaFunctionJob returns a function that will call the given lua function
 // structured as a job call i.e. the job output and arguments are provided
 // to the lua function
-func luaFunctionJob(fn string) func(string, ...string) {
+func luaFunctionJob(fn string) func(string, ...interface{}) {
 	luaFn := strings.Split(fn, ".")
 	plName, plFn := luaFn[0], luaFn[1]
 	pl := config.FindPlugin(plName)
-	return func(output string, args ...string) {
+	return func(output string, args ...interface{}) {
 		var luaArgs []lua.LValue
+		luaArgs = append(luaArgs, luar.New(ulua.L, output))
 		for _, v := range args {
 			luaArgs = append(luaArgs, luar.New(ulua.L, v))
 		}
@@ -118,12 +119,4 @@ func luaFunctionJob(fn string) func(string, ...string) {
 			screen.TermMessage(err)
 		}
 	}
-}
-
-func unpack(old []string) []interface{} {
-	new := make([]interface{}, len(old))
-	for i, v := range old {
-		new[i] = v
-	}
-	return new
 }

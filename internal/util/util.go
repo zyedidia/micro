@@ -3,6 +3,7 @@ package util
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -202,10 +203,10 @@ func FSize(f *os.File) int64 {
 }
 
 // IsWordChar returns whether or not the string is a 'word character'
-// If it is a unicode character, then it does not match
-// Word characters are defined as [A-Za-z0-9_]
+// Word characters are defined as numbers, letters, or '_'
 func IsWordChar(r rune) bool {
-	return (r >= '0' && r <= '9') || (r >= 'A' && r <= 'Z') || (r >= 'a' && r <= 'z') || (r == '_')
+	log.Println("IsWordChar")
+	return unicode.IsLetter(r) || unicode.IsNumber(r) || r == '_'
 }
 
 // Spaces returns a string with n spaces
@@ -237,7 +238,7 @@ func IsSpacesOrTabs(str []byte) bool {
 
 // IsWhitespace returns true if the given rune is a space, tab, or newline
 func IsWhitespace(c rune) bool {
-	return c == ' ' || c == '\t' || c == '\n'
+	return unicode.IsSpace(c)
 }
 
 // IsBytesWhitespace returns true if the given bytes are all whitespace

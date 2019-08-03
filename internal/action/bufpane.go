@@ -1,6 +1,7 @@
 package action
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -261,7 +262,8 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 						// canceled by plugin
 						continue
 					}
-					if action(h) && h.PluginCB("on"+estr) {
+					rel := action(h)
+					if h.PluginCB("on"+estr) && rel {
 						h.Relocate()
 					}
 				}
@@ -271,7 +273,9 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 		if !h.PluginCB("pre" + estr) {
 			return false
 		}
-		if action(h) && h.PluginCB("on"+estr) {
+		rel := action(h)
+		log.Println("calling on", estr)
+		if h.PluginCB("on"+estr) && rel {
 			h.Relocate()
 		}
 		return true

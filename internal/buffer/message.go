@@ -17,10 +17,10 @@ type Message struct {
 	Msg        string
 	Start, End Loc
 	Kind       MsgType
-	Owner      int
+	Owner      string
 }
 
-func NewMessage(owner int, msg string, start, end Loc, kind MsgType) *Message {
+func NewMessage(owner string, msg string, start, end Loc, kind MsgType) *Message {
 	return &Message{
 		Msg:   msg,
 		Start: start,
@@ -30,8 +30,8 @@ func NewMessage(owner int, msg string, start, end Loc, kind MsgType) *Message {
 	}
 }
 
-func NewMessageAtLine(owner int, msg string, line int, kind MsgType) *Message {
-	start := Loc{-1, line}
+func NewMessageAtLine(owner string, msg string, line int, kind MsgType) *Message {
+	start := Loc{-1, line - 1}
 	end := start
 	return NewMessage(owner, msg, start, end, kind)
 }
@@ -64,7 +64,7 @@ func (b *Buffer) removeMsg(i int) {
 	b.Messages = b.Messages[:len(b.Messages)-1]
 }
 
-func (b *Buffer) ClearMessages(owner int) {
+func (b *Buffer) ClearMessages(owner string) {
 	for i := len(b.Messages) - 1; i >= 0; i-- {
 		if b.Messages[i].Owner == owner {
 			b.removeMsg(i)
