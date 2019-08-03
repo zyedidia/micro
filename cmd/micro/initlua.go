@@ -8,6 +8,7 @@ import (
 
 	"github.com/zyedidia/micro/internal/action"
 	"github.com/zyedidia/micro/internal/buffer"
+	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/display"
 	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
@@ -59,6 +60,16 @@ func luaImportMicroConfig() *lua.LTable {
 	ulua.L.SetField(pkg, "OptionValueComplete", luar.New(ulua.L, action.OptionValueComplete))
 	ulua.L.SetField(pkg, "NoComplete", luar.New(ulua.L, nil))
 	ulua.L.SetField(pkg, "TryBindKey", luar.New(ulua.L, action.TryBindKey))
+	ulua.L.SetField(pkg, "Reload", luar.New(ulua.L, action.ReloadConfig))
+	ulua.L.SetField(pkg, "AddRuntimeFileFromMemory", luar.New(ulua.L, config.PluginAddRuntimeFileFromMemory))
+	ulua.L.SetField(pkg, "AddRuntimeFilesFromDirectory", luar.New(ulua.L, config.PluginAddRuntimeFileFromMemory))
+	ulua.L.SetField(pkg, "AddRuntimeFile", luar.New(ulua.L, config.PluginAddRuntimeFile))
+	ulua.L.SetField(pkg, "ListRuntimeFiles", luar.New(ulua.L, config.PluginListRuntimeFiles))
+	ulua.L.SetField(pkg, "ReadRuntimeFile", luar.New(ulua.L, config.PluginReadRuntimeFile))
+	ulua.L.SetField(pkg, "RTColorscheme", luar.New(ulua.L, config.RTColorscheme))
+	ulua.L.SetField(pkg, "RTSyntax", luar.New(ulua.L, config.RTSyntax))
+	ulua.L.SetField(pkg, "RTHelp", luar.New(ulua.L, config.RTHelp))
+	ulua.L.SetField(pkg, "RTPlugin", luar.New(ulua.L, config.RTPlugin))
 
 	return pkg
 }

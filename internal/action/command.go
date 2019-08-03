@@ -3,6 +3,7 @@ package action
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -252,6 +253,29 @@ func (h *BufPane) ToggleLogCmd(args []string) {
 
 // ReloadCmd reloads all files (syntax files, colorschemes...)
 func (h *BufPane) ReloadCmd(args []string) {
+	ReloadConfig()
+}
+
+func ReloadConfig() {
+	config.InitRuntimeFiles()
+	err := config.ReadSettings()
+	if err != nil {
+		screen.TermMessage(err)
+	}
+	config.InitGlobalSettings()
+	InitBindings()
+	InitCommands()
+
+	err = config.InitColorscheme()
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
+	log.Println("RELOAD CONFIG", len(buffer.OpenBuffers))
+	for _, b := range buffer.OpenBuffers {
+		log.Println("UPDATE RULES")
+		b.UpdateRules()
+	}
 }
 
 // ReopenCmd reopens the buffer (reload from disk)
