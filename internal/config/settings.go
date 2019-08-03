@@ -114,12 +114,35 @@ func WriteSettings(filename string) error {
 	return err
 }
 
-// AddOption creates a new option. This is meant to be called by plugins to add options.
-func AddOption(name string, value interface{}) error {
-	GlobalSettings[name] = value
-	err := WriteSettings(ConfigDir + "/settings.json")
-	if err != nil {
-		return errors.New("Error writing settings.json file: " + err.Error())
+// RegisterCommonOption creates a new option. This is meant to be called by plugins to add options.
+func RegisterCommonOption(name string, defaultvalue interface{}) error {
+	if v, ok := GlobalSettings[name]; !ok {
+		defaultCommonSettings[name] = defaultvalue
+		GlobalSettings[name] = defaultvalue
+		err := WriteSettings(ConfigDir + "/settings.json")
+		if err != nil {
+			return errors.New("Error writing settings.json file: " + err.Error())
+		}
+	} else {
+		defaultCommonSettings[name] = v
+	}
+	return nil
+}
+
+func RegisterLocalOption(name string, defaultvalue interface{}) {
+	defaultLocalSettings[name] = defaultvalue
+}
+
+func RegisterGlobalOption(name string, defaultvalue interface{}) error {
+	if v, ok := GlobalSettings[name]; !ok {
+		defaultGlobalSettings[name] = defaultvalue
+		GlobalSettings[name] = defaultvalue
+		err := WriteSettings(ConfigDir + "/settings.json")
+		if err != nil {
+			return errors.New("Error writing settings.json file: " + err.Error())
+		}
+	} else {
+		defaultGlobalSettings[name] = v
 	}
 	return nil
 }
@@ -129,42 +152,40 @@ func GetGlobalOption(name string) interface{} {
 	return GlobalSettings[name]
 }
 
-func DefaultCommonSettings() map[string]interface{} {
-	return map[string]interface{}{
-		"autoindent":     true,
-		"autosave":       false,
-		"basename":       false,
-		"colorcolumn":    float64(0),
-		"cursorline":     true,
-		"encoding":       "utf-8",
-		"eofnewline":     false,
-		"fastdirty":      true,
-		"fileformat":     "unix",
-		"ignorecase":     false,
-		"indentchar":     " ",
-		"keepautoindent": false,
-		"matchbrace":     false,
-		"matchbraceleft": false,
-		"rmtrailingws":   false,
-		"ruler":          true,
-		"savecursor":     false,
-		"saveundo":       false,
-		"scrollbar":      false,
-		"scrollmargin":   float64(3),
-		"scrollspeed":    float64(2),
-		"smartpaste":     true,
-		"softwrap":       false,
-		"splitbottom":    true,
-		"splitright":     true,
-		"statusformatl":  "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)",
-		"statusformatr":  "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help",
-		"statusline":     true,
-		"syntax":         true,
-		"tabmovement":    false,
-		"tabsize":        float64(4),
-		"tabstospaces":   false,
-		"useprimary":     true,
-	}
+var defaultCommonSettings = map[string]interface{}{
+	"autoindent":     true,
+	"autosave":       false,
+	"basename":       false,
+	"colorcolumn":    float64(0),
+	"cursorline":     true,
+	"encoding":       "utf-8",
+	"eofnewline":     false,
+	"fastdirty":      true,
+	"fileformat":     "unix",
+	"ignorecase":     false,
+	"indentchar":     " ",
+	"keepautoindent": false,
+	"matchbrace":     false,
+	"matchbraceleft": false,
+	"rmtrailingws":   false,
+	"ruler":          true,
+	"savecursor":     false,
+	"saveundo":       false,
+	"scrollbar":      false,
+	"scrollmargin":   float64(3),
+	"scrollspeed":    float64(2),
+	"smartpaste":     true,
+	"softwrap":       false,
+	"splitbottom":    true,
+	"splitright":     true,
+	"statusformatl":  "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)",
+	"statusformatr":  "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help",
+	"statusline":     true,
+	"syntax":         true,
+	"tabmovement":    false,
+	"tabsize":        float64(4),
+	"tabstospaces":   false,
+	"useprimary":     true,
 }
 
 func GetInfoBarOffset() int {
@@ -178,41 +199,64 @@ func GetInfoBarOffset() int {
 	return offset
 }
 
+var defaultGlobalSettings = map[string]interface{}{
+	"colorscheme": "default",
+	"infobar":     true,
+	"keymenu":     false,
+	"mouse":       true,
+	"savehistory": true,
+	"sucmd":       "sudo",
+	"termtitle":   false,
+}
+
 // DefaultGlobalSettings returns the default global settings for micro
 // Note that colorscheme is a global only option
 func DefaultGlobalSettings() map[string]interface{} {
-	common := DefaultCommonSettings()
-	common["colorscheme"] = "default"
-	common["infobar"] = true
-	common["keymenu"] = false
-	common["mouse"] = true
-	common["pluginchannels"] = []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"}
-	common["pluginrepos"] = []string{}
-	common["savehistory"] = true
-	common["sucmd"] = "sudo"
-	common["termtitle"] = false
-	return common
+	globalsettings := make(map[string]interface{})
+	for k, v := range defaultCommonSettings {
+		globalsettings[k] = v
+	}
+	for k, v := range defaultGlobalSettings {
+		globalsettings[k] = v
+	}
+	return globalsettings
 }
 
 // LocalSettings is a list of the local only settings
 var LocalSettings = []string{"filetype", "readonly"}
 
+var defaultLocalSettings = map[string]interface{}{
+	"filetype": "unknown",
+	"readonly": false,
+}
+
 // DefaultLocalSettings returns the default local settings
 // Note that filetype is a local only option
 func DefaultLocalSettings() map[string]interface{} {
-	common := DefaultCommonSettings()
-	common["filetype"] = "unknown"
-	common["readonly"] = false
-	return common
+	localsettings := make(map[string]interface{})
+	for k, v := range defaultCommonSettings {
+		localsettings[k] = v
+	}
+	for k, v := range defaultLocalSettings {
+		localsettings[k] = v
+	}
+	return localsettings
 }
 
+// DefaultAllSettings returns a map of all settings and their
+// default values (both local and global settings)
 func DefaultAllSettings() map[string]interface{} {
-	global := DefaultGlobalSettings()
-	local := DefaultLocalSettings()
-	for k, v := range global {
-		local[k] = v
+	allsettings := make(map[string]interface{})
+	for k, v := range defaultCommonSettings {
+		allsettings[k] = v
 	}
-	return local
+	for k, v := range defaultGlobalSettings {
+		allsettings[k] = v
+	}
+	for k, v := range defaultLocalSettings {
+		allsettings[k] = v
+	}
+	return allsettings
 }
 
 func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {

@@ -2,7 +2,7 @@ local runtime = import("runtime")
 local filepath = import("path/filepath")
 local shell = import("micro/shell")
 local buffer = import("micro/buffer")
-local micro = import("micro")
+local config = import("micro/config")
 
 local linters = {}
 
@@ -66,6 +66,13 @@ function init()
     makeLinter("switfc", "swift", "xcrun", {"swiftc", "%f"}, "%f:%l:%d+:.+: %m", {"darwin"}, true)
     makeLinter("switfc", "swiftc", {"%f"}, "%f:%l:%d+:.+: %m", {"linux"}, true)
     makeLinter("yaml", "yaml", "yamllint", {"--format", "parsable", "%f"}, "%f:%l:%d+:.+ %m")
+
+    config.MakeCommand("lint", "linter.lintCmd", config.NoComplete)
+end
+
+function lintCmd(bp)
+    bp:Save()
+    runLinter(bp.Buf)
 end
 
 function contains(list, element)
@@ -107,7 +114,6 @@ function runLinter(buf)
 end
 
 function onSave(bp)
-    micro.Log("SAVE")
     runLinter(bp.Buf)
     return false
 end
@@ -119,8 +125,6 @@ function lint(buf, linter, cmd, args, errorformat)
 end
 
 function onExit(output, buf, linter, errorformat)
-    micro.Log("ONEXIT")
-    micro.Log(output)
     local lines = split(output, "\n")
 
     local regex = errorformat:gsub("%%f", "(..-)"):gsub("%%l", "(%d+)"):gsub("%%m", "(.+)")

@@ -28,6 +28,8 @@ func LuaImport(pkg string) *lua.LTable {
 		return luaImportMicroShell()
 	case "micro/buffer":
 		return luaImportMicroBuffer()
+	case "micro/config":
+		return luaImportMicroConfig()
 	case "micro/util":
 		return luaImportMicroUtil()
 	default:
@@ -43,7 +45,20 @@ func luaImportMicro() *lua.LTable {
 	ulua.L.SetField(pkg, "InfoBar", luar.New(ulua.L, action.GetInfoBar))
 	ulua.L.SetField(pkg, "Log", luar.New(ulua.L, log.Println))
 	ulua.L.SetField(pkg, "SetStatusInfoFn", luar.New(ulua.L, display.SetStatusInfoFnLua))
-	// ulua.L.SetField(pkg, "TryBindKey", luar.New(ulua.L, action.TryBindKey))
+
+	return pkg
+}
+
+func luaImportMicroConfig() *lua.LTable {
+	pkg := ulua.L.NewTable()
+
+	ulua.L.SetField(pkg, "MakeCommand", luar.New(ulua.L, action.LuaMakeCommand))
+	ulua.L.SetField(pkg, "FileComplete", luar.New(ulua.L, buffer.FileComplete))
+	ulua.L.SetField(pkg, "HelpComplete", luar.New(ulua.L, action.HelpComplete))
+	ulua.L.SetField(pkg, "OptionComplete", luar.New(ulua.L, action.OptionComplete))
+	ulua.L.SetField(pkg, "OptionValueComplete", luar.New(ulua.L, action.OptionValueComplete))
+	ulua.L.SetField(pkg, "NoComplete", luar.New(ulua.L, nil))
+	ulua.L.SetField(pkg, "TryBindKey", luar.New(ulua.L, action.TryBindKey))
 
 	return pkg
 }

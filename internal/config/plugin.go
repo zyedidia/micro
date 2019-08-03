@@ -95,9 +95,7 @@ func (p *Plugin) Load() error {
 			return err
 		}
 		p.Loaded = true
-		if _, ok := GlobalSettings[p.Name]; !ok {
-			AddOption(p.Name, true)
-		}
+		RegisterGlobalOption(p.Name, true)
 	}
 	return nil
 }

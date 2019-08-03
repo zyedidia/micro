@@ -10,8 +10,12 @@ import (
 	"strings"
 	"unicode/utf8"
 
+	luar "layeh.com/gopher-luar"
+
+	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
+	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
@@ -63,16 +67,29 @@ func InitCommands() {
 
 // MakeCommand is a function to easily create new commands
 // This can be called by plugins in Lua so that plugins can define their own commands
-// func MakeCommand(name, function string, completions ...Completion) {
-// 	action := commandActions[function]
-// 	// if _, ok := commandActions[function]; !ok {
-// 	// If the user seems to be binding a function that doesn't exist
-// 	// We hope that it's a lua function that exists and bind it to that
-// 	// action = LuaFunctionCommand(function)
-// 	// }
-//
-// 	commands[name] = Command{action, completions}
-// }
+func LuaMakeCommand(name, function string, completer buffer.Completer) {
+	action := LuaFunctionCommand(function)
+	commands[name] = Command{action, completer}
+}
+
+// LuaFunctionCommand returns a normal function
+// so that a command can be bound to a lua function
+func LuaFunctionCommand(fn string) func(*BufPane, []string) {
+	luaFn := strings.Split(fn, ".")
+	plName, plFn := luaFn[0], luaFn[1]
+	pl := config.FindPlugin(plName)
+	return func(bp *BufPane, args []string) {
+		var luaArgs []lua.LValue
+		luaArgs = append(luaArgs, luar.New(ulua.L, bp))
+		for _, v := range args {
+			luaArgs = append(luaArgs, luar.New(ulua.L, v))
+		}
+		_, err := pl.Call(plFn, luaArgs...)
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+}
 
 // CommandEditAction returns a bindable function that opens a prompt with
 // the given string and executes the command when the user presses
@@ -456,7 +473,6 @@ func (h *BufPane) SetLocalCmd(args []string) {
 	if err != nil {
 		InfoBar.Error(err)
 	}
-
 }
 
 // ShowCmd shows the value of the given option
