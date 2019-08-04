@@ -406,9 +406,10 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		}
 	} else if option == "autosave" {
 		if nativeValue.(float64) > 0 {
+			config.SetAutoTime(int(nativeValue.(float64)))
 			config.StartAutoSave()
 		} else {
-			config.StopAutoSave()
+			config.SetAutoTime(0)
 		}
 	} else {
 		for _, pl := range config.Plugins {
