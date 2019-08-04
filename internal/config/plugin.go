@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"log"
 
 	lua "github.com/yuin/gopher-lua"
 	ulua "github.com/zyedidia/micro/internal/lua"
@@ -102,7 +101,6 @@ func (p *Plugin) Load() error {
 
 func (p *Plugin) Call(fn string, args ...lua.LValue) (lua.LValue, error) {
 	plug := ulua.L.GetGlobal(p.Name)
-	log.Println(p.Name, fn, plug)
 	luafn := ulua.L.GetField(plug, fn)
 	if luafn == lua.LNil {
 		return nil, ErrNoSuchFunction

@@ -201,12 +201,6 @@ func main() {
 	action.InitTabs(b)
 	action.InitGlobals()
 
-	for _, s := range config.LocalSettings {
-		if _, ok := config.GlobalSettings[s]; ok {
-			delete(config.GlobalSettings, s)
-		}
-	}
-
 	// Here is the event loop which runs in a separate thread
 	go func() {
 		events = make(chan tcell.Event)

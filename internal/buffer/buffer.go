@@ -6,7 +6,6 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -163,7 +162,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	b := new(Buffer)
 
-	b.Settings = config.DefaultLocalSettings()
+	b.Settings = config.DefaultCommonSettings()
 	for k, v := range config.GlobalSettings {
 		if _, ok := b.Settings[k]; ok {
 			b.Settings[k] = v
@@ -294,7 +293,6 @@ func (b *Buffer) SetName(s string) {
 
 func (b *Buffer) Insert(start Loc, text string) {
 	if !b.Type.Readonly {
-		log.Println("INSERT", start, text)
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)

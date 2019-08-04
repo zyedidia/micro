@@ -129,10 +129,6 @@ func RegisterCommonOption(name string, defaultvalue interface{}) error {
 	return nil
 }
 
-func RegisterLocalOption(name string, defaultvalue interface{}) {
-	defaultLocalSettings[name] = defaultvalue
-}
-
 func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if v, ok := GlobalSettings[name]; !ok {
 		defaultGlobalSettings[name] = defaultvalue
@@ -162,11 +158,13 @@ var defaultCommonSettings = map[string]interface{}{
 	"eofnewline":     false,
 	"fastdirty":      true,
 	"fileformat":     "unix",
+	"filetype":       "unknown",
 	"ignorecase":     false,
 	"indentchar":     " ",
 	"keepautoindent": false,
 	"matchbrace":     false,
 	"matchbraceleft": false,
+	"readonly":       false,
 	"rmtrailingws":   false,
 	"ruler":          true,
 	"savecursor":     false,
@@ -199,6 +197,16 @@ func GetInfoBarOffset() int {
 	return offset
 }
 
+// DefaultCommonSettings returns the default global settings for micro
+// Note that colorscheme is a global only option
+func DefaultCommonSettings() map[string]interface{} {
+	commonsettings := make(map[string]interface{})
+	for k, v := range defaultCommonSettings {
+		commonsettings[k] = v
+	}
+	return commonsettings
+}
+
 var defaultGlobalSettings = map[string]interface{}{
 	"colorscheme": "default",
 	"infobar":     true,
@@ -222,38 +230,14 @@ func DefaultGlobalSettings() map[string]interface{} {
 	return globalsettings
 }
 
-// LocalSettings is a list of the local only settings
-var LocalSettings = []string{"filetype", "readonly"}
-
-var defaultLocalSettings = map[string]interface{}{
-	"filetype": "unknown",
-	"readonly": false,
-}
-
-// DefaultLocalSettings returns the default local settings
-// Note that filetype is a local only option
-func DefaultLocalSettings() map[string]interface{} {
-	localsettings := make(map[string]interface{})
-	for k, v := range defaultCommonSettings {
-		localsettings[k] = v
-	}
-	for k, v := range defaultLocalSettings {
-		localsettings[k] = v
-	}
-	return localsettings
-}
-
 // DefaultAllSettings returns a map of all settings and their
-// default values (both local and global settings)
+// default values (both common and global settings)
 func DefaultAllSettings() map[string]interface{} {
 	allsettings := make(map[string]interface{})
 	for k, v := range defaultCommonSettings {
 		allsettings[k] = v
 	}
 	for k, v := range defaultGlobalSettings {
-		allsettings[k] = v
-	}
-	for k, v := range defaultLocalSettings {
 		allsettings[k] = v
 	}
 	return allsettings

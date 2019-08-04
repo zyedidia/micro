@@ -3,7 +3,6 @@ package action
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -271,9 +270,7 @@ func ReloadConfig() {
 		screen.TermMessage(err)
 	}
 
-	log.Println("RELOAD CONFIG", len(buffer.OpenBuffers))
 	for _, b := range buffer.OpenBuffers {
-		log.Println("UPDATE RULES")
 		b.UpdateRules()
 	}
 }
@@ -450,7 +447,7 @@ func (h *BufPane) ResetCmd(args []string) {
 	option := args[0]
 
 	defaultGlobals := config.DefaultGlobalSettings()
-	defaultLocals := config.DefaultLocalSettings()
+	defaultLocals := config.DefaultCommonSettings()
 
 	if _, ok := defaultGlobals[option]; ok {
 		SetGlobalOptionNative(option, defaultGlobals[option])

@@ -92,17 +92,16 @@ func OptionComplete(b *buffer.Buffer) ([]string, []string) {
 	input, argstart := buffer.GetArg(b)
 
 	var suggestions []string
-	localSettings := config.DefaultLocalSettings()
 	for option := range config.GlobalSettings {
 		if strings.HasPrefix(option, input) {
 			suggestions = append(suggestions, option)
 		}
 	}
-	for option := range localSettings {
-		if strings.HasPrefix(option, input) && !contains(suggestions, option) {
-			suggestions = append(suggestions, option)
-		}
-	}
+	// for option := range localSettings {
+	// 	if strings.HasPrefix(option, input) && !contains(suggestions, option) {
+	// 		suggestions = append(suggestions, option)
+	// 	}
+	// }
 
 	sort.Strings(suggestions)
 	completions := make([]string, len(suggestions))
@@ -122,19 +121,19 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	completeValue := false
 	args := bytes.Split(l, []byte{' '})
 	if len(args) >= 2 {
-		localSettings := config.DefaultLocalSettings()
+		// localSettings := config.DefaultLocalSettings()
 		for option := range config.GlobalSettings {
 			if option == string(args[len(args)-2]) {
 				completeValue = true
 				break
 			}
 		}
-		for option := range localSettings {
-			if option == string(args[len(args)-2]) {
-				completeValue = true
-				break
-			}
-		}
+		// for option := range localSettings {
+		// 	if option == string(args[len(args)-2]) {
+		// 		completeValue = true
+		// 		break
+		// 	}
+		// }
 	}
 	if !completeValue {
 		return OptionComplete(b)
@@ -144,18 +143,18 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 
 	inputOpt = strings.TrimSpace(inputOpt)
 	var suggestions []string
-	localSettings := config.DefaultLocalSettings()
+	// localSettings := config.DefaultLocalSettings()
 	var optionVal interface{}
 	for k, option := range config.GlobalSettings {
 		if k == inputOpt {
 			optionVal = option
 		}
 	}
-	for k, option := range localSettings {
-		if k == inputOpt {
-			optionVal = option
-		}
-	}
+	// for k, option := range localSettings {
+	// 	if k == inputOpt {
+	// 		optionVal = option
+	// 	}
+	// }
 
 	switch optionVal.(type) {
 	case bool:

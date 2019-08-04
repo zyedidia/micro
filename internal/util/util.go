@@ -3,7 +3,6 @@ package util
 import (
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -205,7 +204,6 @@ func FSize(f *os.File) int64 {
 // IsWordChar returns whether or not the string is a 'word character'
 // Word characters are defined as numbers, letters, or '_'
 func IsWordChar(r rune) bool {
-	log.Println("IsWordChar")
 	return unicode.IsLetter(r) || unicode.IsNumber(r) || r == '_'
 }
 

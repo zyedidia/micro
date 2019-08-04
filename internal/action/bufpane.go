@@ -1,7 +1,6 @@
 package action
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -296,7 +295,6 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 			return false
 		}
 		rel := action(h)
-		log.Println("calling on", estr)
 		if h.PluginCB("on"+estr) && rel {
 			h.Relocate()
 		}
