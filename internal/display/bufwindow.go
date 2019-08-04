@@ -395,8 +395,13 @@ func (w *BufWindow) displayBuffer() {
 				r := c.RuneUnder(curX)
 				rl := c.RuneUnder(curX - 1)
 				if r == bp[0] || r == bp[1] || rl == bp[0] || rl == bp[1] {
-					mb, _ := b.FindMatchingBrace(bp, curLoc)
+					mb, left := b.FindMatchingBrace(bp, curLoc)
 					matchingBraces = append(matchingBraces, mb)
+					if !left {
+						matchingBraces = append(matchingBraces, curLoc)
+					} else {
+						matchingBraces = append(matchingBraces, curLoc.Move(-1, b))
+					}
 				}
 			}
 		}
