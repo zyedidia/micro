@@ -55,7 +55,8 @@ func (b *Buffer) Save() error {
 }
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
-func (b *Buffer) SaveAs(filename string) (err error) {
+func (b *Buffer) SaveAs(filename string) error {
+	var err error
 	if b.Type.Scratch {
 		return errors.New("Cannot save scratch buffer")
 	}
@@ -88,24 +89,22 @@ func (b *Buffer) SaveAs(filename string) (err error) {
 	// Removes any tilde and replaces with the absolute path to home
 	absFilename, _ := ReplaceHome(filename)
 
-	// TODO: save creates parent dirs
-	// // Get the leading path to the file | "." is returned if there's no leading path provided
-	// if dirname := filepath.Dir(absFilename); dirname != "." {
-	// 	// Check if the parent dirs don't exist
-	// 	if _, statErr := os.Stat(dirname); os.IsNotExist(statErr) {
-	// 		// Prompt to make sure they want to create the dirs that are missing
-	// 		if yes, canceled := messenger.YesNoPrompt("Parent folders \"" + dirname + "\" do not exist. Create them? (y,n)"); yes && !canceled {
-	// 			// Create all leading dir(s) since they don't exist
-	// 			if mkdirallErr := os.MkdirAll(dirname, os.ModePerm); mkdirallErr != nil {
-	// 				// If there was an error creating the dirs
-	// 				return mkdirallErr
-	// 			}
-	// 		} else {
-	// 			// If they canceled the creation of leading dirs
-	// 			return errors.New("Save aborted")
-	// 		}
-	// 	}
-	// }
+	// Get the leading path to the file | "." is returned if there's no leading path provided
+	if dirname := filepath.Dir(absFilename); dirname != "." {
+		// Check if the parent dirs don't exist
+		if _, statErr := os.Stat(dirname); os.IsNotExist(statErr) {
+			// Prompt to make sure they want to create the dirs that are missing
+			if b.Settings["mkparents"].(bool) {
+				// Create all leading dir(s) since they don't exist
+				if mkdirallErr := os.MkdirAll(dirname, os.ModePerm); mkdirallErr != nil {
+					// If there was an error creating the dirs
+					return mkdirallErr
+				}
+			} else {
+				return errors.New("Parent dirs don't exist, enable 'mkparents' for auto creation")
+			}
+		}
+	}
 
 	var fileSize int
 
@@ -161,7 +160,7 @@ func (b *Buffer) SaveAs(filename string) (err error) {
 	absPath, _ := filepath.Abs(filename)
 	b.AbsPath = absPath
 	b.isModified = false
-	return
+	return err
 }
 
 // SaveWithSudo saves the buffer to the default path with sudo

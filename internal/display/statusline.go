@@ -72,8 +72,6 @@ func SetStatusInfoFnLua(s string, fn string) {
 	}
 }
 
-// TODO: plugin modify status line formatter
-
 // NewStatusLine returns a statusline bound to a window
 func NewStatusLine(win *BufWindow) *StatusLine {
 	s := new(StatusLine)

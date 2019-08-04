@@ -164,6 +164,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"keepautoindent": false,
 	"matchbrace":     false,
 	"matchbraceleft": false,
+	"mkparents":      false,
 	"readonly":       false,
 	"rmtrailingws":   false,
 	"ruler":          true,
