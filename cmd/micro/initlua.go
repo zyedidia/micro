@@ -100,6 +100,12 @@ func luaImportMicroBuffer() *lua.LTable {
 	ulua.L.SetField(pkg, "Loc", luar.New(ulua.L, func(x, y int) buffer.Loc {
 		return buffer.Loc{x, y}
 	}))
+	ulua.L.SetField(pkg, "BTDefault", luar.New(ulua.L, buffer.BTDefault.Kind))
+	ulua.L.SetField(pkg, "BTHelp", luar.New(ulua.L, buffer.BTHelp.Kind))
+	ulua.L.SetField(pkg, "BTLog", luar.New(ulua.L, buffer.BTLog.Kind))
+	ulua.L.SetField(pkg, "BTScratch", luar.New(ulua.L, buffer.BTScratch.Kind))
+	ulua.L.SetField(pkg, "BTRaw", luar.New(ulua.L, buffer.BTRaw.Kind))
+	ulua.L.SetField(pkg, "BTInfo", luar.New(ulua.L, buffer.BTInfo.Kind))
 
 	return pkg
 }
