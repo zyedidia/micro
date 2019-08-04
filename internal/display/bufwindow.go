@@ -67,6 +67,10 @@ func (w *BufWindow) SetActive(b bool) {
 	w.active = b
 }
 
+func (w *BufWindow) IsActive() bool {
+	return w.active
+}
+
 func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) {
 	tabsize := util.IntOpt(w.Buf.Settings["tabsize"])
 	width := 0

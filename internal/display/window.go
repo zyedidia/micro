@@ -23,6 +23,7 @@ type Window interface {
 	GetMouseLoc(vloc buffer.Loc) buffer.Loc
 	Resize(w, h int)
 	SetActive(b bool)
+	IsActive() bool
 }
 
 type BWindow interface {

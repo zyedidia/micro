@@ -232,18 +232,16 @@ func main() {
 		select {
 		case f := <-shell.Jobs:
 			// If a new job has finished while running in the background we should execute the callback
-			log.Println("OUTPUT:", f.Output)
 			f.Function(f.Output, f.Args...)
 		case event = <-events:
 		case <-screen.DrawChan:
 		}
 
-		if event != nil {
-			if action.InfoBar.HasPrompt {
-				action.InfoBar.HandleEvent(event)
-			} else {
-				action.Tabs.HandleEvent(event)
-			}
+		if action.InfoBar.HasPrompt {
+			action.InfoBar.HandleEvent(event)
+		} else {
+			action.Tabs.HandleEvent(event)
 		}
+		log.Println("Done event cycle")
 	}
 }

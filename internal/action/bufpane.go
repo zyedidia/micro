@@ -250,18 +250,20 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 	}
 	h.Buf.MergeCursors()
 
-	// Display any gutter messages for this line
-	c := h.Buf.GetActiveCursor()
-	none := true
-	for _, m := range h.Buf.Messages {
-		if c.Y == m.Start.Y || c.Y == m.End.Y {
-			InfoBar.GutterMessage(m.Msg)
-			none = false
-			break
+	if h.IsActive() {
+		// Display any gutter messages for this line
+		c := h.Buf.GetActiveCursor()
+		none := true
+		for _, m := range h.Buf.Messages {
+			if c.Y == m.Start.Y || c.Y == m.End.Y {
+				InfoBar.GutterMessage(m.Msg)
+				none = false
+				break
+			}
 		}
-	}
-	if none && InfoBar.HasGutter {
-		InfoBar.ClearGutter()
+		if none && InfoBar.HasGutter {
+			InfoBar.ClearGutter()
+		}
 	}
 }
 
@@ -364,6 +366,26 @@ func (h *BufPane) HSplitBuf(buf *buffer.Buffer) {
 }
 func (h *BufPane) Close() {
 	h.Buf.Close()
+}
+
+func (h *BufPane) SetActive(b bool) {
+	h.BWindow.SetActive(b)
+	if b {
+		// Display any gutter messages for this line
+		c := h.Buf.GetActiveCursor()
+		none := true
+		for _, m := range h.Buf.Messages {
+			if c.Y == m.Start.Y || c.Y == m.End.Y {
+				InfoBar.GutterMessage(m.Msg)
+				none = false
+				break
+			}
+		}
+		if none && InfoBar.HasGutter {
+			InfoBar.ClearGutter()
+		}
+	}
+
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute

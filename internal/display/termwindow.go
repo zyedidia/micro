@@ -40,6 +40,10 @@ func (w *TermWindow) SetActive(b bool) {
 	w.active = b
 }
 
+func (w *TermWindow) IsActive() bool {
+	return w.active
+}
+
 func (w *TermWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
 	return vloc
 }
