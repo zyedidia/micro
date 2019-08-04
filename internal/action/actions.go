@@ -1162,14 +1162,20 @@ func (h *BufPane) Quit() bool {
 		}
 	}
 	if h.Buf.Modified() {
-		InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
-			if !canceled && !yes {
-				quit()
-			} else if !canceled && yes {
-				h.Save()
-				quit()
-			}
-		})
+		if config.GlobalSettings["autosave"].(float64) > 0 {
+			// autosave on means we automatically save when quitting
+			h.Save()
+			quit()
+		} else {
+			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
+				if !canceled && !yes {
+					quit()
+				} else if !canceled && yes {
+					h.Save()
+					quit()
+				}
+			})
+		}
 	} else {
 		quit()
 	}

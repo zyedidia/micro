@@ -57,6 +57,9 @@ func (b *Buffer) Save() error {
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
 	var err error
+	if b.Type.Readonly {
+		return errors.New("Cannot save readonly buffer")
+	}
 	if b.Type.Scratch {
 		return errors.New("Cannot save scratch buffer")
 	}

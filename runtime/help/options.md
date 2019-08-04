@@ -13,12 +13,14 @@ Here are the options that you can set:
 
 	default value: `true`
 
-* `autosave`: micro will save the buffer every 8 seconds automatically. Micro
-   also will automatically save and quit when you exit without asking. Be
-   careful when using this feature, because you might accidentally save a file,
-   overwriting what was there before.
+* `autosave`: micro will save the buffer every `n` seconds automatically
+   (where `n` is the value of the option). Micro also will automatically
+   save and quit when you exit without asking. Be careful when using this
+   feature, because you might accidentally save a file, overwriting what
+   was there before. If the value of the option is `0` then micro will
+   not autosave.
 
-	default value: `false`
+	default value: `0`
 
 * `basename`: in the infobar, show only the basename of the file being edited
    rather than the full path.
@@ -123,6 +125,12 @@ Here are the options that you can set:
 
     default value: `false`
 
+* `mkparents`: if a file is opened on a path that does not exist, the file cannot
+   be saved because the parent directories don't exist. This option lets micro
+   automatically create the parent directories in such a situation.
+
+    default value: `false`
+
 * `mouse`: whether to enable mouse support. When mouse support is disabled,
    usually the terminal will be able to access mouse events which can be useful
    if you want to copy from the terminal instead of from micro (if over ssh for
@@ -130,19 +138,6 @@ Here are the options that you can set:
    does not).
 
 	default value: `true`
-
-* `pluginchannels`: contains all the channels micro's plugin manager will search
-   for plugins in. A channel is simply a list of 'repository' json files which
-   contain metadata about the given plugin. See the `Plugin Manager` section of
-   the `plugins` help topic for more information.
-
-	default value: `https://github.com/micro-editor/plugin-channel`
-
-* `pluginrepos`: contains all the 'repositories' micro's plugin manager will
-   search for plugins in. A repository consists of a `repo.json` file which
-   contains metadata for a single plugin.
-
-	default value: ` `
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
 

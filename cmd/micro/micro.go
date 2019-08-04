@@ -233,6 +233,10 @@ func main() {
 		case f := <-shell.Jobs:
 			// If a new job has finished while running in the background we should execute the callback
 			f.Function(f.Output, f.Args...)
+		case <-config.Autosave:
+			for _, b := range buffer.OpenBuffers {
+				b.Save()
+			}
 		case event = <-events:
 		case <-screen.DrawChan:
 		}
