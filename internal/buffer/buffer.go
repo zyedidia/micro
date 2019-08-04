@@ -651,16 +651,30 @@ var BracePairs = [][2]rune{
 // It is given a brace type containing the open and closing character, (for example
 // '{' and '}') as well as the location to match from
 // TODO: maybe can be more efficient with utf8 package
-func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
+// returns the location of the matching brace
+// if the boolean returned is true then the original matching brace is one character left
+// of the starting location
+func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool) {
 	curLine := []rune(string(b.LineBytes(start.Y)))
-	startChar := curLine[start.X]
+	startChar := ' '
+	if start.X >= 0 && start.X < len(curLine) {
+		startChar = curLine[start.X]
+	}
+	leftChar := ' '
+	if start.X-1 >= 0 && start.X-1 < len(curLine) {
+		leftChar = curLine[start.X-1]
+	}
 	var i int
-	if startChar == braceType[0] {
+	if startChar == braceType[0] || leftChar == braceType[0] {
 		for y := start.Y; y < b.LinesNum(); y++ {
 			l := []rune(string(b.LineBytes(y)))
 			xInit := 0
 			if y == start.Y {
-				xInit = start.X
+				if startChar == braceType[0] {
+					xInit = start.X
+				} else {
+					xInit = start.X - 1
+				}
 			}
 			for x := xInit; x < len(l); x++ {
 				r := l[x]
@@ -669,24 +683,34 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
 				} else if r == braceType[1] {
 					i--
 					if i == 0 {
-						return Loc{x, y}
+						if startChar == braceType[0] {
+							return Loc{x, y}, false
+						}
+						return Loc{x, y}, true
 					}
 				}
 			}
 		}
-	} else if startChar == braceType[1] {
+	} else if startChar == braceType[1] || leftChar == braceType[1] {
 		for y := start.Y; y >= 0; y-- {
 			l := []rune(string(b.lines[y].data))
 			xInit := len(l) - 1
 			if y == start.Y {
-				xInit = start.X
+				if leftChar == braceType[1] {
+					xInit = start.X - 1
+				} else {
+					xInit = start.X
+				}
 			}
 			for x := xInit; x >= 0; x-- {
 				r := l[x]
 				if r == braceType[0] {
 					i--
 					if i == 0 {
-						return Loc{x, y}
+						if leftChar == braceType[1] {
+							return Loc{x, y}, true
+						}
+						return Loc{x, y}, false
 					}
 				} else if r == braceType[1] {
 					i++
@@ -694,7 +718,7 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) Loc {
 			}
 		}
 	}
-	return start
+	return start, true
 }
 
 // Retab changes all tabs to spaces or vice versa

@@ -381,6 +381,27 @@ func (w *BufWindow) displayBuffer() {
 		b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
 	}
 
+	var matchingBraces []buffer.Loc
+	// bracePairs is defined in buffer.go
+	if b.Settings["matchbrace"].(bool) {
+		for _, bp := range buffer.BracePairs {
+			for _, c := range b.GetCursors() {
+				if c.HasSelection() {
+					continue
+				}
+				curX := c.X
+				curLoc := c.Loc
+
+				r := c.RuneUnder(curX)
+				rl := c.RuneUnder(curX - 1)
+				if r == bp[0] || r == bp[1] || rl == bp[0] || rl == bp[1] {
+					mb, _ := b.FindMatchingBrace(bp, curLoc)
+					matchingBraces = append(matchingBraces, mb)
+				}
+			}
+		}
+	}
+
 	lineNumStyle := config.DefStyle
 	if style, ok := config.Colorscheme["line-number"]; ok {
 		lineNumStyle = style
@@ -474,6 +495,12 @@ func (w *BufWindow) displayBuffer() {
 					if colorcolumn != 0 && vloc.X-w.gutterOffset == colorcolumn {
 						fg, _, _ := s.Decompose()
 						style = style.Background(fg)
+					}
+				}
+
+				for _, mb := range matchingBraces {
+					if mb.X == bloc.X && mb.Y == bloc.Y {
+						style = style.Underline(true)
 					}
 				}
 

@@ -933,9 +933,14 @@ func (h *BufPane) paste(clip string) {
 func (h *BufPane) JumpToMatchingBrace() bool {
 	for _, bp := range buffer.BracePairs {
 		r := h.Cursor.RuneUnder(h.Cursor.X)
-		if r == bp[0] || r == bp[1] {
-			matchingBrace := h.Buf.FindMatchingBrace(bp, h.Cursor.Loc)
-			h.Cursor.GotoLoc(matchingBrace)
+		rl := h.Cursor.RuneUnder(h.Cursor.X - 1)
+		if r == bp[0] || r == bp[1] || rl == bp[0] || rl == bp[1] {
+			matchingBrace, left := h.Buf.FindMatchingBrace(bp, h.Cursor.Loc)
+			if left {
+				h.Cursor.GotoLoc(matchingBrace)
+			} else {
+				h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
+			}
 		}
 	}
 

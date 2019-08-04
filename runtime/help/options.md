@@ -115,15 +115,10 @@ Here are the options that you can set:
 
 	default value: `false`
 
-* `matchbrace`: highlight matching braces for '()', '{}', '[]'
+* `matchbrace`: underline matching braces for '()', '{}', '[]' when the cursor
+   is on a brace character.
 
-    default value: `false`
-
-* `matchbraceleft`: when matching a closing brace, should matching match the
-   brace directly under the cursor, or the character to the left? only matters
-   if `matchbrace` is true
-
-    default value: `false`
+    default value: `true`
 
 * `mkparents`: if a file is opened on a path that does not exist, the file cannot
    be saved because the parent directories don't exist. This option lets micro
