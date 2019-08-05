@@ -46,6 +46,8 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 		if b.NumCursors() > 1 {
 			b.ClearCursors()
 			h.Relocate()
+			h.Cursor = h.Buf.GetActiveCursor()
+			h.Cursor.Loc = mouseLoc
 		}
 		if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
 			if h.doubleClick {
@@ -88,6 +90,7 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 		}
 	}
 
+	h.Cursor.StoreVisualX()
 	h.lastLoc = mouseLoc
 	return false
 }
@@ -269,11 +272,12 @@ func (h *BufPane) SelectWordLeft() bool {
 // StartOfLine moves the cursor to the start of the line
 func (h *BufPane) StartOfLine() bool {
 	h.Cursor.Deselect(true)
-	if h.Cursor.X != 0 {
-		h.Cursor.Start()
-	} else {
-		h.Cursor.StartOfText()
-	}
+	h.Cursor.StartOfText()
+	// if h.Cursor.X != 0 {
+	// 	h.Cursor.Start()
+	// } else {
+	// 	h.Cursor.StartOfText()
+	// }
 	return true
 }
 
@@ -1189,6 +1193,33 @@ func (h *BufPane) Quit() bool {
 
 // QuitAll quits the whole editor; all splits and tabs
 func (h *BufPane) QuitAll() bool {
+	anyModified := false
+	for _, b := range buffer.OpenBuffers {
+		if b.Modified() {
+			anyModified = true
+			break
+		}
+	}
+
+	quit := func() {
+		for _, b := range buffer.OpenBuffers {
+			b.Close()
+		}
+		screen.Screen.Fini()
+		InfoBar.Close()
+		os.Exit(0)
+	}
+
+	if anyModified {
+		InfoBar.YNPrompt("Quit micro? (all open buffers will be closed without saving)", func(yes, canceled bool) {
+			if !canceled && yes {
+				quit()
+			}
+		})
+	} else {
+		quit()
+	}
+
 	return false
 }
 
@@ -1271,16 +1302,34 @@ func (h *BufPane) PreviousSplit() bool {
 	return false
 }
 
-var curMacro []interface{}
-var recordingMacro bool
+var curmacro []interface{}
+var recording_macro bool
 
 // ToggleMacro toggles recording of a macro
 func (h *BufPane) ToggleMacro() bool {
+	recording_macro = !recording_macro
+	if recording_macro {
+		curmacro = []interface{}{}
+		InfoBar.Message("Recording")
+	} else {
+		InfoBar.Message("Stopped recording")
+	}
 	return true
 }
 
 // PlayMacro plays back the most recently recorded macro
 func (h *BufPane) PlayMacro() bool {
+	if recording_macro {
+		return false
+	}
+	for _, action := range curmacro {
+		switch t := action.(type) {
+		case rune:
+			h.DoRuneInsert(t)
+		case Event:
+			h.DoKeyEvent(t)
+		}
+	}
 	return true
 }
 

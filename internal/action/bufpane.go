@@ -289,6 +289,12 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 					if h.PluginCB("on"+estr) && rel {
 						h.Relocate()
 					}
+
+					if recording_macro {
+						if estr != "ToggleMacro" && estr != "PlayMacro" {
+							curmacro = append(curmacro, e)
+						}
+					}
 				}
 				return true
 			}
@@ -331,6 +337,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 	for _, c := range cursors {
 		// Insert a character
 		h.Buf.SetCurCursor(c.Num)
+		h.Cursor = c
 		if !h.PluginCBRune("preRune", r) {
 			continue
 		}
@@ -345,6 +352,9 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			h.Buf.Replace(c.Loc, next, string(r))
 		} else {
 			h.Buf.Insert(c.Loc, string(r))
+		}
+		if recording_macro {
+			curmacro = append(curmacro, r)
 		}
 		h.PluginCBRune("onRune", r)
 	}

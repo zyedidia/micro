@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"sort"
 
@@ -246,6 +245,5 @@ func main() {
 		} else {
 			action.Tabs.HandleEvent(event)
 		}
-		log.Println("Done event cycle")
 	}
 }
