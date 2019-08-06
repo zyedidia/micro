@@ -483,6 +483,14 @@ func (w *BufWindow) displayBuffer() {
 					}
 				}
 
+				for _, m := range b.Messages {
+					if bloc.GreaterEqual(m.Start) && bloc.LessThan(m.End) ||
+						bloc.LessThan(m.End) && bloc.GreaterEqual(m.Start) {
+						style = style.Underline(true)
+						break
+					}
+				}
+
 				if r == '\t' {
 					if s, ok := config.Colorscheme["indent-char"]; ok {
 						style = s

@@ -134,6 +134,14 @@ func InitRuntimeFiles() {
 	add(RTSyntax, "syntax", "*.yaml")
 	add(RTHelp, "help", "*.md")
 
+	initlua := filepath.Join(ConfigDir, "init.lua")
+	if _, err := os.Stat(initlua); !os.IsNotExist(err) {
+		p := new(Plugin)
+		p.Name = "initlua"
+		p.Srcs = append(p.Srcs, realFile(initlua))
+		Plugins = append(Plugins, p)
+	}
+
 	// Search ConfigDir for plugin-scripts
 	plugdir := filepath.Join(ConfigDir, "plugins")
 	files, _ := ioutil.ReadDir(plugdir)
