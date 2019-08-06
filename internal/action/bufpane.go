@@ -360,19 +360,21 @@ func (h *BufPane) DoRuneInsert(r rune) {
 	}
 }
 
-func (h *BufPane) VSplitBuf(buf *buffer.Buffer) {
+func (h *BufPane) VSplitBuf(buf *buffer.Buffer) *BufPane {
 	e := NewBufPaneFromBuf(buf)
 	e.splitID = MainTab().GetNode(h.splitID).VSplit(h.Buf.Settings["splitright"].(bool))
 	MainTab().Panes = append(MainTab().Panes, e)
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
+	return e
 }
-func (h *BufPane) HSplitBuf(buf *buffer.Buffer) {
+func (h *BufPane) HSplitBuf(buf *buffer.Buffer) *BufPane {
 	e := NewBufPaneFromBuf(buf)
 	e.splitID = MainTab().GetNode(h.splitID).HSplit(h.Buf.Settings["splitbottom"].(bool))
 	MainTab().Panes = append(MainTab().Panes, e)
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
+	return e
 }
 func (h *BufPane) Close() {
 	h.Buf.Close()

@@ -51,7 +51,7 @@ func InitCommands() {
 		"tab":        Command{(*BufPane).NewTabCmd, buffer.FileComplete},
 		"help":       Command{(*BufPane).HelpCmd, HelpComplete},
 		"eval":       Command{(*BufPane).EvalCmd, nil},
-		"togglelog":  Command{(*BufPane).ToggleLogCmd, nil},
+		"log":        Command{(*BufPane).ToggleLogCmd, nil},
 		"plugin":     Command{(*BufPane).PluginCmd, nil},
 		"reload":     Command{(*BufPane).ReloadCmd, nil},
 		"reopen":     Command{(*BufPane).ReopenCmd, nil},
@@ -117,6 +117,30 @@ func CommandAction(cmd string) BufKeyAction {
 
 // PluginCmd installs, removes, updates, lists, or searches for given plugins
 func (h *BufPane) PluginCmd(args []string) {
+	if len(args) <= 0 {
+		InfoBar.Error("Not enough arguments, see 'help commands'")
+		return
+	}
+
+	valid := true
+	switch args[0] {
+	case "list":
+		for _, pl := range config.Plugins {
+			var en string
+			if pl.IsEnabled() {
+				en = "enabled"
+			} else {
+				en = "disabled"
+			}
+			WriteLog(fmt.Sprintf("%s: %s\n", pl.Name, en))
+		}
+	default:
+		valid = false
+	}
+
+	if valid && h.Buf.Type != buffer.BTLog {
+		OpenLogBuf(h)
+	}
 }
 
 // RetabCmd changes all spaces to tabs or all tabs to spaces
@@ -248,6 +272,11 @@ func (h *BufPane) OpenCmd(args []string) {
 
 // ToggleLogCmd toggles the log view
 func (h *BufPane) ToggleLogCmd(args []string) {
+	if h.Buf.Type != buffer.BTLog {
+		OpenLogBuf(h)
+	} else {
+		h.Quit()
+	}
 }
 
 // ReloadCmd reloads all files (syntax files, colorschemes...)
@@ -818,6 +847,8 @@ func (h *BufPane) HandleCommand(input string) {
 	if _, ok := commands[inputCmd]; !ok {
 		InfoBar.Error("Unknown command ", inputCmd)
 	} else {
+		WriteLog("> " + input + "\n")
 		commands[inputCmd].action(h, args[1:])
+		WriteLog("\n")
 	}
 }

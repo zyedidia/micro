@@ -27,6 +27,7 @@ import (
 
 var (
 	OpenBuffers []*Buffer
+	LogBuf      *Buffer
 )
 
 // The BufType defines what kind of buffer this is
@@ -774,4 +775,8 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 
 func (b *Buffer) Line(i int) string {
 	return string(b.LineBytes(i))
+}
+
+func WriteLog(s string) {
+	LogBuf.EventHandler.Insert(LogBuf.End(), s)
 }
