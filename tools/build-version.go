@@ -20,6 +20,10 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 			if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
 				return tagParts[0], &ahead
 			}
+		} else if len(tagParts) == 4 {
+			if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
+				return tagParts[0] + "-" + tagParts[1], &ahead
+			}
 		}
 
 		return tagParts[0], nil
@@ -49,7 +53,9 @@ func main() {
 		tag = "dev"
 	}
 	// Get the most likely next version:
-	version.Patch = version.Patch + 1
+	if !strings.Contains(version.String(), "rc") {
+		version.Patch = version.Patch + 1
+	}
 
 	if pr, err := semver.NewPRVersion(tag); err == nil {
 		// append the tag as pre-release name
