@@ -1,6 +1,7 @@
 package action
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -52,7 +53,7 @@ func InitCommands() {
 		"help":       Command{(*BufPane).HelpCmd, HelpComplete},
 		"eval":       Command{(*BufPane).EvalCmd, nil},
 		"log":        Command{(*BufPane).ToggleLogCmd, nil},
-		"plugin":     Command{(*BufPane).PluginCmd, nil},
+		"plugin":     Command{(*BufPane).PluginCmd, PluginComplete},
 		"reload":     Command{(*BufPane).ReloadCmd, nil},
 		"reopen":     Command{(*BufPane).ReopenCmd, nil},
 		"cd":         Command{(*BufPane).CdCmd, buffer.FileComplete},
@@ -115,6 +116,8 @@ func CommandAction(cmd string) BufKeyAction {
 	}
 }
 
+var PluginCmds = []string{"list", "info", "version"}
+
 // PluginCmd installs, removes, updates, lists, or searches for given plugins
 func (h *BufPane) PluginCmd(args []string) {
 	if len(args) <= 0 {
@@ -132,10 +135,82 @@ func (h *BufPane) PluginCmd(args []string) {
 			} else {
 				en = "disabled"
 			}
-			WriteLog(fmt.Sprintf("%s: %s\n", pl.Name, en))
+			WriteLog(fmt.Sprintf("%s: %s", pl.Name, en))
+			if pl.Default {
+				WriteLog(" (default)\n")
+			} else {
+				WriteLog("\n")
+			}
+		}
+		WriteLog("Default plugins come pre-installed with micro.")
+	case "version":
+		if len(args) <= 1 {
+			InfoBar.Error("No plugin provided to give info for")
+			return
+		}
+		found := false
+		for _, pl := range config.Plugins {
+			if pl.Name == args[1] {
+				found = true
+				if pl.Info == nil {
+					InfoBar.Message("Sorry no version for", pl.Name)
+					return
+				}
+
+				WriteLog("Version: " + pl.Info.Vstr + "\n")
+			}
+		}
+		if !found {
+			InfoBar.Message(args[1], "is not installed")
+		}
+	case "info":
+		if len(args) <= 1 {
+			InfoBar.Error("No plugin provided to give info for")
+			return
+		}
+		found := false
+		for _, pl := range config.Plugins {
+			if pl.Name == args[1] {
+				found = true
+				if pl.Info == nil {
+					InfoBar.Message("Sorry no info for ", pl.Name)
+					return
+				}
+
+				var buffer bytes.Buffer
+				buffer.WriteString("Name: ")
+				buffer.WriteString(pl.Info.Name)
+				buffer.WriteString("\n")
+				buffer.WriteString("Description: ")
+				buffer.WriteString(pl.Info.Desc)
+				buffer.WriteString("\n")
+				buffer.WriteString("Website: ")
+				buffer.WriteString(pl.Info.Site)
+				buffer.WriteString("\n")
+				buffer.WriteString("Installation link: ")
+				buffer.WriteString(pl.Info.Install)
+				buffer.WriteString("\n")
+				buffer.WriteString("Version: ")
+				buffer.WriteString(pl.Info.Vstr)
+				buffer.WriteString("\n")
+				buffer.WriteString("Requirements:")
+				buffer.WriteString("\n")
+				for _, r := range pl.Info.Require {
+					buffer.WriteString("    - ")
+					buffer.WriteString(r)
+					buffer.WriteString("\n")
+				}
+
+				WriteLog(buffer.String())
+			}
+		}
+		if !found {
+			InfoBar.Message(args[1], "is not installed")
+			return
 		}
 	default:
-		valid = false
+		InfoBar.Error("Not a valid plugin command")
+		return
 	}
 
 	if valid && h.Buf.Type != buffer.BTLog {

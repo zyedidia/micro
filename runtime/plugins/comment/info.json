@@ -1,0 +1,10 @@
+{
+    "name": "comment",
+    "description": "Support for automatically commenting blocks of code. Extensible and multiple languages supported.",
+    "website": "https://github.com/zyedidia/micro",
+	"install": "https://github.com/zyedidia/micro",
+    "version": "1.0.0",
+    "require": [
+        "micro >= 2.0.0"
+    ]
+}

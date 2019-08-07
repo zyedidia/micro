@@ -1,0 +1,10 @@
+{
+    "name": "ftoptions",
+    "description": "Sets basic options based on the filetype (for example Makefiles require tabs).",
+    "website": "https://github.com/zyedidia/micro",
+	"install": "https://github.com/zyedidia/micro",
+    "version": "1.0.0",
+    "require": [
+        "micro >= 2.0.0"
+    ]
+}

@@ -65,10 +65,11 @@ func RunPluginFnBool(fn string, args ...lua.LValue) (bool, error) {
 }
 
 type Plugin struct {
-	Name   string        // name of plugin
-	Info   RuntimeFile   // json file containing info
-	Srcs   []RuntimeFile // lua files
-	Loaded bool
+	Name    string        // name of plugin
+	Info    *PluginInfo   // json file containing info
+	Srcs    []RuntimeFile // lua files
+	Loaded  bool
+	Default bool // pre-installed plugin
 }
 
 func (p *Plugin) IsEnabled() bool {

@@ -1,0 +1,10 @@
+{
+    "name": "linter",
+    "description": "Automatic code linting for a variety of languages.",
+    "website": "https://github.com/zyedidia/micro",
+	"install": "https://github.com/zyedidia/micro",
+    "version": "1.0.0",
+    "require": [
+        "micro >= 2.0.0"
+    ]
+}

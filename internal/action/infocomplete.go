@@ -197,6 +197,62 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	return completions, suggestions
 }
 
+// OptionComplete autocompletes options
+func PluginCmdComplete(b *buffer.Buffer) ([]string, []string) {
+	c := b.GetActiveCursor()
+	input, argstart := buffer.GetArg(b)
+
+	var suggestions []string
+	for _, cmd := range PluginCmds {
+		if strings.HasPrefix(cmd, input) {
+			suggestions = append(suggestions, cmd)
+		}
+	}
+
+	sort.Strings(suggestions)
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
+	}
+	return completions, suggestions
+}
+
+// PluginComplete completes values for the plugin command
+func PluginComplete(b *buffer.Buffer) ([]string, []string) {
+	c := b.GetActiveCursor()
+	l := b.LineBytes(c.Y)
+	l = util.SliceStart(l, c.X)
+	input, argstart := buffer.GetArg(b)
+
+	completeValue := false
+	args := bytes.Split(l, []byte{' '})
+	if len(args) >= 2 {
+		for _, cmd := range PluginCmds {
+			if cmd == string(args[len(args)-2]) {
+				completeValue = true
+				break
+			}
+		}
+	}
+	if !completeValue {
+		return PluginCmdComplete(b)
+	}
+
+	var suggestions []string
+	for _, pl := range config.Plugins {
+		if strings.HasPrefix(pl.Name, input) {
+			suggestions = append(suggestions, pl.Name)
+		}
+	}
+	sort.Strings(suggestions)
+
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
+	}
+	return completions, suggestions
+}
+
 // // MakeCompletion registers a function from a plugin for autocomplete commands
 // func MakeCompletion(function string) Completion {
 // 	pluginCompletions = append(pluginCompletions, LuaFunctionComplete(function))

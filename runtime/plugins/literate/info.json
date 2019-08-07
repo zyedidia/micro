@@ -1,0 +1,10 @@
+{
+    "name": "linter",
+    "description": "Highlighting and language support for the Literate programming tool.",
+    "website": "https://github.com/zyedidia/Literate",
+	"install": "https://github.com/zyedidia/micro",
+    "version": "1.0.0",
+    "require": [
+        "micro >= 2.0.0"
+    ]
+}
