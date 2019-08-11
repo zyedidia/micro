@@ -743,28 +743,35 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	all := false
 	noRegex := false
 
-	if len(args) > 2 {
-		for _, arg := range args[2:] {
-			switch arg {
-			case "-a":
-				all = true
-			case "-l":
-				noRegex = true
-			default:
+	foundSearch := false
+	foundReplace := false
+	var search string
+	var replaceStr string
+	for _, arg := range args {
+		switch arg {
+		case "-a":
+			all = true
+		case "-l":
+			noRegex = true
+		default:
+			if !foundSearch {
+				foundSearch = true
+				search = arg
+			} else if !foundReplace {
+				foundReplace = true
+				replaceStr = arg
+			} else {
 				InfoBar.Error("Invalid flag: " + arg)
 				return
 			}
 		}
 	}
 
-	search := args[0]
-
 	if noRegex {
 		search = regexp.QuoteMeta(search)
 	}
 
-	replace := []byte(args[1])
-	replaceStr := args[1]
+	replace := []byte(replaceStr)
 
 	var regex *regexp.Regexp
 	var err error

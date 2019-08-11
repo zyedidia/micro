@@ -60,7 +60,7 @@ func BindKey(k, v string) {
 	config.Bindings[k] = v
 }
 
-// findKeyEvent will find binding Key 'b' using string 'k'
+// findEvent will find binding Key 'b' using string 'k'
 func findEvent(k string) (b Event, ok bool) {
 	modifiers := tcell.ModNone
 
