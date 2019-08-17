@@ -47,23 +47,34 @@ func LuaAction(fn string) func(*BufPane) bool {
 
 // BufMapKey maps a key event to an action
 func BufMapKey(k Event, action string) {
-	if strings.HasPrefix(action, "command:") {
-		action = strings.SplitN(action, ":", 2)[1]
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = CommandAction(action)
-	} else if strings.HasPrefix(action, "command-edit:") {
-		action = strings.SplitN(action, ":", 2)[1]
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = CommandEditAction(action)
-	} else if strings.HasPrefix(action, "lua:") {
-		action = strings.SplitN(action, ":", 2)[1]
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = LuaAction(action)
-	} else if f, ok := BufKeyActions[action]; ok {
-		BufKeyStrings[k] = action
-		BufKeyBindings[k] = f
-	} else {
-		screen.TermMessage("Error:", action, "does not exist")
+	actions := strings.SplitN(action, ",", -1)
+	BufKeyStrings[k] = action
+	actionfns := make([]func(*BufPane) bool, len(actions))
+	for i, a := range actions {
+		a = strings.TrimSpace(a)
+		var afn func(*BufPane) bool
+		if strings.HasPrefix(action, "command:") {
+			a = strings.SplitN(a, ":", 2)[1]
+			afn = CommandAction(a)
+		} else if strings.HasPrefix(a, "command-edit:") {
+			a = strings.SplitN(a, ":", 2)[1]
+			afn = CommandEditAction(a)
+		} else if strings.HasPrefix(a, "lua:") {
+			a = strings.SplitN(a, ":", 2)[1]
+			afn = LuaAction(a)
+		} else if f, ok := BufKeyActions[a]; ok {
+			afn = f
+		} else {
+			screen.TermMessage("Error:", action, "does not exist")
+		}
+		actionfns[i] = afn
+	}
+	BufKeyBindings[k] = func(h *BufPane) bool {
+		b := false
+		for _, a := range actionfns {
+			b = a(h) || b
+		}
+		return b
 	}
 }
 
