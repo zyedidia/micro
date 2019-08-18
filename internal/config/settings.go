@@ -28,6 +28,10 @@ var (
 	parsedSettings map[string]interface{}
 )
 
+func init() {
+	parsedSettings = make(map[string]interface{})
+}
+
 // Options with validators
 var optionValidators = map[string]optionValidator{
 	"autosave":     validateNonNegativeValue,
