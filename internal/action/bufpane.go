@@ -30,8 +30,14 @@ func init() {
 
 func LuaAction(fn string) func(*BufPane) bool {
 	luaFn := strings.Split(fn, ".")
+	if len(luaFn) <= 1 {
+		return nil
+	}
 	plName, plFn := luaFn[0], luaFn[1]
 	pl := config.FindPlugin(plName)
+	if pl == nil {
+		return nil
+	}
 	return func(h *BufPane) bool {
 		val, err := pl.Call(plFn, luar.New(ulua.L, h))
 		if err != nil {

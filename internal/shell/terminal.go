@@ -6,19 +6,31 @@ import (
 	"os"
 	"os/exec"
 	"strconv"
+	"strings"
 
+	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
+	"github.com/zyedidia/micro/internal/config"
+	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/terminal"
+	luar "layeh.com/gopher-luar"
 )
 
 type TermType int
+type CallbackFunc func(string)
 
 const (
 	TTClose   = iota // Should be closed
 	TTRunning        // Currently running a command
 	TTDone           // Finished running a command
 )
+
+var CloseTerms chan bool
+
+func init() {
+	CloseTerms = make(chan bool)
+}
 
 // A Terminal holds information for the terminal emulator
 type Terminal struct {
@@ -30,7 +42,7 @@ type Terminal struct {
 	wait      bool
 	getOutput bool
 	output    *bytes.Buffer
-	callback  string
+	callback  CallbackFunc
 }
 
 // HasSelection returns whether this terminal has a valid selection
@@ -64,7 +76,7 @@ func (t *Terminal) GetSelection(width int) string {
 }
 
 // Start begins a new command in this terminal with a given view
-func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool) error {
+func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback string, userargs []interface{}) error {
 	if len(execCmd) <= 0 {
 		return nil
 	}
@@ -83,6 +95,25 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool) error {
 	t.Status = TTRunning
 	t.title = execCmd[0] + ":" + strconv.Itoa(cmd.Process.Pid)
 	t.wait = wait
+
+	luaFn := strings.Split(callback, ".")
+	if len(luaFn) >= 2 {
+		plName, plFn := luaFn[0], luaFn[1]
+		pl := config.FindPlugin(plName)
+		if pl != nil {
+			t.callback = func(out string) {
+				var luaArgs []lua.LValue
+				luaArgs = append(luaArgs, luar.New(ulua.L, out))
+				for _, v := range userargs {
+					luaArgs = append(luaArgs, luar.New(ulua.L, v))
+				}
+				_, err := pl.Call(plFn, luaArgs...)
+				if err != nil {
+					screen.TermMessage(err)
+				}
+			}
+		}
+	}
 
 	go func() {
 		for {
@@ -108,6 +139,7 @@ func (t *Terminal) Stop() {
 		t.Status = TTDone
 	} else {
 		t.Close()
+		CloseTerms <- true
 	}
 }
 
@@ -117,11 +149,9 @@ func (t *Terminal) Close() {
 	t.Status = TTClose
 	// call the lua function that the user has given as a callback
 	if t.getOutput {
-		// TODO: plugin callback on Term emulator
-		// _, err := Call(t.callback, t.output.String())
-		// if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-		// 	TermMessage(err)
-		// }
+		if t.callback != nil {
+			t.callback(t.output.String())
+		}
 	}
 }
 

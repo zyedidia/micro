@@ -106,8 +106,14 @@ func JobSend(cmd *exec.Cmd, data string) {
 // to the lua function
 func luaFunctionJob(fn string) func(string, ...interface{}) {
 	luaFn := strings.Split(fn, ".")
+	if len(luaFn) <= 1 {
+		return nil
+	}
 	plName, plFn := luaFn[0], luaFn[1]
 	pl := config.FindPlugin(plName)
+	if pl == nil {
+		return nil
+	}
 	return func(output string, args ...interface{}) {
 		var luaArgs []lua.LValue
 		luaArgs = append(luaArgs, luar.New(ulua.L, output))

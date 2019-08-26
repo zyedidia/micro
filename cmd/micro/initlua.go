@@ -85,6 +85,8 @@ func luaImportMicroShell() *lua.LTable {
 	ulua.L.SetField(pkg, "JobSpawn", luar.New(ulua.L, shell.JobSpawn))
 	ulua.L.SetField(pkg, "JobStop", luar.New(ulua.L, shell.JobStop))
 	ulua.L.SetField(pkg, "JobSend", luar.New(ulua.L, shell.JobSend))
+	ulua.L.SetField(pkg, "RunTermEmulator", luar.New(ulua.L, action.RunTermEmulator))
+	ulua.L.SetField(pkg, "TermEmuSupported", luar.New(ulua.L, action.TermEmuSupported))
 
 	return pkg
 }
@@ -106,6 +108,9 @@ func luaImportMicroBuffer() *lua.LTable {
 	ulua.L.SetField(pkg, "BTScratch", luar.New(ulua.L, buffer.BTScratch.Kind))
 	ulua.L.SetField(pkg, "BTRaw", luar.New(ulua.L, buffer.BTRaw.Kind))
 	ulua.L.SetField(pkg, "BTInfo", luar.New(ulua.L, buffer.BTInfo.Kind))
+	ulua.L.SetField(pkg, "NewBufferFromFile", luar.New(ulua.L, func(path string) (*buffer.Buffer, error) {
+		return buffer.NewBufferFromFile(path, buffer.BTDefault)
+	}))
 
 	return pkg
 }

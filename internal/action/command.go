@@ -78,8 +78,14 @@ func LuaMakeCommand(name, function string, completer buffer.Completer) {
 // so that a command can be bound to a lua function
 func LuaFunctionCommand(fn string) func(*BufPane, []string) {
 	luaFn := strings.Split(fn, ".")
+	if len(luaFn) <= 1 {
+		return nil
+	}
 	plName, plFn := luaFn[0], luaFn[1]
 	pl := config.FindPlugin(plName)
+	if pl == nil {
+		return nil
+	}
 	return func(bp *BufPane, args []string) {
 		var luaArgs []lua.LValue
 		luaArgs = append(luaArgs, luar.New(ulua.L, bp))
@@ -872,9 +878,8 @@ func (h *BufPane) TermCmd(args []string) {
 	}
 
 	term := func(i int, newtab bool) {
-
 		t := new(shell.Terminal)
-		t.Start(args, false, true)
+		t.Start(args, false, true, "", nil)
 
 		id := h.ID()
 		if newtab {

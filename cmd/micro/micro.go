@@ -236,6 +236,7 @@ func main() {
 			for _, b := range buffer.OpenBuffers {
 				b.Save()
 			}
+		case <-shell.CloseTerms:
 		case event = <-events:
 		case <-screen.DrawChan:
 		}

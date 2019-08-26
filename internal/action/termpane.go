@@ -80,9 +80,9 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 		} else if t.Status != shell.TTDone {
 			t.WriteString(event.EscSeq())
 		}
-	} else if e, ok := event.(*tcell.EventMouse); !ok || t.State.Mode(terminal.ModeMouseMask) {
+	} else if e, ok := event.(*tcell.EventMouse); e != nil && (!ok || t.State.Mode(terminal.ModeMouseMask)) {
 		t.WriteString(event.EscSeq())
-	} else {
+	} else if e != nil {
 		x, y := e.Position()
 		v := t.GetView()
 		x -= v.X
@@ -108,6 +108,10 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 			}
 			t.mouseReleased = true
 		}
+	}
+
+	if t.Status == shell.TTClose {
+		t.Quit()
 	}
 }
 
