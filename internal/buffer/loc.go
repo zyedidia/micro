@@ -123,3 +123,15 @@ func (l Loc) Diff(a, b Loc, buf *Buffer) int {
 func (l Loc) Move(n int, buf *Buffer) Loc {
 	return l.MoveLA(n, buf.LineArray)
 }
+
+// ByteOffset is just like ToCharPos except it counts bytes instead of runes
+func ByteOffset(pos Loc, buf *Buffer) int {
+	x, y := pos.X, pos.Y
+	loc := 0
+	for i := 0; i < y; i++ {
+		// + 1 for the newline
+		loc += len(buf.Line(i)) + 1
+	}
+	loc += len(buf.Line(y)[:x])
+	return loc
+}

@@ -70,6 +70,8 @@ func luaImportMicroConfig() *lua.LTable {
 	ulua.L.SetField(pkg, "RTSyntax", luar.New(ulua.L, config.RTSyntax))
 	ulua.L.SetField(pkg, "RTHelp", luar.New(ulua.L, config.RTHelp))
 	ulua.L.SetField(pkg, "RTPlugin", luar.New(ulua.L, config.RTPlugin))
+	ulua.L.SetField(pkg, "RegisterCommonOption", luar.New(ulua.L, config.RegisterCommonOption))
+	ulua.L.SetField(pkg, "RegisterGlobalOption", luar.New(ulua.L, config.RegisterGlobalOption))
 
 	return pkg
 }
@@ -111,6 +113,7 @@ func luaImportMicroBuffer() *lua.LTable {
 	ulua.L.SetField(pkg, "NewBufferFromFile", luar.New(ulua.L, func(path string) (*buffer.Buffer, error) {
 		return buffer.NewBufferFromFile(path, buffer.BTDefault)
 	}))
+	ulua.L.SetField(pkg, "ByteOffset", luar.New(ulua.L, buffer.ByteOffset))
 
 	return pkg
 }
