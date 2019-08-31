@@ -368,6 +368,11 @@ func (w *BufWindow) displayBuffer() {
 		bufHeight--
 	}
 
+	bufWidth := w.Width
+	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
+		bufWidth--
+	}
+
 	w.hasCalcHeight = true
 	start := w.StartLine
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
@@ -564,7 +569,7 @@ func (w *BufWindow) displayBuffer() {
 			totalwidth += width
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
-			if vloc.X >= w.Width {
+			if vloc.X >= bufWidth {
 				if !softwrap {
 					break
 				} else {
@@ -590,7 +595,7 @@ func (w *BufWindow) displayBuffer() {
 				}
 			}
 		}
-		for i := vloc.X; i < w.Width; i++ {
+		for i := vloc.X; i < bufWidth; i++ {
 			curStyle := style
 			if s, ok := config.Colorscheme["color-column"]; ok {
 				if colorcolumn != 0 && i-w.gutterOffset == colorcolumn {
@@ -635,8 +640,27 @@ func (w *BufWindow) displayStatusLine() {
 	}
 }
 
+func (w *BufWindow) displayScrollBar() {
+	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
+		scrollX := w.X + w.Width - 1
+		bufHeight := w.Height
+		if w.drawStatus {
+			bufHeight--
+		}
+		barsize := int(float64(w.Height) / float64(w.Buf.LinesNum()) * float64(w.Height))
+		if barsize < 1 {
+			barsize = 1
+		}
+		barstart := int(float64(w.StartLine) / float64(w.Buf.LinesNum()) * float64(w.Height))
+		for y := barstart; y < util.Min(barstart+barsize, w.Y+bufHeight); y++ {
+			screen.Screen.SetContent(scrollX, y, '|', nil, config.DefStyle.Reverse(true))
+		}
+	}
+}
+
 // Display displays the buffer and the statusline
 func (w *BufWindow) Display() {
 	w.displayStatusLine()
+	w.displayScrollBar()
 	w.displayBuffer()
 }
