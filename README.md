@@ -1,10 +1,15 @@
-# ![Micro](./assets/logo.png)
+<p align="center">
+  <img alt="micro logo" src="./assets/logo.png" width="300px" />
+</p>
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
+[![Downloads](https://img.shields.io/github/downloads/zyedidia/micro/total.svg?label=Downloads)](https://github.com/zyedidia/micro/releases/)
+[![Release](https://img.shields.io/github/release/zyedidia/microl.svg?label=Release)](https://github.com/zyedidia/micro/releases)
+[![Contributors](https://img.shields.io/github/contributors/zyedidia/micro?label=Contributors)](https://github.com/zyedidia/micro/graphs/contributors)
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
 of modern terminals. It comes as one single, batteries-included, static binary with no dependencies, and you can download and use it right now.
