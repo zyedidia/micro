@@ -1,4 +1,6 @@
-<img alt="micro logo" src="./assets/logo.png" width="300px"/>
+<p align="center">
+  <img alt="micro logo" src="./assets/logo.png" width="300px"/>
+</p>
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 [![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
