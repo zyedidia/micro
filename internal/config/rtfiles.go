@@ -2,9 +2,11 @@ package config
 
 import (
 	"io/ioutil"
+	"log"
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strings"
 )
 
@@ -143,8 +145,11 @@ func InitRuntimeFiles() {
 	}
 
 	// Search ConfigDir for plugin-scripts
-	plugdir := filepath.Join(ConfigDir, "plugins")
+	plugdir := filepath.Join(ConfigDir, "plug")
 	files, _ := ioutil.ReadDir(plugdir)
+
+	isID := regexp.MustCompile(`^[_A-Za-z0-9]+$`).MatchString
+
 	for _, d := range files {
 		if d.IsDir() {
 			srcs, _ := ioutil.ReadDir(filepath.Join(plugdir, d.Name()))
@@ -159,7 +164,13 @@ func InitRuntimeFiles() {
 						continue
 					}
 					p.Info, _ = NewPluginInfo(data)
+					p.Name = p.Info.Name
 				}
+			}
+
+			if !isID(p.Name) {
+				log.Println("Invalid plugin name", p.Name)
+				continue
 			}
 			Plugins = append(Plugins, p)
 		}
@@ -181,7 +192,12 @@ func InitRuntimeFiles() {
 							continue
 						}
 						p.Info, _ = NewPluginInfo(data)
+						p.Name = p.Info.Name
 					}
+				}
+				if !isID(p.Name) {
+					log.Println("Invalid plugin name", p.Name)
+					continue
 				}
 				Plugins = append(Plugins, p)
 			}
@@ -211,7 +227,7 @@ func PluginListRuntimeFiles(fileType RTFiletype) []string {
 
 // PluginAddRuntimeFile adds a file to the runtime files for a plugin
 func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) {
-	fullpath := filepath.Join(ConfigDir, "plugins", plugin, filePath)
+	fullpath := filepath.Join(ConfigDir, "plug", plugin, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
 	} else {
@@ -222,7 +238,7 @@ func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) {
 
 // PluginAddRuntimeFilesFromDirectory adds files from a directory to the runtime files for a plugin
 func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, directory, pattern string) {
-	fullpath := filepath.Join(ConfigDir, "plugins", plugin, directory)
+	fullpath := filepath.Join(ConfigDir, "plug", plugin, directory)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFilesFromDirectory(filetype, fullpath, pattern)
 	} else {
