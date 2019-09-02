@@ -510,6 +510,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"RemoveAllMultiCursors":  (*BufPane).RemoveAllMultiCursors,
 	"SkipMultiCursor":        (*BufPane).SkipMultiCursor,
 	"JumpToMatchingBrace":    (*BufPane).JumpToMatchingBrace,
+	"None":                   (*BufPane).None,
 
 	// This was changed to InsertNewline but I don't want to break backwards compatibility
 	"InsertEnter": (*BufPane).InsertNewline,

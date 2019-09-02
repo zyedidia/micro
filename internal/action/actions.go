@@ -1467,3 +1467,7 @@ func (h *BufPane) RemoveAllMultiCursors() bool {
 	h.multiWord = false
 	return true
 }
+
+func (h *BufPane) None() bool {
+	return false
+}

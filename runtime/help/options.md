@@ -246,30 +246,13 @@ Here are the options that you can set:
 
 ---
 
-Default plugin options:
-
-* `autoclose`: automatically close `{}` `()` `[]` `""` `''`. Provided by the
-   `autoclose` plugin
-
-	default value: `true`
-
-* `ftoptions`: by default, micro will set some options based on the filetype. At
-   the moment, micro will use tabs for makefiles and spaces for python and yaml
-   files regardless of your settings. If you would like to disable this behavior
-   turn this option off.
-
-	default value: `true`
-
-* `linter`: Automatically lint when the file is saved. Provided by the `linter`
-   plugin.
-
-	default value: `true`
+Plugin options: all plugins come with a special option to enable or disable them. THe option
+is a boolean with the same name as the plugin itself.
 
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
-
 
 ## Global and local settings
 

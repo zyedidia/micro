@@ -2,48 +2,62 @@
 
 This help page aims to cover two aspects of micro's syntax highlighting engine:
 
-- How to create colorschemes and use them
-- How to create syntax files to add to the list of languages micro can highlight
-
+- How to create colorschemes and use them.
+- How to create syntax files to add to the list of languages micro can highlight.
 
 ## Colorschemes
 
 To change your colorscheme, press Ctrl-E in micro to bring up the command
 prompt, and type:
+
 ```
-set colorscheme solarized
+set colorscheme monokai
 ```
+
 (or whichever colorscheme you choose).
 
-Micro comes with a number of colorschemes by default. Here is the list:
+Micro comes with a number of colorschemes by default. Modern terminals tend to
+have three different kinds of color support. The most common is 256 color where
+the terminal provides 256 standardized colors (except the first 16 may be configured
+by the user). A 256-color theme requires a terminal with 256 color support and
+is the most portable.
+
+A 16-color theme uses the 16 user-configurable colors (or 16 default colors on
+old terminals). These colorschemes are guranteed to work, but won't look great
+unless the 16 colors are configured to the user's liking. Using a 16-color theme
+will also preserve the terminal's theme because the terminal usually uses its 16
+colors for prompts or other coloring.
+
+Some terminals support "true color" with 16 million colors (using standard RGB values).
+There is no one standard for this color support among terminals so this method
+is not guaranteed to work. Usually truecolor must also be enabled by the user. The
+colorschemes using true color will look exactly as intended. If true color is not
+supported, a true color colorscheme will approximate its colors to 256-color.
+
+Here is the list of colorschemes:
 
 ### 256 color
 
 These should work and look nice in most terminals. I recommend these
 themes the most.
 
-* `monokai`: this is the monokai colorscheme; you may recognize it as Sublime
-  Text's default colorscheme. It requires true color to look perfect, but the
-  256 color approximation looks very good as well. It's also the default
-  colorscheme.
+* `monokai` (also the `default` colorscheme)
 * `zenburn`
 * `gruvbox`
 * `darcula`
 * `twilight`
 * `railscast`
-* `bubblegum`: a light colorscheme
+* `bubblegum`
 
 ### 16 color
 
 These may vary widely based on the 16 colors selected for your terminal.
 
-* `simple`: this is the simplest colorscheme. It uses 16 colors which are set by
-  your terminal
-* `solarized`: You should have the solarized color palette in your terminal to use this colorscheme properly.
+* `simple`
+* `solarized` (must have the solarized color palette in your terminal to use this colorscheme properly)
 * `cmc-16`
-* `cmc-paper`: cmc-16, but on a white background. (Actually light grey
-  on most ANSI (16-color) terminals)
-* `geany`: Colorscheme based on geany's default highlighting.
+* `cmc-paper`
+* `geany`
 
 ### True color
 
@@ -56,22 +70,10 @@ These require terminals that support true color and require `MICRO_TRUECOLOR=1` 
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
 * `github-tc`: The true color version of the Github colorscheme
 
-### Monochrome
-
-You can also use `monochrome` if you'd prefer to have just the terminal's default
-foreground and background colors. Note: This provides no syntax highlighting!
-
-### Other
-
-See `help gimmickcolors` for a list of some true colour themes that are more 
-just for fun than for serious use. (Though feel free if you want!)
-
-
 ## Creating a Colorscheme
 
 Micro's colorschemes are also extremely simple to create. The default ones can
-be found
-[here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
+be found [here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
 
 They are only about 18-30 lines in total.
 

@@ -29,9 +29,6 @@ Here are the possible commands that you can use.
 
 * `show option`: shows the current value of the given option.
 
-* `eval "expression"`: Evaluates a Lua expression. Note that micro will not
-   print anything so you should use `messenger:Message(...)` to display a value.
-
 * `run sh-command`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.
 
@@ -51,23 +48,11 @@ Here are the possible commands that you can use.
 					 
 * `log`: opens a log of all messages and debug statements.
 
-* `plugin install plugin_name`: installs the given plugin.
-
-* `plugin remove plugin_name`: removes the given plugin.
-
 * `plugin list`: lists all installed plugins.
 
-* `plugin update`: updates all installed plugins.
+* `plugin version pl`: shows version for specified plugin.
 
-* `plugin search plugin_name`: searches for the given plugin. Note that you can
-   find a list of all available plugins at
-   github.com/micro-editor/plugin-channel.
-
-   You can also see more information about the plugin manager in the
-   `Plugin Manager` section of the `plugins` help topic.
-
-* `plugin available`: list plugins available for download (this includes any
-   plugins that may be already installed).
+* `plugin info pl`: shows additional info for specified plugin.
 
 * `reload`: reloads all runtime files.
 
@@ -97,6 +82,8 @@ Here are the possible commands that you can use.
 The following commands are provided by the default plugins:
 
 * `lint`: Lint the current file for errors.
+
+* `comment`: automatically comment or uncomment current selection or line.
 
 # Command Parsing
 

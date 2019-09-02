@@ -5,7 +5,7 @@ hotkeys are fully customizable to your liking.
 
 Custom keybindings are stored internally in micro if changed with the `> bind`
 command or you can also be added in the file `~/.config/micro/bindings.json` as
-discussed below.  For a list of the default keybindings in the json format used
+discussed below. For a list of the default keybindings in the json format used
 by micro, please see the end of this file. For a more user-friendly list with
 explanations of what the default hotkeys are and what they do, please see
 `> help defaultkeys` (a json formatted list of default keys is included
@@ -19,7 +19,6 @@ the cursor to the start and end of the line, and ctrl up and down move the
 cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
-
 
 ## Rebinding keys
 
@@ -120,12 +119,10 @@ You can do this in linux using the loadkeys program.
 
 Coming soon!
 
-
 ## Unbinding keys
 
 It is also possible to disable any of the default key bindings by use of the 
-`UnbindKey` action in the user's `bindings.json` file.
-
+`None` action in the user's `bindings.json` file.
 
 ## Bindable actions and bindable keys
 
@@ -222,7 +219,7 @@ SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
-UnbindKey
+None
 JumpToMatchingBrace
 ```
 
@@ -486,3 +483,9 @@ Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or
 `Ctrl` so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings).
 This is why in the default keybindings you can see `AltShiftLeft` instead of
 `Alt-ShiftLeft` (they are equivalent).
+
+Please note that terminal emulators are strange applications and micro only receives
+key events that the terminal decides to send. Some terminal emulators may not
+send certain events even if this document says micro can receive the event. To see
+exactly what micro receives from the terminal when you press a key, run the `> raw`
+command.
