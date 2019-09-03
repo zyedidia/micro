@@ -7,7 +7,8 @@
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
-[![Downloads](https://img.shields.io/github/downloads/zyedidia/micro/total.svg?label=Downloads)](https://github.com/zyedidia/micro/releases/)
+
+[![Downloads](https://img.shields.io/github/downloads/zyedidia/micro/total.svg?label=Downloads)](x-github-client://openRepo/https://github.com/zyedidia/micro)
 [![Release](https://img.shields.io/github/release/zyedidia/microl.svg?label=Release)](https://github.com/zyedidia/micro/releases)
 [![Contributors](https://img.shields.io/github/contributors/zyedidia/micro?label=Contributors)](https://github.com/zyedidia/micro/graphs/contributors)
 
