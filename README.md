@@ -9,7 +9,7 @@
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
 
 [![Downloads](https://img.shields.io/github/downloads/zyedidia/micro/total.svg?label=Downloads)](x-github-client://openRepo/https://github.com/zyedidia/micro)
-[![Release](https://img.shields.io/github/release/zyedidia/microl.svg?label=Release)](https://github.com/zyedidia/micro/releases)
+[![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
 [![Contributors](https://img.shields.io/github/contributors/zyedidia/micro?label=Contributors)](https://github.com/zyedidia/micro/graphs/contributors)
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
