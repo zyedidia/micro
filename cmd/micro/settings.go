@@ -236,6 +236,7 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"splitright":     true,
 		"statusline":     true,
 		"sucmd":          "sudo",
+		"autosu":         false,
 		"syntax":         true,
 		"tabmovement":    false,
 		"tabsize":        float64(4),

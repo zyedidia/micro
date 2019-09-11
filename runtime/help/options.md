@@ -210,6 +210,10 @@ Here are the options that you can set:
 
 	default value: `sudo`
 
+* `autosu`: defines whether super user saving should be used automatically.
+
+	default value: `false`
+
 * `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
    (e.g. move over 4 spaces at once). This option only does anything if
    `tabstospaces` is on.

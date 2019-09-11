@@ -994,7 +994,12 @@ func (v *View) saveToFile(filename string) {
 	err := v.Buf.SaveAs(filename)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
-			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
+			var choice bool
+			if globalSettings["autosu"].(bool) {
+				choice = true
+			} else {
+				choice, _ = messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
+			}
 			if choice {
 				err = v.Buf.SaveAsWithSudo(filename)
 				if err != nil {
