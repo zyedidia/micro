@@ -255,6 +255,7 @@ func (c *Cursor) RuneUnder(x int) rune {
 	}
 	return line[x]
 }
+
 // UpN moves the cursor up N lines (if possible)
 func (c *Cursor) UpN(amount int) {
 	proposedY := c.Y - amount

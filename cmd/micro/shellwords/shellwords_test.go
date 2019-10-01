@@ -95,6 +95,9 @@ func TestBacktick(t *testing.T) {
 
 	parser.ParseBacktick = false
 	args, err = parser.Parse(`echo $(echo "foo")`)
+	if err != nil {
+		t.Fatal(err)
+	}
 	expected = []string{"echo", `$(echo "foo")`}
 	if !reflect.DeepEqual(args, expected) {
 		t.Fatalf("Expected %#v, but %#v:", expected, args)

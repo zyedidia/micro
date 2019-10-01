@@ -470,13 +470,13 @@ func getinfo(name string) (*Terminfo, string, error) {
 }
 
 func WriteDB(filename string) error {
-	var e error
-	js := []byte{}
-	args := []string{os.Getenv("TERM")}
-
-	tdata := make(map[string]*Terminfo)
-	descs := make(map[string]string)
-
+	var (
+		e error
+		js []byte
+		args = []string{os.Getenv("TERM")}
+		tdata = make(map[string]*Terminfo)
+		descs = make(map[string]string)
+	)
 	for _, term := range args {
 		if t, desc, e := getinfo(term); e != nil {
 			return e

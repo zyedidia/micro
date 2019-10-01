@@ -12,13 +12,15 @@ func min(a, b int) int {
 	return b
 }
 
-func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsize int) (int, int, *tcell.Style) {
-	charPos := 0
-	var lineIdx int
-	var lastWidth int
-	var style *tcell.Style
-	var width int
-	var rw int
+func visualToCharPos(visualIndex, lineN int, str string, buf *Buffer, tabsize int) (int, int, *tcell.Style) {
+	var (
+		charPos   int
+		lineIdx   int
+		lastWidth int
+		style     *tcell.Style
+		width     int
+		rw        int
+	)
 	for i, c := range str {
 		// width := StringWidth(str[:i], tabsize)
 
@@ -36,7 +38,6 @@ func visualToCharPos(visualIndex int, lineN int, str string, buf *Buffer, tabsiz
 			lineIdx += rw
 		}
 		lastWidth = width
-		rw = 0
 		if c == '\t' {
 			rw = tabsize - (lineIdx % tabsize)
 			width += rw
