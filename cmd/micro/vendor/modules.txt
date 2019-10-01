@@ -1,0 +1,66 @@
+# github.com/blang/semver v3.5.1+incompatible
+github.com/blang/semver
+# github.com/dustin/go-humanize v1.0.0
+github.com/dustin/go-humanize
+# github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
+github.com/flynn/json5
+# github.com/gdamore/encoding v1.0.0
+github.com/gdamore/encoding
+# github.com/go-errors/errors v1.0.1
+github.com/go-errors/errors
+# github.com/gopherjs/gopherjs v0.0.0-20181017120253-0766667cb4d1
+github.com/gopherjs/gopherjs/js
+# github.com/jtolds/gls v4.20.0+incompatible
+github.com/jtolds/gls
+# github.com/lucasb-eyer/go-colorful v1.0.2
+github.com/lucasb-eyer/go-colorful
+# github.com/mattn/go-isatty v0.0.9
+github.com/mattn/go-isatty
+# github.com/mattn/go-runewidth v0.0.4
+github.com/mattn/go-runewidth
+# github.com/mitchellh/go-homedir v1.1.0
+github.com/mitchellh/go-homedir
+# github.com/sergi/go-diff v1.0.0
+github.com/sergi/go-diff/diffmatchpatch
+# github.com/smartystreets/assertions v0.0.0-20180927180507-b2de0cb4f26d
+github.com/smartystreets/assertions
+github.com/smartystreets/assertions/internal/go-render/render
+github.com/smartystreets/assertions/internal/oglematchers
+# github.com/smartystreets/goconvey v0.0.0-20190731233626-505e41936337
+github.com/smartystreets/goconvey/convey
+github.com/smartystreets/goconvey/convey/gotest
+github.com/smartystreets/goconvey/convey/reporting
+# github.com/yuin/gopher-lua v0.0.0-20190514113301-1cd887cd7036
+github.com/yuin/gopher-lua
+github.com/yuin/gopher-lua/ast
+github.com/yuin/gopher-lua/parse
+github.com/yuin/gopher-lua/pm
+# github.com/zyedidia/clipboard v0.0.0-20190823154308-241f98e9b197
+github.com/zyedidia/clipboard
+# github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
+github.com/zyedidia/glob
+# github.com/zyedidia/poller v2.0.0+incompatible
+github.com/zyedidia/poller
+# github.com/zyedidia/pty v1.1.1
+github.com/zyedidia/pty
+# github.com/zyedidia/tcell v0.0.0-20190212015332-5c58b4edc169
+github.com/zyedidia/tcell
+github.com/zyedidia/tcell/encoding
+# github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
+github.com/zyedidia/terminal
+# golang.org/x/sys v0.0.0-20190927073244-c990c680b611
+golang.org/x/sys/unix
+# golang.org/x/text v0.3.2
+golang.org/x/text/encoding
+golang.org/x/text/encoding/charmap
+golang.org/x/text/encoding/internal
+golang.org/x/text/encoding/internal/identifier
+golang.org/x/text/encoding/japanese
+golang.org/x/text/encoding/korean
+golang.org/x/text/encoding/simplifiedchinese
+golang.org/x/text/encoding/traditionalchinese
+golang.org/x/text/transform
+# gopkg.in/yaml.v2 v2.2.3
+gopkg.in/yaml.v2
+# layeh.com/gopher-luar v1.0.7
+layeh.com/gopher-luar
