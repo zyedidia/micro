@@ -1,2 +1,4 @@
 language: go
-script: make test
+
+go:
+    - "1.12"
