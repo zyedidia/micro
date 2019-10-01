@@ -53,10 +53,6 @@ github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBY
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
 github.com/zyedidia/poller v2.0.0+incompatible h1:DMOvB0EXz2JTokqOKfxPWN/8xXFJbO+m4vNhMkOY7Lo=
 github.com/zyedidia/poller v2.0.0+incompatible/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
-github.com/zyedidia/pty v1.1.1-0.20180113180753-f8811ff0e5ce h1:QNshpNEeQDV9PWZ0jBAkPx5miC5SFkglmxrqmaDweNY=
-github.com/zyedidia/pty v1.1.1-0.20180113180753-f8811ff0e5ce/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
-github.com/zyedidia/pty v1.1.1 h1:SGOF3egDZGCGbpB5DPlg+yabbAuVkUtXVeNTDFeEytM=
-github.com/zyedidia/pty v1.1.1/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
 github.com/zyedidia/pty v1.1.2-0.20180126010845-30364665a244 h1:DZ7mZvUV5+oXeXV1E1t6ZIXRihHYyqYVIOSA+RGo88A=
 github.com/zyedidia/pty v1.1.2-0.20180126010845-30364665a244/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
 github.com/zyedidia/tcell v0.0.0-20190212015332-5c58b4edc169 h1:LV0ocqfvIoyX83zg9tyr6q8Jy1lRpBV9vmFJztiAeNg=
@@ -64,6 +60,7 @@ github.com/zyedidia/tcell v0.0.0-20190212015332-5c58b4edc169/go.mod h1:yXgdp23+a
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415/go.mod h1:8leT8G0Cm8NoJHdrrKHyR9MirWoF4YW7pZh06B6H+1E=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
+golang.org/x/net v0.0.0-20190311183353-d8887717615a h1:oWX7TPOiFAMXLq8o0ikBYfCJVlRHBcsciT5bXOrH628=
 golang.org/x/net v0.0.0-20190311183353-d8887717615a/go.mod h1:t9HGtf8HONx5eT2rtn7q6eTqICYqUVnKs3thJo3Qplg=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190215142949-d0b11bdaac8a/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

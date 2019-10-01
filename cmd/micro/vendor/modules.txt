@@ -41,7 +41,7 @@ github.com/zyedidia/clipboard
 github.com/zyedidia/glob
 # github.com/zyedidia/poller v2.0.0+incompatible
 github.com/zyedidia/poller
-# github.com/zyedidia/pty v1.1.1
+# github.com/zyedidia/pty v1.1.2-0.20180126010845-30364665a244
 github.com/zyedidia/pty
 # github.com/zyedidia/tcell v0.0.0-20190212015332-5c58b4edc169
 github.com/zyedidia/tcell
