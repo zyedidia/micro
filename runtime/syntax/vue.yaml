@@ -1,0 +1,24 @@
+filetype: vue
+
+detect:
+    filename: "\\.vue$"
+
+rules:
+    - default:
+        start: "<template.*?>"
+        end: "</template.*?>"
+        rules: 
+            - include: "html5"
+            
+    - default: 
+        start: "<script.*?>"
+        end: "</script.*?>"
+        rules:
+            - include: "javascript"
+    
+    - default:
+        start: "<style.*?>"
+        end: "</style.*?>"
+        rules:
+            - include: "css"
+    

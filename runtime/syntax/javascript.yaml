@@ -23,6 +23,7 @@ rules:
     # reserved but unassigned
     - error: "\\b(enum|implements|interface|package|private|protected|public|TODO)"
     - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
+    - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
     - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Math|Map|Set|WeakMap|WeakSet)\\b"
     - type: "\\b(Number|Object|RegExp|String)\\b"
