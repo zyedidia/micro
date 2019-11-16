@@ -8,7 +8,8 @@ rules:
     - constant.number: "\\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\\b"
     - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
     - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
-    - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
+    #- identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
+    # ^ this is not correct usage of the identifier color
     - symbol.brackets: "(\\{|\\})"
     - symbol.brackets: "(\\(|\\))"
     - symbol.brackets: "(\\[|\\])"
@@ -20,14 +21,18 @@ rules:
     - statement: "\\b(for|function|class|extends|get|if|import|from|in|of|instanceof|let|new|return|set)\\b"
     - statement: "\\b(super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"
     # reserved but unassigned
-    - error: "\\b(enum|implements|interface|package|private|protected|public)"
-    - constant: "\\b(null|undefined|NaN)\\b"
+    - error: "\\b(enum|implements|interface|package|private|protected|public|TODO)"
+    - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
-    - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Math)\\b"
+    - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Math|Map|Set|WeakMap|WeakSet)\\b"
     - type: "\\b(Number|Object|RegExp|String)\\b"
     # - constant: "/[^*]([^/]|(\\\\/))*[^\\\\]/[gim]*"
     - constant: "\\\\[0-7][0-7]?[0-7]?|\\\\x[0-9a-fA-F]+|\\\\[bfnrt'\"\\?\\\\]"
     - comment: "^#!.*/(env +)?node( |$)"
+
+    - identifier: "\\b(alert|decodeURI|decodeURIComponent|document|encodeURI|encodeURIComponent|escape|eval|isFinite|isNaN|parseFloat|parseInt|unescape|uneval|window)\\b"
+    - identifier: "\\b(Intl|WebAssembly)\\b"
+    - identifier: "\\b(Arguments)\\b"
 
 
     - constant.string:
