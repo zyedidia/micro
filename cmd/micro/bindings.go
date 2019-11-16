@@ -112,6 +112,8 @@ var bindingActions = map[string]func(*View, bool) bool{
 	"ScrollDown":             (*View).ScrollDownAction,
 	"SpawnMultiCursor":       (*View).SpawnMultiCursor,
 	"SpawnMultiCursorSelect": (*View).SpawnMultiCursorSelect,
+	"SpawnMultiCursorUp": (*View).SpawnMultiCursorUp,
+	"SpawnMultiCursorDown": (*View).SpawnMultiCursorDown,
 	"RemoveMultiCursor":      (*View).RemoveMultiCursor,
 	"RemoveAllMultiCursors":  (*View).RemoveAllMultiCursors,
 	"SkipMultiCursor":        (*View).SkipMultiCursor,
@@ -606,6 +608,9 @@ func DefaultBindings() map[string]string {
 		"MouseLeft":      "MousePress",
 		"MouseMiddle":    "PastePrimary",
 		"Ctrl-MouseLeft": "MouseMultiCursor",
+
+		"AltShiftUp": "SpawnMultiCursorUp",
+		"AltShiftDown": "SpawnMultiCursorDown",
 
 		"Alt-n": "SpawnMultiCursor",
 		"Alt-m": "SpawnMultiCursorSelect",

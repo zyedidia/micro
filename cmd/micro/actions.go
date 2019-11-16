@@ -2184,6 +2184,70 @@ func (v *View) SpawnMultiCursor(usePlugin bool) bool {
 	return false
 }
 
+// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
+func (v *View) SpawnMultiCursorUp(usePlugin bool) bool {
+
+	if usePlugin && !PreActionCall("SpawnMultiCursorUp", v) {
+		return false
+	}
+
+	if v.Cursor.Y == 0 {
+   		return false
+	} else {
+		v.Cursor.GotoLoc(Loc{v.Cursor.X, v.Cursor.Y - 1})
+		v.Cursor.Relocate()
+	}
+
+	if v.mainCursor() {
+		c := &Cursor{
+			buf: v.Buf,
+		}
+		c.GotoLoc(Loc{v.Cursor.X, v.Cursor.Y + 1})
+		v.Buf.cursors = append(v.Buf.cursors, c)
+	}
+
+	v.Buf.MergeCursors()
+	v.Buf.UpdateCursors()
+
+	if usePlugin {
+		PostActionCall("SpawnMultiCursorUp", v)
+	}
+
+	return false
+}
+
+// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y more.
+func (v *View) SpawnMultiCursorDown(usePlugin bool) bool {
+
+	if usePlugin && !PreActionCall("SpawnMultiCursorDown", v) {
+		return false
+	}
+
+	if v.Cursor.Y + 1 == v.Buf.LinesNum() {
+		return false
+	} else {
+		v.Cursor.GotoLoc(Loc{v.Cursor.X, v.Cursor.Y + 1})
+		v.Cursor.Relocate()
+	}
+
+	if v.mainCursor() {
+		c := &Cursor{
+			buf: v.Buf,
+		}
+		c.GotoLoc(Loc{v.Cursor.X, v.Cursor.Y - 1})
+		v.Buf.cursors = append(v.Buf.cursors, c)
+	}
+
+	v.Buf.MergeCursors()
+	v.Buf.UpdateCursors()
+
+	if usePlugin {
+		PostActionCall("SpawnMultiCursorDown", v)
+	}
+
+	return false
+}
+
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
 func (v *View) SpawnMultiCursorSelect(usePlugin bool) bool {
 	if v.Cursor == &v.Buf.Cursor {
