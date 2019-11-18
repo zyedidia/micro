@@ -721,6 +721,7 @@ func loadFromFile(fname string, term string) (*Terminfo, error) {
 	if f, e = os.Open(fname); e != nil {
 		return nil, e
 	}
+	defer f.Close()
 	if strings.HasSuffix(fname, ".gz") {
 		if f, e = gzip.NewReader(f); e != nil {
 			return nil, e
