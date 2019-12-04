@@ -1,0 +1,72 @@
+filetype: zscript
+# Loosely based on the csharp.yaml definition
+# (?i) on everything because ZScript isn't case sensitive
+
+detect:
+    filename: "(?i)\\.z(c|sc)$"
+
+rules:
+
+    # ZScript only has one preprocessor directive and a required engine version declaration
+    - preproc: "(?i)#include"
+    - preproc: "(?i)version"
+
+    # State labels ("goto" word overridden by state logic rule below)
+    - symbol.tag: "(?i)[a-z0-9.]+:"
+    - symbol.tag: "(?i)goto [a-z0-9]+[\\+0-9]*"
+
+    # Classes
+    - identifier.class: "(?i)class +[a-z0-9_]+ *((:) +[a-z0-9.]+)?"
+
+    # Functions (open paren overridden by symbol.brackets rule because perl regex apparently doesn't support postive lookahead)
+    - identifier: "(?i)[\\.]*[a-z0-9_]+[ ]*[(]+"
+
+    # Variable types
+    - type: "(?i)\\b(actor|object|vector2|vector3|name|string|color|sound|void|double|bool|int|float|float64|uint8|uint16|uint|int8|int16|TextureID|SpriteID|Array|voidptr|short|action|state|statelabel)\\b"
+
+    # Keywords
+    - statement: "(?i)\\b(class|default|private|static|native|return|if|else|for|while|do|deprecated|null|readonly|true|false|struct|extend|clearscope|vararg|ui|play|virtual|virtualscope|meta|Property|in|out|states|override|super|is|let|const|replaces|protected|self|abstract|enum|switch|case)\\b"
+
+    # State logic keywords
+    - special: "(?i)\\b(goto|loop|stop|break|continue|fail)\\b"
+
+    # Symbols
+    - symbol.operator: "[\\-+/*=<>?:!~%&|]"
+    - symbol.brackets: "[(){}]|\\[|\\]"
+
+    # Constants
+    - constant.bool: "(?i)(\\b(true|false)\\b|NULL)"
+    - constant.number: "(?i)\\b([0-9][.]*[0-9]*)+?\\b"
+    - constant.number: "(?i)\\b(0x[A-Fa-f0-9_]+)?\\b"
+    - constant.number: "(?i)\\b(0b[0-1_]+)[FL]?\\b"
+    #- constant.number: "(?i)\\b(([0-9][.]*[0-9]*)+|0x[A-Fa-f0-9_]+|0b[0-1_]+)[FL]?\\b"
+
+    # Strings
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
+            - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([btnfr]|'|\\\"|\\\\)"
+            - constant.specialChar: "\\\\u[A-Fa-f0-9]{4}"
+
+    # Comments
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
