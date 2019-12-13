@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"os/signal"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -426,11 +425,6 @@ func (b *Buffer) Save() error {
 	return b.SaveAs(b.Path)
 }
 
-// SaveWithSudo saves the buffer to the default path with sudo
-func (b *Buffer) SaveWithSudo() error {
-	return b.SaveAsWithSudo(b.Path)
-}
-
 // Serialize serializes the buffer to configDir/buffers
 func (b *Buffer) Serialize() error {
 	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
@@ -502,7 +496,7 @@ func (b *Buffer) SaveAs(filename string) error {
 
 	var fileSize int
 
-	err := overwriteFile(absFilename, func(file io.Writer) (e error) {
+	writer := func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
 			return
 		}
@@ -534,10 +528,26 @@ func (b *Buffer) SaveAs(filename string) error {
 		}
 
 		return
-	})
+	}
+
+	err := overwriteFile(absFilename, writer)
 
 	if err != nil {
-		return err
+		if strings.HasSuffix(err.Error(), "permission denied") {
+			sucmd := globalSettings["sucmd"].(string)
+			message := "Permission denied. Do you want to save this file using " + sucmd + "? (y,n)"
+			if choice, _ := messenger.YesNoPrompt(message); choice {
+				messenger.Clear()
+				messenger.Reset()
+				if err = overwriteFileAsRoot(absFilename, writer); err != nil {
+					return err
+				}
+			} else {
+				return errors.New("Save aborted")
+			}
+		} else {
+			return err
+		}
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
@@ -580,6 +590,38 @@ func overwriteFile(name string, fn func(io.Writer) error) (err error) {
 	return
 }
 
+// overwriteFileAsRoot executes dd as root and then calls the supplied function
+// with dd's standard input as an io.Writer object. Dd opens the given file for writing,
+// truncating it if it exists, and writes what it receives on its standard input to the file.
+func overwriteFileAsRoot(name string, fn func(io.Writer) error) (err error) {
+	cmd := exec.Command(globalSettings["sucmd"].(string), "dd", "status=none", "bs=4K", "of=" + name)
+	var stdin io.WriteCloser
+
+	if stdin, err = cmd.StdinPipe(); err != nil {
+		return
+	}
+
+	if err = cmd.Start(); err != nil {
+		return
+	}
+
+	e := fn(stdin)
+
+	if err = stdin.Close(); err != nil {
+		return
+	}
+
+	screen.Fini()
+	screen = nil
+	defer InitScreen()
+
+	if err = cmd.Wait(); err != nil {
+		return
+	}
+
+	return e
+}
+
 // calcHash calculates md5 hash of all lines in the buffer
 func calcHash(b *Buffer, out *[md5.Size]byte) {
 	h := md5.New()
@@ -594,44 +636,6 @@ func calcHash(b *Buffer, out *[md5.Size]byte) {
 	}
 
 	h.Sum((*out)[:0])
-}
-
-// SaveAsWithSudo is the same as SaveAs except it uses a neat trick
-// with tee to use sudo so the user doesn't have to reopen micro with sudo
-func (b *Buffer) SaveAsWithSudo(filename string) error {
-	b.UpdateRules()
-	b.Path = filename
-
-	// Shut down the screen because we're going to interact directly with the shell
-	screen.Fini()
-	screen = nil
-
-	// Set up everything for the command
-	cmd := exec.Command(globalSettings["sucmd"].(string), "tee", filename)
-	cmd.Stdin = bytes.NewBufferString(b.SaveString(b.Settings["fileformat"] == "dos"))
-
-	// This is a trap for Ctrl-C so that it doesn't kill micro
-	// Instead we trap Ctrl-C to kill the program we're running
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			cmd.Process.Kill()
-		}
-	}()
-
-	// Start the command
-	cmd.Start()
-	err := cmd.Wait()
-
-	// Start the screen back up
-	InitScreen()
-	if err == nil {
-		b.IsModified = false
-		b.ModTime, _ = GetModTime(filename)
-		b.Serialize()
-	}
-	return err
 }
 
 // Modified returns if this buffer has been modified since

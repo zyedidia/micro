@@ -993,23 +993,7 @@ func (v *View) Save(usePlugin bool) bool {
 func (v *View) saveToFile(filename string) {
 	err := v.Buf.SaveAs(filename)
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "permission denied") {
-			choice, _ := messenger.YesNoPrompt("Permission denied. Do you want to save this file using sudo? (y,n)")
-			if choice {
-				err = v.Buf.SaveAsWithSudo(filename)
-				if err != nil {
-					messenger.Error(err.Error())
-				} else {
-					v.Buf.Path = filename
-					v.Buf.name = filename
-					messenger.Message("Saved " + filename)
-				}
-			}
-			messenger.Reset()
-			messenger.Clear()
-		} else {
-			messenger.Error(err.Error())
-		}
+		messenger.Error(err.Error())
 	} else {
 		v.Buf.Path = filename
 		v.Buf.name = filename
