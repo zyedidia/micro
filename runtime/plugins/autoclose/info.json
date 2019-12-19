@@ -1,5 +1,5 @@
 {
-    "name": "linter",
+    "name": "autoclose",
     "description": "Automatically places closing characters for quotes, parentheses, brackets, etc...",
     "website": "https://github.com/zyedidia/micro",
 	"install": "https://github.com/zyedidia/micro",

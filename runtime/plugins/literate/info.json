@@ -1,5 +1,5 @@
 {
-    "name": "linter",
+    "name": "literate",
     "description": "Highlighting and language support for the Literate programming tool.",
     "website": "https://github.com/zyedidia/Literate",
 	"install": "https://github.com/zyedidia/micro",
