@@ -180,7 +180,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"softwrap":       false,
 	"splitbottom":    true,
 	"splitright":     true,
-	"statusformatl":  "$(filename) $(modified)($(line),$(col)) $(opt:filetype) $(opt:fileformat) $(opt:encoding)",
+	"statusformatl":  "$(filename) $(modified)($(line),$(col)) | ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
 	"statusformatr":  "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help",
 	"statusline":     true,
 	"syntax":         true,
