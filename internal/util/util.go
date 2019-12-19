@@ -353,7 +353,6 @@ func IntOpt(opt interface{}) int {
 // coordinate (this is necessary because tabs are 1 char but
 // 4 visual spaces)
 func GetCharPosInLine(b []byte, visualPos int, tabsize int) int {
-
 	// Scan rune by rune until we exceed the visual width that we are
 	// looking for. Then we can return the character position we have found
 	i := 0     // char pos

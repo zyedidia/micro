@@ -717,10 +717,11 @@ func AddTerminfo(t *Terminfo) {
 
 func loadFromFile(fname string, term string) (*Terminfo, error) {
 	var e error
-	var f io.Reader
+	var f io.ReadCloser
 	if f, e = os.Open(fname); e != nil {
 		return nil, e
 	}
+	defer f.Close()
 	if strings.HasSuffix(fname, ".gz") {
 		if f, e = gzip.NewReader(f); e != nil {
 			return nil, e

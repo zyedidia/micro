@@ -215,7 +215,6 @@ func (h *BufPane) Name() string {
 }
 
 // HandleEvent executes the tcell event properly
-// TODO: multiple actions bound to one key
 func (h *BufPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventRaw:
