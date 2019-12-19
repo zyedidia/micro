@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"regexp"
 	"strconv"
@@ -64,6 +65,7 @@ func InitCommands() {
 		"memusage":   Command{(*BufPane).MemUsageCmd, nil},
 		"retab":      Command{(*BufPane).RetabCmd, nil},
 		"raw":        Command{(*BufPane).RawCmd, nil},
+		"textfilter": Command{(*BufPane).TextFilterCmd, nil},
 	}
 }
 
@@ -238,6 +240,33 @@ func (h *BufPane) RawCmd(args []string) {
 	tp := NewTabFromPane(0, 0, width, height-iOffset, NewRawPane())
 	Tabs.AddTab(tp)
 	Tabs.SetActive(len(Tabs.List) - 1)
+}
+
+// TextFilterCmd filters the selection through the command.
+// Selection goes to the command input.
+// On successfull run command output replaces the current selection.
+func (h *BufPane) TextFilterCmd(args []string) {
+	if len(args) == 0 {
+		InfoBar.Error("usage: textfilter arguments")
+		return
+	}
+	sel := h.Cursor.GetSelection()
+	if len(sel) == 0 {
+		h.Cursor.SelectWord()
+		sel = h.Cursor.GetSelection()
+	}
+	var bout, berr bytes.Buffer
+	cmd := exec.Command(args[0], args[1:]...)
+	cmd.Stdin = strings.NewReader(string(sel))
+	cmd.Stderr = &berr
+	cmd.Stdout = &bout
+	err := cmd.Run()
+	if err != nil {
+		InfoBar.Error(err.Error() + " " + berr.String())
+		return
+	}
+	h.Cursor.DeleteSelection()
+	h.Buf.Insert(h.Cursor.Loc, bout.String())
 }
 
 // TabSwitchCmd switches to a given tab either by name or by number
