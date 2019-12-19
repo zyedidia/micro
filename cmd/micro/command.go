@@ -58,6 +58,7 @@ func init() {
 		"MemUsage":   MemUsage,
 		"Retab":      Retab,
 		"Raw":        Raw,
+		"TextFilter": TextFilter,
 	}
 }
 
@@ -117,6 +118,7 @@ func DefaultCommands() map[string]StrCommand {
 		"memusage":   {"MemUsage", []Completion{NoCompletion}},
 		"retab":      {"Retab", []Completion{NoCompletion}},
 		"raw":        {"Raw", []Completion{NoCompletion}},
+		"textfilter": {"TextFilter", []Completion{NoCompletion}},
 	}
 }
 
