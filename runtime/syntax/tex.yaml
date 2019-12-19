@@ -20,9 +20,10 @@ rules:
     - special: "[&\\\\]"
     # macros
     - statement: "\\\\@?[a-zA-Z_]+"
+    - statement: "\\\\%"
     # comments
     - comment:
-        start: "%"
+        start: "[^\\\\]%"
         end: "$"
         rules: []
     - comment:
