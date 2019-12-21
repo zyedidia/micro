@@ -755,6 +755,7 @@ func (h *BufPane) GotoCmd(args []string) {
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
 			h.Cursor.GotoLoc(buffer.Loc{0, line})
 		}
+		h.Relocate()
 	}
 }
 

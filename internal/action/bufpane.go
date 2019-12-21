@@ -57,7 +57,7 @@ func BufMapKey(k Event, action string) {
 	BufKeyStrings[k] = action
 	actionfns := make([]func(*BufPane) bool, len(actions))
 	for i, a := range actions {
-		a = strings.TrimSpace(a)
+		// a = strings.TrimSpace(a)
 		var afn func(*BufPane) bool
 		if strings.HasPrefix(action, "command:") {
 			a = strings.SplitN(a, ":", 2)[1]
