@@ -46,7 +46,6 @@ func EndSearch() {
 
 // ExitSearch exits the search mode, reset active search phrase, and clear status bar
 func ExitSearch(v *View) {
-	lastSearch = ""
 	searching = false
 	messenger.hasPrompt = false
 	messenger.Clear()
@@ -59,6 +58,21 @@ func ExitSearch(v *View) {
 func HandleSearchEvent(event tcell.Event, v *View) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
+
+		// Handle FindNext and FindPrevious while composing search
+		switch bindingsStr[reverseBindingKeys[e.Key()]] {
+		case "Find", "FindNext":
+			lastSearch = messenger.response
+			v.FindNext(true)
+			v.Relocate()
+			return
+		case "FindPrevious":
+			lastSearch = messenger.response
+			v.FindPrevious(true)
+			v.Relocate()
+			return
+		}
+
 		switch e.Key() {
 		case tcell.KeyEscape:
 			// Exit the search mode
@@ -74,6 +88,10 @@ func HandleSearchEvent(event tcell.Event, v *View) {
 			EndSearch()
 			return
 		}
+	// Do nothing on mouse events.
+	// Prevents relocating on mouse motion, so we can scroll the view while searching.
+	case *tcell.EventMouse:
+		return
 	}
 
 	messenger.HandleEvent(event, searchHistory)

@@ -527,7 +527,7 @@ func main() {
 					t.Resize()
 				}
 			case *tcell.EventMouse:
-				if !searching {
+				// if !searching {
 					if e.Buttons() == tcell.Button1 {
 						// If the user left clicked we check a couple things
 						_, h := screen.Size()
@@ -563,7 +563,7 @@ func main() {
 							didAction = true
 						}
 					}
-				}
+				// }
 			}
 
 			if !didAction {

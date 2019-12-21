@@ -1115,3 +1115,8 @@ func (v *View) Display() {
 		}
 	}
 }
+
+// Searches in the view for the given regex.
+func (v *View) Search(searchStr string, down bool) {
+	Search(searchStr, v, down)
+}

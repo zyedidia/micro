@@ -1075,14 +1075,13 @@ func (v *View) FindNext(usePlugin bool) bool {
 
 	if v.Cursor.HasSelection() {
 		searchStart = v.Cursor.CurSelection[1]
-		// lastSearch = v.Cursor.GetSelection()
 	} else {
 		searchStart = v.Cursor.Loc
 	}
 	if lastSearch == "" {
 		return true
 	}
-	messenger.Message("Finding: " + lastSearch)
+	messenger.Message("Searched next: " + lastSearch)
 	Search(lastSearch, v, true)
 
 	if usePlugin {
@@ -1102,7 +1101,7 @@ func (v *View) FindPrevious(usePlugin bool) bool {
 	} else {
 		searchStart = v.Cursor.Loc
 	}
-	messenger.Message("Finding: " + lastSearch)
+	messenger.Message("Searched previous: " + lastSearch)
 	Search(lastSearch, v, false)
 
 	if usePlugin {
@@ -1819,11 +1818,6 @@ func (v *View) ToggleOverwriteMode(usePlugin bool) bool {
 // Escape leaves current mode
 func (v *View) Escape(usePlugin bool) bool {
 	if v.mainCursor() {
-		// check if user is searching, or the last search is still active
-		if searching || lastSearch != "" {
-			ExitSearch(v)
-			return true
-		}
 		// check if a prompt is shown, hide it and don't quit
 		if messenger.hasPrompt {
 			messenger.Reset() // FIXME

@@ -8,7 +8,6 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	humanize "github.com/dustin/go-humanize"
 	"github.com/zyedidia/micro/cmd/micro/shellwords"
@@ -547,7 +546,7 @@ func Save(args []string) {
 
 // Replace runs search and replace
 func Replace(args []string) {
-	if len(args) < 2 || len(args) > 4 {
+	if len(args) < 2 || len(args) > 5 {
 		// We need to find both a search and replace expression
 		messenger.Error("Invalid replace statement: " + strings.Join(args, " "))
 		return
@@ -555,6 +554,7 @@ func Replace(args []string) {
 
 	all := false
 	noRegex := false
+	inSelection := false
 
 	if len(args) > 2 {
 		for _, arg := range args[2:] {
@@ -563,6 +563,8 @@ func Replace(args []string) {
 				all = true
 			case "-l":
 				noRegex = true
+			case "-s":
+				inSelection = true
 			default:
 				messenger.Error("Invalid flag: " + arg)
 				return
@@ -587,20 +589,45 @@ func Replace(args []string) {
 	}
 
 	view := CurView()
+	startLine := 0
+	endLine := view.Buf.LinesNum()
+	var originalCursor Cursor
+
+	if inSelection {
+		originalCursor = *view.Cursor
+		if view.Cursor.HasSelection() {
+			startLine = view.Cursor.CurSelection[0].Y
+			endLine = view.Cursor.CurSelection[1].Y
+		} else {
+			startLine = view.Cursor.Loc.Y
+			endLine = startLine
+		}
+		if startLine > endLine {
+			startLine, endLine = endLine, startLine
+		}
+		endLine++
+	}
 
 	found := 0
 	replaceAll := func() {
 		var deltas []Delta
-		for i := 0; i < view.Buf.LinesNum(); i++ {
-			newText := regex.ReplaceAllFunc(view.Buf.lines[i].data, func(in []byte) []byte {
+		previousDelta := Delta{}
+		offset := 0
+		for i := startLine; i < endLine; i++ {
+			for _, submatches := range regex.FindAllSubmatchIndex(view.Buf.lines[i].data, -1) {
+				if previousDelta.Start.Y != i {
+					offset = 0
+				}
+				oldText := string(view.Buf.lines[i].data[submatches[0]:submatches[1]])
+				newText := string(regex.Expand([]byte{}, replaceBytes, view.Buf.lines[i].data, submatches))
+				from := Loc{submatches[0] + offset, i}
+				to := Loc{submatches[1] + offset, i}
+				d := Delta{newText, from, to}
+				deltas = append(deltas, d)
+				previousDelta = d
+				offset += Count(newText) - Count(oldText)
 				found++
-				return replaceBytes
-			})
-
-			from := Loc{0, i}
-			to := Loc{utf8.RuneCount(view.Buf.lines[i].data), i}
-
-			deltas = append(deltas, Delta{string(newText), from, to})
+			}
 		}
 		view.Buf.MultipleReplace(deltas)
 	}
@@ -608,14 +635,33 @@ func Replace(args []string) {
 	if all {
 		replaceAll()
 	} else {
+		hangCheck := 0
 		for {
 			// The 'check' flag was used
 			Search(search, view, true)
 			if !view.Cursor.HasSelection() {
 				break
 			}
+
+			// if searching in a selection, and this result is outside of it,
+			// start the search over from the beginning of the search selection
+			if inSelection {
+				loc := view.Cursor.CurSelection[1]
+				if (loc.Y < startLine || loc.Y >= endLine) {
+					hangCheck++
+					if hangCheck > 1 {
+						view.Cursor.Goto(originalCursor)
+						break
+					}
+					searchStart = Loc{0, startLine}
+					continue
+				}
+			}
+			hangCheck = 0
+
 			view.Relocate()
 			RedrawAll()
+
 			choice, canceled := messenger.LetterPrompt("Perform replacement? (y,n,a)", 'y', 'n', 'a')
 			if canceled {
 				if view.Cursor.HasSelection() {
@@ -633,8 +679,11 @@ func Replace(args []string) {
 				replaceAll()
 				break
 			} else if choice == 'y' {
+				selected := view.Cursor.GetSelection()
+				submatches := regex.FindStringSubmatchIndex(selected)
+				newText := regex.ExpandString([]byte{}, replace, selected, submatches)
 				view.Cursor.DeleteSelection()
-				view.Buf.Insert(view.Cursor.Loc, replace)
+				view.Buf.Insert(view.Cursor.Loc, string(newText))
 				view.Cursor.ResetSelection()
 				messenger.Reset()
 				found++
