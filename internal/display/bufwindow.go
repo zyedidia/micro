@@ -651,7 +651,7 @@ func (w *BufWindow) displayScrollBar() {
 		if barsize < 1 {
 			barsize = 1
 		}
-		barstart := int(float64(w.StartLine) / float64(w.Buf.LinesNum()) * float64(w.Height))
+		barstart := w.Y + int(float64(w.StartLine)/float64(w.Buf.LinesNum())*float64(w.Height))
 		for y := barstart; y < util.Min(barstart+barsize, w.Y+bufHeight); y++ {
 			screen.Screen.SetContent(scrollX, y, '|', nil, config.DefStyle.Reverse(true))
 		}
