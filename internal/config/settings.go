@@ -155,6 +155,7 @@ func GetGlobalOption(name string) interface{} {
 
 var defaultCommonSettings = map[string]interface{}{
 	"autoindent":     true,
+	"backup":         true,
 	"basename":       false,
 	"colorcolumn":    float64(0),
 	"cursorline":     true,
