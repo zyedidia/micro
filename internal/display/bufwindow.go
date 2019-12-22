@@ -497,15 +497,16 @@ func (w *BufWindow) displayBuffer() {
 				}
 
 				if r == '\t' {
-					if s, ok := config.Colorscheme["indent-char"]; ok {
-						style = s
+					indentrunes := []rune(b.Settings["indentchar"].(string))
+					// if empty indentchar settings, use space
+					if indentrunes == nil || len(indentrunes) == 0 {
+						indentrunes = []rune{' '}
+					}
 
-						indentrunes := []rune(b.Settings["indentchar"].(string))
-						// if empty indentchar settings, use space
-						if indentrunes == nil || len(indentrunes) == 0 {
-							indentrunes = []rune{' '}
-						}
-						r = indentrunes[0]
+					r = indentrunes[0]
+					if s, ok := config.Colorscheme["indent-char"]; ok && r != ' ' {
+						fg, _, _ := s.Decompose()
+						style = style.Foreground(fg)
 					}
 				}
 
