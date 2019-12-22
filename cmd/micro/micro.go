@@ -70,7 +70,7 @@ func InitFlags() {
 		// If -options was passed
 		var keys []string
 		m := config.DefaultAllSettings()
-		for k, _ := range m {
+		for k := range m {
 			keys = append(keys, k)
 		}
 		sort.Strings(keys)
@@ -134,6 +134,13 @@ func LoadInput() []*buffer.Buffer {
 }
 
 func main() {
+	defer os.Exit(0)
+
+	// runtime.SetCPUProfileRate(400)
+	// f, _ := os.Create("micro.prof")
+	// pprof.StartCPUProfile(f)
+	// defer pprof.StopCPUProfile()
+
 	var err error
 
 	InitLog()

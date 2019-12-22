@@ -204,7 +204,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.SharedBuffer = new(SharedBuffer)
 		b.Type = btype
 
-		if b.Settings["backup"].(bool) {
+		if b.Settings["backup"].(bool) && len(path) > 0 {
 			backupfile := config.ConfigDir + "/backups/" + EscapePath(absPath)
 			if info, err := os.Stat(backupfile); err == nil {
 				backup, err := os.Open(backupfile)

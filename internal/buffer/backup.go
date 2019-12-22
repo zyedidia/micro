@@ -26,7 +26,7 @@ Options: [r]ecover, [i]gnore: `
 
 // Backup saves the current buffer to ConfigDir/backups
 func (b *Buffer) Backup(checkTime bool) error {
-	if !b.Settings["backup"].(bool) {
+	if !b.Settings["backup"].(bool) || b.Path == "" {
 		return nil
 	}
 
@@ -79,7 +79,7 @@ func (b *Buffer) Backup(checkTime bool) error {
 
 // RemoveBackup removes any backup file associated with this buffer
 func (b *Buffer) RemoveBackup() {
-	if !b.Settings["backup"].(bool) {
+	if !b.Settings["backup"].(bool) || b.Path == "" {
 		return
 	}
 	f := config.ConfigDir + "/backups/" + util.EscapePath(b.AbsPath)

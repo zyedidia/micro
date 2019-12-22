@@ -1,8 +1,8 @@
 package action
 
 import (
-	"os"
 	"regexp"
+	"runtime"
 	"strings"
 	"time"
 	"unicode/utf8"
@@ -1167,7 +1167,7 @@ func (h *BufPane) Quit() bool {
 		} else {
 			screen.Screen.Fini()
 			InfoBar.Close()
-			os.Exit(0)
+			runtime.Goexit()
 		}
 	}
 	if h.Buf.Modified() {
@@ -1207,7 +1207,7 @@ func (h *BufPane) QuitAll() bool {
 		}
 		screen.Screen.Fini()
 		InfoBar.Close()
-		os.Exit(0)
+		runtime.Goexit()
 	}
 
 	if anyModified {

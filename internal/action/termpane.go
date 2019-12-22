@@ -1,7 +1,7 @@
 package action
 
 import (
-	"os"
+	"runtime"
 
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/internal/display"
@@ -47,7 +47,7 @@ func (t *TermPane) Quit() {
 	} else {
 		screen.Screen.Fini()
 		InfoBar.Close()
-		os.Exit(0)
+		runtime.Goexit()
 	}
 }
 

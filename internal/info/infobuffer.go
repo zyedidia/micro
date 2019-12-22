@@ -58,7 +58,7 @@ func (i *InfoBuf) Message(msg ...interface{}) {
 		displayMessage := fmt.Sprint(msg...)
 		// if there is no active prompt then style and display the message as normal
 		i.Msg = displayMessage
-		i.HasMessage = true
+		i.HasMessage, i.HasError = true, false
 	}
 }
 
