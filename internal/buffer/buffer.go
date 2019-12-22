@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"crypto/md5"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -24,6 +26,8 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
+
+const backup_time = 8000
 
 var (
 	OpenBuffers []*Buffer
@@ -109,6 +113,10 @@ type Buffer struct {
 	CurSuggestion int
 
 	Messages []*Message
+
+	// counts the number of edits
+	// resets every backup_time edits
+	lastbackup time.Time
 }
 
 // NewBufferFromFile opens a new buffer using the given path
@@ -191,9 +199,36 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	}
 
 	if !found {
+		choice := 1 // ignore by default
+
 		b.SharedBuffer = new(SharedBuffer)
 		b.Type = btype
-		b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
+
+		if b.Settings["backup"].(bool) {
+			backupfile := config.ConfigDir + "/backups/" + EscapePath(absPath)
+			if info, err := os.Stat(backupfile); err == nil {
+				backup, err := os.Open(backupfile)
+				if err == nil {
+					t := info.ModTime()
+					msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 15:04 2006"))
+					choice = screen.TermPrompt(msg, []string{"r", "i", "recover", "ignore"}, true)
+					log.Println("Choice:", choice)
+
+					if choice%2 == 0 {
+						// recover
+						b.LineArray = NewLineArray(uint64(size), FFAuto, backup)
+					} else if choice%2 == 1 {
+						// delete
+						os.Remove(backupfile)
+					}
+					backup.Close()
+				}
+			}
+		}
+
+		if choice > 0 {
+			b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
+		}
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
@@ -273,6 +308,7 @@ func (b *Buffer) Fini() {
 	if !b.Modified() {
 		b.Serialize()
 	}
+	b.RemoveBackup()
 }
 
 // GetName returns the name that should be displayed in the statusline
@@ -297,6 +333,8 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
+
+		go b.Backup()
 	}
 }
 
@@ -305,6 +343,8 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
+
+		go b.Backup()
 	}
 }
 
