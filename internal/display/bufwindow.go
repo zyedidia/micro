@@ -118,12 +118,12 @@ func (w *BufWindow) Clear() {
 // but if softwrap is enabled things get complicated since one buffer
 // line can take up multiple lines in the view
 func (w *BufWindow) Bottomline() int {
-	// b := w.Buf
+	b := w.Buf
 
 	// TODO: possible non-softwrap optimization
-	// if !b.Settings["softwrap"].(bool) {
-	// 	return w.StartLine + w.Height
-	// }
+	if !b.Settings["softwrap"].(bool) || !w.hasCalcHeight {
+		return w.StartLine + w.Height
+	}
 
 	prev := 0
 	for _, l := range w.lineHeight {

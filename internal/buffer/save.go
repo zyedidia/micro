@@ -12,6 +12,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/screen"
 	. "github.com/zyedidia/micro/internal/util"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
@@ -49,6 +50,48 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error)
 	return
 }
 
+// overwriteFileAsRoot executes dd as root and then calls the supplied function
+// with dd's standard input as an io.Writer object. Dd opens the given file for writing,
+// truncating it if it exists, and writes what it receives on its standard input to the file.
+func overwriteFileAsRoot(name string, enc encoding.Encoding, fn func(io.Writer) error) (err error) {
+	cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "status=none", "bs=4K", "of="+name)
+	var stdin io.WriteCloser
+
+	screenb := screen.TempFini()
+
+	// This is a trap for Ctrl-C so that it doesn't kill micro
+	// Instead we trap Ctrl-C to kill the program we're running
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			cmd.Process.Kill()
+		}
+	}()
+
+	if stdin, err = cmd.StdinPipe(); err != nil {
+		return
+	}
+
+	if err = cmd.Start(); err != nil {
+		return
+	}
+
+	e := fn(stdin)
+
+	if err = stdin.Close(); err != nil {
+		return
+	}
+
+	if err = cmd.Wait(); err != nil {
+		return
+	}
+
+	screen.TempStart(screenb)
+
+	return e
+}
+
 // Save saves the buffer to its default path
 func (b *Buffer) Save() error {
 	return b.SaveAs(b.Path)
@@ -56,6 +99,18 @@ func (b *Buffer) Save() error {
 
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
+	return b.saveToFile(filename, false)
+}
+
+func (b *Buffer) SaveWithSudo() error {
+	return b.SaveAsWithSudo(b.Path)
+}
+
+func (b *Buffer) SaveAsWithSudo(filename string) error {
+	return b.saveToFile(filename, true)
+}
+
+func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 	var err error
 	if b.Type.Readonly {
 		return errors.New("Cannot save readonly buffer")
@@ -116,7 +171,7 @@ func (b *Buffer) SaveAs(filename string) error {
 		return err
 	}
 
-	err = overwriteFile(absFilename, enc, func(file io.Writer) (e error) {
+	fwriter := func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
 			return
 		}
@@ -144,7 +199,13 @@ func (b *Buffer) SaveAs(filename string) error {
 			fileSize += len(eol) + len(l.data)
 		}
 		return
-	})
+	}
+
+	if withSudo {
+		err = overwriteFileAsRoot(absFilename, enc, fwriter)
+	} else {
+		err = overwriteFile(absFilename, enc, fwriter)
+	}
 
 	if err != nil {
 		return err
@@ -163,48 +224,5 @@ func (b *Buffer) SaveAs(filename string) error {
 	absPath, _ := filepath.Abs(filename)
 	b.AbsPath = absPath
 	b.isModified = false
-	return err
-}
-
-// SaveWithSudo saves the buffer to the default path with sudo
-func (b *Buffer) SaveWithSudo() error {
-	return b.SaveAsWithSudo(b.Path)
-}
-
-// SaveAsWithSudo is the same as SaveAs except it uses a neat trick
-// with tee to use sudo so the user doesn't have to reopen micro with sudo
-func (b *Buffer) SaveAsWithSudo(filename string) error {
-	if b.Type.Scratch {
-		return errors.New("Cannot save scratch buffer")
-	}
-
-	b.UpdateRules()
-	b.Path = filename
-	absPath, _ := filepath.Abs(filename)
-	b.AbsPath = absPath
-
-	// Set up everything for the command
-	cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "tee", filename)
-	cmd.Stdin = bytes.NewBuffer(b.Bytes())
-
-	// This is a trap for Ctrl-C so that it doesn't kill micro
-	// Instead we trap Ctrl-C to kill the program we're running
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			cmd.Process.Kill()
-		}
-	}()
-
-	// Start the command
-	cmd.Start()
-	err := cmd.Wait()
-
-	if err == nil {
-		b.isModified = false
-		b.ModTime, _ = GetModTime(filename)
-		return b.Serialize()
-	}
 	return err
 }
