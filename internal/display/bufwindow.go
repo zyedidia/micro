@@ -613,6 +613,8 @@ func (w *BufWindow) displayBuffer() {
 			}
 		}
 
+		draw(' ', curStyle, false)
+
 		bloc.X = w.StartCol
 		bloc.Y++
 		if bloc.Y >= b.LinesNum() {
