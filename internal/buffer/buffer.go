@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"crypto/md5"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -198,36 +196,16 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		}
 	}
 
-	if !found {
-		choice := 1 // ignore by default
+	b.Path = path
+	b.AbsPath = absPath
 
+	if !found {
 		b.SharedBuffer = new(SharedBuffer)
 		b.Type = btype
 
-		if b.Settings["backup"].(bool) && len(path) > 0 {
-			backupfile := config.ConfigDir + "/backups/" + EscapePath(absPath)
-			if info, err := os.Stat(backupfile); err == nil {
-				backup, err := os.Open(backupfile)
-				if err == nil {
-					t := info.ModTime()
-					msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 15:04 2006"))
-					choice = screen.TermPrompt(msg, []string{"r", "i", "recover", "ignore"}, true)
-					log.Println("Choice:", choice)
+		hasBackup := b.ApplyBackup(size)
 
-					if choice%2 == 0 {
-						// recover
-						b.LineArray = NewLineArray(uint64(size), FFAuto, backup)
-						b.isModified = true
-					} else if choice%2 == 1 {
-						// delete
-						os.Remove(backupfile)
-					}
-					backup.Close()
-				}
-			}
-		}
-
-		if choice > 0 {
+		if !hasBackup {
 			b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
 		}
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
@@ -236,9 +214,6 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	if b.Settings["readonly"].(bool) {
 		b.Type.Readonly = true
 	}
-
-	b.Path = path
-	b.AbsPath = absPath
 
 	// The last time this file was modified
 	b.ModTime, _ = GetModTime(b.Path)

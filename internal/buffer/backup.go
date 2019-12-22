@@ -1,12 +1,14 @@
 package buffer
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"os"
 	"time"
 
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
 	"golang.org/x/text/encoding"
 )
@@ -15,7 +17,7 @@ const backupMsg = `A backup was detected for this file. This likely means that m
 crashed while editing this file, or another instance of micro is currently
 editing this file.
 
-The backup was created at %s.
+The backup was created on %s.
 
 * 'recover' will apply the backup as unsaved changes to the current buffer.
   When the buffer is closed, the backup will be removed.
@@ -87,6 +89,30 @@ func (b *Buffer) RemoveBackup() {
 }
 
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
-func (b *Buffer) ApplyBackup() error {
-	return nil
+// Returns true if a backup was applied
+func (b *Buffer) ApplyBackup(fsize int64) bool {
+	if b.Settings["backup"].(bool) && len(b.Path) > 0 {
+		backupfile := config.ConfigDir + "/backups/" + util.EscapePath(b.AbsPath)
+		if info, err := os.Stat(backupfile); err == nil {
+			backup, err := os.Open(backupfile)
+			if err == nil {
+				defer backup.Close()
+				t := info.ModTime()
+				msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 at 15:04, 2006"))
+				choice := screen.TermPrompt(msg, []string{"r", "i", "recover", "ignore"}, true)
+
+				if choice%2 == 0 {
+					// recover
+					b.LineArray = NewLineArray(uint64(fsize), FFAuto, backup)
+					b.isModified = true
+					return true
+				} else if choice%2 == 1 {
+					// delete
+					os.Remove(backupfile)
+				}
+			}
+		}
+	}
+
+	return false
 }
