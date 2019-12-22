@@ -190,6 +190,10 @@ func main() {
 		if err := recover(); err != nil {
 			screen.Screen.Fini()
 			fmt.Println("Micro encountered an error:", err)
+			// backup all open buffers
+			for _, b := range buffer.OpenBuffers {
+				b.Backup(false)
+			}
 			// Print the stack trace too
 			fmt.Print(errors.Wrap(err, 2).ErrorStack())
 			os.Exit(1)

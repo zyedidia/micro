@@ -22,6 +22,17 @@ Here are the options that you can set:
 
 	default value: `0`
 
+* `backup`: micro will automatically keep backups of all open buffers. Backups
+   are stored in `~/.config/micro/backups` and are removed when the buffer is
+   closed cleanly. In the case of a system crash or a micro crash, the contents
+   of the buffer can be recovered automatically by opening the file that
+   was being edited before the crash, or manually by searching for the backup
+   in the backup directory. Backups are made in the background when a buffer is
+   modified and the latest backup is more than 8 seconds old, or when micro
+   detects a crash. It is highly recommended that you leave this feature enabled.
+
+    default value: `true`
+
 * `basename`: in the infobar, show only the basename of the file being edited
    rather than the full path.
 

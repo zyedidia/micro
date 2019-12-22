@@ -25,15 +25,17 @@ The backup was created at %s.
 Options: [r]ecover, [i]gnore: `
 
 // Backup saves the current buffer to ConfigDir/backups
-func (b *Buffer) Backup() error {
+func (b *Buffer) Backup(checkTime bool) error {
 	if !b.Settings["backup"].(bool) {
 		return nil
 	}
 
-	sub := time.Now().Sub(b.lastbackup)
-	if sub < time.Duration(backup_time)*time.Millisecond {
-		log.Println("Backup event but not enough time has passed", sub)
-		return nil
+	if checkTime {
+		sub := time.Now().Sub(b.lastbackup)
+		if sub < time.Duration(backup_time)*time.Millisecond {
+			log.Println("Backup event but not enough time has passed", sub)
+			return nil
+		}
 	}
 
 	b.lastbackup = time.Now()

@@ -217,6 +217,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 					if choice%2 == 0 {
 						// recover
 						b.LineArray = NewLineArray(uint64(size), FFAuto, backup)
+						b.isModified = true
 					} else if choice%2 == 1 {
 						// delete
 						os.Remove(backupfile)
@@ -334,7 +335,7 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
 
-		go b.Backup()
+		go b.Backup(true)
 	}
 }
 
@@ -344,7 +345,7 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
 
-		go b.Backup()
+		go b.Backup(true)
 	}
 }
 
