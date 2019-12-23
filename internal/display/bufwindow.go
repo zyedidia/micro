@@ -62,6 +62,7 @@ func (w *BufWindow) Resize(width, height int) {
 	w.hasCalcHeight = false
 	// This recalculates lineHeight
 	w.GetMouseLoc(buffer.Loc{width, height})
+	w.Relocate()
 }
 
 func (w *BufWindow) SetActive(b bool) {
