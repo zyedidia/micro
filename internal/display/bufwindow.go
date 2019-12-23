@@ -1,6 +1,7 @@
 package display
 
 import (
+	"log"
 	"strconv"
 	"unicode/utf8"
 
@@ -118,11 +119,13 @@ func (w *BufWindow) Clear() {
 // but if softwrap is enabled things get complicated since one buffer
 // line can take up multiple lines in the view
 func (w *BufWindow) Bottomline() int {
-	b := w.Buf
-
 	// TODO: possible non-softwrap optimization
-	if !b.Settings["softwrap"].(bool) || !w.hasCalcHeight {
-		return w.StartLine + w.Height
+	if !w.Buf.Settings["softwrap"].(bool) || !w.hasCalcHeight {
+		h := w.StartLine + w.Height - 1
+		if w.drawStatus {
+			h--
+		}
+		return h
 	}
 
 	prev := 0
@@ -143,6 +146,7 @@ func (w *BufWindow) Relocate() bool {
 	b := w.Buf
 	// how many buffer lines are in the view
 	height := w.Bottomline() + 1 - w.StartLine
+	log.Printf("Height: %d, w.Height: %d\n", height, w.Height)
 	h := w.Height
 	if w.drawStatus {
 		h--
@@ -374,16 +378,18 @@ func (w *BufWindow) displayBuffer() {
 	}
 
 	w.hasCalcHeight = true
-	start := w.StartLine
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
-		if start > 0 && b.Rehighlight(start-1) {
-			b.Highlighter.ReHighlightLine(b, start-1)
-			b.SetRehighlight(start-1, false)
+		for _, c := range b.GetCursors() {
+			// rehighlight starting from where the cursor is
+			start := c.Y
+			if start > 0 && b.Rehighlight(start-1) {
+				b.Highlighter.ReHighlightLine(b, start-1)
+				b.SetRehighlight(start-1, false)
+			}
+
+			b.Highlighter.ReHighlightStates(b, start)
+			b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
 		}
-
-		b.Highlighter.ReHighlightStates(b, start)
-
-		b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
 	}
 
 	var matchingBraces []buffer.Loc
