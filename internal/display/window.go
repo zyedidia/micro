@@ -20,7 +20,7 @@ type Window interface {
 	Relocate() bool
 	GetView() *View
 	SetView(v *View)
-	GetMouseLoc(vloc buffer.Loc) buffer.Loc
+	LocFromVisual(vloc buffer.Loc) buffer.Loc
 	Resize(w, h int)
 	SetActive(b bool)
 	IsActive() bool

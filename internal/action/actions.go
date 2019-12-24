@@ -40,7 +40,7 @@ func (h *BufPane) ScrollDown(n int) {
 func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
-	mouseLoc := h.GetMouseLoc(buffer.Loc{mx, my})
+	mouseLoc := h.LocFromVisual(buffer.Loc{mx, my})
 	h.Cursor.Loc = mouseLoc
 	if h.mouseReleased {
 		if b.NumCursors() > 1 {
@@ -1410,7 +1410,7 @@ func (h *BufPane) SpawnMultiCursorSelect() bool {
 func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
-	mouseLoc := h.GetMouseLoc(buffer.Loc{X: mx, Y: my})
+	mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
 	c := buffer.NewCursor(b, mouseLoc)
 	b.AddCursor(c)
 	b.MergeCursors()

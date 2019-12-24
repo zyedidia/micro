@@ -241,7 +241,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				// Mouse was just released
 
 				mx, my := e.Position()
-				mouseLoc := h.GetMouseLoc(buffer.Loc{X: mx, Y: my})
+				mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
 
 				// Relocating here isn't really necessary because the cursor will
 				// be in the right place from the last mouse event

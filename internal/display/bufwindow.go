@@ -25,10 +25,8 @@ type BufWindow struct {
 
 	sline *StatusLine
 
-	lineHeight    []int
-	hasCalcHeight bool
-	gutterOffset  int
-	drawStatus    bool
+	gutterOffset int
+	drawStatus   bool
 }
 
 // NewBufWindow creates a new window at a location in the screen with a width and height
@@ -36,7 +34,6 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w := new(BufWindow)
 	w.View = new(View)
 	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
-	w.lineHeight = make([]int, height)
 	w.active = true
 
 	w.sline = NewStatusLine(w)
@@ -58,10 +55,6 @@ func (v *View) SetView(view *View) {
 
 func (w *BufWindow) Resize(width, height int) {
 	w.Width, w.Height = width, height
-	w.lineHeight = make([]int, height)
-	w.hasCalcHeight = false
-	// This recalculates lineHeight
-	w.GetMouseLoc(buffer.Loc{width, height})
 	w.Relocate()
 }
 
@@ -120,8 +113,7 @@ func (w *BufWindow) Clear() {
 // but if softwrap is enabled things get complicated since one buffer
 // line can take up multiple lines in the view
 func (w *BufWindow) Bottomline() int {
-	// TODO: possible non-softwrap optimization
-	if !w.Buf.Settings["softwrap"].(bool) || !w.hasCalcHeight {
+	if !w.Buf.Settings["softwrap"].(bool) {
 		h := w.StartLine + w.Height - 1
 		if w.drawStatus {
 			h--
@@ -129,15 +121,10 @@ func (w *BufWindow) Bottomline() int {
 		return h
 	}
 
-	prev := 0
-	for _, l := range w.lineHeight {
-		if l >= prev {
-			prev = l
-		} else {
-			break
-		}
-	}
-	return prev
+	l := w.LocFromVisual(buffer.Loc{0, w.Height})
+
+	log.Println("Bottom line:", l.Y)
+	return l.Y
 }
 
 // Relocate moves the view window so that the cursor is in view
@@ -152,7 +139,7 @@ func (w *BufWindow) Relocate() bool {
 	if w.drawStatus {
 		h--
 	}
-	if b.LinesNum() <= h || !w.hasCalcHeight {
+	if b.LinesNum() <= h {
 		height = w.Height
 	}
 	ret := false
@@ -189,14 +176,14 @@ func (w *BufWindow) Relocate() bool {
 	return ret
 }
 
-func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
+// LocFromVisual takes a visual location (x and y position) and returns the
+// position in the buffer corresponding to the visual location
+// Computing the buffer location requires essentially drawing the entire screen
+// to account for complications like softwrap, wide characters, and horizontal scrolling
+// If the requested position does not correspond to a buffer location it returns
+// the nearest position
+func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 	b := w.Buf
-
-	// TODO: possible non-softwrap optimization
-	// if !b.Settings["softwrap"].(bool) {
-	// 	l := b.LineBytes(svloc.Y)
-	// 	return buffer.Loc{b.GetActiveCursor().GetCharPosInLine(l, svloc.X), svloc.Y}
-	// }
 
 	hasMessage := len(b.Messages) > 0
 	bufHeight := w.Height
@@ -293,11 +280,12 @@ func (w *BufWindow) GetMouseLoc(svloc buffer.Loc) buffer.Loc {
 			return bloc
 		}
 
+		if bloc.Y+1 >= b.LinesNum() || vloc.Y+1 >= bufHeight {
+			return bloc
+		}
+
 		bloc.X = w.StartCol
 		bloc.Y++
-		if bloc.Y >= b.LinesNum() {
-			break
-		}
 	}
 
 	return buffer.Loc{}
@@ -378,7 +366,6 @@ func (w *BufWindow) displayBuffer() {
 		bufWidth--
 	}
 
-	w.hasCalcHeight = true
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 		for _, c := range b.GetCursors() {
 			// rehighlight starting from where the cursor is
@@ -544,8 +531,6 @@ func (w *BufWindow) displayBuffer() {
 			nColsBeforeStart--
 		}
 
-		w.lineHeight[vloc.Y] = bloc.Y
-
 		totalwidth := w.StartCol - nColsBeforeStart
 		for len(line) > 0 {
 			r, size := utf8.DecodeRune(line)
@@ -586,7 +571,6 @@ func (w *BufWindow) displayBuffer() {
 						break
 					}
 					vloc.X = 0
-					w.lineHeight[vloc.Y] = bloc.Y
 					// This will draw an empty line number because the current line is wrapped
 					w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
 				}

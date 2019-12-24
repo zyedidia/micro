@@ -65,7 +65,7 @@ func (i *InfoWindow) SetView(v *View)  {}
 func (i *InfoWindow) SetActive(b bool) {}
 func (i *InfoWindow) IsActive() bool   { return true }
 
-func (i *InfoWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
+func (i *InfoWindow) LocFromVisual(vloc buffer.Loc) buffer.Loc {
 	c := i.Buffer.GetActiveCursor()
 	l := i.Buffer.LineBytes(0)
 	n := utf8.RuneCountInString(i.Msg)

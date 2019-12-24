@@ -44,7 +44,7 @@ func (w *TermWindow) IsActive() bool {
 	return w.active
 }
 
-func (w *TermWindow) GetMouseLoc(vloc buffer.Loc) buffer.Loc {
+func (w *TermWindow) LocFromVisual(vloc buffer.Loc) buffer.Loc {
 	return vloc
 }
 

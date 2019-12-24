@@ -103,7 +103,7 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
-			ind := t.GetMouseLoc(buffer.Loc{mx, my})
+			ind := t.LocFromVisual(buffer.Loc{mx, my})
 			if ind != -1 {
 				t.SetActive(ind)
 			}

@@ -25,7 +25,7 @@ func NewTabWindow(w int, y int) *TabWindow {
 	return tw
 }
 
-func (w *TabWindow) GetMouseLoc(vloc buffer.Loc) int {
+func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
 	x := -w.hscroll
 
 	for i, n := range w.Names {
