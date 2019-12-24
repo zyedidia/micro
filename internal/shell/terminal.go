@@ -102,11 +102,7 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback s
 		pl := config.FindPlugin(plName)
 		if pl != nil {
 			t.callback = func(out string) {
-				var luaArgs []lua.LValue
-				luaArgs = append(luaArgs, luar.New(ulua.L, out))
-				for _, v := range userargs {
-					luaArgs = append(luaArgs, luar.New(ulua.L, v))
-				}
+				luaArgs := []lua.LValue{luar.New(ulua.L, out), luar.New(ulua.L, userargs)}
 				_, err := pl.Call(plFn, luaArgs...)
 				if err != nil {
 					screen.TermMessage(err)

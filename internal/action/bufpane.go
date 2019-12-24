@@ -68,6 +68,10 @@ func BufMapKey(k Event, action string) {
 		} else if strings.HasPrefix(a, "lua:") {
 			a = strings.SplitN(a, ":", 2)[1]
 			afn = LuaAction(a)
+			if afn == nil {
+				screen.TermMessage("Lua Error:", action, "does not exist")
+				continue
+			}
 		} else if f, ok := BufKeyActions[a]; ok {
 			afn = f
 		} else {

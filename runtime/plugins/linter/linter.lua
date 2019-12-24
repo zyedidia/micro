@@ -1,3 +1,4 @@
+local micro = import("micro")
 local runtime = import("runtime")
 local filepath = import("path/filepath")
 local shell = import("micro/shell")
@@ -59,8 +60,8 @@ function init()
     makeLinter("gcc", "c", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
     makeLinter("gcc", "c++", "gcc", {"-fsyntax-only","-std=c++14", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
     makeLinter("dmd", "d", "dmd", {"-color=off", "-o-", "-w", "-wi", "-c", "%f"}, "%f%(%l%):.+: %m")
-    makeLinter("gobuild", "go", "go", {"build", "-o", devnull}, "%f:%l: %m")
-    makeLinter("golint", "go", "golint", {"%f"}, "%f:%l:%c: %m")
+    makeLinter("gobuild", "go", "go", {"build", "-o", devnull}, "%f:%l:%c:? %m")
+    -- makeLinter("golint", "go", "golint", {"%f"}, "%f:%l:%c: %m")
     makeLinter("javac", "java", "javac", {"-d", "%d", "%f"}, "%f:%l: error: %m")
     makeLinter("jshint", "javascript", "jshint", {"%f"}, "%f: line %l,.+, %m")
     makeLinter("literate", "literate", "lit", {"-c", "%f"}, "%f:%l:%m", {}, false, true)
@@ -78,7 +79,7 @@ function init()
     config.MakeCommand("lint", "linter.lintCmd", config.NoComplete)
 end
 
-function lintCmd(bp)
+function lintCmd(bp, args)
     bp:Save()
     runLinter(bp.Buf)
 end
@@ -128,12 +129,13 @@ function onSave(bp)
 end
 
 function lint(buf, linter, cmd, args, errorformat, loff, coff)
-    buf:ClearMessages("linter")
+    buf:ClearMessages(linter)
 
     shell.JobSpawn(cmd, args, "", "", "linter.onExit", buf, linter, errorformat, loff, coff)
 end
 
-function onExit(output, buf, linter, errorformat, loff, coff)
+function onExit(output, args)
+    local buf, linter, errorformat, loff, coff = args[1], args[2], args[3], args[4], args[5]
     local lines = split(output, "\n")
 
     local regex = errorformat:gsub("%%f", "(..-)"):gsub("%%l", "(%d+)"):gsub("%%c", "(%d+)"):gsub("%%m", "(.+)")
@@ -146,15 +148,18 @@ function onExit(output, buf, linter, errorformat, loff, coff)
             if not string.find(errorformat, "%%c") then
                 hascol = false
                 msg = col
+            elseif col == nil then
+                hascol = false
             end
+            micro.Log(basename(buf.Path), basename(file))
             if basename(buf.Path) == basename(file) then
                 local bmsg = nil
                 if hascol then
                     local mstart = buffer.Loc(tonumber(col-1+coff), tonumber(line-1+loff))
                     local mend = buffer.Loc(tonumber(col+coff), tonumber(line-1+loff))
-                    bmsg = buffer.NewMessage("linter", msg, mstart, mend, buffer.MTError)
+                    bmsg = buffer.NewMessage(linter, msg, mstart, mend, buffer.MTError)
                 else
-                    bmsg = buffer.NewMessageAtLine("linter", msg, tonumber(line+loff), buffer.MTError)
+                    bmsg = buffer.NewMessageAtLine(linter, msg, tonumber(line+loff), buffer.MTError)
                 end
                 buf:AddMessage(bmsg)
             end

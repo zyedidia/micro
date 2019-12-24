@@ -115,11 +115,7 @@ func luaFunctionJob(fn string) func(string, ...interface{}) {
 		return nil
 	}
 	return func(output string, args ...interface{}) {
-		var luaArgs []lua.LValue
-		luaArgs = append(luaArgs, luar.New(ulua.L, output))
-		for _, v := range args {
-			luaArgs = append(luaArgs, luar.New(ulua.L, v))
-		}
+		luaArgs := []lua.LValue{luar.New(ulua.L, output), luar.New(ulua.L, args)}
 		_, err := pl.Call(plFn, luaArgs...)
 		if err != nil && err != config.ErrNoSuchFunction {
 			screen.TermMessage(err)

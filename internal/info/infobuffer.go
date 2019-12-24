@@ -2,8 +2,14 @@ package info
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/zyedidia/micro/internal/buffer"
+	luar "layeh.com/gopher-luar"
+
+	"github.com/zyedidia/micro/internal/config"
+	ulua "github.com/zyedidia/micro/internal/lua"
+	"github.com/zyedidia/micro/internal/screen"
 )
 
 // The InfoBuf displays messages and other info at the bottom of the screen.
@@ -113,6 +119,8 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 	i.Buffer.Insert(i.Buffer.Start(), msg)
 }
 
+// YNPrompt creates a yes or no prompt, and the callback returns the yes/no result and whether
+// the prompt was canceled
 func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
 	if i.HasPrompt {
 		i.DonePrompt(true)
@@ -124,6 +132,63 @@ func (i *InfoBuf) YNPrompt(prompt string, donecb func(bool, bool)) {
 	i.HasMessage, i.HasError = false, false
 	i.HasGutter = false
 	i.YNCallback = donecb
+}
+
+// PlugPrompt provides a plugin interface for calling "Prompt" with the appropriate Lua callbacks
+func (i *InfoBuf) PlugPrompt(prompt string, msg string, ptype string, eventcb string, donecb string) {
+	eventLuaFn := strings.Split(eventcb, ".")
+	doneLuaFn := strings.Split(donecb, ".")
+	var luaEventcb func(string)
+	var luaDonecb func(string, bool)
+
+	if len(eventLuaFn) == 2 {
+		plName, plFn := doneLuaFn[0], doneLuaFn[1]
+		pl := config.FindPlugin(plName)
+		if pl != nil {
+			luaEventcb = func(resp string) {
+				_, err := pl.Call(plFn, luar.New(ulua.L, resp))
+				if err != nil && err != config.ErrNoSuchFunction {
+					screen.TermMessage(err)
+				}
+			}
+		}
+	}
+
+	if len(doneLuaFn) == 2 {
+		plName, plFn := doneLuaFn[0], doneLuaFn[1]
+		pl := config.FindPlugin(plName)
+		if pl != nil {
+			luaDonecb = func(resp string, canceled bool) {
+				_, err := pl.Call(plFn, luar.New(ulua.L, resp), luar.New(ulua.L, canceled))
+				if err != nil && err != config.ErrNoSuchFunction {
+					screen.TermMessage(err)
+				}
+			}
+		}
+	}
+
+	i.Prompt(prompt, msg, ptype, luaEventcb, luaDonecb)
+}
+
+// PlugYNPrompt provides a plugin interface for calling "YNPrompt" with the appropriate Lua callbacks
+func (i *InfoBuf) PlugYNPrompt(prompt string, donecb string) {
+	doneLuaFn := strings.Split(donecb, ".")
+	var luaDonecb func(bool, bool)
+
+	if len(doneLuaFn) == 2 {
+		plName, plFn := doneLuaFn[0], doneLuaFn[1]
+		pl := config.FindPlugin(plName)
+		if pl != nil {
+			luaDonecb = func(resp bool, canceled bool) {
+				_, err := pl.Call(plFn, luar.New(ulua.L, resp), luar.New(ulua.L, canceled))
+				if err != nil && err != config.ErrNoSuchFunction {
+					screen.TermMessage(err)
+				}
+			}
+		}
+	}
+
+	i.YNPrompt(prompt, luaDonecb)
 }
 
 // DonePrompt finishes the current prompt and indicates whether or not it was canceled

@@ -74,7 +74,7 @@ function commentSelection(bp, startLine, endLine)
     end
 end
 
-function comment(bp)
+function comment(bp, args)
     if bp.Cursor:HasSelection() then
         if bp.Cursor.CurSelection[1]:GreaterThan(-bp.Cursor.CurSelection[2]) then
             local endLine = bp.Cursor.CurSelection[1].Y

@@ -89,11 +89,7 @@ func LuaFunctionCommand(fn string) func(*BufPane, []string) {
 		return nil
 	}
 	return func(bp *BufPane, args []string) {
-		var luaArgs []lua.LValue
-		luaArgs = append(luaArgs, luar.New(ulua.L, bp))
-		for _, v := range args {
-			luaArgs = append(luaArgs, luar.New(ulua.L, v))
-		}
+		luaArgs := []lua.LValue{luar.New(ulua.L, bp), luar.New(ulua.L, args)}
 		_, err := pl.Call(plFn, luaArgs...)
 		if err != nil {
 			screen.TermMessage(err)
