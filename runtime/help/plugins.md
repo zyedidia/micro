@@ -1,7 +1,7 @@
 # Plugins
 
 Micro supports creating plugins with a simple Lua system. Every plugin has a
-main script which is run at startup which should be placed in 
+main script which is run at startup which should be placed in
 `~/.config/micro/plugins/pluginName/pluginName.lua`.
 
 There are a number of callback functions which you can create in your plugin to
@@ -100,7 +100,7 @@ functions are given using Go's type system):
 
 * `BindKey(key, action string)`: binds `key` to `action`
 
-* `MakeCommand(name, function string, completions ...Completion)`: 
+* `MakeCommand(name, function string, completions ...Completion)`:
    creates a command with `name` which will call `function` when executed. Use 0
    for completions to get NoCompletion.
 
@@ -185,7 +185,7 @@ The possible methods which you can call using the `messenger` variable are:
 * `messenger.Prompt(prompt, historyType string, completionType Completion) (string, bool)`
 * `messenger.AddLog(msg ...interface{})`
 
-#### Note 
+#### Note
 
 Go function signatures use `.` and lua uses `:` so
 
@@ -211,7 +211,7 @@ Debug or logging your plugin can be done with below lua example code.
 messenger:AddLog("Message goes here ",pluginVariableToPrintHere)
 ```
 
-In Micro to see your plugin logging output press `CtrlE` then type `log`, a 
+In Micro to see your plugin logging output press `CtrlE` then type `log`, a
 logging window will open and any logging sent from your plugin will be displayed
 here.
 
@@ -290,7 +290,7 @@ See this example to learn how to use `MakeCompletion` and `MakeCommand`
 ```lua
 local function StartsWith(String,Start)
     String = String:upper()
-    Start = Start:upper() 
+    Start = Start:upper()
     return string.sub(String,1,string.len(Start))==Start
 end
 
@@ -357,8 +357,9 @@ This file will contain the metadata for your plugin. Here is an example:
 }]
 ```
 
-Then open a pull request at github.com/micro-editor/plugin-channel adding a link
-to the raw `repo.json` that is in your plugin repository. To make updating the
-plugin work, the first line of your plugins lua code should contain the version
-of the plugin. (Like this: `VERSION = "1.0.0"`) Please make sure to use
-[semver](http://semver.org/) for versioning.
+Then open a pull request at
+[micro-editor/plugin-channel](https://github.com/micro-editor/plugin-channel),
+adding a link to the raw `repo.json` that is in your plugin repository.
+To make updating the plugin work, the first line of your plugin's Lua code
+should contain the version of the plugin (like this: `VERSION = "1.0.0"`).
+Please make sure to use [Semantic Versioning](https://semver.org/).
