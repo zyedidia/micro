@@ -1386,8 +1386,8 @@ func (h *BufPane) PlayMacro() bool {
 		switch t := action.(type) {
 		case rune:
 			h.DoRuneInsert(t)
-		case Event:
-			h.DoKeyEvent(t)
+		case func(*BufPane) bool:
+			t(h)
 		}
 	}
 	h.Relocate()

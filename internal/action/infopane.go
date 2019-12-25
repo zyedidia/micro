@@ -2,6 +2,7 @@ package action
 
 import (
 	"bytes"
+	"strings"
 
 	"github.com/zyedidia/micro/internal/display"
 	"github.com/zyedidia/micro/internal/info"
@@ -82,7 +83,9 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 			}
 		}
 		for s, a := range InfoOverrides {
-			if s == estr {
+			// TODO this is a hack and really we should have support
+			// for having binding overrides for different buffers
+			if strings.Contains(estr, s) {
 				done = true
 				a(h)
 				break
@@ -150,7 +153,7 @@ var InfoOverrides = map[string]InfoKeyAction{
 	"CursorUp":      (*InfoPane).CursorUp,
 	"CursorDown":    (*InfoPane).CursorDown,
 	"InsertNewline": (*InfoPane).InsertNewline,
-	"InsertTab":     (*InfoPane).InsertTab,
+	"Autocomplete":  (*InfoPane).Autocomplete,
 	"OutdentLine":   (*InfoPane).CycleBack,
 	"Escape":        (*InfoPane).Escape,
 	"Quit":          (*InfoPane).Quit,
@@ -167,8 +170,8 @@ func (h *InfoPane) CursorDown() {
 	h.DownHistory(h.History[h.PromptType])
 }
 
-// InsertTab begins autocompletion
-func (h *InfoPane) InsertTab() {
+// Autocomplete begins autocompletion
+func (h *InfoPane) Autocomplete() {
 	b := h.Buf
 	if b.HasSuggestions {
 		b.CycleAutocomplete(true)
