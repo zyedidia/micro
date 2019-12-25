@@ -92,19 +92,19 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 
 	h.Cursor.StoreVisualX()
 	h.lastLoc = mouseLoc
-	return false
+	return true
 }
 
 // ScrollUpAction scrolls the view up
 func (h *BufPane) ScrollUpAction() bool {
 	h.ScrollUp(util.IntOpt(h.Buf.Settings["scrollspeed"]))
-	return false
+	return true
 }
 
 // ScrollDownAction scrolls the view up
 func (h *BufPane) ScrollDownAction() bool {
 	h.ScrollDown(util.IntOpt(h.Buf.Settings["scrollspeed"]))
-	return false
+	return true
 }
 
 // Center centers the view on the cursor
@@ -118,6 +118,7 @@ func (h *BufPane) Center() bool {
 		v.StartLine = 0
 	}
 	h.SetView(v)
+	h.Relocate()
 	return true
 }
 
@@ -125,6 +126,7 @@ func (h *BufPane) Center() bool {
 func (h *BufPane) CursorUp() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Up()
+	h.Relocate()
 	return true
 }
 
@@ -132,6 +134,7 @@ func (h *BufPane) CursorUp() bool {
 func (h *BufPane) CursorDown() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Down()
+	h.Relocate()
 	return true
 }
 
@@ -156,6 +159,7 @@ func (h *BufPane) CursorLeft() bool {
 			h.Cursor.Left()
 		}
 	}
+	h.Relocate()
 	return true
 }
 
@@ -182,6 +186,7 @@ func (h *BufPane) CursorRight() bool {
 		}
 	}
 
+	h.Relocate()
 	return true
 }
 
@@ -189,6 +194,7 @@ func (h *BufPane) CursorRight() bool {
 func (h *BufPane) WordRight() bool {
 	h.Cursor.Deselect(false)
 	h.Cursor.WordRight()
+	h.Relocate()
 	return true
 }
 
@@ -196,6 +202,7 @@ func (h *BufPane) WordRight() bool {
 func (h *BufPane) WordLeft() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.WordLeft()
+	h.Relocate()
 	return true
 }
 
@@ -206,6 +213,7 @@ func (h *BufPane) SelectUp() bool {
 	}
 	h.Cursor.Up()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -216,6 +224,7 @@ func (h *BufPane) SelectDown() bool {
 	}
 	h.Cursor.Down()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -231,6 +240,7 @@ func (h *BufPane) SelectLeft() bool {
 	}
 	h.Cursor.Left()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -246,6 +256,7 @@ func (h *BufPane) SelectRight() bool {
 	}
 	h.Cursor.Right()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -256,6 +267,7 @@ func (h *BufPane) SelectWordRight() bool {
 	}
 	h.Cursor.WordRight()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -266,6 +278,7 @@ func (h *BufPane) SelectWordLeft() bool {
 	}
 	h.Cursor.WordLeft()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -278,6 +291,7 @@ func (h *BufPane) StartOfLine() bool {
 	// } else {
 	// 	h.Cursor.StartOfText()
 	// }
+	h.Relocate()
 	return true
 }
 
@@ -285,12 +299,14 @@ func (h *BufPane) StartOfLine() bool {
 func (h *BufPane) EndOfLine() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.End()
+	h.Relocate()
 	return true
 }
 
 // SelectLine selects the entire current line
 func (h *BufPane) SelectLine() bool {
 	h.Cursor.SelectLine()
+	h.Relocate()
 	return true
 }
 
@@ -301,6 +317,7 @@ func (h *BufPane) SelectToStartOfLine() bool {
 	}
 	h.Cursor.Start()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -311,6 +328,7 @@ func (h *BufPane) SelectToEndOfLine() bool {
 	}
 	h.Cursor.End()
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -328,6 +346,7 @@ func (h *BufPane) ParagraphPrevious() bool {
 	if line == 0 {
 		h.Cursor.Loc = h.Buf.Start()
 	}
+	h.Relocate()
 	return true
 }
 
@@ -345,6 +364,7 @@ func (h *BufPane) ParagraphNext() bool {
 	if line == h.Buf.LinesNum() {
 		h.Cursor.Loc = h.Buf.End()
 	}
+	h.Relocate()
 	return true
 }
 
@@ -352,6 +372,7 @@ func (h *BufPane) ParagraphNext() bool {
 // on the user's settings
 func (h *BufPane) Retab() bool {
 	h.Buf.Retab()
+	h.Relocate()
 	return true
 }
 
@@ -360,6 +381,7 @@ func (h *BufPane) CursorStart() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.X = 0
 	h.Cursor.Y = 0
+	h.Relocate()
 	return true
 }
 
@@ -368,6 +390,7 @@ func (h *BufPane) CursorEnd() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Loc = h.Buf.End()
 	h.Cursor.StoreVisualX()
+	h.Relocate()
 	return true
 }
 
@@ -378,6 +401,7 @@ func (h *BufPane) SelectToStart() bool {
 	}
 	h.CursorStart()
 	h.Cursor.SelectTo(h.Buf.Start())
+	h.Relocate()
 	return true
 }
 
@@ -388,6 +412,7 @@ func (h *BufPane) SelectToEnd() bool {
 	}
 	h.CursorEnd()
 	h.Cursor.SelectTo(h.Buf.End())
+	h.Relocate()
 	return true
 }
 
@@ -420,6 +445,7 @@ func (h *BufPane) InsertNewline() bool {
 		}
 	}
 	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
+	h.Relocate()
 	return true
 }
 
@@ -449,6 +475,7 @@ func (h *BufPane) Backspace() bool {
 		}
 	}
 	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
+	h.Relocate()
 	return true
 }
 
@@ -459,6 +486,7 @@ func (h *BufPane) DeleteWordRight() bool {
 		h.Cursor.DeleteSelection()
 		h.Cursor.ResetSelection()
 	}
+	h.Relocate()
 	return true
 }
 
@@ -469,6 +497,7 @@ func (h *BufPane) DeleteWordLeft() bool {
 		h.Cursor.DeleteSelection()
 		h.Cursor.ResetSelection()
 	}
+	h.Relocate()
 	return true
 }
 
@@ -483,6 +512,7 @@ func (h *BufPane) Delete() bool {
 			h.Buf.Remove(loc, loc.Move(1, h.Buf))
 		}
 	}
+	h.Relocate()
 	return true
 }
 
@@ -513,6 +543,7 @@ func (h *BufPane) IndentSelection() bool {
 		}
 		h.Buf.RelocateCursors()
 
+		h.Relocate()
 		return true
 	}
 	return false
@@ -531,6 +562,7 @@ func (h *BufPane) OutdentLine() bool {
 		h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y}, buffer.Loc{X: 1, Y: h.Cursor.Y})
 	}
 	h.Buf.RelocateCursors()
+	h.Relocate()
 	return true
 }
 
@@ -557,29 +589,37 @@ func (h *BufPane) OutdentSelection() bool {
 		}
 		h.Buf.RelocateCursors()
 
+		h.Relocate()
 		return true
 	}
 	return false
 }
 
-// InsertTab inserts a tab or spaces
-func (h *BufPane) InsertTab() bool {
+// Autocomplete cycles the suggestions and performs autocompletion if there are suggestions
+func (h *BufPane) Autocomplete() bool {
 	b := h.Buf
+
+	if h.Cursor.HasSelection() {
+		return false
+	}
+
 	if b.HasSuggestions {
 		b.CycleAutocomplete(true)
 		return true
 	}
+	return b.Autocomplete(buffer.BufferComplete)
+}
 
+// InsertTab inserts a tab or spaces
+func (h *BufPane) InsertTab() bool {
+	b := h.Buf
 	l := b.LineBytes(h.Cursor.Y)
 	l = util.SliceStart(l, h.Cursor.X)
-	hasComplete := b.Autocomplete(buffer.BufferComplete)
-	if !hasComplete {
-		indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
-		tabBytes := len(indent)
-		bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
-		b.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
-		return true
-	}
+	indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
+	tabBytes := len(indent)
+	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
+	b.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
+	h.Relocate()
 	return true
 }
 
@@ -588,7 +628,7 @@ func (h *BufPane) SaveAll() bool {
 	for _, b := range buffer.OpenBuffers {
 		b.Save()
 	}
-	return false
+	return true
 }
 
 // Save the buffer to disk
@@ -600,7 +640,7 @@ func (h *BufPane) Save() bool {
 		h.saveBufToFile(h.Buf.Path)
 	}
 
-	return false
+	return true
 }
 
 // SaveAs saves the buffer to disk with the given name
@@ -618,7 +658,7 @@ func (h *BufPane) SaveAs() bool {
 
 		}
 	})
-	return false
+	return true
 }
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
@@ -690,7 +730,7 @@ func (h *BufPane) Find() bool {
 		h.Relocate()
 	})
 
-	return false
+	return true
 }
 
 // FindNext searches forwards for the last used search term
@@ -716,6 +756,7 @@ func (h *BufPane) FindNext() bool {
 	} else {
 		h.Cursor.ResetSelection()
 	}
+	h.Relocate()
 	return true
 }
 
@@ -742,6 +783,7 @@ func (h *BufPane) FindPrevious() bool {
 	} else {
 		h.Cursor.ResetSelection()
 	}
+	h.Relocate()
 	return true
 }
 
@@ -749,6 +791,7 @@ func (h *BufPane) FindPrevious() bool {
 func (h *BufPane) Undo() bool {
 	h.Buf.Undo()
 	InfoBar.Message("Undid action")
+	h.Relocate()
 	return true
 }
 
@@ -756,6 +799,7 @@ func (h *BufPane) Undo() bool {
 func (h *BufPane) Redo() bool {
 	h.Buf.Redo()
 	InfoBar.Message("Redid action")
+	h.Relocate()
 	return true
 }
 
@@ -766,6 +810,7 @@ func (h *BufPane) Copy() bool {
 		h.freshClip = true
 		InfoBar.Message("Copied selection")
 	}
+	h.Relocate()
 	return true
 }
 
@@ -791,6 +836,7 @@ func (h *BufPane) CutLine() bool {
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
 	InfoBar.Message("Cut line")
+	h.Relocate()
 	return true
 }
 
@@ -803,6 +849,7 @@ func (h *BufPane) Cut() bool {
 		h.freshClip = true
 		InfoBar.Message("Cut selection")
 
+		h.Relocate()
 		return true
 	} else {
 		return h.CutLine()
@@ -820,6 +867,7 @@ func (h *BufPane) DuplicateLine() bool {
 	}
 
 	InfoBar.Message("Duplicated line")
+	h.Relocate()
 	return true
 }
 
@@ -832,6 +880,7 @@ func (h *BufPane) DeleteLine() bool {
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
 	InfoBar.Message("Deleted line")
+	h.Relocate()
 	return true
 }
 
@@ -839,8 +888,8 @@ func (h *BufPane) DeleteLine() bool {
 func (h *BufPane) MoveLinesUp() bool {
 	if h.Cursor.HasSelection() {
 		if h.Cursor.CurSelection[0].Y == 0 {
-			InfoBar.Message("Can not move further up")
-			return true
+			InfoBar.Message("Cannot move further up")
+			return false
 		}
 		start := h.Cursor.CurSelection[0].Y
 		end := h.Cursor.CurSelection[1].Y
@@ -855,8 +904,8 @@ func (h *BufPane) MoveLinesUp() bool {
 		h.Cursor.CurSelection[1].Y -= 1
 	} else {
 		if h.Cursor.Loc.Y == 0 {
-			InfoBar.Message("Can not move further up")
-			return true
+			InfoBar.Message("Cannot move further up")
+			return false
 		}
 		h.Buf.MoveLinesUp(
 			h.Cursor.Loc.Y,
@@ -864,6 +913,7 @@ func (h *BufPane) MoveLinesUp() bool {
 		)
 	}
 
+	h.Relocate()
 	return true
 }
 
@@ -871,8 +921,8 @@ func (h *BufPane) MoveLinesUp() bool {
 func (h *BufPane) MoveLinesDown() bool {
 	if h.Cursor.HasSelection() {
 		if h.Cursor.CurSelection[1].Y >= h.Buf.LinesNum() {
-			InfoBar.Message("Can not move further down")
-			return true
+			InfoBar.Message("Cannot move further down")
+			return false
 		}
 		start := h.Cursor.CurSelection[0].Y
 		end := h.Cursor.CurSelection[1].Y
@@ -886,8 +936,8 @@ func (h *BufPane) MoveLinesDown() bool {
 		)
 	} else {
 		if h.Cursor.Loc.Y >= h.Buf.LinesNum()-1 {
-			InfoBar.Message("Can not move further down")
-			return true
+			InfoBar.Message("Cannot move further down")
+			return false
 		}
 		h.Buf.MoveLinesDown(
 			h.Cursor.Loc.Y,
@@ -895,6 +945,7 @@ func (h *BufPane) MoveLinesDown() bool {
 		)
 	}
 
+	h.Relocate()
 	return true
 }
 
@@ -903,6 +954,7 @@ func (h *BufPane) MoveLinesDown() bool {
 func (h *BufPane) Paste() bool {
 	clip, _ := clipboard.ReadAll("clipboard")
 	h.paste(clip)
+	h.Relocate()
 	return true
 }
 
@@ -910,6 +962,7 @@ func (h *BufPane) Paste() bool {
 func (h *BufPane) PastePrimary() bool {
 	clip, _ := clipboard.ReadAll("primary")
 	h.paste(clip)
+	h.Relocate()
 	return true
 }
 
@@ -948,6 +1001,7 @@ func (h *BufPane) JumpToMatchingBrace() bool {
 		}
 	}
 
+	h.Relocate()
 	return true
 }
 
@@ -958,6 +1012,7 @@ func (h *BufPane) SelectAll() bool {
 	// Put the cursor at the beginning
 	h.Cursor.X = 0
 	h.Cursor.Y = 0
+	h.Relocate()
 	return true
 }
 
@@ -968,7 +1023,7 @@ func (h *BufPane) OpenFile() bool {
 			h.HandleCommand(resp)
 		}
 	})
-	return false
+	return true
 }
 
 // Start moves the viewport to the start of the buffer
@@ -976,7 +1031,7 @@ func (h *BufPane) Start() bool {
 	v := h.GetView()
 	v.StartLine = 0
 	h.SetView(v)
-	return false
+	return true
 }
 
 // End moves the viewport to the end of the buffer
@@ -990,7 +1045,7 @@ func (h *BufPane) End() bool {
 		v.StartLine = h.Buf.LinesNum() - v.Height
 		h.SetView(v)
 	}
-	return false
+	return true
 }
 
 // PageUp scrolls the view up a page
@@ -1002,7 +1057,7 @@ func (h *BufPane) PageUp() bool {
 		v.StartLine = 0
 	}
 	h.SetView(v)
-	return false
+	return true
 }
 
 // PageDown scrolls the view down a page
@@ -1013,7 +1068,7 @@ func (h *BufPane) PageDown() bool {
 	} else if h.Buf.LinesNum() >= v.Height {
 		v.StartLine = h.Buf.LinesNum() - v.Height
 	}
-	return false
+	return true
 }
 
 // SelectPageUp selects up one page
@@ -1023,6 +1078,7 @@ func (h *BufPane) SelectPageUp() bool {
 	}
 	h.Cursor.UpN(h.GetView().Height)
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -1033,6 +1089,7 @@ func (h *BufPane) SelectPageDown() bool {
 	}
 	h.Cursor.DownN(h.GetView().Height)
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
 	return true
 }
 
@@ -1046,6 +1103,7 @@ func (h *BufPane) CursorPageUp() bool {
 		h.Cursor.StoreVisualX()
 	}
 	h.Cursor.UpN(h.GetView().Height)
+	h.Relocate()
 	return true
 }
 
@@ -1059,6 +1117,7 @@ func (h *BufPane) CursorPageDown() bool {
 		h.Cursor.StoreVisualX()
 	}
 	h.Cursor.DownN(h.GetView().Height)
+	h.Relocate()
 	return true
 }
 
@@ -1071,7 +1130,7 @@ func (h *BufPane) HalfPageUp() bool {
 		v.StartLine = 0
 	}
 	h.SetView(v)
-	return false
+	return true
 }
 
 // HalfPageDown scrolls the view down half a page
@@ -1085,7 +1144,7 @@ func (h *BufPane) HalfPageDown() bool {
 		}
 	}
 	h.SetView(v)
-	return false
+	return true
 }
 
 // ToggleRuler turns line numbers off and on
@@ -1097,13 +1156,13 @@ func (h *BufPane) ToggleRuler() bool {
 		h.Buf.Settings["ruler"] = false
 		InfoBar.Message("Disabled ruler")
 	}
-	return false
+	return true
 }
 
 // ClearStatus clears the messenger bar
 func (h *BufPane) ClearStatus() bool {
 	InfoBar.Message("")
-	return false
+	return true
 }
 
 // ToggleHelp toggles the help screen
@@ -1113,14 +1172,14 @@ func (h *BufPane) ToggleHelp() bool {
 	} else {
 		h.openHelp("help")
 	}
-	return false
+	return true
 }
 
 // ToggleKeyMenu toggles the keymenu option and resizes all tabs
 func (h *BufPane) ToggleKeyMenu() bool {
 	config.GlobalSettings["keymenu"] = !config.GetGlobalOption("keymenu").(bool)
 	Tabs.Resize()
-	return false
+	return true
 }
 
 // ShellMode opens a terminal to run a shell command
@@ -1132,7 +1191,7 @@ func (h *BufPane) ShellMode() bool {
 		}
 	})
 
-	return false
+	return true
 }
 
 // CommandMode lets the user enter a command
@@ -1142,18 +1201,18 @@ func (h *BufPane) CommandMode() bool {
 			h.HandleCommand(resp)
 		}
 	})
-	return false
+	return true
 }
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
 func (h *BufPane) ToggleOverwriteMode() bool {
 	h.isOverwriteMode = !h.isOverwriteMode
-	return false
+	return true
 }
 
 // Escape leaves current mode
 func (h *BufPane) Escape() bool {
-	return false
+	return true
 }
 
 // Quit this will close the current tab or view that is open
@@ -1188,7 +1247,7 @@ func (h *BufPane) Quit() bool {
 	} else {
 		quit()
 	}
-	return false
+	return true
 }
 
 // QuitAll quits the whole editor; all splits and tabs
@@ -1220,7 +1279,7 @@ func (h *BufPane) QuitAll() bool {
 		quit()
 	}
 
-	return false
+	return true
 }
 
 // AddTab adds a new tab with an empty buffer
@@ -1232,7 +1291,7 @@ func (h *BufPane) AddTab() bool {
 	Tabs.AddTab(tp)
 	Tabs.SetActive(len(Tabs.List) - 1)
 
-	return false
+	return true
 }
 
 // PreviousTab switches to the previous tab in the tab list
@@ -1240,28 +1299,28 @@ func (h *BufPane) PreviousTab() bool {
 	a := Tabs.Active()
 	Tabs.SetActive(util.Clamp(a-1, 0, len(Tabs.List)-1))
 
-	return false
+	return true
 }
 
 // NextTab switches to the next tab in the tab list
 func (h *BufPane) NextTab() bool {
 	a := Tabs.Active()
 	Tabs.SetActive(util.Clamp(a+1, 0, len(Tabs.List)-1))
-	return false
+	return true
 }
 
 // VSplitAction opens an empty vertical split
 func (h *BufPane) VSplitAction() bool {
 	h.VSplitBuf(buffer.NewBufferFromString("", "", buffer.BTDefault))
 
-	return false
+	return true
 }
 
 // HSplitAction opens an empty horizontal split
 func (h *BufPane) HSplitAction() bool {
 	h.HSplitBuf(buffer.NewBufferFromString("", "", buffer.BTDefault))
 
-	return false
+	return true
 }
 
 // Unsplit closes all splits in the current tab except the active one
@@ -1272,7 +1331,7 @@ func (h *BufPane) Unsplit() bool {
 	MainTab().RemovePane(MainTab().GetPane(h.splitID))
 	MainTab().Resize()
 	MainTab().SetActive(len(MainTab().Panes) - 1)
-	return false
+	return true
 }
 
 // NextSplit changes the view to the next split
@@ -1286,7 +1345,7 @@ func (h *BufPane) NextSplit() bool {
 
 	MainTab().SetActive(a)
 
-	return false
+	return true
 }
 
 // PreviousSplit changes the view to the previous split
@@ -1299,7 +1358,7 @@ func (h *BufPane) PreviousSplit() bool {
 	}
 	MainTab().SetActive(a)
 
-	return false
+	return true
 }
 
 var curmacro []interface{}
@@ -1314,6 +1373,7 @@ func (h *BufPane) ToggleMacro() bool {
 	} else {
 		InfoBar.Message("Stopped recording")
 	}
+	h.Relocate()
 	return true
 }
 
@@ -1330,6 +1390,7 @@ func (h *BufPane) PlayMacro() bool {
 			h.DoKeyEvent(t)
 		}
 	}
+	h.Relocate()
 	return true
 }
 
@@ -1339,6 +1400,7 @@ func (h *BufPane) SpawnMultiCursor() bool {
 	if !spawner.HasSelection() {
 		spawner.SelectWord()
 		h.multiWord = true
+		h.Relocate()
 		return true
 	}
 
@@ -1369,6 +1431,7 @@ func (h *BufPane) SpawnMultiCursor() bool {
 		InfoBar.Message("No matches found")
 	}
 
+	h.Relocate()
 	return true
 }
 
@@ -1403,7 +1466,7 @@ func (h *BufPane) SpawnMultiCursorSelect() bool {
 		return false
 	}
 	InfoBar.Message("Added cursors from selection")
-	return false
+	return true
 }
 
 // MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
@@ -1415,7 +1478,7 @@ func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b.AddCursor(c)
 	b.MergeCursors()
 
-	return false
+	return true
 }
 
 // SkipMultiCursor moves the current multiple cursor to the next available position
@@ -1446,6 +1509,7 @@ func (h *BufPane) SkipMultiCursor() bool {
 	} else {
 		InfoBar.Message("No matches found")
 	}
+	h.Relocate()
 	return true
 }
 
@@ -1458,6 +1522,7 @@ func (h *BufPane) RemoveMultiCursor() bool {
 	} else {
 		h.multiWord = false
 	}
+	h.Relocate()
 	return true
 }
 
@@ -1465,9 +1530,11 @@ func (h *BufPane) RemoveMultiCursor() bool {
 func (h *BufPane) RemoveAllMultiCursors() bool {
 	h.Buf.ClearCursors()
 	h.multiWord = false
+	h.Relocate()
 	return true
 }
 
+// None is an action that does nothing
 func (h *BufPane) None() bool {
-	return false
+	return true
 }

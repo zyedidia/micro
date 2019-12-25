@@ -53,18 +53,35 @@ func LuaAction(fn string) func(*BufPane) bool {
 
 // BufMapKey maps a key event to an action
 func BufMapKey(k Event, action string) {
-	actions := strings.SplitN(action, ",", -1)
 	BufKeyStrings[k] = action
-	actionfns := make([]func(*BufPane) bool, len(actions))
-	for i, a := range actions {
-		// a = strings.TrimSpace(a)
+	var actionfns []func(*BufPane) bool
+	var names []string
+	var types []byte
+	for i := 0; ; i++ {
+		if action == "" {
+			break
+		}
+
+		idx := strings.IndexAny(action, "&|,")
+		a := action
+		if idx >= 0 {
+			a = action[:idx]
+			types = append(types, action[idx])
+			action = action[idx+1:]
+		} else {
+			types = append(types, ' ')
+			action = ""
+		}
+
 		var afn func(*BufPane) bool
 		if strings.HasPrefix(action, "command:") {
 			a = strings.SplitN(a, ":", 2)[1]
 			afn = CommandAction(a)
+			names = append(names, "")
 		} else if strings.HasPrefix(a, "command-edit:") {
 			a = strings.SplitN(a, ":", 2)[1]
 			afn = CommandEditAction(a)
+			names = append(names, "")
 		} else if strings.HasPrefix(a, "lua:") {
 			a = strings.SplitN(a, ":", 2)[1]
 			afn = LuaAction(a)
@@ -72,19 +89,31 @@ func BufMapKey(k Event, action string) {
 				screen.TermMessage("Lua Error:", action, "does not exist")
 				continue
 			}
+			names = append(names, "")
 		} else if f, ok := BufKeyActions[a]; ok {
 			afn = f
+			names = append(names, a)
 		} else {
 			screen.TermMessage("Error:", action, "does not exist")
+			continue
 		}
-		actionfns[i] = afn
+		actionfns = append(actionfns, afn)
 	}
 	BufKeyBindings[k] = func(h *BufPane) bool {
-		b := false
-		for _, a := range actionfns {
-			b = a(h) || b
+		cursors := h.Buf.GetCursors()
+		success := true
+		for i, a := range actionfns {
+			for j, c := range cursors {
+				h.Buf.SetCurCursor(c.Num)
+				h.Cursor = c
+				if i == 0 || (success && types[i-1] == '&') || (!success && types[i-1] == '|') || (types[i-1] == ',') {
+					success = h.execAction(a, names[i], j)
+				} else {
+					break
+				}
+			}
 		}
-		return b
+		return true
 	}
 }
 
@@ -291,43 +320,34 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 // to and executing it (possibly multiple times for multiple cursors)
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	if action, ok := BufKeyBindings[e]; ok {
-		estr := BufKeyStrings[e]
-		if estr != "InsertTab" {
-			h.Buf.HasSuggestions = false
-		}
-		for _, s := range MultiActions {
-			if s == estr {
-				cursors := h.Buf.GetCursors()
-				for _, c := range cursors {
-					h.Buf.SetCurCursor(c.Num)
-					h.Cursor = c
-					if !h.PluginCB("pre" + estr) {
-						// canceled by plugin
-						continue
-					}
-					rel := action(h)
-					if h.PluginCB("on"+estr) && rel {
-						h.Relocate()
-					}
+		return action(h)
+	}
+	return false
+}
 
-					if recording_macro {
-						if estr != "ToggleMacro" && estr != "PlayMacro" {
-							curmacro = append(curmacro, e)
-						}
+func (h *BufPane) execAction(action func(*BufPane) bool, name string, cursor int) bool {
+	if name != "Autocomplete" {
+		h.Buf.HasSuggestions = false
+	}
+
+	_, isMulti := MultiActions[name]
+	if (!isMulti && cursor == 0) || isMulti {
+		if h.PluginCB("pre" + name) {
+			asuccess := action(h)
+			psuccess := h.PluginCB("on" + name)
+
+			if isMulti {
+				if recording_macro {
+					if name != "ToggleMacro" && name != "PlayMacro" {
+						curmacro = append(curmacro, action)
 					}
 				}
-				return true
 			}
+
+			return asuccess && psuccess
 		}
-		if !h.PluginCB("pre" + estr) {
-			return false
-		}
-		rel := action(h)
-		if h.PluginCB("on"+estr) && rel {
-			h.Relocate()
-		}
-		return true
 	}
+
 	return false
 }
 
@@ -469,6 +489,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"MoveLinesDown":          (*BufPane).MoveLinesDown,
 	"IndentSelection":        (*BufPane).IndentSelection,
 	"OutdentSelection":       (*BufPane).OutdentSelection,
+	"Autocomplete":           (*BufPane).Autocomplete,
 	"OutdentLine":            (*BufPane).OutdentLine,
 	"Paste":                  (*BufPane).Paste,
 	"PastePrimary":           (*BufPane).PastePrimary,
@@ -529,52 +550,52 @@ var BufMouseActions = map[string]BufMouseAction{
 // times if there are multiple cursors (one per cursor)
 // Generally actions that modify global editor state like quitting or
 // saving should not be included in this list
-var MultiActions = []string{
-	"CursorUp",
-	"CursorDown",
-	"CursorPageUp",
-	"CursorPageDown",
-	"CursorLeft",
-	"CursorRight",
-	"CursorStart",
-	"CursorEnd",
-	"SelectToStart",
-	"SelectToEnd",
-	"SelectUp",
-	"SelectDown",
-	"SelectLeft",
-	"SelectRight",
-	"WordRight",
-	"WordLeft",
-	"SelectWordRight",
-	"SelectWordLeft",
-	"DeleteWordRight",
-	"DeleteWordLeft",
-	"SelectLine",
-	"SelectToStartOfLine",
-	"SelectToEndOfLine",
-	"ParagraphPrevious",
-	"ParagraphNext",
-	"InsertNewline",
-	"Backspace",
-	"Delete",
-	"InsertTab",
-	"FindNext",
-	"FindPrevious",
-	"Cut",
-	"CutLine",
-	"DuplicateLine",
-	"DeleteLine",
-	"MoveLinesUp",
-	"MoveLinesDown",
-	"IndentSelection",
-	"OutdentSelection",
-	"OutdentLine",
-	"Paste",
-	"PastePrimary",
-	"SelectPageUp",
-	"SelectPageDown",
-	"StartOfLine",
-	"EndOfLine",
-	"JumpToMatchingBrace",
+var MultiActions = map[string]bool{
+	"CursorUp":            true,
+	"CursorDown":          true,
+	"CursorPageUp":        true,
+	"CursorPageDown":      true,
+	"CursorLeft":          true,
+	"CursorRight":         true,
+	"CursorStart":         true,
+	"CursorEnd":           true,
+	"SelectToStart":       true,
+	"SelectToEnd":         true,
+	"SelectUp":            true,
+	"SelectDown":          true,
+	"SelectLeft":          true,
+	"SelectRight":         true,
+	"WordRight":           true,
+	"WordLeft":            true,
+	"SelectWordRight":     true,
+	"SelectWordLeft":      true,
+	"DeleteWordRight":     true,
+	"DeleteWordLeft":      true,
+	"SelectLine":          true,
+	"SelectToStartOfLine": true,
+	"SelectToEndOfLine":   true,
+	"ParagraphPrevious":   true,
+	"ParagraphNext":       true,
+	"InsertNewline":       true,
+	"Backspace":           true,
+	"Delete":              true,
+	"InsertTab":           true,
+	"FindNext":            true,
+	"FindPrevious":        true,
+	"Cut":                 true,
+	"CutLine":             true,
+	"DuplicateLine":       true,
+	"DeleteLine":          true,
+	"MoveLinesUp":         true,
+	"MoveLinesDown":       true,
+	"IndentSelection":     true,
+	"OutdentSelection":    true,
+	"OutdentLine":         true,
+	"Paste":               true,
+	"PastePrimary":        true,
+	"SelectPageUp":        true,
+	"SelectPageDown":      true,
+	"StartOfLine":         true,
+	"EndOfLine":           true,
+	"JumpToMatchingBrace": true,
 }
