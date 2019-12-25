@@ -26,7 +26,7 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 			}
 		}
 
-		return tagParts[0], nil
+		return string(tag), nil
 	}
 }
 
