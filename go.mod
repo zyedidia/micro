@@ -14,6 +14,7 @@ require (
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
 	github.com/zyedidia/clipboard v0.0.0-20190823154308-241f98e9b197
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
+	github.com/zyedidia/poller v0.0.0-20170616160828-ab09682913b7 // indirect
 	github.com/zyedidia/pty v2.0.0+incompatible // indirect
 	github.com/zyedidia/tcell v0.0.0-20191219170756-59b50b23fa9b
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
