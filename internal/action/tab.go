@@ -106,6 +106,7 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 			ind := t.LocFromVisual(buffer.Loc{mx, my})
 			if ind != -1 {
 				t.SetActive(ind)
+				return
 			}
 		case tcell.WheelUp:
 			if my == t.Y {
