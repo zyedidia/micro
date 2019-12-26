@@ -13,15 +13,6 @@ Here are the options that you can set:
 
 	default value: `true`
 
-* `autosave`: micro will save the buffer every `n` seconds automatically
-   (where `n` is the value of the option). Micro also will automatically
-   save and quit when you exit without asking. Be careful when using this
-   feature, because you might accidentally save a file, overwriting what
-   was there before. If the value of the option is `0` then micro will
-   not autosave.
-
-	default value: `0`
-
 * `backup`: micro will automatically keep backups of all open buffers. Backups
    are stored in `~/.config/micro/backups` and are removed when the buffer is
    closed cleanly. In the case of a system crash or a micro crash, the contents

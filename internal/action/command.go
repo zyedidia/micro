@@ -539,13 +539,13 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		} else {
 			screen.Screen.EnableMouse()
 		}
-	} else if option == "autosave" {
-		if nativeValue.(float64) > 0 {
-			config.SetAutoTime(int(nativeValue.(float64)))
-			config.StartAutoSave()
-		} else {
-			config.SetAutoTime(0)
-		}
+		// } else if option == "autosave" {
+		// 	if nativeValue.(float64) > 0 {
+		// 		config.SetAutoTime(int(nativeValue.(float64)))
+		// 		config.StartAutoSave()
+		// 	} else {
+		// 		config.SetAutoTime(0)
+		// 	}
 	} else {
 		for _, pl := range config.Plugins {
 			if option == pl.Name {

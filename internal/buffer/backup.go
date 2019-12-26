@@ -17,7 +17,9 @@ const backupMsg = `A backup was detected for this file. This likely means that m
 crashed while editing this file, or another instance of micro is currently
 editing this file.
 
-The backup was created on %s.
+The backup was created on %s, and the file is
+
+%s
 
 * 'recover' will apply the backup as unsaved changes to the current buffer.
   When the buffer is closed, the backup will be removed.
@@ -98,7 +100,7 @@ func (b *Buffer) ApplyBackup(fsize int64) bool {
 			if err == nil {
 				defer backup.Close()
 				t := info.ModTime()
-				msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 at 15:04, 2006"))
+				msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), util.EscapePath(b.AbsPath))
 				choice := screen.TermPrompt(msg, []string{"r", "i", "recover", "ignore"}, true)
 
 				if choice%2 == 0 {

@@ -34,7 +34,7 @@ func init() {
 
 // Options with validators
 var optionValidators = map[string]optionValidator{
-	"autosave":     validateNonNegativeValue,
+	// "autosave":     validateNonNegativeValue,
 	"tabsize":      validatePositiveValue,
 	"scrollmargin": validateNonNegativeValue,
 	"scrollspeed":  validateNonNegativeValue,
@@ -213,7 +213,7 @@ func DefaultCommonSettings() map[string]interface{} {
 }
 
 var defaultGlobalSettings = map[string]interface{}{
-	"autosave":    float64(0),
+	// "autosave":    float64(0),
 	"colorscheme": "default",
 	"infobar":     true,
 	"keymenu":     false,
