@@ -47,6 +47,21 @@ save and quit you can bind it like so:
 }
 ```
 
+Each action will return a success flag. Actions can be chained such that
+the chain only continues when there are successes, or failures, or either.
+The `,` separator will always chain to the next action. The `|` separator
+will abort the chain if the action preceding it succeeds, and the `&` will
+abort the chain if the action preceding it fails. For example, in the default
+bindings, tab is bound as
+
+```
+"Tab": "Autocomplete|IndentSelection|InsertTab"
+```
+
+This means that if the `Autocomplete` action is successful, the chain will abort.
+Otherwise, it will try `IndentSelection`, and if that fails too, it will
+execute `InsertTab`.
+
 ## Binding commands
 
 You can also bind a key to execute a command in command mode (see 
@@ -221,6 +236,7 @@ RemoveAllMultiCursors
 SkipMultiCursor
 None
 JumpToMatchingBrace
+Autocomplete
 ```
 
 You can also bind some mouse actions (these must be bound to mouse buttons)
@@ -407,8 +423,8 @@ MouseWheelRight
     "Backspace":      "Backspace",
     "Alt-CtrlH":      "DeleteWordLeft",
     "Alt-Backspace":  "DeleteWordLeft",
-    "Tab":            "IndentSelection,InsertTab",
-    "Backtab":        "OutdentSelection,OutdentLine",
+    "Tab":            "Autocomplete|IndentSelection|InsertTab",
+    "Backtab":        "OutdentSelection|OutdentLine",
     "CtrlO":          "OpenFile",
     "CtrlS":          "Save",
     "CtrlF":          "Find",
@@ -431,9 +447,12 @@ MouseWheelRight
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
+    "CtrlPageUp":     "PreviousTab",
+    "CtrlPageDown":   "NextTab",
     "CtrlG":          "ToggleHelp",
+    "Alt-g":          "ToggleKeyMenu",
     "CtrlR":          "ToggleRuler",
-    "CtrlL":          "JumpLine",
+    "CtrlL":          "command-edit:goto ",
     "Delete":         "Delete",
     "CtrlB":          "ShellMode",
     "CtrlQ":          "Quit",
@@ -441,6 +460,7 @@ MouseWheelRight
     "CtrlW":          "NextSplit",
     "CtrlU":          "ToggleMacro",
     "CtrlJ":          "PlayMacro",
+    "Insert":         "ToggleOverwriteMode",
 
     // Emacs-style keybindings
     "Alt-f": "WordRight",
@@ -449,7 +469,6 @@ MouseWheelRight
     "Alt-e": "EndOfLine",
 
     // Integration with file managers
-    "F1":  "ToggleHelp",
     "F2":  "Save",
     "F3":  "Find",
     "F4":  "Quit",
@@ -464,12 +483,11 @@ MouseWheelRight
     "MouseMiddle":    "PastePrimary",
     "Ctrl-MouseLeft": "MouseMultiCursor",
 
-    // Multiple cursors bindings
     "Alt-n": "SpawnMultiCursor",
     "Alt-m": "SpawnMultiCursorSelect",
     "Alt-p": "RemoveMultiCursor",
     "Alt-c": "RemoveAllMultiCursors",
-    "Alt-x": "SkipMultiCursor",
+    "Alt-x": "SkipMultiCursor"
 }
 ```
 

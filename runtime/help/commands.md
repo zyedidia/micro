@@ -45,6 +45,11 @@ Here are the possible commands that you can use.
 
 * `tabswitch tab`: This command will switch to the specified tab. The `tab` can
    either be a tab number, or a name of a tab.
+
+* `textfilter sh-command`: filters the current selection through a shell command
+   as standard input and replaces the selection with the stdout of the shell command.
+   For example, to sort a list of numbers, first select them, and then execute
+   `> textfilter sort -n`.
 					 
 * `log`: opens a log of all messages and debug statements.
 
