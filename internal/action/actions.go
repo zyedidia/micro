@@ -23,6 +23,8 @@ func (h *BufPane) ScrollUp(n int) {
 	if v.StartLine >= n {
 		v.StartLine -= n
 		h.SetView(v)
+	} else {
+		v.StartLine = 0
 	}
 }
 
