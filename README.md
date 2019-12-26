@@ -118,10 +118,16 @@ or
 scoop install micro
 ```
 
-On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
+On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install) or [nix](https://nixos.org/nix/):
 
 ```
 snap install micro --classic
+```
+
+or
+
+```
+nix-env -iA nixos.micro
 ```
 
 On OpenBSD, micro is available in the ports tree. It is also available as a binary package.
