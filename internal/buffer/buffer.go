@@ -18,7 +18,7 @@ import (
 	"github.com/zyedidia/micro/internal/config"
 	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
-	. "github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/internal/util"
 	"github.com/zyedidia/micro/pkg/highlight"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
@@ -123,8 +123,8 @@ type Buffer struct {
 // and an error if the file is a directory
 func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 	var err error
-	filename, cursorPos := GetPathAndCursorPosition(path)
-	filename, err = ReplaceHome(filename)
+	filename, cursorPos := util.GetPathAndCursorPosition(path)
+	filename, err = util.ReplaceHome(filename)
 	if err != nil {
 		return nil, err
 	}
@@ -148,7 +148,7 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else {
-		buf = NewBuffer(file, FSize(file), filename, cursorLoc, btype)
+		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
 	}
 
 	return buf, nil
@@ -216,7 +216,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	}
 
 	// The last time this file was modified
-	b.ModTime, _ = GetModTime(b.Path)
+	b.UpdateModTime()
 
 	switch b.Endings {
 	case FFUnix:
@@ -329,6 +329,22 @@ func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)
 }
 
+// ExternallyModified returns whether the file being edited has
+// been modified by some external process
+func (b *Buffer) ExternallyModified() bool {
+	modTime, err := util.GetModTime(b.Path)
+	if err == nil {
+		return modTime != b.ModTime
+	}
+	return false
+}
+
+// UpdateModTime updates the modtime of this file
+func (b *Buffer) UpdateModTime() (err error) {
+	b.ModTime, err = util.GetModTime(b.Path)
+	return
+}
+
 // ReOpen reloads the current buffer from disk
 func (b *Buffer) ReOpen() error {
 	file, err := os.Open(b.Path)
@@ -350,7 +366,7 @@ func (b *Buffer) ReOpen() error {
 	}
 	b.EventHandler.ApplyDiff(txt)
 
-	b.ModTime, err = GetModTime(b.Path)
+	err = b.UpdateModTime()
 	b.isModified = false
 	b.RelocateCursors()
 	return err
@@ -512,7 +528,7 @@ func (b *Buffer) ClearMatches() {
 // depending on the settings)
 func (b *Buffer) IndentString(tabsize int) string {
 	if b.Settings["tabstospaces"].(bool) {
-		return Spaces(tabsize)
+		return util.Spaces(tabsize)
 	}
 	return "\t"
 }
@@ -600,7 +616,7 @@ func (b *Buffer) RemoveCursor(i int) {
 	copy(b.cursors[i:], b.cursors[i+1:])
 	b.cursors[len(b.cursors)-1] = nil
 	b.cursors = b.cursors[:len(b.cursors)-1]
-	b.curCursor = Clamp(b.curCursor, 0, len(b.cursors)-1)
+	b.curCursor = util.Clamp(b.curCursor, 0, len(b.cursors)-1)
 	b.UpdateCursors()
 }
 
@@ -741,13 +757,13 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool) {
 // Retab changes all tabs to spaces or vice versa
 func (b *Buffer) Retab() {
 	toSpaces := b.Settings["tabstospaces"].(bool)
-	tabsize := IntOpt(b.Settings["tabsize"])
+	tabsize := util.IntOpt(b.Settings["tabsize"])
 	dirty := false
 
 	for i := 0; i < b.LinesNum(); i++ {
 		l := b.LineBytes(i)
 
-		ws := GetLeadingWhitespace(l)
+		ws := util.GetLeadingWhitespace(l)
 		if len(ws) != 0 {
 			if toSpaces {
 				ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
@@ -789,10 +805,12 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 	return startpos, err
 }
 
+// Line returns the string representation of the given line number
 func (b *Buffer) Line(i int) string {
 	return string(b.LineBytes(i))
 }
 
+// WriteLog writes a string to the log buffer
 func WriteLog(s string) {
 	LogBuf.EventHandler.Insert(LogBuf.End(), s)
 }

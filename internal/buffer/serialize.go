@@ -10,7 +10,7 @@ import (
 	"golang.org/x/text/encoding"
 
 	"github.com/zyedidia/micro/internal/config"
-	. "github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/internal/util"
 )
 
 // The SerializedBuffer holds the types that get serialized when a buffer is saved
@@ -30,7 +30,7 @@ func (b *Buffer) Serialize() error {
 		return nil
 	}
 
-	name := config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath)
+	name := config.ConfigDir + "/buffers/" + util.EscapePath(b.AbsPath)
 
 	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
 		err := gob.NewEncoder(file).Encode(SerializedBuffer{
@@ -48,7 +48,7 @@ func (b *Buffer) Unserialize() error {
 	if b.Path == "" {
 		return nil
 	}
-	file, err := os.Open(config.ConfigDir + "/buffers/" + EscapePath(b.AbsPath))
+	file, err := os.Open(config.ConfigDir + "/buffers/" + util.EscapePath(b.AbsPath))
 	defer file.Close()
 	if err == nil {
 		var buffer SerializedBuffer

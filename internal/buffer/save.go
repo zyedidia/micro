@@ -13,7 +13,7 @@ import (
 
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
-	. "github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/internal/util"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/transform"
@@ -140,12 +140,12 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 
 	// Update the last time this file was updated after saving
 	defer func() {
-		b.ModTime, _ = GetModTime(filename)
+		b.ModTime, _ = util.GetModTime(filename)
 		err = b.Serialize()
 	}()
 
 	// Removes any tilde and replaces with the absolute path to home
-	absFilename, _ := ReplaceHome(filename)
+	absFilename, _ := util.ReplaceHome(filename)
 
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
