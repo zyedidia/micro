@@ -182,7 +182,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"splitbottom":    true,
 	"splitright":     true,
 	"statusformatl":  "$(filename) $(modified)($(line),$(col)) | ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
-	"statusformatr":  "$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp): toggle help",
+	"statusformatr":  "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
 	"statusline":     true,
 	"syntax":         true,
 	"tabmovement":    false,
