@@ -121,7 +121,7 @@ func (w *BufWindow) Bottomline() int {
 		return h
 	}
 
-	l := w.LocFromVisual(buffer.Loc{0, w.Height})
+	l := w.LocFromVisual(buffer.Loc{0, w.Y + w.Height})
 
 	log.Println("Bottom line:", l.Y)
 	return l.Y
