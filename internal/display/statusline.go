@@ -51,7 +51,7 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 	},
 }
 
-func SetStatusInfoFnLua(s string, fn string) {
+func SetStatusInfoFnLua(fn string) {
 	luaFn := strings.Split(fn, ".")
 	if len(luaFn) <= 1 {
 		return
@@ -61,7 +61,7 @@ func SetStatusInfoFnLua(s string, fn string) {
 	if pl == nil {
 		return
 	}
-	statusInfo[s] = func(b *buffer.Buffer) string {
+	statusInfo[fn] = func(b *buffer.Buffer) string {
 		if pl == nil || !pl.IsEnabled() {
 			return ""
 		}
