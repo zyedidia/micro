@@ -18,8 +18,8 @@ parts:
     plugin: nil
     build-packages: [make]
     build-snaps: [go]
-    build: |
+    build-attributes: [no-patchelf]
+    override-build: |
       make build
-    install: |
       mkdir $SNAPCRAFT_PART_INSTALL/bin
       mv ./micro $SNAPCRAFT_PART_INSTALL/bin/
