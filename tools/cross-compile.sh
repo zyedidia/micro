@@ -1,6 +1,4 @@
-# Source tar
-
-./vendor-src.sh micro-$1-src
+# ./vendor-src.sh micro-$1-src
 cd ..
 
 mkdir -p binaries
@@ -35,8 +33,8 @@ tar -czf micro-$1-linux32.tar.gz micro-$1
 mv micro-$1-linux32.tar.gz binaries
 echo "Linux ARM 32"
 GOOS=linux GOARCH=arm go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE'" -o micro-$1/micro ./cmd/micro
-tar -czf micro-$1-linux-arm32.tar.gz micro-$1
-mv micro-$1-linux-arm32.tar.gz binaries
+tar -czf micro-$1-linux-arm.tar.gz micro-$1
+mv micro-$1-linux-arm.tar.gz binaries
 echo "Linux ARM 64"
 GOOS=linux GOARCH=arm64 go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE'" -o micro-$1/micro ./cmd/micro
 tar -czf micro-$1-linux-arm64.tar.gz micro-$1
