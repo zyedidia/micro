@@ -62,6 +62,8 @@ func BufMapKey(k Event, action string) {
 			break
 		}
 
+		// TODO: fix problem when complex bindings have these
+		// characters (escape them?)
 		idx := strings.IndexAny(action, "&|,")
 		a := action
 		if idx >= 0 {
@@ -74,7 +76,7 @@ func BufMapKey(k Event, action string) {
 		}
 
 		var afn func(*BufPane) bool
-		if strings.HasPrefix(action, "command:") {
+		if strings.HasPrefix(a, "command:") {
 			a = strings.SplitN(a, ":", 2)[1]
 			afn = CommandAction(a)
 			names = append(names, "")
@@ -86,7 +88,7 @@ func BufMapKey(k Event, action string) {
 			a = strings.SplitN(a, ":", 2)[1]
 			afn = LuaAction(a)
 			if afn == nil {
-				screen.TermMessage("Lua Error:", action, "does not exist")
+				screen.TermMessage("Lua Error:", a, "does not exist")
 				continue
 			}
 			names = append(names, "")
@@ -94,7 +96,7 @@ func BufMapKey(k Event, action string) {
 			afn = f
 			names = append(names, a)
 		} else {
-			screen.TermMessage("Error:", action, "does not exist")
+			screen.TermMessage("Error:", a, "does not exist")
 			continue
 		}
 		actionfns = append(actionfns, afn)
