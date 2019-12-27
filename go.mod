@@ -16,7 +16,7 @@ require (
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
 	github.com/zyedidia/poller v0.0.0-20170616160828-ab09682913b7 // indirect
 	github.com/zyedidia/pty v2.0.0+incompatible // indirect
-	github.com/zyedidia/tcell v0.0.0-20191219170756-59b50b23fa9b
+	github.com/zyedidia/tcell v0.0.0-20191227234059-2c574ec1b972
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
 	golang.org/x/text v0.3.2
 	gopkg.in/yaml.v2 v2.2.7

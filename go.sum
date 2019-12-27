@@ -46,6 +46,8 @@ github.com/zyedidia/pty v2.0.0+incompatible h1:Ou5vXL6tvjst+RV8sUFISbuKDnUJPhnpy
 github.com/zyedidia/pty v2.0.0+incompatible/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
 github.com/zyedidia/tcell v0.0.0-20191219170756-59b50b23fa9b h1:cryFENlMxJJrkimVx/CUMFDCxC4vpmey2x3A3tAgTNM=
 github.com/zyedidia/tcell v0.0.0-20191219170756-59b50b23fa9b/go.mod h1:yXgdp23+aW8OMENYVBvpKoeiBtjaVWJ9HhpPDu6LBfM=
+github.com/zyedidia/tcell v0.0.0-20191227234059-2c574ec1b972 h1:tqsPH3tvIF9LQMWQODln09mJEV1ZlwC1qc5dTplj+eI=
+github.com/zyedidia/tcell v0.0.0-20191227234059-2c574ec1b972/go.mod h1:yXgdp23+aW8OMENYVBvpKoeiBtjaVWJ9HhpPDu6LBfM=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415/go.mod h1:8leT8G0Cm8NoJHdrrKHyR9MirWoF4YW7pZh06B6H+1E=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
