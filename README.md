@@ -92,7 +92,7 @@ There is a great script which can install micro for you by downloading the lates
 
 Then you can easily install micro:
 
-    $ curl https://getmic.ro | bash
+    $ curl -L https://getmic.ro | bash
 
 The script will install the micro binary to the current directory.
 
