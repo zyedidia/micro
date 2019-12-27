@@ -820,23 +820,23 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 	nreplaced := 0
 	start := h.Buf.Start()
-	end := h.Buf.End()
-	if h.Cursor.HasSelection() {
-		start = h.Cursor.CurSelection[0]
-		end = h.Cursor.CurSelection[1]
-	}
+	// end := h.Buf.End()
+	// if h.Cursor.HasSelection() {
+	// 	start = h.Cursor.CurSelection[0]
+	// 	end = h.Cursor.CurSelection[1]
+	// }
 	if all {
-		nreplaced = h.Buf.ReplaceRegex(start, end, regex, replace)
+		nreplaced = h.Buf.ReplaceRegex(start, h.Buf.End(), regex, replace)
 	} else {
 		inRange := func(l buffer.Loc) bool {
-			return l.GreaterEqual(start) && l.LessThan(end)
+			return l.GreaterEqual(start) && l.LessEqual(h.Buf.End())
 		}
 
 		searchLoc := start
 		searching := true
 		var doReplacement func()
 		doReplacement = func() {
-			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, !noRegex)
+			locs, found, err := h.Buf.FindNext(search, start, h.Buf.End(), searchLoc, true, !noRegex)
 			if err != nil {
 				InfoBar.Error(err)
 				return
@@ -853,6 +853,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
 					h.Buf.Replace(locs[0], locs[1], replaceStr)
+
 					searchLoc = locs[0]
 					searchLoc.X += utf8.RuneCount(replace)
 					h.Cursor.Loc = searchLoc
