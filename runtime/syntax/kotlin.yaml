@@ -1,7 +1,7 @@
 filetype: kotlin
 
 detect:
-    filename: "\\.kt$"
+    filename: "\\.kts?$"
 
 rules:
      
@@ -9,7 +9,7 @@ rules:
     - symbol.operator: ([.:;,+*|=!?\\%]|<|>|/|-|&)
        
     # Statements Keywords
-    - statement: \b(as|by|class|constructor|companion|fun|import|in|infix|interface|inline|is|out|operator|package|return|suspend|super|this|when|val|var)\b
+    - statement: \b(as|by|class|constructor|companion|const|fun|import|in|infix|interface|inline|is|out|operator|package|return|suspend|super|this|when|val|var)\b
     - statement.properties: \b(get|set)\b
     - statement.control: \b(break|continue|else|do|if|try|catch|finally|for|while)\b
     - statement.class: \b(abstract|annotation|data|enum|final|open|sealed)\b
@@ -18,7 +18,7 @@ rules:
     - statement.parameter: \b(crossinline|noinline|reified|vararg)\b
     
     # Expression and types
-    - type: \b(dynamic|object|throw|typealias|typeof)\b 
+    - type: \b(dynamic|object|throw|typealias)\b 
 
     # Meta
     - statement.meta: \@(\bfile|delegate|field|get|property|receiver|set|setparam|param|)\b
@@ -28,7 +28,7 @@ rules:
     - constant.number: ([0-9]+)
     
     # Storage Types
-    - type.storage: \b(Byte|Char|Double|Float|Int|Long|Short|Boolean|Unit|Nothing)\b
+    - type.storage: \b(Byte|UByte|Char|Double|Float|Int|UInt|Long|ULong|Short|UShort|Boolean|Unit|Nothing)\b
     
     # Collections
     - type.collections: \b(Array)\b
