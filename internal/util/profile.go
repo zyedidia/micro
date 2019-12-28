@@ -16,14 +16,12 @@ func GetMemStats() string {
 	return fmt.Sprintf("Alloc: %s, Sys: %s, GC: %d, PauseTotalNs: %dns", humanize.Bytes(memstats.Alloc), humanize.Bytes(memstats.Sys), memstats.NumGC, memstats.PauseTotalNs)
 }
 
-var start time.Time
-
-func Tic(s string) {
+func Tic(s string) time.Time {
 	log.Println("START:", s)
-	start = time.Now()
+	return time.Now()
 }
 
-func Toc() {
+func Toc(start time.Time) {
 	end := time.Now()
 	log.Println("END: ElapsedTime in seconds:", end.Sub(start))
 }

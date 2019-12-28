@@ -88,7 +88,6 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 			h.Cursor.AddWordToSelection()
 		} else {
 			h.Cursor.SetSelectionEnd(h.Cursor.Loc)
-			h.Cursor.CopySelection("primary")
 		}
 	}
 
