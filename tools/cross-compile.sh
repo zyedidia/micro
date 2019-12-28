@@ -82,12 +82,12 @@ rm micro-$1/micro
 # Windows
 echo "Windows 64"
 GOOS=windows GOARCH=amd64 make build
-mv micro micro-$1
+mv micro.exe micro-$1
 zip -r -q -T micro-$1-win64.zip micro-$1
 mv micro-$1-win64.zip binaries
 echo "Windows 32"
 GOOS=windows GOARCH=386 make build
-mv micro micro-$1
+mv micro.exe micro-$1
 zip -r -q -T micro-$1-win32.zip micro-$1
 mv micro-$1-win32.zip binaries
 
