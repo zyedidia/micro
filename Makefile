@@ -18,6 +18,9 @@ build:
 build-dbg:
 	go build -mod=readonly -ldflags "-s -w $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
+build-mod:
+	go build -ldflags "-s -w $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
+
 # Builds micro after building the runtime and checking dependencies
 build-all: runtime build
 
@@ -39,6 +42,7 @@ install-quick:
 # Builds the runtime
 runtime:
 	git submodule update --init
+	go run runtime/syntax/make_headers.go runtime/syntax
 	go build -o tools/bindata ./tools/go-bindata
 	tools/bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
 	mv runtime.go internal/config
@@ -49,3 +53,4 @@ test:
 
 clean:
 	rm -f micro
+	rm -f runtime/syntax/*.hdr

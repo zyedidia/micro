@@ -12,11 +12,12 @@ import (
 )
 
 const (
-	RTColorscheme = 0
-	RTSyntax      = 1
-	RTHelp        = 2
-	RTPlugin      = 3
-	NumTypes      = 4 // How many filetypes are there
+	RTColorscheme  = 0
+	RTSyntax       = 1
+	RTHelp         = 2
+	RTPlugin       = 3
+	RTSyntaxHeader = 4
+	NumTypes       = 5 // How many filetypes are there
 )
 
 type RTFiletype byte
@@ -135,6 +136,7 @@ func InitRuntimeFiles() {
 
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.yaml")
+	add(RTSyntaxHeader, "header", "*.hdr")
 	add(RTHelp, "help", "*.md")
 
 	initlua := filepath.Join(ConfigDir, "init.lua")
