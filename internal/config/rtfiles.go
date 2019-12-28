@@ -1,6 +1,7 @@
 package config
 
 import (
+	"errors"
 	"io/ioutil"
 	"log"
 	"os"
@@ -140,6 +141,7 @@ func InitRuntimeFiles() {
 	if _, err := os.Stat(initlua); !os.IsNotExist(err) {
 		p := new(Plugin)
 		p.Name = "initlua"
+		p.DirName = "initlua"
 		p.Srcs = append(p.Srcs, realFile(initlua))
 		Plugins = append(Plugins, p)
 	}
@@ -155,6 +157,7 @@ func InitRuntimeFiles() {
 			srcs, _ := ioutil.ReadDir(filepath.Join(plugdir, d.Name()))
 			p := new(Plugin)
 			p.Name = d.Name()
+			p.DirName = d.Name()
 			for _, f := range srcs {
 				if strings.HasSuffix(f.Name(), ".lua") {
 					p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
@@ -182,6 +185,7 @@ func InitRuntimeFiles() {
 			if srcs, err := AssetDir(filepath.Join(plugdir, d)); err == nil {
 				p := new(Plugin)
 				p.Name = d
+				p.DirName = d
 				p.Default = true
 				for _, f := range srcs {
 					if strings.HasSuffix(f, ".lua") {
@@ -226,28 +230,42 @@ func PluginListRuntimeFiles(fileType RTFiletype) []string {
 }
 
 // PluginAddRuntimeFile adds a file to the runtime files for a plugin
-func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) {
-	fullpath := filepath.Join(ConfigDir, "plug", plugin, filePath)
+func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) error {
+	log.Println("PLUGIN ADD:", plugin)
+	pl := FindPlugin(plugin)
+	if pl == nil {
+		return errors.New("Plugin " + plugin + " does not exist")
+	}
+	pldir := pl.DirName
+	log.Println("DIRNAME:", pldir)
+	fullpath := filepath.Join(ConfigDir, "plug", pldir, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))
 	} else {
-		fullpath = path.Join("runtime", "plugins", plugin, filePath)
+		fullpath = path.Join("runtime", "plugins", pldir, filePath)
 		AddRuntimeFile(filetype, assetFile(fullpath))
 	}
+	return nil
 }
 
 // PluginAddRuntimeFilesFromDirectory adds files from a directory to the runtime files for a plugin
-func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, directory, pattern string) {
-	fullpath := filepath.Join(ConfigDir, "plug", plugin, directory)
+func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, directory, pattern string) error {
+	pl := FindPlugin(plugin)
+	if pl == nil {
+		return errors.New("Plugin " + plugin + " does not exist")
+	}
+	pldir := pl.DirName
+	fullpath := filepath.Join(ConfigDir, "plug", pldir, directory)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFilesFromDirectory(filetype, fullpath, pattern)
 	} else {
-		fullpath = path.Join("runtime", "plugins", plugin, directory)
+		fullpath = path.Join("runtime", "plugins", pldir, directory)
 		AddRuntimeFilesFromAssets(filetype, fullpath, pattern)
 	}
+	return nil
 }
 
 // PluginAddRuntimeFileFromMemory adds a file to the runtime files for a plugin from a given string
-func PluginAddRuntimeFileFromMemory(plugin string, filetype RTFiletype, filename, data string) {
+func PluginAddRuntimeFileFromMemory(filetype RTFiletype, filename, data string) {
 	AddRuntimeFile(filetype, memoryFile{filename, []byte(data)})
 }

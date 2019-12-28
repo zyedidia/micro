@@ -48,7 +48,7 @@ function onBufferOpen(buf)
     syntaxFile = syntaxFile .. "                rules: []\n"
     syntaxFile = syntaxFile .. "            - include: " .. codetype .. "\n"
 
-    config.AddRuntimeFileFromMemory("literate", config.RTSyntax, "literate.yaml", syntaxFile)
+    config.AddRuntimeFileFromMemory(config.RTSyntax, "literate.yaml", syntaxFile)
     config.Reload()
     buf:UpdateRules()
 end

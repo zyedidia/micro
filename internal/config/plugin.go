@@ -65,6 +65,7 @@ func RunPluginFnBool(fn string, args ...lua.LValue) (bool, error) {
 }
 
 type Plugin struct {
+	DirName string        // name of plugin folder
 	Name    string        // name of plugin
 	Info    *PluginInfo   // json file containing info
 	Srcs    []RuntimeFile // lua files
