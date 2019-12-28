@@ -103,10 +103,15 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
-			ind := t.LocFromVisual(buffer.Loc{mx, my})
-			if ind != -1 {
-				t.SetActive(ind)
-				return
+			if len(t.List) > 1 {
+				ind := t.LocFromVisual(buffer.Loc{mx, my})
+				if ind != -1 {
+					t.SetActive(ind)
+					return
+				}
+				if my == 0 {
+					return
+				}
 			}
 		case tcell.WheelUp:
 			if my == t.Y {

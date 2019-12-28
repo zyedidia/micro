@@ -280,14 +280,27 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 			h.DoRuneInsert(e.Rune())
 		}
 	case *tcell.EventMouse:
+		cancel := false
 		switch e.Buttons() {
+		case tcell.Button1:
+			_, my := e.Position()
+			if h.Buf.Settings["statusline"].(bool) && my >= h.GetView().Y+h.GetView().Height-1 {
+				cancel = true
+			}
 		case tcell.ButtonNone:
 			// Mouse event with no click
 			if !h.mouseReleased {
 				// Mouse was just released
 
-				mx, my := e.Position()
-				mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
+				// mx, my := e.Position()
+				// mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
+
+				// we could finish the selection based on the release location as described
+				// below but when the mouse click is within the scroll margin this will
+				// cause a scroll and selection even for a simple mouse click which is
+				// not good
+				// for terminals that don't support mouse motion events, selection via
+				// the mouse won't work but this is ok
 
 				// Relocating here isn't really necessary because the cursor will
 				// be in the right place from the last mouse event
@@ -295,20 +308,22 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				// events, this still allows the user to make selections, except only after they
 				// release the mouse
 
-				if !h.doubleClick && !h.tripleClick {
-					h.Cursor.Loc = mouseLoc
-					h.Cursor.SetSelectionEnd(h.Cursor.Loc)
-					h.Cursor.CopySelection("primary")
-				}
+				// if !h.doubleClick && !h.tripleClick {
+				// 	h.Cursor.Loc = mouseLoc
+				// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+				// 	h.Cursor.CopySelection("primary")
+				// }
 				h.mouseReleased = true
 			}
 		}
 
-		me := MouseEvent{
-			btn: e.Buttons(),
-			mod: e.Modifiers(),
+		if !cancel {
+			me := MouseEvent{
+				btn: e.Buttons(),
+				mod: e.Modifiers(),
+			}
+			h.DoMouseEvent(me, e)
 		}
-		h.DoMouseEvent(me, e)
 	}
 	h.Buf.MergeCursors()
 
