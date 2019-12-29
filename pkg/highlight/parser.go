@@ -220,6 +220,40 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 	return s, err
 }
 
+// HasIncludes returns whether this syntax def has any include statements
+func HasIncludes(d *Def) bool {
+	hasIncludes := len(d.rules.includes) > 0
+	for _, r := range d.rules.regions {
+		hasIncludes = hasIncludes || hasIncludesInRegion(r)
+	}
+	return hasIncludes
+}
+
+func hasIncludesInRegion(region *region) bool {
+	hasIncludes := len(region.rules.includes) > 0
+	for _, r := range region.rules.regions {
+		hasIncludes = hasIncludes || hasIncludesInRegion(r)
+	}
+	return hasIncludes
+}
+
+// GetIncludes returns a list of filetypes that are included by this syntax def
+func GetIncludes(d *Def) []string {
+	includes := d.rules.includes
+	for _, r := range d.rules.regions {
+		includes = append(includes, getIncludesInRegion(r)...)
+	}
+	return includes
+}
+
+func getIncludesInRegion(region *region) []string {
+	includes := region.rules.includes
+	for _, r := range region.rules.regions {
+		includes = append(includes, getIncludesInRegion(r)...)
+	}
+	return includes
+}
+
 // ResolveIncludes will sort out the rules for including other filetypes
 // You should call this after parsing all the Defs
 func ResolveIncludes(def *Def, files []*File) {

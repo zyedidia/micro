@@ -533,9 +533,28 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	// TODO: includes
-	// if b.SyntaxDef != nil {
-	// 	highlight.ResolveIncludes(b.SyntaxDef, files)
-	// }
+	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
+		includes := highlight.GetIncludes(b.SyntaxDef)
+
+		var files []*highlight.File
+		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+			data, _ := f.Data()
+			header, _ := highlight.MakeHeaderYaml(data)
+
+			for _, i := range includes {
+				if header.FileType == i {
+					file, _ := highlight.ParseFile(data)
+					files = append(files, file)
+					break
+				}
+			}
+			if len(files) >= len(includes) {
+				break
+			}
+		}
+
+		highlight.ResolveIncludes(b.SyntaxDef, files)
+	}
 
 	if b.Highlighter == nil || syntaxFile != "" {
 		if b.SyntaxDef != nil {
