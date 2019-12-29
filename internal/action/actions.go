@@ -638,10 +638,10 @@ func (h *BufPane) Save() bool {
 	if h.Buf.Path == "" {
 		h.SaveAs()
 	} else {
-		h.saveBufToFile(h.Buf.Path)
+		h.saveBufToFile(h.Buf.Path, "Save")
 	}
 
-	return true
+	return false
 }
 
 // SaveAs saves the buffer to disk with the given name
@@ -655,16 +655,15 @@ func (h *BufPane) SaveAs() bool {
 				InfoBar.Error("Error parsing arguments: ", err)
 				return
 			}
-			h.saveBufToFile(filename)
-
+			h.saveBufToFile(filename, "SaveAs")
 		}
 	})
-	return true
+	return false
 }
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (h *BufPane) saveBufToFile(filename string) {
+func (h *BufPane) saveBufToFile(filename string, action string) {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
@@ -678,6 +677,7 @@ func (h *BufPane) saveBufToFile(filename string) {
 						h.Buf.SetName(filename)
 						InfoBar.Message("Saved " + filename)
 					}
+					h.completeAction(action)
 				}
 			})
 		} else {
@@ -687,6 +687,7 @@ func (h *BufPane) saveBufToFile(filename string) {
 		h.Buf.Path = filename
 		h.Buf.SetName(filename)
 		InfoBar.Message("Saved " + filename)
+		h.completeAction(action)
 	}
 }
 

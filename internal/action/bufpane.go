@@ -361,8 +361,8 @@ func (h *BufPane) execAction(action func(*BufPane) bool, name string, cursor int
 	_, isMulti := MultiActions[name]
 	if (!isMulti && cursor == 0) || isMulti {
 		if h.PluginCB("pre" + name) {
-			asuccess := action(h)
-			psuccess := h.PluginCB("on" + name)
+			success := action(h)
+			success = success && h.PluginCB("on"+name)
 
 			if isMulti {
 				if recording_macro {
@@ -372,11 +372,15 @@ func (h *BufPane) execAction(action func(*BufPane) bool, name string, cursor int
 				}
 			}
 
-			return asuccess && psuccess
+			return success
 		}
 	}
 
 	return false
+}
+
+func (h *BufPane) completeAction(action string) {
+	h.PluginCB("on" + action)
 }
 
 func (h *BufPane) HasKeyEvent(e Event) bool {
