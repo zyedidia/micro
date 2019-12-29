@@ -211,9 +211,10 @@ func main() {
 	action.InitTabs(b)
 	action.InitGlobals()
 
+	events = make(chan tcell.Event)
+
 	// Here is the event loop which runs in a separate thread
 	go func() {
-		events = make(chan tcell.Event)
 		for {
 			screen.Lock()
 			e := screen.Screen.PollEvent()
