@@ -532,18 +532,29 @@ func (b *Buffer) UpdateRules() {
 		}
 	}
 
-	// TODO: includes
 	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
 		includes := highlight.GetIncludes(b.SyntaxDef)
 
 		var files []*highlight.File
 		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			data, _ := f.Data()
-			header, _ := highlight.MakeHeaderYaml(data)
+			data, err := f.Data()
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+			header, err := highlight.MakeHeaderYaml(data)
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
 
 			for _, i := range includes {
 				if header.FileType == i {
-					file, _ := highlight.ParseFile(data)
+					file, err := highlight.ParseFile(data)
+					if err != nil {
+						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
 					files = append(files, file)
 					break
 				}

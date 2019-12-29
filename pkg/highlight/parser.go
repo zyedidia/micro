@@ -106,10 +106,6 @@ func MakeHeader(data []byte) (*Header, error) {
 	fnameRgx := string(lines[1])
 	headerRgx := string(lines[2])
 
-	if fnameRgx == "" && headerRgx == "" {
-		return nil, errors.New("Syntax file must include at least one detection regex")
-	}
-
 	if fnameRgx != "" {
 		header.FtDetect[0], err = regexp.Compile(fnameRgx)
 	}
@@ -135,10 +131,6 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 
 	header := new(Header)
 	header.FileType = hdrYaml.FileType
-
-	if hdrYaml.Detect.FNameRgx == "" && hdrYaml.Detect.HeaderRgx == "" {
-		return nil, errors.New("Syntax file must include at least one detection regex")
-	}
 
 	if hdrYaml.Detect.FNameRgx != "" {
 		header.FtDetect[0], err = regexp.Compile(hdrYaml.Detect.FNameRgx)

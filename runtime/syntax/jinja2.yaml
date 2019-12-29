@@ -1,8 +1,5 @@
 filetype: jinja2
 
-detect:
-    filename: "\\.html$"
-
 rules:
   - include: "html"
   - special: "({{|}}|{%-?|-?%})"
