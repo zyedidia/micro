@@ -32,6 +32,7 @@ type RuntimeFile interface {
 
 // allFiles contains all available files, mapped by filetype
 var allFiles [NumTypes][]RuntimeFile
+var realFiles [NumTypes][]RuntimeFile
 
 // some file on filesystem
 type realFile string
@@ -85,6 +86,12 @@ func AddRuntimeFile(fileType RTFiletype, file RuntimeFile) {
 	allFiles[fileType] = append(allFiles[fileType], file)
 }
 
+// AddRealRuntimeFile registers a file for the given filetype
+func AddRealRuntimeFile(fileType RTFiletype, file RuntimeFile) {
+	allFiles[fileType] = append(allFiles[fileType], file)
+	realFiles[fileType] = append(realFiles[fileType], file)
+}
+
 // AddRuntimeFilesFromDirectory registers each file from the given directory for
 // the filetype which matches the file-pattern
 func AddRuntimeFilesFromDirectory(fileType RTFiletype, directory, pattern string) {
@@ -92,7 +99,7 @@ func AddRuntimeFilesFromDirectory(fileType RTFiletype, directory, pattern string
 	for _, f := range files {
 		if ok, _ := filepath.Match(pattern, f.Name()); !f.IsDir() && ok {
 			fullPath := filepath.Join(directory, f.Name())
-			AddRuntimeFile(fileType, realFile(fullPath))
+			AddRealRuntimeFile(fileType, realFile(fullPath))
 		}
 	}
 }
@@ -127,6 +134,12 @@ func ListRuntimeFiles(fileType RTFiletype) []RuntimeFile {
 	return allFiles[fileType]
 }
 
+// ListRealRuntimeFiles lists all real runtime files (on disk) for a filetype
+// these runtime files will be ones defined by the user and loaded from the config directory
+func ListRealRuntimeFiles(fileType RTFiletype) []RuntimeFile {
+	return realFiles[fileType]
+}
+
 // InitRuntimeFiles initializes all assets file and the config directory
 func InitRuntimeFiles() {
 	add := func(fileType RTFiletype, dir, pattern string) {
@@ -136,7 +149,7 @@ func InitRuntimeFiles() {
 
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.yaml")
-	add(RTSyntaxHeader, "header", "*.hdr")
+	add(RTSyntaxHeader, "syntax", "*.hdr")
 	add(RTHelp, "help", "*.md")
 
 	initlua := filepath.Join(ConfigDir, "init.lua")

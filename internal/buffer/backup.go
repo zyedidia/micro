@@ -36,7 +36,7 @@ func (b *Buffer) Backup(checkTime bool) error {
 
 	if checkTime {
 		sub := time.Now().Sub(b.lastbackup)
-		if sub < time.Duration(backup_time)*time.Millisecond {
+		if sub < time.Duration(backupTime)*time.Millisecond {
 			log.Println("Backup event but not enough time has passed", sub)
 			return nil
 		}

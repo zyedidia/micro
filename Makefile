@@ -1,15 +1,14 @@
 .PHONY: runtime
 
-VERSION := $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
+VERSION = $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/build-version.go)
-HASH := $(shell git rev-parse --short HEAD)
-DATE := $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
+HASH = $(shell git rev-parse --short HEAD)
+DATE = $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/build-date.go)
-ADDITIONAL_GO_LINKER_FLAGS := $(shell GOOS=$(shell go env GOHOSTOS) \
-	GOARCH=$(shell go env GOHOSTARCH) \
-	go run tools/info-plist.go "$(VERSION)")
+ADDITIONAL_GO_LINKER_FLAGS = $(shell GOOS=$(shell go env GOHOSTOS) \
+	GOARCH=$(shell go env GOHOSTARCH))
 GOBIN ?= $(shell go env GOPATH)/bin
-GOVARS := -X github.com/zyedidia/micro/internal/util.Version=$(VERSION) -X github.com/zyedidia/micro/internal/util.CommitHash=$(HASH) -X 'github.com/zyedidia/micro/internal/util.CompileDate=$(DATE)' -X github.com/zyedidia/micro/internal/util.Debug=OFF
+GOVARS = -X github.com/zyedidia/micro/internal/util.Version=$(VERSION) -X github.com/zyedidia/micro/internal/util.CommitHash=$(HASH) -X 'github.com/zyedidia/micro/internal/util.CompileDate=$(DATE)' -X github.com/zyedidia/micro/internal/util.Debug=OFF
 
 # Builds micro after checking dependencies but without updating the runtime
 build:
@@ -53,4 +52,3 @@ test:
 
 clean:
 	rm -f micro
-	rm -f runtime/syntax/*.hdr

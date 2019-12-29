@@ -1,6 +1,7 @@
 package highlight
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"regexp"
@@ -39,6 +40,14 @@ type Def struct {
 type Header struct {
 	FileType string
 	FtDetect [2]*regexp.Regexp
+}
+
+type HeaderYaml struct {
+	FileType string `yaml:"filetype"`
+	Detect   struct {
+		FNameRgx  string `yaml:"filename"`
+		HeaderRgx string `yaml:"header"`
+	} `yaml:"detect"`
 }
 
 type File struct {
@@ -82,52 +91,67 @@ func init() {
 	Groups = make(map[string]Group)
 }
 
-func ParseFtDetect(file *File) (r [2]*regexp.Regexp, err error) {
-	defer func() {
-		if r := recover(); r != nil {
-			var ok bool
-			err, ok = r.(error)
-			if !ok {
-				err = fmt.Errorf("pkg: %v", r)
-			}
-		}
-	}()
+// MakeHeader takes a header (.hdr file) file and parses the header
+// Header files make parsing more efficient when you only want to compute
+// on the headers of syntax files
+// A yaml file might take ~400us to parse while a header file only takes ~20us
+func MakeHeader(data []byte) (*Header, error) {
+	lines := bytes.Split(data, []byte{'\n'})
+	if len(lines) < 3 {
+		return nil, errors.New("Header file has incorrect format")
+	}
+	header := new(Header)
+	var err error
+	header.FileType = string(lines[0])
+	fnameRgx := string(lines[1])
+	headerRgx := string(lines[2])
 
-	rules := file.yamlSrc
-
-	loaded := 0
-	for k, v := range rules {
-		if k == "detect" {
-			ftdetect := v.(map[interface{}]interface{})
-			if len(ftdetect) >= 1 {
-				syntax, err := regexp.Compile(ftdetect["filename"].(string))
-				if err != nil {
-					return r, err
-				}
-
-				r[0] = syntax
-			}
-			if len(ftdetect) >= 2 {
-				header, err := regexp.Compile(ftdetect["header"].(string))
-				if err != nil {
-					return r, err
-				}
-
-				r[1] = header
-			}
-			loaded++
-		}
-
-		if loaded >= 2 {
-			break
-		}
+	if fnameRgx == "" && headerRgx == "" {
+		return nil, errors.New("Syntax file must include at least one detection regex")
 	}
 
-	if loaded == 0 {
-		return r, errors.New("No detect regexes found")
+	if fnameRgx != "" {
+		header.FtDetect[0], err = regexp.Compile(fnameRgx)
+	}
+	if headerRgx != "" {
+		header.FtDetect[1], err = regexp.Compile(headerRgx)
 	}
 
-	return r, err
+	if err != nil {
+		return nil, err
+	}
+
+	return header, nil
+}
+
+// MakeHeaderYaml takes a yaml spec for a syntax file and parses the
+// header
+func MakeHeaderYaml(data []byte) (*Header, error) {
+	var hdrYaml HeaderYaml
+	err := yaml.Unmarshal(data, &hdrYaml)
+	if err != nil {
+		return nil, err
+	}
+
+	header := new(Header)
+	header.FileType = hdrYaml.FileType
+
+	if hdrYaml.Detect.FNameRgx == "" && hdrYaml.Detect.HeaderRgx == "" {
+		return nil, errors.New("Syntax file must include at least one detection regex")
+	}
+
+	if hdrYaml.Detect.FNameRgx != "" {
+		header.FtDetect[0], err = regexp.Compile(hdrYaml.Detect.FNameRgx)
+	}
+	if hdrYaml.Detect.HeaderRgx != "" {
+		header.FtDetect[1], err = regexp.Compile(hdrYaml.Detect.HeaderRgx)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return header, nil
 }
 
 func ParseFile(input []byte) (f *File, err error) {

@@ -25,7 +25,7 @@ import (
 	"golang.org/x/text/transform"
 )
 
-const backup_time = 8000
+const backupTime = 8000
 
 var (
 	OpenBuffers []*Buffer
@@ -113,7 +113,7 @@ type Buffer struct {
 	Messages []*Message
 
 	// counts the number of edits
-	// resets every backup_time edits
+	// resets every backupTime edits
 	lastbackup time.Time
 }
 
@@ -453,59 +453,91 @@ func (b *Buffer) UpdateRules() {
 	if !b.Type.Syntax {
 		return
 	}
-	rehighlight := false
-	var files []*highlight.File
-	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+	syntaxFile := ""
+	ft := b.Settings["filetype"].(string)
+	var header *highlight.Header
+	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 		data, err := f.Data()
 		if err != nil {
-			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-		} else {
-			file, err := highlight.ParseFile(data)
-			if err != nil {
-				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-			ftdetect, err := highlight.ParseFtDetect(file)
-			if err != nil {
-				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
+			screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
+			continue
+		}
 
-			ft := b.Settings["filetype"].(string)
-			if (ft == "unknown" || ft == "") && !rehighlight {
-				if highlight.MatchFiletype(ftdetect, b.Path, b.lines[0].data) {
-					header := new(highlight.Header)
-					header.FileType = file.FileType
-					header.FtDetect = ftdetect
-					b.SyntaxDef, err = highlight.ParseDef(file, header)
-					if err != nil {
-						screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-						continue
-					}
-					rehighlight = true
-				}
-			} else {
-				if file.FileType == ft && !rehighlight {
-					header := new(highlight.Header)
-					header.FileType = file.FileType
-					header.FtDetect = ftdetect
-					b.SyntaxDef, err = highlight.ParseDef(file, header)
-					if err != nil {
-						screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-						continue
-					}
-					rehighlight = true
-				}
+		header, err = highlight.MakeHeader(data)
+		if err != nil {
+			screen.TermMessage("Error reading syntax header file", f.Name(), err)
+			continue
+		}
+
+		if ft == "unknown" || ft == "" {
+			if highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data) {
+				syntaxFile = f.Name()
+				break
 			}
-			files = append(files, file)
+		} else if header.FileType == ft {
+			syntaxFile = f.Name()
+			break
 		}
 	}
 
-	if b.SyntaxDef != nil {
-		highlight.ResolveIncludes(b.SyntaxDef, files)
+	if syntaxFile == "" {
+		// search for the syntax file in the user's custom syntax files
+		for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+			data, err := f.Data()
+			if err != nil {
+				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+
+			header, err = highlight.MakeHeaderYaml(data)
+			file, err := highlight.ParseFile(data)
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+
+			if (ft == "unknown" || ft == "" && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
+				syndef, err := highlight.ParseDef(file, header)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+				b.SyntaxDef = syndef
+				break
+			}
+		}
+	} else {
+		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+			if f.Name() == syntaxFile {
+				data, err := f.Data()
+				if err != nil {
+					screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+
+				file, err := highlight.ParseFile(data)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+
+				syndef, err := highlight.ParseDef(file, header)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+				b.SyntaxDef = syndef
+				break
+			}
+		}
 	}
 
-	if b.Highlighter == nil || rehighlight {
+	// TODO: includes
+	// if b.SyntaxDef != nil {
+	// 	highlight.ResolveIncludes(b.SyntaxDef, files)
+	// }
+
+	if b.Highlighter == nil || syntaxFile != "" {
 		if b.SyntaxDef != nil {
 			b.Settings["filetype"] = b.SyntaxDef.FileType
 			b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
