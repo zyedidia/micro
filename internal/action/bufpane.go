@@ -268,6 +268,9 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 			esc: e.EscSeq(),
 		}
 		h.DoKeyEvent(re)
+	case *tcell.EventPaste:
+		h.paste(e.Text())
+		h.Relocate()
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),
