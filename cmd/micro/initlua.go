@@ -73,6 +73,8 @@ func luaImportMicroConfig() *lua.LTable {
 	ulua.L.SetField(pkg, "RegisterCommonOption", luar.New(ulua.L, config.RegisterCommonOption))
 	ulua.L.SetField(pkg, "RegisterGlobalOption", luar.New(ulua.L, config.RegisterGlobalOption))
 	ulua.L.SetField(pkg, "GetGlobalOption", luar.New(ulua.L, config.GetGlobalOption))
+	ulua.L.SetField(pkg, "SetGlobalOption", luar.New(ulua.L, action.SetGlobalOption))
+	ulua.L.SetField(pkg, "SetGlobalOptionNative", luar.New(ulua.L, action.SetGlobalOptionNative))
 
 	return pkg
 }
