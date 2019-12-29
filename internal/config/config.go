@@ -14,16 +14,21 @@ var ConfigDir string
 func InitConfigDir(flagConfigDir string) error {
 	var e error
 
-	xdgHome := os.Getenv("XDG_CONFIG_HOME")
-	if xdgHome == "" {
-		// The user has not set $XDG_CONFIG_HOME so we should act like it was set to ~/.config
-		home, err := homedir.Dir()
-		if err != nil {
-			return errors.New("Error finding your home directory\nCan't load config files")
+	microHome := os.Getenv("MICRO_CONFIG_HOME")
+	if microHome == "" {
+		// The user has not set $MICRO_CONFIG_HOME so we'll try $XDG_CONFIG_HOME
+		xdgHome := os.Getenv("XDG_CONFIG_HOME")
+		if xdgHome == "" {
+			// The user has not set $XDG_CONFIG_HOME so we should act like it was set to ~/.config
+			home, err := homedir.Dir()
+			if err != nil {
+				return errors.New("Error finding your home directory\nCan't load config files")
+			}
+			xdgHome = home + "/.config"
 		}
-		xdgHome = home + "/.config"
+		microHome = xdgHome + "/micro"
 	}
-	ConfigDir = xdgHome + "/micro"
+	ConfigDir = microHome
 
 	if len(flagConfigDir) > 0 {
 		if _, err := os.Stat(flagConfigDir); os.IsNotExist(err) {
@@ -34,9 +39,9 @@ func InitConfigDir(flagConfigDir string) error {
 		}
 	}
 
-	if _, err := os.Stat(xdgHome); os.IsNotExist(err) {
-		// If the xdgHome doesn't exist we should create it
-		err = os.Mkdir(xdgHome, os.ModePerm)
+	if _, err := os.Stat(microHome); os.IsNotExist(err) {
+		// If the microHome doesn't exist we should create it
+		err = os.Mkdir(microHome, os.ModePerm)
 		if err != nil {
 			return errors.New("Error creating XDG_CONFIG_HOME directory: " + err.Error())
 		}
