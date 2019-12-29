@@ -36,7 +36,7 @@ function onRune(bp, r)
             end
         end
     end
-    return false
+    return true
 end
 
 function preInsertNewline(bp)

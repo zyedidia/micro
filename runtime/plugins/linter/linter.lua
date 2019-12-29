@@ -125,7 +125,7 @@ end
 
 function onSave(bp)
     runLinter(bp.Buf)
-    return false
+    return true
 end
 
 function lint(buf, linter, cmd, args, errorformat, loff, coff)
