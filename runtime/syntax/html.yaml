@@ -18,8 +18,12 @@ rules:
 
     - symbol.tag: "<|>"
     - constant.string.url: "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
-    - comment: "<!--.+?-->"
     - preproc: "<!DOCTYPE.+?>"
+
+    - comment:
+        start: "<!--"
+        end: "-->"
+        rules: []
 
     - constant.string:
         start: "\""
