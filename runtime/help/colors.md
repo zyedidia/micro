@@ -200,7 +200,7 @@ In the future, plugins may also be able to use color groups for styling.
 
 ## Syntax files
 
-The syntax files is written in yaml-format and specify how to highlight
+The syntax files are written in yaml-format and specify how to highlight
 languages.
 
 Micro's builtin syntax highlighting tries very hard to be sane, sensible and
