@@ -810,7 +810,11 @@ func (h *BufPane) Copy() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.CopySelection("clipboard")
 		h.freshClip = true
-		InfoBar.Message("Copied selection")
+		if clipboard.Unsupported {
+			InfoBar.Message("Copied selection (install xclip for external clipboard)")
+		} else {
+			InfoBar.Message("Copied selection")
+		}
 	}
 	h.Relocate()
 	return true
