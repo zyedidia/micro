@@ -5,10 +5,11 @@ hotkeys are fully customizable to your liking.
 
 Custom keybindings are stored internally in micro if changed with the `> bind`
 command or you can also be added in the file `~/.config/micro/bindings.json` as
-discussed below.  For a list of the default keybindings in the json format used
+discussed below. For a list of the default keybindings in the json format used
 by micro, please see the end of this file. For a more user-friendly list with
 explanations of what the default hotkeys are and what they do, please see
-`>help defaultkeys`
+`> help defaultkeys` (a json formatted list of default keys is included
+at the end of this document).
 
 If `~/.config/micro/bindings.json` does not exist, you can simply create it.
 Micro will know what to do with it.
@@ -18,7 +19,6 @@ the cursor to the start and end of the line, and ctrl up and down move the
 cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
-
 
 ## Rebinding keys
 
@@ -46,6 +46,21 @@ save and quit you can bind it like so:
     "Alt-s": "Save,Quit"
 }
 ```
+
+Each action will return a success flag. Actions can be chained such that
+the chain only continues when there are successes, or failures, or either.
+The `,` separator will always chain to the next action. The `|` separator
+will abort the chain if the action preceding it succeeds, and the `&` will
+abort the chain if the action preceding it fails. For example, in the default
+bindings, tab is bound as
+
+```
+"Tab": "Autocomplete|IndentSelection|InsertTab"
+```
+
+This means that if the `Autocomplete` action is successful, the chain will abort.
+Otherwise, it will try `IndentSelection`, and if that fails too, it will
+execute `InsertTab`.
 
 ## Binding commands
 
@@ -119,12 +134,10 @@ You can do this in linux using the loadkeys program.
 
 Coming soon!
 
-
 ## Unbinding keys
 
 It is also possible to disable any of the default key bindings by use of the 
-`UnbindKey` action in the user's `bindings.json` file.
-
+`None` action in the user's `bindings.json` file.
 
 ## Bindable actions and bindable keys
 
@@ -221,8 +234,9 @@ SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
-UnbindKey
+None
 JumpToMatchingBrace
+Autocomplete
 ```
 
 You can also bind some mouse actions (these must be bound to mouse buttons)
@@ -409,8 +423,8 @@ MouseWheelRight
     "Backspace":      "Backspace",
     "Alt-CtrlH":      "DeleteWordLeft",
     "Alt-Backspace":  "DeleteWordLeft",
-    "Tab":            "IndentSelection,InsertTab",
-    "Backtab":        "OutdentSelection,OutdentLine",
+    "Tab":            "Autocomplete|IndentSelection|InsertTab",
+    "Backtab":        "OutdentSelection|OutdentLine",
     "CtrlO":          "OpenFile",
     "CtrlS":          "Save",
     "CtrlF":          "Find",
@@ -433,9 +447,12 @@ MouseWheelRight
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
+    "CtrlPageUp":     "PreviousTab",
+    "CtrlPageDown":   "NextTab",
     "CtrlG":          "ToggleHelp",
+    "Alt-g":          "ToggleKeyMenu",
     "CtrlR":          "ToggleRuler",
-    "CtrlL":          "JumpLine",
+    "CtrlL":          "command-edit:goto ",
     "Delete":         "Delete",
     "CtrlB":          "ShellMode",
     "CtrlQ":          "Quit",
@@ -443,6 +460,7 @@ MouseWheelRight
     "CtrlW":          "NextSplit",
     "CtrlU":          "ToggleMacro",
     "CtrlJ":          "PlayMacro",
+    "Insert":         "ToggleOverwriteMode",
 
     // Emacs-style keybindings
     "Alt-f": "WordRight",
@@ -451,7 +469,6 @@ MouseWheelRight
     "Alt-e": "EndOfLine",
 
     // Integration with file managers
-    "F1":  "ToggleHelp",
     "F2":  "Save",
     "F3":  "Find",
     "F4":  "Quit",
@@ -466,12 +483,11 @@ MouseWheelRight
     "MouseMiddle":    "PastePrimary",
     "Ctrl-MouseLeft": "MouseMultiCursor",
 
-    // Multiple cursors bindings
     "Alt-n": "SpawnMultiCursor",
     "Alt-m": "SpawnMultiCursorSelect",
     "Alt-p": "RemoveMultiCursor",
     "Alt-c": "RemoveAllMultiCursors",
-    "Alt-x": "SkipMultiCursor",
+    "Alt-x": "SkipMultiCursor"
 }
 ```
 
@@ -485,3 +501,9 @@ Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or
 `Ctrl` so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings).
 This is why in the default keybindings you can see `AltShiftLeft` instead of
 `Alt-ShiftLeft` (they are equivalent).
+
+Please note that terminal emulators are strange applications and micro only receives
+key events that the terminal decides to send. Some terminal emulators may not
+send certain events even if this document says micro can receive the event. To see
+exactly what micro receives from the terminal when you press a key, run the `> raw`
+command.

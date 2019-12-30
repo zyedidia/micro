@@ -8,17 +8,6 @@ Hopefully you'll find this useful.
 
 See `> help defaultkeys` for a list an explanation of the default keybindings.
 
-### Plugins
-
-Micro has a plugin manager which can automatically download plugins for you. To
-see the 'official' plugins, go to github.com/micro-editor/plugin-channel.
-
-For example, if you'd like to install the snippets plugin (listed in that repo),
-just press `CtrlE` to execute a command, and type `plugin install snippets`.
-
-For more information about the plugin manager, see the end of the `plugins` help
-topic.
-
 ### Settings
 
 In micro, your settings are stored in `~/.config/micro/settings.json`, a file

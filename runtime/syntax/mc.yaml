@@ -1,0 +1,23 @@
+# sendmail config files
+
+filetype: mc
+
+detect:
+    filename: "\\.mc$"
+
+rules:
+    - statement: "^(divert|VERSIONID|OSTYPE|DOMAIN|FEATURE|define)"
+    - statement: "^(DAEMON_OPTIONS|MAILER)"
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+    - comment:
+        start: "dnl"
+        end: "$"
+        rules: []
+    - constant.string:
+        start: "`"
+        end: "'"
+        rules: []
+
