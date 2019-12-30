@@ -1,15 +1,9 @@
-filetype: vue
+filetype: svelte
 
 detect:
-    filename: "\\.vue$"
+    filename: "\\.svelte$"
 
 rules:
-    - default:
-        start: "<template.*?>"
-        end: "</template.*?>"
-        rules: 
-            - include: "html5"
-            
     - default: 
         start: "<script>"
         end: "</script>"
@@ -17,14 +11,17 @@ rules:
             - include: "javascript"
 
     - default: 
-        start: "<script[ ]+lang=(\"ts\"|'ts')>"
+        start: "<script lang=\"ts\">"
         end: "</script>"
         rules:
             - include: "typescript"
-    
     - default:
         start: "<style.*?>"
         end: "</style.*?>"
         rules:
             - include: "css"
-    
+    - default:
+        start: "^"
+        end: "$"
+        rules:
+            - include: "html5"
