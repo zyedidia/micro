@@ -8,17 +8,21 @@ the config directory.
 
 Here are the options that you can set:
 
-* `autoindent`: when creating a new line use the same indentation as the 
+* `autoindent`: when creating a new line, use the same indentation as the 
    previous line.
 
 	default value: `true`
 
-* `autosave`: micro will save the buffer every 8 seconds automatically. Micro
-   also will automatically save and quit when you exit without asking. Be
-   careful when using this feature, because you might accidentally save a file,
-   overwriting what was there before.
+* `backup`: micro will automatically keep backups of all open buffers. Backups
+   are stored in `~/.config/micro/backups` and are removed when the buffer is
+   closed cleanly. In the case of a system crash or a micro crash, the contents
+   of the buffer can be recovered automatically by opening the file that
+   was being edited before the crash, or manually by searching for the backup
+   in the backup directory. Backups are made in the background when a buffer is
+   modified and the latest backup is more than 8 seconds old, or when micro
+   detects a crash. It is highly recommended that you leave this feature enabled.
 
-	default value: `false`
+    default value: `true`
 
 * `basename`: in the infobar, show only the basename of the file being edited
    rather than the full path.
@@ -51,6 +55,11 @@ Here are the options that you can set:
 
 	default value: `true`
 
+* `encoding`: the encoding to open and save files with. Supported encodings
+   are listed at https://www.w3.org/TR/encoding/.
+
+    default value: `utf-8`
+
 * `eofnewline`: micro will automatically add a newline to the file.
 
 	default value: `false`
@@ -67,11 +76,12 @@ Here are the options that you can set:
 	default value: `true`
 
 * `fileformat`: this determines what kind of line endings micro will use for the
-   file. UNIX line endings are just `\n` (lf) whereas dos line endings are
-   `\r\n` (crlf). The two possible values for this option are `unix` and `dos`.
-   The fileformat will be automatically detected and displayed on the statusline
-   but this option is useful if you would like to change the line endings or if
-   you are starting a new file.
+   file. UNIX line endings are just `\n` (linefeed) whereas dos line endings are
+   `\r\n` (carriage return + linefeed). The two possible values for this option
+   are `unix` and `dos`. The fileformat will be automatically detected (when you
+   open an existing file) and displayed on the statusline, but this option is
+   useful if you would like to change the line endings or if you are starting a
+   new file.
 
 	default value: `unix`
 
@@ -87,7 +97,7 @@ Here are the options that you can set:
 
 * `indentchar`: sets the indentation character.
 
-	default value: ` `
+	default value: ` ` (space)
 
 * `infobar`: enables the line at the bottom of the editor where messages are
    printed. This option is `global only`.
@@ -96,8 +106,8 @@ Here are the options that you can set:
 
 * `keepautoindent`: when using autoindent, whitespace is added for you. This
    option determines if when you move to the next line without any insertions
-   the whitespace that was added should be deleted. By default the autoindent
-   whitespace is deleted if the line was left empty.
+   the whitespace that was added should be deleted to remove trailing whitespace.
+   By default, the autoindent whitespace is deleted if the line was left empty.
 
 	default value: `false`
 
@@ -107,6 +117,17 @@ Here are the options that you can set:
 
 	default value: `false`
 
+* `matchbrace`: underline matching braces for '()', '{}', '[]' when the cursor
+   is on a brace character.
+
+    default value: `true`
+
+* `mkparents`: if a file is opened on a path that does not exist, the file cannot
+   be saved because the parent directories don't exist. This option lets micro
+   automatically create the parent directories in such a situation.
+
+    default value: `false`
+
 * `mouse`: whether to enable mouse support. When mouse support is disabled,
    usually the terminal will be able to access mouse events which can be useful
    if you want to copy from the terminal instead of from micro (if over ssh for
@@ -114,19 +135,6 @@ Here are the options that you can set:
    does not).
 
 	default value: `true`
-
-* `pluginchannels`: contains all the channels micro's plugin manager will search
-   for plugins in. A channel is simply a list of 'repository' json files which
-   contain metadata about the given plugin. See the `Plugin Manager` section of
-   the `plugins` help topic for more information.
-
-	default value: `https://github.com/micro-editor/plugin-channel`
-
-* `pluginrepos`: contains all the 'repositories' micro's plugin manager will
-   search for plugins in. A repository consists of a `repo.json` file which
-   contains metadata for a single plugin.
-
-	default value: ` `
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
 
@@ -184,21 +192,22 @@ Here are the options that you can set:
 
 	default value: `true`
 
+* `statusformatl`: format string definition for the left-justified part of the
+   statusline. Special directives should be placed inside `$()`. Special
+   directives include: `filename`, `modified`, `line`, `col`, `opt`, `bind`.
+   The `opt` and `bind` directives take either an option or an action afterward
+   and fill in the value of the option or the key bound to the action.
+
+    default value: `$(filename) $(modified)($(line),$(col)) $(opt:filetype)
+                    $(opt:fileformat) $(opt:encoding)`
+
+* `statusformatl`: format string definition for the left-justified part of the
+   statusline.
+
+    default value: `$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp):
+                    toggle help`
+
 * `statusline`: display the status line at the bottom of the screen.
-
-	default value: `true`
-
-* `matchbrace`: highlight matching braces for '()', '{}', '[]'
-
-    default value: `false`
-
-* `matchbraceleft`: when matching a closing brace, should matching match the
-   brace directly under the cursor, or the character to the left? only matters
-   if `matchbrace` is true
-
-    default value: `false`
-
-* `syntax`: turns syntax on or off.
 
 	default value: `true`
 
@@ -207,6 +216,10 @@ Here are the options that you can set:
    saving with su.
 
 	default value: `sudo`
+
+* `syntax`: turns syntax on or off.
+
+	default value: `true`
 
 * `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
    (e.g. move over 4 spaces at once). This option only does anything if
@@ -235,30 +248,13 @@ Here are the options that you can set:
 
 ---
 
-Default plugin options:
-
-* `autoclose`: automatically close `{}` `()` `[]` `""` `''`. Provided by the
-   `autoclose` plugin
-
-	default value: `true`
-
-* `ftoptions`: by default, micro will set some options based on the filetype. At
-   the moment, micro will use tabs for makefiles and spaces for python and yaml
-   files regardless of your settings. If you would like to disable this behavior
-   turn this option off.
-
-	default value: `true`
-
-* `linter`: Automatically lint when the file is saved. Provided by the `linter`
-   plugin.
-
-	default value: `true`
+Plugin options: all plugins come with a special option to enable or disable them. THe option
+is a boolean with the same name as the plugin itself.
 
 Any option you set in the editor will be saved to the file 
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
-
 
 ## Global and local settings
 

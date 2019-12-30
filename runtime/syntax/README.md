@@ -64,5 +64,4 @@ Here is a list of the files that have been converted to properly use colorscheme
 
 # License
 
-Because the nano syntax files I have modified are distributed under the GNU GPLv3 license, these files are also distributed
-under that license. See [LICENSE](LICENSE).
+See [LICENSE](LICENSE).

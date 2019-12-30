@@ -13,17 +13,17 @@ rules:
       # definitions
     - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
       # keywords
-    - statement: "\\b(begin|break|catch|continue|function|elseif|struct|else|end|finally|for|global|local|const|if|include|import|using|require|macro|println|return|try|type|while|module)\\b"
+    - statement: "\\b(begin|break|catch|continue|function|elseif|struct|else|end|finally|for|global|local|let|const|if|import|using|macro|println|return|try|while|module)\\b"
       # decorators
     - identifier.macro: "@[A-Za-z0-9_]+"
       # operators
-    - symbol.operator: "[-+*/|=%<>&~^]|\\b(and|not|or|is|in)\\b"
+    - symbol.operator: "[-+*/|=%<>&~^]|\\b(isa|in)\\b"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
-    - constant.number: "\\b[0-9]+\\b"
+    - constant.number: "\\b([0-9]+(_[0-9]+)*|0x[0-9a-fA-F]+(_[0-9a-fA-F]+)*|0b[01]+(_[01]+)*|0o[0-7]+(_[0-7]+)*)\\b"
 
-    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
+    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^']){1}'"
 
     - constant.string:
         start: "\"\"\""
