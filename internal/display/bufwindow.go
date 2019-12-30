@@ -45,12 +45,12 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 	w.Buf = b
 }
 
-func (v *View) GetView() *View {
-	return v
+func (w *BufWindow) GetView() *View {
+	return w.View
 }
 
-func (v *View) SetView(view *View) {
-	v = view
+func (w *BufWindow) SetView(view *View) {
+	w.View = view
 }
 
 func (w *BufWindow) Resize(width, height int) {

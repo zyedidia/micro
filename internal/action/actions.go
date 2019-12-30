@@ -614,8 +614,6 @@ func (h *BufPane) Autocomplete() bool {
 // InsertTab inserts a tab or spaces
 func (h *BufPane) InsertTab() bool {
 	b := h.Buf
-	l := b.LineBytes(h.Cursor.Y)
-	l = util.SliceStart(l, h.Cursor.X)
 	indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
 	tabBytes := len(indent)
 	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
