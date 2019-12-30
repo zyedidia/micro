@@ -23,3 +23,14 @@ rules:
         start: "^#"
         end: "$"
         rules: []
+
+    # Diffs (i.e. git commit --verbose)
+    - default:
+        start: "^diff"
+        # Diff output puts a space before file contents on each line so this
+        # should never match valid diff output and extend highlighting to the
+        # end of the file
+        end: "^ENDOFFILE"
+        limit-group: "magenta"
+        rules:
+            - include: "patch"
