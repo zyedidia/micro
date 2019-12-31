@@ -1,7 +1,7 @@
 filetype: nim
 
 detect: 
-    filename: "\\.nim$|\\.nims$|nim.cfg"
+    filename: "\\.nims?$|nim.cfg"
 
 rules:
     - preproc: "[\\{\\|]\\b(atom|lit|sym|ident|call|lvalue|sideeffect|nosideeffect|param|genericparam|module|type|let|var|const|result|proc|method|iterator|converter|macro|template|field|enumfield|forvar|label|nk[a-zA-Z]+|alias|noalias)\\b[\\}\\|]"

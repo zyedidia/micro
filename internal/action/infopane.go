@@ -147,7 +147,7 @@ var InfoNones = []string{
 	"SkipMultiCursor",
 }
 
-// InfoOverrides is the list of actions which have been overriden
+// InfoOverrides is the list of actions which have been overridden
 // by the infohandler
 var InfoOverrides = map[string]InfoKeyAction{
 	"CursorUp":      (*InfoPane).CursorUp,

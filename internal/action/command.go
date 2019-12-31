@@ -35,37 +35,37 @@ var commands map[string]Command
 
 func InitCommands() {
 	commands = map[string]Command{
-		"set":        Command{(*BufPane).SetCmd, OptionValueComplete},
-		"reset":      Command{(*BufPane).ResetCmd, OptionValueComplete},
-		"setlocal":   Command{(*BufPane).SetLocalCmd, OptionValueComplete},
-		"show":       Command{(*BufPane).ShowCmd, OptionComplete},
-		"showkey":    Command{(*BufPane).ShowKeyCmd, nil},
-		"run":        Command{(*BufPane).RunCmd, nil},
-		"bind":       Command{(*BufPane).BindCmd, nil},
-		"unbind":     Command{(*BufPane).UnbindCmd, nil},
-		"quit":       Command{(*BufPane).QuitCmd, nil},
-		"goto":       Command{(*BufPane).GotoCmd, nil},
-		"save":       Command{(*BufPane).SaveCmd, nil},
-		"replace":    Command{(*BufPane).ReplaceCmd, nil},
-		"replaceall": Command{(*BufPane).ReplaceAllCmd, nil},
-		"vsplit":     Command{(*BufPane).VSplitCmd, buffer.FileComplete},
-		"hsplit":     Command{(*BufPane).HSplitCmd, buffer.FileComplete},
-		"tab":        Command{(*BufPane).NewTabCmd, buffer.FileComplete},
-		"help":       Command{(*BufPane).HelpCmd, HelpComplete},
-		"eval":       Command{(*BufPane).EvalCmd, nil},
-		"log":        Command{(*BufPane).ToggleLogCmd, nil},
-		"plugin":     Command{(*BufPane).PluginCmd, PluginComplete},
-		"reload":     Command{(*BufPane).ReloadCmd, nil},
-		"reopen":     Command{(*BufPane).ReopenCmd, nil},
-		"cd":         Command{(*BufPane).CdCmd, buffer.FileComplete},
-		"pwd":        Command{(*BufPane).PwdCmd, nil},
-		"open":       Command{(*BufPane).OpenCmd, buffer.FileComplete},
-		"tabswitch":  Command{(*BufPane).TabSwitchCmd, nil},
-		"term":       Command{(*BufPane).TermCmd, nil},
-		"memusage":   Command{(*BufPane).MemUsageCmd, nil},
-		"retab":      Command{(*BufPane).RetabCmd, nil},
-		"raw":        Command{(*BufPane).RawCmd, nil},
-		"textfilter": Command{(*BufPane).TextFilterCmd, nil},
+		"set":        {(*BufPane).SetCmd, OptionValueComplete},
+		"reset":      {(*BufPane).ResetCmd, OptionValueComplete},
+		"setlocal":   {(*BufPane).SetLocalCmd, OptionValueComplete},
+		"show":       {(*BufPane).ShowCmd, OptionComplete},
+		"showkey":    {(*BufPane).ShowKeyCmd, nil},
+		"run":        {(*BufPane).RunCmd, nil},
+		"bind":       {(*BufPane).BindCmd, nil},
+		"unbind":     {(*BufPane).UnbindCmd, nil},
+		"quit":       {(*BufPane).QuitCmd, nil},
+		"goto":       {(*BufPane).GotoCmd, nil},
+		"save":       {(*BufPane).SaveCmd, nil},
+		"replace":    {(*BufPane).ReplaceCmd, nil},
+		"replaceall": {(*BufPane).ReplaceAllCmd, nil},
+		"vsplit":     {(*BufPane).VSplitCmd, buffer.FileComplete},
+		"hsplit":     {(*BufPane).HSplitCmd, buffer.FileComplete},
+		"tab":        {(*BufPane).NewTabCmd, buffer.FileComplete},
+		"help":       {(*BufPane).HelpCmd, HelpComplete},
+		"eval":       {(*BufPane).EvalCmd, nil},
+		"log":        {(*BufPane).ToggleLogCmd, nil},
+		"plugin":     {(*BufPane).PluginCmd, PluginComplete},
+		"reload":     {(*BufPane).ReloadCmd, nil},
+		"reopen":     {(*BufPane).ReopenCmd, nil},
+		"cd":         {(*BufPane).CdCmd, buffer.FileComplete},
+		"pwd":        {(*BufPane).PwdCmd, nil},
+		"open":       {(*BufPane).OpenCmd, buffer.FileComplete},
+		"tabswitch":  {(*BufPane).TabSwitchCmd, nil},
+		"term":       {(*BufPane).TermCmd, nil},
+		"memusage":   {(*BufPane).MemUsageCmd, nil},
+		"retab":      {(*BufPane).RetabCmd, nil},
+		"raw":        {(*BufPane).RawCmd, nil},
+		"textfilter": {(*BufPane).TextFilterCmd, nil},
 	}
 }
 
@@ -240,7 +240,7 @@ func (h *BufPane) RawCmd(args []string) {
 
 // TextFilterCmd filters the selection through the command.
 // Selection goes to the command input.
-// On successfull run command output replaces the current selection.
+// On successful run command output replaces the current selection.
 func (h *BufPane) TextFilterCmd(args []string) {
 	if len(args) == 0 {
 		InfoBar.Error("usage: textfilter arguments")
@@ -691,7 +691,7 @@ func (h *BufPane) BindCmd(args []string) {
 // UnbindCmd binds a key to its default action
 func (h *BufPane) UnbindCmd(args []string) {
 	if len(args) < 1 {
-		InfoBar.Error("Not enough arguements")
+		InfoBar.Error("Not enough arguments")
 		return
 	}
 

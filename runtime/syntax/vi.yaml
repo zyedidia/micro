@@ -24,7 +24,7 @@ rules:
         rules:
             - constant.specialChar: "\\\\."
 
-    - constant.comment:
+    - comment:
         start: "\""
         end: "$"
         rules: []

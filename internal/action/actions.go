@@ -614,8 +614,6 @@ func (h *BufPane) Autocomplete() bool {
 // InsertTab inserts a tab or spaces
 func (h *BufPane) InsertTab() bool {
 	b := h.Buf
-	l := b.LineBytes(h.Cursor.Y)
-	l = util.SliceStart(l, h.Cursor.X)
 	indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
 	tabBytes := len(indent)
 	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
@@ -810,7 +808,11 @@ func (h *BufPane) Copy() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.CopySelection("clipboard")
 		h.freshClip = true
-		InfoBar.Message("Copied selection")
+		if clipboard.Unsupported {
+			InfoBar.Message("Copied selection (install xclip for external clipboard)")
+		} else {
+			InfoBar.Message("Copied selection")
+		}
 	}
 	h.Relocate()
 	return true
@@ -984,7 +986,11 @@ func (h *BufPane) paste(clip string) {
 	h.Buf.Insert(h.Cursor.Loc, clip)
 	// h.Cursor.Loc = h.Cursor.Loc.Move(Count(clip), h.Buf)
 	h.freshClip = false
-	InfoBar.Message("Pasted clipboard")
+	if clipboard.Unsupported {
+		InfoBar.Message("Pasted clipboard (install xclip for external clipboard)")
+	} else {
+		InfoBar.Message("Pasted clipboard")
+	}
 }
 
 // JumpToMatchingBrace moves the cursor to the matching brace if it is

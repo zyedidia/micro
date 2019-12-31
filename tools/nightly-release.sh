@@ -48,6 +48,14 @@ github-release upload \
     --name "micro-$1-linux64.tar.gz" \
     --file binaries/micro-$1-linux64.tar.gz
 
+echo "Uploading Linux 64 static binary"
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag nightly \
+    --name "micro-$1-linux64-static.tar.gz" \
+    --file binaries/micro-$1-linux64-static.tar.gz
+
 echo "Uploading Linux 32 binary"
 github-release upload \
     --user zyedidia \

@@ -115,7 +115,7 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 		return [2]Loc{}, false, err
 	}
 
-	found := false
+	var found bool
 	var l [2]Loc
 	if down {
 		l, found = b.findDown(r, from, end)
