@@ -4,7 +4,7 @@ require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/flynn/json5 v0.0.0-20160717195620-7620272ed633
-	github.com/gdamore/encoding v1.0.0 // indirect
+	github.com/gdamore/tcell v1.3.0
 	github.com/go-errors/errors v1.0.1
 	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect
 	github.com/mattn/go-isatty v0.0.11

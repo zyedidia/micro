@@ -10,7 +10,7 @@ import (
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 )
 
 // The BufWindow provides a way of displaying a certain section

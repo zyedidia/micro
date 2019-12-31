@@ -6,7 +6,7 @@ import (
 	"github.com/zyedidia/micro/internal/display"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/views"
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 )
 
 // The TabList is a list of tabs and a window to display the tab bar

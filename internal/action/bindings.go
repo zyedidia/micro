@@ -9,9 +9,9 @@ import (
 	"unicode"
 
 	"github.com/flynn/json5"
+	"github.com/gdamore/tcell"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
-	"github.com/zyedidia/tcell"
 )
 
 func InitBindings() {
@@ -374,8 +374,6 @@ var keyEvents = map[string]tcell.Key{
 	"CtrlRightSq":    tcell.KeyCtrlRightSq,
 	"CtrlCarat":      tcell.KeyCtrlCarat,
 	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
-	"CtrlPageUp":     tcell.KeyCtrlPgUp,
-	"CtrlPageDown":   tcell.KeyCtrlPgDn,
 	"Tab":            tcell.KeyTab,
 	"Esc":            tcell.KeyEsc,
 	"Escape":         tcell.KeyEscape,

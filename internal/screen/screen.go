@@ -7,7 +7,7 @@ import (
 
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/pkg/terminfo"
-	"github.com/zyedidia/tcell"
+	"github.com/gdamore/tcell"
 )
 
 // Screen is the tcell screen we use to draw to the terminal

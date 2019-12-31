@@ -6,13 +6,13 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/gdamore/tcell"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/display"
 	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
-	"github.com/zyedidia/tcell"
 )
 
 type BufKeyAction func(*BufPane) bool
@@ -261,14 +261,14 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 	}
 
 	switch e := event.(type) {
-	case *tcell.EventRaw:
-		re := RawEvent{
-			esc: e.EscSeq(),
-		}
-		h.DoKeyEvent(re)
-	case *tcell.EventPaste:
-		h.paste(e.Text())
-		h.Relocate()
+	// case *tcell.EventRaw:
+	// 	re := RawEvent{
+	// 		esc: e.EscSeq(),
+	// 	}
+	// 	h.DoKeyEvent(re)
+	// case *tcell.EventPaste:
+	// 	h.paste(e.Text())
+	// 	h.Relocate()
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),

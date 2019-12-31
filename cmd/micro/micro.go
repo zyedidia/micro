@@ -7,6 +7,7 @@ import (
 	"os"
 	"sort"
 
+	"github.com/gdamore/tcell"
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
@@ -15,7 +16,6 @@ import (
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/zyedidia/tcell"
 )
 
 var (

@@ -1,12 +1,11 @@
 package action
 
 import (
-	"fmt"
 	"reflect"
 
+	"github.com/gdamore/tcell"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/display"
-	"github.com/zyedidia/tcell"
 )
 
 type RawPane struct {
@@ -35,6 +34,7 @@ func (h *RawPane) HandleEvent(event tcell.Event) {
 	}
 
 	h.Buf.Insert(h.Cursor.Loc, reflect.TypeOf(event).String()[7:])
-	h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
+	// h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
+	h.Buf.Insert(h.Cursor.Loc, "\n")
 	h.Relocate()
 }
