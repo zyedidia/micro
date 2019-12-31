@@ -22,10 +22,11 @@ func InitConfigDir(flagConfigDir string) error {
 			// The user has not set $XDG_CONFIG_HOME so we should act like it was set to ~/.config
 			home, err := homedir.Dir()
 			if err != nil {
-				return errors.New("Error finding your home directory\nCan't load config files")
+				return errors.New("Error finding your home directory\nCan't load config files: " + err.Error())
 			}
 			xdgHome = home + "/.config"
 		}
+
 		microHome = xdgHome + "/micro"
 	}
 	ConfigDir = microHome
@@ -39,20 +40,11 @@ func InitConfigDir(flagConfigDir string) error {
 		}
 	}
 
-	if _, err := os.Stat(microHome); os.IsNotExist(err) {
-		// If the microHome doesn't exist we should create it
-		err = os.Mkdir(microHome, os.ModePerm)
-		if err != nil {
-			return errors.New("Error creating XDG_CONFIG_HOME directory: " + err.Error())
-		}
-	}
-
-	if _, err := os.Stat(ConfigDir); os.IsNotExist(err) {
-		// If the micro specific config directory doesn't exist we should create that too
-		err = os.Mkdir(ConfigDir, os.ModePerm)
-		if err != nil {
-			return errors.New("Error creating configuration directory: " + err.Error())
-		}
+	// Create micro config home directory if it does not exist
+	// This creates parent directories and does nothing if it already exists
+	err := os.MkdirAll(ConfigDir, os.ModePerm)
+	if err != nil {
+		return errors.New("Error creating configuration directory: " + err.Error())
 	}
 
 	return e
