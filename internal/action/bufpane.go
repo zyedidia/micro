@@ -225,8 +225,6 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.BWindow.SetBuffer(b)
 	h.Cursor = b.GetActiveCursor()
 	h.Resize(h.GetView().Width, h.GetView().Height)
-	v := new(display.View)
-	h.SetView(v)
 	h.Relocate()
 	// Set mouseReleased to true because we assume the mouse is not being pressed when
 	// the editor is opened
