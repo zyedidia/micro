@@ -986,7 +986,11 @@ func (h *BufPane) paste(clip string) {
 	h.Buf.Insert(h.Cursor.Loc, clip)
 	// h.Cursor.Loc = h.Cursor.Loc.Move(Count(clip), h.Buf)
 	h.freshClip = false
-	InfoBar.Message("Pasted clipboard")
+	if clipboard.Unsupported {
+		InfoBar.Message("Pasted clipboard (install xclip for external clipboard)")
+	} else {
+		InfoBar.Message("Pasted clipboard")
+	}
 }
 
 // JumpToMatchingBrace moves the cursor to the matching brace if it is
