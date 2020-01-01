@@ -3,11 +3,11 @@ package action
 import (
 	"runtime"
 
-	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/internal/display"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
+	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/terminal"
 )
 
@@ -78,10 +78,10 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 			clipboard.WriteAll(t.GetSelection(t.GetView().Width), "clipboard")
 			InfoBar.Message("Copied selection to clipboard")
 		} else if t.Status != shell.TTDone {
-			t.WriteString(string(e.Rune()))
+			t.WriteString(event.EscSeq())
 		}
 	} else if e, ok := event.(*tcell.EventMouse); e != nil && (!ok || t.State.Mode(terminal.ModeMouseMask)) {
-		// t.WriteString(event.EscSeq())
+		t.WriteString(event.EscSeq())
 	} else if e != nil {
 		x, y := e.Position()
 		v := t.GetView()
