@@ -3,7 +3,6 @@ package buffer
 import (
 	"fmt"
 	"io"
-	"log"
 	"os"
 	"time"
 
@@ -37,7 +36,6 @@ func (b *Buffer) Backup(checkTime bool) error {
 	if checkTime {
 		sub := time.Now().Sub(b.lastbackup)
 		if sub < time.Duration(backupTime)*time.Millisecond {
-			log.Println("Backup event but not enough time has passed", sub)
 			return nil
 		}
 	}
@@ -47,12 +45,9 @@ func (b *Buffer) Backup(checkTime bool) error {
 	backupdir := config.ConfigDir + "/backups/"
 	if _, err := os.Stat(backupdir); os.IsNotExist(err) {
 		os.Mkdir(backupdir, os.ModePerm)
-		log.Println("Creating backup dir")
 	}
 
 	name := backupdir + util.EscapePath(b.AbsPath)
-
-	log.Println("Backing up to", name)
 
 	err := overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {

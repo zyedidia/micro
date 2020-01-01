@@ -1,16 +1,15 @@
 package display
 
 import (
-	"log"
 	"strconv"
 	"unicode/utf8"
 
+	"github.com/zyedidia/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/gdamore/tcell"
 )
 
 // The BufWindow provides a way of displaying a certain section
@@ -123,7 +122,6 @@ func (w *BufWindow) Bottomline() int {
 
 	l := w.LocFromVisual(buffer.Loc{0, w.Y + w.Height})
 
-	log.Println("Bottom line:", l.Y)
 	return l.Y
 }
 
@@ -134,7 +132,6 @@ func (w *BufWindow) Relocate() bool {
 	b := w.Buf
 	// how many buffer lines are in the view
 	height := w.Bottomline() + 1 - w.StartLine
-	log.Printf("Height: %d, w.Height: %d\n", height, w.Height)
 	h := w.Height
 	if w.drawStatus {
 		h--

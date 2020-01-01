@@ -246,13 +246,11 @@ func PluginListRuntimeFiles(fileType RTFiletype) []string {
 
 // PluginAddRuntimeFile adds a file to the runtime files for a plugin
 func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) error {
-	log.Println("PLUGIN ADD:", plugin)
 	pl := FindPlugin(plugin)
 	if pl == nil {
 		return errors.New("Plugin " + plugin + " does not exist")
 	}
 	pldir := pl.DirName
-	log.Println("DIRNAME:", pldir)
 	fullpath := filepath.Join(ConfigDir, "plug", pldir, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFile(filetype, realFile(fullpath))

@@ -55,6 +55,8 @@ github.com/zyedidia/tcell v0.0.0-20191227234059-2c574ec1b972 h1:tqsPH3tvIF9LQMWQ
 github.com/zyedidia/tcell v0.0.0-20191227234059-2c574ec1b972/go.mod h1:yXgdp23+aW8OMENYVBvpKoeiBtjaVWJ9HhpPDu6LBfM=
 github.com/zyedidia/tcell v0.0.0-20191228235154-5b9bbc0d56c7 h1:Qw5255OIirY741L/Kt5KLitfzfhpk29x+A193zByTS0=
 github.com/zyedidia/tcell v0.0.0-20191228235154-5b9bbc0d56c7/go.mod h1:yXgdp23+aW8OMENYVBvpKoeiBtjaVWJ9HhpPDu6LBfM=
+github.com/zyedidia/tcell v0.0.0-20200101010555-3d6f590fde0b h1:WOYC0HHwRKNvDcvVbm5QXfjD+uoBvnqqSxRdjlsXIq0=
+github.com/zyedidia/tcell v0.0.0-20200101010555-3d6f590fde0b/go.mod h1:b7qO+6WpCTSDPZ3ru7R2FNZeEtcNpo+X8m+5Py0/l64=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415/go.mod h1:8leT8G0Cm8NoJHdrrKHyR9MirWoF4YW7pZh06B6H+1E=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

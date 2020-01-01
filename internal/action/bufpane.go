@@ -6,7 +6,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
@@ -266,9 +266,9 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 	// 		esc: e.EscSeq(),
 	// 	}
 	// 	h.DoKeyEvent(re)
-	// case *tcell.EventPaste:
-	// 	h.paste(e.Text())
-	// 	h.Relocate()
+	case *tcell.EventPaste:
+		h.paste(e.Text())
+		h.Relocate()
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),

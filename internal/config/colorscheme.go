@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 // Micro's default style

@@ -7,7 +7,7 @@ import (
 	"github.com/zyedidia/micro/internal/display"
 	"github.com/zyedidia/micro/internal/info"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 type InfoKeyAction func(*InfoPane)

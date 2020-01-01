@@ -7,7 +7,7 @@ import (
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/terminal"
 )
 

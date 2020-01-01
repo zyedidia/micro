@@ -14,7 +14,7 @@ import (
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
 	"github.com/zyedidia/micro/pkg/shellwords"
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 // ScrollUp is not an action

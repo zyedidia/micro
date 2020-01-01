@@ -7,7 +7,7 @@ import (
 	"os"
 	"sort"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"

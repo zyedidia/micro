@@ -9,7 +9,7 @@ import (
 	"unicode"
 
 	"github.com/flynn/json5"
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 )

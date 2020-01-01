@@ -3,7 +3,7 @@ package action
 import (
 	"reflect"
 
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/display"
 )

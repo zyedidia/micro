@@ -1,7 +1,7 @@
 package action
 
 import (
-	"github.com/gdamore/tcell"
+	"github.com/zyedidia/tcell"
 )
 
 type Event interface{}
