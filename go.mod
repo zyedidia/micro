@@ -14,7 +14,7 @@ require (
 	github.com/zyedidia/clipboard v0.0.0-20190823154308-241f98e9b197
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
 	github.com/zyedidia/pty v2.0.0+incompatible // indirect
-	github.com/zyedidia/tcell v0.0.0-20200101225637-d4acd77a1e91
+	github.com/zyedidia/tcell v0.0.0-20200101232410-57510a71c0f8
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
 	golang.org/x/text v0.3.2
 	gopkg.in/yaml.v2 v2.2.7
