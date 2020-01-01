@@ -7,7 +7,6 @@ import (
 	"os"
 	"sort"
 
-	"github.com/zyedidia/tcell"
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
@@ -16,6 +15,7 @@ import (
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/tcell"
 )
 
 var (
@@ -171,6 +171,8 @@ func main() {
 		}
 	}
 
+	screen.Init()
+
 	action.InitBindings()
 	action.InitCommands()
 
@@ -187,8 +189,6 @@ func main() {
 	if err != nil {
 		screen.TermMessage(err)
 	}
-
-	screen.Init()
 
 	// If we have an error, we can exit cleanly and not completely
 	// mess up the terminal being worked in

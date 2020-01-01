@@ -9,9 +9,9 @@ import (
 	"unicode"
 
 	"github.com/flynn/json5"
-	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/tcell"
 )
 
 func InitBindings() {
@@ -83,6 +83,7 @@ modSearch:
 			k = k[5:]
 			modifiers |= tcell.ModShift
 		case strings.HasPrefix(k, "\x1b"):
+			screen.Screen.RegisterRawSeq(k)
 			return RawEvent{
 				esc: k,
 			}, true
