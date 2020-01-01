@@ -134,19 +134,21 @@ pkg_add -v micro
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommend setting it to `~/go` if you don't have one).
+Make sure that you have Go version 1.11 or greater and Go modules are enabled.
 
 ```
-go get -d github.com/zyedidia/micro/cmd/micro
-cd $GOPATH/src/github.com/zyedidia/micro
-make install
+git clone https://github.com/zyedidia/micro
+cd micro
+make build
+sudo mv micro /usr/local/bin # optional
 ```
 
-The binary will then be installed to `$GOPATH/bin` (or your `$GOBIN`).
+The binary will be placed in the current directory and can be moved to
+anywhere you like (for example `/usr/local/bin`).
 
-Please make sure that when you are working with micro's code, you are working on your `GOPATH`.
+The command `make install` will install the binary to `$GOPATH/bin` or `$GOBIN`.
 
-You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
+You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information.
 
 ### MacOS terminal
 
