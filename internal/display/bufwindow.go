@@ -1,15 +1,16 @@
 package display
 
 import (
+	"runtime"
 	"strconv"
 	"unicode/utf8"
 
-	"github.com/zyedidia/tcell"
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/tcell"
 )
 
 // The BufWindow provides a way of displaying a certain section
@@ -339,7 +340,7 @@ func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.
 
 func (w *BufWindow) showCursor(x, y int, main bool) {
 	if w.active {
-		if main {
+		if main && runtime.GOOS != "windows" {
 			screen.Screen.ShowCursor(x, y)
 		} else {
 			r, _, _, _ := screen.Screen.GetContent(x, y)
