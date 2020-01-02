@@ -102,7 +102,7 @@ func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) 
 func (w *BufWindow) Clear() {
 	for y := 0; y < w.Height; y++ {
 		for x := 0; x < w.Width; x++ {
-			screen.Screen.SetContent(w.X+x, w.Y+y, ' ', nil, config.DefStyle)
+			screen.SetContent(w.X+x, w.Y+y, ' ', nil, config.DefStyle)
 		}
 	}
 }
@@ -298,9 +298,9 @@ func (w *BufWindow) drawGutter(vloc *buffer.Loc, bloc *buffer.Loc) {
 			break
 		}
 	}
-	screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
 	vloc.X++
-	screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
 	vloc.X++
 }
 
@@ -309,21 +309,21 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxL
 
 	// Write the spaces before the line number if necessary
 	for i := 0; i < maxLineNumLength-len(lineNum); i++ {
-		screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		vloc.X++
 	}
 	// Write the actual line number
 	for _, ch := range lineNum {
 		if softwrapped {
-			screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		} else {
-			screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ch, nil, lineNumStyle)
+			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ch, nil, lineNumStyle)
 		}
 		vloc.X++
 	}
 
 	// Write the extra space
-	screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 	vloc.X++
 }
 
@@ -342,7 +342,7 @@ func (w *BufWindow) showCursor(x, y int, main bool) {
 		if main {
 			screen.ShowCursor(x, y)
 		} else {
-			screen.ShowFakeCursor(x, y)
+			screen.ShowFakeCursorMulti(x, y)
 		}
 	}
 }
@@ -513,7 +513,7 @@ func (w *BufWindow) displayBuffer() {
 					}
 				}
 
-				screen.Screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, style)
+				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, style)
 
 				if showcursor {
 					for _, c := range cursors {
@@ -591,7 +591,7 @@ func (w *BufWindow) displayBuffer() {
 					curStyle = style.Background(fg)
 				}
 			}
-			screen.Screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, curStyle)
+			screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, curStyle)
 		}
 
 		draw(' ', curStyle, true)
@@ -617,7 +617,7 @@ func (w *BufWindow) displayStatusLine() {
 	} else if w.Y+w.Height != infoY {
 		w.drawStatus = true
 		for x := w.X; x < w.X+w.Width; x++ {
-			screen.Screen.SetContent(x, w.Y+w.Height-1, '-', nil, config.DefStyle.Reverse(true))
+			screen.SetContent(x, w.Y+w.Height-1, '-', nil, config.DefStyle.Reverse(true))
 		}
 	} else {
 		w.drawStatus = false
@@ -637,7 +637,7 @@ func (w *BufWindow) displayScrollBar() {
 		}
 		barstart := w.Y + int(float64(w.StartLine)/float64(w.Buf.LinesNum())*float64(w.Height))
 		for y := barstart; y < util.Min(barstart+barsize, w.Y+bufHeight); y++ {
-			screen.Screen.SetContent(scrollX, y, '|', nil, config.DefStyle.Reverse(true))
+			screen.SetContent(scrollX, y, '|', nil, config.DefStyle.Reverse(true))
 		}
 	}
 }

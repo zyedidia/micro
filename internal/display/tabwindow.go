@@ -91,13 +91,13 @@ func (w *TabWindow) Display() {
 					c = ' '
 				}
 				if x == w.width-1 && !done {
-					screen.Screen.SetContent(w.width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
+					screen.SetContent(w.width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
 					x++
 					break
 				} else if x == 0 && w.hscroll > 0 {
-					screen.Screen.SetContent(0, w.Y, '<', nil, config.DefStyle.Reverse(true))
+					screen.SetContent(0, w.Y, '<', nil, config.DefStyle.Reverse(true))
 				} else if x >= 0 && x < w.width {
-					screen.Screen.SetContent(x, w.Y, c, nil, config.DefStyle.Reverse(true))
+					screen.SetContent(x, w.Y, c, nil, config.DefStyle.Reverse(true))
 				}
 				x++
 			}

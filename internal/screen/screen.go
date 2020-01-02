@@ -17,31 +17,82 @@ import (
 // screen. TODO: maybe we should worry about polling and drawing at the
 // same time too.
 var Screen tcell.Screen
+
+// The lock is necessary since the screen is polled on a separate thread
 var lock sync.Mutex
+
+// DrawChan is a channel that will cause the screen to redraw when
+// written to even if no event user event has occurred
 var DrawChan chan bool
 
+// Lock locks the screen lock
 func Lock() {
 	lock.Lock()
 }
 
+// Unlock unlocks the screen lock
 func Unlock() {
 	lock.Unlock()
 }
 
+// Redraw schedules a redraw with the draw channel
 func Redraw() {
 	DrawChan <- true
 }
 
+type screenCell struct {
+	x, y  int
+	r     rune
+	combc []rune
+	style tcell.Style
+}
+
+var lastCursor screenCell
+
+// ShowFakeCursor displays a cursor at the given position by modifying the
+// style of the given column instead of actually using the terminal cursor
+// This can be useful in certain terminals such as the windows console where
+// modifying the cursor location is slow and frequent modifications cause flashing
+// This keeps track of the most recent fake cursor location and resets it when
+// a new fake cursor location is specified
 func ShowFakeCursor(x, y int) {
+	r, combc, style, _ := Screen.GetContent(x, y)
+	Screen.SetContent(lastCursor.x, lastCursor.y, lastCursor.r, lastCursor.combc, lastCursor.style)
+	Screen.SetContent(x, y, r, combc, config.DefStyle.Reverse(true))
+
+	lastCursor.x, lastCursor.y = x, y
+	lastCursor.r = r
+	lastCursor.combc = combc
+	lastCursor.style = style
+}
+
+// ShowFakeCursorMulti is the same as ShowFakeCursor except it does not
+// reset previous locations of the cursor
+// Fake cursors are also necessary to display multiple cursors
+func ShowFakeCursorMulti(x, y int) {
 	r, _, _, _ := Screen.GetContent(x, y)
 	Screen.SetContent(x, y, r, nil, config.DefStyle.Reverse(true))
 }
 
+// ShowCursor puts the cursor at the given location using a fake cursor
+// if enabled or using the terminal cursor otherwise
+// By default only the windows console will use a fake cursor
 func ShowCursor(x, y int) {
 	if util.FakeCursor {
 		ShowFakeCursor(x, y)
 	} else {
 		Screen.ShowCursor(x, y)
+	}
+}
+
+// SetContent sets a cell at a point on the screen and makes sure that it is
+// synced with the last cursor location
+func SetContent(x, y int, mainc rune, combc []rune, style tcell.Style) {
+	Screen.SetContent(x, y, mainc, combc, style)
+	if util.FakeCursor && lastCursor.x == x && lastCursor.y == y {
+		lastCursor.r = mainc
+		lastCursor.style = style
+		lastCursor.combc = combc
 	}
 }
 

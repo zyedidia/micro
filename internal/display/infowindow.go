@@ -74,7 +74,7 @@ func (i *InfoWindow) LocFromVisual(vloc buffer.Loc) buffer.Loc {
 
 func (i *InfoWindow) Clear() {
 	for x := 0; x < i.Width; x++ {
-		screen.Screen.SetContent(x, i.Y, ' ', nil, i.defStyle())
+		screen.SetContent(x, i.Y, ' ', nil, i.defStyle())
 	}
 }
 
@@ -111,7 +111,7 @@ func (i *InfoWindow) displayBuffer() {
 				if j > 0 {
 					c = ' '
 				}
-				screen.Screen.SetContent(vlocX, i.Y, c, nil, style)
+				screen.SetContent(vlocX, i.Y, c, nil, style)
 			}
 			vlocX++
 		}
@@ -167,9 +167,9 @@ func (i *InfoWindow) displayKeyMenu() {
 	for y := 0; y < len(keydisplay); y++ {
 		for x := 0; x < i.Width; x++ {
 			if x < len(keydisplay[y]) {
-				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, i.defStyle())
+				screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, i.defStyle())
 			} else {
-				screen.Screen.SetContent(x, i.Y-len(keydisplay)+y, ' ', nil, i.defStyle())
+				screen.SetContent(x, i.Y-len(keydisplay)+y, ' ', nil, i.defStyle())
 			}
 		}
 	}
@@ -194,7 +194,7 @@ func (i *InfoWindow) Display() {
 
 		display := i.Msg
 		for _, c := range display {
-			screen.Screen.SetContent(x, i.Y, c, nil, style)
+			screen.SetContent(x, i.Y, c, nil, style)
 			x += runewidth.RuneWidth(c)
 		}
 
@@ -219,13 +219,13 @@ func (i *InfoWindow) Display() {
 				style = style.Reverse(true)
 			}
 			for _, r := range s {
-				screen.Screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, style)
+				screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, style)
 				x++
 				if x >= i.Width {
 					return
 				}
 			}
-			screen.Screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
+			screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
 			x++
 			if x >= i.Width {
 				return
@@ -233,7 +233,7 @@ func (i *InfoWindow) Display() {
 		}
 
 		for x < i.Width {
-			screen.Screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
+			screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
 			x++
 		}
 	}

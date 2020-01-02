@@ -33,7 +33,7 @@ var (
 	Debug = "ON"
 	// FakeCursor is used to disable the terminal cursor and have micro
 	// draw its own (enabled for windows consoles where the cursor is slow)
-	FakeCursor = true
+	FakeCursor = false
 )
 
 func init() {

@@ -118,13 +118,13 @@ func (s *StatusLine) Display() {
 				style = style.Reverse(true)
 			}
 			for _, r := range sug {
-				screen.Screen.SetContent(x, y-keymenuOffset, r, nil, style)
+				screen.SetContent(x, y-keymenuOffset, r, nil, style)
 				x++
 				if x >= s.win.Width {
 					return
 				}
 			}
-			screen.Screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
 			x++
 			if x >= s.win.Width {
 				return
@@ -132,7 +132,7 @@ func (s *StatusLine) Display() {
 		}
 
 		for x < s.win.Width {
-			screen.Screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
 			x++
 		}
 		return
@@ -184,7 +184,7 @@ func (s *StatusLine) Display() {
 					c = ' '
 					x++
 				}
-				screen.Screen.SetContent(winX+x, y, c, nil, statusLineStyle)
+				screen.SetContent(winX+x, y, c, nil, statusLineStyle)
 			}
 		} else if x >= s.win.Width-rightLen && x < rightLen+s.win.Width-rightLen {
 			r, size := utf8.DecodeRune(rightText)
@@ -196,10 +196,10 @@ func (s *StatusLine) Display() {
 					c = ' '
 					x++
 				}
-				screen.Screen.SetContent(winX+x, y, c, nil, statusLineStyle)
+				screen.SetContent(winX+x, y, c, nil, statusLineStyle)
 			}
 		} else {
-			screen.Screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
+			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
 		}
 	}
 }
