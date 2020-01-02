@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/util"
 	"github.com/zyedidia/tcell"
 )
 
@@ -29,6 +30,19 @@ func Unlock() {
 
 func Redraw() {
 	DrawChan <- true
+}
+
+func ShowFakeCursor(x, y int) {
+	r, _, _, _ := Screen.GetContent(x, y)
+	Screen.SetContent(x, y, r, nil, config.DefStyle.Reverse(true))
+}
+
+func ShowCursor(x, y int) {
+	if util.FakeCursor {
+		ShowFakeCursor(x, y)
+	} else {
+		Screen.ShowCursor(x, y)
+	}
 }
 
 // TempFini shuts the screen down temporarily

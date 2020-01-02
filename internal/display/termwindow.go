@@ -111,6 +111,6 @@ func (w *TermWindow) Display() {
 	}
 	if w.State.CursorVisible() && w.active {
 		curx, cury := w.State.Cursor()
-		screen.Screen.ShowCursor(curx+w.X, cury+w.Y)
+		screen.ShowCursor(curx+w.X, cury+w.Y)
 	}
 }

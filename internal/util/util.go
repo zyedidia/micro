@@ -7,6 +7,7 @@ import (
 	"os/user"
 	"path/filepath"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -30,6 +31,9 @@ var (
 	CompileDate = "Unknown"
 	// Debug logging
 	Debug = "ON"
+	// FakeCursor is used to disable the terminal cursor and have micro
+	// draw its own (enabled for windows consoles where the cursor is slow)
+	FakeCursor = true
 )
 
 func init() {
@@ -37,6 +41,10 @@ func init() {
 	SemVersion, err = semver.Make(Version)
 	if err != nil {
 		fmt.Println("Invalid version: ", Version, err)
+	}
+
+	if runtime.GOOS == "windows" {
+		FakeCursor = true
 	}
 }
 

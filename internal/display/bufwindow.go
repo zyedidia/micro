@@ -1,7 +1,6 @@
 package display
 
 import (
-	"runtime"
 	"strconv"
 	"unicode/utf8"
 
@@ -340,11 +339,10 @@ func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.
 
 func (w *BufWindow) showCursor(x, y int, main bool) {
 	if w.active {
-		if main && runtime.GOOS != "windows" {
-			screen.Screen.ShowCursor(x, y)
+		if main {
+			screen.ShowCursor(x, y)
 		} else {
-			r, _, _, _ := screen.Screen.GetContent(x, y)
-			screen.Screen.SetContent(x, y, r, nil, config.DefStyle.Reverse(true))
+			screen.ShowFakeCursor(x, y)
 		}
 	}
 }
@@ -596,13 +594,7 @@ func (w *BufWindow) displayBuffer() {
 			screen.Screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, curStyle)
 		}
 
-		for _, c := range cursors {
-			if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
-				w.showCursor(w.X+vloc.X, w.Y+vloc.Y, c.Num == 0)
-			}
-		}
-
-		draw(' ', curStyle, false)
+		draw(' ', curStyle, true)
 
 		bloc.X = w.StartCol
 		bloc.Y++

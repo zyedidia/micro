@@ -121,7 +121,7 @@ func (i *InfoWindow) displayBuffer() {
 	totalwidth := blocX - nColsBeforeStart
 	for len(line) > 0 {
 		if activeC.X == blocX {
-			screen.Screen.ShowCursor(vlocX, i.Y)
+			screen.ShowCursor(vlocX, i.Y)
 		}
 
 		r, size := utf8.DecodeRune(line)
@@ -155,7 +155,7 @@ func (i *InfoWindow) displayBuffer() {
 		}
 	}
 	if activeC.X == blocX {
-		screen.Screen.ShowCursor(vlocX, i.Y)
+		screen.ShowCursor(vlocX, i.Y)
 	}
 }
 
