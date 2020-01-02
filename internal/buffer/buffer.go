@@ -133,7 +133,7 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 	fileInfo, _ := os.Stat(filename)
 
 	if err == nil && fileInfo.IsDir() {
-		return nil, errors.New(filename + " is a directory")
+		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
 
 	defer file.Close()

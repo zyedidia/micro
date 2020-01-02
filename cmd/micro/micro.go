@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 	"sort"
 
 	"github.com/go-errors/errors"
@@ -208,6 +209,13 @@ func main() {
 	}()
 
 	b := LoadInput()
+
+	if len(b) == 0 {
+		// No buffers to open
+		screen.Screen.Fini()
+		runtime.Goexit()
+	}
+
 	action.InitTabs(b)
 	action.InitGlobals()
 
