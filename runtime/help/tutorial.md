@@ -16,7 +16,7 @@ the settings and their values. To change an option, you can either change the
 value in the `settings.json` file, or you can type it in directly while using
 micro.
 
-Simply press CtrlE to go to command mode, and type `set option value` (in the
+Press CtrlE to go to command mode, and type `set option value` (in the
 future, I will use `> set option value` to indicate pressing CtrlE). The change
 will take effect immediately and will also be saved to the `settings.json` file
 so that the setting will stick even after you close micro.

@@ -2,37 +2,52 @@
 
 This help page aims to cover two aspects of micro's syntax highlighting engine:
 
-- How to create colorschemes and use them.
-- How to create syntax files to add to the list of languages micro can highlight.
+* How to create colorschemes and use them.
+* How to create syntax files to add to the list of languages micro can highlight.
 
 ## Colorschemes
 
-To change your colorscheme, press Ctrl-E in micro to bring up the command
+To change your colorscheme, press Ctrl-e in micro to bring up the command
 prompt, and type:
 
 ```
-set colorscheme monokai
+set colorscheme twilight
 ```
 
 (or whichever colorscheme you choose).
 
-Micro comes with a number of colorschemes by default. Modern terminals tend to
-have three different kinds of color support. The most common is 256 color where
-the terminal provides 256 standardized colors (except the first 16 may be configured
-by the user). A 256-color theme requires a terminal with 256 color support and
-is the most portable.
+Micro comes with a number of colorschemes by default. The colorschemes that you
+can display will depend on what kind of color support your terminal has.
 
-A 16-color theme uses the 16 user-configurable colors (or 16 default colors on
-old terminals). These colorschemes are guranteed to work, but won't look great
-unless the 16 colors are configured to the user's liking. Using a 16-color theme
-will also preserve the terminal's theme because the terminal usually uses its 16
-colors for prompts or other coloring.
+Modern terminals tend to have a palette of 16 user-configurable colors (these
+colors can often be configured in the terminal preferences), and additional
+color support comes in three flavors.
 
-Some terminals support "true color" with 16 million colors (using standard RGB values).
-There is no one standard for this color support among terminals so this method
-is not guaranteed to work. Usually truecolor must also be enabled by the user. The
-colorschemes using true color will look exactly as intended. If true color is not
-supported, a true color colorscheme will approximate its colors to 256-color.
+* 16-color: A colorscheme that uses the 16 default colors will always work but
+  will only look good if the 16 default colors have been configured to the user's
+  liking. Using a colorscheme that only uses the 16 colors from the terminal palette
+  will also preserve the terminal's theme from other applications since the terminal
+  will often use those same colors for other applications. Default colorschemes
+  of this type include `simple` and `solarized`.
+
+* 256-color: Almost all terminals support displaying an additional 240 colors on
+  top of the 16 user-configurable colors (creating 256 colors total). Colorschemes
+  which use 256-color are portable because they will look the same regardless of
+  the configured 16-color palette. However, the color range is fairly limited
+  due to the small number of colors available. Default 256-color colorschemes
+  include `monokai`, `twilight`, `zenburn`, `darcula` and more.
+
+* true-color: Some terminals support displaying "true color" with 16 million
+  colors using standard RGB values. This mode will be able to support displaying
+  any colorscheme, but it should be noted that the user-configured 16-color palette
+  is ignored when using true-color mode (this means the colors while using the
+  terminal emulator will be slightly off). Not all terminals support true color
+  but at this point most do. True color support in micro is off by default but
+  can be enabled by setting the environment variable `MICRO_TRUECOLOR` to 1.
+  True-color colorschemes in micro typically end with `-tc`, such as `solarized-tc`,
+  `atom-dark-tc`, `material-tc`, etc... If true color is not enabled but a true
+  color colorscheme is used, micro will do its best to approximate the colors
+  to the available 256 colors.
 
 Here is the list of colorschemes:
 
@@ -75,9 +90,12 @@ These require terminals that support true color and require `MICRO_TRUECOLOR=1` 
 Micro's colorschemes are also extremely simple to create. The default ones can
 be found [here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
 
-They are only about 18-30 lines in total.
+Custom colorschemes should be placed in the `~/.config/micro/colorschemes` directory.
 
-Basically to create the colorscheme you need to link highlight groups with
+A number of custom directives are placed in a `.micro` file. Colorschemes are 
+typically only 18-30 lines in total.
+
+To create the colorscheme you need to link highlight groups with
 actual colors. This is done using the `color-link` command.
 
 For example, to highlight all comments in green, you would use the command:
@@ -218,7 +236,7 @@ You must start the syntax file by declaring the filetype:
 filetype: go
 ```
 
-#### Detect definition
+### Detect definition
 
 Then you must provide information about how to detect the filetype:
 
@@ -237,7 +255,7 @@ detect:
     header: "%YAML"
 ```
 
-#### Syntax rules
+### Syntax rules
 
 Next you must provide the syntax highlighting rules. There are two types of
 rules: patterns and regions. A pattern is matched on a single line and usually a
@@ -316,3 +334,16 @@ example, the following is possible for html:
     rules:
         - include: "css"
 ```
+
+## Syntax file headers
+
+Syntax file headers are an optimization and it is likely you do not need to
+worry about them.
+
+Syntax file headers are files that contain only the filetype and the detection
+regular expressions for a given syntax file. They have a `.hdr` suffix and are
+used by default only for the pre-installed syntax files. Header files allow micro
+to parse the syntax files much faster when checking the filetype of a certain
+file. Custom syntax files may provide header files in `~/.config/micro/syntax` as
+well but it is not necessary (only do this if you have many (100+) custom syntax
+files and want to improve performance).

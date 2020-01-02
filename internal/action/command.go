@@ -497,6 +497,7 @@ func (h *BufPane) HSplitCmd(args []string) {
 
 // EvalCmd evaluates a lua expression
 func (h *BufPane) EvalCmd(args []string) {
+	InfoBar.Error("Eval unsupported")
 }
 
 // NewTabCmd opens the given file in a new tab
