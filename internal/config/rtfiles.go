@@ -253,7 +253,7 @@ func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) e
 	pldir := pl.DirName
 	fullpath := filepath.Join(ConfigDir, "plug", pldir, filePath)
 	if _, err := os.Stat(fullpath); err == nil {
-		AddRuntimeFile(filetype, realFile(fullpath))
+		AddRealRuntimeFile(filetype, realFile(fullpath))
 	} else {
 		fullpath = path.Join("runtime", "plugins", pldir, filePath)
 		AddRuntimeFile(filetype, assetFile(fullpath))
@@ -280,5 +280,5 @@ func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, dire
 
 // PluginAddRuntimeFileFromMemory adds a file to the runtime files for a plugin from a given string
 func PluginAddRuntimeFileFromMemory(filetype RTFiletype, filename, data string) {
-	AddRuntimeFile(filetype, memoryFile{filename, []byte(data)})
+	AddRealRuntimeFile(filetype, memoryFile{filename, []byte(data)})
 }
