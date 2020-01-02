@@ -8,6 +8,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"path/filepath"
+	"runtime"
 	"unicode"
 	"unicode/utf8"
 
@@ -54,10 +55,18 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error)
 // with dd's standard input as an io.Writer object. Dd opens the given file for writing,
 // truncating it if it exists, and writes what it receives on its standard input to the file.
 func overwriteFileAsRoot(name string, enc encoding.Encoding, fn func(io.Writer) error) (err error) {
-	cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "status=none", "bs=4K", "of="+name)
+	var cmd *exec.Cmd
+	if runtime.GOOS == "windows" {
+		return errors.New("Save with sudo not supported on Windows")
+	} else if runtime.GOOS == "darwin" {
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+	} else {
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "status=none", "bs=4K", "of="+name)
+	}
 	var stdin io.WriteCloser
 
 	screenb := screen.TempFini()
+	defer screen.TempStart(screenb)
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro
 	// Instead we trap Ctrl-C to kill the program we're running
@@ -86,8 +95,6 @@ func overwriteFileAsRoot(name string, enc encoding.Encoding, fn func(io.Writer) 
 	if err = cmd.Wait(); err != nil {
 		return
 	}
-
-	screen.TempStart(screenb)
 
 	return e
 }
