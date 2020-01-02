@@ -8,7 +8,7 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/flynn/json5"
+	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/tcell"
