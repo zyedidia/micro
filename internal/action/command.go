@@ -14,6 +14,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	shellquote "github.com/kballard/go-shellquote"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
@@ -21,7 +22,6 @@ import (
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/zyedidia/micro/pkg/shellwords"
 )
 
 // A Command contains information about how to execute a command
@@ -344,7 +344,7 @@ func (h *BufPane) OpenCmd(args []string) {
 	if len(args) > 0 {
 		filename := args[0]
 		// the filename might or might not be quoted, so unquote first then join the strings.
-		args, err := shellwords.Split(filename)
+		args, err := shellquote.Split(filename)
 		if err != nil {
 			InfoBar.Error("Error parsing args ", err)
 			return
@@ -706,7 +706,7 @@ func (h *BufPane) UnbindCmd(args []string) {
 
 // RunCmd runs a shell command in the background
 func (h *BufPane) RunCmd(args []string) {
-	runf, err := shell.RunBackgroundShell(shellwords.Join(args...))
+	runf, err := shell.RunBackgroundShell(shellquote.Join(args...))
 	if err != nil {
 		InfoBar.Error(err)
 	} else {
@@ -953,7 +953,7 @@ func (h *BufPane) TermCmd(args []string) {
 
 // HandleCommand handles input from the user
 func (h *BufPane) HandleCommand(input string) {
-	args, err := shellwords.Split(input)
+	args, err := shellquote.Split(input)
 	if err != nil {
 		InfoBar.Error("Error parsing args ", err)
 		return

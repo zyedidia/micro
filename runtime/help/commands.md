@@ -5,10 +5,10 @@ meaning that all keybindings from a normal buffer are supported (as well
 as mouse and selection).
 
 When running a command, you can use extra syntax that micro will expand before
-running the command. To use an argument with a space in it, simply put it in
-quotes. You can also use environment variables in the command bar and they
-will be expanded to their value. Finally, you can put an expression in backticks
-and it will be evaluated by the shell beforehand.
+running the command. To use an argument with a space in it, put it in
+quotes. The command bar parser uses the same rules for parsing arguments that
+`/bin/sh` would use (single quotes, double quotes, escaping). The command bar
+does not look up environment variables.
 
 # Commands
 

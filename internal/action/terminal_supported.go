@@ -3,14 +3,14 @@
 package action
 
 import (
+	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/internal/shell"
-	"github.com/zyedidia/micro/pkg/shellwords"
 )
 
 const TermEmuSupported = true
 
 func RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool, callback string, userargs []interface{}) error {
-	args, err := shellwords.Split(input)
+	args, err := shellquote.Split(input)
 	if err != nil {
 		return err
 	}

@@ -9,8 +9,8 @@ import (
 	"os/signal"
 	"strings"
 
+	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/internal/screen"
-	"github.com/zyedidia/micro/pkg/shellwords"
 )
 
 // ExecCommand executes a command using exec
@@ -32,7 +32,7 @@ func ExecCommand(name string, arg ...string) (string, error) {
 
 // RunCommand executes a shell command and returns the output/error
 func RunCommand(input string) (string, error) {
-	args, err := shellwords.Split(input)
+	args, err := shellquote.Split(input)
 	if err != nil {
 		return "", err
 	}
@@ -45,7 +45,7 @@ func RunCommand(input string) (string, error) {
 // It returns a function which will run the command and returns a string
 // message result
 func RunBackgroundShell(input string) (func() string, error) {
-	args, err := shellwords.Split(input)
+	args, err := shellquote.Split(input)
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,7 @@ func RunBackgroundShell(input string) (func() string, error) {
 
 // RunInteractiveShell runs a shellcommand interactively
 func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error) {
-	args, err := shellwords.Split(input)
+	args, err := shellquote.Split(input)
 	if err != nil {
 		return "", err
 	}

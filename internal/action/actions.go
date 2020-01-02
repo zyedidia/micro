@@ -7,13 +7,13 @@ import (
 	"time"
 	"unicode/utf8"
 
+	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/zyedidia/micro/pkg/shellwords"
 	"github.com/zyedidia/tcell"
 )
 
@@ -647,7 +647,7 @@ func (h *BufPane) SaveAs() bool {
 	InfoBar.Prompt("Filename: ", "", "Save", nil, func(resp string, canceled bool) {
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
-			args, err := shellwords.Split(resp)
+			args, err := shellquote.Split(resp)
 			filename := strings.Join(args, " ")
 			if err != nil {
 				InfoBar.Error("Error parsing arguments: ", err)
