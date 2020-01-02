@@ -218,9 +218,9 @@ var defaultGlobalSettings = map[string]interface{}{
 	"infobar":     true,
 	"keymenu":     false,
 	"mouse":       true,
+	"paste":       false,
 	"savehistory": true,
 	"sucmd":       "sudo",
-	"termtitle":   false,
 }
 
 // DefaultGlobalSettings returns the default global settings for micro

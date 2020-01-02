@@ -546,6 +546,8 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		// 	} else {
 		// 		config.SetAutoTime(0)
 		// 	}
+	} else if option == "paste" {
+		screen.Screen.SetPaste(nativeValue.(bool))
 	} else {
 		for _, pl := range config.Plugins {
 			if option == pl.Name {

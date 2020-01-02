@@ -81,7 +81,7 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 			t.WriteString(event.EscSeq())
 		}
 	} else if e, ok := event.(*tcell.EventMouse); e != nil && (!ok || t.State.Mode(terminal.ModeMouseMask)) {
-		t.WriteString(event.EscSeq())
+		// t.WriteString(event.EscSeq())
 	} else if e != nil {
 		x, y := e.Position()
 		v := t.GetView()
