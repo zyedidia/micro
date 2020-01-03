@@ -39,7 +39,7 @@ func (b *Buffer) Serialize() error {
 			b.ModTime,
 		})
 		return err
-	})
+	}, false)
 }
 
 func (b *Buffer) Unserialize() error {

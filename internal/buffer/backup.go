@@ -71,7 +71,7 @@ func (b *Buffer) Backup(checkTime bool) error {
 			}
 		}
 		return
-	})
+	}, false)
 
 	return err
 }
