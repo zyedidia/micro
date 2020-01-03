@@ -2,11 +2,14 @@
 
 Micro stores all of the user configuration in its configuration directory.
 
-Micro uses the `$XDG_CONFIG_HOME/micro` as the configuration directory. As per
-the XDG spec, if `$XDG_CONFIG_HOME` is not set, `~/.config/micro` is used as 
-the config directory.
+Micro uses `$MICRO_CONFIG_HOME` as the configuration directory. If this environment
+variable is not set, it uses `$XDG_CONFIG_HOME/micro` instead. If that
+environment variable is not set, it uses `~/.config/micro` as the configuration
+directory. In the documentation, we use `~/.config/micro` to refer to the
+configuration directory (even if it may in fact be somewhere else if you have
+set either of the above environment variables).
 
-Here are the options that you can set:
+Here are the available options:
 
 * `autoindent`: when creating a new line, use the same indentation as the 
    previous line.
@@ -85,11 +88,11 @@ Here are the options that you can set:
 
 	default value: `unix`
 
-* `filetype`: sets the filetype for the current buffer. This setting is
-   `local only`.
+* `filetype`: sets the filetype for the current buffer. Set this option to `off`
+   to completely disable filetype detection.
 
-	default value: this will be automatically set depending on the file you have
-	open
+	default value: `unknown`. This will be automatically overridden depending
+    on the file you open.
 
 * `ignorecase`: perform case-insensitive searches.
 
@@ -136,7 +139,8 @@ Here are the options that you can set:
 
 	default value: `true`
 
-* `rmtrailingws`: micro will automatically trim trailing whitespaces at eol.
+* `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
+   lines.
 
 	default value: `false`
 
@@ -145,17 +149,19 @@ Here are the options that you can set:
 	default value: `true`
 
 * `savecursor`: remember where the cursor was last time the file was opened and
-   put it there when you open the file again.
+   put it there when you open the file again. Information is saved to
+   `~/.config/micro/buffers/`
 
 	default value: `false`
 
 * `savehistory`: remember command history between closing and re-opening
-   micro.
+   micro. Information is saved to `~/.config/micro/buffers/history`.
 
     default value: `true`
 
 * `saveundo`: when this option is on, undo is saved even after you close a file
-   so if you close and reopen a file, you can keep undoing.
+   so if you close and reopen a file, you can keep undoing. Information is
+   saved to `~/.config/micro/buffers/`.
 
 	default value: `false`
 
@@ -163,8 +169,8 @@ Here are the options that you can set:
 
     default value: `false`
 
-* `scrollmargin`: amount of lines you would like to see above and below the
-   cursor.
+* `scrollmargin`: margin at which the view starts scrolling when the cursor
+   approaches the edge of the view.
 
 	default value: `3`
 
@@ -172,23 +178,23 @@ Here are the options that you can set:
 
 	default value: `2`
 
-* `smartpaste`: should micro add leading whitespace when pasting multiple lines?
+* `smartpaste`: add leading whitespace when pasting multiple lines.
    This will attempt to preserve the current indentation level when pasting an
    unindented block.
 
 	default value: `true`
 
-* `softwrap`: should micro wrap lines that are too long to fit on the screen.
+* `softwrap`: wrap lines that are too long to fit on the screen.
 
 	default value: `false`
 
-* `splitbottom`: when a horizontal split is created, should it be created below
-   the current split?
+* `splitbottom`: when a horizontal split is created, create it below the
+   current split.
 
 	default value: `true`
 
-* `splitright`: when a vertical split is created, should it be created to the
-   right of the current split?
+* `splitright`: when a vertical split is created, create it to the right of the
+   current split.
 
 	default value: `true`
 
@@ -217,7 +223,7 @@ Here are the options that you can set:
 
 	default value: `sudo`
 
-* `syntax`: turns syntax on or off.
+* `syntax`: enables syntax highlighting.
 
 	default value: `true`
 
@@ -227,31 +233,26 @@ Here are the options that you can set:
 
 	default value: `false`
 
-* `tabsize`: sets the tab size to `option`
+* `tabsize`: the size in spaces that a tab character should be displayed with.
 
 	default value: `4`
 
-* `tabstospaces`: use spaces instead of tabs
+* `tabstospaces`: use spaces instead of tabs.
 
 	default value: `false`
 
-* `termtitle`: defines whether or not your terminal's title will be set by micro
-   when opened.
-
-	default value: `false`
-
-* `useprimary` (only useful on *nix): defines whether or not micro will use the
+* `useprimary` (only useful on unix): defines whether or not micro will use the
    primary clipboard to copy selections in the background. This does not affect
-   the normal clipboard using Ctrl-C and Ctrl-V.
+   the normal clipboard using Ctrl-c and Ctrl-v.
 
 	default value: `true`
 
 ---
 
-Plugin options: all plugins come with a special option to enable or disable them. THe option
+Plugin options: all plugins come with a special option to enable or disable them. The option
 is a boolean with the same name as the plugin itself.
 
-Any option you set in the editor will be saved to the file 
+Any option you set in the editor will be saved to the file
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
