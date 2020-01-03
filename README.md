@@ -50,24 +50,19 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Extremely good mouse support
     * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
 * Cross platform (It should work on all the platforms Go runs on)
-    * Note that while Windows is supported, there are still some bugs that need to be worked out
+    * Note that while Windows is supported Mingw/Cygwin is not (see below)
 * Plugin system (plugins are written in Lua)
-    * Micro has a built-in plugin manager to automatically install, remove, and update all your plugins
 * Persistent undo
 * Automatic linting and error notifications
-* Syntax highlighting (for over [90 languages](runtime/syntax)!)
+* Syntax highlighting (for over [120 languages](runtime/syntax)!)
 * Colorscheme support
     * By default, micro comes with 16, 256, and true color themes.
-* True color support (set the `MICRO_TRUECOLOR` env variable to 1 to enable it)
-* Snippets
-    * The snippet plugin can be installed with `> plugin install snippets`
+* True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it)
 * Copy and paste with the system clipboard
 * Small and simple
 * Easily configurable
 * Macros
 * Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
-
-Although not yet implemented, I hope to add more features such as autocompletion ([#174](https://github.com/zyedidia/micro/issues/174)) or a tree view ([#249](https://github.com/zyedidia/micro/issues/249)) in the future.
 
 # Installation
 
@@ -106,47 +101,43 @@ You can install micro using Homebrew on Mac:
 brew install micro
 ```
 
-On Windows, you can install micro through [Chocolatey](https://chocolatey.org/) or [Scoop](https://github.com/lukesampson/scoop):
-
-```
-choco install micro
-```
-
-or
-
-```
-scoop install micro
-```
-
-On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
+On Debian Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
 ```
 snap install micro --classic
 ```
 
-On OpenBSD, micro is available in the ports tree. It is also available as a binary package.
+Homebrew and snap are the two "officially" maintained package manager distributions of micro.
 
-```
-pkg_add -v micro
-```
+Micro is also available through other package managers on Linux such as AUR, Nix, and package managers
+for other operating systems:
+
+* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop)
+    * `choco install micro`
+    * `scoop install micro`
+* OpenBSD: Available in the ports tree and also available as a binary package
+    * `pkd_add -v micro`
 
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.5 or greater (Go 1.4 will work if your version supports CGO) and that your `GOPATH` env variable is set (I recommend setting it to `~/go` if you don't have one).
+Make sure that you have Go version 1.11 or greater and Go modules are enabled.
 
 ```
-go get -d github.com/zyedidia/micro/cmd/micro
-cd $GOPATH/src/github.com/zyedidia/micro
-make install
+git clone https://github.com/zyedidia/micro
+cd micro
+make build
+sudo mv micro /usr/local/bin # optional
 ```
 
-The binary will then be installed to `$GOPATH/bin` (or your `$GOBIN`).
+The binary will be placed in the current directory and can be moved to
+anywhere you like (for example `/usr/local/bin`).
 
-Please make sure that when you are working with micro's code, you are working on your `GOPATH`.
+The command `make install` will install the binary to `$GOPATH/bin` or `$GOBIN`.
 
-You can install directly with `go get` (`go get -u github.com/zyedidia/micro/cmd/micro`) but this isn't recommended because it doesn't build micro with version information which is useful for the plugin manager.
+You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/micro`) but this isn't
+recommended because it doesn't build micro with version information, and doesn't disable debug mode.
 
 ### MacOS terminal
 
@@ -167,7 +158,7 @@ If you don't have xclip or xsel, micro will use an internal clipboard for copy a
 ### Colors and syntax highlighting
 
 If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
-you are using a terminal which does not support 256 color. Try changing the colorscheme to `simple`
+you are using a terminal which does not support 256 colors. Try changing the colorscheme to `simple`
 by pressing CtrlE in micro and typing `set colorscheme simple`.
 
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
@@ -178,9 +169,11 @@ that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
 mintty.
 
-### Plan9, Cygwin
+### Plan9, Cygwin, Mingw
 
-Please note that micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
+These platforms are unfortunately not supported.
+
+Micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
 Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (but NaCl is deprecated anyways).
 

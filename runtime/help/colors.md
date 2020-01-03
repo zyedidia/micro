@@ -2,48 +2,77 @@
 
 This help page aims to cover two aspects of micro's syntax highlighting engine:
 
-- How to create colorschemes and use them
-- How to create syntax files to add to the list of languages micro can highlight
-
+* How to create colorschemes and use them.
+* How to create syntax files to add to the list of languages micro can highlight.
 
 ## Colorschemes
 
-To change your colorscheme, press Ctrl-E in micro to bring up the command
+To change your colorscheme, press Ctrl-e in micro to bring up the command
 prompt, and type:
+
 ```
-set colorscheme solarized
+set colorscheme twilight
 ```
+
 (or whichever colorscheme you choose).
 
-Micro comes with a number of colorschemes by default. Here is the list:
+Micro comes with a number of colorschemes by default. The colorschemes that you
+can display will depend on what kind of color support your terminal has.
+
+Modern terminals tend to have a palette of 16 user-configurable colors (these
+colors can often be configured in the terminal preferences), and additional
+color support comes in three flavors.
+
+* 16-color: A colorscheme that uses the 16 default colors will always work but
+  will only look good if the 16 default colors have been configured to the user's
+  liking. Using a colorscheme that only uses the 16 colors from the terminal palette
+  will also preserve the terminal's theme from other applications since the terminal
+  will often use those same colors for other applications. Default colorschemes
+  of this type include `simple` and `solarized`.
+
+* 256-color: Almost all terminals support displaying an additional 240 colors on
+  top of the 16 user-configurable colors (creating 256 colors total). Colorschemes
+  which use 256-color are portable because they will look the same regardless of
+  the configured 16-color palette. However, the color range is fairly limited
+  due to the small number of colors available. Default 256-color colorschemes
+  include `monokai`, `twilight`, `zenburn`, `darcula` and more.
+
+* true-color: Some terminals support displaying "true color" with 16 million
+  colors using standard RGB values. This mode will be able to support displaying
+  any colorscheme, but it should be noted that the user-configured 16-color palette
+  is ignored when using true-color mode (this means the colors while using the
+  terminal emulator will be slightly off). Not all terminals support true color
+  but at this point most do. True color support in micro is off by default but
+  can be enabled by setting the environment variable `MICRO_TRUECOLOR` to 1.
+  True-color colorschemes in micro typically end with `-tc`, such as `solarized-tc`,
+  `atom-dark-tc`, `material-tc`, etc... If true color is not enabled but a true
+  color colorscheme is used, micro will do its best to approximate the colors
+  to the available 256 colors.
+
+Here is the list of colorschemes:
 
 ### 256 color
 
 These should work and look nice in most terminals. I recommend these
 themes the most.
 
-* `monokai`: this is the monokai colorscheme; you may recognize it as Sublime
-  Text's default colorscheme. It requires true color to look perfect, but the
-  256 color approximation looks very good as well. It's also the default
-  colorscheme.
+* `monokai` (also the `default` colorscheme)
 * `zenburn`
 * `gruvbox`
 * `darcula`
 * `twilight`
 * `railscast`
-* `bubblegum`: a light colorscheme
+* `bubblegum`
 
 ### 16 color
 
 These may vary widely based on the 16 colors selected for your terminal.
 
-* `simple`: this is the simplest colorscheme. It uses 16 colors which are set by
-  your terminal
-* `solarized`: You should have the solarized color palette in your terminal to use this colorscheme properly.
+* `simple`
+* `solarized` (must have the solarized color palette in your terminal to use this colorscheme properly)
 * `cmc-16`
-* `cmc-paper`: cmc-16, but on a white background. (Actually light grey
-  on most ANSI (16-color) terminals)
-* `geany`: Colorscheme based on geany's default highlighting.
+* `cmc-paper`
+* `geany`
 
 ### True color
 
@@ -56,26 +85,17 @@ These require terminals that support true color and require `MICRO_TRUECOLOR=1` 
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
 * `github-tc`: The true color version of the Github colorscheme
 
-### Monochrome
-
-You can also use `monochrome` if you'd prefer to have just the terminal's default
-foreground and background colors. Note: This provides no syntax highlighting!
-
-### Other
-
-See `help gimmickcolors` for a list of some true colour themes that are more 
-just for fun than for serious use. (Though feel free if you want!)
-
-
 ## Creating a Colorscheme
 
 Micro's colorschemes are also extremely simple to create. The default ones can
-be found
-[here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
+be found [here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
 
-They are only about 18-30 lines in total.
+Custom colorschemes should be placed in the `~/.config/micro/colorschemes` directory.
 
-Basically to create the colorscheme you need to link highlight groups with
+A number of custom directives are placed in a `.micro` file. Colorschemes are 
+typically only 18-30 lines in total.
+
+To create the colorscheme you need to link highlight groups with
 actual colors. This is done using the `color-link` command.
 
 For example, to highlight all comments in green, you would use the command:
@@ -198,7 +218,7 @@ In the future, plugins may also be able to use color groups for styling.
 
 ## Syntax files
 
-The syntax files is written in yaml-format and specify how to highlight
+The syntax files are written in yaml-format and specify how to highlight
 languages.
 
 Micro's builtin syntax highlighting tries very hard to be sane, sensible and
@@ -216,7 +236,7 @@ You must start the syntax file by declaring the filetype:
 filetype: go
 ```
 
-#### Detect definition
+### Detect definition
 
 Then you must provide information about how to detect the filetype:
 
@@ -235,7 +255,7 @@ detect:
     header: "%YAML"
 ```
 
-#### Syntax rules
+### Syntax rules
 
 Next you must provide the syntax highlighting rules. There are two types of
 rules: patterns and regions. A pattern is matched on a single line and usually a
@@ -314,3 +334,16 @@ example, the following is possible for html:
     rules:
         - include: "css"
 ```
+
+## Syntax file headers
+
+Syntax file headers are an optimization and it is likely you do not need to
+worry about them.
+
+Syntax file headers are files that contain only the filetype and the detection
+regular expressions for a given syntax file. They have a `.hdr` suffix and are
+used by default only for the pre-installed syntax files. Header files allow micro
+to parse the syntax files much faster when checking the filetype of a certain
+file. Custom syntax files may provide header files in `~/.config/micro/syntax` as
+well but it is not necessary (only do this if you have many (100+) custom syntax
+files and want to improve performance).

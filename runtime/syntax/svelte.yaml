@@ -1,0 +1,27 @@
+filetype: svelte
+
+detect:
+    filename: "\\.svelte$"
+
+rules:
+    - default: 
+        start: "<script>"
+        end: "</script>"
+        rules:
+            - include: "javascript"
+
+    - default: 
+        start: "<script lang=\"ts\">"
+        end: "</script>"
+        rules:
+            - include: "typescript"
+    - default:
+        start: "<style.*?>"
+        end: "</style.*?>"
+        rules:
+            - include: "css"
+    - default:
+        start: "^"
+        end: "$"
+        rules:
+            - include: "html5"

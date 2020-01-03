@@ -11,10 +11,16 @@ rules:
             - include: "html5"
             
     - default: 
-        start: "<script.*?>"
-        end: "</script.*?>"
+        start: "<script>"
+        end: "</script>"
         rules:
             - include: "javascript"
+
+    - default: 
+        start: "<script[ ]+lang=(\"ts\"|'ts')>"
+        end: "</script>"
+        rules:
+            - include: "typescript"
     
     - default:
         start: "<style.*?>"
