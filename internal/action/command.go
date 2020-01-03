@@ -540,6 +540,7 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		} else {
 			screen.Screen.EnableMouse()
 		}
+		// autosave option has been removed
 		// } else if option == "autosave" {
 		// 	if nativeValue.(float64) > 0 {
 		// 		config.SetAutoTime(int(nativeValue.(float64)))
@@ -554,9 +555,15 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 			if option == pl.Name {
 				if nativeValue.(bool) && !pl.Loaded {
 					pl.Load()
-					pl.Call("init")
+					_, err := pl.Call("init")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
 				} else if !nativeValue.(bool) && pl.Loaded {
-					pl.Call("deinit")
+					_, err := pl.Call("deinit")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
 				}
 			}
 		}

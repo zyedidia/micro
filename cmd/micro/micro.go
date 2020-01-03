@@ -174,23 +174,6 @@ func main() {
 
 	screen.Init()
 
-	action.InitBindings()
-	action.InitCommands()
-
-	err = config.InitColorscheme()
-	if err != nil {
-		screen.TermMessage(err)
-	}
-
-	err = config.LoadAllPlugins()
-	if err != nil {
-		screen.TermMessage(err)
-	}
-	err = config.RunPluginFn("init")
-	if err != nil {
-		screen.TermMessage(err)
-	}
-
 	// If we have an error, we can exit cleanly and not completely
 	// mess up the terminal being worked in
 	// In other words we need to shut down tcell before the program crashes
@@ -207,6 +190,23 @@ func main() {
 			os.Exit(1)
 		}
 	}()
+
+	action.InitBindings()
+	action.InitCommands()
+
+	err = config.InitColorscheme()
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
+	err = config.LoadAllPlugins()
+	if err != nil {
+		screen.TermMessage(err)
+	}
+	err = config.RunPluginFn("init")
+	if err != nil {
+		screen.TermMessage(err)
+	}
 
 	b := LoadInput()
 

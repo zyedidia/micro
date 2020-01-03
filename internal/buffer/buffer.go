@@ -453,8 +453,11 @@ func (b *Buffer) UpdateRules() {
 	if !b.Type.Syntax {
 		return
 	}
-	syntaxFile := ""
 	ft := b.Settings["filetype"].(string)
+	if ft == "off" {
+		return
+	}
+	syntaxFile := ""
 	var header *highlight.Header
 	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 		data, err := f.Data()

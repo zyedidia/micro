@@ -29,7 +29,7 @@ Options: [r]ecover, [i]gnore: `
 
 // Backup saves the current buffer to ConfigDir/backups
 func (b *Buffer) Backup(checkTime bool) error {
-	if !b.Settings["backup"].(bool) || b.Path == "" {
+	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return nil
 	}
 
@@ -78,7 +78,7 @@ func (b *Buffer) Backup(checkTime bool) error {
 
 // RemoveBackup removes any backup file associated with this buffer
 func (b *Buffer) RemoveBackup() {
-	if !b.Settings["backup"].(bool) || b.Path == "" {
+	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return
 	}
 	f := config.ConfigDir + "/backups/" + util.EscapePath(b.AbsPath)
@@ -88,7 +88,7 @@ func (b *Buffer) RemoveBackup() {
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) bool {
-	if b.Settings["backup"].(bool) && len(b.Path) > 0 {
+	if b.Settings["backup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
 		backupfile := config.ConfigDir + "/backups/" + util.EscapePath(b.AbsPath)
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
