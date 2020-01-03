@@ -636,7 +636,10 @@ func (h *BufPane) Save() bool {
 	if h.Buf.Path == "" {
 		h.SaveAs()
 	} else {
-		h.saveBufToFile(h.Buf.Path, "Save")
+		noPrompt := h.saveBufToFile(h.Buf.Path, "Save")
+		if noPrompt {
+			return true
+		}
 	}
 
 	return false
@@ -653,7 +656,10 @@ func (h *BufPane) SaveAs() bool {
 				InfoBar.Error("Error parsing arguments: ", err)
 				return
 			}
-			h.saveBufToFile(filename, "SaveAs")
+			noPrompt := h.saveBufToFile(filename, "SaveAs")
+			if noPrompt {
+				h.completeAction("SaveAs")
+			}
 		}
 	})
 	return false
@@ -661,7 +667,7 @@ func (h *BufPane) SaveAs() bool {
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (h *BufPane) saveBufToFile(filename string, action string) {
+func (h *BufPane) saveBufToFile(filename string, action string) bool {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
@@ -678,6 +684,7 @@ func (h *BufPane) saveBufToFile(filename string, action string) {
 					h.completeAction(action)
 				}
 			})
+			return false
 		} else {
 			InfoBar.Error(err)
 		}
@@ -685,8 +692,8 @@ func (h *BufPane) saveBufToFile(filename string, action string) {
 		h.Buf.Path = filename
 		h.Buf.SetName(filename)
 		InfoBar.Message("Saved " + filename)
-		h.completeAction(action)
 	}
+	return true
 }
 
 // Find opens a prompt and searches forward for the input
