@@ -9,6 +9,7 @@ import (
 	"sort"
 
 	"github.com/go-errors/errors"
+    "github.com/gopasspw/gopass/pkg/protect"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
 	"github.com/zyedidia/micro/internal/buffer"
@@ -136,6 +137,10 @@ func LoadInput() []*buffer.Buffer {
 
 func main() {
 	defer os.Exit(0)
+
+	if err := protect.Pledge("stdio rpath wpath cpath tty proc exec"); err != nil {
+        panic(err)
+	}
 
 	// runtime.SetCPUProfileRate(400)
 	// f, _ := os.Create("micro.prof")
