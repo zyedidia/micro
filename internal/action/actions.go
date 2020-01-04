@@ -1,6 +1,7 @@
 package action
 
 import (
+	"log"
 	"regexp"
 	"runtime"
 	"strings"
@@ -609,6 +610,21 @@ func (h *BufPane) Autocomplete() bool {
 		return true
 	}
 	return b.Autocomplete(buffer.BufferComplete)
+}
+
+// CycleAutocompleteBack cycles back in the autocomplete suggestion list
+func (h *BufPane) CycleAutocompleteBack() bool {
+	if h.Cursor.HasSelection() {
+		return false
+	}
+	log.Println(h.Buf.HasSuggestions)
+
+	if h.Buf.HasSuggestions {
+		h.Buf.CycleAutocomplete(false)
+		log.Println("TRUE")
+		return true
+	}
+	return false
 }
 
 // InsertTab inserts a tab or spaces
