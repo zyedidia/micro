@@ -9,7 +9,7 @@ import (
 	"sort"
 
 	"github.com/go-errors/errors"
-    "github.com/gopasspw/gopass/pkg/protect"
+	"github.com/gopasspw/gopass/pkg/protect"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
 	"github.com/zyedidia/micro/internal/buffer"
