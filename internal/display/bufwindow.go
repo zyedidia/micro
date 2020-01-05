@@ -188,6 +188,11 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 		bufHeight--
 	}
 
+	bufWidth := w.Width
+	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
+		bufWidth--
+	}
+
 	// We need to know the string length of the largest line number
 	// so we can pad appropriately when displaying line numbers
 	maxLineNumLength := len(strconv.Itoa(b.LinesNum()))
@@ -259,7 +264,7 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 			totalwidth += width
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
-			if vloc.X >= w.Width {
+			if vloc.X >= bufWidth {
 				if !softwrap {
 					break
 				} else {
@@ -594,7 +599,9 @@ func (w *BufWindow) displayBuffer() {
 			screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, curStyle)
 		}
 
-		draw(' ', curStyle, true)
+		if vloc.X != bufWidth {
+			draw(' ', curStyle, true)
+		}
 
 		bloc.X = w.StartCol
 		bloc.Y++
