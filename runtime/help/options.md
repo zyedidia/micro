@@ -131,13 +131,27 @@ Here are the available options:
 
     default value: `false`
 
-* `mouse`: whether to enable mouse support. When mouse support is disabled,
+* `mouse`: mouse support. When mouse support is disabled,
    usually the terminal will be able to access mouse events which can be useful
    if you want to copy from the terminal instead of from micro (if over ssh for
    example, because the terminal has access to the local clipboard and micro
    does not).
 
 	default value: `true`
+
+* `paste`: Treat characters sent from the terminal in a single chunk as a paste
+   event rather than a series of manual key presses. If you are pasting using
+   the terminal keybinding (not Ctrl-v, which is micro's default paste keybinding)
+   then it is a good idea to enable this option during the paste and disable
+   once the paste is over. See `> help copypaste` for details about copying
+   and pasting in a terminal environment.
+
+    default value: `false`
+
+* `readonly`: when enabled, disallows edits to the buffer. It is recommended
+   to only ever set this option locally using `setlocal`.
+
+    default value: `false`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
    lines.
