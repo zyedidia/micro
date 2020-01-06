@@ -276,7 +276,8 @@ machine, simply copy the settings.json to the other machine.
 You can set these settings either globally or locally. Locally means that the
 setting won't be saved to `~/.config/micro/settings.json` and that it will only
 be set in the current buffer. Setting an option globally is the default, and
-will set the option in all buffers.
+will set the option in all buffers. Use the `setlocal` command to set an option
+locally rather than globally.
 
 The `colorscheme` option is global only, and the `filetype` option is local
 only. To set an option locally, use `setlocal` instead of `set`.
