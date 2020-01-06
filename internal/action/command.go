@@ -349,6 +349,9 @@ func (h *BufPane) OpenCmd(args []string) {
 			InfoBar.Error("Error parsing args ", err)
 			return
 		}
+		if len(args) == 0 {
+			return
+		}
 		filename = strings.Join(args, " ")
 
 		open := func() {
@@ -963,6 +966,10 @@ func (h *BufPane) HandleCommand(input string) {
 	args, err := shellquote.Split(input)
 	if err != nil {
 		InfoBar.Error("Error parsing args ", err)
+		return
+	}
+
+	if len(args) == 0 {
 		return
 	}
 

@@ -667,11 +667,15 @@ func (h *BufPane) SaveAs() bool {
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
 			args, err := shellquote.Split(resp)
-			filename := strings.Join(args, " ")
 			if err != nil {
 				InfoBar.Error("Error parsing arguments: ", err)
 				return
 			}
+			if len(args) == 0 {
+				InfoBar.Error("No filename given")
+				return
+			}
+			filename := strings.Join(args, " ")
 			noPrompt := h.saveBufToFile(filename, "SaveAs")
 			if noPrompt {
 				h.completeAction("SaveAs")
