@@ -12,8 +12,6 @@ github.com/gdamore/encoding v1.0.0 h1:+7OoQ1Bc6eTm5niUzBa0Ctsh6JbMW6Ra+YNuAtDBdk
 github.com/gdamore/encoding v1.0.0/go.mod h1:alR0ol34c49FCSBLjhosxzcPHQbf2trDkoo5dl+VrEg=
 github.com/go-errors/errors v1.0.1 h1:LUHzmkK3GUKUrL/1gfBUxAHzcev3apQlezX/+O7ma6w=
 github.com/go-errors/errors v1.0.1/go.mod h1:f4zRHt4oKfwPJE5k8C9vpYG+aDHdBFUsgrm6/TyX73Q=
-github.com/gopasspw/gopass v1.8.6 h1:TWF7Zsj63xR+T6qIRKZ0ZM0fRDBfSv10yd9rLn631SE=
-github.com/gopasspw/gopass v1.8.6/go.mod h1:IvJpW3zL4Dmp9uPntPl4tLgX3V+CymjeSwtx0NTkf98=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 h1:Z9n2FFNUXsshfwJMBgNA0RU6/i7WVaAegv3PtuIHPMs=
 github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51/go.mod h1:CzGEWj7cYgsdH8dAjBGEr58BoE7ScuLd+fwFZ44+/x8=
 github.com/kr/pretty v0.1.0 h1:L/CwN0zerZDmRFUapSPitk6f+Q3+0za1rQkzVuMiMFI=
@@ -52,8 +50,6 @@ github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
 github.com/zyedidia/pty v2.0.0+incompatible h1:Ou5vXL6tvjst+RV8sUFISbuKDnUJPhnpygApMFGweqw=
 github.com/zyedidia/pty v2.0.0+incompatible/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
-github.com/zyedidia/tcell v1.4.0 h1:uhAz+bdB3HHlVP2hff3WURkI+pERNwgVfy27oi1Gb2A=
-github.com/zyedidia/tcell v1.4.0/go.mod h1:HhlbMSCcGX15rFDB+Q1Lk3pKEOocsCUAQC3zhZ9sadA=
 github.com/zyedidia/tcell v1.4.1 h1:zLci8cg1SLINjwSePZ1yUWnYOnZXMyr4h+zaOvhu5K8=
 github.com/zyedidia/tcell v1.4.1/go.mod h1:HhlbMSCcGX15rFDB+Q1Lk3pKEOocsCUAQC3zhZ9sadA=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=

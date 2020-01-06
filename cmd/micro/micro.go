@@ -9,7 +9,6 @@ import (
 	"sort"
 
 	"github.com/go-errors/errors"
-    "github.com/gopasspw/gopass/pkg/protect"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
 	"github.com/zyedidia/micro/internal/buffer"
@@ -17,6 +16,7 @@ import (
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/pkg/pledge"
 	"github.com/zyedidia/tcell"
 )
 
@@ -138,16 +138,16 @@ func LoadInput() []*buffer.Buffer {
 func main() {
 	defer os.Exit(0)
 
-	if err := protect.Pledge("stdio rpath wpath cpath tty proc exec"); err != nil {
-        panic(err)
-	}
-
 	// runtime.SetCPUProfileRate(400)
 	// f, _ := os.Create("micro.prof")
 	// pprof.StartCPUProfile(f)
 	// defer pprof.StopCPUProfile()
 
 	var err error
+
+	if err = pledge.PledgePromises("stdio rpath wpath cpath tty proc exec"); err != nil {
+		screen.TermMessage(err)
+	}
 
 	InitLog()
 
