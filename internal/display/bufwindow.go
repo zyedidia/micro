@@ -274,7 +274,9 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 					}
 					vloc.X = 0
 					// This will draw an empty line number because the current line is wrapped
-					vloc.X += maxLineNumLength + 1
+					if b.Settings["ruler"].(bool) {
+						vloc.X += maxLineNumLength + 1
+					}
 				}
 			}
 		}
@@ -573,7 +575,9 @@ func (w *BufWindow) displayBuffer() {
 					}
 					vloc.X = 0
 					// This will draw an empty line number because the current line is wrapped
-					w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
+					if b.Settings["ruler"].(bool) {
+						w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
+					}
 				}
 			}
 		}
