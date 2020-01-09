@@ -1,0 +1,40 @@
+filetype: proto
+
+detect:
+    filename: "(\\.(proto)$$)"
+
+rules:
+    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
+    - type: "\\b(int(8|16|32|64))|string|bytes|repeated|bool|required|map|optional|oneof|union\\b"
+    - statement: "\\b(import|service|enum|syntax|package|option|message|rpc|returns|extensions|to)\\b"
+    - constant: "'\\\\(([0-3]?[0-7]{1,2}))'"
+    - constant: "'\\\\x[0-9A-Fa-f]{1,2}'"
+    - symbol.brackets: "[(){}]|\\[|\\]"
+    - constant.number: "(\\b[0-9]+\\b|\\b0x[0-9A-Fa-f]+\\b)"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - preproc: "..+"
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

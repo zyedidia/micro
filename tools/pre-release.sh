@@ -39,6 +39,14 @@ github-release upload \
     --name "micro-$1-linux64.tar.gz" \
     --file binaries/micro-$1-linux64.tar.gz
 
+echo "Uploading Linux 64 static binary"
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag $tag \
+    --name "micro-$1-linux64-static.tar.gz" \
+    --file binaries/micro-$1-linux64-static.tar.gz
+
 echo "Uploading Linux 32 binary"
 github-release upload \
     --user zyedidia \
@@ -47,13 +55,21 @@ github-release upload \
     --name "micro-$1-linux32.tar.gz" \
     --file binaries/micro-$1-linux32.tar.gz
 
-echo "Uploading Linux Arm binary"
+echo "Uploading Linux Arm 32 binary"
 github-release upload \
     --user zyedidia \
     --repo micro \
     --tag $tag \
     --name "micro-$1-linux-arm.tar.gz" \
     --file binaries/micro-$1-linux-arm.tar.gz
+
+echo "Uploading Linux Arm 64 binary"
+github-release upload \
+    --user zyedidia \
+    --repo micro \
+    --tag $tag \
+    --name "micro-$1-linux-arm64.tar.gz" \
+    --file binaries/micro-$1-linux-arm64.tar.gz
 
 echo "Uploading FreeBSD 64 binary"
 github-release upload \
@@ -119,18 +135,18 @@ github-release upload \
     --name "micro-$1-win32.zip" \
     --file binaries/micro-$1-win32.zip
 
-echo "Uploading vendored tarball"
-github-release upload \
-    --user zyedidia \
-    --repo micro \
-    --tag $tag \
-    --name "micro-$1-src.tar.gz" \
-    --file binaries/micro-$1-src.tar.gz
-
-echo "Uploading vendored zip"
-github-release upload \
-    --user zyedidia \
-    --repo micro \
-    --tag $tag \
-    --name "micro-$1-src.zip" \
-    --file binaries/micro-$1-src.zip
+# echo "Uploading vendored tarball"
+# github-release upload \
+#     --user zyedidia \
+#     --repo micro \
+#     --tag $tag \
+#     --name "micro-$1-src.tar.gz" \
+#     --file binaries/micro-$1-src.tar.gz
+#
+# echo "Uploading vendored zip"
+# github-release upload \
+#     --user zyedidia \
+#     --repo micro \
+#     --tag $tag \
+#     --name "micro-$1-src.zip" \
+#     --file binaries/micro-$1-src.zip
