@@ -211,7 +211,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
-	if b.Settings["readonly"].(bool) {
+	if b.Settings["readonly"].(bool) && b.Type == BTDefault {
 		b.Type.Readonly = true
 	}
 
