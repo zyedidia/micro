@@ -178,6 +178,8 @@ The packages and functions are listed below (in Go type signatures):
     - `BTInfo`
     - `NewBufferFromFile`
     - `ByteOffset`
+    - `Log`
+    - `LogBuf`
 * `micro/util`
     - `RuneAt`
     - `GetLeadingWhitespace`

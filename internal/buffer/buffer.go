@@ -879,3 +879,8 @@ func (b *Buffer) Line(i int) string {
 func WriteLog(s string) {
 	LogBuf.EventHandler.Insert(LogBuf.End(), s)
 }
+
+// GetLogBuf returns the log buffer
+func GetLogBuf() *Buffer {
+	return LogBuf
+}

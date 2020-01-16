@@ -28,6 +28,7 @@ var (
 	flagVersion   = flag.Bool("version", false, "Show the version number and information")
 	flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
 	flagOptions   = flag.Bool("options", false, "Show all option help")
+	flagDebug     = flag.Bool("debug", false, "Enable debug mode (prints debug info to ./log.txt)")
 	optionFlags   map[string]*string
 )
 
@@ -41,6 +42,8 @@ func InitFlags() {
 		fmt.Println("    \tThis can also be done by opening file:LINE:COL")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all option help")
+		fmt.Println("-debug")
+		fmt.Println("    \tEnable debug mode (enables logging to ./log.txt)")
 		fmt.Println("-version")
 		fmt.Println("    \tShow the version number and information")
 
@@ -81,6 +84,10 @@ func InitFlags() {
 			fmt.Printf("    \tDefault value: '%v'\n", v)
 		}
 		os.Exit(0)
+	}
+
+	if util.Debug == "OFF" && *flagDebug {
+		util.Debug = "ON"
 	}
 }
 
@@ -144,9 +151,9 @@ func main() {
 
 	var err error
 
-	InitLog()
-
 	InitFlags()
+
+	InitLog()
 
 	err = config.InitConfigDir(*flagConfigDir)
 	if err != nil {
