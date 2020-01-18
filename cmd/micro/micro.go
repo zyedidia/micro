@@ -8,6 +8,7 @@ import (
 	"runtime"
 	"sort"
 
+	"github.com/estrogently/puffy"
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
@@ -16,7 +17,6 @@ import (
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/shell"
 	"github.com/zyedidia/micro/internal/util"
-	"github.com/zyedidia/micro/pkg/pledge"
 	"github.com/zyedidia/tcell"
 )
 
@@ -145,7 +145,7 @@ func main() {
 
 	var err error
 
-	if err = pledge.PledgePromises("stdio rpath wpath cpath tty proc exec"); err != nil {
+	if err = puffy.PledgePromises("stdio rpath wpath cpath tty proc exec"); err != nil {
 		screen.TermMessage(err)
 	}
 

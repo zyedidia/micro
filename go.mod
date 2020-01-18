@@ -3,6 +3,7 @@ module github.com/zyedidia/micro
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dustin/go-humanize v1.0.0
+	github.com/estrogently/puffy v0.0.0-20200118233719-0ab2f3de5d0f
 	github.com/go-errors/errors v1.0.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mattn/go-isatty v0.0.11
@@ -18,7 +19,6 @@ require (
 	github.com/zyedidia/pty v2.0.0+incompatible // indirect
 	github.com/zyedidia/tcell v1.4.1
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
-	golang.org/x/sys v0.0.0-20191026070338-33540a1f6037
 	golang.org/x/text v0.3.2
 	gopkg.in/yaml.v2 v2.2.7
 	layeh.com/gopher-luar v1.0.7
