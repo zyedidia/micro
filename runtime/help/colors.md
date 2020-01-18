@@ -44,6 +44,8 @@ color support comes in three flavors.
   terminal emulator will be slightly off). Not all terminals support true color
   but at this point most do. True color support in micro is off by default but
   can be enabled by setting the environment variable `MICRO_TRUECOLOR` to 1.
+  In addition your terminal must support it (usually indicated by setting `$COLORTERM`
+  to `truecolor`).
   True-color colorschemes in micro typically end with `-tc`, such as `solarized-tc`,
   `atom-dark-tc`, `material-tc`, etc... If true color is not enabled but a true
   color colorscheme is used, micro will do its best to approximate the colors
@@ -76,7 +78,9 @@ These may vary widely based on the 16 colors selected for your terminal.
 
 ### True color
 
-These require terminals that support true color and require `MICRO_TRUECOLOR=1` (this is an environment variable).
+True color requires your terminal to support it. This means that the environment variable
+`COLORTERM` should have the value `truecolor`, `24bit`, or `24-bit`. In addition, to enable
+true color in micro, the environment variable `MICRO_TRUECOLOR` must be set to 1.
 
 * `solarized-tc`: this is the solarized colorscheme for true color.
 * `atom-dark-tc`: this colorscheme is based off of Atom's "dark" colorscheme.

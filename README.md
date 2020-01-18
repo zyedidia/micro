@@ -29,7 +29,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
   - [MacOS terminal](#macos-terminal)
   - [Linux clipboard support](#linux-clipboard-support)
   - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
-  - [Plan9, Cygwin](#plan9-cygwin)
+  - [Plan9, Cygwin, Mingw](#plan9-cygwin-mingw)
 - [Usage](#usage)
 - [Documentation and Help](#documentation-and-help)
 - [Contributing](#contributing)
@@ -142,6 +142,9 @@ recommended because it doesn't build micro with version information, and doesn't
 ### MacOS terminal
 
 If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
+
+If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
+`Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
 
 ### Linux clipboard support
 

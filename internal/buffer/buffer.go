@@ -211,7 +211,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 	}
 
-	if b.Settings["readonly"].(bool) {
+	if b.Settings["readonly"].(bool) && b.Type == BTDefault {
 		b.Type.Readonly = true
 	}
 
@@ -878,4 +878,9 @@ func (b *Buffer) Line(i int) string {
 // WriteLog writes a string to the log buffer
 func WriteLog(s string) {
 	LogBuf.EventHandler.Insert(LogBuf.End(), s)
+}
+
+// GetLogBuf returns the log buffer
+func GetLogBuf() *Buffer {
+	return LogBuf
 }

@@ -422,7 +422,7 @@ func DefaultBindings() map[string]string {
 		"Alt-CtrlH":      "DeleteWordLeft",
 		"Alt-Backspace":  "DeleteWordLeft",
 		"Tab":            "Autocomplete|IndentSelection|InsertTab",
-		"Backtab":        "OutdentSelection|OutdentLine",
+		"Backtab":        "CycleAutocompleteBack|OutdentSelection|OutdentLine",
 		"CtrlO":          "OpenFile",
 		"CtrlS":          "Save",
 		"CtrlF":          "Find",

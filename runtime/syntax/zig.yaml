@@ -15,7 +15,7 @@ rules:
       # Numbers (hexadecimal + decimal)
     - constant.number: "\\b(0x[A-F0-9]+|[0-9]+)\\b"
       # Primitive Types / Derived Data Types
-    - type: "([A-Z][a-z]+|(i8|u8|i16|u16|i32|u32|i64|u64|i128|u128|isize|usize|c_short|c_ushort|c_int|c_uint|c_long|c_ulong|c_longlong|c_ulonglong|c_longdouble|c_void|f16|f32|f64|f128|bool|void|noreturn|type|anyerror|comptime_int|comptime_float))"
+    - type: "\\b([A-Z][a-z]+|(i8|u8|i16|u16|i32|u32|i64|u64|i128|u128|isize|usize|c_short|c_ushort|c_int|c_uint|c_long|c_ulong|c_longlong|c_ulonglong|c_longdouble|c_void|f16|f32|f64|f128|bool|void|noreturn|type|anyerror|comptime_int|comptime_float))\\b"
 
     - constant.string:
         start: "\""

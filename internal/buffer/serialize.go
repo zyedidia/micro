@@ -42,6 +42,7 @@ func (b *Buffer) Serialize() error {
 	}, false)
 }
 
+// Unserialize loads the buffer info from config.ConfigDir/buffers
 func (b *Buffer) Unserialize() error {
 	// If either savecursor or saveundo is turned on, we need to load the serialized information
 	// from ~/.config/micro/buffers
@@ -55,7 +56,7 @@ func (b *Buffer) Unserialize() error {
 		decoder := gob.NewDecoder(file)
 		err = decoder.Decode(&buffer)
 		if err != nil {
-			return errors.New(err.Error() + "\nYou may want to remove the files in ~/.config/micro/buffers (these files store the information for the 'saveundo' and 'savecursor' options) if this problem persists.")
+			return errors.New(err.Error() + "\nYou may want to remove the files in ~/.config/micro/buffers (these files\nstore the information for the 'saveundo' and 'savecursor' options) if\nthis problem persists.\nThis may be caused by upgrading to version 2.0, and removing the 'buffers'\ndirectory will reset the cursor and undo history and solve the problem.")
 		}
 		if b.Settings["savecursor"].(bool) {
 			b.StartCursor = buffer.Cursor

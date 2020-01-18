@@ -35,7 +35,7 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 		}
 	} else if option == "encoding" {
 		b.isModified = true
-	} else if option == "readonly" {
+	} else if option == "readonly" && b.Type == BTDefault {
 		b.Type.Readonly = nativeValue.(bool)
 	}
 
