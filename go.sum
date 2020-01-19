@@ -8,8 +8,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dustin/go-humanize v1.0.0 h1:VSnTsYCnlFHaM2/igO1h6X3HA71jcobQuxemgkq4zYo=
 github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
-github.com/estrogently/puffy v0.0.0-20200118233719-0ab2f3de5d0f h1:VomBIRdCjbppyJPVg2cO1bkmk2F0ZnvQtxKOf/ZDQ9k=
-github.com/estrogently/puffy v0.0.0-20200118233719-0ab2f3de5d0f/go.mod h1:JOpxfeUu8MMOq86Lb1uRmkWVAwRrKJCbxt11ilT/ans=
+github.com/estrogently/puffy v1.0.0 h1:BcBaLdGQdOCo7VR4NjXO8+wyTrzivSls/R+9KLA0JSs=
+github.com/estrogently/puffy v1.0.0/go.mod h1:JOpxfeUu8MMOq86Lb1uRmkWVAwRrKJCbxt11ilT/ans=
 github.com/gdamore/encoding v1.0.0 h1:+7OoQ1Bc6eTm5niUzBa0Ctsh6JbMW6Ra+YNuAtDBdko=
 github.com/gdamore/encoding v1.0.0/go.mod h1:alR0ol34c49FCSBLjhosxzcPHQbf2trDkoo5dl+VrEg=
 github.com/go-errors/errors v1.0.1 h1:LUHzmkK3GUKUrL/1gfBUxAHzcev3apQlezX/+O7ma6w=
