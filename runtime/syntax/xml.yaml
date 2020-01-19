@@ -9,7 +9,12 @@ rules:
         start: "<!DOCTYPE"
         end: "[/]?>"
         rules: []
-    - comment: "<!--.+?-->"
+
+    - comment:
+        start: "<!--"
+        end: "-->"
+        rules: []
+
     - symbol.tag:
         start: "<\\??"
         end: "\\??>"

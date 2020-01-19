@@ -14,6 +14,9 @@ func RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool, callba
 	if err != nil {
 		return err
 	}
+	if len(args) == 0 {
+		return nil
+	}
 
 	t := new(shell.Terminal)
 	t.Start(args, getOutput, wait, callback, userargs)

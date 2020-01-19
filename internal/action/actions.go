@@ -1,6 +1,7 @@
 package action
 
 import (
+	"log"
 	"regexp"
 	"runtime"
 	"strings"
@@ -611,6 +612,21 @@ func (h *BufPane) Autocomplete() bool {
 	return b.Autocomplete(buffer.BufferComplete)
 }
 
+// CycleAutocompleteBack cycles back in the autocomplete suggestion list
+func (h *BufPane) CycleAutocompleteBack() bool {
+	if h.Cursor.HasSelection() {
+		return false
+	}
+	log.Println(h.Buf.HasSuggestions)
+
+	if h.Buf.HasSuggestions {
+		h.Buf.CycleAutocomplete(false)
+		log.Println("TRUE")
+		return true
+	}
+	return false
+}
+
 // InsertTab inserts a tab or spaces
 func (h *BufPane) InsertTab() bool {
 	b := h.Buf
@@ -651,11 +667,15 @@ func (h *BufPane) SaveAs() bool {
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
 			args, err := shellquote.Split(resp)
-			filename := strings.Join(args, " ")
 			if err != nil {
 				InfoBar.Error("Error parsing arguments: ", err)
 				return
 			}
+			if len(args) == 0 {
+				InfoBar.Error("No filename given")
+				return
+			}
+			filename := strings.Join(args, " ")
 			noPrompt := h.saveBufToFile(filename, "SaveAs")
 			if noPrompt {
 				h.completeAction("SaveAs")

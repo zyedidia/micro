@@ -154,7 +154,6 @@ var InfoOverrides = map[string]InfoKeyAction{
 	"CursorDown":    (*InfoPane).CursorDown,
 	"InsertNewline": (*InfoPane).InsertNewline,
 	"Autocomplete":  (*InfoPane).Autocomplete,
-	"OutdentLine":   (*InfoPane).CycleBack,
 	"Escape":        (*InfoPane).Escape,
 	"Quit":          (*InfoPane).Quit,
 	"QuitAll":       (*InfoPane).QuitAll,
@@ -193,13 +192,6 @@ func (h *InfoPane) Autocomplete() {
 				b.Autocomplete(action.completer)
 			}
 		}
-	}
-}
-
-// CycleBack cycles back in the autocomplete suggestion list
-func (h *InfoPane) CycleBack() {
-	if h.Buf.HasSuggestions {
-		h.Buf.CycleAutocomplete(false)
 	}
 }
 

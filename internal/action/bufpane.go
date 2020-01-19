@@ -355,7 +355,7 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 }
 
 func (h *BufPane) execAction(action func(*BufPane) bool, name string, cursor int) bool {
-	if name != "Autocomplete" {
+	if name != "Autocomplete" && name != "CycleAutocompleteBack" {
 		h.Buf.HasSuggestions = false
 	}
 
@@ -523,6 +523,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"IndentSelection":        (*BufPane).IndentSelection,
 	"OutdentSelection":       (*BufPane).OutdentSelection,
 	"Autocomplete":           (*BufPane).Autocomplete,
+	"CycleAutocompleteBack":  (*BufPane).CycleAutocompleteBack,
 	"OutdentLine":            (*BufPane).OutdentLine,
 	"Paste":                  (*BufPane).Paste,
 	"PastePrimary":           (*BufPane).PastePrimary,

@@ -131,13 +131,27 @@ Here are the available options:
 
     default value: `false`
 
-* `mouse`: whether to enable mouse support. When mouse support is disabled,
+* `mouse`: mouse support. When mouse support is disabled,
    usually the terminal will be able to access mouse events which can be useful
    if you want to copy from the terminal instead of from micro (if over ssh for
    example, because the terminal has access to the local clipboard and micro
    does not).
 
 	default value: `true`
+
+* `paste`: Treat characters sent from the terminal in a single chunk as a paste
+   event rather than a series of manual key presses. If you are pasting using
+   the terminal keybinding (not Ctrl-v, which is micro's default paste keybinding)
+   then it is a good idea to enable this option during the paste and disable
+   once the paste is over. See `> help copypaste` for details about copying
+   and pasting in a terminal environment.
+
+    default value: `false`
+
+* `readonly`: when enabled, disallows edits to the buffer. It is recommended
+   to only ever set this option locally using `setlocal`.
+
+    default value: `false`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
    lines.
@@ -262,7 +276,8 @@ machine, simply copy the settings.json to the other machine.
 You can set these settings either globally or locally. Locally means that the
 setting won't be saved to `~/.config/micro/settings.json` and that it will only
 be set in the current buffer. Setting an option globally is the default, and
-will set the option in all buffers.
+will set the option in all buffers. Use the `setlocal` command to set an option
+locally rather than globally.
 
 The `colorscheme` option is global only, and the `filetype` option is local
 only. To set an option locally, use `setlocal` instead of `set`.

@@ -2,6 +2,7 @@ package shell
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -36,6 +37,9 @@ func RunCommand(input string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if len(args) == 0 {
+		return "", errors.New("No arguments")
+	}
 	inputCmd := args[0]
 
 	return ExecCommand(inputCmd, args[1:]...)
@@ -48,6 +52,9 @@ func RunBackgroundShell(input string) (func() string, error) {
 	args, err := shellquote.Split(input)
 	if err != nil {
 		return nil, err
+	}
+	if len(args) == 0 {
+		return nil, errors.New("No arguments")
 	}
 	inputCmd := args[0]
 	return func() string {
@@ -71,6 +78,9 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 	args, err := shellquote.Split(input)
 	if err != nil {
 		return "", err
+	}
+	if len(args) == 0 {
+		return "", errors.New("No arguments")
 	}
 	inputCmd := args[0]
 
