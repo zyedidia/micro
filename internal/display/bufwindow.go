@@ -370,17 +370,18 @@ func (w *BufWindow) displayBuffer() {
 	}
 
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
-		for _, c := range b.GetCursors() {
-			// rehighlight starting from where the cursor is
-			start := c.Y
-			if start > 0 && b.Rehighlight(start-1) {
-				b.Highlighter.ReHighlightLine(b, start-1)
-				b.SetRehighlight(start-1, false)
-			}
+		for _, r := range b.Modifications {
+			for i := r.X; i <= r.Y; i++ {
+				if i > 0 && b.Rehighlight(i-1) {
+					b.Highlighter.ReHighlightLine(b, i-1)
+					b.SetRehighlight(i-1, false)
+				}
 
-			b.Highlighter.ReHighlightStates(b, start)
-			b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
+				b.Highlighter.ReHighlightStates(b, i)
+			}
 		}
+		b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
+		b.ClearModifications()
 	}
 
 	var matchingBraces []buffer.Loc

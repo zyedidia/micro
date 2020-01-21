@@ -176,7 +176,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		return highlights
 	}
 
-	if lineLen == 0 || statesOnly {
+	if lineLen == 0 {
 		if canMatchEnd {
 			h.lastRegion = curRegion
 		}
@@ -197,28 +197,32 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 	if firstLoc[0] != lineLen {
-		highlights[start+firstLoc[0]] = firstRegion.limitGroup
+		if !statesOnly {
+			highlights[start+firstLoc[0]] = firstRegion.limitGroup
+		}
 		h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, firstLoc[0]), curRegion, statesOnly)
 		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
 		return highlights
 	}
 
-	fullHighlights := make([]Group, lineLen)
-	for i := 0; i < len(fullHighlights); i++ {
-		fullHighlights[i] = curRegion.group
-	}
+	if !statesOnly {
+		fullHighlights := make([]Group, lineLen)
+		for i := 0; i < len(fullHighlights); i++ {
+			fullHighlights[i] = curRegion.group
+		}
 
-	for _, p := range curRegion.rules.patterns {
-		matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
-		for _, m := range matches {
-			for i := m[0]; i < m[1]; i++ {
-				fullHighlights[i] = p.group
+		for _, p := range curRegion.rules.patterns {
+			matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
+			for _, m := range matches {
+				for i := m[0]; i < m[1]; i++ {
+					fullHighlights[i] = p.group
+				}
 			}
 		}
-	}
-	for i, h := range fullHighlights {
-		if i == 0 || h != fullHighlights[i-1] {
-			highlights[start+i] = h
+		for i, h := range fullHighlights {
+			if i == 0 || h != fullHighlights[i-1] {
+				highlights[start+i] = h
+			}
 		}
 	}
 

@@ -28,8 +28,11 @@ import (
 const backupTime = 8000
 
 var (
+	// OpenBuffers is a list of the currently open buffers
 	OpenBuffers []*Buffer
-	LogBuf      *Buffer
+	// LogBuf is a reference to the log buffer which can be opened with the
+	// `> log` command
+	LogBuf *Buffer
 )
 
 // The BufType defines what kind of buffer this is
@@ -41,16 +44,26 @@ type BufType struct {
 }
 
 var (
+	// BTDefault is a default buffer
 	BTDefault = BufType{0, false, false, true}
-	BTHelp    = BufType{1, true, true, true}
-	BTLog     = BufType{2, true, true, false}
+	// BTHelp is a help buffer
+	BTHelp = BufType{1, true, true, true}
+	// BTLog is a log buffer
+	BTLog = BufType{2, true, true, false}
+	// BTScratch is a buffer that cannot be saved (for scratch work)
 	BTScratch = BufType{3, false, true, false}
-	BTRaw     = BufType{4, false, true, false}
-	BTInfo    = BufType{5, false, true, false}
+	// BTRaw is is a buffer that shows raw terminal events
+	BTRaw = BufType{4, false, true, false}
+	// BTInfo is a buffer for inputting information
+	BTInfo = BufType{5, false, true, false}
 
+	// ErrFileTooLarge is returned when the file is too large to hash
+	// (fastdirty is automatically enabled)
 	ErrFileTooLarge = errors.New("File is too large to hash")
 )
 
+// SharedBuffer is a struct containing info that is shared among buffers
+// that have the same file open
 type SharedBuffer struct {
 	*LineArray
 	// Stores the last modification time of the file the buffer is pointing to
@@ -97,8 +110,13 @@ type Buffer struct {
 	// Name of the buffer on the status line
 	name string
 
-	SyntaxDef   *highlight.Def
+	// SyntaxDef represents the syntax highlighting definition being used
+	// This stores the highlighting rules and filetype detection info
+	SyntaxDef *highlight.Def
+	// The Highlighter struct actually performs the highlighting
 	Highlighter *highlight.Highlighter
+	// Modifications is the list of modified regions for syntax highlighting
+	Modifications []Loc
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
@@ -260,6 +278,8 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		screen.TermMessage(err)
 	}
 
+	b.Modifications = make([]Loc, 10)
+
 	OpenBuffers = append(OpenBuffers, b)
 
 	return b
@@ -304,24 +324,42 @@ func (b *Buffer) SetName(s string) {
 	b.name = s
 }
 
+// Insert inserts the given string of text at the start location
 func (b *Buffer) Insert(start Loc, text string) {
 	if !b.Type.Readonly {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
 
+		// b.Modifications is cleared every screen redraw so it's
+		// ok to append duplicates
+		b.Modifications = append(b.Modifications, Loc{start.Y, start.Y + strings.Count(text, "\n")})
+
 		go b.Backup(true)
 	}
 }
 
+// Remove removes the characters between the start and end locations
 func (b *Buffer) Remove(start, end Loc) {
 	if !b.Type.Readonly {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
 
+		b.Modifications = append(b.Modifications, Loc{start.Y, start.Y})
+
 		go b.Backup(true)
 	}
+}
+
+// ClearModifications clears the list of modified lines in this buffer
+// The list of modified lines is used for syntax highlighting so that
+// we can selectively highlight only the necessary lines
+// This function should be called every time this buffer is drawn to
+// the screen
+func (b *Buffer) ClearModifications() {
+	// clear slice without resetting the cap
+	b.Modifications = b.Modifications[:0]
 }
 
 // FileType returns the buffer's filetype
@@ -372,6 +410,7 @@ func (b *Buffer) ReOpen() error {
 	return err
 }
 
+// RelocateCursors relocates all cursors (makes sure they are in the buffer)
 func (b *Buffer) RelocateCursors() {
 	for _, c := range b.cursors {
 		c.Relocate()
