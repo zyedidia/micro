@@ -212,6 +212,8 @@ func DefaultCommonSettings() map[string]interface{} {
 	return commonsettings
 }
 
+// a list of settings that should only be globally modified and their
+// default values
 var defaultGlobalSettings = map[string]interface{}{
 	// "autosave":    float64(0),
 	"colorscheme": "default",
@@ -221,6 +223,12 @@ var defaultGlobalSettings = map[string]interface{}{
 	"paste":       false,
 	"savehistory": true,
 	"sucmd":       "sudo",
+}
+
+// a list of settings that should never be globally modified
+var LocalSettings = []string{
+	"filetype",
+	"readonly",
 }
 
 // DefaultGlobalSettings returns the default global settings for micro
@@ -249,6 +257,7 @@ func DefaultAllSettings() map[string]interface{} {
 	return allsettings
 }
 
+// GetNativeValue parses and validates a value for a given option
 func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {
 	var native interface{}
 	kind := reflect.TypeOf(realValue).Kind()

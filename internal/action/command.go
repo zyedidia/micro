@@ -527,45 +527,55 @@ func (h *BufPane) NewTabCmd(args []string) {
 }
 
 func SetGlobalOptionNative(option string, nativeValue interface{}) error {
-	config.GlobalSettings[option] = nativeValue
+	local := false
+	for _, s := range config.LocalSettings {
+		if s == option {
+			local = true
+			break
+		}
+	}
 
-	if option == "colorscheme" {
-		// LoadSyntaxFiles()
-		config.InitColorscheme()
-		for _, b := range buffer.OpenBuffers {
-			b.UpdateRules()
-		}
-	} else if option == "infobar" || option == "keymenu" {
-		Tabs.Resize()
-	} else if option == "mouse" {
-		if !nativeValue.(bool) {
-			screen.Screen.DisableMouse()
+	if !local {
+		config.GlobalSettings[option] = nativeValue
+
+		if option == "colorscheme" {
+			// LoadSyntaxFiles()
+			config.InitColorscheme()
+			for _, b := range buffer.OpenBuffers {
+				b.UpdateRules()
+			}
+		} else if option == "infobar" || option == "keymenu" {
+			Tabs.Resize()
+		} else if option == "mouse" {
+			if !nativeValue.(bool) {
+				screen.Screen.DisableMouse()
+			} else {
+				screen.Screen.EnableMouse()
+			}
+			// autosave option has been removed
+			// } else if option == "autosave" {
+			// 	if nativeValue.(float64) > 0 {
+			// 		config.SetAutoTime(int(nativeValue.(float64)))
+			// 		config.StartAutoSave()
+			// 	} else {
+			// 		config.SetAutoTime(0)
+			// 	}
+		} else if option == "paste" {
+			screen.Screen.SetPaste(nativeValue.(bool))
 		} else {
-			screen.Screen.EnableMouse()
-		}
-		// autosave option has been removed
-		// } else if option == "autosave" {
-		// 	if nativeValue.(float64) > 0 {
-		// 		config.SetAutoTime(int(nativeValue.(float64)))
-		// 		config.StartAutoSave()
-		// 	} else {
-		// 		config.SetAutoTime(0)
-		// 	}
-	} else if option == "paste" {
-		screen.Screen.SetPaste(nativeValue.(bool))
-	} else {
-		for _, pl := range config.Plugins {
-			if option == pl.Name {
-				if nativeValue.(bool) && !pl.Loaded {
-					pl.Load()
-					_, err := pl.Call("init")
-					if err != nil && err != config.ErrNoSuchFunction {
-						screen.TermMessage(err)
-					}
-				} else if !nativeValue.(bool) && pl.Loaded {
-					_, err := pl.Call("deinit")
-					if err != nil && err != config.ErrNoSuchFunction {
-						screen.TermMessage(err)
+			for _, pl := range config.Plugins {
+				if option == pl.Name {
+					if nativeValue.(bool) && !pl.Loaded {
+						pl.Load()
+						_, err := pl.Call("init")
+						if err != nil && err != config.ErrNoSuchFunction {
+							screen.TermMessage(err)
+						}
+					} else if !nativeValue.(bool) && pl.Loaded {
+						_, err := pl.Call("deinit")
+						if err != nil && err != config.ErrNoSuchFunction {
+							screen.TermMessage(err)
+						}
 					}
 				}
 			}
