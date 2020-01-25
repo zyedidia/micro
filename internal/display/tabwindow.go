@@ -45,13 +45,18 @@ func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
 
 func (w *TabWindow) Scroll(amt int) {
 	w.hscroll += amt
-	w.hscroll = util.Clamp(w.hscroll, 0, w.TotalSize()-w.width)
+	s := w.TotalSize()
+	w.hscroll = util.Clamp(w.hscroll, 0, s-w.width)
+
+	if s-w.width <= 0 {
+		w.hscroll = 0
+	}
 }
 
 func (w *TabWindow) TotalSize() int {
 	sum := 2
 	for _, n := range w.Names {
-		sum += utf8.RuneCountInString(n) + 4
+		sum += runewidth.StringWidth(n) + 4
 	}
 	return sum - 4
 }
@@ -64,6 +69,7 @@ func (w *TabWindow) SetActive(a int) {
 	w.active = a
 	x := 2
 	s := w.TotalSize()
+
 	for i, n := range w.Names {
 		c := utf8.RuneCountInString(n)
 		if i == a {
@@ -75,6 +81,10 @@ func (w *TabWindow) SetActive(a int) {
 			break
 		}
 		x += c + 4
+	}
+
+	if s-w.width <= 0 {
+		w.hscroll = 0
 	}
 }
 
