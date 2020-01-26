@@ -25,6 +25,10 @@ func NewTabWindow(w int, y int) *TabWindow {
 	return tw
 }
 
+func (w *TabWindow) Resize(width, height int) {
+	w.width = width
+}
+
 func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
 	x := -w.hscroll
 

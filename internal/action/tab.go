@@ -91,6 +91,7 @@ func (t *TabList) Resize() {
 		t.List[0].Node.Resize(w, h-iOffset)
 		t.List[0].Resize()
 	}
+	t.TabWindow.Resize(w, h)
 }
 
 // HandleEvent checks for a resize event or a mouse event on the tab bar
