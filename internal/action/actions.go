@@ -549,12 +549,14 @@ func (h *BufPane) IndentSelection() bool {
 		tabsize := int(h.Buf.Settings["tabsize"].(float64))
 		indentsize := len(h.Buf.IndentString(tabsize))
 		for y := startY; y <= endY; y++ {
-			h.Buf.Insert(buffer.Loc{X: 0, Y: y}, h.Buf.IndentString(tabsize))
-			if y == startY && start.X > 0 {
-				h.Cursor.SetSelectionStart(start.Move(indentsize, h.Buf))
-			}
-			if y == endY {
-				h.Cursor.SetSelectionEnd(buffer.Loc{X: endX + indentsize + 1, Y: endY})
+			if len(h.Buf.LineBytes(y)) > 0 {
+				h.Buf.Insert(buffer.Loc{X: 0, Y: y}, h.Buf.IndentString(tabsize))
+				if y == startY && start.X > 0 {
+					h.Cursor.SetSelectionStart(start.Move(indentsize, h.Buf))
+				}
+				if y == endY {
+					h.Cursor.SetSelectionEnd(buffer.Loc{X: endX + indentsize + 1, Y: endY})
+				}
 			}
 		}
 		h.Buf.RelocateCursors()
