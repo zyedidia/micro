@@ -114,7 +114,7 @@ type Buffer struct {
 	// This stores the highlighting rules and filetype detection info
 	SyntaxDef *highlight.Def
 	// The Highlighter struct actually performs the highlighting
-	Highlighter *highlight.Highlighter
+	Highlighter highlight.Highlighter
 	// Modifications is the list of modified regions for syntax highlighting
 	Modifications []Loc
 

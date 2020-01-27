@@ -78,14 +78,27 @@ type LineStates interface {
 }
 
 // A Highlighter contains the information needed to highlight a string
-type Highlighter struct {
+type Highlighter interface {
+	HighlightString(input string) []LineMatch
+	HighlightStates(input LineStates)
+	HighlightMatches(input LineStates, startline, endline int)
+	ReHighlightStates(input LineStates, startline int)
+	ReHighlightLine(input LineStates, lineN int)
+}
+
+type yamlHighlighter struct {
 	lastRegion *region
 	Def        *Def
 }
 
 // NewHighlighter returns a new highlighter from the given syntax definition
-func NewHighlighter(def *Def) *Highlighter {
-	h := new(Highlighter)
+func NewHighlighter(def *Def) Highlighter {
+	highlighter := NewTreeSitterHighlighter(def.Header.FileType)
+	if highlighter != nil {
+		return highlighter
+	}
+
+	h := new(yamlHighlighter)
 	h.Def = def
 	return h
 }
@@ -145,7 +158,7 @@ func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 	return matches
 }
 
-func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, curRegion *region, statesOnly bool) LineMatch {
+func (h *yamlHighlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, curRegion *region, statesOnly bool) LineMatch {
 	lineLen := utf8.RuneCount(line)
 	if start == 0 {
 		if !statesOnly {
@@ -233,7 +246,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 	return highlights
 }
 
-func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, statesOnly bool) LineMatch {
+func (h *yamlHighlighter) highlightEmptyRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, statesOnly bool) LineMatch {
 	lineLen := utf8.RuneCount(line)
 	if lineLen == 0 {
 		if canMatchEnd {
@@ -298,7 +311,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 // Use this function for simple syntax highlighting and use the other functions for
 // more advanced syntax highlighting. They are optimized for quick rehighlighting of the same
 // text with minor changes made
-func (h *Highlighter) HighlightString(input string) []LineMatch {
+func (h *yamlHighlighter) HighlightString(input string) []LineMatch {
 	lines := strings.Split(input, "\n")
 	var lineMatches []LineMatch
 
@@ -317,7 +330,7 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 }
 
 // HighlightStates correctly sets all states for the buffer
-func (h *Highlighter) HighlightStates(input LineStates) {
+func (h *yamlHighlighter) HighlightStates(input LineStates) {
 	for i := 0; i < input.LinesNum(); i++ {
 		line := input.LineBytes(i)
 		// highlights := make(LineMatch)
@@ -337,7 +350,7 @@ func (h *Highlighter) HighlightStates(input LineStates) {
 // HighlightMatches sets the matches for each line in between startline and endline
 // It sets all other matches in the buffer to nil to conserve memory
 // This assumes that all the states are set correctly
-func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int) {
+func (h *yamlHighlighter) HighlightMatches(input LineStates, startline, endline int) {
 	for i := startline; i < endline; i++ {
 		if i >= input.LinesNum() {
 			break
@@ -359,7 +372,7 @@ func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int)
 
 // ReHighlightStates will scan down from `startline` and set the appropriate end of line state
 // for each line until it comes across the same state in two consecutive lines
-func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
+func (h *yamlHighlighter) ReHighlightStates(input LineStates, startline int) {
 	// lines := input.LineData()
 
 	h.lastRegion = nil
@@ -388,7 +401,7 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
 }
 
 // ReHighlightLine will rehighlight the state and match for a single line
-func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
+func (h *yamlHighlighter) ReHighlightLine(input LineStates, lineN int) {
 	line := input.LineBytes(lineN)
 	highlights := make(LineMatch)
 
