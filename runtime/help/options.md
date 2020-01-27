@@ -221,11 +221,10 @@ Here are the available options:
     default value: `$(filename) $(modified)($(line),$(col)) $(opt:filetype)
                     $(opt:fileformat) $(opt:encoding)`
 
-* `statusformatl`: format string definition for the left-justified part of the
+* `statusformatr`: format string definition for the right-justified part of the
    statusline.
 
-    default value: `$(bind:ToggleKeyMenu): show bindings, $(bind:ToggleHelp):
-                    toggle help`
+    default value: `$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help`
 
 * `statusline`: display the status line at the bottom of the screen.
 
