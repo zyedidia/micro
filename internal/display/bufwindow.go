@@ -358,6 +358,10 @@ func (w *BufWindow) showCursor(x, y int, main bool) {
 func (w *BufWindow) displayBuffer() {
 	b := w.Buf
 
+	if w.Height <= 0 || w.Width <= 0 {
+		return
+	}
+
 	hasMessage := len(b.Messages) > 0
 	bufHeight := w.Height
 	if w.drawStatus {
@@ -371,16 +375,12 @@ func (w *BufWindow) displayBuffer() {
 
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 		for _, r := range b.Modifications {
+			final := -1
 			for i := r.X; i <= r.Y; i++ {
-				if i > 0 && b.Rehighlight(i-1) {
-					b.Highlighter.ReHighlightLine(b, i-1)
-					b.SetRehighlight(i-1, false)
-				}
-
-				b.Highlighter.ReHighlightStates(b, i)
+				final = util.Max(b.Highlighter.ReHighlightStates(b, i), final)
 			}
+			b.Highlighter.HighlightMatches(b, r.X, final+1)
 		}
-		b.Highlighter.HighlightMatches(b, w.StartLine, w.StartLine+bufHeight)
 		b.ClearModifications()
 	}
 

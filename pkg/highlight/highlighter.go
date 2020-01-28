@@ -358,8 +358,9 @@ func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int)
 }
 
 // ReHighlightStates will scan down from `startline` and set the appropriate end of line state
-// for each line until it comes across the same state in two consecutive lines
-func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
+// for each line until it comes across a line whose state does not change
+// returns the number of the final line
+func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 	// lines := input.LineData()
 
 	h.lastRegion = nil
@@ -382,9 +383,11 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) {
 		input.SetState(i, curState)
 
 		if curState == lastState {
-			break
+			return i
 		}
 	}
+
+	return input.LinesNum() - 1
 }
 
 // ReHighlightLine will rehighlight the state and match for a single line

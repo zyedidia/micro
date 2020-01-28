@@ -278,7 +278,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		screen.TermMessage(err)
 	}
 
-	b.Modifications = make([]Loc, 10)
+	b.Modifications = make([]Loc, 0, 10)
 
 	OpenBuffers = append(OpenBuffers, b)
 
@@ -615,6 +615,7 @@ func (b *Buffer) UpdateRules() {
 			b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
 			if b.Settings["syntax"].(bool) {
 				b.Highlighter.HighlightStates(b)
+				b.Highlighter.HighlightMatches(b, 0, b.End().Y)
 			}
 		}
 	}
