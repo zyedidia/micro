@@ -610,13 +610,16 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if b.Highlighter == nil || syntaxFile != "" {
-		if b.SyntaxDef != nil {
-			b.Settings["filetype"] = b.SyntaxDef.FileType
-			b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
-			if b.Settings["syntax"].(bool) {
-				b.Highlighter.HighlightStates(b)
-				b.Highlighter.HighlightMatches(b, 0, b.End().Y)
-			}
+		b.Settings["filetype"] = b.SyntaxDef.FileType
+	} else {
+		b.SyntaxDef = &highlight.EmptyDef
+	}
+
+	if b.SyntaxDef != nil {
+		b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
+		if b.Settings["syntax"].(bool) {
+			b.Highlighter.HighlightStates(b)
+			b.Highlighter.HighlightMatches(b, 0, b.End().Y)
 		}
 	}
 }
