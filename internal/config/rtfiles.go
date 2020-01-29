@@ -186,8 +186,8 @@ func InitRuntimeFiles() {
 				}
 			}
 
-			if !isID(p.Name) {
-				log.Println("Invalid plugin name", p.Name)
+			if !isID(p.Name) || len(p.Srcs) <= 0 {
+				log.Println(p.Name, "is not a plugin")
 				continue
 			}
 			Plugins = append(Plugins, p)
@@ -214,8 +214,8 @@ func InitRuntimeFiles() {
 						p.Name = p.Info.Name
 					}
 				}
-				if !isID(p.Name) {
-					log.Println("Invalid plugin name", p.Name)
+				if !isID(p.Name) || len(p.Srcs) <= 0 {
+					log.Println(p.Name, "is not a plugin")
 					continue
 				}
 				Plugins = append(Plugins, p)
