@@ -269,6 +269,8 @@ func main() {
 		action.InfoBar.Display()
 		screen.Screen.Show()
 
+		event = nil
+
 		// Check for new events
 		select {
 		case f := <-shell.Jobs:
