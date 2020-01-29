@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -117,6 +118,7 @@ type Buffer struct {
 	Highlighter *highlight.Highlighter
 	// Modifications is the list of modified regions for syntax highlighting
 	Modifications []Loc
+	HighlightLock sync.Mutex
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
@@ -610,7 +612,9 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if b.Highlighter == nil || syntaxFile != "" {
-		b.Settings["filetype"] = b.SyntaxDef.FileType
+		if b.SyntaxDef != nil {
+			b.Settings["filetype"] = b.SyntaxDef.FileType
+		}
 	} else {
 		b.SyntaxDef = &highlight.EmptyDef
 	}
@@ -618,8 +622,11 @@ func (b *Buffer) UpdateRules() {
 	if b.SyntaxDef != nil {
 		b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
 		if b.Settings["syntax"].(bool) {
-			b.Highlighter.HighlightStates(b)
-			b.Highlighter.HighlightMatches(b, 0, b.End().Y)
+			go func() {
+				b.Highlighter.HighlightStates(b)
+				b.Highlighter.HighlightMatches(b, 0, b.End().Y)
+				screen.DrawChan <- true
+			}()
 		}
 	}
 }

@@ -3,6 +3,7 @@ package buffer
 import (
 	"bufio"
 	"io"
+	"sync"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/pkg/highlight"
@@ -38,6 +39,7 @@ type Line struct {
 	state       highlight.State
 	match       highlight.LineMatch
 	rehighlight bool
+	lock        sync.Mutex
 }
 
 const (
@@ -124,12 +126,22 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 
 		if err != nil {
 			if err == io.EOF {
-				la.lines = Append(la.lines, Line{data[:], nil, nil, false})
+				la.lines = Append(la.lines, Line{
+					data:        data[:],
+					state:       nil,
+					match:       nil,
+					rehighlight: false,
+				})
 			}
 			// Last line was read
 			break
 		} else {
-			la.lines = Append(la.lines, Line{data[:dlen-1], nil, nil, false})
+			la.lines = Append(la.lines, Line{
+				data:        data[:dlen-1],
+				state:       nil,
+				match:       nil,
+				rehighlight: false,
+			})
 		}
 		n++
 	}
@@ -155,9 +167,19 @@ func (la *LineArray) Bytes() []byte {
 
 // newlineBelow adds a newline below the given line number
 func (la *LineArray) newlineBelow(y int) {
-	la.lines = append(la.lines, Line{[]byte{' '}, nil, nil, false})
+	la.lines = append(la.lines, Line{
+		data:        []byte{' '},
+		state:       nil,
+		match:       nil,
+		rehighlight: false,
+	})
 	copy(la.lines[y+2:], la.lines[y+1:])
-	la.lines[y+1] = Line{[]byte{}, la.lines[y].state, nil, false}
+	la.lines[y+1] = Line{
+		data:        []byte{},
+		state:       la.lines[y].state,
+		match:       nil,
+		rehighlight: false,
+	}
 }
 
 // Inserts a byte array at a given location
@@ -285,28 +307,40 @@ func (la *LineArray) LineBytes(n int) []byte {
 
 // State gets the highlight state for the given line number
 func (la *LineArray) State(lineN int) highlight.State {
+	la.lines[lineN].lock.Lock()
+	defer la.lines[lineN].lock.Unlock()
 	return la.lines[lineN].state
 }
 
 // SetState sets the highlight state at the given line number
 func (la *LineArray) SetState(lineN int, s highlight.State) {
+	la.lines[lineN].lock.Lock()
+	defer la.lines[lineN].lock.Unlock()
 	la.lines[lineN].state = s
 }
 
 // SetMatch sets the match at the given line number
 func (la *LineArray) SetMatch(lineN int, m highlight.LineMatch) {
+	la.lines[lineN].lock.Lock()
+	defer la.lines[lineN].lock.Unlock()
 	la.lines[lineN].match = m
 }
 
 // Match retrieves the match for the given line number
 func (la *LineArray) Match(lineN int) highlight.LineMatch {
+	la.lines[lineN].lock.Lock()
+	defer la.lines[lineN].lock.Unlock()
 	return la.lines[lineN].match
 }
 
 func (la *LineArray) Rehighlight(lineN int) bool {
+	la.lines[lineN].lock.Lock()
+	defer la.lines[lineN].lock.Unlock()
 	return la.lines[lineN].rehighlight
 }
 
 func (la *LineArray) SetRehighlight(lineN int, on bool) {
+	la.lines[lineN].lock.Lock()
+	defer la.lines[lineN].lock.Unlock()
 	la.lines[lineN].rehighlight = on
 }

@@ -7,6 +7,7 @@ import (
 	"os"
 	"runtime"
 	"sort"
+	"time"
 
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
@@ -240,6 +241,22 @@ func main() {
 		}
 	}()
 
+	// clear the drawchan so we don't redraw excessively
+	// if someone requested a redraw before we started displaying
+	for len(screen.DrawChan) > 0 {
+		<-screen.DrawChan
+	}
+
+	var event tcell.Event
+
+	// wait for initial resize event
+	select {
+	case event = <-events:
+		action.Tabs.HandleEvent(event)
+	case <-time.After(20 * time.Millisecond):
+		// time out after 10ms
+	}
+
 	for {
 		// Display everything
 		screen.Screen.Fill(' ', config.DefStyle)
@@ -251,8 +268,6 @@ func main() {
 		action.MainTab().Display()
 		action.InfoBar.Display()
 		screen.Screen.Show()
-
-		var event tcell.Event
 
 		// Check for new events
 		select {
