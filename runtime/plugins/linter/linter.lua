@@ -133,13 +133,13 @@ function onSave(bp)
 end
 
 function lint(buf, linter, cmd, args, errorformat, loff, coff, callback)
+    buf:ClearMessages(linter)
+
     if callback ~= nil then
-        if callback(buf) then
+        if not callback(buf) then
             return
         end
     end
-
-    buf:ClearMessages(linter)
 
     shell.JobSpawn(cmd, args, "", "", "linter.onExit", buf, linter, errorformat, loff, coff)
 end
