@@ -417,3 +417,7 @@ func IsNonAlphaNumeric(c rune) bool {
 func ParseSpecial(s string) string {
 	return strings.Replace(s, "\\t", "\t", -1)
 }
+
+func String(s []byte) string {
+	return string(s)
+}
