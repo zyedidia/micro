@@ -32,7 +32,10 @@ local linters = {}
 -- coffset: column offset will be added to the col number returned by the linter
 --          useful if the linter returns 0-indexed columns
 --     optional param, default: 0
-function makeLinter(name, filetype, cmd, args, errorformat, os, whitelist, domatch, loffset, coffset)
+-- callback: function to call before executing the linter, if it returns
+--           false the lint is canceled. The callback is passed the buf.
+--     optional param, default: nil
+function makeLinter(name, filetype, cmd, args, errorformat, os, whitelist, domatch, loffset, coffset, callback)
     if linters[name] == nil then
         linters[name] = {}
         linters[name].filetype = filetype
@@ -44,6 +47,7 @@ function makeLinter(name, filetype, cmd, args, errorformat, os, whitelist, domat
         linters[name].domatch = domatch or false
         linters[name].loffset = loffset or 0
         linters[name].coffset = coffset or 0
+        linters[name].callback = callback or nil
     end
 end
 
@@ -118,7 +122,7 @@ function runLinter(buf)
         end
 
         if ftmatch then
-            lint(buf, k, v.cmd, args, v.errorformat, v.loffset, v.coffset)
+            lint(buf, k, v.cmd, args, v.errorformat, v.loffset, v.coffset, v.callback)
         end
     end
 end
@@ -128,7 +132,13 @@ function onSave(bp)
     return true
 end
 
-function lint(buf, linter, cmd, args, errorformat, loff, coff)
+function lint(buf, linter, cmd, args, errorformat, loff, coff, callback)
+    if callback ~= nil then
+        if callback(buf) then
+            return
+        end
+    end
+
     buf:ClearMessages(linter)
 
     shell.JobSpawn(cmd, args, "", "", "linter.onExit", buf, linter, errorformat, loff, coff)
