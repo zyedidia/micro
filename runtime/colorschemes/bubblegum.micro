@@ -20,5 +20,5 @@ color-link line-number "246,254"
 color-link cursor-line "254"
 color-link color-column "254"
 #No extended types (bool in C, &c.) and plain brackets
-color-link type.extended "default"
-color-link symbol.brackets "default"
+color-link type.extended "241,231"
+color-link symbol.brackets "241,231"

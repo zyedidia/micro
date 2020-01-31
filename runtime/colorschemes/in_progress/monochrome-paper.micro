@@ -1,5 +1,0 @@
-#Monochrome Paper theme.
-#Edit your files on a white background without colors.
-color-link default "black,white"
-color-link statusline "white,black"
-color-link tabbar "white,black"

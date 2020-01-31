@@ -417,6 +417,10 @@ func (w *BufWindow) displayBuffer() {
 	curNumStyle := config.DefStyle
 	if style, ok := config.Colorscheme["current-line-number"]; ok {
 		curNumStyle = style
+		if !b.Settings["cursorline"].(bool) {
+			_, bg, _ := lineNumStyle.Decompose()
+			curNumStyle = curNumStyle.Background(bg)
+		}
 	}
 
 	// We need to know the string length of the largest line number
