@@ -17,10 +17,13 @@ const (
 	RTHelp         = 2
 	RTPlugin       = 3
 	RTSyntaxHeader = 4
-	NumTypes       = 5 // How many filetypes are there
 )
 
-type RTFiletype byte
+var (
+	NumTypes = 5 // How many filetypes are there
+)
+
+type RTFiletype int
 
 // RuntimeFile allows the program to read runtime data like colorschemes or syntax files
 type RuntimeFile interface {
@@ -31,8 +34,20 @@ type RuntimeFile interface {
 }
 
 // allFiles contains all available files, mapped by filetype
-var allFiles [NumTypes][]RuntimeFile
-var realFiles [NumTypes][]RuntimeFile
+var allFiles [][]RuntimeFile
+var realFiles [][]RuntimeFile
+
+func init() {
+	allFiles = make([][]RuntimeFile, NumTypes)
+	realFiles = make([][]RuntimeFile, NumTypes)
+}
+
+func NewRTFiletype() int {
+	NumTypes++
+	allFiles = append(allFiles, []RuntimeFile{})
+	realFiles = append(realFiles, []RuntimeFile{})
+	return NumTypes - 1
+}
 
 // some file on filesystem
 type realFile string

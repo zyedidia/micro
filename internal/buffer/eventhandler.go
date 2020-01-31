@@ -191,7 +191,7 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	}
 	eh.UndoStack.Push(t)
 
-	b, err := config.RunPluginFnBool("onBeforeTextEvent", luar.New(ulua.L, t))
+	b, err := config.RunPluginFnBool("onBeforeTextEvent", luar.New(ulua.L, eh.buf), luar.New(ulua.L, t))
 	if err != nil {
 		screen.TermMessage(err)
 	}

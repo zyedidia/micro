@@ -62,10 +62,11 @@ func luaImportMicroConfig() *lua.LTable {
 	ulua.L.SetField(pkg, "TryBindKey", luar.New(ulua.L, action.TryBindKey))
 	ulua.L.SetField(pkg, "Reload", luar.New(ulua.L, action.ReloadConfig))
 	ulua.L.SetField(pkg, "AddRuntimeFileFromMemory", luar.New(ulua.L, config.PluginAddRuntimeFileFromMemory))
-	ulua.L.SetField(pkg, "AddRuntimeFilesFromDirectory", luar.New(ulua.L, config.PluginAddRuntimeFileFromMemory))
+	ulua.L.SetField(pkg, "AddRuntimeFilesFromDirectory", luar.New(ulua.L, config.PluginAddRuntimeFilesFromDirectory))
 	ulua.L.SetField(pkg, "AddRuntimeFile", luar.New(ulua.L, config.PluginAddRuntimeFile))
 	ulua.L.SetField(pkg, "ListRuntimeFiles", luar.New(ulua.L, config.PluginListRuntimeFiles))
 	ulua.L.SetField(pkg, "ReadRuntimeFile", luar.New(ulua.L, config.PluginReadRuntimeFile))
+	ulua.L.SetField(pkg, "NewRTFiletype", luar.New(ulua.L, config.NewRTFiletype))
 	ulua.L.SetField(pkg, "RTColorscheme", luar.New(ulua.L, config.RTColorscheme))
 	ulua.L.SetField(pkg, "RTSyntax", luar.New(ulua.L, config.RTSyntax))
 	ulua.L.SetField(pkg, "RTHelp", luar.New(ulua.L, config.RTHelp))
@@ -130,6 +131,9 @@ func luaImportMicroUtil() *lua.LTable {
 	ulua.L.SetField(pkg, "GetLeadingWhitespace", luar.New(ulua.L, util.LuaGetLeadingWhitespace))
 	ulua.L.SetField(pkg, "IsWordChar", luar.New(ulua.L, util.LuaIsWordChar))
 	ulua.L.SetField(pkg, "String", luar.New(ulua.L, util.String))
+	ulua.L.SetField(pkg, "RuneStr", luar.New(ulua.L, func(r rune) string {
+		return string(r)
+	}))
 
 	return pkg
 }
