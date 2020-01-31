@@ -211,10 +211,6 @@ func main() {
 	if err != nil {
 		screen.TermMessage(err)
 	}
-	err = config.RunPluginFn("init")
-	if err != nil {
-		screen.TermMessage(err)
-	}
 
 	b := LoadInput()
 
@@ -226,6 +222,11 @@ func main() {
 
 	action.InitTabs(b)
 	action.InitGlobals()
+
+	err = config.RunPluginFn("init")
+	if err != nil {
+		screen.TermMessage(err)
+	}
 
 	events = make(chan tcell.Event)
 

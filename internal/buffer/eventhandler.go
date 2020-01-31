@@ -5,6 +5,10 @@ import (
 	"unicode/utf8"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
+	"github.com/zyedidia/micro/internal/config"
+	ulua "github.com/zyedidia/micro/internal/lua"
+	"github.com/zyedidia/micro/internal/screen"
+	luar "layeh.com/gopher-luar"
 )
 
 const (
@@ -187,16 +191,14 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	}
 	eh.UndoStack.Push(t)
 
-	// TODO: Call plugins on text events
-	// for pl := range loadedPlugins {
-	// 	ret, err := Call(pl+".onBeforeTextEvent", t)
-	// 	if err != nil && !strings.HasPrefix(err.Error(), "function does not exist") {
-	// 		screen.TermMessage(err)
-	// 	}
-	// 	if val, ok := ret.(lua.LBool); ok && val == lua.LFalse {
-	// 		return
-	// 	}
-	// }
+	b, err := config.RunPluginFnBool("onBeforeTextEvent", luar.New(ulua.L, t))
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
+	if !b {
+		return
+	}
 
 	ExecuteTextEvent(t, eh.buf)
 }
