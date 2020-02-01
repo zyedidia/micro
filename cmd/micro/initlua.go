@@ -21,6 +21,7 @@ func init() {
 	ulua.L.SetGlobal("import", luar.New(ulua.L, LuaImport))
 }
 
+// LuaImport is meant to be called from lua by a plugin and will import the given micro package
 func LuaImport(pkg string) *lua.LTable {
 	switch pkg {
 	case "micro":
@@ -46,6 +47,12 @@ func luaImportMicro() *lua.LTable {
 	ulua.L.SetField(pkg, "InfoBar", luar.New(ulua.L, action.GetInfoBar))
 	ulua.L.SetField(pkg, "Log", luar.New(ulua.L, log.Println))
 	ulua.L.SetField(pkg, "SetStatusInfoFn", luar.New(ulua.L, display.SetStatusInfoFnLua))
+	ulua.L.SetField(pkg, "CurPane", luar.New(ulua.L, func() action.Pane {
+		return action.MainTab().CurPane()
+	}))
+	ulua.L.SetField(pkg, "CurTab", luar.New(ulua.L, func() *action.Tab {
+		return action.MainTab()
+	}))
 
 	return pkg
 }

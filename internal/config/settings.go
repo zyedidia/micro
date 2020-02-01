@@ -227,6 +227,7 @@ var defaultGlobalSettings = map[string]interface{}{
 
 // a list of settings that should never be globally modified
 var LocalSettings = []string{
+	"fileformat",
 	"filetype",
 	"readonly",
 }
