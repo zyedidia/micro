@@ -3,6 +3,7 @@ module github.com/zyedidia/micro
 require (
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dustin/go-humanize v1.0.0
+	github.com/estrogently/puffy v1.0.0
 	github.com/go-errors/errors v1.0.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mattn/go-isatty v0.0.11

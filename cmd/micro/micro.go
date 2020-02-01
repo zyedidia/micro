@@ -9,6 +9,7 @@ import (
 	"sort"
 	"time"
 
+	"github.com/estrogently/puffy"
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
 	"github.com/zyedidia/micro/internal/action"
@@ -151,6 +152,10 @@ func main() {
 	// defer pprof.StopCPUProfile()
 
 	var err error
+
+	if err = puffy.PledgePromises("stdio rpath wpath cpath tty proc exec"); err != nil {
+		screen.TermMessage(err)
+	}
 
 	InitFlags()
 
