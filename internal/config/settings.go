@@ -119,8 +119,9 @@ func WriteSettings(filename string) error {
 	return err
 }
 
-// RegisterCommonOption creates a new option. This is meant to be called by plugins to add options.
-func RegisterCommonOption(name string, defaultvalue interface{}) error {
+// RegisterCommonOptionPlug creates a new option (called pl.name). This is meant to be called by plugins to add options.
+func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) error {
+	name = pl + "." + name
 	if v, ok := GlobalSettings[name]; !ok {
 		defaultCommonSettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
@@ -134,6 +135,12 @@ func RegisterCommonOption(name string, defaultvalue interface{}) error {
 	return nil
 }
 
+// RegisterGlobalOptionPlug creates a new global-only option (named pl.name)
+func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) error {
+	return RegisterGlobalOption(pl+"."+name, defaultvalue)
+}
+
+// RegisterGlobalOption creates a new global-only option
 func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if v, ok := GlobalSettings[name]; !ok {
 		defaultGlobalSettings[name] = defaultvalue
@@ -229,7 +236,6 @@ var defaultGlobalSettings = map[string]interface{}{
 
 // a list of settings that should never be globally modified
 var LocalSettings = []string{
-	"fileformat",
 	"filetype",
 	"readonly",
 }
