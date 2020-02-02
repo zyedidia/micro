@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"reflect"
 	"strconv"
 	"strings"
@@ -45,7 +46,7 @@ var optionValidators = map[string]optionValidator{
 }
 
 func ReadSettings() error {
-	filename := ConfigDir + "/settings.json"
+	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -119,13 +120,22 @@ func WriteSettings(filename string) error {
 	return err
 }
 
+func OverwriteSettings(filename string) error {
+	var err error
+	if _, e := os.Stat(ConfigDir); e == nil {
+		txt, _ := json.MarshalIndent(GlobalSettings, "", "    ")
+		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+	}
+	return err
+}
+
 // RegisterCommonOptionPlug creates a new option (called pl.name). This is meant to be called by plugins to add options.
 func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) error {
 	name = pl + "." + name
 	if v, ok := GlobalSettings[name]; !ok {
 		defaultCommonSettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
-		err := WriteSettings(ConfigDir + "/settings.json")
+		err := WriteSettings(filepath.Join(ConfigDir, "/settings.json"))
 		if err != nil {
 			return errors.New("Error writing settings.json file: " + err.Error())
 		}
@@ -145,7 +155,7 @@ func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if v, ok := GlobalSettings[name]; !ok {
 		defaultGlobalSettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
-		err := WriteSettings(ConfigDir + "/settings.json")
+		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
 		if err != nil {
 			return errors.New("Error writing settings.json file: " + err.Error())
 		}

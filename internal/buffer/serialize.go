@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 
 	"golang.org/x/text/encoding"
@@ -49,7 +50,7 @@ func (b *Buffer) Unserialize() error {
 	if b.Path == "" {
 		return nil
 	}
-	file, err := os.Open(config.ConfigDir + "/buffers/" + util.EscapePath(b.AbsPath))
+	file, err := os.Open(filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath)))
 	defer file.Close()
 	if err == nil {
 		var buffer SerializedBuffer

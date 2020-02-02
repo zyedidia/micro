@@ -31,12 +31,15 @@ var (
 	flagOptions   = flag.Bool("options", false, "Show all option help")
 	flagDebug     = flag.Bool("debug", false, "Enable debug mode (prints debug info to ./log.txt)")
 	flagPlugin    = flag.String("plugin", "", "Plugin command")
+	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
 	optionFlags   map[string]*string
 )
 
 func InitFlags() {
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTIONS] [FILE]...")
+		fmt.Println("-clean")
+		fmt.Println("    \tCleans the configuration directory")
 		fmt.Println("-config-dir dir")
 		fmt.Println("    \tSpecify a custom location for the configuration directory")
 		fmt.Println("[FILE]:LINE:COL")
@@ -106,14 +109,18 @@ func InitFlags() {
 	}
 }
 
-// DoPluginFlags parses and executes any -plugin flags
+// DoPluginFlags parses and executes any flags that require LoadAllPlugins (-plugin and -clean)
 func DoPluginFlags() {
-	if *flagPlugin != "" {
+	if *flagClean || *flagPlugin != "" {
 		config.LoadAllPlugins()
 
-		args := flag.Args()
+		if *flagPlugin != "" {
+			args := flag.Args()
 
-		config.PluginCommand(os.Stdout, *flagPlugin, args)
+			config.PluginCommand(os.Stdout, *flagPlugin, args)
+		} else if *flagClean {
+			CleanConfig()
+		}
 
 		os.Exit(0)
 	}
