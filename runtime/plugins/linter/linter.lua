@@ -1,3 +1,5 @@
+VERSION = "1.0.0"
+
 local micro = import("micro")
 local runtime = import("runtime")
 local filepath = import("path/filepath")

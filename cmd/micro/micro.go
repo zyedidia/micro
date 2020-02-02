@@ -30,6 +30,7 @@ var (
 	flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
 	flagOptions   = flag.Bool("options", false, "Show all option help")
 	flagDebug     = flag.Bool("debug", false, "Enable debug mode (prints debug info to ./log.txt)")
+	flagPlugin    = flag.String("plugin", "", "Plugin command")
 	optionFlags   map[string]*string
 )
 
@@ -40,13 +41,20 @@ func InitFlags() {
 		fmt.Println("    \tSpecify a custom location for the configuration directory")
 		fmt.Println("[FILE]:LINE:COL")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
-		fmt.Println("    \tThis can also be done by opening file:LINE:COL")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all option help")
 		fmt.Println("-debug")
 		fmt.Println("    \tEnable debug mode (enables logging to ./log.txt)")
 		fmt.Println("-version")
 		fmt.Println("    \tShow the version number and information")
+
+		fmt.Print("\nMicro's plugin's can be managed at the command line with the following commands.\n")
+		fmt.Println("-plugin install [PLUGIN]...")
+		fmt.Println("    \tInstall plugin(s)")
+		fmt.Println("-plugin remove [PLUGIN]...")
+		fmt.Println("    \tRemove plugin(s)")
+		fmt.Println("-plugin update [PLUGIN]...")
+		fmt.Println("    \tUpdate plugin(s) (if no argument is given, updates all plugins)")
 
 		fmt.Print("\nMicro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the settings.json\nfile (see 'help options').\n\n")
 		fmt.Println("-option value")
@@ -89,6 +97,87 @@ func InitFlags() {
 
 	if util.Debug == "OFF" && *flagDebug {
 		util.Debug = "ON"
+	}
+}
+
+// DoPluginFlags parses and executes any -plugin flags
+func DoPluginFlags() {
+	if *flagPlugin != "" {
+		config.LoadAllPlugins()
+
+		args := flag.Args()
+
+		switch *flagPlugin {
+		case "install":
+			installedVersions := config.GetInstalledVersions(false)
+			for _, plugin := range args {
+				pp := config.GetAllPluginPackages().Get(plugin)
+				if pp == nil {
+					fmt.Println("Unknown plugin \"" + plugin + "\"")
+				} else if err := pp.IsInstallable(); err != nil {
+					fmt.Println("Error installing ", plugin, ": ", err)
+				} else {
+					for _, installed := range installedVersions {
+						if pp.Name == installed.Pack().Name {
+							if pp.Versions[0].Version.Compare(installed.Version) == 1 {
+								fmt.Println(pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
+							} else {
+								fmt.Println(pp.Name, " is already installed")
+							}
+						}
+					}
+					pp.Install()
+				}
+			}
+
+		case "remove":
+			removed := ""
+			for _, plugin := range args {
+				// check if the plugin exists.
+				for _, p := range config.Plugins {
+					if p.Name == plugin && p.Default {
+						fmt.Println("Default plugins cannot be removed, but can be disabled via settings.")
+						continue
+					}
+					if p.Name == plugin {
+						config.UninstallPlugin(plugin)
+						removed += plugin + " "
+						continue
+					}
+				}
+			}
+			if removed != "" {
+				fmt.Println("Removed ", removed)
+			} else {
+				fmt.Println("No plugins removed")
+			}
+		case "update":
+			config.UpdatePlugins(args)
+		case "list":
+			plugins := config.GetInstalledVersions(false)
+			fmt.Println("The following plugins are currently installed:")
+			for _, p := range plugins {
+				fmt.Printf("%s (%s)\n", p.Pack().Name, p.Version)
+			}
+		case "search":
+			plugins := config.SearchPlugin(args)
+			fmt.Println(len(plugins), " plugins found")
+			for _, p := range plugins {
+				fmt.Println("----------------")
+				fmt.Println(p.String())
+			}
+			fmt.Println("----------------")
+		case "available":
+			packages := config.GetAllPluginPackages()
+			fmt.Println("Available Plugins:")
+			for _, pkg := range packages {
+				fmt.Println(pkg.Name)
+			}
+		default:
+			fmt.Println("Invalid plugin command")
+			os.Exit(1)
+		}
+		os.Exit(0)
 	}
 }
 
@@ -180,6 +269,8 @@ func main() {
 		}
 	}
 
+	DoPluginFlags()
+
 	screen.Init()
 
 	// If we have an error, we can exit cleanly and not completely
@@ -254,7 +345,7 @@ func main() {
 	select {
 	case event = <-events:
 		action.Tabs.HandleEvent(event)
-	case <-time.After(20 * time.Millisecond):
+	case <-time.After(10 * time.Millisecond):
 		// time out after 10ms
 	}
 

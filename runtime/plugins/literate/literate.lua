@@ -1,3 +1,5 @@
+VERSION = "1.0.0"
+
 local config = import("micro/config")
 
 function startswith(str, start)

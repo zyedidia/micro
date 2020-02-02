@@ -1,3 +1,5 @@
+VERSION = "1.0.0"
+
 function onBufferOpen(b)
     local ft = b:FileType()
 

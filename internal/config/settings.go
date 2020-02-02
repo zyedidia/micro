@@ -216,13 +216,15 @@ func DefaultCommonSettings() map[string]interface{} {
 // default values
 var defaultGlobalSettings = map[string]interface{}{
 	// "autosave":    float64(0),
-	"colorscheme": "default",
-	"infobar":     true,
-	"keymenu":     false,
-	"mouse":       true,
-	"paste":       false,
-	"savehistory": true,
-	"sucmd":       "sudo",
+	"colorscheme":    "default",
+	"infobar":        true,
+	"keymenu":        false,
+	"mouse":          true,
+	"paste":          false,
+	"savehistory":    true,
+	"sucmd":          "sudo",
+	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
+	"pluginrepos":    []string{},
 }
 
 // a list of settings that should never be globally modified

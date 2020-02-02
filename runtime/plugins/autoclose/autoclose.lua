@@ -1,3 +1,5 @@
+VERSION = "1.0.0"
+
 local uutil = import("micro/util")
 local utf8 = import("utf8")
 local autoclosePairs = {"\"\"", "''", "``", "()", "{}", "[]"}

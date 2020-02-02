@@ -191,12 +191,16 @@ func InitRuntimeFiles() {
 			for _, f := range srcs {
 				if strings.HasSuffix(f.Name(), ".lua") {
 					p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
-				} else if f.Name() == "info.json" {
-					data, err := ioutil.ReadFile(filepath.Join(plugdir, d.Name(), "info.json"))
+				} else if strings.HasSuffix(f.Name(), ".json") {
+					data, err := ioutil.ReadFile(filepath.Join(plugdir, d.Name(), f.Name()))
 					if err != nil {
 						continue
 					}
-					p.Info, _ = NewPluginInfo(data)
+					p.Info, err = NewPluginInfo(data)
+					if err != nil {
+						log.Println(err)
+						continue
+					}
 					p.Name = p.Info.Name
 				}
 			}
@@ -220,12 +224,16 @@ func InitRuntimeFiles() {
 				for _, f := range srcs {
 					if strings.HasSuffix(f, ".lua") {
 						p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, d, f)))
-					} else if f == "info.json" {
-						data, err := Asset(filepath.Join(plugdir, d, "info.json"))
+					} else if strings.HasSuffix(f, ".json") {
+						data, err := Asset(filepath.Join(plugdir, d, f))
 						if err != nil {
 							continue
 						}
-						p.Info, _ = NewPluginInfo(data)
+						p.Info, err = NewPluginInfo(data)
+						if err != nil {
+							log.Println(err)
+							continue
+						}
 						p.Name = p.Info.Name
 					}
 				}

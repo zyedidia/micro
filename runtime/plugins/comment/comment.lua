@@ -1,3 +1,5 @@
+VERSION = "1.0.0"
+
 local util = import("micro/util")
 local config = import("micro/config")
 local buffer = import("micro/buffer")
@@ -102,5 +104,7 @@ function string.starts(String,Start)
     return string.sub(String,1,string.len(Start))==Start
 end
 
-config.MakeCommand("comment", "comment.comment", config.NoComplete)
-config.TryBindKey("Alt-/", "lua:comment.comment", false)
+function init()
+    config.MakeCommand("comment", "comment.comment", config.NoComplete)
+    config.TryBindKey("Alt-/", "lua:comment.comment", false)
+end

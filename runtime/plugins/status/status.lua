@@ -1,6 +1,8 @@
-micro = import("micro")
-buffer = import("micro/buffer")
-config = import("micro/config")
+VERSION = "1.0.0"
+
+local micro = import("micro")
+local buffer = import("micro/buffer")
+local config = import("micro/config")
 
 function init()
     micro.SetStatusInfoFn("status.branch")
