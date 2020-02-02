@@ -73,6 +73,7 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	}
 }
 
+// DoKeyEvent executes a key event for the command bar, doing any overriden actions
 func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	done := false
 	if action, ok := BufKeyBindings[e]; ok {
@@ -85,7 +86,7 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 		for s, a := range InfoOverrides {
 			// TODO this is a hack and really we should have support
 			// for having binding overrides for different buffers
-			if strings.Contains(estr, s) {
+			if strings.HasPrefix(estr, s) {
 				done = true
 				a(h)
 				break
