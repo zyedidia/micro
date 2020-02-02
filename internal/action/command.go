@@ -120,11 +120,20 @@ func CommandAction(cmd string) BufKeyAction {
 	}
 }
 
-var PluginCmds = []string{"list", "info", "version"}
+var PluginCmds = []string{"install", "remove", "update", "available", "list", "search"}
 
 // PluginCmd installs, removes, updates, lists, or searches for given plugins
 func (h *BufPane) PluginCmd(args []string) {
-	InfoBar.Error("Plugin command disabled")
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	if h.Buf.Type != buffer.BTLog {
+		OpenLogBuf(h)
+	}
+
+	config.PluginCommand(buffer.LogBuf, args[0], args[1:])
 }
 
 // RetabCmd changes all spaces to tabs or all tabs to spaces

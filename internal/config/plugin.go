@@ -8,6 +8,7 @@ import (
 	ulua "github.com/zyedidia/micro/internal/lua"
 )
 
+// ErrNoSuchFunction is returned when Call is executed on a function that does not exist
 var ErrNoSuchFunction = errors.New("No such function exists")
 
 // LoadAllPlugins loads all detected plugins (in runtime/plugins and ConfigDir/plugins)
@@ -65,6 +66,7 @@ func RunPluginFnBool(fn string, args ...lua.LValue) (bool, error) {
 	return retbool, reterr
 }
 
+// Plugin stores information about the source files/info for a plugin
 type Plugin struct {
 	DirName string        // name of plugin folder
 	Name    string        // name of plugin
@@ -74,6 +76,7 @@ type Plugin struct {
 	Default bool // pre-installed plugin
 }
 
+// IsEnabled returns if a plugin is enabled
 func (p *Plugin) IsEnabled() bool {
 	if v, ok := GlobalSettings[p.Name]; ok {
 		return v.(bool) && p.Loaded
@@ -81,13 +84,15 @@ func (p *Plugin) IsEnabled() bool {
 	return true
 }
 
+// Plugins is a list of all detected plugins (enabled or disabled)
 var Plugins []*Plugin
 
+// Load creates an option for the plugin and runs all source files
 func (p *Plugin) Load() error {
+	if v, ok := GlobalSettings[p.Name]; ok && !v.(bool) {
+		return nil
+	}
 	for _, f := range p.Srcs {
-		if v, ok := GlobalSettings[p.Name]; ok && !v.(bool) {
-			return nil
-		}
 		dat, err := f.Data()
 		if err != nil {
 			return err
@@ -96,12 +101,13 @@ func (p *Plugin) Load() error {
 		if err != nil {
 			return err
 		}
-		p.Loaded = true
-		RegisterGlobalOption(p.Name, true)
 	}
+	p.Loaded = true
+	RegisterGlobalOption(p.Name, true)
 	return nil
 }
 
+// Call calls a given function in this plugin
 func (p *Plugin) Call(fn string, args ...lua.LValue) (lua.LValue, error) {
 	plug := ulua.L.GetGlobal(p.Name)
 	if plug == lua.LNil {
@@ -125,7 +131,23 @@ func (p *Plugin) Call(fn string, args ...lua.LValue) (lua.LValue, error) {
 	return ret, nil
 }
 
+// FindPlugin returns the plugin with the given name
 func FindPlugin(name string) *Plugin {
+	var pl *Plugin
+	for _, p := range Plugins {
+		if !p.IsEnabled() {
+			continue
+		}
+		if p.Name == name {
+			pl = p
+			break
+		}
+	}
+	return pl
+}
+
+// FindAnyPlugin does not require the plugin to be enabled
+func FindAnyPlugin(name string) *Plugin {
 	var pl *Plugin
 	for _, p := range Plugins {
 		if p.Name == name {

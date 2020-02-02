@@ -76,16 +76,24 @@ type SharedBuffer struct {
 	// Whether or not suggestions can be autocompleted must be shared because
 	// it changes based on how the buffer has changed
 	HasSuggestions bool
+
+	// Modifications is the list of modified regions for syntax highlighting
+	Modifications []Loc
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
 	b.isModified = true
 	b.HasSuggestions = false
 	b.LineArray.insert(pos, value)
+
+	// b.Modifications is cleared every screen redraw so it's
+	// ok to append duplicates
+	b.Modifications = append(b.Modifications, Loc{pos.Y, pos.Y + bytes.Count(value, []byte{'\n'})})
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
 	b.HasSuggestions = false
+	b.Modifications = append(b.Modifications, Loc{start.Y, start.Y})
 	return b.LineArray.remove(start, end)
 }
 
@@ -115,9 +123,7 @@ type Buffer struct {
 	// This stores the highlighting rules and filetype detection info
 	SyntaxDef *highlight.Def
 	// The Highlighter struct actually performs the highlighting
-	Highlighter *highlight.Highlighter
-	// Modifications is the list of modified regions for syntax highlighting
-	Modifications []Loc
+	Highlighter   *highlight.Highlighter
 	HighlightLock sync.Mutex
 
 	// Hash of the original buffer -- empty if fastdirty is on
@@ -333,10 +339,6 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
 
-		// b.Modifications is cleared every screen redraw so it's
-		// ok to append duplicates
-		b.Modifications = append(b.Modifications, Loc{start.Y, start.Y + strings.Count(text, "\n")})
-
 		go b.Backup(true)
 	}
 }
@@ -347,8 +349,6 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
-
-		b.Modifications = append(b.Modifications, Loc{start.Y, start.Y})
 
 		go b.Backup(true)
 	}
@@ -907,12 +907,12 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 	}
 
 	startpos.Y, err = strconv.Atoi(cursorPositions[0])
-	startpos.Y -= 1
+	startpos.Y--
 	if err == nil {
 		if len(cursorPositions) > 1 {
 			startpos.X, err = strconv.Atoi(cursorPositions[1])
 			if startpos.X > 0 {
-				startpos.X -= 1
+				startpos.X--
 			}
 		}
 	}
@@ -923,6 +923,11 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 // Line returns the string representation of the given line number
 func (b *Buffer) Line(i int) string {
 	return string(b.LineBytes(i))
+}
+
+func (b *Buffer) Write(bytes []byte) (n int, err error) {
+	b.EventHandler.InsertBytes(b.End(), bytes)
+	return len(bytes), nil
 }
 
 // WriteLog writes a string to the log buffer

@@ -118,17 +118,17 @@ func fetchAllSources(count int, fetcher func(i int) PluginPackages) PluginPackag
 }
 
 // Fetch retrieves all available PluginPackages from the given channels
-func (pc PluginChannels) Fetch() PluginPackages {
+func (pc PluginChannels) Fetch(out io.Writer) PluginPackages {
 	return fetchAllSources(len(pc), func(i int) PluginPackages {
-		return pc[i].Fetch()
+		return pc[i].Fetch(out)
 	})
 }
 
 // Fetch retrieves all available PluginPackages from the given channel
-func (pc PluginChannel) Fetch() PluginPackages {
+func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 	resp, err := http.Get(string(pc))
 	if err != nil {
-		fmt.Println("Failed to query plugin channel:\n", err)
+		fmt.Fprintln(out, "Failed to query plugin channel:\n", err)
 		return PluginPackages{}
 	}
 	defer resp.Body.Close()
@@ -136,19 +136,19 @@ func (pc PluginChannel) Fetch() PluginPackages {
 
 	var repositories []PluginRepository
 	if err := decoder.Decode(&repositories); err != nil {
-		fmt.Println("Failed to decode channel data:\n", err)
+		fmt.Fprintln(out, "Failed to decode channel data:\n", err)
 		return PluginPackages{}
 	}
 	return fetchAllSources(len(repositories), func(i int) PluginPackages {
-		return repositories[i].Fetch()
+		return repositories[i].Fetch(out)
 	})
 }
 
 // Fetch retrieves all available PluginPackages from the given repository
-func (pr PluginRepository) Fetch() PluginPackages {
+func (pr PluginRepository) Fetch(out io.Writer) PluginPackages {
 	resp, err := http.Get(string(pr))
 	if err != nil {
-		fmt.Println("Failed to query plugin repository:\n", err)
+		fmt.Fprintln(out, "Failed to query plugin repository:\n", err)
 		return PluginPackages{}
 	}
 	defer resp.Body.Close()
@@ -156,7 +156,7 @@ func (pr PluginRepository) Fetch() PluginPackages {
 
 	var plugins PluginPackages
 	if err := decoder.Decode(&plugins); err != nil {
-		fmt.Println("Failed to decode repository data:\n", err)
+		fmt.Fprintln(out, "Failed to decode repository data:\n", err)
 		return PluginPackages{}
 	}
 	if len(plugins) > 0 {
@@ -218,7 +218,7 @@ func (pp *PluginPackage) UnmarshalJSON(data []byte) error {
 }
 
 // GetAllPluginPackages gets all PluginPackages which may be available.
-func GetAllPluginPackages() PluginPackages {
+func GetAllPluginPackages(out io.Writer) PluginPackages {
 	if allPluginPackages == nil {
 		getOption := func(name string) []string {
 			data := GetGlobalOption(name)
@@ -249,9 +249,9 @@ func GetAllPluginPackages() PluginPackages {
 		}
 		allPluginPackages = fetchAllSources(len(repos)+1, func(i int) PluginPackages {
 			if i == 0 {
-				return channels.Fetch()
+				return channels.Fetch(out)
 			}
-			return repos[i-1].Fetch()
+			return repos[i-1].Fetch(out)
 		})
 	}
 	return allPluginPackages
@@ -301,8 +301,8 @@ func (pp PluginPackage) Match(text string) bool {
 }
 
 // IsInstallable returns true if the package can be installed.
-func (pp PluginPackage) IsInstallable() error {
-	_, err := GetAllPluginPackages().Resolve(GetInstalledVersions(true), PluginDependencies{
+func (pp PluginPackage) IsInstallable(out io.Writer) error {
+	_, err := GetAllPluginPackages(out).Resolve(GetInstalledVersions(true), PluginDependencies{
 		&PluginDependency{
 			Name:  pp.Name,
 			Range: semver.Range(func(v semver.Version) bool { return true }),
@@ -312,18 +312,18 @@ func (pp PluginPackage) IsInstallable() error {
 
 // SearchPlugin retrieves a list of all PluginPackages which match the given search text and
 // could be or are already installed
-func SearchPlugin(texts []string) (plugins PluginPackages) {
+func SearchPlugin(out io.Writer, texts []string) (plugins PluginPackages) {
 	plugins = make(PluginPackages, 0)
 
 pluginLoop:
-	for _, pp := range GetAllPluginPackages() {
+	for _, pp := range GetAllPluginPackages(out) {
 		for _, text := range texts {
 			if !pp.Match(text) {
 				continue pluginLoop
 			}
 		}
 
-		if err := pp.IsInstallable(); err == nil {
+		if err := pp.IsInstallable(out); err == nil {
 			plugins = append(plugins, pp)
 		}
 	}
@@ -363,6 +363,9 @@ func GetInstalledVersions(withCore bool) PluginVersions {
 	}
 
 	for _, p := range Plugins {
+		if !p.IsEnabled() {
+			continue
+		}
 		version := GetInstalledPluginVersion(p.Name)
 		if pv := newStaticPluginVersion(p.Name, version); pv != nil {
 			result = append(result, pv)
@@ -386,8 +389,8 @@ func GetInstalledPluginVersion(name string) string {
 }
 
 // DownloadAndInstall downloads and installs the given plugin and version
-func (pv *PluginVersion) DownloadAndInstall() error {
-	fmt.Printf("Downloading %q (%s) from %q\n", pv.pack.Name, pv.Version, pv.Url)
+func (pv *PluginVersion) DownloadAndInstall(out io.Writer) error {
+	fmt.Fprintf(out, "Downloading %q (%s) from %q\n", pv.pack.Name, pv.Version, pv.Url)
 	resp, err := http.Get(pv.Url)
 	if err != nil {
 		return err
@@ -536,7 +539,7 @@ func (all PluginPackages) Resolve(selectedVersions PluginVersions, open PluginDe
 	return selectedVersions, nil
 }
 
-func (pv PluginVersions) install() {
+func (pv PluginVersions) install(out io.Writer) {
 	anyInstalled := false
 	currentlyInstalled := GetInstalledVersions(true)
 
@@ -545,16 +548,16 @@ func (pv PluginVersions) install() {
 			shouldInstall := true
 			if pv := currentlyInstalled.find(sel.pack.Name); pv != nil {
 				if pv.Version.NE(sel.Version) {
-					fmt.Println("Uninstalling", sel.pack.Name)
-					UninstallPlugin(sel.pack.Name)
+					fmt.Fprintln(out, "Uninstalling", sel.pack.Name)
+					UninstallPlugin(out, sel.pack.Name)
 				} else {
 					shouldInstall = false
 				}
 			}
 
 			if shouldInstall {
-				if err := sel.DownloadAndInstall(); err != nil {
-					fmt.Println(err)
+				if err := sel.DownloadAndInstall(out); err != nil {
+					fmt.Fprintln(out, err)
 					return
 				}
 				anyInstalled = true
@@ -562,49 +565,56 @@ func (pv PluginVersions) install() {
 		}
 	}
 	if anyInstalled {
-		fmt.Println("One or more plugins installed.")
+		fmt.Fprintln(out, "One or more plugins installed.")
 	} else {
-		fmt.Println("Nothing to install / update")
+		fmt.Fprintln(out, "Nothing to install / update")
 	}
 }
 
 // UninstallPlugin deletes the plugin folder of the given plugin
-func UninstallPlugin(name string) {
+func UninstallPlugin(out io.Writer, name string) {
 	for _, p := range Plugins {
+		if !p.IsEnabled() {
+			continue
+		}
 		if p.Name == name {
 			p.Loaded = false
 			if err := os.RemoveAll(filepath.Join(ConfigDir, "plug", p.DirName)); err != nil {
-				fmt.Println(err)
+				fmt.Fprintln(out, err)
 				return
 			}
+			break
 		}
 	}
 }
 
 // Install installs the plugin
-func (pl PluginPackage) Install() {
-	selected, err := GetAllPluginPackages().Resolve(GetInstalledVersions(true), PluginDependencies{
+func (pl PluginPackage) Install(out io.Writer) {
+	selected, err := GetAllPluginPackages(out).Resolve(GetInstalledVersions(true), PluginDependencies{
 		&PluginDependency{
 			Name:  pl.Name,
 			Range: semver.Range(func(v semver.Version) bool { return true }),
 		}})
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(out, err)
 		return
 	}
-	selected.install()
+	selected.install(out)
 }
 
 // UpdatePlugins updates the given plugins
-func UpdatePlugins(plugins []string) {
+func UpdatePlugins(out io.Writer, plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
 		for _, p := range Plugins {
+			if !p.IsEnabled() {
+				continue
+			}
 			plugins = append(plugins, p.Name)
 		}
 	}
 
-	fmt.Println("Checking for plugin updates")
+	fmt.Fprintln(out, "Checking for plugin updates")
 	microVersion := PluginVersions{
 		newStaticPluginVersion(CorePluginName, util.Version),
 	}
@@ -621,10 +631,82 @@ func UpdatePlugins(plugins []string) {
 		}
 	}
 
-	selected, err := GetAllPluginPackages().Resolve(microVersion, updates)
+	selected, err := GetAllPluginPackages(out).Resolve(microVersion, updates)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Fprintln(out, err)
 		return
 	}
-	selected.install()
+	selected.install(out)
+}
+
+func PluginCommand(out io.Writer, cmd string, args []string) {
+	switch cmd {
+	case "install":
+		installedVersions := GetInstalledVersions(false)
+		for _, plugin := range args {
+			pp := GetAllPluginPackages(out).Get(plugin)
+			if pp == nil {
+				fmt.Fprintln(out, "Unknown plugin \""+plugin+"\"")
+			} else if err := pp.IsInstallable(out); err != nil {
+				fmt.Fprintln(out, "Error installing ", plugin, ": ", err)
+			} else {
+				for _, installed := range installedVersions {
+					if pp.Name == installed.Pack().Name {
+						if pp.Versions[0].Version.Compare(installed.Version) == 1 {
+							fmt.Fprintln(out, pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
+						} else {
+							fmt.Fprintln(out, pp.Name, " is already installed")
+						}
+					}
+				}
+				pp.Install(out)
+			}
+		}
+
+	case "remove":
+		removed := ""
+		for _, plugin := range args {
+			// check if the plugin exists.
+			for _, p := range Plugins {
+				if p.Name == plugin && p.Default {
+					fmt.Fprintln(out, "Default plugins cannot be removed, but can be disabled via settings.")
+					continue
+				}
+				if p.Name == plugin {
+					UninstallPlugin(out, plugin)
+					removed += plugin + " "
+					continue
+				}
+			}
+		}
+		if removed != "" {
+			fmt.Fprintln(out, "Removed ", removed)
+		} else {
+			fmt.Fprintln(out, "No plugins removed")
+		}
+	case "update":
+		UpdatePlugins(out, args)
+	case "list":
+		plugins := GetInstalledVersions(false)
+		fmt.Fprintln(out, "The following plugins are currently installed:")
+		for _, p := range plugins {
+			fmt.Fprintf(out, "%s (%s)\n", p.Pack().Name, p.Version)
+		}
+	case "search":
+		plugins := SearchPlugin(out, args)
+		fmt.Fprintln(out, len(plugins), " plugins found")
+		for _, p := range plugins {
+			fmt.Fprintln(out, "----------------")
+			fmt.Fprintln(out, p.String())
+		}
+		fmt.Fprintln(out, "----------------")
+	case "available":
+		packages := GetAllPluginPackages(out)
+		fmt.Fprintln(out, "Available Plugins:")
+		for _, pkg := range packages {
+			fmt.Fprintln(out, pkg.Name)
+		}
+	default:
+		fmt.Fprintln(out, "Invalid plugin command")
+	}
 }

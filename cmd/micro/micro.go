@@ -55,6 +55,12 @@ func InitFlags() {
 		fmt.Println("    \tRemove plugin(s)")
 		fmt.Println("-plugin update [PLUGIN]...")
 		fmt.Println("    \tUpdate plugin(s) (if no argument is given, updates all plugins)")
+		fmt.Println("-plugin search [PLUGIN]...")
+		fmt.Println("    \tSearch for a plugin")
+		fmt.Println("-plugin list")
+		fmt.Println("    \tList installed plugins")
+		fmt.Println("-plugin available")
+		fmt.Println("    \tList available plugins")
 
 		fmt.Print("\nMicro's options can also be set via command line arguments for quick\nadjustments. For real configuration, please use the settings.json\nfile (see 'help options').\n\n")
 		fmt.Println("-option value")
@@ -107,76 +113,8 @@ func DoPluginFlags() {
 
 		args := flag.Args()
 
-		switch *flagPlugin {
-		case "install":
-			installedVersions := config.GetInstalledVersions(false)
-			for _, plugin := range args {
-				pp := config.GetAllPluginPackages().Get(plugin)
-				if pp == nil {
-					fmt.Println("Unknown plugin \"" + plugin + "\"")
-				} else if err := pp.IsInstallable(); err != nil {
-					fmt.Println("Error installing ", plugin, ": ", err)
-				} else {
-					for _, installed := range installedVersions {
-						if pp.Name == installed.Pack().Name {
-							if pp.Versions[0].Version.Compare(installed.Version) == 1 {
-								fmt.Println(pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
-							} else {
-								fmt.Println(pp.Name, " is already installed")
-							}
-						}
-					}
-					pp.Install()
-				}
-			}
+		config.PluginCommand(os.Stdout, *flagPlugin, args)
 
-		case "remove":
-			removed := ""
-			for _, plugin := range args {
-				// check if the plugin exists.
-				for _, p := range config.Plugins {
-					if p.Name == plugin && p.Default {
-						fmt.Println("Default plugins cannot be removed, but can be disabled via settings.")
-						continue
-					}
-					if p.Name == plugin {
-						config.UninstallPlugin(plugin)
-						removed += plugin + " "
-						continue
-					}
-				}
-			}
-			if removed != "" {
-				fmt.Println("Removed ", removed)
-			} else {
-				fmt.Println("No plugins removed")
-			}
-		case "update":
-			config.UpdatePlugins(args)
-		case "list":
-			plugins := config.GetInstalledVersions(false)
-			fmt.Println("The following plugins are currently installed:")
-			for _, p := range plugins {
-				fmt.Printf("%s (%s)\n", p.Pack().Name, p.Version)
-			}
-		case "search":
-			plugins := config.SearchPlugin(args)
-			fmt.Println(len(plugins), " plugins found")
-			for _, p := range plugins {
-				fmt.Println("----------------")
-				fmt.Println(p.String())
-			}
-			fmt.Println("----------------")
-		case "available":
-			packages := config.GetAllPluginPackages()
-			fmt.Println("Available Plugins:")
-			for _, pkg := range packages {
-				fmt.Println(pkg.Name)
-			}
-		default:
-			fmt.Println("Invalid plugin command")
-			os.Exit(1)
-		}
 		os.Exit(0)
 	}
 }
@@ -290,15 +228,15 @@ func main() {
 		}
 	}()
 
-	action.InitBindings()
-	action.InitCommands()
-
-	err = config.InitColorscheme()
+	err = config.LoadAllPlugins()
 	if err != nil {
 		screen.TermMessage(err)
 	}
 
-	err = config.LoadAllPlugins()
+	action.InitBindings()
+	action.InitCommands()
+
+	err = config.InitColorscheme()
 	if err != nil {
 		screen.TermMessage(err)
 	}

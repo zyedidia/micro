@@ -111,6 +111,11 @@ func (eh *EventHandler) ApplyDiff(new string) {
 // Insert creates an insert text event and executes it
 func (eh *EventHandler) Insert(start Loc, textStr string) {
 	text := []byte(textStr)
+	eh.InsertBytes(start, text)
+}
+
+// InsertBytes creates an insert text event and executes it
+func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],
 		EventType: TextEventInsert,
