@@ -416,10 +416,10 @@ func (w *BufWindow) displayBuffer() {
 	}
 	curNumStyle := config.DefStyle
 	if style, ok := config.Colorscheme["current-line-number"]; ok {
-		curNumStyle = style
 		if !b.Settings["cursorline"].(bool) {
-			_, bg, _ := lineNumStyle.Decompose()
-			curNumStyle = curNumStyle.Background(bg)
+			curNumStyle = lineNumStyle
+		} else {
+			curNumStyle = style
 		}
 	}
 
