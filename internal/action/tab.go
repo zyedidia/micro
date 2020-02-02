@@ -284,6 +284,10 @@ func (t *Tab) Resize() {
 }
 
 // CurPane returns the currently active pane
-func (t *Tab) CurPane() Pane {
-	return t.Panes[t.active]
+func (t *Tab) CurPane() *BufPane {
+	p, ok := t.Panes[t.active].(*BufPane)
+	if !ok {
+		return nil
+	}
+	return p
 }
