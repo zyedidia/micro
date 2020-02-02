@@ -21,7 +21,7 @@ const (
 	// TextEventReplace represents a replace event
 	TextEventReplace = 0
 
-	undoThreshold = 500 // If two events are less than n milliseconds apart, undo both of them
+	undoThreshold = 1000 // If two events are less than n milliseconds apart, undo both of them
 )
 
 // TextEvent holds data for a manipulation on some text that can be undone
@@ -211,8 +211,7 @@ func (eh *EventHandler) Undo() {
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
-
-	eh.UndoOneEvent()
+	endTime := startTime - (startTime % undoThreshold)
 
 	for {
 		t = eh.UndoStack.Peek()
@@ -220,10 +219,9 @@ func (eh *EventHandler) Undo() {
 			return
 		}
 
-		if startTime-(t.Time.UnixNano()/int64(time.Millisecond)) > undoThreshold {
+		if t.Time.UnixNano()/int64(time.Millisecond) < endTime {
 			return
 		}
-		startTime = t.Time.UnixNano() / int64(time.Millisecond)
 
 		eh.UndoOneEvent()
 	}
@@ -263,8 +261,7 @@ func (eh *EventHandler) Redo() {
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
-
-	eh.RedoOneEvent()
+	endTime := startTime - (startTime % undoThreshold) + undoThreshold
 
 	for {
 		t = eh.RedoStack.Peek()
@@ -272,7 +269,7 @@ func (eh *EventHandler) Redo() {
 			return
 		}
 
-		if (t.Time.UnixNano()/int64(time.Millisecond))-startTime > undoThreshold {
+		if t.Time.UnixNano()/int64(time.Millisecond) > endTime {
 			return
 		}
 
