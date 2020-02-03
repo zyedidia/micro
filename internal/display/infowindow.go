@@ -15,6 +15,8 @@ import (
 type InfoWindow struct {
 	*info.InfoBuf
 	*View
+
+	hscroll int
 }
 
 func (i *InfoWindow) errStyle() tcell.Style {
@@ -175,6 +177,36 @@ func (i *InfoWindow) displayKeyMenu() {
 	}
 }
 
+func (i *InfoWindow) totalSize() int {
+	sum := 0
+	for _, n := range i.Suggestions {
+		sum += runewidth.StringWidth(n) + 1
+	}
+	return sum
+}
+
+func (i *InfoWindow) scrollToSuggestion() {
+	x := 0
+	s := i.totalSize()
+
+	for j, n := range i.Suggestions {
+		c := utf8.RuneCountInString(n)
+		if j == i.CurSuggestion {
+			if x+c >= i.hscroll+i.Width {
+				i.hscroll = util.Clamp(x+c+1-i.Width, 0, s-i.Width)
+			} else if x < i.hscroll {
+				i.hscroll = util.Clamp(x-1, 0, s-i.Width)
+			}
+			break
+		}
+		x += c + 1
+	}
+
+	if s-i.Width <= 0 {
+		i.hscroll = 0
+	}
+}
+
 func (i *InfoWindow) Display() {
 	x := 0
 	if config.GetGlobalOption("keymenu").(bool) {
@@ -204,6 +236,11 @@ func (i *InfoWindow) Display() {
 	}
 
 	if i.HasSuggestions && len(i.Suggestions) > 1 {
+		i.scrollToSuggestion()
+
+		x := -i.hscroll
+		done := false
+
 		statusLineStyle := config.DefStyle.Reverse(true)
 		if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
@@ -212,29 +249,43 @@ func (i *InfoWindow) Display() {
 		if config.GetGlobalOption("keymenu").(bool) {
 			keymenuOffset = len(keydisplay)
 		}
-		x := 0
+
+		draw := func(r rune, s tcell.Style) {
+			y := i.Y - keymenuOffset - 1
+			rw := runewidth.RuneWidth(r)
+			for j := 0; j < rw; j++ {
+				c := r
+				if j > 0 {
+					c = ' '
+				}
+
+				if x == i.Width-1 && !done {
+					screen.SetContent(i.Width-1, y, '>', nil, s)
+					x++
+					break
+				} else if x == 0 && i.hscroll > 0 {
+					screen.SetContent(0, y, '<', nil, s)
+				} else if x >= 0 && x < i.Width {
+					screen.SetContent(x, y, c, nil, s)
+				}
+				x++
+			}
+		}
+
 		for j, s := range i.Suggestions {
 			style := statusLineStyle
 			if i.CurSuggestion == j {
 				style = style.Reverse(true)
 			}
 			for _, r := range s {
-				screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, style)
-				x++
-				if x >= i.Width {
-					return
-				}
+				draw(r, style)
+				// screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, style)
 			}
-			screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
-			x++
-			if x >= i.Width {
-				return
-			}
+			draw(' ', statusLineStyle)
 		}
 
 		for x < i.Width {
-			screen.SetContent(x, i.Y-keymenuOffset-1, ' ', nil, statusLineStyle)
-			x++
+			draw(' ', statusLineStyle)
 		}
 	}
 }

@@ -97,7 +97,7 @@ func CleanConfig() {
 			decoder := gob.NewDecoder(file)
 			err = decoder.Decode(&buffer)
 
-			if err != nil {
+			if err != nil && f.Name() != "history" {
 				badFiles = append(badFiles, fname)
 			}
 		}
