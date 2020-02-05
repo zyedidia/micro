@@ -147,7 +147,7 @@ func (h *BufPane) RetabCmd(args []string) {
 func (h *BufPane) RawCmd(args []string) {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
-	tp := NewTabFromPane(0, 0, width, height-iOffset, NewRawPane())
+	tp := NewTabFromPane(0, 0, width, height-iOffset, NewRawPane(nil))
 	Tabs.AddTab(tp)
 	Tabs.SetActive(len(Tabs.List) - 1)
 }
@@ -830,7 +830,7 @@ func (h *BufPane) ReplaceAllCmd(args []string) {
 
 // TermCmd opens a terminal in the current view
 func (h *BufPane) TermCmd(args []string) {
-	ps := MainTab().Panes
+	ps := h.tab.Panes
 
 	if len(args) == 0 {
 		sh := os.Getenv("SHELL")
@@ -855,7 +855,7 @@ func (h *BufPane) TermCmd(args []string) {
 		}
 
 		v := h.GetView()
-		MainTab().Panes[i] = NewTermPane(v.X, v.Y, v.Width, v.Height, t, id)
+		MainTab().Panes[i] = NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
 		MainTab().SetActive(i)
 	}
 

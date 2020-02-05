@@ -25,7 +25,7 @@ func RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool, callba
 	id := MainTab().Panes[0].ID()
 
 	v := h.GetView()
-	MainTab().Panes[0] = NewTermPane(v.X, v.Y, v.Width, v.Height, t, id)
+	MainTab().Panes[0] = NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
 	MainTab().SetActive(0)
 
 	return nil

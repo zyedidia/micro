@@ -57,9 +57,7 @@ func RunPluginFnBool(fn string, args ...lua.LValue) (bool, error) {
 			reterr = errors.New("Plugin " + p.Name + ": " + err.Error())
 			continue
 		}
-		if v, ok := val.(lua.LBool); !ok {
-			reterr = errors.New(p.Name + "." + fn + " should return a boolean")
-		} else {
+		if v, ok := val.(lua.LBool); ok {
 			retbool = retbool && bool(v)
 		}
 	}

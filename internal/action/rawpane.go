@@ -13,17 +13,17 @@ type RawPane struct {
 	*BufPane
 }
 
-func NewRawPaneFromWin(b *buffer.Buffer, win display.BWindow) *RawPane {
+func NewRawPaneFromWin(b *buffer.Buffer, win display.BWindow, tab *Tab) *RawPane {
 	rh := new(RawPane)
-	rh.BufPane = NewBufPane(b, win)
+	rh.BufPane = NewBufPane(b, win, tab)
 
 	return rh
 }
 
-func NewRawPane() *RawPane {
+func NewRawPane(tab *Tab) *RawPane {
 	b := buffer.NewBufferFromString("", "", buffer.BTRaw)
 	w := display.NewBufWindow(0, 0, 0, 0, b)
-	return NewRawPaneFromWin(b, w)
+	return NewRawPaneFromWin(b, w, tab)
 }
 
 func (h *RawPane) HandleEvent(event tcell.Event) {

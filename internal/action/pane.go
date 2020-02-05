@@ -11,4 +11,6 @@ type Pane interface {
 	SetID(i uint64)
 	Name() string
 	Close()
+	SetTab(t *Tab)
+	Tab() *Tab
 }

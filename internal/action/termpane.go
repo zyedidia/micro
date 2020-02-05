@@ -17,14 +17,16 @@ type TermPane struct {
 
 	mouseReleased bool
 	id            uint64
+	tab           *Tab
 }
 
-func NewTermPane(x, y, w, h int, t *shell.Terminal, id uint64) *TermPane {
+func NewTermPane(x, y, w, h int, t *shell.Terminal, id uint64, tab *Tab) *TermPane {
 	th := new(TermPane)
 	th.Terminal = t
 	th.id = id
 	th.mouseReleased = true
 	th.Window = display.NewTermWindow(x, y, w, h, t)
+	th.tab = tab
 	return th
 }
 
@@ -34,6 +36,14 @@ func (t *TermPane) ID() uint64 {
 
 func (t *TermPane) SetID(i uint64) {
 	t.id = i
+}
+
+func (t *TermPane) SetTab(tab *Tab) {
+	t.tab = tab
+}
+
+func (t *TermPane) Tab() *Tab {
+	return t.tab
 }
 
 func (t *TermPane) Close() {}

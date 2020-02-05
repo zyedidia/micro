@@ -167,7 +167,7 @@ func NewTabFromBuffer(x, y, width, height int, b *buffer.Buffer) *Tab {
 	t.Node = views.NewRoot(x, y, width, height)
 	t.UIWindow = display.NewUIWindow(t.Node)
 
-	e := NewBufPaneFromBuf(b)
+	e := NewBufPaneFromBuf(b, t)
 	e.SetID(t.ID())
 
 	t.Panes = append(t.Panes, e)
@@ -178,7 +178,7 @@ func NewTabFromPane(x, y, width, height int, pane Pane) *Tab {
 	t := new(Tab)
 	t.Node = views.NewRoot(x, y, width, height)
 	t.UIWindow = display.NewUIWindow(t.Node)
-
+	pane.SetTab(t)
 	pane.SetID(t.ID())
 
 	t.Panes = append(t.Panes, pane)
@@ -196,7 +196,6 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
-			resizeID := t.GetMouseSplitID(buffer.Loc{mx, my})
 			if t.resizing != nil {
 				var size int
 				if t.resizing.Kind == views.STVert {
@@ -209,6 +208,7 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 				return
 			}
 
+			resizeID := t.GetMouseSplitID(buffer.Loc{mx, my})
 			if resizeID != 0 {
 				t.resizing = t.GetNode(uint64(resizeID))
 				return

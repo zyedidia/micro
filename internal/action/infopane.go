@@ -17,10 +17,10 @@ type InfoPane struct {
 	*info.InfoBuf
 }
 
-func NewInfoPane(ib *info.InfoBuf, w display.BWindow) *InfoPane {
+func NewInfoPane(ib *info.InfoBuf, w display.BWindow, tab *Tab) *InfoPane {
 	ip := new(InfoPane)
 	ip.InfoBuf = ib
-	ip.BufPane = NewBufPane(ib.Buffer, w)
+	ip.BufPane = NewBufPane(ib.Buffer, w, tab)
 
 	return ip
 }
@@ -28,7 +28,7 @@ func NewInfoPane(ib *info.InfoBuf, w display.BWindow) *InfoPane {
 func NewInfoBar() *InfoPane {
 	ib := info.NewBuffer()
 	w := display.NewInfoWindow(ib)
-	return NewInfoPane(ib, w)
+	return NewInfoPane(ib, w, nil)
 }
 
 func (h *InfoPane) Close() {
