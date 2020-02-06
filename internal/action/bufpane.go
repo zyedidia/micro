@@ -91,7 +91,14 @@ func BufMapKey(k Event, action string) {
 				screen.TermMessage("Lua Error:", a, "does not exist")
 				continue
 			}
-			names = append(names, "")
+			split := strings.SplitN(a, ".", 2)
+			if len(split) > 1 {
+				a = strings.Title(split[0]) + strings.Title(split[1])
+			} else {
+				a = strings.Title(a)
+			}
+
+			names = append(names, a)
 		} else if f, ok := BufKeyActions[a]; ok {
 			afn = f
 			names = append(names, a)
