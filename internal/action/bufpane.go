@@ -639,6 +639,7 @@ var MultiActions = map[string]bool{
 	"DeleteWordLeft":      true,
 	"SelectLine":          true,
 	"SelectToStartOfLine": true,
+	"SelectToStartOfText": true,
 	"SelectToEndOfLine":   true,
 	"ParagraphPrevious":   true,
 	"ParagraphNext":       true,
@@ -662,6 +663,7 @@ var MultiActions = map[string]bool{
 	"SelectPageUp":        true,
 	"SelectPageDown":      true,
 	"StartOfLine":         true,
+	"StartOfText":         true,
 	"EndOfLine":           true,
 	"JumpToMatchingBrace": true,
 }
