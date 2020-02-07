@@ -107,4 +107,5 @@ end
 function init()
     config.MakeCommand("comment", "comment.comment", config.NoComplete)
     config.TryBindKey("Alt-/", "lua:comment.comment", false)
+    config.AddRuntimeFile("comment", config.RTHelp, "help/comment.md")
 end

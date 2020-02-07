@@ -295,6 +295,9 @@ There are 6 default plugins that come pre-installed with micro. These are
 * `status`: provides some extensions to the status line (integration with
    Git and more).
 
+See `> help linter`, `> help comment`, and `> help status` for additional
+documentation specific to those plugins.
+
 These are good examples for many use-cases if you are looking to write
 your own plugins.
 

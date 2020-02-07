@@ -8,6 +8,7 @@ function init()
     micro.SetStatusInfoFn("status.branch")
     micro.SetStatusInfoFn("status.hash")
     micro.SetStatusInfoFn("status.paste")
+    config.AddRuntimeFile("status", config.RTHelp, "help/status.md")
 end
 
 function branch(b)
@@ -19,6 +20,7 @@ function branch(b)
         if err == nil then
             return strings.TrimSpace(branch)
         end
+        return ""
     end
 end
 
@@ -31,6 +33,7 @@ function hash(b)
         if err == nil then
             return strings.TrimSpace(hash)
         end
+        return ""
     end
 end
 

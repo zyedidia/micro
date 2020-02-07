@@ -218,8 +218,8 @@ Here are the available options:
    The `opt` and `bind` directives take either an option or an action afterward
    and fill in the value of the option or the key bound to the action.
 
-    default value: `$(filename) $(modified)($(line),$(col)) $(opt:filetype)
-                    $(opt:fileformat) $(opt:encoding)`
+    default value: `$(filename) $(modified)($(line),$(col)) $(status.paste)|
+                    ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)`
 
 * `statusformatr`: format string definition for the right-justified part of the
    statusline.

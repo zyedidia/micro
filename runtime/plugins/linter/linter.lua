@@ -83,6 +83,7 @@ function init()
     makeLinter("yaml", "yaml", "yamllint", {"--format", "parsable", "%f"}, "%f:%l:%c:.+ %m")
 
     config.MakeCommand("lint", "linter.lintCmd", config.NoComplete)
+    config.AddRuntimeFile("linter", config.RTHelp, "help/linter.md")
 end
 
 function lintCmd(bp, args)
