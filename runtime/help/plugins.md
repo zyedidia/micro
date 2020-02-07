@@ -300,12 +300,43 @@ your own plugins.
 
 ## Plugin Manager
 
-Micro's plugin manager is you! Ultimately the plugins that are created
-for micro are quite simple and don't require a complex automated tool
-to manage them. They should be "git cloned" or somehow placed in the
-`~/.config/micro/plug` directory, and that is all that's necessary
-for installation. In the rare case that a more complex installation
-process is needed (such as dependencies, or additional setup) the
-plugin creator should provide the additional instructions on their
-website and point to the link using the `install` field in the `info.json`
-file.
+Micro also has a built in plugin manager which you can invoke with the
+`> plugin ...` command, or in the shell with `micro -plugin ...`.
+
+For the valid commands you can use, see the `command` help topic.
+
+The manager fetches plugins from the channels (which is simply a list of plugin
+metadata) which it knows about. By default, micro only knows about the official
+channel which is located at github.com/micro-editor/plugin-channel but you can
+add your own third-party channels using the `pluginchannels` option and you can
+directly link third-party plugins to allow installation through the plugin
+manager with the `pluginrepos` option.
+
+If you'd like to publish a plugin you've made as an official plugin, you should
+upload your plugin online (to Github preferably) and add a `repo.json` file.
+This file will contain the metadata for your plugin. Here is an example:
+
+```json
+[{
+  "Name": "pluginname",
+  "Description": "Here is a nice concise description of my plugin",
+  "Website": "https://github.com/user/plugin"
+  "Tags": ["python", "linting"],
+  "Versions": [
+    {
+      "Version": "1.0.0",
+      "Url": "https://github.com/user/plugin/archive/v1.0.0.zip",
+      "Require": {
+        "micro": ">=1.0.3"
+      }
+    }
+  ]
+}]
+```
+
+Then open a pull request at github.com/micro-editor/plugin-channel adding a link
+to the raw `repo.json` that is in your plugin repository.
+
+To make updating the plugin work, the first line of your plugins lua code
+should contain the version of the plugin. (Like this: `VERSION = "1.0.0"`)
+Please make sure to use [semver](http://semver.org/) for versioning.

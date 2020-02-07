@@ -1,6 +1,6 @@
 # Command bar
 
-The command bar is opened by pressing Ctrl-e. It is a single-line buffer,
+The command bar is opened by pressing CtrlE. It is a single-line buffer,
 meaning that all keybindings from a normal buffer are supported (as well
 as mouse and selection).
 
@@ -13,7 +13,7 @@ does not look up environment variables.
 # Commands
 
 Micro provides the following commands that can be executed at the command-bar by
-pressing `Ctrl-e` and entering the command. Arguments are placed in single
+pressing `CtrlE` and entering the command. Arguments are placed in single
 quotes here but these are not necessary when entering the command in micro.
 
 * `bind 'key' 'action'`: creates a keybinding from key to action. See the
@@ -69,14 +69,21 @@ quotes here but these are not necessary when entering the command in micro.
    as standard input and replaces the selection with the stdout of the shell command.
    For example, to sort a list of numbers, first select them, and then execute
    `> textfilter sort -n`.
-					 
+
 * `log`: opens a log of all messages and debug statements.
 
-* `plugin 'list'`: lists all installed plugins.
+* `plugin list`: lists all installed plugins.
 
-* `plugin version 'pl'`: shows version for specified plugin.
+* `plugin install 'pl'`: install a plugin.
 
-* `plugin info 'pl'`: shows additional info for specified plugin.
+* `plugin remove 'pl'`: remove a plugin.
+
+* `plugin update 'pl'`: update a plugin (if no arguments are provided
+   updates all plugins).
+
+* `plugin search 'pl'`: search available plugins for a keyword.
+
+* `plugin available`: show available plugins that can be installed.
 
 * `reload`: reloads all runtime files.
 
@@ -99,10 +106,12 @@ quotes here but these are not necessary when entering the command in micro.
 * `showkey`: Show the action(s) bound to a given key. For example
    running `> showkey CtrlC` will display `Copy`.
 
+* `term exec?`: Open a terminal emulator running the given executable. If no
+   executable is given, this will open the default shell in the terminal emulator.
+
 ---
 
 The following commands are provided by the default plugins:
 
 * `lint`: Lint the current file for errors.
-
 * `comment`: automatically comment or uncomment current selection or line.
