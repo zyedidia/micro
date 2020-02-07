@@ -91,7 +91,14 @@ func BufMapKey(k Event, action string) {
 				screen.TermMessage("Lua Error:", a, "does not exist")
 				continue
 			}
-			names = append(names, "")
+			split := strings.SplitN(a, ".", 2)
+			if len(split) > 1 {
+				a = strings.Title(split[0]) + strings.Title(split[1])
+			} else {
+				a = strings.Title(a)
+			}
+
+			names = append(names, a)
 		} else if f, ok := BufKeyActions[a]; ok {
 			afn = f
 			names = append(names, a)
@@ -632,6 +639,7 @@ var MultiActions = map[string]bool{
 	"DeleteWordLeft":      true,
 	"SelectLine":          true,
 	"SelectToStartOfLine": true,
+	"SelectToStartOfText": true,
 	"SelectToEndOfLine":   true,
 	"ParagraphPrevious":   true,
 	"ParagraphNext":       true,
@@ -655,6 +663,7 @@ var MultiActions = map[string]bool{
 	"SelectPageUp":        true,
 	"SelectPageDown":      true,
 	"StartOfLine":         true,
+	"StartOfText":         true,
 	"EndOfLine":           true,
 	"JumpToMatchingBrace": true,
 }
