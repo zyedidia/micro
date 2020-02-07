@@ -2,8 +2,6 @@ package shell
 
 import (
 	"bytes"
-	"fmt"
-	"os"
 	"os/exec"
 	"strconv"
 	"strings"
@@ -115,7 +113,8 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback s
 		for {
 			err := Term.Parse()
 			if err != nil {
-				fmt.Fprintln(os.Stderr, "[Press enter to close]")
+				Term.Write([]byte("Press enter to close"))
+				screen.Redraw()
 				break
 			}
 			screen.Redraw()
