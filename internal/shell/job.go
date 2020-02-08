@@ -4,14 +4,6 @@ import (
 	"bytes"
 	"io"
 	"os/exec"
-	"strings"
-
-	luar "layeh.com/gopher-luar"
-
-	lua "github.com/yuin/gopher-lua"
-	"github.com/zyedidia/micro/internal/config"
-	ulua "github.com/zyedidia/micro/internal/lua"
-	"github.com/zyedidia/micro/internal/screen"
 )
 
 var Jobs chan JobFunction
@@ -32,7 +24,7 @@ func init() {
 // JobFunction is a representation of a job (this data structure is what is loaded
 // into the jobs channel)
 type JobFunction struct {
-	Function func(string, ...interface{})
+	Function func(string, []interface{})
 	Output   string
 	Args     []interface{}
 }
@@ -41,7 +33,7 @@ type JobFunction struct {
 type CallbackFile struct {
 	io.Writer
 
-	callback func(string, ...interface{})
+	callback func(string, []interface{})
 	args     []interface{}
 }
 
@@ -55,23 +47,23 @@ func (f *CallbackFile) Write(data []byte) (int, error) {
 
 // JobStart starts a shell command in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobStart(cmd string, onStdout, onStderr, onExit string, userargs ...interface{}) *exec.Cmd {
+func JobStart(cmd string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *exec.Cmd {
 	return JobSpawn("sh", []string{"-c", cmd}, onStdout, onStderr, onExit, userargs...)
 }
 
 // JobSpawn starts a process with args in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit string, userargs ...interface{}) *exec.Cmd {
+func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *exec.Cmd {
 	// Set up everything correctly if the functions have been provided
 	proc := exec.Command(cmdName, cmdArgs...)
 	var outbuf bytes.Buffer
-	if onStdout != "" {
-		proc.Stdout = &CallbackFile{&outbuf, luaFunctionJob(onStdout), userargs}
+	if onStdout != nil {
+		proc.Stdout = &CallbackFile{&outbuf, onStdout, userargs}
 	} else {
 		proc.Stdout = &outbuf
 	}
-	if onStderr != "" {
-		proc.Stderr = &CallbackFile{&outbuf, luaFunctionJob(onStderr), userargs}
+	if onStderr != nil {
+		proc.Stderr = &CallbackFile{&outbuf, onStderr, userargs}
 	} else {
 		proc.Stderr = &outbuf
 	}
@@ -79,7 +71,7 @@ func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit strin
 	go func() {
 		// Run the process in the background and create the onExit callback
 		proc.Run()
-		jobFunc := JobFunction{luaFunctionJob(onExit), string(outbuf.Bytes()), userargs}
+		jobFunc := JobFunction{onExit, string(outbuf.Bytes()), userargs}
 		Jobs <- jobFunc
 	}()
 
@@ -99,26 +91,4 @@ func JobSend(cmd *exec.Cmd, data string) {
 	}
 
 	stdin.Write([]byte(data))
-}
-
-// luaFunctionJob returns a function that will call the given lua function
-// structured as a job call i.e. the job output and arguments are provided
-// to the lua function
-func luaFunctionJob(fn string) func(string, ...interface{}) {
-	luaFn := strings.Split(fn, ".")
-	if len(luaFn) <= 1 {
-		return nil
-	}
-	plName, plFn := luaFn[0], luaFn[1]
-	pl := config.FindPlugin(plName)
-	if pl == nil {
-		return nil
-	}
-	return func(output string, args ...interface{}) {
-		luaArgs := []lua.LValue{luar.New(ulua.L, output), luar.New(ulua.L, args)}
-		_, err := pl.Call(plFn, luaArgs...)
-		if err != nil && err != config.ErrNoSuchFunction {
-			screen.TermMessage(err)
-		}
-	}
 }

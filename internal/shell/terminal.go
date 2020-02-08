@@ -4,15 +4,10 @@ import (
 	"bytes"
 	"os/exec"
 	"strconv"
-	"strings"
 
-	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/buffer"
-	"github.com/zyedidia/micro/internal/config"
-	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/terminal"
-	luar "layeh.com/gopher-luar"
 )
 
 type TermType int
@@ -74,7 +69,7 @@ func (t *Terminal) GetSelection(width int) string {
 }
 
 // Start begins a new command in this terminal with a given view
-func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback string, userargs []interface{}) error {
+func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback func(out string, userargs []interface{}), userargs []interface{}) error {
 	if len(execCmd) <= 0 {
 		return nil
 	}
@@ -93,20 +88,8 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback s
 	t.Status = TTRunning
 	t.title = execCmd[0] + ":" + strconv.Itoa(cmd.Process.Pid)
 	t.wait = wait
-
-	luaFn := strings.Split(callback, ".")
-	if len(luaFn) >= 2 {
-		plName, plFn := luaFn[0], luaFn[1]
-		pl := config.FindPlugin(plName)
-		if pl != nil {
-			t.callback = func(out string) {
-				luaArgs := []lua.LValue{luar.New(ulua.L, out), luar.New(ulua.L, userargs)}
-				_, err := pl.Call(plFn, luaArgs...)
-				if err != nil {
-					screen.TermMessage(err)
-				}
-			}
-		}
+	t.callback = func(out string) {
+		callback(out, userargs)
 	}
 
 	go func() {

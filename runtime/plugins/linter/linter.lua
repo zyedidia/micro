@@ -82,13 +82,12 @@ function init()
     makeLinter("swiftc", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
     makeLinter("yaml", "yaml", "yamllint", {"--format", "parsable", "%f"}, "%f:%l:%c:.+ %m")
 
-    config.MakeCommand("lint", "linter.lintCmd", config.NoComplete)
-    config.AddRuntimeFile("linter", config.RTHelp, "help/linter.md")
-end
+    config.MakeCommand("lint", function(bp, args)
+        bp:Save()
+        runLinter(bp.Buf)
+    end, config.NoComplete)
 
-function lintCmd(bp, args)
-    bp:Save()
-    runLinter(bp.Buf)
+    config.AddRuntimeFile("linter", config.RTHelp, "help/linter.md")
 end
 
 function contains(list, element)
@@ -144,7 +143,7 @@ function lint(buf, linter, cmd, args, errorformat, loff, coff, callback)
         end
     end
 
-    shell.JobSpawn(cmd, args, "", "", "linter.onExit", buf, linter, errorformat, loff, coff)
+    shell.JobSpawn(cmd, args, nil, nil, onExit, buf, linter, errorformat, loff, coff)
 end
 
 function onExit(output, args)
