@@ -47,6 +47,9 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 		if b.Modified() {
 			return "+ "
 		}
+		if b.Type.Readonly {
+			return "(readonly) "
+		}
 		return ""
 	},
 }
