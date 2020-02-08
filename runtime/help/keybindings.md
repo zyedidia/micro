@@ -392,6 +392,10 @@ MouseWheelRight
 
 # Default keybinding configuration.
 
+A select few keybindings are different on MacOS compared to other
+operating systems. This is because different OSes have different
+conventions for text editing defaults.
+
 ```json
 {
     "Up":             "CursorUp",
@@ -406,13 +410,19 @@ MouseWheelRight
     "AltRight":       "WordRight",
     "AltUp":          "MoveLinesUp",
     "AltDown":        "MoveLinesDown",
-    "CtrlShiftRight":  "SelectWordRight",
-    "CtrlShiftLeft":   "SelectWordLeft",
+    "CtrlShiftRight": "SelectWordRight",
+    "CtrlShiftLeft":  "SelectWordLeft",
     "AltLeft":        "StartOfLine",
     "AltRight":       "EndOfLine",
+    "AltShiftRight":  "SelectWordRight", (Mac)
+    "AltShiftLeft":   "SelectWordLeft", (Mac)
+    "CtrlLeft":       "StartOfText", (Mac)
+    "CtrlRight":      "EndOfLine", (Mac)
     "AltShiftLeft":   "SelectToStartOfLine",
+    "CtrlShiftLeft":  "SelectToStartOfText", (Mac)
     "ShiftHome":      "SelectToStartOfLine",
     "AltShiftRight":  "SelectToEndOfLine",
+    "CtrlShiftRight": "SelectToEndOfLine", (Mac)
     "ShiftEnd":       "SelectToEndOfLine",
     "CtrlUp":         "CursorStart",
     "CtrlDown":       "CursorEnd",
