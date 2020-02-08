@@ -442,14 +442,13 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 			} else {
 				screen.Screen.EnableMouse()
 			}
-			// autosave option has been removed
-			// } else if option == "autosave" {
-			// 	if nativeValue.(float64) > 0 {
-			// 		config.SetAutoTime(int(nativeValue.(float64)))
-			// 		config.StartAutoSave()
-			// 	} else {
-			// 		config.SetAutoTime(0)
-			// 	}
+		} else if option == "autosave" {
+			if nativeValue.(float64) > 0 {
+				config.SetAutoTime(int(nativeValue.(float64)))
+				config.StartAutoSave()
+			} else {
+				config.SetAutoTime(0)
+			}
 		} else if option == "paste" {
 			screen.Screen.SetPaste(nativeValue.(bool))
 		} else {

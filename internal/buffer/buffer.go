@@ -6,6 +6,7 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -527,6 +528,7 @@ func (b *Buffer) UpdateRules() {
 	if syntaxFile == "" {
 		// search for the syntax file in the user's custom syntax files
 		for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+			log.Println("real runtime file", f.Name())
 			data, err := f.Data()
 			if err != nil {
 				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
@@ -540,7 +542,7 @@ func (b *Buffer) UpdateRules() {
 				continue
 			}
 
-			if (ft == "unknown" || ft == "" && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
+			if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
 				syndef, err := highlight.ParseDef(file, header)
 				if err != nil {
 					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
