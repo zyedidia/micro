@@ -22,7 +22,7 @@ rules:
     - statement: "\\b(get|if|import|from|in|of|instanceof|let|new|reject|resolve|return)\\b"
     - statement: "\\b(set|super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"
     # reserved but unassigned
-    - error: "\\b(enum|implements|interface|package|private|protected|public|TODO)"
+    - error: "\\b(enum|implements|interface|package|private|protected|public)"
     - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
     - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
@@ -60,13 +60,20 @@ rules:
             - constant.specialChar: "\\\\."
             - identifier: "\\x24\\{.*?\\}"
 
+    - constant.bool: "\\b(true|false)\\b"
+    - constant.bool.false: "\\b(false)\\b"
+    - constant.bool.true: "\\b(true)\\b"
+
     - comment:
         start: "//"
         end: "$"
-        rules: []
+        rules:
+            - todo: "(TODO|XXX|FIXME)"
 
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
-
+        rules:
+            # function documentation
+            - identifier: "\\s\\*\\s.*"
+            - todo: "(TODO|XXX|FIXME)"
