@@ -21,10 +21,10 @@ can change it!
 |--------------------------- |------------------------------------------------------------------------------------------ |
 | Arrows                     | Move the cursor around                                                                    |
 | Shift+arrows               | Move and select text                                                                      |
-| Home or Ctrl+LeftArrow     | Move to the beginning of the current line                                                 |
-| End or Ctrl+RightArrow     | Move to the end of the current line                                                       |
-| Alt+LeftArrow              | Move cursor one word left                                                                 |
-| Alt+RightArrow             | Move cursor one word right                                                                |
+| Home or Alt+LeftArrow      | Move to the beginning of the current line                                                 |
+| End or Alt+RightArrow      | Move to the end of the current line                                                       |
+| Ctrl+LeftArrow             | Move cursor one word left                                                                 |
+| Ctrl+RightArrow            | Move cursor one word right                                                                |
 | Alt+{                      | Move cursor to previous empty line, or beginning of document                              |
 | Alt+}                      | Move cursor to next empty line, or end of document                                        |
 | PageUp                     | Move cursor up one page                                                                   |
@@ -62,10 +62,10 @@ can change it!
 
 | Key                                 | Description of function                   |
 |------------------------------------ |------------------------------------------ |
-| Alt+Shift+RightArrow                | Select word right                         |
-| Alt+Shift+LeftArrow                 | Select word left                          |
-| Shift+Home or Ctrl+Shift+LeftArrow  | Select to start of current line           |
-| Shift+End or Ctrl+Shift+RightArrow  | Select to end of current line             |
+| Ctrl+Shift+RightArrow               | Select word right                         |
+| Ctrl+Shift+LeftArrow                | Select word left                          |
+| Shift+Home or Alt+Shift+LeftArrow   | Select to start of current line           |
+| Shift+End or Alt+Shift+RightArrow   | Select to end of current line             |
 | Ctrl+Shift+UpArrow                  | Select to start of file                   |
 | Ctrl+Shift+DownArrow                | Select to end of file                     |
 | Ctrl+X                              | Cut selected text                         |
