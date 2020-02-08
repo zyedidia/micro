@@ -167,10 +167,11 @@ by pressing CtrlE in micro and typing `set colorscheme simple`.
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.
 
-Many of the Windows terminals don't support more than 16 colors, which means
+Many older Windows terminals don't support more than 16 colors, which means
 that micro's default colorscheme won't look very good. You can either set
 the colorscheme to `simple`, or download a better terminal emulator, like
-mintty.
+mintty. However, if you are on a recent version of Windows 10, the default
+`cmd.exe` should do fine.
 
 ### Plan9, Cygwin, Mingw
 
