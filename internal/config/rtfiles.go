@@ -42,6 +42,7 @@ func init() {
 	realFiles = make([][]RuntimeFile, NumTypes)
 }
 
+// NewRTFiletype creates a new RTFiletype
 func NewRTFiletype() int {
 	NumTypes++
 	allFiles = append(allFiles, []RuntimeFile{})

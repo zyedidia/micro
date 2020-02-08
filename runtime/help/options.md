@@ -2,12 +2,12 @@
 
 Micro stores all of the user configuration in its configuration directory.
 
-Micro uses `$MICRO_CONFIG_HOME` as the configuration directory. If this environment
-variable is not set, it uses `$XDG_CONFIG_HOME/micro` instead. If that
-environment variable is not set, it uses `~/.config/micro` as the configuration
-directory. In the documentation, we use `~/.config/micro` to refer to the
-configuration directory (even if it may in fact be somewhere else if you have
-set either of the above environment variables).
+Micro uses `$MICRO_CONFIG_HOME` as the configuration directory. If this
+environment variable is not set, it uses `$XDG_CONFIG_HOME/micro` instead. If
+that environment variable is not set, it uses `~/.config/micro` as the
+configuration directory. In the documentation, we use `~/.config/micro` to
+refer to the configuration directory (even if it may in fact be somewhere else
+if you have set either of the above environment variables).
 
 Here are the available options:
 
@@ -19,11 +19,12 @@ Here are the available options:
 * `backup`: micro will automatically keep backups of all open buffers. Backups
    are stored in `~/.config/micro/backups` and are removed when the buffer is
    closed cleanly. In the case of a system crash or a micro crash, the contents
-   of the buffer can be recovered automatically by opening the file that
-   was being edited before the crash, or manually by searching for the backup
-   in the backup directory. Backups are made in the background when a buffer is
+   of the buffer can be recovered automatically by opening the file that was
+   being edited before the crash, or manually by searching for the backup in
+   the backup directory. Backups are made in the background when a buffer is
    modified and the latest backup is more than 8 seconds old, or when micro
-   detects a crash. It is highly recommended that you leave this feature enabled.
+   detects a crash. It is highly recommended that you leave this feature
+   enabled.
 
     default value: `true`
 
@@ -43,8 +44,9 @@ Here are the available options:
 
 	default value: `default`
 
-	Note that the default colorschemes (default, solarized, and solarized-tc)
-	are not located in configDir, because they are embedded in the micro binary.
+    Note that the default colorschemes (default, solarized, and solarized-tc)
+    are not located in configDir, because they are embedded in the micro
+    binary.
 
 	The colorscheme can be selected from all the files in the 
 	~/.config/micro/colorschemes/ directory. Micro comes by default with three
@@ -67,29 +69,29 @@ Here are the available options:
 
 	default value: `false`
 
-* `fastdirty`: this determines what kind of algorithm micro uses to determine if
-   a buffer is modified or not. When `fastdirty` is on, micro just uses a
+* `fastdirty`: this determines what kind of algorithm micro uses to determine
+   if a buffer is modified or not. When `fastdirty` is on, micro just uses a
    boolean `modified` that is set to `true` as soon as the user makes an edit.
    This is fast, but can be inaccurate. If `fastdirty` is off, then micro will
-   hash the current buffer against a hash of the original file (created when the
-   buffer was loaded). This is more accurate but obviously more resource
+   hash the current buffer against a hash of the original file (created when
+   the buffer was loaded). This is more accurate but obviously more resource
    intensive. This option is only for people who really care about having
    accurate modified status.
 
 	default value: `true`
 
-* `fileformat`: this determines what kind of line endings micro will use for the
-   file. UNIX line endings are just `\n` (linefeed) whereas dos line endings are
-   `\r\n` (carriage return + linefeed). The two possible values for this option
-   are `unix` and `dos`. The fileformat will be automatically detected (when you
-   open an existing file) and displayed on the statusline, but this option is
-   useful if you would like to change the line endings or if you are starting a
-   new file.
+* `fileformat`: this determines what kind of line endings micro will use for
+   the file. UNIX line endings are just `\n` (linefeed) whereas dos line
+   endings are `\r\n` (carriage return + linefeed). The two possible values for
+   this option are `unix` and `dos`. The fileformat will be automatically
+   detected (when you open an existing file) and displayed on the statusline,
+   but this option is useful if you would like to change the line endings or if
+   you are starting a new file.
 
 	default value: `unix`
 
-* `filetype`: sets the filetype for the current buffer. Set this option to `off`
-   to completely disable filetype detection.
+* `filetype`: sets the filetype for the current buffer. Set this option to
+  `off` to completely disable filetype detection.
 
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
@@ -109,8 +111,9 @@ Here are the available options:
 
 * `keepautoindent`: when using autoindent, whitespace is added for you. This
    option determines if when you move to the next line without any insertions
-   the whitespace that was added should be deleted to remove trailing whitespace.
-   By default, the autoindent whitespace is deleted if the line was left empty.
+   the whitespace that was added should be deleted to remove trailing
+   whitespace.  By default, the autoindent whitespace is deleted if the line
+   was left empty.
 
 	default value: `false`
 
@@ -125,9 +128,9 @@ Here are the available options:
 
     default value: `true`
 
-* `mkparents`: if a file is opened on a path that does not exist, the file cannot
-   be saved because the parent directories don't exist. This option lets micro
-   automatically create the parent directories in such a situation.
+* `mkparents`: if a file is opened on a path that does not exist, the file
+   cannot be saved because the parent directories don't exist. This option lets
+   micro automatically create the parent directories in such a situation.
 
     default value: `false`
 
@@ -141,10 +144,10 @@ Here are the available options:
 
 * `paste`: Treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
-   the terminal keybinding (not Ctrl-v, which is micro's default paste keybinding)
-   then it is a good idea to enable this option during the paste and disable
-   once the paste is over. See `> help copypaste` for details about copying
-   and pasting in a terminal environment.
+   the terminal keybinding (not Ctrl-v, which is micro's default paste
+   keybinding) then it is a good idea to enable this option during the paste
+   and disable once the paste is over. See `> help copypaste` for details about
+   copying and pasting in a terminal environment.
 
     default value: `false`
 
@@ -262,8 +265,8 @@ Here are the available options:
 
 ---
 
-Plugin options: all plugins come with a special option to enable or disable them. The option
-is a boolean with the same name as the plugin itself.
+Plugin options: all plugins come with a special option to enable or disable
+them. The option is a boolean with the same name as the plugin itself.
 
 Any option you set in the editor will be saved to the file
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
@@ -281,9 +284,9 @@ locally rather than globally.
 The `colorscheme` option is global only, and the `filetype` option is local
 only. To set an option locally, use `setlocal` instead of `set`.
 
-In the `settings.json` file you can also put set options locally by specifying either
-a glob or a filetype. Here is an example which has `tabstospaces` on for all files except Go
-files, and `tabsize` 4 for all files except Ruby files:
+In the `settings.json` file you can also put set options locally by specifying
+either a glob or a filetype. Here is an example which has `tabstospaces` on for
+all files except Go files, and `tabsize` 4 for all files except Ruby files:
 
 ```json
 {

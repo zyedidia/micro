@@ -1,8 +1,8 @@
 # Tutorial
 
-This is a brief intro to micro's configuration system that will give some simple
-examples showing how to configure settings, rebind keys, and use `init.lua` to
-configure micro to your liking.
+This is a brief intro to micro's configuration system that will give some
+simple examples showing how to configure settings, rebind keys, and use
+`init.lua` to configure micro to your liking.
 
 Hopefully you'll find this useful.
 
@@ -21,8 +21,8 @@ future, I will use `> set option value` to indicate pressing CtrlE). The change
 will take effect immediately and will also be saved to the `settings.json` file
 so that the setting will stick even after you close micro.
 
-You can also set options locally which means that the setting will only have the
-value you give it in the buffer you set it in. For example, if you have two
+You can also set options locally which means that the setting will only have
+the value you give it in the buffer you set it in. For example, if you have two
 splits open, and you type `> setlocal tabsize 2`, the tabsize will only be 2 in
 the current buffer. Also micro will not save this local change to the
 `settings.json` file. However, you can still set options locally in the
@@ -60,20 +60,21 @@ following in `bindings.json`:
 Very simple.
 
 You can also bind keys while in micro by using the `> bind key action` command,
-but the bindings you make with the command won't be saved to the `bindings.json`
-file.
+but the bindings you make with the command won't be saved to the
+`bindings.json` file.
 
-For more information about keybindings, like which keys can be bound, and
-what actions are available, see the `keybindings` help topic (`> help keybindings`).
+For more information about keybindings, like which keys can be bound, and what
+actions are available, see the `keybindings` help topic (`> help keybindings`).
 
 ### Configuration with Lua
 
 If you need more power than the json files provide, you can use the `init.lua`
 file. Create it in `~/.config/micro`. This file is a lua file that is run when
-micro starts and is essentially a one-file plugin. The plugin name is `initlua`.
+micro starts and is essentially a one-file plugin. The plugin name is
+`initlua`.
 
-This example will show you how to use the `init.lua` file by creating
-a binding to `CtrlR` which will execute the bash command `go run` on the current file,
+This example will show you how to use the `init.lua` file by creating a binding
+to `CtrlR` which will execute the bash command `go run` on the current file,
 given that the current file is a Go file.
 
 You can do that by putting the following in `init.lua`:
@@ -98,8 +99,8 @@ function gorun(bp)
 end
 ```
 
-Alternatively, you could get rid of the `TryBindKey` line, and put this line in the
-`bindings.json` file:
+Alternatively, you could get rid of the `TryBindKey` line, and put this line in
+the `bindings.json` file:
 
 ```json
 {

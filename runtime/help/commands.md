@@ -12,8 +12,8 @@ does not look up environment variables.
 
 # Commands
 
-Micro provides the following commands that can be executed at the command-bar by
-pressing `CtrlE` and entering the command. Arguments are placed in single
+Micro provides the following commands that can be executed at the command-bar
+by pressing `CtrlE` and entering the command. Arguments are placed in single
 quotes here but these are not necessary when entering the command in micro.
 
 * `bind 'key' 'action'`: creates a keybinding from key to action. See the
@@ -42,33 +42,33 @@ quotes here but these are not necessary when entering the command in micro.
 
 	See `replace` command for more information.
 
-* `set 'option' 'value'`: sets the option to value. See the `options` help topic for
-   a list of options you can set. This will modify your `settings.json` with the
-   new value.
+* `set 'option' 'value'`: sets the option to value. See the `options` help
+   topic for a list of options you can set. This will modify your
+   `settings.json` with the new value.
 
-* `setlocal 'option' 'value'`: sets the option to value locally (only in the current
-   buffer). This will *not* modify `settings.json`.
+* `setlocal 'option' 'value'`: sets the option to value locally (only in the
+   current buffer). This will *not* modify `settings.json`.
 
 * `show 'option'`: shows the current value of the given option.
 
 * `run 'sh-command'`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.
 
-* `vsplit 'filename'`: opens a vertical split with `filename`. If no filename is
-   provided, a vertical split is opened with an empty buffer.
+* `vsplit 'filename'`: opens a vertical split with `filename`. If no filename
+   is provided, a vertical split is opened with an empty buffer.
 
-* `hsplit 'filename'`: same as `vsplit` but opens a horizontal split instead of a
-   vertical split.
+* `hsplit 'filename'`: same as `vsplit` but opens a horizontal split instead
+   of a vertical split.
 
 * `tab 'filename'`: opens the given file in a new tab.
 
-* `tabswitch 'tab'`: This command will switch to the specified tab. The `tab` can
-   either be a tab number, or a name of a tab.
+* `tabswitch 'tab'`: This command will switch to the specified tab. The `tab`
+   can either be a tab number, or a name of a tab.
 
-* `textfilter 'sh-command'`: filters the current selection through a shell command
-   as standard input and replaces the selection with the stdout of the shell command.
-   For example, to sort a list of numbers, first select them, and then execute
-   `> textfilter sort -n`.
+* `textfilter 'sh-command'`: filters the current selection through a shell
+   command as standard input and replaces the selection with the stdout of
+   the shell command.  For example, to sort a list of numbers, first select
+   them, and then execute `> textfilter sort -n`.
 
 * `log`: opens a log of all messages and debug statements.
 
@@ -107,7 +107,8 @@ quotes here but these are not necessary when entering the command in micro.
    running `> showkey CtrlC` will display `Copy`.
 
 * `term exec?`: Open a terminal emulator running the given executable. If no
-   executable is given, this will open the default shell in the terminal emulator.
+   executable is given, this will open the default shell in the terminal
+   emulator.
 
 ---
 

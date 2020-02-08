@@ -418,6 +418,7 @@ func ParseSpecial(s string) string {
 	return strings.Replace(s, "\\t", "\t", -1)
 }
 
+// String converts a byte array to a string (for lua plugins)
 func String(s []byte) string {
 	return string(s)
 }

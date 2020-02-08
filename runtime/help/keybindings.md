@@ -14,16 +14,16 @@ at the end of this document).
 If `~/.config/micro/bindings.json` does not exist, you can simply create it.
 Micro will know what to do with it.
 
-You can use the alt keys + arrows to move word by word. Ctrl left and right move
-the cursor to the start and end of the line, and ctrl up and down move the
+You can use the alt keys + arrows to move word by word. Ctrl left and right
+move the cursor to the start and end of the line, and ctrl up and down move the
 cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
 ## Rebinding keys
 
-The bindings may be rebound using the `~/.config/micro/bindings.json` file. Each
-key is bound to an action.
+The bindings may be rebound using the `~/.config/micro/bindings.json` file.
+Each key is bound to an action.
 
 For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the
 following in the `bindings.json` file.
@@ -58,9 +58,9 @@ bindings, tab is bound as
 "Tab": "Autocomplete|IndentSelection|InsertTab"
 ```
 
-This means that if the `Autocomplete` action is successful, the chain will abort.
-Otherwise, it will try `IndentSelection`, and if that fails too, it will
-execute `InsertTab`.
+This means that if the `Autocomplete` action is successful, the chain will
+abort. Otherwise, it will try `IndentSelection`, and if that fails too, it
+will execute `InsertTab`.
 
 ## Binding commands
 
@@ -87,8 +87,9 @@ you could rebind `CtrlG` to `> help`:
 }
 ```
 
-Now when you press `CtrlG`, `help` will appear in the command bar and your cursor will
-be placed after it (note the space in the json that controls the cursor placement).
+Now when you press `CtrlG`, `help` will appear in the command bar and your
+cursor will be placed after it (note the space in the json that controls the
+cursor placement).
 
 ## Binding raw escape sequences
 
@@ -103,15 +104,15 @@ starting with `0x1b`.
 For example, if micro reads `\x1b[1;5D`, on most terminals this will mean the
 user pressed CtrlLeft.
 
-For many key chords though, the terminal won't send any escape code or will send
-an escape code already in use. For example for `CtrlBackspace`, my terminal
-sends `\u007f` (note this doesn't start with `0x1b`), which it also sends for
-`Backspace` meaning micro can't bind `CtrlBackspace`.
+For many key chords though, the terminal won't send any escape code or will
+send an escape code already in use. For example for `CtrlBackspace`, my
+terminal sends `\u007f` (note this doesn't start with `0x1b`), which it also
+sends for `Backspace` meaning micro can't bind `CtrlBackspace`.
 
 However, some terminals do allow you to bind keys to send specific escape
 sequences you define. Then from micro you can directly bind those escape
-sequences to actions. For example, to bind `CtrlBackspace` you can instruct your
-terminal to send `\x1bctrlback` and then bind it in `bindings.json`:
+sequences to actions. For example, to bind `CtrlBackspace` you can instruct
+your terminal to send `\x1bctrlback` and then bind it in `bindings.json`:
 
 ```json
 {
@@ -123,9 +124,9 @@ Here are some instructions for sending raw escapes in different terminals
 
 ### iTerm2
 
-In iTerm2, you can do this in  `Preferences->Profiles->Keys` then click the `+`,
-input your keybinding, and for the `Action` select `Send Escape Sequence`. For
-the above example your would type `ctrlback` into the box (the `\x1b`) is
+In iTerm2, you can do this in  `Preferences->Profiles->Keys` then click the
+`+`, input your keybinding, and for the `Action` select `Send Escape Sequence`.
+For the above example your would type `ctrlback` into the box (the `\x1b`) is
 automatically sent by iTerm2.
 
 ### Linux using loadkeys
@@ -516,8 +517,8 @@ Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or
 This is why in the default keybindings you can see `AltShiftLeft` instead of
 `Alt-ShiftLeft` (they are equivalent).
 
-Please note that terminal emulators are strange applications and micro only receives
-key events that the terminal decides to send. Some terminal emulators may not
-send certain events even if this document says micro can receive the event. To see
-exactly what micro receives from the terminal when you press a key, run the `> raw`
-command.
+Please note that terminal emulators are strange applications and micro only
+receives key events that the terminal decides to send. Some terminal emulators
+may not send certain events even if this document says micro can receive the
+event. To see exactly what micro receives from the terminal when you press a
+key, run the `> raw` command.

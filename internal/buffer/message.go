@@ -13,13 +13,19 @@ const (
 	MTError
 )
 
+// Message represents the information for a gutter message
 type Message struct {
-	Msg        string
+	// The Msg iteslf
+	Msg string
+	// Start and End locations for the message
 	Start, End Loc
-	Kind       MsgType
-	Owner      string
+	// The Kind stores the message type
+	Kind MsgType
+	// The Owner of the message
+	Owner string
 }
 
+// NewMessage creates a new gutter message
 func NewMessage(owner string, msg string, start, end Loc, kind MsgType) *Message {
 	return &Message{
 		Msg:   msg,
@@ -30,6 +36,7 @@ func NewMessage(owner string, msg string, start, end Loc, kind MsgType) *Message
 	}
 }
 
+// NewMessageAtLine creates a new gutter message at a given line
 func NewMessageAtLine(owner string, msg string, line int, kind MsgType) *Message {
 	start := Loc{-1, line - 1}
 	end := start
