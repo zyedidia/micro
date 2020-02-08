@@ -96,10 +96,12 @@ func DefaultBindings() map[string]string {
 		"MouseMiddle":    "PastePrimary",
 		"Ctrl-MouseLeft": "MouseMultiCursor",
 
-		"Alt-n": "SpawnMultiCursor",
-		"Alt-m": "SpawnMultiCursorSelect",
-		"Alt-p": "RemoveMultiCursor",
-		"Alt-c": "RemoveAllMultiCursors",
-		"Alt-x": "SkipMultiCursor",
+		"Alt-n":        "SpawnMultiCursor",
+		"AltShiftUp":   "SpawnMultiCursorUp",
+		"AltShiftDown": "SpawnMultiCursorDown",
+		"Alt-m":        "SpawnMultiCursorSelect",
+		"Alt-p":        "RemoveMultiCursor",
+		"Alt-c":        "RemoveAllMultiCursors",
+		"Alt-x":        "SkipMultiCursor",
 	}
 }
