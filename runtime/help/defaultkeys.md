@@ -92,6 +92,8 @@ can change it!
 | Key               | Description of function                                                                       |
 |------------------ |---------------------------------------------------------------------------------------------- |
 | Alt+N             | Create new multiple cursor from selection (will select current word if no current selection)  |
+| AltShiftUp        | Spawn a new cursor on the line above the current one                                          |
+| AltShiftDown      | Spawn a new cursor on the line below the current one                                          |
 | Alt+P             | Remove latest multiple cursor                                                                 |
 | Alt+C             | Remove all multiple cursors (cancel)                                                          |
 | Alt+X             | Skip multiple cursor selection                                                                |
