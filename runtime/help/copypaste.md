@@ -89,8 +89,9 @@ selection, micro's mouse support must first be disabled by turning the
 `mouse` option off. The terminal, unlike micro, has no sense of different
 buffers/splits and what the different characters being displayed are. This
 means that for copying multiple lines using the terminal selection, you
-should first disable line numbers (turn off the `ruler` option), otherwise
-they might be part of your selection and copied.
+should first disable line numbers and diff indicators (turn off the `ruler`
+and `diffgutter` options), otherwise they might be part of your selection
+and copied.
 
 ## Recommendations
 
@@ -103,7 +104,7 @@ The recommended method of copying is the following:
 * If you are working over SSH, use the terminal keybinding
   (Ctrl-Shift-c or Command-c) to perform copies. You must first disable
   the `mouse` option to perform a terminal selection, and you may wish
-  to disable line numbers (`ruler` option) and close other splits. This
-  method will only be able to copy characters that are displayed on the
-  screen (you will not be able to copy more than one page's worth of
-  characters).
+  to disable line numbers and diff indicators (`ruler` and `diffgutter`
+  options) and close other splits. This method will only be able to copy
+  characters that are displayed on the screen (you will not be able to
+  copy more than one page's worth of characters).

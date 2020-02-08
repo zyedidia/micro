@@ -573,6 +573,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"EndOfLine":              (*BufPane).EndOfLine,
 	"ToggleHelp":             (*BufPane).ToggleHelp,
 	"ToggleKeyMenu":          (*BufPane).ToggleKeyMenu,
+	"ToggleDiffGutter":       (*BufPane).ToggleDiffGutter,
 	"ToggleRuler":            (*BufPane).ToggleRuler,
 	"ClearStatus":            (*BufPane).ClearStatus,
 	"ShellMode":              (*BufPane).ShellMode,

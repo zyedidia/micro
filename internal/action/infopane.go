@@ -123,6 +123,7 @@ var InfoNones = []string{
 	"HalfPageDown",
 	"ToggleHelp",
 	"ToggleKeyMenu",
+	"ToggleDiffGutter",
 	"ToggleRuler",
 	"JumpLine",
 	"ClearStatus",
