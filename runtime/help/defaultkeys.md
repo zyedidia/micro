@@ -17,22 +17,24 @@ can change it!
 
 ### Navigation
 
-| Key                        | Description of function                                                                   |
-|--------------------------- |------------------------------------------------------------------------------------------ |
-| Arrows                     | Move the cursor around                                                                    |
-| Shift+arrows               | Move and select text                                                                      |
-| Home or Ctrl+LeftArrow     | Move to the beginning of the current line                                                 |
-| End or Ctrl+RightArrow     | Move to the end of the current line                                                       |
-| Alt+LeftArrow              | Move cursor one word left                                                                 |
-| Alt+RightArrow             | Move cursor one word right                                                                |
-| Alt+{                      | Move cursor to previous empty line, or beginning of document                              |
-| Alt+}                      | Move cursor to next empty line, or end of document                                        |
-| PageUp                     | Move cursor up one page                                                                   |
-| PageDown                   | Move cursor down one page                                                                 |
-| Ctrl+Home or Ctrl+UpArrow  | Move cursor to start of document                                                          |
-| Ctrl+End or Ctrl+DownArrow | Move cursor to end of document                                                            |
-| Ctrl+L                     | Jump to a line in the file (prompts with #)                                               |
-| Ctrl+W                     | Cycle between splits in the current tab (use `> vsplit` or `> hsplit` to create a split)  |
+| Key                         | Description of function                                                                   |
+|---------------------------- |------------------------------------------------------------------------------------------ |
+| Arrows                      | Move the cursor around                                                                    |
+| Shift+arrows                | Move and select text                                                                      |
+| Alt(Ctrl on Mac)+LeftArrow  | Move to the beginning of the current line                                                 |
+| Alt(Ctrl on Mac)+RightArrow | Move to the end of the current line                                                       |
+| Home                        | Move to the beginning of the current line                                                 |
+| End                         | Move to the end of the current line                                                       |
+| Ctrl(Alt on Mac)+LeftArrow  | Move cursor one word left                                                                 |
+| Ctrl(Alt on Mac)+RightArrow | Move cursor one word right                                                                |
+| Alt+{                       | Move cursor to previous empty line, or beginning of document                              |
+| Alt+}                       | Move cursor to next empty line, or end of document                                        |
+| PageUp                      | Move cursor up one page                                                                   |
+| PageDown                    | Move cursor down one page                                                                 |
+| Ctrl+Home or Ctrl+UpArrow   | Move cursor to start of document                                                          |
+| Ctrl+End or Ctrl+DownArrow  | Move cursor to end of document                                                            |
+| Ctrl+L                      | Jump to a line in the file (prompts with #)                                               |
+| Ctrl+W                      | Cycle between splits in the current tab (use `> vsplit` or `> hsplit` to create a split)  |
 
 ### Tabs
 
@@ -62,10 +64,12 @@ can change it!
 
 | Key                                 | Description of function                   |
 |------------------------------------ |------------------------------------------ |
-| Alt+Shift+RightArrow                | Select word right                         |
-| Alt+Shift+LeftArrow                 | Select word left                          |
-| Shift+Home or Ctrl+Shift+LeftArrow  | Select to start of current line           |
-| Shift+End or Ctrl+Shift+RightArrow  | Select to end of current line             |
+| Ctrl(Alt on Mac)+Shift+RightArrow   | Select word right                         |
+| Ctrl(Alt on Mac)+Shift+LeftArrow    | Select word left                          |
+| Alt(Ctrl on Mac)+Shift+LeftArrow    | Select to start of current line           |
+| Alt(Ctrl on Mac)+Shift+RightArrow   | Select to end of current line             |
+| Shift+Home                          | Select to start of current line           |
+| Shift+End                           | Select to end of current line             |
 | Ctrl+Shift+UpArrow                  | Select to start of file                   |
 | Ctrl+Shift+DownArrow                | Select to end of file                     |
 | Ctrl+X                              | Cut selected text                         |
