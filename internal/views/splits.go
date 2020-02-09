@@ -456,9 +456,9 @@ func (n *Node) unsplit(i int, h bool) {
 
 // Unsplit deletes this split and resizes everything
 // else accordingly
-func (n *Node) Unsplit() {
-	if !n.IsLeaf() {
-		return
+func (n *Node) Unsplit() bool {
+	if !n.IsLeaf() || n.parent == nil {
+		return false
 	}
 	ind := 0
 	for i, c := range n.parent.children {
@@ -473,8 +473,9 @@ func (n *Node) Unsplit() {
 	}
 
 	if n.parent.IsLeaf() {
-		n.parent.Unsplit()
+		return n.parent.Unsplit()
 	}
+	return true
 }
 
 // String returns the string form of the node and all children (used for debugging)

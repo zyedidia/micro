@@ -1373,38 +1373,42 @@ func (h *BufPane) HSplitAction() bool {
 
 // Unsplit closes all splits in the current tab except the active one
 func (h *BufPane) Unsplit() bool {
-	n := MainTab().GetNode(h.splitID)
-	n.Unsplit()
+	tab := h.tab
+	n := tab.GetNode(h.splitID)
+	ok := n.Unsplit()
+	if ok {
+		tab.RemovePane(tab.GetPane(h.splitID))
+		tab.Resize()
+		tab.SetActive(len(tab.Panes) - 1)
 
-	MainTab().RemovePane(MainTab().GetPane(h.splitID))
-	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
-	return true
+		return true
+	}
+	return false
 }
 
 // NextSplit changes the view to the next split
 func (h *BufPane) NextSplit() bool {
-	a := MainTab().active
-	if a < len(MainTab().Panes)-1 {
+	a := h.tab.active
+	if a < len(h.tab.Panes)-1 {
 		a++
 	} else {
 		a = 0
 	}
 
-	MainTab().SetActive(a)
+	h.tab.SetActive(a)
 
 	return true
 }
 
 // PreviousSplit changes the view to the previous split
 func (h *BufPane) PreviousSplit() bool {
-	a := MainTab().active
+	a := h.tab.active
 	if a > 0 {
 		a--
 	} else {
-		a = len(MainTab().Panes) - 1
+		a = len(h.tab.Panes) - 1
 	}
-	MainTab().SetActive(a)
+	h.tab.SetActive(a)
 
 	return true
 }
