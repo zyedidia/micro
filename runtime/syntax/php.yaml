@@ -1,6 +1,6 @@
 filetype: php
 
-detect: 
+detect:
     filename: "\\.php[2345s~]?$"
 
 rules:
@@ -18,16 +18,15 @@ rules:
     - comment: "<!--.+?-->"
     - default: "<\\?(php|=)\" end=\"\\?>"
     - identifier.class: "([a-zA-Z0-9_-]+)\\("
-    - preproc: "\\b(require|include)(_once)?\\b"
-    - type: "\\b(var|class|extends|function|echo|case|default|exit|switch|extends|as|define|do|declare|in|trait|interface|[E|e]xception|array|int|string|bool|iterable|void)\\b"
+    - type: "\\b(array|bool(ean)?|callable|callback|float|int(eger)?|iterable|object|resource|mixed|string|void)\\b"
     - identifier.class: "[a-zA-Z\\\\]+::"
     - identifier: "\\b([A-Z][a-zA-Z0-9_]+)\\b"
     - identifier: "([A-Z0-9_]+)[;|\\s|\\)|,]"
-    - type.keyword: "(global|public|private|protected|static|const)"
-    - statement: "(implements|abstract|instanceof|if|else(if)?|endif|namespace|use|as|new|throw|catch|try|while|print|(end)?(foreach)?)\\b"
-    - identifier: "new\\s([a-zA-Z0-9\\\\]+)"
-    - special: "(break|continue|goto|return)"
-    - constant.bool: "(true|false|null|TRUE|FALSE|NULL)"
+    - type.keyword: "\\b(global|final|public|private|protected|static|const|var)\\b"
+    - statement: "\\b(abstract|catch|class|declare|do|else(if)?|end(declare|for(each)?|if|switch|while)|finally|for(each)|function|if|interface|namespace|switch|trait|try|while)\\b"
+    - identifier: "\\bnew\\s+([a-zA-Z0-9\\\\]+)"
+    - special: "\\b(as|and|break|case|clone|continue|default|die|fn|echo|empty|eval|exit|extends|goto|or|include(_once)?|implements|instanceof|insteadof|isset|list|new|print|return|require(_once)?|unset|use|throw|xor|yield(\\s+from))\\b"
+    - constant.bool: "\\b(true|false|null|TRUE|FALSE|NULL)\\b"
     - constant: "[\\s|=|\\s|\\(|/|+|-|\\*|\\[]"
     - constant.number: "[0-9]"
     - identifier: "(\\$this|parent|self|\\$this->)"
