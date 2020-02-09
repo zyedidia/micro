@@ -139,7 +139,7 @@ func ByteOffset(pos Loc, buf *Buffer) int {
 // clamps a loc within a buffer
 func clamp(pos Loc, la *LineArray) Loc {
 	if pos.GreaterEqual(la.End()) {
-		return la.End().MoveLA(-1, la)
+		return la.End()
 	} else if pos.LessThan(la.Start()) {
 		return la.Start()
 	}
