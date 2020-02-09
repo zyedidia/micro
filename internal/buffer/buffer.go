@@ -1,6 +1,7 @@
 package buffer
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/md5"
 	"errors"
@@ -210,7 +211,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.Settings["encoding"] = "utf-8"
 	}
 
-	reader := transform.NewReader(r, enc.NewDecoder())
+	reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
 
 	found := false
 	if len(path) > 0 {
@@ -398,7 +399,7 @@ func (b *Buffer) ReOpen() error {
 		return err
 	}
 
-	reader := transform.NewReader(file, enc.NewDecoder())
+	reader := bufio.NewReader(transform.NewReader(file, enc.NewDecoder()))
 	data, err := ioutil.ReadAll(reader)
 	txt := string(data)
 
