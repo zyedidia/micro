@@ -13,11 +13,12 @@ rules:
       # definitions
     - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
       # keywords
-    - statement: "\\b(begin|break|catch|continue|function|elseif|struct|else|end|finally|for|global|local|let|const|if|import|export|using|macro|println|return|try|while|module)\\b"
+    - statement: "\\b(baremodule|begin|break|catch|const|continue|do|else|elseif|end|export|finally|for|function|global|if|import|let|local|macro|module|quote|return|struct|try|using|while)\\b"
+    - statement: "\\b(abstract type|primitive type|mutable struct\\b)"
       # decorators
     - identifier.macro: "@[A-Za-z0-9_]+"
       # operators
-    - symbol.operator: "[-+*/|=%<>&~^]|\\b(isa|in)\\b"
+    - symbol.operator: "[-+*/|=%<>&~^]|\\b(in|isa|where)\\b"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
