@@ -1,0 +1,34 @@
+filetype: forth
+
+detect:
+    filename: "\\.(forth|4th|fs|fs8|ft|fth|frt)$"
+
+rules:
+    - identifier: "\\b[A-Za-z_0-9-]*\\b"
+    
+    - statement: "\\b(?i:(if|else|then|do|loop|case|endcase|of|endof|begin|while|repeat|until|again|unloop|leave|exit|done|next|\\?do|\\+do|\\-do|\\+loop|\\-loop|\\?leave))\\b"
+
+    - statement: "(^:|;$)"
+
+    - type: "\\b(?i:(variable|constant|cells))\\b"
+
+    - special: "\\B[?.]\\B" #for some reason, \b and \B are inverted for symbols
+
+    - constant.number: "\\b[0-9]+\\b"
+
+    - constant.string:
+        start: "\\b([Ss.]\" )"
+        end: "\""
+        rules: []
+
+    - comment:
+        start: "\\("
+        end: "\\)"
+        rules:
+            - todo: "(TODO|NOTE|XXX|FIXME):?"
+
+    - comment:
+        start: "\\\\"
+        end: "$"
+        rules:
+            - todo: "(TODO|NOTE|XXX|FIXME):?"
