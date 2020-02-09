@@ -48,7 +48,7 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 			return "+ "
 		}
 		if b.Type.Readonly {
-			return "(readonly) "
+			return "[ro] "
 		}
 		return ""
 	},
