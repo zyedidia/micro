@@ -620,6 +620,11 @@ func (h *BufPane) Autocomplete() bool {
 		return false
 	}
 
+	if !util.IsNonAlphaNumeric(h.Cursor.RuneUnder(h.Cursor.X)) {
+		// don't autocomplete if cursor is on alpha numeric character (middle of a word)
+		return false
+	}
+
 	if b.HasSuggestions {
 		b.CycleAutocomplete(true)
 		return true
