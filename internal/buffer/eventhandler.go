@@ -1,6 +1,8 @@
 package buffer
 
 import (
+	"bytes"
+	"log"
 	"time"
 	"unicode/utf8"
 
@@ -122,21 +124,38 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 		Deltas:    []Delta{{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
 	}
+	// oldl := eh.buf.LinesNum()
 	eh.Execute(e)
+	// linecount := eh.buf.LinesNum() - oldl
 	textcount := utf8.RuneCount(text)
+	lastnl := bytes.LastIndex(text, []byte{'\n'})
+	var endX int
+	var textX int
+	if lastnl >= 0 {
+		endX = utf8.RuneCount(text[lastnl:])
+		textX = endX
+	} else {
+		// endX = start.X + textcount
+		textX = textcount
+	}
+
 	e.Deltas[0].End = start.MoveLA(textcount, eh.buf.LineArray)
+	// e.Deltas[0].End = clamp(Loc{endX, start.Y + linecount}, eh.buf.LineArray)
 	end := e.Deltas[0].End
 
 	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
+			log.Println("move", loc)
 			if start.Y != end.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-				loc = loc.MoveLA(textcount, eh.buf.LineArray)
+				loc.Y += end.Y - start.Y
+				loc.X += textX
 			}
 			return loc
 		}
 		c.Loc = move(c.Loc)
+		c.Relocate()
 		c.CurSelection[0] = move(c.CurSelection[0])
 		c.CurSelection[1] = move(c.CurSelection[1])
 		c.OrigSelection[0] = move(c.OrigSelection[0])
