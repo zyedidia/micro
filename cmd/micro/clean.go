@@ -92,13 +92,16 @@ func CleanConfig() {
 		for _, f := range files {
 			fname := filepath.Join(config.ConfigDir, "buffers", f.Name())
 			file, e := os.Open(fname)
-			defer file.Close()
 
-			decoder := gob.NewDecoder(file)
-			err = decoder.Decode(&buffer)
+			if e == nil {
+				defer file.Close()
 
-			if e != nil && f.Name() != "history" {
-				badFiles = append(badFiles, fname)
+				decoder := gob.NewDecoder(file)
+				err = decoder.Decode(&buffer)
+
+				if err != nil && f.Name() != "history" {
+					badFiles = append(badFiles, fname)
+				}
 			}
 		}
 
