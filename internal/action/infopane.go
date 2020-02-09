@@ -73,7 +73,7 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	}
 }
 
-// DoKeyEvent executes a key event for the command bar, doing any overriden actions
+// DoKeyEvent executes a key event for the command bar, doing any overridden actions
 func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	done := false
 	if action, ok := BufKeyBindings[e]; ok {

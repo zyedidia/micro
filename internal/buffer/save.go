@@ -28,41 +28,41 @@ const LargeFileThreshold = 50000
 // the supplied function with the file as io.Writer object, also making sure the file is
 // closed afterwards.
 func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error, withSudo bool) (err error) {
-    var writeCloser io.WriteCloser
+	var writeCloser io.WriteCloser
 
-    if withSudo {
-        cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+	if withSudo {
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
 
-        if writeCloser, err = cmd.StdinPipe(); err != nil {
-            return
-        }
+		if writeCloser, err = cmd.StdinPipe(); err != nil {
+			return
+		}
 
-        c := make(chan os.Signal, 1)
-        signal.Notify(c, os.Interrupt)
-        go func() {
-            <-c
-            cmd.Process.Kill()
-        }()
+		c := make(chan os.Signal, 1)
+		signal.Notify(c, os.Interrupt)
+		go func() {
+			<-c
+			cmd.Process.Kill()
+		}()
 
-        defer func() {
-            screenb := screen.TempFini()
-            if e := cmd.Run(); e != nil && err == nil {
-                err = e
-            }
-            screen.TempStart(screenb)
-        }()
-    } else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
-        return
-    }
+		defer func() {
+			screenb := screen.TempFini()
+			if e := cmd.Run(); e != nil && err == nil {
+				err = e
+			}
+			screen.TempStart(screenb)
+		}()
+	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
+		return
+	}
 
-    w := transform.NewWriter(writeCloser, enc.NewEncoder())
-    err = fn(w)
+	w := transform.NewWriter(writeCloser, enc.NewEncoder())
+	err = fn(w)
 
-    if e := writeCloser.Close(); e != nil && err == nil {
-        err = e
-    }
+	if e := writeCloser.Close(); e != nil && err == nil {
+		err = e
+	}
 
-    return
+	return
 }
 
 // Save saves the buffer to its default path
@@ -92,7 +92,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 		return errors.New("Cannot save scratch buffer")
 	}
 	if withSudo && runtime.GOOS == "windows" {
-	    return errors.New("Save with sudo not supported on Windows")
+		return errors.New("Save with sudo not supported on Windows")
 	}
 
 	b.UpdateRules()
@@ -178,7 +178,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 	}
 
 	if err = overwriteFile(absFilename, enc, fwriter, withSudo); err != nil {
-	    return err
+		return err
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
