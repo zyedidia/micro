@@ -224,7 +224,7 @@ func (la *LineArray) split(pos Loc) {
 
 // removes from start to end
 func (la *LineArray) remove(start, end Loc) []byte {
-	// sub := la.Substr(start, end)
+	sub := la.Substr(start, end)
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
 	if start.Y == end.Y {
@@ -235,7 +235,7 @@ func (la *LineArray) remove(start, end Loc) []byte {
 		la.deleteFromStart(Loc{endX - 1, start.Y + 1})
 		la.joinLines(start.Y, start.Y+1)
 	}
-	return []byte{}
+	return sub
 }
 
 // deleteToEnd deletes from the end of a line to the position

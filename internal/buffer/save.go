@@ -1,6 +1,7 @@
 package buffer
 
 import (
+	"bufio"
 	"bytes"
 	"errors"
 	"io"
@@ -55,7 +56,7 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		return
 	}
 
-	w := transform.NewWriter(writeCloser, enc.NewEncoder())
+	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
 	err = fn(w)
 
 	if e := writeCloser.Close(); e != nil && err == nil {
