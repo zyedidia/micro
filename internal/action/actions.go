@@ -659,23 +659,27 @@ func (h *BufPane) SaveAll() bool {
 	return true
 }
 
-// Save the buffer to disk
-func (h *BufPane) Save() bool {
+// SaveCB performs a save and does a callback at the very end (after all prompts have been resolved)
+func (h *BufPane) SaveCB(action string, callback func()) bool {
 	// If this is an empty buffer, ask for a filename
 	if h.Buf.Path == "" {
-		h.SaveAs()
+		h.SaveAsCB(action, callback)
 	} else {
-		noPrompt := h.saveBufToFile(h.Buf.Path, "Save")
+		noPrompt := h.saveBufToFile(h.Buf.Path, action, callback)
 		if noPrompt {
 			return true
 		}
 	}
-
 	return false
 }
 
-// SaveAs saves the buffer to disk with the given name
-func (h *BufPane) SaveAs() bool {
+// Save the buffer to disk
+func (h *BufPane) Save() bool {
+	return h.SaveCB("Save", nil)
+}
+
+// SaveAsCB performs a save as and does a callback at the very end (after all prompts have been resolved)
+func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 	InfoBar.Prompt("Filename: ", "", "Save", nil, func(resp string, canceled bool) {
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
@@ -689,18 +693,23 @@ func (h *BufPane) SaveAs() bool {
 				return
 			}
 			filename := strings.Join(args, " ")
-			noPrompt := h.saveBufToFile(filename, "SaveAs")
+			noPrompt := h.saveBufToFile(filename, action, callback)
 			if noPrompt {
-				h.completeAction("SaveAs")
+				h.completeAction(action)
 			}
 		}
 	})
 	return false
 }
 
+// SaveAs saves the buffer to disk with the given name
+func (h *BufPane) SaveAs() bool {
+	return h.SaveAsCB("SaveAs", nil)
+}
+
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (h *BufPane) saveBufToFile(filename string, action string) bool {
+func (h *BufPane) saveBufToFile(filename string, action string, callback func()) bool {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
@@ -716,6 +725,9 @@ func (h *BufPane) saveBufToFile(filename string, action string) bool {
 					}
 					h.completeAction(action)
 				}
+				if callback != nil {
+					callback()
+				}
 			})
 			return false
 		} else {
@@ -725,6 +737,9 @@ func (h *BufPane) saveBufToFile(filename string, action string) bool {
 		h.Buf.Path = filename
 		h.Buf.SetName(filename)
 		InfoBar.Message("Saved " + filename)
+	}
+	if callback != nil {
+		callback()
 	}
 	return true
 }
@@ -1280,15 +1295,17 @@ func (h *BufPane) Quit() bool {
 	if h.Buf.Modified() {
 		if config.GlobalSettings["autosave"].(float64) > 0 {
 			// autosave on means we automatically save when quitting
-			h.Save()
-			quit()
+			h.SaveCB("Quit", func() {
+				quit()
+			})
 		} else {
 			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && !yes {
 					quit()
 				} else if !canceled && yes {
-					h.Save()
-					quit()
+					h.SaveCB("Quit", func() {
+						quit()
+					})
 				}
 			})
 		}
