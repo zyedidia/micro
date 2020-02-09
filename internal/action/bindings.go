@@ -14,6 +14,13 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+func createBindingsIfNotExist(fname string) {
+	if _, e := os.Stat(fname); os.IsNotExist(e) {
+		ioutil.WriteFile(fname, []byte("{}"), 0644)
+	}
+}
+
+// InitBindings intializes the bindings map by reading from bindings.json
 func InitBindings() {
 	config.Bindings = DefaultBindings()
 
@@ -21,6 +28,8 @@ func InitBindings() {
 	defaults := DefaultBindings()
 
 	filename := config.ConfigDir + "/bindings.json"
+	createBindingsIfNotExist(filename)
+
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -159,6 +168,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	var parsed map[string]string
 
 	filename := config.ConfigDir + "/bindings.json"
+	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
@@ -208,6 +218,7 @@ func UnbindKey(k string) error {
 	var parsed map[string]string
 
 	filename := config.ConfigDir + "/bindings.json"
+	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
