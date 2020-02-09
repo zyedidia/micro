@@ -453,7 +453,7 @@ This file will contain the metadata for your plugin. Here is an example:
 [{
   "Name": "pluginname",
   "Description": "Here is a nice concise description of my plugin",
-  "Website": "https://github.com/user/plugin"
+  "Website": "https://github.com/user/plugin",
   "Tags": ["python", "linting"],
   "Versions": [
     {

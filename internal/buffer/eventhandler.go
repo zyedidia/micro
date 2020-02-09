@@ -123,7 +123,8 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 		Time:      time.Now(),
 	}
 	eh.Execute(e)
-	e.Deltas[0].End = start.MoveLA(utf8.RuneCount(text), eh.buf.LineArray)
+	textcount := utf8.RuneCount(text)
+	e.Deltas[0].End = start.MoveLA(textcount, eh.buf.LineArray)
 	end := e.Deltas[0].End
 
 	for _, c := range eh.cursors {
@@ -131,7 +132,7 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 			if start.Y != end.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-				loc = loc.MoveLA(utf8.RuneCount(text), eh.buf.LineArray)
+				loc = loc.MoveLA(textcount, eh.buf.LineArray)
 			}
 			return loc
 		}
