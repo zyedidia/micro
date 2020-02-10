@@ -16,6 +16,14 @@ Here are the available options:
 
 	default value: `true`
 
+* `autosave`: automatically save the buffer every n seconds, where n is the
+   value of the autosave option. Also when quitting on a modified buffer, micro
+   will automatically save and quit. Be warned, this option saves the buffer
+   without prompting the user, so data may be overwritten. If this option is
+   set to `0`, no autosaving is performed.
+
+    default value: `0`
+
 * `backup`: micro will automatically keep backups of all open buffers. Backups
    are stored in `~/.config/micro/backups` and are removed when the buffer is
    closed cleanly. In the case of a system crash or a micro crash, the contents
@@ -154,6 +162,19 @@ Here are the available options:
    copying and pasting in a terminal environment.
 
     default value: `false`
+
+* `pluginchannels`: list of URLs pointing to plugin channels for downloading and
+   installing plugins. A plugin channel consists of a json file with links to
+   plugin repos, which store information about plugin versions and download URLs.
+   By default, this option points to the official plugin channel hosted on GitHub
+   at https://github.com/micro-editor/plugin-channel.
+
+    default value: `https://raw.githubusercontent.com/micro-editor/plugin-channel
+                    /master/channel.json`
+
+* `pluginrepos`: a list of links to plugin repositories.
+
+    default value: ``
 
 * `readonly`: when enabled, disallows edits to the buffer. It is recommended
    to only ever set this option locally using `setlocal`.
