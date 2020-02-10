@@ -62,7 +62,7 @@ Here are the available options:
 
 * `diffgutter`: display diff indicators before lines.
 
-	default value: `true`
+	default value: `false`
 
 * `encoding`: the encoding to open and save files with. Supported encodings
    are listed at https://www.w3.org/TR/encoding/.
