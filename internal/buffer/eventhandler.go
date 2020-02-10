@@ -117,6 +117,7 @@ func (eh *EventHandler) Insert(start Loc, textStr string) {
 
 // InsertBytes creates an insert text event and executes it
 func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
+	start = clamp(start, eh.buf.LineArray)
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],
 		EventType: TextEventInsert,
@@ -167,6 +168,8 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 
 // Remove creates a remove text event and executes it
 func (eh *EventHandler) Remove(start, end Loc) {
+	start = clamp(start, eh.buf.LineArray)
+	end = clamp(end, eh.buf.LineArray)
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],
 		EventType: TextEventRemove,
