@@ -18,6 +18,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/internal/config"
 	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
@@ -26,7 +27,6 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
-	dmp "github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const backupTime = 8000
@@ -908,6 +908,7 @@ func (b *Buffer) Retab() {
 
 		l = bytes.TrimLeft(l, " \t")
 		b.lines[i].data = append(ws, l...)
+		b.Modifications = append(b.Modifications, Loc{i, i})
 		dirty = true
 	}
 
