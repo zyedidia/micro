@@ -7,7 +7,7 @@
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
 
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
-of modern terminals. It comes as one single, batteries-included, static binary with no dependencies, and you can download and use it right now.
+of modern terminals. It comes as one single batteries-included binary with no dependencies, and you can download and use it right now.
 
 As the name indicates, micro aims to be somewhat of a successor to the nano editor by being easy to install and use in a pinch, but micro also aims to be
 enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
@@ -16,7 +16,7 @@ Here is a picture of micro editing its source code.
 
 ![Screenshot](./assets/micro-solarized.png)
 
-To see more screenshots of micro, showcasing all of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
+To see more screenshots of micro, showcasing some of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
  
 You can also check out the website for Micro at https://micro-editor.github.io.
 
@@ -58,7 +58,9 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Colorscheme support
     * By default, micro comes with 16, 256, and true color themes.
 * True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it)
-* Copy and paste with the system clipboard
+* Copy and paste with the system clipboard (requires xclip/xsel on Linux)
+* Built-in diff gutter
+* Simple autocompletion
 * Small and simple
 * Easily configurable
 * Macros
