@@ -26,6 +26,7 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
+	dmp "github.com/sergi/go-diff/diffmatchpatch"
 )
 
 const backupTime = 8000
@@ -99,6 +100,15 @@ func (b *SharedBuffer) remove(start, end Loc) []byte {
 	return b.LineArray.remove(start, end)
 }
 
+const (
+	DSUnchanged    = 0
+	DSAdded        = 1
+	DSModified     = 2
+	DSDeletedAbove = 3
+)
+
+type DiffStatus byte
+
 // Buffer stores the main information about a currently open file including
 // the actual text (in a LineArray), the undo/redo stack (in an EventHandler)
 // all the cursors, the syntax highlighting info, the settings for the buffer
@@ -139,6 +149,12 @@ type Buffer struct {
 	CurSuggestion int
 
 	Messages []*Message
+
+	updateDiffTimer   *time.Timer
+	diffBase          []byte
+	diffBaseLineCount int
+	diffLock          sync.RWMutex
+	diff              map[int]DiffStatus
 
 	// counts the number of edits
 	// resets every backupTime edits
@@ -931,6 +947,101 @@ func (b *Buffer) Line(i int) string {
 func (b *Buffer) Write(bytes []byte) (n int, err error) {
 	b.EventHandler.InsertBytes(b.End(), bytes)
 	return len(bytes), nil
+}
+
+func (b *Buffer) updateDiffSync() {
+	b.diffLock.Lock()
+	defer b.diffLock.Unlock()
+
+	b.diff = make(map[int]DiffStatus)
+
+	if b.diffBase == nil {
+		return
+	}
+
+	differ := dmp.New()
+	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(b.Bytes()))
+	diffs := differ.DiffMainRunes(baseRunes, bufferRunes, false)
+	lineN := 0
+
+	for _, diff := range diffs {
+		lineCount := len([]rune(diff.Text))
+
+		switch diff.Type {
+		case dmp.DiffEqual:
+			lineN += lineCount
+		case dmp.DiffInsert:
+			var status DiffStatus
+			if b.diff[lineN] == DSDeletedAbove {
+				status = DSModified
+			} else {
+				status = DSAdded
+			}
+			for i := 0; i < lineCount; i++ {
+				b.diff[lineN] = status
+				lineN++
+			}
+		case dmp.DiffDelete:
+			b.diff[lineN] = DSDeletedAbove
+		}
+	}
+}
+
+// UpdateDiff computes the diff between the diff base and the buffer content.
+// The update may be performed synchronously or asynchronously.
+// UpdateDiff calls the supplied callback when the update is complete.
+// The argument passed to the callback is set to true if and only if
+// the update was performed synchronously.
+// If an asynchronous update is already pending when UpdateDiff is called,
+// UpdateDiff does not schedule another update, in which case the callback
+// is not called.
+func (b *Buffer) UpdateDiff(callback func(bool)) {
+	if b.updateDiffTimer != nil {
+		return
+	}
+
+	lineCount := b.LinesNum()
+	if b.diffBaseLineCount > lineCount {
+		lineCount = b.diffBaseLineCount
+	}
+
+	if lineCount < 1000 {
+		b.updateDiffSync()
+		callback(true)
+	} else if lineCount < 30000 {
+		b.updateDiffTimer = time.AfterFunc(500*time.Millisecond, func() {
+			b.updateDiffTimer = nil
+			b.updateDiffSync()
+			callback(false)
+		})
+	} else {
+		// Don't compute diffs for very large files
+		b.diffLock.Lock()
+		b.diff = make(map[int]DiffStatus)
+		b.diffLock.Unlock()
+		callback(true)
+	}
+}
+
+// SetDiffBase sets the text that is used as the base for diffing the buffer content
+func (b *Buffer) SetDiffBase(diffBase []byte) {
+	b.diffBase = diffBase
+	if diffBase == nil {
+		b.diffBaseLineCount = 0
+	} else {
+		b.diffBaseLineCount = strings.Count(string(diffBase), "\n")
+	}
+	b.UpdateDiff(func(synchronous bool) {
+		screen.DrawChan <- true
+	})
+}
+
+// DiffStatus returns the diff status for a line in the buffer
+func (b *Buffer) DiffStatus(lineN int) DiffStatus {
+	b.diffLock.RLock()
+	defer b.diffLock.RUnlock()
+	// Note that the zero value for DiffStatus is equal to DSUnchanged
+	return b.diff[lineN]
 }
 
 // WriteLog writes a string to the log buffer

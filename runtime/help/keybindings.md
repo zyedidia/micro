@@ -210,6 +210,7 @@ EndOfLine
 ParagraphPrevious
 ParagraphNext
 ToggleHelp
+ToggleDiffGutter
 ToggleRuler
 JumpLine
 ClearStatus

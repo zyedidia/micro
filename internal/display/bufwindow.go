@@ -212,6 +212,9 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 		if hasMessage {
 			vloc.X += 2
 		}
+		if b.Settings["diffgutter"].(bool) {
+			vloc.X++
+		}
 		if b.Settings["ruler"].(bool) {
 			vloc.X += maxLineNumLength + 1
 		}
@@ -273,6 +276,9 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 						break
 					}
 					vloc.X = 0
+					if b.Settings["diffgutter"].(bool) {
+						vloc.X++
+					}
 					// This will draw an empty line number because the current line is wrapped
 					if b.Settings["ruler"].(bool) {
 						vloc.X += maxLineNumLength + 1
@@ -308,6 +314,34 @@ func (w *BufWindow) drawGutter(vloc *buffer.Loc, bloc *buffer.Loc) {
 	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
 	vloc.X++
 	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
+	vloc.X++
+}
+
+func (w *BufWindow) drawDiffGutter(backgroundStyle tcell.Style, softwrapped bool, vloc *buffer.Loc, bloc *buffer.Loc) {
+	symbol := ' '
+	styleName := ""
+
+	switch w.Buf.DiffStatus(bloc.Y) {
+	case buffer.DSAdded:
+		symbol = '\u258C' // Left half block
+		styleName = "diff-added"
+	case buffer.DSModified:
+		symbol = '\u258C' // Left half block
+		styleName = "diff-modified"
+	case buffer.DSDeletedAbove:
+		if !softwrapped {
+			symbol = '\u2594' // Upper one eighth block
+			styleName = "diff-deleted"
+		}
+	}
+
+	style := backgroundStyle
+	if s, ok := config.Colorscheme[styleName]; ok {
+		foreground, _, _ := s.Decompose()
+		style = style.Foreground(foreground)
+	}
+
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, symbol, nil, style)
 	vloc.X++
 }
 
@@ -373,15 +407,33 @@ func (w *BufWindow) displayBuffer() {
 		bufWidth--
 	}
 
-	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
-		for _, r := range b.Modifications {
-			final := -1
-			for i := r.X; i <= r.Y; i++ {
-				final = util.Max(b.Highlighter.ReHighlightStates(b, i), final)
+	if len(b.Modifications) > 0 {
+		if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
+			for _, r := range b.Modifications {
+				final := -1
+				for i := r.X; i <= r.Y; i++ {
+					final = util.Max(b.Highlighter.ReHighlightStates(b, i), final)
+				}
+				b.Highlighter.HighlightMatches(b, r.X, final+1)
 			}
-			b.Highlighter.HighlightMatches(b, r.X, final+1)
 		}
+
 		b.ClearModifications()
+
+		if b.Settings["diffgutter"].(bool) {
+			b.UpdateDiff(func(synchronous bool) {
+				// If the diff was updated asynchronously, the outer call to
+				// displayBuffer might already be completed and we need to
+				// schedule a redraw in order to display the new diff.
+				// Note that this cannot lead to an infinite recursion
+				// because the modifications were cleared above so there won't
+				// be another call to UpdateDiff when displayBuffer is called
+				// during the redraw.
+				if !synchronous {
+					screen.DrawChan <- true
+				}
+			})
+		}
 	}
 
 	var matchingBraces []buffer.Loc
@@ -444,18 +496,28 @@ func (w *BufWindow) displayBuffer() {
 	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 
+		currentLine := false
+		for _, c := range cursors {
+			if bloc.Y == c.Y && w.active {
+				currentLine = true
+				break
+			}
+		}
+
+		s := lineNumStyle
+		if currentLine {
+			s = curNumStyle
+		}
+
 		if hasMessage {
 			w.drawGutter(&vloc, &bloc)
 		}
 
+		if b.Settings["diffgutter"].(bool) {
+			w.drawDiffGutter(s, false, &vloc, &bloc)
+		}
+
 		if b.Settings["ruler"].(bool) {
-			s := lineNumStyle
-			for _, c := range cursors {
-				if bloc.Y == c.Y && w.active {
-					s = curNumStyle
-					break
-				}
-			}
 			w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
 		}
 
@@ -579,6 +641,9 @@ func (w *BufWindow) displayBuffer() {
 						break
 					}
 					vloc.X = 0
+					if b.Settings["diffgutter"].(bool) {
+						w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
+					}
 					// This will draw an empty line number because the current line is wrapped
 					if b.Settings["ruler"].(bool) {
 						w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)

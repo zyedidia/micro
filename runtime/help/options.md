@@ -60,6 +60,10 @@ Here are the available options:
 
 	default value: `true`
 
+* `diffgutter`: display diff indicators before lines.
+
+	default value: `true`
+
 * `encoding`: the encoding to open and save files with. Supported encodings
    are listed at https://www.w3.org/TR/encoding/.
 

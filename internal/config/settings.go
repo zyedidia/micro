@@ -188,6 +188,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"basename":       false,
 	"colorcolumn":    float64(0),
 	"cursorline":     true,
+	"diffgutter":     true,
 	"encoding":       "utf-8",
 	"eofnewline":     false,
 	"fastdirty":      true,
