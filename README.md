@@ -175,9 +175,14 @@ the colorscheme to `simple`, or download a better terminal emulator, like
 mintty. However, if you are on a recent version of Windows 10, the default
 `cmd.exe` should do fine.
 
-### Plan9, Cygwin, Mingw
+### Cygwin, Mingw, Plan9
 
-These platforms are unfortunately not supported.
+These platforms are unfortunately not officially supported. In Cygwin and Mingw, micro will often work when run inside
+the `winpty` utility:
+
+```
+winpty micro.exe ...
+```
 
 Micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
