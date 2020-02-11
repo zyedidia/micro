@@ -1,6 +1,7 @@
-# [![micro logo](./assets/logo.png)](https://micro-editor.github.io)
+<img alt="micro logo" src="./assets/logo.png" width="300px"/>
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
+[![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
@@ -37,38 +38,6 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 
 - - -
 
-# Features
-
-* Easy to use and to install
-* No dependencies or external files are needed -- just the binary you can download further down the page
-* Multiple cursors
-* Common keybindings (ctrl-s, ctrl-c, ctrl-v, ctrl-z...)
-    * Keybindings can be rebound to your liking
-* Sane defaults
-    * You shouldn't have to configure much out of the box (and it is extremely easy to configure)
-* Splits and tabs
-* Nano-like menu to help you remember the keybindings
-* Extremely good mouse support
-    * This means mouse dragging to create a selection, double click to select by word, and triple click to select by line
-* Cross platform (It should work on all the platforms Go runs on)
-    * Note that while Windows is supported Mingw/Cygwin is not (see below)
-* Plugin system (plugins are written in Lua)
-* Persistent undo
-* Automatic linting and error notifications
-* Syntax highlighting (for over [120 languages](runtime/syntax)!)
-* Colorscheme support
-    * By default, micro comes with 16, 256, and true color themes.
-* True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it)
-* Copy and paste with the system clipboard (requires xclip/xsel on Linux)
-* Built-in diff gutter
-* Simple autocompletion
-* Small and simple
-* Easily configurable
-* Macros
-* Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
-
-# Installation
-=======
 ## Features
 
 - Easy to use and install.
