@@ -122,10 +122,8 @@ func (i *InfoWindow) displayBuffer() {
 
 	totalwidth := blocX - nColsBeforeStart
 	for len(line) > 0 {
-		if activeC.X == blocX {
-			screen.ShowCursor(vlocX, i.Y)
-		}
-
+		curVX := vlocX
+		curBX := blocX
 		r, size := utf8.DecodeRune(line)
 
 		draw(r, i.defStyle())
@@ -150,6 +148,9 @@ func (i *InfoWindow) displayBuffer() {
 			for j := 1; j < width; j++ {
 				draw(char, i.defStyle())
 			}
+		}
+		if activeC.X == curBX {
+			screen.ShowCursor(curVX, i.Y)
 		}
 		totalwidth += width
 		if vlocX >= i.Width {
@@ -208,6 +209,7 @@ func (i *InfoWindow) scrollToSuggestion() {
 }
 
 func (i *InfoWindow) Display() {
+	i.Clear()
 	x := 0
 	if config.GetGlobalOption("keymenu").(bool) {
 		i.displayKeyMenu()
