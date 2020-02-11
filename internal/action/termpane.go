@@ -1,6 +1,7 @@
 package action
 
 import (
+	"errors"
 	"runtime"
 
 	"github.com/zyedidia/clipboard"
@@ -20,14 +21,18 @@ type TermPane struct {
 	tab           *Tab
 }
 
-func NewTermPane(x, y, w, h int, t *shell.Terminal, id uint64, tab *Tab) *TermPane {
+func NewTermPane(x, y, w, h int, t *shell.Terminal, id uint64, tab *Tab) (*TermPane, error) {
+	if !TermEmuSupported {
+		return nil, errors.New("Terminal emulator is not supported on this system")
+	}
+
 	th := new(TermPane)
 	th.Terminal = t
 	th.id = id
 	th.mouseReleased = true
 	th.Window = display.NewTermWindow(x, y, w, h, t)
 	th.tab = tab
-	return th
+	return th, nil
 }
 
 func (t *TermPane) ID() uint64 {
