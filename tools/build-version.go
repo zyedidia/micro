@@ -15,6 +15,11 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 	if tag, err := exec.Command("git", args...).Output(); err != nil {
 		return "", nil
 	} else {
+		if len(tag) == 0 {
+			if _, err := exec.Command("git", "fetch", "tags").Output(); err != nil {
+				return "", nil
+			}
+		}
 		tagParts := strings.Split(string(tag), "-")
 		if len(tagParts) == 3 {
 			if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
