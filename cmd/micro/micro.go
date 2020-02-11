@@ -11,6 +11,7 @@ import (
 
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
+	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/internal/action"
 	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/config"
@@ -218,9 +219,6 @@ func main() {
 
 	screen.Init()
 
-	// If we have an error, we can exit cleanly and not completely
-	// mess up the terminal being worked in
-	// In other words we need to shut down tcell before the program crashes
 	defer func() {
 		if err := recover(); err != nil {
 			screen.Screen.Fini()
@@ -284,48 +282,64 @@ func main() {
 		<-screen.DrawChan
 	}
 
-	var event tcell.Event
-
 	// wait for initial resize event
 	select {
-	case event = <-events:
+	case event := <-events:
 		action.Tabs.HandleEvent(event)
 	case <-time.After(10 * time.Millisecond):
 		// time out after 10ms
 	}
 
+	// Since this loop is very slow (waits for user input every time) it's
+	// okay to be inefficient and run it via a function every time
+	// We do this so we can recover from panics without crashing the editor
 	for {
-		// Display everything
-		screen.Screen.Fill(' ', config.DefStyle)
-		screen.Screen.HideCursor()
-		action.Tabs.Display()
-		for _, ep := range action.MainTab().Panes {
-			ep.Display()
-		}
-		action.MainTab().Display()
-		action.InfoBar.Display()
-		screen.Screen.Show()
+		DoEvent()
+	}
+}
 
-		event = nil
+// DoEvent runs the main action loop of the editor
+func DoEvent() {
+	var event tcell.Event
 
-		// Check for new events
-		select {
-		case f := <-shell.Jobs:
-			// If a new job has finished while running in the background we should execute the callback
-			f.Function(f.Output, f.Args)
-		case <-config.Autosave:
-			for _, b := range buffer.OpenBuffers {
-				b.Save()
+	// recover from errors without crashing the editor
+	defer func() {
+		if err := recover(); err != nil {
+			if e, ok := err.(*lua.ApiError); ok {
+				screen.TermMessage("Lua API error:", e)
+			} else {
+				screen.TermMessage("Micro encountered an error:", errors.Wrap(err, 2).ErrorStack(), "\nIf you can reproduce this error, please report it at https://github.com/zyedidia/micro/issues")
 			}
-		case <-shell.CloseTerms:
-		case event = <-events:
-		case <-screen.DrawChan:
 		}
+	}()
+	// Display everything
+	screen.Screen.Fill(' ', config.DefStyle)
+	screen.Screen.HideCursor()
+	action.Tabs.Display()
+	for _, ep := range action.MainTab().Panes {
+		ep.Display()
+	}
+	action.MainTab().Display()
+	action.InfoBar.Display()
+	screen.Screen.Show()
 
-		if action.InfoBar.HasPrompt {
-			action.InfoBar.HandleEvent(event)
-		} else {
-			action.Tabs.HandleEvent(event)
+	// Check for new events
+	select {
+	case f := <-shell.Jobs:
+		// If a new job has finished while running in the background we should execute the callback
+		f.Function(f.Output, f.Args)
+	case <-config.Autosave:
+		for _, b := range buffer.OpenBuffers {
+			b.Save()
 		}
+	case <-shell.CloseTerms:
+	case event = <-events:
+	case <-screen.DrawChan:
+	}
+
+	if action.InfoBar.HasPrompt {
+		action.InfoBar.HandleEvent(event)
+	} else {
+		action.Tabs.HandleEvent(event)
 	}
 }
