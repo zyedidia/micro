@@ -12,27 +12,28 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 	args := append([]string{
 		"describe", "--tags",
 	}, match...)
-	if tag, err := exec.Command("git", args...).Output(); err != nil {
-		return "", nil
-	} else {
-		if len(tag) == 0 {
-			if _, err := exec.Command("git", "fetch", "tags").Output(); err != nil {
-				return "", nil
-			}
+	var tag []byte
+	var err error
+	if tag, err = exec.Command("git", args...).Output(); err != nil {
+		if _, err := exec.Command("git", "fetch", "tags").Output(); err != nil {
+			return "", nil
 		}
-		tagParts := strings.Split(string(tag), "-")
-		if len(tagParts) == 3 {
-			if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
-				return tagParts[0], &ahead
-			}
-		} else if len(tagParts) == 4 {
-			if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
-				return tagParts[0] + "-" + tagParts[1], &ahead
-			}
+		if tag, err = exec.Command("git", args...).Output(); err != nil {
+			return "", nil
 		}
-
-		return string(tag), nil
 	}
+	tagParts := strings.Split(string(tag), "-")
+	if len(tagParts) == 3 {
+		if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
+			return tagParts[0], &ahead
+		}
+	} else if len(tagParts) == 4 {
+		if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
+			return tagParts[0] + "-" + tagParts[1], &ahead
+		}
+	}
+
+	return string(tag), nil
 }
 
 func main() {
