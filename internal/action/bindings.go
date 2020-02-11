@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 	"unicode"
 
@@ -27,7 +28,7 @@ func InitBindings() {
 	var parsed map[string]string
 	defaults := DefaultBindings()
 
-	filename := config.ConfigDir + "/bindings.json"
+	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 
 	if _, e := os.Stat(filename); e == nil {
@@ -167,7 +168,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	var e error
 	var parsed map[string]string
 
-	filename := config.ConfigDir + "/bindings.json"
+	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
@@ -217,7 +218,7 @@ func UnbindKey(k string) error {
 	var e error
 	var parsed map[string]string
 
-	filename := config.ConfigDir + "/bindings.json"
+	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)

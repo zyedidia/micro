@@ -31,7 +31,7 @@ func (b *Buffer) Serialize() error {
 		return nil
 	}
 
-	name := config.ConfigDir + "/buffers/" + util.EscapePath(b.AbsPath)
+	name := filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath))
 
 	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
 		err := gob.NewEncoder(file).Encode(SerializedBuffer{

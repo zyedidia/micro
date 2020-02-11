@@ -272,8 +272,8 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	b.UpdateRules()
 	config.InitLocalSettings(b.Settings, b.Path)
 
-	if _, err := os.Stat(config.ConfigDir + "/buffers/"); os.IsNotExist(err) {
-		os.Mkdir(config.ConfigDir+"/buffers/", os.ModePerm)
+	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
+		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)
 	}
 
 	if startcursor.X != -1 && startcursor.Y != -1 {

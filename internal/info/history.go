@@ -3,6 +3,7 @@ package info
 import (
 	"encoding/gob"
 	"os"
+	"path/filepath"
 
 	"github.com/zyedidia/micro/internal/config"
 )
@@ -12,7 +13,7 @@ import (
 // The savehistory option must be on
 func (i *InfoBuf) LoadHistory() {
 	if config.GetGlobalOption("savehistory").(bool) {
-		file, err := os.Open(config.ConfigDir + "/buffers/history")
+		file, err := os.Open(filepath.Join(config.ConfigDir, "buffers", "history"))
 		defer file.Close()
 		var decodedMap map[string][]string
 		if err == nil {
@@ -46,7 +47,7 @@ func (i *InfoBuf) SaveHistory() {
 			}
 		}
 
-		file, err := os.Create(config.ConfigDir + "/buffers/history")
+		file, err := os.Create(filepath.Join(config.ConfigDir, "buffers", "history"))
 		defer file.Close()
 		if err == nil {
 			encoder := gob.NewEncoder(file)

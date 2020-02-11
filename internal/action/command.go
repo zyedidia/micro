@@ -475,7 +475,7 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		b.SetOptionNative(option, nativeValue)
 	}
 
-	return config.WriteSettings(config.ConfigDir + "/settings.json")
+	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
 }
 
 func SetGlobalOption(option, value string) error {

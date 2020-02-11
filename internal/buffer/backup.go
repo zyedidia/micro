@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/zyedidia/micro/internal/config"
@@ -42,12 +43,12 @@ func (b *Buffer) Backup(checkTime bool) error {
 
 	b.lastbackup = time.Now()
 
-	backupdir := config.ConfigDir + "/backups/"
+	backupdir := filepath.Join(config.ConfigDir, "backups")
 	if _, err := os.Stat(backupdir); os.IsNotExist(err) {
 		os.Mkdir(backupdir, os.ModePerm)
 	}
 
-	name := backupdir + util.EscapePath(b.AbsPath)
+	name := filepath.Join(backupdir, util.EscapePath(b.AbsPath))
 
 	err := overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
@@ -81,7 +82,7 @@ func (b *Buffer) RemoveBackup() {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return
 	}
-	f := config.ConfigDir + "/backups/" + util.EscapePath(b.AbsPath)
+	f := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
 	os.Remove(f)
 }
 
@@ -89,7 +90,7 @@ func (b *Buffer) RemoveBackup() {
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) bool {
 	if b.Settings["backup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
-		backupfile := config.ConfigDir + "/backups/" + util.EscapePath(b.AbsPath)
+		backupfile := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
 			if err == nil {

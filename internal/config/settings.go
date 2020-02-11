@@ -147,7 +147,7 @@ func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) 
 	if v, ok := GlobalSettings[name]; !ok {
 		defaultCommonSettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
-		err := WriteSettings(filepath.Join(ConfigDir, "/settings.json"))
+		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
 		if err != nil {
 			return errors.New("Error writing settings.json file: " + err.Error())
 		}

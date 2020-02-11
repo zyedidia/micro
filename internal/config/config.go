@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"path/filepath"
 
 	homedir "github.com/mitchellh/go-homedir"
 )
@@ -24,10 +25,10 @@ func InitConfigDir(flagConfigDir string) error {
 			if err != nil {
 				return errors.New("Error finding your home directory\nCan't load config files: " + err.Error())
 			}
-			xdgHome = home + "/.config"
+			xdgHome = filepath.Join(home, ".config")
 		}
 
-		microHome = xdgHome + "/micro"
+		microHome = filepath.Join(xdgHome, "micro")
 	}
 	ConfigDir = microHome
 
