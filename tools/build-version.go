@@ -15,7 +15,7 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 	var tag []byte
 	var err error
 	if tag, err = exec.Command("git", args...).Output(); err != nil {
-		if _, err := exec.Command("git", "fetch", "tags").Output(); err != nil {
+		if _, err := exec.Command("git", "fetch", "--tags").Output(); err != nil {
 			return "", nil
 		}
 		if tag, err = exec.Command("git", args...).Output(); err != nil {
