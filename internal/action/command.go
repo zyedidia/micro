@@ -807,6 +807,11 @@ func (h *BufPane) ReplaceAllCmd(args []string) {
 func (h *BufPane) TermCmd(args []string) {
 	ps := h.tab.Panes
 
+	if !TermEmuSupported {
+		InfoBar.Error("Terminal emulator not supported on this system")
+		return
+	}
+
 	if len(args) == 0 {
 		sh := os.Getenv("SHELL")
 		if sh == "" {
@@ -830,7 +835,12 @@ func (h *BufPane) TermCmd(args []string) {
 		}
 
 		v := h.GetView()
-		MainTab().Panes[i] = NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
+		tp, err := NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
+		MainTab().Panes[i] = tp
 		MainTab().SetActive(i)
 	}
 
