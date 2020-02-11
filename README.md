@@ -1,4 +1,4 @@
-# ![Micro](./assets/logo.png)
+# [![micro logo](./assets/logo.png)](https://micro-editor.github.io)
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
@@ -6,27 +6,28 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
 
-Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
-of modern terminals. It comes as one single batteries-included binary with no dependencies, and you can download and use it right now.
+**micro** is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the capabilities
+of modern terminals. It comes as a single, batteries-included, static binary with no dependencies; you can download and use it right now!
 
-As the name indicates, micro aims to be somewhat of a successor to the nano editor by being easy to install and use in a pinch, but micro also aims to be
-enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
+As its name indicates, micro aims to be somewhat of a successor to the nano editor by being easy to install and use.
+It strives to be enjoyable as a full-time editor for people who prefer to work in a terminal, or those who regularly edit files over SSH.
 
 Here is a picture of micro editing its source code.
 
 ![Screenshot](./assets/micro-solarized.png)
 
-To see more screenshots of micro, showcasing some of the default colorschemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
+To see more screenshots of micro, showcasing some of the default color schemes, see [here](http://zbyedidia.webfactional.com/micro/screenshots.html).
  
 You can also check out the website for Micro at https://micro-editor.github.io.
 
-# Table of Contents
+## Table of Contents
+
 - [Features](#features)
 - [Installation](#installation)
   - [Prebuilt binaries](#prebuilt-binaries)
   - [Package Managers](#package-managers)
   - [Building from source](#building-from-source)
-  - [MacOS terminal](#macos-terminal)
+  - [macOS terminal](#macos-terminal)
   - [Linux clipboard support](#linux-clipboard-support)
   - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
   - [Plan9, Cygwin, Mingw](#plan9-cygwin-mingw)
@@ -67,6 +68,39 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 * Common editor things such as undo/redo, line numbers, Unicode support, softwrap...
 
 # Installation
+=======
+## Features
+
+- Easy to use and install.
+- No dependencies or external files are needed — just the binary you can download further down the page.
+- Multiple cursors.
+- Common keybindings (<kbd>Ctrl+S</kbd>, <kbd>Ctrl+C</kbd>, <kbd>Ctrl+V</kbd>, <kbd>Ctrl+Z</kbd>, …).
+  - Keybindings can be rebound to your liking.
+- Sane defaults.
+  - You shouldn't have to configure much out of the box (and it is extremely easy to configure).
+- Splits and tabs.
+- nano-like menu to help you remember the keybindings.
+- Extremely good mouse support.
+  - This means mouse dragging to create a selection, double click to select by word, and triple click to select by line.
+- Cross-platform (it should work on all the platforms Go runs on).
+  - Note that while Windows is supported Mingw/Cygwin is not (see below)
+- Plugin system (plugins are written in Lua).
+  - micro has a built-in plugin manager to automatically install, remove, and update plugins.
+- Built-in diff gutter
+- Simple autocompletion
+- Persistent undo.
+- Automatic linting and error notifications
+- Syntax highlighting for over [130 languages](runtime/syntax).
+- Color scheme support.
+  - By default, micro comes with 16, 256, and true color themes.
+- True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it).
+- Copy and paste with the system clipboard.
+- Small and simple.
+- Easily configurable.
+- Macros.
+- Common editor features such as undo/redo, line numbers, Unicode support, soft wrapping, …
+
+## Installation
 
 To install micro, you can download a [prebuilt binary](https://github.com/zyedidia/micro/releases), or you can build it from source.
 
@@ -81,19 +115,19 @@ Download the binary from the [releases](https://github.com/zyedidia/micro/releas
 On that page you'll see the nightly release, which contains binaries for micro which are built every night,
 and you'll see all the stable releases with the corresponding binaries.
 
-If you'd like to see more information after installing micro, run `micro -version`.
+Running `micro -version` will give you the version information.
 
 ### Installation script
 
-There is a great script which can install micro for you by downloading the latest prebuilt binary. You can find it at https://getmic.ro (the github repo for it is [here](https://github.com/benweissmann/getmic.ro)).
+There is a script which can install micro for you by downloading the latest prebuilt binary. You can find it at <https://getmic.ro>.
 
 Then you can easily install micro:
 
-    $ curl https://getmic.ro | bash
+```bash
+curl https://getmic.ro | bash
+```
 
-The script will install the micro binary to the current directory.
-
-See the [Github page](https://github.com/benweissmann/getmic.ro) for more information.
+The script will install the micro binary to the current directory. See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
 
 ### Package managers
 
@@ -139,18 +173,19 @@ anywhere you like (for example `/usr/local/bin`).
 The command `make install` will install the binary to `$GOPATH/bin` or `$GOBIN`.
 
 You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/micro`) but this isn't
-recommended because it doesn't build micro with version information, and doesn't disable debug mode.
+recommended because it doesn't build micro with version information (necessary for the plugin manager),
+and doesn't disable debug mode.
 
-### MacOS terminal
+### macOS terminal
 
-If you are using MacOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default Mac terminal. The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
+If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
 
 ### Linux clipboard support
 
-On Linux, clipboard support requires the 'xclip' or 'xsel' commands to be installed.
+On Linux, clipboard support requires the `xclip` or `xsel` commands to be installed.
 
 For Ubuntu:
 
@@ -158,26 +193,25 @@ For Ubuntu:
 sudo apt-get install xclip
 ```
 
-If you don't have xclip or xsel, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
+If you don't have `xclip` or `xsel`, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
 
 ### Colors and syntax highlighting
 
 If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
-you are using a terminal which does not support 256 colors. Try changing the colorscheme to `simple`
-by pressing CtrlE in micro and typing `set colorscheme simple`.
+you are using a terminal which does not support 256 color mode. Try changing the color scheme to `simple`
+by pressing <kbd>Ctrl+E</kbd> in micro and typing `set colorscheme simple`.
 
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.
 
-Many older Windows terminals don't support more than 16 colors, which means
-that micro's default colorscheme won't look very good. You can either set
-the colorscheme to `simple`, or download a better terminal emulator, like
-mintty. However, if you are on a recent version of Windows 10, the default
-`cmd.exe` should do fine.
+Many of the Windows terminals don't support more than 16 colors, which means
+that micro's default color scheme won't look very good. You can either set
+the color scheme to `simple`, or download and configure a better terminal emulator
+than the Windows default.
 
 ### Cygwin, Mingw, Plan9
 
-These platforms are unfortunately not officially supported. In Cygwin and Mingw, micro will often work when run inside
+Cygwin, Mingw, and Plan9 are unfortunately not officially supported. In Cygwin and Mingw, micro will often work when run using
 the `winpty` utility:
 
 ```
@@ -186,13 +220,13 @@ winpty micro.exe ...
 
 Micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
-Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (but NaCl is deprecated anyways).
+Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (which is deprecated anyway).
 
-# Usage
+## Usage
 
-Once you have built the editor, simply start it by running `micro path/to/file.txt` or simply `micro` to open an empty buffer.
+Once you have built the editor, start it by running `micro path/to/file.txt` or `micro` to open an empty buffer.
 
-Micro also supports creating buffers from `stdin`:
+micro also supports creating buffers from `stdin`:
 
 ```sh
 ifconfig | micro
@@ -204,22 +238,22 @@ You can also use the mouse to manipulate the text. Simply clicking and dragging
 will select text. You can also double click to enable word selection, and triple
 click to enable line selection.
 
-# Documentation and Help
+## Documentation and Help
 
-Micro has a built-in help system which you can access by pressing `Ctrl-E` and typing `help`. Additionally, you can
+micro has a built-in help system which you can access by pressing <kbd>Ctrl+E</kbd> and typing `help`. Additionally, you can
 view the help files here:
 
-* [main help](https://github.com/zyedidia/micro/tree/master/runtime/help/help.md)
-* [keybindings](https://github.com/zyedidia/micro/tree/master/runtime/help/keybindings.md)
-* [commands](https://github.com/zyedidia/micro/tree/master/runtime/help/commands.md)
-* [colors](https://github.com/zyedidia/micro/tree/master/runtime/help/colors.md)
-* [options](https://github.com/zyedidia/micro/tree/master/runtime/help/options.md)
-* [plugins](https://github.com/zyedidia/micro/tree/master/runtime/help/plugins.md)
+- [main help](https://github.com/zyedidia/micro/tree/master/runtime/help/help.md)
+- [keybindings](https://github.com/zyedidia/micro/tree/master/runtime/help/keybindings.md)
+- [commands](https://github.com/zyedidia/micro/tree/master/runtime/help/commands.md)
+- [colors](https://github.com/zyedidia/micro/tree/master/runtime/help/colors.md)
+- [options](https://github.com/zyedidia/micro/tree/master/runtime/help/options.md)
+- [plugins](https://github.com/zyedidia/micro/tree/master/runtime/help/plugins.md)
 
 I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
 a brief introduction to the more powerful configuration features micro offers.
 
-# Contributing
+## Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
 
