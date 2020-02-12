@@ -821,7 +821,7 @@ var BracePairs = [][2]rune{
 // returns the location of the matching brace
 // if the boolean returned is true then the original matching brace is one character left
 // of the starting location
-func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool) {
+func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, bool) {
 	curLine := []rune(string(b.LineBytes(start.Y)))
 	startChar := ' '
 	if start.X >= 0 && start.X < len(curLine) {
@@ -851,9 +851,9 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool) {
 					i--
 					if i == 0 {
 						if startChar == braceType[0] {
-							return Loc{x, y}, false
+							return Loc{x, y}, false, true
 						}
-						return Loc{x, y}, true
+						return Loc{x, y}, true, true
 					}
 				}
 			}
@@ -875,9 +875,9 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool) {
 					i--
 					if i == 0 {
 						if leftChar == braceType[1] {
-							return Loc{x, y}, true
+							return Loc{x, y}, true, true
 						}
-						return Loc{x, y}, false
+						return Loc{x, y}, false, true
 					}
 				} else if r == braceType[1] {
 					i++
@@ -885,7 +885,7 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool) {
 			}
 		}
 	}
-	return start, true
+	return start, true, false
 }
 
 // Retab changes all tabs to spaces or vice versa
