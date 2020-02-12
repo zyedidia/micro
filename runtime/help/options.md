@@ -24,6 +24,14 @@ Here are the available options:
 
     default value: `0`
 
+* `autosu`: When a file is saved that the user doesn't have permission to
+   modify, micro will ask if the user would like to use super user
+   privileges to save the file. If this option is enabled, micro will
+   automatically attempt to use super user privileges to save without
+   asking the user.
+
+    default value: `false`
+
 * `backup`: micro will automatically keep backups of all open buffers. Backups
    are stored in `~/.config/micro/backups` and are removed when the buffer is
    closed cleanly. In the case of a system crash or a micro crash, the contents
