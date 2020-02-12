@@ -82,6 +82,9 @@ type SharedBuffer struct {
 
 	// Modifications is the list of modified regions for syntax highlighting
 	Modifications []Loc
+
+	// Hash of the original buffer -- empty if fastdirty is on
+	origHash [md5.Size]byte
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
@@ -137,9 +140,6 @@ type Buffer struct {
 	// The Highlighter struct actually performs the highlighting
 	Highlighter   *highlight.Highlighter
 	HighlightLock sync.Mutex
-
-	// Hash of the original buffer -- empty if fastdirty is on
-	origHash [md5.Size]byte
 
 	// Settings customized by the user
 	Settings map[string]interface{}
