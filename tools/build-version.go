@@ -12,31 +12,29 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 	args := append([]string{
 		"describe", "--tags",
 	}, match...)
-	var tag []byte
-	var err error
-	if tag, err = exec.Command("git", args...).Output(); err != nil {
-		if _, err := exec.Command("git", "fetch", "--tags").Output(); err != nil {
-			return "", nil
+	if tag, err := exec.Command("git", args...).Output(); err != nil {
+		return "", nil
+	} else {
+		tagParts := strings.Split(string(tag), "-")
+		if len(tagParts) == 3 {
+			if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
+				return tagParts[0], &ahead
+			}
+		} else if len(tagParts) == 4 {
+			if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
+				return tagParts[0] + "-" + tagParts[1], &ahead
+			}
 		}
-		if tag, err = exec.Command("git", args...).Output(); err != nil {
-			return "", nil
-		}
-	}
-	tagParts := strings.Split(string(tag), "-")
-	if len(tagParts) == 3 {
-		if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
-			return tagParts[0], &ahead
-		}
-	} else if len(tagParts) == 4 {
-		if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
-			return tagParts[0] + "-" + tagParts[1], &ahead
-		}
-	}
 
-	return string(tag), nil
+		return string(tag), nil
+	}
 }
 
 func main() {
+	if tags, err := exec.Command("git", "tag").Output(); err != nil || len(tags) == 0 {
+		// no tags found -- fetch them
+		exec.Command("git", "fetch", "--tags").Run()
+	}
 	// Find the last vX.X.X Tag and get how many builds we are ahead of it.
 	versionStr, ahead := getTag("--match", "v*")
 	version, err := semver.ParseTolerant(versionStr)
