@@ -28,6 +28,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
   - [Prebuilt binaries](#prebuilt-binaries)
   - [Package Managers](#package-managers)
   - [Building from source](#building-from-source)
+  - [Fully static binary](#fully-static-binary)
   - [macOS terminal](#macos-terminal)
   - [Linux clipboard support](#linux-clipboard-support)
   - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
