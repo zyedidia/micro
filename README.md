@@ -145,6 +145,16 @@ You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/mi
 recommended because it doesn't build micro with version information (necessary for the plugin manager),
 and doesn't disable debug mode.
 
+### Fully static binary
+
+By default, the micro binary will dynamically link with core system libraries (this is generally
+recommended for security and portability). However, there is a fully static prebuilt binary that
+is provided for amd64 as `linux-static.tar.gz`, and to build a fully static binary from source, run
+
+```
+CGO_ENABLED=0 make build
+```
+
 ### macOS terminal
 
 If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
