@@ -275,8 +275,11 @@ func (h *BufPane) Name() string {
 
 // HandleEvent executes the tcell event properly
 func (h *BufPane) HandleEvent(event tcell.Event) {
-	if h.Buf.ExternallyModified() {
-		InfoBar.YNPrompt("The file on disk has changed. Reload file? (y,n)", func(yes, canceled bool) {
+	if h.Buf.ExternallyModified() && !h.Buf.ReloadDisabled {
+		InfoBar.YNPrompt("The file on disk has changed. Reload file? (y,n,esc)", func(yes, canceled bool) {
+			if canceled {
+				h.Buf.DisableReload()
+			}
 			if !yes || canceled {
 				h.Buf.UpdateModTime()
 			} else {

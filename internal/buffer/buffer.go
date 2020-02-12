@@ -75,6 +75,10 @@ type SharedBuffer struct {
 	// Type of the buffer (e.g. help, raw, scratch etc..)
 	Type BufType
 
+	// ReloadDisabled allows the user to disable reloads if they
+	// are viewing a file that is constantly changing
+	ReloadDisabled bool
+
 	isModified bool
 	// Whether or not suggestions can be autocompleted must be shared because
 	// it changes based on how the buffer has changed
@@ -101,6 +105,11 @@ func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.HasSuggestions = false
 	b.Modifications = append(b.Modifications, Loc{start.Y, start.Y})
 	return b.LineArray.remove(start, end)
+}
+
+// DisableReload disables future reloads of this sharedbuffer
+func (b *SharedBuffer) DisableReload() {
+	b.ReloadDisabled = true
 }
 
 const (
