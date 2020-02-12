@@ -215,7 +215,8 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	b.Settings = config.DefaultCommonSettings()
 	for k, v := range config.GlobalSettings {
-		if _, ok := b.Settings[k]; ok {
+		if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
+			// make sure setting is not global-only
 			b.Settings[k] = v
 		}
 	}
@@ -425,6 +426,9 @@ func (b *Buffer) ReOpen() error {
 	b.EventHandler.ApplyDiff(txt)
 
 	err = b.UpdateModTime()
+	if !b.Settings["fastdirty"].(bool) {
+		calcHash(b, &b.origHash)
+	}
 	b.isModified = false
 	b.RelocateCursors()
 	return err
