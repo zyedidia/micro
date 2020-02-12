@@ -430,7 +430,7 @@ func (w *BufWindow) displayBuffer() {
 				// be another call to UpdateDiff when displayBuffer is called
 				// during the redraw.
 				if !synchronous {
-					screen.DrawChan <- true
+					screen.Redraw()
 				}
 			})
 		}

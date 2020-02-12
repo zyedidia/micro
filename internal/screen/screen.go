@@ -37,7 +37,11 @@ func Unlock() {
 
 // Redraw schedules a redraw with the draw channel
 func Redraw() {
-	DrawChan <- true
+	select {
+	case DrawChan <- true:
+	default:
+		// channel is full
+	}
 }
 
 type screenCell struct {
@@ -118,7 +122,7 @@ func TempStart(screenWasNil bool) {
 
 // Init creates and initializes the tcell screen
 func Init() {
-	DrawChan = make(chan bool, 8)
+	DrawChan = make(chan bool)
 
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"

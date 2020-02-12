@@ -644,7 +644,7 @@ func (b *Buffer) UpdateRules() {
 			go func() {
 				b.Highlighter.HighlightStates(b)
 				b.Highlighter.HighlightMatches(b, 0, b.End().Y)
-				screen.DrawChan <- true
+				screen.Redraw()
 			}()
 		}
 	}
@@ -1033,7 +1033,7 @@ func (b *Buffer) SetDiffBase(diffBase []byte) {
 		b.diffBaseLineCount = strings.Count(string(diffBase), "\n")
 	}
 	b.UpdateDiff(func(synchronous bool) {
-		screen.DrawChan <- true
+		screen.Redraw()
 	})
 }
 

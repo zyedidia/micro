@@ -1220,7 +1220,7 @@ func (h *BufPane) ToggleDiffGutter() bool {
 	if !h.Buf.Settings["diffgutter"].(bool) {
 		h.Buf.Settings["diffgutter"] = true
 		h.Buf.UpdateDiff(func(synchronous bool) {
-			screen.DrawChan <- true
+			screen.Redraw()
 		})
 		InfoBar.Message("Enabled diff gutter")
 	} else {
