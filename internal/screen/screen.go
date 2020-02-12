@@ -21,9 +21,9 @@ var Screen tcell.Screen
 // The lock is necessary since the screen is polled on a separate thread
 var lock sync.Mutex
 
-// DrawChan is a channel that will cause the screen to redraw when
+// drawChan is a channel that will cause the screen to redraw when
 // written to even if no event user event has occurred
-var DrawChan chan bool
+var drawChan chan bool
 
 // Lock locks the screen lock
 func Lock() {
@@ -38,10 +38,15 @@ func Unlock() {
 // Redraw schedules a redraw with the draw channel
 func Redraw() {
 	select {
-	case DrawChan <- true:
+	case drawChan <- true:
 	default:
 		// channel is full
 	}
+}
+
+// DrawChan returns the draw channel
+func DrawChan() chan bool {
+	return drawChan
 }
 
 type screenCell struct {
@@ -122,7 +127,7 @@ func TempStart(screenWasNil bool) {
 
 // Init creates and initializes the tcell screen
 func Init() {
-	DrawChan = make(chan bool)
+	drawChan = make(chan bool)
 
 	// Should we enable true color?
 	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"

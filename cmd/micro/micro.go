@@ -278,8 +278,8 @@ func main() {
 
 	// clear the drawchan so we don't redraw excessively
 	// if someone requested a redraw before we started displaying
-	for len(screen.DrawChan) > 0 {
-		<-screen.DrawChan
+	for len(screen.DrawChan()) > 0 {
+		<-screen.DrawChan()
 	}
 
 	// wait for initial resize event
@@ -334,7 +334,7 @@ func DoEvent() {
 		}
 	case <-shell.CloseTerms:
 	case event = <-events:
-	case <-screen.DrawChan:
+	case <-screen.DrawChan():
 	}
 
 	if action.InfoBar.HasPrompt {
