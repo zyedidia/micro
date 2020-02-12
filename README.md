@@ -106,13 +106,13 @@ You can install micro using Homebrew on Mac:
 brew install micro
 ```
 
-On Debian Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
+On Debian systems, you can install micro via apt:
 
 ```
-snap install micro --classic
+apt install micro
 ```
 
-Homebrew and snap are the two "officially" maintained package manager distributions of micro.
+Homebrew and apt are the two "officially" maintained package manager distributions of micro.
 
 Micro is also available through other package managers on Linux such as AUR, Nix, and package managers
 for other operating systems:
