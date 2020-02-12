@@ -11,7 +11,7 @@ from the go plugin, which has the following file structure:
 ```
 ~/.config/micro/plug/go-plugin/
     go.lua
-    info.json
+    repo.json
     help/
         go-plugin.md
 ```
@@ -34,34 +34,6 @@ cases a plugin may also want to add colorschemes or syntax files. It
 is unlikely for a plugin to need to add plugin files at runtime or
 syntax header files. No directory structure is enforced but keeping
 runtime files in their own directories is good practice.
-
-# Info file
-
-The `info.json` for the Go plugin is the following:
-
-```
-{
-    "name": "go",
-    "description": "Go formatting and tool support",
-    "website": "https://github.com/micro-editor/go-plugin",
-	"install": "https://github.com/micro-editor/go-plugin",
-    "version": "1.0.0",
-    "require": [
-        "micro >= 2.0.0"
-    ]
-}
-```
-
-All fields are simply interpreted as strings, so the version does not
-need to be a semantic version, and the dependencies are also only
-meant to be parsed by humans. The name should be an identifier, and
-the website should point to a valid website. The install field should
-provide info about installing the plugin, or point to a website that
-provides information.
-
-Note that the name of the plugin is defined by the name field in
-the `info.json` and not by the installation path. Some functions micro
-exposes to plugins require passing the name of the plugin.
 
 ## Lua callbacks
 
