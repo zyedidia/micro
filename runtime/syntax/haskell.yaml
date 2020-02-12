@@ -21,10 +21,10 @@ rules:
 
       # Data constructors
     - constant.bool: "\\b(True|False)\\b"
-    - constant: "(Nothing|Just|Left|Right|LT|EQ|GT)"
+    - constant: "\\b(Nothing|Just|Left|Right|LT|EQ|GT)\\b"
 
       # Data classes
-    - identifier.class: "[ ](Read|Show|Enum|Eq|Ord|Data|Bounded|Typeable|Num|Real|Fractional|Integral|RealFrac|Floating|RealFloat|Monad|MonadPlus|Functor)"
+    - identifier.class: "\\b(Read|Show|Enum|Eq|Ord|Data|Bounded|Typeable|Num|Real|Fractional|Integral|RealFrac|Floating|RealFloat|Monad|MonadPlus|Functor|Foldable|Additive|Zip)[ ]"
 
       # Strings
     - constant.string:
