@@ -199,7 +199,6 @@ func InitRuntimeFiles() {
 					}
 					p.Info, err = NewPluginInfo(data)
 					if err != nil {
-						log.Println(err)
 						continue
 					}
 					p.Name = p.Info.Name
@@ -232,7 +231,6 @@ func InitRuntimeFiles() {
 						}
 						p.Info, err = NewPluginInfo(data)
 						if err != nil {
-							log.Println(err)
 							continue
 						}
 						p.Name = p.Info.Name

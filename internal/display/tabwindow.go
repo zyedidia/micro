@@ -14,19 +14,19 @@ type TabWindow struct {
 	Names   []string
 	active  int
 	Y       int
-	width   int
+	Width   int
 	hscroll int
 }
 
 func NewTabWindow(w int, y int) *TabWindow {
 	tw := new(TabWindow)
-	tw.width = w
+	tw.Width = w
 	tw.Y = y
 	return tw
 }
 
 func (w *TabWindow) Resize(width, height int) {
-	w.width = width
+	w.Width = width
 }
 
 func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
@@ -40,7 +40,7 @@ func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
 		}
 		x += s
 		x += 3
-		if x >= w.width {
+		if x >= w.Width {
 			break
 		}
 	}
@@ -50,9 +50,9 @@ func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
 func (w *TabWindow) Scroll(amt int) {
 	w.hscroll += amt
 	s := w.TotalSize()
-	w.hscroll = util.Clamp(w.hscroll, 0, s-w.width)
+	w.hscroll = util.Clamp(w.hscroll, 0, s-w.Width)
 
-	if s-w.width <= 0 {
+	if s-w.Width <= 0 {
 		w.hscroll = 0
 	}
 }
@@ -77,17 +77,17 @@ func (w *TabWindow) SetActive(a int) {
 	for i, n := range w.Names {
 		c := utf8.RuneCountInString(n)
 		if i == a {
-			if x+c >= w.hscroll+w.width {
-				w.hscroll = util.Clamp(x+c+1-w.width, 0, s-w.width)
+			if x+c >= w.hscroll+w.Width {
+				w.hscroll = util.Clamp(x+c+1-w.Width, 0, s-w.Width)
 			} else if x < w.hscroll {
-				w.hscroll = util.Clamp(x-4, 0, s-w.width)
+				w.hscroll = util.Clamp(x-4, 0, s-w.Width)
 			}
 			break
 		}
 		x += c + 4
 	}
 
-	if s-w.width <= 0 {
+	if s-w.Width <= 0 {
 		w.hscroll = 0
 	}
 }
@@ -104,13 +104,13 @@ func (w *TabWindow) Display() {
 				if j > 0 {
 					c = ' '
 				}
-				if x == w.width-1 && !done {
-					screen.SetContent(w.width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
+				if x == w.Width-1 && !done {
+					screen.SetContent(w.Width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
 					x++
 					break
 				} else if x == 0 && w.hscroll > 0 {
 					screen.SetContent(0, w.Y, '<', nil, config.DefStyle.Reverse(true))
-				} else if x >= 0 && x < w.width {
+				} else if x >= 0 && x < w.Width {
 					screen.SetContent(x, w.Y, c, nil, config.DefStyle.Reverse(true))
 				}
 				x++
@@ -136,12 +136,12 @@ func (w *TabWindow) Display() {
 		} else {
 			draw(' ', 3)
 		}
-		if x >= w.width {
+		if x >= w.Width {
 			break
 		}
 	}
 
-	if x < w.width {
-		draw(' ', w.width-x)
+	if x < w.Width {
+		draw(' ', w.Width-x)
 	}
 }

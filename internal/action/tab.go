@@ -104,6 +104,13 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
+			if my == t.Y && mx == 0 {
+				t.Scroll(-4)
+				return
+			} else if my == t.Y && mx == t.Width-1 {
+				t.Scroll(4)
+				return
+			}
 			if len(t.List) > 1 {
 				ind := t.LocFromVisual(buffer.Loc{mx, my})
 				if ind != -1 {

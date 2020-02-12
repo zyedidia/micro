@@ -113,6 +113,9 @@ func BufMapKey(k Event, action string) {
 		success := true
 		for i, a := range actionfns {
 			for j, c := range cursors {
+				if c == nil {
+					continue
+				}
 				h.Buf.SetCurCursor(c.Num)
 				h.Cursor = c
 				if i == 0 || (success && types[i-1] == '&') || (!success && types[i-1] == '|') || (types[i-1] == ',') {
