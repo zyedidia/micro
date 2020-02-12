@@ -391,6 +391,9 @@ There are 6 default plugins that come pre-installed with micro. These are
    programming tool.
 * `status`: provides some extensions to the status line (integration with
    Git and more).
+* `diff`: integrates the `diffgutter` option with Git. If you are in a Git
+   directory, the diff gutter will show changes with respect to the most
+   recent Git commit rather than the diff since opening the file.
 
 See `> help linter`, `> help comment`, and `> help status` for additional
 documentation specific to those plugins.

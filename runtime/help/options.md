@@ -301,6 +301,21 @@ Here are the available options:
 Plugin options: all plugins come with a special option to enable or disable
 them. The option is a boolean with the same name as the plugin itself.
 
+By default, the following plugins are provided, each with an option to enable
+or disable them:
+
+* `autoclose`: automatically closes brackets, quotes, etc...
+* `comment`: provides automatic commenting for a number of languages
+* `ftoptions`: alters some default options depending on the filetype
+* `linter`: provides extensible linting for many languages
+* `literate`: provides advanced syntax highlighting for the Literate
+   programming tool.
+* `status`: provides some extensions to the status line (integration with
+   Git and more).
+* `diff`: integrates the `diffgutter` option with Git. If you are in a Git
+   directory, the diff gutter will show changes with respect to the most
+   recent Git commit rather than the diff since opening the file.
+
 Any option you set in the editor will be saved to the file
 ~/.config/micro/settings.json so, in effect, your configuration file will be 
 created for you. If you'd like to take your configuration with you to another
