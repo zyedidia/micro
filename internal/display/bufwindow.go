@@ -410,11 +410,13 @@ func (w *BufWindow) displayBuffer() {
 	if len(b.Modifications) > 0 {
 		if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 			for _, r := range b.Modifications {
+				rx := util.Clamp(r.X, 0, b.LinesNum())
+				ry := util.Clamp(r.Y, 0, b.LinesNum())
 				final := -1
-				for i := r.X; i <= r.Y; i++ {
+				for i := rx; i <= ry; i++ {
 					final = util.Max(b.Highlighter.ReHighlightStates(b, i), final)
 				}
-				b.Highlighter.HighlightMatches(b, r.X, final+1)
+				b.Highlighter.HighlightMatches(b, rx, final+1)
 			}
 		}
 
