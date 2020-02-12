@@ -66,12 +66,12 @@ the `misspell` linter which checks for misspelled words in a file.
 ```lua
 local config = import("micro/config")
 
+config.RegisterCommonOption("misspell", true)
+
 function init()
     -- uses the default linter plugin
     -- matches any filetype
     linter.makeLinter("misspell", "", "misspell", {"%f"}, "%f:%l:%c: %m", {}, false, true, 0, 0, hasMisspell)
-
-    config.RegisterCommonOption("misspell", true)
 end
 
 function hasMisspell(buf)

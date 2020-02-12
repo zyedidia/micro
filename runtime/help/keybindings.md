@@ -194,6 +194,8 @@ DuplicateLine
 DeleteLine
 IndentSelection
 OutdentSelection
+OutdentLine
+IndentLine
 Paste
 SelectAll
 OpenFile

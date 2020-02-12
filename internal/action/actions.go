@@ -566,6 +566,20 @@ func (h *BufPane) IndentSelection() bool {
 	return false
 }
 
+// IndentLine moves the current line forward one indentation
+func (h *BufPane) IndentLine() bool {
+	if h.Cursor.HasSelection() {
+		return false
+	}
+
+	tabsize := int(h.Buf.Settings["tabsize"].(float64))
+	indentstr := h.Buf.IndentString(tabsize)
+	h.Buf.Insert(buffer.Loc{X: 0, Y: h.Cursor.Y}, indentstr)
+	h.Buf.RelocateCursors()
+	h.Relocate()
+	return true
+}
+
 // OutdentLine moves the current line back one indentation
 func (h *BufPane) OutdentLine() bool {
 	if h.Cursor.HasSelection() {
