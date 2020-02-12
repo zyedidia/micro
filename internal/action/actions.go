@@ -732,23 +732,30 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if strings.HasSuffix(err.Error(), "permission denied") {
-			InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
-				if yes && !canceled {
-					err = h.Buf.SaveAsWithSudo(filename)
-					if err != nil {
-						InfoBar.Error(err)
-					} else {
-						h.Buf.Path = filename
-						h.Buf.SetName(filename)
-						InfoBar.Message("Saved " + filename)
+			saveWithSudo := func() {
+				err = h.Buf.SaveAsWithSudo(filename)
+				if err != nil {
+					InfoBar.Error(err)
+				} else {
+					h.Buf.Path = filename
+					h.Buf.SetName(filename)
+					InfoBar.Message("Saved " + filename)
+				}
+			}
+			if h.Buf.Settings["autosu"].(bool) {
+				saveWithSudo()
+			} else {
+				InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
+					if yes && !canceled {
+						saveWithSudo()
+						h.completeAction(action)
 					}
-					h.completeAction(action)
-				}
-				if callback != nil {
-					callback()
-				}
-			})
-			return false
+					if callback != nil {
+						callback()
+					}
+				})
+				return false
+			}
 		} else {
 			InfoBar.Error(err)
 		}
