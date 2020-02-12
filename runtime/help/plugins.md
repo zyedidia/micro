@@ -74,16 +74,6 @@ within.  This is almost always the current bufpane.
 
 All available actions are listed in the keybindings section of the help.
 
-For callbacks to mouse actions, you are also given the event info:
-
-```lua
-function onMousePress(view, event)
-    local x, y = event:Position()
-
-    return false
-end
-```
-
 These functions should also return a boolean specifying whether the bufpane
 should be relocated to the cursor or not after the action is complete.
 
@@ -113,7 +103,12 @@ The packages and functions are listed below (in Go type signatures):
        `-debug` flag, or binary built with `build-dbg`).
 
     - `SetStatusInfoFn(fn string)`: register the given lua function as
-       accessible from the statusline formatting options
+       accessible from the statusline formatting options.
+
+    - `CurPane() *BufPane`: returns the current BufPane, or nil if the
+       current pane is not a BufPane.
+
+    - `CurTab() *Tab`: returns the current tab.
 * `micro/config`
 	- `MakeCommand(name string, action func(bp *BufPane, args[]string),
                    completer buffer.Completer)`:

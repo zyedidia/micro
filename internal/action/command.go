@@ -106,7 +106,7 @@ func (h *BufPane) PluginCmd(args []string) {
 	}
 
 	if h.Buf.Type != buffer.BTLog {
-		OpenLogBuf(h)
+		h.OpenLogBuf()
 	}
 
 	config.PluginCommand(buffer.LogBuf, args[0], args[1:])
@@ -272,7 +272,7 @@ func (h *BufPane) OpenCmd(args []string) {
 // ToggleLogCmd toggles the log view
 func (h *BufPane) ToggleLogCmd(args []string) {
 	if h.Buf.Type != buffer.BTLog {
-		OpenLogBuf(h)
+		h.OpenLogBuf()
 	} else {
 		h.Quit()
 	}
