@@ -6,6 +6,7 @@
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
+ [![DebianBadge](https://badges.debian.net/badges/debian/unstable/micro/version.svg)](https://packages.debian.org/unstable/micro)
 
 **micro** is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the capabilities
 of modern terminals. It comes as a single, batteries-included, static binary with no dependencies; you can download and use it right now!
@@ -111,6 +112,12 @@ On Debian Linux, you can install micro through [snap](https://snapcraft.io/docs/
 ```
 snap install micro --classic
 ```
+
+On Debian `unstable | testing | buster-backports` and Ubuntu `focal`:
+```
+sudo apt install micro
+``` 
+
 
 Homebrew and snap are the two "officially" maintained package manager distributions of micro.
 
