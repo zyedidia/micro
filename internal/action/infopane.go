@@ -68,7 +68,7 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 				h.EventCallback(resp)
 			}
 		}
-	case *tcell.EventMouse:
+	default:
 		h.BufPane.HandleEvent(event)
 	}
 }
