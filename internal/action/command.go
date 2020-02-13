@@ -764,7 +764,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
-					h.Buf.Replace(locs[0], locs[1], replaceStr)
+					h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace)
 
 					searchLoc = locs[0]
 					searchLoc.X += utf8.RuneCount(replace)

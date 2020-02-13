@@ -155,8 +155,12 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 			l = util.SliceStart(l, end.X)
 		}
 		newText := search.ReplaceAllFunc(l, func(in []byte) []byte {
+			result := []byte{}
+			for _, submatches := range search.FindAllSubmatchIndex(in, -1) {
+				result = search.Expand(result, replace, in, submatches)
+			}
 			found++
-			return replace
+			return result
 		})
 
 		from := Loc{charpos, i}
