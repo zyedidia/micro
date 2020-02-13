@@ -1,7 +1,6 @@
 filetype: v
 
 detect:
-    filename: "\\.v$"
 
 rules:
     # Conditionals and control flow
