@@ -283,7 +283,7 @@ func (h *BufPane) SelectWordLeft() bool {
 	return true
 }
 
-// StartOfLine moves the cursor to the start of the text of the line
+// StartOfText moves the cursor to the start of the text of the line
 func (h *BufPane) StartOfText() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.StartOfText()
@@ -1567,7 +1567,7 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 	return true
 }
 
-// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y more.
+// SpawnMultiCursorDown creates additional cursor, at the same X (if possible), one Y more.
 func (h *BufPane) SpawnMultiCursorDown() bool {
 	if h.Cursor.Y+1 == h.Buf.LinesNum() {
 		return false

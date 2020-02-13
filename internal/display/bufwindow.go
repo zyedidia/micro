@@ -275,14 +275,7 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 					if vloc.Y >= bufHeight {
 						break
 					}
-					vloc.X = 0
-					if b.Settings["diffgutter"].(bool) {
-						vloc.X++
-					}
-					// This will draw an empty line number because the current line is wrapped
-					if b.Settings["ruler"].(bool) {
-						vloc.X += maxLineNumLength + 1
-					}
+					vloc.X = w.gutterOffset
 				}
 			}
 		}
@@ -648,6 +641,11 @@ func (w *BufWindow) displayBuffer() {
 					if b.Settings["diffgutter"].(bool) {
 						w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
 					}
+
+					if hasMessage {
+						w.drawGutter(&vloc, &bloc)
+					}
+
 					// This will draw an empty line number because the current line is wrapped
 					if b.Settings["ruler"].(bool) {
 						w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
