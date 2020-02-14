@@ -1,7 +1,7 @@
 filetype: verilog
 
 detect:
-    filename: "\\.(vh|sv|svh)$"
+    filename: "\\.(v|vh|sv|svh)$"
 
 rules:
     - preproc: "\\b(module|package|program|endmodule|endpackage|endprogram)\\b"
