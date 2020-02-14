@@ -21,7 +21,7 @@ parts:
     build-attributes: [no-patchelf]
     override-pull: |
       snapcraftctl pull
-      version="$(go run $SNAPCRAFT_PROJECT_DIR/tools/build-version.go)"
+      version="$(go run $SNAPCRAFT_PART_SRC/tools/build-version.go)"
       [ -n "$(echo $version | grep "dev")" ] && grade=devel || grade=stable
       snapcraftctl set-version "$version"
       snapcraftctl set-grade "$grade"

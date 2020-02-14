@@ -458,6 +458,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		if recording_macro {
 			curmacro = append(curmacro, r)
 		}
+		h.Relocate()
 		h.PluginCBRune("onRune", r)
 	}
 }
