@@ -184,7 +184,7 @@ func GetGlobalOption(name string) interface{} {
 
 var defaultCommonSettings = map[string]interface{}{
 	"autoindent":     true,
-	"autosu":         true,
+	"autosu":         false,
 	"backup":         true,
 	"basename":       false,
 	"colorcolumn":    float64(0),
@@ -192,7 +192,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"diffgutter":     false,
 	"encoding":       "utf-8",
 	"eofnewline":     false,
-	"fastdirty":      true,
+	"fastdirty":      false,
 	"fileformat":     "unix",
 	"filetype":       "unknown",
 	"ignorecase":     false,

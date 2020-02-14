@@ -95,10 +95,10 @@ Here are the available options:
    This is fast, but can be inaccurate. If `fastdirty` is off, then micro will
    hash the current buffer against a hash of the original file (created when
    the buffer was loaded). This is more accurate but obviously more resource
-   intensive. This option is only for people who really care about having
-   accurate modified status.
+   intensive. This option will be automatically disabled if the file size
+   exceeds 50KB.
 
-	default value: `true`
+	default value: `false`
 
 * `fileformat`: this determines what kind of line endings micro will use for
    the file. UNIX line endings are just `\n` (linefeed) whereas dos line
