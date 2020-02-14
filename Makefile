@@ -17,6 +17,10 @@ build:
 build-dbg:
 	go build -ldflags "-s -w $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
+build-tags:
+	git fetch --tags
+	go build -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
+
 # Builds micro after building the runtime and checking dependencies
 build-all: runtime build
 

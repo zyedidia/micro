@@ -20,6 +20,6 @@ parts:
     build-snaps: [go]
     build-attributes: [no-patchelf]
     override-build: |
-      make build
+      make build-tags
       mkdir $SNAPCRAFT_PART_INSTALL/bin
       mv ./micro $SNAPCRAFT_PART_INSTALL/bin/
