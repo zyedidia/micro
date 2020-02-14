@@ -638,12 +638,11 @@ func (w *BufWindow) displayBuffer() {
 						break
 					}
 					vloc.X = 0
-					if b.Settings["diffgutter"].(bool) {
-						w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
-					}
-
 					if hasMessage {
 						w.drawGutter(&vloc, &bloc)
+					}
+					if b.Settings["diffgutter"].(bool) {
+						w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
 					}
 
 					// This will draw an empty line number because the current line is wrapped

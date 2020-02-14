@@ -102,7 +102,7 @@ func (l Loc) left(buf *LineArray) Loc {
 	return res
 }
 
-// Move moves the cursor n characters to the left or right
+// MoveLA moves the cursor n characters to the left or right
 // It moves the cursor left if n is negative
 func (l Loc) MoveLA(n int, buf *LineArray) Loc {
 	if n > 0 {
@@ -117,9 +117,12 @@ func (l Loc) MoveLA(n int, buf *LineArray) Loc {
 	return l
 }
 
-func (l Loc) Diff(a, b Loc, buf *Buffer) int {
-	return DiffLA(a, b, buf.LineArray)
+// Diff returns the difference between two locs
+func (l Loc) Diff(b Loc, buf *Buffer) int {
+	return DiffLA(l, b, buf.LineArray)
 }
+
+// Move moves a loc n characters
 func (l Loc) Move(n int, buf *Buffer) Loc {
 	return l.MoveLA(n, buf.LineArray)
 }
