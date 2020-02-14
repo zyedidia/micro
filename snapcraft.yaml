@@ -1,11 +1,11 @@
 name: micro
-version: git
 summary: A modern and intuitive terminal-based text editor
 description: |
   Micro is a terminal-based text editor that aims to be easy to use and
   intuitive, while also taking advantage of the full capabilities of modern
   terminals.
 confinement: classic
+adopt-info: micro
 
 apps:
   micro:
@@ -19,6 +19,12 @@ parts:
     build-packages: [make]
     build-snaps: [go]
     build-attributes: [no-patchelf]
+    override-pull: |
+      snapcraftctl pull
+      version="$(go run $SNAPCRAFT_PROJECT_DIR/tools/build-version.go)"
+      [ -n "$(echo $version | grep "dev")" ] && grade=devel || grade=stable
+      snapcraftctl set-version "$version"
+      snapcraftctl set-grade "$grade"
     override-build: |
       make build-tags
       mkdir $SNAPCRAFT_PART_INSTALL/bin
