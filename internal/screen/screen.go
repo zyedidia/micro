@@ -136,6 +136,12 @@ func Init() {
 		os.Setenv("TCELL_TRUECOLOR", "disable")
 	}
 
+	var oldTerm string
+	if config.GetGlobalOption("xterm").(bool) {
+		oldTerm = os.Getenv("TERM")
+		os.Setenv("TERM", "xterm-256color")
+	}
+
 	// Initilize tcell
 	var err error
 	Screen, err = tcell.NewScreen()
@@ -147,6 +153,11 @@ func Init() {
 	if err = Screen.Init(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	// restore TERM
+	if config.GetGlobalOption("xterm").(bool) {
+		os.Setenv("TERM", oldTerm)
 	}
 
 	if config.GetGlobalOption("mouse").(bool) {

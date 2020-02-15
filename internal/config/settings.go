@@ -256,6 +256,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"sucmd":          "sudo",
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},
+	"xterm":          false,
 }
 
 // a list of settings that should never be globally modified

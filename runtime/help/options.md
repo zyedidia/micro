@@ -296,6 +296,13 @@ Here are the available options:
 
 	default value: `true`
 
+* `xterm`: micro will assume that the terminal it is running in conforms to
+  `xterm-256color` regardless of what the `$TERM` variable actually contains.
+   Enabling this option may cause unwanted effects if your terminal in fact
+   does not conform to the `xterm-256color` standard.
+
+    Default value: `false`
+
 ---
 
 Plugin options: all plugins come with a special option to enable or disable
