@@ -136,9 +136,6 @@ func (w *BufWindow) Relocate() bool {
 	if w.drawStatus {
 		h--
 	}
-	if b.LinesNum() <= h {
-		height = w.Height
-	}
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	cy := activeC.Y

@@ -396,6 +396,7 @@ func (h *BufPane) CursorStart() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.X = 0
 	h.Cursor.Y = 0
+	h.Cursor.StoreVisualX()
 	h.Relocate()
 	return true
 }
