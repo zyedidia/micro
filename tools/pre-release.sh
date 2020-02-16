@@ -10,6 +10,10 @@ echo "Creating tag"
 git tag $tag $commitID
 hub push --tags
 
+echo "Cross compiling binaries"
+./cross-compile.sh $1
+mv ../binaries .
+
 NL=$'\n'
 
 echo "Creating new release"

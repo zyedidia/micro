@@ -17,6 +17,10 @@ hub push origin :refs/tags/nightly
 git tag -f nightly $commitID
 hub push --tags
 
+echo "Cross compiling binaries"
+./cross-compile.sh $1
+mv ../binaries .
+
 echo "Creating new release"
 hub release create nightly \
     --prerelease \
