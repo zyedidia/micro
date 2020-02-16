@@ -12,6 +12,10 @@ hub push --tags
 
 NL=$'\n'
 
+echo "Cross compiling binaries"
+./cross-compile.sh $1
+mv ../binaries .
+
 echo "Creating new release"
 hub release create $tag \
     --message "$1${NL}${NL}$2" \
