@@ -6,6 +6,8 @@ local filepath = import("path/filepath")
 local shell = import("micro/shell")
 local buffer = import("micro/buffer")
 local config = import("micro/config")
+local util = import("micro/util")
+local os = import("os")
 
 local linters = {}
 
@@ -66,7 +68,7 @@ function init()
     makeLinter("gcc", "c", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
     makeLinter("gcc", "c++", "gcc", {"-fsyntax-only","-std=c++14", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
     makeLinter("dmd", "d", "dmd", {"-color=off", "-o-", "-w", "-wi", "-c", "%f"}, "%f%(%l%):.+: %m")
-    makeLinter("gobuild", "go", "go", {"build", "-o", devnull}, "%f:%l:%c:? %m")
+    makeLinter("gobuild", "go", "go", {"build", "-o", devnull, "%d"}, "%f:%l:%c:? %m")
     -- makeLinter("golint", "go", "golint", {"%f"}, "%f:%l:%c: %m")
     makeLinter("javac", "java", "javac", {"-d", "%d", "%f"}, "%f:%l: error: %m")
     makeLinter("jshint", "javascript", "jshint", {"%f"}, "%f: line %l,.+, %m")
@@ -102,7 +104,7 @@ end
 function runLinter(buf)
     local ft = buf:FileType()
     local file = buf.Path
-    local dir = filepath.Dir(file)
+    local dir = "." .. util.RuneStr(os.PathSeparator) .. filepath.Dir(file)
 
     for k, v in pairs(linters) do
         local ftmatch = ft == v.filetype
