@@ -53,7 +53,7 @@ func main() {
 	}
 
 	// If we don't have any tag assume "dev"
-	if tag == "" {
+	if tag == "" || strings.HasPrefix(tag, "nightly") {
 		tag = "dev"
 	}
 	// Get the most likely next version:
