@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"strings"
 
+	"github.com/zyedidia/micro/internal/buffer"
 	"github.com/zyedidia/micro/internal/display"
 	"github.com/zyedidia/micro/internal/info"
 	"github.com/zyedidia/micro/internal/util"
@@ -186,14 +187,16 @@ func (h *InfoPane) Autocomplete() {
 	args := bytes.Split(l, []byte{' '})
 	cmd := string(args[0])
 
-	if len(args) == 1 {
-		b.Autocomplete(CommandComplete)
-	} else {
-		if action, ok := commands[cmd]; ok {
+	if h.PromptType == "Command" {
+		if len(args) == 1 {
+			b.Autocomplete(CommandComplete)
+		} else if action, ok := commands[cmd]; ok {
 			if action.completer != nil {
 				b.Autocomplete(action.completer)
 			}
 		}
+	} else if h.PromptType == "Shell" {
+		b.Autocomplete(buffer.FileComplete)
 	}
 }
 
