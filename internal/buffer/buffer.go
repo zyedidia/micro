@@ -281,14 +281,14 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
 		}
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
+
+		// The last time this file was modified
+		b.UpdateModTime()
 	}
 
 	if b.Settings["readonly"].(bool) && b.Type == BTDefault {
 		b.Type.Readonly = true
 	}
-
-	// The last time this file was modified
-	b.UpdateModTime()
 
 	switch b.Endings {
 	case FFUnix:
@@ -319,7 +319,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	b.AddCursor(NewCursor(b, b.StartCursor))
 	b.GetActiveCursor().Relocate()
 
-	if !b.Settings["fastdirty"].(bool) {
+	if !b.Settings["fastdirty"].(bool) && !found {
 		if size > LargeFileThreshold {
 			// If the file is larger than LargeFileThreshold fastdirty needs to be on
 			b.Settings["fastdirty"] = true
