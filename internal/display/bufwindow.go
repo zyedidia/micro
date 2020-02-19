@@ -397,21 +397,7 @@ func (w *BufWindow) displayBuffer() {
 		bufWidth--
 	}
 
-	if len(b.Modifications) > 0 {
-		if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
-			for _, r := range b.Modifications {
-				rx := util.Clamp(r.X, 0, b.LinesNum())
-				ry := util.Clamp(r.Y, 0, b.LinesNum())
-				final := -1
-				for i := rx; i <= ry; i++ {
-					final = util.Max(b.Highlighter.ReHighlightStates(b, i), final)
-				}
-				b.Highlighter.HighlightMatches(b, rx, final+1)
-			}
-		}
-
-		b.ClearModifications()
-
+	if b.ModifiedThisFrame {
 		if b.Settings["diffgutter"].(bool) {
 			b.UpdateDiff(func(synchronous bool) {
 				// If the diff was updated asynchronously, the outer call to
@@ -426,6 +412,7 @@ func (w *BufWindow) displayBuffer() {
 				}
 			})
 		}
+		b.ModifiedThisFrame = false
 	}
 
 	var matchingBraces []buffer.Loc

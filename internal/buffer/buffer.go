@@ -75,6 +75,32 @@ type SharedBuffer struct {
 	// Type of the buffer (e.g. help, raw, scratch etc..)
 	Type BufType
 
+	// Path to the file on disk
+	Path string
+	// Absolute path to the file on disk
+	AbsPath string
+	// Name of the buffer on the status line
+	name string
+
+	// Settings customized by the user
+	Settings map[string]interface{}
+
+	Suggestions   []string
+	Completions   []string
+	CurSuggestion int
+
+	Messages []*Message
+
+	updateDiffTimer   *time.Timer
+	diffBase          []byte
+	diffBaseLineCount int
+	diffLock          sync.RWMutex
+	diff              map[int]DiffStatus
+
+	// counts the number of edits
+	// resets every backupTime edits
+	lastbackup time.Time
+
 	// ReloadDisabled allows the user to disable reloads if they
 	// are viewing a file that is constantly changing
 	ReloadDisabled bool
@@ -84,8 +110,13 @@ type SharedBuffer struct {
 	// it changes based on how the buffer has changed
 	HasSuggestions bool
 
-	// Modifications is the list of modified regions for syntax highlighting
-	Modifications []Loc
+	// The Highlighter struct actually performs the highlighting
+	Highlighter *highlight.Highlighter
+	// SyntaxDef represents the syntax highlighting definition being used
+	// This stores the highlighting rules and filetype detection info
+	SyntaxDef *highlight.Def
+
+	ModifiedThisFrame bool
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
@@ -96,15 +127,36 @@ func (b *SharedBuffer) insert(pos Loc, value []byte) {
 	b.HasSuggestions = false
 	b.LineArray.insert(pos, value)
 
-	// b.Modifications is cleared every screen redraw so it's
-	// ok to append duplicates
-	b.Modifications = append(b.Modifications, Loc{pos.Y, pos.Y + bytes.Count(value, []byte{'\n'})})
+	inslines := bytes.Count(value, []byte{'\n'})
+	log.Println("insert", string(value), pos.Y, pos.Y+inslines)
+	b.MarkModified(pos.Y, pos.Y+inslines)
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
 	b.HasSuggestions = false
-	b.Modifications = append(b.Modifications, Loc{start.Y, start.Y})
+	defer b.MarkModified(start.Y, end.Y)
 	return b.LineArray.remove(start, end)
+}
+
+// MarkModified marks the buffer as modified for this frame
+// and performs rehighlighting if syntax highlighting is enabled
+func (b *SharedBuffer) MarkModified(start, end int) {
+	b.ModifiedThisFrame = true
+
+	if !b.Settings["syntax"].(bool) || b.SyntaxDef == nil {
+		return
+	}
+
+	log.Println("Modified", start, end, len(b.lines))
+	start = util.Clamp(start, 0, len(b.lines))
+	end = util.Clamp(end, 0, len(b.lines))
+
+	l := -1
+	log.Println("Modified", start, end)
+	for i := start; i <= end; i++ {
+		l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
+	}
+	b.Highlighter.HighlightMatches(b, start, l+1)
 }
 
 // DisableReload disables future reloads of this sharedbuffer
@@ -135,39 +187,6 @@ type Buffer struct {
 	cursors     []*Cursor
 	curCursor   int
 	StartCursor Loc
-
-	// Path to the file on disk
-	Path string
-	// Absolute path to the file on disk
-	AbsPath string
-	// Name of the buffer on the status line
-	name string
-
-	// SyntaxDef represents the syntax highlighting definition being used
-	// This stores the highlighting rules and filetype detection info
-	SyntaxDef *highlight.Def
-	// The Highlighter struct actually performs the highlighting
-	Highlighter   *highlight.Highlighter
-	HighlightLock sync.Mutex
-
-	// Settings customized by the user
-	Settings map[string]interface{}
-
-	Suggestions   []string
-	Completions   []string
-	CurSuggestion int
-
-	Messages []*Message
-
-	updateDiffTimer   *time.Timer
-	diffBase          []byte
-	diffBaseLineCount int
-	diffLock          sync.RWMutex
-	diff              map[int]DiffStatus
-
-	// counts the number of edits
-	// resets every backupTime edits
-	lastbackup time.Time
 }
 
 // NewBufferFromFile opens a new buffer using the given path
@@ -222,23 +241,6 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	b := new(Buffer)
 
-	b.Settings = config.DefaultCommonSettings()
-	for k, v := range config.GlobalSettings {
-		if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
-			// make sure setting is not global-only
-			b.Settings[k] = v
-		}
-	}
-	config.InitLocalSettings(b.Settings, path)
-
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
-	if err != nil {
-		enc = unicode.UTF8
-		b.Settings["encoding"] = "utf-8"
-	}
-
-	reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
-
 	found := false
 	if len(path) > 0 {
 		for _, buf := range OpenBuffers {
@@ -250,16 +252,32 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		}
 	}
 
-	b.Path = path
-	b.AbsPath = absPath
-
 	if !found {
 		b.SharedBuffer = new(SharedBuffer)
 		b.Type = btype
 
+		b.AbsPath = absPath
+		b.Path = path
+
+		b.Settings = config.DefaultCommonSettings()
+		for k, v := range config.GlobalSettings {
+			if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
+				// make sure setting is not global-only
+				b.Settings[k] = v
+			}
+		}
+		config.InitLocalSettings(b.Settings, path)
+
+		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+		if err != nil {
+			enc = unicode.UTF8
+			b.Settings["encoding"] = "utf-8"
+		}
+
 		hasBackup := b.ApplyBackup(size)
 
 		if !hasBackup {
+			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
 			b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
 		}
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
@@ -280,6 +298,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	}
 
 	b.UpdateRules()
+	// init local settings again now that we know the filetype
 	config.InitLocalSettings(b.Settings, b.Path)
 
 	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
@@ -309,12 +328,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		}
 	}
 
-	err = config.RunPluginFn("onBufferOpen", luar.New(ulua.L, b))
+	err := config.RunPluginFn("onBufferOpen", luar.New(ulua.L, b))
 	if err != nil {
 		screen.TermMessage(err)
 	}
-
-	b.Modifications = make([]Loc, 0, 10)
 
 	OpenBuffers = append(OpenBuffers, b)
 
@@ -380,16 +397,6 @@ func (b *Buffer) Remove(start, end Loc) {
 
 		go b.Backup(true)
 	}
-}
-
-// ClearModifications clears the list of modified lines in this buffer
-// The list of modified lines is used for syntax highlighting so that
-// we can selectively highlight only the necessary lines
-// This function should be called every time this buffer is drawn to
-// the screen
-func (b *Buffer) ClearModifications() {
-	// clear slice without resetting the cap
-	b.Modifications = b.Modifications[:0]
 }
 
 // FileType returns the buffer's filetype
@@ -922,7 +929,7 @@ func (b *Buffer) Retab() {
 
 		l = bytes.TrimLeft(l, " \t")
 		b.lines[i].data = append(ws, l...)
-		b.Modifications = append(b.Modifications, Loc{i, i})
+		b.MarkModified(i, i)
 		dirty = true
 	}
 
