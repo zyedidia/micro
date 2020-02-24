@@ -207,7 +207,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"saveundo":       false,
 	"scrollbar":      false,
 	"scrollmargin":   float64(3),
-	"scrollspeed":    float64(2),
+	"scrollspeed":    float64(3),
 	"smartpaste":     true,
 	"softwrap":       false,
 	"splitbottom":    true,
