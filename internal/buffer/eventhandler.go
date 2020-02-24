@@ -144,12 +144,12 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 
 	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
-			if start.Y != end.Y && loc.GreaterThan(start) {
+			if start.Y != loc.Y && loc.GreaterThan(start) {
 				loc.Y += end.Y - start.Y
 			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
 				loc.Y += end.Y - start.Y
 				if lastnl >= 0 {
-					loc.X = textX
+					loc.X += textX - start.X
 				} else {
 					loc.X += textX
 				}
