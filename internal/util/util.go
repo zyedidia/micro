@@ -30,7 +30,7 @@ var (
 	// CompileDate is the date this binary was compiled on
 	CompileDate = "Unknown"
 	// Debug logging
-	Debug = "ON"
+	Debug = "OFF"
 	// FakeCursor is used to disable the terminal cursor and have micro
 	// draw its own (enabled for windows consoles where the cursor is slow)
 	FakeCursor = false
