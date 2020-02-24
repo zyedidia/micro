@@ -195,7 +195,8 @@ func (h *InfoPane) Autocomplete() {
 				b.Autocomplete(action.completer)
 			}
 		}
-	} else if h.PromptType == "Shell" {
+	} else {
+		// by default use filename autocompletion
 		b.Autocomplete(buffer.FileComplete)
 	}
 }
