@@ -96,6 +96,11 @@ func (w *TabWindow) Display() {
 	x := -w.hscroll
 	done := false
 
+	tabBarStyle := config.DefStyle.Reverse(true)
+	if style, ok := config.Colorscheme["tabbar"]; ok {
+		tabBarStyle = style
+	}
+
 	draw := func(r rune, n int) {
 		for i := 0; i < n; i++ {
 			rw := runewidth.RuneWidth(r)
@@ -105,13 +110,13 @@ func (w *TabWindow) Display() {
 					c = ' '
 				}
 				if x == w.Width-1 && !done {
-					screen.SetContent(w.Width-1, w.Y, '>', nil, config.DefStyle.Reverse(true))
+					screen.SetContent(w.Width-1, w.Y, '>', nil, tabBarStyle)
 					x++
 					break
 				} else if x == 0 && w.hscroll > 0 {
-					screen.SetContent(0, w.Y, '<', nil, config.DefStyle.Reverse(true))
+					screen.SetContent(0, w.Y, '<', nil, tabBarStyle)
 				} else if x >= 0 && x < w.Width {
-					screen.SetContent(x, w.Y, c, nil, config.DefStyle.Reverse(true))
+					screen.SetContent(x, w.Y, c, nil, tabBarStyle)
 				}
 				x++
 			}

@@ -270,7 +270,11 @@ func (h *BufPane) SetID(i uint64) {
 }
 
 func (h *BufPane) Name() string {
-	return h.Buf.GetName()
+	n := h.Buf.GetName()
+	if h.Buf.Modified() {
+		n += " +"
+	}
+	return n
 }
 
 // HandleEvent executes the tcell event properly
