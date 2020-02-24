@@ -44,8 +44,8 @@ Here are the available options:
 
     default value: `true`
 
-* `basename`: in the infobar, show only the basename of the file being edited
-   rather than the full path.
+* `basename`: in the infobar and tabbar, show only the basename of the file
+   being edited rather than the full path.
 
     default value: `false`
 

@@ -3,7 +3,6 @@ package display
 import (
 	"bytes"
 	"fmt"
-	"path"
 	"regexp"
 	"strconv"
 	"strings"
@@ -32,9 +31,6 @@ type StatusLine struct {
 
 var statusInfo = map[string]func(*buffer.Buffer) string{
 	"filename": func(b *buffer.Buffer) string {
-		if b.Settings["basename"].(bool) {
-			return path.Base(b.GetName())
-		}
 		return b.GetName()
 	},
 	"line": func(b *buffer.Buffer) string {

@@ -9,6 +9,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -363,13 +364,17 @@ func (b *Buffer) Fini() {
 // GetName returns the name that should be displayed in the statusline
 // for this buffer
 func (b *Buffer) GetName() string {
-	if b.name == "" {
+	name := b.name
+	if name == "" {
 		if b.Path == "" {
 			return "No name"
 		}
-		return b.Path
+		name = b.Path
 	}
-	return b.name
+	if b.Settings["basename"].(bool) {
+		return path.Base(name)
+	}
+	return name
 }
 
 //SetName changes the name for this buffer
