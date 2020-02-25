@@ -7,7 +7,6 @@ import (
 	"errors"
 	"io"
 	"io/ioutil"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -129,7 +128,6 @@ func (b *SharedBuffer) insert(pos Loc, value []byte) {
 	b.LineArray.insert(pos, value)
 
 	inslines := bytes.Count(value, []byte{'\n'})
-	log.Println("insert", string(value), pos.Y, pos.Y+inslines)
 	b.MarkModified(pos.Y, pos.Y+inslines)
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
@@ -148,12 +146,10 @@ func (b *SharedBuffer) MarkModified(start, end int) {
 		return
 	}
 
-	log.Println("Modified", start, end, len(b.lines))
 	start = util.Clamp(start, 0, len(b.lines))
 	end = util.Clamp(end, 0, len(b.lines))
 
 	l := -1
-	log.Println("Modified", start, end)
 	for i := start; i <= end; i++ {
 		l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
 	}
@@ -570,7 +566,6 @@ func (b *Buffer) UpdateRules() {
 	if syntaxFile == "" {
 		// search for the syntax file in the user's custom syntax files
 		for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
-			log.Println("real runtime file", f.Name())
 			data, err := f.Data()
 			if err != nil {
 				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
@@ -788,7 +783,6 @@ func (b *Buffer) ClearCursors() {
 	b.UpdateCursors()
 	b.curCursor = 0
 	b.GetActiveCursor().ResetSelection()
-	log.Println("Cleared cursors:", len(b.cursors))
 }
 
 // MoveLinesUp moves the range of lines up one row

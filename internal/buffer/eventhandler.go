@@ -180,7 +180,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 
 	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
-			if start.Y != end.Y && loc.GreaterThan(end) {
+			if loc.Y != end.Y && loc.GreaterThan(end) {
 				loc.Y -= end.Y - start.Y
 			} else if loc.Y == end.Y && loc.GreaterEqual(end) {
 				loc = loc.MoveLA(-DiffLA(start, end, eh.buf.LineArray), eh.buf.LineArray)
