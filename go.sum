@@ -52,8 +52,6 @@ github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
 github.com/zyedidia/pty v2.0.0+incompatible h1:Ou5vXL6tvjst+RV8sUFISbuKDnUJPhnpygApMFGweqw=
 github.com/zyedidia/pty v2.0.0+incompatible/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
-github.com/zyedidia/tcell v1.4.3 h1:s0nmxj22Jj+vyt4nVmnB6kbnwRxEay1zfS0j8IsbtfI=
-github.com/zyedidia/tcell v1.4.3/go.mod h1:HhlbMSCcGX15rFDB+Q1Lk3pKEOocsCUAQC3zhZ9sadA=
 github.com/zyedidia/tcell v1.4.4 h1:o34LXujNuSueuyTy+5eoQW+rQr8g0UbY8k1NczZyskQ=
 github.com/zyedidia/tcell v1.4.4/go.mod h1:HhlbMSCcGX15rFDB+Q1Lk3pKEOocsCUAQC3zhZ9sadA=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
