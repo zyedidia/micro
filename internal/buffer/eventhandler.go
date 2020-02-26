@@ -270,7 +270,6 @@ func (eh *EventHandler) Undo() {
 		}
 
 		eh.UndoOneEvent()
-		break
 	}
 }
 
@@ -320,7 +319,6 @@ func (eh *EventHandler) Redo() {
 		}
 
 		eh.RedoOneEvent()
-		break
 	}
 }
 
