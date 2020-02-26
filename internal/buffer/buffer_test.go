@@ -79,7 +79,6 @@ func check(t *testing.T, before []string, operations []operation, after []string
 		cursor := cursors[i]
 		b.SetCurCursor(cursor.Num)
 		cursor.DeleteSelection()
-		cursor.ResetSelection()
 		b.Insert(cursor.Loc, strings.Join(op.text, "\n"))
 	}
 
@@ -95,7 +94,7 @@ func check(t *testing.T, before []string, operations []operation, after []string
 
 	for i, op := range operations {
 		cursor := cursors[i]
-		if !cursor.HasSelection() {
+		if op.start == op.end {
 			assert.Equal(op.start, cursor.Loc)
 		} else {
 			assert.Equal(op.start, cursor.CurSelection[0])
