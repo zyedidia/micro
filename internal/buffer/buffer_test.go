@@ -85,7 +85,9 @@ func check(t *testing.T, before []string, operations []operation, after []string
 
 	checkText(after)
 
-	for b.UndoStack.Peek() != nil {
+	// must have exactly two events per operation (delete and insert)
+	for range operations {
+		b.UndoOneEvent()
 		b.UndoOneEvent()
 	}
 
@@ -101,7 +103,8 @@ func check(t *testing.T, before []string, operations []operation, after []string
 		}
 	}
 
-	for b.RedoStack.Peek() != nil {
+	for range operations {
+		b.RedoOneEvent()
 		b.RedoOneEvent()
 	}
 
