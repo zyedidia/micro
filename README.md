@@ -91,7 +91,7 @@ Running `micro -version` will give you the version information.
 
 There is a script which can install micro for you by downloading the latest prebuilt binary. You can find it at <https://getmic.ro>.
 
-Then you can easily install micro:
+You can easily install micro by running
 
 ```bash
 curl https://getmic.ro | bash
@@ -128,6 +128,8 @@ for other operating systems:
     * `scoop install micro`
 * OpenBSD: Available in the ports tree and also available as a binary package
     * `pkd_add -v micro`
+* Arch Linux, CRUX, Termux for Android
+    * See details in the [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro)
 
 ### Building from source
 
