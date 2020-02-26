@@ -41,6 +41,73 @@ type Delta struct {
 	End   Loc
 }
 
+// DoTextEvent runs a text event
+func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
+	oldl := eh.buf.LinesNum()
+
+	if useUndo {
+		eh.Execute(t)
+	} else {
+		ExecuteTextEvent(t, eh.buf)
+	}
+
+	if len(t.Deltas) != 1 {
+		return
+	}
+
+	text := t.Deltas[0].Text
+	start := t.Deltas[0].Start
+	lastnl := -1
+	var endX int
+	var textX int
+	if t.EventType == TextEventInsert {
+		linecount := eh.buf.LinesNum() - oldl
+		textcount := utf8.RuneCount(text)
+		lastnl = bytes.LastIndex(text, []byte{'\n'})
+		if lastnl >= 0 {
+			endX = utf8.RuneCount(text[lastnl+1:])
+			textX = endX
+		} else {
+			endX = start.X + textcount
+			textX = textcount
+		}
+		t.Deltas[0].End = clamp(Loc{endX, start.Y + linecount}, eh.buf.LineArray)
+	}
+	end := t.Deltas[0].End
+
+	for _, c := range eh.cursors {
+		move := func(loc Loc) Loc {
+			if t.EventType == TextEventInsert {
+				if start.Y != loc.Y && loc.GreaterThan(start) {
+					loc.Y += end.Y - start.Y
+				} else if loc.Y == start.Y && loc.GreaterEqual(start) {
+					loc.Y += end.Y - start.Y
+					if lastnl >= 0 {
+						loc.X += textX - start.X
+					} else {
+						loc.X += textX
+					}
+				}
+				return loc
+			} else {
+				if loc.Y != end.Y && loc.GreaterThan(end) {
+					loc.Y -= end.Y - start.Y
+				} else if loc.Y == end.Y && loc.GreaterEqual(end) {
+					loc = loc.MoveLA(-DiffLA(start, end, eh.buf.LineArray), eh.buf.LineArray)
+				}
+				return loc
+			}
+		}
+		c.Loc = move(c.Loc)
+		c.CurSelection[0] = move(c.CurSelection[0])
+		c.CurSelection[1] = move(c.CurSelection[1])
+		c.OrigSelection[0] = move(c.OrigSelection[0])
+		c.OrigSelection[1] = move(c.OrigSelection[1])
+		c.Relocate()
+		c.LastVisualX = c.GetVisualX()
+	}
+}
+
 // ExecuteTextEvent runs a text event
 func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 	if t.EventType == TextEventInsert {
@@ -65,9 +132,9 @@ func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 }
 
 // UndoTextEvent undoes a text event
-func UndoTextEvent(t *TextEvent, buf *SharedBuffer) {
+func (eh *EventHandler) UndoTextEvent(t *TextEvent) {
 	t.EventType = -t.EventType
-	ExecuteTextEvent(t, buf)
+	eh.DoTextEvent(t, false)
 }
 
 // EventHandler executes text manipulations and allows undoing and redoing
@@ -117,6 +184,9 @@ func (eh *EventHandler) Insert(start Loc, textStr string) {
 
 // InsertBytes creates an insert text event and executes it
 func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
+	if len(text) == 0 {
+		return
+	}
 	start = clamp(start, eh.buf.LineArray)
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],
@@ -124,50 +194,14 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 		Deltas:    []Delta{{text, start, Loc{0, 0}}},
 		Time:      time.Now(),
 	}
-	oldl := eh.buf.LinesNum()
-	eh.Execute(e)
-	linecount := eh.buf.LinesNum() - oldl
-	textcount := utf8.RuneCount(text)
-	lastnl := bytes.LastIndex(text, []byte{'\n'})
-	var endX int
-	var textX int
-	if lastnl >= 0 {
-		endX = utf8.RuneCount(text[lastnl+1:])
-		textX = endX
-	} else {
-		endX = start.X + textcount
-		textX = textcount
-	}
-
-	e.Deltas[0].End = clamp(Loc{endX, start.Y + linecount}, eh.buf.LineArray)
-	end := e.Deltas[0].End
-
-	for _, c := range eh.cursors {
-		move := func(loc Loc) Loc {
-			if start.Y != loc.Y && loc.GreaterThan(start) {
-				loc.Y += end.Y - start.Y
-			} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-				loc.Y += end.Y - start.Y
-				if lastnl >= 0 {
-					loc.X += textX - start.X
-				} else {
-					loc.X += textX
-				}
-			}
-			return loc
-		}
-		c.Loc = move(c.Loc)
-		c.Relocate()
-		c.CurSelection[0] = move(c.CurSelection[0])
-		c.CurSelection[1] = move(c.CurSelection[1])
-		c.OrigSelection[0] = move(c.OrigSelection[0])
-		c.OrigSelection[1] = move(c.OrigSelection[1])
-		c.LastVisualX = c.GetVisualX()
-	}
+	eh.DoTextEvent(e, true)
 }
 
 // Remove creates a remove text event and executes it
 func (eh *EventHandler) Remove(start, end Loc) {
+	if start == end {
+		return
+	}
 	start = clamp(start, eh.buf.LineArray)
 	end = clamp(end, eh.buf.LineArray)
 	e := &TextEvent{
@@ -176,24 +210,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 		Deltas:    []Delta{{[]byte{}, start, end}},
 		Time:      time.Now(),
 	}
-	eh.Execute(e)
-
-	for _, c := range eh.cursors {
-		move := func(loc Loc) Loc {
-			if loc.Y != end.Y && loc.GreaterThan(end) {
-				loc.Y -= end.Y - start.Y
-			} else if loc.Y == end.Y && loc.GreaterEqual(end) {
-				loc = loc.MoveLA(-DiffLA(start, end, eh.buf.LineArray), eh.buf.LineArray)
-			}
-			return loc
-		}
-		c.Loc = move(c.Loc)
-		c.CurSelection[0] = move(c.CurSelection[0])
-		c.CurSelection[1] = move(c.CurSelection[1])
-		c.OrigSelection[0] = move(c.OrigSelection[0])
-		c.OrigSelection[1] = move(c.OrigSelection[1])
-		c.LastVisualX = c.GetVisualX()
-	}
+	eh.DoTextEvent(e, true)
 }
 
 // MultipleReplace creates an multiple insertions executes them
@@ -253,6 +270,7 @@ func (eh *EventHandler) Undo() {
 		}
 
 		eh.UndoOneEvent()
+		break
 	}
 }
 
@@ -264,10 +282,9 @@ func (eh *EventHandler) UndoOneEvent() {
 	if t == nil {
 		return
 	}
-
 	// Undo it
 	// Modifies the text event
-	UndoTextEvent(t, eh.buf)
+	eh.UndoTextEvent(t)
 
 	// Set the cursor in the right place
 	teCursor := t.C
@@ -303,6 +320,7 @@ func (eh *EventHandler) Redo() {
 		}
 
 		eh.RedoOneEvent()
+		break
 	}
 }
 
@@ -313,9 +331,6 @@ func (eh *EventHandler) RedoOneEvent() {
 		return
 	}
 
-	// Modifies the text event
-	UndoTextEvent(t, eh.buf)
-
 	teCursor := t.C
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
 		t.C = *eh.cursors[teCursor.Num]
@@ -323,6 +338,9 @@ func (eh *EventHandler) RedoOneEvent() {
 	} else {
 		teCursor.Num = -1
 	}
+
+	// Modifies the text event
+	eh.UndoTextEvent(t)
 
 	eh.UndoStack.Push(t)
 }

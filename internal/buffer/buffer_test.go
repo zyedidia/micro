@@ -47,17 +47,17 @@ func check(t *testing.T, before []string, operations []operation, after []string
 
 	b := NewBufferFromString(strings.Join(before, "\n"), "", BTDefault)
 
-	assert.NotEqual(b.GetName(), "")
-	assert.Equal(b.ExternallyModified(), false)
-	assert.Equal(b.Modified(), false)
-	assert.Equal(b.NumCursors(), 1)
+	assert.NotEqual("", b.GetName())
+	assert.Equal(false, b.ExternallyModified())
+	assert.Equal(false, b.Modified())
+	assert.Equal(1, b.NumCursors())
 
 	checkText := func(lines []string) {
-		assert.Equal(b.Bytes(), []byte(strings.Join(lines, "\n")))
-		assert.Equal(b.LinesNum(), len(lines))
+		assert.Equal([]byte(strings.Join(lines, "\n")), b.Bytes())
+		assert.Equal(len(lines), b.LinesNum())
 		for i, s := range lines {
-			assert.Equal(b.Line(i), s)
-			assert.Equal(b.LineBytes(i), []byte(s))
+			assert.Equal(s, b.Line(i))
+			assert.Equal([]byte(s), b.LineBytes(i))
 		}
 	}
 
@@ -73,18 +73,19 @@ func check(t *testing.T, before []string, operations []operation, after []string
 		cursors = append(cursors, cursor)
 	}
 
-	assert.Equal(b.NumCursors(), 1+len(operations))
+	assert.Equal(1+len(operations), b.NumCursors())
 
 	for i, op := range operations {
 		cursor := cursors[i]
+		b.SetCurCursor(cursor.Num)
 		cursor.DeleteSelection()
+		cursor.ResetSelection()
 		b.Insert(cursor.Loc, strings.Join(op.text, "\n"))
 	}
 
 	checkText(after)
 
-	for _ = range operations {
-		b.UndoOneEvent()
+	for b.UndoStack.Peek() != nil {
 		b.UndoOneEvent()
 	}
 
@@ -92,13 +93,15 @@ func check(t *testing.T, before []string, operations []operation, after []string
 
 	for i, op := range operations {
 		cursor := cursors[i]
-		assert.Equal(cursor.Loc, op.start)
-		assert.Equal(cursor.CurSelection[0], op.start)
-		assert.Equal(cursor.CurSelection[1], op.end)
+		if !cursor.HasSelection() {
+			assert.Equal(op.start, cursor.Loc)
+		} else {
+			assert.Equal(op.start, cursor.CurSelection[0])
+			assert.Equal(op.end, cursor.CurSelection[1])
+		}
 	}
 
-	for _ = range operations {
-		b.RedoOneEvent()
+	for b.RedoStack.Peek() != nil {
 		b.RedoOneEvent()
 	}
 
