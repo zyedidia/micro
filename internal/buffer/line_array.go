@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"bufio"
+	"bytes"
 	"io"
 	"sync"
 	"unicode/utf8"
@@ -152,17 +153,19 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 // Bytes returns the string that should be written to disk when
 // the line array is saved
 func (la *LineArray) Bytes() []byte {
-	str := make([]byte, 0, la.initsize+1000) // initsize should provide a good estimate
+	b := new(bytes.Buffer)
+	// initsize should provide a good estimate
+	b.Grow(int(la.initsize + 4096))
 	for i, l := range la.lines {
-		str = append(str, l.data...)
+		b.Write(l.data)
 		if i != len(la.lines)-1 {
 			if la.Endings == FFDos {
-				str = append(str, '\r')
+				b.WriteByte('\r')
 			}
-			str = append(str, '\n')
+			b.WriteByte('\n')
 		}
 	}
-	return str
+	return b.Bytes()
 }
 
 // newlineBelow adds a newline below the given line number
