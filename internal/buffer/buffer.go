@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"crypto/md5"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"os"
@@ -60,6 +61,9 @@ var (
 	BTRaw = BufType{4, false, true, false}
 	// BTInfo is a buffer for inputting information
 	BTInfo = BufType{5, false, true, false}
+	// BTStdout is a buffer that only writes to stdout
+	// when closed
+	BTStdout = BufType{6, false, true, true}
 
 	// ErrFileTooLarge is returned when the file is too large to hash
 	// (fastdirty is automatically enabled)
@@ -81,6 +85,8 @@ type SharedBuffer struct {
 	AbsPath string
 	// Name of the buffer on the status line
 	name string
+
+	toStdout bool
 
 	// Settings customized by the user
 	Settings map[string]interface{}
@@ -355,6 +361,10 @@ func (b *Buffer) Fini() {
 		b.Serialize()
 	}
 	b.RemoveBackup()
+
+	if b.Type == BTStdout {
+		fmt.Fprint(util.Stdout, string(b.Bytes()))
+	}
 }
 
 // GetName returns the name that should be displayed in the statusline

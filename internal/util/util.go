@@ -1,6 +1,7 @@
 package util
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"os"
@@ -34,6 +35,9 @@ var (
 	// FakeCursor is used to disable the terminal cursor and have micro
 	// draw its own (enabled for windows consoles where the cursor is slow)
 	FakeCursor = false
+
+	// Stdout is a buffer that is written to stdout when micro closes
+	Stdout *bytes.Buffer
 )
 
 func init() {
@@ -46,6 +50,7 @@ func init() {
 	if runtime.GOOS == "windows" {
 		FakeCursor = true
 	}
+	Stdout = new(bytes.Buffer)
 }
 
 // SliceEnd returns a byte slice where the index is a rune index

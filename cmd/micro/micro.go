@@ -147,11 +147,16 @@ func LoadInput() []*buffer.Buffer {
 	args := flag.Args()
 	buffers := make([]*buffer.Buffer, 0, len(args))
 
+	btype := buffer.BTDefault
+	if !isatty.IsTerminal(os.Stdout.Fd()) {
+		btype = buffer.BTStdout
+	}
+
 	if len(args) > 0 {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(args); i++ {
-			buf, err := buffer.NewBufferFromFile(args[i], buffer.BTDefault)
+			buf, err := buffer.NewBufferFromFile(args[i], btype)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
@@ -168,17 +173,22 @@ func LoadInput() []*buffer.Buffer {
 			screen.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
-		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, buffer.BTDefault))
+		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, btype))
 	} else {
 		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, buffer.BTDefault))
+		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, btype))
 	}
 
 	return buffers
 }
 
 func main() {
-	defer os.Exit(0)
+	defer func() {
+		if util.Stdout.Len() > 0 {
+			fmt.Fprint(os.Stdout, util.Stdout.String())
+		}
+		os.Exit(0)
+	}()
 
 	// runtime.SetCPUProfileRate(400)
 	// f, _ := os.Create("micro.prof")
