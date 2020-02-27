@@ -586,6 +586,7 @@ func (b *Buffer) UpdateRules() {
 					continue
 				}
 				b.SyntaxDef = syndef
+				syntaxFile = f.Name()
 				break
 			}
 		}
