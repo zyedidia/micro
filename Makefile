@@ -65,7 +65,21 @@ test:
 	go test ./internal/...
 
 bench:
-	go test -bench=. ./internal/...
+	for i in 1 2 3; do \
+		go test -bench=. ./internal/...; \
+	done > benchmark_results
+	benchstat benchmark_results
+
+bench-baseline:
+	for i in 1 2 3; do \
+		go test -bench=. ./internal/...; \
+	done > benchmark_results_baseline
+
+bench-compare:
+	for i in 1 2 3; do \
+		go test -bench=. ./internal/...; \
+	done > benchmark_results
+	benchstat benchmark_results_baseline benchmark_results
 
 clean:
 	rm -f micro
