@@ -1120,6 +1120,16 @@ func (h *BufPane) OpenFile() bool {
 	return true
 }
 
+// OpenFile opens a new file in the buffer
+func (h *BufPane) JumpLine() bool {
+	InfoBar.Prompt("> ", "goto ", "Command", nil, func(resp string, canceled bool) {
+		if !canceled {
+			h.HandleCommand(resp)
+		}
+	})
+	return true
+}
+
 // Start moves the viewport to the start of the buffer
 func (h *BufPane) Start() bool {
 	v := h.GetView()
