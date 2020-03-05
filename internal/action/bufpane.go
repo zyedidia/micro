@@ -343,10 +343,11 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				// release the mouse
 
 				// if !h.doubleClick && !h.tripleClick {
-				// 	h.Cursor.Loc = mouseLoc
 				// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
-				// 	h.Cursor.CopySelection("primary")
 				// }
+				if h.Cursor.HasSelection() {
+					h.Cursor.CopySelection("primary")
+				}
 				h.mouseReleased = true
 			}
 		}
