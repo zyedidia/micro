@@ -774,7 +774,7 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 // Find opens a prompt and searches forward for the input
 func (h *BufPane) Find() bool {
 	h.searchOrig = h.Cursor.Loc
-	InfoBar.Prompt("Find: ", "", "Find", func(resp string) {
+	InfoBar.Prompt("Find (regex): ", "", "Find", func(resp string) {
 		// Event callback
 		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, true)
 		if found {
