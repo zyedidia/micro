@@ -8,6 +8,7 @@ rules:
 
     # built-in objects
     - constant.bool: "\\b(true|false)\\b"
+    - constant: "\\b(nothing|missing)\\b"
       # built-in attributes
     - constant: "__[A-Za-z0-9_]+__"
       # definitions
