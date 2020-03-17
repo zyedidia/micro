@@ -209,13 +209,13 @@ func (i *InfoWindow) scrollToSuggestion() {
 }
 
 func (i *InfoWindow) Display() {
-	i.Clear()
-	x := 0
-	if config.GetGlobalOption("keymenu").(bool) {
-		i.displayKeyMenu()
-	}
-
 	if i.HasPrompt || config.GlobalSettings["infobar"].(bool) {
+		i.Clear()
+		x := 0
+		if config.GetGlobalOption("keymenu").(bool) {
+			i.displayKeyMenu()
+		}
+
 		if !i.HasPrompt && !i.HasMessage && !i.HasError {
 			return
 		}
