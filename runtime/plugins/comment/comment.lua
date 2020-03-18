@@ -23,6 +23,7 @@ ft["javascript"] = "// %s"
 ft["ruby"] = "# %s"
 ft["d"] = "// %s"
 ft["swift"] = "// %s"
+ft["elm"] = "-- %s"
 
 function onBufferOpen(buf)
     if buf.Settings["commenttype"] == nil then
