@@ -24,7 +24,7 @@ rules:
         rules:
             - constant.specialChar: "\\\\."
      
-     - constant.string:
+    - constant.string:
         start: "'"
         end: "'"
         skip: "\\\\."
