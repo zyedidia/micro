@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"regexp"
 	"runtime"
 	"sort"
 	"time"
@@ -44,6 +45,7 @@ func InitFlags() {
 		fmt.Println("-config-dir dir")
 		fmt.Println("    \tSpecify a custom location for the configuration directory")
 		fmt.Println("[FILE]:LINE:COL")
+		fmt.Println("+LINE:COL")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all option help")
@@ -152,11 +154,27 @@ func LoadInput() []*buffer.Buffer {
 		btype = buffer.BTStdout
 	}
 
-	if len(args) > 0 {
+	files := make([]string, 0, len(args))
+	flagStartPos := ""
+	flagr := regexp.MustCompile(`^\+\d+(:\d+)?$`)
+	for _, a := range args {
+		if flagr.MatchString(a) {
+			flagStartPos = a[1:]
+		} else {
+			if flagStartPos != "" {
+				files = append(files, a+":"+flagStartPos)
+				flagStartPos = ""
+			} else {
+				files = append(files, a)
+			}
+		}
+	}
+
+	if len(files) > 0 {
 		// Option 1
 		// We go through each file and load it
-		for i := 0; i < len(args); i++ {
-			buf, err := buffer.NewBufferFromFile(args[i], btype)
+		for i := 0; i < len(files); i++ {
+			buf, err := buffer.NewBufferFromFile(files[i], btype)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
