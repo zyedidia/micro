@@ -548,7 +548,37 @@ func (b *Buffer) UpdateRules() {
 		return
 	}
 	syntaxFile := ""
+	foundDef := false
 	var header *highlight.Header
+	// search for the syntax file in the user's custom syntax files
+	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		header, err = highlight.MakeHeaderYaml(data)
+		file, err := highlight.ParseFile(data)
+		if err != nil {
+			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
+			syndef, err := highlight.ParseDef(file, header)
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+			b.SyntaxDef = syndef
+			syntaxFile = f.Name()
+			foundDef = true
+			break
+		}
+	}
+
+	// search in the default syntax files
 	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 		data, err := f.Data()
 		if err != nil {
@@ -573,34 +603,8 @@ func (b *Buffer) UpdateRules() {
 		}
 	}
 
-	if syntaxFile == "" {
-		// search for the syntax file in the user's custom syntax files
-		for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
-			data, err := f.Data()
-			if err != nil {
-				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			header, err = highlight.MakeHeaderYaml(data)
-			file, err := highlight.ParseFile(data)
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
-				syndef, err := highlight.ParseDef(file, header)
-				if err != nil {
-					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-				b.SyntaxDef = syndef
-				syntaxFile = f.Name()
-				break
-			}
-		}
-	} else {
+	if syntaxFile != "" && !foundDef {
+		// we found a syntax file using a syntax header file
 		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
 			if f.Name() == syntaxFile {
 				data, err := f.Data()
