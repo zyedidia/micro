@@ -821,7 +821,11 @@ func (h *BufPane) TermCmd(args []string) {
 
 	term := func(i int, newtab bool) {
 		t := new(shell.Terminal)
-		t.Start(args, false, true, nil, nil)
+		err := t.Start(args, false, true, nil, nil)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
 		id := h.ID()
 		if newtab {
