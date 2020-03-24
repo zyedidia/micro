@@ -733,7 +733,8 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	nreplaced := 0
 	start := h.Buf.Start()
 	end := h.Buf.End()
-	if h.Cursor.HasSelection() {
+	selection := h.Cursor.HasSelection()
+	if selection {
 		start = h.Cursor.CurSelection[0]
 		end = h.Cursor.CurSelection[1]
 	}
@@ -786,13 +787,20 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 	h.Buf.RelocateCursors()
 
+	var s string
 	if nreplaced > 1 {
-		InfoBar.Message("Replaced ", nreplaced, " occurrences of ", search)
+		s = fmt.Sprintf("Replaced %d occurrences of %s", nreplaced, search)
 	} else if nreplaced == 1 {
-		InfoBar.Message("Replaced ", nreplaced, " occurrence of ", search)
+		s = fmt.Sprintf("Replaced 1 occurrence of %s", search)
 	} else {
-		InfoBar.Message("Nothing matched ", search)
+		s = fmt.Sprintf("Nothing matched %s", search)
 	}
+
+	if selection {
+		s += " in selection"
+	}
+
+	InfoBar.Message(s)
 }
 
 // ReplaceAllCmd replaces search term all at once
