@@ -762,6 +762,8 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			h.Cursor.SetSelectionStart(locs[0])
 			h.Cursor.SetSelectionEnd(locs[1])
 
+			h.Relocate()
+
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
 					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace)
@@ -786,6 +788,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	}
 
 	h.Buf.RelocateCursors()
+	h.Relocate()
 
 	var s string
 	if nreplaced > 1 {
