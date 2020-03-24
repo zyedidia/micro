@@ -1,8 +1,8 @@
-filename: python3
+filetype: python
 
 detect:
-    filename: "\\.py3$"
-    header: "^#!.*/(env +)?python3$"
+    filename: "\\.py(3)?$"
+    header: "^#!.*/(env +)?python(3)?$"
 
 rules:
     # built-in objects
