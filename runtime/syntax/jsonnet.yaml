@@ -1,0 +1,92 @@
+filename: jsonnet
+
+detect:
+    filename: "\\.jsonnet$"
+
+# Spec: https://jsonnet.org/ref/spec.html
+
+rules:
+    # built-in objects
+    # FIXME: $ won't match
+    - constant: "\\b(self|\\$|super)\\b"
+    # boolean constants
+    - constant.bool: "\\b(null|true|false)\\b"
+    # the standard library
+    - identifier: "\\bstd\\.(extVar|thisFile|type|length|objectHas|objectFields|objectHasAll|objectFieldsAll|prune|mapWithKey|abs|sign|max|min|pow|exp|log|exponent|mantissa|floor|ceil|sqrt|sin|cos|tan|asin|acos|atan|mod|assertEqual|toString|codepoint|char|substr|findSubstr|startsWith|endsWith|split|splitLimit|strReplace|asciiUpper|asciiLower|stringChars|format|escapeStringDollars|escapeStringPython|parseInt|parseOctal|parseHex|parseJson|encodeUTF8|decodeUTF8|manifestIni|manifestPython|manifestPythonVars|manifestJsonEx|manifestYamlDoc|manifestYamlStream|manifestXmlJsonml|makeArray|count|find|map|mapWithIndex|filterMap|filter|foldl|foldr|range|join|lines|flattenArrays|sort|uniq|set|setInter|setUnion|setDiff|setMember|base64|base64DecodeBytes|base64Decode|md5|mergePatch|trace)\\b"
+    # unquoted object keys
+    - type: "[_a-zA-Z][_a-zA-Z0-9]*\\s*:"
+    # object key separator
+    - statement: ":"
+    # keywords
+    - statement: "\\b(assert|else|error|for|function|if|import|importstr|in|local|tailstrict|then)\\b"
+    # operators
+    - symbol.operator: "([.;,+*|=!\\%]|<|>|/|-|&)"
+    # parentheses
+    - symbol.brackets: "([(){}]|\\[|\\])"
+    # numbers
+    - constant.number: "\\b(0|([1-9][0-9]*))(\\.[0-9]+)?([eE][\\+-]?[0-9]+)?\\b"
+
+    # double-quoted string
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\\""
+        rules:
+            - constant.specialChar: "\\\\u[0-9a-fA-F]{4}|\\\\[bfnrt'\"/\\\\]"
+
+    # single-quoted string
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\'"
+        rules:
+            - constant.specialChar: "\\\\u[0-9a-fA-F]{4}|\\\\[bfnrt'\"/\\\\]"
+
+    # double-quoted verbatim string
+    - constant.string:
+        start: "@\""
+        end: "\""
+        skip: "\\\\\""
+        rules:
+            - constant.specialChar: "\\\\\""
+            
+    # single-quoted verbatim string
+    - constant.string:
+        start: "@'"
+        end: "'"
+        skip: "\\\\'"
+        rules:
+            - constant.specialChar: "\\\\'"
+
+    # block string
+    - constant.string:
+        # FIXME:
+        # This isn't quite right.
+        # The spec says this:
+
+        # beginning with |||, followed by optional whitespace and a new-line.
+        # The next non-blank line must be prefixed with some non-zero length
+        # whitespace W. The block ends at the first subsequent line that does
+        # not begin with W, and it is an error if this line does not contain
+        # some optional whitespace followed by |||.
+
+        # We need to match ^(\s+) on the first non-blank line after |||
+        # Then we need to skip ^\1.*$
+
+        start: "\\|\\|\\| *$"
+        end: "^ *\\|\\|\\|"
+        rules: []
+
+    # multi-line comment
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # single-line comment
+    - comment:
+        start: "#|(//)"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

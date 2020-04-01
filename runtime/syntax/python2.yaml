@@ -1,8 +1,8 @@
-filetype: python
+filetype: python2
 
 detect:
-    filename: "\\.py$"
-    header: "^#!.*/(env +)?python( |$)"
+    filename: "\\.py2$"
+    header: "^#!.*/(env +)?python2$"
 
 rules:
 

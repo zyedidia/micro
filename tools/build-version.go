@@ -5,7 +5,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/zyedidia/micro/tools/semver"
+	"github.com/blang/semver"
 )
 
 func getTag(match ...string) (string, *semver.PRVersion) {
@@ -20,13 +20,21 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 			if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
 				return tagParts[0], &ahead
 			}
+		} else if len(tagParts) == 4 {
+			if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
+				return tagParts[0] + "-" + tagParts[1], &ahead
+			}
 		}
 
-		return tagParts[0], nil
+		return string(tag), nil
 	}
 }
 
 func main() {
+	if tags, err := exec.Command("git", "tag").Output(); err != nil || len(tags) == 0 {
+		// no tags found -- fetch them
+		exec.Command("git", "fetch", "--tags").Run()
+	}
 	// Find the last vX.X.X Tag and get how many builds we are ahead of it.
 	versionStr, ahead := getTag("--match", "v*")
 	version, err := semver.ParseTolerant(versionStr)
@@ -45,11 +53,13 @@ func main() {
 	}
 
 	// If we don't have any tag assume "dev"
-	if tag == "" {
+	if tag == "" || strings.HasPrefix(tag, "nightly") {
 		tag = "dev"
 	}
 	// Get the most likely next version:
-	version.Patch = version.Patch + 1
+	if !strings.Contains(version.String(), "rc") {
+		version.Patch = version.Patch + 1
+	}
 
 	if pr, err := semver.NewPRVersion(tag); err == nil {
 		// append the tag as pre-release name

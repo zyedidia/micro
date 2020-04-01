@@ -4,7 +4,7 @@ detect:
     filename: "\\.(gql|graphql)$"
 
 rules:
-    - type: "\\b(?:(query|mutation|subscription|type|fragment|schema|union|on|extends?))\\b"
+    - type: "\\b(?:(query|mutation|subscription|type|input|scalar|fragment|schema|union|on|extends?))\\b"
 
     # scalar types
     - statement: "\\b(ID|Int|Float|Boolean|String|Datetime|Null)\\b"

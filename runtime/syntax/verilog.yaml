@@ -1,0 +1,60 @@
+filetype: verilog
+
+detect:
+    filename: "\\.(v|vh|sv|svh)$"
+
+rules:
+    - preproc: "\\b(module|package|program|endmodule|endpackage|endprogram)\\b"
+    - type.keyword: "\\b(task|interface|class|endtask|endinterface|endclass)\\b"
+    # builtin functions like $display
+    - special: "\\$[0-9A-Za-z_]+"
+
+    # Verilog keywords
+    - statement: "\\b(always|and|assign|automatic|begin|buf|bufif0|bufif1|case|casex|casez|cell|cmos|config)\\b"
+    - statement: "\\b(deassign|default|defparam|design|disable|edge|else|end|endcase|endconfig|endfunction|endgenerate)\\b"
+    - statement: "\\b(endprimitive|endspecify|endtable|event|for|force|forever|fork|function|generate)\\b"
+    - statement: "\\b(genvar|highz0|highz1|if|iff|ifnone|incdir|include|initial|input|instance|join)\\b"
+    - statement: "\\b(large|liblist|library|localparam|macromodule|medium|nand|negedge|nmos|nor|noshowcancelled)\\b"
+    - statement: "\\b(not|notif0|notif1|null|or|output|parameter|pmos|posedge|primitive|pull0|pull1|pulldown|pullup)\\b"
+    - statement: "\\b(pulsestyle_onevent|pulsestyle_ondetect|rcmos|realtime|reg|release|repeat|rnmos|rpmos|rtran)\\b"
+    - statement: "\\b(rtranif0|rtranif1|scalared|showcancelled|small|specify|specparam|strong0|strong1|supply0)\\b"
+    - statement: "\\b(supply1|table|time|tran|tranif0|tranif1|tri0|tri1|triand|trior|trireg|use|uwire)\\b"
+    - statement: "\\b(vectored|wait|wand|weak0|weak1|while|wor|xnor|xor)\\b"
+
+    # SystemVerilog keywords
+    - statement: "\\b(alias|always_comb|always_ff|always_latch|assert|assume|before|bind|bins|binsof|break)\\b"
+    - statement: "\\b(chandle|clocking|const|constraint|context|continue|cover|covergroup|coverpoint|cross|dist|do)\\b"
+    - statement: "\\b(endclocking|endgroup|endproperty|endsequence|enum)\\b"
+    - statement: "\\b(expect|export|extends|extern|final|first_match|foreach|forkjoin|ignore_bins|illegal_bins|import)\\b"
+    - statement: "\\b(inside|intersect|join_any|join_none|local|longint|matches|modport|new)\\b"
+    - statement: "\\b(packed|priority|property|protected|pure|rand|randc|randcase|randsequence|ref|return)\\b"
+    - statement: "\\b(sequence|solve|static|struct|super|tagged|this|throughout|timeprecision)\\b"
+    - statement: "\\b(timeunit|type|typedef|union|unique|virtual|wait_order|wildcard|with|within)\\b"
+
+    # types
+    - type.keyword: "\\b(int|integer|logic|wire|tri|unsigned|signed|inout|var|shortint|shortreal|real|void|string|bit|byte)\\b"
+
+    # constants
+    - constant.number: "\\b[0-9]+\\b"
+    - constant.number: "\\b'[su]?[dboh][0-9xzXZa-fA-F]+\\b"
+    # .asdf(...) argument syntax
+    - special: "\\.((\\*)|([A-Za-z][A-Za-z0-9_]*))"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

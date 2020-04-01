@@ -1,33 +1,31 @@
 name: micro
-version: git
 summary: A modern and intuitive terminal-based text editor
 description: |
   Micro is a terminal-based text editor that aims to be easy to use and
   intuitive, while also taking advantage of the full capabilities of modern
   terminals.
 confinement: classic
+adopt-info: micro
 
 apps:
   micro:
     command: bin/micro
 
 parts:
-  go:
-    source-tag: go1.10
   micro:
-    after: [go]
     source: .
     source-type: git
     plugin: nil
     build-packages: [make]
-    prepare: |
-      mkdir -p ../go/src/github.com/zyedidia/micro
-      cp -R . ../go/src/github.com/zyedidia/micro
-    build: |
-      export GOPATH=$(pwd)/../go
-      export GOBIN=$(pwd)/../go/bin
-      cd ../go/src/github.com/zyedidia/micro
-      make install
-    install: |
+    build-snaps: [go]
+    build-attributes: [no-patchelf]
+    override-pull: |
+      snapcraftctl pull
+      version="$(go run $SNAPCRAFT_PART_SRC/tools/build-version.go)"
+      [ -n "$(echo $version | grep "dev")" ] && grade=devel || grade=stable
+      snapcraftctl set-version "$version"
+      snapcraftctl set-grade "$grade"
+    override-build: |
+      make build-tags
       mkdir $SNAPCRAFT_PART_INSTALL/bin
-      mv ../go/bin/micro $SNAPCRAFT_PART_INSTALL/bin/
+      mv ./micro $SNAPCRAFT_PART_INSTALL/bin/

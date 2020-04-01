@@ -1,7 +1,6 @@
--- VERSION = "1.0.0"
-if GetOption("literate") == nil then
-    AddOption("literate", true)
-end
+VERSION = "1.0.0"
+
+local config = import("micro/config")
 
 function startswith(str, start)
    return string.sub(str,1,string.len(start))==start
@@ -12,21 +11,20 @@ function endswith(str, endStr)
 end
 
 function split(string, sep)
-        local sep, fields = sep or ":", {}
-        local pattern = string.format("([^%s]+)", sep)
-        string:gsub(pattern, function(c) fields[#fields+1] = c end)
-        return fields
+    local sep, fields = sep or ":", {}
+    local pattern = string.format("([^%s]+)", sep)
+    string:gsub(pattern, function(c) fields[#fields+1] = c end)
+    return fields
 end
 
-function onViewOpen(view)
-    if not GetOption("literate") then return end
-    if not endswith(view.Buf.Path, ".lit") then
+function onBufferOpen(buf)
+    if not endswith(buf.Path, ".lit") then
         return
     end
 
     local codetype = "unknown"
-    for i=1,view.Buf.NumLines do
-        local line = view.Buf:Line(i-1)
+    for i=1,buf:LinesNum() do
+        local line = buf:Line(i-1)
         if startswith(line, "@code_type") then
             codetype = split(line, " ")[2]
             break
@@ -52,6 +50,7 @@ function onViewOpen(view)
     syntaxFile = syntaxFile .. "                rules: []\n"
     syntaxFile = syntaxFile .. "            - include: " .. codetype .. "\n"
 
-    AddRuntimeFileFromMemory("literate", "syntax", "literate.yaml", syntaxFile)
-    Reload()
+    config.AddRuntimeFileFromMemory(config.RTSyntax, "literate.yaml", syntaxFile)
+    config.Reload()
+    buf:UpdateRules()
 end
