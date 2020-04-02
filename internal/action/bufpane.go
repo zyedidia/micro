@@ -224,6 +224,7 @@ func (h *BufPane) ResizePane(size int) {
 	h.tab.Resize()
 }
 
+// CheckPassword checks if there is a password and prompts if not
 func CheckPassword(buf *buffer.Buffer, filename string, callback func()) {
 	var password string
 	if value, ok := buf.Settings["password"]; ok {
