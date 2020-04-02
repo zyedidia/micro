@@ -251,7 +251,7 @@ func NewBufferFromFile(path string, btype BufType, passwords []screen.Password) 
 	var size int64
 	if err == nil {
 		size = util.FSize(file)
-		if btype == BTArmorGPG || btype == BTGPG {
+		if (btype == BTArmorGPG || btype == BTGPG) && len(passwords) == 1 {
 			buffer := bytes.Buffer{}
 			settings := map[string]interface{}{
 				"password": passwords[0].Secret,
@@ -290,6 +290,11 @@ func NewBufferFromFile(path string, btype BufType, passwords []screen.Password) 
 		buf = NewBufferFromString("", filename, btype)
 	} else {
 		buf = NewBuffer(reader, size, filename, cursorLoc, btype)
+	}
+
+	if (btype == BTArmorGPG || btype == BTGPG) && len(passwords) == 1 {
+		buf.Settings["password"] = passwords[0].Secret
+		buf.Settings["passwordPrompted"] = passwords[0].Prompted
 	}
 
 	return buf, nil

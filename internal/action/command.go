@@ -229,10 +229,15 @@ func (h *BufPane) PwdCmd(args []string) {
 	}
 }
 
+// GetPasswords gets the passwrods for a new file
 func GetPasswords(filename string, callback func(btype buffer.BufType, passwords []screen.Password)) {
 	passwords := make([]screen.Password, 0, 1)
 	bufType := buffer.GetBufferType(filename, buffer.BTDefault)
 	if bufType == buffer.BTArmorGPG || bufType == buffer.BTGPG {
+		if _, e := os.Stat(filename); e != nil {
+			callback(bufType, passwords)
+			return
+		}
 		InfoBar.PasswordPrompt(false, func(password string, canceled bool) {
 			if canceled {
 				InfoBar.Error("password required")
@@ -249,11 +254,6 @@ func GetPasswords(filename string, callback func(btype buffer.BufType, passwords
 	}
 	callback(bufType, passwords)
 	return
-}
-
-func SavePasswords(buf *buffer.Buffer, passwords []screen.Password) {
-	buf.Settings["password"] = passwords[0].Secret
-	buf.Settings["passwordPrompted"] = true
 }
 
 // OpenCmd opens a new buffer with a given filename
@@ -281,7 +281,6 @@ func (h *BufPane) OpenCmd(args []string) {
 					InfoBar.Error(err)
 					return
 				}
-				SavePasswords(b, passwords)
 				h.OpenBuffer(b)
 			})
 		}
@@ -403,7 +402,6 @@ func (h *BufPane) VSplitCmd(args []string) {
 			InfoBar.Error(err)
 			return
 		}
-		SavePasswords(buf, passwords)
 		h.VSplitBuf(buf)
 	})
 }
@@ -426,7 +424,6 @@ func (h *BufPane) HSplitCmd(args []string) {
 			InfoBar.Error(err)
 			return
 		}
-		SavePasswords(buf, passwords)
 
 		h.HSplitBuf(buf)
 	})
@@ -455,7 +452,6 @@ func (h *BufPane) NewTabCmd(args []string) {
 						InfoBar.Error(err)
 						return
 					}
-					SavePasswords(b, passwords)
 					tp := NewTabFromBuffer(0, 0, width, height-1-iOffset, b)
 					Tabs.AddTab(tp)
 					Tabs.SetActive(len(Tabs.List) - 1)

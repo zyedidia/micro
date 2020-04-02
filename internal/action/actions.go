@@ -723,7 +723,9 @@ func (h *BufPane) SaveAsCB(action string, callback func(noPrompt bool)) {
 				if noPrompt {
 					h.completeAction(action)
 				}
-				callback(noPrompt)
+				if callback != nil {
+					callback(noPrompt)
+				}
 			})
 		}
 	})

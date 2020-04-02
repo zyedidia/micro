@@ -165,19 +165,17 @@ func LoadInput(files []File) []*buffer.Buffer {
 		// Option 1
 		// We go through each file and load it
 		for _, file := range files {
-			for i := 0; i < len(files); i++ {
-				buf, err := buffer.NewBufferFromFile(file.Name, file.Type, file.Passwords)
-				if err != nil {
-					screen.TermMessage(err)
-					continue
-				}
-				if len(file.Passwords) == 1 {
-					buf.Settings["password"] = file.Passwords[0].Secret
-					buf.Settings["passwordPrompted"] = file.Passwords[0].Prompted
-				}
-				// If the file didn't exist, input will be empty, and we'll open an empty buffer
-				buffers = append(buffers, buf)
+			buf, err := buffer.NewBufferFromFile(file.Name, file.Type, file.Passwords)
+			if err != nil {
+				screen.TermMessage(err)
+				continue
 			}
+			if len(file.Passwords) == 1 {
+				buf.Settings["password"] = file.Passwords[0].Secret
+				buf.Settings["passwordPrompted"] = file.Passwords[0].Prompted
+			}
+			// If the file didn't exist, input will be empty, and we'll open an empty buffer
+			buffers = append(buffers, buf)
 		}
 	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
