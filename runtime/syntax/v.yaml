@@ -1,0 +1,84 @@
+filetype: v
+
+detect:
+
+rules:
+    # Conditionals and control flow
+    - keywords: "\\b(import|go|defer)\\b"
+    - special: "\\b(or|break|continue|match|case|goto|return|none)\\b"
+    - function: "\\b(fn)\\b"
+    - main_function: "\\b(fn main\\(\\))"
+    - optionals: "\\b(none|error\\()"
+    - statement: "\\b(if|else|for|match)\\b"
+    - assert: "\\b(assert)\\b"
+    - symbol.operator: "\\b([-+/*=<>!~%&|^])\\b"
+    - symbol.operator: "\\b(:=)\\b"
+    - symbol.operator: "\\b(\\|\\|)\b"
+    - symbol.operator: "\\b(\\&\\&)\\b"
+
+    - compile_if: "\\b(\\$if|\\$else)\\b"
+    - oses: "\\b(mac|macos|linux|windows|freebsd|openbsd|netbsd|dragonfly|js|android|solaris|haiku)\\b"
+
+      # Types
+    - symbol: "(,|\\.)"
+    - btype: "\\b(bool)\\b"
+    - ztype: "\\b(char|byte)\\b"
+    - itype: "\\b(int|i(8|16|64)|u(8|16|32|64))\\b"
+    - ftype: "\\b(f(32|64))\\b"
+    - ptype: "\\b(uintptr|charptr|byteptr|voidptr)\\b"
+    - atype: "\\b(array)\\b"
+    - stype: "\\b(string|ustring)\\b"
+    - mtype: "\\b(map)\\b"
+    - type.keyword: "\\b(pub|mut|struct|enum|interface|module|type|const)\\b"
+    - constant.bool: "\\b(true|false)\\b"
+
+      # Brackets
+    - symbol.brackets: "(\\{|\\})"
+    - symbol.brackets: "(\\(|\\))"
+    - symbol.brackets: "(\\[|\\])"
+
+      # Numbers and strings
+    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - error: "..+"
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "`"
+        end: "`"
+        rules: []
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - function.attribute:
+        start: "^\\["
+        end: "\\]$"
+        rules:
+            - known: "\\b(deprecated|inline|typedef|if)\\b"
+

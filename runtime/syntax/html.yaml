@@ -1,44 +1,70 @@
 filetype: html
 
-detect: 
+detect:
     filename: "\\.htm[l]?$"
 
 rules:
-    - error: "<[^!].*?>"
-    - symbol.tag: "(?i)<[/]?(a(bbr|cronym|ddress|pplet|rea|rticle|side|udio)?|b(ase(font)?|d(i|o)|ig|lockquote|r)?|ca(nvas|ption)|center|cite|co(de|l|lgroup)|d(ata(list)?|d|el|etails|fn|ialog|ir|l|t)|em(bed)?|fieldset|fig(caption|ure)|font|form|(i)?frame|frameset|h[1-6]|hr|i|img|in(put|s)|kbd|keygen|label|legend|li(nk)?|ma(in|p|rk)|menu(item)?|met(a|er)|nav|no(frames|script)|o(l|pt(group|ion)|utput)|p(aram|icture|re|rogress)?|q|r(p|t|uby)|s(trike)?|samp|se(ction|lect)|small|source|span|strong|su(b|p|mmary)|textarea|time|track|u(l)?|var|video|wbr)( .*|>)*?>"
-    - symbol.tag.extended: "(?i)<[/]?(body|div|html|head(er)?|footer|title|table|t(body|d|h(ead)?|r|foot))( .*)*?>"
-    - special: "&[^;[[:space:]]]*;"
-    - symbol: "[:=]"
-    - identifier: "(alt|bgcolor|height|href|id|label|longdesc|name|on(click|focus|load|mouseover)|size|span|src|target|type|value|width)="
-    - constant.number: "(?i)#[0-9A-F]{6,6}"
-    # - default:
-    #     start: ">"
-    #     end: "<"
-    #     rules: []
-
-    - symbol.tag: "<|>"
-    - constant.string.url: "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
-    - comment: "<!--.+?-->"
-    - preproc: "<!DOCTYPE.+?>"
-
-    - constant.string:
-        start: "\""
-        end: "\""
-        skip: "\\\\."
+    # Doctype is case-insensitive
+    - preproc: "<!(?i)(DOCTYPE html.*)>"
+    # Opening tag
+    - symbol.tag:
+        start: "<(a|abbr|acronym|address|applet|area|article|aside|audio|b|base|bdi|bdo|big|blockquote|body|br|button|canvas|caption|center|cite|code|col|colgroup|command|datalist|dd|del|details|dfn|dir|div|dl|dt|em|embed|fieldset|figcaption|figure|font|footer|form|frame|frameset|h[1-6]|head|header|hgroup|hr|html|i|iframe|img|input|ins|kbd|keygen|label|legend|li|link|map|mark|menu|meta|meter|nav|noframes|noscript|object|ol|optgroup|option|output|p|param|pre|progress|q|rp|rt|ruby|s|samp|section|select|small|source|span|strike|strong|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|title|tr|track|tt|u|ul|var|video|wbr)\\b"
+        end: ">"
         rules:
-            - constant.specialChar: "\\\\."
+          - identifier: "\\b(placeholder|style|alt|bgcolor|height|href|id|(aria|data)\\-.+|label|longdesc|name|on(click|focus|load|mouseover)|size|span|src|target|type|value|width|class|charset|content|rel|integrity|crossorigin|for|onsubmit|lang|role)\\b"
+          - special: "\\b(required)\\b"
+          # Match double-quote strings
+          - constant.string:
+                start: "\""
+                end: "\""
+                skip: "\\\\."
+                rules:
+                  - constant.specialChar: "\\\\."
+                  - constant.string.url: "((ftp(s)?|http(s)?|git|chrome)://[^\\s]+)"
+          # Match single-quote strings
+          - constant.string:
+                start: "'"
+                end: "'"
+                skip: "\\\\."
+                rules:
+                  - constant.specialChar: "\\\\."
+                  - constant.string.url: "((ftp(s)?|http(s)?|git|chrome)://[^\\s]+)"
+          # Highlight the equals and any colon between words
+          - symbol: "\\b(=|:\\b)"
 
+    # Closing tag
+    - symbol.tag:
+        start: "</(a|abbr|acronym|address|applet|area|article|aside|audio|b|base|bdi|bdo|big|blockquote|body|br|button|canvas|caption|center|cite|code|col|colgroup|command|datalist|dd|del|details|dfn|dir|div|dl|dt|em|embed|fieldset|figcaption|figure|font|footer|form|frame|frameset|h[1-6]|head|header|hgroup|hr|html|i|iframe|img|input|ins|kbd|keygen|label|legend|li|link|map|mark|menu|meta|meter|nav|noframes|noscript|object|ol|optgroup|option|output|p|param|pre|progress|q|rp|rt|ruby|s|samp|section|select|small|source|span|strike|strong|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|title|tr|track|tt|u|ul|var|video|wbr)\\b"
+        end: ">"
+        rules:
+          # Anything in the closing tag is an error
+          - error: "."
+
+    # Reserved entities like a&#12; &nbsp; and &#x12A;
+    - special: "(([a-zA-Z]&#[0-9]+|&[a-zA-Z]+|&#[a-zA-Z0-9]+);)"
+
+    # TODO: Add `limit-rules` to both the `default` rules below once it's implemented into Micro
     - default:
         start: "<script.*?>"
         end: "</script.*?>"
         limit-group: symbol.tag
         rules:
-            - include: "javascript"
+          - include: "javascript"
 
     - default:
         start: "<style.*?>"
         end: "</style.*?>"
         limit-group: symbol.tag
         rules:
-            - include: "css"
+          - include: "css"
 
+    # This weird empty comment thing is technically valid
+    - comment: "<!>"
+
+    - comment.block:
+        start: "<!\\-\\-"
+        end: "\\-\\->"
+        rules:
+          - todo: "(FIXME|NOTE|TODO):?"
+          # While technically not a "true" error, these are recommended to not be used inside a comment
+          - error: "(\\-\\-|>)"

@@ -1,26 +1,68 @@
 filetype: ruby
 
 detect: 
-    filename: "\\.rb$|\\.gemspec$|Gemfile|config.ru|Rakefile|Capfile|Vagrantfile"
+    filename: "\\.(rb|rake|gemspec)$|^(Gemfile|config.ru|Rakefile|Capfile|Vagrantfile|Guardfile|Appfile|Fastfile|Pluginfile|Podfile)$"
     header: "^#!.*/(env +)?ruby( |$)"
 
 rules:
-    - statement: "\\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\\?|do|else|elsif|end|ensure|false|for|if|in|module|next|nil|not|or|redo|rescue|retry|return|self|super|then|true|undef|unless|until|when|while|yield)\\b"
+    - comment.bright:
+        start: "##"
+        end: "$"
+        rules:
+            - todo: "(XXX|TODO|FIXME|BUG|\\?\\?\\?)"
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(XXX|TODO|FIXME|BUG|\\?\\?\\?)"
+
+    - statement: "\\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\\?|do|else|elsif|end|ensure|for|if|in|module|next|nil|not|or|private|protected|public|redo|rescue|retry|return|self|super|then|undef|unless|until|when|while|yield)\\b"
     - constant: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
-    - constant.number: "\\b[0-9]+\\b"
+    - constant.number: "(?i)\\b0x[0-9a-f][0-9a-f_]*\\b"
+    - constant.number: "(?i)\\b0b[01][01_]*\\b"
+    - constant.number: "(?i)\\b[0-9][0-9_]*(['.'][0-9_]+)?(e[\\-]?[0-9_]+)?\\b"
+    # Ruby "Symbols"
     - constant: "(i?)([ 	]|^):[0-9A-Z_]+\\b"
     - constant: "\\b(__FILE__|__LINE__)\\b"
     - constant: "/([^/]|(\\\\/))*/[iomx]*|%r\\{([^}]|(\\\\}))*\\}[iomx]*"
-    - constant.string: "`[^`]*`|%x\\{[^}]*\\}"
-    - constant.string: "\"([^\"]|(\\\\\"))*\"|%[QW]?\\{[^}]*\\}|%[QW]?\\([^)]*\\)|%[QW]?<[^>]*>|%[QW]?\\[[^]]*\\]|%[QW]?\\$[^$]*\\$|%[QW]?\\^[^^]*\\^|%[QW]?![^!]*!"
-    - special: "#\\{[^}]*\\}"
-    - constant.string: "'([^']|(\\\\'))*'|%[qw]\\{[^}]*\\}|%[qw]\\([^)]*\\)|%[qw]<[^>]*>|%[qw]\\[[^]]*\\]|%[qw]\\$[^$]*\\$|%[qw]\\^[^^]*\\^|%[qw]![^!]*!"
-    - comment: "#[^{].*$|#$"
-    - comment.bright: "##[^{].*$|##$"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules: []
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - symbol.brackets:
+                start: "#\\{"
+                end: "\\}"
+                rules:
+                    - default: ".*"
+
+    - constant.string.exec:
+        start: "`"
+        end: "`"
+        skip: "\\\\."
+        rules:
+            - symbol.brackets:
+                start: "#\\{"
+                end: "\\}"
+                rules:
+                    - default: ".*"
+
+    - constant.string: "%[QW]?\\{[^}]*\\}|%[QW]?\\([^)]*\\)|%[QW]?<[^>]*>|%[QW]?\\[[^]]*\\]|%[QW]?\\$[^$]*\\$|%[QW]?\\^[^^]*\\^|%[QW]?![^!]*!"
+    - constant.string: "%[qw]\\{[^}]*\\}|%[qw]\\([^)]*\\)|%[qw]<[^>]*>|%[qw]\\[[^]]*\\]|%[qw]\\$[^$]*\\$|%[qw]\\^[^^]*\\^|%[qw]![^!]*!"
+    - constant.string.exec: "%[x]\\{[^}]*\\}|%[x]\\([^)]*\\)|%[x]<[^>]*>|%[x]\\[[^]]*\\]|%[x]\\$[^$]*\\$|%[x]\\^[^^]*\\^|%[x]![^!]*!"
+    - constant.bool: "\\b(true|false|nil|TRUE|FALSE|NIL)\\b"
+    - symbol.operator: "[-+/*=<>!~%&|^]|\\b:"
+    - symbol.brackets: "([(){}]|\\[|\\])"
     - constant.macro:
         start: "<<-?'?EOT'?"
         end: "^EOT"
         rules: []
 
-    - todo: "(XXX|TODO|FIXME|\\?\\?\\?)"
     - preproc.shebang: "^#!.+?( |$)"

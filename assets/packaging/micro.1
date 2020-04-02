@@ -1,11 +1,4 @@
-.\" micro manual page - micro(1)
-.\" 
-.\" Copyright © 2017 Zachary Yedidia <zyedidia@gmail.com>
-.\" Copyright © 2017 Collin Warren <anatoly@somethinghub.com>
-.\"
-.\" This document is provided under the same licensing as micro.
-.\" See \usr\share\doc\micro\LICENSE for more information.
-.TH micro 1 "2017-03-28"
+.TH micro 1 "2020-02-10"
 .SH NAME
 micro \- A modern and intuitive terminal-based text editor
 .SH SYNOPSIS
@@ -23,38 +16,95 @@ enjoyable to use full time, whether you work in the terminal because you prefer 
 
 .SH OPTIONS
 .PP
+\-clean
+.RS 4
+Cleans the configuration directory
+.RE
+
+.PP
 \-config-dir dir
 .RS 4
 Specify a custom location for the configuration directory
 .RE
+
 .PP
-\-startpos LINE,COL
+[FILE]:LINE:COL
 .RS 4
 Specify a line and column to start the cursor at when opening a buffer
 .RE
+
 .PP
 \-options
 .RS 4
 Show all option help
 .RE
+
+.PP
+\-debug
+.RS 4
+Enable debug mode (enables logging to ./log.txt)
+.RE
+
 .PP
 \-version
 .RS 4
 Show the version number and information
 .RE
 
+Micro's plugin's can be managed at the command line with the following commands.
+.RS 4
+
+.PP
+\-plugin remove [PLUGIN]...
+.RS 4
+Remove plugin(s)
+.RE
+
+.PP
+\-plugin update [PLUGIN]...
+.RS 4
+Update plugin(s) (if no argument is given, updates all plugins)
+.RE
+
+.PP
+\-plugin search [PLUGIN]...
+.RS 4
+Search for a plugin
+.RE
+
+.PP
+\-plugin list
+.RS 4
+List installed plugins
+.RE
+
+.PP
+\-plugin available
+.RS 4
+List available plugins
+.RE
+.RE
+
+Micro's options can also be set via command line arguments for quick
+adjustments. For real configuration, please use the settings.json
+file (see 'help options').
+.RS 4
+
+.PP
+\-option value
+.RS 4
+Set `option` to `value` for this session
+For example: `micro -syntax off file.c`
+.RE
+
+
 .SH CONFIGURATION
 
-Micro uses
-\fI$XDG_CONFIG_HOME/micro\fR
-for configuration by default. If it is not set, micro uses ~/.config/micro.
-Two main configuration files are settings.json, containing the user's
-settings, and bindings.json, containing the user's custom keybindings.
-
-.SH ENVIRONMENT
-Micro's behaviour can be changed by setting environment variables, of which there is currently only one:
-\fIMICRO_TRUECOLOR\fR.
-When MICRO_TRUECOLOR is set to 1, micro will attempt to treat your terminal as a true-color terminal and will be able to make full use of the true-color colorschemes that are included with micro. If MICRO_TRUECOLOR is not set or is set to 0, then micro will only make use of 256 color features and will internally map true-color colorschemes to the nearest colors available. For more information see micro's documentation.
+Micro uses $MICRO_CONFIG_HOME as the configuration directory.
+If this environment variable is not set, it uses $XDG_CONFIG_HOME/micro instead.
+If that environment variable is not set, it uses ~/.config/micro as the configuration directory.
+In the documentation, we use ~/.config/micro to refer to the configuration directory
+(even if it may in fact be somewhere else if you have set either of the above environment variables).
 
 .SH NOTICE
 This manpage is intended only to serve as a quick guide to the invocation of 
@@ -69,5 +119,5 @@ and to report any newly encountered bugs you may find. We strive to correct
 bugs as swiftly as possible.
 
 .SH COPYRIGHT
-Copyright \(co 2017 Zachary Yedidia, Collin Warren, et al.
+Copyright \(co 2020 Zachary Yedidia, et al.
 See /usr/share/doc/micro/LICENSE and /usr/share/doc/micro/AUTHORS for more information.
