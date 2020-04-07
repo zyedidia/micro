@@ -457,7 +457,7 @@ conventions for text editing defaults.
     "CtrlT":          "AddTab",
     "Alt,":           "PreviousTab",
     "Alt.":           "NextTab",
-    "Home":           "StartOfLine",
+    "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",
