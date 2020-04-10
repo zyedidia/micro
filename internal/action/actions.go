@@ -291,6 +291,19 @@ func (h *BufPane) StartOfText() bool {
 	return true
 }
 
+// StartOfTextToggle toggles the cursor between the start of the text of the line
+// and the start of the line
+func (h *BufPane) StartOfTextToggle() bool {
+	h.Cursor.Deselect(true)
+	if h.Cursor.IsStartOfText() {
+		h.Cursor.Start()
+	} else {
+		h.Cursor.StartOfText()
+	}
+	h.Relocate()
+	return true
+}
+
 // StartOfLine moves the cursor to the start of the line
 func (h *BufPane) StartOfLine() bool {
 	h.Cursor.Deselect(true)
@@ -324,6 +337,23 @@ func (h *BufPane) SelectToStartOfText() bool {
 	h.Relocate()
 	return true
 }
+
+// SelectToStartOfTextToggle toggles the selection between the start of the text
+// on the current line and the start of the line
+func (h *BufPane) SelectToStartOfTextToggle() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	if h.Cursor.IsStartOfText() {
+		h.Cursor.Start()
+	} else {
+		h.Cursor.StartOfText()
+	}
+	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
+	return true
+}
+
 
 // SelectToStartOfLine selects to the start of the current line
 func (h *BufPane) SelectToStartOfLine() bool {
