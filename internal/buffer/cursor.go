@@ -109,6 +109,19 @@ func (c *Cursor) StartOfText() {
 	}
 }
 
+// IsStartOfText returns whether the cursor is at the first
+// non-whitespace rune of the line it is on
+func (c *Cursor) IsStartOfText() bool {
+	x := 0
+	for util.IsWhitespace(c.RuneUnder(x)) {
+		if x == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+			break
+		}
+		x++
+	}
+	return c.X == x
+}
+
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
 	c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
