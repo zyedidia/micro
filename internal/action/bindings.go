@@ -249,6 +249,7 @@ func UnbindKey(k string) error {
 		if a, ok := defaults[k]; ok {
 			BindKey(k, a)
 		} else if _, ok := config.Bindings[k]; ok {
+			BufUnmap(key)
 			delete(config.Bindings, k)
 		}
 
