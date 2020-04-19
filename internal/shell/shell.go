@@ -9,6 +9,7 @@ import (
 	"os/exec"
 	"os/signal"
 	"strings"
+	"log"
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/internal/screen"
@@ -73,17 +74,48 @@ func RunBackgroundShell(input string) (func() string, error) {
 	}, nil
 }
 
-// ExecuteCmdPipe executes a stack of commands
-//
+// executeCmdPipe executes a stack of commands
 // This function executes a stack of chained commands using io.Pipes.
-func ExecuteCmdPipe(outputBuffer *bytes.Buffer, getOutput bool, stack ...*exec.Cmd) (err error) {
+//
+// TODO
+// Implement other type of command support?
+// egs. 
+//	If first ok: cmd1 && cmd2 
+//  Sequential:  cmd1  & cmd2
+//  Concurrent:  cmd1  ; cmd2
+func executeCmdPipe(outputBuffer *bytes.Buffer, getOutput bool, stack ...*exec.Cmd) (err error) {
 	if len(stack) == 0 {
 		return fmt.Errorf("length of the cmd stack is zero (0)")
 	} 
 
     var errorBuffer bytes.Buffer
-	pipeLen := len(stack)-1    
-    pipes := make([]*io.PipeWriter, pipeLen)
+    var pipeLen int
+	var pipes []*io.PipeWriter
+
+	// Handle the simple case, i.e. no pipes
+	if len(stack) == 1 {
+		pipeLen = 1
+		stack[0].Stdin = os.Stdin
+		
+		if getOutput {
+			stack[0].Stdout = io.MultiWriter(os.Stdout, outputBuffer)
+		} else {
+			stack[0].Stdout = os.Stdout
+		}
+		
+		stack[0].Stderr = os.Stderr
+		stack[0].Start()
+
+	    log.Println("ExecuteCmdPipe: stack ->", stack)
+       	log.Println("ExecuteCmdPipe: pipes ->", pipes)
+       	log.Println("ExecuteCmdPipe: pipeLen     ->", pipeLen)
+       	log.Println("ExecuteCmdPipe: want output ->", getOutput)
+
+		return stack[0].Wait()
+	}
+
+	pipeLen = len(stack)-1
+    pipes = make([]*io.PipeWriter, pipeLen)
 
     i := 0
     for ; i < pipeLen; i++ {
@@ -92,7 +124,7 @@ func ExecuteCmdPipe(outputBuffer *bytes.Buffer, getOutput bool, stack ...*exec.C
         stack[i].Stdout = stdoutPipe
         stack[i].Stderr = &errorBuffer
 
-       	stack[i+1].Stdin = stdinPipe
+     	stack[i+1].Stdin = stdinPipe
         
         pipes[i] = stdoutPipe
     }
@@ -103,7 +135,12 @@ func ExecuteCmdPipe(outputBuffer *bytes.Buffer, getOutput bool, stack ...*exec.C
 		stack[i].Stdout = os.Stdout
 	}
     
-    stack[i].Stderr = &errorBuffer
+    stack[i].Stderr = os.Stderr
+
+    log.Println("ExecuteCmdPipe: stack ->", stack)
+  	log.Println("ExecuteCmdPipe: pipes ->", pipes)
+  	log.Println("ExecuteCmdPipe: pipeLen     ->", pipeLen)
+  	log.Println("ExecuteCmdPipe: want output ->", getOutput)
 
     if err := executePipe(stack, pipes); err != nil {
         return fmt.Errorf("executePipe(%s): %v", errorBuffer.Bytes(), err)
@@ -166,12 +203,10 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 		
 		stack[i] = exec.Command(iArgs[0], iArgs[1:]...)
 	}
+	
+   	log.Println("RunInteractiveShell: stack ->", stack)
 
-   	if err := ExecuteCmdPipe(outputBuffer, getOutput, stack...); err != nil {
-   		return "", err
-   	}
-
-   	c := make(chan os.Signal, 1)
+	c := make(chan os.Signal, 1)
    	signal.Notify(c, os.Interrupt)
    	go func() {
    		for range c {
@@ -182,8 +217,20 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
    			}
    		}
    	}()
+	
+   	err = executeCmdPipe(outputBuffer, getOutput, stack...)
+   	if err != nil {
+		log.Println("RunInteractiveShell: got error ->", err)
+   	}
 
-	return outputBuffer.String(), err
+   	log.Println("RunInteractiveShell: outputBuffer ->", outputBuffer)
+   			
+	if wait {
+		// This is just so we don't return right away and let the user press enter to return
+		screen.TermMessage("")
+	}
+   	
+	return outputBuffer.String(), err;
 }
 
 // UserCommand runs the shell command
