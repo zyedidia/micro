@@ -73,57 +73,117 @@ func RunBackgroundShell(input string) (func() string, error) {
 	}, nil
 }
 
+// ExecuteCmdPipe executes a stack of commands
+//
+// This function executes a stack of chained commands using io.Pipes.
+func ExecuteCmdPipe(outputBuffer *bytes.Buffer, getOutput bool, stack ...*exec.Cmd) (err error) {
+	if len(stack) == 0 {
+		return fmt.Errorf("length of the cmd stack is zero (0)")
+	} 
+
+    var errorBuffer bytes.Buffer
+	pipeLen := len(stack)-1    
+    pipes := make([]*io.PipeWriter, pipeLen)
+
+    i := 0
+    for ; i < pipeLen; i++ {
+        stdinPipe, stdoutPipe := io.Pipe()
+        
+        stack[i].Stdout = stdoutPipe
+        stack[i].Stderr = &errorBuffer
+
+       	stack[i+1].Stdin = stdinPipe
+        
+        pipes[i] = stdoutPipe
+    }
+    
+    if getOutput {
+		stack[i].Stdout = outputBuffer
+	} else {
+		stack[i].Stdout = os.Stdout
+	}
+    
+    stack[i].Stderr = &errorBuffer
+
+    if err := executePipe(stack, pipes); err != nil {
+        return fmt.Errorf("executePipe(%s): %v", errorBuffer.Bytes(), err)
+    }
+    
+    return err
+}
+
+// executePipe is a helper recursive function for ExecuteCmdPipe
+func executePipe(stack []*exec.Cmd, pipes []*io.PipeWriter) (err error) {
+    if stack[0].Process == nil {
+        if err = stack[0].Start(); err != nil {
+            return err
+        }
+    }
+    
+    if len(stack) > 1 {
+        if err = stack[1].Start(); err != nil {
+             return err
+        }
+        
+        defer func() {
+            if err == nil {
+                pipes[0].Close()
+                err = executePipe(stack[1:], pipes[1:])
+            }
+        }()
+    }
+    
+    return stack[0].Wait()
+}
+
 // RunInteractiveShell runs a shellcommand interactively
 func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error) {
 	args, err := shellquote.Split(input)
 	if err != nil {
 		return "", err
 	}
+	
 	if len(args) == 0 {
 		return "", errors.New("No arguments")
 	}
-	inputCmd := args[0]
 
-	// Shut down the screen because we're going to interact directly with the shell
+	commands := strings.Split(input, "|")
+
+	// Shut down the screen because we're going to interact 
+	// directly with the shell and defer the screen backup
 	screenb := screen.TempFini()
+	defer screen.TempStart(screenb)
+	
+   	outputBuffer := &bytes.Buffer{}
 
-	args = args[1:]
+	stack := make([]*exec.Cmd, len(commands)) 
 
-	// Set up everything for the command
-	outputBytes := &bytes.Buffer{}
-	cmd := exec.Command(inputCmd, args...)
-	cmd.Stdin = os.Stdin
-	if getOutput {
-		cmd.Stdout = io.MultiWriter(os.Stdout, outputBytes)
-	} else {
-		cmd.Stdout = os.Stdout
-	}
-	cmd.Stderr = os.Stderr
-
-	// This is a trap for Ctrl-C so that it doesn't kill micro
-	// Instead we trap Ctrl-C to kill the program we're running
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			cmd.Process.Kill()
+	for i := range commands {
+		iArgs, err := shellquote.Split(commands[i])
+		if err != nil {
+			return "", err
 		}
-	}()
-
-	cmd.Start()
-	err = cmd.Wait()
-
-	output := outputBytes.String()
-
-	if wait {
-		// This is just so we don't return right away and let the user press enter to return
-		screen.TermMessage("")
+		
+		stack[i] = exec.Command(iArgs[0], iArgs[1:]...)
 	}
 
-	// Start the screen back up
-	screen.TempStart(screenb)
+   	if err := ExecuteCmdPipe(outputBuffer, getOutput, stack...); err != nil {
+   		return "", err
+   	}
 
-	return output, err
+   	c := make(chan os.Signal, 1)
+   	signal.Notify(c, os.Interrupt)
+   	go func() {
+   		for range c {
+   			for i := range args {
+   				if stack[i].Process != nil {
+   					stack[i].Process.Kill()
+   				}
+   			}
+   		}
+   	}()
+
+	return outputBuffer.String(), err
 }
 
 // UserCommand runs the shell command
