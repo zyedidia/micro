@@ -139,9 +139,6 @@ func (w *BufWindow) Relocate() bool {
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	cy := activeC.Y
-	if activeC.HasSelection() {
-		cy = activeC.CurSelection[0].Y
-	}
 	scrollmargin := int(b.Settings["scrollmargin"].(float64))
 	if cy < w.StartLine+scrollmargin && cy > scrollmargin-1 {
 		w.StartLine = cy - scrollmargin
