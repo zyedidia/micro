@@ -1447,8 +1447,9 @@ func (h *BufPane) AddTab() bool {
 
 // PreviousTab switches to the previous tab in the tab list
 func (h *BufPane) PreviousTab() bool {
-	a := Tabs.Active()
-	Tabs.SetActive(util.Clamp(a-1, 0, len(Tabs.List)-1))
+	tabsLen := len(Tabs.List)
+	a := Tabs.Active() + tabsLen 
+	Tabs.SetActive((a - 1) % tabsLen)
 
 	return true
 }
@@ -1456,7 +1457,8 @@ func (h *BufPane) PreviousTab() bool {
 // NextTab switches to the next tab in the tab list
 func (h *BufPane) NextTab() bool {
 	a := Tabs.Active()
-	Tabs.SetActive(util.Clamp(a+1, 0, len(Tabs.List)-1))
+	Tabs.SetActive((a + 1) % len(Tabs.List))
+
 	return true
 }
 
