@@ -162,6 +162,8 @@ SelectUp
 SelectDown
 SelectLeft
 SelectRight
+SelectToStartOfText
+SelectToStartOfTextToggle
 WordRight
 WordLeft
 SelectWordRight
@@ -209,6 +211,8 @@ HalfPageUp
 HalfPageDown
 StartOfLine
 EndOfLine
+StartOfText
+StartOfTextToggle
 ParagraphPrevious
 ParagraphNext
 ToggleHelp
@@ -244,6 +248,9 @@ None
 JumpToMatchingBrace
 Autocomplete
 ```
+
+The `StartOfTextToggle` and `SelectToStartOfTextToggle` actions toggle between
+jumping to the start of the text (first) and start of the line.
 
 You can also bind some mouse actions (these must be bound to mouse buttons)
 
@@ -410,21 +417,21 @@ conventions for text editing defaults.
     "ShiftDown":      "SelectDown",
     "ShiftLeft":      "SelectLeft",
     "ShiftRight":     "SelectRight",
-    "AltLeft":        "WordLeft",
-    "AltRight":       "WordRight",
+    "AltLeft":        "WordLeft", (Mac)
+    "AltRight":       "WordRight", (Mac)
     "AltUp":          "MoveLinesUp",
     "AltDown":        "MoveLinesDown",
     "CtrlShiftRight": "SelectWordRight",
     "CtrlShiftLeft":  "SelectWordLeft",
-    "AltLeft":        "StartOfLine",
+    "AltLeft":        "StartOfTextToggle",
     "AltRight":       "EndOfLine",
     "AltShiftRight":  "SelectWordRight", (Mac)
     "AltShiftLeft":   "SelectWordLeft", (Mac)
     "CtrlLeft":       "StartOfText", (Mac)
     "CtrlRight":      "EndOfLine", (Mac)
-    "AltShiftLeft":   "SelectToStartOfLine",
-    "CtrlShiftLeft":  "SelectToStartOfText", (Mac)
-    "ShiftHome":      "SelectToStartOfLine",
+    "AltShiftLeft":   "SelectToStartOfTextToggle",
+    "CtrlShiftLeft":  "SelectToStartOfTextToggle", (Mac)
+    "ShiftHome":      "SelectToStartOfTextToggle",
     "AltShiftRight":  "SelectToEndOfLine",
     "CtrlShiftRight": "SelectToEndOfLine", (Mac)
     "ShiftEnd":       "SelectToEndOfLine",
@@ -457,7 +464,7 @@ conventions for text editing defaults.
     "CtrlT":          "AddTab",
     "Alt,":           "PreviousTab",
     "Alt.":           "NextTab",
-    "Home":           "StartOfLine",
+    "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",

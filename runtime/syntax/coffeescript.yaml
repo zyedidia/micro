@@ -12,6 +12,9 @@ rules:
     - statement:  "\\b(debugger|switch|while|do|class|extends|super)\\b"
     - statement:  "\\b(undefined|then|unless|until|loop|of|by|when)\\b"
     - constant.bool:  "\\b(true|false|yes|no|on|off)\\b"
+    - constant.number: "\\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\\b"
+    - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
+    - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
     - identifier: "@[A-Za-z0-9_]*"
 
     - constant.string:
@@ -20,10 +23,23 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+     
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+      
 
     - comment:
         start: "#"
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
+    - comment:
+        start: "###"
+        end: "###"
+        rules:  
+            - todo: "(TODO|XXX|FIXME)"
 

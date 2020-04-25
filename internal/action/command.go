@@ -761,6 +761,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			h.Cursor.SetSelectionStart(locs[0])
 			h.Cursor.SetSelectionEnd(locs[1])
+			h.Cursor.GotoLoc(locs[0])
 
 			h.Relocate()
 

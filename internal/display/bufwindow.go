@@ -139,9 +139,6 @@ func (w *BufWindow) Relocate() bool {
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	cy := activeC.Y
-	if activeC.HasSelection() {
-		cy = activeC.CurSelection[0].Y
-	}
 	scrollmargin := int(b.Settings["scrollmargin"].(float64))
 	if cy < w.StartLine+scrollmargin && cy > scrollmargin-1 {
 		w.StartLine = cy - scrollmargin
@@ -559,7 +556,7 @@ func (w *BufWindow) displayBuffer() {
 				}
 
 				if s, ok := config.Colorscheme["color-column"]; ok {
-					if colorcolumn != 0 && vloc.X-w.gutterOffset == colorcolumn {
+					if colorcolumn != 0 && vloc.X-w.gutterOffset+w.StartCol == colorcolumn {
 						fg, _, _ := s.Decompose()
 						style = style.Background(fg)
 					}
@@ -653,7 +650,7 @@ func (w *BufWindow) displayBuffer() {
 		for i := vloc.X; i < bufWidth; i++ {
 			curStyle := style
 			if s, ok := config.Colorscheme["color-column"]; ok {
-				if colorcolumn != 0 && i-w.gutterOffset == colorcolumn {
+				if colorcolumn != 0 && i-w.gutterOffset+w.StartCol == colorcolumn {
 					fg, _, _ := s.Decompose()
 					curStyle = style.Background(fg)
 				}

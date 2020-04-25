@@ -166,6 +166,8 @@ type Tab struct {
 	active int
 
 	resizing *views.Node // node currently being resized
+	// captures whether the mouse is released
+	release bool
 }
 
 // NewTabFromBuffer creates a new tab from the given buffer
@@ -203,6 +205,8 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
+			wasReleased := t.release
+			t.release = false
 			if t.resizing != nil {
 				var size int
 				if t.resizing.Kind == views.STVert {
@@ -215,22 +219,25 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 				return
 			}
 
-			resizeID := t.GetMouseSplitID(buffer.Loc{mx, my})
-			if resizeID != 0 {
-				t.resizing = t.GetNode(uint64(resizeID))
-				return
-			}
+			if wasReleased {
+				resizeID := t.GetMouseSplitID(buffer.Loc{mx, my})
+				if resizeID != 0 {
+					t.resizing = t.GetNode(uint64(resizeID))
+					return
+				}
 
-			for i, p := range t.Panes {
-				v := p.GetView()
-				inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
-				if inpane {
-					t.SetActive(i)
-					break
+				for i, p := range t.Panes {
+					v := p.GetView()
+					inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
+					if inpane {
+						t.SetActive(i)
+						break
+					}
 				}
 			}
 		case tcell.ButtonNone:
 			t.resizing = nil
+			t.release = true
 		default:
 			for _, p := range t.Panes {
 				v := p.GetView()
