@@ -103,7 +103,7 @@ func BufMapKey(k Event, action string) {
 			afn = f
 			names = append(names, a)
 		} else {
-			screen.TermMessage("Error:", a, "does not exist")
+			screen.TermMessage("Error in bindings: action", a, "does not exist")
 			continue
 		}
 		actionfns = append(actionfns, afn)
