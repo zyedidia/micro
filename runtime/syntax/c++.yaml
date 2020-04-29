@@ -1,7 +1,7 @@
 filetype: c++
 
 detect: 
-    filename: "\\.c(c|pp|xx)$|\\.h(h|pp|xx)$|\\.ii?$|\\.(def)$"
+    filename: "\\.c(c|pp|xx)$|\\.h(h|pp|xx)$|\\.inl$|\\.ii?$|\\.(def)$"
 
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
