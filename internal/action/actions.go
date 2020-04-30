@@ -354,7 +354,6 @@ func (h *BufPane) SelectToStartOfTextToggle() bool {
 	return true
 }
 
-
 // SelectToStartOfLine selects to the start of the current line
 func (h *BufPane) SelectToStartOfLine() bool {
 	if !h.Cursor.HasSelection() {
@@ -930,6 +929,25 @@ func (h *BufPane) Copy() bool {
 	return true
 }
 
+// Copy the current line to the clipboard
+func (h *BufPane) CopyLine() bool {
+	if h.Cursor.HasSelection() {
+		return false
+	} else {
+		h.Cursor.SelectLine()
+		h.Cursor.CopySelection("clipboard")
+		h.freshClip = true
+		if clipboard.Unsupported {
+			InfoBar.Message("Copied line (install xclip for external clipboard)")
+		} else {
+			InfoBar.Message("Copied line")
+		}
+	}
+	h.Cursor.Deselect(true)
+	h.Relocate()
+	return true
+}
+
 // CutLine cuts the current line to the clipboard
 func (h *BufPane) CutLine() bool {
 	h.Cursor.SelectLine()
@@ -1448,7 +1466,7 @@ func (h *BufPane) AddTab() bool {
 // PreviousTab switches to the previous tab in the tab list
 func (h *BufPane) PreviousTab() bool {
 	tabsLen := len(Tabs.List)
-	a := Tabs.Active() + tabsLen 
+	a := Tabs.Active() + tabsLen
 	Tabs.SetActive((a - 1) % tabsLen)
 
 	return true

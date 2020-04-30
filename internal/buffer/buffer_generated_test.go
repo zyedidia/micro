@@ -16,7 +16,7 @@ func TestAuto1(t *testing.T) {
 			"",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{1, 0},
 				text: []string{
@@ -25,7 +25,7 @@ func TestAuto1(t *testing.T) {
 					"fq",
 				},
 			},
-			operation{
+			{
 				start: Loc{3, 0},
 				end:   Loc{0, 1},
 				text: []string{
@@ -58,7 +58,7 @@ func TestAuto2(t *testing.T) {
 			"gmm",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{1, 0},
 				text: []string{
@@ -66,7 +66,7 @@ func TestAuto2(t *testing.T) {
 					"o",
 				},
 			},
-			operation{
+			{
 				start: Loc{3, 1},
 				end:   Loc{3, 1},
 				text: []string{
@@ -74,7 +74,7 @@ func TestAuto2(t *testing.T) {
 					"avb",
 				},
 			},
-			operation{
+			{
 				start: Loc{4, 1},
 				end:   Loc{1, 5},
 				text: []string{
@@ -111,7 +111,7 @@ func TestAuto3(t *testing.T) {
 			"xuccnb",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 3},
 				end:   Loc{2, 3},
 				text: []string{
@@ -145,14 +145,14 @@ func TestAuto4(t *testing.T) {
 			"lnqdgorosf",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{4, 0},
 				text: []string{
 					"hp",
 				},
 			},
-			operation{
+			{
 				start: Loc{6, 0},
 				end:   Loc{0, 1},
 				text: []string{
@@ -161,7 +161,7 @@ func TestAuto4(t *testing.T) {
 					"mpx",
 				},
 			},
-			operation{
+			{
 				start: Loc{1, 1},
 				end:   Loc{1, 1},
 				text: []string{
@@ -170,7 +170,7 @@ func TestAuto4(t *testing.T) {
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{1, 1},
 				end:   Loc{1, 1},
 				text: []string{
@@ -178,7 +178,7 @@ func TestAuto4(t *testing.T) {
 					"mo",
 				},
 			},
-			operation{
+			{
 				start: Loc{1, 3},
 				end:   Loc{2, 4},
 				text: []string{
@@ -210,14 +210,14 @@ func TestBug19872UndoIsFunky(t *testing.T) {
 			"something else",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 1},
 				end:   Loc{1, 1},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 2},
 				end:   Loc{1, 3},
 				text: []string{
@@ -244,14 +244,14 @@ func TestBug19872UndoIsFunky_2(t *testing.T) {
 			"something else",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 1},
 				end:   Loc{0, 1},
 				text: []string{
 					" ",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 2},
 				end:   Loc{0, 2},
 				text: []string{
@@ -281,7 +281,7 @@ func TestInsertEmptyText(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
@@ -310,14 +310,14 @@ func TestLastOpIsNoOp(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 0},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 3},
 				end:   Loc{0, 3},
 				text: []string{
@@ -346,7 +346,7 @@ func TestInsertTextWithoutNewline1(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
@@ -375,7 +375,7 @@ func TestInsertTextWithoutNewline2(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -404,7 +404,7 @@ func TestInsertOneNewline(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{3, 0},
 				end:   Loc{3, 0},
 				text: []string{
@@ -435,7 +435,7 @@ func TestInsertTextWithOneNewline(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -466,7 +466,7 @@ func TestInsertTextWithTwoNewlines(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -499,7 +499,7 @@ func TestInsertTextWithManyNewlines(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -536,7 +536,7 @@ func TestInsertMultipleNewlines(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -547,7 +547,7 @@ func TestInsertMultipleNewlines(t *testing.T) {
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{14, 2},
 				end:   Loc{14, 2},
 				text: []string{
@@ -582,7 +582,7 @@ func TestDeleteEmptyText(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
@@ -611,7 +611,7 @@ func TestDeleteTextFromOneLine(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 0},
 				text: []string{
@@ -640,7 +640,7 @@ func TestDeleteTextFromOneLine2(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -669,7 +669,7 @@ func TestDeleteAllTextFromALine(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{13, 0},
 				text: []string{
@@ -698,7 +698,7 @@ func TestDeleteTextFromTwoLines(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{3, 0},
 				end:   Loc{5, 1},
 				text: []string{
@@ -726,7 +726,7 @@ func TestDeleteTextFromManyLines(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{3, 0},
 				end:   Loc{4, 2},
 				text: []string{
@@ -753,7 +753,7 @@ func TestDeleteEverything(t *testing.T) {
 			"1",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 4},
 				text: []string{
@@ -778,14 +778,14 @@ func TestTwoUnrelatedEdits(t *testing.T) {
 			"123",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 1},
 				end:   Loc{2, 1},
 				text: []string{
 					"\t",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 2},
 				end:   Loc{4, 2},
 				text: []string{
@@ -814,14 +814,14 @@ func TestTwoEditsOnOneLine(t *testing.T) {
 			"\t\t<!@#fifth#@!>\t\t",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 4},
 				end:   Loc{6, 4},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{11, 4},
 				end:   Loc{15, 4},
 				text: []string{
@@ -846,21 +846,21 @@ func TestManyEdits(t *testing.T) {
 			"{\"x\" : 1}",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{1, 0},
 				text: []string{
 					"\n  ",
 				},
 			},
-			operation{
+			{
 				start: Loc{4, 0},
 				end:   Loc{5, 0},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{8, 0},
 				end:   Loc{8, 0},
 				text: []string{
@@ -885,21 +885,21 @@ func TestManyEditsReversed(t *testing.T) {
 			"}",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{2, 1},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{5, 1},
 				end:   Loc{5, 1},
 				text: []string{
 					" ",
 				},
 			},
-			operation{
+			{
 				start: Loc{8, 1},
 				end:   Loc{0, 2},
 				text: []string{
@@ -924,7 +924,7 @@ func TestReplacingNewlines1(t *testing.T) {
 			"}",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{0, 1},
 				text: []string{
@@ -932,7 +932,7 @@ func TestReplacingNewlines1(t *testing.T) {
 					"\t",
 				},
 			},
-			operation{
+			{
 				start: Loc{10, 1},
 				end:   Loc{0, 3},
 				text: []string{
@@ -962,7 +962,7 @@ func TestReplacingNewlines2(t *testing.T) {
 			"and the last line",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{4, 0},
 				end:   Loc{0, 2},
 				text: []string{
@@ -971,7 +971,7 @@ func TestReplacingNewlines2(t *testing.T) {
 					"some more text",
 				},
 			},
-			operation{
+			{
 				start: Loc{1, 2},
 				end:   Loc{0, 3},
 				text: []string{
@@ -981,14 +981,14 @@ func TestReplacingNewlines2(t *testing.T) {
 					"asd",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 4},
 				end:   Loc{5, 4},
 				text: []string{
 					"zzzzzzzz",
 				},
 			},
-			operation{
+			{
 				start: Loc{10, 4},
 				end:   Loc{15, 5},
 				text: []string{
@@ -1024,14 +1024,14 @@ func TestAdvanced1(t *testing.T) {
 			"        ,\"e\": /*comment*/ [null] }",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 0},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{9, 0},
 				text: []string{
@@ -1039,7 +1039,7 @@ func TestAdvanced1(t *testing.T) {
 					"  ",
 				},
 			},
-			operation{
+			{
 				start: Loc{15, 0},
 				end:   Loc{13, 1},
 				text: []string{
@@ -1047,7 +1047,7 @@ func TestAdvanced1(t *testing.T) {
 					"    ",
 				},
 			},
-			operation{
+			{
 				start: Loc{17, 1},
 				end:   Loc{8, 2},
 				text: []string{
@@ -1055,14 +1055,14 @@ func TestAdvanced1(t *testing.T) {
 					"  ",
 				},
 			},
-			operation{
+			{
 				start: Loc{21, 2},
 				end:   Loc{8, 3},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{9, 3},
 				end:   Loc{9, 3},
 				text: []string{
@@ -1070,7 +1070,7 @@ func TestAdvanced1(t *testing.T) {
 					"  ",
 				},
 			},
-			operation{
+			{
 				start: Loc{27, 3},
 				end:   Loc{27, 3},
 				text: []string{
@@ -1078,7 +1078,7 @@ func TestAdvanced1(t *testing.T) {
 					"    ",
 				},
 			},
-			operation{
+			{
 				start: Loc{31, 3},
 				end:   Loc{31, 3},
 				text: []string{
@@ -1086,7 +1086,7 @@ func TestAdvanced1(t *testing.T) {
 					"  ",
 				},
 			},
-			operation{
+			{
 				start: Loc{32, 3},
 				end:   Loc{33, 3},
 				text: []string{
@@ -1116,21 +1116,21 @@ func TestAdvancedSimplified(t *testing.T) {
 			" ,def",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{3, 0},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{6, 0},
 				end:   Loc{1, 1},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{2, 1},
 				end:   Loc{2, 1},
 				text: []string{
@@ -1158,7 +1158,7 @@ func TestIssue144(t *testing.T) {
 			"",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 5},
 				text: []string{
@@ -1194,7 +1194,7 @@ func TestIssue2586ReplacingSelectedEndOfLineWithNewlineLocksUpTheDocument(t *tes
 			"interesting",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{9, 0},
 				end:   Loc{0, 1},
 				text: []string{
@@ -1222,7 +1222,7 @@ func TestIssue3980(t *testing.T) {
 			"}",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{7, 0},
 				end:   Loc{8, 0},
 				text: []string{
@@ -1230,7 +1230,7 @@ func TestIssue3980(t *testing.T) {
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{16, 2},
 				end:   Loc{17, 2},
 				text: []string{
@@ -1238,14 +1238,14 @@ func TestIssue3980(t *testing.T) {
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{17, 2},
 				end:   Loc{17, 2},
 				text: []string{
 					"    ",
 				},
 			},
-			operation{
+			{
 				start: Loc{4, 3},
 				end:   Loc{4, 3},
 				text: []string{
@@ -1273,14 +1273,14 @@ func TestTouchingEditsTwoInsertsAtTheSamePosition(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
 					"a",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
@@ -1301,14 +1301,14 @@ func TestTouchingEditsInsertAndReplaceTouching(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
 					"b",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -1329,14 +1329,14 @@ func TestTouchingEditsTwoTouchingReplaces(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 0},
 				text: []string{
 					"H",
 				},
 			},
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -1357,14 +1357,14 @@ func TestTouchingEditsTwoTouchingDeletes(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 0},
 				text: []string{
 					"",
 				},
 			},
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -1385,14 +1385,14 @@ func TestTouchingEditsInsertAndReplace(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
 					"H",
 				},
 			},
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -1413,14 +1413,14 @@ func TestTouchingEditsReplaceAndInsert(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{2, 0},
 				text: []string{
 					"H",
 				},
 			},
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{2, 0},
 				text: []string{
@@ -1441,7 +1441,7 @@ func TestSingleDelete1(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{1, 0},
 				text: []string{
@@ -1462,7 +1462,7 @@ func TestSingleDelete2(t *testing.T) {
 			"helloworld",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{2, 0},
 				end:   Loc{7, 0},
 				text: []string{
@@ -1483,7 +1483,7 @@ func TestSingleDelete3(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{5, 0},
 				text: []string{
@@ -1504,7 +1504,7 @@ func TestSingleDelete4(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{6, 0},
 				text: []string{
@@ -1525,7 +1525,7 @@ func TestSingleDelete5(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{11, 0},
 				text: []string{
@@ -1548,7 +1548,7 @@ func TestMultiDelete6(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{5, 0},
 				end:   Loc{5, 2},
 				text: []string{
@@ -1571,7 +1571,7 @@ func TestMultiDelete7(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{11, 0},
 				end:   Loc{11, 2},
 				text: []string{
@@ -1594,7 +1594,7 @@ func TestMultiDelete8(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 2},
 				text: []string{
@@ -1617,7 +1617,7 @@ func TestMultiDelete9(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{11, 0},
 				end:   Loc{0, 2},
 				text: []string{
@@ -1638,7 +1638,7 @@ func TestSingleInsert1(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
@@ -1659,7 +1659,7 @@ func TestSingleInsert2(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{1, 0},
 				end:   Loc{1, 0},
 				text: []string{
@@ -1680,7 +1680,7 @@ func TestSingleInsert3(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{5, 0},
 				end:   Loc{5, 0},
 				text: []string{
@@ -1701,7 +1701,7 @@ func TestSingleInsert4(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{6, 0},
 				end:   Loc{6, 0},
 				text: []string{
@@ -1722,7 +1722,7 @@ func TestSingleInsert5(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{11, 0},
 				end:   Loc{11, 0},
 				text: []string{
@@ -1743,7 +1743,7 @@ func TestMultiInsert6(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{0, 0},
 				end:   Loc{0, 0},
 				text: []string{
@@ -1765,7 +1765,7 @@ func TestMultiInsert7(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{11, 0},
 				end:   Loc{11, 0},
 				text: []string{
@@ -1787,7 +1787,7 @@ func TestMultiInsert8(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{6, 0},
 				end:   Loc{6, 0},
 				text: []string{
@@ -1810,7 +1810,7 @@ func TestMultiInsert9(t *testing.T) {
 			"hello world",
 		},
 		[]operation{
-			operation{
+			{
 				start: Loc{6, 0},
 				end:   Loc{6, 0},
 				text: []string{
