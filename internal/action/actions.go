@@ -930,6 +930,25 @@ func (h *BufPane) Copy() bool {
 	return true
 }
 
+// Copy the current line to the clipboard
+func (h *BufPane) CopyLine() bool {
+    if h.Cursor.HasSelection() {
+    	return false
+    } else {
+    	h.Cursor.SelectLine()
+    	h.Cursor.CopySelection("clipboard")
+    	h.freshClip = true
+    	if clipboard.Unsupported {
+    		InfoBar.Message("Copied line (install xclip for external clipboard)")
+    	} else {
+    		InfoBar.Message("Copied line")
+    	}
+    }
+    h.Cursor.Deselect(true)
+    h.Relocate()
+    return true
+}
+
 // CutLine cuts the current line to the clipboard
 func (h *BufPane) CutLine() bool {
 	h.Cursor.SelectLine()

@@ -43,7 +43,7 @@ func DefaultBindings() map[string]string {
 		"CtrlP":          "FindPrevious",
 		"CtrlZ":          "Undo",
 		"CtrlY":          "Redo",
-		"CtrlC":          "Copy",
+		"CtrlC":          "CopyLine|Copy",
 		"CtrlX":          "Cut",
 		"CtrlK":          "CutLine",
 		"CtrlD":          "DuplicateLine",
