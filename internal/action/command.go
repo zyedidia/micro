@@ -56,6 +56,7 @@ func InitCommands() {
 		"cd":         {(*BufPane).CdCmd, buffer.FileComplete},
 		"pwd":        {(*BufPane).PwdCmd, nil},
 		"open":       {(*BufPane).OpenCmd, buffer.FileComplete},
+		"tabmove":    {(*BufPane).TabMoveCmd, nil},
 		"tabswitch":  {(*BufPane).TabSwitchCmd, nil},
 		"term":       {(*BufPane).TermCmd, nil},
 		"memusage":   {(*BufPane).MemUsageCmd, nil},
@@ -153,6 +154,57 @@ func (h *BufPane) TextFilterCmd(args []string) {
 	}
 	h.Cursor.DeleteSelection()
 	h.Buf.Insert(h.Cursor.Loc, bout.String())
+}
+
+// TabMoveCmd moves the current tab to a given index (starts at 1). The
+// displaced tabs are moved up.
+func (h *BufPane) TabMoveCmd(args []string) {
+	if len(args) <= 0 {
+		InfoBar.Error("Not enough arguments: provide an index, starting at 1")
+		return
+	}
+
+	if len(args[0]) <= 0 {
+		InfoBar.Error("Invalid argument: empty string")
+		return
+	}
+
+	num, err := strconv.Atoi(args[0])
+	if err != nil {
+		InfoBar.Error("Invalid argument: ", err)
+		return
+	}
+
+	// Preserve sign for relative move, if one exists
+	var shiftDirection byte
+	if strings.Contains("-+", string([]byte{args[0][0]})) {
+		shiftDirection = args[0][0]
+	}
+
+	// Relative positions -> absolute positions
+	idxFrom := Tabs.Active()
+	idxTo := 0
+	offset := util.Abs(num)
+	if shiftDirection == '-' {
+		idxTo = idxFrom - offset
+	} else if shiftDirection == '+' {
+		idxTo = idxFrom + offset
+	} else {
+		idxTo = offset - 1
+	}
+
+	// Restrain position to within the valid range
+	idxTo = util.Min(idxTo, len(Tabs.List)-1)
+	idxTo = util.Max(idxTo, 0)
+
+	activeTab := Tabs.List[idxFrom]
+	Tabs.RemoveTab(activeTab.ID())
+	Tabs.List = append(Tabs.List, nil)
+	copy(Tabs.List[idxTo+1:], Tabs.List[idxTo:])
+	Tabs.List[idxTo] = activeTab
+	Tabs.UpdateNames()
+	Tabs.SetActive(idxTo)
+	// InfoBar.Message(fmt.Sprintf("Moved tab from slot %d to %d", idxFrom+1, idxTo+1))
 }
 
 // TabSwitchCmd switches to a given tab either by name or by number
