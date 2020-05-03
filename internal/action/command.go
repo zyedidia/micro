@@ -229,6 +229,33 @@ func (h *BufPane) PwdCmd(args []string) {
 	}
 }
 
+// GetPasswords gets the passwrods for a new file
+func GetPasswords(filename string, callback func(btype buffer.BufType, passwords []screen.Password)) {
+	passwords := make([]screen.Password, 0, 1)
+	bufType := buffer.GetBufferType(filename, buffer.BTDefault)
+	if bufType == buffer.BTArmorGPG || bufType == buffer.BTGPG {
+		if _, e := os.Stat(filename); e != nil {
+			callback(bufType, passwords)
+			return
+		}
+		InfoBar.PasswordPrompt(false, func(password string, canceled bool) {
+			if canceled {
+				InfoBar.Error("password required")
+				callback(bufType, nil)
+				return
+			}
+			passwords = append(passwords, screen.Password{
+				Secret:   password,
+				Prompted: true,
+			})
+			callback(bufType, passwords)
+		})
+		return
+	}
+	callback(bufType, passwords)
+	return
+}
+
 // OpenCmd opens a new buffer with a given filename
 func (h *BufPane) OpenCmd(args []string) {
 	if len(args) > 0 {
@@ -245,12 +272,17 @@ func (h *BufPane) OpenCmd(args []string) {
 		filename = strings.Join(args, " ")
 
 		open := func() {
-			b, err := buffer.NewBufferFromFile(filename, buffer.BTDefault)
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			h.OpenBuffer(b)
+			GetPasswords(filename, func(btype buffer.BufType, passwords []screen.Password) {
+				if passwords == nil {
+					return
+				}
+				b, err := buffer.NewBufferFromFile(filename, btype, passwords)
+				if err != nil {
+					InfoBar.Error(err)
+					return
+				}
+				h.OpenBuffer(b)
+			})
 		}
 		if h.Buf.Modified() {
 			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
@@ -361,13 +393,17 @@ func (h *BufPane) VSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
-
-	h.VSplitBuf(buf)
+	GetPasswords(args[0], func(btype buffer.BufType, passwords []screen.Password) {
+		if passwords == nil {
+			return
+		}
+		buf, err := buffer.NewBufferFromFile(args[0], btype, passwords)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
+		h.VSplitBuf(buf)
+	})
 }
 
 // HSplitCmd opens a horizontal split with file given in the first argument
@@ -379,13 +415,18 @@ func (h *BufPane) HSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	GetPasswords(args[0], func(btype buffer.BufType, passwords []screen.Password) {
+		if passwords == nil {
+			return
+		}
+		buf, err := buffer.NewBufferFromFile(args[0], btype, passwords)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.HSplitBuf(buf)
+		h.HSplitBuf(buf)
+	})
 }
 
 // EvalCmd evaluates a lua expression
@@ -398,16 +439,27 @@ func (h *BufPane) NewTabCmd(args []string) {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
 	if len(args) > 0 {
-		for _, a := range args {
-			b, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
-			if err != nil {
-				InfoBar.Error(err)
-				return
+		var open func(i int)
+		open = func(i int) {
+			if i < len(args) {
+				a := args[i]
+				GetPasswords(a, func(btype buffer.BufType, passwords []screen.Password) {
+					if passwords != nil {
+						return
+					}
+					b, err := buffer.NewBufferFromFile(a, btype, passwords)
+					if err != nil {
+						InfoBar.Error(err)
+						return
+					}
+					tp := NewTabFromBuffer(0, 0, width, height-1-iOffset, b)
+					Tabs.AddTab(tp)
+					Tabs.SetActive(len(Tabs.List) - 1)
+					open(i + 1)
+				})
 			}
-			tp := NewTabFromBuffer(0, 0, width, height-1-iOffset, b)
-			Tabs.AddTab(tp)
-			Tabs.SetActive(len(Tabs.List) - 1)
 		}
+		open(0)
 	} else {
 		b := buffer.NewBufferFromString("", "", buffer.BTDefault)
 		tp := NewTabFromBuffer(0, 0, width, height-iOffset, b)

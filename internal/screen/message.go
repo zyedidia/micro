@@ -6,6 +6,9 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"syscall"
+
+	"golang.org/x/crypto/ssh/terminal"
 )
 
 // TermMessage sends a message to the user in the terminal. This usually occurs before
@@ -62,4 +65,32 @@ func TermPrompt(prompt string, options []string, wait bool) int {
 // as an error
 func TermError(filename string, lineNum int, err string) {
 	TermMessage(filename + ", " + strconv.Itoa(lineNum) + ": " + err)
+}
+
+// Password a password
+type Password struct {
+	Secret   string
+	Prompted bool
+}
+
+// TermPassword gets the password for the encrypted file
+func TermPassword(filename string) (pass Password) {
+	if _, e := os.Stat(filename); e != nil {
+		return
+	}
+
+	for {
+		fmt.Printf("Password for %v: ", filename)
+		password, err := terminal.ReadPassword(syscall.Stdin)
+		fmt.Printf("\n")
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		pass.Secret = string(password)
+		pass.Prompted = true
+		break
+	}
+
+	return pass
 }

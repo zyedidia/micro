@@ -14,6 +14,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/internal/config"
+	encode "github.com/zyedidia/micro/internal/encoding"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
 	"golang.org/x/text/encoding"
@@ -28,7 +29,7 @@ const LargeFileThreshold = 50000
 // overwriteFile opens the given file for writing, truncating if one exists, and then calls
 // the supplied function with the file as io.Writer object, also making sure the file is
 // closed afterwards.
-func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error, withSudo bool) (err error) {
+func (b *Buffer) overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error, withSudo bool) (err error) {
 	var writeCloser io.WriteCloser
 
 	if withSudo {
@@ -54,6 +55,25 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		}()
 	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
 		return
+	}
+
+	if b.Type == BTArmorGPG || b.Type == BTGPG {
+		settings := map[string]interface{}{
+			"password": b.Settings["password"],
+			"size":     int64(0),
+		}
+		writer, err := encode.Encoder(writeCloser, name, settings)
+		if err == nil {
+			writeCloser = writer
+		}
+	} else if b.Type == BTGZIP {
+		settings := map[string]interface{}{
+			"size": int64(0),
+		}
+		writer, err := encode.Encoder(writeCloser, name, settings)
+		if err == nil {
+			writeCloser = writer
+		}
 	}
 
 	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
@@ -179,7 +199,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 		return
 	}
 
-	if err = overwriteFile(absFilename, enc, fwriter, withSudo); err != nil {
+	if err = b.overwriteFile(absFilename, enc, fwriter, withSudo); err != nil {
 		return err
 	}
 

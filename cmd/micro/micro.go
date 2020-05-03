@@ -129,9 +129,16 @@ func DoPluginFlags() {
 	}
 }
 
+// File is a file to open
+type File struct {
+	Name      string
+	Type      buffer.BufType
+	Passwords []screen.Password
+}
+
 // LoadInput determines which files should be loaded into buffers
 // based on the input stored in flag.Args()
-func LoadInput() []*buffer.Buffer {
+func LoadInput(files []File) []*buffer.Buffer {
 	// There are a number of ways micro should start given its input
 
 	// 1. If it is given a files in flag.Args(), it should open those
@@ -154,30 +161,18 @@ func LoadInput() []*buffer.Buffer {
 		btype = buffer.BTStdout
 	}
 
-	files := make([]string, 0, len(args))
-	flagStartPos := ""
-	flagr := regexp.MustCompile(`^\+\d+(:\d+)?$`)
-	for _, a := range args {
-		if flagr.MatchString(a) {
-			flagStartPos = a[1:]
-		} else {
-			if flagStartPos != "" {
-				files = append(files, a+":"+flagStartPos)
-				flagStartPos = ""
-			} else {
-				files = append(files, a)
-			}
-		}
-	}
-
 	if len(files) > 0 {
 		// Option 1
 		// We go through each file and load it
-		for i := 0; i < len(files); i++ {
-			buf, err := buffer.NewBufferFromFile(files[i], btype)
+		for _, file := range files {
+			buf, err := buffer.NewBufferFromFile(file.Name, file.Type, file.Passwords)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
+			}
+			if len(file.Passwords) == 1 {
+				buf.Settings["password"] = file.Passwords[0].Secret
+				buf.Settings["passwordPrompted"] = file.Passwords[0].Prompted
 			}
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, buf)
@@ -224,11 +219,44 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	args := flag.Args()
+	files := make([]File, 0, len(args))
+	flagStartPos := ""
+	flagr := regexp.MustCompile(`^\+\d+(:\d+)?$`)
+	for _, a := range args {
+		if flagr.MatchString(a) {
+			flagStartPos = a[1:]
+		} else {
+			if flagStartPos != "" {
+				files = append(files, File{Name: a + ":" + flagStartPos})
+				flagStartPos = ""
+			} else {
+				files = append(files, File{Name: a})
+			}
+		}
+	}
+
+	btype := buffer.BTDefault
+	if !isatty.IsTerminal(os.Stdout.Fd()) {
+		btype = buffer.BTStdout
+	}
+	for i := range files {
+		files[i].Type = buffer.GetBufferType(files[i].Name, btype)
+		if files[i].Type == buffer.BTArmorGPG {
+			password := screen.TermPassword(files[i].Name)
+			files[i].Passwords = append(files[i].Passwords, password)
+		} else if files[i].Type == buffer.BTGPG {
+			password := screen.TermPassword(files[i].Name)
+			files[i].Passwords = append(files[i].Passwords, password)
+		}
+	}
+
 	config.InitRuntimeFiles()
 	err = config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
 	}
+
 	config.InitGlobalSettings()
 
 	// flag options
@@ -274,7 +302,7 @@ func main() {
 		screen.TermMessage(err)
 	}
 
-	b := LoadInput()
+	b := LoadInput(files)
 
 	if len(b) == 0 {
 		// No buffers to open

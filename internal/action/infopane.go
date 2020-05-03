@@ -58,8 +58,12 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 			}
 		}
 		if e.Key() == tcell.KeyRune && !done && !hasYN {
-			h.DoRuneInsert(e.Rune())
-			done = true
+			if h.PromptType == "secret" {
+				h.Secret = append(h.Secret, e.Rune())
+			} else {
+				h.DoRuneInsert(e.Rune())
+				done = true
+			}
 		}
 		if done && h.HasPrompt && !hasYN {
 			resp := string(h.LineBytes(0))

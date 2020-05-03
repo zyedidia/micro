@@ -125,7 +125,7 @@ func luaImportMicroBuffer() *lua.LTable {
 		return buffer.NewBufferFromString(text, path, buffer.BTDefault)
 	}))
 	ulua.L.SetField(pkg, "NewBufferFromFile", luar.New(ulua.L, func(path string) (*buffer.Buffer, error) {
-		return buffer.NewBufferFromFile(path, buffer.BTDefault)
+		return buffer.NewBufferFromFile(path, buffer.BTDefault, nil)
 	}))
 	ulua.L.SetField(pkg, "ByteOffset", luar.New(ulua.L, buffer.ByteOffset))
 	ulua.L.SetField(pkg, "Log", luar.New(ulua.L, buffer.WriteLog))

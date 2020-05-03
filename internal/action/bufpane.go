@@ -224,6 +224,32 @@ func (h *BufPane) ResizePane(size int) {
 	h.tab.Resize()
 }
 
+// CheckPassword checks if there is a password and prompts if not
+func CheckPassword(buf *buffer.Buffer, filename string, callback func()) {
+	var password string
+	if value, ok := buf.Settings["password"]; ok {
+		password = value.(string)
+	}
+	var passwordPrompted bool
+	if value, ok := buf.Settings["passwordPrompted"]; ok {
+		passwordPrompted = value.(bool)
+	}
+	bufType := buffer.GetBufferType(filename, buffer.BTDefault)
+	if (bufType == buffer.BTArmorGPG || bufType == buffer.BTGPG) &&
+		password == "" && !passwordPrompted {
+		InfoBar.PasswordPrompt(true, func(password string, canceled bool) {
+			if !canceled {
+				buf.Settings["password"] = password
+				buf.Type = bufType
+			}
+			buf.Settings["passwordPrompted"] = true
+			callback()
+		})
+		return
+	}
+	callback()
+}
+
 // PluginCB calls all plugin callbacks with a certain name and
 // displays an error if there is one and returns the aggregrate
 // boolean response

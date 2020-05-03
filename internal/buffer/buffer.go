@@ -21,6 +21,7 @@ import (
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/internal/encoding"
 	ulua "github.com/zyedidia/micro/internal/lua"
 	"github.com/zyedidia/micro/internal/screen"
 	"github.com/zyedidia/micro/internal/util"
@@ -64,11 +65,44 @@ var (
 	// BTStdout is a buffer that only writes to stdout
 	// when closed
 	BTStdout = BufType{6, false, true, true}
+	// BTArmorGPG armored gpg encrypted file extension
+	BTArmorGPG = BufType{7, false, false, true}
+	// BTGPG gpg encrypted file extension
+	BTGPG = BufType{8, false, false, true}
+	// BTGZIP gzip encoded file extension
+	BTGZIP = BufType{9, false, false, true}
 
 	// ErrFileTooLarge is returned when the file is too large to hash
 	// (fastdirty is automatically enabled)
 	ErrFileTooLarge = errors.New("File is too large to hash")
 )
+
+const (
+	// ExtensionArmorGPG armored gpg encrypted file extension
+	ExtensionArmorGPG = "asc"
+	// ExtensionGPG gpg encrypted file extension
+	ExtensionGPG = "gpg"
+	// ExtensionGZIP gzip encoded file
+	ExtensionGZIP = "gz"
+)
+
+// GetBufferType gets the buffer type
+func GetBufferType(filename string, bufType BufType) BufType {
+	parts := strings.Split(filename, ".")
+	if len(parts) > 1 {
+		for _, part := range parts[1:] {
+			switch part {
+			case ExtensionArmorGPG:
+				return BTArmorGPG
+			case ExtensionGPG:
+				return BTGPG
+			case ExtensionGZIP:
+				return BTGZIP
+			}
+		}
+	}
+	return bufType
+}
 
 // SharedBuffer is a struct containing info that is shared among buffers
 // that have the same file open
@@ -196,7 +230,7 @@ type Buffer struct {
 // It will also automatically handle `~`, and line/column with filename:l:c
 // It will return an empty buffer if the path does not exist
 // and an error if the file is a directory
-func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
+func NewBufferFromFile(path string, btype BufType, passwords []screen.Password) (*Buffer, error) {
 	var err error
 	filename, cursorPos := util.GetPathAndCursorPosition(path)
 	filename, err = util.ReplaceHome(filename)
@@ -213,6 +247,38 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 
 	defer file.Close()
 
+	var reader io.Reader = file
+	var size int64
+	if err == nil {
+		size = util.FSize(file)
+		if (btype == BTArmorGPG || btype == BTGPG) && len(passwords) == 1 {
+			buffer := bytes.Buffer{}
+			settings := map[string]interface{}{
+				"password": passwords[0].Secret,
+				"size":     size,
+			}
+			reader, err = encoding.Decoder(reader, filename, settings)
+			if err == nil {
+				_, err = io.Copy(&buffer, reader)
+				if err == nil {
+					reader, size = &buffer, int64(buffer.Len())
+				}
+			}
+		} else if btype == BTGZIP {
+			buffer := bytes.Buffer{}
+			settings := map[string]interface{}{
+				"size": size,
+			}
+			reader, err = encoding.Decoder(reader, filename, settings)
+			if err == nil {
+				_, err = io.Copy(&buffer, reader)
+				if err == nil {
+					reader, size = &buffer, int64(buffer.Len())
+				}
+			}
+		}
+	}
+
 	cursorLoc, cursorerr := ParseCursorLocation(cursorPos)
 	if cursorerr != nil {
 		cursorLoc = Loc{-1, -1}
@@ -223,7 +289,12 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else {
-		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
+		buf = NewBuffer(reader, size, filename, cursorLoc, btype)
+	}
+
+	if (btype == BTArmorGPG || btype == BTGPG) && len(passwords) == 1 {
+		buf.Settings["password"] = passwords[0].Secret
+		buf.Settings["passwordPrompted"] = passwords[0].Prompted
 	}
 
 	return buf, nil

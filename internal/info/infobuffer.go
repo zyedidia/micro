@@ -20,6 +20,7 @@ type InfoBuf struct {
 
 	Msg    string
 	YNResp bool
+	Secret []rune
 
 	// This map stores the history for all the different kinds of uses Prompt has
 	// It's a map of history type -> history array
@@ -107,10 +108,50 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 	i.Msg = prompt
 	i.HasPrompt = true
 	i.HasMessage, i.HasError, i.HasYN = false, false, false
+	i.Secret = []rune{}
 	i.HasGutter = false
 	i.PromptCallback = donecb
 	i.EventCallback = eventcb
 	i.Buffer.Insert(i.Buffer.Start(), msg)
+}
+
+// PasswordPrompt asks the user for a password and returns the result
+func (i *InfoBuf) PasswordPrompt(verify bool, callback func(password string, canceled bool)) {
+	eventcb := func(password string) {
+
+	}
+	passwordPrompt := func(prompt string, next func(password string, canceled bool)) {
+		donecb := func(password string, canceled bool) {
+			if canceled {
+				callback("", true)
+			} else if next != nil {
+				next(password, canceled)
+			}
+		}
+		i.Prompt(prompt, "", "secret", eventcb, donecb)
+	}
+
+	if verify {
+		verifyPassword := ""
+		next1 := func(password string, canceled bool) {
+			if canceled {
+				callback("", true)
+			} else if password == verifyPassword {
+				callback(password, canceled)
+			} else {
+				i.PasswordPrompt(verify, callback)
+			}
+		}
+		next := func(password string, canceled bool) {
+			verifyPassword = password
+			passwordPrompt("Verify Password: ", next1)
+		}
+		passwordPrompt("Password: ", next)
+		return
+	}
+
+	passwordPrompt("Password: ", callback)
+	return
 }
 
 // YNPrompt creates a yes or no prompt, and the callback returns the yes/no result and whether
@@ -136,17 +177,24 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 	i.HasGutter = false
 	if !hadYN {
 		if i.PromptCallback != nil {
+			callback := i.PromptCallback
+			i.PromptCallback = nil
 			if canceled {
-				i.PromptCallback("", true)
 				h := i.History[i.PromptType]
 				i.History[i.PromptType] = h[:len(h)-1]
+				callback("", true)
 			} else {
-				resp := string(i.LineBytes(0))
-				i.PromptCallback(resp, false)
-				h := i.History[i.PromptType]
-				h[len(h)-1] = resp
+				if i.PromptType == "secret" {
+					secret := string(i.Secret)
+					i.Secret = []rune{}
+					callback(secret, false)
+				} else {
+					resp := string(i.LineBytes(0))
+					h := i.History[i.PromptType]
+					h[len(h)-1] = resp
+					callback(resp, false)
+				}
 			}
-			i.PromptCallback = nil
 		}
 		i.Replace(i.Start(), i.End(), "")
 	}

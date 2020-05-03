@@ -33,7 +33,7 @@ func (b *Buffer) Serialize() error {
 
 	name := filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath))
 
-	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
+	return b.overwriteFile(name, encoding.Nop, func(file io.Writer) error {
 		err := gob.NewEncoder(file).Encode(SerializedBuffer{
 			b.EventHandler,
 			b.GetActiveCursor().Loc,

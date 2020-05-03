@@ -702,33 +702,39 @@ func (h *BufPane) InsertTab() bool {
 
 // SaveAll saves all open buffers
 func (h *BufPane) SaveAll() bool {
-	for _, b := range buffer.OpenBuffers {
-		b.Save()
+	var save func(int)
+	save = func(i int) {
+		if i < len(buffer.OpenBuffers) {
+			b := buffer.OpenBuffers[i]
+			CheckPassword(b, b.AbsPath, func() {
+				b.Save()
+				save(i + 1)
+			})
+		}
 	}
+	save(0)
 	return true
 }
 
 // SaveCB performs a save and does a callback at the very end (after all prompts have been resolved)
-func (h *BufPane) SaveCB(action string, callback func()) bool {
+func (h *BufPane) SaveCB(action string, callback func(noPrompt bool)) {
 	// If this is an empty buffer, ask for a filename
 	if h.Buf.Path == "" {
 		h.SaveAsCB(action, callback)
 	} else {
-		noPrompt := h.saveBufToFile(h.Buf.Path, action, callback)
-		if noPrompt {
-			return true
-		}
+		h.saveBufToFile(h.Buf.Path, action, callback)
 	}
-	return false
+	return
 }
 
 // Save the buffer to disk
 func (h *BufPane) Save() bool {
-	return h.SaveCB("Save", nil)
+	h.SaveCB("Save", nil)
+	return true
 }
 
 // SaveAsCB performs a save as and does a callback at the very end (after all prompts have been resolved)
-func (h *BufPane) SaveAsCB(action string, callback func()) bool {
+func (h *BufPane) SaveAsCB(action string, callback func(noPrompt bool)) {
 	InfoBar.Prompt("Filename: ", "", "Save", nil, func(resp string, canceled bool) {
 		if !canceled {
 			// the filename might or might not be quoted, so unquote first then join the strings.
@@ -742,62 +748,68 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 				return
 			}
 			filename := strings.Join(args, " ")
-			noPrompt := h.saveBufToFile(filename, action, callback)
-			if noPrompt {
-				h.completeAction(action)
-			}
+			h.saveBufToFile(filename, action, func(noPrompt bool) {
+				if noPrompt {
+					h.completeAction(action)
+				}
+				if callback != nil {
+					callback(noPrompt)
+				}
+			})
 		}
 	})
-	return false
+	return
 }
 
 // SaveAs saves the buffer to disk with the given name
 func (h *BufPane) SaveAs() bool {
-	return h.SaveAsCB("SaveAs", nil)
+	h.SaveAsCB("SaveAs", nil)
+	return true
 }
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
-func (h *BufPane) saveBufToFile(filename string, action string, callback func()) bool {
-	err := h.Buf.SaveAs(filename)
-	if err != nil {
-		if strings.HasSuffix(err.Error(), "permission denied") {
-			saveWithSudo := func() {
-				err = h.Buf.SaveAsWithSudo(filename)
-				if err != nil {
-					InfoBar.Error(err)
-				} else {
-					h.Buf.Path = filename
-					h.Buf.SetName(filename)
-					InfoBar.Message("Saved " + filename)
+func (h *BufPane) saveBufToFile(filename string, action string, callback func(noPrompt bool)) {
+	CheckPassword(h.Buf, filename, func() {
+		err := h.Buf.SaveAs(filename)
+		if err != nil {
+			if strings.HasSuffix(err.Error(), "permission denied") {
+				saveWithSudo := func() {
+					err = h.Buf.SaveAsWithSudo(filename)
+					if err != nil {
+						InfoBar.Error(err)
+					} else {
+						h.Buf.Path = filename
+						h.Buf.SetName(filename)
+						InfoBar.Message("Saved " + filename)
+					}
 				}
-			}
-			if h.Buf.Settings["autosu"].(bool) {
-				saveWithSudo()
+				if h.Buf.Settings["autosu"].(bool) {
+					saveWithSudo()
+				} else {
+					InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
+						if yes && !canceled {
+							saveWithSudo()
+							h.completeAction(action)
+						}
+						if callback != nil {
+							callback(false)
+						}
+					})
+				}
 			} else {
-				InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
-					if yes && !canceled {
-						saveWithSudo()
-						h.completeAction(action)
-					}
-					if callback != nil {
-						callback()
-					}
-				})
-				return false
+				InfoBar.Error(err)
 			}
 		} else {
-			InfoBar.Error(err)
+			h.Buf.Path = filename
+			h.Buf.SetName(filename)
+			InfoBar.Message("Saved " + filename)
 		}
-	} else {
-		h.Buf.Path = filename
-		h.Buf.SetName(filename)
-		InfoBar.Message("Saved " + filename)
-	}
-	if callback != nil {
-		callback()
-	}
-	return true
+		if callback != nil {
+			callback(true)
+		}
+	})
+	return
 }
 
 // Find opens a prompt and searches forward for the input
@@ -1399,7 +1411,7 @@ func (h *BufPane) Quit() bool {
 	if h.Buf.Modified() {
 		if config.GlobalSettings["autosave"].(float64) > 0 {
 			// autosave on means we automatically save when quitting
-			h.SaveCB("Quit", func() {
+			h.SaveCB("Quit", func(noPrompt bool) {
 				quit()
 			})
 		} else {
@@ -1407,7 +1419,7 @@ func (h *BufPane) Quit() bool {
 				if !canceled && !yes {
 					quit()
 				} else if !canceled && yes {
-					h.SaveCB("Quit", func() {
+					h.SaveCB("Quit", func(noPrompt bool) {
 						quit()
 					})
 				}

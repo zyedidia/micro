@@ -50,7 +50,7 @@ func (b *Buffer) Backup(checkTime bool) error {
 
 	name := filepath.Join(backupdir, util.EscapePath(b.AbsPath))
 
-	err := overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
+	err := b.overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
 		if len(b.lines) == 0 {
 			return
 		}
