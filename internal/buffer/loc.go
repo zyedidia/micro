@@ -3,7 +3,7 @@ package buffer
 import (
 	"unicode/utf8"
 
-	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // Loc stores a location

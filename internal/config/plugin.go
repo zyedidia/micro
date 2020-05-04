@@ -5,7 +5,7 @@ import (
 	"log"
 
 	lua "github.com/yuin/gopher-lua"
-	ulua "github.com/zyedidia/micro/internal/lua"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 )
 
 // ErrNoSuchFunction is returned when Call is executed on a function that does not exist

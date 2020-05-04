@@ -4,7 +4,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/zyedidia/clipboard"
-	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // InBounds returns whether the given location is a valid character position in the given buffer

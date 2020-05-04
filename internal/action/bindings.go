@@ -10,8 +10,8 @@ import (
 	"unicode"
 
 	"github.com/zyedidia/json5"
-	"github.com/zyedidia/micro/internal/config"
-	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/tcell"
 )
 

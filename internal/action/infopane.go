@@ -4,10 +4,10 @@ import (
 	"bytes"
 	"strings"
 
-	"github.com/zyedidia/micro/internal/buffer"
-	"github.com/zyedidia/micro/internal/display"
-	"github.com/zyedidia/micro/internal/info"
-	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/display"
+	"github.com/zyedidia/micro/v2/internal/info"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/tcell"
 )
 

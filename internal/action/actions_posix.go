@@ -5,7 +5,7 @@ package action
 import (
 	"syscall"
 
-	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
 // Suspend sends micro to the background. This is the same as pressing CtrlZ in most unix programs.

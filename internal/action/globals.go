@@ -1,6 +1,6 @@
 package action
 
-import "github.com/zyedidia/micro/internal/buffer"
+import "github.com/zyedidia/micro/v2/internal/buffer"
 
 var InfoBar *InfoPane
 var LogBufPane *BufPane

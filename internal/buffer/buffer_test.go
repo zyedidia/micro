@@ -7,7 +7,7 @@ import (
 	testifyAssert "github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
 
-	ulua "github.com/zyedidia/micro/internal/lua"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 )
 
 type operation struct {

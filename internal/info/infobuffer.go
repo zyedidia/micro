@@ -3,7 +3,7 @@ package info
 import (
 	"fmt"
 
-	"github.com/zyedidia/micro/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/buffer"
 )
 
 // The InfoBuf displays messages and other info at the bottom of the screen.

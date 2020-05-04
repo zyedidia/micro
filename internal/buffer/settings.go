@@ -1,8 +1,8 @@
 package buffer
 
 import (
-	"github.com/zyedidia/micro/internal/config"
-	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
 func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {

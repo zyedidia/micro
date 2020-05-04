@@ -5,9 +5,9 @@ import (
 	"runtime"
 
 	"github.com/zyedidia/clipboard"
-	"github.com/zyedidia/micro/internal/display"
-	"github.com/zyedidia/micro/internal/screen"
-	"github.com/zyedidia/micro/internal/shell"
+	"github.com/zyedidia/micro/v2/internal/display"
+	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/tcell"
 	"github.com/zyedidia/terminal"
 )

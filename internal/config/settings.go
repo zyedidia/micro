@@ -12,7 +12,7 @@ import (
 
 	"github.com/zyedidia/glob"
 	"github.com/zyedidia/json5"
-	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"golang.org/x/text/encoding/htmlindex"
 )
 

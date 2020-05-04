@@ -1,7 +1,7 @@
 package action
 
 import (
-	"github.com/zyedidia/micro/internal/display"
+	"github.com/zyedidia/micro/v2/internal/display"
 )
 
 type Pane interface {

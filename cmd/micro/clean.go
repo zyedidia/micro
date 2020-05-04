@@ -10,8 +10,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/zyedidia/micro/internal/buffer"
-	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/config"
 )
 
 func shouldContinue() bool {

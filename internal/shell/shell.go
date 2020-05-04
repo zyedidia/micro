@@ -11,7 +11,7 @@ import (
 	"strings"
 
 	shellquote "github.com/kballard/go-shellquote"
-	"github.com/zyedidia/micro/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
 // ExecCommand executes a command using exec

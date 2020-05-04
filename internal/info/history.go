@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/zyedidia/micro/internal/config"
+	"github.com/zyedidia/micro/v2/internal/config"
 )
 
 // LoadHistory attempts to load user history from configDir/buffers/history

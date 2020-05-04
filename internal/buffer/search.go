@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"unicode/utf8"
 
-	"github.com/zyedidia/micro/internal/util"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
