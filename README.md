@@ -107,6 +107,10 @@ You can install micro using Homebrew on Mac:
 brew install micro
 ```
 
+**Note for Mac:** All micro keybindings use the control or alt (option) key, not the command
+key. By default, macOS terminals do not forward alt key events. To fix this, please see
+the section on [macOS terminals](https://github.com/zyedidia/micro#macos-terminal) further below.
+
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
 ```
@@ -119,6 +123,10 @@ via `apt`:
 ```
 sudo apt install micro
 ```
+
+**Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
+must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
+further below.
 
 Micro is also available through other package managers on Linux such as AUR, Nix, and package managers
 for other operating systems:
