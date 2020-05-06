@@ -194,7 +194,7 @@ func (h *BufPane) TabMoveCmd(args []string) {
 	}
 
 	// Restrain position to within the valid range
-	idxTo = util.Clamp(0, len(tabs.List)-1)
+	idxTo = util.Clamp(idxTo, 0, len(tabs.List)-1)
 
 	activeTab := Tabs.List[idxFrom]
 	Tabs.RemoveTab(activeTab.ID())
