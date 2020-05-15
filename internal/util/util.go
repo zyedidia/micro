@@ -416,7 +416,7 @@ func Clamp(val, min, max int) int {
 }
 
 func IsNonAlphaNumeric(c rune) bool {
-	return !unicode.IsLetter(c) && !unicode.IsNumber(c)
+	return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
 }
 
 func ParseSpecial(s string) string {
