@@ -1,6 +1,7 @@
 package action
 
 import (
+	"regexp"
 	"strings"
 	"time"
 
@@ -194,6 +195,10 @@ type BufPane struct {
 	// Last search stores the last successful search for FindNext and FindPrev
 	lastSearch      string
 	lastSearchRegex bool
+
+	highlightSearch bool
+	lastHlSearch    string
+
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
 	multiWord bool
@@ -529,6 +534,52 @@ func (h *BufPane) SetActive(b bool) {
 
 }
 
+func (h *BufPane) HighlightCustomPattern(group, regex string) error {
+	if regex != "" {
+		// validate the regex before doing anything
+		if _, err := regexp.Compile(regex); err != nil {
+			return err
+		}
+	}
+
+	// "hlsearch" is a special case
+	if group == "hlsearch" {
+		if regex != "" {
+			h.highlightSearch = true
+			h.lastHlSearch = regex
+		} else {
+			h.highlightSearch = false
+		}
+	}
+
+	h.Buf.Highlighter.RemoveCustomPattern(group)
+	if regex != "" {
+		h.Buf.Highlighter.AddCustomPattern(group, regex)
+	}
+
+	start := h.GetView().StartLine
+	end := start + h.GetView().Height - 1 // TODO: use Bottomline()
+	go func() {
+		// Syntax regions don't change, so no need to call HighlightStates()
+
+		// Simple optimization: update current frame first
+		h.Buf.Highlighter.HighlightMatches(h.Buf, start, end)
+		screen.Redraw()
+		h.Buf.Highlighter.HighlightMatches(h.Buf, 0, start-1)
+		h.Buf.Highlighter.HighlightMatches(h.Buf, end+1, h.Buf.End().Y)
+		screen.Redraw()
+
+		// TODO: if there is an unfinished highlighting from previous HighlightCustomPattern, stop it.
+		// All those pending highlightings are doing all the same job, needlessly consuming N times more CPU.
+		// This is noticeable with huge files.
+		//
+		// By the way, the same applies to highlighting in Buffer.UpdateRules().
+		// As soon as we close the buffer or change the highlighting scheme,
+		// we should stop previous highlighting.
+	}()
+	return nil
+}
+
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute
 var BufKeyActions = map[string]BufKeyAction{
 	"CursorUp":                  (*BufPane).CursorUp,
@@ -569,6 +620,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"FindLiteral":               (*BufPane).FindLiteral,
 	"FindNext":                  (*BufPane).FindNext,
 	"FindPrevious":              (*BufPane).FindPrevious,
+	"ToggleHighlightSearch":     (*BufPane).ToggleHighlightSearch,
 	"Center":                    (*BufPane).Center,
 	"Undo":                      (*BufPane).Undo,
 	"Redo":                      (*BufPane).Redo,

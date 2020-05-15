@@ -412,3 +412,39 @@ func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
 	input.SetMatch(lineN, match)
 	input.SetState(lineN, curState)
 }
+
+// TODO: the below implementation of custom patterns is just a quick hack.
+// - It highlights only those matches which are not inside syntax regions (fully or partially).
+// - It doesn't work when syntax highlighting is off ("syntax" option set to false).
+//
+// Instead of adding/removing custom patterns to the syntax definition,
+// we should add/remove them to a separate custom highlighting layer
+// independent of syntax highlighting layer.
+// - If syntax=true, custom highlighting should be overlayed on top of syntax highlighting.
+// - If syntax=false, only custom highlighting should be displayed.
+
+func (h *Highlighter) AddCustomPattern(group, regex string) error {
+	r, err := regexp.Compile(regex)
+	if err != nil {
+		return err
+	}
+
+	if _, ok := Groups[group]; !ok {
+		numGroups++
+		Groups[group] = numGroups
+	}
+	groupNum := Groups[group]
+	h.Def.rules.patterns = append(h.Def.rules.patterns, &pattern{groupNum, r})
+
+	return nil
+}
+
+func (h *Highlighter) RemoveCustomPattern(group string) {
+	for i, p := range h.Def.rules.patterns {
+		if p.group.String() == group {
+			// TODO support multiple patterns for the same group
+			h.Def.rules.patterns = append(h.Def.rules.patterns[:i], h.Def.rules.patterns[i+1:]...)
+			break
+		}
+	}
+}
