@@ -56,6 +56,8 @@ github.com/zyedidia/pty v2.0.0+incompatible h1:Ou5vXL6tvjst+RV8sUFISbuKDnUJPhnpy
 github.com/zyedidia/pty v2.0.0+incompatible/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
 github.com/zyedidia/tcell v1.4.4 h1:o34LXujNuSueuyTy+5eoQW+rQr8g0UbY8k1NczZyskQ=
 github.com/zyedidia/tcell v1.4.4/go.mod h1:HhlbMSCcGX15rFDB+Q1Lk3pKEOocsCUAQC3zhZ9sadA=
+github.com/zyedidia/tcell v1.4.5 h1:JFmOiWLxr3Fsk2vjRL3n8oRUoJeyrazGhkhZqW31kEY=
+github.com/zyedidia/tcell v1.4.5/go.mod h1:HhlbMSCcGX15rFDB+Q1Lk3pKEOocsCUAQC3zhZ9sadA=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415/go.mod h1:8leT8G0Cm8NoJHdrrKHyR9MirWoF4YW7pZh06B6H+1E=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=

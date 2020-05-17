@@ -151,6 +151,9 @@ func StringToStyle(str string) tcell.Style {
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
 	}
+	if strings.Contains(str, "italic") {
+		style = style.Italic(true)
+	}
 	if strings.Contains(str, "reverse") {
 		style = style.Reverse(true)
 	}
