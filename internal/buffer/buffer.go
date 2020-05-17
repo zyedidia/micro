@@ -152,14 +152,14 @@ func (b *SharedBuffer) MarkModified(start, end int) {
 		return
 	}
 
-	start = util.Clamp(start, 0, len(b.lines))
-	end = util.Clamp(end, 0, len(b.lines))
+	start = util.Clamp(start, 0, len(b.lines)-1)
+	end = util.Clamp(end, 0, len(b.lines)-1)
 
 	l := -1
 	for i := start; i <= end; i++ {
 		l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
 	}
-	b.Highlighter.HighlightMatches(b, start, l+1)
+	b.Highlighter.HighlightMatches(b, start, l)
 }
 
 // DisableReload disables future reloads of this sharedbuffer
