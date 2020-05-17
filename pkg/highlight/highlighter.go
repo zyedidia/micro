@@ -336,11 +336,11 @@ func (h *Highlighter) HighlightStates(input LineStates) {
 	}
 }
 
-// HighlightMatches sets the matches for each line in between startline and endline
+// HighlightMatches sets the matches for each line from startline to endline
 // It sets all other matches in the buffer to nil to conserve memory
 // This assumes that all the states are set correctly
 func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int) {
-	for i := startline; i < endline; i++ {
+	for i := startline; i <= endline; i++ {
 		if i >= input.LinesNum() {
 			break
 		}
