@@ -139,6 +139,17 @@ func BufMapMouse(k MouseEvent, action string) {
 	}
 }
 
+// BufUnmap unmaps a key or mouse event from any action
+func BufUnmap(k Event) {
+	delete(BufKeyBindings, k)
+	delete(BufKeyStrings, k)
+
+	switch e := k.(type) {
+	case MouseEvent:
+		delete(BufMouseBindings, e)
+	}
+}
+
 // The BufPane connects the buffer and the window
 // It provides a cursor (or multiple) and defines a set of actions
 // that can be taken on the buffer

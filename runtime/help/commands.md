@@ -62,6 +62,11 @@ quotes here but these are not necessary when entering the command in micro.
 
 * `tab 'filename'`: opens the given file in a new tab.
 
+* `tabmove '[-+]?n'`: Moves the active tab to another slot. `n` is an integer.
+   If `n` is prefixed with `-` or `+`, then it represents a relative position
+   (e.g. `tabmove +2` moves the tab to the right by `2`). If `n` has no prefix,
+   it represents an absolute position (e.g. `tabmove 2` moves the tab to slot `2`).
+
 * `tabswitch 'tab'`: This command will switch to the specified tab. The `tab`
    can either be a tab number, or a name of a tab.
 
