@@ -185,6 +185,7 @@ Save
 SaveAll
 SaveAs
 Find
+FindLiteral
 FindNext
 FindPrevious
 Undo

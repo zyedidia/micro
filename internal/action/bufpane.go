@@ -180,6 +180,7 @@ type BufPane struct {
 
 	// Last search stores the last successful search for FindNext and FindPrev
 	lastSearch string
+	lastSearchRegex bool
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
 	multiWord bool
@@ -552,6 +553,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SaveAll":                   (*BufPane).SaveAll,
 	"SaveAs":                    (*BufPane).SaveAs,
 	"Find":                      (*BufPane).Find,
+	"FindLiteral":               (*BufPane).FindLiteral,
 	"FindNext":                  (*BufPane).FindNext,
 	"FindPrevious":              (*BufPane).FindPrevious,
 	"Center":                    (*BufPane).Center,

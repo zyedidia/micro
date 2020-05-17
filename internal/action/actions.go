@@ -802,10 +802,23 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 
 // Find opens a prompt and searches forward for the input
 func (h *BufPane) Find() bool {
+	return h.find(true)
+}
+
+// FindLiteral is the same as Find() but does not support regular expressions
+func (h *BufPane) FindLiteral() bool {
+	return h.find(false)
+}
+
+func (h *BufPane) find(useRegex bool) bool {
 	h.searchOrig = h.Cursor.Loc
-	InfoBar.Prompt("Find (regex): ", "", "Find", func(resp string) {
+	prompt := "Find: "
+	if useRegex {
+		prompt = "Find (regex): "
+	}
+	InfoBar.Prompt(prompt, "", "Find", func(resp string) {
 		// Event callback
-		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, true)
+		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
 		if found {
 			h.Cursor.SetSelectionStart(match[0])
 			h.Cursor.SetSelectionEnd(match[1])
@@ -820,7 +833,7 @@ func (h *BufPane) Find() bool {
 	}, func(resp string, canceled bool) {
 		// Finished callback
 		if !canceled {
-			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, true)
+			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
 			if err != nil {
 				InfoBar.Error(err)
 			}
@@ -831,6 +844,7 @@ func (h *BufPane) Find() bool {
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
 				h.lastSearch = resp
+				h.lastSearchRegex = useRegex
 			} else {
 				h.Cursor.ResetSelection()
 				InfoBar.Message("No matches found")
@@ -854,7 +868,7 @@ func (h *BufPane) FindNext() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[1]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, true)
+	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.lastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -881,7 +895,7 @@ func (h *BufPane) FindPrevious() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[0]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, true)
+	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.lastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
 	}
