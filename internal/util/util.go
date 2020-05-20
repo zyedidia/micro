@@ -64,7 +64,7 @@ func SliceEnd(slc []byte, index int) []byte {
 			return slc[totalSize:]
 		}
 
-		_, size := utf8.DecodeRune(slc[totalSize:])
+		_, _, size := DecodeCharacter(slc[totalSize:])
 		totalSize += size
 		i++
 	}
@@ -101,7 +101,7 @@ func SliceStart(slc []byte, index int) []byte {
 			return slc[:totalSize]
 		}
 
-		_, size := utf8.DecodeRune(slc[totalSize:])
+		_, _, size := DecodeCharacter(slc[totalSize:])
 		totalSize += size
 		i++
 	}
@@ -135,7 +135,7 @@ func SliceVisualEnd(b []byte, n, tabsize int) ([]byte, int, int) {
 	width := 0
 	i := 0
 	for len(b) > 0 {
-		r, size := utf8.DecodeRune(b)
+		r, _, size := DecodeCharacter(b)
 
 		w := 0
 		switch r {
@@ -172,7 +172,7 @@ func StringWidth(b []byte, n, tabsize int) int {
 	i := 0
 	width := 0
 	for len(b) > 0 {
-		r, size := utf8.DecodeRune(b)
+		r, _, size := DecodeCharacter(b)
 		b = b[size:]
 
 		switch r {
@@ -265,7 +265,7 @@ func IsBytesWhitespace(b []byte) bool {
 // RunePos returns the rune index of a given byte index
 // Make sure the byte index is not between code points
 func RunePos(b []byte, i int) int {
-	return utf8.RuneCount(b[:i])
+	return CharacterCount(b[:i])
 }
 
 // MakeRelative will attempt to make a relative path between path and base
@@ -344,7 +344,7 @@ func EscapePath(path string) string {
 func GetLeadingWhitespace(b []byte) []byte {
 	ws := []byte{}
 	for len(b) > 0 {
-		r, size := utf8.DecodeRune(b)
+		r, _, size := DecodeCharacter(b)
 		if r == ' ' || r == '\t' {
 			ws = append(ws, byte(r))
 		} else {
@@ -370,7 +370,7 @@ func GetCharPosInLine(b []byte, visualPos int, tabsize int) int {
 	i := 0     // char pos
 	width := 0 // string visual width
 	for len(b) > 0 {
-		r, size := utf8.DecodeRune(b)
+		r, _, size := DecodeCharacter(b)
 		b = b[size:]
 
 		switch r {

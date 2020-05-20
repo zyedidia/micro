@@ -2,7 +2,6 @@ package display
 
 import (
 	"strconv"
-	"unicode/utf8"
 
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -73,9 +72,9 @@ func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) 
 	curStyle := config.DefStyle
 	var s *tcell.Style
 	for len(b) > 0 {
-		r, size := utf8.DecodeRune(b)
+		r, _, size := util.DecodeCharacter(b)
 
-		curStyle, found := w.getStyle(curStyle, bloc, r)
+		curStyle, found := w.getStyle(curStyle, bloc)
 		if found {
 			s = &curStyle
 		}
@@ -237,7 +236,7 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 				return bloc
 			}
 
-			r, size := utf8.DecodeRune(line)
+			r, _, size := util.DecodeCharacter(line)
 			draw()
 			width := 0
 
@@ -360,7 +359,7 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxL
 
 // getStyle returns the highlight style for the given character position
 // If there is no change to the current highlight style it just returns that
-func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc, r rune) (tcell.Style, bool) {
+func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc) (tcell.Style, bool) {
 	if group, ok := w.Buf.Match(bloc.Y)[bloc.X]; ok {
 		s := config.GetColor(group.String())
 		return s, true
@@ -510,7 +509,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 		bloc.X = bslice
 
-		draw := func(r rune, style tcell.Style, showcursor bool) {
+		draw := func(r rune, combc []rune, style tcell.Style, showcursor bool) {
 			if nColsBeforeStart <= 0 {
 				for _, c := range cursors {
 					if c.HasSelection() &&
@@ -568,7 +567,7 @@ func (w *BufWindow) displayBuffer() {
 					}
 				}
 
-				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, nil, style)
+				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, combc, style)
 
 				if showcursor {
 					for _, c := range cursors {
@@ -584,10 +583,11 @@ func (w *BufWindow) displayBuffer() {
 
 		totalwidth := w.StartCol - nColsBeforeStart
 		for len(line) > 0 {
-			r, size := utf8.DecodeRune(line)
-			curStyle, _ = w.getStyle(curStyle, bloc, r)
+			r, combc, size := util.DecodeCharacter(line)
 
-			draw(r, curStyle, true)
+			curStyle, _ = w.getStyle(curStyle, bloc)
+
+			draw(r, combc, curStyle, true)
 
 			width := 0
 
@@ -604,7 +604,7 @@ func (w *BufWindow) displayBuffer() {
 			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 			if width > 1 {
 				for i := 1; i < width; i++ {
-					draw(char, curStyle, false)
+					draw(char, nil, curStyle, false)
 				}
 			}
 			bloc.X++
@@ -659,7 +659,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		if vloc.X != bufWidth {
-			draw(' ', curStyle, true)
+			draw(' ', nil, curStyle, true)
 		}
 
 		bloc.X = w.StartCol

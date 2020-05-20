@@ -436,7 +436,7 @@ func (c *Cursor) RuneUnder(x int) rune {
 	}
 	i := 0
 	for len(line) > 0 {
-		r, size := utf8.DecodeRune(line)
+		r, _, size := util.DecodeCharacter(line)
 		line = line[size:]
 
 		if i == x {

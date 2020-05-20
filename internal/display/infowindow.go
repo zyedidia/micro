@@ -92,7 +92,7 @@ func (i *InfoWindow) displayBuffer() {
 	line, nColsBeforeStart, bslice := util.SliceVisualEnd(line, blocX, tabsize)
 	blocX = bslice
 
-	draw := func(r rune, style tcell.Style) {
+	draw := func(r rune, combc []rune, style tcell.Style) {
 		if nColsBeforeStart <= 0 {
 			bloc := buffer.Loc{X: blocX, Y: 0}
 			if activeC.HasSelection() &&
@@ -112,8 +112,9 @@ func (i *InfoWindow) displayBuffer() {
 				c := r
 				if j > 0 {
 					c = ' '
+					combc = nil
 				}
-				screen.SetContent(vlocX, i.Y, c, nil, style)
+				screen.SetContent(vlocX, i.Y, c, combc, style)
 			}
 			vlocX++
 		}
@@ -124,9 +125,9 @@ func (i *InfoWindow) displayBuffer() {
 	for len(line) > 0 {
 		curVX := vlocX
 		curBX := blocX
-		r, size := utf8.DecodeRune(line)
+		r, combc, size := util.DecodeCharacter(line)
 
-		draw(r, i.defStyle())
+		draw(r, combc, i.defStyle())
 
 		width := 0
 
@@ -146,7 +147,7 @@ func (i *InfoWindow) displayBuffer() {
 		// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 		if width > 1 {
 			for j := 1; j < width; j++ {
-				draw(char, i.defStyle())
+				draw(char, nil, i.defStyle())
 			}
 		}
 		if activeC.X == curBX {

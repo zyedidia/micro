@@ -8,6 +8,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/v2/pkg/highlight"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // Finds the byte index of the nth rune in a byte slice
@@ -19,7 +20,7 @@ func runeToByteIndex(n int, txt []byte) int {
 	count := 0
 	i := 0
 	for len(txt) > 0 {
-		_, size := utf8.DecodeRune(txt)
+		_, _, size := util.DecodeCharacter(txt)
 
 		txt = txt[size:]
 		count += size

@@ -474,7 +474,7 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 	if len(line) > 0 {
 		i := 0
 		for len(line) > 0 {
-			r, size := utf8.DecodeRune(line)
+			r, _, size := util.DecodeCharacter(line)
 			line = line[size:]
 			i++
 

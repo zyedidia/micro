@@ -174,28 +174,30 @@ func (s *StatusLine) Display() {
 	winX := s.win.X
 	for x := 0; x < s.win.Width; x++ {
 		if x < leftLen {
-			r, size := utf8.DecodeRune(leftText)
+			r, combc, size := util.DecodeCharacter(leftText)
 			leftText = leftText[size:]
 			rw := runewidth.RuneWidth(r)
 			for j := 0; j < rw; j++ {
 				c := r
 				if j > 0 {
 					c = ' '
+					combc = nil
 					x++
 				}
-				screen.SetContent(winX+x, y, c, nil, statusLineStyle)
+				screen.SetContent(winX+x, y, c, combc, statusLineStyle)
 			}
 		} else if x >= s.win.Width-rightLen && x < rightLen+s.win.Width-rightLen {
-			r, size := utf8.DecodeRune(rightText)
+			r, combc, size := util.DecodeCharacter(rightText)
 			rightText = rightText[size:]
 			rw := runewidth.RuneWidth(r)
 			for j := 0; j < rw; j++ {
 				c := r
 				if j > 0 {
 					c = ' '
+					combc = nil
 					x++
 				}
-				screen.SetContent(winX+x, y, c, nil, statusLineStyle)
+				screen.SetContent(winX+x, y, c, combc, statusLineStyle)
 			}
 		} else {
 			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
