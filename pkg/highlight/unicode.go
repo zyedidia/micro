@@ -5,17 +5,6 @@ import (
 	"unicode/utf8"
 )
 
-// combining character range table
-var combining = &unicode.RangeTable{
-	R16: []unicode.Range16{
-		{0x0300, 0x036f, 1}, // combining diacritical marks
-		{0x1ab0, 0x1aff, 1}, // combining diacritical marks extended
-		{0x1dc0, 0x1dff, 1}, // combining diacritical marks supplement
-		{0x20d0, 0x20ff, 1}, // combining diacritical marks for symbols
-		{0xfe20, 0xfe2f, 1}, // combining half marks
-	},
-}
-
 // DecodeCharacter returns the next character from an array of bytes
 // A character is a rune along with any accompanying combining runes
 func DecodeCharacter(b []byte) (rune, []rune, int) {
@@ -24,7 +13,7 @@ func DecodeCharacter(b []byte) (rune, []rune, int) {
 	c, s := utf8.DecodeRune(b)
 
 	var combc []rune
-	for unicode.In(c, combining) {
+	for unicode.In(c, unicode.Mark) {
 		combc = append(combc, c)
 		size += s
 
@@ -43,7 +32,7 @@ func DecodeCharacterInString(str string) (rune, []rune, int) {
 	c, s := utf8.DecodeRuneInString(str)
 
 	var combc []rune
-	for unicode.In(c, combining) {
+	for unicode.In(c, unicode.Mark) {
 		combc = append(combc, c)
 		size += s
 
@@ -61,7 +50,7 @@ func CharacterCount(b []byte) int {
 
 	for len(b) > 0 {
 		r, size := utf8.DecodeRune(b)
-		if !unicode.In(r, combining) {
+		if !unicode.In(r, unicode.Mark) {
 			s++
 		}
 
@@ -77,7 +66,7 @@ func CharacterCountInString(str string) int {
 	s := 0
 
 	for _, r := range str {
-		if !unicode.In(r, combining) {
+		if !unicode.In(r, unicode.Mark) {
 			s++
 		}
 	}
