@@ -11,6 +11,7 @@ todo.txt
 test.txt
 log.txt
 *.old
+benchmark_results*
 tools/build-version
 tools/build-date
 tools/info-plist
