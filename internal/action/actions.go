@@ -5,7 +5,6 @@ import (
 	"runtime"
 	"strings"
 	"time"
-	"unicode/utf8"
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/clipboard"
@@ -175,7 +174,7 @@ func (h *BufPane) CursorRight() bool {
 		if tabstospaces && tabmovement {
 			tabsize := int(h.Buf.Settings["tabsize"].(float64))
 			line := h.Buf.LineBytes(h.Cursor.Y)
-			if h.Cursor.X+tabsize < utf8.RuneCount(line) && util.IsSpaces(line[h.Cursor.X:h.Cursor.X+tabsize]) && util.IsBytesWhitespace(line[0:h.Cursor.X]) {
+			if h.Cursor.X+tabsize < util.CharacterCount(line) && util.IsSpaces(line[h.Cursor.X:h.Cursor.X+tabsize]) && util.IsBytesWhitespace(line[0:h.Cursor.X]) {
 				for i := 0; i < tabsize; i++ {
 					h.Cursor.Right()
 				}
@@ -486,7 +485,7 @@ func (h *BufPane) InsertNewline() bool {
 		// Remove the whitespaces if keepautoindent setting is off
 		if util.IsSpacesOrTabs(h.Buf.LineBytes(h.Cursor.Y-1)) && !h.Buf.Settings["keepautoindent"].(bool) {
 			line := h.Buf.LineBytes(h.Cursor.Y - 1)
-			h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y - 1}, buffer.Loc{X: utf8.RuneCount(line), Y: h.Cursor.Y - 1})
+			h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y - 1}, buffer.Loc{X: util.CharacterCount(line), Y: h.Cursor.Y - 1})
 		}
 	}
 	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
@@ -511,7 +510,7 @@ func (h *BufPane) Backspace() bool {
 		// tab (tabSize number of spaces)
 		lineStart := util.SliceStart(h.Buf.LineBytes(h.Cursor.Y), h.Cursor.X)
 		tabSize := int(h.Buf.Settings["tabsize"].(float64))
-		if h.Buf.Settings["tabstospaces"].(bool) && util.IsSpaces(lineStart) && len(lineStart) != 0 && utf8.RuneCount(lineStart)%tabSize == 0 {
+		if h.Buf.Settings["tabstospaces"].(bool) && util.IsSpaces(lineStart) && len(lineStart) != 0 && util.CharacterCount(lineStart)%tabSize == 0 {
 			loc := h.Cursor.Loc
 			h.Buf.Remove(loc.Move(-tabSize, h.Buf), loc)
 		} else {

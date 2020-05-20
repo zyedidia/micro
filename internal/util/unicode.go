@@ -16,7 +16,6 @@ var combining = &unicode.RangeTable{
 	},
 }
 
-
 // DecodeCharacter returns the next character from an array of bytes
 // A character is a rune along with any accompanying combining runes
 func DecodeCharacter(b []byte) (rune, []rune, int) {
@@ -32,7 +31,7 @@ func DecodeCharacter(b []byte) (rune, []rune, int) {
 		b = b[s:]
 		c, s = utf8.DecodeRune(b)
 	}
-	
+
 	return r, combc, size
 }
 

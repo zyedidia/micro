@@ -1,8 +1,6 @@
 package display
 
 import (
-	"unicode/utf8"
-
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -99,7 +97,7 @@ func (w *TermWindow) Display() {
 		}
 
 		text := []byte(w.Name())
-		textLen := utf8.RuneCount(text)
+		textLen := util.CharacterCount(text)
 		for x := 0; x < w.Width; x++ {
 			if x < textLen {
 				r, combc, size := util.DecodeCharacter(text)

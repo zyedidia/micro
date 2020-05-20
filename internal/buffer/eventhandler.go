@@ -3,12 +3,12 @@ package buffer
 import (
 	"bytes"
 	"time"
-	"unicode/utf8"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 	luar "layeh.com/gopher-luar"
 )
 
@@ -62,10 +62,10 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 	var textX int
 	if t.EventType == TextEventInsert {
 		linecount := eh.buf.LinesNum() - oldl
-		textcount := utf8.RuneCount(text)
+		textcount := util.CharacterCount(text)
 		lastnl = bytes.LastIndex(text, []byte{'\n'})
 		if lastnl >= 0 {
-			endX = utf8.RuneCount(text[lastnl+1:])
+			endX = util.CharacterCount(text[lastnl+1:])
 			textX = endX
 		} else {
 			endX = start.X + textcount
@@ -123,7 +123,7 @@ func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
 			buf.insert(d.Start, d.Text)
 			t.Deltas[i].Start = d.Start
-			t.Deltas[i].End = Loc{d.Start.X + utf8.RuneCount(d.Text), d.Start.Y}
+			t.Deltas[i].End = Loc{d.Start.X + util.CharacterCount(d.Text), d.Start.Y}
 		}
 		for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
 			t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
@@ -166,12 +166,12 @@ func (eh *EventHandler) ApplyDiff(new string) {
 	loc := eh.buf.Start()
 	for _, d := range diff {
 		if d.Type == dmp.DiffDelete {
-			eh.Remove(loc, loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf.LineArray))
+			eh.Remove(loc, loc.MoveLA(util.CharacterCountInString(d.Text), eh.buf.LineArray))
 		} else {
 			if d.Type == dmp.DiffInsert {
 				eh.Insert(loc, d.Text)
 			}
-			loc = loc.MoveLA(utf8.RuneCountInString(d.Text), eh.buf.LineArray)
+			loc = loc.MoveLA(util.CharacterCountInString(d.Text), eh.buf.LineArray)
 		}
 	}
 }

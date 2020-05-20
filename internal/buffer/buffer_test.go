@@ -4,12 +4,12 @@ import (
 	"math/rand"
 	"strings"
 	"testing"
-	"unicode/utf8"
 
 	"github.com/stretchr/testify/assert"
 	lua "github.com/yuin/gopher-lua"
-	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/config"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 type operation struct {
@@ -158,9 +158,9 @@ func benchEdit(testingB *testing.B, nLines, nCursors int) {
 	operations := make([]operation, nCursors)
 	for i := range operations {
 		startLine := (i * regionSize) + rand.Intn(regionSize-5)
-		startColumn := rand.Intn(utf8.RuneCountInString(b.Line(startLine)) + 1)
+		startColumn := rand.Intn(util.CharacterCountInString(b.Line(startLine)) + 1)
 		endLine := startLine + 1 + rand.Intn(5)
-		endColumn := rand.Intn(utf8.RuneCountInString(b.Line(endLine)) + 1)
+		endColumn := rand.Intn(util.CharacterCountInString(b.Line(endLine)) + 1)
 
 		operations[i] = operation{
 			start: Loc{startColumn, startLine},

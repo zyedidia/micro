@@ -6,7 +6,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	luar "layeh.com/gopher-luar"
 
@@ -168,8 +167,8 @@ func (s *StatusLine) Display() {
 		statusLineStyle = style
 	}
 
-	leftLen := util.StringWidth(leftText, utf8.RuneCount(leftText), 1)
-	rightLen := util.StringWidth(rightText, utf8.RuneCount(rightText), 1)
+	leftLen := util.StringWidth(leftText, util.CharacterCount(leftText), 1)
+	rightLen := util.StringWidth(rightText, util.CharacterCount(rightText), 1)
 
 	winX := s.win.X
 	for x := 0; x < s.win.Width; x++ {

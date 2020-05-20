@@ -10,7 +10,6 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
-	"unicode/utf8"
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -703,7 +702,7 @@ func (h *BufPane) GotoCmd(args []string) {
 				return
 			}
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			col = util.Clamp(col-1, 0, utf8.RuneCount(h.Buf.LineBytes(line)))
+			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
 			h.Cursor.GotoLoc(buffer.Loc{col, line})
 		} else {
 			line, err := strconv.Atoi(args[0])
@@ -827,7 +826,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					nreplaced++
 				} else if !canceled && !yes {
 					searchLoc = locs[0]
-					searchLoc.X += utf8.RuneCount(replace)
+					searchLoc.X += util.CharacterCount(replace)
 				} else if canceled {
 					h.Cursor.ResetSelection()
 					h.Buf.RelocateCursors()

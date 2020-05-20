@@ -1,8 +1,6 @@
 package display
 
 import (
-	"unicode/utf8"
-
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -70,7 +68,7 @@ func (i *InfoWindow) IsActive() bool   { return true }
 func (i *InfoWindow) LocFromVisual(vloc buffer.Loc) buffer.Loc {
 	c := i.Buffer.GetActiveCursor()
 	l := i.Buffer.LineBytes(0)
-	n := utf8.RuneCountInString(i.Msg)
+	n := util.CharacterCountInString(i.Msg)
 	return buffer.Loc{c.GetCharPosInLine(l, vloc.X-n), 0}
 }
 
@@ -86,7 +84,7 @@ func (i *InfoWindow) displayBuffer() {
 	activeC := b.GetActiveCursor()
 
 	blocX := 0
-	vlocX := utf8.RuneCountInString(i.Msg)
+	vlocX := util.CharacterCountInString(i.Msg)
 
 	tabsize := 4
 	line, nColsBeforeStart, bslice := util.SliceVisualEnd(line, blocX, tabsize)
@@ -192,7 +190,7 @@ func (i *InfoWindow) scrollToSuggestion() {
 	s := i.totalSize()
 
 	for j, n := range i.Suggestions {
-		c := utf8.RuneCountInString(n)
+		c := util.CharacterCountInString(n)
 		if j == i.CurSuggestion {
 			if x+c >= i.hscroll+i.Width {
 				i.hscroll = util.Clamp(x+c+1-i.Width, 0, s-i.Width)

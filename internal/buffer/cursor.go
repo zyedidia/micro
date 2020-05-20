@@ -1,15 +1,13 @@
 package buffer
 
 import (
-	"unicode/utf8"
-
 	"github.com/zyedidia/clipboard"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // InBounds returns whether the given location is a valid character position in the given buffer
 func InBounds(pos Loc, buf *Buffer) bool {
-	if pos.Y < 0 || pos.Y >= len(buf.lines) || pos.X < 0 || pos.X > utf8.RuneCount(buf.LineBytes(pos.Y)) {
+	if pos.Y < 0 || pos.Y >= len(buf.lines) || pos.X < 0 || pos.X > util.CharacterCount(buf.LineBytes(pos.Y)) {
 		return false
 	}
 
@@ -76,8 +74,8 @@ func (c *Cursor) GetVisualX() int {
 
 	bytes := c.buf.LineBytes(c.Y)
 	tabsize := int(c.buf.Settings["tabsize"].(float64))
-	if c.X > utf8.RuneCount(bytes) {
-		c.X = utf8.RuneCount(bytes) - 1
+	if c.X > util.CharacterCount(bytes) {
+		c.X = util.CharacterCount(bytes) - 1
 	}
 
 	return util.StringWidth(bytes, c.X, tabsize)
@@ -102,7 +100,7 @@ func (c *Cursor) Start() {
 func (c *Cursor) StartOfText() {
 	c.Start()
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 			break
 		}
 		c.Right()
@@ -114,7 +112,7 @@ func (c *Cursor) StartOfText() {
 func (c *Cursor) IsStartOfText() bool {
 	x := 0
 	for util.IsWhitespace(c.RuneUnder(x)) {
-		if x == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+		if x == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 			break
 		}
 		x++
@@ -124,7 +122,7 @@ func (c *Cursor) IsStartOfText() bool {
 
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
-	c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
+	c.X = util.CharacterCount(c.buf.LineBytes(c.Y))
 	c.LastVisualX = c.GetVisualX()
 }
 
@@ -242,8 +240,8 @@ func (c *Cursor) UpN(amount int) {
 	bytes := c.buf.LineBytes(proposedY)
 	c.X = c.GetCharPosInLine(bytes, c.LastVisualX)
 
-	if c.X > utf8.RuneCount(bytes) || (amount < 0 && proposedY == c.Y) {
-		c.X = utf8.RuneCount(bytes)
+	if c.X > util.CharacterCount(bytes) || (amount < 0 && proposedY == c.Y) {
+		c.X = util.CharacterCount(bytes)
 	}
 
 	c.Y = proposedY
@@ -285,7 +283,7 @@ func (c *Cursor) Right() {
 	if c.Loc == c.buf.End() {
 		return
 	}
-	if c.X < utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+	if c.X < util.CharacterCount(c.buf.LineBytes(c.Y)) {
 		c.X++
 	} else {
 		c.Down()
@@ -306,8 +304,8 @@ func (c *Cursor) Relocate() {
 
 	if c.X < 0 {
 		c.X = 0
-	} else if c.X > utf8.RuneCount(c.buf.LineBytes(c.Y)) {
-		c.X = utf8.RuneCount(c.buf.LineBytes(c.Y))
+	} else if c.X > util.CharacterCount(c.buf.LineBytes(c.Y)) {
+		c.X = util.CharacterCount(c.buf.LineBytes(c.Y))
 	}
 }
 
@@ -333,7 +331,7 @@ func (c *Cursor) SelectWord() {
 	c.SetSelectionStart(Loc{backward, c.Y})
 	c.OrigSelection[0] = c.CurSelection[0]
 
-	lineLen := utf8.RuneCount(c.buf.LineBytes(c.Y)) - 1
+	lineLen := util.CharacterCount(c.buf.LineBytes(c.Y)) - 1
 	for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
 		forward++
 	}
@@ -365,7 +363,7 @@ func (c *Cursor) AddWordToSelection() {
 	if c.Loc.GreaterThan(c.OrigSelection[1]) {
 		forward := c.X
 
-		lineLen := utf8.RuneCount(c.buf.LineBytes(c.Y)) - 1
+		lineLen := util.CharacterCount(c.buf.LineBytes(c.Y)) - 1
 		for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
 			forward++
 		}
@@ -392,7 +390,7 @@ func (c *Cursor) SelectTo(loc Loc) {
 // WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
-		if c.X == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 			c.Right()
 			return
 		}
@@ -400,7 +398,7 @@ func (c *Cursor) WordRight() {
 	}
 	c.Right()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
-		if c.X == utf8.RuneCount(c.buf.LineBytes(c.Y)) {
+		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 			return
 		}
 		c.Right()
@@ -429,7 +427,7 @@ func (c *Cursor) WordLeft() {
 // RuneUnder returns the rune under the given x position
 func (c *Cursor) RuneUnder(x int) rune {
 	line := c.buf.LineBytes(c.Y)
-	if len(line) == 0 || x >= utf8.RuneCount(line) {
+	if len(line) == 0 || x >= util.CharacterCount(line) {
 		return '\n'
 	} else if x < 0 {
 		x = 0

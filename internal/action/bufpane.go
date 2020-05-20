@@ -190,7 +190,7 @@ type BufPane struct {
 	tripleClick bool
 
 	// Last search stores the last successful search for FindNext and FindPrev
-	lastSearch string
+	lastSearch      string
 	lastSearchRegex bool
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)

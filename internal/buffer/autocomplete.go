@@ -6,7 +6,6 @@ import (
 	"os"
 	"sort"
 	"strings"
-	"unicode/utf8"
 
 	"github.com/zyedidia/micro/v2/internal/util"
 )
@@ -54,7 +53,7 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	start := c.Loc
 	end := c.Loc
 	if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
-		start = end.Move(-utf8.RuneCountInString(b.Completions[prevSuggestion]), b)
+		start = end.Move(-util.CharacterCountInString(b.Completions[prevSuggestion]), b)
 	} else {
 		// end = start.Move(1, b)
 	}
@@ -82,7 +81,7 @@ func GetWord(b *Buffer) ([]byte, int) {
 
 	args := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
 	input := args[len(args)-1]
-	return input, c.X - utf8.RuneCount(input)
+	return input, c.X - util.CharacterCount(input)
 }
 
 // GetArg gets the most recent word (separated by ' ' only)
@@ -98,7 +97,7 @@ func GetArg(b *Buffer) (string, int) {
 		if i == len(args)-1 {
 			break
 		}
-		argstart += utf8.RuneCount(a) + 1
+		argstart += util.CharacterCount(a) + 1
 	}
 
 	return input, argstart
@@ -162,7 +161,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 		return []string{}, []string{}
 	}
 
-	inputLen := utf8.RuneCount(input)
+	inputLen := util.CharacterCount(input)
 
 	suggestionsSet := make(map[string]struct{})
 
@@ -171,7 +170,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 		l := b.LineBytes(i)
 		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
 		for _, w := range words {
-			if bytes.HasPrefix(w, input) && utf8.RuneCount(w) > inputLen {
+			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
 				strw := string(w)
 				if _, ok := suggestionsSet[strw]; !ok {
 					suggestionsSet[strw] = struct{}{}
@@ -184,7 +183,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 		l := b.LineBytes(i)
 		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
 		for _, w := range words {
-			if bytes.HasPrefix(w, input) && utf8.RuneCount(w) > inputLen {
+			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
 				strw := string(w)
 				if _, ok := suggestionsSet[strw]; !ok {
 					suggestionsSet[strw] = struct{}{}

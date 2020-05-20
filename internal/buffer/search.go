@@ -2,7 +2,6 @@ package buffer
 
 import (
 	"regexp"
-	"unicode/utf8"
 
 	"github.com/zyedidia/micro/v2/internal/util"
 )
@@ -20,19 +19,19 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 		charpos := 0
 
 		if i == start.Y && start.Y == end.Y {
-			nchars := utf8.RuneCount(l)
+			nchars := util.CharacterCount(l)
 			start.X = util.Clamp(start.X, 0, nchars)
 			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == start.Y {
-			nchars := utf8.RuneCount(l)
+			nchars := util.CharacterCount(l)
 			start.X = util.Clamp(start.X, 0, nchars)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == end.Y {
-			nchars := utf8.RuneCount(l)
+			nchars := util.CharacterCount(l)
 			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 		}
@@ -61,19 +60,19 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 		charpos := 0
 
 		if i == start.Y && start.Y == end.Y {
-			nchars := utf8.RuneCount(l)
+			nchars := util.CharacterCount(l)
 			start.X = util.Clamp(start.X, 0, nchars)
 			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == start.Y {
-			nchars := utf8.RuneCount(l)
+			nchars := util.CharacterCount(l)
 			start.X = util.Clamp(start.X, 0, nchars)
 			l = util.SliceEnd(l, start.X)
 			charpos = start.X
 		} else if i == end.Y {
-			nchars := utf8.RuneCount(l)
+			nchars := util.CharacterCount(l)
 			end.X = util.Clamp(end.X, 0, nchars)
 			l = util.SliceStart(l, end.X)
 		}
@@ -163,12 +162,12 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 				result = search.Expand(result, replace, in, submatches)
 			}
 			found++
-			netrunes += utf8.RuneCount(in) - utf8.RuneCount(result)
+			netrunes += util.CharacterCount(in) - util.CharacterCount(result)
 			return result
 		})
 
 		from := Loc{charpos, i}
-		to := Loc{charpos + utf8.RuneCount(l), i}
+		to := Loc{charpos + util.CharacterCount(l), i}
 
 		deltas = append(deltas, Delta{newText, from, to})
 	}

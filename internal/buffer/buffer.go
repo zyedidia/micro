@@ -15,7 +15,6 @@ import (
 	"strings"
 	"sync"
 	"time"
-	"unicode/utf8"
 
 	luar "layeh.com/gopher-luar"
 
@@ -809,7 +808,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	if end == len(b.lines) {
 		b.Insert(
 			Loc{
-				utf8.RuneCount(b.lines[end-1].data),
+				util.CharacterCount(b.lines[end-1].data),
 				end - 1,
 			},
 			"\n"+l,

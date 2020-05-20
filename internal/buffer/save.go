@@ -11,7 +11,6 @@ import (
 	"path/filepath"
 	"runtime"
 	"unicode"
-	"unicode/utf8"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -100,9 +99,9 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 	b.UpdateRules()
 	if b.Settings["rmtrailingws"].(bool) {
 		for i, l := range b.lines {
-			leftover := utf8.RuneCount(bytes.TrimRightFunc(l.data, unicode.IsSpace))
+			leftover := util.CharacterCount(bytes.TrimRightFunc(l.data, unicode.IsSpace))
 
-			linelen := utf8.RuneCount(l.data)
+			linelen := util.CharacterCount(l.data)
 			b.Remove(Loc{leftover, i}, Loc{linelen, i})
 		}
 
