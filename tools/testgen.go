@@ -233,8 +233,6 @@ func main() {
 	re := regexp.MustCompile(`[^\w]`)
 	usedNames := map[string]bool{}
 
-	var b strings.Builder
-
 	for _, test := range tests {
 		name := strings.Title(strings.ToLower(test.description))
 		name = re.ReplaceAllLiteralString(name, "")
@@ -253,15 +251,5 @@ func main() {
 		usedNames[name] = true
 
 		fmt.Println(testToGoTest(test, name))
-
-		b.WriteString("Test")
-		b.WriteString(name)
-		b.WriteString("(nil)\n")
 	}
-
-	fmt.Println("func BenchmarkBuffer(b *testing.B) {")
-	fmt.Println("for i := 0; i < b.N; i++ {")
-	fmt.Print(b.String())
-	fmt.Println("}")
-	fmt.Println("}")
 }
