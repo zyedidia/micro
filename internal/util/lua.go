@@ -1,15 +1,11 @@
 package util
 
-import (
-	"unicode/utf8"
-)
-
 // LuaRuneAt is a helper function for lua plugins to return the rune
 // at an index within a string
 func LuaRuneAt(str string, runeidx int) string {
 	i := 0
 	for len(str) > 0 {
-		r, size := utf8.DecodeRuneInString(str)
+		r, _, size := DecodeCharacterInString(str)
 
 		str = str[size:]
 
@@ -26,7 +22,7 @@ func LuaRuneAt(str string, runeidx int) string {
 func LuaGetLeadingWhitespace(s string) string {
 	ws := []byte{}
 	for len(s) > 0 {
-		r, size := utf8.DecodeRuneInString(s)
+		r, _, size := DecodeCharacterInString(s)
 		if r == ' ' || r == '\t' {
 			ws = append(ws, byte(r))
 		} else {
@@ -40,6 +36,6 @@ func LuaGetLeadingWhitespace(s string) string {
 
 // LuaIsWordChar returns true if the first rune in a string is a word character
 func LuaIsWordChar(s string) bool {
-	r, _ := utf8.DecodeRuneInString(s)
+	r, _, _ := DecodeCharacterInString(s)
 	return IsWordChar(r)
 }

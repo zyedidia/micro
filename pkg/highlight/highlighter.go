@@ -3,7 +3,6 @@ package highlight
 import (
 	"regexp"
 	"strings"
-	"unicode/utf8"
 )
 
 func sliceStart(slc []byte, index int) []byte {
@@ -15,7 +14,7 @@ func sliceStart(slc []byte, index int) []byte {
 			return slc[totalSize:]
 		}
 
-		_, size := utf8.DecodeRune(slc[totalSize:])
+		_, _, size := DecodeCharacter(slc[totalSize:])
 		totalSize += size
 		i++
 	}
@@ -32,7 +31,7 @@ func sliceEnd(slc []byte, index int) []byte {
 			return slc[:totalSize]
 		}
 
-		_, size := utf8.DecodeRune(slc[totalSize:])
+		_, _, size := DecodeCharacter(slc[totalSize:])
 		totalSize += size
 		i++
 	}
@@ -47,9 +46,9 @@ func runePos(p int, str []byte) int {
 		return 0
 	}
 	if p >= len(str) {
-		return utf8.RuneCount(str)
+		return CharacterCount(str)
 	}
-	return utf8.RuneCount(str[:p])
+	return CharacterCount(str[:p])
 }
 
 func combineLineMatch(src, dst LineMatch) LineMatch {
@@ -112,7 +111,7 @@ func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte, canMatchSt
 	var strbytes []byte
 	if skip != nil {
 		strbytes = skip.ReplaceAllFunc(str, func(match []byte) []byte {
-			res := make([]byte, utf8.RuneCount(match))
+			res := make([]byte, CharacterCount(match))
 			return res
 		})
 	} else {
@@ -148,7 +147,7 @@ func findAllIndex(regex *regexp.Regexp, str []byte, canMatchStart, canMatchEnd b
 }
 
 func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, curRegion *region, statesOnly bool) LineMatch {
-	lineLen := utf8.RuneCount(line)
+	lineLen := CharacterCount(line)
 	if start == 0 {
 		if !statesOnly {
 			if _, ok := highlights[0]; !ok {
@@ -236,7 +235,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 }
 
 func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, statesOnly bool) LineMatch {
-	lineLen := utf8.RuneCount(line)
+	lineLen := CharacterCount(line)
 	if lineLen == 0 {
 		if canMatchEnd {
 			h.lastRegion = nil

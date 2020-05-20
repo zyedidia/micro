@@ -13,7 +13,6 @@ import (
 	"strings"
 	"time"
 	"unicode"
-	"unicode/utf8"
 
 	"github.com/blang/semver"
 	runewidth "github.com/mattn/go-runewidth"
@@ -82,7 +81,7 @@ func SliceEndStr(str string, index int) string {
 			return str[totalSize:]
 		}
 
-		_, size := utf8.DecodeRuneInString(str[totalSize:])
+		_, _, size := DecodeCharacterInString(str[totalSize:])
 		totalSize += size
 		i++
 	}
@@ -119,7 +118,7 @@ func SliceStartStr(str string, index int) string {
 			return str[:totalSize]
 		}
 
-		_, size := utf8.DecodeRuneInString(str[totalSize:])
+		_, _, size := DecodeCharacterInString(str[totalSize:])
 		totalSize += size
 		i++
 	}
