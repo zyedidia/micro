@@ -141,6 +141,7 @@ func luaImportMicroUtil() *lua.LTable {
 	ulua.L.SetField(pkg, "GetLeadingWhitespace", luar.New(ulua.L, util.LuaGetLeadingWhitespace))
 	ulua.L.SetField(pkg, "IsWordChar", luar.New(ulua.L, util.LuaIsWordChar))
 	ulua.L.SetField(pkg, "String", luar.New(ulua.L, util.String))
+	ulua.L.SetField(pkg, "CharacterCountInString", luar.New(ulua.L, util.CharacterCountInString))
 	ulua.L.SetField(pkg, "RuneStr", luar.New(ulua.L, func(r rune) string {
 		return string(r)
 	}))
