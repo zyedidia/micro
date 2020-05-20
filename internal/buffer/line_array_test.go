@@ -46,14 +46,15 @@ func TestInsert(t *testing.T) {
 
 	assert.Equal(t, []byte("Uppen Sevarne staþe, foobar sel þar him þuhte,"), sub1)
 
-	la.insert(Loc{25, 2}, []byte("ಮಣ್ಣಾಗಿ"))
+	la.insert(Loc{25, 2}, []byte("H̼̥̯͇͙̕͘͞e̸̦̞̠̣̰͙̼̥̦̼̖̬͕͕̰̯̫͇̕ĺ̜̠̩̯̯͙̼̭̠͕̮̞͜l̶͓̫̞̮͈͞ͅo̸͔͙̳̠͈̮̼̳͙̥̲͜͠"))
+
 	sub2 := la.Substr(Loc{0, 2}, Loc{60, 2})
-	assert.Equal(t, []byte("He wonede at Ernleȝe at æಮಣ್ಣಾಗಿðelen are chirechen,"), sub2)
+	assert.Equal(t, []byte("He wonede at Ernleȝe at æH̼̥̯͇͙̕͘͞e̸̦̞̠̣̰͙̼̥̦̼̖̬͕͕̰̯̫͇̕ĺ̜̠̩̯̯͙̼̭̠͕̮̞͜l̶͓̫̞̮͈͞ͅo̸͔͙̳̠͈̮̼̳͙̥̲͜͠ðelen are chirechen,"), sub2)
 }
 
 func TestRemove(t *testing.T) {
 	la.remove(Loc{20, 3}, Loc{27, 3})
-	la.remove(Loc{25, 2}, Loc{32, 2})
+	la.remove(Loc{25, 2}, Loc{30, 2})
 
 	bytes := la.Bytes()
 	assert.Equal(t, unicode_txt, string(bytes))
