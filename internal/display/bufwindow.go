@@ -682,8 +682,27 @@ func (w *BufWindow) displayStatusLine() {
 		w.sline.Display()
 	} else if w.Y+w.Height != infoY {
 		w.drawStatus = true
+
+		divchars := config.GetGlobalOption("divchars").(string)
+		if util.CharacterCountInString(divchars) != 2 {
+			divchars = "|-"
+		}
+
+		_, _, size := util.DecodeCharacterInString(divchars)
+		divchar, combc, _ := util.DecodeCharacterInString(divchars[size:])
+
+		dividerStyle := config.DefStyle
+		if style, ok := config.Colorscheme["divider"]; ok {
+			dividerStyle = style
+		}
+
+		divreverse := config.GetGlobalOption("divreverse").(bool)
+		if divreverse {
+			dividerStyle = dividerStyle.Reverse(true)
+		}
+
 		for x := w.X; x < w.X+w.Width; x++ {
-			screen.SetContent(x, w.Y+w.Height-1, '-', nil, config.DefStyle.Reverse(true))
+			screen.SetContent(x, w.Y+w.Height-1, divchar, combc, dividerStyle)
 		}
 	} else {
 		w.drawStatus = false

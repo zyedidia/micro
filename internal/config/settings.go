@@ -248,6 +248,8 @@ func DefaultCommonSettings() map[string]interface{} {
 var DefaultGlobalOnlySettings = map[string]interface{}{
 	"autosave":       float64(0),
 	"colorscheme":    "default",
+	"divchars":       "|-",
+	"divreverse":     true,
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,

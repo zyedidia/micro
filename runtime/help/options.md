@@ -80,6 +80,21 @@ Here are the available options:
 
 	default value: `false`
 
+* `divchars`: specifies the "divider" characters used for the dividing line
+   between vertical/horizontal splits. The first character is for vertical
+   dividers, and the second is for horizontal dividers. By default, for
+   horizontal splits the statusline serves as a divider, but if the statusline
+   is disabled the horizontal divider character will be used.
+
+    default value: `|-`
+
+* `divreverse`: colorschemes provide the color (foreground and background) for
+   the characters displayed in split dividers. With this option enabled, the
+   colors specified by the colorscheme will be reversed (foreground and
+   background colors swapped).
+
+    default value: `true`
+
 * `encoding`: the encoding to open and save files with. Supported encodings
    are listed at https://www.w3.org/TR/encoding/.
 

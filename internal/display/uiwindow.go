@@ -4,6 +4,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/internal/views"
 )
 
@@ -24,11 +25,23 @@ func (w *UIWindow) drawNode(n *views.Node) {
 		dividerStyle = style
 	}
 
+	divchars := config.GetGlobalOption("divchars").(string)
+	if util.CharacterCountInString(divchars) != 2 {
+		divchars = "|-"
+	}
+
+	divchar, combc, _ := util.DecodeCharacterInString(divchars)
+
+	divreverse := config.GetGlobalOption("divreverse").(bool)
+	if divreverse {
+		dividerStyle = dividerStyle.Reverse(true)
+	}
+
 	for i, c := range cs {
 		if c.IsLeaf() && c.Kind == views.STVert {
 			if i != len(cs)-1 {
 				for h := 0; h < c.H; h++ {
-					screen.SetContent(c.X+c.W, c.Y+h, '|', nil, dividerStyle.Reverse(true))
+					screen.SetContent(c.X+c.W, c.Y+h, divchar, combc, dividerStyle)
 				}
 			}
 		} else {
