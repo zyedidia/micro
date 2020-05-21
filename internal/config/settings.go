@@ -219,6 +219,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabmovement":    false,
 	"tabsize":        float64(4),
 	"tabstospaces":   false,
+	"unicodeBox":     false,
 	"useprimary":     true,
 }
 

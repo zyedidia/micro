@@ -682,8 +682,16 @@ func (w *BufWindow) displayStatusLine() {
 		w.sline.Display()
 	} else if w.Y+w.Height != infoY {
 		w.drawStatus = true
+		// use unicode box Horizontal or ascii dash for the statusbar
+		var dashChar rune = '-'       // ascii dash
+		var dashCharStyle bool = true // highlighting the status line
+		if config.GetGlobalOption("unicodeBox") == true {
+			dashChar = '─'        // unicode U+2500 Box Drawings Light Horizontal
+			dashCharStyle = false // no highlighting on the status line
+		}
+		// draw the statusbar line
 		for x := w.X; x < w.X+w.Width; x++ {
-			screen.SetContent(x, w.Y+w.Height-1, '-', nil, config.DefStyle.Reverse(true))
+			screen.SetContent(x, w.Y+w.Height-1, dashChar, nil, config.DefStyle.Reverse(dashCharStyle))
 		}
 	} else {
 		w.drawStatus = false
@@ -703,7 +711,13 @@ func (w *BufWindow) displayScrollBar() {
 		}
 		barstart := w.Y + int(float64(w.StartLine)/float64(w.Buf.LinesNum())*float64(w.Height))
 		for y := barstart; y < util.Min(barstart+barsize, w.Y+bufHeight); y++ {
-			screen.SetContent(scrollX, y, '|', nil, config.DefStyle.Reverse(true))
+			// use unicode box Vertical or ascii dash for the scrollbar line
+			var dashChar rune = '|' // ascii character
+			if config.GetGlobalOption("unicodeBox") == true {
+				dashChar = '│' // unicode U+2502 Box Drawings Light Vertical
+			}
+			// draw the scrollbar line
+			screen.SetContent(scrollX, y, dashChar, nil, config.DefStyle.Reverse(true))
 		}
 	}
 }

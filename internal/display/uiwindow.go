@@ -26,9 +26,17 @@ func (w *UIWindow) drawNode(n *views.Node) {
 
 	for i, c := range cs {
 		if c.IsLeaf() && c.Kind == views.STVert {
+			// use unicode box Vertical or ascii dash for vertical line
+			var dashChar rune = '|'       // ascii character
+			var dashCharStyle bool = true // highlighting the vertical line
+			if config.GetGlobalOption("unicodeBox") == true {
+				dashChar = '│'        // unicode U+2502 Box Drawings Light Vertical
+				dashCharStyle = false // no highlighting on the vertical line
+			}
+			// draw the scrollbar line
 			if i != len(cs)-1 {
 				for h := 0; h < c.H; h++ {
-					screen.SetContent(c.X+c.W, c.Y+h, '|', nil, dividerStyle.Reverse(true))
+					screen.SetContent(c.X+c.W, c.Y+h, dashChar, nil, dividerStyle.Reverse(dashCharStyle))
 				}
 			}
 		} else {
