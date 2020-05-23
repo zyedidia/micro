@@ -363,6 +363,9 @@ func DoEvent() {
 	case <-shell.CloseTerms:
 	case event = <-events:
 	case <-screen.DrawChan():
+		for len(screen.DrawChan()) > 0 {
+			<-screen.DrawChan()
+		}
 	}
 
 	if action.InfoBar.HasPrompt {
