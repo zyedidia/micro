@@ -4,39 +4,53 @@ detect:
     filename: "\\.toml"
 
 rules:
-    - statement: "(.*)[[:space:]]="
-    - special: "="
-
-      # Bracket thingies
-    - special: "(\\[|\\])"
-
-      # Numbers and strings
-    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
-    - constant.number: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
-
+    # Punctuation
+    - symbol: '[=,\.]'
+    - symbol.brackets: '[{\[\]}]'
+    # Strings
     - constant.string:
-        start: "\""
-        end: "\""
-        skip: "\\\\."
+        start: '"""'
+        end: '\"{3,5}'
+        skip: '\\.'
         rules:
-            - constant.specialChar: "\\\\."
-
+            - constant.specialChar: '\\u[[:xdigit:]]{4}'
+            - constant.specialChar: '\\U[[:xdigit:]]{8}'
+            - constant.specialChar: '\\[btnfr"\\]'
+    - constant.string:
+        start: '"'
+        end: '"'
+        skip: '\\.'
+        rules:
+            - constant.specialChar: '\\u[[:xdigit:]]{4}'
+            - constant.specialChar: '\\U[[:xdigit:]]{8}'
+            - constant.specialChar: '\\[btnfr"\\]'
+    - constant.string:
+        start: "'''"
+        end: "'{3,5}"
+        rules: []
     - constant.string:
         start: "'"
         end: "'"
-        skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - constant.string:
-        start: "`"
-        end: "`"
-        rules:
-            - constant.specialChar: "\\\\."
-
+        rules: []
+    # Integer
+    - constant.number: '[+-]?(\d+_)*\d+\b'
+    - constant.number: '(0x([[:xdigit:]]+_)*[[:xdigit:]]+|0o([0-7]_)*[0-7]+|0b([01]+_)*[01]+)'
+    # Float
+    - constant.number: '[+-]?(\d+_)*\d+\.(\d+_)*\d+'
+    - constant.number: '[+-]?(\d+_)*\d+(\.(\d+_)*\d+)?[Ee][+-]?(\d+_)*\d+'
+    - constant.number: '(\+|-)(inf|nan)'
+    # Bare key, keys starting with a digit or dash are ambiguous with numbers and are skipped
+    - identifier: '\b[A-Za-z_][A-Za-z0-9_-]*\b'
+    # Boolean and inf, nan without sign
+    - constant.bool.true: '\btrue\b'
+    - constant.bool.false: '\bfalse\b'
+    - constant.number: '\b(inf|nan)\b'
+    # Date and Time
+    - constant: '\d+-\d{2}-\d{2}([T ]\d{2}:\d{2}:\d{2}(\.\d+)?([+-]\d{2}:\d{2}|Z)?)?'
+    - constant: '\d{2}:\d{2}:\d{2}(\.\d+)?'
+    # Comments
     - comment:
         start: "#"
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-
