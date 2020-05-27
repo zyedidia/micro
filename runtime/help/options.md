@@ -11,6 +11,11 @@ if you have set either of the above environment variables).
 
 Here are the available options:
 
+* `allowpaste`: allows external pasting. only has effect, when paste is on.  
+  May be helpful to get rid of some keys or the mouse pasting escape sequences.
+
+	default value: `true`
+
 * `autoindent`: when creating a new line, use the same indentation as the 
    previous line.
 
