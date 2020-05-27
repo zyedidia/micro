@@ -312,8 +312,10 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 		}
 		h.DoKeyEvent(re)
 	case *tcell.EventPaste:
-		h.paste(e.Text())
-		h.Relocate()
+		if h.Buf.Settings["allowpaste"].(bool){
+			h.paste(e.Text())
+			h.Relocate()
+		}
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),

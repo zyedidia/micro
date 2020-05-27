@@ -183,6 +183,7 @@ func GetGlobalOption(name string) interface{} {
 }
 
 var defaultCommonSettings = map[string]interface{}{
+	//"allowpaste": 	  true,
 	"autoindent":     true,
 	"autosu":         false,
 	"backup":         true,
