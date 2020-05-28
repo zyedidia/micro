@@ -76,16 +76,14 @@ To install micro, you can download a [prebuilt binary](https://github.com/zyedid
 
 If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro).
 
+Use `micro -version` to get the version information after installing. It is only guaranteed that you are installing the most recent
+stable version if you install from the prebuilt binaries, Homebrew, or Snap.
+
 ### Prebuilt binaries
 
 All you need to install micro is one file, the binary itself. It's as simple as that!
 
 Download the binary from the [releases](https://github.com/zyedidia/micro/releases) page.
-
-On that page you'll see the nightly release, which contains binaries for micro which are built every night,
-and you'll see all the stable releases with the corresponding binaries.
-
-Running `micro -version` will give you the version information.
 
 ### Installation script
 
@@ -97,7 +95,7 @@ You can easily install micro by running
 curl https://getmic.ro | bash
 ```
 
-The script will install the micro binary to the current directory. See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
+The script will place the micro binary in the current directory. See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
 
 ### Package managers
 
@@ -259,3 +257,5 @@ You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
 For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).
+
+Sometimes I am unresponsive, and I apologize! If that happens, please ping me.
