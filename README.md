@@ -115,33 +115,23 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
-On Debian `unstable | testing | buster-backports` and Ubuntu `focal` (20.04), micro is available
-via `apt`:
-
-```
-sudo apt install micro
-```
-
-On Fedora, micro is available via `dnf`:
-
-```
-sudo dnf install micro
-```
-
 **Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
 must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
 further below.
 
-Micro is also available through other package managers on Linux such as AUR, Nix, and package managers
-for other operating systems:
+Micro is also available through other package managers on Linux such as apt, dnf, AUR, Nix, and package managers
+for other operating systems. These packages are not guaranteed to be up-to-date.
 
-* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop)
-    * `choco install micro`
-    * `scoop install micro`
-* OpenBSD: Available in the ports tree and also available as a binary package
-    * `pkd_add -v micro`
-* Arch Linux, CRUX, Termux for Android
-    * See details in the [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro)
+* Linux: Available in distro-specific package managers.
+    * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`).
+    * `dnf install micro` (Fedora).
+    * `yay -S micro` (Arch Linux).
+    * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
+* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
+    * `choco install micro`.
+    * `scoop install micro`.
+* OpenBSD: Available in the ports tree and also available as a binary package.
+    * `pkd_add -v micro`.
 
 ### Building from source
 
