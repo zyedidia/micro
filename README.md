@@ -124,6 +124,12 @@ via `apt`:
 sudo apt install micro
 ```
 
+On Fedora, micro is available via `dnf`:
+
+```
+sudo dnf install micro
+```
+
 **Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
 must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
 further below.
