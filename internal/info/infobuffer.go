@@ -146,7 +146,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 				h := i.History[i.PromptType]
 				h[len(h)-1] = resp
 			}
-			i.PromptCallback = nil
+			// i.PromptCallback = nil
 		}
 		i.Replace(i.Start(), i.End(), "")
 	}

@@ -96,7 +96,6 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 		return errors.New("Save with sudo not supported on Windows")
 	}
 
-	b.UpdateRules()
 	if b.Settings["rmtrailingws"].(bool) {
 		for i, l := range b.lines {
 			leftover := util.CharacterCount(bytes.TrimRightFunc(l.data, unicode.IsSpace))
@@ -195,5 +194,6 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 	absPath, _ := filepath.Abs(filename)
 	b.AbsPath = absPath
 	b.isModified = false
+	b.UpdateRules()
 	return err
 }

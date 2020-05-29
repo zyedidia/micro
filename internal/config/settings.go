@@ -204,6 +204,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"readonly":       false,
 	"rmtrailingws":   false,
 	"ruler":          true,
+	"relativeruler":  false,
 	"savecursor":     false,
 	"saveundo":       false,
 	"scrollbar":      false,

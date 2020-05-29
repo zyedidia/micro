@@ -76,16 +76,14 @@ To install micro, you can download a [prebuilt binary](https://github.com/zyedid
 
 If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro).
 
+Use `micro -version` to get the version information after installing. It is only guaranteed that you are installing the most recent
+stable version if you install from the prebuilt binaries, Homebrew, or Snap.
+
 ### Prebuilt binaries
 
 All you need to install micro is one file, the binary itself. It's as simple as that!
 
 Download the binary from the [releases](https://github.com/zyedidia/micro/releases) page.
-
-On that page you'll see the nightly release, which contains binaries for micro which are built every night,
-and you'll see all the stable releases with the corresponding binaries.
-
-Running `micro -version` will give you the version information.
 
 ### Installation script
 
@@ -97,7 +95,7 @@ You can easily install micro by running
 curl https://getmic.ro | bash
 ```
 
-The script will install the micro binary to the current directory. See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
+The script will place the micro binary in the current directory. See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
 
 ### Package managers
 
@@ -117,27 +115,23 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
-On Debian `unstable | testing | buster-backports` and Ubuntu `focal` (20.04), micro is available
-via `apt`:
-
-```
-sudo apt install micro
-```
-
 **Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
 must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
 further below.
 
-Micro is also available through other package managers on Linux such as AUR, Nix, and package managers
-for other operating systems:
+Micro is also available through other package managers on Linux such as apt, dnf, AUR, Nix, and package managers
+for other operating systems. These packages are not guaranteed to be up-to-date.
 
-* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop)
-    * `choco install micro`
-    * `scoop install micro`
-* OpenBSD: Available in the ports tree and also available as a binary package
-    * `pkd_add -v micro`
-* Arch Linux, CRUX, Termux for Android
-    * See details in the [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro)
+* Linux: Available in distro-specific package managers.
+    * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`).
+    * `dnf install micro` (Fedora).
+    * `yay -S micro` (Arch Linux).
+    * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
+* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
+    * `choco install micro`.
+    * `scoop install micro`.
+* OpenBSD: Available in the ports tree and also available as a binary package.
+    * `pkd_add -v micro`.
 
 ### Building from source
 
@@ -253,3 +247,5 @@ You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
 For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).
+
+Sometimes I am unresponsive, and I apologize! If that happens, please ping me.
