@@ -335,7 +335,14 @@ func (w *BufWindow) drawDiffGutter(backgroundStyle tcell.Style, softwrapped bool
 }
 
 func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
-	lineNum := strconv.Itoa(bloc.Y + 1)
+	cursorLine := w.Buf.GetActiveCursor().Loc.Y
+	var lineInt int
+	if w.Buf.Settings["rulerhybrid"] == false || cursorLine == bloc.Y {
+		lineInt = bloc.Y + 1
+	} else {
+		lineInt = bloc.Y - cursorLine
+	}
+	lineNum := strconv.Itoa(util.Abs(lineInt))
 
 	// Write the spaces before the line number if necessary
 	for i := 0; i < maxLineNumLength-len(lineNum); i++ {
