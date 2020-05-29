@@ -214,6 +214,12 @@ Here are the available options:
 
 	default value: `true`
 
+* `relativeruler`: make line numbers display relatively. If set to true, all lines except
+	for the line that the cursor is located will display the distance from the 
+	cursor's line. 
+
+	default value: `false` 
+
 * `savecursor`: remember where the cursor was last time the file was opened and
    put it there when you open the file again. Information is saved to
    `~/.config/micro/buffers/`
