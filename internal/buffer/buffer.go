@@ -197,7 +197,11 @@ type Buffer struct {
 // and an error if the file is a directory
 func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 	var err error
-	filename, cursorPos := util.GetPathAndCursorPosition(path)
+	var cursorPos []string
+	filename := path
+	if config.GetGlobalOption("parsecursor").(bool) {
+		filename, cursorPos = util.GetPathAndCursorPosition(path)
+	}
 	filename, err = util.ReplaceHome(filename)
 	if err != nil {
 		return nil, err

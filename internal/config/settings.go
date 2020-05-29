@@ -254,6 +254,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
+	"parsecursor":    false,
 	"paste":          false,
 	"savehistory":    true,
 	"sucmd":          "sudo",
