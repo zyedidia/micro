@@ -300,6 +300,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
 		}
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
+		b.Highlighter = highlight.NewHighlighter(&highlight.EmptyDef)
 
 		// The last time this file was modified
 		b.UpdateModTime()
@@ -681,7 +682,7 @@ func (b *Buffer) UpdateRules() {
 		highlight.ResolveIncludes(b.SyntaxDef, files)
 	}
 
-	if b.Highlighter == nil || syntaxFile != "" {
+	if syntaxFile != "" {
 		if b.SyntaxDef != nil {
 			b.Settings["filetype"] = b.SyntaxDef.FileType
 		}
@@ -690,7 +691,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if b.SyntaxDef != nil {
-		b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
+		b.Highlighter.SetDef(b.SyntaxDef)
 		if b.Settings["syntax"].(bool) {
 			go func() {
 				b.Highlighter.HighlightStates(b)
@@ -703,10 +704,16 @@ func (b *Buffer) UpdateRules() {
 
 // ClearMatches clears all of the syntax highlighting for the buffer
 func (b *Buffer) ClearMatches() {
+	b.Highlighter.SetDef(&highlight.EmptyDef)
 	for i := range b.lines {
 		b.SetMatch(i, nil)
 		b.SetState(i, nil)
 	}
+	// Clear syntax highlighting but keep custom highlighting
+	go func() {
+		b.Highlighter.HighlightMatches(b, 0, b.End().Y)
+		screen.Redraw()
+	}()
 }
 
 // IndentString returns this buffer's indent method (a tabstop or n spaces

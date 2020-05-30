@@ -94,6 +94,11 @@ func NewHighlighter(def *Def) *Highlighter {
 	return h
 }
 
+// SetDef changes highlighter syntax definition to `def`
+func (h *Highlighter) SetDef(def *Def) {
+	h.Def = def
+}
+
 // LineMatch represents the syntax highlighting matches for one line. Each index where the coloring is changed is marked with that
 // color's group (represented as one byte)
 type LineMatch map[int]Group
