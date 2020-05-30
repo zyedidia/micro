@@ -8,6 +8,7 @@ import (
 	"regexp"
 	"runtime"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/go-errors/errors"
@@ -155,18 +156,31 @@ func LoadInput() []*buffer.Buffer {
 	}
 
 	files := make([]string, 0, len(args))
-	flagStartPos := ""
-	flagr := regexp.MustCompile(`^\+\d+(:\d+)?$`)
+	flagStartPos := buffer.Loc{-1, -1}
+	flagr := regexp.MustCompile(`^\+(\d+)(?::(\d+))?$`)
 	for _, a := range args {
-		if flagr.MatchString(a) {
-			flagStartPos = a[1:]
-		} else {
-			if flagStartPos != "" {
-				files = append(files, a+":"+flagStartPos)
-				flagStartPos = ""
-			} else {
-				files = append(files, a)
+		match := flagr.FindStringSubmatch(a)
+		if len(match) == 3 && match[2] != "" {
+			line, err := strconv.Atoi(match[1])
+			if err != nil {
+				screen.TermMessage(err)
+				continue
 			}
+			col, err := strconv.Atoi(match[2])
+			if err != nil {
+				screen.TermMessage(err)
+				continue
+			}
+			flagStartPos = buffer.Loc{col, line - 1}
+		} else if len(match) == 3 && match[2] == "" {
+			line, err := strconv.Atoi(match[1])
+			if err != nil {
+				screen.TermMessage(err)
+				continue
+			}
+			flagStartPos = buffer.Loc{0, line - 1}
+		} else {
+			files = append(files, a)
 		}
 	}
 
@@ -174,7 +188,7 @@ func LoadInput() []*buffer.Buffer {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(files); i++ {
-			buf, err := buffer.NewBufferFromFile(files[i], btype)
+			buf, err := buffer.NewBufferFromFileAtLoc(files[i], btype, flagStartPos)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
@@ -191,10 +205,10 @@ func LoadInput() []*buffer.Buffer {
 			screen.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
-		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, btype))
+		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
 	} else {
 		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromString(string(input), filename, btype))
+		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
 	}
 
 	return buffers
