@@ -1,6 +1,7 @@
 package highlight
 
 import (
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -82,6 +83,8 @@ type LineStates interface {
 type Highlighter struct {
 	lastRegion *region
 	Def        *Def
+
+	customPatterns []*pattern
 }
 
 // NewHighlighter returns a new highlighter from the given syntax definition
@@ -295,6 +298,37 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	return highlights
 }
 
+func (h *Highlighter) highlightCustomMatches(highlights LineMatch, line []byte) LineMatch {
+	lineLen := CharacterCount(line)
+
+	for _, p := range h.customPatterns {
+		matches := findAllIndex(p.regex, line, true, true)
+		for _, m := range matches {
+			var lastHighlight Group
+			lastIdx := -1
+			for i, h := range highlights {
+				if i < m[1] && i > lastIdx {
+					lastIdx = i
+					lastHighlight = h
+				}
+				if i >= m[0] && i < m[1] {
+					delete(highlights, i)
+				}
+			}
+
+			highlights[m[0]] = p.group
+
+			if lastIdx >= 0 && m[1] < lineLen {
+				if _, ok := highlights[m[1]]; !ok {
+					highlights[m[1]] = lastHighlight
+				}
+			}
+		}
+	}
+
+	return highlights
+}
+
 // HighlightString syntax highlights a string
 // Use this function for simple syntax highlighting and use the other functions for
 // more advanced syntax highlighting. They are optimized for quick rehighlighting of the same
@@ -308,10 +342,14 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 		highlights := make(LineMatch)
 
 		if i == 0 || h.lastRegion == nil {
-			lineMatches = append(lineMatches, h.highlightEmptyRegion(highlights, 0, true, i, line, false))
+			highlights = h.highlightEmptyRegion(highlights, 0, true, i, line, false)
 		} else {
-			lineMatches = append(lineMatches, h.highlightRegion(highlights, 0, true, i, line, h.lastRegion, false))
+			highlights = h.highlightRegion(highlights, 0, true, i, line, h.lastRegion, false)
 		}
+
+		highlights = h.highlightCustomMatches(highlights, line)
+
+		lineMatches = append(lineMatches, highlights)
 	}
 
 	return lineMatches
@@ -353,6 +391,8 @@ func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int)
 		} else {
 			match = h.highlightRegion(highlights, 0, true, i, line, input.State(i-1), false)
 		}
+
+		match = h.highlightCustomMatches(match, line)
 
 		input.SetMatch(i, match)
 	}
@@ -409,20 +449,16 @@ func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
 	}
 	curState := h.lastRegion
 
+	match = h.highlightCustomMatches(match, line)
+
 	input.SetMatch(lineN, match)
 	input.SetState(lineN, curState)
 }
 
-// TODO: the below implementation of custom patterns is just a quick hack.
-// - It highlights only those matches which are not inside syntax regions (fully or partially).
-// - It doesn't work when syntax highlighting is off ("syntax" option set to false).
-//
-// Instead of adding/removing custom patterns to the syntax definition,
-// we should add/remove them to a separate custom highlighting layer
-// independent of syntax highlighting layer.
-// - If syntax=true, custom highlighting should be overlayed on top of syntax highlighting.
-// - If syntax=false, only custom highlighting should be displayed.
-
+// AddCustomPattern adds a custom regex pattern for the given group.
+// Custom patterns are highlighted independently of syntax highlighting. When displayed,
+// they are overlayed on top of syntax highlighting. Each next custom pattern is overlayed
+// on top of previous custom patterns.
 func (h *Highlighter) AddCustomPattern(group, regex string) error {
 	r, err := regexp.Compile(regex)
 	if err != nil {
@@ -434,16 +470,22 @@ func (h *Highlighter) AddCustomPattern(group, regex string) error {
 		Groups[group] = numGroups
 	}
 	groupNum := Groups[group]
-	h.Def.rules.patterns = append(h.Def.rules.patterns, &pattern{groupNum, r})
+
+	for _, p := range h.customPatterns {
+		if p.group == groupNum {
+			return fmt.Errorf("Multiple custom patterns for the same group (%s) not supported", group)
+		}
+	}
+	h.customPatterns = append(h.customPatterns, &pattern{groupNum, r})
 
 	return nil
 }
 
+// RemoveCustomPattern removes custom pattern for the given group.
 func (h *Highlighter) RemoveCustomPattern(group string) {
-	for i, p := range h.Def.rules.patterns {
+	for i, p := range h.customPatterns {
 		if p.group.String() == group {
-			// TODO support multiple patterns for the same group
-			h.Def.rules.patterns = append(h.Def.rules.patterns[:i], h.Def.rules.patterns[i+1:]...)
+			h.customPatterns = append(h.customPatterns[:i], h.customPatterns[i+1:]...)
 			break
 		}
 	}
