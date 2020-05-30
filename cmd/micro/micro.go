@@ -45,7 +45,7 @@ func InitFlags() {
 		fmt.Println("    \tCleans the configuration directory")
 		fmt.Println("-config-dir dir")
 		fmt.Println("    \tSpecify a custom location for the configuration directory")
-		fmt.Println("[FILE]:LINE:COL")
+		fmt.Println("[FILE]:LINE:COL (if the `parsecursor` option is enabled)")
 		fmt.Println("+LINE:COL")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
 		fmt.Println("-options")
@@ -171,7 +171,7 @@ func LoadInput() []*buffer.Buffer {
 				screen.TermMessage(err)
 				continue
 			}
-			flagStartPos = buffer.Loc{col, line - 1}
+			flagStartPos = buffer.Loc{col - 1, line - 1}
 		} else if len(match) == 3 && match[2] == "" {
 			line, err := strconv.Atoi(match[1])
 			if err != nil {
