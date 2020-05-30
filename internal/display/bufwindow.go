@@ -589,6 +589,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		totalwidth := w.StartCol - nColsBeforeStart
+		tabnum := 0
 		for len(line) > 0 {
 			r, combc, size := util.DecodeCharacter(line)
 
@@ -603,6 +604,7 @@ func (w *BufWindow) displayBuffer() {
 			case '\t':
 				ts := tabsize - (totalwidth % tabsize)
 				width = ts
+				tabnum++
 			default:
 				width = runewidth.RuneWidth(r)
 				char = '@'
@@ -640,6 +642,13 @@ func (w *BufWindow) displayBuffer() {
 					if b.Settings["ruler"].(bool) {
 						w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
 					}
+					
+					if b.Settings["wrapindent"] == true {
+						for i:=0;i<tabnum*tabsize;i++ {
+							draw(' ', nil, curStyle, false)
+						}
+					}
+					
 				}
 			}
 		}

@@ -221,6 +221,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabsize":        float64(4),
 	"tabstospaces":   false,
 	"useprimary":     true,
+	"wrapindent": 	  false,
 }
 
 func GetInfoBarOffset() int {
