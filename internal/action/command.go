@@ -701,6 +701,9 @@ func (h *BufPane) GotoCmd(args []string) {
 				InfoBar.Error(err)
 				return
 			}
+			if line < 0 {
+				line = h.Buf.LinesNum() + 1 + line
+			}
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
 			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
 			h.Cursor.GotoLoc(buffer.Loc{col, line})
@@ -709,6 +712,9 @@ func (h *BufPane) GotoCmd(args []string) {
 			if err != nil {
 				InfoBar.Error(err)
 				return
+			}
+			if line < 0 {
+				line = h.Buf.LinesNum() + 1 + line
 			}
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
 			h.Cursor.GotoLoc(buffer.Loc{0, line})
