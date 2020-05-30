@@ -132,6 +132,14 @@ Here are the available options:
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `hlsearch`: highlight all search matches after a successful search.
+   Once it is highlighted, it can be turned off and on with a key bound to
+   `ToggleHighlightSearch` action. Note that `ToggleHighlightSearch` doesn't
+   change `hlsearch` setting, it only affects the last search. After the
+   next search the highlighting is turned on again.
+
+	default value: `false`
+
 * `ignorecase`: perform case-insensitive searches.
 
 	default value: `false`

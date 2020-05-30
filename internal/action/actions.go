@@ -924,9 +924,8 @@ func (h *BufPane) FindPrevious() bool {
 	return true
 }
 
+// ToggleHighlightSearch toggles highlighting of the last search matches
 func (h *BufPane) ToggleHighlightSearch() bool {
-	// We could just highlight our lastSearch. But we want to allow users
-	// to override hlsearch pattern via HighlightCustomPattern() from Lua.
 	if h.lastHlSearch != "" {
 		if !h.highlightSearch {
 			h.HighlightCustomPattern("hlsearch", h.lastHlSearch)

@@ -196,8 +196,11 @@ type BufPane struct {
 	lastSearch      string
 	lastSearchRegex bool
 
+	// Should we highlight the last search matches
 	highlightSearch bool
-	lastHlSearch    string
+	// Last highlighted search pattern. Usually it is the same as lastSearch
+	// but we allow users to override hlsearch pattern via HighlightCustomPattern() from Lua
+	lastHlSearch string
 
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
@@ -534,6 +537,17 @@ func (h *BufPane) SetActive(b bool) {
 
 }
 
+// HighlightCustomPattern highlights a custom regex pattern with colors of the given
+// colorscheme group.
+//
+// Custom patterns are highlighted independently of syntax highlighting. They are overlayed
+// on top of syntax highlighting. Each next custom pattern is overlayed on top of previous
+// custom patterns.
+//
+// Multiple custom patterns for the same group are not supported.
+//
+// If regex is an empty string, HighlightCustomPattern clears custom highlighting for the
+// given group.
 func (h *BufPane) HighlightCustomPattern(group, regex string) error {
 	if regex != "" {
 		// validate the regex before doing anything

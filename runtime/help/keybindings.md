@@ -218,6 +218,7 @@ StartOfTextToggle
 ParagraphPrevious
 ParagraphNext
 ToggleHelp
+ToggleHighlightSearch
 ToggleDiffGutter
 ToggleRuler
 JumpLine
