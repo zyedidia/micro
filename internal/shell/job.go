@@ -6,6 +6,12 @@ import (
 	"os/exec"
 )
 
+type Cmd struct {
+	Cmd *exec.Cmd
+
+	In io.WriteCloser
+}
+
 var Jobs chan JobFunction
 
 func init() {
@@ -47,13 +53,13 @@ func (f *CallbackFile) Write(data []byte) (int, error) {
 
 // JobStart starts a shell command in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobStart(cmd string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *exec.Cmd {
+func JobStart(cmd string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *Cmd {
 	return JobSpawn("sh", []string{"-c", cmd}, onStdout, onStderr, onExit, userargs...)
 }
 
 // JobSpawn starts a process with args in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *exec.Cmd {
+func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *Cmd {
 	// Set up everything correctly if the functions have been provided
 	proc := exec.Command(cmdName, cmdArgs...)
 	var outbuf bytes.Buffer
@@ -67,6 +73,7 @@ func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(
 	} else {
 		proc.Stderr = &outbuf
 	}
+	in, _ := proc.StdinPipe()
 
 	go func() {
 		// Run the process in the background and create the onExit callback
@@ -75,7 +82,10 @@ func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(
 		Jobs <- jobFunc
 	}()
 
-	return proc
+	return &Cmd{
+		Cmd: proc,
+		In:  in,
+	}
 }
 
 // JobStop kills a job
