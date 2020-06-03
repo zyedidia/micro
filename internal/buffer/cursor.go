@@ -242,6 +242,12 @@ func (c *Cursor) UpN(amount int) {
 
 	if c.X > util.CharacterCount(bytes) || (amount < 0 && proposedY == c.Y) {
 		c.X = util.CharacterCount(bytes)
+		c.StoreVisualX()
+	}
+
+	if c.X < 0 || (amount > 0 && proposedY == c.Y) {
+		c.X = 0
+		c.StoreVisualX()
 	}
 
 	c.Y = proposedY
