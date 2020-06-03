@@ -191,13 +191,22 @@ type Buffer struct {
 	StartCursor Loc
 }
 
-// NewBufferFromFile opens a new buffer using the given path
-// It will also automatically handle `~`, and line/column with filename:l:c
-// It will return an empty buffer if the path does not exist
-// and an error if the file is a directory
-func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
+// NewBufferFromFileAtLoc opens a new buffer with a given cursor location
+// If cursorLoc is {-1, -1} the location does not overwrite what the cursor location
+// would otherwise be (start of file, or saved cursor position if `savecursor` is
+// enabled)
+func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer, error) {
 	var err error
-	filename, cursorPos := util.GetPathAndCursorPosition(path)
+	filename := path
+	if config.GetGlobalOption("parsecursor").(bool) && cursorLoc.X == -1 && cursorLoc.Y == -1 {
+		var cursorPos []string
+		filename, cursorPos = util.GetPathAndCursorPosition(filename)
+		cursorLoc, err = ParseCursorLocation(cursorPos)
+		if err != nil {
+			cursorLoc = Loc{-1, -1}
+		}
+	}
+
 	filename, err = util.ReplaceHome(filename)
 	if err != nil {
 		return nil, err
@@ -212,11 +221,6 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 
 	defer file.Close()
 
-	cursorLoc, cursorerr := ParseCursorLocation(cursorPos)
-	if cursorerr != nil {
-		cursorLoc = Loc{-1, -1}
-	}
-
 	var buf *Buffer
 	if err != nil {
 		// File does not exist -- create an empty buffer with that name
@@ -226,6 +230,19 @@ func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
 	}
 
 	return buf, nil
+}
+
+// NewBufferFromFile opens a new buffer using the given path
+// It will also automatically handle `~`, and line/column with filename:l:c
+// It will return an empty buffer if the path does not exist
+// and an error if the file is a directory
+func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
+	return NewBufferFromFileAtLoc(path, btype, Loc{-1, -1})
+}
+
+// NewBufferFromStringAtLoc creates a new buffer containing the given string with a cursor loc
+func NewBufferFromStringAtLoc(text, path string, btype BufType, cursorLoc Loc) *Buffer {
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, cursorLoc, btype)
 }
 
 // NewBufferFromString creates a new buffer containing the given string

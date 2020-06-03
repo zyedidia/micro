@@ -124,6 +124,8 @@ func BufMapKey(k Event, action string) {
 					break
 				}
 			}
+			// if the action changed the current pane, update the reference
+			h = MainTab().CurPane()
 		}
 		return true
 	}

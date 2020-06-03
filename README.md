@@ -56,10 +56,10 @@ You can also check out the website for Micro at https://micro-editor.github.io.
   - Note that while Windows is supported Mingw/Cygwin is not (see below)
 - Plugin system (plugins are written in Lua).
   - micro has a built-in plugin manager to automatically install, remove, and update plugins.
-- Built-in diff gutter
-- Simple autocompletion
+- Built-in diff gutter.
+- Simple autocompletion.
 - Persistent undo.
-- Automatic linting and error notifications
+- Automatic linting and error notifications.
 - Syntax highlighting for over [130 languages](runtime/syntax).
 - Color scheme support.
   - By default, micro comes with 16, 256, and true color themes.
@@ -132,6 +132,8 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `scoop install micro`.
 * OpenBSD: Available in the ports tree and also available as a binary package.
     * `pkd_add -v micro`.
+* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
+    * `pkg_add micro`
 
 ### Building from source
 

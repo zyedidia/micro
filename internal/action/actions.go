@@ -727,6 +727,7 @@ func (h *BufPane) Save() bool {
 }
 
 // SaveAsCB performs a save as and does a callback at the very end (after all prompts have been resolved)
+// The callback is only called if the save was successful
 func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 	InfoBar.Prompt("Filename: ", "", "Save", nil, func(resp string, canceled bool) {
 		if !canceled {
@@ -757,6 +758,7 @@ func (h *BufPane) SaveAs() bool {
 
 // This function saves the buffer to `filename` and changes the buffer's path and name
 // to `filename` if the save is successful
+// The callback is only called if the save was successful
 func (h *BufPane) saveBufToFile(filename string, action string, callback func()) bool {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
@@ -769,6 +771,9 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 					h.Buf.Path = filename
 					h.Buf.SetName(filename)
 					InfoBar.Message("Saved " + filename)
+					if callback != nil {
+						callback()
+					}
 				}
 			}
 			if h.Buf.Settings["autosu"].(bool) {
@@ -778,9 +783,6 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 					if yes && !canceled {
 						saveWithSudo()
 						h.completeAction(action)
-					}
-					if callback != nil {
-						callback()
 					}
 				})
 				return false
@@ -792,9 +794,9 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 		h.Buf.Path = filename
 		h.Buf.SetName(filename)
 		InfoBar.Message("Saved " + filename)
-	}
-	if callback != nil {
-		callback()
+		if callback != nil {
+			callback()
+		}
 	}
 	return true
 }
