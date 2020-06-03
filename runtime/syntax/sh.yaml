@@ -2,7 +2,7 @@ filetype: shell
 
 detect:
     filename: "(\\.sh$|\\.bash|\\.ash|bashrc|bash_aliases|bash_functions|profile|bash-fc\\.|Pkgfile|pkgmk.conf|rc.conf|PKGBUILD|.ebuild\\$|APKBUILD)"
-    header: "^#!.*/(env +)?(ba)?(a)?sh( |$)"
+    header: "^#!.*/(env +)?(ba)?(a)?(mk)?sh( |$)"
 
 rules:
     # Numbers
