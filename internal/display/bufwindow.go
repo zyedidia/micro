@@ -666,7 +666,8 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		if vloc.X != bufWidth {
-			draw(' ', nil, curStyle, true)
+			// Display newline within a selection
+			draw(' ', nil, config.DefStyle, true)
 		}
 
 		bloc.X = w.StartCol
