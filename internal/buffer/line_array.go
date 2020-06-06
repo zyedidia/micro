@@ -87,6 +87,8 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 	br := bufio.NewReader(reader)
 	var loaded int
 
+	la.Endings = endings
+
 	n := 0
 	for {
 		data, err := br.ReadBytes('\n')

@@ -297,7 +297,21 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 		if !hasBackup {
 			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
-			b.LineArray = NewLineArray(uint64(size), FFAuto, reader)
+
+			var ff FileFormat = FFAuto
+
+			if size == 0 {
+				// for empty files, use the fileformat setting instead of
+				// autodetection
+				switch b.Settings["fileformat"] {
+				case "unix":
+					ff = FFUnix
+				case "dos":
+					ff = FFDos
+				}
+			}
+
+			b.LineArray = NewLineArray(uint64(size), ff, reader)
 		}
 		b.EventHandler = NewEventHandler(b.SharedBuffer, b.cursors)
 
