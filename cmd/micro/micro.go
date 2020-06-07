@@ -243,7 +243,10 @@ func main() {
 	if err != nil {
 		screen.TermMessage(err)
 	}
-	config.InitGlobalSettings()
+	err = config.InitGlobalSettings()
+	if err != nil {
+		screen.TermMessage(err)
+	}
 
 	// flag options
 	for k, v := range optionFlags {

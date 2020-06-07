@@ -3,6 +3,7 @@ package config
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -75,16 +76,33 @@ func ReadSettings() error {
 	return nil
 }
 
+func verifySetting(option string, value reflect.Type, def reflect.Type) bool {
+	var interfaceArr []interface{}
+	switch option {
+	case "pluginrepos", "pluginchannels":
+		return value.AssignableTo(reflect.TypeOf(interfaceArr))
+	default:
+		return def.AssignableTo(value)
+	}
+}
+
 // InitGlobalSettings initializes the options map and sets all options to their default values
 // Must be called after ReadSettings
-func InitGlobalSettings() {
+func InitGlobalSettings() error {
+	var err error
 	GlobalSettings = DefaultGlobalSettings()
 
 	for k, v := range parsedSettings {
 		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			if _, ok := GlobalSettings[k]; ok && !verifySetting(k, reflect.TypeOf(v), reflect.TypeOf(GlobalSettings[k])) {
+				err = errors.New(fmt.Sprintf("Global Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v), GlobalSettings[k], reflect.TypeOf(GlobalSettings[k])))
+				continue
+			}
+
 			GlobalSettings[k] = v
 		}
 	}
+	return err
 }
 
 // InitLocalSettings scans the json in settings.json and sets the options locally based
@@ -97,6 +115,10 @@ func InitLocalSettings(settings map[string]interface{}, path string) error {
 			if strings.HasPrefix(k, "ft:") {
 				if settings["filetype"].(string) == k[3:] {
 					for k1, v1 := range v.(map[string]interface{}) {
+						if _, ok := settings[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(settings[k1])) {
+							parseError = errors.New(fmt.Sprintf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1])))
+							continue
+						}
 						settings[k1] = v1
 					}
 				}
@@ -109,6 +131,10 @@ func InitLocalSettings(settings map[string]interface{}, path string) error {
 
 				if g.MatchString(path) {
 					for k1, v1 := range v.(map[string]interface{}) {
+						if _, ok := settings[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(settings[k1])) {
+							parseError = errors.New(fmt.Sprintf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1])))
+							continue
+						}
 						settings[k1] = v1
 					}
 				}

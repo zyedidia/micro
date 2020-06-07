@@ -339,7 +339,10 @@ func ReloadConfig() {
 	if err != nil {
 		screen.TermMessage(err)
 	}
-	config.InitGlobalSettings()
+	err = config.InitGlobalSettings()
+	if err != nil {
+		screen.TermMessage(err)
+	}
 	InitBindings()
 	InitCommands()
 
