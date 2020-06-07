@@ -53,6 +53,9 @@ func luaImportMicro() *lua.LTable {
 	ulua.L.SetField(pkg, "CurTab", luar.New(ulua.L, func() *action.Tab {
 		return action.MainTab()
 	}))
+	ulua.L.SetField(pkg, "Tabs", luar.New(ulua.L, func() *action.TabList {
+		return action.Tabs
+	}))
 
 	return pkg
 }
@@ -83,6 +86,7 @@ func luaImportMicroConfig() *lua.LTable {
 	ulua.L.SetField(pkg, "GetGlobalOption", luar.New(ulua.L, config.GetGlobalOption))
 	ulua.L.SetField(pkg, "SetGlobalOption", luar.New(ulua.L, action.SetGlobalOption))
 	ulua.L.SetField(pkg, "SetGlobalOptionNative", luar.New(ulua.L, action.SetGlobalOptionNative))
+	ulua.L.SetField(pkg, "ConfigDir", luar.New(ulua.L, config.ConfigDir))
 
 	return pkg
 }
