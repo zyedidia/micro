@@ -148,8 +148,23 @@ func InitLocalSettings(settings map[string]interface{}, path string) error {
 func WriteSettings(filename string) error {
 	var err error
 	if _, e := os.Stat(ConfigDir); e == nil {
+		defaults := DefaultGlobalSettings()
+
+		// remove any options froms parsedSettings that have since been marked as default
+		for k, v := range parsedSettings {
+			if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+				cur, okcur := GlobalSettings[k]
+				if def, ok := defaults[k]; ok && okcur && reflect.DeepEqual(cur, def) {
+					delete(parsedSettings, k)
+				}
+			}
+		}
+
+		// add any options to parsedSettings that have since been marked as non-default
 		for k, v := range GlobalSettings {
-			parsedSettings[k] = v
+			if def, ok := defaults[k]; !ok || !reflect.DeepEqual(v, def) {
+				parsedSettings[k] = v
+			}
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
@@ -158,10 +173,21 @@ func WriteSettings(filename string) error {
 	return err
 }
 
+// OverwriteSettings writes the current settings to settings.json and
+// resets any user configuration of local settings present in settings.json
 func OverwriteSettings(filename string) error {
+	settings := make(map[string]interface{})
+
 	var err error
 	if _, e := os.Stat(ConfigDir); e == nil {
-		txt, _ := json.MarshalIndent(GlobalSettings, "", "    ")
+		defaults := DefaultGlobalSettings()
+		for k, v := range GlobalSettings {
+			if def, ok := defaults[k]; !ok || !reflect.DeepEqual(v, def) {
+				settings[k] = v
+			}
+		}
+
+		txt, _ := json.MarshalIndent(settings, "", "    ")
 		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return err
