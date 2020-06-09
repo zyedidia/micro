@@ -28,9 +28,14 @@ var (
 
 	// This is the raw parsed json
 	parsedSettings map[string]interface{}
+
+	// ModifiedSettings is a map of settings which should be written to disk
+	// because they have been modified by the user in this session
+	ModifiedSettings map[string]bool
 )
 
 func init() {
+	ModifiedSettings = make(map[string]bool)
 	parsedSettings = make(map[string]interface{})
 }
 
@@ -163,7 +168,9 @@ func WriteSettings(filename string) error {
 		// add any options to parsedSettings that have since been marked as non-default
 		for k, v := range GlobalSettings {
 			if def, ok := defaults[k]; !ok || !reflect.DeepEqual(v, def) {
-				parsedSettings[k] = v
+				if _, wr := ModifiedSettings[k]; wr {
+					parsedSettings[k] = v
+				}
 			}
 		}
 
@@ -183,7 +190,9 @@ func OverwriteSettings(filename string) error {
 		defaults := DefaultGlobalSettings()
 		for k, v := range GlobalSettings {
 			if def, ok := defaults[k]; !ok || !reflect.DeepEqual(v, def) {
-				settings[k] = v
+				if _, wr := ModifiedSettings[k]; wr {
+					settings[k] = v
+				}
 			}
 		}
 
