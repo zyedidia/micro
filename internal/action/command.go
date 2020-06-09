@@ -480,6 +480,7 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 
 	if !local {
 		config.GlobalSettings[option] = nativeValue
+		config.ModifiedSettings[option] = true
 
 		if option == "colorscheme" {
 			// LoadSyntaxFiles()
