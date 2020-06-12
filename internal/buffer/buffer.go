@@ -837,19 +837,18 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	}
 	l := string(b.LineBytes(start - 1))
 	if end == len(b.lines) {
-		b.Insert(
+		b.insert(
 			Loc{
 				util.CharacterCount(b.lines[end-1].data),
 				end - 1,
 			},
-			"\n"+l,
-		)
-	} else {
-		b.Insert(
-			Loc{0, end},
-			l+"\n",
+			[]byte{'\n'},
 		)
 	}
+	b.Insert(
+		Loc{0, end},
+		l+"\n",
+	)
 	b.Remove(
 		Loc{0, start - 1},
 		Loc{0, start},
@@ -858,7 +857,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 
 // MoveLinesDown moves the range of lines down one row
 func (b *Buffer) MoveLinesDown(start int, end int) {
-	if start < 0 || start >= end || end >= len(b.lines)-1 {
+	if start < 0 || start >= end || end >= len(b.lines) {
 		return
 	}
 	l := string(b.LineBytes(end))
