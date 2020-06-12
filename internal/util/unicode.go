@@ -16,6 +16,16 @@ import (
 // For rendering, micro will display the combining characters. It's not perfect
 // but it's pretty good.
 
+var minMark = rune(unicode.Mark.R16[0].Lo)
+
+func isMark(r rune) bool {
+	// Fast path
+	if r < minMark {
+		return false
+	}
+	return unicode.In(r, unicode.Mark)
+}
+
 // DecodeCharacter returns the next character from an array of bytes
 // A character is a rune along with any accompanying combining runes
 func DecodeCharacter(b []byte) (rune, []rune, int) {
@@ -24,7 +34,7 @@ func DecodeCharacter(b []byte) (rune, []rune, int) {
 	c, s := utf8.DecodeRune(b)
 
 	var combc []rune
-	for unicode.In(c, unicode.Mark) {
+	for isMark(c) {
 		combc = append(combc, c)
 		size += s
 
@@ -43,7 +53,7 @@ func DecodeCharacterInString(str string) (rune, []rune, int) {
 	c, s := utf8.DecodeRuneInString(str)
 
 	var combc []rune
-	for unicode.In(c, unicode.Mark) {
+	for isMark(c) {
 		combc = append(combc, c)
 		size += s
 
@@ -61,7 +71,7 @@ func CharacterCount(b []byte) int {
 
 	for len(b) > 0 {
 		r, size := utf8.DecodeRune(b)
-		if !unicode.In(r, unicode.Mark) {
+		if !isMark(r) {
 			s++
 		}
 
@@ -77,7 +87,7 @@ func CharacterCountInString(str string) int {
 	s := 0
 
 	for _, r := range str {
-		if !unicode.In(r, unicode.Mark) {
+		if !isMark(r) {
 			s++
 		}
 	}
