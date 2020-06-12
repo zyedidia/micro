@@ -79,7 +79,7 @@ bench-compare:
 	for i in 1 2 3; do \
 		go test -bench=. ./internal/...; \
 	done > benchmark_results
-	benchstat benchmark_results_baseline benchmark_results
+	benchstat -alpha 0.15 benchmark_results_baseline benchmark_results
 
 clean:
 	rm -f micro
