@@ -46,6 +46,7 @@ fetch-tags:
 # Builds the runtime
 runtime:
 	git submodule update --init
+	rm -f runtime/syntax/*.hdr
 	go run runtime/syntax/make_headers.go runtime/syntax
 	go build -o tools/bindata ./tools/go-bindata
 	tools/bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
