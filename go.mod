@@ -25,4 +25,6 @@ require (
 	layeh.com/gopher-luar v1.0.7
 )
 
+replace github.com/kballard/go-shellquote => github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655
+
 go 1.11
