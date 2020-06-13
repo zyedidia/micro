@@ -25,4 +25,6 @@ require (
 	layeh.com/gopher-luar v1.0.7
 )
 
+replace github.com/mattn/go-runewidth => github.com/p-e-w/go-runewidth v0.0.10-0.20200613030200-3e1705c5c059
+
 go 1.11
