@@ -27,6 +27,8 @@ github.com/mattn/go-runewidth v0.0.7 h1:Ei8KR0497xHyKJPAv59M1dkC+rOZCMBJ+t3fZ+tw
 github.com/mattn/go-runewidth v0.0.7/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
+github.com/p-e-w/go-runewidth v0.0.10-0.20200613030200-3e1705c5c059 h1:/+h2b6i15wh4EWsFkfdNdBE1jjGA872tpXEyhPM5aYg=
+github.com/p-e-w/go-runewidth v0.0.10-0.20200613030200-3e1705c5c059/go.mod h1:H031xJmbD/WCDINGzjvQ9THkh0rPKHF+m2gUSrubnMI=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff h1:+6NUiITWwE5q1KO6SAfUX918c+Tab0+tGAM/mtdlUyA=
@@ -46,6 +48,8 @@ github.com/zyedidia/clipboard v0.0.0-20200421031010-7c45b8673834 h1:0nOfq3JwYRiY
 github.com/zyedidia/clipboard v0.0.0-20200421031010-7c45b8673834/go.mod h1:zykFnZUXX0ErxqvYLUFEq7QDJKId8rmh2FgD0/Y8cjA=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBYj5/td9WC0mw4g1xDBPovIqmHew=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
+github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655 h1:Z3RhH6hvcSx7eX6Q/pP6YVsgea/1eMDG99vtWwi3nK4=
+github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655/go.mod h1:1sTqqO+kcYzZp43M5VsJe1tns9IzlSeC9jB6c2+o/5Y=
 github.com/zyedidia/highlight v0.0.0-20170330143449-201131ce5cf5 h1:Zs6mpwXvlqpF9zHl5XaN0p5V4J9XvP+WBuiuXyIgqvc=
 github.com/zyedidia/highlight v0.0.0-20170330143449-201131ce5cf5/go.mod h1:c1r+Ob9tUTPB0FKWO1+x+Hsc/zNa45WdGq7Y38Ybip0=
 github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d h1:zmDMkh22zXOB7gz8jFaI4GpI7llsPgzm38/jG0UgxjE=

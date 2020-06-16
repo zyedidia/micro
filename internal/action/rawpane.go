@@ -35,6 +35,13 @@ func (h *RawPane) HandleEvent(event tcell.Event) {
 	}
 
 	h.Buf.Insert(h.Cursor.Loc, reflect.TypeOf(event).String()[7:])
+
+	switch e := event.(type) {
+	case *tcell.EventKey:
+		h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %s", e.Name()))
+	}
+
 	h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))
+
 	h.Relocate()
 }

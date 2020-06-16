@@ -6,24 +6,58 @@ local buffer = import("micro/buffer")
 
 local ft = {}
 
+ft["apacheconf"] = "# %s"
+ft["bat"] = ":: %s"
 ft["c"] = "// %s"
 ft["c++"] = "// %s"
+ft["cmake"] = "# %s"
+ft["conf"] = "# %s"
+ft["crystal"] = "# %s"
+ft["css"] = "/* %s */"
+ft["d"] = "// %s"
+ft["dart"] = "// %s"
+ft["dockerfile"] = "# %s"
+ft["elm"] = "-- %s"
+ft["fish"] = "# %s"
+ft["gdscript"] = "# %s"
+ft["glsl"] = "// %s"
 ft["go"] = "// %s"
-ft["python"] = "# %s"
-ft["python3"] = "# %s"
+ft["haskell"] = "-- %s"
 ft["html"] = "<!-- %s -->"
+ft["ini"] = "; %s"
 ft["java"] = "// %s"
+ft["javascript"] = "// %s"
+ft["jinja2"] = "{# %s #}"
 ft["julia"] = "# %s"
+ft["kotlin"] = "// %s"
+ft["lua"] = "-- %s"
+ft["markdown"] = "<!-- %s -->"
+ft["nginx"] = "# %s"
+ft["nim"] = "# %s"
+ft["objc"] = "// %s"
+ft["pascal"] = "{ %s }"
 ft["perl"] = "# %s"
 ft["php"] = "// %s"
-ft["rust"] = "// %s"
-ft["shell"] = "# %s"
-ft["lua"] = "-- %s"
-ft["javascript"] = "// %s"
+ft["pony"] = "// %s"
+ft["powershell"] = "# %s"
+ft["proto"] = "// %s"
+ft["python"] = "# %s"
+ft["python3"] = "# %s"
 ft["ruby"] = "# %s"
-ft["d"] = "// %s"
+ft["rust"] = "// %s"
+ft["scala"] = "// %s"
+ft["shell"] = "# %s"
+ft["sql"] = "-- %s"
 ft["swift"] = "// %s"
-ft["elm"] = "-- %s"
+ft["tex"] = "% %s"
+ft["toml"] = "# %s"
+ft["twig"] = "{# %s #}"
+ft["v"] = "// %s"
+ft["xml"] = "<!-- %s -->"
+ft["yaml"] = "# %s"
+ft["zig"] = "// %s"
+ft["zscript"] = "// %s"
+ft["zsh"] = "# %s"
 
 function onBufferOpen(buf)
     if buf.Settings["commenttype"] == nil then
@@ -38,7 +72,7 @@ end
 function commentLine(bp, lineN)
     local line = bp.Buf:Line(lineN)
     local commentType = bp.Buf.Settings["commenttype"]
-    local commentRegex = "^%s*" .. commentType:gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%s", "(.*)")
+    local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
@@ -98,7 +132,8 @@ function comment(bp, args)
 end
 
 function trim(s)
-    return (s:gsub("^%s*(.-)%s*$", "%1"))
+    local trimmed = s:gsub("^%s*(.-)%s*$", "%1"):gsub("%%","%%%%")
+    return trimmed
 end
 
 function string.starts(String,Start)

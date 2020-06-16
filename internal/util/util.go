@@ -418,6 +418,10 @@ func IsNonAlphaNumeric(c rune) bool {
 	return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
 }
 
+func IsAutocomplete(c rune) bool {
+	return c == '.' || !IsNonAlphaNumeric(c)
+}
+
 func ParseSpecial(s string) string {
 	return strings.Replace(s, "\\t", "\t", -1)
 }

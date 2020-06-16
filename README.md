@@ -44,7 +44,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Easy to use and install.
 - No dependencies or external files are needed — just the binary you can download further down the page.
 - Multiple cursors.
-- Common keybindings (<kbd>Ctrl+S</kbd>, <kbd>Ctrl+C</kbd>, <kbd>Ctrl+V</kbd>, <kbd>Ctrl+Z</kbd>, …).
+- Common keybindings (<kbd>Ctrl-s</kbd>, <kbd>Ctrl-c</kbd>, <kbd>Ctrl-v</kbd>, <kbd>Ctrl-z</kbd>, …).
   - Keybindings can be rebound to your liking.
 - Sane defaults.
   - You shouldn't have to configure much out of the box (and it is extremely easy to configure).
@@ -53,7 +53,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Extremely good mouse support.
   - This means mouse dragging to create a selection, double click to select by word, and triple click to select by line.
 - Cross-platform (it should work on all the platforms Go runs on).
-  - Note that while Windows is supported Mingw/Cygwin is not (see below)
+  - Note that while Windows is supported Mingw/Cygwin is not (see below).
 - Plugin system (plugins are written in Lua).
   - micro has a built-in plugin manager to automatically install, remove, and update plugins.
 - Built-in diff gutter.
@@ -169,7 +169,7 @@ CGO_ENABLED=0 make build
 
 ### macOS terminal
 
-If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Load Preset`. The newest versions also support true color.
+If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
@@ -187,7 +187,7 @@ If you don't have these commands, micro will use an internal clipboard for copy 
 
 If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
 you are using a terminal which does not support 256 color mode. Try changing the color scheme to `simple`
-by pressing <kbd>Ctrl+E</kbd> in micro and typing `set colorscheme simple`.
+by pressing <kbd>Ctrl-e</kbd> in micro and typing `set colorscheme simple`.
 
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.
@@ -228,7 +228,7 @@ click to enable line selection.
 
 ## Documentation and Help
 
-micro has a built-in help system which you can access by pressing <kbd>Ctrl+E</kbd> and typing `help`. Additionally, you can
+micro has a built-in help system which you can access by pressing <kbd>Ctrl-e</kbd> and typing `help`. Additionally, you can
 view the help files here:
 
 - [main help](https://github.com/zyedidia/micro/tree/master/runtime/help/help.md)

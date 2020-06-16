@@ -73,6 +73,12 @@ You can also bind a key to execute a command in command mode (see
 }
 ```
 
+**Note for macOS**: By default, macOS terminals do not forward alt events and
+instead insert unicode characters. To fix this, do the following:
+
+* iTerm2: select `Esc+` for `Left Option Key` in `Preferences->Profiles->Keys`.
+* Terminal.app: Enable `Use Option key as Meta key` in `Preferences->Profiles->Keyboard`.
+
 Now when you press `Alt-p` the `pwd` command will be executed which will show
 your working directory in the infobar.
 

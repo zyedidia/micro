@@ -46,6 +46,7 @@ fetch-tags:
 # Builds the runtime
 runtime:
 	git submodule update --init
+	rm -f runtime/syntax/*.hdr
 	go run runtime/syntax/make_headers.go runtime/syntax
 	go build -o tools/bindata ./tools/go-bindata
 	tools/bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
@@ -79,7 +80,7 @@ bench-compare:
 	for i in 1 2 3; do \
 		go test -bench=. ./internal/...; \
 	done > benchmark_results
-	benchstat benchmark_results_baseline benchmark_results
+	benchstat -alpha 0.15 benchmark_results_baseline benchmark_results
 
 clean:
 	rm -f micro
