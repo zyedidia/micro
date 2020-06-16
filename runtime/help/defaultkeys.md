@@ -80,7 +80,7 @@ can change it!
 | Ctrl+Z                              | Undo                                      |
 | Ctrl+Y                              | Redo                                      |
 | Alt+UpArrow                         | Move current line or selected lines up    |
-| Alt+DownArrow                       | Move current line of selected lines down  |
+| Alt+DownArrow                       | Move current line or selected lines down  |
 | Alt+Backspace or Alt+Ctrl+H         | Delete word left                          |
 | Ctrl+A                              | Select all                                |
 
