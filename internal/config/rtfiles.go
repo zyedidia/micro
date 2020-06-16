@@ -1,3 +1,4 @@
+//go:generate go run runtime_generate.go ../../runtime/syntax ../../runtime
 package config
 
 import (
@@ -9,6 +10,8 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+
+	"github.com/zyedidia/micro/v2/internal/vfsutil"
 )
 
 const (
@@ -90,7 +93,7 @@ func (af assetFile) Name() string {
 }
 
 func (af assetFile) Data() ([]byte, error) {
-	return Asset(string(af))
+	return vfsutil.ReadFile(Assets, string(af))
 }
 
 func (nf namedFile) Name() string {
@@ -111,7 +114,10 @@ func AddRealRuntimeFile(fileType RTFiletype, file RuntimeFile) {
 // AddRuntimeFilesFromDirectory registers each file from the given directory for
 // the filetype which matches the file-pattern
 func AddRuntimeFilesFromDirectory(fileType RTFiletype, directory, pattern string) {
-	files, _ := ioutil.ReadDir(directory)
+	files, err := ioutil.ReadDir(directory)
+	if err != nil {
+		return
+	}
 	for _, f := range files {
 		if ok, _ := filepath.Match(pattern, f.Name()); !f.IsDir() && ok {
 			fullPath := filepath.Join(directory, f.Name())
@@ -123,13 +129,13 @@ func AddRuntimeFilesFromDirectory(fileType RTFiletype, directory, pattern string
 // AddRuntimeFilesFromAssets registers each file from the given asset-directory for
 // the filetype which matches the file-pattern
 func AddRuntimeFilesFromAssets(fileType RTFiletype, directory, pattern string) {
-	files, err := AssetDir(directory)
+	files, err := vfsutil.ReadDir(Assets, directory)
 	if err != nil {
 		return
 	}
 	for _, f := range files {
-		if ok, _ := path.Match(pattern, f); ok {
-			AddRuntimeFile(fileType, assetFile(path.Join(directory, f)))
+		if ok, _ := path.Match(pattern, f.Name()); ok {
+			AddRuntimeFile(fileType, assetFile(path.Join(directory, f.Name())))
 		}
 	}
 }
@@ -156,11 +162,60 @@ func ListRealRuntimeFiles(fileType RTFiletype) []RuntimeFile {
 	return realFiles[fileType]
 }
 
+func addPlugin(dirname string, plugdir string, isID func(string) bool, vfs bool) {
+	var srcs []os.FileInfo
+	var err error
+	if vfs {
+		srcs, err = vfsutil.ReadDir(Assets, filepath.Join(plugdir, dirname))
+	} else {
+		srcs, err = ioutil.ReadDir(filepath.Join(plugdir, dirname))
+	}
+	if err != nil {
+		return
+	}
+	p := new(Plugin)
+	p.Name = dirname
+	p.DirName = dirname
+	p.Default = vfs
+	for _, f := range srcs {
+		if strings.HasSuffix(f.Name(), ".lua") {
+			if vfs {
+				p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, dirname, f.Name())))
+			} else {
+				p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, dirname, f.Name())))
+			}
+		} else if strings.HasSuffix(f.Name(), ".json") {
+			var data []byte
+			var err error
+
+			if vfs {
+				data, err = vfsutil.ReadFile(Assets, filepath.Join(plugdir, dirname, f.Name()))
+			} else {
+				data, err = ioutil.ReadFile(filepath.Join(plugdir, dirname, f.Name()))
+			}
+			if err != nil {
+				continue
+			}
+			p.Info, err = NewPluginInfo(data)
+			if err != nil {
+				continue
+			}
+			p.Name = p.Info.Name
+		}
+	}
+
+	if !isID(p.Name) || len(p.Srcs) <= 0 {
+		log.Println(p.Name, "is not a plugin")
+		return
+	}
+	Plugins = append(Plugins, p)
+}
+
 // InitRuntimeFiles initializes all assets file and the config directory
 func InitRuntimeFiles() {
 	add := func(fileType RTFiletype, dir, pattern string) {
 		AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
-		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
+		AddRuntimeFilesFromAssets(fileType, dir, pattern)
 	}
 
 	add(RTColorscheme, "colorschemes", "*.micro")
@@ -179,68 +234,24 @@ func InitRuntimeFiles() {
 
 	// Search ConfigDir for plugin-scripts
 	plugdir := filepath.Join(ConfigDir, "plug")
-	files, _ := ioutil.ReadDir(plugdir)
+	files, err := ioutil.ReadDir(plugdir)
 
 	isID := regexp.MustCompile(`^[_A-Za-z0-9]+$`).MatchString
 
-	for _, d := range files {
-		if d.IsDir() {
-			srcs, _ := ioutil.ReadDir(filepath.Join(plugdir, d.Name()))
-			p := new(Plugin)
-			p.Name = d.Name()
-			p.DirName = d.Name()
-			for _, f := range srcs {
-				if strings.HasSuffix(f.Name(), ".lua") {
-					p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
-				} else if strings.HasSuffix(f.Name(), ".json") {
-					data, err := ioutil.ReadFile(filepath.Join(plugdir, d.Name(), f.Name()))
-					if err != nil {
-						continue
-					}
-					p.Info, err = NewPluginInfo(data)
-					if err != nil {
-						continue
-					}
-					p.Name = p.Info.Name
-				}
+	if err == nil {
+		for _, d := range files {
+			if d.IsDir() {
+				addPlugin(d.Name(), plugdir, isID, false)
 			}
-
-			if !isID(p.Name) || len(p.Srcs) <= 0 {
-				log.Println(p.Name, "is not a plugin")
-				continue
-			}
-			Plugins = append(Plugins, p)
 		}
 	}
 
-	plugdir = filepath.Join("runtime", "plugins")
-	if files, err := AssetDir(plugdir); err == nil {
+	plugdir = "plugins"
+	files, err = vfsutil.ReadDir(Assets, plugdir)
+	if err == nil {
 		for _, d := range files {
-			if srcs, err := AssetDir(filepath.Join(plugdir, d)); err == nil {
-				p := new(Plugin)
-				p.Name = d
-				p.DirName = d
-				p.Default = true
-				for _, f := range srcs {
-					if strings.HasSuffix(f, ".lua") {
-						p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, d, f)))
-					} else if strings.HasSuffix(f, ".json") {
-						data, err := Asset(filepath.Join(plugdir, d, f))
-						if err != nil {
-							continue
-						}
-						p.Info, err = NewPluginInfo(data)
-						if err != nil {
-							continue
-						}
-						p.Name = p.Info.Name
-					}
-				}
-				if !isID(p.Name) || len(p.Srcs) <= 0 {
-					log.Println(p.Name, "is not a plugin")
-					continue
-				}
-				Plugins = append(Plugins, p)
+			if d.IsDir() {
+				addPlugin(d.Name(), plugdir, isID, true)
 			}
 		}
 	}
@@ -277,7 +288,7 @@ func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) e
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRealRuntimeFile(filetype, realFile(fullpath))
 	} else {
-		fullpath = path.Join("runtime", "plugins", pldir, filePath)
+		fullpath = path.Join("plugins", pldir, filePath)
 		AddRuntimeFile(filetype, assetFile(fullpath))
 	}
 	return nil
@@ -294,7 +305,7 @@ func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, dire
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFilesFromDirectory(filetype, fullpath, pattern)
 	} else {
-		fullpath = path.Join("runtime", "plugins", pldir, directory)
+		fullpath = path.Join("plugins", pldir, directory)
 		AddRuntimeFilesFromAssets(filetype, fullpath, pattern)
 	}
 	return nil

@@ -18,3 +18,4 @@ tools/info-plist
 tools/bindata
 tools/vscode-tests/
 *.hdr
+assets_vfsdata.go
