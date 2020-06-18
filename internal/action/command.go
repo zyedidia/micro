@@ -805,7 +805,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			return l.GreaterEqual(start) && l.LessEqual(end)
 		}
 
-		searchLoc := start
+		searchLoc := h.Cursor.Loc
 		var doReplacement func()
 		doReplacement = func() {
 			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, !noRegex)
@@ -816,6 +816,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			if !found || !inRange(locs[0]) || !inRange(locs[1]) {
 				h.Cursor.ResetSelection()
 				h.Buf.RelocateCursors()
+
 				return
 			}
 
