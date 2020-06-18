@@ -832,7 +832,9 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 					searchLoc = locs[0]
 					searchLoc.X += nrunes + locs[0].Diff(locs[1], h.Buf)
-					end.Move(nrunes, h.Buf)
+					if end.Y == locs[1].Y {
+						end = end.Move(nrunes, h.Buf)
+					}
 					h.Cursor.Loc = searchLoc
 					nreplaced++
 				} else if !canceled && !yes {

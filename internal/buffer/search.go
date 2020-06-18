@@ -7,6 +7,13 @@ import (
 )
 
 func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
+	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
+	if start.Y > b.LinesNum()-1 {
+		start.X = lastcn - 1
+	}
+	if end.Y > b.LinesNum()-1 {
+		end.X = lastcn
+	}
 	start.Y = util.Clamp(start.Y, 0, b.LinesNum()-1)
 	end.Y = util.Clamp(end.Y, 0, b.LinesNum()-1)
 
@@ -48,6 +55,13 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 }
 
 func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
+	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
+	if start.Y > b.LinesNum()-1 {
+		start.X = lastcn - 1
+	}
+	if end.Y > b.LinesNum()-1 {
+		end.X = lastcn
+	}
 	start.Y = util.Clamp(start.Y, 0, b.LinesNum()-1)
 	end.Y = util.Clamp(end.Y, 0, b.LinesNum()-1)
 
@@ -132,7 +146,7 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 
 // ReplaceRegex replaces all occurrences of 'search' with 'replace' in the given area
 // and returns the number of replacements made and the number of runes
-// added or removed
+// added or removed on the last line of the range
 func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []byte) (int, int) {
 	if start.GreaterThan(end) {
 		start, end = end, start
@@ -162,7 +176,9 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 				result = search.Expand(result, replace, in, submatches)
 			}
 			found++
-			netrunes += util.CharacterCount(in) - util.CharacterCount(result)
+			if i == end.Y {
+				netrunes += util.CharacterCount(result) - util.CharacterCount(in)
+			}
 			return result
 		})
 
