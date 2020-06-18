@@ -30,10 +30,16 @@ following in the `bindings.json` file.
 
 ```json
 {
-	"CtrlY": "Undo",
-	"CtrlZ": "Redo"
+	"Ctrl-y": "Undo",
+	"Ctrl-z": "Redo"
 }
 ```
+
+**Note:** The syntax `<Modifier><key>` is equivalent to `<Modifier>-<key>`. In
+addition, Ctrl-Shift bindings are not supported by terminals, and are the same
+as simply Ctrl bindings. This means that `CtrlG`, `Ctrl-G`, and `Ctrl-g` all
+mean the same thing. However, for Alt this is not the case: `AltG` and `Alt-G`
+mean `Alt-Shift-g`, while `Alt-g` does not require the Shift modifier.
 
 In addition to editing your `~/.config/micro/bindings.json`, you can run
 `>bind <keycombo> <action>` For a list of bindable actions, see below.
@@ -85,15 +91,15 @@ your working directory in the infobar.
 You can also bind an "editable" command with `command-edit:`. This means that 
 micro won't immediately execute the command when you press the binding, but
 instead just place the string in the infobar in command mode. For example, 
-you could rebind `CtrlG` to `> help`:
+you could rebind `Ctrl-g` to `> help`:
 
 ```json
 {
-    "CtrlG": "command-edit:help "
+    "Ctrl-g": "command-edit:help "
 }
 ```
 
-Now when you press `CtrlG`, `help` will appear in the command bar and your
+Now when you press `Ctrl-g`, `help` will appear in the command bar and your
 cursor will be placed after it (note the space in the json that controls the
 cursor placement).
 
@@ -357,32 +363,32 @@ F62
 F63
 F64
 CtrlSpace
-CtrlA
-CtrlB
-CtrlC
-CtrlD
-CtrlE
-CtrlF
-CtrlG
-CtrlH
-CtrlI
-CtrlJ
-CtrlK
-CtrlL
-CtrlM
-CtrlN
-CtrlO
-CtrlP
-CtrlQ
-CtrlR
-CtrlS
-CtrlT
-CtrlU
-CtrlV
-CtrlW
-CtrlX
-CtrlY
-CtrlZ
+Ctrl-a
+Ctrl-b
+Ctrl-c
+Ctrl-d
+Ctrl-e
+Ctrl-f
+Ctrl-g
+Ctrl-h
+Ctrl-i
+Ctrl-j
+Ctrl-k
+Ctrl-l
+Ctrl-m
+Ctrl-n
+Ctrl-o
+Ctrl-p
+Ctrl-q
+Ctrl-r
+Ctrl-s
+Ctrl-t
+Ctrl-u
+Ctrl-v
+Ctrl-w
+Ctrl-x
+Ctrl-y
+Ctrl-z
 CtrlLeftSq
 CtrlBackslash
 CtrlRightSq
@@ -450,28 +456,28 @@ conventions for text editing defaults.
     "Alt-{":          "ParagraphPrevious",
     "Alt-}":          "ParagraphNext",
     "Enter":          "InsertNewline",
-    "CtrlH":          "Backspace",
+    "Ctrl-h":          "Backspace",
     "Backspace":      "Backspace",
     "Alt-CtrlH":      "DeleteWordLeft",
     "Alt-Backspace":  "DeleteWordLeft",
     "Tab":            "Autocomplete|IndentSelection|InsertTab",
     "Backtab":        "OutdentSelection|OutdentLine",
-    "CtrlO":          "OpenFile",
-    "CtrlS":          "Save",
-    "CtrlF":          "Find",
-    "CtrlN":          "FindNext",
-    "CtrlP":          "FindPrevious",
-    "CtrlZ":          "Undo",
-    "CtrlY":          "Redo",
-    "CtrlC":          "CopyLine|Copy",
-    "CtrlX":          "Cut",
-    "CtrlK":          "CutLine",
-    "CtrlD":          "DuplicateLine",
-    "CtrlV":          "Paste",
-    "CtrlA":          "SelectAll",
-    "CtrlT":          "AddTab",
-    "Alt,":           "PreviousTab",
-    "Alt.":           "NextTab",
+    "Ctrl-o":          "OpenFile",
+    "Ctrl-s":          "Save",
+    "Ctrl-f":          "Find",
+    "Ctrl-n":          "FindNext",
+    "Ctrl-p":          "FindPrevious",
+    "Ctrl-z":          "Undo",
+    "Ctrl-y":          "Redo",
+    "Ctrl-c":          "CopyLine|Copy",
+    "Ctrl-x":          "Cut",
+    "Ctrl-k":          "CutLine",
+    "Ctrl-d":          "DuplicateLine",
+    "Ctrl-v":          "Paste",
+    "Ctrl-a":          "SelectAll",
+    "Ctrl-t":          "AddTab",
+    "Alt-,":           "PreviousTab",
+    "Alt-.":           "NextTab",
     "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
@@ -480,17 +486,17 @@ conventions for text editing defaults.
     "PageDown":       "CursorPageDown",
     "CtrlPageUp":     "PreviousTab",
     "CtrlPageDown":   "NextTab",
-    "CtrlG":          "ToggleHelp",
+    "Ctrl-g":          "ToggleHelp",
     "Alt-g":          "ToggleKeyMenu",
-    "CtrlR":          "ToggleRuler",
-    "CtrlL":          "command-edit:goto ",
+    "Ctrl-r":          "ToggleRuler",
+    "Ctrl-l":          "command-edit:goto ",
     "Delete":         "Delete",
-    "CtrlB":          "ShellMode",
-    "CtrlQ":          "Quit",
-    "CtrlE":          "CommandMode",
-    "CtrlW":          "NextSplit",
-    "CtrlU":          "ToggleMacro",
-    "CtrlJ":          "PlayMacro",
+    "Ctrl-b":          "ShellMode",
+    "Ctrl-q":          "Quit",
+    "Ctrl-e":          "CommandMode",
+    "Ctrl-w":          "NextSplit",
+    "Ctrl-u":          "ToggleMacro",
+    "Ctrl-j":          "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
 
     // Emacs-style keybindings
@@ -526,7 +532,7 @@ conventions for text editing defaults.
 
 ## Final notes
 
-Note: On some old terminal emulators and on Windows machines, `CtrlH` should be
+Note: On some old terminal emulators and on Windows machines, `Ctrl-h` should be
 used for backspace.
 
 Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or

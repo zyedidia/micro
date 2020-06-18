@@ -1,6 +1,6 @@
 # Command bar
 
-The command bar is opened by pressing CtrlE. It is a single-line buffer,
+The command bar is opened by pressing Ctrl-e. It is a single-line buffer,
 meaning that all keybindings from a normal buffer are supported (as well
 as mouse and selection).
 
@@ -13,7 +13,7 @@ does not look up environment variables.
 # Commands
 
 Micro provides the following commands that can be executed at the command-bar
-by pressing `CtrlE` and entering the command. Arguments are placed in single
+by pressing `Ctrl-e` and entering the command. Arguments are placed in single
 quotes here but these are not necessary when entering the command in micro.
 
 * `bind 'key' 'action'`: creates a keybinding from key to action. See the
@@ -109,7 +109,7 @@ quotes here but these are not necessary when entering the command in micro.
    is most useful for debugging keybindings.
 
 * `showkey`: Show the action(s) bound to a given key. For example
-   running `> showkey CtrlC` will display `Copy`.
+   running `> showkey Ctrl-c` will display `Copy`.
 
 * `term exec?`: Open a terminal emulator running the given executable. If no
    executable is given, this will open the default shell in the terminal
