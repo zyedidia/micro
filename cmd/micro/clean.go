@@ -41,6 +41,9 @@ func CleanConfig() {
 		return
 	}
 
+	fmt.Println("Cleaning default settings")
+	config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+
 	// detect unused options
 	var unusedOptions []string
 	defaultSettings := config.DefaultAllSettings()
