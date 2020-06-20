@@ -114,15 +114,21 @@ func CleanConfig() {
 			fmt.Printf("Removing badly formatted files in %s\n", filepath.Join(config.ConfigDir, "buffers"))
 
 			if shouldContinue() {
+				removed := 0
 				for _, f := range badFiles {
 					err := os.Remove(f)
 					if err != nil {
 						fmt.Println(err)
 						continue
 					}
+					removed++
 				}
 
-				fmt.Println("Removed badly formatted files")
+				if removed == 0 {
+					fmt.Println("Failed to remove files")
+				} else {
+					fmt.Printf("Removed %d badly formatted files\n", removed)
+				}
 				fmt.Print("\n\n")
 			}
 		}
