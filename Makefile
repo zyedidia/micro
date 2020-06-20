@@ -64,6 +64,7 @@ testgen:
 
 test:
 	go test ./internal/...
+	go test ./cmd/...
 
 bench:
 	for i in 1 2 3; do \

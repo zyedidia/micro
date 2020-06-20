@@ -132,7 +132,7 @@ func DoPluginFlags() {
 
 // LoadInput determines which files should be loaded into buffers
 // based on the input stored in flag.Args()
-func LoadInput() []*buffer.Buffer {
+func LoadInput(args []string) []*buffer.Buffer {
 	// There are a number of ways micro should start given its input
 
 	// 1. If it is given a files in flag.Args(), it should open those
@@ -147,7 +147,6 @@ func LoadInput() []*buffer.Buffer {
 	var filename string
 	var input []byte
 	var err error
-	args := flag.Args()
 	buffers := make([]*buffer.Buffer, 0, len(args))
 
 	btype := buffer.BTDefault
@@ -262,7 +261,12 @@ func main() {
 
 	DoPluginFlags()
 
-	screen.Init()
+	err = screen.Init()
+	if err != nil {
+		fmt.Println(err)
+		fmt.Println("Fatal: Micro could not initialize a Screen.")
+		os.Exit(1)
+	}
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -291,7 +295,8 @@ func main() {
 		screen.TermMessage(err)
 	}
 
-	b := LoadInput()
+	args := flag.Args()
+	b := LoadInput(args)
 
 	if len(b) == 0 {
 		// No buffers to open

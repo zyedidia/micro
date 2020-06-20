@@ -1,7 +1,7 @@
 package screen
 
 import (
-	"fmt"
+	"errors"
 	"os"
 	"sync"
 	"unicode"
@@ -131,7 +131,7 @@ func TempStart(screenWasNil bool) {
 }
 
 // Init creates and initializes the tcell screen
-func Init() {
+func Init() error {
 	drawChan = make(chan bool, 8)
 
 	// Should we enable true color?
@@ -151,13 +151,10 @@ func Init() {
 	var err error
 	Screen, err = tcell.NewScreen()
 	if err != nil {
-		fmt.Println(err)
-		fmt.Println("Fatal: Micro could not initialize a Screen.")
-		os.Exit(1)
+		return err
 	}
 	if err = Screen.Init(); err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+		return err
 	}
 
 	// restore TERM
@@ -168,4 +165,30 @@ func Init() {
 	if config.GetGlobalOption("mouse").(bool) {
 		Screen.EnableMouse()
 	}
+
+	return nil
+}
+
+// InitSimScreen initializes a simulation screen for testing purposes
+func InitSimScreen() (tcell.SimulationScreen, error) {
+	drawChan = make(chan bool, 8)
+
+	// Initilize tcell
+	var err error
+	s := tcell.NewSimulationScreen("")
+	if s == nil {
+		return nil, errors.New("Failed to get a simulation screen")
+	}
+	if err = s.Init(); err != nil {
+		return nil, err
+	}
+
+	s.SetSize(80, 24)
+	Screen = s
+
+	if config.GetGlobalOption("mouse").(bool) {
+		Screen.EnableMouse()
+	}
+
+	return s, nil
 }
