@@ -82,7 +82,7 @@ modSearch:
 		case strings.HasPrefix(k, "-"):
 			// We optionally support dashes between modifiers
 			k = k[1:]
-		case strings.HasPrefix(k, "Ctrl") && k != "CtrlH":
+		case strings.HasPrefix(k, "Ctrl") && k != "Ctrl-h" && k != "CtrlH" && k != "Ctrlh":
 			// CtrlH technically does not have a 'Ctrl' modifier because it is really backspace
 			k = k[4:]
 			modifiers |= tcell.ModCtrl
