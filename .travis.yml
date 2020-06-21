@@ -6,5 +6,6 @@ os:
     - osx
     - windows
 script:
-    - make build
-    - make test
+    - go build ./cmd/micro
+    - go test ./internal/...
+    - go test ./cmd/...
