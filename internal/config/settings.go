@@ -205,7 +205,7 @@ func OverwriteSettings(filename string) error {
 // RegisterCommonOptionPlug creates a new option (called pl.name). This is meant to be called by plugins to add options.
 func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) error {
 	name = pl + "." + name
-	if v, ok := GlobalSettings[name]; !ok {
+	if _, ok := GlobalSettings[name]; !ok {
 		defaultCommonSettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
 		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
@@ -213,7 +213,7 @@ func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) 
 			return errors.New("Error writing settings.json file: " + err.Error())
 		}
 	} else {
-		defaultCommonSettings[name] = v
+		defaultCommonSettings[name] = defaultvalue
 	}
 	return nil
 }
