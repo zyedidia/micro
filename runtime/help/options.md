@@ -37,12 +37,17 @@ Here are the available options:
    closed cleanly. In the case of a system crash or a micro crash, the contents
    of the buffer can be recovered automatically by opening the file that was
    being edited before the crash, or manually by searching for the backup in
-   the backup directory. Backups are made in the background when a buffer is
-   modified and the latest backup is more than 8 seconds old, or when micro
-   detects a crash. It is highly recommended that you leave this feature
-   enabled.
+   the backup directory. Backups are made in the background for newly modified
+   buffers every 8 seconds, or when micro detects a crash.
 
     default value: `true`
+
+* `backupdir`: the directory micro should place backups in. For the default
+   value of `""` (empty string), the backup directory will be
+   `ConfigDir/backups`, which is `~/.config/micro/backups` by default. The
+   directory specified for backups will be created if it does not exist.
+
+    default value: `""` (empty string)
 
 * `basename`: in the infobar and tabbar, show only the basename of the file
    being edited rather than the full path.
@@ -50,8 +55,8 @@ Here are the available options:
     default value: `false`
 
 * `colorcolumn`: if this is not set to 0, it will display a column at the
-  specified column. This is useful if you want column 80 to be highlighted
-  special for example.
+   specified column. This is useful if you want column 80 to be highlighted
+   special for example.
 
 	default value: `0`
 
@@ -197,6 +202,13 @@ Here are the available options:
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
    It is also possible to open a file with a certain cursor location by using the
    `+LINE,COL` flag syntax. See `micro -help` for the command line options.
+
+    default value: `false`
+
+* `permbackup`: this option causes backups (see `backup` option) to be
+   permanently saved. With permanent backups, micro will not remove backups when
+   files are closed and will never apply them to existing files. Use this option
+   if you are interested in manually managing your backup files.
 
     default value: `false`
 

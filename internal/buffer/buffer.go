@@ -102,9 +102,7 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	// counts the number of edits
-	// resets every backupTime edits
-	lastbackup time.Time
+	requestedBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
 	// are viewing a file that is constantly changing
@@ -271,6 +269,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		}
 	}
 
+	hasBackup := false
 	if !found {
 		b.SharedBuffer = new(SharedBuffer)
 		b.Type = btype
@@ -293,7 +292,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			b.Settings["encoding"] = "utf-8"
 		}
 
-		hasBackup := b.ApplyBackup(size)
+		hasBackup = b.ApplyBackup(size)
 
 		if !hasBackup {
 			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
@@ -356,7 +355,9 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		if size > LargeFileThreshold {
 			// If the file is larger than LargeFileThreshold fastdirty needs to be on
 			b.Settings["fastdirty"] = true
-		} else {
+		} else if !hasBackup {
+			// since applying a backup does not save the applied backup to disk, we should
+			// not calculate the original hash based on the backup data
 			calcHash(b, &b.origHash)
 		}
 	}
@@ -425,7 +426,7 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
 
-		go b.Backup(true)
+		b.RequestBackup()
 	}
 }
 
@@ -436,7 +437,7 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
 
-		go b.Backup(true)
+		b.RequestBackup()
 	}
 }
 

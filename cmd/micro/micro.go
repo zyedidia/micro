@@ -274,7 +274,7 @@ func main() {
 			fmt.Println("Micro encountered an error:", err)
 			// backup all open buffers
 			for _, b := range buffer.OpenBuffers {
-				b.Backup(false)
+				b.Backup()
 			}
 			// Print the stack trace too
 			fmt.Print(errors.Wrap(err, 2).ErrorStack())
