@@ -56,7 +56,7 @@ func startup(args []string) (tcell.SimulationScreen, error) {
 			fmt.Println("Micro encountered an error:", err)
 			// backup all open buffers
 			for _, b := range buffer.OpenBuffers {
-				b.Backup(false)
+				b.Backup()
 			}
 			// Print the stack trace too
 			log.Fatalf(errors.Wrap(err, 2).ErrorStack())
