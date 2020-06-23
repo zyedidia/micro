@@ -191,10 +191,15 @@ func (la *LineArray) newlineBelow(y int) {
 func (la *LineArray) insert(pos Loc, value []byte) {
 	x, y := runeToByteIndex(pos.X, la.lines[pos.Y].data), pos.Y
 	for i := 0; i < len(value); i++ {
-		if value[i] == '\n' {
+		if value[i] == '\n' || (value[i] == '\r' && i < len(value)-1 && value[i+1] == '\n') {
 			la.split(Loc{x, y})
 			x = 0
 			y++
+
+			if value[i] == '\r' {
+				i++
+			}
+
 			continue
 		}
 		la.insertByte(Loc{x, y}, value[i])
