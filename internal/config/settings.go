@@ -27,7 +27,8 @@ var (
 	GlobalSettings map[string]interface{}
 
 	// This is the raw parsed json
-	parsedSettings map[string]interface{}
+	parsedSettings     map[string]interface{}
+	settingsParseError bool
 
 	// ModifiedSettings is a map of settings which should be written to disk
 	// because they have been modified by the user in this session
@@ -56,12 +57,14 @@ func ReadSettings() error {
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
 		if err != nil {
+			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
 		}
 		if !strings.HasPrefix(string(input), "null") {
 			// Unmarshal the input into the parsed map
 			err = json5.Unmarshal(input, &parsedSettings)
 			if err != nil {
+				settingsParseError = true
 				return errors.New("Error reading settings.json: " + err.Error())
 			}
 
@@ -151,6 +154,14 @@ func InitLocalSettings(settings map[string]interface{}, path string) error {
 
 // WriteSettings writes the settings to the specified filename as JSON
 func WriteSettings(filename string) error {
+	if settingsParseError {
+		// Don't write settings if there was a parse error
+		// because this will delete the settings.json if it
+		// is invalid. Instead we should allow the user to fix
+		// it manually.
+		return nil
+	}
+
 	var err error
 	if _, e := os.Stat(ConfigDir); e == nil {
 		defaults := DefaultGlobalSettings()
