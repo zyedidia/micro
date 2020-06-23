@@ -816,6 +816,30 @@ func (h *BufPane) FindLiteral() bool {
 	return h.find(false)
 }
 
+// Search searches for a given string/regex in the buffer and selects the next
+// match if a match is found
+// This function affects lastSearch and lastSearchRegex (saved searches) for
+// use with FindNext and FindPrevious
+func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
+	match, found, err := h.Buf.FindNext(str, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, searchDown, useRegex)
+	if err != nil {
+		return err
+	}
+	if found {
+		h.Cursor.SetSelectionStart(match[0])
+		h.Cursor.SetSelectionEnd(match[1])
+		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+		h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
+		h.lastSearch = str
+		h.lastSearchRegex = useRegex
+		h.Relocate()
+	} else {
+		h.Cursor.ResetSelection()
+	}
+	return nil
+}
+
 func (h *BufPane) find(useRegex bool) bool {
 	h.searchOrig = h.Cursor.Loc
 	prompt := "Find: "
