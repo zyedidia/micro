@@ -534,6 +534,22 @@ func (b *Buffer) Modified() bool {
 	return buff != b.origHash
 }
 
+// Size returns the number of bytes in the current buffer
+func (b *Buffer) Size() int {
+	nb := 0
+	for i := 0; i < b.LinesNum(); i++ {
+		nb += len(b.LineBytes(i))
+
+		if i != b.LinesNum()-1 {
+			if b.Endings == FFDos {
+				nb++ // carriage return
+			}
+			nb++ // newline
+		}
+	}
+	return nb
+}
+
 // calcHash calculates md5 hash of all lines in the buffer
 func calcHash(b *Buffer, out *[md5.Size]byte) error {
 	h := md5.New()

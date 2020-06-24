@@ -3,12 +3,33 @@ VERSION = "1.0.0"
 local micro = import("micro")
 local buffer = import("micro/buffer")
 local config = import("micro/config")
+local humanize = import("humanize")
 
 function init()
     micro.SetStatusInfoFn("status.branch")
     micro.SetStatusInfoFn("status.hash")
     micro.SetStatusInfoFn("status.paste")
+    micro.SetStatusInfoFn("status.vcol")
+    micro.SetStatusInfoFn("status.lines")
+    micro.SetStatusInfoFn("status.bytes")
+    micro.SetStatusInfoFn("status.size")
     config.AddRuntimeFile("status", config.RTHelp, "help/status.md")
+end
+
+function lines(b)
+    return tostring(b:LinesNum())
+end
+
+function vcol(b)
+    return tostring(b:GetActiveCursor():GetVisualX())
+end
+
+function bytes(b)
+    return tostring(b:Size())
+end
+
+function size(b)
+    return humanize.Bytes(b:Size())
 end
 
 function branch(b)
