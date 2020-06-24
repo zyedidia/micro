@@ -359,6 +359,14 @@ library documentation at https://golang.org/pkg/ (for the packages
 exposed to micro plugins). The Lua standard library is also available
 to plugins though it is rather small.
 
+The following functions are also available from the go-humanize package:
+
+The `humanize` package exposes:
+* `Bytes`
+* `Ordinal`
+* `Ftoa`
+* `FtoaWithDigits`
+
 ## Adding help files, syntax files, or colorschemes in your plugin
 
 You can use the `AddRuntimeFile(name string, type config.RTFiletype,
