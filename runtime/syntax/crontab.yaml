@@ -21,9 +21,9 @@ rules:
     - type: "^[A-Z]+\\="
 
       # Months and weekday keywords
-    - type: "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
-    - constant: "sun|mon|tue|wed|thu|fri|sat"
-    - type: "\\@(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)"
+    - type: "\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b"
+    - constant: "\\b(sun|mon|tue|wed|thu|fri|sat)\\b"
+    - type: "\\@(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)\\b"
 
       # Conditionals
     - special: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|^|!|=|&|\\|)"
