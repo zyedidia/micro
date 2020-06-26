@@ -5,9 +5,7 @@ detect:
 
 rules:
     # Keywords
-    - statement: "[ ](as|case|of|class|data|default|deriving|do|forall|foreign|hiding|if|then|else|import|infix|infixl|infixr|instance|let|in|mdo|module|newtype|qualified|type|where)[ ]"
-    - statement: "(^data|^foreign|^import|^infix|^infixl|^infixr|^instance|^module|^newtype|^type)[ ]"
-    - statement: "[ ](as$|case$|of$|class$|data$|default$|deriving$|do$|forall$|foreign$|hiding$|if$|then$|else$|import$|infix$|infixl$|infixr$|instance$|let$|in$|mdo$|module$|newtype$|qualified$|type$|where$)"
+    - statement: "\\b(as|case|of|class|data|default|deriving|do|forall|foreign|hiding|if|then|else|import|infix|infixl|infixr|instance|let|in|mdo|module|newtype|qualified|type|where)\\b"
 
       # Various symbols
     - symbol: "(\\||@|!|:|_|~|=|\\\\|;|\\(\\)|,|\\[|\\]|\\{|\\})"
