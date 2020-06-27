@@ -336,6 +336,10 @@ func GetModTime(path string) (time.Time, error) {
 // EscapePath replaces every path separator in a given path with a %
 func EscapePath(path string) string {
 	path = filepath.ToSlash(path)
+	if runtime.GOOS == "windows" {
+		// ':' is not valid in a path name on Windows but is ok on Unix
+		path = strings.Replace(path, ":", "%", -1)
+	}
 	return strings.Replace(path, "/", "%", -1)
 }
 
