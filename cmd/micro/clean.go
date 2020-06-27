@@ -97,14 +97,13 @@ func CleanConfig() {
 			file, e := os.Open(fname)
 
 			if e == nil {
-				defer file.Close()
-
 				decoder := gob.NewDecoder(file)
 				err = decoder.Decode(&buffer)
 
 				if err != nil && f.Name() != "history" {
 					badFiles = append(badFiles, fname)
 				}
+				file.Close()
 			}
 		}
 
