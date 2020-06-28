@@ -345,9 +345,7 @@ func main() {
 	// okay to be inefficient and run it via a function every time
 	// We do this so we can recover from panics without crashing the editor
 	for {
-		ulua.Lock.Lock()
 		DoEvent()
-		ulua.Lock.Unlock()
 	}
 }
 
@@ -380,11 +378,15 @@ func DoEvent() {
 	select {
 	case f := <-shell.Jobs:
 		// If a new job has finished while running in the background we should execute the callback
+		ulua.Lock.Lock()
 		f.Function(f.Output, f.Args)
+		ulua.Lock.Unlock()
 	case <-config.Autosave:
+		ulua.Lock.Lock()
 		for _, b := range buffer.OpenBuffers {
 			b.Save()
 		}
+		ulua.Lock.Unlock()
 	case <-shell.CloseTerms:
 	case event = <-events:
 	case <-screen.DrawChan():
@@ -393,9 +395,11 @@ func DoEvent() {
 		}
 	}
 
+	ulua.Lock.Lock()
 	if action.InfoBar.HasPrompt {
 		action.InfoBar.HandleEvent(event)
 	} else {
 		action.Tabs.HandleEvent(event)
 	}
+	ulua.Lock.Unlock()
 }
