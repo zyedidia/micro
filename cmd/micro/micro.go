@@ -17,6 +17,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -344,7 +345,9 @@ func main() {
 	// okay to be inefficient and run it via a function every time
 	// We do this so we can recover from panics without crashing the editor
 	for {
+		ulua.Lock.Lock()
 		DoEvent()
+		ulua.Lock.Unlock()
 	}
 }
 

@@ -15,6 +15,7 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
+	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -24,6 +25,7 @@ import (
 )
 
 var L *lua.LState
+var Lock sync.Mutex
 
 // LoadFile loads a lua file
 func LoadFile(module string, file string, data []byte) error {
