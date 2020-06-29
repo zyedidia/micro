@@ -76,9 +76,10 @@ func (k KeyEvent) String() string {
 }
 
 // A KeySequence defines a list of consecutive
-// key events
+// events. All events in the sequence must be KeyEvents
+// or MouseEvents.
 type KeySequenceEvent struct {
-	keys []KeyEvent
+	keys []Event
 }
 
 func (k KeySequenceEvent) String() string {
