@@ -364,8 +364,6 @@ The following functions are also available from the go-humanize package:
 The `humanize` package exposes:
 * `Bytes`
 * `Ordinal`
-* `Ftoa`
-* `FtoaWithDigits`
 
 ## Adding help files, syntax files, or colorschemes in your plugin
 
