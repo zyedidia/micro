@@ -567,8 +567,6 @@ func importHumanize() *lua.LTable {
 
 	L.SetField(pkg, "Bytes", luar.New(L, humanize.Bytes))
 	L.SetField(pkg, "Ordinal", luar.New(L, humanize.Ordinal))
-	L.SetField(pkg, "Ftoa", luar.New(L, humanize.Ftoa))
-	L.SetField(pkg, "FtoaWithDigits", luar.New(L, humanize.FtoaWithDigits))
 
 	return pkg
 }
