@@ -20,7 +20,16 @@ func init() {
 	InfoBufBindings = NewKeyTree()
 }
 
-func InfoMapKey(k Event, action string) {
+func InfoMapEvent(k Event, action string) {
+	switch e := k.(type) {
+	case KeyEvent, KeySequenceEvent, RawEvent:
+		infoMapKey(e, action)
+	case MouseEvent:
+		infoMapMouse(e, action)
+	}
+}
+
+func infoMapKey(k Event, action string) {
 	if f, ok := InfoKeyActions[action]; ok {
 		InfoBindings.RegisterKeyBinding(k, InfoKeyActionGeneral(f))
 	} else if f, ok := BufKeyActions[action]; ok {
@@ -28,18 +37,19 @@ func InfoMapKey(k Event, action string) {
 	}
 }
 
-func InfoMapMouse(k MouseEvent, action string) {
+func infoMapMouse(k MouseEvent, action string) {
+	// TODO: map mouse
 	if f, ok := BufMouseActions[action]; ok {
 		InfoBufBindings.RegisterMouseBinding(k, BufMouseActionGeneral(f))
 	} else {
-		InfoMapKey(k, action)
+		infoMapKey(k, action)
 	}
 }
 
 func InfoKeyActionGeneral(a InfoKeyAction) PaneKeyAction {
 	return func(p Pane) bool {
 		a(p.(*InfoPane))
-		return false
+		return true
 	}
 }
 
@@ -107,7 +117,6 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 
 // DoKeyEvent executes a key event for the command bar, doing any overridden actions
 func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
-	done := false
 	action, more := InfoBindings.NextEvent(e, nil)
 	if action != nil && !more {
 		action(h)
@@ -119,15 +128,18 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 		// return false //TODO:?
 	}
 
-	action, more = InfoBufBindings.NextEvent(e, nil)
-	if action != nil && !more {
-		done = action(h.BufPane)
-		InfoBufBindings.ResetEvents()
-	} else if action == nil && !more {
-		InfoBufBindings.ResetEvents()
+	if !more {
+		action, more = InfoBufBindings.NextEvent(e, nil)
+		if action != nil && !more {
+			done := action(h.BufPane)
+			InfoBufBindings.ResetEvents()
+			return done
+		} else if action == nil && !more {
+			InfoBufBindings.ResetEvents()
+		}
 	}
 
-	return done
+	return more
 }
 
 // HistoryUp cycles history up
@@ -181,7 +193,7 @@ func (h *InfoPane) AbortCommand() {
 	h.DonePrompt(true)
 }
 
-// BufKeyActions contains the list of all possible key actions the bufhandler could execute
+// InfoKeyActions contains the list of all possible key actions the infopane could execute
 var InfoKeyActions = map[string]InfoKeyAction{
 	"HistoryUp":       (*InfoPane).HistoryUp,
 	"HistoryDown":     (*InfoPane).HistoryDown,

@@ -1,7 +1,6 @@
 package action
 
 import (
-	"log"
 	"strings"
 	"time"
 
@@ -61,8 +60,17 @@ func LuaAction(fn string) func(*BufPane) bool {
 	}
 }
 
-// BufMapKey maps a key event to an action
-func BufMapKey(k Event, action string) {
+// BufMapKey maps an event to an action
+func BufMapEvent(k Event, action string) {
+	switch e := k.(type) {
+	case KeyEvent, KeySequenceEvent, RawEvent:
+		bufMapKey(e, action)
+	case MouseEvent:
+		bufMapMouse(e, action)
+	}
+}
+
+func bufMapKey(k Event, action string) {
 	var actionfns []func(*BufPane) bool
 	var names []string
 	var types []byte
@@ -145,13 +153,13 @@ func BufMapKey(k Event, action string) {
 }
 
 // BufMapMouse maps a mouse event to an action
-func BufMapMouse(k MouseEvent, action string) {
+func bufMapMouse(k MouseEvent, action string) {
 	if f, ok := BufMouseActions[action]; ok {
 		BufBindings.RegisterMouseBinding(k, BufMouseActionGeneral(f))
 	} else {
 		// TODO
 		// delete(BufMouseBindings, k)
-		BufMapKey(k, action)
+		bufMapKey(k, action)
 	}
 }
 
@@ -423,14 +431,14 @@ func (h *BufPane) Bindings() *KeyTree {
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	binds := h.Bindings()
 	action, more := binds.NextEvent(e, nil)
-	log.Println("Next event", e, more)
 	if action != nil && !more {
 		action(h)
 		binds.ResetEvents()
+		return true
 	} else if action == nil && !more {
 		binds.ResetEvents()
 	}
-	return false
+	return more
 }
 
 func (h *BufPane) execAction(action func(*BufPane) bool, name string, cursor int) bool {

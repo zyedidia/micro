@@ -16,6 +16,12 @@ import (
 	"github.com/zyedidia/tcell"
 )
 
+var Binder = map[string]func(e Event, action string){
+	"info":     InfoMapEvent,
+	"buffer":   BufMapEvent,
+	"terminal": TermMapEvent,
+}
+
 func createBindingsIfNotExist(fname string) {
 	if _, e := os.Stat(fname); os.IsNotExist(e) {
 		ioutil.WriteFile(fname, []byte("{}"), 0644)
@@ -24,10 +30,9 @@ func createBindingsIfNotExist(fname string) {
 
 // InitBindings intializes the bindings map by reading from bindings.json
 func InitBindings() {
-	config.Bindings = DefaultBindings()
+	config.Bindings = DefaultBindings("buffer")
 
-	var parsed map[string]string
-	defaults := DefaultBindings()
+	var parsed map[string]interface{}
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
@@ -45,55 +50,52 @@ func InitBindings() {
 		}
 	}
 
-	for k, v := range defaults {
-		BindKey(k, v)
+	for p, bind := range Binder {
+		defaults := DefaultBindings(p)
+
+		for k, v := range defaults {
+			BindKey(k, v, bind)
+		}
 	}
+
 	for k, v := range parsed {
-		BindKey(k, v)
-	}
-
-	defaultInfos := DefaultInfoBindings()
-	for k, v := range defaultInfos {
-		BindInfoKey(k, v)
+		switch val := v.(type) {
+		case string:
+			BindKey(k, val, Binder["buffer"])
+		case map[string]interface{}:
+			bind := Binder[k]
+			for e, a := range val {
+				s, ok := a.(string)
+				if !ok {
+					screen.TermMessage("Error reading bindings.json: non-string and non-map entry", k)
+				} else {
+					BindKey(e, s, bind)
+				}
+			}
+		default:
+			screen.TermMessage("Error reading bindings.json: non-string and non-map entry", k)
+		}
 	}
 }
 
-func BindInfoKey(k, v string) {
+func BindKey(k, v string, bind func(e Event, a string)) {
 	event, err := findEvent(k)
 	if err != nil {
 		screen.TermMessage(err)
 	}
 
-	switch e := event.(type) {
-	case KeyEvent:
-		InfoMapKey(e, v)
-	case KeySequenceEvent:
-		InfoMapKey(e, v)
-	case MouseEvent:
-		InfoMapMouse(e, v)
-	case RawEvent:
-		InfoMapKey(e, v)
-	}
-}
+	bind(event, v)
 
-func BindKey(k, v string) {
-	event, err := findEvent(k)
-	if err != nil {
-		screen.TermMessage(err)
-	}
-
-	switch e := event.(type) {
-	case KeyEvent:
-		BufMapKey(e, v)
-	case KeySequenceEvent:
-		BufMapKey(e, v)
-	case MouseEvent:
-		BufMapMouse(e, v)
-	case RawEvent:
-		BufMapKey(e, v)
-	}
-
-	config.Bindings[k] = v
+	// switch e := event.(type) {
+	// case KeyEvent:
+	// 	InfoMapKey(e, v)
+	// case KeySequenceEvent:
+	// 	InfoMapKey(e, v)
+	// case MouseEvent:
+	// 	InfoMapMouse(e, v)
+	// case RawEvent:
+	// 	InfoMapKey(e, v)
+	// }
 }
 
 var r = regexp.MustCompile("<(.+?)>")
@@ -276,7 +278,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 			parsed[k] = v
 		}
 
-		BindKey(k, v)
+		BindKey(k, v, Binder["buffer"])
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
 		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
@@ -316,9 +318,9 @@ func UnbindKey(k string) error {
 			}
 		}
 
-		defaults := DefaultBindings()
+		defaults := DefaultBindings("buffer")
 		if a, ok := defaults[k]; ok {
-			BindKey(k, a)
+			BindKey(k, a, Binder["buffer"])
 		} else if _, ok := config.Bindings[k]; ok {
 			BufUnmap(key)
 			delete(config.Bindings, k)
