@@ -51,6 +51,29 @@ func InitBindings() {
 	for k, v := range parsed {
 		BindKey(k, v)
 	}
+
+	defaultInfos := DefaultInfoBindings()
+	for k, v := range defaultInfos {
+		BindInfoKey(k, v)
+	}
+}
+
+func BindInfoKey(k, v string) {
+	event, err := findEvent(k)
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
+	switch e := event.(type) {
+	case KeyEvent:
+		InfoMapKey(e, v)
+	case KeySequenceEvent:
+		InfoMapKey(e, v)
+	case MouseEvent:
+		InfoMapMouse(e, v)
+	case RawEvent:
+		InfoMapKey(e, v)
+	}
 }
 
 func BindKey(k, v string) {
