@@ -1,6 +1,7 @@
 package action
 
 import (
+	"log"
 	"strings"
 	"time"
 
@@ -19,14 +20,29 @@ import (
 type BufKeyAction func(*BufPane) bool
 type BufMouseAction func(*BufPane, *tcell.EventMouse) bool
 
+var BufBindings *KeyTree
 var BufKeyBindings map[Event]BufKeyAction
 var BufKeyStrings map[Event]string
 var BufMouseBindings map[MouseEvent]BufMouseAction
+
+func BufKeyActionGeneral(a BufKeyAction) PaneKeyAction {
+	return func(p Pane) bool {
+		return a(p.(*BufPane))
+	}
+}
+
+func BufMouseActionGeneral(a BufMouseAction) PaneMouseAction {
+	return func(p Pane, me *tcell.EventMouse) bool {
+		return a(p.(*BufPane), me)
+	}
+}
 
 func init() {
 	BufKeyBindings = make(map[Event]BufKeyAction)
 	BufKeyStrings = make(map[Event]string)
 	BufMouseBindings = make(map[MouseEvent]BufMouseAction)
+
+	BufBindings = NewKeyTree()
 }
 
 func LuaAction(fn string) func(*BufPane) bool {
@@ -54,7 +70,7 @@ func LuaAction(fn string) func(*BufPane) bool {
 
 // BufMapKey maps a key event to an action
 func BufMapKey(k Event, action string) {
-	BufKeyStrings[k] = action
+	// BufKeyStrings[k] = action
 	var actionfns []func(*BufPane) bool
 	var names []string
 	var types []byte
@@ -109,7 +125,7 @@ func BufMapKey(k Event, action string) {
 		}
 		actionfns = append(actionfns, afn)
 	}
-	BufKeyBindings[k] = func(h *BufPane) bool {
+	bufAction := func(h *BufPane) bool {
 		cursors := h.Buf.GetCursors()
 		success := true
 		for i, a := range actionfns {
@@ -132,27 +148,33 @@ func BufMapKey(k Event, action string) {
 		}
 		return true
 	}
+
+	BufBindings.RegisterKeyBinding(k, BufKeyActionGeneral(bufAction))
 }
 
 // BufMapMouse maps a mouse event to an action
 func BufMapMouse(k MouseEvent, action string) {
 	if f, ok := BufMouseActions[action]; ok {
-		BufMouseBindings[k] = f
+		BufBindings.RegisterMouseBinding(k, BufMouseActionGeneral(f))
+		// BufMouseBindings[k] = f
 	} else {
-		delete(BufMouseBindings, k)
+		// TODO
+		// delete(BufMouseBindings, k)
+		// BufMapKey(k, action)
 		BufMapKey(k, action)
 	}
 }
 
 // BufUnmap unmaps a key or mouse event from any action
 func BufUnmap(k Event) {
-	delete(BufKeyBindings, k)
-	delete(BufKeyStrings, k)
-
-	switch e := k.(type) {
-	case MouseEvent:
-		delete(BufMouseBindings, e)
-	}
+	// TODO
+	// delete(BufKeyBindings, k)
+	// delete(BufKeyStrings, k)
+	//
+	// switch e := k.(type) {
+	// case MouseEvent:
+	// 	delete(BufMouseBindings, e)
+	// }
 }
 
 // The BufPane connects the buffer and the window
@@ -163,9 +185,13 @@ func BufUnmap(k Event) {
 type BufPane struct {
 	display.BWindow
 
+	// Buf is the buffer this BufPane views
 	Buf *buffer.Buffer
+	// Bindings stores the association of key events and actions
+	Bindings *KeyTree
 
-	Cursor *buffer.Cursor // the active cursor
+	// Cursor is the currently active buffer cursor
+	Cursor *buffer.Cursor
 
 	// Since tcell doesn't differentiate between a mouse release event
 	// and a mouse move event with no keys pressed, we need to keep
@@ -399,9 +425,17 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 // DoKeyEvent executes a key event by finding the action it is bound
 // to and executing it (possibly multiple times for multiple cursors)
 func (h *BufPane) DoKeyEvent(e Event) bool {
-	if action, ok := BufKeyBindings[e]; ok {
-		return action(h)
+	action, more := BufBindings.NextEvent(e, nil)
+	log.Println("Next event", e, more)
+	if action != nil && !more {
+		action(h)
+		BufBindings.ResetEvents()
+	} else if action == nil && !more {
+		BufBindings.ResetEvents()
 	}
+	// if action, ok := BufKeyBindings[e]; ok {
+	// 	return action(h)
+	// }
 	return false
 }
 
@@ -436,22 +470,36 @@ func (h *BufPane) completeAction(action string) {
 }
 
 func (h *BufPane) HasKeyEvent(e Event) bool {
-	_, ok := BufKeyBindings[e]
-	return ok
+	// TODO
+	return true
+	// _, ok := BufKeyBindings[e]
+	// return ok
 }
 
 // DoMouseEvent executes a mouse event by finding the action it is bound
 // to and executing it
 func (h *BufPane) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
-	if action, ok := BufMouseBindings[e]; ok {
-		if action(h, te) {
+	log.Println("DOMOUSEEVENT")
+	action, _ := BufBindings.NextEvent(e, te)
+	if action != nil {
+		if action(h) {
 			h.Relocate()
 		}
+		BufBindings.ResetEvents()
 		return true
-	} else if h.HasKeyEvent(e) {
-		return h.DoKeyEvent(e)
 	}
+	// TODO
 	return false
+
+	// if action, ok := BufMouseBindings[e]; ok {
+	// 	if action(h, te) {
+	// 		h.Relocate()
+	// 	}
+	// 	return true
+	// } else if h.HasKeyEvent(e) {
+	// 	return h.DoKeyEvent(e)
+	// }
+	// return false
 }
 
 // DoRuneInsert inserts a given rune into the current buffer

@@ -1,9 +1,14 @@
 package action
 
-type KeyAction func(Pane) bool
-type MouseAction func(Pane, *MouseEvent) bool
+import (
+	"log"
 
-type KeyAnyAction func(Pane, []KeyEvent) bool
+	"github.com/zyedidia/tcell"
+)
+
+type PaneKeyAction func(Pane) bool
+type PaneMouseAction func(Pane, *tcell.EventMouse) bool
+type PaneKeyAnyAction func(Pane, []KeyEvent) bool
 
 // A KeyTreeNode stores a single node in the KeyTree (trie). The
 // children are stored as a map, and any node may store a list of
@@ -30,9 +35,9 @@ func NewKeyTreeNode() *KeyTreeNode {
 // the action to be active.
 type TreeAction struct {
 	// only one of these can be non-nil
-	action KeyAction
-	any    KeyAnyAction
-	mouse  MouseAction
+	action PaneKeyAction
+	any    PaneKeyAnyAction
+	mouse  PaneMouseAction
 
 	modes []ModeConstraint
 }
@@ -56,13 +61,13 @@ type KeyTreeCursor struct {
 	node *KeyTreeNode
 
 	wildcards []KeyEvent
-	mouseInfo *MouseEvent
+	mouseInfo *tcell.EventMouse
 }
 
 // MakeClosure uses the information stored in a key tree cursor to construct
-// a KeyAction from a TreeAction (which may have a KeyAction, MouseAction,
+// a PaneKeyAction from a TreeAction (which may have a PaneKeyAction, PaneMouseAction,
 // or AnyAction)
-func (k *KeyTreeCursor) MakeClosure(a TreeAction) KeyAction {
+func (k *KeyTreeCursor) MakeClosure(a TreeAction) PaneKeyAction {
 	if a.action != nil {
 		return a.action
 	} else if a.any != nil {
@@ -80,7 +85,7 @@ func (k *KeyTreeCursor) MakeClosure(a TreeAction) KeyAction {
 
 // NewKeyTree allocates and returns an empty key tree
 func NewKeyTree() *KeyTree {
-	root := new(KeyTreeNode)
+	root := NewKeyTreeNode()
 	tree := new(KeyTree)
 
 	tree.root = root
@@ -101,8 +106,8 @@ type ModeConstraint struct {
 	disabled bool
 }
 
-// RegisterKeyBinding registers a KeyAction with an Event.
-func (k *KeyTree) RegisterKeyBinding(e Event, a KeyAction) {
+// RegisterKeyBinding registers a PaneKeyAction with an Event.
+func (k *KeyTree) RegisterKeyBinding(e Event, a PaneKeyAction) {
 	k.registerBinding(e, TreeAction{
 		action: a,
 		any:    nil,
@@ -111,9 +116,9 @@ func (k *KeyTree) RegisterKeyBinding(e Event, a KeyAction) {
 	})
 }
 
-// RegisterKeyAnyBinding registers a KeyAnyAction with an Event.
+// RegisterKeyAnyBinding registers a PaneKeyAnyAction with an Event.
 // The event should contain an "any" event.
-func (k *KeyTree) RegisterKeyAnyBinding(e Event, a KeyAnyAction) {
+func (k *KeyTree) RegisterKeyAnyBinding(e Event, a PaneKeyAnyAction) {
 	k.registerBinding(e, TreeAction{
 		action: nil,
 		any:    a,
@@ -122,9 +127,9 @@ func (k *KeyTree) RegisterKeyAnyBinding(e Event, a KeyAnyAction) {
 	})
 }
 
-// RegisterMouseBinding registers a MouseAction with an Event.
+// RegisterMouseBinding registers a PaneMouseAction with an Event.
 // The event should contain a mouse event.
-func (k *KeyTree) RegisterMouseBinding(e Event, a MouseAction) {
+func (k *KeyTree) RegisterMouseBinding(e Event, a PaneMouseAction) {
 	k.registerBinding(e, TreeAction{
 		action: nil,
 		any:    nil,
@@ -135,19 +140,19 @@ func (k *KeyTree) RegisterMouseBinding(e Event, a MouseAction) {
 
 func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 	switch ev := e.(type) {
-	case *KeyEvent, *MouseEvent:
-		n, ok := k.root.children[e]
+	case KeyEvent, MouseEvent:
+		newNode, ok := k.root.children[e]
 		if !ok {
-			newNode := NewKeyTreeNode()
+			newNode = NewKeyTreeNode()
 			k.root.children[e] = newNode
 		}
-		n.actions = append(n.actions, a)
-	case *KeySequenceEvent:
+		newNode.actions = append(newNode.actions, a)
+	case KeySequenceEvent:
 		n := k.root
 		for _, key := range ev.keys {
 			newNode, ok := n.children[key]
 			if !ok {
-				newNode := NewKeyTreeNode()
+				newNode = NewKeyTreeNode()
 				n.children[key] = newNode
 			}
 
@@ -158,8 +163,8 @@ func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 }
 
 // NextEvent returns the action for the current sequence where e is the next
-// event. Even if the action was registered as a KeyAnyAction or MouseAction,
-// it will be returned as a KeyAction closure where the appropriate arguments
+// event. Even if the action was registered as a PaneKeyAnyAction or PaneMouseAction,
+// it will be returned as a PaneKeyAction closure where the appropriate arguments
 // have been provided.
 // If no action is associated with the given Event, or mode constraints are not
 // met for that action, nil is returned.
@@ -168,14 +173,27 @@ func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 // bindings associated with further sequences starting with this event. The
 // calling function can decide what to do about the conflict (e.g. use a
 // timeout).
-func (k *KeyTree) NextEvent(e Event) (KeyAction, bool) {
+func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bool) {
 	n := k.cursor.node
 	c, ok := n.children[e]
+	log.Println("NEXT EVENT", e, len(n.children), ok)
+
 	if !ok {
 		return nil, false
 	}
 
 	more := len(c.children) > 0
+
+	k.cursor.node = c
+
+	switch ev := e.(type) {
+	case KeyEvent:
+		if ev.any {
+			k.cursor.wildcards = append(k.cursor.wildcards, ev)
+		}
+	case MouseEvent:
+		k.cursor.mouseInfo = mouse
+	}
 
 	if len(c.actions) > 0 {
 		// check if actions are active
@@ -199,8 +217,8 @@ func (k *KeyTree) NextEvent(e Event) (KeyAction, bool) {
 	return nil, more
 }
 
-// Reset sets the current sequence back to the initial value.
-func (k *KeyTree) Reset() {
+// ResetEvents sets the current sequence back to the initial value.
+func (k *KeyTree) ResetEvents() {
 	k.cursor.node = k.root
 	k.cursor.wildcards = []KeyEvent{}
 	k.cursor.mouseInfo = nil

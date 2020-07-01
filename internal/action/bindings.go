@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"unicode"
 
@@ -53,13 +54,15 @@ func InitBindings() {
 }
 
 func BindKey(k, v string) {
-	event, ok := findEvent(k)
-	if !ok {
-		screen.TermMessage(k, "is not a bindable event")
+	event, err := findEvent(k)
+	if err != nil {
+		screen.TermMessage(err)
 	}
 
 	switch e := event.(type) {
 	case KeyEvent:
+		BufMapKey(e, v)
+	case KeySequenceEvent:
 		BufMapKey(e, v)
 	case MouseEvent:
 		BufMapMouse(e, v)
@@ -70,8 +73,36 @@ func BindKey(k, v string) {
 	config.Bindings[k] = v
 }
 
-// findEvent will find binding Key 'b' using string 'k'
-func findEvent(k string) (b Event, ok bool) {
+var r = regexp.MustCompile("<(.+?)>")
+
+func findEvents(k string) (b KeySequenceEvent, ok bool, err error) {
+	var events []Event = nil
+	for len(k) > 0 {
+		groups := r.FindStringSubmatchIndex(k)
+
+		if len(groups) > 3 {
+			if events == nil {
+				events = make([]Event, 0, 3)
+			}
+
+			e, ok := findSingleEvent(k[groups[2]:groups[3]])
+			if !ok {
+				return KeySequenceEvent{}, false, errors.New("Invalid event " + k[groups[2]:groups[3]])
+			}
+
+			events = append(events, e)
+
+			k = k[groups[3]+1:]
+		} else {
+			return KeySequenceEvent{}, false, nil
+		}
+	}
+
+	return KeySequenceEvent{events}, true, nil
+}
+
+// findSingleEvent will find binding Key 'b' using string 'k'
+func findSingleEvent(k string) (b Event, ok bool) {
 	modifiers := tcell.ModNone
 
 	// First, we'll strip off all the modifiers in the name and add them to the
@@ -162,6 +193,23 @@ modSearch:
 	return KeyEvent{}, false
 }
 
+func findEvent(k string) (Event, error) {
+	var event Event
+	event, ok, err := findEvents(k)
+	if err != nil {
+		return nil, err
+	}
+
+	if !ok {
+		event, ok = findSingleEvent(k)
+		if !ok {
+			return nil, errors.New(k + " is not a bindable event")
+		}
+	}
+
+	return event, nil
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
@@ -181,14 +229,14 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 			return false, errors.New("Error reading bindings.json: " + err.Error())
 		}
 
-		key, ok := findEvent(k)
-		if !ok {
-			return false, errors.New("Invalid event " + k)
+		key, err := findEvent(k)
+		if err != nil {
+			return false, err
 		}
 
 		found := false
 		for ev := range parsed {
-			if e, ok := findEvent(ev); ok {
+			if e, err := findEvent(ev); err == nil {
 				if e == key {
 					if overwrite {
 						parsed[ev] = v
@@ -231,13 +279,13 @@ func UnbindKey(k string) error {
 			return errors.New("Error reading bindings.json: " + err.Error())
 		}
 
-		key, ok := findEvent(k)
-		if !ok {
-			return errors.New("Invalid event " + k)
+		key, err := findEvent(k)
+		if err != nil {
+			return err
 		}
 
 		for ev := range parsed {
-			if e, ok := findEvent(ev); ok {
+			if e, err := findEvent(ev); err == nil {
 				if e == key {
 					delete(parsed, ev)
 					break

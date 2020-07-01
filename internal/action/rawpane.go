@@ -38,7 +38,7 @@ func (h *RawPane) HandleEvent(event tcell.Event) {
 
 	e, err := ConstructEvent(event)
 	if err == nil {
-		h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %s", e.String()))
+		h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %s", e.Name()))
 	}
 
 	h.Buf.Insert(h.Cursor.Loc, fmt.Sprintf(": %q\n", event.EscSeq()))

@@ -10,7 +10,7 @@ import (
 )
 
 type Event interface {
-	String() string
+	Name() string
 }
 
 // RawEvent is simply an escape code
@@ -20,7 +20,7 @@ type RawEvent struct {
 	esc string
 }
 
-func (r RawEvent) String() string {
+func (r RawEvent) Name() string {
 	return r.esc
 }
 
@@ -36,7 +36,7 @@ type KeyEvent struct {
 	any  bool
 }
 
-func (k KeyEvent) String() string {
+func (k KeyEvent) Name() string {
 	if k.any {
 		return "<any>"
 	}
@@ -82,10 +82,12 @@ type KeySequenceEvent struct {
 	keys []Event
 }
 
-func (k KeySequenceEvent) String() string {
+func (k KeySequenceEvent) Name() string {
 	buf := bytes.Buffer{}
 	for _, e := range k.keys {
-		buf.WriteString(e.String())
+		buf.WriteByte('<')
+		buf.WriteString(e.Name())
+		buf.WriteByte('>')
 	}
 	return buf.String()
 }
@@ -97,7 +99,7 @@ type MouseEvent struct {
 	mod tcell.ModMask
 }
 
-func (m MouseEvent) String() string {
+func (m MouseEvent) Name() string {
 	mod := ""
 	if m.mod&tcell.ModShift != 0 {
 		mod = "Shift-"
