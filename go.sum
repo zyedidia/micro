@@ -38,8 +38,8 @@ github.com/stretchr/testify v1.4.0/go.mod h1:j7eGeouHqKxXV5pUuKE4zz7dFj8WfuZ+81P
 github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
 github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb h1:ZkM6LRnq40pR1Ox0hTHlnpkcOTuFIDQpZ1IN8rKKhX0=
 github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
-github.com/zyedidia/clipboard v0.0.0-20200421031010-7c45b8673834 h1:0nOfq3JwYRiY3+nwfWVQYEaXDmGCQgj3RKoqTifLzP4=
-github.com/zyedidia/clipboard v0.0.0-20200421031010-7c45b8673834/go.mod h1:zykFnZUXX0ErxqvYLUFEq7QDJKId8rmh2FgD0/Y8cjA=
+github.com/zyedidia/clipboard v1.0.1 h1:DNsDMRXdptfdp4f6gSnSNJpWadAgI8UCm26elADCYak=
+github.com/zyedidia/clipboard v1.0.1/go.mod h1:zykFnZUXX0ErxqvYLUFEq7QDJKId8rmh2FgD0/Y8cjA=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBYj5/td9WC0mw4g1xDBPovIqmHew=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
 github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655 h1:Z3RhH6hvcSx7eX6Q/pP6YVsgea/1eMDG99vtWwi3nK4=
