@@ -4,7 +4,6 @@ import (
 	"errors"
 	"os"
 	"sync"
-	"unicode"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -98,7 +97,7 @@ func ShowCursor(x, y int) {
 // SetContent sets a cell at a point on the screen and makes sure that it is
 // synced with the last cursor location
 func SetContent(x, y int, mainc rune, combc []rune, style tcell.Style) {
-	if !unicode.IsPrint(mainc) {
+	if !Screen.CanDisplay(mainc, true) {
 		mainc = '�'
 	}
 
