@@ -1443,6 +1443,18 @@ func (h *BufPane) Escape() bool {
 	return true
 }
 
+// Deselect deselects on the current cursor
+func (h *BufPane) Deselect() bool {
+	h.Cursor.Deselect(true)
+	return true
+}
+
+// ClearInfo clears the infobar
+func (h *BufPane) ClearInfo() bool {
+	InfoBar.Message("")
+	return true
+}
+
 // Quit this will close the current tab or view that is open
 func (h *BufPane) Quit() bool {
 	quit := func() {

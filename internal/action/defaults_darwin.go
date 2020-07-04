@@ -88,7 +88,7 @@ func DefaultBindings() map[string]string {
 		"F4":  "Quit",
 		"F7":  "Find",
 		"F10": "Quit",
-		"Esc": "Escape",
+		"Esc": "Deselect,ClearInfo,RemoveAllMultiCursors",
 
 		// Mouse bindings
 		"MouseWheelUp":   "ScrollUp",
