@@ -32,7 +32,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
   - [macOS terminal](#macos-terminal)
   - [Linux clipboard support](#linux-clipboard-support)
   - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
-  - [Plan9, Cygwin, Mingw](#plan9-cygwin-mingw)
+  - [Cygwin, Mingw, Plan9](#cygwin-mingw-plan9)
 - [Usage](#usage)
 - [Documentation and Help](#documentation-and-help)
 - [Contributing](#contributing)
