@@ -69,30 +69,30 @@ func Write(text string, r Register) error {
 }
 
 // ReadMulti reads text from a clipboard register for a certain multi-cursor
-func ReadMulti(r Register, num int) (string, error) {
+func ReadMulti(r Register, num, ncursors int) (string, error) {
 	clip, err := Read(r)
 	if err != nil {
 		return "", err
 	}
-	if ValidMulti(r, clip) {
+	if ValidMulti(r, clip, ncursors) {
 		return multi.getText(r, num), nil
 	}
 	return clip, nil
 }
 
 // WriteMulti writes text to a clipboard register for a certain multi-cursor
-func WriteMulti(text string, r Register, num int) error {
-	return writeMulti(text, r, num, CurrentMethod)
+func WriteMulti(text string, r Register, num int, ncursors int) error {
+	return writeMulti(text, r, num, ncursors, CurrentMethod)
 }
 
 // ValidMulti checks if the internal multi-clipboard is valid and up-to-date
 // with the system clipboard
-func ValidMulti(r Register, clip string) bool {
-	return multi.isValid(r, clip)
+func ValidMulti(r Register, clip string, ncursors int) bool {
+	return multi.isValid(r, clip, ncursors)
 }
 
-func writeMulti(text string, r Register, num int, m Method) error {
-	multi.writeText(text, r, num)
+func writeMulti(text string, r Register, num int, ncursors int, m Method) error {
+	multi.writeText(text, r, num, ncursors)
 	return write(multi.getAllText(r), r, m)
 }
 

@@ -2,7 +2,6 @@ package clipboard
 
 import (
 	"bytes"
-	"hash/fnv"
 )
 
 // For storing multi cursor clipboard contents
@@ -19,7 +18,6 @@ func (c multiClipboard) getAllText(r Register) string {
 	buf := &bytes.Buffer{}
 	for _, s := range content {
 		buf.WriteString(s)
-		buf.WriteByte('\n')
 	}
 	return buf.String()
 }
@@ -33,37 +31,28 @@ func (c multiClipboard) getText(r Register, num int) string {
 	return content[num]
 }
 
-func hash(s string) uint32 {
-	h := fnv.New32a()
-	h.Write([]byte(s))
-	return h.Sum32()
-}
-
 // isValid checks if the text stored in this multi-clipboard is the same as the
 // text stored in the system clipboard (provided as an argument), and therefore
 // if it is safe to use the multi-clipboard for pasting instead of the system
 // clipboard.
-func (c multiClipboard) isValid(r Register, clipboard string) bool {
+func (c multiClipboard) isValid(r Register, clipboard string, ncursors int) bool {
 	content := c[r]
-	if content == nil {
+	if content == nil || len(content) != ncursors {
 		return false
 	}
 
-	return hash(clipboard) == hash(c.getAllText(r))
+	return clipboard == c.getAllText(r)
 }
 
-func (c multiClipboard) writeText(text string, r Register, num int) {
+func (c multiClipboard) writeText(text string, r Register, num int, ncursors int) {
 	content := c[r]
-	if content == nil {
-		content = make([]string, num+1, num+1)
+	if content == nil || len(content) != ncursors {
+		content = make([]string, ncursors, ncursors)
 		c[r] = content
 	}
 
-	if num >= cap(content) {
-		newctnt := make([]string, num+1, num+1)
-		copy(newctnt, content)
-		content = newctnt
-		c[r] = content
+	if num >= ncursors {
+		return
 	}
 
 	content[num] = text
