@@ -128,7 +128,7 @@ func (c *Cursor) End() {
 func (c *Cursor) CopySelection(target clipboard.Register) {
 	if c.HasSelection() {
 		if target != clipboard.PrimaryReg || c.buf.Settings["useprimary"].(bool) {
-			clipboard.Write(string(c.GetSelection()), target)
+			clipboard.WriteMulti(string(c.GetSelection()), target, c.Num)
 		}
 	}
 }

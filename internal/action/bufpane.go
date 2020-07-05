@@ -113,6 +113,7 @@ func BufMapKey(k Event, action string) {
 		cursors := h.Buf.GetCursors()
 		success := true
 		for i, a := range actionfns {
+			innerSuccess := true
 			for j, c := range cursors {
 				if c == nil {
 					continue
@@ -120,13 +121,14 @@ func BufMapKey(k Event, action string) {
 				h.Buf.SetCurCursor(c.Num)
 				h.Cursor = c
 				if i == 0 || (success && types[i-1] == '&') || (!success && types[i-1] == '|') || (types[i-1] == ',') {
-					success = h.execAction(a, names[i], j)
+					innerSuccess = innerSuccess && h.execAction(a, names[i], j)
 				} else {
 					break
 				}
 			}
 			// if the action changed the current pane, update the reference
 			h = MainTab().CurPane()
+			success = innerSuccess
 		}
 		return true
 	}
@@ -689,6 +691,7 @@ var MultiActions = map[string]bool{
 	"FindNext":                  true,
 	"FindPrevious":              true,
 	"CopyLine":                  true,
+	"Copy":                      true,
 	"Cut":                       true,
 	"CutLine":                   true,
 	"DuplicateLine":             true,

@@ -995,7 +995,7 @@ func (h *BufPane) CutLine() bool {
 			if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
 				InfoBar.Error(err)
 			} else {
-				clipboard.Write(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg)
+				clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num)
 			}
 		}
 	} else if time.Since(h.lastCutTime)/time.Second > 10*time.Second || h.freshClip == false {
@@ -1139,7 +1139,7 @@ func (h *BufPane) MoveLinesDown() bool {
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
 func (h *BufPane) Paste() bool {
-	clip, err := clipboard.Read(clipboard.ClipboardReg)
+	clip, err := clipboard.ReadMulti(clipboard.ClipboardReg, h.Cursor.Num)
 	if err != nil {
 		InfoBar.Error(err)
 	} else {
@@ -1151,7 +1151,7 @@ func (h *BufPane) Paste() bool {
 
 // PastePrimary pastes from the primary clipboard (only use on linux)
 func (h *BufPane) PastePrimary() bool {
-	clip, err := clipboard.Read(clipboard.PrimaryReg)
+	clip, err := clipboard.ReadMulti(clipboard.PrimaryReg, h.Cursor.Num)
 	if err != nil {
 		InfoBar.Error(err)
 	} else {

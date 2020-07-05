@@ -54,8 +54,16 @@ func (c multiClipboard) isValid(r Register, clipboard string) bool {
 
 func (c multiClipboard) writeText(text string, r Register, num int) {
 	content := c[r]
-	if content == nil || num >= cap(content) {
+	if content == nil {
 		content = make([]string, num+1, num+1)
+		c[r] = content
+	}
+
+	if num >= cap(content) {
+		newctnt := make([]string, num+1, num+1)
+		copy(newctnt, content)
+		content = newctnt
+		c[r] = content
 	}
 
 	content[num] = text
