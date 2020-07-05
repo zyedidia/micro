@@ -70,8 +70,14 @@ func Write(text string, r Register) error {
 
 // ReadMulti reads text from a clipboard register for a certain multi-cursor
 func ReadMulti(r Register, num int) (string, error) {
-	s := multi.getText(r, num)
-	return s, nil
+	clip, err := Read(r)
+	if err != nil {
+		return "", err
+	}
+	if ValidMulti(r, clip) {
+		return multi.getText(r, num), nil
+	}
+	return clip, nil
 }
 
 // WriteMulti writes text to a clipboard register for a certain multi-cursor
@@ -81,12 +87,8 @@ func WriteMulti(text string, r Register, num int) error {
 
 // ValidMulti checks if the internal multi-clipboard is valid and up-to-date
 // with the system clipboard
-func ValidMulti(r Register, ncursors int) bool {
-	clip, err := Read(r)
-	if err != nil {
-		return false
-	}
-	return multi.isValid(r, ncursors, clip)
+func ValidMulti(r Register, clip string) bool {
+	return multi.isValid(r, clip)
 }
 
 func writeMulti(text string, r Register, num int, m Method) error {
@@ -112,11 +114,9 @@ func read(r Register, m Method) (string, error) {
 		case ClipboardReg:
 			// terminal paste works by sending an esc sequence to the
 			// terminal to trigger a paste event
-			err := terminal.read("clipboard")
-			return "", err
+			return terminal.read("clipboard")
 		case PrimaryReg:
-			err := terminal.read("primary")
-			return "", err
+			return terminal.read("primary")
 		default:
 			return internal.read(r), nil
 		}

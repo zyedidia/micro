@@ -27,7 +27,6 @@ import (
 
 var (
 	// Event channel
-	events   chan tcell.Event
 	autosave chan bool
 
 	// Command line flags
@@ -321,7 +320,7 @@ func main() {
 		action.InfoBar.Error(clipErr, " or change 'clipboard' option")
 	}
 
-	events = make(chan tcell.Event)
+	screen.Events = make(chan tcell.Event)
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
@@ -330,7 +329,7 @@ func main() {
 			e := screen.Screen.PollEvent()
 			screen.Unlock()
 			if e != nil {
-				events <- e
+				screen.Events <- e
 			}
 		}
 	}()
@@ -343,7 +342,7 @@ func main() {
 
 	// wait for initial resize event
 	select {
-	case event := <-events:
+	case event := <-screen.Events:
 		action.Tabs.HandleEvent(event)
 	case <-time.After(10 * time.Millisecond):
 		// time out after 10ms
@@ -396,7 +395,7 @@ func DoEvent() {
 		}
 		ulua.Lock.Unlock()
 	case <-shell.CloseTerms:
-	case event = <-events:
+	case event = <-screen.Events:
 	case <-screen.DrawChan():
 		for len(screen.DrawChan()) > 0 {
 			<-screen.DrawChan()

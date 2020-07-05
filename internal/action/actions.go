@@ -1142,8 +1142,9 @@ func (h *BufPane) Paste() bool {
 	clip, err := clipboard.Read(clipboard.ClipboardReg)
 	if err != nil {
 		InfoBar.Error(err)
+	} else {
+		h.paste(clip)
 	}
-	h.paste(clip)
 	h.Relocate()
 	return true
 }
@@ -1153,8 +1154,9 @@ func (h *BufPane) PastePrimary() bool {
 	clip, err := clipboard.Read(clipboard.PrimaryReg)
 	if err != nil {
 		InfoBar.Error(err)
+	} else {
+		h.paste(clip)
 	}
-	h.paste(clip)
 	h.Relocate()
 	return true
 }

@@ -20,7 +20,7 @@ var tempDir string
 var sim tcell.SimulationScreen
 
 func init() {
-	events = make(chan tcell.Event, 8)
+	screen.Events = make(chan tcell.Event, 8)
 }
 
 func startup(args []string) (tcell.SimulationScreen, error) {
@@ -106,7 +106,7 @@ func handleEvent() {
 	e := screen.Screen.PollEvent()
 	screen.Unlock()
 	if e != nil {
-		events <- e
+		screen.Events <- e
 	}
 	DoEvent()
 }

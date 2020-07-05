@@ -18,6 +18,9 @@ import (
 // same time too.
 var Screen tcell.Screen
 
+// Events is the channel of tcell events
+var Events chan (tcell.Event)
+
 // The lock is necessary since the screen is polled on a separate thread
 var lock sync.Mutex
 

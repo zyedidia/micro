@@ -43,9 +43,9 @@ func hash(s string) uint32 {
 // text stored in the system clipboard (provided as an argument), and therefore
 // if it is safe to use the multi-clipboard for pasting instead of the system
 // clipboard.
-func (c multiClipboard) isValid(r Register, ncursors int, clipboard string) bool {
+func (c multiClipboard) isValid(r Register, clipboard string) bool {
 	content := c[r]
-	if content == nil || len(content) != ncursors {
+	if content == nil {
 		return false
 	}
 
