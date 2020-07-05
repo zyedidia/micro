@@ -64,7 +64,7 @@ Here are the available options:
     * `terminal`: accesses the clipboard via your terminal emulator. Note that
        there is limited support among terminal emulators for this feature
        (called OSC 52). Terminals that are known to work are Kitty (enable
-       reading with `clipboard_control` setting), iTerm2 (enable in prefs),
+       reading with `clipboard_control` setting), iTerm2 (only copying),
        st, rxvt-unicode and xterm if enabled (see `> help copypaste` for
        details). Note that Gnome-terminal does not support this feature. With
        this setting, copy-paste **will** work over ssh. See `> help copypaste`

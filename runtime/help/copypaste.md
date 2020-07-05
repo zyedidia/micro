@@ -16,8 +16,9 @@ Here is a list of terminal emulators and their status:
   reading, add `read-primary` and `read-clipboard` to the
   `clipboard_control` option.
 
-* iTerm2: supported, but must be enabled in
+* iTerm2: only copying (writing to clipboard) is supported. Must be enabled in
   `Preferences->General-> Selection->Applications in terminal may access clipboard`.
+  You can use Command-v to paste.
 
 * `st`: supported.
 
