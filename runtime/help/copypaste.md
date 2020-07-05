@@ -4,7 +4,50 @@ because there are multiple methods. This help document will explain
 the various methods for copying and pasting, how they work,
 and the best methods for doing so over SSH.
 
+# OSC 52 (terminal clipboard)
+
+If possible, setting the `clipboard` option to `terminal` will give
+best results because it will work over SSH and locally. However, there
+is limited support among terminal emulators for the terminal clipboard
+(which uses the OSC 52 protocol to communicate clipboard contents).
+Here is a list of terminal emulators and their status:
+
+* Kitty: supported, but only writing is enabled by default. To enable
+  reading, add `read-primary` and `read-clipboard` to the
+  `clipboard_control` option.
+
+* iTerm2: supported, but must be enabled in
+  `Preferences->General-> Selection->Applications in terminal may access clipboard`.
+
+* `st`: supported.
+
+* `rxvt-unicode`: not natively supported, but there is a Perl extension
+   [here](http://anti.teamidiot.de/static/nei/*/Code/urxvt/).
+
+* `xterm`: supported, but disabled by default. It can be enabled by putting
+   the following in `.Xresources` or `.Xdefaults`:
+   `XTerm*disallowedWindowOps: 20,21,SetXprop`.
+
+* `gnome-terminal`: does not support OSC 52.
+
+**Summary:** If you want copy and paste to work over SSH, then you
+should set `clipboard` to `terminal`, and make sure your terminal
+supports OSC 52.
+
 # Pasting
+
+## Recommendations (TL;DR)
+
+The recommended method of pasting is the following:
+
+* If you are not working over SSH, use the micro keybinding (Ctrl-v
+  by default) to perform pastes. If on Linux, install `xclip` or
+  `xsel` beforehand.
+
+* If you are working over SSH, use the terminal keybinding
+  (Ctrl-Shift-v or Command-v) to perform pastes. If your terminal
+  does not support bracketed paste, when performing a paste first
+  enable the `paste` option, and when finished disable the option.
 
 ## Micro paste events
 
@@ -56,20 +99,23 @@ machine's clipboard. On the other hand, the terminal keybinding
 for paste will access your local clipboard and send the text over
 the network as a paste event, which is what you want.
 
-## Recommendations
+# Copying
 
-The recommended method of pasting is the following:
+# Recommendations (TL;DR)
 
-* If you are not working over SSH, use the micro keybinding (Ctrl-v
-  by default) to perform pastes. If on Linux, install `xclip` or
-  `xsel` beforehand.
+The recommended method of copying is the following:
+
+* If you are not working over SSH, use the micro keybinding (Ctrl-c by
+  default) to perform copies. If on Linux, install `xclip` or `xsel`
+  beforehand.
 
 * If you are working over SSH, use the terminal keybinding
-  (Ctrl-Shift-v or Command-v) to perform pastes. If your terminal
-  does not support bracketed paste, when performing a paste first
-  enable the `paste` option, and when finished disable the option.
-
-# Copying
+  (Ctrl-Shift-c or Command-c) to perform copies. You must first disable
+  the `mouse` option to perform a terminal selection, and you may wish
+  to disable line numbers and diff indicators (`ruler` and `diffgutter`
+  options) and close other splits. This method will only be able to copy
+  characters that are displayed on the screen (you will not be able to
+  copy more than one page's worth of characters).
 
 Copying follows a similar discussion to the one above about pasting.
 The primary difference is before performing a copy, the application
@@ -92,19 +138,3 @@ means that for copying multiple lines using the terminal selection, you
 should first disable line numbers and diff indicators (turn off the `ruler`
 and `diffgutter` options), otherwise they might be part of your selection
 and copied.
-
-## Recommendations
-
-The recommended method of copying is the following:
-
-* If you are not working over SSH, use the micro keybinding (Ctrl-c by
-  default) to perform copies. If on Linux, install `xclip` or `xsel`
-  beforehand.
-
-* If you are working over SSH, use the terminal keybinding
-  (Ctrl-Shift-c or Command-c) to perform copies. You must first disable
-  the `mouse` option to perform a terminal selection, and you may wish
-  to disable line numbers and diff indicators (`ruler` and `diffgutter`
-  options) and close other splits. This method will only be able to copy
-  characters that are displayed on the screen (you will not be able to
-  copy more than one page's worth of characters).

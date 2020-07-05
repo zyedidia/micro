@@ -43,6 +43,7 @@ func init() {
 // Options with validators
 var optionValidators = map[string]optionValidator{
 	"autosave":     validateNonNegativeValue,
+	"clipboard":    validateClipboard,
 	"tabsize":      validatePositiveValue,
 	"scrollmargin": validateNonNegativeValue,
 	"scrollspeed":  validateNonNegativeValue,
@@ -322,6 +323,7 @@ func DefaultCommonSettings() map[string]interface{} {
 // default values
 var DefaultGlobalOnlySettings = map[string]interface{}{
 	"autosave":       float64(0),
+	"clipboard":      "external",
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
@@ -445,6 +447,22 @@ func validateColorscheme(option string, value interface{}) error {
 
 	if !ColorschemeExists(colorscheme) {
 		return errors.New(colorscheme + " is not a valid colorscheme")
+	}
+
+	return nil
+}
+
+func validateClipboard(option string, value interface{}) error {
+	val, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for clipboard")
+	}
+
+	switch val {
+	case "internal", "external", "terminal":
+	default:
+		return errors.New(option + " must be 'internal', 'external', or 'terminal'")
 	}
 
 	return nil

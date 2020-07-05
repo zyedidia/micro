@@ -186,6 +186,16 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 			if strings.HasPrefix("doas", input) {
 				suggestions = append(suggestions, "doas")
 			}
+		case "clipboard":
+			if strings.HasPrefix("external", input) {
+				suggestions = append(suggestions, "external")
+			}
+			if strings.HasPrefix("internal", input) {
+				suggestions = append(suggestions, "internal")
+			}
+			if strings.HasPrefix("terminal", input) {
+				suggestions = append(suggestions, "terminal")
+			}
 		}
 	}
 	sort.Strings(suggestions)

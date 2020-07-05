@@ -13,6 +13,7 @@ import (
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
@@ -505,6 +506,12 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 			}
 		} else if option == "paste" {
 			screen.Screen.SetPaste(nativeValue.(bool))
+		} else if option == "clipboard" {
+			m := clipboard.SetMethod(nativeValue.(string))
+			err := clipboard.Initialize(m)
+			if err != nil {
+				return err
+			}
 		} else {
 			for _, pl := range config.Plugins {
 				if option == pl.Name {

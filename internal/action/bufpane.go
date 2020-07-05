@@ -8,6 +8,7 @@ import (
 
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
@@ -360,7 +361,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
 				// }
 				if h.Cursor.HasSelection() {
-					h.Cursor.CopySelection("primary")
+					h.Cursor.CopySelection(clipboard.PrimaryReg)
 				}
 				h.mouseReleased = true
 			}

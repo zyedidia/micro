@@ -4,7 +4,7 @@ import (
 	"errors"
 	"runtime"
 
-	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/display"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
@@ -90,7 +90,7 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 			}
 		}
 		if e.Key() == tcell.KeyCtrlC && t.HasSelection() {
-			clipboard.WriteAll(t.GetSelection(t.GetView().Width), "clipboard")
+			clipboard.Write(t.GetSelection(t.GetView().Width), clipboard.ClipboardReg)
 			InfoBar.Message("Copied selection to clipboard")
 		} else if t.Status != shell.TTDone {
 			t.WriteString(event.EscSeq())

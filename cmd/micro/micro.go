@@ -16,6 +16,7 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -269,6 +270,9 @@ func main() {
 		os.Exit(1)
 	}
 
+	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
+	clipErr := clipboard.Initialize(m)
+
 	defer func() {
 		if err := recover(); err != nil {
 			screen.Screen.Fini()
@@ -311,6 +315,10 @@ func main() {
 	err = config.RunPluginFn("init")
 	if err != nil {
 		screen.TermMessage(err)
+	}
+
+	if clipErr != nil {
+		action.InfoBar.Error(clipErr, " or change 'clipboard' option")
 	}
 
 	events = make(chan tcell.Event)

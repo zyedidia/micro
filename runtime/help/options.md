@@ -54,6 +54,25 @@ Here are the available options:
 
     default value: `false`
 
+* `clipboard`: specifies how micro should access the system clipboard.
+   Possible values are:
+    * `external`: accesses clipboard via an external tool, such as xclip/xsel
+       or wl-clipboard on Linux, pbcopy/pbpaste on MacOS, and system calls on
+       Windows. On Linux, if you do not have one of the tools installed, or if
+       they are not working, micro will throw an error and use an internal
+       clipboard.
+    * `terminal`: accesses the clipboard via your terminal emulator. Note that
+       there is limited support among terminal emulators for this feature
+       (called OSC 52). Terminals that are known to work are Kitty (enable
+       reading with `clipboard_control` setting), iTerm2 (enable in prefs),
+       st, rxvt-unicode and xterm if enabled (see `> help copypaste` for
+       details). Note that Gnome-terminal does not support this feature. With
+       this setting, copy-paste **will** work over ssh. See `> help copypaste`
+       for details.
+    * `internal`: micro will use an internal clipboard.
+
+    default value: `external`
+
 * `colorcolumn`: if this is not set to 0, it will display a column at the
    specified column. This is useful if you want column 80 to be highlighted
    special for example.

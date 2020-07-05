@@ -1,7 +1,7 @@
 package buffer
 
 import (
-	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
@@ -125,10 +125,10 @@ func (c *Cursor) End() {
 
 // CopySelection copies the user's selection to either "primary"
 // or "clipboard"
-func (c *Cursor) CopySelection(target string) {
+func (c *Cursor) CopySelection(target clipboard.Register) {
 	if c.HasSelection() {
-		if target != "primary" || c.buf.Settings["useprimary"].(bool) {
-			clipboard.WriteAll(string(c.GetSelection()), target)
+		if target != clipboard.PrimaryReg || c.buf.Settings["useprimary"].(bool) {
+			clipboard.Write(string(c.GetSelection()), target)
 		}
 	}
 }
