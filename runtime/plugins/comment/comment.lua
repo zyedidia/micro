@@ -134,6 +134,7 @@ function toggleCommentSelection(bp, startLine, endLine, commentRegex)
     for line = startLine, endLine do
         if not isCommented(bp, line, commentRegex) then
             allComments = false
+            break
         end
     end
 
