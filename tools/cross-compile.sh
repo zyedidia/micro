@@ -23,7 +23,7 @@ mv micro-$1-osx.tar.gz binaries
 # Linux
 echo "Linux 64"
 GOOS=linux GOARCH=amd64 make build
-./package-deb.sh $1
+./tools/package-deb.sh $1
 mv micro_$1_amd64.deb binaries
 
 mv micro micro-$1
