@@ -1,0 +1,1 @@
+fpm -s dir  -t deb --name micro --version $1 --deb-recommends xclip --description "A modern and intuitive terminal-based text editor" ./micro=/usr/bin/micro ./assets/packaging/micro.1=/usr/share/man/man1/micro.1

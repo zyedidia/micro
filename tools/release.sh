@@ -22,6 +22,7 @@ hub release create $tag \
     --attach "binaries/micro-$1-osx.tar.gz" \
     --attach "binaries/micro-$1-linux64.tar.gz" \
     --attach "binaries/micro-$1-linux64-static.tar.gz" \
+    --attach "binaries/micro_$1_amd64.deb" \
     --attach "binaries/micro-$1-linux32.tar.gz" \
     --attach "binaries/micro-$1-linux-arm.tar.gz" \
     --attach "binaries/micro-$1-linux-arm64.tar.gz" \
