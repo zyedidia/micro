@@ -69,10 +69,38 @@ function onBufferOpen(buf)
     end
 end
 
+function isCommented(bp, lineN, commentRegex)
+    local line = bp.Buf:Line(lineN)
+    if string.match(line, commentRegex) then
+        return true
+    end
+    return false
+end
+
 function commentLine(bp, lineN)
     local line = bp.Buf:Line(lineN)
     local commentType = bp.Buf.Settings["commenttype"]
-    local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
+    local sel = -bp.Cursor.CurSelection
+    local curpos = -bp.Cursor.Loc
+    local index = string.find(commentType, "%%s") - 1
+    local commentedLine = commentType:gsub("%%s", trim(line))
+    bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), util.GetLeadingWhitespace(line) .. commentedLine)
+    if bp.Cursor:HasSelection() then
+        bp.Cursor.CurSelection[1].Y = sel[1].Y
+        bp.Cursor.CurSelection[2].Y = sel[2].Y
+        bp.Cursor.CurSelection[1].X = sel[1].X
+        bp.Cursor.CurSelection[2].X = sel[2].X
+    else
+        bp.Cursor.X = curpos.X + index
+        bp.Cursor.Y = curpos.Y
+    end
+    bp.Cursor:Relocate()
+    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+end
+
+function uncommentLine(bp, lineN, commentRegex)
+    local line = bp.Buf:Line(lineN)
+    local commentType = bp.Buf.Settings["commenttype"]
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
@@ -88,46 +116,57 @@ function commentLine(bp, lineN)
             bp.Cursor.X = curpos.X - index
             bp.Cursor.Y = curpos.Y
         end
-    else
-        local commentedLine = commentType:gsub("%%s", trim(line))
-        bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), util.GetLeadingWhitespace(line) .. commentedLine)
-        if bp.Cursor:HasSelection() then
-            bp.Cursor.CurSelection[1].Y = sel[1].Y
-            bp.Cursor.CurSelection[2].Y = sel[2].Y
-            bp.Cursor.CurSelection[1].X = sel[1].X
-            bp.Cursor.CurSelection[2].X = sel[2].X
-        else
-            bp.Cursor.X = curpos.X + index
-            bp.Cursor.Y = curpos.Y
-        end
     end
     bp.Cursor:Relocate()
     bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
 end
 
-function commentSelection(bp, startLine, endLine)
+function toggleCommentLine(bp, lineN, commentRegex)
+    if isCommented(bp, lineN, commentRegex) then
+        uncommentLine(bp, lineN, commentRegex)
+    else
+        commentLine(bp, lineN)
+    end
+end
+
+function toggleCommentSelection(bp, startLine, endLine, commentRegex)
+    local allComments = true
     for line = startLine, endLine do
-        commentLine(bp, line)
+        if not isCommented(bp, line, commentRegex) then
+            allComments = false
+            break
+        end
+    end
+
+    for line = startLine, endLine do
+        if allComments then
+            uncommentLine(bp, line, commentRegex)
+        else
+            commentLine(bp, line)
+        end
     end
 end
 
 function comment(bp, args)
+    local commentType = bp.Buf.Settings["commenttype"]
+    local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)"):gsub("%s+", "%s*")
+
     if bp.Cursor:HasSelection() then
         if bp.Cursor.CurSelection[1]:GreaterThan(-bp.Cursor.CurSelection[2]) then
             local endLine = bp.Cursor.CurSelection[1].Y
             if bp.Cursor.CurSelection[1].X == 0 then
                 endLine = endLine - 1
             end
-            commentSelection(bp, bp.Cursor.CurSelection[2].Y, endLine)
+            toggleCommentSelection(bp, bp.Cursor.CurSelection[2].Y, endLine, commentRegex)
         else
             local endLine = bp.Cursor.CurSelection[2].Y
             if bp.Cursor.CurSelection[2].X == 0 then
                 endLine = endLine - 1
             end
-            commentSelection(bp, bp.Cursor.CurSelection[1].Y, endLine)
+            toggleCommentSelection(bp, bp.Cursor.CurSelection[1].Y, endLine, commentRegex)
         end
     else
-        commentLine(bp, bp.Cursor.Y)
+        toggleCommentLine(bp, bp.Cursor.Y, commentRegex)
     end
 end
 
