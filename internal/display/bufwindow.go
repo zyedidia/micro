@@ -518,10 +518,17 @@ func (w *BufWindow) displayBuffer() {
 
 		draw := func(r rune, combc []rune, style tcell.Style, showcursor bool) {
 			if nColsBeforeStart <= 0 {
+				if w.Buf.HighlightSearch && w.Buf.SearchMatch(bloc) {
+					style = config.DefStyle.Reverse(true)
+					if s, ok := config.Colorscheme["hlsearch"]; ok {
+						style = s
+					}
+				}
+
 				_, origBg, _ := style.Decompose()
 				_, defBg, _ := config.DefStyle.Decompose()
 
-				// syntax highlighting with non-default background takes precedence
+				// syntax or hlsearch highlighting with non-default background takes precedence
 				// over cursor-line and color-column
 				dontOverrideBackground := origBg != defBg
 

@@ -146,18 +146,20 @@ func (b *SharedBuffer) remove(start, end Loc) []byte {
 func (b *SharedBuffer) MarkModified(start, end int) {
 	b.ModifiedThisFrame = true
 
-	if !b.Settings["syntax"].(bool) || b.SyntaxDef == nil {
-		return
-	}
-
 	start = util.Clamp(start, 0, len(b.lines)-1)
 	end = util.Clamp(end, 0, len(b.lines)-1)
 
-	l := -1
-	for i := start; i <= end; i++ {
-		l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
+	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
+		l := -1
+		for i := start; i <= end; i++ {
+			l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
+		}
+		b.Highlighter.HighlightMatches(b, start, l)
 	}
-	b.Highlighter.HighlightMatches(b, start, l)
+
+	for i := start; i <= end; i++ {
+		b.LineArray.invalidateSearchMatches(i)
+	}
 }
 
 // DisableReload disables future reloads of this sharedbuffer
@@ -181,6 +183,7 @@ type DiffStatus byte
 // The syntax highlighting info must be stored with the buffer because the syntax
 // highlighter attaches information to each line of the buffer for optimization
 // purposes so it doesn't have to rehighlight everything on every update.
+// Likewise for the search highlighting.
 type Buffer struct {
 	*EventHandler
 	*SharedBuffer
@@ -189,6 +192,12 @@ type Buffer struct {
 	cursors     []*Cursor
 	curCursor   int
 	StartCursor Loc
+
+	// Last search stores the last successful search
+	LastSearch      string
+	LastSearchRegex bool
+	// HighlightSearch enables highlighting all instances of the last successful search
+	HighlightSearch bool
 }
 
 // NewBufferFromFileAtLoc opens a new buffer with a given cursor location
@@ -1132,6 +1141,12 @@ func (b *Buffer) DiffStatus(lineN int) DiffStatus {
 	defer b.diffLock.RUnlock()
 	// Note that the zero value for DiffStatus is equal to DSUnchanged
 	return b.diff[lineN]
+}
+
+// SearchMatch returns true if the given location is within a match of the last search.
+// It is used for search highlighting
+func (b *Buffer) SearchMatch(pos Loc) bool {
+	return b.LineArray.SearchMatch(b, pos)
 }
 
 // WriteLog writes a string to the log buffer
