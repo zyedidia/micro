@@ -4,8 +4,7 @@ detect:
     filename: "(\\.c(c|pp|xx)$|\\.h(h|pp|xx)$|\\.ii?$|\\.(def)$)"
 
 rules:
-
-    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b" 
+    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
     - type: "\\b(auto|float|double|bool|char|int|short|long|sizeof|enum|void|static|const|constexpr|struct|union|typedef|extern|(un)?signed|inline)\\b"
     - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
     - statement: "\\b(class|namespace|template|public|protected|private|typename|this|friend|virtual|using|mutable|volatile|register|explicit)\\b"
@@ -13,13 +12,12 @@ rules:
     - statement: "\\b(try|throw|catch|operator|new|delete)\\b"
     - statement: "\\b(goto|continue|break|return)\\b"
     - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
-    - constant: "('([^'\\\\]|(\\\\[\"'abfnrtv\\\\]))'|'\\\\(([0-3]?[0-7]{1,2}))'|'\\\\x[0-9A-Fa-f]{1,2}')"
 
       # GCC builtins
     - statement: "(__attribute__[[:space:]]*\\(\\([^)]*\\)\\)|__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__)"
 
       # Operator Color
-    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)" 
+    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)"
       # Parenthetical Color
     - symbol.brackets: "[(){}]|\\[|\\]"
 
@@ -31,15 +29,15 @@ rules:
         end: "\""
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 
     - constant.string:
         start: "'"
         end: "'"
         skip: "\\\\."
         rules:
-            - preproc: "..+"
-            - constant.specialChar: "\\\\."
+            - error: "..+"
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 
     - comment:
         start: "//"
