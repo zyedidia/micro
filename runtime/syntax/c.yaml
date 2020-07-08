@@ -12,9 +12,6 @@ rules:
     - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
     - statement: "\\b(goto|continue|break|return)\\b"
     - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
-    - constant: "'([^'\\\\]|(\\\\[\"'abfnrtv\\\\]))'"
-    - constant: "'\\\\(([0-3]?[0-7]{1,2}))'"
-    - constant: "'\\\\x[0-9A-Fa-f]{1,2}'"
       # GCC builtins
     - statement: "__attribute__[[:space:]]*\\(\\([^)]*\\)\\)"
     - statement: "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
@@ -29,15 +26,15 @@ rules:
         end: "\""
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 
     - constant.string:
         start: "'"
         end: "'"
         skip: "\\\\."
         rules:
-            - preproc: "..+"
-            - constant.specialChar: "\\\\."
+            - error: "..+"
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 
     - comment:
         start: "//"
