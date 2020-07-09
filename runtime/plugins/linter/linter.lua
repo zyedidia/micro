@@ -83,7 +83,7 @@ function init()
     makeLinter("pylint", "python", "pylint", {"--output-format=parseable", "--reports=no", "%f"}, "%f:%l: %m")
     makeLinter("shfmt", "shell", "shfmt", {"%f"}, "%f:%l:%c: %m")
     makeLinter("swiftc", "swift", "xcrun", {"swiftc", "%f"}, "%f:%l:%c:.+: %m", {"darwin"}, true)
-    makeLinter("swiftc", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
+    makeLinter("swiftc", "swift", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
     makeLinter("yaml", "yaml", "yamllint", {"--format", "parsable", "%f"}, "%f:%l:%c:.+ %m")
 
     config.MakeCommand("lint", function(bp, args)
