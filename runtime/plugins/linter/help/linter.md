@@ -64,17 +64,17 @@ Below is an example for including a linter for any filetype using
 the `misspell` linter which checks for misspelled words in a file.
 
 ```lua
-local config = import("micro/config")
-
-config.RegisterCommonOption("misspell", true)
-
 function init()
     -- uses the default linter plugin
     -- matches any filetype
-    linter.makeLinter("misspell", "", "misspell", {"%f"}, "%f:%l:%c: %m", {}, false, true, 0, 0, hasMisspell)
+    linter.makeLinter("misspell", "", "misspell", {"%f"}, "%f:%l:%c: %m", {}, false, true)
 end
+```
 
-function hasMisspell(buf)
-    return buf.Settings["misspell"]
+Here is an example for a more typical use-case, where the linter will only match one filetype (C in this case):
+
+```lua
+function init()
+    linter.makeLinter("gcc", "c", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
 end
 ```
