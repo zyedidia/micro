@@ -9,8 +9,10 @@ following filetypes and linters:
 * c++: g++
 * d: dmd
 * go: go build
+* haskell: hlint
 * java: javac
 * javascript: jshint
+* javascript: eslint
 * literate: lit
 * lua: luacheck
 * nim: nim
@@ -19,7 +21,7 @@ following filetypes and linters:
 * python: mypy
 * python: pylint
 * shell: shfmt
-* swift: swiftc
+* swift: swiftc (MacOS and Linux only)
 * yaml: yamllint
 
 If the linter plugin is enabled and the file corresponds to one of
