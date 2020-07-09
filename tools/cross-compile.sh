@@ -7,6 +7,8 @@ cp LICENSE micro-$1
 cp README.md micro-$1
 cp LICENSE-THIRD-PARTY micro-$1
 cp assets/packaging/micro.1 micro-$1
+cp assets/packaging/micro.desktop micro-$1
+cp assets/micro-logo-mark.svg micro-$1
 
 HASH="$(git rev-parse --short HEAD)"
 VERSION="$(go run tools/build-version.go)"
