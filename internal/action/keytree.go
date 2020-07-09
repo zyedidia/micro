@@ -1,7 +1,7 @@
 package action
 
 import (
-	"log"
+	"bytes"
 
 	"github.com/zyedidia/tcell"
 )
@@ -60,8 +60,9 @@ type KeyTree struct {
 type KeyTreeCursor struct {
 	node *KeyTreeNode
 
-	wildcards []KeyEvent
-	mouseInfo *tcell.EventMouse
+	recordedEvents []Event
+	wildcards      []KeyEvent
+	mouseInfo      *tcell.EventMouse
 }
 
 // MakeClosure uses the information stored in a key tree cursor to construct
@@ -176,7 +177,6 @@ func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bool) {
 	n := k.cursor.node
 	c, ok := n.children[e]
-	log.Println("NEXT EVENT", e, len(n.children), ok)
 
 	if !ok {
 		return nil, false
@@ -185,6 +185,8 @@ func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bo
 	more := len(c.children) > 0
 
 	k.cursor.node = c
+
+	k.cursor.recordedEvents = append(k.cursor.recordedEvents, e)
 
 	switch ev := e.(type) {
 	case KeyEvent:
@@ -221,7 +223,17 @@ func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bo
 func (k *KeyTree) ResetEvents() {
 	k.cursor.node = k.root
 	k.cursor.wildcards = []KeyEvent{}
+	k.cursor.recordedEvents = []Event{}
 	k.cursor.mouseInfo = nil
+}
+
+// CurrentEventsStr returns the list of recorded events as a string
+func (k *KeyTree) RecordedEventsStr() string {
+	buf := &bytes.Buffer{}
+	for _, e := range k.cursor.recordedEvents {
+		buf.WriteString(e.Name())
+	}
+	return buf.String()
 }
 
 // DeleteBinding removes any currently active actions associated with the
