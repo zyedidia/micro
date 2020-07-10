@@ -159,6 +159,8 @@ func Init() error {
 		return err
 	}
 
+	Screen.SetPaste(config.GetGlobalOption("paste").(bool))
+
 	// restore TERM
 	if config.GetGlobalOption("xterm").(bool) {
 		os.Setenv("TERM", oldTerm)
