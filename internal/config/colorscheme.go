@@ -117,16 +117,12 @@ func ParseColorscheme(text string) (map[string]tcell.Style, error) {
 
 // StringToStyle returns a style from a string
 // The strings must be in the format "extra foregroundcolor,backgroundcolor"
-// The 'extra' can be bold, reverse, or underline
+// The 'extra' can be bold, reverse, italic or underline
 func StringToStyle(str string) tcell.Style {
 	var fg, bg string
 	spaceSplit := strings.Split(str, " ")
 	var split []string
-	if len(spaceSplit) > 1 {
-		split = strings.Split(spaceSplit[1], ",")
-	} else {
-		split = strings.Split(str, ",")
-	}
+	split = strings.Split(spaceSplit[len(spaceSplit)-1], ",")
 	if len(split) > 1 {
 		fg, bg = split[0], split[1]
 	} else {
