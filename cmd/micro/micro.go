@@ -299,6 +299,11 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	err = config.RunPluginFn("preinit")
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
 	args := flag.Args()
 	b := LoadInput(args)
 
@@ -312,6 +317,11 @@ func main() {
 	action.InitGlobals()
 
 	err = config.RunPluginFn("init")
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
+	err = config.RunPluginFn("postinit")
 	if err != nil {
 		screen.TermMessage(err)
 	}

@@ -59,7 +59,7 @@ function removeLinter(name)
     linters[name] = nil
 end
 
-function init()
+function preinit()
     local devnull = "/dev/null"
     if runtime.GOOS == "windows" then
         devnull = "NUL"
@@ -81,6 +81,7 @@ function init()
     makeLinter("pyflakes", "python", "pyflakes", {"%f"}, "%f:%l:.-:? %m")
     makeLinter("mypy", "python", "mypy", {"%f"}, "%f:%l: %m")
     makeLinter("pylint", "python", "pylint", {"--output-format=parseable", "--reports=no", "%f"}, "%f:%l: %m")
+    makeLinter("flake8", "python", "flake8", {"%f"}, "%f:%l:%c: %m")
     makeLinter("shfmt", "shell", "shfmt", {"%f"}, "%f:%l:%c: %m")
     makeLinter("swiftc", "swift", "xcrun", {"swiftc", "%f"}, "%f:%l:%c:.+: %m", {"darwin"}, true)
     makeLinter("swiftc", "swift", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
@@ -167,7 +168,6 @@ function onExit(output, args)
             elseif col == nil then
                 hascol = false
             end
-            micro.Log(basename(buf.Path), basename(file))
             if basename(buf.Path) == basename(file) then
                 local bmsg = nil
                 if hascol then
