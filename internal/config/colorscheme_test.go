@@ -26,6 +26,18 @@ func TestAttributeStringToStyle(t *testing.T) {
 	assert.NotEqual(t, 0, attr&tcell.AttrBold)
 }
 
+func TestMultiAttributesStringToStyle(t *testing.T) {
+	s := StringToStyle("bold italic underline cyan,brightcyan")
+
+	fg, bg, attr := s.Decompose()
+
+	assert.Equal(t, tcell.ColorTeal, fg)
+	assert.Equal(t, tcell.ColorAqua, bg)
+	assert.NotEqual(t, 0, attr&tcell.AttrBold)
+	assert.NotEqual(t, 0, attr&tcell.AttrItalic)
+	assert.NotEqual(t, 0, attr&tcell.AttrUnderline)
+}
+
 func TestColor256StringToStyle(t *testing.T) {
 	s := StringToStyle("128,60")
 
