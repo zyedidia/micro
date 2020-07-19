@@ -1,0 +1,15 @@
+filetype: renpy
+
+detect:
+    filename: "\\.rpy$"
+
+rules:
+    # Script language keywords.
+    - statement: "\\b(python|init|early|define|default|label|call|jump|image|layeredimage|screen|style|transform|menu|show|hide|scene|at|with|zorder|behind|pause|play|stop|fadeout|fadein|queue)\\b"
+    # ATL keywords.
+    - type: "\\b(repeat|block|choice|parallel|(x|y|)(pos|offset|anchor|align|center|tile|zoom)|time|linear|easein|alpha|subpixel)\\b"
+    - identifier: "\\bpersistent\\b"
+    - special: "\\$ "
+    # Tab characters are not allowed in Renpy scripts.
+    - error: "\\t"
+    - include: python
