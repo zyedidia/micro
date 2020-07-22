@@ -607,7 +607,7 @@ func UpdatePlugins(out io.Writer, plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
 		for _, p := range Plugins {
-			if !p.IsEnabled() {
+			if !p.IsEnabled() || p.Default {
 				continue
 			}
 			plugins = append(plugins, p.Name)
