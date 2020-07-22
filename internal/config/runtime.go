@@ -250,6 +250,8 @@
 // runtime/syntax/r.yaml
 // runtime/syntax/reST.hdr
 // runtime/syntax/reST.yaml
+// runtime/syntax/renpy.hdr
+// runtime/syntax/renpy.yaml
 // runtime/syntax/rpmspec.hdr
 // runtime/syntax/rpmspec.yaml
 // runtime/syntax/ruby.hdr
@@ -5383,6 +5385,46 @@ func runtimeSyntaxRestYaml() (*asset, error) {
 	return a, nil
 }
 
+var _runtimeSyntaxRenpyHdr = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x2a\x4a\xcd\x2b\xa8\xe4\x8a\xd1\x2b\x2a\xa8\x54\xe1\xe2\x02\x04\x00\x00\xff\xff\xb8\x46\x2f\x78\x0e\x00\x00\x00"
+
+func runtimeSyntaxRenpyHdrBytes() ([]byte, error) {
+	return bindataRead(
+		_runtimeSyntaxRenpyHdr,
+		"runtime/syntax/renpy.hdr",
+	)
+}
+
+func runtimeSyntaxRenpyHdr() (*asset, error) {
+	bytes, err := runtimeSyntaxRenpyHdrBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "runtime/syntax/renpy.hdr", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
+var _runtimeSyntaxRenpyYaml = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x64\x92\xb1\x72\xdc\x3c\x0c\x84\x7b\x3d\x05\xc7\xbf\x0b\x5f\x61\x3f\xc0\x75\x7f\x9f\x2a\x71\x79\x0d\x44\xad\x4e\x88\x21\x90\x01\xc1\x39\xcb\x83\x87\xcf\x9c\x94\x38\x99\x49\x85\xe1\xec\x0e\xb9\x1f\x17\x33\x0b\x7c\xab\x38\x27\x83\xd6\x6d\x18\x26\x38\xb2\x9f\x87\x94\x52\xba\x8b\x4a\x2b\xce\xe9\xe1\x72\x79\xb1\xba\x3d\x3e\x0c\x83\x75\x41\x3b\xf4\xff\xd2\xb7\x6c\x5c\x3d\x09\xe9\xb5\xd3\x15\xe9\x0d\xdb\xad\xd8\xd4\x5e\x76\xfd\x39\x35\x27\xc7\x0a\xf5\xfd\x8a\xf1\xa9\x6e\xbe\x14\x0d\x56\xf6\x00\x99\x6c\x31\x61\x66\xc5\x7d\x50\x17\x0f\xa1\x11\x12\x99\x44\xe2\x7b\x5f\x6b\xf0\x4a\x57\x84\xd0\x06\xc3\x74\x1c\x5a\x36\x40\xa3\xf9\x26\x08\x37\xd2\x36\x17\x5b\x63\x85\xf6\x68\x4b\xb9\xc5\xc2\xd3\xdd\x05\x45\x90\xc7\x8d\x7d\x89\x8f\x62\x13\x2c\x46\x2c\xac\x53\x54\xea\x0d\x51\x85\xb6\x68\x5e\x6a\xcc\x34\xa1\x74\xdf\x27\x6b\xfc\xe8\xe8\x38\x5d\x2e\xe3\xc3\x2f\xca\xff\x5f\xbf\xfc\x43\x76\x7c\xda\x0e\x65\xa8\x20\x8f\x51\x4a\x7e\x8b\xbc\x14\xce\x88\x4a\x46\x22\x90\x78\x7a\x8f\x2d\x4e\x4f\xb5\xb4\x28\xf3\xdc\xe0\x41\x9a\x97\x62\x41\xc2\x57\x8d\x0c\x75\x58\x38\x0b\xe2\xa3\x94\xf5\x14\xce\x2b\x42\x58\x41\x16\xa0\x76\x0f\x44\x52\x17\x8a\xd6\xc7\xca\xef\x90\x3f\xc9\x9e\x13\x4f\x50\xe7\x99\x61\x47\x96\x0a\x6b\xdc\x1c\xea\x7f\x99\x5a\x45\x66\x92\xdd\xf1\x98\x7e\x43\xbd\xd2\x98\xf2\x42\x46\xd9\x61\x2d\x91\x21\x69\xf1\x44\x22\xe5\x86\x29\xb1\xa6\xaf\xf7\x8d\x48\x6d\xaf\xf8\x93\x1b\x66\xe5\x78\xcc\x3f\x43\x68\x96\x3e\xe1\x9c\x8e\x76\x87\x9f\x01\x00\x00\xff\xff\x38\x17\x3e\x93\x54\x02\x00\x00"
+
+func runtimeSyntaxRenpyYamlBytes() ([]byte, error) {
+	return bindataRead(
+		_runtimeSyntaxRenpyYaml,
+		"runtime/syntax/renpy.yaml",
+	)
+}
+
+func runtimeSyntaxRenpyYaml() (*asset, error) {
+	bytes, err := runtimeSyntaxRenpyYamlBytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindataFileInfo{name: "runtime/syntax/renpy.yaml", size: 0, mode: os.FileMode(0), modTime: time.Unix(0, 0)}
+	a := &asset{bytes: bytes, info: info}
+	return a, nil
+}
+
 var _runtimeSyntaxRpmspecHdr = "\x1f\x8b\x08\x00\x00\x00\x00\x00\x00\xff\x2a\x2a\xc8\x2d\x2e\x48\x4d\xe6\x8a\xd1\x03\x51\x2a\x35\x31\x7a\x50\x11\x15\x2e\x2e\x40\x00\x00\x00\xff\xff\xd9\xd5\x93\x8f\x1c\x00\x00\x00"
 
 func runtimeSyntaxRpmspecHdrBytes() ([]byte, error) {
@@ -7005,6 +7047,8 @@ var _bindata = map[string]func() (*asset, error){
 	"runtime/syntax/r.yaml":                    runtimeSyntaxRYaml,
 	"runtime/syntax/reST.hdr":                  runtimeSyntaxRestHdr,
 	"runtime/syntax/reST.yaml":                 runtimeSyntaxRestYaml,
+	"runtime/syntax/renpy.hdr":                 runtimeSyntaxRenpyHdr,
+	"runtime/syntax/renpy.yaml":                runtimeSyntaxRenpyYaml,
 	"runtime/syntax/rpmspec.hdr":               runtimeSyntaxRpmspecHdr,
 	"runtime/syntax/rpmspec.yaml":              runtimeSyntaxRpmspecYaml,
 	"runtime/syntax/ruby.hdr":                  runtimeSyntaxRubyHdr,
@@ -7392,6 +7436,8 @@ var _bintree = &bintree{nil, map[string]*bintree{
 			"r.yaml":                  &bintree{runtimeSyntaxRYaml, map[string]*bintree{}},
 			"reST.hdr":                &bintree{runtimeSyntaxRestHdr, map[string]*bintree{}},
 			"reST.yaml":               &bintree{runtimeSyntaxRestYaml, map[string]*bintree{}},
+			"renpy.hdr":               &bintree{runtimeSyntaxRenpyHdr, map[string]*bintree{}},
+			"renpy.yaml":              &bintree{runtimeSyntaxRenpyYaml, map[string]*bintree{}},
 			"rpmspec.hdr":             &bintree{runtimeSyntaxRpmspecHdr, map[string]*bintree{}},
 			"rpmspec.yaml":            &bintree{runtimeSyntaxRpmspecYaml, map[string]*bintree{}},
 			"ruby.hdr":                &bintree{runtimeSyntaxRubyHdr, map[string]*bintree{}},
