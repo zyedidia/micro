@@ -24,7 +24,10 @@ func RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool, callba
 	}
 
 	t := new(shell.Terminal)
-	t.Start(args, getOutput, wait, callback, userargs)
+	err = t.Start(args, getOutput, wait, callback, userargs)
+	if err != nil {
+		return err
+	}
 
 	h.AddTab()
 	id := MainTab().Panes[0].ID()
