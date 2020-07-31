@@ -899,6 +899,12 @@ func (h *BufPane) ToggleHighlightSearch() bool {
 	return true
 }
 
+// UnhighlightSearch unhighlights all instances of the last used search term
+func (h *BufPane) UnhighlightSearch() bool {
+	h.Buf.HighlightSearch = false
+	return true
+}
+
 // FindNext searches forwards for the last used search term
 func (h *BufPane) FindNext() bool {
 	// If the cursor is at the start of a selection and we search we want

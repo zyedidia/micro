@@ -657,6 +657,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleDiffGutter":          (*BufPane).ToggleDiffGutter,
 	"ToggleRuler":               (*BufPane).ToggleRuler,
 	"ToggleHighlightSearch":     (*BufPane).ToggleHighlightSearch,
+	"UnhighlightSearch":         (*BufPane).UnhighlightSearch,
 	"ClearStatus":               (*BufPane).ClearStatus,
 	"ShellMode":                 (*BufPane).ShellMode,
 	"CommandMode":               (*BufPane).CommandMode,
