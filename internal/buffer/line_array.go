@@ -51,6 +51,12 @@ type Line struct {
 	rehighlight bool
 	lock        sync.Mutex
 
+	// The search states for the line, used for highlighting of search matches,
+	// separately from the syntax highlighting.
+	// A map is used because the line array may be shared between multiple buffers
+	// (multiple instances of the same file opened in different edit panes)
+	// which have distinct searches, so in the general case there are multiple
+	// searches per a line, one search per a Buffer containing this line.
 	search map[*Buffer]*searchState
 }
 
@@ -377,8 +383,9 @@ func (la *LineArray) SetRehighlight(lineN int, on bool) {
 // previously found matches are used.
 //
 // The buffer `b` needs to be passed because the line array may be shared
-// between between multiple buffers which have distinct searches, so
-// SearchMatch needs to know which search to match against.
+// between multiple buffers (multiple instances of the same file opened
+// in different edit panes) which have distinct searches, so SearchMatch
+// needs to know which search to match against.
 func (la *LineArray) SearchMatch(b *Buffer, pos Loc) bool {
 	if b.LastSearch == "" {
 		return false
