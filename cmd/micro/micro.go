@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/signal"
 	"regexp"
 	"runtime"
 	"sort"
 	"strconv"
+	"syscall"
 	"time"
 
 	"github.com/go-errors/errors"
@@ -269,12 +271,25 @@ func main() {
 		os.Exit(1)
 	}
 
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Kill, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		if screen.Screen != nil {
+			screen.Screen.Fini()
+		}
+		os.Exit(0)
+	}()
+
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
 	clipErr := clipboard.Initialize(m)
 
 	defer func() {
 		if err := recover(); err != nil {
-			screen.Screen.Fini()
+			if screen.Screen != nil {
+				screen.Screen.Fini()
+			}
 			fmt.Println("Micro encountered an error:", err)
 			// backup all open buffers
 			for _, b := range buffer.OpenBuffers {
