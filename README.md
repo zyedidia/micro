@@ -130,6 +130,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled.
     * `dnf install micro` (Fedora).
     * `yay -S micro` (Arch Linux).
+    * `eopkg install micro` (Solus).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
     * `choco install micro`.
