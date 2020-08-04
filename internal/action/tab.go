@@ -220,9 +220,8 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 			}
 
 			if wasReleased {
-				resizeID := t.GetMouseSplitID(buffer.Loc{mx, my})
-				if resizeID != 0 {
-					t.resizing = t.GetNode(uint64(resizeID))
+				t.resizing = t.GetMouseSplitNode(buffer.Loc{mx, my})
+				if t.resizing != nil {
 					return
 				}
 
