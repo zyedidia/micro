@@ -175,6 +175,7 @@ func NewTabFromBuffer(x, y, width, height int, b *buffer.Buffer) *Tab {
 	t := new(Tab)
 	t.Node = views.NewRoot(x, y, width, height)
 	t.UIWindow = display.NewUIWindow(t.Node)
+	t.release = true
 
 	e := NewBufPaneFromBuf(b, t)
 	e.SetID(t.ID())
@@ -187,6 +188,7 @@ func NewTabFromPane(x, y, width, height int, pane Pane) *Tab {
 	t := new(Tab)
 	t.Node = views.NewRoot(x, y, width, height)
 	t.UIWindow = display.NewUIWindow(t.Node)
+	t.release = true
 	pane.SetTab(t)
 	pane.SetID(t.ID())
 
