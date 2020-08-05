@@ -33,11 +33,16 @@ rules:
         rules: []
 
     - constant.string:
-        start: "'''"
-        end: "'''"
+        start: "\"[^\"]|\"$"
+        end: "\""
         rules: []
 
     - comment:
-        start: "#"
+        start: "#[^=]|#$"
         end: "$"
+        rules: []
+
+    - comment:
+        start: "#="
+        end: "=#"
         rules: []
