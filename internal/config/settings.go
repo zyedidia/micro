@@ -269,6 +269,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"fastdirty":      false,
 	"fileformat":     "unix",
 	"filetype":       "unknown",
+	"hlsearch":       false,
 	"ignorecase":     false,
 	"indentchar":     " ",
 	"keepautoindent": false,

@@ -875,6 +875,17 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
 				h.lastSearch = resp
 				h.lastSearchRegex = useRegex
+
+				if h.Buf.Settings["hlsearch"].(bool) {
+					regex := resp
+					if !useRegex {
+						regex = regexp.QuoteMeta(regex)
+					}
+					if h.Buf.Settings["ignorecase"].(bool) {
+						regex = "(?i)" + regex
+					}
+					h.HighlightCustomPattern("hlsearch", regex)
+				}
 			} else {
 				h.Cursor.ResetSelection()
 				InfoBar.Message("No matches found")
@@ -940,6 +951,20 @@ func (h *BufPane) FindPrevious() bool {
 	}
 	h.Relocate()
 	return true
+}
+
+// ToggleHighlightSearch toggles highlighting of the last search matches
+func (h *BufPane) ToggleHighlightSearch() bool {
+	if h.lastHlSearch != "" {
+		if !h.highlightSearch {
+			h.HighlightCustomPattern("hlsearch", h.lastHlSearch)
+		} else {
+			h.HighlightCustomPattern("hlsearch", "")
+		}
+		return true
+	} else {
+		return false
+	}
 }
 
 // Undo undoes the last action

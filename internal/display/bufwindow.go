@@ -368,6 +368,12 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxL
 // If there is no change to the current highlight style it just returns that
 func (w *BufWindow) getStyle(style tcell.Style, bloc buffer.Loc) (tcell.Style, bool) {
 	if group, ok := w.Buf.Match(bloc.Y)[bloc.X]; ok {
+		if group.String() == "hlsearch" {
+			if s, ok := config.Colorscheme["hlsearch"]; !ok {
+				s = config.DefStyle.Reverse(true)
+				return s, true
+			}
+		}
 		s := config.GetColor(group.String())
 		return s, true
 	}
