@@ -10,6 +10,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path"
+	gopath "path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -20,6 +21,7 @@ import (
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/lsp"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -123,6 +125,9 @@ type SharedBuffer struct {
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
+
+	server  *lsp.Server
+	version int
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
@@ -368,6 +373,18 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	}
 
 	OpenBuffers = append(OpenBuffers, b)
+
+	if !found {
+		if btype == BTDefault {
+			ft := b.Settings["filetype"].(string)
+			l, ok := lsp.GetLanguage(ft)
+			if ok && l.Installed() {
+				b.server, _ = lsp.StartServer(l)
+				b.server.Initialize(gopath.Dir(b.AbsPath))
+				b.server.DidOpen(b.AbsPath, ft, string(b.Bytes()), b.version)
+			}
+		}
+	}
 
 	return b
 }

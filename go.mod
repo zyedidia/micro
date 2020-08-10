@@ -1,6 +1,7 @@
 module github.com/zyedidia/micro/v2
 
 require (
+	github.com/BurntSushi/toml v0.3.1
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-errors/errors v1.0.1
@@ -10,6 +11,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/sergi/go-diff v1.1.0
+	github.com/sourcegraph/go-lsp v0.0.0-20200429204803-219e11d77f5d
 	github.com/stretchr/testify v1.4.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
 	github.com/zyedidia/clipboard v1.0.3
