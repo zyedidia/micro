@@ -1,12 +1,10 @@
 package lsp
 
 import (
-	"log"
-
 	"github.com/sourcegraph/go-lsp"
 )
 
-func (s *Server) DidOpen(filename, language, text string, version int) error {
+func (s *Server) DidOpen(filename, language, text string, version int) {
 	doc := lsp.TextDocumentItem{
 		URI:        lsp.DocumentURI("file://" + filename),
 		LanguageID: language,
@@ -18,12 +16,58 @@ func (s *Server) DidOpen(filename, language, text string, version int) error {
 		TextDocument: doc,
 	}
 
-	resp, err := s.SendMessage("textDocument/didOpen", params)
-	if err != nil {
-		return err
+	go s.SendMessage("textDocument/didOpen", params)
+}
+
+func (s *Server) DidSave(filename string) {
+	doc := lsp.TextDocumentIdentifier{
+		URI: lsp.DocumentURI("file://" + filename),
 	}
 
-	log.Println("Received", string(resp))
+	params := lsp.DidSaveTextDocumentParams{
+		TextDocument: doc,
+	}
+	go s.SendMessage("textDocument/didSave", params)
+}
 
-	return nil
+func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocumentContentChangeEvent) {
+	doc := lsp.VersionedTextDocumentIdentifier{
+		TextDocumentIdentifier: lsp.TextDocumentIdentifier{
+			URI: lsp.DocumentURI("file://" + filename),
+		},
+		Version: version,
+	}
+
+	params := lsp.DidChangeTextDocumentParams{
+		TextDocument:   doc,
+		ContentChanges: changes,
+	}
+	go s.SendMessage("textDocument/didChange", params)
+}
+
+func (s *Server) DidClose(filename string) {
+	doc := lsp.TextDocumentIdentifier{
+		URI: lsp.DocumentURI("file://" + filename),
+	}
+
+	params := lsp.DidCloseTextDocumentParams{
+		TextDocument: doc,
+	}
+	go s.SendMessage("textDocument/didClose", params)
+}
+
+func (s *Server) DocumentFormat() {
+
+}
+
+func (s *Server) DocumentRangeFormat() {
+
+}
+
+func (s *Server) Completion() {
+
+}
+
+func (s *Server) CompletionResolve() {
+
 }

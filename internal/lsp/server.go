@@ -3,22 +3,23 @@ package lsp
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"strconv"
 	"strings"
+	"sync"
 
 	"github.com/sourcegraph/go-lsp"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
-var ActiveServers map[string]*Server
+var activeServers map[string]*Server
+var slock sync.Mutex
 
 func init() {
-	ActiveServers = make(map[string]*Server)
+	activeServers = make(map[string]*Server)
 }
 
 type Server struct {
@@ -27,6 +28,8 @@ type Server struct {
 	stdout       *bufio.Reader
 	language     *Language
 	capabilities lsp.ServerCapabilities
+	root         string
+	lock         sync.Mutex
 }
 
 type RPCMessage struct {
@@ -68,12 +71,14 @@ func StartServer(l Language) (*Server, error) {
 	s.stdout = bufio.NewReader(stdout)
 	s.language = &l
 
-	// ActiveServers[l.Command] = s
+	// activeServers[l.Command] = s
 
 	return s, nil
 }
 
-func (s *Server) Initialize(directory string) error {
+// Initialize performs the LSP initialization handshake
+// The directory must be an absolute path
+func (s *Server) Initialize(directory string) {
 	params := lsp.InitializeParams{
 		ProcessID: os.Getpid(),
 		RootURI:   lsp.DocumentURI("file://" + directory),
@@ -128,30 +133,35 @@ func (s *Server) Initialize(directory string) error {
 		},
 	}
 
-	resp, err := s.SendMessage("initialize", params)
-	if err != nil {
-		return err
-	}
+	go func() {
+		resp, err := s.SendMessage("initialize", params)
+		if err != nil {
+			return
+		}
 
-	// todo parse capabilities
-	log.Println("Received", string(resp))
+		// todo parse capabilities
+		log.Println("Received", string(resp))
 
-	var r RPCInit
-	err = json.Unmarshal(resp, &r)
-	if err != nil {
-		return err
-	}
+		var r RPCInit
+		err = json.Unmarshal(resp, &r)
+		if err != nil {
+			return
+		}
 
-	fmt.Println(r)
-	s.capabilities = r.Result.Capabilities
-	fmt.Println(s.capabilities)
+		_, err = s.SendMessage("initialized", struct{}{})
+		if err != nil {
+			return
+		}
 
-	_, err = s.SendMessage("initialized", struct{}{})
-	if err != nil {
-		return err
-	}
+		slock.Lock()
+		activeServers[s.language.Command+"-"+directory] = s
+		slock.Unlock()
 
-	return nil
+		s.lock.Lock()
+		s.capabilities = r.Result.Capabilities
+		s.root = directory
+		s.lock.Unlock()
+	}()
 }
 
 func (s *Server) SendMessage(method string, params interface{}) ([]byte, error) {
@@ -174,6 +184,7 @@ func (s *Server) SendMessage(method string, params interface{}) ([]byte, error) 
 
 	log.Println("Sending", string(msg))
 
+	s.lock.Lock()
 	s.stdin.Write(msg)
 
 	n := -1
@@ -207,6 +218,10 @@ func (s *Server) SendMessage(method string, params interface{}) ([]byte, error) 
 	if err != nil {
 		return nil, err
 	}
+
+	log.Println("Received", string(bytes))
+
+	s.lock.Unlock()
 
 	return bytes, nil
 }

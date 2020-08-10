@@ -17,9 +17,8 @@ import (
 	"sync"
 	"time"
 
-	luar "layeh.com/gopher-luar"
-
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
+	lspt "github.com/sourcegraph/go-lsp"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/lsp"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
@@ -29,6 +28,7 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
+	luar "layeh.com/gopher-luar"
 )
 
 const backupTime = 8000
@@ -137,12 +137,36 @@ func (b *SharedBuffer) insert(pos Loc, value []byte) {
 
 	inslines := bytes.Count(value, []byte{'\n'})
 	b.MarkModified(pos.Y, pos.Y+inslines)
+
+	b.lspDidChange(pos, pos.MoveLA(util.CharacterCount(value), b.LineArray), string(value))
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
 	b.HasSuggestions = false
 	defer b.MarkModified(start.Y, end.Y)
-	return b.LineArray.remove(start, end)
+	sub := b.LineArray.remove(start, end)
+	b.lspDidChange(start, end, "")
+	return sub
+}
+
+func (b *SharedBuffer) lspDidChange(start, end Loc, text string) {
+	b.version++
+	// TODO: convert to UTF16 codepoints
+	change := lspt.TextDocumentContentChangeEvent{
+		Range: &lspt.Range{
+			Start: lspt.Position{
+				Line:      start.Y,
+				Character: start.X,
+			},
+			End: lspt.Position{
+				Line:      end.Y,
+				Character: end.X,
+			},
+		},
+		Text: text,
+	}
+
+	b.server.DidChange(b.AbsPath, b.version, []lspt.TextDocumentContentChangeEvent{change})
 }
 
 // MarkModified marks the buffer as modified for this frame
