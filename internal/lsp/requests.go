@@ -1,8 +1,16 @@
 package lsp
 
 import (
+	"encoding/json"
+
 	"github.com/sourcegraph/go-lsp"
 )
+
+type RPCCompletion struct {
+	RPCVersion string             `json:"jsonrpc"`
+	ID         int                `json:"id"`
+	Result     lsp.CompletionList `json:"result"`
+}
 
 func (s *Server) DidOpen(filename, language, text string, version int) {
 	doc := lsp.TextDocumentItem{
@@ -16,7 +24,7 @@ func (s *Server) DidOpen(filename, language, text string, version int) {
 		TextDocument: doc,
 	}
 
-	go s.SendMessage("textDocument/didOpen", params)
+	s.SendMessage("textDocument/didOpen", params)
 }
 
 func (s *Server) DidSave(filename string) {
@@ -27,7 +35,7 @@ func (s *Server) DidSave(filename string) {
 	params := lsp.DidSaveTextDocumentParams{
 		TextDocument: doc,
 	}
-	go s.SendMessage("textDocument/didSave", params)
+	s.SendMessage("textDocument/didSave", params)
 }
 
 func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocumentContentChangeEvent) {
@@ -42,7 +50,7 @@ func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocum
 		TextDocument:   doc,
 		ContentChanges: changes,
 	}
-	go s.SendMessage("textDocument/didChange", params)
+	s.SendMessage("textDocument/didChange", params)
 }
 
 func (s *Server) DidClose(filename string) {
@@ -53,7 +61,7 @@ func (s *Server) DidClose(filename string) {
 	params := lsp.DidCloseTextDocumentParams{
 		TextDocument: doc,
 	}
-	go s.SendMessage("textDocument/didClose", params)
+	s.SendMessage("textDocument/didClose", params)
 }
 
 func (s *Server) DocumentFormat() {
@@ -64,8 +72,34 @@ func (s *Server) DocumentRangeFormat() {
 
 }
 
-func (s *Server) Completion() {
+func (s *Server) Completion(filename string, pos lsp.Position) ([]lsp.CompletionItem, error) {
+	cc := lsp.CompletionContext{
+		TriggerKind: lsp.CTKInvoked,
+	}
 
+	docpos := lsp.TextDocumentPositionParams{
+		TextDocument: lsp.TextDocumentIdentifier{
+			URI: lsp.DocumentURI("file://" + filename),
+		},
+		Position: pos,
+	}
+
+	params := lsp.CompletionParams{
+		TextDocumentPositionParams: docpos,
+		Context:                    cc,
+	}
+	resp, err := s.SendMessageGetResponse("textDocument/completion", params)
+	if err != nil {
+		return nil, err
+	}
+
+	var r RPCCompletion
+	err = json.Unmarshal(resp, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Result.Items, nil
 }
 
 func (s *Server) CompletionResolve() {

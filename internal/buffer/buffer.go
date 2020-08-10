@@ -138,7 +138,9 @@ func (b *SharedBuffer) insert(pos Loc, value []byte) {
 	inslines := bytes.Count(value, []byte{'\n'})
 	b.MarkModified(pos.Y, pos.Y+inslines)
 
-	b.lspDidChange(pos, pos.MoveLA(util.CharacterCount(value), b.LineArray), string(value))
+	p := pos
+	p.X += util.CharacterCount(value)
+	b.lspDidChange(pos, p, string(value))
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
@@ -405,7 +407,11 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			if ok && l.Installed() {
 				b.server, _ = lsp.StartServer(l)
 				b.server.Initialize(gopath.Dir(b.AbsPath))
-				b.server.DidOpen(b.AbsPath, ft, string(b.Bytes()), b.version)
+				bytes := b.Bytes()
+				if len(bytes) == 0 {
+					bytes = []byte{'\n'}
+				}
+				b.server.DidOpen(b.AbsPath, ft, string(bytes), b.version)
 			}
 		}
 	}

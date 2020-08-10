@@ -7,6 +7,7 @@ import (
 	"sort"
 	"strings"
 
+	lspt "github.com/sourcegraph/go-lsp"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
@@ -194,6 +195,37 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 	}
 	if len(suggestions) > 1 {
 		suggestions = append(suggestions, string(input))
+	}
+
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
+	}
+
+	return completions, suggestions
+}
+
+func LSPComplete(b *Buffer) ([]string, []string) {
+	c := b.GetActiveCursor()
+	_, argstart := GetWord(b)
+
+	if argstart == -1 {
+		return []string{}, []string{}
+	}
+
+	pos := lspt.Position{
+		Line:      c.Y,
+		Character: c.X,
+	}
+	items, err := b.server.Completion(b.AbsPath, pos)
+	if err != nil {
+		return []string{}, []string{}
+	}
+
+	suggestions := make([]string, len(items))
+
+	for i, item := range items {
+		suggestions[i] = item.Label
 	}
 
 	completions := make([]string, len(suggestions))

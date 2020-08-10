@@ -678,7 +678,7 @@ func (h *BufPane) Autocomplete() bool {
 		b.CycleAutocomplete(true)
 		return true
 	}
-	return b.Autocomplete(buffer.BufferComplete)
+	return b.Autocomplete(buffer.LSPComplete)
 }
 
 // CycleAutocompleteBack cycles back in the autocomplete suggestion list

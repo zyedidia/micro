@@ -30,6 +30,9 @@ type Server struct {
 	capabilities lsp.ServerCapabilities
 	root         string
 	lock         sync.Mutex
+	active       bool
+	requestID    int
+	responses    map[int]chan ([]byte)
 }
 
 type RPCMessage struct {
@@ -43,6 +46,12 @@ type RPCInit struct {
 	RPCVersion string               `json:"jsonrpc"`
 	ID         int                  `json:"id"`
 	Result     lsp.InitializeResult `json:"result"`
+}
+
+type RPCResult struct {
+	RPCVersion string `json:"jsonrpc"`
+	ID         int    `json:"id,omitempty"`
+	Method     string `json:"method,omitempty"`
 }
 
 func StartServer(l Language) (*Server, error) {
@@ -70,6 +79,7 @@ func StartServer(l Language) (*Server, error) {
 	s.stdin = stdin
 	s.stdout = bufio.NewReader(stdout)
 	s.language = &l
+	s.responses = make(map[int]chan []byte)
 
 	// activeServers[l.Command] = s
 
@@ -133,67 +143,83 @@ func (s *Server) Initialize(directory string) {
 		},
 	}
 
-	go func() {
-		resp, err := s.SendMessage("initialize", params)
-		if err != nil {
-			return
-		}
-
-		// todo parse capabilities
-		log.Println("Received", string(resp))
-
-		var r RPCInit
-		err = json.Unmarshal(resp, &r)
-		if err != nil {
-			return
-		}
-
-		_, err = s.SendMessage("initialized", struct{}{})
-		if err != nil {
-			return
-		}
-
-		slock.Lock()
-		activeServers[s.language.Command+"-"+directory] = s
-		slock.Unlock()
-
-		s.lock.Lock()
-		s.capabilities = r.Result.Capabilities
-		s.root = directory
-		s.lock.Unlock()
-	}()
-}
-
-func (s *Server) SendMessage(method string, params interface{}) ([]byte, error) {
-	m := RPCMessage{
-		RPCVersion: "2.0",
-		ID:         os.Getpid(),
-		Method:     method,
-		Params:     params,
-	}
-
-	msg, err := json.Marshal(m)
+	err := s.SendMessage("initialize", params)
 	if err != nil {
-		return nil, err
+		return
 	}
 
-	msg = append(msg, '\r', '\n')
+	resp, err := s.receiveMessage()
+	if err != nil {
+		return
+	}
 
-	header := []byte("Content-Length: " + strconv.Itoa(len(msg)) + "\r\n\r\n")
-	msg = append(header, msg...)
+	// todo parse capabilities
+	log.Println("Received", string(resp))
 
-	log.Println("Sending", string(msg))
+	var r RPCInit
+	err = json.Unmarshal(resp, &r)
+	if err != nil {
+		return
+	}
+
+	err = s.SendMessage("initialized", struct{}{})
+	if err != nil {
+		return
+	}
+
+	slock.Lock()
+	activeServers[s.language.Command+"-"+directory] = s
+	slock.Unlock()
 
 	s.lock.Lock()
-	s.stdin.Write(msg)
+	s.capabilities = r.Result.Capabilities
+	s.root = directory
+	s.active = true
+	s.lock.Unlock()
 
+	go s.receive()
+}
+
+func (s *Server) receive() {
+	for s.active {
+		resp, err := s.receiveMessage()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+		log.Println("Received", string(resp))
+
+		var r RPCResult
+		err = json.Unmarshal(resp, &r)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		switch r.Method {
+		case "window/logMessage":
+			// TODO
+		case "textDocument/publishDiagnostics":
+			// TODO
+		case "":
+			// Response
+			if _, ok := s.responses[r.ID]; ok {
+				s.responses[r.ID] <- resp
+			}
+		}
+	}
+}
+
+func (s *Server) receiveMessage() ([]byte, error) {
 	n := -1
 	for {
+		log.Println("waiting for header")
 		b, err := s.stdout.ReadBytes('\n')
 		if err != nil {
 			return nil, err
 		}
 		headerline := strings.TrimSpace(string(b))
+		log.Println("Read header", headerline)
 		if len(headerline) == 0 {
 			break
 		}
@@ -213,15 +239,52 @@ func (s *Server) SendMessage(method string, params interface{}) ([]byte, error) 
 		return []byte{}, nil
 	}
 
+	log.Println("CONTENT-LENGTH:", n)
+
 	bytes := make([]byte, n)
-	_, err = s.stdout.Read(bytes)
+	_, err := io.ReadFull(s.stdout, bytes)
+	if err != nil {
+		log.Println("ERROR:", err)
+	}
+	return bytes, err
+}
+
+func (s *Server) SendMessageGetResponse(method string, params interface{}) ([]byte, error) {
+	id := s.requestID
+	r := make(chan []byte)
+	s.responses[id] = r
+	err := s.SendMessage(method, params)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Println("Received", string(bytes))
-
-	s.lock.Unlock()
+	bytes := <-r
+	delete(s.responses, id)
 
 	return bytes, nil
+}
+
+func (s *Server) SendMessage(method string, params interface{}) error {
+	m := RPCMessage{
+		RPCVersion: "2.0",
+		ID:         s.requestID,
+		Method:     method,
+		Params:     params,
+	}
+	s.requestID++
+
+	msg, err := json.Marshal(m)
+	if err != nil {
+		return err
+	}
+
+	// encode header and proper line endings
+	msg = append(msg, '\r', '\n')
+	header := []byte("Content-Length: " + strconv.Itoa(len(msg)) + "\r\n\r\n")
+	msg = append(header, msg...)
+
+	log.Println("Sending", string(msg))
+
+	s.stdin.Write(msg)
+	return nil
 }
