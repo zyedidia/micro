@@ -37,6 +37,12 @@ type CallbackFile struct {
 	args     []interface{}
 }
 
+// Job stores the executing command for the job, and the stdin pipe
+type Job struct {
+	*exec.Cmd
+	Stdin io.WriteCloser
+}
+
 func (f *CallbackFile) Write(data []byte) (int, error) {
 	// This is either stderr or stdout
 	// In either case we create a new job function callback and put it in the jobs channel
@@ -47,13 +53,13 @@ func (f *CallbackFile) Write(data []byte) (int, error) {
 
 // JobStart starts a shell command in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobStart(cmd string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *exec.Cmd {
+func JobStart(cmd string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *Job {
 	return JobSpawn("sh", []string{"-c", cmd}, onStdout, onStderr, onExit, userargs...)
 }
 
 // JobSpawn starts a process with args in the background with the given callbacks
 // It returns an *exec.Cmd as the job id
-func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *exec.Cmd {
+func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(string, []interface{}), userargs ...interface{}) *Job {
 	// Set up everything correctly if the functions have been provided
 	proc := exec.Command(cmdName, cmdArgs...)
 	var outbuf bytes.Buffer
@@ -67,6 +73,7 @@ func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(
 	} else {
 		proc.Stderr = &outbuf
 	}
+	stdin, _ := proc.StdinPipe()
 
 	go func() {
 		// Run the process in the background and create the onExit callback
@@ -75,20 +82,15 @@ func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(
 		Jobs <- jobFunc
 	}()
 
-	return proc
+	return &Job{proc, stdin}
 }
 
 // JobStop kills a job
-func JobStop(cmd *exec.Cmd) {
-	cmd.Process.Kill()
+func JobStop(j *Job) {
+	j.Process.Kill()
 }
 
 // JobSend sends the given data into the job's stdin stream
-func JobSend(cmd *exec.Cmd, data string) {
-	stdin, err := cmd.StdinPipe()
-	if err != nil {
-		return
-	}
-
-	stdin.Write([]byte(data))
+func JobSend(j *Job, data string) {
+	j.Stdin.Write([]byte(data))
 }
