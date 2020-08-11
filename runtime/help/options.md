@@ -394,6 +394,84 @@ Any option you set in the editor will be saved to the file
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
 
+## Settings.json file
+
+The settings.json file should go in your configuration directory (by default
+at `~/.config/micro`), and should contain only options which have been modified
+from their default setting. Here is the full list of options in json format,
+so that you can see what the formatting should look like.
+
+```json
+{
+    "autoclose": true,
+    "autoindent": true,
+    "autosave": 0,
+    "autosu": false,
+    "backup": true,
+    "backupdir": "",
+    "basename": false,
+    "clipboard": "external",
+    "colorcolumn": 0,
+    "colorscheme": "default",
+    "comment": true,
+    "cursorline": true,
+    "diff": true,
+    "diffgutter": false,
+    "divchars": "|-",
+    "divreverse": true,
+    "encoding": "utf-8",
+    "eofnewline": true,
+    "fastdirty": false,
+    "fileformat": "unix",
+    "filetype": "unknown",
+    "ftoptions": true,
+    "ignorecase": false,
+    "indentchar": " ",
+    "infobar": true,
+    "initlua": true,
+    "keepautoindent": false,
+    "keymenu": false,
+    "linter": true,
+    "literate": true,
+    "matchbrace": true,
+    "mkparents": false,
+    "mouse": true,
+    "parsecursor": false,
+    "paste": false,
+    "permbackup": false,
+    "pluginchannels": [
+        "https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"
+    ],
+    "pluginrepos": [],
+    "readonly": false,
+    "relativeruler": false,
+    "rmtrailingws": false,
+    "ruler": true,
+    "savecursor": false,
+    "savehistory": true,
+    "saveundo": false,
+    "scrollbar": false,
+    "scrollmargin": 3,
+    "scrollspeed": 2,
+    "smartpaste": true,
+    "softwrap": false,
+    "splitbottom": true,
+    "splitright": true,
+    "status": true,
+    "statusformatl": "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+    "statusformatr": "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
+    "statusline": true,
+    "sucmd": "sudo",
+    "syntax": true,
+    "tabmovement": false,
+    "tabsize": 4,
+    "tabstospaces": false,
+    "test": true,
+    "useprimary": true,
+    "xterm": false
+}
+```
+
 ## Global and local settings
 
 You can set these settings either globally or locally. Locally means that the
