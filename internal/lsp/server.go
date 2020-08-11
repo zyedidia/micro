@@ -22,6 +22,10 @@ func init() {
 	activeServers = make(map[string]*Server)
 }
 
+func GetServer(l Language, dir string) *Server {
+	return activeServers[l.Command+"-"+dir]
+}
+
 type Server struct {
 	cmd          *exec.Cmd
 	stdin        io.WriteCloser
@@ -30,7 +34,7 @@ type Server struct {
 	capabilities lsp.ServerCapabilities
 	root         string
 	lock         sync.Mutex
-	active       bool
+	Active       bool
 	requestID    int
 	responses    map[int]chan ([]byte)
 }
@@ -61,6 +65,8 @@ type RPCResult struct {
 }
 
 func StartServer(l Language) (*Server, error) {
+	s := new(Server)
+
 	c := exec.Command(l.Command, l.Args...)
 
 	c.Stderr = log.Writer()
@@ -83,7 +89,6 @@ func StartServer(l Language) (*Server, error) {
 		return nil, err
 	}
 
-	s := new(Server)
 	s.cmd = c
 	s.stdin = stdin
 	s.stdout = bufio.NewReader(stdout)
@@ -151,7 +156,7 @@ func (s *Server) Initialize(directory string) {
 	}
 
 	activeServers[s.language.Command+"-"+directory] = s
-	s.active = true
+	s.Active = true
 	s.root = directory
 
 	go s.receive()
@@ -161,7 +166,7 @@ func (s *Server) Initialize(directory string) {
 		resp, err := s.sendRequest("initialize", params)
 		if err != nil {
 			log.Println("[micro-lsp]", err)
-			s.active = false
+			s.Active = false
 			s.lock.Unlock()
 			return
 		}
@@ -183,7 +188,7 @@ func (s *Server) Initialize(directory string) {
 }
 
 func (s *Server) receive() {
-	for s.active {
+	for s.Active {
 		resp, err := s.receiveMessage()
 		if err != nil {
 			log.Println("[micro-lsp]", err)

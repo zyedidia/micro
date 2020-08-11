@@ -13,6 +13,7 @@ function init()
     micro.SetStatusInfoFn("status.lines")
     micro.SetStatusInfoFn("status.bytes")
     micro.SetStatusInfoFn("status.size")
+    micro.SetStatusInfoFn("status.lsp")
     config.AddRuntimeFile("status", config.RTHelp, "help/status.md")
 end
 
@@ -30,6 +31,13 @@ end
 
 function size(b)
     return humanize.Bytes(b:Size())
+end
+
+function lsp(b)
+    if b:HasLSP() then
+        return "on"
+    end
+    return "off"
 end
 
 function branch(b)

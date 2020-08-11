@@ -166,7 +166,14 @@ func (b *SharedBuffer) lspDidChange(start, end Loc, text string) {
 		Text: text,
 	}
 
-	b.server.DidChange(b.AbsPath, b.version, []lspt.TextDocumentContentChangeEvent{change})
+	if b.HasLSP() {
+		b.server.DidChange(b.AbsPath, b.version, []lspt.TextDocumentContentChangeEvent{change})
+	}
+}
+
+// HasLSP returns whether this buffer is communicating with an LSP server
+func (b *SharedBuffer) HasLSP() bool {
+	return b.server != nil && b.server.Active
 }
 
 // MarkModified marks the buffer as modified for this frame
@@ -400,21 +407,35 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	if !found {
 		if btype == BTDefault {
-			ft := b.Settings["filetype"].(string)
-			l, ok := lsp.GetLanguage(ft)
-			if ok && l.Installed() {
-				b.server, _ = lsp.StartServer(l)
-				b.server.Initialize(gopath.Dir(b.AbsPath))
-				bytes := b.Bytes()
-				if len(bytes) == 0 {
-					bytes = []byte{'\n'}
-				}
-				b.server.DidOpen(b.AbsPath, ft, string(bytes), b.version)
-			}
+			b.lspInit()
 		}
 	}
 
 	return b
+}
+
+// initializes an LSP server if possible, or calls didOpen on an existing
+// LSP server in this workspace
+func (b *Buffer) lspInit() {
+	ft := b.Settings["filetype"].(string)
+	l, ok := lsp.GetLanguage(ft)
+	if ok && l.Installed() {
+		b.server = lsp.GetServer(l, gopath.Dir(b.AbsPath))
+		if b.server == nil {
+			var err error
+			b.server, err = lsp.StartServer(l)
+			if err == nil {
+				b.server.Initialize(gopath.Dir(b.AbsPath))
+			}
+		}
+		if b.HasLSP() {
+			bytes := b.Bytes()
+			if len(bytes) == 0 {
+				bytes = []byte{'\n'}
+			}
+			b.server.DidOpen(b.AbsPath, ft, string(bytes), b.version)
+		}
+	}
 }
 
 // Close removes this buffer from the list of open buffers
@@ -442,7 +463,9 @@ func (b *Buffer) Fini() {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
 	}
 
-	b.server.DidClose(b.AbsPath)
+	if b.HasLSP() {
+		b.server.DidClose(b.AbsPath)
+	}
 }
 
 // GetName returns the name that should be displayed in the statusline

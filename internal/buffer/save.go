@@ -196,7 +196,9 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 	b.isModified = false
 	b.UpdateRules()
 
-	b.server.DidSave(b.AbsPath)
+	if b.HasLSP() {
+		b.server.DidSave(b.AbsPath)
+	}
 
 	return err
 }
