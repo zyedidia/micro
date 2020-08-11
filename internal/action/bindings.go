@@ -50,14 +50,6 @@ func InitBindings() {
 		}
 	}
 
-	for p, bind := range Binder {
-		defaults := DefaultBindings(p)
-
-		for k, v := range defaults {
-			BindKey(k, v, bind)
-		}
-	}
-
 	for k, v := range parsed {
 		switch val := v.(type) {
 		case string:
@@ -74,6 +66,14 @@ func InitBindings() {
 			}
 		default:
 			screen.TermMessage("Error reading bindings.json: non-string and non-map entry", k)
+		}
+	}
+
+	for p, bind := range Binder {
+		defaults := DefaultBindings(p)
+
+		for k, v := range defaults {
+			BindKey(k, v, bind)
 		}
 	}
 }
