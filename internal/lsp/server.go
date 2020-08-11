@@ -90,8 +90,6 @@ func StartServer(l Language) (*Server, error) {
 	s.language = &l
 	s.responses = make(map[int]chan []byte)
 
-	// activeServers[l.Command] = s
-
 	return s, nil
 }
 
@@ -154,29 +152,34 @@ func (s *Server) Initialize(directory string) {
 
 	activeServers[s.language.Command+"-"+directory] = s
 	s.active = true
+	s.root = directory
 
 	go s.receive()
 
-	resp, err := s.sendRequest("initialize", params)
-	if err != nil {
-		log.Println("[micro-lsp]", err)
-		return
-	}
+	s.lock.Lock()
+	go func() {
+		resp, err := s.sendRequest("initialize", params)
+		if err != nil {
+			log.Println("[micro-lsp]", err)
+			s.active = false
+			s.lock.Unlock()
+			return
+		}
 
-	// todo parse capabilities
-	log.Println("[micro-lsp] <<<", string(resp))
+		// todo parse capabilities
+		log.Println("[micro-lsp] <<<", string(resp))
 
-	var r RPCInit
-	json.Unmarshal(resp, &r)
+		var r RPCInit
+		json.Unmarshal(resp, &r)
 
-	err = s.sendNotification("initialized", struct{}{})
-	if err != nil {
-		log.Println("[micro-lsp]", err)
-		return
-	}
+		s.lock.Unlock()
+		err = s.sendNotification("initialized", struct{}{})
+		if err != nil {
+			log.Println("[micro-lsp]", err)
+		}
 
-	s.capabilities = r.Result.Capabilities
-	s.root = directory
+		s.capabilities = r.Result.Capabilities
+	}()
 }
 
 func (s *Server) receive() {
@@ -203,6 +206,7 @@ func (s *Server) receive() {
 		case "":
 			// Response
 			if _, ok := s.responses[r.ID]; ok {
+				log.Println("[micro-lsp] Got response for", r.ID)
 				s.responses[r.ID] <- resp
 			}
 		}
@@ -251,6 +255,8 @@ func (s *Server) sendNotification(method string, params interface{}) error {
 		Params:     params,
 	}
 
+	s.lock.Lock()
+	defer s.lock.Unlock()
 	return s.sendMessage(m)
 }
 

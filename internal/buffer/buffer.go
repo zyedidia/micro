@@ -443,6 +443,8 @@ func (b *Buffer) Fini() {
 	if b.Type == BTStdout {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
 	}
+
+	b.server.DidClose(b.AbsPath)
 }
 
 // GetName returns the name that should be displayed in the statusline

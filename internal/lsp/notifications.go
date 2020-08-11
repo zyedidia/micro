@@ -14,7 +14,7 @@ func (s *Server) DidOpen(filename, language, text string, version int) {
 		TextDocument: doc,
 	}
 
-	s.sendNotification("textDocument/didOpen", params)
+	go s.sendNotification("textDocument/didOpen", params)
 }
 
 func (s *Server) DidSave(filename string) {
@@ -25,7 +25,7 @@ func (s *Server) DidSave(filename string) {
 	params := lsp.DidSaveTextDocumentParams{
 		TextDocument: doc,
 	}
-	s.sendNotification("textDocument/didSave", params)
+	go s.sendNotification("textDocument/didSave", params)
 }
 
 func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocumentContentChangeEvent) {
@@ -40,7 +40,7 @@ func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocum
 		TextDocument:   doc,
 		ContentChanges: changes,
 	}
-	s.sendNotification("textDocument/didChange", params)
+	go s.sendNotification("textDocument/didChange", params)
 }
 
 func (s *Server) DidClose(filename string) {
@@ -51,5 +51,5 @@ func (s *Server) DidClose(filename string) {
 	params := lsp.DidCloseTextDocumentParams{
 		TextDocument: doc,
 	}
-	s.sendNotification("textDocument/didClose", params)
+	go s.sendNotification("textDocument/didClose", params)
 }
