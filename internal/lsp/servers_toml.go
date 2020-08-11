@@ -32,11 +32,11 @@ command = "pyls"
 install = [["pip", "install", "python-language-server"]]
 
 [language.c]
-command = "clangd"
-args = ["--log=verbose"]
+command = "ccls"
+args = []
 
 [language.cpp]
-command = "clangd"
+command = "ccls"
 args = []
 
 [language.haskell]

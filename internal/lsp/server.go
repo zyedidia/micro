@@ -35,9 +35,15 @@ type Server struct {
 	responses    map[int]chan ([]byte)
 }
 
-type RPCMessage struct {
+type RPCRequest struct {
 	RPCVersion string      `json:"jsonrpc"`
 	ID         int         `json:"id"`
+	Method     string      `json:"method"`
+	Params     interface{} `json:"params"`
+}
+
+type RPCNotification struct {
+	RPCVersion string      `json:"jsonrpc"`
 	Method     string      `json:"method"`
 	Params     interface{} `json:"params"`
 }
@@ -57,20 +63,23 @@ type RPCResult struct {
 func StartServer(l Language) (*Server, error) {
 	c := exec.Command(l.Command, l.Args...)
 
-	log.Println("Running", l.Command, l.Args)
+	c.Stderr = log.Writer()
 
 	stdin, err := c.StdinPipe()
 	if err != nil {
+		log.Println("[micro-lsp]", err)
 		return nil, err
 	}
 
 	stdout, err := c.StdoutPipe()
 	if err != nil {
+		log.Println("[micro-lsp]", err)
 		return nil, err
 	}
 
 	err = c.Start()
 	if err != nil {
+		log.Println("[micro-lsp]", err)
 		return nil, err
 	}
 
@@ -143,56 +152,46 @@ func (s *Server) Initialize(directory string) {
 		},
 	}
 
-	err := s.SendMessage("initialize", params)
-	if err != nil {
-		return
-	}
+	activeServers[s.language.Command+"-"+directory] = s
+	s.active = true
 
-	resp, err := s.receiveMessage()
+	go s.receive()
+
+	resp, err := s.sendRequest("initialize", params)
 	if err != nil {
+		log.Println("[micro-lsp]", err)
 		return
 	}
 
 	// todo parse capabilities
-	log.Println("Received", string(resp))
+	log.Println("[micro-lsp] <<<", string(resp))
 
 	var r RPCInit
-	err = json.Unmarshal(resp, &r)
+	json.Unmarshal(resp, &r)
+
+	err = s.sendNotification("initialized", struct{}{})
 	if err != nil {
+		log.Println("[micro-lsp]", err)
 		return
 	}
 
-	err = s.SendMessage("initialized", struct{}{})
-	if err != nil {
-		return
-	}
-
-	slock.Lock()
-	activeServers[s.language.Command+"-"+directory] = s
-	slock.Unlock()
-
-	s.lock.Lock()
 	s.capabilities = r.Result.Capabilities
 	s.root = directory
-	s.active = true
-	s.lock.Unlock()
-
-	go s.receive()
 }
 
 func (s *Server) receive() {
 	for s.active {
 		resp, err := s.receiveMessage()
 		if err != nil {
-			log.Println(err)
+			log.Println("[micro-lsp]", err)
 			continue
 		}
-		log.Println("Received", string(resp))
+		log.Println("[micro-lsp] <<<", string(resp))
 
 		var r RPCResult
 		err = json.Unmarshal(resp, &r)
 		if err != nil {
-			log.Println(err)
+			log.Println("[micro-lsp]", err)
 			continue
 		}
 
@@ -213,13 +212,11 @@ func (s *Server) receive() {
 func (s *Server) receiveMessage() ([]byte, error) {
 	n := -1
 	for {
-		log.Println("waiting for header")
 		b, err := s.stdout.ReadBytes('\n')
 		if err != nil {
 			return nil, err
 		}
 		headerline := strings.TrimSpace(string(b))
-		log.Println("Read header", headerline)
 		if len(headerline) == 0 {
 			break
 		}
@@ -239,21 +236,38 @@ func (s *Server) receiveMessage() ([]byte, error) {
 		return []byte{}, nil
 	}
 
-	log.Println("CONTENT-LENGTH:", n)
-
 	bytes := make([]byte, n)
 	_, err := io.ReadFull(s.stdout, bytes)
 	if err != nil {
-		log.Println("ERROR:", err)
+		log.Println("[micro-lsp]", err)
 	}
 	return bytes, err
 }
 
-func (s *Server) SendMessageGetResponse(method string, params interface{}) ([]byte, error) {
+func (s *Server) sendNotification(method string, params interface{}) error {
+	m := RPCNotification{
+		RPCVersion: "2.0",
+		Method:     method,
+		Params:     params,
+	}
+
+	return s.sendMessage(m)
+}
+
+func (s *Server) sendRequest(method string, params interface{}) ([]byte, error) {
 	id := s.requestID
+	s.requestID++
 	r := make(chan []byte)
 	s.responses[id] = r
-	err := s.SendMessage(method, params)
+
+	m := RPCRequest{
+		RPCVersion: "2.0",
+		ID:         id,
+		Method:     method,
+		Params:     params,
+	}
+
+	err := s.sendMessage(m)
 	if err != nil {
 		return nil, err
 	}
@@ -264,27 +278,19 @@ func (s *Server) SendMessageGetResponse(method string, params interface{}) ([]by
 	return bytes, nil
 }
 
-func (s *Server) SendMessage(method string, params interface{}) error {
-	m := RPCMessage{
-		RPCVersion: "2.0",
-		ID:         s.requestID,
-		Method:     method,
-		Params:     params,
-	}
-	s.requestID++
-
+func (s *Server) sendMessage(m interface{}) error {
 	msg, err := json.Marshal(m)
 	if err != nil {
 		return err
 	}
+
+	log.Println("[micro-lsp] >>>", string(msg))
 
 	// encode header and proper line endings
 	msg = append(msg, '\r', '\n')
 	header := []byte("Content-Length: " + strconv.Itoa(len(msg)) + "\r\n\r\n")
 	msg = append(header, msg...)
 
-	log.Println("Sending", string(msg))
-
-	s.stdin.Write(msg)
-	return nil
+	_, err = s.stdin.Write(msg)
+	return err
 }

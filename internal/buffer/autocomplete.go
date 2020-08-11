@@ -223,14 +223,17 @@ func LSPComplete(b *Buffer) ([]string, []string) {
 	}
 
 	suggestions := make([]string, len(items))
+	completions := make([]string, len(items))
 
 	for i, item := range items {
 		suggestions[i] = item.Label
-	}
-
-	completions := make([]string, len(suggestions))
-	for i := range suggestions {
-		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
+		if len(item.TextEdit.NewText) > 0 {
+			completions[i] = util.SliceEndStr(item.TextEdit.NewText, c.X-argstart)
+		} else if len(item.InsertText) > 0 {
+			completions[i] = util.SliceEndStr(item.InsertText, c.X-argstart)
+		} else {
+			completions[i] = util.SliceEndStr(item.Label, c.X-argstart)
+		}
 	}
 
 	return completions, suggestions
