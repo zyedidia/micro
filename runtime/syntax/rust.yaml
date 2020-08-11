@@ -7,15 +7,19 @@ rules:
     # function definition
     - identifier: "fn [a-z0-9_]+"
       # Reserved words
-    - statement: "\\b(abstract|alignof|as|become|box|break|const|continue|crate|do|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\\b"
+    - statement: "\\b(abstract|alignof|as|become|box|break|const|continue|crate|do|dyn|else|enum|extern|false|final|fn|for|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|unsafe|unsized|use|virtual|where|while|yield)\\b"
       # macros
     - special: "[a-z_]+!"
       # Constants
-    - constant: "[A-Z][A-Z_]+"
+    - constant: "\\b[A-Z][A-Z_0-9]+\\b"
       # Numbers
     - constant.number: "\\b[0-9]+\\b"
+      # Booleans
+    - constant: "\\b(true|false)\\b"
       # Traits/Enums/Structs/Types/etc.
-    - type: "[A-Z][a-z]+"
+    - type: "\\b[A-Z]+[a-zA-Z_0-9]*[a-z]+[a-zA-Z_0-9]*\\b"
+      # Builtin types that start with lowercase.
+    - type: "\\b(bool|str|isize|usize|((i|u)(8|16|32|64))|f32|f64)\\b"
 
     - constant.string:
         start: "\""
