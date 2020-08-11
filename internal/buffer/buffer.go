@@ -138,9 +138,7 @@ func (b *SharedBuffer) insert(pos Loc, value []byte) {
 	inslines := bytes.Count(value, []byte{'\n'})
 	b.MarkModified(pos.Y, pos.Y+inslines)
 
-	p := pos
-	p.X += util.CharacterCount(value)
-	b.lspDidChange(pos, p, string(value))
+	b.lspDidChange(pos, pos, string(value))
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
