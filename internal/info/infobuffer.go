@@ -145,6 +145,14 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 				i.PromptCallback(resp, false)
 				h := i.History[i.PromptType]
 				h[len(h)-1] = resp
+
+				// avoid duplicates
+				for j := len(h) - 2; j >= 0; j-- {
+					if h[j] == h[len(h)-1] {
+						i.History[i.PromptType] = append(h[:j], h[j+1:]...)
+						break
+					}
+				}
 			}
 			// i.PromptCallback = nil
 		}
