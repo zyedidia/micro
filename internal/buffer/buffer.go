@@ -18,13 +18,13 @@ import (
 	"time"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
-	lspt "github.com/sourcegraph/go-lsp"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/lsp"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
+	lspt "go.lsp.dev/protocol"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -126,8 +126,8 @@ type SharedBuffer struct {
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
 
-	server  *lsp.Server
-	version int
+	Server  *lsp.Server
+	version uint64
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
@@ -154,26 +154,20 @@ func (b *SharedBuffer) lspDidChange(start, end Loc, text string) {
 	// TODO: convert to UTF16 codepoints
 	change := lspt.TextDocumentContentChangeEvent{
 		Range: &lspt.Range{
-			Start: lspt.Position{
-				Line:      start.Y,
-				Character: start.X,
-			},
-			End: lspt.Position{
-				Line:      end.Y,
-				Character: end.X,
-			},
+			Start: lsp.Position(start.X, start.Y),
+			End:   lsp.Position(end.X, end.Y),
 		},
 		Text: text,
 	}
 
 	if b.HasLSP() {
-		b.server.DidChange(b.AbsPath, b.version, []lspt.TextDocumentContentChangeEvent{change})
+		b.Server.DidChange(b.AbsPath, &b.version, []lspt.TextDocumentContentChangeEvent{change})
 	}
 }
 
 // HasLSP returns whether this buffer is communicating with an LSP server
 func (b *SharedBuffer) HasLSP() bool {
-	return b.server != nil && b.server.Active
+	return b.Server != nil && b.Server.Active
 }
 
 // MarkModified marks the buffer as modified for this frame
@@ -420,12 +414,12 @@ func (b *Buffer) lspInit() {
 	ft := b.Settings["filetype"].(string)
 	l, ok := lsp.GetLanguage(ft)
 	if ok && l.Installed() {
-		b.server = lsp.GetServer(l, gopath.Dir(b.AbsPath))
-		if b.server == nil {
+		b.Server = lsp.GetServer(l, gopath.Dir(b.AbsPath))
+		if b.Server == nil {
 			var err error
-			b.server, err = lsp.StartServer(l)
+			b.Server, err = lsp.StartServer(l)
 			if err == nil {
-				b.server.Initialize(gopath.Dir(b.AbsPath))
+				b.Server.Initialize(gopath.Dir(b.AbsPath))
 			}
 		}
 		if b.HasLSP() {
@@ -433,7 +427,7 @@ func (b *Buffer) lspInit() {
 			if len(bytes) == 0 {
 				bytes = []byte{'\n'}
 			}
-			b.server.DidOpen(b.AbsPath, ft, string(bytes), b.version)
+			b.Server.DidOpen(b.AbsPath, ft, string(bytes), &b.version)
 		}
 	}
 }
@@ -464,7 +458,7 @@ func (b *Buffer) Fini() {
 	}
 
 	if b.HasLSP() {
-		b.server.DidClose(b.AbsPath)
+		b.Server.DidClose(b.AbsPath)
 	}
 }
 

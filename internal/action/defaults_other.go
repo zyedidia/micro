@@ -72,6 +72,7 @@ var bufdefaults = map[string]string{
 	"Ctrl-w":         "NextSplit",
 	"Ctrl-u":         "ToggleMacro",
 	"Ctrl-j":         "PlayMacro",
+	"Alt-i":          "SemanticInfo",
 	"Insert":         "ToggleOverwriteMode",
 
 	// Emacs-style keybindings

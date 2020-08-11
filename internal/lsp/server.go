@@ -11,8 +11,8 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/sourcegraph/go-lsp"
-	"github.com/zyedidia/micro/v2/internal/util"
+	lsp "go.lsp.dev/protocol"
+	"go.lsp.dev/uri"
 )
 
 var activeServers map[string]*Server
@@ -102,56 +102,36 @@ func StartServer(l Language) (*Server, error) {
 // The directory must be an absolute path
 func (s *Server) Initialize(directory string) {
 	params := lsp.InitializeParams{
-		ProcessID: os.Getpid(),
-		RootURI:   lsp.DocumentURI("file://" + directory),
-		ClientInfo: lsp.ClientInfo{
-			Name:    "micro",
-			Version: util.Version,
-		},
-		Trace: "off",
+		ProcessID: float64(os.Getpid()),
+		RootURI:   uri.File(directory),
 		Capabilities: lsp.ClientCapabilities{
-			Workspace: lsp.WorkspaceClientCapabilities{
-				WorkspaceEdit: struct {
-					DocumentChanges    bool     `json:"documentChanges,omitempty"`
-					ResourceOperations []string `json:"resourceOperations,omitempty"`
-				}{
+			Workspace: &lsp.WorkspaceClientCapabilities{
+				WorkspaceEdit: &lsp.WorkspaceClientCapabilitiesWorkspaceEdit{
 					DocumentChanges:    true,
 					ResourceOperations: []string{"create", "rename", "delete"},
 				},
 				ApplyEdit: true,
 			},
-			TextDocument: lsp.TextDocumentClientCapabilities{
-				Formatting: &struct {
-					DynamicRegistration bool `json:"dynamicRegistration,omitempty"`
-				}{
-					DynamicRegistration: true,
+			TextDocument: &lsp.TextDocumentClientCapabilities{
+				Formatting: &lsp.TextDocumentClientCapabilitiesFormatting{
+					DynamicRegistration: false,
 				},
-				Completion: struct {
-					CompletionItem struct {
-						DocumentationFormat []lsp.DocumentationFormat `json:"documentationFormat,omitempty"`
-						SnippetSupport      bool                      `json:"snippetSupport,omitempty"`
-					} `json:"completionItem,omitempty"`
-
-					CompletionItemKind struct {
-						ValueSet []lsp.CompletionItemKind `json:"valueSet,omitempty"`
-					} `json:"completionItemKind,omitempty"`
-
-					ContextSupport bool `json:"contextSupport,omitempty"`
-				}{
-					CompletionItem: struct {
-						DocumentationFormat []lsp.DocumentationFormat `json:"documentationFormat,omitempty"`
-						SnippetSupport      bool                      `json:"snippetSupport,omitempty"`
-					}{
-						DocumentationFormat: []lsp.DocumentationFormat{lsp.DFPlainText},
-						SnippetSupport:      false,
+				Completion: &lsp.TextDocumentClientCapabilitiesCompletion{
+					DynamicRegistration: false,
+					CompletionItem: &lsp.TextDocumentClientCapabilitiesCompletionItem{
+						SnippetSupport:          false,
+						CommitCharactersSupport: false,
+						DocumentationFormat:     []lsp.MarkupKind{lsp.PlainText},
+						DeprecatedSupport:       false,
+						PreselectSupport:        false,
 					},
 					ContextSupport: false,
 				},
+				Hover: &lsp.TextDocumentClientCapabilitiesHover{
+					DynamicRegistration: false,
+					ContentFormat:       []lsp.MarkupKind{lsp.PlainText},
+				},
 			},
-			Window: lsp.WindowClientCapabilities{
-				WorkDoneProgress: false,
-			},
-			Experimental: nil,
 		},
 	}
 

@@ -11,7 +11,6 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/robertkrimen/otto v0.0.0-20191219234010-c382bd3c16ff
 	github.com/sergi/go-diff v1.1.0
-	github.com/sourcegraph/go-lsp v0.0.0-20200429204803-219e11d77f5d
 	github.com/stretchr/testify v1.4.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
 	github.com/zyedidia/clipboard v1.0.3
@@ -21,6 +20,8 @@ require (
 	github.com/zyedidia/pty v2.0.0+incompatible // indirect
 	github.com/zyedidia/tcell v1.4.10
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
+	go.lsp.dev/protocol v0.8.0
+	go.lsp.dev/uri v0.3.0
 	golang.org/x/text v0.3.2
 	gopkg.in/sourcemap.v1 v1.0.5 // indirect
 	gopkg.in/yaml.v2 v2.2.7

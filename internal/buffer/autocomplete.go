@@ -7,7 +7,7 @@ import (
 	"sort"
 	"strings"
 
-	lspt "github.com/sourcegraph/go-lsp"
+	"github.com/zyedidia/micro/v2/internal/lsp"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
@@ -213,11 +213,8 @@ func LSPComplete(b *Buffer) ([]string, []string) {
 		return []string{}, []string{}
 	}
 
-	pos := lspt.Position{
-		Line:      c.Y,
-		Character: c.X,
-	}
-	items, err := b.server.Completion(b.AbsPath, pos)
+	pos := lsp.Position(c.X, c.Y)
+	items, err := b.Server.Completion(b.AbsPath, pos)
 	if err != nil {
 		return []string{}, []string{}
 	}

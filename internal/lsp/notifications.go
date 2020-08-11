@@ -1,12 +1,15 @@
 package lsp
 
-import "github.com/sourcegraph/go-lsp"
+import (
+	lsp "go.lsp.dev/protocol"
+	"go.lsp.dev/uri"
+)
 
-func (s *Server) DidOpen(filename, language, text string, version int) {
+func (s *Server) DidOpen(filename, language, text string, version *uint64) {
 	doc := lsp.TextDocumentItem{
-		URI:        lsp.DocumentURI("file://" + filename),
-		LanguageID: language,
-		Version:    version,
+		URI:        uri.File(filename),
+		LanguageID: lsp.LanguageIdentifier(language),
+		Version:    float64(*version), // not sure why this is a float on go.lsp.dev
 		Text:       text,
 	}
 
@@ -19,7 +22,7 @@ func (s *Server) DidOpen(filename, language, text string, version int) {
 
 func (s *Server) DidSave(filename string) {
 	doc := lsp.TextDocumentIdentifier{
-		URI: lsp.DocumentURI("file://" + filename),
+		URI: uri.File(filename),
 	}
 
 	params := lsp.DidSaveTextDocumentParams{
@@ -28,10 +31,10 @@ func (s *Server) DidSave(filename string) {
 	go s.sendNotification("textDocument/didSave", params)
 }
 
-func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocumentContentChangeEvent) {
+func (s *Server) DidChange(filename string, version *uint64, changes []lsp.TextDocumentContentChangeEvent) {
 	doc := lsp.VersionedTextDocumentIdentifier{
 		TextDocumentIdentifier: lsp.TextDocumentIdentifier{
-			URI: lsp.DocumentURI("file://" + filename),
+			URI: uri.File(filename),
 		},
 		Version: version,
 	}
@@ -45,7 +48,7 @@ func (s *Server) DidChange(filename string, version int, changes []lsp.TextDocum
 
 func (s *Server) DidClose(filename string) {
 	doc := lsp.TextDocumentIdentifier{
-		URI: lsp.DocumentURI("file://" + filename),
+		URI: uri.File(filename),
 	}
 
 	params := lsp.DidCloseTextDocumentParams{

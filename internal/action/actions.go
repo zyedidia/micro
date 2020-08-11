@@ -10,6 +10,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/lsp"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -1811,6 +1812,20 @@ func (h *BufPane) RemoveAllMultiCursors() bool {
 	h.Buf.ClearCursors()
 	h.multiWord = false
 	h.Relocate()
+	return true
+}
+
+func (h *BufPane) SemanticInfo() bool {
+	info, err := h.Buf.Server.Hover(h.Buf.AbsPath, lsp.Position(h.Cursor.X, h.Cursor.Y))
+
+	if err != nil {
+		InfoBar.Error(err)
+		return false
+	}
+
+	info = strings.Split(info, "\n")[0]
+
+	InfoBar.Message(info)
 	return true
 }
 
