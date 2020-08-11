@@ -5,3 +5,7 @@ const (
 )
 
 var Bindings map[string]string
+
+func init() {
+	Bindings = make(map[string]string)
+}

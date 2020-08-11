@@ -141,13 +141,14 @@ func (k *KeyTree) RegisterMouseBinding(e Event, a PaneMouseAction) {
 
 func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 	switch ev := e.(type) {
-	case KeyEvent, MouseEvent:
+	case KeyEvent, MouseEvent, RawEvent:
 		newNode, ok := k.root.children[e]
 		if !ok {
 			newNode = NewKeyTreeNode()
 			k.root.children[e] = newNode
 		}
-		newNode.actions = append(newNode.actions, a)
+		// newNode.actions = append(newNode.actions, a)
+		newNode.actions = []TreeAction{a}
 	case KeySequenceEvent:
 		n := k.root
 		for _, key := range ev.keys {
@@ -159,7 +160,8 @@ func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 
 			n = newNode
 		}
-		n.actions = append(n.actions, a)
+		// n.actions = append(n.actions, a)
+		n.actions = []TreeAction{a}
 	}
 }
 

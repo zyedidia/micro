@@ -30,8 +30,6 @@ func createBindingsIfNotExist(fname string) {
 
 // InitBindings intializes the bindings map by reading from bindings.json
 func InitBindings() {
-	config.Bindings = DefaultBindings("buffer")
-
 	var parsed map[string]interface{}
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
@@ -47,6 +45,14 @@ func InitBindings() {
 		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json:", err.Error())
+		}
+	}
+
+	for p, bind := range Binder {
+		defaults := DefaultBindings(p)
+
+		for k, v := range defaults {
+			BindKey(k, v, bind)
 		}
 	}
 
@@ -68,21 +74,16 @@ func InitBindings() {
 			screen.TermMessage("Error reading bindings.json: non-string and non-map entry", k)
 		}
 	}
-
-	for p, bind := range Binder {
-		defaults := DefaultBindings(p)
-
-		for k, v := range defaults {
-			BindKey(k, v, bind)
-		}
-	}
 }
 
 func BindKey(k, v string, bind func(e Event, a string)) {
 	event, err := findEvent(k)
 	if err != nil {
 		screen.TermMessage(err)
+		return
 	}
+
+	config.Bindings[event.Name()] = v
 
 	bind(event, v)
 
