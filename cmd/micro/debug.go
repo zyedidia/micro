@@ -12,7 +12,7 @@ type NullWriter struct{}
 
 // Write is empty
 func (NullWriter) Write(data []byte) (n int, err error) {
-	return 0, nil
+	return len(data), nil
 }
 
 // InitLog sets up the debug log system for micro if it has been enabled by compile-time variables
