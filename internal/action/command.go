@@ -641,7 +641,12 @@ func (h *BufPane) ShowKeyCmd(args []string) {
 		return
 	}
 
-	if action, ok := config.Bindings[args[0]]; ok {
+	event, err := findEvent(args[0])
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+	if action, ok := config.Bindings[event.Name()]; ok {
 		InfoBar.Message(action)
 	} else {
 		InfoBar.Message(args[0], " has no binding")
