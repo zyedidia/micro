@@ -1835,17 +1835,30 @@ func (h *BufPane) SemanticInfo() bool {
 
 // AutoFormat automatically formats the document using LSP
 func (h *BufPane) AutoFormat() bool {
-	edits, err := h.Buf.Server.DocumentFormat(h.Buf.AbsPath, protocol.FormattingOptions{
-		InsertSpaces: h.Buf.Settings["tabstospaces"].(bool),
-		TabSize:      h.Buf.Settings["tabsize"].(float64),
-	})
+	var err error
+	var edits []protocol.TextEdit
+
+	if h.Cursor.HasSelection() {
+		edits, err = h.Buf.Server.DocumentRangeFormat(h.Buf.AbsPath, protocol.Range{
+			Start: lsp.Position(h.Cursor.CurSelection[0].X, h.Cursor.CurSelection[0].Y),
+			End:   lsp.Position(h.Cursor.CurSelection[1].X, h.Cursor.CurSelection[1].Y),
+		}, protocol.FormattingOptions{
+			InsertSpaces: h.Buf.Settings["tabstospaces"].(bool),
+			TabSize:      h.Buf.Settings["tabsize"].(float64),
+		})
+	} else {
+		edits, err = h.Buf.Server.DocumentFormat(h.Buf.AbsPath, protocol.FormattingOptions{
+			InsertSpaces: h.Buf.Settings["tabstospaces"].(bool),
+			TabSize:      h.Buf.Settings["tabsize"].(float64),
+		})
+	}
+
 	if err != nil {
 		InfoBar.Error(err)
 		return false
 	}
 
 	h.Buf.ApplyEdits(edits)
-
 	return true
 }
 

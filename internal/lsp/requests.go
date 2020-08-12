@@ -2,10 +2,13 @@ package lsp
 
 import (
 	"encoding/json"
+	"errors"
 
 	lsp "go.lsp.dev/protocol"
 	"go.lsp.dev/uri"
 )
+
+var ErrNotSupported = errors.New("Operation not supported by language server")
 
 type RPCCompletion struct {
 	RPCVersion string             `json:"jsonrpc"`
@@ -54,6 +57,9 @@ func Position(x, y int) lsp.Position {
 }
 
 func (s *Server) DocumentFormat(filename string, options lsp.FormattingOptions) ([]lsp.TextEdit, error) {
+	if !s.capabilities.DocumentFormattingProvider {
+		return nil, ErrNotSupported
+	}
 	doc := lsp.TextDocumentIdentifier{
 		URI: uri.File(filename),
 	}
@@ -77,11 +83,40 @@ func (s *Server) DocumentFormat(filename string, options lsp.FormattingOptions) 
 	return r.Result, nil
 }
 
-func (s *Server) DocumentRangeFormat() {
+func (s *Server) DocumentRangeFormat(filename string, r lsp.Range, options lsp.FormattingOptions) ([]lsp.TextEdit, error) {
+	if !s.capabilities.DocumentRangeFormattingProvider {
+		return nil, ErrNotSupported
+	}
 
+	doc := lsp.TextDocumentIdentifier{
+		URI: uri.File(filename),
+	}
+
+	params := lsp.DocumentRangeFormattingParams{
+		Options:      options,
+		Range:        r,
+		TextDocument: doc,
+	}
+
+	resp, err := s.sendRequest(lsp.MethodTextDocumentFormatting, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var rpc RPCFormat
+	err = json.Unmarshal(resp, &rpc)
+	if err != nil {
+		return nil, err
+	}
+
+	return rpc.Result, nil
 }
 
 func (s *Server) Completion(filename string, pos lsp.Position) ([]lsp.CompletionItem, error) {
+	if s.capabilities.CompletionProvider == nil {
+		return nil, ErrNotSupported
+	}
+
 	cc := lsp.CompletionContext{
 		TriggerKind: lsp.Invoked,
 	}
@@ -120,6 +155,10 @@ func (s *Server) CompletionResolve() {
 }
 
 func (s *Server) Hover(filename string, pos lsp.Position) (string, error) {
+	if !s.capabilities.HoverProvider {
+		return "", ErrNotSupported
+	}
+
 	params := lsp.TextDocumentPositionParams{
 		TextDocument: lsp.TextDocumentIdentifier{
 			URI: uri.File(filename),
@@ -148,8 +187,11 @@ func (s *Server) Hover(filename string, pos lsp.Position) (string, error) {
 		switch t := c.(type) {
 		case string:
 			return t, nil
-		case map[string]string:
-			return t["value"], nil
+		case map[string]interface{}:
+			s, ok := t["value"].(string)
+			if ok {
+				return s, nil
+			}
 		}
 	}
 	return "", nil

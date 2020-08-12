@@ -172,8 +172,13 @@ func (s *Server) Initialize(directory string) {
 func (s *Server) receive() {
 	for s.Active {
 		resp, err := s.receiveMessage()
+		if err == io.EOF {
+			log.Println("Received EOF, shutting down")
+			s.Active = false
+			return
+		}
 		if err != nil {
-			log.Println("[micro-lsp]", err)
+			log.Println("[micro-lsp,error]", err)
 			continue
 		}
 		log.Println("[micro-lsp] <<<", string(resp))
