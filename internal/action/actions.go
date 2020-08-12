@@ -1844,9 +1844,7 @@ func (h *BufPane) AutoFormat() bool {
 		return false
 	}
 
-	for _, e := range edits {
-		h.Buf.ApplyEdit(e)
-	}
+	h.Buf.ApplyEdits(edits)
 
 	return true
 }

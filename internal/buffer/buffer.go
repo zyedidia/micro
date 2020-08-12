@@ -12,6 +12,7 @@ import (
 	"path"
 	gopath "path"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -515,6 +516,25 @@ func (b *Buffer) ApplyEdit(e lspt.TextEdit) {
 		// insertion
 		b.Insert(toLoc(e.Range.Start), e.NewText)
 	}
+}
+
+func (b *Buffer) ApplyEdits(edits []lspt.TextEdit) {
+	deltas := make([]Delta, len(edits))
+	for i, e := range edits {
+		deltas[i] = Delta{
+			Text:  []byte(e.NewText),
+			Start: toLoc(e.Range.Start),
+			End:   toLoc(e.Range.End),
+		}
+	}
+	// Since edit ranges are guaranteed by LSP to never overlap we can sort
+	// by last edit first and apply each edit in order
+	// Perhaps in the future we should make this more robust to a non-conforming
+	// server that sends overlapping ranges
+	sort.Slice(deltas, func(i, j int) bool {
+		return deltas[i].Start.GreaterThan(deltas[j].Start)
+	})
+	b.MultipleReplace(deltas)
 }
 
 // FileType returns the buffer's filetype
