@@ -493,6 +493,7 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.Insert(start, text)
 
 		b.RequestBackup()
+		b.RelocateCursors()
 	}
 }
 
@@ -504,6 +505,7 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.Remove(start, end)
 
 		b.RequestBackup()
+		b.RelocateCursors()
 	}
 }
 
@@ -513,28 +515,43 @@ func (b *Buffer) ApplyEdit(e lspt.TextEdit) {
 		// deletion
 		b.Remove(toLoc(e.Range.Start), toLoc(e.Range.End))
 	} else {
-		// insertion
-		b.Insert(toLoc(e.Range.Start), e.NewText)
+		// insert/replace
+		b.Replace(toLoc(e.Range.Start), toLoc(e.Range.End), e.NewText)
 	}
 }
 
 func (b *Buffer) ApplyEdits(edits []lspt.TextEdit) {
-	deltas := make([]Delta, len(edits))
-	for i, e := range edits {
-		deltas[i] = Delta{
-			Text:  []byte(e.NewText),
-			Start: toLoc(e.Range.Start),
-			End:   toLoc(e.Range.End),
+	if !b.Type.Readonly {
+		locs := make([]struct {
+			t          string
+			start, end Loc
+		}, len(edits))
+		for i, e := range edits {
+			locs[i] = struct {
+				t          string
+				start, end Loc
+			}{
+				t:     e.NewText,
+				start: toLoc(e.Range.Start),
+				end:   toLoc(e.Range.End),
+			}
 		}
+		// Since edit ranges are guaranteed by LSP to never overlap we can sort
+		// by last edit first and apply each edit in order
+		// Perhaps in the future we should make this more robust to a non-conforming
+		// server that sends overlapping ranges
+		sort.Slice(locs, func(i, j int) bool {
+			return locs[i].start.GreaterThan(locs[j].start)
+		})
+		for _, d := range locs {
+			if len(d.t) == 0 {
+				b.Remove(d.start, d.end)
+			} else {
+				b.Replace(d.start, d.end, d.t)
+			}
+		}
+		b.RelocateCursors()
 	}
-	// Since edit ranges are guaranteed by LSP to never overlap we can sort
-	// by last edit first and apply each edit in order
-	// Perhaps in the future we should make this more robust to a non-conforming
-	// server that sends overlapping ranges
-	sort.Slice(deltas, func(i, j int) bool {
-		return deltas[i].Start.GreaterThan(deltas[j].Start)
-	})
-	b.MultipleReplace(deltas)
 }
 
 // FileType returns the buffer's filetype
