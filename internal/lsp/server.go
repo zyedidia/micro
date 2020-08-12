@@ -3,6 +3,7 @@ package lsp
 import (
 	"bufio"
 	"encoding/json"
+	"errors"
 	"io"
 	"log"
 	"os"
@@ -10,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	lsp "go.lsp.dev/protocol"
 	"go.lsp.dev/uri"
@@ -263,10 +265,15 @@ func (s *Server) sendRequest(method string, params interface{}) ([]byte, error) 
 		return nil, err
 	}
 
-	bytes := <-r
+	var bytes []byte
+	select {
+	case bytes = <-r:
+	case <-time.After(5 * time.Second):
+		err = errors.New("Request timed out")
+	}
 	delete(s.responses, id)
 
-	return bytes, nil
+	return bytes, err
 }
 
 func (s *Server) sendMessage(m interface{}) error {

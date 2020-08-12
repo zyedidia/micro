@@ -13,10 +13,22 @@ type RPCCompletion struct {
 	Result     lsp.CompletionList `json:"result"`
 }
 
+type RPCCompletionAlternate struct {
+	RPCVersion string               `json:"jsonrpc"`
+	ID         int                  `json:"id"`
+	Result     []lsp.CompletionItem `json:"result"`
+}
+
 type RPCHover struct {
 	RPCVersion string    `json:"jsonrpc"`
 	ID         int       `json:"id"`
 	Result     lsp.Hover `json:"result"`
+}
+
+type RPCFormat struct {
+	RPCVersion string         `json:"jsonrpc"`
+	ID         int            `json:"id"`
+	Result     []lsp.TextEdit `json:"result"`
 }
 
 type hoverAlternate struct {
@@ -41,8 +53,28 @@ func Position(x, y int) lsp.Position {
 	}
 }
 
-func (s *Server) DocumentFormat() {
+func (s *Server) DocumentFormat(filename string, options lsp.FormattingOptions) ([]lsp.TextEdit, error) {
+	doc := lsp.TextDocumentIdentifier{
+		URI: uri.File(filename),
+	}
 
+	params := lsp.DocumentFormattingParams{
+		Options:      options,
+		TextDocument: doc,
+	}
+
+	resp, err := s.sendRequest(lsp.MethodTextDocumentFormatting, params)
+	if err != nil {
+		return nil, err
+	}
+
+	var r RPCFormat
+	err = json.Unmarshal(resp, &r)
+	if err != nil {
+		return nil, err
+	}
+
+	return r.Result, nil
 }
 
 func (s *Server) DocumentRangeFormat() {
@@ -65,18 +97,22 @@ func (s *Server) Completion(filename string, pos lsp.Position) ([]lsp.Completion
 		TextDocumentPositionParams: docpos,
 		Context:                    &cc,
 	}
-	resp, err := s.sendRequest("textDocument/completion", params)
+	resp, err := s.sendRequest(lsp.MethodTextDocumentCompletion, params)
 	if err != nil {
 		return nil, err
 	}
 
 	var r RPCCompletion
 	err = json.Unmarshal(resp, &r)
+	if err == nil {
+		return r.Result.Items, nil
+	}
+	var ra RPCCompletionAlternate
+	err = json.Unmarshal(resp, &ra)
 	if err != nil {
 		return nil, err
 	}
-
-	return r.Result.Items, nil
+	return ra.Result, nil
 }
 
 func (s *Server) CompletionResolve() {
@@ -91,7 +127,7 @@ func (s *Server) Hover(filename string, pos lsp.Position) (string, error) {
 		Position: pos,
 	}
 
-	resp, err := s.sendRequest("textDocument/hover", params)
+	resp, err := s.sendRequest(lsp.MethodTextDocumentHover, params)
 	if err != nil {
 		return "", err
 	}

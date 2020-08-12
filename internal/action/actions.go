@@ -15,6 +15,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/tcell"
+	"go.lsp.dev/protocol"
 )
 
 // ScrollUp is not an action
@@ -1815,6 +1816,9 @@ func (h *BufPane) RemoveAllMultiCursors() bool {
 	return true
 }
 
+// SemanticInfo returns information about the identifier the cursor is on and
+// displays the information in the infobar
+// The information is fetched using the LSP server (must be enabled)
 func (h *BufPane) SemanticInfo() bool {
 	info, err := h.Buf.Server.Hover(h.Buf.AbsPath, lsp.Position(h.Cursor.X, h.Cursor.Y))
 
@@ -1826,6 +1830,24 @@ func (h *BufPane) SemanticInfo() bool {
 	info = strings.Split(info, "\n")[0]
 
 	InfoBar.Message(info)
+	return true
+}
+
+// AutoFormat automatically formats the document using LSP
+func (h *BufPane) AutoFormat() bool {
+	edits, err := h.Buf.Server.DocumentFormat(h.Buf.AbsPath, protocol.FormattingOptions{
+		InsertSpaces: h.Buf.Settings["tabstospaces"].(bool),
+		TabSize:      h.Buf.Settings["tabsize"].(float64),
+	})
+	if err != nil {
+		InfoBar.Error(err)
+		return false
+	}
+
+	for _, e := range edits {
+		h.Buf.ApplyEdit(e)
+	}
+
 	return true
 }
 

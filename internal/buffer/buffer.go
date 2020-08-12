@@ -419,7 +419,8 @@ func (b *Buffer) lspInit() {
 			var err error
 			b.Server, err = lsp.StartServer(l)
 			if err == nil {
-				b.Server.Initialize(gopath.Dir(b.AbsPath))
+				d, _ := os.Getwd()
+				b.Server.Initialize(d)
 			}
 		}
 		if b.HasLSP() {
@@ -502,6 +503,17 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.Remove(start, end)
 
 		b.RequestBackup()
+	}
+}
+
+// ApplyEdit performs a LSP text edit on the buffer
+func (b *Buffer) ApplyEdit(e lspt.TextEdit) {
+	if len(e.NewText) == 0 {
+		// deletion
+		b.Remove(toLoc(e.Range.Start), toLoc(e.Range.End))
+	} else {
+		// insertion
+		b.Insert(toLoc(e.Range.Start), e.NewText)
 	}
 }
 

@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"github.com/zyedidia/micro/v2/internal/util"
+	"go.lsp.dev/protocol"
 )
 
 // Loc stores a location
@@ -145,4 +146,11 @@ func clamp(pos Loc, la *LineArray) Loc {
 		return la.Start()
 	}
 	return pos
+}
+
+func toLoc(r protocol.Position) Loc {
+	return Loc{
+		X: int(r.Character),
+		Y: int(r.Line),
+	}
 }
