@@ -19,6 +19,21 @@ type RPCHover struct {
 	Result     lsp.Hover `json:"result"`
 }
 
+type hoverAlternate struct {
+	// Contents is the hover's content
+	Contents []interface{} `json:"contents"`
+
+	// Range an optional range is a range inside a text document
+	// that is used to visualize a hover, e.g. by changing the background color.
+	Range lsp.Range `json:"range,omitempty"`
+}
+
+type RPCHoverAlternate struct {
+	RPCVersion string         `json:"jsonrpc"`
+	ID         int            `json:"id"`
+	Result     hoverAlternate `json:"result"`
+}
+
 func Position(x, y int) lsp.Position {
 	return lsp.Position{
 		Line:      float64(y),
@@ -83,9 +98,23 @@ func (s *Server) Hover(filename string, pos lsp.Position) (string, error) {
 
 	var r RPCHover
 	err = json.Unmarshal(resp, &r)
+	if err == nil {
+		return r.Result.Contents.Value, nil
+	}
+
+	var ra RPCHoverAlternate
+	err = json.Unmarshal(resp, &ra)
 	if err != nil {
 		return "", err
 	}
 
-	return r.Result.Contents.Value, nil
+	for _, c := range ra.Result.Contents {
+		switch t := c.(type) {
+		case string:
+			return t, nil
+		case map[string]string:
+			return t["value"], nil
+		}
+	}
+	return "", nil
 }
