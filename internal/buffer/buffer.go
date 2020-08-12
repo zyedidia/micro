@@ -411,7 +411,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 // initializes an LSP server if possible, or calls didOpen on an existing
 // LSP server in this workspace
 func (b *Buffer) lspInit() {
-	ft := b.Settings["filetype"].(string)
+	ft := lsp.Filetype(b.Settings["filetype"].(string))
 	l, ok := lsp.GetLanguage(ft)
 	if ok && l.Installed() {
 		b.Server = lsp.GetServer(l, gopath.Dir(b.AbsPath))

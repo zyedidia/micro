@@ -76,4 +76,13 @@ install = [["npm", "install", "-g", "vim-language-server"]]
 command = "purescript-language-server"
 args = ["--stdio"]
 install = [["npm", "install", "-g", "purescript-language-server"]]
+
+[language.verilog]
+command = "svls"
+args = []
+install = [["cargo", "install", "svls"]]
+
+[language.d]
+command = "serve-d"
+args = []
 `
