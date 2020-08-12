@@ -92,6 +92,7 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 
 	h.Cursor.StoreVisualX()
 	h.lastLoc = mouseLoc
+	h.Relocate()
 	return true
 }
 

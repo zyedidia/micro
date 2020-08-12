@@ -484,9 +484,7 @@ func (h *BufPane) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 	binds := h.Bindings()
 	action, _ := binds.NextEvent(e, te)
 	if action != nil {
-		if action(h) {
-			h.Relocate()
-		}
+		action(h)
 		binds.ResetEvents()
 		return true
 	}
