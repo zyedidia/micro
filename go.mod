@@ -1,7 +1,6 @@
 module github.com/zyedidia/micro/v2
 
 require (
-	github.com/BurntSushi/toml v0.3.1
 	github.com/blang/semver v3.5.1+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-errors/errors v1.0.1

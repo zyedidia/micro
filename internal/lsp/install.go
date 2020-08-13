@@ -3,38 +3,46 @@ package lsp
 import (
 	"errors"
 	"io"
+	"log"
 	"os/exec"
 	"strings"
 
-	"github.com/BurntSushi/toml"
+	"gopkg.in/yaml.v2"
 )
 
 var ErrManualInstall = errors.New("Requires manual installation")
 
 type Config struct {
-	Languages map[string]Language `toml:"language"`
+	Languages map[string]Language `yaml:"language"`
 }
 
 type Language struct {
-	Command string     `toml:"command"`
-	Args    []string   `toml:"args"`
-	Install [][]string `toml:"install"`
+	Command string     `yaml:"command"`
+	Args    []string   `yaml:"args"`
+	Install [][]string `yaml:"install"`
 }
 
 var conf *Config
 
 func GetLanguage(lang string) (Language, bool) {
-	l, ok := conf.Languages[lang]
-	return l, ok
+	if conf != nil {
+		l, ok := conf.Languages[lang]
+		return l, ok
+	}
+	return Language{}, false
 }
 
 func init() {
-	conf, _ = LoadConfig([]byte(servers))
+	var err error
+	conf, err = LoadConfig([]byte(servers))
+	if err != nil {
+		log.Println("[micro-lsp]", err)
+	}
 }
 
 func LoadConfig(data []byte) (*Config, error) {
 	var conf Config
-	if _, err := toml.Decode(string(data), &conf); err != nil {
+	if err := yaml.Unmarshal(data, &conf); err != nil {
 		return nil, err
 	}
 
