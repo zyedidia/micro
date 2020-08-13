@@ -28,6 +28,12 @@ func GetServer(l Language, dir string) *Server {
 	return activeServers[l.Command+"-"+dir]
 }
 
+func ShutdownAllServers() {
+	for _, s := range activeServers {
+		s.Shutdown()
+	}
+}
+
 type Server struct {
 	cmd          *exec.Cmd
 	stdin        io.WriteCloser
@@ -145,7 +151,7 @@ func (s *Server) Initialize(directory string) {
 
 	s.lock.Lock()
 	go func() {
-		resp, err := s.sendRequest("initialize", params)
+		resp, err := s.sendRequest(lsp.MethodInitialize, params)
 		if err != nil {
 			log.Println("[micro-lsp]", err)
 			s.Active = false
@@ -160,13 +166,18 @@ func (s *Server) Initialize(directory string) {
 		json.Unmarshal(resp, &r)
 
 		s.lock.Unlock()
-		err = s.sendNotification("initialized", struct{}{})
+		err = s.sendNotification(lsp.MethodInitialized, struct{}{})
 		if err != nil {
 			log.Println("[micro-lsp]", err)
 		}
 
 		s.capabilities = r.Result.Capabilities
 	}()
+}
+
+func (s *Server) Shutdown() {
+	s.sendRequest(lsp.MethodShutdown, nil)
+	s.sendNotification(lsp.MethodExit, nil)
 }
 
 func (s *Server) receive() {
@@ -191,9 +202,9 @@ func (s *Server) receive() {
 		}
 
 		switch r.Method {
-		case "window/logMessage":
+		case lsp.MethodWindowLogMessage:
 			// TODO
-		case "textDocument/publishDiagnostics":
+		case lsp.MethodTextDocumentPublishDiagnostics:
 			// TODO
 		case "":
 			// Response

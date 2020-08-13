@@ -20,6 +20,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/lsp"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
@@ -218,6 +219,8 @@ func LoadInput(args []string) []*buffer.Buffer {
 
 func main() {
 	defer func() {
+		lsp.ShutdownAllServers()
+
 		if util.Stdout.Len() > 0 {
 			fmt.Fprint(os.Stdout, util.Stdout.String())
 		}
