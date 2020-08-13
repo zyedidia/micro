@@ -1,6 +1,6 @@
 package lsp
 
-var servers = `language:
+var servers_internal = []byte(`language:
   rust:
     command: rls
     install: [["rustup", "update"], ["rustup", "component", "add", "rls", "rust-analysis", "rust-src"]]
@@ -64,4 +64,4 @@ var servers = `language:
     install: [["cargo", "install", "svls"]]
   d:
     command: serve-d
-`
+`)

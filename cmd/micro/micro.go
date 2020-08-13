@@ -253,6 +253,11 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	err = lsp.Init()
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
 	// flag options
 	for k, v := range optionFlags {
 		if *v != "" {

@@ -3,10 +3,13 @@ package lsp
 import (
 	"errors"
 	"io"
-	"log"
+	"io/ioutil"
+	"os"
 	"os/exec"
+	"path/filepath"
 	"strings"
 
+	"github.com/zyedidia/micro/v2/internal/config"
 	"gopkg.in/yaml.v2"
 )
 
@@ -32,12 +35,23 @@ func GetLanguage(lang string) (Language, bool) {
 	return Language{}, false
 }
 
-func init() {
+func Init() error {
+	var servers []byte
 	var err error
-	conf, err = LoadConfig([]byte(servers))
-	if err != nil {
-		log.Println("[micro-lsp]", err)
+
+	filename := filepath.Join(config.ConfigDir, "lsp.yaml")
+	if _, e := os.Stat(filename); e == nil {
+		servers, err = ioutil.ReadFile(filename)
+		if err != nil {
+			servers = servers_internal
+		}
+	} else {
+		err = ioutil.WriteFile(filename, servers_internal, 0644)
+		servers = servers_internal
 	}
+
+	conf, err = LoadConfig(servers)
+	return err
 }
 
 func LoadConfig(data []byte) (*Config, error) {
