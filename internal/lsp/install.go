@@ -41,7 +41,7 @@ func LoadConfig(data []byte) (*Config, error) {
 	return &conf, nil
 }
 
-func (l *Language) Installed() bool {
+func (l Language) Installed() bool {
 	_, err := exec.LookPath(l.Command)
 	if err != nil {
 		return false
@@ -50,7 +50,7 @@ func (l *Language) Installed() bool {
 	return true
 }
 
-func (l *Language) DoInstall(w io.Writer) error {
+func (l Language) DoInstall(w io.Writer) error {
 	if l.Installed() {
 		return nil
 	}

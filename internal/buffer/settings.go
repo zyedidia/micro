@@ -39,6 +39,12 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 		b.isModified = true
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
+	} else if option == "lsp" && b.Type.Kind == BTDefault.Kind {
+		if nativeValue.(bool) && !b.HasLSP() {
+			b.lspInit()
+		} else if b.HasLSP() {
+			b.Server.Shutdown()
+		}
 	}
 
 	return nil

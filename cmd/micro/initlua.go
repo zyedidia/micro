@@ -10,6 +10,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
+	"github.com/zyedidia/micro/v2/internal/lsp"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
@@ -34,6 +35,8 @@ func LuaImport(pkg string) *lua.LTable {
 		return luaImportMicroConfig()
 	case "micro/util":
 		return luaImportMicroUtil()
+	case "micro/lsp":
+		return luaImportMicroLsp()
 	default:
 		return ulua.Import(pkg)
 	}
@@ -150,6 +153,13 @@ func luaImportMicroUtil() *lua.LTable {
 	ulua.L.SetField(pkg, "RuneStr", luar.New(ulua.L, func(r rune) string {
 		return string(r)
 	}))
+
+	return pkg
+}
+func luaImportMicroLsp() *lua.LTable {
+	pkg := ulua.L.NewTable()
+
+	ulua.L.SetField(pkg, "GetLanguage", luar.New(ulua.L, lsp.GetLanguage))
 
 	return pkg
 }

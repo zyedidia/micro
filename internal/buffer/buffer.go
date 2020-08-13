@@ -401,7 +401,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	OpenBuffers = append(OpenBuffers, b)
 
 	if !found {
-		if btype == BTDefault {
+		if btype == BTDefault && b.Settings["lsp"].(bool) {
 			b.lspInit()
 		}
 	}

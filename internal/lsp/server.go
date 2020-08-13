@@ -25,12 +25,18 @@ func init() {
 }
 
 func GetServer(l Language, dir string) *Server {
-	return activeServers[l.Command+"-"+dir]
+	s, ok := activeServers[l.Command+"-"+dir]
+	if ok && s.Active {
+		return s
+	}
+	return nil
 }
 
 func ShutdownAllServers() {
 	for _, s := range activeServers {
-		s.Shutdown()
+		if s.Active {
+			s.Shutdown()
+		}
 	}
 }
 
@@ -178,6 +184,7 @@ func (s *Server) Initialize(directory string) {
 func (s *Server) Shutdown() {
 	s.sendRequest(lsp.MethodShutdown, nil)
 	s.sendNotification(lsp.MethodExit, nil)
+	s.Active = false
 }
 
 func (s *Server) receive() {
