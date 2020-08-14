@@ -98,8 +98,16 @@ func (w *TabWindow) Display() {
 	if style, ok := config.Colorscheme["tabbar"]; ok {
 		tabBarStyle = style
 	}
+	tabBarActiveStyle := tabBarStyle
+	if style, ok := config.Colorscheme["tabbar.active"]; ok {
+		tabBarActiveStyle = style
+	}
 
-	draw := func(r rune, n int) {
+	draw := func(r rune, n int, active bool) {
+		style := tabBarStyle
+		if active {
+			style = tabBarActiveStyle
+		}
 		for i := 0; i < n; i++ {
 			rw := runewidth.RuneWidth(r)
 			for j := 0; j < rw; j++ {
@@ -114,7 +122,7 @@ func (w *TabWindow) Display() {
 				} else if x == 0 && w.hscroll > 0 {
 					screen.SetContent(0, w.Y, '<', nil, tabBarStyle)
 				} else if x >= 0 && x < w.Width {
-					screen.SetContent(x, w.Y, c, nil, tabBarStyle)
+					screen.SetContent(x, w.Y, c, nil, style)
 				}
 				x++
 			}
@@ -123,21 +131,21 @@ func (w *TabWindow) Display() {
 
 	for i, n := range w.Names {
 		if i == w.active {
-			draw('[', 1)
+			draw('[', 1, true)
 		} else {
-			draw(' ', 1)
+			draw(' ', 1, false)
 		}
 		for _, c := range n {
-			draw(c, 1)
+			draw(c, 1, i == w.active)
 		}
 		if i == len(w.Names)-1 {
 			done = true
 		}
 		if i == w.active {
-			draw(']', 1)
-			draw(' ', 2)
+			draw(']', 1, true)
+			draw(' ', 2, true)
 		} else {
-			draw(' ', 3)
+			draw(' ', 3, false)
 		}
 		if x >= w.Width {
 			break
@@ -145,6 +153,6 @@ func (w *TabWindow) Display() {
 	}
 
 	if x < w.Width {
-		draw(' ', w.Width-x)
+		draw(' ', w.Width-x, false)
 	}
 }
