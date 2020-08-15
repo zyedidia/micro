@@ -126,18 +126,23 @@ type SharedBuffer struct {
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
-	b.isModified = true
-	b.HasSuggestions = false
-	b.LineArray.insert(pos, value)
+	if !b.Type.Readonly {
+		b.isModified = true
+		b.HasSuggestions = false
+		b.LineArray.insert(pos, value)
 
-	inslines := bytes.Count(value, []byte{'\n'})
-	b.MarkModified(pos.Y, pos.Y+inslines)
+		inslines := bytes.Count(value, []byte{'\n'})
+		b.MarkModified(pos.Y, pos.Y+inslines)
+	}
 }
 func (b *SharedBuffer) remove(start, end Loc) []byte {
-	b.isModified = true
-	b.HasSuggestions = false
-	defer b.MarkModified(start.Y, end.Y)
-	return b.LineArray.remove(start, end)
+	if !b.Type.Readonly {
+		b.isModified = true
+		b.HasSuggestions = false
+		defer b.MarkModified(start.Y, end.Y)
+		return b.LineArray.remove(start, end)
+	}
+	return b.LineArray.Substr(start, end);
 }
 
 // MarkModified marks the buffer as modified for this frame
@@ -971,29 +976,31 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, boo
 
 // Retab changes all tabs to spaces or vice versa
 func (b *Buffer) Retab() {
-	toSpaces := b.Settings["tabstospaces"].(bool)
-	tabsize := util.IntOpt(b.Settings["tabsize"])
-	dirty := false
+	if !b.Type.Readonly {
+		toSpaces := b.Settings["tabstospaces"].(bool)
+		tabsize := util.IntOpt(b.Settings["tabsize"])
+		dirty := false
 
-	for i := 0; i < b.LinesNum(); i++ {
-		l := b.LineBytes(i)
+		for i := 0; i < b.LinesNum(); i++ {
+			l := b.LineBytes(i)
 
-		ws := util.GetLeadingWhitespace(l)
-		if len(ws) != 0 {
-			if toSpaces {
-				ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
-			} else {
-				ws = bytes.Replace(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'}, -1)
+			ws := util.GetLeadingWhitespace(l)
+			if len(ws) != 0 {
+				if toSpaces {
+					ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
+				} else {
+					ws = bytes.Replace(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'}, -1)
+				}
 			}
+
+			l = bytes.TrimLeft(l, " \t")
+			b.lines[i].data = append(ws, l...)
+			b.MarkModified(i, i)
+			dirty = true
 		}
 
-		l = bytes.TrimLeft(l, " \t")
-		b.lines[i].data = append(ws, l...)
-		b.MarkModified(i, i)
-		dirty = true
+		b.isModified = dirty
 	}
-
-	b.isModified = dirty
 }
 
 // ParseCursorLocation turns a cursor location like 10:5 (LINE:COL)
