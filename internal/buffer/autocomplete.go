@@ -9,7 +9,6 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/lsp"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"go.lsp.dev/protocol"
 )
 
 // A Completer is a function that takes a buffer and returns info
@@ -22,7 +21,7 @@ import (
 type Completer func(*Buffer) []Completion
 
 type Completion struct {
-	Edits       []protocol.TextEdit
+	Edits       []Delta
 	Label       string
 	CommitChars []rune
 	Kind        int
@@ -67,7 +66,7 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 
 	// apply current completion
 	comp := b.Completions[b.CurCompletion]
-	b.ApplyEdits(comp.Edits)
+	b.ApplyDeltas(comp.Edits)
 	if len(b.Completions) > 1 {
 		b.HasSuggestions = true
 	}
@@ -234,7 +233,11 @@ func LSPComplete(b *Buffer) []Completion {
 		}
 
 		if item.TextEdit != nil && len(item.TextEdit.NewText) > 0 {
-			completions[i].Edits = []protocol.TextEdit{*item.TextEdit}
+			completions[i].Edits = []Delta{Delta{
+				Text:  []byte(item.TextEdit.NewText),
+				Start: toLoc(item.TextEdit.Range.Start),
+				End:   toLoc(item.TextEdit.Range.End),
+			}}
 		} else {
 			var t string
 			if len(item.InsertText) > 0 {
@@ -243,13 +246,11 @@ func LSPComplete(b *Buffer) []Completion {
 				t = item.Label
 			}
 			_, argstart := GetWord(b)
-			str := util.SliceEndStr(t, c.X-argstart)
-			completions[i].Edits = []protocol.TextEdit{protocol.TextEdit{
-				NewText: str,
-				Range: protocol.Range{
-					Start: lsp.Position(c.X, c.Y),
-					End:   lsp.Position(c.X, c.Y),
-				},
+			str := util.SliceEnd([]byte(t), c.X-argstart)
+			completions[i].Edits = []Delta{Delta{
+				Text:  str,
+				Start: Loc{c.X, c.Y},
+				End:   Loc{c.X, c.Y},
 			}}
 		}
 	}
@@ -266,12 +267,10 @@ func ConvertCompletions(completions, suggestions []string, c *Cursor) []Completi
 		comp[i] = Completion{
 			Label: suggestions[i],
 		}
-		comp[i].Edits = []protocol.TextEdit{protocol.TextEdit{
-			NewText: completions[i],
-			Range: protocol.Range{
-				Start: lsp.Position(c.X, c.Y),
-				End:   lsp.Position(c.X, c.Y),
-			},
+		comp[i].Edits = []Delta{Delta{
+			Text:  []byte(completions[i]),
+			Start: Loc{c.X, c.Y},
+			End:   Loc{c.X, c.Y},
 		}}
 	}
 	return comp

@@ -230,6 +230,12 @@ func (eh *EventHandler) Replace(start, end Loc, replace string) {
 	eh.Insert(start, replace)
 }
 
+// ReplaceBytes deletes from start to end and replaces it with the given string
+func (eh *EventHandler) ReplaceBytes(start, end Loc, replace []byte) {
+	eh.Remove(start, end)
+	eh.InsertBytes(start, replace)
+}
+
 // Execute a textevent and add it to the undo stack
 func (eh *EventHandler) Execute(t *TextEvent) {
 	if eh.RedoStack.Len() > 0 {

@@ -553,6 +553,22 @@ func (b *Buffer) ApplyEdits(edits []lspt.TextEdit) {
 	}
 }
 
+func (b *Buffer) ApplyDeltas(deltas []Delta) {
+	if !b.Type.Readonly {
+		sort.Slice(deltas, func(i, j int) bool {
+			return deltas[i].Start.GreaterThan(deltas[j].Start)
+		})
+		for _, d := range deltas {
+			if len(d.Text) == 0 {
+				b.Remove(d.Start, d.End)
+			} else {
+				b.ReplaceBytes(d.Start, d.End, d.Text)
+			}
+		}
+		b.RelocateCursors()
+	}
+}
+
 // FileType returns the buffer's filetype
 func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)
