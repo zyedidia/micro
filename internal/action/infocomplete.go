@@ -15,7 +15,7 @@ import (
 // for example with `vsplit filename`.
 
 // CommandComplete autocompletes commands
-func CommandComplete(b *buffer.Buffer) ([]string, []string) {
+func CommandComplete(b *buffer.Buffer) []buffer.Completion {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -32,11 +32,11 @@ func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
 
-	return completions, suggestions
+	return buffer.ConvertCompletions(completions, suggestions, c)
 }
 
 // HelpComplete autocompletes help topics
-func HelpComplete(b *buffer.Buffer) ([]string, []string) {
+func HelpComplete(b *buffer.Buffer) []buffer.Completion {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -54,7 +54,7 @@ func HelpComplete(b *buffer.Buffer) ([]string, []string) {
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return completions, suggestions
+	return buffer.ConvertCompletions(completions, suggestions, c)
 }
 
 // colorschemeComplete tab-completes names of colorschemes.
@@ -87,7 +87,7 @@ func contains(s []string, e string) bool {
 }
 
 // OptionComplete autocompletes options
-func OptionComplete(b *buffer.Buffer) ([]string, []string) {
+func OptionComplete(b *buffer.Buffer) []buffer.Completion {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -97,22 +97,17 @@ func OptionComplete(b *buffer.Buffer) ([]string, []string) {
 			suggestions = append(suggestions, option)
 		}
 	}
-	// for option := range localSettings {
-	// 	if strings.HasPrefix(option, input) && !contains(suggestions, option) {
-	// 		suggestions = append(suggestions, option)
-	// 	}
-	// }
 
 	sort.Strings(suggestions)
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return completions, suggestions
+	return buffer.ConvertCompletions(completions, suggestions, c)
 }
 
 // OptionValueComplete completes values for various options
-func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
+func OptionValueComplete(b *buffer.Buffer) []buffer.Completion {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -128,12 +123,6 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 				break
 			}
 		}
-		// for option := range localSettings {
-		// 	if option == string(args[len(args)-2]) {
-		// 		completeValue = true
-		// 		break
-		// 	}
-		// }
 	}
 	if !completeValue {
 		return OptionComplete(b)
@@ -150,11 +139,6 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 			optionVal = option
 		}
 	}
-	// for k, option := range localSettings {
-	// 	if k == inputOpt {
-	// 		optionVal = option
-	// 	}
-	// }
 
 	switch optionVal.(type) {
 	case bool:
@@ -204,11 +188,11 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return completions, suggestions
+	return buffer.ConvertCompletions(completions, suggestions, c)
 }
 
 // PluginCmdComplete autocompletes the plugin command
-func PluginCmdComplete(b *buffer.Buffer) ([]string, []string) {
+func PluginCmdComplete(b *buffer.Buffer) []buffer.Completion {
 	c := b.GetActiveCursor()
 	input, argstart := buffer.GetArg(b)
 
@@ -224,11 +208,11 @@ func PluginCmdComplete(b *buffer.Buffer) ([]string, []string) {
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return completions, suggestions
+	return buffer.ConvertCompletions(completions, suggestions, c)
 }
 
 // PluginComplete completes values for the plugin command
-func PluginComplete(b *buffer.Buffer) ([]string, []string) {
+func PluginComplete(b *buffer.Buffer) []buffer.Completion {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -260,7 +244,7 @@ func PluginComplete(b *buffer.Buffer) ([]string, []string) {
 	for i := range suggestions {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
-	return completions, suggestions
+	return buffer.ConvertCompletions(completions, suggestions, c)
 }
 
 // PluginNameComplete completes with the names of loaded plugins

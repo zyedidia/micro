@@ -179,8 +179,8 @@ func (i *InfoWindow) displayKeyMenu() {
 
 func (i *InfoWindow) totalSize() int {
 	sum := 0
-	for _, n := range i.Suggestions {
-		sum += runewidth.StringWidth(n) + 1
+	for _, n := range i.Completions {
+		sum += runewidth.StringWidth(n.Label) + 1
 	}
 	return sum
 }
@@ -189,9 +189,9 @@ func (i *InfoWindow) scrollToSuggestion() {
 	x := 0
 	s := i.totalSize()
 
-	for j, n := range i.Suggestions {
-		c := util.CharacterCountInString(n)
-		if j == i.CurSuggestion {
+	for j, n := range i.Completions {
+		c := util.CharacterCountInString(n.Label)
+		if j == i.CurCompletion {
 			if x+c >= i.hscroll+i.Width {
 				i.hscroll = util.Clamp(x+c+1-i.Width, 0, s-i.Width)
 			} else if x < i.hscroll {
@@ -236,7 +236,7 @@ func (i *InfoWindow) Display() {
 		}
 	}
 
-	if i.HasSuggestions && len(i.Suggestions) > 1 {
+	if i.HasSuggestions && len(i.Completions) > 1 {
 		i.scrollToSuggestion()
 
 		x := -i.hscroll
@@ -273,12 +273,12 @@ func (i *InfoWindow) Display() {
 			}
 		}
 
-		for j, s := range i.Suggestions {
+		for j, s := range i.Completions {
 			style := statusLineStyle
-			if i.CurSuggestion == j {
+			if i.CurCompletion == j {
 				style = style.Reverse(true)
 			}
-			for _, r := range s {
+			for _, r := range s.Label {
 				draw(r, style)
 				// screen.SetContent(x, i.Y-keymenuOffset-1, r, nil, style)
 			}

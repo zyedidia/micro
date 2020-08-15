@@ -9,6 +9,7 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/lsp"
 	"github.com/zyedidia/micro/v2/internal/util"
+	"go.lsp.dev/protocol"
 )
 
 // A Completer is a function that takes a buffer and returns info
@@ -18,49 +19,56 @@ import (
 // the current cursor location if selected as well as a list of
 // suggestion names which can be displayed in an autocomplete box or
 // other UI element
-type Completer func(*Buffer) ([]string, []string)
+type Completer func(*Buffer) []Completion
 
-func (b *Buffer) GetSuggestions() {
-
+type Completion struct {
+	Edits       []protocol.TextEdit
+	Label       string
+	CommitChars []rune
+	Kind        int
+	Filter      string
+	Detail      string
+	Doc         string
 }
 
 // Autocomplete starts the autocomplete process
 func (b *Buffer) Autocomplete(c Completer) bool {
-	b.Completions, b.Suggestions = c(b)
-	if len(b.Completions) != len(b.Suggestions) || len(b.Completions) == 0 {
+	b.Completions = c(b)
+	if len(b.Completions) == 0 {
 		return false
 	}
-	b.CurSuggestion = -1
+	b.CurCompletion = -1
 	b.CycleAutocomplete(true)
 	return true
 }
 
 // CycleAutocomplete moves to the next suggestion
 func (b *Buffer) CycleAutocomplete(forward bool) {
-	prevSuggestion := b.CurSuggestion
+	prevCompletion := b.CurCompletion
 
 	if forward {
-		b.CurSuggestion++
+		b.CurCompletion++
 	} else {
-		b.CurSuggestion--
+		b.CurCompletion--
 	}
-	if b.CurSuggestion >= len(b.Suggestions) {
-		b.CurSuggestion = 0
-	} else if b.CurSuggestion < 0 {
-		b.CurSuggestion = len(b.Suggestions) - 1
+	if b.CurCompletion >= len(b.Completions) {
+		b.CurCompletion = 0
+	} else if b.CurCompletion < 0 {
+		b.CurCompletion = len(b.Completions) - 1
 	}
 
-	c := b.GetActiveCursor()
-	start := c.Loc
-	end := c.Loc
-	if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
-		start = end.Move(-util.CharacterCountInString(b.Completions[prevSuggestion]), b)
-	} else {
-		// end = start.Move(1, b)
+	// undo prev completion
+	if prevCompletion != -1 {
+		prev := b.Completions[prevCompletion]
+		for i := 0; i < len(prev.Edits); i++ {
+			b.UndoOneEvent()
+		}
 	}
 
-	b.Replace(start, end, b.Completions[b.CurSuggestion])
-	if len(b.Suggestions) > 1 {
+	// apply current completion
+	comp := b.Completions[b.CurCompletion]
+	b.ApplyEdits(comp.Edits)
+	if len(b.Completions) > 1 {
 		b.HasSuggestions = true
 	}
 }
@@ -105,7 +113,7 @@ func GetArg(b *Buffer) (string, int) {
 }
 
 // FileComplete autocompletes filenames
-func FileComplete(b *Buffer) ([]string, []string) {
+func FileComplete(b *Buffer) []Completion {
 	c := b.GetActiveCursor()
 	input, argstart := GetArg(b)
 
@@ -124,7 +132,7 @@ func FileComplete(b *Buffer) ([]string, []string) {
 	}
 
 	if err != nil {
-		return nil, nil
+		return nil
 	}
 
 	var suggestions []string
@@ -150,16 +158,16 @@ func FileComplete(b *Buffer) ([]string, []string) {
 		completions[i] = util.SliceEndStr(complete, c.X-argstart)
 	}
 
-	return completions, suggestions
+	return ConvertCompletions(completions, suggestions, c)
 }
 
 // BufferComplete autocompletes based on previous words in the buffer
-func BufferComplete(b *Buffer) ([]string, []string) {
+func BufferComplete(b *Buffer) []Completion {
 	c := b.GetActiveCursor()
 	input, argstart := GetWord(b)
 
 	if argstart == -1 {
-		return []string{}, []string{}
+		return nil
 	}
 
 	inputLen := util.CharacterCount(input)
@@ -202,36 +210,69 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
 	}
 
-	return completions, suggestions
+	return ConvertCompletions(completions, suggestions, c)
 }
 
-func LSPComplete(b *Buffer) ([]string, []string) {
-	c := b.GetActiveCursor()
-	_, argstart := GetWord(b)
-
-	if argstart == -1 {
-		return []string{}, []string{}
+func LSPComplete(b *Buffer) []Completion {
+	if !b.HasLSP() {
+		return nil
 	}
 
+	c := b.GetActiveCursor()
 	pos := lsp.Position(c.X, c.Y)
 	items, err := b.Server.Completion(b.AbsPath, pos)
 	if err != nil {
-		return []string{}, []string{}
+		return nil
 	}
 
-	suggestions := make([]string, len(items))
-	completions := make([]string, len(items))
+	completions := make([]Completion, len(items))
 
 	for i, item := range items {
-		suggestions[i] = item.Label
+		completions[i] = Completion{
+			Label:  item.Label,
+			Detail: item.Detail,
+		}
+
 		if item.TextEdit != nil && len(item.TextEdit.NewText) > 0 {
-			completions[i] = util.SliceEndStr(item.TextEdit.NewText, c.X-argstart)
-		} else if len(item.InsertText) > 0 {
-			completions[i] = util.SliceEndStr(item.InsertText, c.X-argstart)
+			completions[i].Edits = []protocol.TextEdit{*item.TextEdit}
 		} else {
-			completions[i] = util.SliceEndStr(item.Label, c.X-argstart)
+			var t string
+			if len(item.InsertText) > 0 {
+				t = item.InsertText
+			} else {
+				t = item.Label
+			}
+			_, argstart := GetWord(b)
+			str := util.SliceEndStr(t, c.X-argstart)
+			completions[i].Edits = []protocol.TextEdit{protocol.TextEdit{
+				NewText: str,
+				Range: protocol.Range{
+					Start: lsp.Position(c.X, c.Y),
+					End:   lsp.Position(c.X, c.Y),
+				},
+			}}
 		}
 	}
 
-	return completions, suggestions
+	return completions
+}
+
+// ConvertCompletions converts a list of insert text with suggestion labels
+// to an array of completion objects ready for autocompletion
+func ConvertCompletions(completions, suggestions []string, c *Cursor) []Completion {
+	comp := make([]Completion, len(completions))
+
+	for i := 0; i < len(completions); i++ {
+		comp[i] = Completion{
+			Label: suggestions[i],
+		}
+		comp[i].Edits = []protocol.TextEdit{protocol.TextEdit{
+			NewText: completions[i],
+			Range: protocol.Range{
+				Start: lsp.Position(c.X, c.Y),
+				End:   lsp.Position(c.X, c.Y),
+			},
+		}}
+	}
+	return comp
 }

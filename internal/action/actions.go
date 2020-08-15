@@ -666,6 +666,13 @@ func (h *BufPane) Autocomplete() bool {
 		return false
 	}
 
+	// if there is an existing completion, always cycle it
+	if b.HasSuggestions {
+		b.CycleAutocomplete(true)
+		return true
+	}
+
+	// don't start a new completion unless the correct conditions are met
 	if h.Cursor.X == 0 {
 		return false
 	}
@@ -674,11 +681,6 @@ func (h *BufPane) Autocomplete() bool {
 	if !util.IsAutocomplete(prev) || !util.IsNonAlphaNumeric(r) {
 		// don't autocomplete if cursor is on alpha numeric character (middle of a word)
 		return false
-	}
-
-	if b.HasSuggestions {
-		b.CycleAutocomplete(true)
-		return true
 	}
 	return b.Autocomplete(buffer.LSPComplete)
 }

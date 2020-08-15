@@ -93,9 +93,8 @@ type SharedBuffer struct {
 	// Settings customized by the user
 	Settings map[string]interface{}
 
-	Suggestions   []string
-	Completions   []string
-	CurSuggestion int
+	Completions   []Completion
+	CurCompletion int
 
 	Messages []*Message
 

@@ -100,7 +100,7 @@ func (s *StatusLine) Display() {
 
 	b := s.win.Buf
 	// autocomplete suggestions (for the buffer, not for the infowindow)
-	if b.HasSuggestions && len(b.Suggestions) > 1 {
+	if b.HasSuggestions && len(b.Completions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
 		if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
@@ -110,12 +110,12 @@ func (s *StatusLine) Display() {
 			keymenuOffset = len(keydisplay)
 		}
 		x := 0
-		for j, sug := range b.Suggestions {
+		for j, sug := range b.Completions {
 			style := statusLineStyle
-			if b.CurSuggestion == j {
+			if b.CurCompletion == j {
 				style = style.Reverse(true)
 			}
-			for _, r := range sug {
+			for _, r := range sug.Label {
 				screen.SetContent(x, y-keymenuOffset, r, nil, style)
 				x++
 				if x >= s.win.Width {
