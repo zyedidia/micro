@@ -668,7 +668,7 @@ func (h *BufPane) Autocomplete() bool {
 
 	// if there is an existing completion, always cycle it
 	if b.HasSuggestions {
-		b.CycleAutocomplete(true)
+		h.cycleAutocomplete(true)
 		return true
 	}
 
@@ -682,8 +682,12 @@ func (h *BufPane) Autocomplete() bool {
 		// don't autocomplete if cursor is on alpha numeric character (middle of a word)
 		return false
 	}
+	ret := true
 	if !b.Autocomplete(buffer.LSPComplete) {
-		return b.Autocomplete(buffer.BufferComplete)
+		ret = b.Autocomplete(buffer.BufferComplete)
+	}
+	if ret {
+		h.displayCompletionDoc()
 	}
 	return true
 }
@@ -695,10 +699,22 @@ func (h *BufPane) CycleAutocompleteBack() bool {
 	}
 
 	if h.Buf.HasSuggestions {
-		h.Buf.CycleAutocomplete(false)
+		h.cycleAutocomplete(false)
 		return true
 	}
 	return false
+}
+
+func (h *BufPane) cycleAutocomplete(forward bool) {
+	h.Buf.CycleAutocomplete(forward)
+	h.displayCompletionDoc()
+}
+
+func (h *BufPane) displayCompletionDoc() {
+	c := h.Buf.CurCompletion
+	if c >= 0 && c < len(h.Buf.Completions) {
+		InfoBar.Message(h.Buf.Completions[c].Doc)
+	}
 }
 
 // InsertTab inserts a tab or spaces

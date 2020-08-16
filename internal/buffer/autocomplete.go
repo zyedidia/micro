@@ -9,6 +9,7 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/lsp"
 	"github.com/zyedidia/micro/v2/internal/util"
+	"go.lsp.dev/protocol"
 )
 
 // A Completer is a function that takes a buffer and returns info
@@ -24,7 +25,7 @@ type Completion struct {
 	Edits       []Delta
 	Label       string
 	CommitChars []rune
-	Kind        int
+	Kind        string
 	Filter      string
 	Detail      string
 	Doc         string
@@ -235,6 +236,8 @@ func LSPComplete(b *Buffer) []Completion {
 		completions[i] = Completion{
 			Label:  item.Label,
 			Detail: item.Detail,
+			Kind:   toKindStr(item.Kind),
+			Doc:    getDoc(item.Documentation),
 		}
 
 		if item.TextEdit != nil && len(item.TextEdit.NewText) > 0 {
@@ -287,4 +290,22 @@ func ConvertCompletions(completions, suggestions []string, c *Cursor) []Completi
 		}}
 	}
 	return comp
+}
+
+func toKindStr(k protocol.CompletionItemKind) string {
+	s := k.String()
+	return strings.ToLower(string(s[0]))
+}
+
+// returns documentation from a string | MarkupContent item
+func getDoc(documentation interface{}) string {
+	var doc string
+	switch s := documentation.(type) {
+	case string:
+		doc = s
+	case protocol.MarkupContent:
+		doc = s.Value
+	}
+
+	return strings.Split(doc, "\n")[0]
 }

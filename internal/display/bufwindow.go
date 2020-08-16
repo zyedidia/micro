@@ -755,31 +755,48 @@ func (w *BufWindow) displayCompleteBox() {
 		return
 	}
 
-	width := 0
+	labelw := 0
+	detailw := 0
+	kindw := 0
 	for _, comp := range w.Buf.Completions {
 		charcount := util.CharacterCountInString(comp.Label)
-		if charcount > width {
-			width = charcount
+		if charcount > labelw {
+			labelw = charcount
+		}
+		charcount = util.CharacterCountInString(comp.Detail)
+		if charcount > detailw {
+			detailw = charcount
+		}
+		charcount = util.CharacterCountInString(comp.Kind)
+		if charcount > kindw {
+			kindw = charcount
 		}
 	}
-	width++
+	labelw++
+	kindw++
 
-	for i, comp := range w.Buf.Completions {
-		label := comp.Label
+	display := func(s string, width, x, y int, cur bool) {
 		for j := 0; j < width; j++ {
 			r := ' '
 			var combc []rune
 			var size int
-			if len(label) > 0 {
-				r, combc, size = util.DecodeCharacterInString(label)
-				label = label[size:]
+			if len(s) > 0 {
+				r, combc, size = util.DecodeCharacterInString(s)
+				s = s[size:]
 			}
 			st := config.DefStyle.Reverse(true)
-			if i == w.Buf.CurCompletion {
+			if cur {
 				st = st.Reverse(false)
 			}
-			screen.SetContent(w.completeBox.X+j, w.completeBox.Y+i+1, r, combc, st)
+			screen.SetContent(w.completeBox.X+x+j, w.completeBox.Y+y, r, combc, st)
 		}
+	}
+
+	for i, comp := range w.Buf.Completions {
+		cur := i == w.Buf.CurCompletion
+		display(comp.Label+" ", labelw, 0, i+1, cur)
+		display(comp.Kind+" ", kindw, labelw, i+1, cur)
+		display(comp.Detail, detailw, labelw+kindw, i+1, cur)
 	}
 }
 
