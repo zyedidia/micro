@@ -266,8 +266,8 @@ func (s *Server) sendNotification(method string, params interface{}) error {
 	}
 
 	s.lock.Lock()
-	defer s.lock.Unlock()
-	return s.sendMessage(m)
+	go s.sendMessageUnlock(m)
+	return nil
 }
 
 func (s *Server) sendRequest(method string, params interface{}) ([]byte, error) {
@@ -314,4 +314,9 @@ func (s *Server) sendMessage(m interface{}) error {
 
 	_, err = s.stdin.Write(msg)
 	return err
+}
+
+func (s *Server) sendMessageUnlock(m interface{}) error {
+	defer s.lock.Unlock()
+	return s.sendMessage(m)
 }

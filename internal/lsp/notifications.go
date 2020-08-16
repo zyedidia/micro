@@ -5,11 +5,11 @@ import (
 	"go.lsp.dev/uri"
 )
 
-func (s *Server) DidOpen(filename, language, text string, version *uint64) {
+func (s *Server) DidOpen(filename, language, text string, version uint64) {
 	doc := lsp.TextDocumentItem{
 		URI:        uri.File(filename),
 		LanguageID: lsp.LanguageIdentifier(language),
-		Version:    float64(*version), // not sure why this is a float on go.lsp.dev
+		Version:    float64(version), // not sure why this is a float on go.lsp.dev
 		Text:       text,
 	}
 
@@ -31,12 +31,12 @@ func (s *Server) DidSave(filename string) {
 	go s.sendNotification(lsp.MethodTextDocumentDidSave, params)
 }
 
-func (s *Server) DidChange(filename string, version *uint64, changes []lsp.TextDocumentContentChangeEvent) {
+func (s *Server) DidChange(filename string, version uint64, changes []lsp.TextDocumentContentChangeEvent) {
 	doc := lsp.VersionedTextDocumentIdentifier{
 		TextDocumentIdentifier: lsp.TextDocumentIdentifier{
 			URI: uri.File(filename),
 		},
-		Version: version,
+		Version: &version,
 	}
 
 	params := lsp.DidChangeTextDocumentParams{

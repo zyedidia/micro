@@ -161,7 +161,7 @@ func (b *SharedBuffer) lspDidChange(start, end Loc, text string) {
 	}
 
 	if b.HasLSP() {
-		b.Server.DidChange(b.AbsPath, &b.version, []lspt.TextDocumentContentChangeEvent{change})
+		b.Server.DidChange(b.AbsPath, b.version, []lspt.TextDocumentContentChangeEvent{change})
 	}
 }
 
@@ -428,7 +428,7 @@ func (b *Buffer) lspInit() {
 			if len(bytes) == 0 {
 				bytes = []byte{'\n'}
 			}
-			b.Server.DidOpen(b.AbsPath, ft, string(bytes), &b.version)
+			b.Server.DidOpen(b.AbsPath, ft, string(bytes), b.version)
 		}
 	}
 }
