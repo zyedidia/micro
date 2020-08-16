@@ -17,7 +17,8 @@ type BufWindow struct {
 	*View
 
 	// Buffer being shown in this window
-	Buf *buffer.Buffer
+	Buf         *buffer.Buffer
+	completeBox buffer.Loc
 
 	active bool
 
@@ -583,6 +584,13 @@ func (w *BufWindow) displayBuffer() {
 
 				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, combc, style)
 
+				if w.Buf.HasSuggestions && len(w.Buf.Completions) > 0 {
+					compl := w.Buf.Completions[0].Edits[0].Start
+					if bloc.X == compl.X && bloc.Y == compl.Y {
+						w.completeBox = buffer.Loc{w.X + vloc.X, w.Y + vloc.Y}
+					}
+				}
+
 				if showcursor {
 					for _, c := range cursors {
 						if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
@@ -742,9 +750,43 @@ func (w *BufWindow) displayScrollBar() {
 	}
 }
 
+func (w *BufWindow) displayCompleteBox() {
+	if !w.Buf.HasSuggestions || w.Buf.NumCursors() > 1 {
+		return
+	}
+
+	width := 0
+	for _, comp := range w.Buf.Completions {
+		charcount := util.CharacterCountInString(comp.Label)
+		if charcount > width {
+			width = charcount
+		}
+	}
+	width++
+
+	for i, comp := range w.Buf.Completions {
+		label := comp.Label
+		for j := 0; j < width; j++ {
+			r := ' '
+			var combc []rune
+			var size int
+			if len(label) > 0 {
+				r, combc, size = util.DecodeCharacterInString(label)
+				label = label[size:]
+			}
+			st := config.DefStyle.Reverse(true)
+			if i == w.Buf.CurCompletion {
+				st = st.Reverse(false)
+			}
+			screen.SetContent(w.completeBox.X+j, w.completeBox.Y+i+1, r, combc, st)
+		}
+	}
+}
+
 // Display displays the buffer and the statusline
 func (w *BufWindow) Display() {
 	w.displayStatusLine()
 	w.displayScrollBar()
 	w.displayBuffer()
+	w.displayCompleteBox()
 }
