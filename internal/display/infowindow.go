@@ -243,7 +243,9 @@ func (i *InfoWindow) Display() {
 		done := false
 
 		statusLineStyle := config.DefStyle.Reverse(true)
-		if style, ok := config.Colorscheme["statusline"]; ok {
+		if style, ok := config.Colorscheme["statusline.suggestions"]; ok {
+			statusLineStyle = style
+		} else if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
 		}
 		keymenuOffset := 0

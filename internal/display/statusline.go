@@ -102,7 +102,9 @@ func (s *StatusLine) Display() {
 	// autocomplete suggestions (for the buffer, not for the infowindow)
 	if b.HasSuggestions && len(b.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
-		if style, ok := config.Colorscheme["statusline"]; ok {
+		if style, ok := config.Colorscheme["statusline.suggestions"]; ok {
+			statusLineStyle = style
+		} else if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
 		}
 		keymenuOffset := 0
@@ -163,8 +165,16 @@ func (s *StatusLine) Display() {
 	rightText = formatParser.ReplaceAllFunc(rightText, formatter)
 
 	statusLineStyle := config.DefStyle.Reverse(true)
-	if style, ok := config.Colorscheme["statusline"]; ok {
-		statusLineStyle = style
+	if s.win.IsActive() {
+		if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
+	} else {
+		if style, ok := config.Colorscheme["statusline.inactive"]; ok {
+			statusLineStyle = style
+		} else if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
 	}
 
 	leftLen := util.StringWidth(leftText, util.CharacterCount(leftText), 1)
