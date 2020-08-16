@@ -48,6 +48,11 @@ func (l Loc) LessEqual(b Loc) bool {
 	return l == b
 }
 
+// Equal returns true if two locs are equal
+func (l Loc) Equal(b Loc) bool {
+	return l.Y == b.Y && l.X == b.X
+}
+
 // The following functions require a buffer to know where newlines are
 
 // Diff returns the distance between two locations

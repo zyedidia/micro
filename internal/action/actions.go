@@ -682,7 +682,10 @@ func (h *BufPane) Autocomplete() bool {
 		// don't autocomplete if cursor is on alpha numeric character (middle of a word)
 		return false
 	}
-	return b.Autocomplete(buffer.LSPComplete)
+	if !b.Autocomplete(buffer.LSPComplete) {
+		return b.Autocomplete(buffer.BufferComplete)
+	}
+	return true
 }
 
 // CycleAutocompleteBack cycles back in the autocomplete suggestion list

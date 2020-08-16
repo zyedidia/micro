@@ -2,6 +2,7 @@ package buffer
 
 import (
 	"bytes"
+	"log"
 	"time"
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
@@ -52,6 +53,7 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 	}
 
 	if len(t.Deltas) != 1 {
+		log.Println("Multiple deltas not supported")
 		return
 	}
 

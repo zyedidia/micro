@@ -60,7 +60,12 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	if prevCompletion != -1 {
 		prev := b.Completions[prevCompletion]
 		for i := 0; i < len(prev.Edits); i++ {
-			b.UndoOneEvent()
+			if len(prev.Edits[i].Text) != 0 {
+				b.UndoOneEvent()
+			}
+			if !prev.Edits[i].Start.Equal(prev.Edits[i].End) {
+				b.UndoOneEvent()
+			}
 		}
 	}
 
