@@ -22,7 +22,7 @@ rules:
       # decorators
     - brightgreen: "@.*[(]"
       # operators
-    - symbol.operator: "([.:;,+*|=!\\%@]|<|>|/|-|&)"
+    - symbol.operator: "([~.:;,+*|=!\\%@]|<|>|/|-|&)"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
