@@ -58,5 +58,5 @@ rules:
     - comment:
         start: "#"
         end: "$"
-        rules: []
-
+        rules:
+            - todo: "(TODO|FIXME):?"
