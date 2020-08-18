@@ -27,6 +27,8 @@ rules:
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
     - constant.number: "\\b[0-9]+\\b"
+    - constant.number: "\\b0x[0-9]+\\b"
+    - constant.number: "\\b0b[0-9]+\\b"
 
     - constant.string:
         start: "\"\"\""
