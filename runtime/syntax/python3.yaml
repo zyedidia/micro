@@ -26,9 +26,8 @@ rules:
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
-    - constant.number: "\\b[0-9]+\\b"
-    - constant.number: "\\b0x[0-9]+\\b"
-    - constant.number: "\\b0b[0-9]+\\b"
+    - constant.number: "\\b[1-9](_?[0-9])*\\b" # decimal
+    - constant.number: "\\b0[box](_?[0-9])+\\b" # bin, oct and hex
 
     - constant.string:
         start: "\"\"\""
