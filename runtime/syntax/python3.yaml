@@ -6,7 +6,7 @@ detect:
 
 rules:
     # built-in objects
-    - constant: "\\b(Ellipsis|None|self|True|False)\\b"
+    - constant: "\\b(Ellipsis|None|self|cls|True|False)\\b"
       # built-in attributes
     - constant: "\\b(__bases__|__builtin__|__class__|__debug__|__dict__|__doc__|__file__|__members__|__methods__|__name__|__self__)\\b"
       # built-in functions
