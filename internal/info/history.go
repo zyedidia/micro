@@ -61,6 +61,30 @@ func (i *InfoBuf) SaveHistory() {
 	}
 }
 
+// AddToHistory adds a new item to the history for the prompt type `ptype`.
+// This function is not used by micro itself. It is useful for plugins
+// which add their own items to the history, bypassing the infobar command line.
+func (i *InfoBuf) AddToHistory(ptype string, item string) {
+	if i.HasPrompt && i.PromptType == ptype {
+		return
+	}
+
+	if _, ok := i.History[ptype]; !ok {
+		i.History[ptype] = []string{item}
+	} else {
+		i.History[ptype] = append(i.History[ptype], item)
+
+		// avoid duplicates
+		h := i.History[ptype]
+		for j := len(h) - 2; j >= 0; j-- {
+			if h[j] == h[len(h)-1] {
+				i.History[ptype] = append(h[:j], h[j+1:]...)
+				break
+			}
+		}
+	}
+}
+
 // UpHistory fetches the previous item in the history
 func (i *InfoBuf) UpHistory(history []string) {
 	if i.HistoryNum > 0 && i.HasPrompt && !i.HasYN {
