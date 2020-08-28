@@ -14,7 +14,7 @@ rules: # comment convention: 'python' means it was copied from python3.yaml
       # python: built-in functions
     - identifier: "\\b(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dir|divmod|eval|exec|format|getattr|globals|hasattr|hash|help|hex|id|input|isinstance|issubclass|iter|len|locals|max|min|next|nonlocal|oct|open|ord|pow|print|repr|round|setattr|sorted|sum|vars|__import__)\\b"
       # dogelang: built-in functions
-    - identifier: "\\b(foldl1?|foldr|scanl1?|scanr|bind|flip|take|takewhile|drop|dropwhile|iterate|head|tail|fst|snd|init|last)\\b"
+    - identifier: "\\b(chain|exhaust|foldl1?|foldr|scanl1?|scanr|bind|flip|take|takewhile|drop|dropwhile|iterate|head|tail|fst|snd|init|last)\\b"
       # python: special method names
     - identifier: "\\b__(abs|add|and|call|cmp|coerce|complex|concat|contains|delattr|delitem|delslice|del|dict|divmod|div|float|getattr|getitem|getslice|hash|hex|iadd|iand|iconcat|ifloordiv|ilshift|imatmul|imod|imul|init|int|invert|inv|ior|ipow|irshift|isub|iter|itruediv|ixor|len|long|lshift|mod|mul|neg|next|nonzero|oct|or|pos|pow|radd|rand|rcmp|rdivmod|rdiv|repeat|repr|rlshift|rmod|rmul|ror|rpow|rrshift|rshift|rsub|rxor|setattr|setitem|setslice|str|sub|xor)__\\b"
       # python: types
@@ -24,7 +24,7 @@ rules: # comment convention: 'python' means it was copied from python3.yaml
       # dogelang: Classes
     - type: "\\b_?[A-Z][a-zA-Z_0-9]*\\b"
       # dogelang: keywords
-    - statement: "\\b(and|assert|async|await|break|subclass|continue|except|finally|for|if|import|in|is|not|or|raise|return|while|with|yield|where|otherwise)\\b"
+    - statement: "\\b(and|assert|async|await|break|subclass|continue|except|finally|for|if|import|in|is|not|or|raise|return|while|with|yield(\\s+from)?|where|otherwise)\\b"
       # dogelang: operators
     - symbol.operator: "([~^.:;,+*|=!\\%@?]|<|>|/|-|&)+"
     - symbol.operator: "[$]" # split of from the above regex to mitigate the impact of https://github.com/zyedidia/micro/issues/1457
