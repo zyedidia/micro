@@ -41,6 +41,9 @@ rules:
       # urls
     - underlined: "https?://[^ )>]+"
 
+      # html tags
+    - identifier: "\\<[^!].*?\\>"
+
       # inline code
     - special: "`[^`]*(`|$)"
 
