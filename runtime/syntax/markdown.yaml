@@ -140,5 +140,4 @@ rules:
     - special:
         start: "^\\s*```.*\\s*$"
         end: "^\\s*```\\s*$"
-        rules:
-        - identiier: "^\\s*```.*$"
+        rules: []
