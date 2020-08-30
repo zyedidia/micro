@@ -4,7 +4,7 @@ Micro has a plethora of hotkeys that make it easy and powerful to use and all
 hotkeys are fully customizable to your liking.
 
 Custom keybindings are stored internally in micro if changed with the `> bind`
-command or you can also be added in the file `~/.config/micro/bindings.json` as
+command or can also be added in the file `~/.config/micro/bindings.json` as
 discussed below. For a list of the default keybindings in the json format used
 by micro, please see the end of this file. For a more user-friendly list with
 explanations of what the default hotkeys are and what they do, please see
