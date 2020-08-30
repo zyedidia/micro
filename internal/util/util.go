@@ -423,7 +423,7 @@ func IsNonAlphaNumeric(c rune) bool {
 }
 
 func IsAutocomplete(c rune) bool {
-	return c == '.' || !IsNonAlphaNumeric(c)
+	return !unicode.IsSpace(c) || !IsNonAlphaNumeric(c)
 }
 
 func ParseSpecial(s string) string {
