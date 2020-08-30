@@ -276,6 +276,13 @@ func main() {
 
 	go func() {
 		<-c
+
+		for _, b := range buffer.OpenBuffers {
+			if !b.Modified() {
+				b.Fini()
+			}
+		}
+
 		if screen.Screen != nil {
 			screen.Screen.Fini()
 		}
