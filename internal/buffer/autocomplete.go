@@ -54,8 +54,6 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	end := c.Loc
 	if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
 		start = end.Move(-util.CharacterCountInString(b.Completions[prevSuggestion]), b)
-	} else {
-		// end = start.Move(1, b)
 	}
 
 	b.Replace(start, end, b.Completions[b.CurSuggestion])
