@@ -159,7 +159,7 @@ modSearch:
 		}
 	}
 
-	if len(k) == 0 {
+	if k == "" {
 		return KeyEvent{}, false
 	}
 
