@@ -51,8 +51,8 @@ func (b *Buffer) Unserialize() error {
 		return nil
 	}
 	file, err := os.Open(filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath)))
-	defer file.Close()
 	if err == nil {
+		defer file.Close()
 		var buffer SerializedBuffer
 		decoder := gob.NewDecoder(file)
 		err = decoder.Decode(&buffer)
