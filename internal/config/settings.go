@@ -104,7 +104,7 @@ func InitGlobalSettings() error {
 	for k, v := range parsedSettings {
 		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 			if _, ok := GlobalSettings[k]; ok && !verifySetting(k, reflect.TypeOf(v), reflect.TypeOf(GlobalSettings[k])) {
-				err = errors.New(fmt.Sprintf("Global Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v), GlobalSettings[k], reflect.TypeOf(GlobalSettings[k])))
+				err = fmt.Errorf("Global Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v), GlobalSettings[k], reflect.TypeOf(GlobalSettings[k]))
 				continue
 			}
 
@@ -125,7 +125,7 @@ func InitLocalSettings(settings map[string]interface{}, path string) error {
 				if settings["filetype"].(string) == k[3:] {
 					for k1, v1 := range v.(map[string]interface{}) {
 						if _, ok := settings[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(settings[k1])) {
-							parseError = errors.New(fmt.Sprintf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1])))
+							parseError = fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1]))
 							continue
 						}
 						settings[k1] = v1
@@ -141,7 +141,7 @@ func InitLocalSettings(settings map[string]interface{}, path string) error {
 				if g.MatchString(path) {
 					for k1, v1 := range v.(map[string]interface{}) {
 						if _, ok := settings[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(settings[k1])) {
-							parseError = errors.New(fmt.Sprintf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1])))
+							parseError = fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1]))
 							continue
 						}
 						settings[k1] = v1
