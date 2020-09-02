@@ -121,8 +121,7 @@ func ParseColorscheme(text string) (map[string]tcell.Style, error) {
 func StringToStyle(str string) tcell.Style {
 	var fg, bg string
 	spaceSplit := strings.Split(str, " ")
-	var split []string
-	split = strings.Split(spaceSplit[len(spaceSplit)-1], ",")
+	split := strings.Split(spaceSplit[len(spaceSplit)-1], ",")
 	if len(split) > 1 {
 		fg, bg = split[0], split[1]
 	} else {
