@@ -14,6 +14,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	luar "layeh.com/gopher-luar"
@@ -184,6 +185,7 @@ type Buffer struct {
 	*EventHandler
 	*SharedBuffer
 
+	fini        int32
 	cursors     []*Cursor
 	curCursor   int
 	StartCursor Loc
@@ -396,6 +398,8 @@ func (b *Buffer) Fini() {
 	if b.Type == BTStdout {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
 	}
+
+	atomic.StoreInt32(&(b.fini), int32(1))
 }
 
 // GetName returns the name that should be displayed in the statusline

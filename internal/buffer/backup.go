@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"sync/atomic"
 	"time"
 
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -36,7 +37,10 @@ func backupThread() {
 
 		for len(backupRequestChan) > 0 {
 			b := <-backupRequestChan
-			b.Backup()
+			bfini := atomic.LoadInt32(&(b.fini)) != 0
+			if !bfini {
+				b.Backup()
+			}
 		}
 	}
 }
