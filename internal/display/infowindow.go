@@ -7,7 +7,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/info"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/tcell/v2"
 )
 
 type InfoWindow struct {

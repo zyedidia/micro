@@ -24,7 +24,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/tcell/v2"
 )
 
 var (
@@ -297,13 +297,15 @@ func main() {
 			if screen.Screen != nil {
 				screen.Screen.Fini()
 			}
-			fmt.Println("Micro encountered an error:", err)
+			if e, ok := err.(*lua.ApiError); ok {
+				fmt.Println("Lua API error:", e)
+			} else {
+				fmt.Println("Micro encountered an error:", errors.Wrap(err, 2).ErrorStack(), "\nIf you can reproduce this error, please report it at https://github.com/zyedidia/micro/issues")
+			}
 			// backup all open buffers
 			for _, b := range buffer.OpenBuffers {
 				b.Backup()
 			}
-			// Print the stack trace too
-			fmt.Print(errors.Wrap(err, 2).ErrorStack())
 			os.Exit(1)
 		}
 	}()
@@ -380,9 +382,6 @@ func main() {
 		// time out after 10ms
 	}
 
-	// Since this loop is very slow (waits for user input every time) it's
-	// okay to be inefficient and run it via a function every time
-	// We do this so we can recover from panics without crashing the editor
 	for {
 		DoEvent()
 	}
@@ -392,16 +391,6 @@ func main() {
 func DoEvent() {
 	var event tcell.Event
 
-	// recover from errors without crashing the editor
-	defer func() {
-		if err := recover(); err != nil {
-			if e, ok := err.(*lua.ApiError); ok {
-				screen.TermMessage("Lua API error:", e)
-			} else {
-				screen.TermMessage("Micro encountered an error:", errors.Wrap(err, 2).ErrorStack(), "\nIf you can reproduce this error, please report it at https://github.com/zyedidia/micro/issues")
-			}
-		}
-	}()
 	// Display everything
 	screen.Screen.Fill(' ', config.DefStyle)
 	screen.Screen.HideCursor()
@@ -435,10 +424,12 @@ func DoEvent() {
 	}
 
 	ulua.Lock.Lock()
+	// if event != nil {
 	if action.InfoBar.HasPrompt {
 		action.InfoBar.HandleEvent(event)
 	} else {
 		action.Tabs.HandleEvent(event)
 	}
+	// }
 	ulua.Lock.Unlock()
 }

@@ -13,7 +13,7 @@ import (
 	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/tcell"
+	"github.com/zyedidia/tcell/v2"
 )
 
 var Binder = map[string]func(e Event, action string){
@@ -334,9 +334,9 @@ func UnbindKey(k string) error {
 }
 
 var mouseEvents = map[string]tcell.ButtonMask{
-	"MouseLeft":       tcell.Button1,
-	"MouseMiddle":     tcell.Button2,
-	"MouseRight":      tcell.Button3,
+	"MouseLeft":       tcell.ButtonPrimary,
+	"MouseMiddle":     tcell.ButtonMiddle,
+	"MouseRight":      tcell.ButtonSecondary,
 	"MouseWheelUp":    tcell.WheelUp,
 	"MouseWheelDown":  tcell.WheelDown,
 	"MouseWheelLeft":  tcell.WheelLeft,
