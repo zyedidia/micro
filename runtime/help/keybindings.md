@@ -415,6 +415,11 @@ MouseWheelLeft
 MouseWheelRight
 ```
 
+## Key sequences
+
+Key sequences can be bound by specifying valid keys one after another in brackets, such
+as `<Ctrl-x><Ctrl-c>`.
+
 # Default keybinding configuration.
 
 A select few keybindings are different on MacOS compared to other
@@ -527,6 +532,107 @@ conventions for text editing defaults.
     "Alt-p":        "RemoveMultiCursor",
     "Alt-c":        "RemoveAllMultiCursors",
     "Alt-x":        "SkipMultiCursor",
+}
+```
+
+## Pane type bindings
+
+Keybindings can be specified for different pane types as well. For example, to
+make a binding that only affects the command bar, use the `command` subgroup:
+
+```
+{
+    "command": {
+        "Ctrl-w": "WordLeft"
+    }
+}
+```
+
+The possible pane types are `buffer` (normal buffer), `command` (command bar),
+and `terminal` (terminal pane). The defaults for the command and terminal panes
+are given below:
+
+```
+{
+    "terminal": {
+        "<Ctrl-q><Ctrl-q>": "Exit",
+        "<Ctrl-e><Ctrl-e>": "CommandMode",
+        "<Ctrl-w><Ctrl-w>": "NextSplit"
+    },
+
+    "command": {
+        "Up":             "HistoryUp",
+        "Down":           "HistoryDown",
+        "Right":          "CursorRight",
+        "Left":           "CursorLeft",
+        "ShiftUp":        "SelectUp",
+        "ShiftDown":      "SelectDown",
+        "ShiftLeft":      "SelectLeft",
+        "ShiftRight":     "SelectRight",
+        "AltLeft":        "StartOfTextToggle",
+        "AltRight":       "EndOfLine",
+        "AltUp":          "CursorStart",
+        "AltDown":        "CursorEnd",
+        "AltShiftRight":  "SelectWordRight",
+        "AltShiftLeft":   "SelectWordLeft",
+        "CtrlLeft":       "WordLeft",
+        "CtrlRight":      "WordRight",
+        "CtrlShiftLeft":  "SelectToStartOfTextToggle",
+        "ShiftHome":      "SelectToStartOfTextToggle",
+        "CtrlShiftRight": "SelectToEndOfLine",
+        "ShiftEnd":       "SelectToEndOfLine",
+        "CtrlUp":         "CursorStart",
+        "CtrlDown":       "CursorEnd",
+        "CtrlShiftUp":    "SelectToStart",
+        "CtrlShiftDown":  "SelectToEnd",
+        "Enter":          "ExecuteCommand",
+        "CtrlH":          "Backspace",
+        "Backspace":      "Backspace",
+        "OldBackspace":   "Backspace",
+        "Alt-CtrlH":      "DeleteWordLeft",
+        "Alt-Backspace":  "DeleteWordLeft",
+        "Tab":            "CommandComplete",
+        "Backtab":        "CycleAutocompleteBack",
+        "Ctrl-z":         "Undo",
+        "Ctrl-y":         "Redo",
+        "Ctrl-c":         "CopyLine|Copy",
+        "Ctrl-x":         "Cut",
+        "Ctrl-k":         "CutLine",
+        "Ctrl-v":         "Paste",
+        "Home":           "StartOfTextToggle",
+        "End":            "EndOfLine",
+        "CtrlHome":       "CursorStart",
+        "CtrlEnd":        "CursorEnd",
+        "Delete":         "Delete",
+        "Ctrl-q":         "AbortCommand",
+        "Ctrl-e":         "EndOfLine",
+        "Ctrl-a":         "StartOfLine",
+        "Ctrl-w":         "DeleteWordLeft",
+        "Insert":         "ToggleOverwriteMode",
+        "Ctrl-b":         "WordLeft",
+        "Ctrl-f":         "WordRight",
+        "Ctrl-d":         "DeleteWordLeft",
+        "Ctrl-m":         "ExecuteCommand",
+        "Ctrl-n":         "HistoryDown",
+        "Ctrl-p":         "HistoryUp",
+        "Ctrl-u":         "SelectToStart",
+
+        // Emacs-style keybindings
+        "Alt-f": "WordRight",
+        "Alt-b": "WordLeft",
+        "Alt-a": "StartOfText",
+        "Alt-e": "EndOfLine",
+
+        // Integration with file managers
+        "F10": "AbortCommand",
+        "Esc": "AbortCommand",
+
+        // Mouse bindings
+        "MouseWheelUp":   "HistoryUp",
+        "MouseWheelDown": "HistoryDown",
+        "MouseLeft":      "MousePress",
+        "MouseMiddle":    "PastePrimary"
+    }
 }
 ```
 

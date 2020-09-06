@@ -17,7 +17,7 @@ import (
 )
 
 var Binder = map[string]func(e Event, action string){
-	"info":     InfoMapEvent,
+	"command":  InfoMapEvent,
 	"buffer":   BufMapEvent,
 	"terminal": TermMapEvent,
 }

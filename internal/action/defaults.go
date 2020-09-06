@@ -9,7 +9,7 @@ var termdefaults = map[string]string{
 // DefaultBindings returns a map containing micro's default keybindings
 func DefaultBindings(pane string) map[string]string {
 	switch pane {
-	case "info":
+	case "command":
 		return infodefaults
 	case "buffer":
 		return bufdefaults
