@@ -345,7 +345,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),
-			mod:  e.Modifiers(),
+			mod:  metaToAlt(e.Modifiers()),
 			r:    e.Rune(),
 		}
 
@@ -395,7 +395,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 		if !cancel {
 			me := MouseEvent{
 				btn: e.Buttons(),
-				mod: e.Modifiers(),
+				mod: metaToAlt(e.Modifiers()),
 			}
 			h.DoMouseEvent(me, e)
 		}

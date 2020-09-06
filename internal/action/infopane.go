@@ -83,7 +83,7 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),
-			mod:  e.Modifiers(),
+			mod:  metaToAlt(e.Modifiers()),
 			r:    e.Rune(),
 		}
 

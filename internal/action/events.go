@@ -36,6 +36,14 @@ type KeyEvent struct {
 	any  bool
 }
 
+func metaToAlt(mod tcell.ModMask) tcell.ModMask {
+	if mod&tcell.ModMeta != 0 {
+		mod &= ^tcell.ModMeta
+		mod |= tcell.ModAlt
+	}
+	return mod
+}
+
 func (k KeyEvent) Name() string {
 	if k.any {
 		return "<any>"
@@ -132,7 +140,7 @@ func ConstructEvent(event tcell.Event) (Event, error) {
 	case *tcell.EventKey:
 		return KeyEvent{
 			code: e.Key(),
-			mod:  e.Modifiers(),
+			mod:  metaToAlt(e.Modifiers()),
 			r:    e.Rune(),
 		}, nil
 	case *tcell.EventRaw:
@@ -142,7 +150,7 @@ func ConstructEvent(event tcell.Event) (Event, error) {
 	case *tcell.EventMouse:
 		return MouseEvent{
 			btn: e.Buttons(),
-			mod: e.Modifiers(),
+			mod: metaToAlt(e.Modifiers()),
 		}, nil
 	}
 	return nil, errors.New("No micro event equivalent")
