@@ -4,12 +4,12 @@ detect:
     filename: "(\\.c(c|pp|xx)$|\\.h(h|pp|xx)$|\\.ii?$|\\.(def)$)"
 
 rules:
-    - identifier: "\\b[a-zA-Z_][0-9a-zA-Z_]*\\b"
+    - identifier: "\\b[A-Z_][0-9A-Z_]*\\b"
     - type: "\\b(float|double|bool|char|int|short|long|enum|void|struct|union|typedef|(un)?signed|inline)\\b"
-    - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr))|char(8|16|32))_t|wchar_t\\b"
+    - type: "\\b(((s?size)|((u_?)?int(8|16|32|64|ptr))|char(8|16|32))_t|wchar_t)\\b"
     - type: "\\b(final|override)\\b"
     - type.keyword: "\\b(auto|volatile|const(expr|eval|init)?|mutable|register|thread_local|static|extern|decltype|explicit|virtual)\\b"
-    - statement: "\\b(class|namespace|template|typename|this|nullptr|friend|using|public|protected|private|noexcept)\\b"
+    - statement: "\\b(class|namespace|template|typename|this|friend|using|public|protected|private|noexcept)\\b"
     - statement: "\\b((const|dynamic|reinterpret|static)_cast)\\b"
     - statement: "\\b(concept|requires)\\b"
     - statement: "\\b(import|export|module)\\b"
@@ -25,12 +25,16 @@ rules:
     - statement: "(__attribute__[[:space:]]*\\(\\([^)]*\\)\\)|__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__)"
 
       # Operator Color
-    - symbol.operator: "([.:;,+*~|=!\\%]|<|>|/|-|&|\\b(sizeof|alignof|typeid|(and|or|xor|not)(_eq)?|bitor|compl|bitand)\\b)"
+    - symbol.operator: "([.:;,+*~|=!?\\%]|<|>|/|-|&|\\b(sizeof|alignof|typeid|(and|or|xor|not)(_eq)?|bitor|compl|bitand)\\b)"
       # Parenthetical Color
     - symbol.brackets: "[(){}]|\\[|\\]"
-
-    - constant.number: "(\\b[0-9]+\\b|\\b0x[0-9A-Fa-f]+\\b)"
-    - constant.bool: "(\\b(true|false|NULL)\\b)"
+      # Integer Literals
+    - constant.number: "(\\b([1-9][0-9']*|0[0-7']*|0[Xx][0-9a-fA-F']+|0[Bb][01]+)([Uu]?[Ll][Ll]?|[Ll][Ll]?[Uu]?)?\\b)"
+      # Decimal Floating-point Literals
+    - constant.number: "(\\b([0-9']*[.][0-9']*([Ee][+-]?[0-9']+)?|[0-9']+[Ee][+-]?[0-9']+)[FfLl]?\\b)"
+      # Hexadecimal Floating-point Literals
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z']+[.][0-9a-zA-Z']*|[0-9a-zA-Z']*[.][0-9a-zA-Z']+)[Pp][+-]?[0-9']+[FfLl]?\\b)"
+    - constant.bool: "(\\b(true|false|NULL|nullptr)\\b)"
 
     - constant.string:
         start: "\""
