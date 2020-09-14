@@ -466,7 +466,6 @@ so that you can see what the formatting should look like.
     "tabmovement": false,
     "tabsize": 4,
     "tabstospaces": false,
-    "test": true,
     "useprimary": true,
     "xterm": false
 }
