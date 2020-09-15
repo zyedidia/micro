@@ -2,6 +2,7 @@ package screen
 
 import (
 	"errors"
+	"log"
 	"os"
 	"sync"
 
@@ -144,16 +145,28 @@ func Init() error {
 	}
 
 	var oldTerm string
-	if config.GetGlobalOption("xterm").(bool) {
+	modifiedTerm := false
+	setXterm := func() {
 		oldTerm = os.Getenv("TERM")
 		os.Setenv("TERM", "xterm-256color")
+		modifiedTerm = true
+	}
+
+	if config.GetGlobalOption("xterm").(bool) {
+		setXterm()
 	}
 
 	// Initilize tcell
 	var err error
 	Screen, err = tcell.NewScreen()
 	if err != nil {
-		return err
+		log.Println("Warning: during screen initialization:", err)
+		log.Println("Falling back to TERM=xterm-256color")
+		setXterm()
+		Screen, err = tcell.NewScreen()
+		if err != nil {
+			return err
+		}
 	}
 	if err = Screen.Init(); err != nil {
 		return err
@@ -162,7 +175,7 @@ func Init() error {
 	Screen.SetPaste(config.GetGlobalOption("paste").(bool))
 
 	// restore TERM
-	if config.GetGlobalOption("xterm").(bool) {
+	if modifiedTerm {
 		os.Setenv("TERM", oldTerm)
 	}
 
