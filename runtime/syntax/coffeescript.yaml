@@ -4,18 +4,31 @@ detect:
     filename: "\\.coffee$"
 
 rules:
-    - symbol.operator: "[!&|=/*+-<>]|\\b(and|or|is|isnt|not)\\b"
+    - symbol.operator: "([-+/*=<>!~%?:&|]|[.]{3})|\\b(and|or|is|isnt|not)\\b"
     - identifier.class: "([A-Za-z_][A-Za-z0-9_]*:[[:space:]]*(->|\\()|->)"
     - symbol.brackets: "[()]"
-    - statement:  "\\b(for|of|continue|break|isnt|null|unless|this|else|if|return)\\b"
-    - statement:  "\\b(try|catch|finally|throw|new|delete|typeof|in|instanceof)\\b"
-    - statement:  "\\b(debugger|switch|while|do|class|extends|super)\\b"
-    - statement:  "\\b(undefined|then|unless|until|loop|of|by|when)\\b"
+
+    - statement:  "\\b(await|when|catch|continue|debugger|default|by|until)\\b"
+    - statement:  "\\b(delete|do|else|export|finally|for|class|extends|while|then)\\b"
+    - statement:  "\\b(get|if|import|from|in|instanceof|new|reject|resolve|return)\\b"
+    - statement:  "\\b(set|super|switch|this|throw|try|typeof|with|yield|unless)\\b"
+
     - constant.bool:  "\\b(true|false|yes|no|on|off)\\b"
+    - constant.bool.false: "\\b(false|no|off)\\b"
+    - constant.bool.true: "\\b(true|yes|on)\\b"
+
     - constant.number: "\\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\\b"
     - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
     - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
     - identifier: "@[A-Za-z0-9_]*"
+
+    - error: "\\b(enum|implements|interface|package|private|protected|public)"
+    - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
+    - constant: "\\b(null|undefined|NaN)\\b"
+    - constant: "\\b(true|false|yes|no|on|off)\\b"
+    - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Generator|Map|Math)\\b"
+    - type: "\\b(Number|Object|Promise|Proxy|Reflect|RegExp|Set|String|Symbol|WeakMap|WeakSet)\\b"
+    - type: "\\b(BigInt64Array|BigUint64Array|Float32Array|Float64Array|Int16Array)\\b"
 
     - constant.string:
         start: "\""
@@ -30,16 +43,14 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
-      
+
+    - comment:
+        start: "###"
+        end: "###"
+        rules:  []
 
     - comment:
         start: "#"
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-    - comment:
-        start: "###"
-        end: "###"
-        rules:  
-            - todo: "(TODO|XXX|FIXME)"
-
