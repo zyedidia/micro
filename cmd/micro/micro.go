@@ -91,7 +91,7 @@ func InitFlags() {
 		// If -version was passed
 		fmt.Println("Version:", util.Version)
 		fmt.Println("Commit hash:", util.CommitHash)
-		fmt.Println("Compiled on", util.CompileDate)
+		fmt.Println(fmt.Sprintf("Compiled on %s (go version %s)", util.CompileDate, runtime.Version()))
 		os.Exit(0)
 	}
 
