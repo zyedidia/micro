@@ -14,9 +14,9 @@ import (
 func (i *InfoBuf) LoadHistory() {
 	if config.GetGlobalOption("savehistory").(bool) {
 		file, err := os.Open(filepath.Join(config.ConfigDir, "buffers", "history"))
-		defer file.Close()
 		var decodedMap map[string][]string
 		if err == nil {
+			defer file.Close()
 			decoder := gob.NewDecoder(file)
 			err = decoder.Decode(&decodedMap)
 
@@ -48,8 +48,8 @@ func (i *InfoBuf) SaveHistory() {
 		}
 
 		file, err := os.Create(filepath.Join(config.ConfigDir, "buffers", "history"))
-		defer file.Close()
 		if err == nil {
+			defer file.Close()
 			encoder := gob.NewEncoder(file)
 
 			err = encoder.Encode(i.History)

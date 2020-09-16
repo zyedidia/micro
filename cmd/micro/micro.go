@@ -272,7 +272,7 @@ func main() {
 	}
 
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Kill, syscall.SIGTERM)
+	signal.Notify(c, syscall.SIGTERM)
 
 	go func() {
 		<-c

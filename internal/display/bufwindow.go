@@ -557,7 +557,7 @@ func (w *BufWindow) displayBuffer() {
 				if r == '\t' {
 					indentrunes := []rune(b.Settings["indentchar"].(string))
 					// if empty indentchar settings, use space
-					if indentrunes == nil || len(indentrunes) == 0 {
+					if len(indentrunes) == 0 {
 						indentrunes = []rune{' '}
 					}
 

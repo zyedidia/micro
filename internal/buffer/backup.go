@@ -69,7 +69,7 @@ func (b *Buffer) Backup() error {
 	}
 
 	backupdir, err := util.ReplaceHome(b.Settings["backupdir"].(string))
-	if len(backupdir) == 0 || err != nil {
+	if backupdir == "" || err != nil {
 		backupdir = filepath.Join(config.ConfigDir, "backups")
 	}
 	if _, err := os.Stat(backupdir); os.IsNotExist(err) {

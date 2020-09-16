@@ -610,6 +610,9 @@ func (b *Buffer) UpdateRules() {
 		}
 
 		header, err = highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
+		}
 		file, err := highlight.ParseFile(data)
 		if err != nil {
 			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())

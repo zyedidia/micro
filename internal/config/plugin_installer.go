@@ -479,9 +479,7 @@ func (pl PluginPackages) GetAllVersions(name string) PluginVersions {
 	result := make(PluginVersions, 0)
 	p := pl.Get(name)
 	if p != nil {
-		for _, v := range p.Versions {
-			result = append(result, v)
-		}
+		result = append(result, p.Versions...)
 	}
 	return result
 }

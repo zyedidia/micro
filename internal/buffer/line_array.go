@@ -130,7 +130,7 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 		if err != nil {
 			if err == io.EOF {
 				la.lines = Append(la.lines, Line{
-					data:        data[:],
+					data:        data,
 					state:       nil,
 					match:       nil,
 					rehighlight: false,
