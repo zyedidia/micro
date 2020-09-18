@@ -10,7 +10,6 @@ rules:
     - type: "\\b(final|override)\\b"
     - type.keyword: "\\b(auto|volatile|const(expr|eval|init)?|mutable|register|thread_local|static|extern|decltype|explicit|virtual)\\b"
     - statement: "\\b(class|namespace|template|typename|this|friend|using|public|protected|private|noexcept)\\b"
-    - statement: "\\b((const|dynamic|reinterpret|static)_cast)\\b"
     - statement: "\\b(concept|requires)\\b"
     - statement: "\\b(import|export|module)\\b"
     - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
@@ -25,15 +24,15 @@ rules:
     - statement: "(__attribute__[[:space:]]*\\(\\([^)]*\\)\\)|__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__)"
 
       # Operator Color
-    - symbol.operator: "([.:;,+*~|=!?\\%]|<|>|/|-|&|\\b(sizeof|alignof|typeid|(and|or|xor|not)(_eq)?|bitor|compl|bitand)\\b)"
+    - symbol.operator: "[-+*/%=<>.:;,~&|^!?]|\\b(sizeof|alignof|typeid|(and|or|xor|not)(_eq)?|bitor|compl|bitand|(const|dynamic|reinterpret|static)_cast)\\b"
       # Parenthetical Color
     - symbol.brackets: "[(){}]|\\[|\\]"
       # Integer Literals
     - constant.number: "(\\b([1-9][0-9']*|0[0-7']*|0[Xx][0-9a-fA-F']+|0[Bb][01]+)([Uu]?[Ll][Ll]?|[Ll][Ll]?[Uu]?)?\\b)"
       # Decimal Floating-point Literals
-    - constant.number: "(\\b([0-9']*[.][0-9']*([Ee][+-]?[0-9']+)?|[0-9']+[Ee][+-]?[0-9']+)[FfLl]?\\b)"
+    - constant.number: "(\\b(([0-9']*[.][0-9']+|[0-9']+[.][0-9']*)([Ee][+-]?[0-9']+)?|[0-9']+[Ee][+-]?[0-9']+)[FfLl]?\\b)"
       # Hexadecimal Floating-point Literals
-    - constant.number: "(\\b0[Xx]([0-9a-zA-Z']+[.][0-9a-zA-Z']*|[0-9a-zA-Z']*[.][0-9a-zA-Z']+)[Pp][+-]?[0-9']+[FfLl]?\\b)"
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z']*[.][0-9a-zA-Z']+|[0-9a-zA-Z']+[.][0-9a-zA-Z']*)[Pp][+-]?[0-9']+[FfLl]?\\b)"
     - constant.bool: "(\\b(true|false|NULL|nullptr)\\b)"
 
     - constant.string:
