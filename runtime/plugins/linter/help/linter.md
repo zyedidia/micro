@@ -21,6 +21,7 @@ following filetypes and linters:
 * python: mypy
 * python: pylint
 * shell: shfmt
+* shell: shellcheck
 * swift: swiftc (MacOS and Linux only)
 * yaml: yamllint
 
