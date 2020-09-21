@@ -81,7 +81,7 @@ func (w *TermWindow) Display() {
 			if b == terminal.DefaultBG {
 				bg = int(tcell.ColorDefault)
 			}
-			st := tcell.StyleDefault.Foreground(config.GetColor256(int(fg))).Background(config.GetColor256(int(bg)))
+			st := tcell.StyleDefault.Foreground(config.GetColor256(fg)).Background(config.GetColor256(bg))
 
 			if l.LessThan(w.Selection[1]) && l.GreaterEqual(w.Selection[0]) || l.LessThan(w.Selection[0]) && l.GreaterEqual(w.Selection[1]) {
 				st = st.Reverse(true)
