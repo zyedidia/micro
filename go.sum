@@ -54,12 +54,8 @@ github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
 github.com/zyedidia/pty v2.0.0+incompatible h1:Ou5vXL6tvjst+RV8sUFISbuKDnUJPhnpygApMFGweqw=
 github.com/zyedidia/pty v2.0.0+incompatible/go.mod h1:4y9l9yJZNxRa7GB/fB+mmDmGkG3CqmzLf4vUxGGotEA=
-github.com/zyedidia/tcell/v2 v2.0.2 h1:Zuf6vic3Yj2tFMXHCGOGL4WjqR3BwG30mOdwEz+ScxM=
-github.com/zyedidia/tcell/v2 v2.0.2/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
-github.com/zyedidia/tcell/v2 v2.0.3 h1:074Hr0CZY8RhHa3eHVKY/ixVA75m0DHyXDdn/3zoQ2k=
-github.com/zyedidia/tcell/v2 v2.0.3/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
-github.com/zyedidia/tcell/v2 v2.0.4 h1:pESaBDhJ839aVYgT7qHNStiMULt7zk/jh+qsjoRFtGs=
-github.com/zyedidia/tcell/v2 v2.0.4/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
+github.com/zyedidia/tcell/v2 v2.0.6 h1:v0GoNpPYJ+Wbd1RiSL09SUFzoq4eVKTuT5awbW6aqGs=
+github.com/zyedidia/tcell/v2 v2.0.6/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415/go.mod h1:8leT8G0Cm8NoJHdrrKHyR9MirWoF4YW7pZh06B6H+1E=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
