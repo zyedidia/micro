@@ -59,4 +59,4 @@ rules:
         start: "#"
         end: "$"
         rules:  # AKA Code tags (PEP 350)
-            - todo: "(TODO|FIXME|HACK|BUG|NOTE|FAQ|MNEMONIC|REQ|RFE|IDEA|PORT|\?\?\?|!!!|GLOSS|SEE|TODOC|STAT|RVD|CRED):?"
+            - todo: "(TODO|FIXME|HACK|BUG|NOTE|FAQ|MNEMONIC|REQ|RFE|IDEA|PORT|\\?\\?\\?|!!!|GLOSS|SEE|TODOC|STAT|RVD|CRED):?"
