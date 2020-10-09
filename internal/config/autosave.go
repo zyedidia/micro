@@ -31,14 +31,13 @@ func GetAutoTime() int {
 func StartAutoSave() {
 	go func() {
 		for {
-			if autotime < 1 {
+			autolock.Lock()
+			a := autotime
+			autolock.Unlock()
+			if a < 1 {
 				break
 			}
-			time.Sleep(time.Duration(autotime) * time.Second)
-			// it's possible autotime was changed while sleeping
-			if autotime < 1 {
-				break
-			}
+			time.Sleep(time.Duration(a) * time.Second)
 			Autosave <- true
 		}
 	}()
