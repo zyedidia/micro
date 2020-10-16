@@ -116,13 +116,13 @@ func (s *StatusLine) Display() {
 				style = style.Reverse(true)
 			}
 			for _, r := range sug {
-				screen.SetContent(x, y-keymenuOffset, r, nil, style)
+				screen.SetContent(x + s.win.X, y-keymenuOffset, r, nil, style)
 				x++
 				if x >= s.win.Width {
 					return
 				}
 			}
-			screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			screen.SetContent(x + s.win.X, y-keymenuOffset, ' ', nil, statusLineStyle)
 			x++
 			if x >= s.win.Width {
 				return
@@ -130,7 +130,7 @@ func (s *StatusLine) Display() {
 		}
 
 		for x < s.win.Width {
-			screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			screen.SetContent(x + s.win.X, y-keymenuOffset, ' ', nil, statusLineStyle)
 			x++
 		}
 		return
