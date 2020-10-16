@@ -4,7 +4,7 @@ detect:
     filename: "\\.lua$"
 
 rules:
-    - statement: "\\b(do|end|while|repeat|until|if|elseif|then|else|for|in|function|local|return)\\b"
+    - statement: "\\b(do|end|while|break|repeat|until|if|elseif|then|else|for|in|function|local|return)\\b"
     - statement: "\\b(not|and|or)\\b"
     - statement: "\\b(debug|string|math|table|io|coroutine|os|utf8|bit32)\\b\\."
     - statement: "\\b(_ENV|_G|_VERSION|assert|collectgarbage|dofile|error|getfenv|getmetatable|ipairs|load|loadfile|module|next|pairs|pcall|print|rawequal|rawget|rawlen|rawset|require|select|setfenv|setmetatable|tonumber|tostring|type|unpack|xpcall)\\s*\\("
