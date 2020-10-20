@@ -28,6 +28,8 @@ color-link tabbar "bold #b1b1b1,#232323"
 color-link cursor-line "#353535"
 color-link color-column "#353535"
 color-link space "underline #e6e1dc,#2b2b2b"
+color-link tab-error "#d75f5f"
+color-link trailingws "#d75f5f"
 
 #the Python syntax definition are wrong. This is not how you should do decorators!
 color-link brightgreen "#edb753,#2b2b2b"
