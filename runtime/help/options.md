@@ -181,6 +181,12 @@ Here are the available options:
 
 	default value: `false`
 
+* `hltrailingws`: highlight trailing whitespaces at ends of lines. Note that
+   it doesn't highlight newly added trailing whitespaces that naturally occur
+   while typing text. It highlights only nasty forgotten trailing whitespaces.
+
+	default value: `false`
+
 * `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
 	default value: `true`

@@ -509,6 +509,13 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 			InfoBar.ClearGutter()
 		}
 	}
+
+	cursors := h.Buf.GetCursors()
+	for _, c := range cursors {
+		if c.NewTrailingWsY != c.Y {
+			c.NewTrailingWsY = -1
+		}
+	}
 }
 
 // Bindings returns the current bindings tree for this buffer.
