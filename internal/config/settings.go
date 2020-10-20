@@ -289,6 +289,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"fileformat":      defaultFileFormat(),
 	"filetype":        "unknown",
 	"hlsearch":        false,
+	"hltaberrors":     false,
 	"incsearch":       true,
 	"ignorecase":      true,
 	"indentchar":      " ",
