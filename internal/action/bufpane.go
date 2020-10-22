@@ -512,7 +512,8 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 
 	cursors := h.Buf.GetCursors()
 	for _, c := range cursors {
-		if c.NewTrailingWsY != c.Y {
+		if c.NewTrailingWsY != c.Y && (!c.HasSelection() ||
+			(c.NewTrailingWsY != c.CurSelection[0].Y && c.NewTrailingWsY != c.CurSelection[1].Y)) {
 			c.NewTrailingWsY = -1
 		}
 	}
