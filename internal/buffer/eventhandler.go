@@ -107,7 +107,9 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 		c.LastVisualX = c.GetVisualX()
 	}
 
-	eh.updateTrailingWs(t)
+	if useUndo {
+		eh.updateTrailingWs(t)
+	}
 }
 
 // ExecuteTextEvent runs a text event
@@ -292,6 +294,7 @@ func (eh *EventHandler) UndoOneEvent() {
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
 		t.C = *eh.cursors[teCursor.Num]
 		eh.cursors[teCursor.Num].Goto(teCursor)
+		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
 	} else {
 		teCursor.Num = -1
 	}
@@ -335,6 +338,7 @@ func (eh *EventHandler) RedoOneEvent() {
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
 		t.C = *eh.cursors[teCursor.Num]
 		eh.cursors[teCursor.Num].Goto(teCursor)
+		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
 	} else {
 		teCursor.Num = -1
 	}
