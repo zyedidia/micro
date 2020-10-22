@@ -391,5 +391,11 @@ func (eh *EventHandler) updateTrailingWs(t *TextEvent) {
 		} else if !removedAfterWs {
 			c.NewTrailingWsY = -1
 		}
+	} else if c.NewTrailingWsY != -1 && start.Y != end.Y && c.Loc.GreaterThan(start) &&
+		((t.EventType == TextEventInsert && c.Y == c.NewTrailingWsY+(end.Y-start.Y)) ||
+			(t.EventType == TextEventRemove && c.Y == c.NewTrailingWsY-(end.Y-start.Y))) {
+		// The cursor still has its new trailingws
+		// but its line number was shifted by insert or remove of lines above
+		c.NewTrailingWsY = c.Y
 	}
 }
