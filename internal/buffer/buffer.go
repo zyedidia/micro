@@ -511,11 +511,12 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 		for len(line) > 0 {
 			r, _, size := util.DecodeCharacter(line)
 			line = line[size:]
-			i++
 
 			if i == loc.X {
 				return r
 			}
+
+			i++
 		}
 	}
 	return '\n'

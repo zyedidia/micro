@@ -98,16 +98,14 @@ func (s *StatusLine) Display() {
 	// We'll draw the line at the lowest line in the window
 	y := s.win.Height + s.win.Y - 1
 
+	winX := s.win.X
+
 	b := s.win.Buf
 	// autocomplete suggestions (for the buffer, not for the infowindow)
 	if b.HasSuggestions && len(b.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
 		if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
-		}
-		keymenuOffset := 0
-		if config.GetGlobalOption("keymenu").(bool) {
-			keymenuOffset = len(keydisplay)
 		}
 		x := 0
 		for j, sug := range b.Suggestions {
@@ -116,13 +114,13 @@ func (s *StatusLine) Display() {
 				style = style.Reverse(true)
 			}
 			for _, r := range sug {
-				screen.SetContent(x, y-keymenuOffset, r, nil, style)
+				screen.SetContent(winX+x, y, r, nil, style)
 				x++
 				if x >= s.win.Width {
 					return
 				}
 			}
-			screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
 			x++
 			if x >= s.win.Width {
 				return
@@ -130,7 +128,7 @@ func (s *StatusLine) Display() {
 		}
 
 		for x < s.win.Width {
-			screen.SetContent(x, y-keymenuOffset, ' ', nil, statusLineStyle)
+			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
 			x++
 		}
 		return
@@ -170,7 +168,6 @@ func (s *StatusLine) Display() {
 	leftLen := util.StringWidth(leftText, util.CharacterCount(leftText), 1)
 	rightLen := util.StringWidth(rightText, util.CharacterCount(rightText), 1)
 
-	winX := s.win.X
 	for x := 0; x < s.win.Width; x++ {
 		if x < leftLen {
 			r, combc, size := util.DecodeCharacter(leftText)
