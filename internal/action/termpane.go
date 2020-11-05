@@ -5,6 +5,7 @@ import (
 	"runtime"
 
 	"github.com/zyedidia/micro/v2/internal/clipboard"
+	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
@@ -28,6 +29,8 @@ func TermKeyActionGeneral(a TermKeyAction) PaneKeyAction {
 }
 
 func TermMapEvent(k Event, action string) {
+	config.Bindings["terminal"][k.Name()] = action
+
 	switch e := k.(type) {
 	case KeyEvent, KeySequenceEvent, RawEvent:
 		termMapKey(e, action)

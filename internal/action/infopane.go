@@ -4,6 +4,7 @@ import (
 	"bytes"
 
 	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	"github.com/zyedidia/micro/v2/internal/info"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -21,6 +22,8 @@ func init() {
 }
 
 func InfoMapEvent(k Event, action string) {
+	config.Bindings["command"][k.Name()] = action
+
 	switch e := k.(type) {
 	case KeyEvent, KeySequenceEvent, RawEvent:
 		infoMapKey(e, action)

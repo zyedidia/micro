@@ -83,8 +83,6 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 		return
 	}
 
-	config.Bindings[event.Name()] = v
-
 	bind(event, v)
 
 	// switch e := event.(type) {
@@ -322,9 +320,9 @@ func UnbindKey(k string) error {
 		defaults := DefaultBindings("buffer")
 		if a, ok := defaults[k]; ok {
 			BindKey(k, a, Binder["buffer"])
-		} else if _, ok := config.Bindings[k]; ok {
+		} else if _, ok := config.Bindings["buffer"][k]; ok {
 			BufUnmap(key)
-			delete(config.Bindings, k)
+			delete(config.Bindings["buffer"], k)
 		}
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
