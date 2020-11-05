@@ -161,7 +161,7 @@ Here are the available options:
 
 * `ignorecase`: perform case-insensitive searches.
 
-	default value: `false`
+	default value: `true`
 
 * `indentchar`: sets the indentation character.
 
