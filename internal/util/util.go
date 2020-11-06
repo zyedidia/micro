@@ -46,7 +46,8 @@ func init() {
 		fmt.Println("Invalid version: ", Version, err)
 	}
 
-	if runtime.GOOS == "windows" {
+	_, wt := os.LookupEnv("WT_SESSION")
+	if runtime.GOOS == "windows" && !wt {
 		FakeCursor = true
 	}
 	Stdout = new(bytes.Buffer)
