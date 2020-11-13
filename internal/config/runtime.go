@@ -7176,7 +7176,7 @@ var _bindata = map[string]func() (*asset, error){
 // AssetDir("") will return []string{"data"}.
 func AssetDir(name string) ([]string, error) {
 	node := _bintree
-	if len(name) != 0 {
+	if name != "" {
 		cannonicalName := strings.Replace(name, "\\", "/", -1)
 		pathList := strings.Split(cannonicalName, "/")
 		for _, p := range pathList {
