@@ -341,12 +341,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	if startcursor.X != -1 && startcursor.Y != -1 {
 		b.StartCursor = startcursor
-	} else {
-		if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-			err := b.Unserialize()
-			if err != nil {
-				screen.TermMessage(err)
-			}
+	} else if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+		err := b.Unserialize()
+		if err != nil {
+			screen.TermMessage(err)
 		}
 	}
 
