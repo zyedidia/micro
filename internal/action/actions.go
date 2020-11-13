@@ -1166,7 +1166,7 @@ func (h *BufPane) paste(clip string) {
 	if h.Buf.Settings["smartpaste"].(bool) {
 		if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
 			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
-			clip = strings.Replace(clip, "\n", "\n"+string(leadingWS), -1)
+			clip = strings.ReplaceAll(clip, "\n", "\n"+string(leadingWS))
 		}
 	}
 

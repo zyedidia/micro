@@ -987,9 +987,9 @@ func (b *Buffer) Retab() {
 		ws := util.GetLeadingWhitespace(l)
 		if len(ws) != 0 {
 			if toSpaces {
-				ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
+				ws = bytes.ReplaceAll(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize))
 			} else {
-				ws = bytes.Replace(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'}, -1)
+				ws = bytes.ReplaceAll(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'})
 			}
 		}
 
