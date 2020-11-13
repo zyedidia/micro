@@ -1348,10 +1348,8 @@ func (h *BufPane) HalfPageDown() bool {
 	v := h.GetView()
 	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height/2 {
 		h.ScrollDown(v.Height / 2)
-	} else {
-		if h.Buf.LinesNum() >= v.Height {
-			v.StartLine = h.Buf.LinesNum() - v.Height
-		}
+	} else if h.Buf.LinesNum() >= v.Height {
+		v.StartLine = h.Buf.LinesNum() - v.Height
 	}
 	h.SetView(v)
 	return true
