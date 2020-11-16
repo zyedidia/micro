@@ -1,6 +1,7 @@
 package lua
 
 import (
+	"archive/zip"
 	"bytes"
 	"errors"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"math"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"path"
 	"path/filepath"
@@ -74,6 +76,10 @@ func Import(pkg string) *lua.LTable {
 		return importUtf8()
 	case "humanize":
 		return importHumanize()
+	case "net/http", "http":
+		return importHTTP()
+	case "archive/zip":
+		return importArchiveZip()
 	default:
 		return nil
 	}
@@ -383,6 +389,7 @@ func importOs() *lua.LTable {
 	L.SetField(pkg, "Symlink", luar.New(L, os.Symlink))
 	L.SetField(pkg, "TempDir", luar.New(L, os.TempDir))
 	L.SetField(pkg, "Truncate", luar.New(L, os.Truncate))
+	L.SetField(pkg, "UserHomeDir", luar.New(L, os.UserHomeDir))
 
 	return pkg
 }
@@ -567,6 +574,25 @@ func importHumanize() *lua.LTable {
 
 	L.SetField(pkg, "Bytes", luar.New(L, humanize.Bytes))
 	L.SetField(pkg, "Ordinal", luar.New(L, humanize.Ordinal))
+
+	return pkg
+}
+
+func importHTTP() *lua.LTable {
+	pkg := L.NewTable()
+
+	L.SetField(pkg, "Get", luar.New(L, http.Get))
+	L.SetField(pkg, "Post", luar.New(L, http.Post))
+
+	return pkg
+}
+
+func importArchiveZip() *lua.LTable {
+	pkg := L.NewTable()
+
+	L.SetField(pkg, "OpenReader", luar.New(L, zip.OpenReader))
+	L.SetField(pkg, "NewReader", luar.New(L, zip.NewReader))
+	L.SetField(pkg, "NewWriter", luar.New(L, zip.NewWriter))
 
 	return pkg
 }
