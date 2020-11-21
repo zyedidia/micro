@@ -285,6 +285,7 @@ The packages and functions are listed below (in Go type signatures):
        string is a word character.
     - `String(b []byte) string`: converts a byte array to a string.
     - `RuneStr(r rune) string`: converts a rune to a string.
+    - `Unzip(src, dest string) error`: unzips a file to given folder.
 
 This may seem like a small list of available functions but some of the objects
 returned by the functions have many methods. The Lua plugin may access any
@@ -358,6 +359,8 @@ strings
 regexp
 errors
 time
+archive/zip
+net/http
 ```
 
 For documentation for each of these functions, see the Go standard
