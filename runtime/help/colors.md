@@ -87,7 +87,8 @@ These may vary widely based on the 16 colors selected for your terminal.
 True color requires your terminal to support it. This means that the
 environment variable `COLORTERM` should have the value `truecolor`, `24bit`,
 or `24-bit`. In addition, to enable true color in micro, the environment
-variable `MICRO_TRUECOLOR` must be set to 1.
+variable `MICRO_TRUECOLOR` must be set to 1. Note that you have to create
+and set this variable yourself.
 
 * `solarized-tc`: this is the solarized colorscheme for true color.
 * `atom-dark-tc`: this colorscheme is based off of Atom's "dark" colorscheme.
