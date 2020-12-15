@@ -26,7 +26,7 @@ rules:
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
-    - constant.number: "\\b[1-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
+    - constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
     - constant.number: "\\b0b(_?[01])+\\b"     # bin
     - constant.number: "\\b0o(_?[0-7])+\\b"    # oct
     - constant.number: "\\b0x(_?[0-9a-f])+\\b" # hex
