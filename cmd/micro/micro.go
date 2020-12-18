@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/signal"
 	"regexp"
@@ -351,7 +352,7 @@ func main() {
 	}
 
 	if clipErr != nil {
-		action.InfoBar.Error(clipErr, " or change 'clipboard' option")
+		log.Println(clipErr, " or change 'clipboard' option")
 	}
 
 	if a := config.GetGlobalOption("autosave").(float64); a > 0 {
