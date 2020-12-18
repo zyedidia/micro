@@ -212,8 +212,15 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	}
 
+	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	readonly := os.IsPermission(err)
+	f.Close()
+
 	file, err := os.Open(filename)
-	fileInfo, _ := os.Stat(filename)
+	fileInfo, serr := os.Stat(filename)
+	if serr != nil {
+		return nil, serr
+	}
 
 	if err == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
@@ -222,12 +229,16 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	defer file.Close()
 
 	var buf *Buffer
-	if err != nil {
+	if os.IsNotExist(err) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
+	} else if err != nil {
+		return nil, err
 	} else {
 		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
 	}
+
+	buf.SetOptionNative("readonly", readonly)
 
 	return buf, nil
 }
