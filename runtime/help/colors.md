@@ -176,6 +176,7 @@ Here is a list of the colorscheme groups that you can use:
 * underlined
 * error
 * todo
+* selection (Color of the text selection)
 * statusline (Color of the statusline)
 * tabbar (Color of the tabbar that lists open files)
 * indent-char (Color of the character which indicates tabs if the option is
@@ -183,11 +184,17 @@ Here is a list of the colorscheme groups that you can use:
 * line-number
 * gutter-error
 * gutter-warning
+* diff-added
+* diff-modified
+* diff-deleted
 * cursor-line
 * current-line-number
 * color-column
 * ignore
+* scrollbar
 * divider (Color of the divider between vertical splits)
+* message (Color of messages in the bottom line of the screen)
+* error-message (Color of error messages in the bottom line of the screen)
 
 Colorschemes must be placed in the `~/.config/micro/colorschemes` directory to
 be used.
