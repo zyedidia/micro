@@ -218,7 +218,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 
 	file, err := os.Open(filename)
 	fileInfo, serr := os.Stat(filename)
-	if serr != nil {
+	if serr != nil && !os.IsNotExist(serr) {
 		return nil, serr
 	}
 
