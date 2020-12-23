@@ -239,7 +239,9 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
 	}
 
-	buf.SetOptionNative("readonly", readonly)
+	if readonly {
+		buf.SetOptionNative("readonly", true)
+	}
 
 	return buf, nil
 }
