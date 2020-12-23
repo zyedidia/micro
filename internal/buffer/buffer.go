@@ -216,17 +216,18 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	readonly := os.IsPermission(err)
 	f.Close()
 
-	file, err := os.Open(filename)
 	fileInfo, serr := os.Stat(filename)
 	if serr != nil && !os.IsNotExist(serr) {
 		return nil, serr
 	}
-
-	if err == nil && fileInfo.IsDir() {
+	if serr == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
 
-	defer file.Close()
+	file, err := os.Open(filename)
+	if err == nil {
+		defer file.Close()
+	}
 
 	var buf *Buffer
 	if os.IsNotExist(err) {
