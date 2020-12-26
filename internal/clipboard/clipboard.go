@@ -42,7 +42,9 @@ func Initialize(m Method) error {
 	case External:
 		err = clipboard.Initialize()
 	}
-	CurrentMethod = Internal
+	if err != nil {
+		CurrentMethod = Internal
+	}
 	return err
 }
 
