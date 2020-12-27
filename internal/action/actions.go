@@ -1195,6 +1195,7 @@ func (h *BufPane) JumpToMatchingBrace() bool {
 				} else {
 					h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
 				}
+				break
 			} else {
 				return false
 			}
