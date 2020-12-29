@@ -20,7 +20,8 @@ set colorscheme twilight
 Micro comes with a number of colorschemes by default. The colorschemes that you
 can display will depend on what kind of color support your terminal has.
 
-Omit color-link default "[fg color],[bg color]" will make the background color match the terminal's, and transparency if set.
+Omitting `color-link default "[fg color],[bg color]"` will make the background
+color match the terminal's, and transparency if set.
 
 Modern terminals tend to have a palette of 16 user-configurable colors (these
 colors can often be configured in the terminal preferences), and additional
@@ -164,7 +165,7 @@ marked with a `-paper` suffix.
 
 Here is a list of the colorscheme groups that you can use:
 
-* default (color of the background and foreground for unhighlighted text)
+* default (Color of the background and foreground for unstyled text)
 * comment
 * identifier
 * constant
@@ -176,7 +177,7 @@ Here is a list of the colorscheme groups that you can use:
 * underlined
 * error
 * todo
-* selection (Color of the text selection)
+* selection (Specify foreground color to change background of selection. If not set uses default reverse)
 * statusline (Color of the statusline)
 * tabbar (Color of the tabbar that lists open files)
 * indent-char (Color of the character which indicates tabs if the option is
@@ -187,9 +188,9 @@ Here is a list of the colorscheme groups that you can use:
 * diff-added
 * diff-modified
 * diff-deleted
-* cursor-line
+* cursor-line (Specify foreground color to change background of cursor line)
 * current-line-number
-* color-column
+* color-column (Specify foreground color to change background of configured color column)
 * ignore
 * scrollbar
 * divider (Color of the divider between vertical splits)
