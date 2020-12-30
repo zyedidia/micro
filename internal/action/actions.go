@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
@@ -1195,15 +1196,12 @@ func (h *BufPane) JumpToMatchingBrace() bool {
 				} else {
 					h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
 				}
-				break
-			} else {
-				return false
+				h.Relocate()
+				return true
 			}
 		}
 	}
-
-	h.Relocate()
-	return true
+	return false
 }
 
 // SelectAll selects the entire buffer
