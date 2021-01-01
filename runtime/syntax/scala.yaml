@@ -8,6 +8,10 @@ rules:
     - statement: "\\b(match|val|var|break|case|catch|continue|default|do|else|finally|for|if|return|switch|throw|try|while)\\b"
     - statement: "\\b(def|object|case|trait|lazy|implicit|abstract|class|extends|with|final|implements|override|import|instanceof|interface|native|package|private|protected|public|static|strictfp|super|synchronized|throws|volatile|sealed)\\b"
     - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules: []
+    - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
