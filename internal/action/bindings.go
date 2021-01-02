@@ -238,7 +238,7 @@ func findEvent(k string) (Event, error) {
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	var e error
-	var parsed map[string]string
+	var parsed map[string]interface{}
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
@@ -288,7 +288,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 // UnbindKey removes the binding for a key from the bindings.json file
 func UnbindKey(k string) error {
 	var e error
-	var parsed map[string]string
+	var parsed map[string]interface{}
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
