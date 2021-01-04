@@ -847,21 +847,24 @@ func (h *BufPane) find(useRegex bool) bool {
 	if useRegex {
 		prompt = "Find (regex): "
 	}
-	InfoBar.Prompt(prompt, "", "Find", func(resp string) {
-		// Event callback
-		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
-		if found {
-			h.Cursor.SetSelectionStart(match[0])
-			h.Cursor.SetSelectionEnd(match[1])
-			h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
-			h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-			h.Cursor.GotoLoc(match[1])
-		} else {
-			h.Cursor.GotoLoc(h.searchOrig)
-			h.Cursor.ResetSelection()
+	var eventCallback func(resp string)
+	if h.Buf.Settings["findontype"].(bool) {
+		eventCallback = func(resp string) {
+			match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
+			if found {
+				h.Cursor.SetSelectionStart(match[0])
+				h.Cursor.SetSelectionEnd(match[1])
+				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+				h.Cursor.GotoLoc(match[1])
+			} else {
+				h.Cursor.GotoLoc(h.searchOrig)
+				h.Cursor.ResetSelection()
+			}
+			h.Relocate()
 		}
-		h.Relocate()
-	}, func(resp string, canceled bool) {
+	}
+	InfoBar.Prompt(prompt, "", "Find", eventCallback, func(resp string, canceled bool) {
 		// Finished callback
 		if !canceled {
 			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)

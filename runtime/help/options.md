@@ -159,6 +159,10 @@ Here are the available options:
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `findontype`: enable search-on-type in "Find" prompt (pattern input)
+
+	default value: `true`
+
 * `ignorecase`: perform case-insensitive searches.
 
 	default value: `true`
@@ -423,6 +427,7 @@ so that you can see what the formatting should look like.
     "fastdirty": false,
     "fileformat": "unix",
     "filetype": "unknown",
+    "findontype": true,
     "ftoptions": true,
     "ignorecase": false,
     "indentchar": " ",
