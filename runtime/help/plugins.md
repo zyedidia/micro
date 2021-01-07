@@ -259,6 +259,7 @@ The packages and functions are listed below (in Go type signatures):
     - `MTError` error message.
 
     - `Loc(x, y int) Loc`: creates a new location struct.
+    - `SLoc(line, row int) display.SLoc`: creates a new scrolling location struct.
 
     - `BTDefault`: default buffer type.
     - `BTLog`: log buffer type.

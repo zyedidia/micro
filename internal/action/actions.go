@@ -10,6 +10,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/display"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -19,21 +20,26 @@ import (
 // ScrollUp is not an action
 func (h *BufPane) ScrollUp(n int) {
 	v := h.GetView()
-	if v.StartLine >= n {
-		v.StartLine -= n
-		h.SetView(v)
-	} else {
-		v.StartLine = 0
-	}
+	v.StartLine = h.Scroll(v.StartLine, -n)
+	h.SetView(v)
 }
 
 // ScrollDown is not an action
 func (h *BufPane) ScrollDown(n int) {
 	v := h.GetView()
-	if v.StartLine <= h.Buf.LinesNum()-1-n {
-		v.StartLine += n
-		h.SetView(v)
+	v.StartLine = h.Scroll(v.StartLine, n)
+	h.SetView(v)
+}
+
+// If the user has scrolled past the last line, ScrollAdjust can be used
+// to shift the view so that the last line is at the bottom
+func (h *BufPane) ScrollAdjust() {
+	v := h.GetView()
+	end := h.SLocFromLoc(h.Buf.End())
+	if h.Diff(v.StartLine, end) < v.Height-1 {
+		v.StartLine = h.Scroll(end, -v.Height+1)
 	}
+	h.SetView(v)
 }
 
 // MousePress is the event that should happen when a normal click happens
@@ -111,15 +117,9 @@ func (h *BufPane) ScrollDownAction() bool {
 // Center centers the view on the cursor
 func (h *BufPane) Center() bool {
 	v := h.GetView()
-	v.StartLine = h.Cursor.Y - v.Height/2
-	if v.StartLine+v.Height > h.Buf.LinesNum() {
-		v.StartLine = h.Buf.LinesNum() - v.Height
-	}
-	if v.StartLine < 0 {
-		v.StartLine = 0
-	}
+	v.StartLine = h.Scroll(h.SLocFromLoc(h.Cursor.Loc), -v.Height/2)
 	h.SetView(v)
-	h.Relocate()
+	h.ScrollAdjust()
 	return true
 }
 
@@ -1240,45 +1240,31 @@ func (h *BufPane) JumpLine() bool {
 // Start moves the viewport to the start of the buffer
 func (h *BufPane) Start() bool {
 	v := h.GetView()
-	v.StartLine = 0
+	v.StartLine = display.SLoc{0, 0}
 	h.SetView(v)
 	return true
 }
 
 // End moves the viewport to the end of the buffer
 func (h *BufPane) End() bool {
-	// TODO: softwrap problems?
 	v := h.GetView()
-	if v.Height > h.Buf.LinesNum() {
-		v.StartLine = 0
-		h.SetView(v)
-	} else {
-		v.StartLine = h.Buf.LinesNum() - v.Height
-		h.SetView(v)
-	}
+	v.StartLine = h.Scroll(h.SLocFromLoc(h.Buf.End()), -v.Height+1)
+	h.SetView(v)
 	return true
 }
 
 // PageUp scrolls the view up a page
 func (h *BufPane) PageUp() bool {
 	v := h.GetView()
-	if v.StartLine > v.Height {
-		h.ScrollUp(v.Height)
-	} else {
-		v.StartLine = 0
-	}
-	h.SetView(v)
+	h.ScrollUp(v.Height)
 	return true
 }
 
 // PageDown scrolls the view down a page
 func (h *BufPane) PageDown() bool {
 	v := h.GetView()
-	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height {
-		h.ScrollDown(v.Height)
-	} else if h.Buf.LinesNum() >= v.Height {
-		v.StartLine = h.Buf.LinesNum() - v.Height
-	}
+	h.ScrollDown(v.Height)
+	h.ScrollAdjust()
 	return true
 }
 
@@ -1335,26 +1321,15 @@ func (h *BufPane) CursorPageDown() bool {
 // HalfPageUp scrolls the view up half a page
 func (h *BufPane) HalfPageUp() bool {
 	v := h.GetView()
-	if v.StartLine > v.Height/2 {
-		h.ScrollUp(v.Height / 2)
-	} else {
-		v.StartLine = 0
-	}
-	h.SetView(v)
+	h.ScrollUp(v.Height / 2)
 	return true
 }
 
 // HalfPageDown scrolls the view down half a page
 func (h *BufPane) HalfPageDown() bool {
 	v := h.GetView()
-	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height/2 {
-		h.ScrollDown(v.Height / 2)
-	} else {
-		if h.Buf.LinesNum() >= v.Height {
-			v.StartLine = h.Buf.LinesNum() - v.Height
-		}
-	}
-	h.SetView(v)
+	h.ScrollDown(v.Height / 2)
+	h.ScrollAdjust()
 	return true
 }
 
