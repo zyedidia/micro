@@ -355,12 +355,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	if startcursor.X != -1 && startcursor.Y != -1 {
 		b.StartCursor = startcursor
-	} else {
-		if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-			err := b.Unserialize()
-			if err != nil {
-				screen.TermMessage(err)
-			}
+	} else if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+		err := b.Unserialize()
+		if err != nil {
+			screen.TermMessage(err)
 		}
 	}
 
@@ -1003,9 +1001,9 @@ func (b *Buffer) Retab() {
 		ws := util.GetLeadingWhitespace(l)
 		if len(ws) != 0 {
 			if toSpaces {
-				ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
+				ws = bytes.ReplaceAll(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize))
 			} else {
-				ws = bytes.Replace(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'}, -1)
+				ws = bytes.ReplaceAll(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'})
 			}
 		}
 

@@ -341,9 +341,9 @@ func EscapePath(path string) string {
 	path = filepath.ToSlash(path)
 	if runtime.GOOS == "windows" {
 		// ':' is not valid in a path name on Windows but is ok on Unix
-		path = strings.Replace(path, ":", "%", -1)
+		path = strings.ReplaceAll(path, ":", "%")
 	}
-	return strings.Replace(path, "/", "%", -1)
+	return strings.ReplaceAll(path, "/", "%")
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
@@ -430,7 +430,7 @@ func IsAutocomplete(c rune) bool {
 }
 
 func ParseSpecial(s string) string {
-	return strings.Replace(s, "\\t", "\t", -1)
+	return strings.ReplaceAll(s, "\\t", "\t")
 }
 
 // String converts a byte array to a string (for lua plugins)
