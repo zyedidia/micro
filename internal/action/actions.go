@@ -848,7 +848,7 @@ func (h *BufPane) find(useRegex bool) bool {
 		prompt = "Find (regex): "
 	}
 	var eventCallback func(resp string)
-	if h.Buf.Settings["findontype"].(bool) {
+	if h.Buf.Settings["incsearch"].(bool) {
 		eventCallback = func(resp string) {
 			match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
 			if found {
