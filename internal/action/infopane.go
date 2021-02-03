@@ -84,15 +84,22 @@ func (h *InfoPane) Close() {
 func (h *InfoPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
+		code := e.Key()
+		if code >= tcell.KeyUp && code <= tcell.KeyEnd {
+			// Up, Down, Right, Left, UpLeft, UpRight,
+			// DownLeft, DownRight, Center, PgUp, PgDn, Home, End
+			h.BufPane.HandleEvent(event)
+			return
+		}
 		ke := KeyEvent{
-			code: e.Key(),
+			code: code,
 			mod:  metaToAlt(e.Modifiers()),
 			r:    e.Rune(),
 		}
 
 		done := h.DoKeyEvent(ke)
 		hasYN := h.HasYN
-		if e.Key() == tcell.KeyRune && hasYN {
+		if code == tcell.KeyRune && hasYN {
 			if e.Rune() == 'y' && hasYN {
 				h.YNResp = true
 				h.DonePrompt(false)
@@ -101,7 +108,7 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 				h.DonePrompt(false)
 			}
 		}
-		if e.Key() == tcell.KeyRune && !done && !hasYN {
+		if code == tcell.KeyRune && !done && !hasYN {
 			h.DoRuneInsert(e.Rune())
 			done = true
 		}
