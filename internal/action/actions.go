@@ -850,21 +850,24 @@ func (h *BufPane) find(useRegex bool) bool {
 	if useRegex {
 		prompt = "Find (regex): "
 	}
-	InfoBar.Prompt(prompt, "", "Find", func(resp string) {
-		// Event callback
-		match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
-		if found {
-			h.Cursor.SetSelectionStart(match[0])
-			h.Cursor.SetSelectionEnd(match[1])
-			h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
-			h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-			h.Cursor.GotoLoc(match[1])
-		} else {
-			h.Cursor.GotoLoc(h.searchOrig)
-			h.Cursor.ResetSelection()
+	var eventCallback func(resp string)
+	if h.Buf.Settings["incsearch"].(bool) {
+		eventCallback = func(resp string) {
+			match, found, _ := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
+			if found {
+				h.Cursor.SetSelectionStart(match[0])
+				h.Cursor.SetSelectionEnd(match[1])
+				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+				h.Cursor.GotoLoc(match[1])
+			} else {
+				h.Cursor.GotoLoc(h.searchOrig)
+				h.Cursor.ResetSelection()
+			}
+			h.Relocate()
 		}
-		h.Relocate()
-	}, func(resp string, canceled bool) {
+	}
+	InfoBar.Prompt(prompt, "", "Find", eventCallback, func(resp string, canceled bool) {
 		// Finished callback
 		if !canceled {
 			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
@@ -1182,7 +1185,7 @@ func (h *BufPane) paste(clip string) {
 	if h.Buf.Settings["smartpaste"].(bool) {
 		if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
 			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
-			clip = strings.Replace(clip, "\n", "\n"+string(leadingWS), -1)
+			clip = strings.ReplaceAll(clip, "\n", "\n"+string(leadingWS))
 		}
 	}
 
@@ -1211,6 +1214,7 @@ func (h *BufPane) JumpToMatchingBrace() bool {
 				} else {
 					h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
 				}
+				break
 			} else {
 				return false
 			}
@@ -1364,10 +1368,8 @@ func (h *BufPane) HalfPageDown() bool {
 	v := h.GetView()
 	if h.Buf.LinesNum()-(v.StartLine+v.Height) > v.Height/2 {
 		h.ScrollDown(v.Height / 2)
-	} else {
-		if h.Buf.LinesNum() >= v.Height {
-			v.StartLine = h.Buf.LinesNum() - v.Height
-		}
+	} else if h.Buf.LinesNum() >= v.Height {
+		v.StartLine = h.Buf.LinesNum() - v.Height
 	}
 	h.SetView(v)
 	return true

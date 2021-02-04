@@ -221,21 +221,35 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	}
 
-	file, err := os.Open(filename)
-	fileInfo, _ := os.Stat(filename)
+	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	readonly := os.IsPermission(err)
+	f.Close()
 
-	if err == nil && fileInfo.IsDir() {
+	fileInfo, serr := os.Stat(filename)
+	if serr != nil && !os.IsNotExist(serr) {
+		return nil, serr
+	}
+	if serr == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
 
-	defer file.Close()
+	file, err := os.Open(filename)
+	if err == nil {
+		defer file.Close()
+	}
 
 	var buf *Buffer
-	if err != nil {
+	if os.IsNotExist(err) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
+	} else if err != nil {
+		return nil, err
 	} else {
 		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
+	}
+
+	if readonly {
+		buf.SetOptionNative("readonly", true)
 	}
 
 	return buf, nil
@@ -350,12 +364,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	if startcursor.X != -1 && startcursor.Y != -1 {
 		b.StartCursor = startcursor
-	} else {
-		if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
-			err := b.Unserialize()
-			if err != nil {
-				screen.TermMessage(err)
-			}
+	} else if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
+		err := b.Unserialize()
+		if err != nil {
+			screen.TermMessage(err)
 		}
 	}
 
@@ -998,9 +1010,9 @@ func (b *Buffer) Retab() {
 		ws := util.GetLeadingWhitespace(l)
 		if len(ws) != 0 {
 			if toSpaces {
-				ws = bytes.Replace(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize), -1)
+				ws = bytes.ReplaceAll(ws, []byte{'\t'}, bytes.Repeat([]byte{' '}, tabsize))
 			} else {
-				ws = bytes.Replace(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'}, -1)
+				ws = bytes.ReplaceAll(ws, bytes.Repeat([]byte{' '}, tabsize), []byte{'\t'})
 			}
 		}
 
