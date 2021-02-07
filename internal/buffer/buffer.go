@@ -293,6 +293,13 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.AbsPath = absPath
 		b.Path = path
 
+		// this is a little messy since we need to know some settings to read
+		// the file properly, but some settings depend on the filetype, which
+		// we don't know until reading the file. We first read the settings
+		// into a local variable and then use that to determine the encoding,
+		// readonly, and fileformat necessary for reading the file and
+		// assigning the filetype.
+		settings := config.DefaultCommonSettings()
 		b.Settings = config.DefaultCommonSettings()
 		for k, v := range config.GlobalSettings {
 			if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
@@ -300,9 +307,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 				b.Settings[k] = v
 			}
 		}
-		config.InitLocalSettings(b.Settings, path)
+		b.Settings["readonly"] = settings["readonly"]
+		config.InitLocalSettings(settings, path)
 
-		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+		enc, err := htmlindex.Get(settings["encoding"].(string))
 		if err != nil {
 			enc = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
@@ -318,7 +326,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			if size == 0 {
 				// for empty files, use the fileformat setting instead of
 				// autodetection
-				switch b.Settings["fileformat"] {
+				switch settings["fileformat"] {
 				case "unix":
 					ff = FFUnix
 				case "dos":
