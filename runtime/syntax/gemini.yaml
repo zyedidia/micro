@@ -1,0 +1,19 @@
+filetype: gemini
+
+detect:
+    filename: "\\.(gmi|gemini)$"
+
+rules:
+      # link lines
+    - constant: "^=>[[:space:]].*"
+      # preformatted text lines
+    - special:
+        start: "^```"
+        end: "^```"
+        rules: []
+      # heading lines
+    - special:  "^#{1,3}.*"
+      # unordered list items
+    - identifier: "^\\*[[:space:]]"
+      # quote lines
+    - statement:  "^>.*"
