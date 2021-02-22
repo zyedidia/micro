@@ -304,11 +304,14 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		for k, v := range config.GlobalSettings {
 			if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
 				// make sure setting is not global-only
+				settings[k] = v
 				b.Settings[k] = v
 			}
 		}
-		b.Settings["readonly"] = settings["readonly"]
 		config.InitLocalSettings(settings, path)
+		b.Settings["readonly"] = settings["readonly"]
+		b.Settings["filetype"] = settings["filetype"]
+		b.Settings["syntax"] = settings["syntax"]
 
 		enc, err := htmlindex.Get(settings["encoding"].(string))
 		if err != nil {
