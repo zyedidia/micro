@@ -18,7 +18,7 @@ Here is a picture of micro editing its source code.
 ![Screenshot](./assets/micro-solarized.png)
 
 To see more screenshots of micro, showcasing some of the default color schemes, see [here](https://micro-editor.github.io).
- 
+
 You can also check out the website for Micro at https://micro-editor.github.io.
 
 ## Table of Contents
@@ -76,8 +76,7 @@ To install micro, you can download a [prebuilt binary](https://github.com/zyedid
 
 If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro).
 
-Use `micro -version` to get the version information after installing. It is only guaranteed that you are installing the most recent
-stable version if you install from the prebuilt binaries, Homebrew, or Snap.
+Use `micro -version` to get the version information after installing.
 
 A desktop entry file and man page can be found in the [assets/packaging](https://github.com/zyedidia/micro/tree/master/assets/packaging) directory.
 
@@ -87,7 +86,7 @@ All you need to install micro is one file, the binary itself. It's as simple as 
 
 Download the binary from the [releases](https://github.com/zyedidia/micro/releases) page.
 
-### Installation script
+### Linux Installation
 
 There is a script which can install micro for you by downloading the latest prebuilt binary. You can find it at <https://getmic.ro>.
 
@@ -101,7 +100,11 @@ The script will place the micro binary in the current directory. From there, you
 
 To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
-### Package managers
+**Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
+must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
+further below.
+
+### macOS Installation
 
 You can install micro using Homebrew on Mac:
 
@@ -112,33 +115,6 @@ brew install micro
 **Note for Mac:** All micro keybindings use the control or alt (option) key, not the command
 key. By default, macOS terminals do not forward alt key events. To fix this, please see
 the section on [macOS terminals](https://github.com/zyedidia/micro#macos-terminal) further below.
-
-On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
-
-```
-snap install micro --classic
-```
-
-**Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
-must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
-further below.
-
-Micro is also available through other package managers on Linux such as apt, dnf, AUR, Nix, and package managers
-for other operating systems. These packages are not guaranteed to be up-to-date.
-
-* Linux: Available in distro-specific package managers.
-    * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled.
-    * `dnf install micro` (Fedora).
-    * `pacman -S micro` (Arch Linux).
-    * `eopkg install micro` (Solus).
-    * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
-* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
-    * `choco install micro`.
-    * `scoop install micro`.
-* OpenBSD: Available in the ports tree and also available as a binary package.
-    * `pkd_add -v micro`.
-* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
-    * `pkg_add micro`
 
 ### Building from source
 
