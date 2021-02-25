@@ -1,0 +1,60 @@
+filetype: sage
+
+detect:
+    filename: "\\.sage$"
+    header: "^#!.*/(env +)?sage( |$)"
+
+rules:
+
+    # built-in objects
+    - constant: "\\b(None|self|True|False)\\b"
+      # built-in attributes
+    - constant: "\\b(__bases__|__builtin__|__class__|__debug__|__dict__|__doc__|__file__|__members__|__methods__|__name__|__self__)\\b"
+      # built-in functions
+    - identifier: "\\b(abs|apply|callable|chr|cmp|compile|delattr|dir|divmod|eval|exec|execfile|filter|format|getattr|globals|hasattr|hash|help|hex|id|input|intern|isinstance|issubclass|len|locals|max|min|next|oct|open|ord|pow|range|raw_input|reduce|reload|repr|round|setattr|unichr|vars|zip|__import__)\\b"
+      # special method names
+    - identifier: "\\b(__abs__|__add__|__and__|__call__|__cmp__|__coerce__|__complex__|__concat__|__contains__|__del__|__delattr__|__delitem__|__dict__|__delslice__|__div__|__divmod__|__float__|__getattr__|__getitem__|__getslice__|__hash__|__hex__|__init__|__int__|__inv__|__invert__|__len__|__long__|__lshift__|__mod__|__mul__|__neg__|__nonzero__|__oct__|__or__|__pos__|__pow__|__radd__|__rand__|__rcmp__|__rdiv__|__rdivmod__|__repeat__|__repr__|__rlshift__|__rmod__|__rmul__|__ror__|__rpow__|__rrshift__|__rshift__|__rsub__|__rxor__|__setattr__|__setitem__|__setslice__|__str__|__sub__|__xor__)\\b"
+      # types
+    - type: "\\b(basestring|bool|buffer|bytearray|bytes|classmethod|complex|dict|enumerate|file|float|frozenset|int|list|long|map|memoryview|object|property|reversed|set|slice|staticmethod|str|super|tuple|type|unicode|xrange)\\b"
+      # definitions
+    - identifier: "def [a-zA-Z_0-9]+"
+      # keywords
+    - statement: "\\b(and|as|assert|break|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|not|or|pass|print|raise|return|try|while|with|yield)\\b"
+      # decorators
+    - brightgreen: "@.*[(]"
+      # operators
+    - statement: "([.:;,+*|=!\\%@]|<|>|/|-|&)"
+      # parentheses
+    - statement: "([(){}]|\\[|\\])"
+      # numbers
+    - constant.number: "\\b[0-9]+\\b"
+
+    - comment:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules: []
+
+    - comment:
+        start: "'''"
+        end: "'''"
+        rules: []
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+

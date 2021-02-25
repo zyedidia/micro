@@ -14,16 +14,16 @@ rules:
       #              month          0-12 (or names, see below)
       #              day of week    0-7 (0 or 7 is Sun, or use names)
 
-    - statement: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(.*)$\\n?"
-    - constant: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)"
+    - statement: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(([\\*0-9,\\-\\/]+)|(\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b))\\s+(([\\*0-9,\\-\\/]+)|(\\b(sun|mon|tue|wed|thu|fri|sat)\\b))\\s+(.*)$\\n?"
+    - constant:  "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(([\\*0-9,\\-\\/]+)|(\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b))\\s+(([\\*0-9,\\-\\/]+)|(\\b(sun|mon|tue|wed|thu|fri|sat)\\b))"
     
       # Shell Values
     - type: "^[A-Z]+\\="
 
       # Months and weekday keywords
-    - type: "jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec"
-    - constant: "sun|mon|tue|wed|thu|fri|sat"
-    - type: "\\@(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)"
+    - constant: "\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b"
+    - constant: "\\b(sun|mon|tue|wed|thu|fri|sat)\\b"
+    - type: "\\@(reboot|yearly|annually|monthly|weekly|daily|midnight|hourly)\\b"
 
       # Conditionals
     - special: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|^|!|=|&|\\|)"

@@ -1,0 +1,53 @@
+filetype: zig
+
+detect:
+    filename: "\\.zig$"
+
+rules:
+      # Reserved words
+    - statement: "\\b(align|allowzero|and|asm|async|await|break|callconv|catch|comptime|const|continue|defer|else|errdefer|error|export|extern|fn|for|if|inline|noalias|noinline|nosuspend|or|orelse|packed|pub|resume|return|linksection|suspend|switch|test|threadlocal|try|unreachable|usingnamespace|var|volatile|while)\\b"
+      # builtin functions
+    - special: "@[a-zA-Z_]+"
+      # Primitive Types
+    - type: "\\b(anyframe|anytype|anyerror|bool|comptime_int|comptime_float|enum|f(16|32|64|128)|isize|noreturn|struct|type|union|usize|void)\\b"
+    - type: "\\b(c_u?(short|int|long(long)?)|c_longdouble|c_void)\\b"
+    - type: "\\b((i|u)[0-9]+)\\b"
+
+     # Operators
+    - symbol.operator: "[-!|=;%.+^*:&?<>~]"
+
+     # Parenthesis
+    - symbol.brackets: "[(){}]|\\[|\\]"
+
+     # Constants
+    - constant: "\\b(null|undefined)\\b"
+    - constant.number: "\\b(0b[01_]+|0o[0-7_]+|[0-9_]+|0x[a-fA-F0-9_]+)\\b"
+    - constant.bool: "\\b(true|false)\\b"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([nrt\\\\'\"]|x[a-fA-F0-9]{2}|u{[a-fA-F0-9]+})"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - error: "..+"
+            - constant.specialChar: "\\\\([nrt\\\\'\"]|x[a-fA-F0-9]{2}|u{[a-fA-F0-9]+})"
+
+    - constant.string:
+        start: "\\\\\\\\"
+        end: "$"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([nrt\\\\'\"]|x[a-fA-F0-9]{2}|u{[a-fA-F0-9]+})"
+    
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

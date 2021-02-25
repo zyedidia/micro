@@ -1,0 +1,19 @@
+filetype: jinja2
+
+rules:
+  - include: "html"
+  - special: "({{|}}|{%-?|-?%})"
+  - default:
+        start: "({%-?|{{)"
+        end: "(-?%}|}})"
+        limit-group: special
+        rules:
+          - include: "python"
+          - statement: "\\b(ignore missing|with(out)? context|block|call|endblock|endcall|endfilter|endfor|endmacro|endraw|endset|extends|filter|for|include|macro|raw|recursive|scoped|set)\\b"
+          - identifier.builtinfunc: "\\b(attr|batch|capitalize|center|count|d|default|dictsort|e|escape|filesizeformat|first|forceescape|groupby|indent|join|last|length|lower|pprint|random|reject|rejectattr|replace|reverse|safe|select|selectattr|striptags|title|tojson|trim|truncate|unique|upper|urlencode|urlize|wordcount|wordwrap|xmlattr)\\b"
+          - identifier.builtintest: "\\b(callable|defined|divisibleby|eq|equalto|escaped|even|ge|gt|iterable|le|lower|lt|mapping|ne|none|number|odd|sameas|sequence|string|undefined|upper)\\b"
+          - identifier.defaultglobal: "\\b(lipsum|cycler|joiner|namespace)\\b"
+  - comment:
+        start: "{#"
+        end: "#}"
+        rules: []

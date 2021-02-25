@@ -1,0 +1,8 @@
+filetype: csharp-script
+detect:
+    filename: "\\.csx$"
+    header: "^#!.*/(env +)?dotnet-script( |$)"
+    
+rules:
+    - include: "csharp"
+    - preproc: "\\B(\\#!|\\#[r|load|]+\\b)"

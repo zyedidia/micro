@@ -1,8 +1,8 @@
-filetype: python
+filetype: python2
 
 detect:
-    filename: "\\.py$"
-    header: "^#!.*/(env +)?python( |$)"
+    filename: "\\.py2$"
+    header: "^#!.*/(env +)?python2$"
 
 rules:
 
@@ -23,13 +23,13 @@ rules:
       # decorators
     - brightgreen: "@.*[(]"
       # operators
-    - statement: "([.:;,+*|=!\\%@]|<|>|/|-|&)"
+    - symbol.operator: "([.:;,+*|=!\\%@]|<|>|/|-|&)"
       # parentheses
-    - statement: "([(){}]|\\[|\\])"
+    - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
     - constant.number: "\\b[0-9]+\\b"
 
-    - comment:
+    - constant.string:
         start: "\"\"\""
         end: "\"\"\""
         rules: []

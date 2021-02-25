@@ -1,7 +1,7 @@
 filetype: tex
 
 detect: 
-    filename: "\\.tex$|bib|\\.bib$|cls|\\.cls$"
+    filename: "\\.tex$|\\.bib$|\\.cls$"
 
 rules:
     # colorize the identifiers of {<identifier>} and [<identifier>]
@@ -20,9 +20,10 @@ rules:
     - special: "[&\\\\]"
     # macros
     - statement: "\\\\@?[a-zA-Z_]+"
+    - statement: "\\\\%"
     # comments
     - comment:
-        start: "%"
+        start: "[^\\\\]%"
         end: "$"
         rules: []
     - comment:

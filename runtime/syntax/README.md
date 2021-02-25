@@ -25,7 +25,7 @@ Most the the syntax files here have been converted using that tool.
 
 Note that the tool isn't perfect and though it is unlikely, you may run into some small issues that you will have to fix manually
 (about 4 files from this directory had issues after being converted).
-=======
+
 # Micro syntax highlighting files
 
 These are the syntax highlighting files for micro. To install them, just
@@ -64,5 +64,4 @@ Here is a list of the files that have been converted to properly use colorscheme
 
 # License
 
-Because the nano syntax files I have modified are distributed under the GNU GPLv3 license, these files are also distributed
-under that license. See [LICENSE](LICENSE).
+See [LICENSE](LICENSE).

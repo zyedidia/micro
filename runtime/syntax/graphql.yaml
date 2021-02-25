@@ -1,0 +1,47 @@
+filetype: graphql
+
+detect:
+    filename: "\\.(gql|graphql)$"
+
+rules:
+    - type: "\\b(?:(query|mutation|subscription|type|input|scalar|fragment|schema|union|on|extends?))\\b"
+
+    # scalar types
+    - statement: "\\b(ID|Int|Float|Boolean|String|Datetime|Null)\\b"
+
+    # introspection types
+    - statement: "(__\\w+)"
+
+    # parameters
+    - statement: "((\\w+)(?:\\:([\\s]*)?)(?:\\$))"
+
+    # directive locations
+    - statement: "\\b(QUERY|MUTATION|SUBSCRIPTION|FIELD|FRAGMENT_DEFINITION|FRAGMENT_SPREAD|INLINE_FRAGMENT|SCHEMA|SCALAR|OBJECT|FIELD_DEFINITION|ARGUMENT_DEFINITION|INTERFACE|UNION|ENUM|ENUM_VALUE|INPUT_OBJECT|INPUT_FIELD_DEFINITION)\\b"
+
+    # directives
+    - constant: "(@\\w+)"
+
+    # root types
+    - constant: "\\b(Query|Mutation|Subscription|Schema|Root)\\b"
+
+    # variables
+    - special: "(\\$\\w+)"
+
+    # required symbol
+    - special: "(!)"
+
+    - symbol: "(:|=|\\||\\(|\\)|\\{|\\}|\\[|\\])"
+
+    - constant.bool: "\\b(true|false)\\b"  
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []

@@ -1,0 +1,125 @@
+.TH micro 1 "2020-02-10"
+.SH NAME
+micro \- A modern and intuitive terminal-based text editor
+.SH SYNOPSIS
+.B micro
+.RB [OPTIONS]
+[FILE]\&...
+
+.SH DESCRIPTION
+
+Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
+of modern terminals. It comes as one single, batteries-included, static binary with no dependencies.
+
+As the name indicates, micro aims to be somewhat of a successor to the nano editor by being easy to install and use in a pinch, but micro also aims to be
+enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
+
+Use Ctrl-q to quit, Ctrl-s to save, and Ctrl-g to open the in-editor help menu.
+
+.SH OPTIONS
+.PP
+\-clean
+.RS 4
+Cleans the configuration directory
+.RE
+
+.PP
+\-config-dir dir
+.RS 4
+Specify a custom location for the configuration directory
+.RE
+
+.PP
+[FILE]:LINE:COL
+.RS 4
+Specify a line and column to start the cursor at when opening a buffer
+.RE
+
+.PP
+\-options
+.RS 4
+Show all option help
+.RE
+
+.PP
+\-debug
+.RS 4
+Enable debug mode (enables logging to ./log.txt)
+.RE
+
+.PP
+\-version
+.RS 4
+Show the version number and information
+.RE
+
+Micro's plugins can be managed at the command line with the following commands.
+.RS 4
+
+.PP
+\-plugin remove [PLUGIN]...
+.RS 4
+Remove plugin(s)
+.RE
+
+.PP
+\-plugin update [PLUGIN]...
+.RS 4
+Update plugin(s) (if no argument is given, updates all plugins)
+.RE
+
+.PP
+\-plugin search [PLUGIN]...
+.RS 4
+Search for a plugin
+.RE
+
+.PP
+\-plugin list
+.RS 4
+List installed plugins
+.RE
+
+.PP
+\-plugin available
+.RS 4
+List available plugins
+.RE
+.RE
+
+Micro's options can also be set via command line arguments for quick
+adjustments. For real configuration, please use the settings.json
+file (see 'help options').
+.RS 4
+
+.PP
+\-option value
+.RS 4
+Set `option` to `value` for this session
+For example: `micro -syntax off file.c`
+.RE
+
+
+.SH CONFIGURATION
+
+Micro uses $MICRO_CONFIG_HOME as the configuration directory.
+If this environment variable is not set, it uses $XDG_CONFIG_HOME/micro instead.
+If that environment variable is not set, it uses ~/.config/micro as the configuration directory.
+In the documentation, we use ~/.config/micro to refer to the configuration directory
+(even if it may in fact be somewhere else if you have set either of the above environment variables).
+
+.SH NOTICE
+This manpage is intended only to serve as a quick guide to the invocation of 
+micro and is not intended to replace the full documentation included with micro
+which can be accessed from within micro. Micro tells you what key combination to
+press to get help in the lower right.
+
+.SH BUGS
+A comprehensive list of bugs will not be listed in this manpage. See the Github
+page at \fBhttps://github.com/zyedidia/micro/issues\fP for a list of known bugs
+and to report any newly encountered bugs you may find. We strive to correct
+bugs as swiftly as possible.
+
+.SH COPYRIGHT
+Copyright \(co 2020 Zachary Yedidia, et al. MIT license.
+See \fBhttps://github.com/zyedidia/micro\fP for details.

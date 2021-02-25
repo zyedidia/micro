@@ -1,7 +1,6 @@
 #Geany
 color-link comment "red"
 color-link constant "default"
-color-link constant.number
 color-link constant.string "bold yellow"
 color-link identifier "default"
 color-link preproc "cyan"
@@ -19,5 +18,8 @@ color-link current-line-number ""
 color-link statusline "black,white"
 color-link tabbar "black,white"
 color-link color-column "bold geren"
+color-link diff-added "green"
+color-link diff-modified "yellow"
+color-link diff-deleted "red"
 color-link gutter-error ",red"
 color-link gutter-warning "red"

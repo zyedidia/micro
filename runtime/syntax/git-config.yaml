@@ -5,7 +5,7 @@ detect:
 
 rules:
     - constant: "\\<(true|false)\\>"
-    - keyword: "^[[:space:]]*[^=]*="
+    - type.keyword: "^[[:space:]]*[^=]*="
     - constant: "^[[:space:]]*\\[.*\\]$"
     - constant: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
     - comment:

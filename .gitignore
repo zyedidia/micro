@@ -7,3 +7,14 @@ tmp.sh
 test/
 .idea/
 packages/
+todo.txt
+test.txt
+log.txt
+*.old
+benchmark_results*
+tools/build-version
+tools/build-date
+tools/info-plist
+tools/bindata
+tools/vscode-tests/
+*.hdr

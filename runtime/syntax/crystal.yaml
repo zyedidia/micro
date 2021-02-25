@@ -5,10 +5,14 @@ detect:
 
 rules:
     # Asciibetical list of reserved words
-    - statement: "\\b(BEGIN|END|abstract|alias|and|begin|break|case|class|def|defined\\?|do|else|elsif|end|ensure|enum|false|for|fun|if|in|include|lib|loop|macro|module|next|nil|not|of|or|pointerof|private|protected|raise|redo|require|rescue|retry|return|self|sizeof|spawn|struct|super|then|true|type|undef|union|uninitialized|unless|until|when|while|yield)\\b"
+    - statement: "\\b(abstract|alias|as|asm|begin|break|case|class|def|do|else|elsif|end|ensure|enum|extend|for|fun|if|in|include|instance_sizeof|lib|loop|macro|module|next|of|out|pointerof|private|protected|raise|require|rescue|return|select|self|sizeof|spawn|struct|super|then|type|typeof|uninitialized|union|unless|until|verbatim|when|while|with|yield)\\b"
       # Constants
-    - constant: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
+    - constant: "\\b(true|false|nil)\\b"
     - constant.number: "\\b[0-9]+\\b"
+      # Ones that can't be in the same regex because they include non-words.
+      # The nil? one has to be after the constants.
+    - statement: "\\b(nil\\?|as(\\?|\\b)|is_a\\?|responds_to\\?)"
+    - type: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
       # Crystal "symbols"
     - constant:  "([ 	]|^):[0-9A-Z_]+\\b"
       # Some unique things we want to stand out
@@ -36,7 +40,11 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
-            - special: "#\\{[^}]*\\}"
+            - symbol.brackets:
+                start: "#\\{"
+                end: "\\}"
+                rules:
+                    - default: ".*"
 
     - constant.string:
         start: "'"

@@ -1,16 +1,37 @@
 filetype: xml
 
 detect:
-    filename: "\\.(xml|sgml?|rng|plist)$"
+    filename: "\\.(xml|sgml?|rng|svg|plist)$"
+    header: "<\\?xml.*\\?>"
 
 rules:
-    - identifier: "<.*?>"
-    - comment:
+    - preproc:
         start: "<!DOCTYPE"
         end: "[/]?>"
         rules: []
-    - comment: 
+
+    - comment:
         start: "<!--"
         end: "-->"
         rules: []
-    - special: "&[^;]*;"
+
+    - symbol.tag:
+        start: "<\\??"
+        end: "\\??>"
+        rules:
+            - identifier:
+                start: " "
+                end: "="
+                rules: []
+            - constant.string:
+                start: "\""
+                end: "\""
+                skip: "\\\\."
+                rules:
+                    - constant.specialChar: "\\\\."
+            - constant.string:
+                start: "'"
+                end: "'"
+                skip: "\\\\."
+                rules:
+                    - constant.specialChar: "\\\\."

@@ -46,7 +46,7 @@ rules:
         rules: []
 
     - comment:
-        start: "#"
+        start: "(^|\\s)#"
         end: "$"
         rules: []
 

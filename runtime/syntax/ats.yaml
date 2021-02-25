@@ -1,0 +1,99 @@
+filetype: ATS
+
+detect:
+    filename: "\\.(d|h|s)ats$"
+
+rules:
+    - default: \b[[:alnum:]]+[^0-9A-Za-z]
+
+    # Operators
+    - symbol.operator: "[.:;+`|~<>?='\\&]|/|%|-|,|!|\\*|@|\\#"
+    - symbol.operator: \^
+
+    # Types, abstract types and some predefined sorts
+    - type: \b(addr|age?z|bool|char|cls|schar|uchar|double|ldouble|eff|exn|float|int(ptr)?|lincloptr|uint)\b
+    - type: \b(lint|ulint|llint|ullint|nat|ptr|real|ref|size_t|ssize_t|sint|usint|string|tkind|viewt|v?t0p|vt|void)\b
+    - type: \b(prop|t[@0]ype|type|viewt[@0]ype|viewtype|vt[@0]ype|vtype|view)\b
+    - type: \b(prop[+-]|t[@0]ype[+-]|type[+-]|viewt[@0]ype[+-]|viewtype[+-]|vt[@0]ype[+-]|vtype[+-]|view[+-])
+
+    # Statements
+    - statement: \b(abstype|abst|absprop|absviewt|absvt(ype)?|absview|and|andalso|as|(re)?assume|begin|(pr)?case|s?case)\b
+    - statement: \b(classdec|dataprop|data(v|view)?type|dataview|datasort|do|dynload|else|end|exception|extype|extva(r|l)|s?if)\b
+    - statement: \b(ifcase|import|for|in|infix(l|r)?|let|local|macrodef|macdef|not|of|op|or|orelse|overload|(pre|post|non)fix)\b
+    - statement: \b(propdef|rec|sortdef|stacst|stadef|staload|stavar|sta(tic)?|symelim|symintr|tkindef|then|try|viewdef|v?typedef)\b
+    - statement: \b(viewtypedef|(pr)?va(l|r)|when|where|while|with|withtype|withprop|withv(iew)?type|withview)\b
+    - statement: \b(abst[@0]ype|absviewt[@0]?ype|absvt[@0]ype|abstbox|abstflat|absvtbox|absvtflat|absimpl|absreimpl|abs)\b
+    - statement: \b(case[+-]|(pr)?va(l|r)[+-]|for\*|while\*)
+
+    # Numbers
+    - constant.number: \b[0-9.]+([eE][+-]?[0-9]+)?[fFlL]?\b
+    - constant.number: \b0[xX][0-9A-Fa-f]*(\.[0-9A-Fa-f]*)?[pP][+-]?[0-9]+[fFlL]?\b
+    - constant.number: \b([0-9]+|0[xX][0-9A-Fa-f]+)[lLuU]*\b
+
+    # Function-related keywords, special functions and namespaces. Not really identifiers
+    - identifier: \b(fix|(pr)?fu?n|fnx|castfn|praxi|extern|lam|llam|(pr)?implement|(pr)?implmnt)\b
+    - identifier: \b(fix@|fold@|free@|lam@|llam@|addr@|view@|ref@|fn\*)
+    - identifier: \$\w*\b
+
+    # Other keywords, function effects...
+    - special: (\$(arrpsz|arrptrsize|break|continue|d2ctype|delay|effmask_(ntm|exn|ref|wrt|all)))\b
+    - special: (\$(effmask|extern|extype_struct|extype|extkind|extval|extfcall|extmcall|ldelay|literal))\b
+    - special: (\$(li?st_vt|li?st_t|li?st|myfilename|myfunction|mylocation|raise|rec(ord)?_vt))\b
+    - special: (\$(rec(ord)?_t|rec(ord)?|showtype|solver_assert|solver_verify|tempenver))\b
+    - special: (\$(tup(le)?_vt|tup(le)?_t|tup(le)?|tyrep|vararg|vcopyenv_vt|vcopyenv_v))\b
+    - special: \!(wrt|exnref|exnwrt|exn|refwrt|ref|all|ntm|laz)\b
+    - special: \b(fun(0|1)|(lin)?cloptr(0|1)?|cloref(0|1)?|clo(0|1)?|lin|prf)\b
+    - special: \b(f?print(ln)?!|prerr(ln)?!|tupz!)
+
+    # Some C macros and other ATS macros
+    - preproc: ^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error|assert)\b
+    - preproc: ^[[:space:]]*#[[:space:]]*(codegen2|codegen3|elifdef|elifndef|prerr|print|require|then|staload|dynload)\b
+
+    # Boolean values
+    - constant.bool: \b(true|false|null)\b
+
+
+    # The "%{ ... %}" block inserts foreign code into ATS at compile-time
+    # Code inside of it is generally C or JavaScript
+    - default:
+        start: "%{[#^$]?"
+        end: "%}"
+        skip: "\\."
+        limit-group: symbol.operator
+        rules:
+            - include: "c"
+            - include: "javascript"
+
+
+    # Strings and chars
+    - constant.string: \"[^"]*\"
+    - constant.string: \'[^']*\'
+
+
+    # Comments
+    # "////" comments everything until it reaches EOF
+    - comment.block:
+        start: ////
+        end: $a
+        rules:
+            - todo: (TODO|XXX|FIXME)
+
+    - comment.line:
+        start: //
+        end: $
+        rules:
+            - todo: (TODO|XXX|FIXME)
+
+    # ML-like block comment
+    - comment.block:
+        start: \(\*
+        end: \*\)
+        rules:
+            - todo: (TODO|XXX|FIXME)
+
+    # C-like block comment
+    - comment.block:
+        start: /\*
+        end: \*\/
+        rules:
+            - todo: (TODO|XXX|FIXME)

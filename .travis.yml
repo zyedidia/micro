@@ -1,2 +1,11 @@
 language: go
-script: make test
+go:
+    - "1.13.x"
+os:
+    - linux
+    - osx
+    - windows
+script:
+    - go build ./cmd/micro
+    - go test ./internal/...
+    - go test ./cmd/...
