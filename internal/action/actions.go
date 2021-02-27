@@ -36,8 +36,8 @@ func (h *BufPane) ScrollDown(n int) {
 func (h *BufPane) ScrollAdjust() {
 	v := h.GetView()
 	end := h.SLocFromLoc(h.Buf.End())
-	if h.Diff(v.StartLine, end) < v.Height-1 {
-		v.StartLine = h.Scroll(end, -v.Height+1)
+	if h.Diff(v.StartLine, end) < h.BufHeight()-1 {
+		v.StartLine = h.Scroll(end, -h.BufHeight()+1)
 	}
 	h.SetView(v)
 }
@@ -117,7 +117,7 @@ func (h *BufPane) ScrollDownAction() bool {
 // Center centers the view on the cursor
 func (h *BufPane) Center() bool {
 	v := h.GetView()
-	v.StartLine = h.Scroll(h.SLocFromLoc(h.Cursor.Loc), -v.Height/2)
+	v.StartLine = h.Scroll(h.SLocFromLoc(h.Cursor.Loc), -h.BufHeight()/2)
 	h.SetView(v)
 	h.ScrollAdjust()
 	return true
@@ -1251,22 +1251,20 @@ func (h *BufPane) Start() bool {
 // End moves the viewport to the end of the buffer
 func (h *BufPane) End() bool {
 	v := h.GetView()
-	v.StartLine = h.Scroll(h.SLocFromLoc(h.Buf.End()), -v.Height+1)
+	v.StartLine = h.Scroll(h.SLocFromLoc(h.Buf.End()), -h.BufHeight()+1)
 	h.SetView(v)
 	return true
 }
 
 // PageUp scrolls the view up a page
 func (h *BufPane) PageUp() bool {
-	v := h.GetView()
-	h.ScrollUp(v.Height)
+	h.ScrollUp(h.BufHeight())
 	return true
 }
 
 // PageDown scrolls the view down a page
 func (h *BufPane) PageDown() bool {
-	v := h.GetView()
-	h.ScrollDown(v.Height)
+	h.ScrollDown(h.BufHeight())
 	h.ScrollAdjust()
 	return true
 }
@@ -1276,7 +1274,7 @@ func (h *BufPane) SelectPageUp() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.UpN(h.GetView().Height)
+	h.Cursor.UpN(h.BufHeight())
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -1287,7 +1285,7 @@ func (h *BufPane) SelectPageDown() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.DownN(h.GetView().Height)
+	h.Cursor.DownN(h.BufHeight())
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -1302,7 +1300,7 @@ func (h *BufPane) CursorPageUp() bool {
 		h.Cursor.ResetSelection()
 		h.Cursor.StoreVisualX()
 	}
-	h.Cursor.UpN(h.GetView().Height)
+	h.Cursor.UpN(h.BufHeight())
 	h.Relocate()
 	return true
 }
@@ -1316,22 +1314,20 @@ func (h *BufPane) CursorPageDown() bool {
 		h.Cursor.ResetSelection()
 		h.Cursor.StoreVisualX()
 	}
-	h.Cursor.DownN(h.GetView().Height)
+	h.Cursor.DownN(h.BufHeight())
 	h.Relocate()
 	return true
 }
 
 // HalfPageUp scrolls the view up half a page
 func (h *BufPane) HalfPageUp() bool {
-	v := h.GetView()
-	h.ScrollUp(v.Height / 2)
+	h.ScrollUp(h.BufHeight() / 2)
 	return true
 }
 
 // HalfPageDown scrolls the view down half a page
 func (h *BufPane) HalfPageDown() bool {
-	v := h.GetView()
-	h.ScrollDown(v.Height / 2)
+	h.ScrollDown(h.BufHeight() / 2)
 	h.ScrollAdjust()
 	return true
 }

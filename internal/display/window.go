@@ -33,4 +33,6 @@ type BWindow interface {
 	Window
 	SoftWrap
 	SetBuffer(b *buffer.Buffer)
+	BufWidth() int
+	BufHeight() int
 }

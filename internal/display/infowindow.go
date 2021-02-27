@@ -72,6 +72,9 @@ func (i *InfoWindow) LocFromVisual(vloc buffer.Loc) buffer.Loc {
 	return buffer.Loc{c.GetCharPosInLine(l, vloc.X-n), 0}
 }
 
+func (i *InfoWindow) BufWidth() int  { return i.Width }
+func (i *InfoWindow) BufHeight() int { return 1 }
+
 func (i *InfoWindow) Scroll(s SLoc, n int) SLoc       { return s }
 func (i *InfoWindow) Diff(s1, s2 SLoc) int            { return 0 }
 func (i *InfoWindow) SLocFromLoc(loc buffer.Loc) SLoc { return SLoc{0, 0} }

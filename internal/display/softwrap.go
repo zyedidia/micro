@@ -36,17 +36,13 @@ type SoftWrap interface {
 }
 
 func (w *BufWindow) getRow(loc buffer.Loc) int {
-	width := w.Width - w.gutterOffset
-	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
-		width--
-	}
-	if width <= 0 {
+	if w.bufWidth <= 0 {
 		return 0
 	}
 	// TODO: this doesn't work quite correctly if there is an incomplete tab
 	// or wide character at the end of a row. See also issue #1979
 	x := util.StringWidth(w.Buf.LineBytes(loc.Y), loc.X, util.IntOpt(w.Buf.Settings["tabsize"]))
-	return x / width
+	return x / w.bufWidth
 }
 
 func (w *BufWindow) getRowCount(line int) int {

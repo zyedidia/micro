@@ -23,8 +23,12 @@ type BufWindow struct {
 
 	sline *StatusLine
 
-	gutterOffset int
-	drawStatus   bool
+	bufWidth         int
+	bufHeight        int
+	gutterOffset     int
+	hasMessage       bool
+	maxLineNumLength int
+	drawDivider      bool
 }
 
 // NewBufWindow creates a new window at a location in the screen with a width and height
@@ -62,6 +66,61 @@ func (w *BufWindow) SetActive(b bool) {
 
 func (w *BufWindow) IsActive() bool {
 	return w.active
+}
+
+// BufWidth returns the width of the actual buffer displayed in the window,
+// which is usually less than the window width due to the gutter, ruler or scrollbar
+func (w *BufWindow) BufWidth() int {
+	return w.bufWidth
+}
+
+// BufHeight returns the height of the actual buffer displayed in the window,
+// which is usually less than the window height due to the statusline
+func (w *BufWindow) BufHeight() int {
+	return w.bufHeight
+}
+
+func (w *BufWindow) updateDisplayInfo() {
+	b := w.Buf
+
+	w.drawDivider = false
+	if !b.Settings["statusline"].(bool) {
+		_, h := screen.Screen.Size()
+		infoY := h
+		if config.GetGlobalOption("infobar").(bool) {
+			infoY--
+		}
+		if w.Y+w.Height != infoY {
+			w.drawDivider = true
+		}
+	}
+
+	w.bufHeight = w.Height
+	if b.Settings["statusline"].(bool) || w.drawDivider {
+		w.bufHeight--
+	}
+
+	w.hasMessage = len(b.Messages) > 0
+
+	// We need to know the string length of the largest line number
+	// so we can pad appropriately when displaying line numbers
+	w.maxLineNumLength = len(strconv.Itoa(b.LinesNum()))
+
+	w.gutterOffset = 0
+	if w.hasMessage {
+		w.gutterOffset += 2
+	}
+	if b.Settings["diffgutter"].(bool) {
+		w.gutterOffset++
+	}
+	if b.Settings["ruler"].(bool) {
+		w.gutterOffset += w.maxLineNumLength + 1
+	}
+
+	w.bufWidth = w.Width - w.gutterOffset
+	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
+		w.bufWidth--
+	}
 }
 
 func (w *BufWindow) getStartInfo(n, lineN int) ([]byte, int, int, *tcell.Style) {
@@ -111,10 +170,7 @@ func (w *BufWindow) Clear() {
 // Returns true if the window location is moved
 func (w *BufWindow) Relocate() bool {
 	b := w.Buf
-	height := w.Height
-	if w.drawStatus {
-		height--
-	}
+	height := w.bufHeight
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
 	scrollmargin := int(b.Settings["scrollmargin"].(float64))
@@ -162,20 +218,7 @@ func (w *BufWindow) Relocate() bool {
 func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 	b := w.Buf
 
-	hasMessage := len(b.Messages) > 0
-	bufHeight := w.Height
-	if w.drawStatus {
-		bufHeight--
-	}
-
-	bufWidth := w.Width
-	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
-		bufWidth--
-	}
-
-	// We need to know the string length of the largest line number
-	// so we can pad appropriately when displaying line numbers
-	maxLineNumLength := len(strconv.Itoa(b.LinesNum()))
+	maxWidth := w.gutterOffset + w.bufWidth
 
 	tabsize := int(b.Settings["tabsize"].(float64))
 	softwrap := b.Settings["softwrap"].(bool)
@@ -191,17 +234,8 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 	// this represents the current draw position in the buffer (char positions)
 	bloc := buffer.Loc{X: -1, Y: w.StartLine.Line}
 
-	for ; vloc.Y < bufHeight; vloc.Y++ {
-		vloc.X = 0
-		if hasMessage {
-			vloc.X += 2
-		}
-		if b.Settings["diffgutter"].(bool) {
-			vloc.X++
-		}
-		if b.Settings["ruler"].(bool) {
-			vloc.X += maxLineNumLength + 1
-		}
+	for ; vloc.Y < w.bufHeight; vloc.Y++ {
+		vloc.X = w.gutterOffset
 
 		line := b.LineBytes(bloc.Y)
 		line, nColsBeforeStart, bslice := util.SliceVisualEnd(line, w.StartCol, tabsize)
@@ -251,12 +285,12 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 			totalwidth += width
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
-			if vloc.X >= bufWidth {
+			if vloc.X >= maxWidth {
 				if !softwrap {
 					break
 				} else {
 					vloc.Y++
-					if vloc.Y >= bufHeight {
+					if vloc.Y >= w.bufHeight {
 						break
 					}
 					vloc.X = w.gutterOffset
@@ -267,7 +301,7 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 			return bloc
 		}
 
-		if bloc.Y+1 >= b.LinesNum() || vloc.Y+1 >= bufHeight {
+		if bloc.Y+1 >= b.LinesNum() || vloc.Y+1 >= w.bufHeight {
 			return bloc
 		}
 
@@ -322,7 +356,7 @@ func (w *BufWindow) drawDiffGutter(backgroundStyle tcell.Style, softwrapped bool
 	vloc.X++
 }
 
-func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxLineNumLength int, vloc *buffer.Loc, bloc *buffer.Loc) {
+func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, vloc *buffer.Loc, bloc *buffer.Loc) {
 	cursorLine := w.Buf.GetActiveCursor().Loc.Y
 	var lineInt int
 	if w.Buf.Settings["relativeruler"] == false || cursorLine == bloc.Y {
@@ -333,7 +367,7 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, maxL
 	lineNum := strconv.Itoa(util.Abs(lineInt))
 
 	// Write the spaces before the line number if necessary
-	for i := 0; i < maxLineNumLength-len(lineNum); i++ {
+	for i := 0; i < w.maxLineNumLength-len(lineNum); i++ {
 		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		vloc.X++
 	}
@@ -380,16 +414,7 @@ func (w *BufWindow) displayBuffer() {
 		return
 	}
 
-	hasMessage := len(b.Messages) > 0
-	bufHeight := w.Height
-	if w.drawStatus {
-		bufHeight--
-	}
-
-	bufWidth := w.Width
-	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
-		bufWidth--
-	}
+	maxWidth := w.gutterOffset + w.bufWidth
 
 	if b.ModifiedThisFrame {
 		if b.Settings["diffgutter"].(bool) {
@@ -450,10 +475,6 @@ func (w *BufWindow) displayBuffer() {
 		}
 	}
 
-	// We need to know the string length of the largest line number
-	// so we can pad appropriately when displaying line numbers
-	maxLineNumLength := len(strconv.Itoa(b.LinesNum()))
-
 	softwrap := b.Settings["softwrap"].(bool)
 	tabsize := util.IntOpt(b.Settings["tabsize"])
 	colorcolumn := util.IntOpt(b.Settings["colorcolumn"])
@@ -472,7 +493,7 @@ func (w *BufWindow) displayBuffer() {
 	cursors := b.GetCursors()
 
 	curStyle := config.DefStyle
-	for ; vloc.Y < bufHeight; vloc.Y++ {
+	for ; vloc.Y < w.bufHeight; vloc.Y++ {
 		vloc.X = 0
 
 		currentLine := false
@@ -489,7 +510,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		if vloc.Y >= 0 {
-			if hasMessage {
+			if w.hasMessage {
 				w.drawGutter(&vloc, &bloc)
 			}
 
@@ -498,21 +519,11 @@ func (w *BufWindow) displayBuffer() {
 			}
 
 			if b.Settings["ruler"].(bool) {
-				w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
+				w.drawLineNum(s, false, &vloc, &bloc)
 			}
 		} else {
-			if hasMessage {
-				vloc.X += 2
-			}
-			if b.Settings["diffgutter"].(bool) {
-				vloc.X++
-			}
-			if b.Settings["ruler"].(bool) {
-				vloc.X += maxLineNumLength + 1
-			}
+			vloc.X = w.gutterOffset
 		}
-
-		w.gutterOffset = vloc.X
 
 		line, nColsBeforeStart, bslice, startStyle := w.getStartInfo(w.StartCol, bloc.Y)
 		if startStyle != nil {
@@ -633,16 +644,16 @@ func (w *BufWindow) displayBuffer() {
 			totalwidth += width
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
-			if vloc.X >= bufWidth {
+			if vloc.X >= maxWidth {
 				if !softwrap {
 					break
 				} else {
 					vloc.Y++
-					if vloc.Y >= bufHeight {
+					if vloc.Y >= w.bufHeight {
 						break
 					}
 					vloc.X = 0
-					if hasMessage {
+					if w.hasMessage {
 						w.drawGutter(&vloc, &bloc)
 					}
 					if b.Settings["diffgutter"].(bool) {
@@ -651,7 +662,7 @@ func (w *BufWindow) displayBuffer() {
 
 					// This will draw an empty line number because the current line is wrapped
 					if b.Settings["ruler"].(bool) {
-						w.drawLineNum(lineNumStyle, true, maxLineNumLength, &vloc, &bloc)
+						w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
 					}
 				}
 			}
@@ -667,7 +678,7 @@ func (w *BufWindow) displayBuffer() {
 				}
 			}
 		}
-		for i := vloc.X; i < bufWidth; i++ {
+		for i := vloc.X; i < maxWidth; i++ {
 			curStyle := style
 			if s, ok := config.Colorscheme["color-column"]; ok {
 				if colorcolumn != 0 && i-w.gutterOffset+w.StartCol == colorcolumn {
@@ -678,7 +689,7 @@ func (w *BufWindow) displayBuffer() {
 			screen.SetContent(i+w.X, vloc.Y+w.Y, ' ', nil, curStyle)
 		}
 
-		if vloc.X != bufWidth {
+		if vloc.X != maxWidth {
 			// Display newline within a selection
 			draw(' ', nil, config.DefStyle, true)
 		}
@@ -692,18 +703,9 @@ func (w *BufWindow) displayBuffer() {
 }
 
 func (w *BufWindow) displayStatusLine() {
-	_, h := screen.Screen.Size()
-	infoY := h
-	if config.GetGlobalOption("infobar").(bool) {
-		infoY--
-	}
-
 	if w.Buf.Settings["statusline"].(bool) {
-		w.drawStatus = true
 		w.sline.Display()
-	} else if w.Y+w.Height != infoY {
-		w.drawStatus = true
-
+	} else if w.drawDivider {
 		divchars := config.GetGlobalOption("divchars").(string)
 		if util.CharacterCountInString(divchars) != 2 {
 			divchars = "|-"
@@ -725,18 +727,12 @@ func (w *BufWindow) displayStatusLine() {
 		for x := w.X; x < w.X+w.Width; x++ {
 			screen.SetContent(x, w.Y+w.Height-1, divchar, combc, dividerStyle)
 		}
-	} else {
-		w.drawStatus = false
 	}
 }
 
 func (w *BufWindow) displayScrollBar() {
 	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
 		scrollX := w.X + w.Width - 1
-		bufHeight := w.Height
-		if w.drawStatus {
-			bufHeight--
-		}
 		barsize := int(float64(w.Height) / float64(w.Buf.LinesNum()) * float64(w.Height))
 		if barsize < 1 {
 			barsize = 1
@@ -748,7 +744,7 @@ func (w *BufWindow) displayScrollBar() {
 			scrollBarStyle = style
 		}
 
-		for y := barstart; y < util.Min(barstart+barsize, w.Y+bufHeight); y++ {
+		for y := barstart; y < util.Min(barstart+barsize, w.Y+w.bufHeight); y++ {
 			screen.SetContent(scrollX, y, '|', nil, scrollBarStyle)
 		}
 	}
@@ -756,6 +752,8 @@ func (w *BufWindow) displayScrollBar() {
 
 // Display displays the buffer and the statusline
 func (w *BufWindow) Display() {
+	w.updateDisplayInfo()
+
 	w.displayStatusLine()
 	w.displayScrollBar()
 	w.displayBuffer()
