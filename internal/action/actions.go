@@ -1454,39 +1454,43 @@ func (h *BufPane) ClearInfo() bool {
 	return true
 }
 
+// ForceQuit closes the current tab or view even if there are unsaved changes
+// (no prompt)
+func (h *BufPane) ForceQuit() bool {
+	h.Buf.Close()
+	if len(MainTab().Panes) > 1 {
+		h.Unsplit()
+	} else if len(Tabs.List) > 1 {
+		Tabs.RemoveTab(h.splitID)
+	} else {
+		screen.Screen.Fini()
+		InfoBar.Close()
+		runtime.Goexit()
+	}
+	return true
+}
+
 // Quit this will close the current tab or view that is open
 func (h *BufPane) Quit() bool {
-	quit := func() {
-		h.Buf.Close()
-		if len(MainTab().Panes) > 1 {
-			h.Unsplit()
-		} else if len(Tabs.List) > 1 {
-			Tabs.RemoveTab(h.splitID)
-		} else {
-			screen.Screen.Fini()
-			InfoBar.Close()
-			runtime.Goexit()
-		}
-	}
 	if h.Buf.Modified() {
 		if config.GlobalSettings["autosave"].(float64) > 0 {
 			// autosave on means we automatically save when quitting
 			h.SaveCB("Quit", func() {
-				quit()
+				h.ForceQuit()
 			})
 		} else {
 			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && !yes {
-					quit()
+					h.ForceQuit()
 				} else if !canceled && yes {
 					h.SaveCB("Quit", func() {
-						quit()
+						h.ForceQuit()
 					})
 				}
 			})
 		}
 	} else {
-		quit()
+		h.ForceQuit()
 	}
 	return true
 }
