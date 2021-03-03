@@ -208,12 +208,17 @@ func (w *BufWindow) Relocate() bool {
 	// horizontal relocation (scrolling)
 	if !b.Settings["softwrap"].(bool) {
 		cx := activeC.GetVisualX()
+		rw := runewidth.RuneWidth(activeC.RuneUnder(activeC.X))
+		if rw == 0 {
+			rw = 1 // tab or newline
+		}
+
 		if cx < w.StartCol {
 			w.StartCol = cx
 			ret = true
 		}
-		if cx+w.gutterOffset+1 > w.StartCol+w.Width {
-			w.StartCol = cx - w.Width + w.gutterOffset + 1
+		if cx+w.gutterOffset+rw > w.StartCol+w.Width {
+			w.StartCol = cx - w.Width + w.gutterOffset + rw
 			ret = true
 		}
 	}
