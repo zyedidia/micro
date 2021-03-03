@@ -189,6 +189,13 @@ type Buffer struct {
 	cursors     []*Cursor
 	curCursor   int
 	StartCursor Loc
+
+	// OptionCallback is called after a buffer option value is changed.
+	// The display module registers its OptionCallback to ensure the buffer window
+	// is properly updated when needed. This is a workaround for the fact that
+	// the buffer module cannot directly call the display's API (it would mean
+	// a circular dependency between packages).
+	OptionCallback func(option string, nativeValue interface{})
 }
 
 // NewBufferFromFileAtLoc opens a new buffer with a given cursor location

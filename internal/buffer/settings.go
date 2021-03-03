@@ -41,6 +41,10 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 		b.Type.Readonly = nativeValue.(bool)
 	}
 
+	if b.OptionCallback != nil {
+		b.OptionCallback(option, nativeValue)
+	}
+
 	return nil
 }
 

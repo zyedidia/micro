@@ -35,7 +35,8 @@ type BufWindow struct {
 func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w := new(BufWindow)
 	w.View = new(View)
-	w.X, w.Y, w.Width, w.Height, w.Buf = x, y, width, height, buf
+	w.X, w.Y, w.Width, w.Height = x, y, width, height
+	w.SetBuffer(buf)
 	w.active = true
 
 	w.sline = NewStatusLine(w)
@@ -45,6 +46,16 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 
 func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 	w.Buf = b
+	b.OptionCallback = func(option string, nativeValue interface{}) {
+		if option == "softwrap" {
+			if nativeValue.(bool) {
+				w.StartCol = 0
+			} else {
+				w.StartLine.Row = 0
+			}
+			w.Relocate()
+		}
+	}
 }
 
 func (w *BufWindow) GetView() *View {
