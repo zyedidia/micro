@@ -54,7 +54,14 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 				w.StartLine.Row = 0
 			}
 			w.Relocate()
+
+			for _, c := range w.Buf.GetCursors() {
+				c.LastVisualX = c.GetVisualX()
+			}
 		}
+	}
+	b.GetVisualX = func(loc buffer.Loc) int {
+		return w.VLocFromLoc(loc).VisualX
 	}
 }
 
@@ -68,7 +75,15 @@ func (w *BufWindow) SetView(view *View) {
 
 func (w *BufWindow) Resize(width, height int) {
 	w.Width, w.Height = width, height
+	w.updateDisplayInfo()
+
 	w.Relocate()
+
+	if w.Buf.Settings["softwrap"].(bool) {
+		for _, c := range w.Buf.GetCursors() {
+			c.LastVisualX = c.GetVisualX()
+		}
+	}
 }
 
 func (w *BufWindow) SetActive(b bool) {

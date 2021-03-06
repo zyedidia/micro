@@ -123,10 +123,49 @@ func (h *BufPane) Center() bool {
 	return true
 }
 
+// MoveCursorUp is not an action
+func (h *BufPane) MoveCursorUp(n int) {
+	if !h.Buf.Settings["softwrap"].(bool) {
+		h.Cursor.UpN(n)
+	} else {
+		vloc := h.VLocFromLoc(h.Cursor.Loc)
+		sloc := h.Scroll(vloc.SLoc, -n)
+		if sloc == vloc.SLoc {
+			// we are at the beginning of buffer
+			h.Cursor.Loc = h.Buf.Start()
+			h.Cursor.LastVisualX = 0
+		} else {
+			vloc.SLoc = sloc
+			vloc.VisualX = h.Cursor.LastVisualX
+			h.Cursor.Loc = h.LocFromVLoc(vloc)
+		}
+	}
+}
+
+// MoveCursorDown is not an action
+func (h *BufPane) MoveCursorDown(n int) {
+	if !h.Buf.Settings["softwrap"].(bool) {
+		h.Cursor.DownN(n)
+	} else {
+		vloc := h.VLocFromLoc(h.Cursor.Loc)
+		sloc := h.Scroll(vloc.SLoc, n)
+		if sloc == vloc.SLoc {
+			// we are at the end of buffer
+			h.Cursor.Loc = h.Buf.End()
+			vloc = h.VLocFromLoc(h.Cursor.Loc)
+			h.Cursor.LastVisualX = vloc.VisualX
+		} else {
+			vloc.SLoc = sloc
+			vloc.VisualX = h.Cursor.LastVisualX
+			h.Cursor.Loc = h.LocFromVLoc(vloc)
+		}
+	}
+}
+
 // CursorUp moves the cursor up
 func (h *BufPane) CursorUp() bool {
 	h.Cursor.Deselect(true)
-	h.Cursor.Up()
+	h.MoveCursorUp(1)
 	h.Relocate()
 	return true
 }
@@ -134,7 +173,7 @@ func (h *BufPane) CursorUp() bool {
 // CursorDown moves the cursor down
 func (h *BufPane) CursorDown() bool {
 	h.Cursor.Deselect(true)
-	h.Cursor.Down()
+	h.MoveCursorDown(1)
 	h.Relocate()
 	return true
 }
@@ -212,7 +251,7 @@ func (h *BufPane) SelectUp() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.Up()
+	h.MoveCursorUp(1)
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -223,7 +262,7 @@ func (h *BufPane) SelectDown() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.Down()
+	h.MoveCursorDown(1)
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -1274,7 +1313,7 @@ func (h *BufPane) SelectPageUp() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.UpN(h.BufHeight())
+	h.MoveCursorUp(h.BufHeight())
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -1285,7 +1324,7 @@ func (h *BufPane) SelectPageDown() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.DownN(h.BufHeight())
+	h.MoveCursorDown(h.BufHeight())
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -1300,7 +1339,7 @@ func (h *BufPane) CursorPageUp() bool {
 		h.Cursor.ResetSelection()
 		h.Cursor.StoreVisualX()
 	}
-	h.Cursor.UpN(h.BufHeight())
+	h.MoveCursorUp(h.BufHeight())
 	h.Relocate()
 	return true
 }
@@ -1314,7 +1353,7 @@ func (h *BufPane) CursorPageDown() bool {
 		h.Cursor.ResetSelection()
 		h.Cursor.StoreVisualX()
 	}
-	h.Cursor.DownN(h.BufHeight())
+	h.MoveCursorDown(h.BufHeight())
 	h.Relocate()
 	return true
 }
