@@ -242,119 +242,18 @@ func (w *BufWindow) Relocate() bool {
 
 // LocFromVisual takes a visual location (x and y position) and returns the
 // position in the buffer corresponding to the visual location
-// Computing the buffer location requires essentially drawing the entire screen
-// to account for complications like softwrap, wide characters, and horizontal scrolling
 // If the requested position does not correspond to a buffer location it returns
 // the nearest position
 func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
-	b := w.Buf
-
-	maxWidth := w.gutterOffset + w.bufWidth
-
-	tabsize := int(b.Settings["tabsize"].(float64))
-	softwrap := b.Settings["softwrap"].(bool)
-
-	// this represents the current draw position
-	// within the current window
-	vloc := buffer.Loc{X: 0, Y: 0}
-	if softwrap {
-		// the start line may be partially out of the current window
-		vloc.Y = -w.StartLine.Row
+	vx := svloc.X - w.X - w.gutterOffset
+	if vx < 0 {
+		vx = 0
 	}
-
-	// this represents the current draw position in the buffer (char positions)
-	bloc := buffer.Loc{X: -1, Y: w.StartLine.Line}
-
-	for ; vloc.Y < w.bufHeight; vloc.Y++ {
-		vloc.X = w.gutterOffset
-
-		line := b.LineBytes(bloc.Y)
-		line, nColsBeforeStart, bslice := util.SliceVisualEnd(line, w.StartCol, tabsize)
-		bloc.X = bslice
-
-		draw := func() {
-			if nColsBeforeStart <= 0 {
-				vloc.X++
-			}
-			nColsBeforeStart--
-		}
-
-		totalwidth := w.StartCol - nColsBeforeStart
-
-		for len(line) > 0 {
-			r, _, size := util.DecodeCharacter(line)
-
-			width := 0
-
-			switch r {
-			case '\t':
-				ts := tabsize - (totalwidth % tabsize)
-				width = util.Min(ts, maxWidth-vloc.X)
-				totalwidth += ts
-			default:
-				width = runewidth.RuneWidth(r)
-				totalwidth += width
-			}
-
-			// If a wide rune does not fit in the window
-			if vloc.X+width > maxWidth && vloc.X > w.gutterOffset {
-				if vloc.Y+w.Y == svloc.Y {
-					return bloc
-				}
-
-				// We either stop or we wrap to draw the rune in the next line
-				if !softwrap {
-					break
-				} else {
-					vloc.Y++
-					if vloc.Y >= w.bufHeight {
-						break
-					}
-					vloc.X = w.gutterOffset
-				}
-			}
-
-			draw()
-
-			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
-			if width > 1 {
-				for i := 1; i < width; i++ {
-					draw()
-				}
-			}
-
-			if svloc.X < vloc.X+w.X && vloc.Y+w.Y == svloc.Y {
-				return bloc
-			}
-			bloc.X++
-			line = line[size:]
-
-			// If we reach the end of the window then we either stop or we wrap for softwrap
-			if vloc.X >= maxWidth {
-				if !softwrap {
-					break
-				} else {
-					vloc.Y++
-					if vloc.Y >= w.bufHeight {
-						break
-					}
-					vloc.X = w.gutterOffset
-				}
-			}
-		}
-		if vloc.Y+w.Y == svloc.Y {
-			return bloc
-		}
-
-		if bloc.Y+1 >= b.LinesNum() || vloc.Y+1 >= w.bufHeight {
-			return bloc
-		}
-
-		bloc.X = w.StartCol
-		bloc.Y++
+	vloc := VLoc{
+		SLoc:    w.Scroll(w.StartLine, svloc.Y-w.Y),
+		VisualX: vx + w.StartCol,
 	}
-
-	return buffer.Loc{}
+	return w.LocFromVLoc(vloc)
 }
 
 func (w *BufWindow) drawGutter(vloc *buffer.Loc, bloc *buffer.Loc) {
