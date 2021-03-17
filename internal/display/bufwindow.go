@@ -477,68 +477,70 @@ func (w *BufWindow) displayBuffer() {
 		}
 		bloc.X = bslice
 
-		draw := func(r rune, combc []rune, style tcell.Style, showcursor bool) {
+		draw := func(r rune, combc []rune, style tcell.Style, highlight bool, showcursor bool) {
 			if nColsBeforeStart <= 0 && vloc.Y >= 0 {
-				_, origBg, _ := style.Decompose()
-				_, defBg, _ := config.DefStyle.Decompose()
+				if highlight {
+					_, origBg, _ := style.Decompose()
+					_, defBg, _ := config.DefStyle.Decompose()
 
-				// syntax highlighting with non-default background takes precedence
-				// over cursor-line and color-column
-				dontOverrideBackground := origBg != defBg
+					// syntax highlighting with non-default background takes precedence
+					// over cursor-line and color-column
+					dontOverrideBackground := origBg != defBg
 
-				for _, c := range cursors {
-					if c.HasSelection() &&
-						(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
-							bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
-						// The current character is selected
-						style = config.DefStyle.Reverse(true)
+					for _, c := range cursors {
+						if c.HasSelection() &&
+							(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
+								bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
+							// The current character is selected
+							style = config.DefStyle.Reverse(true)
 
-						if s, ok := config.Colorscheme["selection"]; ok {
-							style = s
+							if s, ok := config.Colorscheme["selection"]; ok {
+								style = s
+							}
+						}
+
+						if b.Settings["cursorline"].(bool) && w.active && !dontOverrideBackground &&
+							!c.HasSelection() && c.Y == bloc.Y {
+							if s, ok := config.Colorscheme["cursor-line"]; ok {
+								fg, _, _ := s.Decompose()
+								style = style.Background(fg)
+							}
 						}
 					}
 
-					if b.Settings["cursorline"].(bool) && w.active && !dontOverrideBackground &&
-						!c.HasSelection() && c.Y == bloc.Y {
-						if s, ok := config.Colorscheme["cursor-line"]; ok {
+					for _, m := range b.Messages {
+						if bloc.GreaterEqual(m.Start) && bloc.LessThan(m.End) ||
+							bloc.LessThan(m.End) && bloc.GreaterEqual(m.Start) {
+							style = style.Underline(true)
+							break
+						}
+					}
+
+					if r == '\t' {
+						indentrunes := []rune(b.Settings["indentchar"].(string))
+						// if empty indentchar settings, use space
+						if len(indentrunes) == 0 {
+							indentrunes = []rune{' '}
+						}
+
+						r = indentrunes[0]
+						if s, ok := config.Colorscheme["indent-char"]; ok && r != ' ' {
+							fg, _, _ := s.Decompose()
+							style = style.Foreground(fg)
+						}
+					}
+
+					if s, ok := config.Colorscheme["color-column"]; ok {
+						if colorcolumn != 0 && vloc.X-w.gutterOffset+w.StartCol == colorcolumn && !dontOverrideBackground {
 							fg, _, _ := s.Decompose()
 							style = style.Background(fg)
 						}
 					}
-				}
 
-				for _, m := range b.Messages {
-					if bloc.GreaterEqual(m.Start) && bloc.LessThan(m.End) ||
-						bloc.LessThan(m.End) && bloc.GreaterEqual(m.Start) {
-						style = style.Underline(true)
-						break
-					}
-				}
-
-				if r == '\t' {
-					indentrunes := []rune(b.Settings["indentchar"].(string))
-					// if empty indentchar settings, use space
-					if len(indentrunes) == 0 {
-						indentrunes = []rune{' '}
-					}
-
-					r = indentrunes[0]
-					if s, ok := config.Colorscheme["indent-char"]; ok && r != ' ' {
-						fg, _, _ := s.Decompose()
-						style = style.Foreground(fg)
-					}
-				}
-
-				if s, ok := config.Colorscheme["color-column"]; ok {
-					if colorcolumn != 0 && vloc.X-w.gutterOffset+w.StartCol == colorcolumn && !dontOverrideBackground {
-						fg, _, _ := s.Decompose()
-						style = style.Background(fg)
-					}
-				}
-
-				for _, mb := range matchingBraces {
-					if mb.X == bloc.X && mb.Y == bloc.Y {
-						style = style.Underline(true)
+					for _, mb := range matchingBraces {
+						if mb.X == bloc.X && mb.Y == bloc.Y {
+							style = style.Underline(true)
+						}
 					}
 				}
 
@@ -622,7 +624,7 @@ func (w *BufWindow) displayBuffer() {
 			// If a word (or just a wide rune) does not fit in the window
 			if vloc.X+wordwidth > maxWidth && vloc.X > w.gutterOffset {
 				for vloc.X < maxWidth {
-					draw(' ', nil, config.DefStyle, false)
+					draw(' ', nil, config.DefStyle, false, false)
 				}
 
 				// We either stop or we wrap to draw the word in the next line
@@ -638,7 +640,7 @@ func (w *BufWindow) displayBuffer() {
 			}
 
 			for _, r := range word {
-				draw(r.r, r.combc, r.style, true)
+				draw(r.r, r.combc, r.style, true, true)
 
 				// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 				if r.width > 1 {
@@ -648,7 +650,7 @@ func (w *BufWindow) displayBuffer() {
 					}
 
 					for i := 1; i < r.width; i++ {
-						draw(char, nil, r.style, false)
+						draw(char, nil, r.style, true, false)
 					}
 				}
 				bloc.X++
@@ -694,7 +696,7 @@ func (w *BufWindow) displayBuffer() {
 
 		if vloc.X != maxWidth {
 			// Display newline within a selection
-			draw(' ', nil, config.DefStyle, true)
+			draw(' ', nil, config.DefStyle, true, true)
 		}
 
 		bloc.X = w.StartCol
