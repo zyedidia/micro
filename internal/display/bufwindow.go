@@ -261,39 +261,53 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 
 		totalwidth := w.StartCol - nColsBeforeStart
 
-		if svloc.X <= vloc.X+w.X && vloc.Y+w.Y == svloc.Y {
-			return bloc
-		}
 		for len(line) > 0 {
-			if vloc.X+w.X == svloc.X && vloc.Y+w.Y == svloc.Y {
-				return bloc
-			}
-
 			r, _, size := util.DecodeCharacter(line)
-			draw()
+
 			width := 0
 
 			switch r {
 			case '\t':
 				ts := tabsize - (totalwidth % tabsize)
-				width = ts
+				width = util.Min(ts, maxWidth-vloc.X)
+				totalwidth += ts
 			default:
 				width = runewidth.RuneWidth(r)
+				totalwidth += width
 			}
+
+			// If a wide rune does not fit in the window
+			if vloc.X+width > maxWidth && vloc.X > w.gutterOffset {
+				if vloc.Y+w.Y == svloc.Y {
+					return bloc
+				}
+
+				// We either stop or we wrap to draw the rune in the next line
+				if !softwrap {
+					break
+				} else {
+					vloc.Y++
+					if vloc.Y >= w.bufHeight {
+						break
+					}
+					vloc.X = w.gutterOffset
+				}
+			}
+
+			draw()
 
 			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 			if width > 1 {
 				for i := 1; i < width; i++ {
-					if vloc.X+w.X == svloc.X && vloc.Y+w.Y == svloc.Y {
-						return bloc
-					}
 					draw()
 				}
 			}
+
+			if svloc.X < vloc.X+w.X && vloc.Y+w.Y == svloc.Y {
+				return bloc
+			}
 			bloc.X++
 			line = line[size:]
-
-			totalwidth += width
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
 			if vloc.X >= maxWidth {
@@ -623,13 +637,26 @@ func (w *BufWindow) displayBuffer() {
 			nColsBeforeStart--
 		}
 
+		wrap := func() {
+			vloc.X = 0
+			if w.hasMessage {
+				w.drawGutter(&vloc, &bloc)
+			}
+			if b.Settings["diffgutter"].(bool) {
+				w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
+			}
+
+			// This will draw an empty line number because the current line is wrapped
+			if b.Settings["ruler"].(bool) {
+				w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
+			}
+		}
+
 		totalwidth := w.StartCol - nColsBeforeStart
 		for len(line) > 0 {
 			r, combc, size := util.DecodeCharacter(line)
 
 			curStyle, _ = w.getStyle(curStyle, bloc)
-
-			draw(r, combc, curStyle, true)
 
 			width := 0
 
@@ -637,11 +664,33 @@ func (w *BufWindow) displayBuffer() {
 			switch r {
 			case '\t':
 				ts := tabsize - (totalwidth % tabsize)
-				width = ts
+				width = util.Min(ts, maxWidth-vloc.X)
+				totalwidth += ts
 			default:
 				width = runewidth.RuneWidth(r)
 				char = '@'
+				totalwidth += width
 			}
+
+			// If a wide rune does not fit in the window
+			if vloc.X+width > maxWidth && vloc.X > w.gutterOffset {
+				for vloc.X < maxWidth {
+					draw(' ', nil, config.DefStyle, false)
+				}
+
+				// We either stop or we wrap to draw the rune in the next line
+				if !softwrap {
+					break
+				} else {
+					vloc.Y++
+					if vloc.Y >= w.bufHeight {
+						break
+					}
+					wrap()
+				}
+			}
+
+			draw(r, combc, curStyle, true)
 
 			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 			if width > 1 {
@@ -652,8 +701,6 @@ func (w *BufWindow) displayBuffer() {
 			bloc.X++
 			line = line[size:]
 
-			totalwidth += width
-
 			// If we reach the end of the window then we either stop or we wrap for softwrap
 			if vloc.X >= maxWidth {
 				if !softwrap {
@@ -663,18 +710,7 @@ func (w *BufWindow) displayBuffer() {
 					if vloc.Y >= w.bufHeight {
 						break
 					}
-					vloc.X = 0
-					if w.hasMessage {
-						w.drawGutter(&vloc, &bloc)
-					}
-					if b.Settings["diffgutter"].(bool) {
-						w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
-					}
-
-					// This will draw an empty line number because the current line is wrapped
-					if b.Settings["ruler"].(bool) {
-						w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
-					}
+					wrap()
 				}
 			}
 		}

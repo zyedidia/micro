@@ -1,6 +1,7 @@
 package display
 
 import (
+	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
@@ -36,13 +37,55 @@ type SoftWrap interface {
 }
 
 func (w *BufWindow) getRow(loc buffer.Loc) int {
+	if loc.X <= 0 {
+		return 0
+	}
+
 	if w.bufWidth <= 0 {
 		return 0
 	}
-	// TODO: this doesn't work quite correctly if there is an incomplete tab
-	// or wide character at the end of a row. See also issue #1979
-	x := util.StringWidth(w.Buf.LineBytes(loc.Y), loc.X, util.IntOpt(w.Buf.Settings["tabsize"]))
-	return x / w.bufWidth
+
+	tabsize := util.IntOpt(w.Buf.Settings["tabsize"])
+
+	line := w.Buf.LineBytes(loc.Y)
+	x := 0
+	visualx := 0
+	row := 0
+	totalwidth := 0
+
+	for len(line) > 0 {
+		r, _, size := util.DecodeCharacter(line)
+
+		width := 0
+		switch r {
+		case '\t':
+			ts := tabsize - (totalwidth % tabsize)
+			width = util.Min(ts, w.bufWidth-visualx)
+			totalwidth += ts
+		default:
+			width = runewidth.RuneWidth(r)
+			totalwidth += width
+		}
+
+		// If a wide rune does not fit in the window
+		if visualx+width > w.bufWidth && visualx > 0 {
+			row++
+			visualx = 0
+		}
+
+		if x == loc.X {
+			return row
+		}
+		x++
+		line = line[size:]
+
+		visualx += width
+		if visualx >= w.bufWidth {
+			row++
+			visualx = 0
+		}
+	}
+	return row
 }
 
 func (w *BufWindow) getRowCount(line int) int {
