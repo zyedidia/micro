@@ -56,14 +56,19 @@ func (w *BufWindow) getVLocFromLoc(loc buffer.Loc) VLoc {
 		return vloc
 	}
 
+	wordwrap := w.Buf.Settings["wordwrap"].(bool)
 	tabsize := util.IntOpt(w.Buf.Settings["tabsize"])
 
 	line := w.Buf.LineBytes(loc.Y)
 	x := 0
 	totalwidth := 0
 
+	wordwidth := 0
+	wordoffset := 0
+
 	for len(line) > 0 {
 		r, _, size := util.DecodeCharacter(line)
+		line = line[size:]
 
 		width := 0
 		switch r {
@@ -76,19 +81,37 @@ func (w *BufWindow) getVLocFromLoc(loc buffer.Loc) VLoc {
 			totalwidth += width
 		}
 
-		// If a wide rune does not fit in the window
-		if vloc.VisualX+width > w.bufWidth && vloc.VisualX > 0 {
+		wordwidth += width
+
+		// Collect a complete word to know its width.
+		// If wordwrap is off, every single character is a complete "word".
+		if wordwrap {
+			if !util.IsWhitespace(r) && len(line) > 0 && wordwidth < w.bufWidth {
+				if x < loc.X {
+					wordoffset += width
+					x++
+				}
+				continue
+			}
+		}
+
+		// If a word (or just a wide rune) does not fit in the window
+		if vloc.VisualX+wordwidth > w.bufWidth && vloc.VisualX > 0 {
 			vloc.Row++
 			vloc.VisualX = 0
 		}
 
 		if x == loc.X {
+			vloc.VisualX += wordoffset
 			return vloc
 		}
 		x++
-		line = line[size:]
 
-		vloc.VisualX += width
+		vloc.VisualX += wordwidth
+
+		wordwidth = 0
+		wordoffset = 0
+
 		if vloc.VisualX >= w.bufWidth {
 			vloc.Row++
 			vloc.VisualX = 0
@@ -104,6 +127,7 @@ func (w *BufWindow) getLocFromVLoc(svloc VLoc) buffer.Loc {
 		return loc
 	}
 
+	wordwrap := w.Buf.Settings["wordwrap"].(bool)
 	tabsize := util.IntOpt(w.Buf.Settings["tabsize"])
 
 	line := w.Buf.LineBytes(svloc.Line)
@@ -111,8 +135,17 @@ func (w *BufWindow) getLocFromVLoc(svloc VLoc) buffer.Loc {
 
 	totalwidth := 0
 
+	var widths []int
+	if wordwrap {
+		widths = make([]int, 0, w.bufWidth)
+	} else {
+		widths = make([]int, 0, 1)
+	}
+	wordwidth := 0
+
 	for len(line) > 0 {
 		r, _, size := util.DecodeCharacter(line)
+		line = line[size:]
 
 		width := 0
 		switch r {
@@ -125,21 +158,40 @@ func (w *BufWindow) getLocFromVLoc(svloc VLoc) buffer.Loc {
 			totalwidth += width
 		}
 
-		// If a wide rune does not fit in the window
-		if vloc.VisualX+width > w.bufWidth && vloc.VisualX > 0 {
+		widths = append(widths, width)
+		wordwidth += width
+
+		// Collect a complete word to know its width.
+		// If wordwrap is off, every single character is a complete "word".
+		if wordwrap {
+			if !util.IsWhitespace(r) && len(line) > 0 && wordwidth < w.bufWidth {
+				continue
+			}
+		}
+
+		// If a word (or just a wide rune) does not fit in the window
+		if vloc.VisualX+wordwidth > w.bufWidth && vloc.VisualX > 0 {
 			if vloc.Row == svloc.Row {
+				if wordwrap {
+					// it's a word, not a wide rune
+					loc.X--
+				}
 				return loc
 			}
 			vloc.Row++
 			vloc.VisualX = 0
 		}
 
-		vloc.VisualX += width
-		if vloc.Row == svloc.Row && vloc.VisualX > svloc.VisualX {
-			return loc
+		for i := range widths {
+			vloc.VisualX += widths[i]
+			if vloc.Row == svloc.Row && vloc.VisualX > svloc.VisualX {
+				return loc
+			}
+			loc.X++
 		}
-		loc.X++
-		line = line[size:]
+
+		widths = widths[:0]
+		wordwidth = 0
 
 		if vloc.VisualX >= w.bufWidth {
 			vloc.Row++

@@ -420,6 +420,8 @@ func (w *BufWindow) displayBuffer() {
 	}
 
 	softwrap := b.Settings["softwrap"].(bool)
+	wordwrap := softwrap && b.Settings["wordwrap"].(bool)
+
 	tabsize := util.IntOpt(b.Settings["tabsize"])
 	colorcolumn := util.IntOpt(b.Settings["colorcolumn"])
 
@@ -571,15 +573,31 @@ func (w *BufWindow) displayBuffer() {
 			}
 		}
 
+		type glyph struct {
+			r     rune
+			combc []rune
+			style tcell.Style
+			width int
+		}
+
+		var word []glyph
+		if wordwrap {
+			word = make([]glyph, 0, w.bufWidth)
+		} else {
+			word = make([]glyph, 0, 1)
+		}
+		wordwidth := 0
+
 		totalwidth := w.StartCol - nColsBeforeStart
 		for len(line) > 0 {
 			r, combc, size := util.DecodeCharacter(line)
+			line = line[size:]
 
-			curStyle, _ = w.getStyle(curStyle, bloc)
+			loc := buffer.Loc{X: bloc.X + len(word), Y: bloc.Y}
+			curStyle, _ = w.getStyle(curStyle, loc)
 
 			width := 0
 
-			char := ' '
 			switch r {
 			case '\t':
 				ts := tabsize - (totalwidth % tabsize)
@@ -587,17 +605,27 @@ func (w *BufWindow) displayBuffer() {
 				totalwidth += ts
 			default:
 				width = runewidth.RuneWidth(r)
-				char = '@'
 				totalwidth += width
 			}
 
-			// If a wide rune does not fit in the window
-			if vloc.X+width > maxWidth && vloc.X > w.gutterOffset {
+			word = append(word, glyph{r, combc, curStyle, width})
+			wordwidth += width
+
+			// Collect a complete word to know its width.
+			// If wordwrap is off, every single character is a complete "word".
+			if wordwrap {
+				if !util.IsWhitespace(r) && len(line) > 0 && wordwidth < w.bufWidth {
+					continue
+				}
+			}
+
+			// If a word (or just a wide rune) does not fit in the window
+			if vloc.X+wordwidth > maxWidth && vloc.X > w.gutterOffset {
 				for vloc.X < maxWidth {
 					draw(' ', nil, config.DefStyle, false)
 				}
 
-				// We either stop or we wrap to draw the rune in the next line
+				// We either stop or we wrap to draw the word in the next line
 				if !softwrap {
 					break
 				} else {
@@ -609,16 +637,25 @@ func (w *BufWindow) displayBuffer() {
 				}
 			}
 
-			draw(r, combc, curStyle, true)
+			for _, r := range word {
+				draw(r.r, r.combc, r.style, true)
 
-			// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
-			if width > 1 {
-				for i := 1; i < width; i++ {
-					draw(char, nil, curStyle, false)
+				// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
+				if r.width > 1 {
+					char := ' '
+					if r.r != '\t' {
+						char = '@'
+					}
+
+					for i := 1; i < r.width; i++ {
+						draw(char, nil, r.style, false)
+					}
 				}
+				bloc.X++
 			}
-			bloc.X++
-			line = line[size:]
+
+			word = word[:0]
+			wordwidth = 0
 
 			// If we reach the end of the window then we either stop or we wrap for softwrap
 			if vloc.X >= maxWidth {
