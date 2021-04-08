@@ -99,8 +99,8 @@ func (w *BufWindow) IsActive() bool {
 // ruler, scrollbar and statusline.
 func (w *BufWindow) BufView() View {
 	return View{
-		X:         w.gutterOffset,
-		Y:         0,
+		X:         w.X + w.gutterOffset,
+		Y:         w.Y,
 		Width:     w.bufWidth,
 		Height:    w.bufHeight,
 		StartLine: w.StartLine,
