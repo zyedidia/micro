@@ -106,51 +106,35 @@ func (w *BufWindow) Clear() {
 	}
 }
 
-// Bottomline returns the line number of the lowest line in the view
-// You might think that this is obviously just v.StartLine + v.Height
-// but if softwrap is enabled things get complicated since one buffer
-// line can take up multiple lines in the view
-func (w *BufWindow) Bottomline() int {
-	if !w.Buf.Settings["softwrap"].(bool) {
-		h := w.StartLine + w.Height - 1
-		if w.drawStatus {
-			h--
-		}
-		return h
-	}
-
-	l := w.LocFromVisual(buffer.Loc{0, w.Y + w.Height})
-
-	return l.Y
-}
-
 // Relocate moves the view window so that the cursor is in view
 // This is useful if the user has scrolled far away, and then starts typing
 // Returns true if the window location is moved
 func (w *BufWindow) Relocate() bool {
 	b := w.Buf
-	// how many buffer lines are in the view
-	height := w.Bottomline() + 1 - w.StartLine
-	h := w.Height
+	height := w.Height
 	if w.drawStatus {
-		h--
+		height--
 	}
 	ret := false
 	activeC := w.Buf.GetActiveCursor()
-	cy := activeC.Y
 	scrollmargin := int(b.Settings["scrollmargin"].(float64))
-	if cy < w.StartLine+scrollmargin && cy > scrollmargin-1 {
-		w.StartLine = cy - scrollmargin
+
+	c := w.SLocFromLoc(activeC.Loc)
+	bStart := SLoc{0, 0}
+	bEnd := w.SLocFromLoc(b.End())
+
+	if c.LessThan(w.Scroll(w.StartLine, scrollmargin)) && c.GreaterThan(w.Scroll(bStart, scrollmargin-1)) {
+		w.StartLine = w.Scroll(c, -scrollmargin)
 		ret = true
-	} else if cy < w.StartLine {
-		w.StartLine = cy
+	} else if c.LessThan(w.StartLine) {
+		w.StartLine = c
 		ret = true
 	}
-	if cy > w.StartLine+height-1-scrollmargin && cy < b.LinesNum()-scrollmargin {
-		w.StartLine = cy - height + 1 + scrollmargin
+	if c.GreaterThan(w.Scroll(w.StartLine, height-1-scrollmargin)) && c.LessThan(w.Scroll(bEnd, -scrollmargin+1)) {
+		w.StartLine = w.Scroll(c, -height+1+scrollmargin)
 		ret = true
-	} else if cy >= b.LinesNum()-scrollmargin && cy >= height {
-		w.StartLine = b.LinesNum() - height
+	} else if c.GreaterThan(w.Scroll(bEnd, -scrollmargin)) && c.GreaterThan(w.Scroll(w.StartLine, height-1)) {
+		w.StartLine = w.Scroll(bEnd, -height+1)
 		ret = true
 	}
 
@@ -199,11 +183,15 @@ func (w *BufWindow) LocFromVisual(svloc buffer.Loc) buffer.Loc {
 	// this represents the current draw position
 	// within the current window
 	vloc := buffer.Loc{X: 0, Y: 0}
+	if softwrap {
+		// the start line may be partially out of the current window
+		vloc.Y = -w.StartLine.Row
+	}
 
 	// this represents the current draw position in the buffer (char positions)
-	bloc := buffer.Loc{X: -1, Y: w.StartLine}
+	bloc := buffer.Loc{X: -1, Y: w.StartLine.Line}
 
-	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
+	for ; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 		if hasMessage {
 			vloc.X += 2
@@ -473,14 +461,18 @@ func (w *BufWindow) displayBuffer() {
 	// this represents the current draw position
 	// within the current window
 	vloc := buffer.Loc{X: 0, Y: 0}
+	if softwrap {
+		// the start line may be partially out of the current window
+		vloc.Y = -w.StartLine.Row
+	}
 
 	// this represents the current draw position in the buffer (char positions)
-	bloc := buffer.Loc{X: -1, Y: w.StartLine}
+	bloc := buffer.Loc{X: -1, Y: w.StartLine.Line}
 
 	cursors := b.GetCursors()
 
 	curStyle := config.DefStyle
-	for vloc.Y = 0; vloc.Y < bufHeight; vloc.Y++ {
+	for ; vloc.Y < bufHeight; vloc.Y++ {
 		vloc.X = 0
 
 		currentLine := false
@@ -496,16 +488,28 @@ func (w *BufWindow) displayBuffer() {
 			s = curNumStyle
 		}
 
-		if hasMessage {
-			w.drawGutter(&vloc, &bloc)
-		}
+		if vloc.Y >= 0 {
+			if hasMessage {
+				w.drawGutter(&vloc, &bloc)
+			}
 
-		if b.Settings["diffgutter"].(bool) {
-			w.drawDiffGutter(s, false, &vloc, &bloc)
-		}
+			if b.Settings["diffgutter"].(bool) {
+				w.drawDiffGutter(s, false, &vloc, &bloc)
+			}
 
-		if b.Settings["ruler"].(bool) {
-			w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
+			if b.Settings["ruler"].(bool) {
+				w.drawLineNum(s, false, maxLineNumLength, &vloc, &bloc)
+			}
+		} else {
+			if hasMessage {
+				vloc.X += 2
+			}
+			if b.Settings["diffgutter"].(bool) {
+				vloc.X++
+			}
+			if b.Settings["ruler"].(bool) {
+				vloc.X += maxLineNumLength + 1
+			}
 		}
 
 		w.gutterOffset = vloc.X
@@ -517,7 +521,7 @@ func (w *BufWindow) displayBuffer() {
 		bloc.X = bslice
 
 		draw := func(r rune, combc []rune, style tcell.Style, showcursor bool) {
-			if nColsBeforeStart <= 0 {
+			if nColsBeforeStart <= 0 && vloc.Y >= 0 {
 				if w.Buf.HighlightSearch && w.Buf.SearchMatch(bloc) {
 					style = config.DefStyle.Reverse(true)
 					if s, ok := config.Colorscheme["hlsearch"]; ok {
@@ -597,6 +601,8 @@ func (w *BufWindow) displayBuffer() {
 						}
 					}
 				}
+			}
+			if nColsBeforeStart <= 0 {
 				vloc.X++
 			}
 			nColsBeforeStart--
@@ -742,7 +748,7 @@ func (w *BufWindow) displayScrollBar() {
 		if barsize < 1 {
 			barsize = 1
 		}
-		barstart := w.Y + int(float64(w.StartLine)/float64(w.Buf.LinesNum())*float64(w.Height))
+		barstart := w.Y + int(float64(w.StartLine.Line)/float64(w.Buf.LinesNum())*float64(w.Height))
 
 		scrollBarStyle := config.DefStyle.Reverse(true)
 		if style, ok := config.Colorscheme["scrollbar"]; ok {

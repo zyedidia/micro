@@ -3,6 +3,7 @@ package action
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -61,7 +62,11 @@ func InitBindings() {
 		case string:
 			BindKey(k, val, Binder["buffer"])
 		case map[string]interface{}:
-			bind := Binder[k]
+			bind, ok := Binder[k]
+			if !ok || bind == nil {
+				screen.TermMessage(fmt.Sprintf("%s is not a valid pane type", k))
+				continue
+			}
 			for e, a := range val {
 				s, ok := a.(string)
 				if !ok {

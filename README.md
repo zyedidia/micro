@@ -5,7 +5,7 @@
 [![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Snap Status](https://build.snapcraft.io/badge/zyedidia/micro.svg)](https://build.snapcraft.io/user/zyedidia/micro)
+[![Snap Status](https://snapcraft.io/micro/badge.svg)](https://snapcraft.io/micro)
 
 **micro** is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the capabilities
 of modern terminals. It comes as a single, batteries-included, static binary with no dependencies; you can download and use it right now!
@@ -129,7 +129,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 * Linux: Available in distro-specific package managers.
     * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled.
     * `dnf install micro` (Fedora).
-    * `yay -S micro` (Arch Linux).
+    * `pacman -S micro` (Arch Linux).
     * `eopkg install micro` (Solus).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).

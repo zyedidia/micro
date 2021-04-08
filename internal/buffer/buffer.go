@@ -302,16 +302,27 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.AbsPath = absPath
 		b.Path = path
 
+		// this is a little messy since we need to know some settings to read
+		// the file properly, but some settings depend on the filetype, which
+		// we don't know until reading the file. We first read the settings
+		// into a local variable and then use that to determine the encoding,
+		// readonly, and fileformat necessary for reading the file and
+		// assigning the filetype.
+		settings := config.DefaultCommonSettings()
 		b.Settings = config.DefaultCommonSettings()
 		for k, v := range config.GlobalSettings {
 			if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
 				// make sure setting is not global-only
+				settings[k] = v
 				b.Settings[k] = v
 			}
 		}
-		config.InitLocalSettings(b.Settings, path)
+		config.InitLocalSettings(settings, path)
+		b.Settings["readonly"] = settings["readonly"]
+		b.Settings["filetype"] = settings["filetype"]
+		b.Settings["syntax"] = settings["syntax"]
 
-		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+		enc, err := htmlindex.Get(settings["encoding"].(string))
 		if err != nil {
 			enc = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
@@ -327,7 +338,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			if size == 0 {
 				// for empty files, use the fileformat setting instead of
 				// autodetection
-				switch b.Settings["fileformat"] {
+				switch settings["fileformat"] {
 				case "unix":
 					ff = FFUnix
 				case "dos":
@@ -541,6 +552,27 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 		}
 	}
 	return '\n'
+}
+
+// WordAt returns the word around a given location in the buffer
+func (b *Buffer) WordAt(loc Loc) []byte {
+	if len(b.LineBytes(loc.Y)) == 0 || !util.IsWordChar(b.RuneAt(loc)) {
+		return []byte{}
+	}
+
+	start := loc
+	end := loc.Move(1, b)
+
+	for start.X > 0 && util.IsWordChar(b.RuneAt(start.Move(-1, b))) {
+		start.X--
+	}
+
+	lineLen := util.CharacterCount(b.LineBytes(loc.Y))
+	for end.X < lineLen && util.IsWordChar(b.RuneAt(end)) {
+		end.X++
+	}
+
+	return b.Substr(start, end)
 }
 
 // Modified returns if this buffer has been modified since

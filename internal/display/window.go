@@ -8,10 +8,13 @@ type View struct {
 	X, Y          int // X,Y location of the view
 	Width, Height int // Width and height of the view
 
-	// Start line and start column of the view (vertical/horizontal scroll)
+	// Start line of the view (for vertical scroll)
+	StartLine SLoc
+
+	// Start column of the view (for horizontal scroll)
 	// note that since the starting column of every line is different if the view
 	// is scrolled, StartCol is a visual index (will be the same for every line)
-	StartLine, StartCol int
+	StartCol int
 }
 
 type Window interface {
@@ -28,5 +31,6 @@ type Window interface {
 
 type BWindow interface {
 	Window
+	SoftWrap
 	SetBuffer(b *buffer.Buffer)
 }
