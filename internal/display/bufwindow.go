@@ -94,16 +94,18 @@ func (w *BufWindow) IsActive() bool {
 	return w.active
 }
 
-// BufWidth returns the width of the actual buffer displayed in the window,
-// which is usually less than the window width due to the gutter, ruler or scrollbar
-func (w *BufWindow) BufWidth() int {
-	return w.bufWidth
-}
-
-// BufHeight returns the height of the actual buffer displayed in the window,
-// which is usually less than the window height due to the statusline
-func (w *BufWindow) BufHeight() int {
-	return w.bufHeight
+// BufView returns the width, height and x,y location of the actual buffer.
+// It is not exactly the same as the whole window which also contains gutter,
+// ruler, scrollbar and statusline.
+func (w *BufWindow) BufView() View {
+	return View{
+		X:         w.gutterOffset,
+		Y:         0,
+		Width:     w.bufWidth,
+		Height:    w.bufHeight,
+		StartLine: w.StartLine,
+		StartCol:  w.StartCol,
+	}
 }
 
 func (w *BufWindow) updateDisplayInfo() {
