@@ -2,12 +2,17 @@ package action
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
+	"regexp"
 	"sort"
 	"strings"
 
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
+
+	yaml "gopkg.in/yaml.v2"
 )
 
 // This file is meant (for now) for autocompletion in command mode, not
@@ -58,7 +63,7 @@ func HelpComplete(b *buffer.Buffer) ([]string, []string) {
 }
 
 // colorschemeComplete tab-completes names of colorschemes.
-// This is just a heper value for OptionValueComplete
+// This is just a helper value for OptionValueComplete
 func colorschemeComplete(input string) (string, []string) {
 	var suggestions []string
 	files := config.ListRuntimeFiles(config.RTColorscheme)
@@ -66,6 +71,86 @@ func colorschemeComplete(input string) (string, []string) {
 	for _, f := range files {
 		if strings.HasPrefix(f.Name(), input) {
 			suggestions = append(suggestions, f.Name())
+		}
+	}
+
+	var chosen string
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+
+	return chosen, suggestions
+}
+
+// Helper function for filetypeComplete, adapted elements from `highlight.ParseFile`—attempts to
+// parse filetype key, returning an empty string on failure.
+// TODO(disk0) Best place to put this if not here?
+func parseSyntaxFiletype(input []byte) (filetype string, err error) {
+	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			err, ok = r.(error)
+			if !ok {
+				err = fmt.Errorf("pkg: %v", r)
+			}
+		}
+	}()
+
+	var rules map[interface{}]interface{}
+	if err = yaml.Unmarshal(input, &rules); err != nil {
+		return "", err
+	}
+
+	for k, v := range rules {
+		if k == "filetype" {
+			return v.(string), err
+		}
+	}
+
+	return "", err
+}
+
+// Helper function for filetypeComplete, finds filetype value via basic regexp search. Returns
+// error just for type parity with `parseRTSyntaxFiletype`
+// TODO(disk0) Same as above
+// TODO(disk0) Determine if this method is significantly more performant, else just stick with
+//             yaml parser
+func matchSyntaxFiletype(input []byte) (filetype string, err error) {
+	pattern := regexp.MustCompile(`^filetype:[ '"]*([^\s"']+)`)
+	match := pattern.FindSubmatchIndex(input)
+
+	if len(match) < 4 {
+		return "", errors.New("Submatch returned from filetype search contains less than 4 elements")
+	}
+
+	return string(input[match[2]:match[3]]), err
+}
+
+// filetypeComplete completes syntax definiton filetype key values for filetype option
+func filetypeComplete(input string) (string, []string) {
+	var suggestions []string
+	files := config.ListRuntimeFiles(config.RTSyntax)
+
+	for _, f := range files {
+
+		// Load file bytes
+		data, err := f.Data()
+		if err != nil {
+			continue
+		}
+
+		// Then parse filetype
+		// ft, err := parseRTSyntaxFiletype(data)
+		ft, err := matchSyntaxFiletype(data)
+
+		// As noted in parseFiletypeKey doc comment `ft` can be an empty string, needs length check
+		if err != nil || len(ft) == 0 {
+			continue
+		}
+
+		if strings.HasPrefix(ft, input) {
+			suggestions = append(suggestions, ft)
 		}
 	}
 
@@ -179,6 +264,8 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 			if strings.HasPrefix("dos", input) {
 				suggestions = append(suggestions, "dos")
 			}
+		case "filetype":
+			_, suggestions = filetypeComplete(input)
 		case "sucmd":
 			if strings.HasPrefix("sudo", input) {
 				suggestions = append(suggestions, "sudo")
