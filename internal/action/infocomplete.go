@@ -82,9 +82,9 @@ func colorschemeComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
-// Helper function for filetypeComplete, adapted elements from `highlight.ParseFile`—attempts to
-// parse filetype key, returning an empty string on failure.
-// TODO(disk0) Best place to put this if not here?
+// parseSyntaxFiletype tries to parse filetype key, returns an empty string on failure. Based on
+// `highlight.ParseFile`.
+// Helper function for filetypeComplete.
 func parseSyntaxFiletype(input []byte) (filetype string, err error) {
 	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
 	defer func() {
@@ -111,11 +111,8 @@ func parseSyntaxFiletype(input []byte) (filetype string, err error) {
 	return "", err
 }
 
-// Helper function for filetypeComplete, finds filetype value via basic regexp search. Returns
-// error just for type parity with `parseRTSyntaxFiletype`
-// TODO(disk0) Same as above
-// TODO(disk0) Determine if this method is significantly more performant, else just stick with
-//             yaml parser
+// matchSyntaxFiletype finds filetype value via regexp search.
+// Helper function for filetypeComplete.
 func matchSyntaxFiletype(input []byte) (filetype string, err error) {
 	pattern := regexp.MustCompile(`^filetype:[ '"]*([^\s"']+)`)
 	match := pattern.FindSubmatchIndex(input)
@@ -127,7 +124,8 @@ func matchSyntaxFiletype(input []byte) (filetype string, err error) {
 	return string(input[match[2]:match[3]]), err
 }
 
-// filetypeComplete completes syntax definiton filetype key values for filetype option
+// filetypeComplete completes syntax definiton's filetype values
+// Helper function for OptionValueComplete.
 func filetypeComplete(input string) (string, []string) {
 	var suggestions []string
 	files := config.ListRuntimeFiles(config.RTSyntax)
@@ -143,8 +141,6 @@ func filetypeComplete(input string) (string, []string) {
 		// Then parse filetype
 		// ft, err := parseRTSyntaxFiletype(data)
 		ft, err := matchSyntaxFiletype(data)
-
-		// As noted in parseFiletypeKey doc comment `ft` can be an empty string, needs length check
 		if err != nil || len(ft) == 0 {
 			continue
 		}
