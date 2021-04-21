@@ -545,6 +545,27 @@ func (b *Buffer) RuneAt(loc Loc) rune {
 	return '\n'
 }
 
+// WordAt returns the word around a given location in the buffer
+func (b *Buffer) WordAt(loc Loc) []byte {
+	if len(b.LineBytes(loc.Y)) == 0 || !util.IsWordChar(b.RuneAt(loc)) {
+		return []byte{}
+	}
+
+	start := loc
+	end := loc.Move(1, b)
+
+	for start.X > 0 && util.IsWordChar(b.RuneAt(start.Move(-1, b))) {
+		start.X--
+	}
+
+	lineLen := util.CharacterCount(b.LineBytes(loc.Y))
+	for end.X < lineLen && util.IsWordChar(b.RuneAt(end)) {
+		end.X++
+	}
+
+	return b.Substr(start, end)
+}
+
 // Modified returns if this buffer has been modified since
 // being opened
 func (b *Buffer) Modified() bool {
