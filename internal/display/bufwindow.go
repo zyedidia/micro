@@ -534,10 +534,12 @@ func (w *BufWindow) displayBuffer() {
 						(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
 							bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
 						// The current character is selected
-						style = config.DefStyle.Reverse(true)
 
 						if s, ok := config.Colorscheme["selection"]; ok {
-							style = s
+							fg, _, _ := s.Decompose()
+							style = style.Background(fg)
+						} else {
+							style = config.DefStyle.Reverse(true)
 						}
 					}
 

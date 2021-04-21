@@ -101,10 +101,12 @@ func (i *InfoWindow) displayBuffer() {
 				(bloc.GreaterEqual(activeC.CurSelection[0]) && bloc.LessThan(activeC.CurSelection[1]) ||
 					bloc.LessThan(activeC.CurSelection[0]) && bloc.GreaterEqual(activeC.CurSelection[1])) {
 				// The current character is selected
-				style = i.defStyle().Reverse(true)
 
 				if s, ok := config.Colorscheme["selection"]; ok {
-					style = s
+					fg, _, _ := s.Decompose()
+					style = style.Background(fg)
+				} else {
+					style = i.defStyle().Reverse(true)
 				}
 
 			}
