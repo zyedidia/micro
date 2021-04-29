@@ -21,13 +21,6 @@ func WriteLog(s string) {
 	buffer.WriteLog(s)
 	if LogBufPane != nil {
 		LogBufPane.CursorEnd()
-		v := LogBufPane.GetView()
-		endY := buffer.LogBuf.End().Y
-
-		if endY > v.StartLine+v.Height {
-			v.StartLine = buffer.LogBuf.End().Y - v.Height + 2
-			LogBufPane.SetView(v)
-		}
 	}
 }
 
@@ -37,12 +30,4 @@ func WriteLog(s string) {
 func (h *BufPane) OpenLogBuf() {
 	LogBufPane = h.HSplitBuf(buffer.LogBuf)
 	LogBufPane.CursorEnd()
-
-	v := LogBufPane.GetView()
-	endY := buffer.LogBuf.End().Y
-
-	if endY > v.StartLine+v.Height {
-		v.StartLine = buffer.LogBuf.End().Y - v.Height + 2
-		LogBufPane.SetView(v)
-	}
 }

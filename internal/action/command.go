@@ -820,7 +820,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		searchLoc := h.Cursor.Loc
 		var doReplacement func()
 		doReplacement = func() {
-			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, !noRegex)
+			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, true)
 			if err != nil {
 				InfoBar.Error(err)
 				return

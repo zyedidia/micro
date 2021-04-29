@@ -1,7 +1,8 @@
 filetype: patch
 
-detect: 
+detect:
     filename: "\\.(patch|diff)$"
+    header: "^diff"
 
 rules:
     - brightgreen: "^\\+.*"
