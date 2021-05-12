@@ -33,4 +33,5 @@ type BWindow interface {
 	Window
 	SoftWrap
 	SetBuffer(b *buffer.Buffer)
+	BufView() View
 }
