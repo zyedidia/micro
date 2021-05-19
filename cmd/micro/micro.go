@@ -319,6 +319,8 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	action.InitGlobals()
+	buffer.SetMessager(action.InfoBar)
 	args := flag.Args()
 	b := LoadInput(args)
 
@@ -329,7 +331,6 @@ func main() {
 	}
 
 	action.InitTabs(b)
-	action.InitGlobals()
 
 	err = config.RunPluginFn("init")
 	if err != nil {

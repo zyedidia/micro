@@ -252,8 +252,9 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
 	}
 
-	if readonly {
-		buf.SetOptionNative("readonly", true)
+	if readonly && prompt != nil {
+		prompt.Message("Warning: file is readonly - sudo will be attempted when saving")
+		// buf.SetOptionNative("readonly", true)
 	}
 
 	return buf, nil
