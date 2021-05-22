@@ -222,7 +222,7 @@ Once you have built the editor, start it by running `micro path/to/file.txt` or 
 micro also supports creating buffers from `stdin`:
 
 ```sh
-ifconfig | micro
+ip a | micro
 ```
 
 You can move the cursor around with the arrow keys and mouse.
