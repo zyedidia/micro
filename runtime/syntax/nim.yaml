@@ -18,7 +18,7 @@ rules:
     - constant.number: "\\b0[bB][01][01_]+\\b"
     - constant.number: "\\b[0-9_]((\\.?)[0-9_]+)?[eE][+\\-][0-9][0-9_]+\\b"
     - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
-    - comment: "[[:space:]]*#.*$"
+    - comment: "[[:space:]]*[^\\\\]#.*$"
     - comment:
         start: "\\#\\["
         end: "\\]\\#"
