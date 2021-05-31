@@ -155,12 +155,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 	var input []byte
 	var err error
 	buffers := make([]*buffer.Buffer, 0, len(args))
-
 	btype := buffer.BTDefault
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
-		btype = buffer.BTStdout
-	}
-
 	files := make([]string, 0, len(args))
 	flagStartPos := buffer.Loc{-1, -1}
 	flagr := regexp.MustCompile(`^\+(\d+)(?::(\d+))?$`)
@@ -202,7 +197,11 @@ func LoadInput(args []string) []*buffer.Buffer {
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, buf)
 		}
-	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
+	} else {
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			btype = buffer.BTStdout
+		}
+		if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
@@ -212,9 +211,10 @@ func LoadInput(args []string) []*buffer.Buffer {
 			input = []byte{}
 		}
 		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
-	} else {
-		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		} else {
+			// Option 3, just open an empty buffer
+			buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		}
 	}
 
 	return buffers
