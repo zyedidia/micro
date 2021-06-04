@@ -193,6 +193,19 @@ type Buffer struct {
 	curCursor   int
 	StartCursor Loc
 
+	// OptionCallback is called after a buffer option value is changed.
+	// The display module registers its OptionCallback to ensure the buffer window
+	// is properly updated when needed. This is a workaround for the fact that
+	// the buffer module cannot directly call the display's API (it would mean
+	// a circular dependency between packages).
+	OptionCallback func(option string, nativeValue interface{})
+
+	// The display module registers its own GetVisualX function for getting
+	// the correct visual x location of a cursor when softwrap is used.
+	// This is hacky. Maybe it would be better to move all the visual x logic
+	// from buffer to display, but it would require rewriting a lot of code.
+	GetVisualX func(loc Loc) int
+
 	// Last search stores the last successful search
 	LastSearch      string
 	LastSearchRegex bool
@@ -248,8 +261,9 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
 	}
 
-	if readonly {
-		buf.SetOptionNative("readonly", true)
+	if readonly && prompt != nil {
+		prompt.Message("Warning: file is readonly - sudo will be attempted when saving")
+		// buf.SetOptionNative("readonly", true)
 	}
 
 	return buf, nil

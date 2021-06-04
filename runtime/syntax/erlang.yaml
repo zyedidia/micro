@@ -39,3 +39,7 @@ rules:
         end: "\\*\\)"
         rules:
             - todo: "(TODO|FIXME|WONTFIX|NOTE|HACK):?"
+    - comment:
+        start: "%"
+        end: "$"
+        rules: []

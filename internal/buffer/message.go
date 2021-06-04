@@ -82,3 +82,13 @@ func (b *Buffer) ClearMessages(owner string) {
 func (b *Buffer) ClearAllMessages() {
 	b.Messages = make([]*Message, 0)
 }
+
+type Messager interface {
+	Message(msg ...interface{})
+}
+
+var prompt Messager
+
+func SetMessager(m Messager) {
+	prompt = m
+}

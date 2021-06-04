@@ -40,6 +40,9 @@ var (
 	flagPlugin    = flag.String("plugin", "", "Plugin command")
 	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
 	optionFlags   map[string]*string
+
+	sigterm chan os.Signal
+	sighup  chan os.Signal
 )
 
 func InitFlags() {
@@ -272,23 +275,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, syscall.SIGTERM)
-
-	go func() {
-		<-c
-
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-
-		if screen.Screen != nil {
-			screen.Screen.Fini()
-		}
-		os.Exit(0)
-	}()
+	sigterm = make(chan os.Signal, 1)
+	sighup = make(chan os.Signal, 1)
+	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(sighup, syscall.SIGHUP)
 
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
 	clipErr := clipboard.Initialize(m)
@@ -329,6 +319,8 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	action.InitGlobals()
+	buffer.SetMessager(action.InfoBar)
 	args := flag.Args()
 	b := LoadInput(args)
 
@@ -339,7 +331,6 @@ func main() {
 	}
 
 	action.InitTabs(b)
-	action.InitGlobals()
 
 	err = config.RunPluginFn("init")
 	if err != nil {
@@ -427,6 +418,24 @@ func DoEvent() {
 		for len(screen.DrawChan()) > 0 {
 			<-screen.DrawChan()
 		}
+	case <-sighup:
+		for _, b := range buffer.OpenBuffers {
+			if !b.Modified() {
+				b.Fini()
+			}
+		}
+		os.Exit(0)
+	case <-sigterm:
+		for _, b := range buffer.OpenBuffers {
+			if !b.Modified() {
+				b.Fini()
+			}
+		}
+
+		if screen.Screen != nil {
+			screen.Screen.Fini()
+		}
+		os.Exit(0)
 	}
 
 	ulua.Lock.Lock()

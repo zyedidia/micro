@@ -123,12 +123,11 @@ function runLinter(buf)
             ftmatch = false
         end
 
-        local args = {}
-        for k, arg in pairs(v.args) do
-            args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
-        end
-
         if ftmatch then
+            local args = {}
+            for k, arg in pairs(v.args) do
+                args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
+            end
             lint(buf, k, v.cmd, args, v.errorformat, v.loffset, v.coffset, v.callback)
         end
     end

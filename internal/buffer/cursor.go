@@ -67,6 +67,10 @@ func (c *Cursor) GotoLoc(l Loc) {
 
 // GetVisualX returns the x value of the cursor in visual spaces
 func (c *Cursor) GetVisualX() int {
+	if c.buf.GetVisualX != nil {
+		return c.buf.GetVisualX(c.Loc)
+	}
+
 	if c.X <= 0 {
 		c.X = 0
 		return 0
