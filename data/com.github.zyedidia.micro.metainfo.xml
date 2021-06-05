@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <component>
 	<id>com.github.zyedidia.micro</id>
+	<launchable type="desktop-id">micro.desktop</launchable>
 	<name>Micro Text Editor</name>
 	<summary>A modern and intuitive terminal-based text editor</summary>
 	<metadata_license>MIT</metadata_license>
