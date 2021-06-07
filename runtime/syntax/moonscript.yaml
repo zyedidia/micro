@@ -1,0 +1,44 @@
+filetype: moonscript
+
+detect:
+    filename: "\\.moon$"
+
+rules:
+    - symbol.brackets: "[()]"
+    - symbol.operator: "([-+*/%^&|~<>#=]|[.]{3}|[/.]{2})|\\b(or|and|not)\\b"
+
+    - identifier.class: "([A-Za-z_][A-Za-z0-9_]*:[[:space:]]*(->|\\()|->)"
+
+    - statement: "\\b(global|require|import|from|export)\\b"
+    - statement: "\\b(if|else|elseif|for|while|do|switch|in|when|then|using)\\b"
+    - statement: "\\b(new|class|extends|super)\\b"
+    - statement: "\\b(return)\\b"
+
+    - type: "\\b(nil|boolean|number|string|function|userdata|thread|table)\\b"
+
+    - identifier: "@[A-Za-z0-9_]*"
+
+    - constant: "\\b(nil|false|true)\\b"
+
+    - constant.bool: "\\b(false|true)\\b"
+    - constant.bool.false: "\\b(false)\\b"
+    - constant.bool.true: "\\b(true)\\b"
+
+    - constant.number: "\\b[-+]?[0-9]*\\b"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "[-]{2}"
+        end: ""
+        rules: []
+
+    - comment:
+        start: "[-]{2}[\\[]{2}"
+        end: "[-]{2}"
+        rules: []
