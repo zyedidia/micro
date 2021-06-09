@@ -932,6 +932,9 @@ func (h *BufPane) find(useRegex bool) bool {
 		eventCallback(pattern)
 	}
 	InfoBar.Prompt(prompt, pattern, "Find", eventCallback, findCallback)
+	if pattern != "" {
+		InfoBar.SelectAll()
+	}
 	return true
 }
 
