@@ -1,0 +1,24 @@
+name: Test Micro
+
+on: push
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-10.15
+          - windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup go
+        uses: actions/setup-go@v2
+        with:
+          go-version: '1.13.x'
+      - name: Test
+        run: |
+          go build ./cmd/micro
+          go test ./internal/...
+          go test ./cmd/...
