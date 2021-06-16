@@ -105,7 +105,7 @@ func (s *StatusLine) Display() {
 	if b.HasSuggestions && len(b.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
 		cursorLine := s.win.Buf.GetActiveCursor().Loc.Y - s.win.View.StartLine.Line + s.win.Y
-		cursorRow := s.win.Buf.GetActiveCursor().GetVisualX() + winX + s.win.maxLineNumLength + 1
+		cursorRow := s.win.Buf.GetActiveCursor().GetVisualX() + winX + s.win.gutterOffset
 		curSugLen := len(b.Suggestions[b.CurSuggestion])
 		if style, ok := config.Colorscheme["suggestions"]; ok {
 			statusLineStyle = style

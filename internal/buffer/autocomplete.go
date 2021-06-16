@@ -1,12 +1,23 @@
 package buffer
-
+/*
+#cgo CFLAGS: -g
+#cgo LDFLAGS: -lclang
+typedef struct suggestions_struct{
+	char ** sug_str;
+	int ** sug_kind;
+	int * sug_str_len;
+	int sug_len;
+} suggestions_t;
+suggestions_t FindErrors(char * Buff, char * Fname, unsigned line, unsigned column);
+*/
+import "C"
 import (
 	"bytes"
 	"io/ioutil"
 	"os"
 	"sort"
 	"strings"
-
+	
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
