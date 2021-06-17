@@ -86,6 +86,7 @@ function preinit()
     makeLinter("swiftc", "swift", "xcrun", {"swiftc", "%f"}, "%f:%l:%c:.+: %m", {"darwin"}, true)
     makeLinter("swiftc", "swift", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
     makeLinter("yaml", "yaml", "yamllint", {"--format", "parsable", "%f"}, "%f:%l:%c:.+ %m")
+    makeLinter("nix-linter", "nix", "nix-linter", {"%f"}, "%m at %f:%l:%c", {"linux"}, true)
 
     config.MakeCommand("lint", function(bp, args)
         bp:Save()
@@ -123,12 +124,11 @@ function runLinter(buf)
             ftmatch = false
         end
 
-        local args = {}
-        for k, arg in pairs(v.args) do
-            args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
-        end
-
         if ftmatch then
+            local args = {}
+            for k, arg in pairs(v.args) do
+                args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
+            end
             lint(buf, k, v.cmd, args, v.errorformat, v.loffset, v.coffset, v.callback)
         end
     end

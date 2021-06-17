@@ -53,7 +53,7 @@ following in `bindings.json`:
 
 ```json
 {
-    "Ctrl-r": "redo"
+    "Ctrl-r": "Redo"
 }
 ```
 
