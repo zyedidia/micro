@@ -717,7 +717,14 @@ func (h *BufPane) Autocomplete() bool {
 		b.CycleAutocomplete(true)
 		return true
 	}
-	return b.Autocomplete(buffer.BufferComplete)
+	switch b.FileType() {
+		case "c++":
+			return b.Autocomplete(buffer.BufferCompleteClang)
+		case "c":
+			return b.Autocomplete(buffer.BufferCompleteClang)
+		default:
+			return b.Autocomplete(buffer.BufferComplete)
+	}
 }
 
 // CycleAutocompleteBack cycles back in the autocomplete suggestion list

@@ -312,7 +312,59 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 		return []string{}, []string{}
 	}
 
-	// inputLen := util.CharacterCount(input)
+	inputLen := util.CharacterCount(input)
+
+	suggestionsSet := make(map[string]struct{})
+
+	var suggestions []string
+	for i := c.Y; i >= 0; i-- {
+		l := b.LineBytes(i)
+		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		for _, w := range words {
+			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
+				strw := string(w)
+				if _, ok := suggestionsSet[strw]; !ok {
+					suggestionsSet[strw] = struct{}{}
+					suggestions = append(suggestions, strw)
+				}
+			}
+		}
+	}
+	for i := c.Y + 1; i < b.LinesNum(); i++ {
+		l := b.LineBytes(i)
+		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		for _, w := range words {
+			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
+				strw := string(w)
+				if _, ok := suggestionsSet[strw]; !ok {
+					suggestionsSet[strw] = struct{}{}
+					suggestions = append(suggestions, strw)
+				}
+			}
+		}
+	}
+	if len(suggestions) > 1 {
+		suggestions = append(suggestions, string(input))
+	}
+
+	completions := make([]string, len(suggestions))
+	for i := range suggestions {
+		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
+	}
+
+	return completions, suggestions
+}
+
+// BufferCompleteClang autocompletes based on what Clang autocomplete gives us
+func BufferCompleteClang(b *Buffer) ([]string, []string) {
+	c := b.GetActiveCursor()
+	input, argstart := GetWord(b)
+
+	if argstart == -1 {
+		return []string{}, []string{}
+	}
+
+	inputLen := util.CharacterCount(input)
 	var suggestions []string
 	suggestionsSet := make(map[string]string)
 	var buff string
@@ -343,43 +395,14 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 				completion += C.GoString(C.CRetrSug_KindStr(suggestionsStruc, i, j))
 			}
 		}
-		
-		if bytes.HasPrefix([]byte(completion), input) {
+		compbytes := []byte(completion)
+		if bytes.HasPrefix([]byte(compbytes), input) && util.CharacterCount(compbytes) > inputLen {
 			suggestions = append(suggestions, Str)
 			suggestionsSet[Str] = completion
 		}
-		// suggestions = append(suggestions, Str)
-		//RetrCSug_Str_Len
-		//RetrCSug_Kind
-		//RetrCSug_Str
 	}
 	C.CFreeSug(suggestionsStruc)
-	// for i := c.Y; i >= 0; i-- {
-		// l := b.LineBytes(i)
-		// words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
-		// for _, w := range words {
-			// if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
-				// strw := string(w)
-				// if _, ok := suggestionsSet[strw]; !ok {
-					// suggestionsSet[strw] = struct{}{}
-					// suggestions = append(suggestions, strw)
-				// }
-			// }
-		// }
-	// }
-	// for i := c.Y + 1; i < b.LinesNum(); i++ {
-		// l := b.LineBytes(i)
-		// words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
-		// for _, w := range words {
-			// if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
-				// strw := string(w)
-				// if _, ok := suggestionsSet[strw]; !ok {
-					// suggestionsSet[strw] = struct{}{}
-					// suggestions = append(suggestions, strw)
-				// }
-			// }
-		// }
-	// }
+
 	if len(suggestions) > 1 {
 		suggestions = append(suggestions, string(input))
 		suggestionsSet[string(input)] = ""
