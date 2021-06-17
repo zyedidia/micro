@@ -2,13 +2,154 @@ package buffer
 /*
 #cgo CFLAGS: -g
 #cgo LDFLAGS: -lclang
+
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <clang-c/Index.h>
+
+#define recalloc(mem_ptr, count, size) (\
+    {\
+        void * val;\
+        if (NULL == (mem_ptr))\
+        {\
+            val = calloc((count), (size));\
+        }\
+        else\
+        {\
+            val = realloc((mem_ptr), (count) * (size));\
+        }\
+        val;\
+    }\
+    )
+
+typedef struct suggestion_struct{
+    char * str;
+    int kind;
+    int str_len;
+}sug_t;
+
 typedef struct suggestions_struct{
-	char ** sug_str;
-	int ** sug_kind;
-	int * sug_str_len;
+    sug_t ** sugs;
+    int * sug_plen;
 	int sug_len;
-} suggestions_t;
-suggestions_t FindErrors(char * Buff, char * Fname, unsigned line, unsigned column);
+} sugs_t;
+
+//Create suggestions strings
+sugs_t printCodeCompletionSuggestions(CXCodeCompleteResults* results){
+    unsigned numResults = results->NumResults;
+    sugs_t sugs;
+    sugs.sugs = NULL;
+    sugs.sug_plen = NULL;
+    sugs.sug_len = 0;
+    
+    CXCompletionResult *result = results->Results;
+    for (unsigned i = 0; i < numResults; i++){
+        CXCompletionString completionString = result[i].CompletionString;
+        unsigned priority = clang_getCompletionPriority(completionString);
+        if (priority > 50){
+            continue;
+        }
+
+        unsigned numChunks = clang_getNumCompletionChunks(completionString);
+    
+        sugs.sug_plen = (int*)recalloc(sugs.sug_plen, sugs.sug_len+1, sizeof(int));
+        sugs.sug_plen[sugs.sug_len] = numChunks;
+        sugs.sugs = (sug_t**)recalloc(sugs.sugs, sugs.sug_len+1, sizeof(sug_t*));
+        sugs.sugs[sugs.sug_len] = (sug_t*)calloc(numChunks, sizeof(sug_t));
+
+        for (unsigned chunkNumber = 0; chunkNumber < numChunks; chunkNumber++){
+            CXString chunk = clang_getCompletionChunkText(completionString, chunkNumber);
+            const char * chunk_c = clang_getCString(chunk);
+            sugs.sugs[sugs.sug_len][chunkNumber].str_len = strlen(chunk_c);
+			sugs.sugs[sugs.sug_len][chunkNumber].str = (char*)calloc(sugs.sugs[sugs.sug_len][chunkNumber].str_len, sizeof(char));
+			memcpy(sugs.sugs[sugs.sug_len][chunkNumber].str, chunk_c, sugs.sugs[sugs.sug_len][chunkNumber].str_len);
+            clang_disposeString(chunk);
+
+            enum CXCompletionChunkKind kind = clang_getCompletionChunkKind(completionString, chunkNumber);
+			sugs.sugs[sugs.sug_len][chunkNumber].kind = kind;
+
+        }
+        sugs.sug_len += 1;
+    }
+    clang_disposeCodeCompleteResults(results);
+    return sugs;
+}
+
+sugs_t CSuggestions(const char * Buff, const char * Fname, int line, int column){
+    sugs_t sug;
+    sug.sugs = NULL;
+    sug.sug_plen = NULL;
+    sug.sug_len = 0;
+    CXCodeCompleteResults * res = NULL;
+
+    struct CXUnsavedFile* uf = (struct CXUnsavedFile*)calloc(1, sizeof(struct CXUnsavedFile));
+    uf[0].Filename = Fname;
+    uf[0].Contents = Buff;
+    uf[0].Length = strlen(Buff);
+    
+    CXIndex idx = clang_createIndex(0, 0);
+
+    CXTranslationUnit u = clang_parseTranslationUnit(idx, uf->Filename, NULL, 0, uf, 1, CXTranslationUnit_None);
+    if (NULL != u){ 
+    	res = clang_codeCompleteAt(u, uf->Filename, line, column, uf, 1, clang_defaultCodeCompleteOptions());
+    	if (NULL != res){
+    		sug = printCodeCompletionSuggestions(res);
+    	}
+    	clang_disposeTranslationUnit(u);
+	}
+    clang_disposeIndex(idx);
+    free(uf);
+
+    return sug;
+}
+
+void CFreeSug(sugs_t sug){
+    for (int i = 0; i < sug.sug_len; i++){
+        for (int j = 0; j < sug.sug_plen[i]; j++){
+            free(sug.sugs[i][j].str);
+        }
+        free(sug.sugs[i]);
+    }
+    free(sug.sugs);
+    free(sug.sug_plen);
+}
+
+char * CRetrSug_SugStr(sugs_t sug, int index){
+    int strlen = 0;
+    for (int i = 0; i < sug.sug_plen[index]; i++){
+        strlen += sug.sugs[index][i].str_len;
+        if (sug.sugs[index][i].kind == 15){
+            strlen++;
+        }
+    }
+    strlen++;
+    char * sugstr = (char*)calloc(strlen, sizeof(char));
+    for (int i = 0; i < sug.sug_plen[index]; i++){
+        memcpy(sugstr + strnlen(sugstr, strlen), sug.sugs[index][i].str, sug.sugs[index][i].str_len);
+        if (sug.sugs[index][i].kind == 15){
+            strcat(sugstr, " ");
+        }
+    }
+    sugstr[strlen-1] = '\0';
+    return sugstr;
+}
+
+int CRetrSug_SugsLen(sugs_t sug, int index){
+	return sug.sug_plen[index];
+}
+
+sug_t CRetrSug_Sug(sugs_t sug, int line, int index){
+	return sug.sugs[line][index];
+}
+
+int CRetrSug_Kind(sugs_t sug, int line, int index){
+    return sug.sugs[line][index].kind;
+}
+
+char * CRetrSug_KindStr(sugs_t sug, int line, int index){
+    return sug.sugs[line][index].str;
+}
 */
 import "C"
 import (
@@ -17,6 +158,7 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"unsafe"
 	
 	"github.com/zyedidia/micro/v2/internal/util"
 )
@@ -170,44 +312,81 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 		return []string{}, []string{}
 	}
 
-	inputLen := util.CharacterCount(input)
-
-	suggestionsSet := make(map[string]struct{})
-
+	// inputLen := util.CharacterCount(input)
 	var suggestions []string
-	for i := c.Y; i >= 0; i-- {
-		l := b.LineBytes(i)
-		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
-		for _, w := range words {
-			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
-				strw := string(w)
-				if _, ok := suggestionsSet[strw]; !ok {
-					suggestionsSet[strw] = struct{}{}
-					suggestions = append(suggestions, strw)
-				}
+	suggestionsSet := make(map[string]string)
+	var buff string
+	for i := 0; i < b.LinesNum(); i++ {
+		buff += b.Line(i)
+		buff += "\r\n"
+	}
+
+	cbuff := C.CString(buff)
+	cfnme := C.CString(b.GetName())
+	
+	suggestionsStruc := C.CSuggestions(cbuff, cfnme, C.int(c.Y+1), C.int(c.X+1))
+	C.free(unsafe.Pointer(cbuff))
+	C.free(unsafe.Pointer(cfnme))
+
+	for i := C.int(0); i < suggestionsStruc.sug_len; i++ {
+		cStr := C.CRetrSug_SugStr(suggestionsStruc, i)
+		Str := C.GoString(cStr)
+		C.free(unsafe.Pointer(cStr))
+
+		completion := ""
+		for j := C.int(0); j < C.CRetrSug_SugsLen(suggestionsStruc, i); j++ {
+			if C.CRetrSug_Kind(suggestionsStruc, i, j) != 15 &&
+				C.CRetrSug_Kind(suggestionsStruc, i, j) != 14 &&
+				C.CRetrSug_Kind(suggestionsStruc, i, j) != 6 &&
+				C.CRetrSug_Kind(suggestionsStruc, i, j) != 7 &&
+				C.CRetrSug_Kind(suggestionsStruc, i, j) != 3 {
+				completion += C.GoString(C.CRetrSug_KindStr(suggestionsStruc, i, j))
 			}
 		}
-	}
-	for i := c.Y + 1; i < b.LinesNum(); i++ {
-		l := b.LineBytes(i)
-		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
-		for _, w := range words {
-			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
-				strw := string(w)
-				if _, ok := suggestionsSet[strw]; !ok {
-					suggestionsSet[strw] = struct{}{}
-					suggestions = append(suggestions, strw)
-				}
-			}
+		
+		if bytes.HasPrefix([]byte(completion), input) {
+			suggestions = append(suggestions, Str)
+			suggestionsSet[Str] = completion
 		}
+		// suggestions = append(suggestions, Str)
+		//RetrCSug_Str_Len
+		//RetrCSug_Kind
+		//RetrCSug_Str
 	}
+	C.CFreeSug(suggestionsStruc)
+	// for i := c.Y; i >= 0; i-- {
+		// l := b.LineBytes(i)
+		// words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		// for _, w := range words {
+			// if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
+				// strw := string(w)
+				// if _, ok := suggestionsSet[strw]; !ok {
+					// suggestionsSet[strw] = struct{}{}
+					// suggestions = append(suggestions, strw)
+				// }
+			// }
+		// }
+	// }
+	// for i := c.Y + 1; i < b.LinesNum(); i++ {
+		// l := b.LineBytes(i)
+		// words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		// for _, w := range words {
+			// if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
+				// strw := string(w)
+				// if _, ok := suggestionsSet[strw]; !ok {
+					// suggestionsSet[strw] = struct{}{}
+					// suggestions = append(suggestions, strw)
+				// }
+			// }
+		// }
+	// }
 	if len(suggestions) > 1 {
 		suggestions = append(suggestions, string(input))
+		suggestionsSet[string(input)] = ""
 	}
-
 	completions := make([]string, len(suggestions))
 	for i := range suggestions {
-		completions[i] = util.SliceEndStr(suggestions[i], c.X-argstart)
+		completions[i] = util.SliceEndStr(suggestionsSet[suggestions[i]], c.X-argstart)
 	}
 
 	return completions, suggestions

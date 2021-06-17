@@ -640,6 +640,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"OutdentLine":               (*BufPane).OutdentLine,
 	"IndentLine":                (*BufPane).IndentLine,
 	"Paste":                     (*BufPane).Paste,
+	"PasteNoIndent":             (*BufPane).PasteNoIndent,
 	"PastePrimary":              (*BufPane).PastePrimary,
 	"SelectAll":                 (*BufPane).SelectAll,
 	"OpenFile":                  (*BufPane).OpenFile,
