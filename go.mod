@@ -16,7 +16,7 @@ require (
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
 	github.com/zyedidia/highlight v0.0.0-20170330143449-201131ce5cf5
 	github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d
-	github.com/zyedidia/pty v2.0.0+incompatible // indirect
+	github.com/zyedidia/pty v1.1.15 // indirect
 	github.com/zyedidia/tcell/v2 v2.0.8
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
 	golang.org/x/text v0.3.2
