@@ -31,6 +31,10 @@ Here is a list of terminal emulators and their status:
 
 * `gnome-terminal`: does not support OSC 52.
 
+* `alacritty`: supported.
+
+* `foot`: supported.
+
 **Summary:** If you want copy and paste to work over SSH, then you
 should set `clipboard` to `terminal`, and make sure your terminal
 supports OSC 52.
