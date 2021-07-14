@@ -761,7 +761,7 @@ func (w *BufWindow) displayScrollBar() {
 func (w *BufWindow) Display() {
 	w.updateDisplayInfo()
 
-	w.displayStatusLine()
 	w.displayScrollBar()
 	w.displayBuffer()
+	w.displayStatusLine()
 }

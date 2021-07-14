@@ -717,7 +717,14 @@ func (h *BufPane) Autocomplete() bool {
 		b.CycleAutocomplete(true)
 		return true
 	}
-	return b.Autocomplete(buffer.BufferComplete)
+	switch b.FileType() {
+		case "c++":
+			return b.Autocomplete(buffer.BufferCompleteClang)
+		case "c":
+			return b.Autocomplete(buffer.BufferCompleteClang)
+		default:
+			return b.Autocomplete(buffer.BufferComplete)
+	}
 }
 
 // CycleAutocompleteBack cycles back in the autocomplete suggestion list
@@ -1199,6 +1206,17 @@ func (h *BufPane) Paste() bool {
 	return true
 }
 
+func (h *BufPane) PasteNoIndent() bool {
+	clip, err := clipboard.ReadMulti(clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
+	if err != nil {
+		InfoBar.Error(err)
+	} else {
+		h.pasteNoIndent(clip)
+	}
+	h.Relocate()
+	return true
+}
+
 // PastePrimary pastes from the primary clipboard (only use on linux)
 func (h *BufPane) PastePrimary() bool {
 	clip, err := clipboard.ReadMulti(clipboard.PrimaryReg, h.Cursor.Num, h.Buf.NumCursors())
@@ -1211,12 +1229,10 @@ func (h *BufPane) PastePrimary() bool {
 	return true
 }
 
-func (h *BufPane) paste(clip string) {
-	if h.Buf.Settings["smartpaste"].(bool) {
-		if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
-			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
-			clip = strings.ReplaceAll(clip, "\n", "\n"+string(leadingWS))
-		}
+func (h *BufPane) pasteIndent(clip string) {
+	if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
+		leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
+		clip = strings.ReplaceAll(clip, "\n", "\n"+string(leadingWS))
 	}
 
 	if h.Cursor.HasSelection() {
@@ -1228,6 +1244,26 @@ func (h *BufPane) paste(clip string) {
 	// h.Cursor.Loc = h.Cursor.Loc.Move(Count(clip), h.Buf)
 	h.freshClip = false
 	InfoBar.Message("Pasted clipboard")
+}
+
+func (h *BufPane) pasteNoIndent(clip string) {
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+
+	h.Buf.Insert(h.Cursor.Loc, clip)
+	// h.Cursor.Loc = h.Cursor.Loc.Move(Count(clip), h.Buf)
+	h.freshClip = false
+	InfoBar.Message("Pasted clipboard")
+}
+
+func (h *BufPane) paste(clip string) {
+	if h.Buf.Settings["smartpaste"].(bool) {
+		h.pasteIndent(clip)
+		return
+	}
+	h.pasteNoIndent(clip)
 }
 
 // JumpToMatchingBrace moves the cursor to the matching brace if it is

@@ -104,35 +104,49 @@ func (s *StatusLine) Display() {
 	// autocomplete suggestions (for the buffer, not for the infowindow)
 	if b.HasSuggestions && len(b.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
-		if style, ok := config.Colorscheme["statusline"]; ok {
+		cursorLine := s.win.Buf.GetActiveCursor().Loc.Y - s.win.View.StartLine.Line + s.win.Y
+		cursorRow := s.win.Buf.GetActiveCursor().GetVisualX() + winX + s.win.gutterOffset
+		curSugLen := len(b.Completions[b.CurSuggestion]) + len(b.Suggestions[len(b.Suggestions)-1])
+		if style, ok := config.Colorscheme["suggestions"]; ok {
+			statusLineStyle = style
+		}else if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
 		}
-		x := 0
+		maxSugLen := 0
+		for _, sug := range b.Suggestions {
+			if (len(sug)) > maxSugLen {
+				maxSugLen = len(sug)
+			}
+		}
 		for j, sug := range b.Suggestions {
 			style := statusLineStyle
 			if b.CurSuggestion == j {
 				style = style.Reverse(true)
 			}
+			x := 0
+			screen.SetContent(cursorRow + x - curSugLen, cursorLine + 1 + j, ' ', nil, statusLineStyle)
+			x++
 			for _, r := range sug {
-				screen.SetContent(winX+x, y, r, nil, style)
+				screen.SetContent(cursorRow + x - curSugLen, cursorLine + 1 + j, r, nil, style)
 				x++
 				if x >= s.win.Width {
-					return
+					goto ENDAUTOCOMP;
 				}
 			}
-			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
-			x++
-			if x >= s.win.Width {
-				return
+			for x < maxSugLen + 2 {
+				screen.SetContent(cursorRow + x - curSugLen, cursorLine + 1 + j, ' ', nil, statusLineStyle)
+				x++
+				if x >= s.win.Width {
+					goto ENDAUTOCOMP;
+				}
+			}
+			if cursorLine + 2 + j >= s.win.Height {
+				goto ENDAUTOCOMP;
 			}
 		}
-
-		for x < s.win.Width {
-			screen.SetContent(winX+x, y, ' ', nil, statusLineStyle)
-			x++
-		}
-		return
+		goto ENDAUTOCOMP;
 	}
+	ENDAUTOCOMP:
 
 	formatter := func(match []byte) []byte {
 		name := match[2 : len(match)-1]
