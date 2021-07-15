@@ -18,4 +18,3 @@ tools/info-plist
 tools/bindata
 tools/vscode-tests/
 *.hdr
-internal/config/runtime.go
