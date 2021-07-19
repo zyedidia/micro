@@ -69,7 +69,7 @@ themes the most.
 * `darcula`
 * `twilight`
 * `railscast`
-* `bubblegum`
+* `bubblegum` (light theme)
 
 ### 16 color
 
