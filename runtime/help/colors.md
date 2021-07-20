@@ -52,7 +52,7 @@ color support comes in three flavors.
   environment variable `MICRO_TRUECOLOR` to 1.  In addition your terminal
   must support it (usually indicated by setting `$COLORTERM` to `truecolor`).
   True-color colorschemes in micro typically end with `-tc`, such as
-  `solarized-tc`, `atom-dark-tc`, `material-tc`, etc... If true color is not
+  `solarized-tc`, `gruvbox-tc`, `material-tc`, etc... If true color is not
   enabled but a true color colorscheme is used, micro will do its best to
   approximate the colors to the available 256 colors.
 
@@ -63,23 +63,28 @@ Here is the list of colorschemes:
 These should work and look nice in most terminals. I recommend these
 themes the most.
 
-* `monokai` (also the `default` colorscheme)
-* `zenburn`
-* `gruvbox`
-* `darcula`
-* `twilight`
-* `railscast`
 * `bubblegum`
+* `darcula`
+* `default`
+* `gotham`
+* `gruvbox`
+* `monokai-dark`
+* `monokai` (`default` colorscheme, also default in sublime text)
+* `one-dark` (colorscheme from atom editor)
+* `railscast`
+* `sunny-day`
+* `twilight`
+* `zenburn`
 
 ### 16 color
 
 These may vary widely based on the 16 colors selected for your terminal.
 
+* `cmc-16`
+* `atom-dark` (16 color version of one-dark)
 * `simple`
 * `solarized` (must have the solarized color palette in your terminal to use
    this colorscheme properly)
-* `cmc-16`
-* `cmc-paper`
 * `geany`
 
 ### True color
@@ -90,13 +95,13 @@ or `24-bit`. In addition, to enable true color in micro, the environment
 variable `MICRO_TRUECOLOR` must be set to 1. Note that you have to create
 and set this variable yourself.
 
-* `solarized-tc`: this is the solarized colorscheme for true color.
-* `atom-dark-tc`: this colorscheme is based off of Atom's "dark" colorscheme.
-* `cmc-tc`: A true colour variant of the cmc theme.  It requires true color to
-  look its best. Use cmc-16 if your terminal doesn't support true color.
-* `gruvbox-tc`: The true color version of the gruvbox colorscheme
-* `github-tc`: The true color version of the Github colorscheme
-* `material-tc`: Colorscheme based off of Google's Material Design palette
+* `cmc-tc`
+* `dukedark-tc`
+* `dukelight-tc`
+* `dukeubuntu-tc`
+* `gruvbox-tc` truevolor version of gruvbox
+* `material-tc`: colorscheme based off of Google's Material Design palette
+* `solarized-tc`: truecolor version of solarized
 
 ## Creating a Colorscheme
 
