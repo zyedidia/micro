@@ -3,7 +3,7 @@
 Micro supports creating plugins with a simple Lua system. Plugins are
 folders containing Lua files and possibly other source files placed
 in `~/.config/micro/plug`. The plugin directory (within `plug`) should
-contain at least one Lua file and an `info.json` file. The info file
+contain at least one Lua file and a `repo.json` file. The latter
 provides additional information such as the name of the plugin, the
 plugin's website, dependencies, etc... Here is an example info file
 from the go plugin, which has the following file structure:
