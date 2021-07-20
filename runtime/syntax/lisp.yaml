@@ -1,7 +1,7 @@
 filetype: lisp
 
 detect: 
-    filename: "(emacs|zile)$|\\.(el|li?sp|scm|ss)$"
+    filename: "(emacs|zile)$|\\.(el|li?sp|scm|ss|rkt)$"
 
 rules:
     - default: "\\([a-z-]+"
