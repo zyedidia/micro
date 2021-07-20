@@ -24,14 +24,22 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
-        skip: "\\\\."
+        skip: '\\.'
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: '\\.'
 
     - constant.string:
         start: "r#+\""
         end: "\"#+"
         rules: []
+
+    # Character literals
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: '\\.'
+        rules:
+            - constant.specialChar: '\\.'
 
     - comment:
         start: "//"
@@ -49,4 +57,3 @@ rules:
         start: "#!\\["
         end: "\\]"
         rules: []
-
