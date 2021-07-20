@@ -7,6 +7,9 @@
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Snap Status](https://snapcraft.io/micro/badge.svg)](https://snapcraft.io/micro)
 
+[![Packages versions](https://repology.org/badge/latest-versions/micro.svg)](https://repology.org/metapackage/micro/versions)
+[![Packages](https://repology.org/badge/tiny-repos/micro.svg)](https://repology.org/metapackage/micro/versions)
+
 **micro** is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the capabilities
 of modern terminals. It comes as a single, batteries-included, static binary with no dependencies; you can download and use it right now!
 
