@@ -58,6 +58,7 @@ func InitCommands() {
 		"open":       {(*BufPane).OpenCmd, buffer.FileComplete},
 		"tabmove":    {(*BufPane).TabMoveCmd, nil},
 		"tabswitch":  {(*BufPane).TabSwitchCmd, nil},
+		"region":     {(*BufPane).GetCurrBufferPosRegion, nil},
 		"term":       {(*BufPane).TermCmd, nil},
 		"memusage":   {(*BufPane).MemUsageCmd, nil},
 		"retab":      {(*BufPane).RetabCmd, nil},
@@ -154,6 +155,20 @@ func (h *BufPane) TextFilterCmd(args []string) {
 	}
 	h.Cursor.DeleteSelection()
 	h.Buf.Insert(h.Cursor.Loc, bout.String())
+}
+
+// GetCurrBufferPosRegion calculates the name of region which the cursor currently is in (if current
+// buffer is highlighted, and has an active cursor position to process.
+//
+// NOTE(disco0) Originally was going to just return the name of the region,
+// but commands can't return values
+func (h *BufPane) GetCurrBufferPosRegion(args []string)() {
+	// NOTE: Assuming this is BufPane, for now
+
+	// Is this ever not possible?
+	c := h.Cursor
+
+	h.Buf.Highlighter()
 }
 
 // TabMoveCmd moves the current tab to a given index (starts at 1). The
