@@ -1,0 +1,9 @@
+#!/bin/sh
+
+set -e
+
+if [ "$1" = "configure" ] || [ "$1" = "abort-upgrade" ]; then
+    update-alternatives --install /usr/bin/editor editor /usr/bin/micro 40 \
+      --slave /usr/share/man/man1/editor.1 editor.1 \
+      /usr/share/man/man1/micro.1
+fi
