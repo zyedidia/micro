@@ -34,12 +34,16 @@ rules:
         rules: []
 
     # Character literals
+    # NOTE: This is an ugly hack to work around the fact that rust uses
+    # single quotes both for character literals and lifetimes.
+    # Match all character literals.
+    - constant.string: "'(\\\\.|.)'"
+    # Match the '"' literal which would otherwise match
+    # as a double quoted string and destroy the highlighting.
     - constant.string:
-        start: "'"
+        start: "'\""
         end: "'"
-        skip: '\\.'
-        rules:
-            - constant.specialChar: '\\.'
+        rules: []
 
     - comment:
         start: "//"
