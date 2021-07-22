@@ -159,6 +159,19 @@ Here are the available options:
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `hltaberrors`: highlight tabs when spaces are expected, and spaces when tabs
+   are expected. More precisely: if `tabstospaces` option is on, highlight
+   all tab characters; if `tabstospaces` is off, highlight space characters
+   in the initial indent part of the line.
+
+	default value: `false`
+
+* `hltrailingws`: highlight trailing whitespaces at ends of lines. Note that
+   it doesn't highlight newly added trailing whitespaces that naturally occur
+   while typing text. It highlights only nasty forgotten trailing whitespaces.
+
+	default value: `false`
+
 * `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
 	default value: `true`

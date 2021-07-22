@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	"github.com/blang/semver"
 	runewidth "github.com/mattn/go-runewidth"
@@ -360,6 +361,28 @@ func GetLeadingWhitespace(b []byte) []byte {
 		b = b[size:]
 	}
 	return ws
+}
+
+// GetTrailingWhitespace returns the trailing whitespace of the given byte array
+func GetTrailingWhitespace(b []byte) []byte {
+	ws := []byte{}
+	for len(b) > 0 {
+		r, size := utf8.DecodeLastRune(b)
+		if IsWhitespace(r) {
+			ws = append([]byte(string(r)), ws...)
+		} else {
+			break
+		}
+
+		b = b[:len(b)-size]
+	}
+	return ws
+}
+
+// HasTrailingWhitespace returns true if the given byte array ends with a whitespace
+func HasTrailingWhitespace(b []byte) bool {
+	r, _ := utf8.DecodeLastRune(b)
+	return IsWhitespace(r)
 }
 
 // IntOpt turns a float64 setting to an int

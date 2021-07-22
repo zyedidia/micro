@@ -26,3 +26,5 @@ color-link type.extended "default"
 color-link symbol.brackets "default"
 #Color shebangs the comment color
 color-link preproc.shebang "comment"
+color-link tab-error "brightred"
+color-link trailingws "brightred"
