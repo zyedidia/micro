@@ -1,0 +1,153 @@
+filetype: red
+
+detect:
+    filename: "\\.reds?$"
+    header: "\\A(Red|Red/System)\\s+\\["
+
+rules:
+    # Get/Set-Word, Get/Set-Path
+    - symbol.operator: ":"
+
+    # Functions & Objects
+    - statement: "\\b(func|has|does|function|routine|context|object|construct)\\b"
+
+    # Value-Integer
+    - constant.number: "(\\A|\\s|\\[|\\()[-\\+]?\\d+('\\d+)*%?"
+
+    # Value-Integer-Hexadecimal
+    - constant.number: "(\\A|\\s|\\[|\\()[0-9A-F]{2,8}h"
+
+    # Value-Pair    
+    - constant: "(\\A|\\s|\\[|\\()[-\\+]?\\d+x[-\\+]?[0-9A-F]+h?"    
+
+    # Value-Float, Value-Money
+    - constant.number: "(\\A|\\s|\\[|\\()[-\\+]?([a-zA-Z]{3})?[\\$]?(\\d+'\\d+)*([\\.,]?\\d+)+([eE][-\\+]\\d+)?%?"
+
+    # String-URL                 
+    - constant.string: "(\\A|\\s|\\[|\\()[A-Za-z][\\w-]{1,15}:(/{0,3}[^\\s\\n\\[\\]\\(\\)]+|//)"    
+
+    # Value-Date
+    - constant.number: "(\\A|\\s|\\[|\\()\\d{1,4}[-/]W?(\\d{1,4}|[a-zA-Z]{3,})[-/]?\\d{1,4}/?T?"
+    - constant.number: "(\\A|\\s|\\[|\\()\\d{8}T\\d{4,6}Z?[-\\+]?\\d*"
+
+    # Value-Time    
+    - constant.number: "(\\A|\\s|\\[|\\(|/|T)[-\\+]?\\d{1,2}:\\d{1,2}(:\\d{1,2})?(\\.\\d+)?Z?[\\+-]?[\\d?]*:?[\\d?]*(\\s|$|\\)|\\])"
+    
+    # Word-Lit & Path-Lit
+    - constant: "\\B'[^\\d\\/\\\\,\\^\\[\\]\\(\\)\\{\\}\\\"\\#\\$\\%\\@\\:\\;\\s][^\\\\,\\^\\[\\]\\(\\)\\{\\}\\\"\\#\\$\\%\\@\\:\\;\\s]*"
+
+    # Word-Datatype
+    - type: "[^\\d\\/\\\\,\\^\\[\\]\\(\\)\\{\\}\\\"\\#\\$\\%\\@\\:\\;\\s]+([^\\\\,\\^\\[\\]\\(\\)\\{\\}\\\"\\#\\$\\%\\@\\:\\;\\s]?)+!"
+
+    # Word-Header
+    - preproc: "\\A(Red|Red/System)\\s+\\["
+    
+    # String-Issue
+    - constant.string: "\\B#[^\\s\\n\\[\\]\\(\\)]+"
+        
+    # Dialects
+    - preproc: "(\\A|\\s|\\[|\\()(parse|draw|view)\\b"
+    - preproc: "\\B(#if|#either|#switch|#case|#include|#do|#macro|#local|#reset|#process|#trace|#import|#syscall|#define|#enum|#verbose|#call|#export|#u16|#inline)\\b"
+
+    # String-File
+    - constant.string: "\\B%((\\\"[^\\\"]*\\\"(\\]|\\)|\\s|$))|[^\\\"\\s]+)"
+   
+    # String-Tag
+    - symbol.tag: "<[^<>=\\s].+>"
+
+    # String-Email & Reference
+    - constant.string: "[^\\s\\n:/\\[\\]\\(\\)\\\"%]*@[^\\s\\n:/\\[\\]\\(\\)\\\"%]*"
+        
+    # Operators
+    - symbol.operator: "\\s(\\+|<|<>|%|<<|\\*|/|-|>|<=|>=|//|\\*\\*|==|=\\?|=|>>|>>>|or|and|xor|is)\\s"
+
+    # String-Quoted    
+    - constant.string: "(\\A|\\s|\\[|\\()\\\"[^\\\"]*\\\""
+
+    # String-Binary-Base-2
+    - constant.string: 
+        start: "2#\\{"
+        end: "\\}"
+        rules:
+            - constant.number: "[01]*"
+            
+    # String-Binary-Base-16
+    - constant.string: 
+        start: "(16)?#\\{"
+        end: "\\}"
+        rules:
+            - constant.number: "[0-9a-fA-F]*"
+
+    # String-Binary-Base-64
+    - constant.string: 
+        start: "64#\\{"
+        end: "\\}"
+        rules: 
+            - constant.number: "[0-9a-zA-Z+/=]*"
+
+    # String-Multiline    
+    - constant.string:        
+        start: "\\{"        
+        end: "\\}"        
+        rules: []
+                    
+    # Comment-Line
+    - comment: 
+        start: ";"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # Multiline Comments
+        # (Unfortunately, RE2 engine doesn't support recursion 
+        # or backtracking making nested match impossible)
+
+    # Comment-Multiline-String
+    - comment: 
+        start: "(\\A|\\s)comment\\s+\\{"
+        end: "\\}"
+        rules: 
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # Comment-Multiline-EvalGroup
+    - comment: 
+        start: "(\\A|\\s)comment\\s+\\("
+        end: "\\)"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # Comment-Multiline-Block
+    - comment: 
+        start: "(\\A|\\s)comment\\s+\\["
+        end: "\\]"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # Comment-Tag
+    - comment: 
+        start: "<!--"
+        end: "-->"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # Block-Parens        
+    - symbol.brackets: "[\\[\\]\\(\\)]"
+      
+    # Character
+    - constant.string.char: "\\B#\\\"(\\^(\\(([0-9a-fA-F]{2,4}|[a-zA-Z]{3,6})\\)|.)|[^\\^\\\"])\\\"\\B"
+    - constant.string.char: "\\b(null|newline|slash|dbl-quote|space|lf|tab|CR|dot|escape|sp|comma)\\b"
+
+    # Character-Escaped
+    - constant.string.char: "\\^(\\([0-9a-fA-F]{2,4}\\)|.)"
+
+    # Logic
+    - constant.bool: "\\b(true|false|on\\s|off\\s|yes|no)\\b"
+    - constant.bool: "\\B#\\[(true|false)\\]\\B"
+
+    # None
+    - special: "\\b(none)\\b"
+    - special: "\\B#\\[none\\]\\B"
+
+    # First argument for "comment" word
+    - comment: "(\\A|\\s)comment\\s+\\\".*\\\""
+    - comment: "(\\A|\\s)comment\\s+\\S+"   
