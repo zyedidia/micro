@@ -1,7 +1,7 @@
 filetype: shell
 
 detect:
-    filename: "(\\.sh$|\\.bash|\\.ash|bashrc|bash_aliases|bash_functions|profile|bash-fc\\.|Pkgfile|pkgmk.conf|rc.conf|PKGBUILD|.ebuild\\$|APKBUILD)"
+    filename: "(\\.sh$|\\.bash|\\.ash|bashrc|bash_aliases|bash_functions|profile$|bash-fc\\.|Pkgfile|pkgmk.conf|rc.conf|PKGBUILD|.ebuild\\$|APKBUILD)"
     header: "^#!.*/(env +)?(ba)?(a)?(mk)?sh( |$)"
 
 rules:
