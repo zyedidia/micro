@@ -250,6 +250,9 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	} else {
 		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
+		if buf == nil {
+			return nil, errors.New("could not open file")
+		}
 	}
 
 	if readonly && prompt != nil {
@@ -333,8 +336,12 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			b.Settings["encoding"] = "utf-8"
 		}
 
-		hasBackup = b.ApplyBackup(size)
+		var ok bool
+		hasBackup, ok = b.ApplyBackup(size)
 
+		if !ok {
+			return NewBufferFromString("", "", btype)
+		}
 		if !hasBackup {
 			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
 
