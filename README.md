@@ -103,10 +103,16 @@ To uninstall micro, simply remove the binary, and the configuration directory at
 
 ### Package managers
 
-You can install micro using Homebrew on Mac:
+On the Mac, you can install micro using [Homebrew](https://brew.sh):
 
 ```
 brew install micro
+```
+
+...or [MacPorts](https://www.macports.org):
+
+```
+sudo port install micro
 ```
 
 **Note for Mac:** All micro keybindings use the control or alt (option) key, not the command
