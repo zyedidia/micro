@@ -1,6 +1,6 @@
 filetype: erb
 
-detect: 
+detect:
     filename: "\\.erb$|\\.rhtml$"
 
 rules:
@@ -12,7 +12,7 @@ rules:
     - symbol: "[:=]"
     - identifier: "(alt|bgcolor|height|href|id|label|longdesc|name|onclick|onfocus|onload|onmouseover|size|span|src|style|target|type|value|width)="
     - constant.string: "\"[^\"]*\""
-    - constant.number: "(?i)#[0-9A-F]{6,6}"
+    - constant.number: "(?i)#[0-9a-fA-F]{6,6}"
     - constant.string.url: "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"
     - comment: "<!--.+?-->"
     - preproc: "<!DOCTYPE.+?>"
