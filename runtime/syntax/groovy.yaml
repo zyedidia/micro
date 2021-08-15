@@ -9,13 +9,13 @@ rules:
     - identifier: "\\b[A-Z_$]+\\b"
     # The style guide for JVM languages is PascalCase for classes and interfaces
     - identifier.class: "\\b[A-Z][a-zA-Z0-9$]+\\b"
-    
+
     # Primitive types
     - type: "\\b(byte|short|int|long|float|double|char|boolean|void)\\b"
-    
+
     # Type-related keywords
     - type.keyword: "\\b(private|public|protected|static|final|var|def)\\b"
-    
+
     # Keywords
     - statement: "\\b(for|while|do|if|else|switch|case|default|try|catch|finally)\\b"
     - statement: "\\b(break|continue|return|throw|assert)\\b"
@@ -23,11 +23,11 @@ rules:
     - statement: "\\b(this|super)\\b"
     # Unsused, but reserved keywords
     - statement: "\\b(goto|const)\\b"
-    
+
     # Operators and punctuation
     - symbol.operator: "[-+*/%=<>^~&|!?:;,.@]|\\b(in|is|as|instanceof|new)\\b"
     - symbol.brackets: "[(){}]|\\[|\\]"
-    
+
     # Decimal integer literal
     - constant.number: "(?i)\\b[1-9]([_0-9]*[0-9])?[GLIDF]?\\b"
     # Binary integer literal
@@ -35,14 +35,14 @@ rules:
     # Octal integer literal
     - constant.number: "(?i)\\b0[0-7]([0-7_]*[0-7])?[GLIDF]?\\b"
     # Hexadecimal integer literal
-    - constant.number: "(?i)\\b0x[0-9a-f]([0-9a-f_]*[0-9a-f])?[GLIDF]?\\b"
+    - constant.number: "(?i)\\b0x[0-9a-fA-F]([0-9a-f_]*[0-9a-fA-F])?[GLIDF]?\\b"
     # Floating-point literal
     - constant.number: "(?i)\\b[0-9]([0-9_]*[0-9])?([.][0-9]([0-9_]*[0-9])?)?(e[+-]?[0-9]([0-9_]*[0-9])?)?[DF]?\\b"
     - constant.bool: "\\b(true|false|null)\\b"
-    
+
     # Annotations
     - identifier: "@[A-Za-z_$][A-Za-z0-9_$]*\\b"
-    
+
     # Single-quoted strings
     - constant.string:
         start: "'"
@@ -50,7 +50,7 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
-    
+
     # This also matches the Triple-double-quoted strings region, but I can't really find a way to mitigate it, all the while still matching "" as a string correctly
     # Also, nesting ${} are never going to be matched correctly with just regex either, so highlighting will break if one is to nest interpolation
     # These two problems combined mean slight mistakes in highlighing that the user is just going to have to deal with
@@ -63,7 +63,7 @@ rules:
             - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
             - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][a-zA-Z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
             - identifier: "\\x24[{].*[}]"
-    
+
     # Triple-double-quoted strings
     - constant.string:
         start: "\"\"\""
@@ -76,7 +76,7 @@ rules:
                 start: "[$][{]"
                 end: "[}]"
                 rules: []
-    
+
     # Triple-single-quoted strings
     - constant.string:
         start: "'''"
@@ -84,28 +84,28 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
-    
+
     # Slashy strings are left out, because they match in unwanted places pretty much all the time
     # Dollar-slashy strings
     - constant.string:
         start: "[$]/"
         end: "/[$]"
         rules: []
-    
+
     # Single-line comments
     - comment:
         start: "//"
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-    
+
     # Multiline comments
     - comment:
         start: "/[*]"
         end: "[*]/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-    
+
     # Groovydoc comments
     - comment:
         start: "/[*][*]@?"

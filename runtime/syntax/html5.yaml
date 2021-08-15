@@ -1,6 +1,6 @@
 filetype: html5
 
-detect: 
+detect:
     filename: "\\.htm[l]?5$"
     header: "<!DOCTYPE html5>"
 
@@ -13,7 +13,7 @@ rules:
     - symbol: "[:=]"
     - identifier: "(alt|bgcolor|height|href|id|label|longdesc|name|on(click|focus|load|mouseover)|size|span|src|style|target|type|value|width)="
     - constant.string: "\"[^\"]*\""
-    - constant.number: "(?i)#[0-9A-F]{6,6}"
+    - constant.number: "(?i)#[0-9a-fA-F]{6,6}"
     - default:
         start: ">"
         end: "<"
