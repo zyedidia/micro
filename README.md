@@ -106,9 +106,11 @@ eget zyedidia/micro
 Use `--tag VERSION` to download a specific tagged version.
 
 ```
-eget --tag nightly zyedidia/micro # download the nightly version (compiled every day at 8pm ET)
+eget --tag nightly zyedidia/micro # download the nightly version (compiled every day at midnight UTC)
 eget --tag v2.0.8 zyedidia/micro  # download version 2.0.8 rather than the latest release
 ```
+
+You can install `micro` by adding `--to /usr/local/bin` to the `eget` command, or move the binary manually to a directory on your `$PATH` after the download completes.
 
 See [Eget](https://github.com/zyedidia/eget) for more information.
 
@@ -134,11 +136,11 @@ snap install micro --classic
 must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
 further below.
 
-Micro is also available through other package managers on Linux such as apt, dnf, AUR, Nix, and package managers
+Micro is also available through other package managers on Linux such dnf, AUR, Nix, and package managers
 for other operating systems. These packages are not guaranteed to be up-to-date.
 
 * Linux: Available in distro-specific package managers.
-    * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled.
+<!-- * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled. -->
     * `dnf install micro` (Fedora).
     * `pacman -S micro` (Arch Linux).
     * `eopkg install micro` (Solus).
