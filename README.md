@@ -81,17 +81,13 @@ stable version if you install from the prebuilt binaries, Homebrew, or Snap.
 
 A desktop entry file and man page can be found in the [assets/packaging](https://github.com/zyedidia/micro/tree/master/assets/packaging) directory.
 
-### Prebuilt binaries
+### Pre-built binaries
 
-All you need to install micro is one file, the binary itself. It's as simple as that!
+Pre-built binaries are distributed with [releases](https://github.com/zyedidia/micro/releases).
 
-Download the binary from the [releases](https://github.com/zyedidia/micro/releases) page.
+To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
-### Installation script
-
-There is a script which can install micro for you by downloading the latest prebuilt binary. You can find it at <https://getmic.ro>.
-
-You can easily install micro by running
+#### Quick-install script
 
 ```bash
 curl https://getmic.ro | bash
@@ -99,7 +95,22 @@ curl https://getmic.ro | bash
 
 The script will place the micro binary in the current directory. From there, you can move it to a directory on your path of your choosing (e.g. `sudo mv micro /usr/bin`). See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
 
-To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
+#### Eget
+
+With [Eget](https://github.com/zyedidia/eget) installed, you can easily get a pre-built binary:
+
+```
+eget zyedidia/micro
+```
+
+Use `--tag VERSION` to download a specific tagged version.
+
+```
+eget --tag nightly zyedidia/micro # download the nightly version (compiled every day at 8pm ET)
+eget --tag v2.0.8 zyedidia/micro  # download version 2.0.8 rather than the latest release
+```
+
+See [Eget](https://github.com/zyedidia/eget) for more information.
 
 ### Package managers
 
