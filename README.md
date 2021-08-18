@@ -139,8 +139,9 @@ further below.
 Micro is also available through other package managers on Linux such dnf, AUR, Nix, and package managers
 for other operating systems. These packages are not guaranteed to be up-to-date.
 
-* Linux: Available in distro-specific package managers.
 <!-- * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled. -->
+
+* Linux: Available in distro-specific package managers.
     * `dnf install micro` (Fedora).
     * `pacman -S micro` (Arch Linux).
     * `eopkg install micro` (Solus).
