@@ -1,6 +1,9 @@
 package action
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"regexp"
 	"runtime"
 	"strings"
@@ -807,7 +810,7 @@ func (h *BufPane) SaveAs() bool {
 func (h *BufPane) saveBufToFile(filename string, action string, callback func()) bool {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "permission denied") {
+		if errors.Is(err, fs.ErrPermission) {
 			saveWithSudo := func() {
 				err = h.Buf.SaveAsWithSudo(filename)
 				if err != nil {
@@ -824,12 +827,15 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 			if h.Buf.Settings["autosu"].(bool) {
 				saveWithSudo()
 			} else {
-				InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
-					if yes && !canceled {
-						saveWithSudo()
-						h.completeAction(action)
-					}
-				})
+				InfoBar.YNPrompt(
+					fmt.Sprintf("Permission denied. Do you want to save this file using %s? (y,n)", config.GlobalSettings["sucmd"].(string)),
+					func(yes, canceled bool) {
+						if yes && !canceled {
+							saveWithSudo()
+							h.completeAction(action)
+						}
+					},
+				)
 				return false
 			}
 		} else {
