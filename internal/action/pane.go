@@ -4,6 +4,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/display"
 )
 
+// A Pane is a general interface for a window in the editor.
 type Pane interface {
 	Handler
 	display.Window

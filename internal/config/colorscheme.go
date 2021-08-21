@@ -9,10 +9,10 @@ import (
 	"github.com/zyedidia/tcell/v2"
 )
 
-// Micro's default style
+// DefStyle is Micro's default style
 var DefStyle tcell.Style = tcell.StyleDefault
 
-// The current colorscheme
+// Colorscheme is the current colorscheme
 var Colorscheme map[string]tcell.Style
 
 // GetColor takes in a syntax group and returns the colorscheme's style for that group

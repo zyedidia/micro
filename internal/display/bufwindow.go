@@ -11,8 +11,7 @@ import (
 	"github.com/zyedidia/tcell/v2"
 )
 
-// The BufWindow provides a way of displaying a certain section
-// of a buffer
+// The BufWindow provides a way of displaying a certain section of a buffer.
 type BufWindow struct {
 	*View
 
@@ -44,6 +43,7 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	return w
 }
 
+// SetBuffer sets this window's buffer.
 func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 	w.Buf = b
 	b.OptionCallback = func(option string, nativeValue interface{}) {
@@ -65,14 +65,17 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 	}
 }
 
+// GetView gets the view.
 func (w *BufWindow) GetView() *View {
 	return w.View
 }
 
+// GetView sets the view.
 func (w *BufWindow) SetView(view *View) {
 	w.View = view
 }
 
+// Resize resizes this window.
 func (w *BufWindow) Resize(width, height int) {
 	w.Width, w.Height = width, height
 	w.updateDisplayInfo()
@@ -86,10 +89,12 @@ func (w *BufWindow) Resize(width, height int) {
 	}
 }
 
+// SetActive marks the window as active.
 func (w *BufWindow) SetActive(b bool) {
 	w.active = b
 }
 
+// IsActive returns true if this window is active.
 func (w *BufWindow) IsActive() bool {
 	return w.active
 }

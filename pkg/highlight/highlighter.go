@@ -67,6 +67,7 @@ func combineLineMatch(src, dst LineMatch) LineMatch {
 // A State represents the region at the end of a line
 type State *region
 
+// EmptyDef is an empty definition.
 var EmptyDef = Def{nil, &rules{}}
 
 // LineStates is an interface for a buffer-like object which can also store the states and matches for every line

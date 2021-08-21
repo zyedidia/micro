@@ -470,7 +470,7 @@ func (h *BufPane) execAction(action func(*BufPane) bool, name string, cursor int
 			success = success && h.PluginCB("on"+name)
 
 			if isMulti {
-				if recording_macro {
+				if recordingMacro {
 					if name != "ToggleMacro" && name != "PlayMacro" {
 						curmacro = append(curmacro, action)
 					}
@@ -542,7 +542,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		} else {
 			h.Buf.Insert(c.Loc, string(r))
 		}
-		if recording_macro {
+		if recordingMacro {
 			curmacro = append(curmacro, r)
 		}
 		h.Relocate()

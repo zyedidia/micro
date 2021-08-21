@@ -34,8 +34,8 @@ func (h *BufPane) ScrollDown(n int) {
 	h.SetView(v)
 }
 
-// If the user has scrolled past the last line, ScrollAdjust can be used
-// to shift the view so that the last line is at the bottom
+// ScrollAdjust can be used to shift the view so that the last line is at the
+// bottom if the user has scrolled past the last line.
 func (h *BufPane) ScrollAdjust() {
 	v := h.GetView()
 	end := h.SLocFromLoc(h.Buf.End())
@@ -1025,16 +1025,16 @@ func (h *BufPane) Copy() bool {
 	return true
 }
 
-// Copy the current line to the clipboard
+// CopyLine copies the current line to the clipboard
 func (h *BufPane) CopyLine() bool {
 	if h.Cursor.HasSelection() {
 		return false
-	} else {
-		h.Cursor.SelectLine()
-		h.Cursor.CopySelection(clipboard.ClipboardReg)
-		h.freshClip = true
-		InfoBar.Message("Copied line")
 	}
+	h.Cursor.SelectLine()
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.freshClip = true
+	InfoBar.Message("Copied line")
+
 	h.Cursor.Deselect(true)
 	h.Relocate()
 	return true
@@ -1077,9 +1077,8 @@ func (h *BufPane) Cut() bool {
 
 		h.Relocate()
 		return true
-	} else {
-		return h.CutLine()
 	}
+	return h.CutLine()
 }
 
 // DuplicateLine duplicates the current line or selection
@@ -1638,12 +1637,12 @@ func (h *BufPane) PreviousSplit() bool {
 }
 
 var curmacro []interface{}
-var recording_macro bool
+var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
 func (h *BufPane) ToggleMacro() bool {
-	recording_macro = !recording_macro
-	if recording_macro {
+	recordingMacro = !recordingMacro
+	if recordingMacro {
 		curmacro = []interface{}{}
 		InfoBar.Message("Recording")
 	} else {
@@ -1655,7 +1654,7 @@ func (h *BufPane) ToggleMacro() bool {
 
 // PlayMacro plays back the most recently recorded macro
 func (h *BufPane) PlayMacro() bool {
-	if recording_macro {
+	if recordingMacro {
 		return false
 	}
 	for _, action := range curmacro {
@@ -1715,10 +1714,9 @@ func (h *BufPane) SpawnMultiCursor() bool {
 func (h *BufPane) SpawnMultiCursorUp() bool {
 	if h.Cursor.Y == 0 {
 		return false
-	} else {
-		h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-		h.Cursor.Relocate()
 	}
+	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
+	h.Cursor.Relocate()
 
 	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
 	h.Buf.AddCursor(c)
@@ -1733,10 +1731,9 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 func (h *BufPane) SpawnMultiCursorDown() bool {
 	if h.Cursor.Y+1 == h.Buf.LinesNum() {
 		return false
-	} else {
-		h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
-		h.Cursor.Relocate()
 	}
+	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
+	h.Cursor.Relocate()
 
 	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
 	h.Buf.AddCursor(c)
