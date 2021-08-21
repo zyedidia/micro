@@ -256,7 +256,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	if readonly && prompt != nil {
-		prompt.Message("Warning: file is readonly - sudo will be attempted when saving")
+		prompt.Message(fmt.Sprintf("Warning: file is readonly - %s will be attempted when saving", config.GlobalSettings["sucmd"].(string)))
 		// buf.SetOptionNative("readonly", true)
 	}
 
