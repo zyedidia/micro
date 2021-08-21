@@ -23,7 +23,7 @@ func shouldContinue() bool {
 		return false
 	}
 
-    text = strings.TrimRight(text, "\r\n")
+	text = strings.TrimRight(text, "\r\n")
 
 	return len(text) == 0 || strings.ToLower(text)[0] == 'y'
 }
