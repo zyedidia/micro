@@ -2,7 +2,6 @@ package config
 
 import (
 	"embed"
-	"os"
 	"strings"
 )
 
