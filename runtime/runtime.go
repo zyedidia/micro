@@ -2,6 +2,7 @@ package config
 
 import (
 	"embed"
+	"path/filepath"
 	"strings"
 )
 
@@ -10,9 +11,13 @@ import (
 //go:embed colorschemes help plugins syntax
 var runtime embed.FS
 
+func fixPath(name string) string {
+	return strings.TrimLeft(filepath.ToSlash(name), "runtime/")
+}
+
 // AssetDir lists file names in folder
 func AssetDir(name string) ([]string, error) {
-	name = strings.TrimLeft(name, "runtime/")
+	name = fixPath(name)
 	entries, err := runtime.ReadDir(name)
 	if err != nil {
 		return nil, err
@@ -26,6 +31,6 @@ func AssetDir(name string) ([]string, error) {
 
 // Asset returns a file content
 func Asset(name string) ([]byte, error) {
-	name = strings.TrimLeft(name, "runtime/")
+	name = fixPath(name)
 	return runtime.ReadFile(name)
 }
