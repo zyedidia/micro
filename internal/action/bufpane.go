@@ -702,6 +702,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleMacro":               (*BufPane).ToggleMacro,
 	"PlayMacro":                 (*BufPane).PlayMacro,
 	"Suspend":                   (*BufPane).Suspend,
+	"Abort":                     (*BufPane).Abort,
 	"ScrollUp":                  (*BufPane).ScrollUpAction,
 	"ScrollDown":                (*BufPane).ScrollDownAction,
 	"SpawnMultiCursor":          (*BufPane).SpawnMultiCursor,

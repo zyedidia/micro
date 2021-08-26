@@ -43,6 +43,7 @@ var (
 
 	sigterm chan os.Signal
 	sighup  chan os.Signal
+	sigabrt chan os.Signal
 )
 
 func InitFlags() {
@@ -351,6 +352,8 @@ func main() {
 	sighup = make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
 	signal.Notify(sighup, syscall.SIGHUP)
+	sigabrt = make(chan os.Signal, 1)
+	signal.Notify(sigabrt, syscall.SIGABRT)
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
@@ -435,6 +438,16 @@ func DoEvent() {
 			screen.Screen.Fini()
 		}
 		os.Exit(0)
+	case <-sigabrt:
+		for _, b := range buffer.OpenBuffers {
+			if !b.Modified() {
+				b.Fini()
+			}
+		}
+		if screen.Screen != nil {
+			screen.Screen.Fini()
+		}
+		os.Exit(6)
 	}
 
 	ulua.Lock.Lock()
