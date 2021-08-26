@@ -40,6 +40,7 @@ var bufdefaults = map[string]string{
 	"Ctrl-o":         "OpenFile",
 	"Ctrl-s":         "Save",
 	"Ctrl-f":         "Find",
+	"Alt-F":          "FindLiteral",
 	"Ctrl-n":         "FindNext",
 	"Ctrl-p":         "FindPrevious",
 	"Ctrl-z":         "Undo",

@@ -70,7 +70,8 @@ function preinit()
     makeLinter("dmd", "d", "dmd", {"-color=off", "-o-", "-w", "-wi", "-c", "%f"}, "%f%(%l%):.+: %m")
     makeLinter("eslint", "javascript", "eslint", {"-f","compact","%f"}, "%f: line %l, col %c, %m")
     makeLinter("gobuild", "go", "go", {"build", "-o", devnull, "%d"}, "%f:%l:%c:? %m")
-    -- makeLinter("golint", "go", "golint", {"%f"}, "%f:%l:%c: %m")
+    makeLinter("govet", "go", "go", {"vet"}, "%f:%l:%c: %m")
+    makeLinter("clippy", "rust", "cargo", {"clippy", "--message-format", "short"}, "%f:%l:%c: %m")
     makeLinter("hlint", "haskell", "hlint", {"%f"}, "%f:%(?%l[,:]%c%)?.-: %m")
     makeLinter("javac", "java", "javac", {"-d", "%d", "%f"}, "%f:%l: error: %m")
     makeLinter("jshint", "javascript", "jshint", {"%f"}, "%f: line %l,.+, %m")
@@ -83,9 +84,11 @@ function preinit()
     makeLinter("pylint", "python", "pylint", {"--output-format=parseable", "--reports=no", "%f"}, "%f:%l: %m")
     makeLinter("flake8", "python", "flake8", {"%f"}, "%f:%l:%c: %m")
     makeLinter("shfmt", "shell", "shfmt", {"%f"}, "%f:%l:%c: %m")
+    makeLinter("shellcheck", "shell", "shellcheck", {"-f", "gcc", "%f"}, "%f:%l:%c:.+: %m")
     makeLinter("swiftc", "swift", "xcrun", {"swiftc", "%f"}, "%f:%l:%c:.+: %m", {"darwin"}, true)
-    makeLinter("swiftc", "swift", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
+    makeLinter("swiftc-linux", "swift", "swiftc", {"%f"}, "%f:%l:%c:.+: %m", {"linux"}, true)
     makeLinter("yaml", "yaml", "yamllint", {"--format", "parsable", "%f"}, "%f:%l:%c:.+ %m")
+    makeLinter("nix-linter", "nix", "nix-linter", {"%f"}, "%m at %f:%l:%c", {"linux"}, true)
 
     config.MakeCommand("lint", function(bp, args)
         bp:Save()
@@ -123,12 +126,11 @@ function runLinter(buf)
             ftmatch = false
         end
 
-        local args = {}
-        for k, arg in pairs(v.args) do
-            args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
-        end
-
         if ftmatch then
+            local args = {}
+            for k, arg in pairs(v.args) do
+                args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
+            end
             lint(buf, k, v.cmd, args, v.errorformat, v.loffset, v.coffset, v.callback)
         end
     end

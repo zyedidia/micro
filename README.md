@@ -81,17 +81,13 @@ stable version if you install from the prebuilt binaries, Homebrew, or Snap.
 
 A desktop entry file and man page can be found in the [assets/packaging](https://github.com/zyedidia/micro/tree/master/assets/packaging) directory.
 
-### Prebuilt binaries
+### Pre-built binaries
 
-All you need to install micro is one file, the binary itself. It's as simple as that!
+Pre-built binaries are distributed with [releases](https://github.com/zyedidia/micro/releases).
 
-Download the binary from the [releases](https://github.com/zyedidia/micro/releases) page.
+To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
-### Installation script
-
-There is a script which can install micro for you by downloading the latest prebuilt binary. You can find it at <https://getmic.ro>.
-
-You can easily install micro by running
+#### Quick-install script
 
 ```bash
 curl https://getmic.ro | bash
@@ -99,7 +95,24 @@ curl https://getmic.ro | bash
 
 The script will place the micro binary in the current directory. From there, you can move it to a directory on your path of your choosing (e.g. `sudo mv micro /usr/bin`). See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
 
-To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
+#### Eget
+
+With [Eget](https://github.com/zyedidia/eget) installed, you can easily get a pre-built binary:
+
+```
+eget zyedidia/micro
+```
+
+Use `--tag VERSION` to download a specific tagged version.
+
+```
+eget --tag nightly zyedidia/micro # download the nightly version (compiled every day at midnight UTC)
+eget --tag v2.0.8 zyedidia/micro  # download version 2.0.8 rather than the latest release
+```
+
+You can install `micro` by adding `--to /usr/local/bin` to the `eget` command, or move the binary manually to a directory on your `$PATH` after the download completes.
+
+See [Eget](https://github.com/zyedidia/eget) for more information.
 
 ### Package managers
 
@@ -123,11 +136,12 @@ snap install micro --classic
 must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
 further below.
 
-Micro is also available through other package managers on Linux such as apt, dnf, AUR, Nix, and package managers
+Micro is also available through other package managers on Linux such dnf, AUR, Nix, and package managers
 for other operating systems. These packages are not guaranteed to be up-to-date.
 
+<!-- * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled. -->
+
 * Linux: Available in distro-specific package managers.
-    * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled.
     * `dnf install micro` (Fedora).
     * `pacman -S micro` (Arch Linux).
     * `eopkg install micro` (Solus).

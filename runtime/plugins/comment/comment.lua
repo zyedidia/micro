@@ -60,13 +60,11 @@ ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
 
-function onBufferOpen(buf)
-    if buf.Settings["commenttype"] == nil then
-        if ft[buf.Settings["filetype"]] ~= nil then
-            buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
-        else
-            buf.Settings["commenttype"] = "# %s"
-        end
+function updateCommentType(buf)
+    if ft[buf.Settings["filetype"]] ~= nil and ft[buf.Settings["filetype"]] ~= nil then
+        buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
+    elseif buf.Settings["commenttype"] == nil then
+        buf.Settings["commenttype"] = "# %s"
     end
 end
 
@@ -79,6 +77,8 @@ function isCommented(bp, lineN, commentRegex)
 end
 
 function commentLine(bp, lineN)
+    updateCommentType(bp.Buf)
+
     local line = bp.Buf:Line(lineN)
     local commentType = bp.Buf.Settings["commenttype"]
     local sel = -bp.Cursor.CurSelection
@@ -100,6 +100,8 @@ function commentLine(bp, lineN)
 end
 
 function uncommentLine(bp, lineN, commentRegex)
+    updateCommentType(bp.Buf)
+
     local line = bp.Buf:Line(lineN)
     local commentType = bp.Buf.Settings["commenttype"]
     local sel = -bp.Cursor.CurSelection
@@ -149,6 +151,8 @@ function toggleCommentSelection(bp, startLine, endLine, commentRegex)
 end
 
 function comment(bp, args)
+    updateCommentType(bp.Buf)
+
     local commentType = bp.Buf.Settings["commenttype"]
     local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)"):gsub("%s+", "%s*")
 

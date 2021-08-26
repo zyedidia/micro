@@ -3,34 +3,35 @@ filetype: v
 detect:
 
 rules:
-    # Conditionals and control flow
-    - keywords: "\\b(import|go|defer)\\b"
-    - special: "\\b(or|break|continue|match|case|goto|return|none)\\b"
-    - function: "\\b(fn)\\b"
-    - main_function: "\\b(fn main\\(\\))"
-    - optionals: "\\b(none|error\\()"
-    - statement: "\\b(if|else|for|match)\\b"
-    - assert: "\\b(assert)\\b"
-    - symbol.operator: "\\b([-+/*=<>!~%&|^])\\b"
-    - symbol.operator: "\\b(:=)\\b"
-    - symbol.operator: "\\b(\\|\\|)\b"
-    - symbol.operator: "\\b(\\&\\&)\\b"
+      # Conditionals and control flow
+    - preproc: "\\b(module|import)\\b"
+    - statement: "\\b(if|else|for|match|select|defer|or|unsafe)\\b"
+    - statement: "\\b(break|continue|goto|return)\\b"
+    - type.keyword: "\\b(assert|const|enum|fn|struct|interface|type)\\b"
+    - type.keyword: "\\b(pub|mut|__global)\\b"
 
-    - compile_if: "\\b(\\$if|\\$else)\\b"
-    - oses: "\\b(mac|macos|linux|windows|freebsd|openbsd|netbsd|dragonfly|js|android|solaris|haiku)\\b"
+    - preproc: "\\$\\b(if|else)\\b"
+    - identifier.os: "\\b(mac|macos|linux|windows|freebsd|openbsd|netbsd|dragonfly|android|solaris|haiku)\\b"
+    - identifier.compiler: "\\b(gcc|tinyc|clang|mingw|msvc|cplusplus)\\b"
+    - identifier.platform: "\\b(amd64|aarch64|x64|x32|little_endian|big_endian)\\b"
+    - identifier.other: "\\b(debug|test|js|glibc|prealloc|no_bounds_checking)\\b"
+
+    - identifier.class: "\\b([A-Z][A-Za-z0-9_]*)\\b"
+    - identifier.function: "\\b([a-z_]+\\()"
+    - symbol.operator: "\\b(i[ns])\\b|[-+/*<>!=~*%&:|,.?]"
+    - symbol.attribute:
+        start: "^\\["
+        end: "\\]$"
+        rules:
+            - default: ".*"
+            - symbol: "\\b(deprecated|direct_array_access|if|inline|live|ref_only|typedef|windows_stdcall)\\b"
 
       # Types
-    - symbol: "(,|\\.)"
-    - btype: "\\b(bool)\\b"
-    - ztype: "\\b(char|byte)\\b"
-    - itype: "\\b(int|i(8|16|64)|u(8|16|32|64))\\b"
-    - ftype: "\\b(f(32|64))\\b"
-    - ptype: "\\b(uintptr|charptr|byteptr|voidptr)\\b"
-    - atype: "\\b(array)\\b"
-    - stype: "\\b(string|ustring)\\b"
-    - mtype: "\\b(map)\\b"
-    - type.keyword: "\\b(pub|mut|struct|enum|interface|module|type|const)\\b"
+    - type: "\\b(byte|u(16|32|64|128)|i(nt|8|16|64|128)|f(32|64))\\b"
+    - type: "\\b(bool|cha[nr]|map|rune|string)\\b"
+    - type: "\\b(any(_int|_float)?|size_t|(uint|byte|char|void)ptr)\\b"
     - constant.bool: "\\b(true|false)\\b"
+    - constant.none: "\\b(none)\\b"
 
       # Brackets
     - symbol.brackets: "(\\{|\\})"
@@ -38,7 +39,10 @@ rules:
     - symbol.brackets: "(\\[|\\])"
 
       # Numbers and strings
-    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+    - constant.number: "\\b(0b[01_]+)\\b"
+    - constant.number: "\\b(0o[0-7_]+)\\b"
+    - constant.number: "\\b(0x[0-9a-fA-F_]+)\\b"
+    - constant.number: "\\b([0-9_]+)\\b"
 
     - constant.string:
         start: "\""
@@ -46,7 +50,7 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "%."
-            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\[abefnrtv'\\\"\\\\]"
             - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
 
     - constant.string:
@@ -54,9 +58,8 @@ rules:
         end: "'"
         skip: "\\\\."
         rules:
-            - error: "..+"
             - constant.specialChar: "%."
-            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\[abefnrtv'\\\"\\\\]"
             - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
 
     - constant.string:
@@ -75,10 +78,3 @@ rules:
         end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-
-    - function.attribute:
-        start: "^\\["
-        end: "\\]$"
-        rules:
-            - known: "\\b(deprecated|inline|typedef|if)\\b"
-

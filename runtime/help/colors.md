@@ -52,7 +52,7 @@ color support comes in three flavors.
   environment variable `MICRO_TRUECOLOR` to 1.  In addition your terminal
   must support it (usually indicated by setting `$COLORTERM` to `truecolor`).
   True-color colorschemes in micro typically end with `-tc`, such as
-  `solarized-tc`, `atom-dark-tc`, `material-tc`, etc... If true color is not
+  `solarized-tc`, `atom-dark`, `material-tc`, etc... If true color is not
   enabled but a true color colorscheme is used, micro will do its best to
   approximate the colors to the available 256 colors.
 
@@ -69,7 +69,7 @@ themes the most.
 * `darcula`
 * `twilight`
 * `railscast`
-* `bubblegum`
+* `bubblegum` (light theme)
 
 ### 16 color
 
@@ -91,11 +91,10 @@ variable `MICRO_TRUECOLOR` must be set to 1. Note that you have to create
 and set this variable yourself.
 
 * `solarized-tc`: this is the solarized colorscheme for true color.
-* `atom-dark-tc`: this colorscheme is based off of Atom's "dark" colorscheme.
+* `atom-dark`: this colorscheme is based off of Atom's "dark" colorscheme.
 * `cmc-tc`: A true colour variant of the cmc theme.  It requires true color to
   look its best. Use cmc-16 if your terminal doesn't support true color.
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
-* `github-tc`: The true color version of the Github colorscheme
 * `material-tc`: Colorscheme based off of Google's Material Design palette
 
 ## Creating a Colorscheme
