@@ -224,7 +224,7 @@ Here are the available options:
    given line and column 0. Note that with this option enabled it is not possible
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
    It is also possible to open a file with a certain cursor location by using the
-   `+LINE,COL` flag syntax. See `micro -help` for the command line options.
+   `+LINE:COL` flag syntax. See `micro -help` for the command line options.
 
     default value: `false`
 
