@@ -132,10 +132,6 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
-**Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
-must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
-further below.
-
 Micro is also available through other package managers on Linux such dnf, AUR, Nix, and package managers
 for other operating systems. These packages are not guaranteed to be up-to-date.
 
@@ -153,6 +149,14 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `pkd_add -v micro`.
 * NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
     * `pkg_add micro`
+
+**Note for Linux desktop environments:**
+
+For interfacing with the local system clipboard, the following tools need to be installed:
+* For X11 `xclip` or `xsel`
+* For [Wayland](https://wayland.freedesktop.org/) `wl-clipboard`
+
+Without these tools installed, micro will use an internal clipboard for copy and paste, but it won't be accessible to external applications.
 
 ### Building from source
 
@@ -192,15 +196,6 @@ If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) i
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
-
-### Linux clipboard support
-
-On Linux, clipboard support requires:
-
-- On X11, the `xclip` or `xsel` commands (for Ubuntu: `sudo apt install xclip`)
-- On Wayland, the `wl-clipboard` command
-
-If you don't have these commands, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
 
 ### Colors and syntax highlighting
 
