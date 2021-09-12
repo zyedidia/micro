@@ -144,6 +144,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 * Linux: Available in distro-specific package managers.
     * `dnf install micro` (Fedora).
     * `pacman -S micro` (Arch Linux).
+    * `emerge app-editors/micro` (Gentoo).
     * `eopkg install micro` (Solus).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
