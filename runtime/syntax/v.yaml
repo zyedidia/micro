@@ -13,7 +13,7 @@ rules:
     - type: "\\b(any(_int|_float)?|isize|usize|(uint|byte|char|void)ptr)\\b"
     - type.keyword: "\\b(assert|const|enum|fn|struct|union|interface|type|in)\\b"
     - type.keyword: "\\b(as|asm|atomic|embed|go|in|is|lock|rlock|shared|sizeof|typeof)\\b"
-    - type.keyword: "\\b(pub|mut|__global)\\b"
+    - type.keyword: "\\b(pub|mut|volatile|__global)\\b"
 
     - constant.bool: "\\b(true|false)\\b"
     - constant.none: "\\b(none)\\b"
