@@ -13,12 +13,6 @@ GOVARS = -X github.com/zyedidia/micro/v2/internal/util.Version=$(VERSION) -X git
 DEBUGVAR = -X github.com/zyedidia/micro/v2/internal/util.Debug=ON
 VSCODE_TESTS_BASE_URL = 'https://raw.githubusercontent.com/microsoft/vscode/e6a45f4242ebddb7aa9a229f85555e8a3bd987e2/src/vs/editor/test/common/model/'
 
-fetch-tags:
-	git fetch --tags
-
-generate:
-	go generate ./runtime
-
 build:
 	go build -trimpath -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
@@ -34,6 +28,12 @@ install:
 	go install -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 install-all: generate install
+
+fetch-tags:
+	git fetch --tags
+
+generate:
+	go generate ./runtime
 
 testgen:
 	mkdir -p tools/vscode-tests
