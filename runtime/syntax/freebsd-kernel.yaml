@@ -4,10 +4,8 @@ detect:
     filename: "GENERIC$"
 
 rules:
-    - identifier: "^(cpu|ident|options|makeoptions|device)"
-    - special: ""
+    - identifier: "^(cpu|ident|options|makeoptions|device|include)"
     - statement: "\\s\\S*"
-    - preproc: "^(include)"
 
     - comment:
         start: "#"
