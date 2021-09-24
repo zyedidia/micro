@@ -1083,7 +1083,9 @@ func (h *BufPane) Cut() bool {
 
 // DuplicateLine duplicates the current line or selection
 func (h *BufPane) DuplicateLine() bool {
+	var infoMessage = "Duplicated line"
 	if h.Cursor.HasSelection() {
+		infoMessage = "Duplicated selection"
 		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
 	} else {
 		h.Cursor.End()
@@ -1091,7 +1093,7 @@ func (h *BufPane) DuplicateLine() bool {
 		// h.Cursor.Right()
 	}
 
-	InfoBar.Message("Duplicated line")
+	InfoBar.Message(infoMessage)
 	h.Relocate()
 	return true
 }
