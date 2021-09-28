@@ -35,8 +35,6 @@ func GetColor(color string) tcell.Style {
 		}
 	} else if style, ok := Colorscheme[color]; ok {
 		st = style
-	} else {
-		st = StringToStyle(color)
 	}
 
 	return st
