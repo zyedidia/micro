@@ -161,9 +161,10 @@ Here are the available options:
 
 * `hlsearch`: highlight all instances of the searched text after a successful
    search. This highlighting can be turned off via `UnhighlightSearch` action
-   or toggled on/off via `ToggleHighlightSearch` action. Note that these actions
-   don't change `hlsearch` setting. After the next search the highlighting is
-   turned on again.
+   (triggered by Esc key by default) or toggled on/off via `ToggleHighlightSearch`
+   action. Note that these actions don't change `hlsearch` setting.
+   As long as `hlsearch` is set to true, after the next search the highlighting
+   is turned on again.
 
 	default value: `false`
 
