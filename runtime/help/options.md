@@ -159,6 +159,15 @@ Here are the available options:
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `hlsearch`: highlight all instances of the searched text after a successful
+   search. This highlighting can be turned off via `UnhighlightSearch` action
+   (triggered by Esc key by default) or toggled on/off via `ToggleHighlightSearch`
+   action. Note that these actions don't change `hlsearch` setting.
+   As long as `hlsearch` is set to true, after the next search the highlighting
+   is turned on again.
+
+	default value: `false`
+
 * `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
 	default value: `true`

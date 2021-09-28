@@ -39,6 +39,12 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 		b.isModified = true
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
+	} else if option == "hlsearch" {
+		for _, buf := range OpenBuffers {
+			if b.SharedBuffer == buf.SharedBuffer {
+				buf.HighlightSearch = nativeValue.(bool)
+			}
+		}
 	}
 
 	if b.OptionCallback != nil {
