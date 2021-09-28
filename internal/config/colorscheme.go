@@ -35,8 +35,6 @@ func GetColor(color string) tcell.Style {
 		}
 	} else if style, ok := Colorscheme[color]; ok {
 		st = style
-	} else {
-		st = StringToStyle(color)
 	}
 
 	return st
@@ -131,12 +129,12 @@ func StringToStyle(str string) tcell.Style {
 	bg = strings.TrimSpace(bg)
 
 	var fgColor, bgColor tcell.Color
-	if fg == "" {
+	if fg == "" || fg == "default" {
 		fgColor, _, _ = DefStyle.Decompose()
 	} else {
 		fgColor = StringToColor(fg)
 	}
-	if bg == "" {
+	if bg == "" || bg == "default" {
 		_, bgColor, _ = DefStyle.Decompose()
 	} else {
 		bgColor = StringToColor(bg)
