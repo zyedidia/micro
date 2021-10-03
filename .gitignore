@@ -15,6 +15,5 @@ benchmark_results*
 tools/build-version
 tools/build-date
 tools/info-plist
-tools/bindata
 tools/vscode-tests/
 *.hdr

@@ -91,9 +91,10 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 			l = util.SliceStart(l, end.X)
 		}
 
-		match := r.FindIndex(l)
+		allMatches := r.FindAllIndex(l, -1)
 
-		if match != nil {
+		if allMatches != nil {
+			match := allMatches[len(allMatches)-1]
 			start := Loc{charpos + util.RunePos(l, match[0]), i}
 			end := Loc{charpos + util.RunePos(l, match[1]), i}
 			return [2]Loc{start, end}, true

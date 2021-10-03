@@ -1,0 +1,14 @@
+filetype: freebsd-kernel
+
+detect:
+    filename: "GENERIC$"
+
+rules:
+    - identifier: "^(cpu|ident|options|makeoptions|device|include)"
+    - statement: "\\s\\S*"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

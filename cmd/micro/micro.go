@@ -274,12 +274,6 @@ func main() {
 		fmt.Println("Fatal: Micro could not initialize a Screen.")
 		os.Exit(1)
 	}
-
-	sigterm = make(chan os.Signal, 1)
-	sighup = make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
-	signal.Notify(sighup, syscall.SIGHUP)
-
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
 	clipErr := clipboard.Initialize(m)
 
@@ -352,6 +346,11 @@ func main() {
 	}
 
 	screen.Events = make(chan tcell.Event)
+
+	sigterm = make(chan os.Signal, 1)
+	sighup = make(chan os.Signal, 1)
+	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(sighup, syscall.SIGHUP)
 
 	// Here is the event loop which runs in a separate thread
 	go func() {

@@ -93,10 +93,10 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 		done := h.DoKeyEvent(ke)
 		hasYN := h.HasYN
 		if e.Key() == tcell.KeyRune && hasYN {
-			if e.Rune() == 'y' && hasYN {
+			if (e.Rune() == 'y' || e.Rune() == 'Y') && hasYN {
 				h.YNResp = true
 				h.DonePrompt(false)
-			} else if e.Rune() == 'n' && hasYN {
+			} else if (e.Rune() == 'n' || e.Rune() == 'N') && hasYN {
 				h.YNResp = false
 				h.DonePrompt(false)
 			}

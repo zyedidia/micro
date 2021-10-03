@@ -26,8 +26,9 @@ The backup was created on %s, and the file is
   When the buffer is closed, the backup will be removed.
 * 'ignore' will ignore the backup, discarding its changes. The backup file
   will be removed.
+* 'abort' will abort the open operation, and instead open an empty buffer.
 
-Options: [r]ecover, [i]gnore: `
+Options: [r]ecover, [i]gnore, [a]bort: `
 
 var backupRequestChan chan *Buffer
 
@@ -118,7 +119,7 @@ func (b *Buffer) RemoveBackup() {
 
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
 // Returns true if a backup was applied
-func (b *Buffer) ApplyBackup(fsize int64) bool {
+func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
 	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
 		backupfile := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
 		if info, err := os.Stat(backupfile); err == nil {
@@ -127,20 +128,22 @@ func (b *Buffer) ApplyBackup(fsize int64) bool {
 				defer backup.Close()
 				t := info.ModTime()
 				msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), util.EscapePath(b.AbsPath))
-				choice := screen.TermPrompt(msg, []string{"r", "i", "recover", "ignore"}, true)
+				choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
 
-				if choice%2 == 0 {
+				if choice%3 == 0 {
 					// recover
 					b.LineArray = NewLineArray(uint64(fsize), FFAuto, backup)
 					b.isModified = true
-					return true
-				} else if choice%2 == 1 {
+					return true, true
+				} else if choice%3 == 1 {
 					// delete
 					os.Remove(backupfile)
+				} else if choice%3 == 2 {
+					return false, false
 				}
 			}
 		}
 	}
 
-	return false
+	return false, true
 }

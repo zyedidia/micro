@@ -23,12 +23,9 @@ func shouldContinue() bool {
 		return false
 	}
 
-	if len(text) <= 1 {
-		// default continue
-		return true
-	}
+	text = strings.TrimRight(text, "\r\n")
 
-	return strings.ToLower(text)[0] == 'y'
+	return len(text) == 0 || strings.ToLower(text)[0] == 'y'
 }
 
 // CleanConfig performs cleanup in the user's configuration directory

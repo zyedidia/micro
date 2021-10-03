@@ -2,7 +2,10 @@ package action
 
 import "github.com/zyedidia/micro/v2/internal/buffer"
 
+// InfoBar is the global info bar.
 var InfoBar *InfoPane
+
+// LogBufPane is a global log buffer.
 var LogBufPane *BufPane
 
 // InitGlobals initializes the log buffer and the info bar

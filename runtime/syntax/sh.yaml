@@ -1,7 +1,29 @@
 filetype: shell
 
+# Detection based on filename is rather complicated as there are many
+# different file extensions and special filenames in use.
+# This expressions aims to capture them all while not matching
+# filenames that coincidentally contain the same substring.
+#
+# File extensions:
+# * .sh
+# * .bash
+# * .ash 
+# * .ebuild (Gentoo ebuild format)
+#
+# Special filenames:
+# * .bashrc, .bash_aliases, .bash_functions .bash_profile
+# * profile, .profile (/etc/profile or ~/.profile)
+# * Pkgfile
+# * pkgmk.conf
+# * rc.conf
+# * PKGBUILD (Arch Linux build scripts)
+# * APKBUILD
+#
+# Fix command (fc) files:
+# * bash-fc. (followed by a random string)
 detect:
-    filename: "(\\.sh$|\\.bash|\\.ash|bashrc|bash_aliases|bash_functions|profile|bash-fc\\.|Pkgfile|pkgmk.conf|rc.conf|PKGBUILD|.ebuild\\$|APKBUILD)"
+    filename: '(\.(sh|bash|ash|ebuild)$|(\.bash(rc|_aliases|_functions|_profile)|\.?profile|Pkgfile|pkgmk\.conf|rc\.conf|PKGBUILD|APKBUILD)$|bash-fc\.)'
     header: "^#!.*/(env +)?(ba)?(a)?(mk)?sh( |$)"
 
 rules:

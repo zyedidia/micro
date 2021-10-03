@@ -229,7 +229,7 @@ func (k *KeyTree) ResetEvents() {
 	k.cursor.mouseInfo = nil
 }
 
-// CurrentEventsStr returns the list of recorded events as a string
+// RecordedEventsStr returns the list of recorded events as a string
 func (k *KeyTree) RecordedEventsStr() string {
 	buf := &bytes.Buffer{}
 	for _, e := range k.cursor.recordedEvents {

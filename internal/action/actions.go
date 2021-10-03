@@ -1,6 +1,9 @@
 package action
 
 import (
+	"errors"
+	"fmt"
+	"io/fs"
 	"regexp"
 	"runtime"
 	"strings"
@@ -31,8 +34,8 @@ func (h *BufPane) ScrollDown(n int) {
 	h.SetView(v)
 }
 
-// If the user has scrolled past the last line, ScrollAdjust can be used
-// to shift the view so that the last line is at the bottom
+// ScrollAdjust can be used to shift the view so that the last line is at the
+// bottom if the user has scrolled past the last line.
 func (h *BufPane) ScrollAdjust() {
 	v := h.GetView()
 	end := h.SLocFromLoc(h.Buf.End())
@@ -807,7 +810,7 @@ func (h *BufPane) SaveAs() bool {
 func (h *BufPane) saveBufToFile(filename string, action string, callback func()) bool {
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
-		if strings.HasSuffix(err.Error(), "permission denied") {
+		if errors.Is(err, fs.ErrPermission) {
 			saveWithSudo := func() {
 				err = h.Buf.SaveAsWithSudo(filename)
 				if err != nil {
@@ -824,12 +827,15 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 			if h.Buf.Settings["autosu"].(bool) {
 				saveWithSudo()
 			} else {
-				InfoBar.YNPrompt("Permission denied. Do you want to save this file using sudo? (y,n)", func(yes, canceled bool) {
-					if yes && !canceled {
-						saveWithSudo()
-						h.completeAction(action)
-					}
-				})
+				InfoBar.YNPrompt(
+					fmt.Sprintf("Permission denied. Do you want to save this file using %s? (y,n)", config.GlobalSettings["sucmd"].(string)),
+					func(yes, canceled bool) {
+						if yes && !canceled {
+							saveWithSudo()
+							h.completeAction(action)
+						}
+					},
+				)
 				return false
 			}
 		} else {
@@ -858,8 +864,10 @@ func (h *BufPane) FindLiteral() bool {
 
 // Search searches for a given string/regex in the buffer and selects the next
 // match if a match is found
-// This function affects lastSearch and lastSearchRegex (saved searches) for
-// use with FindNext and FindPrevious
+// This function behaves the same way as Find and FindLiteral actions:
+// it affects the buffer's LastSearch and LastSearchRegex (saved searches)
+// for use with FindNext and FindPrevious, and turns HighlightSearch on or off
+// according to hlsearch setting
 func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
 	match, found, err := h.Buf.FindNext(str, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, searchDown, useRegex)
 	if err != nil {
@@ -871,8 +879,9 @@ func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 		h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
-		h.lastSearch = str
-		h.lastSearchRegex = useRegex
+		h.Buf.LastSearch = str
+		h.Buf.LastSearchRegex = useRegex
+		h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
 		h.Relocate()
 	} else {
 		h.Cursor.ResetSelection()
@@ -916,8 +925,9 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
-				h.lastSearch = resp
-				h.lastSearchRegex = useRegex
+				h.Buf.LastSearch = resp
+				h.Buf.LastSearchRegex = useRegex
+				h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
 			} else {
 				h.Cursor.ResetSelection()
 				InfoBar.Message("No matches found")
@@ -932,6 +942,21 @@ func (h *BufPane) find(useRegex bool) bool {
 		eventCallback(pattern)
 	}
 	InfoBar.Prompt(prompt, pattern, "Find", eventCallback, findCallback)
+	if pattern != "" {
+		InfoBar.SelectAll()
+	}
+	return true
+}
+
+// ToggleHighlightSearch toggles highlighting all instances of the last used search term
+func (h *BufPane) ToggleHighlightSearch() bool {
+	h.Buf.HighlightSearch = !h.Buf.HighlightSearch
+	return true
+}
+
+// UnhighlightSearch unhighlights all instances of the last used search term
+func (h *BufPane) UnhighlightSearch() bool {
+	h.Buf.HighlightSearch = false
 	return true
 }
 
@@ -945,7 +970,7 @@ func (h *BufPane) FindNext() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[1]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.lastSearchRegex)
+	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -972,7 +997,7 @@ func (h *BufPane) FindPrevious() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[0]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.lastSearchRegex)
+	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -1016,16 +1041,16 @@ func (h *BufPane) Copy() bool {
 	return true
 }
 
-// Copy the current line to the clipboard
+// CopyLine copies the current line to the clipboard
 func (h *BufPane) CopyLine() bool {
 	if h.Cursor.HasSelection() {
 		return false
-	} else {
-		h.Cursor.SelectLine()
-		h.Cursor.CopySelection(clipboard.ClipboardReg)
-		h.freshClip = true
-		InfoBar.Message("Copied line")
 	}
+	h.Cursor.SelectLine()
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.freshClip = true
+	InfoBar.Message("Copied line")
+
 	h.Cursor.Deselect(true)
 	h.Relocate()
 	return true
@@ -1068,14 +1093,15 @@ func (h *BufPane) Cut() bool {
 
 		h.Relocate()
 		return true
-	} else {
-		return h.CutLine()
 	}
+	return h.CutLine()
 }
 
 // DuplicateLine duplicates the current line or selection
 func (h *BufPane) DuplicateLine() bool {
+	var infoMessage = "Duplicated line"
 	if h.Cursor.HasSelection() {
+		infoMessage = "Duplicated selection"
 		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
 	} else {
 		h.Cursor.End()
@@ -1083,7 +1109,7 @@ func (h *BufPane) DuplicateLine() bool {
 		// h.Cursor.Right()
 	}
 
-	InfoBar.Message("Duplicated line")
+	InfoBar.Message(infoMessage)
 	h.Relocate()
 	return true
 }
@@ -1629,12 +1655,12 @@ func (h *BufPane) PreviousSplit() bool {
 }
 
 var curmacro []interface{}
-var recording_macro bool
+var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
 func (h *BufPane) ToggleMacro() bool {
-	recording_macro = !recording_macro
-	if recording_macro {
+	recordingMacro = !recordingMacro
+	if recordingMacro {
 		curmacro = []interface{}{}
 		InfoBar.Message("Recording")
 	} else {
@@ -1646,7 +1672,7 @@ func (h *BufPane) ToggleMacro() bool {
 
 // PlayMacro plays back the most recently recorded macro
 func (h *BufPane) PlayMacro() bool {
-	if recording_macro {
+	if recordingMacro {
 		return false
 	}
 	for _, action := range curmacro {
@@ -1706,10 +1732,9 @@ func (h *BufPane) SpawnMultiCursor() bool {
 func (h *BufPane) SpawnMultiCursorUp() bool {
 	if h.Cursor.Y == 0 {
 		return false
-	} else {
-		h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-		h.Cursor.Relocate()
 	}
+	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
+	h.Cursor.Relocate()
 
 	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
 	h.Buf.AddCursor(c)
@@ -1724,10 +1749,9 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 func (h *BufPane) SpawnMultiCursorDown() bool {
 	if h.Cursor.Y+1 == h.Buf.LinesNum() {
 		return false
-	} else {
-		h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
-		h.Cursor.Relocate()
 	}
+	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
+	h.Cursor.Relocate()
 
 	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
 	h.Buf.AddCursor(c)

@@ -38,6 +38,7 @@ var bufdefaults = map[string]string{
 	"Ctrl-o":         "OpenFile",
 	"Ctrl-s":         "Save",
 	"Ctrl-f":         "Find",
+	"Alt-F":          "FindLiteral",
 	"Ctrl-n":         "FindNext",
 	"Ctrl-p":         "FindPrevious",
 	"Ctrl-z":         "Undo",
@@ -86,7 +87,7 @@ var bufdefaults = map[string]string{
 	"F4":  "Quit",
 	"F7":  "Find",
 	"F10": "Quit",
-	"Esc": "Escape,Deselect,ClearInfo,RemoveAllMultiCursors",
+	"Esc": "Escape,Deselect,ClearInfo,RemoveAllMultiCursors,UnhighlightSearch",
 
 	// Mouse bindings
 	"MouseWheelUp":   "ScrollUp",

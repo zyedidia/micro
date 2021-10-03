@@ -1,4 +1,4 @@
-.PHONY: runtime
+.PHONY: runtime build generate build-quick
 
 VERSION = $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/build-version.go)
@@ -13,46 +13,29 @@ GOVARS = -X github.com/zyedidia/micro/v2/internal/util.Version=$(VERSION) -X git
 DEBUGVAR = -X github.com/zyedidia/micro/v2/internal/util.Debug=ON
 VSCODE_TESTS_BASE_URL = 'https://raw.githubusercontent.com/microsoft/vscode/e6a45f4242ebddb7aa9a229f85555e8a3bd987e2/src/vs/editor/test/common/model/'
 
-# Builds micro after checking dependencies but without updating the runtime
-build:
+build: generate build-quick
+
+build-quick:
 	go build -trimpath -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
 build-dbg:
 	go build -trimpath -ldflags "-s -w $(ADDITIONAL_GO_LINKER_FLAGS) $(DEBUGVAR)" ./cmd/micro
 
-build-tags: fetch-tags
+build-tags: fetch-tags generate
 	go build -trimpath -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
-# Builds micro after building the runtime and checking dependencies
-build-all: runtime build
+build-all: build
 
-# Builds micro without checking for dependencies
-build-quick:
-	go build -trimpath -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
-
-# Same as 'build' but installs to $GOBIN afterward
-install:
+install: generate
 	go install -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
 
-# Same as 'build-all' but installs to $GOBIN afterward
-install-all: runtime install
-
-# Same as 'build-quick' but installs to $GOBIN afterward
-install-quick:
-	go install -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)"  ./cmd/micro
+install-all: install
 
 fetch-tags:
 	git fetch --tags
 
-# Builds the runtime
-runtime:
-	git submodule update --init
-	rm -f runtime/syntax/*.hdr
-	go run runtime/syntax/make_headers.go runtime/syntax
-	go build -o tools/bindata ./tools/go-bindata
-	tools/bindata -pkg config -nomemcopy -nometadata -o runtime.go runtime/...
-	mv runtime.go internal/config
-	gofmt -w internal/config/runtime.go
+generate:
+	go generate ./runtime
 
 testgen:
 	mkdir -p tools/vscode-tests
