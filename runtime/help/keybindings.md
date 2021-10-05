@@ -30,8 +30,8 @@ following in the `bindings.json` file.
 
 ```json
 {
-	"Ctrl-y": "Undo",
-	"Ctrl-z": "Redo"
+	"Ctrl-z": "Undo",
+	"Ctrl-y": "Redo"
 }
 ```
 
