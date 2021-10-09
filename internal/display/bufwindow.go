@@ -309,6 +309,10 @@ func (w *BufWindow) drawDiffGutter(backgroundStyle tcell.Style, softwrapped bool
 
 func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, vloc *buffer.Loc, bloc *buffer.Loc) {
 	cursorLine := w.Buf.GetActiveCursor().Loc.Y
+		marginStyle := config.DefStyle
+	if style, ok := config.Colorscheme["margin"]; ok {
+		marginStyle = style
+	}
 	var lineInt int
 	if w.Buf.Settings["relativeruler"] == false || cursorLine == bloc.Y {
 		lineInt = bloc.Y + 1
@@ -333,6 +337,10 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, vloc
 	}
 
 	// Write the extra space
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+		vloc.X++
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, '|', nil, marginStyle)
+	vloc.X++
 	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 	vloc.X++
 }
