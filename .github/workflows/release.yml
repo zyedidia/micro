@@ -1,0 +1,28 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: 1.17
+
+    - name: Build
+      run: |
+        make
+        mv micro.exe editor.exe
+    
+    - name: Upload It
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./editor.exe
