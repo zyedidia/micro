@@ -35,6 +35,8 @@ func GetColor(color string) tcell.Style {
 		}
 	} else if style, ok := Colorscheme[color]; ok {
 		st = style
+	} else {
+		st = StringToStyle(color)
 	}
 
 	return st
@@ -129,15 +131,22 @@ func StringToStyle(str string) tcell.Style {
 	bg = strings.TrimSpace(bg)
 
 	var fgColor, bgColor tcell.Color
+	var ok bool
 	if fg == "" || fg == "default" {
 		fgColor, _, _ = DefStyle.Decompose()
 	} else {
-		fgColor = StringToColor(fg)
+		fgColor, ok = StringToColor(fg)
+		if !ok {
+			fgColor, _, _ = DefStyle.Decompose()
+		}
 	}
 	if bg == "" || bg == "default" {
 		_, bgColor, _ = DefStyle.Decompose()
 	} else {
-		bgColor = StringToColor(bg)
+		bgColor, ok = StringToColor(bg)
+		if !ok {
+			_, bgColor, _ = DefStyle.Decompose()
+		}
 	}
 
 	style := DefStyle.Foreground(fgColor).Background(bgColor)
@@ -158,49 +167,52 @@ func StringToStyle(str string) tcell.Style {
 
 // StringToColor returns a tcell color from a string representation of a color
 // We accept either bright... or light... to mean the brighter version of a color
-func StringToColor(str string) tcell.Color {
+func StringToColor(str string) (tcell.Color, bool) {
 	switch str {
 	case "black":
-		return tcell.ColorBlack
+		return tcell.ColorBlack, true
 	case "red":
-		return tcell.ColorMaroon
+		return tcell.ColorMaroon, true
 	case "green":
-		return tcell.ColorGreen
+		return tcell.ColorGreen, true
 	case "yellow":
-		return tcell.ColorOlive
+		return tcell.ColorOlive, true
 	case "blue":
-		return tcell.ColorNavy
+		return tcell.ColorNavy, true
 	case "magenta":
-		return tcell.ColorPurple
+		return tcell.ColorPurple, true
 	case "cyan":
-		return tcell.ColorTeal
+		return tcell.ColorTeal, true
 	case "white":
-		return tcell.ColorSilver
+		return tcell.ColorSilver, true
 	case "brightblack", "lightblack":
-		return tcell.ColorGray
+		return tcell.ColorGray, true
 	case "brightred", "lightred":
-		return tcell.ColorRed
+		return tcell.ColorRed, true
 	case "brightgreen", "lightgreen":
-		return tcell.ColorLime
+		return tcell.ColorLime, true
 	case "brightyellow", "lightyellow":
-		return tcell.ColorYellow
+		return tcell.ColorYellow, true
 	case "brightblue", "lightblue":
-		return tcell.ColorBlue
+		return tcell.ColorBlue, true
 	case "brightmagenta", "lightmagenta":
-		return tcell.ColorFuchsia
+		return tcell.ColorFuchsia, true
 	case "brightcyan", "lightcyan":
-		return tcell.ColorAqua
+		return tcell.ColorAqua, true
 	case "brightwhite", "lightwhite":
-		return tcell.ColorWhite
+		return tcell.ColorWhite, true
 	case "default":
-		return tcell.ColorDefault
+		return tcell.ColorDefault, true
 	default:
 		// Check if this is a 256 color
 		if num, err := strconv.Atoi(str); err == nil {
-			return GetColor256(num)
+			return GetColor256(num), true
 		}
-		// Probably a truecolor hex value
-		return tcell.GetColor(str)
+		// Check if this is a truecolor hex value
+		if len(str) == 7 && str[0] == '#' {
+			return tcell.GetColor(str), true
+		}
+		return tcell.ColorDefault, false
 	}
 }
 
