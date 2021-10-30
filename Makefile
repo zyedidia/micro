@@ -35,7 +35,7 @@ fetch-tags:
 	git fetch --tags
 
 generate:
-	go generate ./runtime
+	GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) go generate ./runtime
 
 testgen:
 	mkdir -p tools/vscode-tests
