@@ -176,7 +176,12 @@ Here are the available options:
 
 	default value: `true`
 
-* `indentchar`: sets the indentation character.
+* `indentchar`: sets the indentation character. This will not be inserted into
+  files; it is only a visual indicator that whitespace is present. If set to a
+  printing character, it functions as a subset of the "show invisibles"
+  setting available in many other text editors. The color of this character is
+  determined by the `indent-char` field in the current theme rather than the
+  default text color.
 
 	default value: ` ` (space)
 
