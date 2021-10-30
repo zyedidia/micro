@@ -267,7 +267,7 @@ Here are the available options:
     default value: `false`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
-   lines.
+   lines. Note: This setting overrides `keepautoindent`
 
 	default value: `false`
 
