@@ -22,7 +22,9 @@ quotes here but these are not necessary when entering the command in micro.
    `key` that already exist.
 
 * `help 'topic'?`: opens the corresponding help topic. If no topic is provided
-   opens the default help screen.
+   opens the default help screen. Help topics are stored as `.md` files in the
+   `runtime/help` directory of the source tree, which is embedded in the final
+   binary.
 
 * `save 'filename'?`: saves the current buffer. If the file is provided it
    will 'save as' the filename.
