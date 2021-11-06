@@ -153,6 +153,8 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `pkd_add -v micro`.
 * NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
     * `pkg_add micro`
+* macOS with [MacPorts](https://www.macports.org):
+    * `sudo port install micro`
 
 ### Building from source
 
