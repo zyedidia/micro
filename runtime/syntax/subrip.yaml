@@ -1,0 +1,12 @@
+filetype: subrip
+
+detect:
+    filename: "\\.srt$"
+
+rules:
+    # Subtitle number
+    - identifier: "^[0-9]+$"
+    # Timecode
+    - special: "^[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3} --> [0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}"
+    # Tags
+    - preproc: "<[[:alpha:]/!?][^>]*>"
