@@ -21,6 +21,8 @@ To see more screenshots of micro, showcasing some of the default color schemes, 
  
 You can also check out the website for Micro at https://micro-editor.github.io.
 
+[中文](https://github.com/yi0322/micro-help-chinese)
+
 ## Table of Contents
 
 - [Features](#features)
