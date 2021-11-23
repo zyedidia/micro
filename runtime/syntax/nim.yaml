@@ -10,7 +10,7 @@ rules:
     - symbol.operator: "[=\\+\\-\\*/<>@\\$~&%\\|!\\?\\^\\.:\\\\]+"
     - special: "\\{\\.|\\.\\}|\\[\\.|\\.\\]|\\(\\.|\\.\\)|;|,|`"
     - statement: "\\.\\."
-    - type: "\\b(int|cint|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|float|float32|float64|bool|char|enum|string|cstring|array|openarray|seq|varargs|tuple|object|set|void|auto|cshort|range|nil|T|untyped|typedesc)\\b"
+    - type: "\\b(int|cint|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|float|float32|float64|bool|char|enum|string|cstring|cstringArray|cdouble|csize_t|pointer|array|openarray|seq|varargs|tuple|object|set|void|auto|cshort|clong|range|nil|T|untyped|typedesc)\\b"
     - type: "'[iI](8|16|32|64)?\\b|'[uU](8|16|32|64)?\\b|'[fF](32|64|128)?\\b|'[dD]\\b"
     - constant.number: "\\b[0-9]+\\b"
     - constant.number: "\\b0[xX][0-9A-Fa-f][0-9_A-Fa-f]+\\b"
