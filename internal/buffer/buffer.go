@@ -420,7 +420,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		}
 	}
 
-	err := config.RunPluginFn("onBufferOpen", luar.New(ulua.L, b))
+	err = config.RunPluginFn("onBufferOpen", luar.New(ulua.L, b))
 	if err != nil {
 		screen.TermMessage(err)
 	}
