@@ -1,16 +1,16 @@
 filetype: nim
 
 detect: 
-    filename: "\\.nims?$|nim.cfg"
+    filename: "\\.nims?$|.nimble?$|nim.cfg"
 
 rules:
     - preproc: "[\\{\\|]\\b(atom|lit|sym|ident|call|lvalue|sideeffect|nosideeffect|param|genericparam|module|type|let|var|const|result|proc|method|iterator|converter|macro|template|field|enumfield|forvar|label|nk[a-zA-Z]+|alias|noalias)\\b[\\}\\|]"
-    - statement: "\\b(addr|and|as|asm|atomic|bind|block|break|case|cast|concept|const|continue|converter|defer|discard|distinct|div|do|elif|else|end|enum|except|export|finally|for|from|func|generic|if|import|in|include|interface|is|isnot|iterator|let|macro|method|mixin|mod|nil|not|notin|object|of|or|out|proc|ptr|raise|ref|return|shl|shr|static|template|try|tuple|type|using|var|when|while|with|without|xor|yield)\\b"
-    - statement: "\\b(deprecated|noSideEffect|constructor|destructor|override|procvar|compileTime|noReturn|acyclic|final|shallow|pure|asmNoStackFrame|error|fatal|warning|hint|line|linearScanEnd|computedGoto|unroll|immediate|checks|boundsChecks|overflowChecks|nilChecks|assertations|warnings|hints|optimization|patterns|callconv|push|pop|global|pragma|experimental|bitsize|volatile|noDecl|header|incompleteStruct|compile|link|passC|passL|emit|importc|importcpp|importobjc|codegenDecl|injectStmt|intdefine|strdefine|varargs|exportc|extern|bycopy|byref|union|packed|unchecked|dynlib|cdecl|thread|gcsafe|threadvar|guard|locks|compileTime)\\b"
+    - statement: "\\b(addr|and|as|asm|assert|inc|dec|atomic|bind|block|break|runnableExamples|doaAssert|case|gensym|cast|concept|const|continue|converter|defer|discard|distinct|div|do|elif|else|end|enum|except|export|finally|for|from|func|generic|if|import|in|include|interface|is|isnot|iterator|let|len|macro|method|mixin|mod|nil|not|notin|of|or|ord|high|low|out|proc|ptr|raise|ref|return|shl|shr|sin|cos|tan|static|template|try|tuple|type|using|var|when|while|with|without|xor|yield)\\b"
+    - statement: "\\b(deprecated|noSideEffect|constructor|destructor|debugger|passc|nimcall|multisync|genSym|fastcall|override|procvar|merge|noinit|compileTime|cursor|used|noReturn|executeOnReload|base|since|core|importCompilerProc|effectsOf|dirty|noreturn|sideEffect|acyclic|final|closure|shallow|pure|tags|auditDelete|asmNoStackFrame|noinline|rtl|inl|stackTrace|error|fatal|warning|hint|line|linearScanEnd|computedGoto|unroll|immediate|checks|boundsChecks|overflowChecks|stack_trace|profiler|compilerproc|nonReloadable|stdcall|inline|rtlThreadVar|noconv|nodecl|discardable|nilChecks|compilerRtl|benign|assertations|warnings|hints|optimization|patterns|callconv|push|pop|global|pragma|experimental|bitsize|volatile|noDecl|header|incompleteStruct|compile|async|link|passC|passL|emit|importc|importcpp|importobjc|importjs|codegenDecl|injectStmt|intdefine|strdefine|varargs|exportc|extern|bycopy|byref|union|packed|unchecked|dynlib|cdecl|thread|nonReloaded|borrow|gcsafe|threadvar|guard|locks|magic|raises|compileTime)\\b"
     - symbol.operator: "[=\\+\\-\\*/<>@\\$~&%\\|!\\?\\^\\.:\\\\]+"
     - special: "\\{\\.|\\.\\}|\\[\\.|\\.\\]|\\(\\.|\\.\\)|;|,|`"
     - statement: "\\.\\."
-    - type: "\\b(int|cint|int8|int16|int32|int64|uint|uint8|uint16|uint32|uint64|float|float32|float64|bool|char|enum|string|cstring|cstringArray|cdouble|csize_t|pointer|array|openarray|seq|varargs|tuple|object|set|void|auto|cshort|clong|range|nil|T|untyped|typedesc)\\b"
+    - type: "\\b(int|cint|int8|int16|int32|int64|uint|cuint|uint8|uint16|uint32|uint64|Utf16Char|Natural|IOError|OSError|ValueError|float|float32|float64|bool|true|false|Ordinal|char|cuchar|cchar|cschar|enum|Exception|string|cstring|cstringArray|cfloat|cdouble|clongdouble|csize|csize_t|pointer|array|Future|FutureStream|FutureVar|Table|openarray|seq|Slice|BitsRange|Color|Complex|HSlice|varargs|tuple|object|set|void|auto|cshort|cushort|clong|culong|clonglong|culonglong|range|nil|T|untyped|typedesc|CFile|CFilePtr|NimNode)\\b"
     - type: "'[iI](8|16|32|64)?\\b|'[uU](8|16|32|64)?\\b|'[fF](32|64|128)?\\b|'[dD]\\b"
     - constant.number: "\\b[0-9]+\\b"
     - constant.number: "\\b0[xX][0-9A-Fa-f][0-9_A-Fa-f]+\\b"
@@ -19,9 +19,12 @@ rules:
     - constant.number: "\\b[0-9_]((\\.?)[0-9_]+)?[eE][+\\-][0-9][0-9_]+\\b"
     - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
     - comment: "[[:space:]]*[^\\\\]#.*$"
+    - comment: "#.*$"
     - comment:
         start: "\\#\\["
+        start: "\\##\\["
         end: "\\]\\#"
+        end: "\\]\\##"
         rules: []
 
     - todo: "(TODO|FIXME|XXX):?"
