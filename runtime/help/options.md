@@ -369,7 +369,11 @@ Here are the available options:
 
 	default value: `4`
 
-* `tabstospaces`: use spaces instead of tabs.
+* `tabstospaces`: use spaces instead of tabs. Note: This option will be
+   overridden by [the `ftoptions` plugin](https://github.com/zyedidia/micro/blob/master/runtime/plugins/ftoptions/ftoptions.lua)
+   for certain filetypes. To disable this behavior, add `"ftoptions": false` to
+   your config. See [issue #2213](https://github.com/zyedidia/micro/issues/2213)
+   for more details.
 
 	default value: `false`
 
