@@ -12,14 +12,18 @@ rules:
     - identifier: "[$@%&](\\.|!|^)?([[:alpha:]]|_)([[:alnum:]]|-|_)*([[:alnum:]]|_)"
     - identifier: "[$@%&](\\?|\\*)([A-Z])([A-Z]|-)*([A-Z])"
 
-    - constant.string: "\".*\"|qq\\|.*\\|"
-    - default: "[sm]/.*/"
+    - comment: "#\ [^`|=]*"
+    - comment: "#[:alnum:].*"
+    - comment: "^#!/.*"
+
+    - constant.string: "\"([^\"]).*\""
+    - constant.string: "'([^']).*'"
+
     - preproc:
         start: "(^use| = new)"
         end: ";"
         rules: []
 
-    - comment: "#.*"
     - identifier.macro:
         start: "<<EOSQL"
         end: "EOSQL"
