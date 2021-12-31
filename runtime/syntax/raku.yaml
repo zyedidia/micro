@@ -12,10 +12,6 @@ rules:
     - identifier: "[$@%&](\\.|!|^)?([[:alpha:]]|_)([[:alnum:]]|-|_)*([[:alnum:]]|_)"
     - identifier: "[$@%&](\\?|\\*)([A-Z])([A-Z]|-)*([A-Z])"
 
-    - comment: "#\ [^`|=]*"
-    - comment: "#[:alnum:].*"
-    - comment: "^#!/.*"
-
     - constant.string:
         start: "\""
         end: "\""
@@ -40,3 +36,7 @@ rules:
         end: "EOSQL"
         rules: []
 
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
