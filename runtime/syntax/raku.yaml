@@ -16,8 +16,19 @@ rules:
     - comment: "#[:alnum:].*"
     - comment: "^#!/.*"
 
-    - constant.string: "\"([^\"]).*\""
-    - constant.string: "'([^']).*'"
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
 
     - preproc:
         start: "(^use| = new)"
