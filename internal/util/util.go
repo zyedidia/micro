@@ -3,6 +3,10 @@ package util
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/aes"
+	"crypto/cipher"
+	"crypto/rand"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"io"
@@ -492,4 +496,85 @@ func Unzip(src, dest string) error {
 	}
 
 	return nil
+}
+
+func Encrypt(text, key string) (string, error) {
+	// This code borrowed from https://golangdocs.com/aes-encryption-decryption-in-golang
+	keyAsBytes := []byte(key)
+	// Need the key to be 32 bytes long, so either truncate or pad
+	if len(keyAsBytes) > 32 {
+		keyAsBytes = keyAsBytes[0:32]
+	} else if len(keyAsBytes) < 32 {
+		extraBytesNeeded := 32 - len(keyAsBytes)
+		idxToAdd := 0
+		keyStartLen := len(keyAsBytes)
+		for extraBytesNeeded > 0 {
+			keyAsBytes = append(keyAsBytes, keyAsBytes[idxToAdd])
+			idxToAdd++
+			if idxToAdd == keyStartLen {
+				idxToAdd = 0
+			}
+			extraBytesNeeded--
+		}
+	}
+
+	c, err := aes.NewCipher(keyAsBytes)
+	if err != nil {
+		return fmt.Sprintf("creating cipher err: %v", err), err
+	}
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return fmt.Sprintf("creating gcm err: %v", err), err
+	}
+	nonce := make([]byte, gcm.NonceSize())
+	// populates our nonce with a cryptographically secure
+	// random sequence
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
+		fmt.Println(err)
+	}
+
+	// return hex string
+	return hex.EncodeToString(gcm.Seal(nonce, nonce, []byte(text), nil)), nil
+}
+
+func Decrypt(text, key string) (string, error) {
+	// This code borrowed from https://golangdocs.com/aes-encryption-decryption-in-golang
+	keyAsBytes := []byte(key)
+	// Need the key to be 32 bytes long, so either truncate or pad
+	if len(keyAsBytes) > 32 {
+		keyAsBytes = keyAsBytes[0:32]
+	} else if len(keyAsBytes) < 32 {
+		extraBytesNeeded := 32 - len(keyAsBytes)
+		idxToAdd := 0
+		keyStartLen := len(keyAsBytes)
+		for extraBytesNeeded > 0 {
+			keyAsBytes = append(keyAsBytes, keyAsBytes[idxToAdd])
+			idxToAdd++
+			if idxToAdd == keyStartLen {
+				idxToAdd = 0
+			}
+			extraBytesNeeded--
+		}
+	}
+
+	c, err := aes.NewCipher(keyAsBytes)
+	if err != nil {
+		return fmt.Sprintf("creating cipher err: %v", err), err
+	}
+	gcm, err := cipher.NewGCM(c)
+	if err != nil {
+		return fmt.Sprintf("creating gcm err: %v", err), err
+	}
+
+	textAsBytes, err := hex.DecodeString(text)
+	if err != nil {
+		return fmt.Sprintf("decoding err: %v", err), err
+	}
+	nonce, ciphertext := textAsBytes[:gcm.NonceSize()], textAsBytes[gcm.NonceSize():]
+	plaintext, err := gcm.Open(nil, nonce, ciphertext, nil)
+	if err == nil {
+		return string(plaintext), nil
+	} else {
+		return fmt.Sprintf("decrypting err: %v", err), err
+	}
 }

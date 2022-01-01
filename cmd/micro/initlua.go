@@ -154,6 +154,8 @@ func luaImportMicroUtil() *lua.LTable {
 	ulua.L.SetField(pkg, "RuneStr", luar.New(ulua.L, func(r rune) string {
 		return string(r)
 	}))
+	ulua.L.SetField(pkg, "Encrypt", luar.New(ulua.L, util.Encrypt))
+	ulua.L.SetField(pkg, "Decrypt", luar.New(ulua.L, util.Decrypt))
 
 	return pkg
 }
