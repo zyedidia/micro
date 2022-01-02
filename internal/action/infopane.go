@@ -108,7 +108,9 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 		if done && h.HasPrompt && !hasYN {
 			resp := string(h.LineBytes(0))
 			hist := h.History[h.PromptType]
-			hist[h.HistoryNum] = resp
+			if h.HistoryNum < len(hist) {
+				hist[h.HistoryNum] = resp
+			}
 			if h.EventCallback != nil {
 				h.EventCallback(resp)
 			}
