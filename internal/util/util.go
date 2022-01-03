@@ -500,8 +500,6 @@ func Unzip(src, dest string) error {
 }
 
 func Encrypt(text, key string) (string, error) {
-	// This code borrowed from https://golangdocs.com/aes-encryption-decryption-in-golang
-	// Need the key to be 32 bytes long, so either truncate or pad
 	keyHash := sha256.Sum256([]byte(key))
 	c, err := aes.NewCipher(keyHash[:])
 	if err != nil {
@@ -523,7 +521,6 @@ func Encrypt(text, key string) (string, error) {
 }
 
 func Decrypt(text, key string) (string, error) {
-	// This code borrowed from https://golangdocs.com/aes-encryption-decryption-in-golang
 	keyHash := sha256.Sum256([]byte(key))
 	c, err := aes.NewCipher(keyHash[:])
 	if err != nil {
