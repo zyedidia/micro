@@ -262,6 +262,8 @@ view the help files here:
 I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
 a brief introduction to the more powerful configuration features micro offers.
 
+There is also an unofficial Discord, which you can join at https://discord.gg/nhWR6armnR.
+
 ## Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
@@ -269,6 +271,6 @@ If you find any bugs, please report them! I am also happy to accept pull request
 You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
-For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR).
 
 Sometimes I am unresponsive, and I apologize! If that happens, please ping me.

@@ -14,8 +14,8 @@ at the end of this document).
 If `~/.config/micro/bindings.json` does not exist, you can simply create it.
 Micro will know what to do with it.
 
-You can use the alt keys + arrows to move word by word. Ctrl left and right
-move the cursor to the start and end of the line, and ctrl up and down move the
+You can use Ctrl + arrows to move word by word (Alt + arrows for Mac). Alt + left and right
+move the cursor to the start and end of the line (Ctrl + left/right for Mac), and Ctrl + up and down move the
 cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
@@ -70,7 +70,7 @@ will execute `InsertTab`.
 
 ## Binding commands
 
-You can also bind a key to execute a command in command mode (see 
+You can also bind a key to execute a command in command mode (see
 `help commands`). Simply prepend the binding with `command:`. For example:
 
 ```json
@@ -88,9 +88,9 @@ instead insert unicode characters. To fix this, do the following:
 Now when you press `Alt-p` the `pwd` command will be executed which will show
 your working directory in the infobar.
 
-You can also bind an "editable" command with `command-edit:`. This means that 
+You can also bind an "editable" command with `command-edit:`. This means that
 micro won't immediately execute the command when you press the binding, but
-instead just place the string in the infobar in command mode. For example, 
+instead just place the string in the infobar in command mode. For example,
 you could rebind `Ctrl-g` to `> help`:
 
 ```json
@@ -105,13 +105,13 @@ cursor placement).
 
 ## Binding raw escape sequences
 
-Only read this section if you are interested in binding keys that aren't on the 
+Only read this section if you are interested in binding keys that aren't on the
 list of supported keys for binding.
 
 One of the drawbacks of using a terminal-based editor is that the editor must
 get all of its information about key events through the terminal. The terminal
 sends these events in the form of escape sequences often (but not always)
-starting with `0x1b`. 
+starting with `0x1b`.
 
 For example, if micro reads `\x1b[1;5D`, on most terminals this will mean the
 user pressed CtrlLeft.
@@ -149,7 +149,7 @@ Coming soon!
 
 ## Unbinding keys
 
-It is also possible to disable any of the default key bindings by use of the 
+It is also possible to disable any of the default key bindings by use of the
 `None` action in the user's `bindings.json` file.
 
 ## Bindable actions and bindable keys
@@ -642,7 +642,7 @@ Note: On some old terminal emulators and on Windows machines, `Ctrl-h` should be
 used for backspace.
 
 Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or
-`Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and 
+`Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and
 `Ctrl` so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings).
 This is why in the default keybindings you can see `AltShiftLeft` instead of
 `Alt-ShiftLeft` (they are equivalent).
