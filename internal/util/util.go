@@ -6,6 +6,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/hex"
 	"errors"
 	"fmt"
@@ -500,25 +501,9 @@ func Unzip(src, dest string) error {
 
 func Encrypt(text, key string) (string, error) {
 	// This code borrowed from https://golangdocs.com/aes-encryption-decryption-in-golang
-	keyAsBytes := []byte(key)
 	// Need the key to be 32 bytes long, so either truncate or pad
-	if len(keyAsBytes) > 32 {
-		keyAsBytes = keyAsBytes[0:32]
-	} else if len(keyAsBytes) < 32 {
-		extraBytesNeeded := 32 - len(keyAsBytes)
-		idxToAdd := 0
-		keyStartLen := len(keyAsBytes)
-		for extraBytesNeeded > 0 {
-			keyAsBytes = append(keyAsBytes, keyAsBytes[idxToAdd])
-			idxToAdd++
-			if idxToAdd == keyStartLen {
-				idxToAdd = 0
-			}
-			extraBytesNeeded--
-		}
-	}
-
-	c, err := aes.NewCipher(keyAsBytes)
+	keyHash := sha256.Sum256([]byte(key))
+	c, err := aes.NewCipher(keyHash[:])
 	if err != nil {
 		return fmt.Sprintf("creating cipher err: %v", err), err
 	}
@@ -539,25 +524,8 @@ func Encrypt(text, key string) (string, error) {
 
 func Decrypt(text, key string) (string, error) {
 	// This code borrowed from https://golangdocs.com/aes-encryption-decryption-in-golang
-	keyAsBytes := []byte(key)
-	// Need the key to be 32 bytes long, so either truncate or pad
-	if len(keyAsBytes) > 32 {
-		keyAsBytes = keyAsBytes[0:32]
-	} else if len(keyAsBytes) < 32 {
-		extraBytesNeeded := 32 - len(keyAsBytes)
-		idxToAdd := 0
-		keyStartLen := len(keyAsBytes)
-		for extraBytesNeeded > 0 {
-			keyAsBytes = append(keyAsBytes, keyAsBytes[idxToAdd])
-			idxToAdd++
-			if idxToAdd == keyStartLen {
-				idxToAdd = 0
-			}
-			extraBytesNeeded--
-		}
-	}
-
-	c, err := aes.NewCipher(keyAsBytes)
+	keyHash := sha256.Sum256([]byte(key))
+	c, err := aes.NewCipher(keyHash[:])
 	if err != nil {
 		return fmt.Sprintf("creating cipher err: %v", err), err
 	}
