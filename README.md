@@ -166,7 +166,7 @@ Make sure that you have Go version 1.11 or greater and Go modules are enabled.
 git clone https://github.com/zyedidia/micro
 cd micro
 make build
-sudo mv micro /usr/local/bin # optional
+sudo mv micro /usr/local/bin/micro # optional
 ```
 
 The binary will be placed in the current directory and can be moved to
