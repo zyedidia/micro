@@ -1,7 +1,7 @@
 filetype: git-commit
 
 detect:
-    filename: "^(.*[\\/])?(COMMIT_EDITMSG|TAG_EDITMSG)$"
+    filename: "^(.*[\\/])?(COMMIT_EDITMSG|TAG_EDITMSG|MERGE_MSG)$"
 
 rules:
     # File changes
