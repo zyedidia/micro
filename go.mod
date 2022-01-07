@@ -26,4 +26,6 @@ replace github.com/kballard/go-shellquote => github.com/zyedidia/go-shellquote v
 
 replace github.com/mattn/go-runewidth => github.com/zyedidia/go-runewidth v0.0.12
 
+replace layeh.com/gopher-luar => github.com/layeh/gopher-luar v1.0.7
+
 go 1.16
