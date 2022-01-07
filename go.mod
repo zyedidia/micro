@@ -18,7 +18,7 @@ require (
 	github.com/zyedidia/tcell/v2 v2.0.8
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
 	golang.org/x/text v0.3.2
-	gopkg.in/yaml.v2 v2.2.7
+	gopkg.in/yaml.v2 v2.2.8
 	layeh.com/gopher-luar v1.0.7
 )
 
