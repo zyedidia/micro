@@ -336,6 +336,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"parsecursor":    false,
 	"paste":          false,
 	"savehistory":    true,
+	"scrollbarchar":  "|",
 	"sucmd":          "sudo",
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},

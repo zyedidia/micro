@@ -302,6 +302,10 @@ Here are the available options:
 
     default value: `false`
 
+* `scrollbarchar`: specifies the character used for displaying the scrollbar
+
+    default value: `|`
+
 * `scrollmargin`: margin at which the view starts scrolling when the cursor
    approaches the edge of the view.
 
