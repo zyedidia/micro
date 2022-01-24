@@ -167,6 +167,7 @@ func InitRuntimeFiles() {
 
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.yaml")
+	add(RTSyntax, "syntax", "*.yml")
 	add(RTSyntaxHeader, "syntax", "*.hdr")
 	add(RTHelp, "help", "*.md")
 
