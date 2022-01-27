@@ -5,7 +5,7 @@ detect:
 
 rules:
     # Conditionals, control flow, operator keywords, attributes
-    - special: "\\b(return|defer|case|continue|break|size_of|offset_of|type_info_of|typeid_of|type_of|align_of|transmute|cast)\\b"
+    - special: "\\b(return|defer|case|continue|break|size_of|offset_of|type_info_of|typeid_of|type_of|align_of|transmute|cast|auto_cast)\\b"
     - special: "#([^ ])+"
     - statement: "\\b(if|else|for|do|switch|when)"
     - preproc: "\\b(struct|enum|union|bit_field|bit_set|using|import|export|foreign|const|package|proc|in|not_in|dynamic)"
