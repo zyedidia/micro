@@ -1,0 +1,64 @@
+filetype: odin
+
+detect:
+    filename: "\\.odin$"
+
+rules:
+    # Conditionals and control flow
+    - special: "\\b(return|defer|case|continue|break|size_of|offset_of|type_info_of|typeid_of|type_of|align_of|transmute|cast)\\b"
+    - statement: "\\b(if|else|for|do|switch|when)"
+    - preproc: "\\b(struct|enum|union|bit_field|bit_set|using|import|export|foreign|const|package|proc|in|notin|not_in|dynamic)"
+    - symbol.operator: "[-+/*=<>!~%&|^:\\.]|%."
+
+    # Types
+    - type: "\\b(string|cstring|bool|b(8|16|32|64)|rune|any|rawptr|f(32|64)(le|be)?|u(8|16|32|64|128)(le|be)?|uint|uintptr|i(8|16|32|64|128)(le|be)?|int|complex(32|64|128)?|quaternion(64|128|256)?|matrix)\\b"
+    - constant.bool: "\\b(true|false|nil)\\b"\
+    - symbol: "(,|;)"
+    
+    # Brackets
+    - symbol.brackets: "(\\{|\\})"
+    - symbol.brackets: "(\\(|\\))"
+    - symbol.brackets: "(\\[|\\])"
+
+    # Comments
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+    
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    # Numbers and strings
+    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\."
+        rules:
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "`"
+        end: "`"
+        skip: "\\."
+        rules:
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+            
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\."
+        rules:
+            - constant.specialChar: "%."
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
