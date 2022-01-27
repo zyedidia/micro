@@ -4,15 +4,16 @@ detect:
     filename: "\\.odin$"
 
 rules:
-    # Conditionals and control flow
+    # Conditionals, control flow, operator keywords, attributes
     - special: "\\b(return|defer|case|continue|break|size_of|offset_of|type_info_of|typeid_of|type_of|align_of|transmute|cast)\\b"
+    - special: "#([^ ])+"
     - statement: "\\b(if|else|for|do|switch|when)"
-    - preproc: "\\b(struct|enum|union|bit_field|bit_set|using|import|export|foreign|const|package|proc|in|notin|not_in|dynamic)"
-    - symbol.operator: "[-+/*=<>!~%&|^:\\.]|%."
+    - preproc: "\\b(struct|enum|union|bit_field|bit_set|using|import|export|foreign|const|package|proc|in|not_in|dynamic)"
+    - symbol.operator: "[-+/*=<>!~%&|^:\\.]"
 
     # Types
     - type: "\\b(string|cstring|bool|b(8|16|32|64)|rune|any|rawptr|f(32|64)(le|be)?|u(8|16|32|64|128)(le|be)?|uint|uintptr|i(8|16|32|64|128)(le|be)?|int|complex(32|64|128)?|quaternion(64|128|256)?|matrix)\\b"
-    - constant.bool: "\\b(true|false|nil)\\b"\
+    - constant.bool: "\\b(true|false|nil)\\b"
     - symbol: "(,|;)"
     
     # Brackets
