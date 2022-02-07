@@ -18,7 +18,7 @@ Here is a picture of micro editing its source code.
 ![Screenshot](./assets/micro-solarized.png)
 
 To see more screenshots of micro, showcasing some of the default color schemes, see [here](https://micro-editor.github.io).
- 
+
 You can also check out the website for Micro at https://micro-editor.github.io.
 
 ## Table of Contents
@@ -90,7 +90,9 @@ To uninstall micro, simply remove the binary, and the configuration directory at
 #### Quick-install script
 
 ```bash
-curl https://getmic.ro | bash
+curl https://getmic.ro | sudo sh
+sudo mv micro /usr/bin # optional
+micro --version
 ```
 
 The script will place the micro binary in the current directory. From there, you can move it to a directory on your path of your choosing (e.g. `sudo mv micro /usr/bin`). See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
