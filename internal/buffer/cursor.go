@@ -394,14 +394,15 @@ func (c *Cursor) SelectTo(loc Loc) {
 	}
 }
 
-// WordRight moves the cursor one word to the right
-func (c *Cursor) WordRight() {
+// WordEnd moves the cursor to the end of the next word or to the
+// end of the word currently under it
+func (c *Cursor) WordEnd() {
+	c.Right()
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-			c.Right()
 			return
 		}
-		c.Right()
+		c.Left()
 	}
 	c.Right()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
@@ -409,6 +410,34 @@ func (c *Cursor) WordRight() {
 			return
 		}
 		c.Right()
+	}
+}
+
+// skipRightWhiteSpaces moves the cursor until it reaches a non
+// white space character
+func (c *Cursor) skipRightWhiteSpaces() {
+	for util.IsWhitespace(c.RuneUnder(c.X)) {
+		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+			c.Right()
+			return
+		}
+		c.Right()
+	}
+}
+
+// WordRight moves the cursor one word to the right
+func (c *Cursor) WordRight() {
+	if !util.IsWordChar(c.RuneUnder(c.X)) {
+		c.Right()
+		c.skipRightWhiteSpaces()
+	} else {
+		for util.IsWordChar(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+		c.skipRightWhiteSpaces()
 	}
 }
 
