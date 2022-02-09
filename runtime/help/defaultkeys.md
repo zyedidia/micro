@@ -83,6 +83,8 @@ can change it!
 | Alt-DownArrow                       | Move current line or selected lines down  |
 | Alt-Backspace or Alt-Ctrl-h         | Delete word left                          |
 | Ctrl-a                              | Select all                                |
+| Tab                                 | Indent selected text                      |
+| Shift-Tab                           | Unindent selected text                    |
 
 ### Macros
 
