@@ -1,4 +1,4 @@
-filetype: mperl
+filetype: perl
 
 detect: 
     filename: "\\.pp[lmp]$"
