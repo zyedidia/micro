@@ -238,7 +238,7 @@ Here are the available options:
    given line and column 0. Note that with this option enabled it is not possible
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
    It is also possible to open a file with a certain cursor location by using the
-   `+LINE,COL` flag syntax. See `micro -help` for the command line options.
+   `+LINE:COL` flag syntax. See `micro -help` for the command line options.
 
     default value: `false`
 
@@ -333,7 +333,7 @@ Here are the available options:
 
 * `statusformatl`: format string definition for the left-justified part of the
    statusline. Special directives should be placed inside `$()`. Special
-   directives include: `filename`, `modified`, `line`, `col`, `opt`, `bind`.
+   directives include: `filename`, `modified`, `line`, `col`, `lines`, `percentage`, `opt`, `bind`.
    The `opt` and `bind` directives take either an option or an action afterward
    and fill in the value of the option or the key bound to the action.
 
@@ -369,7 +369,11 @@ Here are the available options:
 
 	default value: `4`
 
-* `tabstospaces`: use spaces instead of tabs.
+* `tabstospaces`: use spaces instead of tabs. Note: This option will be
+   overridden by [the `ftoptions` plugin](https://github.com/zyedidia/micro/blob/master/runtime/plugins/ftoptions/ftoptions.lua)
+   for certain filetypes. To disable this behavior, add `"ftoptions": false` to
+   your config. See [issue #2213](https://github.com/zyedidia/micro/issues/2213)
+   for more details.
 
 	default value: `false`
 

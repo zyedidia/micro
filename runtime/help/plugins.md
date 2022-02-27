@@ -401,7 +401,7 @@ There are 6 default plugins that come pre-installed with micro. These are
 
 * `autoclose`: automatically closes brackets, quotes, etc...
 * `comment`: provides automatic commenting for a number of languages
-* `ftoptions`: alters some default options depending on the filetype
+* `ftoptions`: alters some default options (notably indentation) depending on the filetype
 * `linter`: provides extensible linting for many languages
 * `literate`: provides advanced syntax highlighting for the Literate
    programming tool.
