@@ -3,5 +3,6 @@
 # In Go files we indent with tabs but still 
 # set indent_size to control the GitHub web viewer.  
 [*.go]
+charset=utf-8
 indent_size=4
 
