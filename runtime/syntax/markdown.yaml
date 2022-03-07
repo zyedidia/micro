@@ -4,7 +4,12 @@ detect:
     filename: "\\.(md|mkd|mkdn|markdown)$"
 
 rules:
-    # Tables (Github extension)
+    - comment:
+        start: "<!--"
+        end: "-->"
+        rules: []
+
+      # Tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
 
       # quotes
