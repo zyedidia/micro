@@ -6,6 +6,7 @@ detect:
 rules:
     # Markdown is a superset of HTML
     {include: "html"}
+
       # Tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
 
