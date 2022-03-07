@@ -5,6 +5,7 @@ detect:
 
 rules:
     # Markdown is a superset of HTML. These rules were copied from the HTML syntax.
+    # TODO: find a way to import the HTML syntax file instead.
 
     # Doctype is case-insensitive
     - preproc: "<!(?i)(DOCTYPE html.*)>"
@@ -71,7 +72,7 @@ rules:
           # While technically not a "true" error, these are recommended to not be used inside a comment
           - error: "(\\-\\-|>)"
 
-    # Actual Markdown extensions
+    # Actual Markdown syntax
 
       # Tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
