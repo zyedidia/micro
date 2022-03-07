@@ -7,7 +7,8 @@ rules:
     - comment:
         start: "<!--"
         end: "-->"
-        rules: []
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
 
       # Tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
