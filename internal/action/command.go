@@ -757,6 +757,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	}
 
 	all := false
+	backward := false
 	noRegex := false
 
 	foundSearch := false
@@ -767,6 +768,8 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		switch arg {
 		case "-a":
 			all = true
+		case "-b":
+			backward = true
 		case "-l":
 			noRegex = true
 		default:
@@ -820,7 +823,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		searchLoc := h.Cursor.Loc
 		var doReplacement func()
 		doReplacement = func() {
-			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, true)
+			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, !backward, true)
 			if err != nil {
 				InfoBar.Error(err)
 				return
@@ -854,7 +857,11 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					nreplaced++
 				} else if !canceled && !yes {
 					searchLoc = locs[0]
-					searchLoc.X += util.CharacterCount(replace)
+					if backward {
+						searchLoc.X -= util.CharacterCount(replace)
+					} else {
+						searchLoc.X += util.CharacterCount(replace)
+					}
 				} else if canceled {
 					h.Cursor.ResetSelection()
 					h.Buf.RelocateCursors()

@@ -39,6 +39,7 @@ quotes here but these are not necessary when entering the command in micro.
    The `flags` are optional. Possible flags are:
    * `-a`: Replace all occurrences at once
    * `-l`: Do a literal search instead of a regex search
+   * `-b`: Search backward through the file instead of forward
 
    Note that `search` must be a valid regex (unless `-l` is passed). If one 
    of the arguments does not have any spaces in it, you may omit the quotes.
