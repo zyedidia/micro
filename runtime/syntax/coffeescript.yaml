@@ -18,11 +18,11 @@ rules:
     - constant.bool.true: "\\b(true|yes|on)\\b"
 
     - constant.number: "\\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\\b"
-    - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
-    - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
+    - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?\\b"
+    - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?\\b"
     - identifier: "@[A-Za-z0-9_]*"
 
-    - error: "\\b(enum|implements|interface|package|private|protected|public)"
+    - error: "\\b(enum|implements|interface|package|private|protected|public)\\b"
     - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
     - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false|yes|no|on|off)\\b"
