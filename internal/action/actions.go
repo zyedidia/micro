@@ -864,8 +864,10 @@ func (h *BufPane) FindLiteral() bool {
 
 // Search searches for a given string/regex in the buffer and selects the next
 // match if a match is found
-// This function affects lastSearch and lastSearchRegex (saved searches) for
-// use with FindNext and FindPrevious
+// This function behaves the same way as Find and FindLiteral actions:
+// it affects the buffer's LastSearch and LastSearchRegex (saved searches)
+// for use with FindNext and FindPrevious, and turns HighlightSearch on or off
+// according to hlsearch setting
 func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
 	match, found, err := h.Buf.FindNext(str, h.Buf.Start(), h.Buf.End(), h.Cursor.Loc, searchDown, useRegex)
 	if err != nil {
@@ -877,8 +879,9 @@ func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 		h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
-		h.lastSearch = str
-		h.lastSearchRegex = useRegex
+		h.Buf.LastSearch = str
+		h.Buf.LastSearchRegex = useRegex
+		h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
 		h.Relocate()
 	} else {
 		h.Cursor.ResetSelection()
@@ -922,8 +925,9 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
 				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
-				h.lastSearch = resp
-				h.lastSearchRegex = useRegex
+				h.Buf.LastSearch = resp
+				h.Buf.LastSearchRegex = useRegex
+				h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
 			} else {
 				h.Cursor.ResetSelection()
 				InfoBar.Message("No matches found")
@@ -944,6 +948,18 @@ func (h *BufPane) find(useRegex bool) bool {
 	return true
 }
 
+// ToggleHighlightSearch toggles highlighting all instances of the last used search term
+func (h *BufPane) ToggleHighlightSearch() bool {
+	h.Buf.HighlightSearch = !h.Buf.HighlightSearch
+	return true
+}
+
+// UnhighlightSearch unhighlights all instances of the last used search term
+func (h *BufPane) UnhighlightSearch() bool {
+	h.Buf.HighlightSearch = false
+	return true
+}
+
 // FindNext searches forwards for the last used search term
 func (h *BufPane) FindNext() bool {
 	// If the cursor is at the start of a selection and we search we want
@@ -954,7 +970,7 @@ func (h *BufPane) FindNext() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[1]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.lastSearchRegex)
+	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -981,7 +997,7 @@ func (h *BufPane) FindPrevious() bool {
 	if h.Cursor.HasSelection() {
 		searchLoc = h.Cursor.CurSelection[0]
 	}
-	match, found, err := h.Buf.FindNext(h.lastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.lastSearchRegex)
+	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -1083,7 +1099,9 @@ func (h *BufPane) Cut() bool {
 
 // DuplicateLine duplicates the current line or selection
 func (h *BufPane) DuplicateLine() bool {
+	var infoMessage = "Duplicated line"
 	if h.Cursor.HasSelection() {
+		infoMessage = "Duplicated selection"
 		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
 	} else {
 		h.Cursor.End()
@@ -1091,7 +1109,7 @@ func (h *BufPane) DuplicateLine() bool {
 		// h.Cursor.Right()
 	}
 
-	InfoBar.Message("Duplicated line")
+	InfoBar.Message(infoMessage)
 	h.Relocate()
 	return true
 }

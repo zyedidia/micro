@@ -159,6 +159,15 @@ Here are the available options:
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `hlsearch`: highlight all instances of the searched text after a successful
+   search. This highlighting can be turned off via `UnhighlightSearch` action
+   (triggered by Esc key by default) or toggled on/off via `ToggleHighlightSearch`
+   action. Note that these actions don't change `hlsearch` setting.
+   As long as `hlsearch` is set to true, after the next search the highlighting
+   is turned on again.
+
+	default value: `false`
+
 * `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
 	default value: `true`
@@ -167,7 +176,12 @@ Here are the available options:
 
 	default value: `true`
 
-* `indentchar`: sets the indentation character.
+* `indentchar`: sets the indentation character. This will not be inserted into
+  files; it is only a visual indicator that whitespace is present. If set to a
+  printing character, it functions as a subset of the "show invisibles"
+  setting available in many other text editors. The color of this character is
+  determined by the `indent-char` field in the current theme rather than the
+  default text color.
 
 	default value: ` ` (space)
 
@@ -224,7 +238,7 @@ Here are the available options:
    given line and column 0. Note that with this option enabled it is not possible
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
    It is also possible to open a file with a certain cursor location by using the
-   `+LINE,COL` flag syntax. See `micro -help` for the command line options.
+   `+LINE:COL` flag syntax. See `micro -help` for the command line options.
 
     default value: `false`
 
@@ -253,7 +267,7 @@ Here are the available options:
     default value: `false`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
-   lines.
+   lines. Note: This setting overrides `keepautoindent`
 
 	default value: `false`
 
@@ -319,7 +333,7 @@ Here are the available options:
 
 * `statusformatl`: format string definition for the left-justified part of the
    statusline. Special directives should be placed inside `$()`. Special
-   directives include: `filename`, `modified`, `line`, `col`, `opt`, `bind`.
+   directives include: `filename`, `modified`, `line`, `col`, `lines`, `percentage`, `opt`, `bind`.
    The `opt` and `bind` directives take either an option or an action afterward
    and fill in the value of the option or the key bound to the action.
 
@@ -355,7 +369,11 @@ Here are the available options:
 
 	default value: `4`
 
-* `tabstospaces`: use spaces instead of tabs.
+* `tabstospaces`: use spaces instead of tabs. Note: This option will be
+   overridden by [the `ftoptions` plugin](https://github.com/zyedidia/micro/blob/master/runtime/plugins/ftoptions/ftoptions.lua)
+   for certain filetypes. To disable this behavior, add `"ftoptions": false` to
+   your config. See [issue #2213](https://github.com/zyedidia/micro/issues/2213)
+   for more details.
 
 	default value: `false`
 

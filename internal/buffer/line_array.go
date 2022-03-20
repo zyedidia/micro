@@ -32,6 +32,15 @@ func runeToByteIndex(n int, txt []byte) int {
 	return count
 }
 
+// A searchState contains the search match info for a single line
+type searchState struct {
+	search     string
+	useRegex   bool
+	ignorecase bool
+	match      [][2]int
+	done       bool
+}
+
 // A Line contains the data in bytes as well as a highlight state, match
 // and a flag for whether the highlighting needs to be updated
 type Line struct {
@@ -41,6 +50,14 @@ type Line struct {
 	match       highlight.LineMatch
 	rehighlight bool
 	lock        sync.Mutex
+
+	// The search states for the line, used for highlighting of search matches,
+	// separately from the syntax highlighting.
+	// A map is used because the line array may be shared between multiple buffers
+	// (multiple instances of the same file opened in different edit panes)
+	// which have distinct searches, so in the general case there are multiple
+	// searches per a line, one search per a Buffer containing this line.
+	search map[*Buffer]*searchState
 }
 
 const (
@@ -355,4 +372,80 @@ func (la *LineArray) SetRehighlight(lineN int, on bool) {
 	la.lines[lineN].lock.Lock()
 	defer la.lines[lineN].lock.Unlock()
 	la.lines[lineN].rehighlight = on
+}
+
+// SearchMatch returns true if the location `pos` is within a match
+// of the last search for the buffer `b`.
+// It is used for efficient highlighting of search matches (separately
+// from the syntax highlighting).
+// SearchMatch searches for the matches if it is called first time
+// for the given line or if the line was modified. Otherwise the
+// previously found matches are used.
+//
+// The buffer `b` needs to be passed because the line array may be shared
+// between multiple buffers (multiple instances of the same file opened
+// in different edit panes) which have distinct searches, so SearchMatch
+// needs to know which search to match against.
+func (la *LineArray) SearchMatch(b *Buffer, pos Loc) bool {
+	if b.LastSearch == "" {
+		return false
+	}
+
+	lineN := pos.Y
+	if la.lines[lineN].search == nil {
+		la.lines[lineN].search = make(map[*Buffer]*searchState)
+	}
+	s, ok := la.lines[lineN].search[b]
+	if !ok {
+		// Note: here is a small harmless leak: when the buffer `b` is closed,
+		// `s` is not deleted from the map. It means that the buffer
+		// will not be garbage-collected until the line array is garbage-collected,
+		// i.e. until all the buffers sharing this file are closed.
+		s = new(searchState)
+		la.lines[lineN].search[b] = s
+	}
+	if !ok || s.search != b.LastSearch || s.useRegex != b.LastSearchRegex ||
+		s.ignorecase != b.Settings["ignorecase"].(bool) {
+		s.search = b.LastSearch
+		s.useRegex = b.LastSearchRegex
+		s.ignorecase = b.Settings["ignorecase"].(bool)
+		s.done = false
+	}
+
+	if !s.done {
+		s.match = nil
+		start := Loc{0, lineN}
+		end := Loc{util.CharacterCount(la.lines[lineN].data), lineN}
+		for start.X < end.X {
+			m, found, _ := b.FindNext(b.LastSearch, start, end, start, true, b.LastSearchRegex)
+			if !found {
+				break
+			}
+			s.match = append(s.match, [2]int{m[0].X, m[1].X})
+
+			start.X = m[1].X
+			if m[1].X == m[0].X {
+				start.X = m[1].X + 1
+			}
+		}
+
+		s.done = true
+	}
+
+	for _, m := range s.match {
+		if pos.X >= m[0] && pos.X < m[1] {
+			return true
+		}
+	}
+	return false
+}
+
+// invalidateSearchMatches marks search matches for the given line as outdated.
+// It is called when the line is modified.
+func (la *LineArray) invalidateSearchMatches(lineN int) {
+	if la.lines[lineN].search != nil {
+		for _, s := range la.lines[lineN].search {
+			s.done = false
+		}
+	}
 }

@@ -153,12 +153,14 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `pkd_add -v micro`.
 * NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
     * `pkg_add micro`
+* macOS with [MacPorts](https://www.macports.org):
+    * `sudo port install micro`
 
 ### Building from source
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.11 or greater and Go modules are enabled.
+Make sure that you have Go version 1.16 or greater and Go modules are enabled.
 
 ```
 git clone https://github.com/zyedidia/micro
@@ -260,6 +262,8 @@ view the help files here:
 I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
 a brief introduction to the more powerful configuration features micro offers.
 
+There is also an unofficial Discord, which you can join at https://discord.gg/nhWR6armnR.
+
 ## Contributing
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
@@ -267,6 +271,6 @@ If you find any bugs, please report them! I am also happy to accept pull request
 You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
-For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro).
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR).
 
 Sometimes I am unresponsive, and I apologize! If that happens, please ping me.

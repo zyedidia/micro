@@ -24,6 +24,8 @@ color-link underlined "#FF79C6"
 color-link error "bold #FF5555"
 color-link todo "bold #FF79C6"
 
+color-link hlsearch "#282A36,#50FA7B"
+
 color-link diff-added "#50FA7B"
 color-link diff-modified "#FFB86C"
 color-link diff-deleted "#FF5555"

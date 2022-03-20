@@ -226,9 +226,6 @@ type BufPane struct {
 	// Same here, just to keep track for mouse move events
 	tripleClick bool
 
-	// Last search stores the last successful search for FindNext and FindPrev
-	lastSearch      string
-	lastSearchRegex bool
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
 	multiWord bool
@@ -683,6 +680,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleKeyMenu":             (*BufPane).ToggleKeyMenu,
 	"ToggleDiffGutter":          (*BufPane).ToggleDiffGutter,
 	"ToggleRuler":               (*BufPane).ToggleRuler,
+	"ToggleHighlightSearch":     (*BufPane).ToggleHighlightSearch,
+	"UnhighlightSearch":         (*BufPane).UnhighlightSearch,
 	"ClearStatus":               (*BufPane).ClearStatus,
 	"ShellMode":                 (*BufPane).ShellMode,
 	"CommandMode":               (*BufPane).CommandMode,
