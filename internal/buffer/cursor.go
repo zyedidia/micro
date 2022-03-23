@@ -171,14 +171,20 @@ func (c *Cursor) DeleteSelection() {
 	}
 }
 
+const (
+	ResetLocationStart = iota
+	ResetLocationEnd
+	ResetLocationDefault
+)
+
 // Deselect closes the cursor's current selection
-// Start indicates whether the cursor should be placed
-// at the start or end of the selection
-func (c *Cursor) Deselect(start bool) {
+// resetLocation indicates whether the cursor should be placed
+// at the start or end of the selection, or not changed at all
+func (c *Cursor) Deselect(resetLocation int) {
 	if c.HasSelection() {
-		if start {
+		if resetLocation == ResetLocationStart {
 			c.Loc = c.CurSelection[0]
-		} else {
+		} else if resetLocation == ResetLocationEnd {
 			c.Loc = c.CurSelection[1].Move(-1, c.buf)
 		}
 		c.ResetSelection()

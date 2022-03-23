@@ -167,7 +167,7 @@ func (h *BufPane) MoveCursorDown(n int) {
 
 // CursorUp moves the cursor up
 func (h *BufPane) CursorUp() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationDefault)
 	h.MoveCursorUp(1)
 	h.Relocate()
 	return true
@@ -175,7 +175,7 @@ func (h *BufPane) CursorUp() bool {
 
 // CursorDown moves the cursor down
 func (h *BufPane) CursorDown() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationDefault)
 	h.MoveCursorDown(1)
 	h.Relocate()
 	return true
@@ -184,7 +184,7 @@ func (h *BufPane) CursorDown() bool {
 // CursorLeft moves the cursor left
 func (h *BufPane) CursorLeft() bool {
 	if h.Cursor.HasSelection() {
-		h.Cursor.Deselect(true)
+		h.Cursor.Deselect(buffer.ResetLocationStart)
 	} else {
 		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := h.Buf.Settings["tabmovement"].(bool)
@@ -209,7 +209,7 @@ func (h *BufPane) CursorLeft() bool {
 // CursorRight moves the cursor right
 func (h *BufPane) CursorRight() bool {
 	if h.Cursor.HasSelection() {
-		h.Cursor.Deselect(false)
+		h.Cursor.Deselect(buffer.ResetLocationEnd)
 		h.Cursor.Loc = h.Cursor.Loc.Move(1, h.Buf)
 	} else {
 		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
@@ -235,7 +235,7 @@ func (h *BufPane) CursorRight() bool {
 
 // WordRight moves the cursor one word to the right
 func (h *BufPane) WordRight() bool {
-	h.Cursor.Deselect(false)
+	h.Cursor.Deselect(buffer.ResetLocationEnd)
 	h.Cursor.WordRight()
 	h.Relocate()
 	return true
@@ -243,7 +243,7 @@ func (h *BufPane) WordRight() bool {
 
 // WordLeft moves the cursor one word to the left
 func (h *BufPane) WordLeft() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Cursor.WordLeft()
 	h.Relocate()
 	return true
@@ -327,7 +327,7 @@ func (h *BufPane) SelectWordLeft() bool {
 
 // StartOfText moves the cursor to the start of the text of the line
 func (h *BufPane) StartOfText() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Cursor.StartOfText()
 	h.Relocate()
 	return true
@@ -336,7 +336,7 @@ func (h *BufPane) StartOfText() bool {
 // StartOfTextToggle toggles the cursor between the start of the text of the line
 // and the start of the line
 func (h *BufPane) StartOfTextToggle() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	if h.Cursor.IsStartOfText() {
 		h.Cursor.Start()
 	} else {
@@ -348,7 +348,7 @@ func (h *BufPane) StartOfTextToggle() bool {
 
 // StartOfLine moves the cursor to the start of the line
 func (h *BufPane) StartOfLine() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Cursor.Start()
 	h.Relocate()
 	return true
@@ -356,7 +356,7 @@ func (h *BufPane) StartOfLine() bool {
 
 // EndOfLine moves the cursor to the end of the line
 func (h *BufPane) EndOfLine() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Cursor.End()
 	h.Relocate()
 	return true
@@ -464,7 +464,7 @@ func (h *BufPane) Retab() bool {
 
 // CursorStart moves the cursor to the start of the buffer
 func (h *BufPane) CursorStart() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Cursor.X = 0
 	h.Cursor.Y = 0
 	h.Cursor.StoreVisualX()
@@ -474,7 +474,7 @@ func (h *BufPane) CursorStart() bool {
 
 // CursorEnd moves the cursor to the end of the buffer
 func (h *BufPane) CursorEnd() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Cursor.Loc = h.Buf.End()
 	h.Cursor.StoreVisualX()
 	h.Relocate()
@@ -1051,7 +1051,7 @@ func (h *BufPane) CopyLine() bool {
 	h.freshClip = true
 	InfoBar.Message("Copied line")
 
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	h.Relocate()
 	return true
 }
@@ -1362,7 +1362,7 @@ func (h *BufPane) SelectPageDown() bool {
 
 // CursorPageUp places the cursor a page up
 func (h *BufPane) CursorPageUp() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 
 	if h.Cursor.HasSelection() {
 		h.Cursor.Loc = h.Cursor.CurSelection[0]
@@ -1376,7 +1376,7 @@ func (h *BufPane) CursorPageUp() bool {
 
 // CursorPageDown places the cursor a page up
 func (h *BufPane) CursorPageDown() bool {
-	h.Cursor.Deselect(false)
+	h.Cursor.Deselect(buffer.ResetLocationEnd)
 
 	if h.Cursor.HasSelection() {
 		h.Cursor.Loc = h.Cursor.CurSelection[1]
@@ -1486,7 +1486,7 @@ func (h *BufPane) Escape() bool {
 
 // Deselect deselects on the current cursor
 func (h *BufPane) Deselect() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(buffer.ResetLocationStart)
 	return true
 }
 
