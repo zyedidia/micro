@@ -25,7 +25,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 
 - [Features](#features)
 - [Installation](#installation)
-  - [Prebuilt binaries](#prebuilt-binaries)
+  - [Prebuilt binaries](#pre-built-binaries)
   - [Package Managers](#package-managers)
   - [Building from source](#building-from-source)
   - [Fully static binary](#fully-static-binary)
