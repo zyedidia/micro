@@ -145,6 +145,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `dnf install micro` (Fedora).
     * `pacman -S micro` (Arch Linux).
     * `eopkg install micro` (Solus).
+    * `add-apt-repository universe -y` then `apt install micro` (Ubuntu).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
     * `choco install micro`.
