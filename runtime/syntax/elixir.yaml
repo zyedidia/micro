@@ -20,7 +20,7 @@ rules:
     - comment.bright: "##[^{].*$|##$"
 
     - type.keyword: "\\:[a-zA-Z][a-zA-Z0-9_]*"
-    - type.keyword: "\\b(describe|test)"
+    - type.keyword: "\\b(describe|test)\\b"
     - statement: "\\b(expected|assert|assert_raise|assert_in_delta|assert_received|catch_error|catch_throw|flunk|refute|refute_in_delta|refute_received)\\b"
     - symbol.tag: "^\\s*\\@[a-zA-Z][a-zA-Z0-9_]*\\b"
 

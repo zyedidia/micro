@@ -5,8 +5,8 @@ detect:
 
 rules:
     - constant.number: "\\b[-+]?([1-9][0-9]*|0[0-7]*|0x[0-9a-fA-F]+)([uU][lL]?|[lL][uU]?)?\\b"
-    - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?"
-    - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
+    - constant.number: "\\b[-+]?([0-9]+\\.[0-9]*|[0-9]*\\.[0-9]+)([EePp][+-]?[0-9]+)?[fFlL]?\\b"
+    - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?\\b"
     - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
     - statement: "\\b(abstract|as|async|await|break|case|catch|class|const|constructor|continue)\\b"
     - statement: "\\b(debugger|declare|default|delete|do|else|enum|export|extends|finally|for|from)\\b"
