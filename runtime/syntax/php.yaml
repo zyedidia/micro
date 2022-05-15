@@ -38,6 +38,12 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+    - constant.string:
+        start: "\'"
+        end: "\'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
     - symbol.brackets: "(\\[|\\]|\\{|\\}|[()])"
     - comment: "(^|[[:space:]])//.*"
     - comment: "(^|[[:space:]])#.*"
