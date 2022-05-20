@@ -4,12 +4,12 @@ detect:
     filename: "\\.lua$"
 
 rules:
-    - statement: "\\b(do|end|while|break|repeat|until|if|elseif|then|else|for|in|function|local|return)\\b"
+    - statement: "\\b(do|end|while|break|repeat|until|if|elseif|then|else|for|in|function|local|return|goto)\\b"
     - statement: "\\b(not|and|or)\\b"
     - statement: "\\b(debug|string|math|table|io|coroutine|os|utf8|bit32)\\b\\."
     - statement: "\\b(_ENV|_G|_VERSION|assert|collectgarbage|dofile|error|getfenv|getmetatable|ipairs|load|loadfile|module|next|pairs|pcall|print|rawequal|rawget|rawlen|rawset|require|select|setfenv|setmetatable|tonumber|tostring|type|unpack|xpcall)\\s*\\("
     - identifier: "io\\.\\b(close|flush|input|lines|open|output|popen|read|tmpfile|type|write)\\b"
-    - identifier: "math\\.\\b(abs|acos|asin|atan2|atan|ceil|cosh|cos|deg|exp|floor|fmod|frexp|huge|ldexp|log10|log|max|maxinteger|min|mininteger|modf|pi|pow|rad|random|randomseed|sinh|sqrt|tan|tointeger|type|ult)\\b"
+    - identifier: "math\\.\\b(abs|acos|asin|atan2|atan|ceil|cosh|cos|deg|exp|floor|fmod|frexp|huge|ldexp|log10|log|max|maxinteger|min|mininteger|modf|pi|pow|rad|random|randomseed|sin|sqrt|tan|tointeger|type|ult)\\b"
     - identifier: "os\\.\\b(clock|date|difftime|execute|exit|getenv|remove|rename|setlocale|time|tmpname)\\b"
     - identifier: "package\\.\\b(config|cpath|loaded|loadlib|path|preload|seeall|searchers|searchpath)\\b"
     - identifier: "string\\.\\b(byte|char|dump|find|format|gmatch|gsub|len|lower|match|pack|packsize|rep|reverse|sub|unpack|upper)\\b"
@@ -22,29 +22,30 @@ rules:
     - identifier: "\\b(self|arg)\\b"
     - constant: "\\b(false|nil|true)\\b"
     - statement: "(\\b(dofile|require|include)|%q|%!|%Q|%r|%x)\\b"
-    - constant.number: "\\b([0-9]+)\\b"
+
     - symbol.brackets: "[(){}\\[\\]]"
     - symbol: "(\\*|//|/|%|\\+|-|\\^|>|>=|<|<=|~=|=|[\\.]{2,3}|#)"
+
+    - constant.number: "\\b((0[xX](([0-9A-Fa-f]+\\.[0-9A-Fa-f]*)|(\\.?[0-9A-Fa-f]+))([pP][-+]?[0-9]+)?)|((([0-9]+\\.[0-9]*)|(\\.?[0-9]+))([eE][-+]?[0-9]+)?))"    
 
     - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: "\\\\([abfnrtvz\\'\"]|[0-9]{1,3}|x[0-9a-fA-F][0-9a-fA-F]|u\\{[0-9a-fA-F]+\\})"
 
     - constant.string:
         start: "'"
         end: "'"
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: "\\\\([abfnrtvz\\'\"]|[0-9]{1,3}|x[0-9a-fA-F][0-9a-fA-F]|u\\{[0-9a-fA-F]+\\})"
 
     - constant.string:
         start: "\\[\\["
         end: "\\]\\]"
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
 # support first few lengths of "long brackets" explicitly
 # brackets longer than that will give false positives
@@ -52,28 +53,22 @@ rules:
     - constant.string:
         start: "\\[=\\["
         end: "\\]=\\]"
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
     - constant.string:
         start: "\\[==\\["
         end: "\\]==\\]"
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
     - constant.string:
         start: "\\[===\\["
         end: "\\]===\\]"
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
     - constant.string:
         start: "\\[====+\\["
         end: "\\]====+\\]"
-        rules:
-            - constant.specialChar: "\\\\."
-
-    - special: "\\\\[0-7][0-7][0-7]|\\\\x[0-9a-fA-F][0-9a-fA-F]|\\\\[abefnrs]|(\\\\c|\\\\C-|\\\\M-|\\\\M-\\\\C-)."
+        rules: []
 
     - comment.block:
         start: "\\-\\-\\[\\["
