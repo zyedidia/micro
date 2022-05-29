@@ -2,10 +2,7 @@ package main
 
 import (
 	"sort"
-<<<<<<< HEAD
-=======
 	"strconv"
->>>>>>> dc272633 (UI Tweaks)
 	"path/filepath"
 
 	"github.com/zyedidia/tcell"
@@ -47,6 +44,9 @@ func NewTabFromView(v *View) *Tab {
 	if globalSettings["infobar"].(bool) {
 		t.tree.height--
 	}
+
+	//Reset the Scroll Offset so that the tabbar centers correctly on the new tab.
+	ScrollOffset = 0
 
 	//Reset the Scroll Offset so that the tabbar centers correctly on the new tab.
 	ScrollOffset = 0
@@ -104,6 +104,7 @@ func TabbarString() (string, map[int]int) {
 			str += " "
 		}
 <<<<<<< HEAD
+<<<<<<< HEAD
 		//To address issue 556.2
 =======
 		if globalSettings["numberedtabs"].(bool){
@@ -112,6 +113,21 @@ func TabbarString() (string, map[int]int) {
 >>>>>>> dc272633 (UI Tweaks)
 		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
 		str += name
+=======
+		if globalSettings["numberedtabs"].(bool){
+			str += "(" + strconv.Itoa(i + 1) + ")"
+		}
+		buf := t.views[t.CurView].Buf
+		str += buf.GetName()
+		if buf.Modified() {
+			str += " +"
+		}
+		_, name := filepath.Split(t.views[t.CurView].Buf.GetName())
+		str += name
+		//if t.views[t.CurView].Buf.IsModified {
+		//	str += "*"
+		//}
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 		if i == curTab {
 			str += "]"
 		} else {

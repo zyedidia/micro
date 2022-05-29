@@ -968,8 +968,6 @@ func (v *View) DisplayView() {
 				}
 				v.drawCell(screenX-v.leftCol+i, screenY, ' ', nil, lineStyle)
 			}
-<<<<<<< HEAD
-=======
 		}
 	}
 
@@ -980,7 +978,6 @@ func (v *View) DisplayView() {
 		}
 		for i := visualLineN + 1; i < v.Height; i++ {
 			screen.SetContent(v.x, yOffset+i, tcell.RuneVLine, nil, dividerStyle.Reverse(true))
->>>>>>> 26bebf9c (Readded the VLine rune that was accidentally removed during view refactor merge.)
 		}
 	}
 }

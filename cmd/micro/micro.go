@@ -421,6 +421,20 @@ func main() {
 	go func() {
 		i:=0
 		for {
+<<<<<<< HEAD
+=======
+			time.Sleep(autosaveTime * time.Second)
+			if globalSettings["autosave"].(bool) {
+				autosave <- true
+			}
+		}
+	}()
+
+	//Async refresh the screen if using the statusline clock
+	go func() {
+		i:=0
+		for {
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 			if globalSettings["showclock"].(bool) {
 				if globalSettings["showseconds"].(bool){
 					RedrawAll()
@@ -428,6 +442,76 @@ func main() {
 					if i >= 15 {
 						i=0
 						RedrawAll()
+<<<<<<< HEAD
+=======
+					}
+				}
+			}
+			i++
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	for {
+		// Display everything
+		RedrawAll()
+
+		var event tcell.Event
+
+		// Check for new events
+		select {
+		case f := <-jobs:
+			// If a new job has finished while running in the background we should execute the callback
+			f.function(f.output, f.args...)
+			continue
+		case <-autosave:
+			CurView().Save(true)
+		case event = <-events:
+		}
+
+		for event != nil {
+			didAction := false
+
+			switch e := event.(type) {
+			case *tcell.EventResize:
+				for _, t := range tabs {
+					t.Resize()
+				}
+			case *tcell.EventMouse:
+				if !searching {
+					if e.Buttons() == tcell.Button1 {
+						// If the user left clicked we check a couple things
+						_, h := screen.Size()
+						x, y := e.Position()
+						if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
+							// If the user clicked in the bottom bar, and there is a message down there
+							// we copy it to the clipboard.
+							// Often error messages are displayed down there so it can be useful to easily
+							// copy the message
+							clipboard.WriteAll(messenger.message, "primary")
+							break
+						}
+
+						if CurView().mouseReleased {
+							// We loop through each view in the current tab and make sure the current view
+							// is the one being clicked in
+							for _, v := range tabs[curTab].views {
+								if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+									tabs[curTab].CurView = v.Num
+								}
+							}
+						}
+					} else if e.Buttons() == tcell.WheelUp || e.Buttons() == tcell.WheelDown {
+						var view *View
+						x, y := e.Position()
+						for _, v := range tabs[curTab].views {
+							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								view = tabs[curTab].views[v.Num]
+							}
+						}
+						view.HandleEvent(e)
+						didAction = true
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 					}
 				}
 			}

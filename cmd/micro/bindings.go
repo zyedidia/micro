@@ -216,10 +216,15 @@ var bindingKeys = map[string]tcell.Key{
 	"CtrlCarat":      tcell.KeyCtrlCarat,
 	"CtrlUnderscore": tcell.KeyCtrlUnderscore,
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 //	"CtrlPageUp":     tcell.KeyCtrlPgUp,
 //	"CtrlPageDown":   tcell.KeyCtrlPgDn,
 >>>>>>> 10b9dfe4 (Yes)
+=======
+//	"CtrlPageUp":     tcell.KeyCtrlPgUp,
+//	"CtrlPageDown":   tcell.KeyCtrlPgDn,
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 	"Tab":            tcell.KeyTab,
 	"Esc":            tcell.KeyEsc,
 	"Escape":         tcell.KeyEscape,
@@ -434,6 +439,10 @@ func DefaultBindings() map[string]string {
 		"CtrlG":          "ToggleHelp",
 		"Alt-h":          "ToggleHelp",
 		"Altr":           "ToggleRuler",
+<<<<<<< HEAD
+=======
+		"Alt-g":          "ToggleKeyMenu",
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 		"CtrlL":          "JumpLine",
 		"Delete":         "Delete",
 		"CtrlB":          "ShellMode",

@@ -183,12 +183,33 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"cursorline":     true,
 		"eofnewline":     true,
 		"rmtrailingws":   false,
+<<<<<<< HEAD
 		"ignorecase":     false,
 		"indentchar":     " ",
 		"infobar":        true,
+=======
+		"fastdirty":      true,
+		"fileformat":     "unix",
+		"ignorecase":     false,
+		"indentchar":     " ",
+		"infobar":        true,
+		"keepautoindent": false,
+		"keymenu":        false,
+		"mouse":          true,
+		"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
+		"pluginrepos":    []string{},
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 		"ruler":          true,
 		"savecursor":     false,
 		"saveundo":       false,
+<<<<<<< HEAD
+=======
+		"scrollbar":      false,
+		"scrollmargin":   float64(3),
+		"showclock":      false,
+		"12hourclock":    false,
+		"showseconds":    false,
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 		"scrollspeed":    float64(2),
 		"scrollmargin":   float64(3),
 		"showclock":      false,
@@ -201,6 +222,10 @@ func DefaultGlobalSettings() map[string]interface{} {
 		"syntax":         true,
 		"tabbaralways":   false,
 		"numberedtabs":   true,
+<<<<<<< HEAD
+=======
+		"tabmovement":    false,
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
 		"tabsize":        float64(4),
 		"tabstospaces":   false,
 		"pluginchannels": []string{
@@ -222,9 +247,12 @@ func DefaultLocalSettings() map[string]interface{} {
 		"cursorline":     true,
 		"eofnewline":     true,
 		"rmtrailingws":   false,
+		"fastdirty":      true,
+		"fileformat":     "unix",
 		"filetype":       "Unknown",
 		"ignorecase":     false,
 		"indentchar":     " ",
+		"keepautoindent": false,
 		"ruler":          true,
 		"savecursor":     false,
 		"saveundo":       false,
