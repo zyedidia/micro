@@ -41,6 +41,8 @@ github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb h1:ZkM6LRnq40pR1Ox
 github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
 github.com/zyedidia/clipboard v1.0.3 h1:F/nCDVYMdbDWTmY8s8cJl0tnwX32q96IF09JHM14bUI=
 github.com/zyedidia/clipboard v1.0.3/go.mod h1:zykFnZUXX0ErxqvYLUFEq7QDJKId8rmh2FgD0/Y8cjA=
+github.com/zyedidia/clipboard v1.0.4 h1:r6GUQOyPtIaApRLeD56/U+2uJbXis6ANGbKWCljULEo=
+github.com/zyedidia/clipboard v1.0.4/go.mod h1:zykFnZUXX0ErxqvYLUFEq7QDJKId8rmh2FgD0/Y8cjA=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBYj5/td9WC0mw4g1xDBPovIqmHew=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
 github.com/zyedidia/go-runewidth v0.0.12 h1:aHWj8qL3aH7caRzoPBJXe1pEaZBXHpKtfTuiBo5p74Q=
