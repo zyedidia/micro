@@ -3,7 +3,7 @@ package clipboard
 import (
 	"errors"
 
-	"github.com/zyedidia/clipboard"
+	"github.com/zyedidia/clipper"
 )
 
 type Method int
@@ -35,12 +35,19 @@ const (
 	PrimaryReg = -2
 )
 
+var clipboard clipper.Clipboard
+
 // Initialize attempts to initialize the clipboard using the given method
 func Initialize(m Method) error {
 	var err error
 	switch m {
 	case External:
-		err = clipboard.Initialize()
+		clips := make([]clipper.Clipboard, 0, len(clipper.Clipboards)+1)
+		clips = append(clips, &clipper.Custom{
+			Name: "micro-clip",
+		})
+		clips = append(clips, clipper.Clipboards...)
+		clipboard, err = clipper.GetClipboard(clips...)
 	}
 	if err != nil {
 		CurrentMethod = Internal
@@ -104,9 +111,11 @@ func read(r Register, m Method) (string, error) {
 	case External:
 		switch r {
 		case ClipboardReg:
-			return clipboard.ReadAll("clipboard")
+			b, e := clipboard.ReadAll(clipper.RegClipboard)
+			return string(b), e
 		case PrimaryReg:
-			return clipboard.ReadAll("primary")
+			b, e := clipboard.ReadAll(clipper.RegPrimary)
+			return string(b), e
 		default:
 			return internal.read(r), nil
 		}
@@ -132,9 +141,9 @@ func write(text string, r Register, m Method) error {
 	case External:
 		switch r {
 		case ClipboardReg:
-			return clipboard.WriteAll(text, "clipboard")
+			return clipboard.WriteAll(clipper.RegClipboard, []byte(text))
 		case PrimaryReg:
-			return clipboard.WriteAll(text, "primary")
+			return clipboard.WriteAll(clipper.RegPrimary, []byte(text))
 		default:
 			internal.write(text, r)
 		}
