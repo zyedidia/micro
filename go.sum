@@ -55,6 +55,10 @@ github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
 github.com/zyedidia/pty v1.1.15 h1:XlxMFph7HDvTn4sDG8Klgmb/g4ATGiSj4655vAETp1U=
 github.com/zyedidia/pty v1.1.15/go.mod h1:HWbpfrLoVM9FmU+/9NV+PzVQV8jSxgnQLk8fvx0q/i8=
+github.com/zyedidia/pty v1.1.19 h1:GouvvD/u+uml5EPFUAt5N3rFQKPBmZuuUXHvzAJhVA0=
+github.com/zyedidia/pty v1.1.19/go.mod h1:HWbpfrLoVM9FmU+/9NV+PzVQV8jSxgnQLk8fvx0q/i8=
+github.com/zyedidia/pty v1.1.20 h1:mkZ5/UiEjZVMFzoXp8oyJAlbn3b380m5lvFrbx/NL/g=
+github.com/zyedidia/pty v1.1.20/go.mod h1:HWbpfrLoVM9FmU+/9NV+PzVQV8jSxgnQLk8fvx0q/i8=
 github.com/zyedidia/tcell/v2 v2.0.9 h1:FxXRkE62N0GPHES7EMLtp2rteYqC9r1kVid8vJN1kOE=
 github.com/zyedidia/tcell/v2 v2.0.9/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
 github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
