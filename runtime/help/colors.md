@@ -73,7 +73,11 @@ themes the most.
 
 ### 16 color
 
+<<<<<<< HEAD
 These may vary widely based on the 16 colors selected for your terminal.
+=======
+* geany: Colorscheme based on geany's default highlighting.
+>>>>>>> baf74535 (Themeable vsplit divider.)
 
 * `simple`
 * `solarized` (must have the solarized color palette in your terminal to use
@@ -175,11 +179,17 @@ Here is a list of the colorscheme groups that you can use:
 * underlined
 * error
 * todo
+<<<<<<< HEAD
 * selection (Color of the text selection)
 * statusline (Color of the statusline)
 * tabbar (Color of the tabbar that lists open files)
 * indent-char (Color of the character which indicates tabs if the option is
   enabled)
+=======
+* statusline ( Color of the statusline)
+* tabbar ( Color of the tabbar that lists open files.)
+* indent-char ( Color of the character which indicates tabs if the option is enabled)
+>>>>>>> baf74535 (Themeable vsplit divider.)
 * line-number
 * gutter-error
 * gutter-warning
@@ -190,10 +200,14 @@ Here is a list of the colorscheme groups that you can use:
 * current-line-number
 * color-column
 * ignore
+<<<<<<< HEAD
 * scrollbar
 * divider (Color of the divider between vertical splits)
 * message (Color of messages in the bottom line of the screen)
 * error-message (Color of error messages in the bottom line of the screen)
+=======
+* divider ( Color of the divider between vertical splits. )
+>>>>>>> baf74535 (Themeable vsplit divider.)
 
 Colorschemes must be placed in the `~/.config/micro/colorschemes` directory to
 be used.

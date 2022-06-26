@@ -4,42 +4,36 @@ Micro has a plethora of hotkeys that make it easy and powerful to use and all
 hotkeys are fully customizable to your liking.
 
 Custom keybindings are stored internally in micro if changed with the `> bind`
-command or can also be added in the file `~/.config/micro/bindings.json` as
-discussed below. For a list of the default keybindings in the json format used
+command or you can also be added in the file `~/.config/micro/bindings.json` as
+discussed below.  For a list of the default keybindings in the json format used
 by micro, please see the end of this file. For a more user-friendly list with
 explanations of what the default hotkeys are and what they do, please see
-`> help defaultkeys` (a json formatted list of default keys is included
-at the end of this document).
+`>help defaultkeys`
 
 If `~/.config/micro/bindings.json` does not exist, you can simply create it.
 Micro will know what to do with it.
 
-You can use Ctrl + arrows to move word by word (Alt + arrows for Mac). Alt + left and right
-move the cursor to the start and end of the line (Ctrl + left/right for Mac), and Ctrl + up and down move the
+You can use the alt keys + arrows to move word by word. Ctrl left and right move
+the cursor to the start and end of the line, and ctrl up and down move the
 cursor the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
+
 ## Rebinding keys
 
-The bindings may be rebound using the `~/.config/micro/bindings.json` file.
-Each key is bound to an action.
+The bindings may be rebound using the `~/.config/micro/bindings.json` file. Each
+key is bound to an action.
 
 For example, to bind `Ctrl-y` to undo and `Ctrl-z` to redo, you could put the
 following in the `bindings.json` file.
 
 ```json
 {
-	"Ctrl-y": "Undo",
-	"Ctrl-z": "Redo"
+	"CtrlY": "Undo",
+	"CtrlZ": "Redo"
 }
 ```
-
-**Note:** The syntax `<Modifier><key>` is equivalent to `<Modifier>-<key>`. In
-addition, Ctrl-Shift bindings are not supported by terminals, and are the same
-as simply Ctrl bindings. This means that `CtrlG`, `Ctrl-G`, and `Ctrl-g` all
-mean the same thing. However, for Alt this is not the case: `AltG` and `Alt-G`
-mean `Alt-Shift-g`, while `Alt-g` does not require the Shift modifier.
 
 In addition to editing your `~/.config/micro/bindings.json`, you can run
 `>bind <keycombo> <action>` For a list of bindable actions, see below.
@@ -53,78 +47,29 @@ save and quit you can bind it like so:
 }
 ```
 
-Each action will return a success flag. Actions can be chained such that
-the chain only continues when there are successes, or failures, or either.
-The `,` separator will always chain to the next action. The `|` separator
-will abort the chain if the action preceding it succeeds, and the `&` will
-abort the chain if the action preceding it fails. For example, in the default
-bindings, tab is bound as
-
-```
-"Tab": "Autocomplete|IndentSelection|InsertTab"
-```
-
-This means that if the `Autocomplete` action is successful, the chain will
-abort. Otherwise, it will try `IndentSelection`, and if that fails too, it
-will execute `InsertTab`.
-
-## Binding commands
-
-You can also bind a key to execute a command in command mode (see
-`help commands`). Simply prepend the binding with `command:`. For example:
-
-```json
-{
-    "Alt-p": "command:pwd"
-}
-```
-
-**Note for macOS**: By default, macOS terminals do not forward alt events and
-instead insert unicode characters. To fix this, do the following:
-
-* iTerm2: select `Esc+` for `Left Option Key` in `Preferences->Profiles->Keys`.
-* Terminal.app: Enable `Use Option key as Meta key` in `Preferences->Profiles->Keyboard`.
-
-Now when you press `Alt-p` the `pwd` command will be executed which will show
-your working directory in the infobar.
-
-You can also bind an "editable" command with `command-edit:`. This means that
-micro won't immediately execute the command when you press the binding, but
-instead just place the string in the infobar in command mode. For example,
-you could rebind `Ctrl-g` to `> help`:
-
-```json
-{
-    "Ctrl-g": "command-edit:help "
-}
-```
-
-Now when you press `Ctrl-g`, `help` will appear in the command bar and your
-cursor will be placed after it (note the space in the json that controls the
-cursor placement).
 
 ## Binding raw escape sequences
 
-Only read this section if you are interested in binding keys that aren't on the
+Only read this section if you are interested in binding keys that aren't on the 
 list of supported keys for binding.
 
 One of the drawbacks of using a terminal-based editor is that the editor must
 get all of its information about key events through the terminal. The terminal
 sends these events in the form of escape sequences often (but not always)
-starting with `0x1b`.
+starting with `0x1b`. 
 
 For example, if micro reads `\x1b[1;5D`, on most terminals this will mean the
 user pressed CtrlLeft.
 
-For many key chords though, the terminal won't send any escape code or will
-send an escape code already in use. For example for `CtrlBackspace`, my
-terminal sends `\u007f` (note this doesn't start with `0x1b`), which it also
-sends for `Backspace` meaning micro can't bind `CtrlBackspace`.
+For many key chords though, the terminal won't send any escape code or will send
+an escape code already in use. For example for `CtrlBackspace`, my terminal
+sends `\u007f` (note this doesn't start with `0x1b`), which it also sends for
+`Backspace` meaning micro can't bind `CtrlBackspace`.
 
 However, some terminals do allow you to bind keys to send specific escape
 sequences you define. Then from micro you can directly bind those escape
-sequences to actions. For example, to bind `CtrlBackspace` you can instruct
-your terminal to send `\x1bctrlback` and then bind it in `bindings.json`:
+sequences to actions. For example, to bind `CtrlBackspace` you can instruct your
+terminal to send `\x1bctrlback` and then bind it in `bindings.json`:
 
 ```json
 {
@@ -136,9 +81,9 @@ Here are some instructions for sending raw escapes in different terminals
 
 ### iTerm2
 
-In iTerm2, you can do this in  `Preferences->Profiles->Keys` then click the
-`+`, input your keybinding, and for the `Action` select `Send Escape Sequence`.
-For the above example your would type `ctrlback` into the box (the `\x1b`) is
+In iTerm2, you can do this in  `Preferences->Profiles->Keys` then click the `+`,
+input your keybinding, and for the `Action` select `Send Escape Sequence`. For
+the above example your would type `ctrlback` into the box (the `\x1b`) is
 automatically sent by iTerm2.
 
 ### Linux using loadkeys
@@ -147,10 +92,12 @@ You can do this in linux using the loadkeys program.
 
 Coming soon!
 
+
 ## Unbinding keys
 
-It is also possible to disable any of the default key bindings by use of the
-`None` action in the user's `bindings.json` file.
+It is also possible to disable any of the default key bindings by use of the 
+`UnbindKey` action in the user's `bindings.json` file.
+
 
 ## Bindable actions and bindable keys
 
@@ -174,8 +121,6 @@ SelectUp
 SelectDown
 SelectLeft
 SelectRight
-SelectToStartOfText
-SelectToStartOfTextToggle
 WordRight
 WordLeft
 SelectWordRight
@@ -184,7 +129,6 @@ MoveLinesUp
 MoveLinesDown
 DeleteWordRight
 DeleteWordLeft
-SelectLine
 SelectToStartOfLine
 SelectToEndOfLine
 InsertNewline
@@ -197,21 +141,17 @@ Save
 SaveAll
 SaveAs
 Find
-FindLiteral
 FindNext
 FindPrevious
 Undo
 Redo
 Copy
-CopyLine
 Cut
 CutLine
 DuplicateLine
 DeleteLine
 IndentSelection
 OutdentSelection
-OutdentLine
-IndentLine
 Paste
 SelectAll
 OpenFile
@@ -219,18 +159,13 @@ Start
 End
 PageUp
 PageDown
-SelectPageUp
-SelectPageDown
 HalfPageUp
 HalfPageDown
 StartOfLine
 EndOfLine
-StartOfText
-StartOfTextToggle
 ParagraphPrevious
 ParagraphNext
 ToggleHelp
-ToggleDiffGutter
 ToggleRuler
 JumpLine
 ClearStatus
@@ -248,23 +183,15 @@ HSplit
 PreviousSplit
 ToggleMacro
 PlayMacro
-Suspend (Unix only)
+Suspend (Linux only)
 ScrollUp
 ScrollDown
 SpawnMultiCursor
-SpawnMultiCursorUp
-SpawnMultiCursorDown
-SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
-None
-JumpToMatchingBrace
-Autocomplete
+UnbindKey
 ```
-
-The `StartOfTextToggle` and `SelectToStartOfTextToggle` actions toggle between
-jumping to the start of the text (first) and start of the line.
 
 You can also bind some mouse actions (these must be bound to mouse buttons)
 
@@ -363,39 +290,38 @@ F62
 F63
 F64
 CtrlSpace
-Ctrl-a
-Ctrl-b
-Ctrl-c
-Ctrl-d
-Ctrl-e
-Ctrl-f
-Ctrl-g
-Ctrl-h
-Ctrl-i
-Ctrl-j
-Ctrl-k
-Ctrl-l
-Ctrl-m
-Ctrl-n
-Ctrl-o
-Ctrl-p
-Ctrl-q
-Ctrl-r
-Ctrl-s
-Ctrl-t
-Ctrl-u
-Ctrl-v
-Ctrl-w
-Ctrl-x
-Ctrl-y
-Ctrl-z
+CtrlA
+CtrlB
+CtrlC
+CtrlD
+CtrlE
+CtrlF
+CtrlG
+CtrlH
+CtrlI
+CtrlJ
+CtrlK
+CtrlL
+CtrlM
+CtrlN
+CtrlO
+CtrlP
+CtrlQ
+CtrlR
+CtrlS
+CtrlT
+CtrlU
+CtrlV
+CtrlW
+CtrlX
+CtrlY
+CtrlZ
 CtrlLeftSq
 CtrlBackslash
 CtrlRightSq
 CtrlCarat
 CtrlUnderscore
 Backspace
-OldBackspace
 Tab
 Esc
 Escape
@@ -415,16 +341,7 @@ MouseWheelLeft
 MouseWheelRight
 ```
 
-## Key sequences
-
-Key sequences can be bound by specifying valid keys one after another in brackets, such
-as `<Ctrl-x><Ctrl-c>`.
-
 # Default keybinding configuration.
-
-A select few keybindings are different on MacOS compared to other
-operating systems. This is because different OSes have different
-conventions for text editing defaults.
 
 ```json
 {
@@ -436,23 +353,17 @@ conventions for text editing defaults.
     "ShiftDown":      "SelectDown",
     "ShiftLeft":      "SelectLeft",
     "ShiftRight":     "SelectRight",
-    "AltLeft":        "WordLeft", (Mac)
-    "AltRight":       "WordRight", (Mac)
+    "AltLeft":        "WordLeft",
+    "AltRight":       "WordRight",
     "AltUp":          "MoveLinesUp",
     "AltDown":        "MoveLinesDown",
-    "CtrlShiftRight": "SelectWordRight",
-    "CtrlShiftLeft":  "SelectWordLeft",
-    "AltLeft":        "StartOfTextToggle",
-    "AltRight":       "EndOfLine",
-    "AltShiftRight":  "SelectWordRight", (Mac)
-    "AltShiftLeft":   "SelectWordLeft", (Mac)
-    "CtrlLeft":       "StartOfText", (Mac)
-    "CtrlRight":      "EndOfLine", (Mac)
-    "AltShiftLeft":   "SelectToStartOfTextToggle",
-    "CtrlShiftLeft":  "SelectToStartOfTextToggle", (Mac)
-    "ShiftHome":      "SelectToStartOfTextToggle",
-    "AltShiftRight":  "SelectToEndOfLine",
-    "CtrlShiftRight": "SelectToEndOfLine", (Mac)
+    "AltShiftRight":  "SelectWordRight",
+    "AltShiftLeft":   "SelectWordLeft",
+    "CtrlLeft":       "StartOfLine",
+    "CtrlRight":      "EndOfLine",
+    "CtrlShiftLeft":  "SelectToStartOfLine",
+    "ShiftHome":      "SelectToStartOfLine",
+    "CtrlShiftRight": "SelectToEndOfLine",
     "ShiftEnd":       "SelectToEndOfLine",
     "CtrlUp":         "CursorStart",
     "CtrlDown":       "CursorEnd",
@@ -461,48 +372,49 @@ conventions for text editing defaults.
     "Alt-{":          "ParagraphPrevious",
     "Alt-}":          "ParagraphNext",
     "Enter":          "InsertNewline",
-    "Ctrl-h":          "Backspace",
+    "CtrlH":          "Backspace",
     "Backspace":      "Backspace",
     "Alt-CtrlH":      "DeleteWordLeft",
     "Alt-Backspace":  "DeleteWordLeft",
-    "Tab":            "Autocomplete|IndentSelection|InsertTab",
-    "Backtab":        "OutdentSelection|OutdentLine",
-    "Ctrl-o":          "OpenFile",
-    "Ctrl-s":          "Save",
-    "Ctrl-f":          "Find",
-    "Ctrl-n":          "FindNext",
-    "Ctrl-p":          "FindPrevious",
-    "Ctrl-z":          "Undo",
-    "Ctrl-y":          "Redo",
-    "Ctrl-c":          "CopyLine|Copy",
-    "Ctrl-x":          "Cut",
-    "Ctrl-k":          "CutLine",
-    "Ctrl-d":          "DuplicateLine",
-    "Ctrl-v":          "Paste",
-    "Ctrl-a":          "SelectAll",
-    "Ctrl-t":          "AddTab",
-    "Alt-,":           "PreviousTab",
-    "Alt-.":           "NextTab",
-    "Home":           "StartOfText",
+    "Tab":            "IndentSelection,InsertTab",
+    "Backtab":        "OutdentSelection,OutdentLine",
+    "CtrlO":          "OpenFile",
+    "CtrlS":          "Save",
+    "CtrlF":          "Find",
+    "CtrlN":          "FindNext",
+    "CtrlP":          "FindPrevious",
+    "CtrlR":          "Replace",
+    "CtrlZ":          "Undo",
+    "CtrlY":          "Redo",
+    "CtrlC":          "Copy",
+    "CtrlX":          "Cut",
+    "CtrlK":          "CutLine",
+    "CtrlD":          "DuplicateLine",
+    "CtrlV":          "Paste",
+    "CtrlA":          "SelectAll",
+    "CtrlT":          "AddTab",
+    "Alt,":           "PreviousTab",
+    "Alt.":           "NextTab",
+    "Alt-t":          "Tabswitch",
+    "Home":           "StartOfLine",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
-    "CtrlPageUp":     "PreviousTab",
-    "CtrlPageDown":   "NextTab",
-    "Ctrl-g":          "ToggleHelp",
-    "Alt-g":          "ToggleKeyMenu",
-    "Ctrl-r":          "ToggleRuler",
-    "Ctrl-l":          "command-edit:goto ",
+    "CtrlG":          "ToggleHelp",
+    "Alt-h":          "ToggleHelp",
+    "Altr":           "ToggleRuler",
+    "CtrlL":          "JumpLine",
     "Delete":         "Delete",
-    "Ctrl-b":          "ShellMode",
-    "Ctrl-q":          "Quit",
-    "Ctrl-e":          "CommandMode",
-    "Ctrl-w":          "NextSplit",
-    "Ctrl-u":          "ToggleMacro",
-    "Ctrl-j":          "PlayMacro",
-    "Insert":         "ToggleOverwriteMode",
+    "CtrlB":          "ShellMode",
+    "CtrlQ":          "Quit",
+    "CtrlE":          "CommandMode",
+    "CtrlW":          "NextSplit",
+    "CtrlU":          "ToggleMacro",
+    "CtrlJ":          "PlayMacro",
+    "CtrlBackslash":  "VSplit",
+    "CtrlUnderscore": "HSplit",
 
     // Emacs-style keybindings
     "Alt-f": "WordRight",
@@ -511,6 +423,7 @@ conventions for text editing defaults.
     "Alt-e": "EndOfLine",
 
     // Integration with file managers
+    "F1":  "ToggleHelp",
     "F2":  "Save",
     "F3":  "Find",
     "F4":  "Quit",
@@ -525,130 +438,21 @@ conventions for text editing defaults.
     "MouseMiddle":    "PastePrimary",
     "Ctrl-MouseLeft": "MouseMultiCursor",
 
-    "Alt-n":        "SpawnMultiCursor",
-    "AltShiftUp":   "SpawnMultiCursorUp",
-    "AltShiftDown": "SpawnMultiCursorDown",
-    "Alt-m":        "SpawnMultiCursorSelect",
-    "Alt-p":        "RemoveMultiCursor",
-    "Alt-c":        "RemoveAllMultiCursors",
-    "Alt-x":        "SkipMultiCursor",
-}
-```
-
-## Pane type bindings
-
-Keybindings can be specified for different pane types as well. For example, to
-make a binding that only affects the command bar, use the `command` subgroup:
-
-```
-{
-    "command": {
-        "Ctrl-w": "WordLeft"
-    }
-}
-```
-
-The possible pane types are `buffer` (normal buffer), `command` (command bar),
-and `terminal` (terminal pane). The defaults for the command and terminal panes
-are given below:
-
-```
-{
-    "terminal": {
-        "<Ctrl-q><Ctrl-q>": "Exit",
-        "<Ctrl-e><Ctrl-e>": "CommandMode",
-        "<Ctrl-w><Ctrl-w>": "NextSplit"
-    },
-
-    "command": {
-        "Up":             "HistoryUp",
-        "Down":           "HistoryDown",
-        "Right":          "CursorRight",
-        "Left":           "CursorLeft",
-        "ShiftUp":        "SelectUp",
-        "ShiftDown":      "SelectDown",
-        "ShiftLeft":      "SelectLeft",
-        "ShiftRight":     "SelectRight",
-        "AltLeft":        "StartOfTextToggle",
-        "AltRight":       "EndOfLine",
-        "AltUp":          "CursorStart",
-        "AltDown":        "CursorEnd",
-        "AltShiftRight":  "SelectWordRight",
-        "AltShiftLeft":   "SelectWordLeft",
-        "CtrlLeft":       "WordLeft",
-        "CtrlRight":      "WordRight",
-        "CtrlShiftLeft":  "SelectToStartOfTextToggle",
-        "ShiftHome":      "SelectToStartOfTextToggle",
-        "CtrlShiftRight": "SelectToEndOfLine",
-        "ShiftEnd":       "SelectToEndOfLine",
-        "CtrlUp":         "CursorStart",
-        "CtrlDown":       "CursorEnd",
-        "CtrlShiftUp":    "SelectToStart",
-        "CtrlShiftDown":  "SelectToEnd",
-        "Enter":          "ExecuteCommand",
-        "CtrlH":          "Backspace",
-        "Backspace":      "Backspace",
-        "OldBackspace":   "Backspace",
-        "Alt-CtrlH":      "DeleteWordLeft",
-        "Alt-Backspace":  "DeleteWordLeft",
-        "Tab":            "CommandComplete",
-        "Backtab":        "CycleAutocompleteBack",
-        "Ctrl-z":         "Undo",
-        "Ctrl-y":         "Redo",
-        "Ctrl-c":         "CopyLine|Copy",
-        "Ctrl-x":         "Cut",
-        "Ctrl-k":         "CutLine",
-        "Ctrl-v":         "Paste",
-        "Home":           "StartOfTextToggle",
-        "End":            "EndOfLine",
-        "CtrlHome":       "CursorStart",
-        "CtrlEnd":        "CursorEnd",
-        "Delete":         "Delete",
-        "Ctrl-q":         "AbortCommand",
-        "Ctrl-e":         "EndOfLine",
-        "Ctrl-a":         "StartOfLine",
-        "Ctrl-w":         "DeleteWordLeft",
-        "Insert":         "ToggleOverwriteMode",
-        "Ctrl-b":         "WordLeft",
-        "Ctrl-f":         "WordRight",
-        "Ctrl-d":         "DeleteWordLeft",
-        "Ctrl-m":         "ExecuteCommand",
-        "Ctrl-n":         "HistoryDown",
-        "Ctrl-p":         "HistoryUp",
-        "Ctrl-u":         "SelectToStart",
-
-        // Emacs-style keybindings
-        "Alt-f": "WordRight",
-        "Alt-b": "WordLeft",
-        "Alt-a": "StartOfText",
-        "Alt-e": "EndOfLine",
-
-        // Integration with file managers
-        "F10": "AbortCommand",
-        "Esc": "AbortCommand",
-
-        // Mouse bindings
-        "MouseWheelUp":   "HistoryUp",
-        "MouseWheelDown": "HistoryDown",
-        "MouseLeft":      "MousePress",
-        "MouseMiddle":    "PastePrimary"
-    }
+    // Multiple cursors bindings
+    "Alt-n": "SpawnMultiCursor",
+    "Alt-p": "RemoveMultiCursor",
+    "Alt-c": "RemoveAllMultiCursors",
+    "Alt-x": "SkipMultiCursor",
 }
 ```
 
 ## Final notes
 
-Note: On some old terminal emulators and on Windows machines, `Ctrl-h` should be
+Note: On some old terminal emulators and on Windows machines, `CtrlH` should be
 used for backspace.
 
 Additionally, alt keys can be bound by using `Alt-key`. For example `Alt-a` or
-`Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and
+`Alt-Up`. Micro supports an optional `-` between modifiers like `Alt` and 
 `Ctrl` so `Alt-a` could be rewritten as `Alta` (case matters for alt bindings).
 This is why in the default keybindings you can see `AltShiftLeft` instead of
 `Alt-ShiftLeft` (they are equivalent).
-
-Please note that terminal emulators are strange applications and micro only
-receives key events that the terminal decides to send. Some terminal emulators
-may not send certain events even if this document says micro can receive the
-event. To see exactly what micro receives from the terminal when you press a
-key, run the `> raw` command.

@@ -29,6 +29,44 @@ import (
 )
 
 var (
+<<<<<<< HEAD
+=======
+	// The main screen
+	screen tcell.Screen
+
+	// Object to send messages and prompts to the user
+	messenger *Messenger
+
+	// The default highlighting style
+	// This simply defines the default foreground and background colors
+	defStyle tcell.Style
+
+	// Where the user's configuration is
+	// This should be $XDG_CONFIG_HOME/micro
+	// If $XDG_CONFIG_HOME is not set, it is ~/.config/micro
+	configDir string
+
+	pluginsline string
+
+	// Version is the version number or commit hash
+	// These variables should be set by the linker when compiling
+	Version     = "0.0.0-unknown"
+	CommitHash  = "Unknown"
+	CompileDate = "Unknown"
+
+	// L is the lua state
+	// This is the VM that runs the plugins
+	L *lua.LState
+
+	// The list of views
+	tabs []*Tab
+	// This is the currently open tab
+	// It's just an index to the tab in the tabs array
+	curTab int
+
+	// Channel of jobs running in the background
+	jobs chan JobFunction
+>>>>>>> dc272633 (UI Tweaks)
 	// Event channel
 	autosave chan bool
 
@@ -364,6 +402,7 @@ func main() {
 		}
 	}()
 
+<<<<<<< HEAD
 	// clear the drawchan so we don't redraw excessively
 	// if someone requested a redraw before we started displaying
 	for len(screen.DrawChan()) > 0 {
@@ -377,6 +416,110 @@ func main() {
 	case <-time.After(10 * time.Millisecond):
 		// time out after 10ms
 	}
+=======
+	//Async refresh the screen if using the statusline clock
+	go func() {
+		i:=0
+		for {
+<<<<<<< HEAD
+=======
+			time.Sleep(autosaveTime * time.Second)
+			if globalSettings["autosave"].(bool) {
+				autosave <- true
+			}
+		}
+	}()
+
+	//Async refresh the screen if using the statusline clock
+	go func() {
+		i:=0
+		for {
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
+			if globalSettings["showclock"].(bool) {
+				if globalSettings["showseconds"].(bool){
+					RedrawAll()
+				} else {
+					if i >= 15 {
+						i=0
+						RedrawAll()
+<<<<<<< HEAD
+=======
+					}
+				}
+			}
+			i++
+			time.Sleep(1 * time.Second)
+		}
+	}()
+
+	for {
+		// Display everything
+		RedrawAll()
+
+		var event tcell.Event
+
+		// Check for new events
+		select {
+		case f := <-jobs:
+			// If a new job has finished while running in the background we should execute the callback
+			f.function(f.output, f.args...)
+			continue
+		case <-autosave:
+			CurView().Save(true)
+		case event = <-events:
+		}
+
+		for event != nil {
+			didAction := false
+
+			switch e := event.(type) {
+			case *tcell.EventResize:
+				for _, t := range tabs {
+					t.Resize()
+				}
+			case *tcell.EventMouse:
+				if !searching {
+					if e.Buttons() == tcell.Button1 {
+						// If the user left clicked we check a couple things
+						_, h := screen.Size()
+						x, y := e.Position()
+						if y == h-1 && messenger.message != "" && globalSettings["infobar"].(bool) {
+							// If the user clicked in the bottom bar, and there is a message down there
+							// we copy it to the clipboard.
+							// Often error messages are displayed down there so it can be useful to easily
+							// copy the message
+							clipboard.WriteAll(messenger.message, "primary")
+							break
+						}
+
+						if CurView().mouseReleased {
+							// We loop through each view in the current tab and make sure the current view
+							// is the one being clicked in
+							for _, v := range tabs[curTab].views {
+								if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+									tabs[curTab].CurView = v.Num
+								}
+							}
+						}
+					} else if e.Buttons() == tcell.WheelUp || e.Buttons() == tcell.WheelDown {
+						var view *View
+						x, y := e.Position()
+						for _, v := range tabs[curTab].views {
+							if x >= v.x && x < v.x+v.Width && y >= v.y && y < v.y+v.Height {
+								view = tabs[curTab].views[v.Num]
+							}
+						}
+						view.HandleEvent(e)
+						didAction = true
+>>>>>>> de3abad137ca6ff08e33fd00e1bd896058feddb2
+					}
+				}
+			}
+			i++
+			time.Sleep(1 * time.Second)
+		}
+	}()
+>>>>>>> dc272633 (UI Tweaks)
 
 	for {
 		DoEvent()
