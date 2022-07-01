@@ -258,6 +258,7 @@ func GetGlobalOption(name string) interface{} {
 var defaultCommonSettings = map[string]interface{}{
 	"autoindent":     true,
 	"autosu":         false,
+	"autoretab":      false,
 	"backup":         true,
 	"backupdir":      "",
 	"basename":       false,
