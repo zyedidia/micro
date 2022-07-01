@@ -170,6 +170,6 @@ func (w *TabWindow) Display() {
 	}
 
 	if x < w.Width {
-		draw(' ', w.Width-x, false, false)
+		draw(' ', w.Width-x, false, globalTabReverse)
 	}
 }
