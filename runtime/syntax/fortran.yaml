@@ -25,6 +25,8 @@ rules:
     - constant:  "(?i)\\b(reshape|rewind|save|scan|sequence|shape|sign|size|spacing)\\b" 
     - constant:  "(?i)\\b(spread|sum|system_clock|target|transfer|transpose|trim)\\b" 
     - constant:  "(?i)\\b(ubound|unpack|verify|write|tiny|type|use|yes)\\b"
+    
+    - constant.number: "\\b([0-9]+)\\b"
 
     - statement: "(?i)\\b(.and.|case|do|else|else?if|else?where|end|end?do|end?if)\\b"
     - statement: "(?i)\\b(end?select|.eqv.|forall|if|lge|lgt|lle|llt|.neqv.|.not.)\\b"
