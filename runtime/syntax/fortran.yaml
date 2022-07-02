@@ -35,7 +35,7 @@ rules:
     - special: "(?i)\\b(continue|cycle|exit|go?to|result|return)\\b"
 
       #Operator Color
-    - symbol.operator: "[.:;,+*|=!\\%]|/|-|&"
+    - symbol.operator: "[.:;,+*|=!\\%]|/|-|>|<&"
 
       #Parenthetical Color
     - symbol.bracket: "[(){}]|\\[|\\]"
