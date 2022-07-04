@@ -5,11 +5,11 @@ detect:
 
 rules:
     - statement: "\\b(set|unset|plot|splot|replot|if|else|do|for|while|fit)\\b"
-    - symbol.operator: "[-+/*=<>?:!~%&|^]"
+    - symbol.operator: "[-+/*=<>?:!~%&|^$]"
     - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b"
+    
     - comment:
-        - comment: 
-        start: "//"
+        start: "#"
         end: "$"
         rules:
             - todo: "TODO:?"
