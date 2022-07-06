@@ -30,7 +30,7 @@ rules:
 
     - statement: "(?i)\\b(.and.|case|do|else|else?if|else?where|end|end?do|end?if)\\b"
     - statement: "(?i)\\b(end?select|.eqv.|forall|if|lge|lgt|lle|llt|.neqv.|.not.)\\b"
-    - statement: "(?i)\\b(or|and|repeat|select|case|then|where|while)\\b"
+    - statement: "(?i)\\b(or|and|repeat|select|case|then|where|while|import)\\b"
 
     - special: "(?i)\\b(continue|cycle|exit|go?to|result|return)\\b"
 
