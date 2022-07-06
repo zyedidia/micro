@@ -581,8 +581,17 @@ func importHumanize() *lua.LTable {
 func importHTTP() *lua.LTable {
 	pkg := L.NewTable()
 
+	L.SetField(pkg, "CanonicalHeaderKey", luar.New(L, http.CanonicalHeaderKey))
+	L.SetField(pkg, "DetectContentType", luar.New(L, http.DetectContentType))
+	L.SetField(pkg, "StatusText", luar.New(L, http.StatusText))
+	L.SetField(pkg, "Client", luar.New(L, http.Client))
+	L.SetField(pkg, "Header", luar.New(L, http.Header))
+	L.SetField(pkg, "NewRequest", luar.New(L, http.NewRequest))
 	L.SetField(pkg, "Get", luar.New(L, http.Get))
+	L.SetField(pkg, "Head", luar.New(L, http.Head))
 	L.SetField(pkg, "Post", luar.New(L, http.Post))
+	L.SetField(pkg, "PostForm", luar.New(L, http.PostForm))
+	L.SetField(pkg, "ReadResponse", luar.New(L, http.ReadResponse))
 
 	return pkg
 }
