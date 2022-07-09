@@ -207,7 +207,7 @@ syntax files, you can make use of your own subgroups.
 If micro can't match the subgroup, it'll default to the root group, so  it's
 safe and recommended to use subgroups in your custom syntax files.
 
-For example if `constant.string` is found in your colorscheme, micro will us
+For example if `constant.string` is found in your colorscheme, micro will use
 that for highlighting strings. If it's not found, it will use constant instead.
 Micro tries to match the largest set of groups it can find in the colorscheme
 definitions, so if, for examle `constant.bool.true` is found then micro will
