@@ -365,6 +365,14 @@ Here are the available options:
 
 	default value: `false`
 
+* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc) colors with respect to the tab bar.
+
+	default value: false
+
+* `tabreverse`: reverses the tab bar colors when active.
+
+	default value: true
+
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
 	default value: `4`
@@ -491,6 +499,8 @@ so that you can see what the formatting should look like.
     "sucmd": "sudo",
     "syntax": true,
     "tabmovement": false,
+    "tabhighlight": true,
+    "tabreverse": false,
     "tabsize": 4,
     "tabstospaces": false,
     "useprimary": true,
