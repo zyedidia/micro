@@ -1,4 +1,4 @@
-<img alt="micro logo" src="./assets/micro-logo.svg" width="500px"/>
+<img alt="micro logo" src="./assets/micro-logo-drop.svg" width="500px"/>
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
