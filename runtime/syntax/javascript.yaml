@@ -22,7 +22,7 @@ rules:
     - statement: "\\b(get|if|import|from|in|of|instanceof|let|new|reject|resolve|return)\\b"
     - statement: "\\b(set|static|super|switch|this|throw|try|typeof|var|void|while|with|yield)\\b"
     # reserved but unassigned
-    - error: "\\b(enum|implements|interface|package|private|protected|public)"
+    - error: "\\b(enum|implements|interface|package|private|protected|public)\\b"
     - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
     - constant: "\\b(null|undefined|NaN)\\b"
     - constant: "\\b(true|false)\\b"
