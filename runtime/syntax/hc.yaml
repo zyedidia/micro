@@ -1,0 +1,52 @@
+filetype: hc
+
+detect:
+    filename: "(\\.(hc|HC)$|\\.(hh|HH)$|\\.ii?$|\\.(def)$)"
+
+rules:
+    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
+    - type: "\\b(F64|I8|U8|I16|U16|I32|U32|I64|U64|sizeof|enum|U0|static|extern|struct|union|class|intern|public|argc|argv|asm)\\b"
+    
+    - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
+    - statement: "\\b(try|catch|throw|goto|continue|break|return)\\b"
+    - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|help_index|ifjit|ifaot|exe)"
+     
+      # Operator Color
+    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)"
+    - symbol.brackets: "[(){}]|\\[|\\]"
+      # Integer Constants
+    - constant.number: "(\\b([1-9][0-9]*|0[0-7]*|0[Xx][0-9A-Fa-f]+|0[Bb][01]+)([Uu]?[Ll][Ll]?|[Ll][Ll]?[Uu]?)?\\b)"
+      # Decimal Floating Constants
+    - constant.number: "(\\b(([0-9]*[.][0-9]+|[0-9]+[.][0-9]*)([Ee][+-]?[0-9]+)?|[0-9]+[Ee][+-]?[0-9]+)[FfLl]?\\b)"
+      # Hexadecimal Floating Constants
+    - constant.number: "(\\b0[Xx]([0-9A-Za-z]*[.][0-9A-Za-z]+|[0-9A-Za-z]+[.][0-9A-Za-z]*)[Pp][+-]?[0-9]+[FfLl]?\\b)"
+    - constant.number: "NULL"
+    - constant.number: "TRUE"
+    - constant.number: "FALSE"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - error: "..+"
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
