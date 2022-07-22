@@ -17,6 +17,9 @@ func check(e error) {
 }
 
 func main() {
+	if runtime.GOOS != "darwin" {
+		return
+	}
 	if len(os.Args) == 3 {
 		if os.Args[1] == "darwin" && runtime.GOOS == "darwin" {
 			rawInfoPlistString := `<?xml version="1.0" encoding="UTF-8"?>
