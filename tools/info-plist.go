@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"runtime"
 )
 
 func check(e error) {
@@ -17,7 +18,7 @@ func check(e error) {
 
 func main() {
 	if len(os.Args) == 3 {
-		if os.Args[1] == "darwin" {
+		if os.Args[1] == "darwin" && runtime.GOOS == "darwin" {
 			rawInfoPlistString := `<?xml version="1.0" encoding="UTF-8"?>
 	<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 	<plist version="1.0">
