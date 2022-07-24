@@ -1047,12 +1047,14 @@ func (h *BufPane) CopyLine() bool {
 	if h.Cursor.HasSelection() {
 		return false
 	}
+	origLoc := h.Cursor.Loc
 	h.Cursor.SelectLine()
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
 	h.freshClip = true
 	InfoBar.Message("Copied line")
 
 	h.Cursor.Deselect(true)
+	h.Cursor.Loc = origLoc
 	h.Relocate()
 	return true
 }
