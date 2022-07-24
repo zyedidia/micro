@@ -1,0 +1,87 @@
+#
+# This syntax definition is based on the Terraform guide:
+# https://www.terraform.io/docs/configuration/index.html
+#
+# Formatting is loosely based on Sublime's and VSCode's syntax highlighting for Terraform:
+# https://github.com/totoroot/Terraform.tmLanguage/blob/master/Terraform.sublime-syntax
+# https://github.com/hashicorp/vscode-terraform/blob/main/syntaxes/terraform.tmGrammar.json
+#
+
+filetype: terraform
+
+detect:
+    # File Extensions:
+    #
+    # - ".tf": the standard file extension
+    #   https://www.terraform.io/docs/configuration/index.html#code-organization
+    #
+    # - ".hcl": non-terraform tools often use this HCL syntax, i.e. Vault
+    #   https://www.vaultproject.io/docs/configuration/
+    filename: "\\.tf$|\\.hcl$"
+
+rules:
+    # Named Values
+    #
+    # https://www.terraform.io/docs/language/expressions/references.html
+    - identifier: "\\b(var|local|module|data|path|terraform)\\b"
+
+    # Block types
+    #
+    # resource: https://www.terraform.io/docs/language/resources/syntax.html
+    # provider: https://www.terraform.io/docs/language/providers/configuration.html
+    # variable: https://www.terraform.io/docs/language/values/variables.html
+    # output: https://www.terraform.io/docs/language/values/outputs.html
+    # locals: https://www.terraform.io/docs/language/values/locals.html
+    # module: https://www.terraform.io/docs/language/modules/syntax.html
+    # data: https://www.terraform.io/docs/language/data-sources/index.html
+    # terraform: https://www.terraform.io/docs/language/settings/index.html#terraform-block-syntax
+    - special: "\\b(resource|provider|variable|output|locals|module|terraform)\\b"
+
+    # Built-In type keywords
+    #
+    # https://www.terraform.io/docs/language/expressions/type-constraints.html#primitive-types
+    # https://www.terraform.io/docs/language/expressions/type-constraints.html#dynamic-types-the-quot-any-quot-constraint
+    - type.keyword: "\\b(any|string|number|bool)\\b"
+
+    # Built-In Functions
+    #
+    # https://www.terraform.io/docs/language/functions/index.html
+    - statement: "\\b(abs|ceil|floor|log|max|min|parseint|pow|signum|chomp|format|formatlist|indent|join|lower|regex|regexall|replace|split|strrev|substr|title|trim|trimprefix|trimsuffix|trimspace|upper|alltrue|anytrue|chunklist|coalesce|coalescelist|compact|concat|contains|distinct|element|flatten|index|keys|length|list|lookup|map|matchkeys|merge|one|range|reverse|setintersection|setproduct|setsubtract|setunion|slice|sort|sum|transpose|values|zipmap|base64decode|base64encode|base64gzip|csvdecode|jsondecode|jsonencode|textdecodebase64|textencodebase64|urlencode|yamldecode|yamlencode|abspath|dirname|pathexpand|basename|file|fileexists|fileset|filebase64|templatefile|formatdate|timeadd|timestamp|base64sha256|base64sha512|bcrypt|filebase64sha256|filebase64sha512|filemd5|filesha1|filesha256|filesha512|md5|rsadecrypt|sha1|sha256|sha512|uuid|uuidv5|cidrhost|cidrnetmask|cidrsubnet|cidrsubnets|can|defaults|nonsensitive|sensitive|tobool|tolist|tomap|tonumber|toset|tostring|try)\\b"
+
+    - symbol.operator: "([~^.:;,+*|=!\\%@]|<|>|/|-|&)"
+
+    - symbol.brackets: "([(){}]|\\[|\\])"
+
+    - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b|'.'"
+
+    - constant.bool: "\\b(true|false|null)\\b"
+
+    - constant.string:
+          start: "\""
+          end: "\""
+          skip: "\\\\."
+          rules:
+              - constant.specialChar: "%."
+              - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+              - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+          start: "''"
+          end: "''"
+          skip: "\\\\."
+          rules:
+              - constant.specialChar: "%."
+              - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+              - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - comment:
+          start: "#|//"
+          end: "$\\n?"
+          rules:
+              - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+          start: "/\\*"
+          end: "\\*/"
+          rules:
+              - todo: "(TODO|XXX|FIXME):?"
