@@ -388,6 +388,7 @@ func DoEvent() {
 	var event tcell.Event
 
 	// Display everything
+	screen.DrawLock.Lock()
 	screen.Screen.Fill(' ', config.DefStyle)
 	screen.Screen.HideCursor()
 	action.Tabs.Display()
@@ -397,6 +398,7 @@ func DoEvent() {
 	action.MainTab().Display()
 	action.InfoBar.Display()
 	screen.Screen.Show()
+	screen.DrawLock.Unlock()
 
 	// Check for new events
 	select {

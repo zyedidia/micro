@@ -24,6 +24,7 @@ var Events chan (tcell.Event)
 
 // The lock is necessary since the screen is polled on a separate thread
 var lock sync.Mutex
+var DrawLock sync.Mutex
 
 // drawChan is a channel that will cause the screen to redraw when
 // written to even if no event user event has occurred
@@ -120,6 +121,7 @@ func TempFini() bool {
 	if !screenWasNil {
 		Screen.Fini()
 		Lock()
+		DrawLock.Lock()
 		Screen = nil
 	}
 	return screenWasNil
@@ -130,6 +132,7 @@ func TempStart(screenWasNil bool) {
 	if !screenWasNil {
 		Init()
 		Unlock()
+		DrawLock.Unlock()
 	}
 }
 
