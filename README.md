@@ -139,6 +139,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 
 * Linux: Available in distro-specific package managers.
     * `dnf install micro` (Fedora).
+    * `apt install micro` (Ubuntu and Debian).
     * `pacman -S micro` (Arch Linux).
     * `emerge app-editors/micro` (Gentoo).
     * `eopkg install micro` (Solus).
