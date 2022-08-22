@@ -46,14 +46,14 @@ rules:
     - identifier: "\\$\\{?[0-9A-Za-z_!@#$*?-]+\\}?"
 
     - constant.string:
-        start: "\""
+        start: "(?:^|[^\\\\])(\")"
         end: "\""
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
 
     - constant.string:
-        start: "'"
+        start: "(?:^|[^\\\\])(')"
         end: "'"
         rules: []
 
