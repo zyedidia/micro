@@ -119,6 +119,17 @@ func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte, canMatchSt
 		strbytes = str
 	}
 
+	if strings.Contains(regexStr, "(") {
+		match := regex.FindSubmatchIndex(strbytes)
+		if match == nil {
+			return nil
+		}
+		if len(match) < 4 {
+			return []int{runePos(match[0], str), runePos(match[1], str)}
+		}
+		return []int{runePos(match[2], str), runePos(match[3], str)}
+	}
+
 	match := regex.FindIndex(strbytes)
 	if match == nil {
 		return nil
