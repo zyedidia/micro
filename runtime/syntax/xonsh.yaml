@@ -2,7 +2,7 @@
 filetype: 'xonsh'
 
 detect:
-    filename: "\\.xonsh$"
+    filename: "(\\.xonsh|\\.xsh)$"
     header: "^#!.*/(env +)?[bg]?xonsh"
 
 rules:
@@ -101,3 +101,5 @@ rules:
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
+
+    ### Xonsh-specific things ###
