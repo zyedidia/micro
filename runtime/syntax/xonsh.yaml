@@ -1,0 +1,103 @@
+# For more information, see https://xon.sh
+filetype: 'xonsh'
+
+detect:
+    filename: "\\.xonsh$"
+    header: "^#!.*/(env +)?[bg]?xonsh"
+
+rules:
+    ### Python things ###
+
+    # built-in objects
+    - constant: "\\b(Ellipsis|None|self|cls|True|False)\\b"
+      # built-in attributes
+    - constant: "\\b(__bases__|__builtin__|__class__|__debug__|__dict__|__doc__|__file__|__members__|__methods__|__name__|__self__)\\b"
+      # built-in functions
+    - identifier: "\\b(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dir|divmod|eval|exec|format|getattr|globals|hasattr|hash|help|hex|id|input|isinstance|issubclass|iter|len|locals|max|min|next|nonlocal|oct|open|ord|pow|print|repr|round|setattr|sorted|sum|vars|__import__)\\b"
+      # special method names
+    - identifier: "\\b__(abs|add|and|call|cmp|coerce|complex|concat|contains|delattr|delitem|delslice|del|dict|divmod|div|float|getattr|getitem|getslice|hash|hex|iadd|iand|iconcat|ifloordiv|ilshift|imatmul|imod|imul|init|int|invert|inv|ior|ipow|irshift|isub|iter|itruediv|ixor|len|long|lshift|mod|mul|neg|next|nonzero|oct|or|pos|pow|radd|rand|rcmp|rdivmod|rdiv|repeat|repr|rlshift|rmod|rmul|ror|rpow|rrshift|rshift|rsub|rxor|setattr|setitem|setslice|str|sub|xor)__\\b"
+      # types
+    - type: "\\b(bool|bytearray|bytes|classmethod|complex|dict|enumerate|filter|float|frozenset|int|list|map|memoryview|object|property|range|reversed|set|slice|staticmethod|str|super|tuple|type|zip)\\b"
+      # definitions
+    - identifier: "def [a-zA-Z_0-9]+"
+      # keywords
+    - statement: "\\b(and|as|assert|async|await|break|case|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|match|nonlocal|not|or|pass|raise|return|try|while|with|yield)\\b"
+      # decorators
+    - brightgreen: "@.*[(]"
+      # operators
+    - symbol.operator: "([~^.:;,+*|=!\\%@]|<|>|/|-|&)"
+      # parentheses
+    - symbol.brackets: "([(){}]|\\[|\\])"
+      # numbers
+    - constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
+    - constant.number: "\\b0b(_?[01])+\\b"     # bin
+    - constant.number: "\\b0o(_?[0-7])+\\b"    # oct
+    - constant.number: "\\b0x(_?[0-9a-fA-F])+\\b" # hex
+
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules: []
+
+    - constant.string:
+        start: "'''"
+        end: "'''"
+        rules: []
+
+    - constant.string:
+        start: "\""
+        end: "(\"|$)"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "('|$)"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:  # AKA Code tags (PEP 350)
+            - todo: "(TODO|FIXME|HACK|BUG|NOTE|FAQ|MNEMONIC|REQ|RFE|IDEA|PORT|\\?\\?\\?|!!!|GLOSS|SEE|TODOC|STAT|RVD|CRED):?"
+
+    ### Bash things ###
+
+    # Numbers
+    - constant.number: "\\b[0-9]+\\b"
+      # Conditionals and control flow
+    - statement: "\\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while)\\b"
+    - special: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|!|=|&|\\|)"
+      # Shell commands
+    - type: "\\b(cd|echo|export|let|set|umask|unset)\\b"
+      # Common linux commands
+    - type: "\\b((g|ig)?awk|bash|dash|find|\\w{0,4}grep|kill|killall|\\w{0,4}less|make|pkill|sed|sh|tar)\\b"
+      # Coreutils commands
+    - type: "\\b(base64|basename|cat|chcon|chgrp|chmod|chown|chroot|cksum|comm|cp|csplit|cut|date|dd|df|dir|dircolors|dirname|du|env|expand|expr|factor|false|fmt|fold|head|hostid|id|install|join|link|ln|logname|ls|md5sum|mkdir|mkfifo|mknod|mktemp|mv|nice|nl|nohup|nproc|numfmt|od|paste|pathchk|pinky|pr|printenv|printf|ptx|pwd|readlink|realpath|rm|rmdir|runcon|seq|(sha1|sha224|sha256|sha384|sha512)sum|shred|shuf|sleep|sort|split|stat|stdbuf|stty|sum|sync|tac|tail|tee|test|time|timeout|touch|tr|true|truncate|tsort|tty|uname|unexpand|uniq|unlink|users|vdir|wc|who|whoami|yes)\\b"
+      # Conditional flags
+    - statement: "--[a-z-]+"
+    - statement: "\\ -[a-z]+"
+
+    - identifier: "\\$\\{?[0-9A-Za-z_!@#$*?-]+\\}?"
+    - identifier: "\\$\\{?[0-9A-Za-z_!@#$*?-]+\\}?"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        rules: []
+
+    - comment:
+        start: "(^|\\s)#"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
