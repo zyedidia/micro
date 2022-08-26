@@ -1,7 +1,7 @@
 filetype: perl
 
 detect: 
-    filename: "\\.pp[lmp]$"
+    filename: "\\.p[lmp]$"
     header: "^#!.*/(env +)?perl( |$)"
 
 rules:
