@@ -11,11 +11,11 @@ require (
 	github.com/sergi/go-diff v1.1.0
 	github.com/stretchr/testify v1.4.0
 	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
-	github.com/zyedidia/clipboard v1.0.3
+	github.com/zyedidia/clipper v0.1.0
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
 	github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d
-	github.com/zyedidia/pty v1.1.15 // indirect
-	github.com/zyedidia/tcell/v2 v2.0.8
+	github.com/zyedidia/pty v1.1.20 // indirect
+	github.com/zyedidia/tcell/v2 v2.0.9
 	github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415
 	golang.org/x/text v0.3.2
 	gopkg.in/yaml.v2 v2.2.8

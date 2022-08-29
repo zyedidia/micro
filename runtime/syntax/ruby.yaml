@@ -1,7 +1,7 @@
 filetype: ruby
 
 detect: 
-    filename: "\\.(rb|rake|gemspec)$|^(Gemfile|config.ru|Rakefile|Capfile|Vagrantfile|Guardfile|Appfile|Fastfile|Pluginfile|Podfile)$"
+    filename: "\\.(rb|rake|gemspec)$|^(Gemfile|config.ru|Rakefile|Capfile|Vagrantfile|Guardfile|Appfile|Fastfile|Pluginfile|Podfile|\\.?[Bb]rewfile)$"
     header: "^#!.*/(env +)?ruby( |$)"
 
 rules:
@@ -18,7 +18,7 @@ rules:
 
     - statement: "\\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\\?|do|else|elsif|end|ensure|for|if|in|module|next|nil|not|or|private|protected|public|redo|rescue|retry|return|self|super|then|undef|unless|until|when|while|yield)\\b"
     - constant: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
-    - constant.number: "(?i)\\b0x[0-9a-f][0-9a-f_]*\\b"
+    - constant.number: "(?i)\\b0x[0-9a-fA-F][0-9a-f_]*\\b"
     - constant.number: "(?i)\\b0b[01][01_]*\\b"
     - constant.number: "(?i)\\b[0-9][0-9_]*(['.'][0-9_]+)?(e[\\-]?[0-9_]+)?\\b"
     # Ruby "Symbols"

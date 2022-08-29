@@ -5,9 +5,9 @@ detect:
 
 rules:
     # Rebase commands
-    - statement: "^(p(ick)?|r(eword)?|e(dit)?|s(quash)?|f(ixup)?|x|exec|d(rop)?)\\b"
+    - statement: "^(p(ick)?|r(eword)?|e(dit)?|s(quash)?|f(ixup)?|x|exec|b(reak)?|d(rop)?|l(abel)?|t|reset|m(erge)?)\\b"
     # Commit IDs
-    - identifier: "\\b([0-9a-f]{7,40})\\b"
+    - identifier: "\\b([0-9a-fA-F]{7,40})\\b"
 
     # Color keywords for Github (and others)
     - type.keyword: "\\b(?i)((fix(es|ed)?|close(s|d)?) #[0-9]+)\\b"

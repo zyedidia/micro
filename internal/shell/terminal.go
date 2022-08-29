@@ -128,7 +128,13 @@ func (t *Terminal) Close() {
 	// call the lua function that the user has given as a callback
 	if t.getOutput {
 		if t.callback != nil {
-			t.callback(t.output.String())
+			Jobs <- JobFunction{
+				Function: func(out string, args []interface{}) {
+					t.callback(out)
+				},
+				Output: t.output.String(),
+				Args:   nil,
+			}
 		}
 	}
 }

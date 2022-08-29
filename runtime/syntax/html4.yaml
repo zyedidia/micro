@@ -1,6 +1,6 @@
 filetype: html4
 
-detect: 
+detect:
     filename: "\\.htm[l]?4$"
     header: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01//EN|http://www.w3.org/TR/html4/strict.dtd\">"
 
@@ -13,7 +13,7 @@ rules:
     - symbol: "[:=]"
     - identifier: "(alt|bgcolor|height|href|id|label|longdesc|name|on(click|focus|load|mouseover)|size|span|src|style|target|type|value|width)="
     - constant.string: "\"[^\"]*\""
-    - constant.number: "(?i)#[0-9A-F]{6,6}"
+    - constant.number: "(?i)#[0-9a-fA-F]{6,6}"
     - default:
         start: ">"
         end: "<"

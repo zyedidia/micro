@@ -60,7 +60,6 @@ func startup(args []string) (tcell.SimulationScreen, error) {
 			}
 			// Print the stack trace too
 			log.Fatalf(errors.Wrap(err, 2).ErrorStack())
-			os.Exit(1)
 		}
 	}()
 
@@ -171,7 +170,6 @@ func TestMain(m *testing.M) {
 	sim, err = startup([]string{})
 	if err != nil {
 		log.Fatalln(err)
-		os.Exit(1)
 	}
 
 	retval := m.Run()

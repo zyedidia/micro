@@ -1,4 +1,4 @@
-<img alt="micro logo" src="./assets/micro-logo.svg" width="500px"/>
+<img alt="micro logo" src="./assets/micro-logo-drop.svg" width="500px"/>
 
 [![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
@@ -132,10 +132,6 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
-**Note for Linux:** for interfacing with the local system clipboard, `xclip` or `xsel`
-must be installed. Please see the section on [Linux clipboard support](https://github.com/zyedidia/micro#linux-clipboard-support)
-further below.
-
 Micro is also available through other package managers on Linux such dnf, AUR, Nix, and package managers
 for other operating systems. These packages are not guaranteed to be up-to-date.
 
@@ -143,8 +139,11 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 
 * Linux: Available in distro-specific package managers.
     * `dnf install micro` (Fedora).
+    * `apt install micro` (Ubuntu and Debian).
     * `pacman -S micro` (Arch Linux).
+    * `emerge app-editors/micro` (Gentoo).
     * `eopkg install micro` (Solus).
+    * `pacstall -I micro` (Pacstall).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
     * `choco install micro`.
@@ -155,6 +154,14 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `pkg_add micro`
 * macOS with [MacPorts](https://www.macports.org):
     * `sudo port install micro`
+
+**Note for Linux desktop environments:**
+
+For interfacing with the local system clipboard, the following tools need to be installed:
+* For X11 `xclip` or `xsel`
+* For [Wayland](https://wayland.freedesktop.org/) `wl-clipboard`
+
+Without these tools installed, micro will use an internal clipboard for copy and paste, but it won't be accessible to external applications.
 
 ### Building from source
 
@@ -195,15 +202,6 @@ If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) i
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
 
-### Linux clipboard support
-
-On Linux, clipboard support requires:
-
-- On X11, the `xclip` or `xsel` commands (for Ubuntu: `sudo apt install xclip`)
-- On Wayland, the `wl-clipboard` command
-
-If you don't have these commands, micro will use an internal clipboard for copy and paste, but it won't work with external applications.
-
 ### Colors and syntax highlighting
 
 If you open micro and it doesn't seem like syntax highlighting is working, this is probably because
@@ -238,7 +236,7 @@ Once you have built the editor, start it by running `micro path/to/file.txt` or 
 micro also supports creating buffers from `stdin`:
 
 ```sh
-ifconfig | micro
+ip a | micro
 ```
 
 You can move the cursor around with the arrow keys and mouse.
@@ -271,6 +269,6 @@ If you find any bugs, please report them! I am also happy to accept pull request
 You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
-For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR).
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR). You can also use the [Discussions](https://github.com/zyedidia/micro/discussions) section on Github for a forum-like setting or for Q&A.
 
 Sometimes I am unresponsive, and I apologize! If that happens, please ping me.

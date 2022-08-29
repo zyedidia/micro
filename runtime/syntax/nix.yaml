@@ -25,3 +25,8 @@ rules:
         start: "#"
         end: "$"
         rules: []
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules: []

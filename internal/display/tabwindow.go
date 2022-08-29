@@ -2,6 +2,7 @@ package display
 
 import (
 	runewidth "github.com/mattn/go-runewidth"
+	"github.com/zyedidia/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -94,16 +95,27 @@ func (w *TabWindow) Display() {
 	x := -w.hscroll
 	done := false
 
-	tabBarStyle := config.DefStyle.Reverse(true)
-	if style, ok := config.Colorscheme["tabbar"]; ok {
-		tabBarStyle = style
-	}
-	tabBarActiveStyle := tabBarStyle
-	if style, ok := config.Colorscheme["tabbar.active"]; ok {
-		tabBarActiveStyle = style
-	}
+	globalTabReverse := config.GetGlobalOption("tabreverse").(bool)
+	globalTabHighlight := config.GetGlobalOption("tabhighlight").(bool)
 
-	draw := func(r rune, n int, active bool) {
+	// xor of reverse and tab highlight to get tab character (as in filename and surrounding characters) reverse state
+	tabCharHighlight := (globalTabReverse || globalTabHighlight) && !(globalTabReverse && globalTabHighlight)
+
+	reverseStyles := func(reverse bool) (tcell.Style, tcell.Style) {
+		tabBarStyle := config.DefStyle.Reverse(reverse)
+		if style, ok := config.Colorscheme["tabbar"]; ok {
+			tabBarStyle = style
+		}
+		tabBarActiveStyle := tabBarStyle
+		if style, ok := config.Colorscheme["tabbar.active"]; ok {
+			tabBarActiveStyle = style
+		}
+		return tabBarStyle, tabBarActiveStyle
+	}
+	
+	draw := func(r rune, n int, active bool, reversed bool) {
+		tabBarStyle, tabBarActiveStyle := reverseStyles(reversed)
+		
 		style := tabBarStyle
 		if active {
 			style = tabBarActiveStyle
@@ -131,28 +143,33 @@ func (w *TabWindow) Display() {
 
 	for i, n := range w.Names {
 		if i == w.active {
-			draw('[', 1, true)
+			draw('[', 1, true, tabCharHighlight)
 		} else {
-			draw(' ', 1, false)
+			draw(' ', 1, false, tabCharHighlight)
 		}
+		
 		for _, c := range n {
-			draw(c, 1, i == w.active)
+			draw(c, 1, i == w.active, tabCharHighlight)
 		}
+		
 		if i == len(w.Names)-1 {
 			done = true
 		}
+		
 		if i == w.active {
-			draw(']', 1, true)
-			draw(' ', 2, true)
+			draw(']', 1, true, tabCharHighlight)
+			draw(' ', 2, true, globalTabReverse)
 		} else {
-			draw(' ', 3, false)
+			draw(' ', 1, false, tabCharHighlight)
+			draw(' ', 2, false, globalTabReverse)
 		}
+		
 		if x >= w.Width {
 			break
 		}
 	}
 
 	if x < w.Width {
-		draw(' ', w.Width-x, false)
+		draw(' ', w.Width-x, false, globalTabReverse)
 	}
 }
