@@ -5,7 +5,7 @@ detect:
 
 rules:
   - type: "\\b(int|float|bool|string|color|brush|physical-length|length|duration|angle|easing|percent|image)\\b"
-  - statement: "\\b(import|export|struct|from|property|callback|animate|states|transitions|if|for|return)\\b"
+  - statement: "\\b(import|export|struct|from|property|callback|animate|states|transitions|if|for|return|in)\\b"
   
   - constant.number: "\\b[0-9]+\\b"
   - constant.number: "\\b[0-9]+(px|%)\\b"
