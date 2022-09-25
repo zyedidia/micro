@@ -9,7 +9,7 @@ rules:
   
   - constant.number: "\\b[0-9]+\\b"
   - constant.number: "\\b[0-9]+(px|%)\\b"
-  - constant: "\\b(blue|red|green|yellow|red|black|ease|ease_in|ease_out|ease_in_out)\\b"
+  - constant: "\\b(blue|red|green|yellow|red|black|orange|grey|gray|ease|ease_in|ease_out|ease_in_out)\\b"
   - constant.color: "#[0-9a-fA-F]+"
   - constant.bool: "\\b(true|false)\\b"
   - constant.bool.false: "\\b(false)\\b"
