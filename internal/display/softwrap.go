@@ -30,6 +30,28 @@ func (s SLoc) GreaterThan(b SLoc) bool {
 	return s.Line == b.Line && s.Row > b.Row
 }
 
+// LessEqual returns true if s is less than or equal to b
+func (s SLoc) LessEqual(b SLoc) bool {
+	if s.Line < b.Line {
+		return true
+	}
+	if s.Line == b.Line && s.Row < b.Row {
+		return true
+	}
+	return s == b
+}
+
+// GreaterEqual returns true if s is bigger than or equal to b
+func (s SLoc) GreaterEqual(b SLoc) bool {
+	if s.Line > b.Line {
+		return true
+	}
+	if s.Line == b.Line && s.Row > b.Row {
+		return true
+	}
+	return s == b
+}
+
 // VLoc represents a location in the buffer as a visual location in the
 // linewrapped buffer.
 type VLoc struct {
