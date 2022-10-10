@@ -142,6 +142,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `apt install micro` (Ubuntu and Debian).
     * `pacman -S micro` (Arch Linux).
     * `emerge app-editors/micro` (Gentoo).
+    * `zypper install micro-editor` (SUSE)
     * `eopkg install micro` (Solus).
     * `pacstall -I micro` (Pacstall).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
