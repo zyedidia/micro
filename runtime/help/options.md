@@ -73,11 +73,11 @@ Here are the available options:
 
     default value: `external`
 
-* `colorcolumn`: if this is not set to 0, it will display a column at the
-   specified column. This is useful if you want column 80 to be highlighted
-   special for example.
+* `colorcolumns`: if this is not set to `[0]`, it will display a column at the
+   specified column(s). For instance, `[80,100,120]` will highlight all three
+   of those columns.
 
-	default value: `0`
+	default value: `[0]`
 
 * `colorscheme`: loads the colorscheme stored in 
    $(configDir)/colorschemes/`option`.micro, This setting is `global only`.
@@ -447,7 +447,7 @@ so that you can see what the formatting should look like.
     "backupdir": "",
     "basename": false,
     "clipboard": "external",
-    "colorcolumn": 0,
+    "colorcolumns": [0],
     "colorscheme": "default",
     "comment": true,
     "cursorline": true,
