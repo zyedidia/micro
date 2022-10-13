@@ -219,7 +219,7 @@ func (w *BufWindow) Relocate() bool {
 		w.StartLine = c
 		ret = true
 	}
-	if c.GreaterThan(w.Scroll(w.StartLine, height-1-scrollmargin)) && c.LessThan(w.Scroll(bEnd, -scrollmargin+1)) {
+	if c.GreaterThan(w.Scroll(w.StartLine, height-1-scrollmargin)) && c.LessEqual(w.Scroll(bEnd, -scrollmargin)) {
 		w.StartLine = w.Scroll(c, -height+1+scrollmargin)
 		ret = true
 	} else if c.GreaterThan(w.Scroll(bEnd, -scrollmargin)) && c.GreaterThan(w.Scroll(w.StartLine, height-1)) {
