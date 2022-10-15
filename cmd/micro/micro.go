@@ -62,7 +62,7 @@ func InitFlags() {
 		fmt.Println("-version")
 		fmt.Println("    \tShow the version number and information")
 
-		fmt.Print("\nMicro's plugin's can be managed at the command line with the following commands.\n")
+		fmt.Print("\nMicro's plugins can be managed at the command line with the following commands.\n")
 		fmt.Println("-plugin install [PLUGIN]...")
 		fmt.Println("    \tInstall plugin(s)")
 		fmt.Println("-plugin remove [PLUGIN]...")
