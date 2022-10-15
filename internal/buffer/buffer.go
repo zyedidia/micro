@@ -678,6 +678,7 @@ func (b *Buffer) UpdateRules() {
 	}
 	syntaxFile := ""
 	foundDef := false
+	foundDefPriority := -1 // all syntax definitions has priority 0 by default
 	var header *highlight.Header
 	// search for the syntax file in the user's custom syntax files
 	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
@@ -698,6 +699,9 @@ func (b *Buffer) UpdateRules() {
 		}
 
 		if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
+			if foundDefPriority >= header.Priority {
+				continue
+			}
 			syndef, err := highlight.ParseDef(file, header)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
@@ -706,7 +710,10 @@ func (b *Buffer) UpdateRules() {
 			b.SyntaxDef = syndef
 			syntaxFile = f.Name()
 			foundDef = true
-			break
+			foundDefPriority = header.Priority
+			if header.FileType == ft {
+				break
+			}
 		}
 	}
 
