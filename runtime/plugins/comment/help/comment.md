@@ -47,6 +47,8 @@ but it is only available for certain filetypes:
 * java: `// %s`
 * javascript: `// %s`
 * jinja2: `{# %s #}`
+* jinja2-html: `{# %s #}`
+* jinja2-yaml: `{# %s #}`
 * julia: `# %s`
 * kotlin: `// %s`
 * lua: `-- %s`

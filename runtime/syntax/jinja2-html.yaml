@@ -1,0 +1,9 @@
+filetype: jinja2-html
+
+detect:
+    filename: "\\.html?5?\\.(j2|jinja2)$"
+    priority: 1
+
+rules:
+  - include: "html"
+  - include: "jinja2"

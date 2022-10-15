@@ -1,0 +1,9 @@
+filetype: jinja2-yaml
+
+detect:
+    filename: "\\.(yaml|yml)\\.(j2|jinja2)$"
+    priority: 1
+
+rules:
+  - include: "yaml"
+  - include: "jinja2"
