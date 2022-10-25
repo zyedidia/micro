@@ -8,7 +8,6 @@ import (
 
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
@@ -200,11 +199,15 @@ type BufPane struct {
 	// Cursor is the currently active buffer cursor
 	Cursor *buffer.Cursor
 
-	// Since tcell doesn't differentiate between a mouse release event
-	// and a mouse move event with no keys pressed, we need to keep
-	// track of whether or not the mouse was pressed (or not released) last event to determine
-	// mouse release events
-	mouseReleased bool
+	// Since tcell doesn't differentiate between a mouse press event
+	// and a mouse move event with button pressed (nor between a mouse
+	// release event and a mouse move event with no buttons pressed),
+	// we need to keep track of whether or not the mouse was previously
+	// pressed, to determine mouse release and mouse drag events.
+	// Moreover, since in case of a release event tcell doesn't tell us
+	// which button was released, we need to keep track of which
+	// (possibly multiple) buttons were pressed previously.
+	mousePressed map[MouseEvent]bool
 
 	// We need to keep track of insert key press toggle
 	isOverwriteMode bool
@@ -250,7 +253,7 @@ func newBufPane(buf *buffer.Buffer, win display.BWindow, tab *Tab) *BufPane {
 	h.tab = tab
 
 	h.Cursor = h.Buf.GetActiveCursor()
-	h.mouseReleased = true
+	h.mousePressed = make(map[MouseEvent]bool)
 
 	return h
 }
@@ -332,7 +335,9 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.initialRelocate()
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
-	h.mouseReleased = true
+	for me := range h.mousePressed {
+		delete(h.mousePressed, me)
+	}
 	// Set isOverwriteMode to false, because we assume we are in the default
 	// mode when editor is opened
 	h.isOverwriteMode = false
@@ -432,50 +437,31 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 			h.DoRuneInsert(e.Rune())
 		}
 	case *tcell.EventMouse:
-		cancel := false
-		switch e.Buttons() {
-		case tcell.Button1:
-			_, my := e.Position()
-			if h.Buf.Type.Kind != buffer.BTInfo.Kind && h.Buf.Settings["statusline"].(bool) && my >= h.GetView().Y+h.GetView().Height-1 {
-				cancel = true
-			}
-		case tcell.ButtonNone:
-			// Mouse event with no click
-			if !h.mouseReleased {
-				// Mouse was just released
-
-				// mx, my := e.Position()
-				// mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
-
-				// we could finish the selection based on the release location as described
-				// below but when the mouse click is within the scroll margin this will
-				// cause a scroll and selection even for a simple mouse click which is
-				// not good
-				// for terminals that don't support mouse motion events, selection via
-				// the mouse won't work but this is ok
-
-				// Relocating here isn't really necessary because the cursor will
-				// be in the right place from the last mouse event
-				// However, if we are running in a terminal that doesn't support mouse motion
-				// events, this still allows the user to make selections, except only after they
-				// release the mouse
-
-				// if !h.doubleClick && !h.tripleClick {
-				// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
-				// }
-				if h.Cursor.HasSelection() {
-					h.Cursor.CopySelection(clipboard.PrimaryReg)
-				}
-				h.mouseReleased = true
-			}
-		}
-
-		if !cancel {
+		if e.Buttons() != tcell.ButtonNone {
 			me := MouseEvent{
-				btn: e.Buttons(),
-				mod: metaToAlt(e.Modifiers()),
+				btn:   e.Buttons(),
+				mod:   metaToAlt(e.Modifiers()),
+				state: MousePress,
 			}
+			if len(h.mousePressed) > 0 {
+				me.state = MouseDrag
+			}
+
+			if e.Buttons() & ^(tcell.WheelUp|tcell.WheelDown|tcell.WheelLeft|tcell.WheelRight) != tcell.ButtonNone {
+				h.mousePressed[me] = true
+			}
+
 			h.DoMouseEvent(me, e)
+		} else {
+			// Mouse event with no click - mouse was just released.
+			// If there were multiple mouse buttons pressed, we don't know which one
+			// was actually released, so we assume they all were released.
+			for me := range h.mousePressed {
+				delete(h.mousePressed, me)
+
+				me.state = MouseRelease
+				h.DoMouseEvent(me, e)
+			}
 		}
 	}
 	h.Buf.MergeCursors()
@@ -788,6 +774,8 @@ var BufKeyActions = map[string]BufKeyAction{
 // BufMouseActions contains the list of all possible mouse actions the bufhandler could execute
 var BufMouseActions = map[string]BufMouseAction{
 	"MousePress":       (*BufPane).MousePress,
+	"MouseDrag":        (*BufPane).MouseDrag,
+	"MouseRelease":     (*BufPane).MouseRelease,
 	"MouseMultiCursor": (*BufPane).MouseMultiCursor,
 }
 

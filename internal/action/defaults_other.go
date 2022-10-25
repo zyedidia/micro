@@ -92,11 +92,13 @@ var bufdefaults = map[string]string{
 	"Esc": "Escape,Deselect,ClearInfo,RemoveAllMultiCursors,UnhighlightSearch",
 
 	// Mouse bindings
-	"MouseWheelUp":   "ScrollUp",
-	"MouseWheelDown": "ScrollDown",
-	"MouseLeft":      "MousePress",
-	"MouseMiddle":    "PastePrimary",
-	"Ctrl-MouseLeft": "MouseMultiCursor",
+	"MouseWheelUp":     "ScrollUp",
+	"MouseWheelDown":   "ScrollDown",
+	"MouseLeft":        "MousePress",
+	"MouseLeftDrag":    "MouseDrag",
+	"MouseLeftRelease": "MouseRelease",
+	"MouseMiddle":      "PastePrimary",
+	"Ctrl-MouseLeft":   "MouseMultiCursor",
 
 	"Alt-n":        "SpawnMultiCursor",
 	"Alt-m":        "SpawnMultiCursorSelect",
@@ -175,8 +177,10 @@ var infodefaults = map[string]string{
 	"Esc": "AbortCommand",
 
 	// Mouse bindings
-	"MouseWheelUp":   "HistoryUp",
-	"MouseWheelDown": "HistoryDown",
-	"MouseLeft":      "MousePress",
-	"MouseMiddle":    "PastePrimary",
+	"MouseWheelUp":     "HistoryUp",
+	"MouseWheelDown":   "HistoryDown",
+	"MouseLeft":        "MousePress",
+	"MouseLeftDrag":    "MouseDrag",
+	"MouseLeftRelease": "MouseRelease",
+	"MouseMiddle":      "PastePrimary",
 }

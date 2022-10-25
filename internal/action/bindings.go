@@ -201,11 +201,20 @@ modSearch:
 		}, true
 	}
 
+	var mstate MouseState = MousePress
+	if strings.HasSuffix(k, "Drag") {
+		k = k[:len(k)-4]
+		mstate = MouseDrag
+	} else if strings.HasSuffix(k, "Release") {
+		k = k[:len(k)-7]
+		mstate = MouseRelease
+	}
 	// See if we can find the key in bindingMouse
 	if code, ok := mouseEvents[k]; ok {
 		return MouseEvent{
-			btn: code,
-			mod: modifiers,
+			btn:   code,
+			mod:   modifiers,
+			state: mstate,
 		}, true
 	}
 
