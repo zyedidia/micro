@@ -1679,7 +1679,7 @@ func (h *BufPane) PlayMacro() bool {
 		switch t := action.(type) {
 		case rune:
 			h.DoRuneInsert(t)
-		case func(*BufPane) bool:
+		case BufKeyAction:
 			t(h)
 		}
 	}
