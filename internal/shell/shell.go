@@ -100,8 +100,7 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 	}
 	cmd.Stderr = os.Stderr
 
-	// This is a trap for Ctrl-C so that it doesn't kill micro
-	// Instead we trap Ctrl-C to kill the program we're running
+	// Trap Ctrl-C to kill the program we're running
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	go func() {
@@ -111,6 +110,12 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 	}()
 
 	cmd.Start()
+
+	// Ignore Ctrl-C so that it doesn't kill micro while the interactive shell is
+	// active. It is important to do this AFTER the call to cmd.Start() or the
+	// child process will inherit the behavior!
+	signal.Ignore(os.Interrupt)
+
 	err = cmd.Wait()
 
 	output := outputBytes.String()
