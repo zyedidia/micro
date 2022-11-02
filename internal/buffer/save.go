@@ -29,9 +29,11 @@ const LargeFileThreshold = 50000
 // closed afterwards.
 func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error, withSudo bool) (err error) {
 	var writeCloser io.WriteCloser
+	var screenb bool
+	var cmd *exec.Cmd
 
 	if withSudo {
-		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
 
 		if writeCloser, err = cmd.StdinPipe(); err != nil {
 			return
@@ -44,13 +46,13 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 			cmd.Process.Kill()
 		}()
 
-		defer func() {
-			screenb := screen.TempFini()
-			if e := cmd.Run(); e != nil && err == nil {
-				err = e
-			}
-			screen.TempStart(screenb)
-		}()
+		screenb = screen.TempFini()
+		// need to start the process now, otherwise when we flush the file
+		// contents to its stdin it might hang because the kernel's pipe size
+		// is too small to handle the full file contents all at once
+		if e := cmd.Start(); e != nil && err == nil {
+			return err
+		}
 	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644); err != nil {
 		return
 	}
@@ -61,6 +63,15 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 
 	if e := writeCloser.Close(); e != nil && err == nil {
 		err = e
+	}
+
+	if withSudo {
+		// wait for dd to finish and restart the screen if we used sudo
+		err := cmd.Wait()
+		if err != nil {
+			return err
+		}
+		screen.TempStart(screenb)
 	}
 
 	return
