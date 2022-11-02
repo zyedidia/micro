@@ -443,14 +443,15 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				mod:   metaToAlt(e.Modifiers()),
 				state: MousePress,
 			}
-			if len(h.mousePressed) > 0 {
-				me.state = MouseDrag
-			}
+			isDrag := len(h.mousePressed) > 0
 
 			if e.Buttons() & ^(tcell.WheelUp|tcell.WheelDown|tcell.WheelLeft|tcell.WheelRight) != tcell.ButtonNone {
 				h.mousePressed[me] = true
 			}
 
+			if isDrag {
+				me.state = MouseDrag
+			}
 			h.DoMouseEvent(me, e)
 		} else {
 			// Mouse event with no click - mouse was just released.
