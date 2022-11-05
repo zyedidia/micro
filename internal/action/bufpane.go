@@ -325,6 +325,12 @@ func (h *BufPane) PluginCBRune(cb string, r rune) bool {
 	return b
 }
 
+func (h *BufPane) resetMouse() {
+	for me := range h.mousePressed {
+		delete(h.mousePressed, me)
+	}
+}
+
 // OpenBuffer opens the given buffer in this pane.
 func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.Buf.Close()
@@ -335,9 +341,7 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.initialRelocate()
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
-	for me := range h.mousePressed {
-		delete(h.mousePressed, me)
-	}
+	h.resetMouse()
 	// Set isOverwriteMode to false, because we assume we are in the default
 	// mode when editor is opened
 	h.isOverwriteMode = false
