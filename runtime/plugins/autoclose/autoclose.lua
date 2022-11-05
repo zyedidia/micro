@@ -4,6 +4,7 @@ local uutil = import("micro/util")
 local utf8 = import("utf8")
 local autoclosePairs = {"\"\"", "''", "``", "()", "{}", "[]"}
 local autoNewlinePairs = {"()", "{}", "[]"}
+local autoNewlineChars = {":", "then", "do"}
 
 function charAt(str, i)
     -- lua indexing is one off from go
@@ -46,6 +47,14 @@ function preInsertNewline(bp)
     local curRune = charAt(curLine, bp.Cursor.X)
     local nextRune = charAt(curLine, bp.Cursor.X+1)
     local ws = uutil.GetLeadingWhitespace(curLine)
+
+    for i = 1, #autoNewlineChars do
+        if curLine:match(autoNewlineChars[i] .. "$") then
+            bp:InsertNewline()
+            bp:InsertTab()
+            return false
+        end
+    end
 
     for i = 1, #autoNewlinePairs do
         if curRune == charAt(autoNewlinePairs[i], 1) then
