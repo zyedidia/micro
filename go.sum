@@ -43,6 +43,8 @@ github.com/zyedidia/clipper v0.0.0-20220613212750-517cd4a6c524 h1:sWYUMHs1EAlsPE
 github.com/zyedidia/clipper v0.0.0-20220613212750-517cd4a6c524/go.mod h1:7YApPNiiTZTXdKKZG92G50qj6mnWEX975Sdu65J7YpQ=
 github.com/zyedidia/clipper v0.1.0 h1:e16nhM1RgL3HYcugcHRUpMya1K830TS5uo6LlPJHySg=
 github.com/zyedidia/clipper v0.1.0/go.mod h1:7YApPNiiTZTXdKKZG92G50qj6mnWEX975Sdu65J7YpQ=
+github.com/zyedidia/clipper v0.1.1 h1:HBgguFNDq/QmSQKBnhy4sMKzILINr139VEgAhftOUTw=
+github.com/zyedidia/clipper v0.1.1/go.mod h1:7YApPNiiTZTXdKKZG92G50qj6mnWEX975Sdu65J7YpQ=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBYj5/td9WC0mw4g1xDBPovIqmHew=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
 github.com/zyedidia/go-runewidth v0.0.12 h1:aHWj8qL3aH7caRzoPBJXe1pEaZBXHpKtfTuiBo5p74Q=
