@@ -236,10 +236,14 @@ type BufPane struct {
 
 	// remember original location of a search in case the search is canceled
 	searchOrig buffer.Loc
+
+	// The pane may not yet be fully initialized after its creation
+	// since we may not know the window geometry yet. In such case we finish
+	// its initialization a bit later, after the initial resize.
+	initialized bool
 }
 
-// NewBufPane creates a new buffer pane with the given window.
-func NewBufPane(buf *buffer.Buffer, win display.BWindow, tab *Tab) *BufPane {
+func newBufPane(buf *buffer.Buffer, win display.BWindow, tab *Tab) *BufPane {
 	h := new(BufPane)
 	h.Buf = buf
 	h.BWindow = win
@@ -248,8 +252,13 @@ func NewBufPane(buf *buffer.Buffer, win display.BWindow, tab *Tab) *BufPane {
 	h.Cursor = h.Buf.GetActiveCursor()
 	h.mouseReleased = true
 
-	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+	return h
+}
 
+// NewBufPane creates a new buffer pane with the given window.
+func NewBufPane(buf *buffer.Buffer, win display.BWindow, tab *Tab) *BufPane {
+	h := newBufPane(buf, win, tab)
+	h.finishInitialize()
 	return h
 }
 
@@ -257,7 +266,24 @@ func NewBufPane(buf *buffer.Buffer, win display.BWindow, tab *Tab) *BufPane {
 // creates a buf window.
 func NewBufPaneFromBuf(buf *buffer.Buffer, tab *Tab) *BufPane {
 	w := display.NewBufWindow(0, 0, 0, 0, buf)
-	return NewBufPane(buf, w, tab)
+	h := newBufPane(buf, w, tab)
+	// Postpone finishing initializing the pane until we know the actual geometry
+	// of the buf window.
+	return h
+}
+
+// TODO: make sure splitID and tab are set before finishInitialize is called
+func (h *BufPane) finishInitialize() {
+	h.initialized = true
+	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+}
+
+// Resize resizes the pane
+func (h *BufPane) Resize(width, height int) {
+	h.BWindow.Resize(width, height)
+	if !h.initialized {
+		h.finishInitialize()
+	}
 }
 
 // SetTab sets this pane's tab.
