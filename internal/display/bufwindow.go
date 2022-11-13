@@ -81,12 +81,6 @@ func (w *BufWindow) Resize(width, height int) {
 	w.updateDisplayInfo()
 
 	w.Relocate()
-
-	if w.Buf.Settings["softwrap"].(bool) {
-		for _, c := range w.Buf.GetCursors() {
-			c.LastVisualX = c.GetVisualX()
-		}
-	}
 }
 
 // SetActive marks the window as active.
@@ -150,9 +144,17 @@ func (w *BufWindow) updateDisplayInfo() {
 		w.gutterOffset += w.maxLineNumLength + 1
 	}
 
+	prevBufWidth := w.bufWidth
+
 	w.bufWidth = w.Width - w.gutterOffset
 	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
 		w.bufWidth--
+	}
+
+	if w.bufWidth != prevBufWidth && w.Buf.Settings["softwrap"].(bool) {
+		for _, c := range w.Buf.GetCursors() {
+			c.LastVisualX = c.GetVisualX()
+		}
 	}
 }
 
