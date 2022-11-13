@@ -269,6 +269,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"fastdirty":      false,
 	"fileformat":     "unix",
 	"filetype":       "unknown",
+	"hidecursor":     false,
 	"hlsearch":       false,
 	"incsearch":      true,
 	"ignorecase":     true,
@@ -347,6 +348,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 // a list of settings that should never be globally modified
 var LocalSettings = []string{
 	"filetype",
+	"hidecursor",
 	"readonly",
 }
 

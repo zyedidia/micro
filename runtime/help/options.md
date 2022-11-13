@@ -159,6 +159,11 @@ Here are the available options:
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `hidecursor`: don't display the cursor. This option is useful mainly for
+   plugins. This option is local only.
+
+	default value: `false`
+
 * `hlsearch`: highlight all instances of the searched text after a successful
    search. This highlighting can be temporarily turned off via the
    `UnhighlightSearch` action (triggered by the Esc key by default) or toggled
