@@ -13,6 +13,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/display"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/tcell/v2"
 )
 
@@ -309,6 +310,26 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	// mode when editor is opened
 	h.isOverwriteMode = false
 	h.lastClickTime = time.Time{}
+}
+
+// GotoLoc moves the cursor to a new location and adjusts the view accordingly.
+// Use GotoLoc when the new location may be far away from the current location.
+func (h *BufPane) GotoLoc(loc buffer.Loc) {
+	sloc := h.SLocFromLoc(loc)
+	d := h.Diff(h.SLocFromLoc(h.Cursor.Loc), sloc)
+
+	h.Cursor.GotoLoc(loc)
+
+	// If the new location is far away from the previous one,
+	// ensure the cursor is at 25% of the window height
+	height := h.BufView().Height
+	if util.Abs(d) >= height {
+		v := h.GetView()
+		v.StartLine = h.Scroll(sloc, -height/4)
+		h.ScrollAdjust()
+		v.StartCol = 0
+	}
+	h.Relocate()
 }
 
 // ID returns this pane's split id.
