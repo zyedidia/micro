@@ -274,6 +274,7 @@ func NewBufPaneFromBuf(buf *buffer.Buffer, tab *Tab) *BufPane {
 
 // TODO: make sure splitID and tab are set before finishInitialize is called
 func (h *BufPane) finishInitialize() {
+	h.initialRelocate()
 	h.initialized = true
 	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
 }
@@ -328,7 +329,7 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	h.BWindow.SetBuffer(b)
 	h.Cursor = b.GetActiveCursor()
 	h.Resize(h.GetView().Width, h.GetView().Height)
-	h.Relocate()
+	h.initialRelocate()
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
 	h.mouseReleased = true
@@ -355,6 +356,23 @@ func (h *BufPane) GotoLoc(loc buffer.Loc) {
 		h.ScrollAdjust()
 		v.StartCol = 0
 	}
+	h.Relocate()
+}
+
+func (h *BufPane) initialRelocate() {
+	sloc := h.SLocFromLoc(h.Cursor.Loc)
+	height := h.BufView().Height
+
+	// If the initial cursor location is far away from the beginning
+	// of the buffer, ensure the cursor is at 25% of the window height
+	v := h.GetView()
+	if h.Diff(display.SLoc{0, 0}, sloc) < height {
+		v.StartLine = display.SLoc{0, 0}
+	} else {
+		v.StartLine = h.Scroll(sloc, -height/4)
+		h.ScrollAdjust()
+	}
+	v.StartCol = 0
 	h.Relocate()
 }
 
