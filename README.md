@@ -68,6 +68,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Small and simple.
 - Easily configurable.
 - Macros.
+- Smart highlighting of trailing whitespace and tab vs space errors.
 - Common editor features such as undo/redo, line numbers, Unicode support, soft wrapping, …
 
 ## Installation
