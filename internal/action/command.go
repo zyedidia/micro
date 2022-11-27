@@ -853,8 +853,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					h.Cursor.Loc = searchLoc
 					nreplaced++
 				} else if !canceled && !yes {
-					searchLoc = locs[0]
-					searchLoc.X = locs[1].X
+					searchLoc = locs[1]
 				} else if canceled {
 					h.Cursor.ResetSelection()
 					h.Buf.RelocateCursors()
