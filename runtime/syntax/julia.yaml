@@ -39,13 +39,12 @@ rules:
         rules:
             - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{1,4}|U[0-9A-Fa-f]{1,8})"
 
+    # Lifted from Rust's syntax highlighting
+    - constant.string: "'(\\\\.|.)'"
     - constant.string:
-        start: "'"
+        start: "'\""
         end: "'"
-        skip: "\\\\."
-        rules:
-            - error: "..+"
-            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{1,4}|U[0-9A-Fa-f]{1,8})"
+        rules: []
 
     - comment:
         start: "#="
