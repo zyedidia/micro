@@ -226,34 +226,40 @@ func NewTabFromPane(x, y, width, height int, pane Pane) *Tab {
 // HandleEvent takes a tcell event and usually dispatches it to the current
 // active pane. However if the event is a resize or a mouse event where the user
 // is interacting with the UI (resizing splits) then the event is consumed here
-// If the event is a mouse event in a pane, that pane will become active and get
-// the event
+// If the event is a mouse press event in a pane, that pane will become active
+// and get the event
 func (t *Tab) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
 	case *tcell.EventMouse:
 		mx, my := e.Position()
-		switch e.Buttons() {
-		case tcell.Button1:
+		btn := e.Buttons()
+		switch {
+		case btn & ^(tcell.WheelUp|tcell.WheelDown|tcell.WheelLeft|tcell.WheelRight) != tcell.ButtonNone:
+			// button press or drag
 			wasReleased := t.release
 			t.release = false
-			if t.resizing != nil {
-				var size int
-				if t.resizing.Kind == views.STVert {
-					size = mx - t.resizing.X
-				} else {
-					size = my - t.resizing.Y + 1
+
+			if btn == tcell.Button1 {
+				if t.resizing != nil {
+					var size int
+					if t.resizing.Kind == views.STVert {
+						size = mx - t.resizing.X
+					} else {
+						size = my - t.resizing.Y + 1
+					}
+					t.resizing.ResizeSplit(size)
+					t.Resize()
+					return
 				}
-				t.resizing.ResizeSplit(size)
-				t.Resize()
-				return
+				if wasReleased {
+					t.resizing = t.GetMouseSplitNode(buffer.Loc{mx, my})
+					if t.resizing != nil {
+						return
+					}
+				}
 			}
 
 			if wasReleased {
-				t.resizing = t.GetMouseSplitNode(buffer.Loc{mx, my})
-				if t.resizing != nil {
-					return
-				}
-
 				for i, p := range t.Panes {
 					v := p.GetView()
 					inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
@@ -263,10 +269,15 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 					}
 				}
 			}
-		case tcell.ButtonNone:
-			t.resizing = nil
+		case btn == tcell.ButtonNone:
+			// button release
 			t.release = true
+			if t.resizing != nil {
+				t.resizing = nil
+				return
+			}
 		default:
+			// wheel move
 			for _, p := range t.Panes {
 				v := p.GetView()
 				inpane := mx >= v.X && mx < v.X+v.Width && my >= v.Y && my < v.Y+v.Height
