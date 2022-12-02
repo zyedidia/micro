@@ -53,8 +53,10 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 			} else {
 				w.StartLine.Row = 0
 			}
-			w.Relocate()
+		}
 
+		if option == "softwrap" || option == "wordwrap" {
+			w.Relocate()
 			for _, c := range w.Buf.GetCursors() {
 				c.LastVisualX = c.GetVisualX()
 			}
