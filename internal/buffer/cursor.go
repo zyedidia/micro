@@ -171,12 +171,31 @@ func (c *Cursor) DeleteSelection() {
 	}
 }
 
-// Deselect closes the cursor's current selection
-// Start indicates whether the cursor should be placed
-// at the start or end of the selection
-func (c *Cursor) Deselect(start bool) {
+// DeselectAndMoveCursor closes the cursor's current selection, and either
+// moves the cursor to the end of the selection if it was done top-down, or
+// moves the cursor to the beginning of the selection if it was done bottom-up.
+// In other words, it moves the cursor along with the selection.
+func (c *Cursor) DeselectAndMoveCursor() {
 	if c.HasSelection() {
-		if start {
+		if c.OrigSelection[0] == c.CurSelection[0] {
+			// top-down selection, index 1 is the end.
+			c.Loc = c.CurSelection[1]
+		} else {
+			// bottom-up selection, index 0 is the end.
+			c.Loc = c.CurSelection[0]
+		}
+		c.ResetSelection()
+		c.StoreVisualX()
+	}
+
+}
+
+// Deselect closes the cursor's current selection
+// Top indicates whether the cursor should be placed
+// at the top or the bottom of the selection
+func (c *Cursor) Deselect(top bool) {
+	if c.HasSelection() {
+		if top {
 			c.Loc = c.CurSelection[0]
 		} else {
 			c.Loc = c.CurSelection[1].Move(-1, c.buf)

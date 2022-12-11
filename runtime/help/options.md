@@ -223,6 +223,15 @@ Here are the available options:
 
 	default value: `true`
 
+* `movecursor`: move the cursor along with the selection. When enabled, the
+   behavior is similar to other CUA editors, where the cursor moves along with
+   the end of the selection, with awareness of the selection direction. When
+   disabled, the behavior is similar to vim visual mode, where the cursor stays
+   at the top of the selection, without considering the selection direction,
+   i.e. the existing behavior before this option.
+
+	default value: `false`
+
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
    the terminal keybinding (not Ctrl-v, which is micro's default paste
