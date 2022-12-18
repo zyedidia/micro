@@ -219,7 +219,61 @@ func FSize(f *os.File) int64 {
 // IsWordChar returns whether or not the string is a 'word character'
 // Word characters are defined as numbers, letters, or '_'
 func IsWordChar(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsNumber(r) || r == '_'
+	return IsAlphanumeric(r) || IsWordDelimiter(r)
+}
+
+// IsUpperWordChar returns whether or not the string is a 'upper word character'
+// Upper word characters are defined as numbers, upper-case letters, or delimiters ([A-Z0-9_])
+func IsUpperWordChar(r rune) bool {
+	return IsUpperAlphanumeric(r) || IsWordDelimiter(r)
+}
+
+// IsLowerWordChar returns whether or not the string is a 'lower word character'
+// Lower word characters are defined as numbers, upper-case letters, or delimiters ([a-z0-9_])
+func IsLowerWordChar(r rune) bool {
+	return IsLowerAlphanumeric(r) || IsWordDelimiter(r)
+}
+
+// IsWordDelimiter returns whether or not the string is a 'delimiter character'
+// Delimiter characters are defined as '_'
+func IsWordDelimiter(r rune) bool {
+	return r == '_'
+}
+
+// IsNoneWordChar returns whether or not the string is not a 'word character'
+// None word characters are defined as all characters not being alphanumerics, whitespaces or delimiters ([!A-Za-z0-9\s_])
+func IsNoneWordChar(r rune) bool {
+	return !IsAlphanumeric(r) && !IsWhitespace(r) && !IsWordDelimiter(r)
+}
+
+// IsAlphanumeric returns whether or not the string is an 'alphanumeric character'
+// Alphanumeric characters are defined as numbers or letters ([A-Za-z0-9])
+func IsAlphanumeric(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsNumber(r)
+}
+
+// IsUpperAlphanumeric returns whether or not the string is an 'upper alphanumeric character'
+// Upper alphanumeric characters are defined as numbers or upper-case letters ([A-Z0-9])
+func IsUpperAlphanumeric(r rune) bool {
+	return IsUpperLetter(r) || unicode.IsNumber(r)
+}
+
+// IsLowerAlphanumeric returns whether or not the string is an 'lower alphanumeric character'
+// Lower alphanumeric characters are defined as numbers or lower-case letters ([a-z0-9])
+func IsLowerAlphanumeric(r rune) bool {
+	return IsLowerLetter(r) || unicode.IsNumber(r)
+}
+
+// IsUpperLetter returns whether or not the string is a 'upper letter character'
+// Upper letter characters are defined as upper-case letters ([A-Z])
+func IsUpperLetter(r rune) bool {
+	return unicode.IsLetter(r) && unicode.IsUpper(r)
+}
+
+// IsLowerLetter returns whether or not the string is a 'lower letter character'
+// Lower letter characters are defined as lower-case letters ([a-z])
+func IsLowerLetter(r rune) bool {
+	return unicode.IsLetter(r) && unicode.IsLower(r)
 }
 
 // Spaces returns a string with n spaces
