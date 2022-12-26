@@ -70,13 +70,14 @@ end
 
 function isCommented(bp, lineN, commentRegex)
     local line = bp.Buf:Line(lineN)
-    if string.match(line, commentRegex) then
+    local regex = commentRegex:gsub("%s+", "%s*")
+    if string.match(line, regex) then
         return true
     end
     return false
 end
 
-function commentLine(bp, lineN)
+function commentLine(bp, lineN, indentLen)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
@@ -84,8 +85,11 @@ function commentLine(bp, lineN)
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
-    local commentedLine = commentType:gsub("%%s", trim(line))
-    bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), util.GetLeadingWhitespace(line) .. commentedLine)
+    local indent = string.sub(line, 1, indentLen)
+    local trimmedLine = string.sub(line, indentLen + 1)
+    trimmedLine = trimmedLine:gsub("%%", "%%%%")
+    local commentedLine = commentType:gsub("%%s", trimmedLine)
+    bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), indent .. commentedLine)
     if bp.Cursor:HasSelection() then
         bp.Cursor.CurSelection[1].Y = sel[1].Y
         bp.Cursor.CurSelection[2].Y = sel[2].Y
@@ -107,6 +111,9 @@ function uncommentLine(bp, lineN, commentRegex)
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
+    if not string.match(line, commentRegex) then
+        commentRegex = commentRegex:gsub("%s+", "%s*")
+    end
     if string.match(line, commentRegex) then
         uncommentedLine = string.match(line, commentRegex)
         bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), util.GetLeadingWhitespace(line) .. uncommentedLine)
@@ -128,7 +135,7 @@ function toggleCommentLine(bp, lineN, commentRegex)
     if isCommented(bp, lineN, commentRegex) then
         uncommentLine(bp, lineN, commentRegex)
     else
-        commentLine(bp, lineN)
+        commentLine(bp, lineN, #util.GetLeadingWhitespace(bp.Buf:Line(lineN)))
     end
 end
 
@@ -141,11 +148,22 @@ function toggleCommentSelection(bp, startLine, endLine, commentRegex)
         end
     end
 
+    -- NOTE: we assume that the indentation is either tabs only or spaces only
+    local indentMin = -1
+    if not allComments then
+        for line = startLine, endLine do
+            local indentLen = #util.GetLeadingWhitespace(bp.Buf:Line(line))
+            if indentMin == -1 or indentLen < indentMin then
+                indentMin = indentLen
+            end
+        end
+    end
+
     for line = startLine, endLine do
         if allComments then
             uncommentLine(bp, line, commentRegex)
         else
-            commentLine(bp, line)
+            commentLine(bp, line, indentMin)
         end
     end
 end
@@ -154,7 +172,7 @@ function comment(bp, args)
     updateCommentType(bp.Buf)
 
     local commentType = bp.Buf.Settings["commenttype"]
-    local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)"):gsub("%s+", "%s*")
+    local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
 
     if bp.Cursor:HasSelection() then
         if bp.Cursor.CurSelection[1]:GreaterThan(-bp.Cursor.CurSelection[2]) then
@@ -173,11 +191,6 @@ function comment(bp, args)
     else
         toggleCommentLine(bp, bp.Cursor.Y, commentRegex)
     end
-end
-
-function trim(s)
-    local trimmed = s:gsub("^%s*(.-)%s*$", "%1"):gsub("%%","%%%%")
-    return trimmed
 end
 
 function string.starts(String,Start)
