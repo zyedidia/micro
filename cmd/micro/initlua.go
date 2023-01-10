@@ -150,6 +150,7 @@ func luaImportMicroUtil() *lua.LTable {
 	ulua.L.SetField(pkg, "Unzip", luar.New(ulua.L, util.Unzip))
 	ulua.L.SetField(pkg, "Version", luar.New(ulua.L, util.Version))
 	ulua.L.SetField(pkg, "SemVersion", luar.New(ulua.L, util.SemVersion))
+	ulua.L.SetField(pkg, "HttpRequest", luar.New(ulua.L, util.HttpRequest))
 	ulua.L.SetField(pkg, "CharacterCountInString", luar.New(ulua.L, util.CharacterCountInString))
 	ulua.L.SetField(pkg, "RuneStr", luar.New(ulua.L, func(r rune) string {
 		return string(r)
