@@ -174,7 +174,7 @@ Here are the available options:
 
 * `ignorecase`: perform case-insensitive searches.
 
-	default value: `true`
+	default value: `false`
 
 * `indentchar`: sets the indentation character. This will not be inserted into
   files; it is only a visual indicator that whitespace is present. If set to a
