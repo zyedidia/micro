@@ -139,7 +139,7 @@ func findSingleEvent(k string) (b Event, ok bool) {
 modSearch:
 	for {
 		switch {
-		case strings.HasPrefix(k, "-"):
+		case strings.HasPrefix(k, "-") && k != "-":
 			// We optionally support dashes between modifiers
 			k = k[1:]
 		case strings.HasPrefix(k, "Ctrl") && k != "CtrlH":
