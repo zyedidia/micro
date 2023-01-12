@@ -462,7 +462,7 @@ so that you can see what the formatting should look like.
     "filetype": "unknown",
     "incsearch": true,
     "ftoptions": true,
-    "ignorecase": false,
+    "ignorecase": true,
     "indentchar": " ",
     "infobar": true,
     "initlua": true,
