@@ -174,7 +174,7 @@ Here are the available options:
 
 * `ignorecase`: perform case-insensitive searches.
 
-	default value: `false`
+	default value: `true`
 
 * `indentchar`: sets the indentation character. This will not be inserted into
   files; it is only a visual indicator that whitespace is present. If set to a
@@ -462,7 +462,7 @@ so that you can see what the formatting should look like.
     "filetype": "unknown",
     "incsearch": true,
     "ftoptions": true,
-    "ignorecase": false,
+    "ignorecase": true,
     "indentchar": " ",
     "infobar": true,
     "initlua": true,
