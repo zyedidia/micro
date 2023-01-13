@@ -17,6 +17,7 @@ hub release edit nightly \
     --draft=false \
     --message "$MESSAGE (please DISREGARD the creation date of this Github release). Assets uploaded on $(date) for commit $commitID." \
     --attach "binaries/micro-$1-osx.tar.gz" \
+    --attach "binaries/micro-$1-macos-arm64.tar.gz" \
     --attach "binaries/micro-$1-linux64.tar.gz" \
     --attach "binaries/micro-$1-linux64-static.tar.gz" \
     --attach "binaries/micro-$1-amd64.deb" \
