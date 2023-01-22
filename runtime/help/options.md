@@ -223,6 +223,15 @@ Here are the available options:
 
 	default value: `true`
 
+* `multimode`: specifies how to layout multiple files opened at startup.
+   Most useful as a command-line option, like `-multimode vsplit`. Possible
+   values correspond to commands (see `> help commands`) that open files:
+    * `tab`: open each file in a separate tab.
+    * `vsplit`: open files side-by-side.
+    * `hsplit`: open files stacked top to bottom.
+
+	default value: `tab`
+
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
    the terminal keybinding (not Ctrl-v, which is micro's default paste
