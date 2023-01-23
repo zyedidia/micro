@@ -51,6 +51,7 @@ var optionValidators = map[string]optionValidator{
 	"colorcolumn":  validateNonNegativeValue,
 	"fileformat":   validateLineEnding,
 	"encoding":     validateEncoding,
+	"multimode":    validateMultiMode,
 }
 
 func ReadSettings() error {
@@ -333,6 +334,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
+	"multimode":      "tab",
 	"parsecursor":    false,
 	"paste":          false,
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
@@ -490,4 +492,20 @@ func validateLineEnding(option string, value interface{}) error {
 func validateEncoding(option string, value interface{}) error {
 	_, err := htmlindex.Get(value.(string))
 	return err
+}
+
+func validateMultiMode(option string, value interface{}) error {
+	val, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for multimode")
+	}
+
+	switch val {
+	case "tab", "hsplit", "vsplit":
+	default:
+		return errors.New(option + " must be 'tab', 'hsplit', or 'vsplit'")
+	}
+
+	return nil
 }
