@@ -121,6 +121,11 @@
                         "description": "A float number constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "constant.number.complex": {
+                        "title": "complex number constant rule region",
+                        "description": "A complex number constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "constant.string": {
                         "title": "string constant rule region",
                         "description": "A string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
