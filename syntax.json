@@ -116,6 +116,21 @@
                         "description": "A symbol rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "symbol.brackets": {
+                        "title": "bracket symbol rule region",
+                        "description": "A bracket symbol rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "symbol.operator": {
+                        "title": "operator symbol rule region",
+                        "description": "An operator symbol rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "symbol.tag": {
+                        "title": "tag symbol rule region",
+                        "description": "A tag symbol rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "preproc": {
                         "title": "preprocessor rule region",
                         "description": "A preprocessor rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
