@@ -86,6 +86,11 @@
                         "description": "A constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "identifier.null": {
+                        "title": "null identifier rule region",
+                        "description": "A null rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "constant.bool": {
                         "title": "bool constant rule region",
                         "description": "A bool constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
