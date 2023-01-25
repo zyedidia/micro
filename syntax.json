@@ -71,9 +71,19 @@
                         "description": "An identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "identifier.builtin": {
+                        "title": "builtin identifier rule region",
+                        "description": "A builtin identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "identifier.type": {
                         "title": "type identifier rule region",
                         "description": "A type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "identifier.type.builtin": {
+                        "title": "builtin type identifier rule region",
+                        "description": "A builtin type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "identifier.callable": {
@@ -81,14 +91,29 @@
                         "description": "A callable identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "identifier.callable.builtin": {
+                        "title": "builtin callable identifier rule region",
+                        "description": "A builtin callable identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "identifier.macro": {
                         "title": "macro identifier rule region",
                         "description": "A macro rule\nAlso used for functions\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "identifier.macro.builtin": {
+                        "title": "builtin macro identifier rule region",
+                        "description": "A builtin macro rule\nAlso used for functions\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "identifier.var": {
                         "title": "variable identifier rule region",
                         "description": "A variable identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "identifier.var.builtin": {
+                        "title": "builtin variable identifier rule region",
+                        "description": "A builtin variable identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "constant": {
@@ -108,12 +133,12 @@
                     },
                     "constant.bool.true": {
                         "title": "true bool constant rule region",
-                        "description": "A true bool constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "description": "A true bool constant rule\n`.builtin` suffix is not used\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "constant.bool.false": {
                         "title": "false bool constant rule region",
-                        "description": "A false bool constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "description": "A false bool constant rule\n`.builtin` suffix is not used\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "constant.number": {
@@ -139,6 +164,11 @@
                     "constant.string": {
                         "title": "string constant rule region",
                         "description": "A string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "constant.string.builtin": {
+                        "title": "builtin string constant rule region",
+                        "description": "A builtin string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "constant.string.url": {
