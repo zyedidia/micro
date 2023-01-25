@@ -1,0 +1,129 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema",
+    "definitions": {
+        "string-or-region": {
+            "oneOf": [
+                {
+                    "type": "string"
+                },
+                {
+                    "type": "object",
+                    "properties": {
+                        "start": {
+                            "description": "A region start\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                            "type": "string",
+                            "examples": [
+                                "//"
+                            ]
+                        },
+                        "end": {
+                            "description": "A region end\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                            "type": "string",
+                            "examples": [
+                                "$"
+                            ]
+                        },
+                        "skip": {
+                            "description": "Ignored region sequences\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                            "type": "string",
+                            "examples": [
+                                "\\\\."
+                            ]
+                        },
+                        "rules": {
+                            "$ref": "#/definitions/rules"
+                        }
+                    },
+                    "additionalProperties": false
+                }
+            ]
+        },
+        "rules": {
+            "description": "Rules\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "description": "A rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                "type": "object",
+                "properties": {
+                    "comment": {
+                        "title": "comment rule region",
+                        "description": "A comment rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "identifier": {
+                        "title": "identifier rule region",
+                        "description": "An identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "constant": {
+                        "title": "constant rule region",
+                        "description": "A constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "statement": {
+                        "title": "statement rule region",
+                        "description": "A statement rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "symbol": {
+                        "title": "symbol rule region",
+                        "description": "A symbol rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "preproc": {
+                        "title": "preprocessor rule region",
+                        "description": "A preprocessor rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "type": {
+                        "title": "type rule region",
+                        "description": "A type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    }
+                },
+                "additionalProperties": {
+                    "title": "rule region",
+                    "description": "A rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                    "$ref": "#/definitions/string-or-region"
+                }
+            }
+        }
+    },
+    "title": "syntax",
+    "description": "A syntax\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-files",
+    "properties": {
+        "filetype": {
+            "description": "A file type\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#filetype-definition",
+            "type": "string",
+            "examples": [
+                "go"
+            ]
+        },
+        "detect": {
+            "title": "detection options",
+            "description": "Detection options\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#detect-definition",
+            "properties": {
+                "filename": {
+                    "description": "A file name\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#detect-definition",
+                    "type": "string",
+                    "examples": [
+                        "\\.go$"
+                    ]
+                },
+                "header": {
+                    "description": "A file header\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#detect-definition",
+                    "type": "string",
+                    "examples": [
+                        "%YAML"
+                    ]
+                }
+            },
+            "additionalProperties": false
+        },
+        "rules": {
+            "$ref": "#/definitions/rules"
+        }
+    },
+    "additionalProperties": false
+}

@@ -1,0 +1,5 @@
+{
+    "yaml.schemas": {
+        "syntax.json": "runtime/syntax/*.yaml"
+    }
+}
