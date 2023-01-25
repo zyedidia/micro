@@ -230,6 +230,7 @@
             "additionalProperties": false
         },
         "rules": {
+            "title": "rule",
             "$ref": "#/definitions/rules"
         }
     },
