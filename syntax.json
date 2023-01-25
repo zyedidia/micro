@@ -150,6 +150,13 @@
                         "title": "keyword type rule region",
                         "description": "A keyword type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
+                    },
+                    "include": {
+                        "description": "An include\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "type": "string",
+                        "examples": [
+                            "javascript"
+                        ]
                     }
                 },
                 "additionalProperties": {
