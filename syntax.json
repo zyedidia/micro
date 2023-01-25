@@ -131,6 +131,11 @@
                         "description": "A url string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "constant.string.escape": {
+                        "title": "escape string constant rule region",
+                        "description": "A escape string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "statement": {
                         "title": "statement rule region",
                         "description": "A statement rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
