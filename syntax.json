@@ -61,9 +61,14 @@
                         "description": "An identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
-                    "identifier.class": {
-                        "title": "class identifier rule region",
-                        "description": "A class rule\nAlso used for functions\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                    "identifier.type": {
+                        "title": "type identifier rule region",
+                        "description": "A type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "identifier.callable": {
+                        "title": "callable identifier rule region",
+                        "description": "A callable identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "identifier.macro": {
