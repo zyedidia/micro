@@ -4,7 +4,8 @@
         "string-or-region": {
             "oneOf": [
                 {
-                    "type": "string"
+                    "type": "string",
+                    "minLength": 1
                 },
                 {
                     "type": "object",
@@ -12,6 +13,7 @@
                         "start": {
                             "description": "A region start\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                             "type": "string",
+                            "minLength": 1,
                             "examples": [
                                 "//"
                             ]
@@ -19,6 +21,7 @@
                         "end": {
                             "description": "A region end\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                             "type": "string",
+                            "minLength": 1,
                             "examples": [
                                 "$"
                             ]
@@ -26,6 +29,7 @@
                         "skip": {
                             "description": "Ignored region sequences\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                             "type": "string",
+                            "minLength": 1,
                             "examples": [
                                 "\\\\."
                             ]
@@ -173,6 +177,7 @@
         "filetype": {
             "description": "A file type\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#filetype-definition",
             "type": "string",
+            "minLength": 1,
             "examples": [
                 "go"
             ]
@@ -184,6 +189,7 @@
                 "filename": {
                     "description": "A file name\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#detect-definition",
                     "type": "string",
+                    "minLength": 1,
                     "examples": [
                         "\\.go$"
                     ]
@@ -191,6 +197,7 @@
                 "header": {
                     "description": "A file header\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#detect-definition",
                     "type": "string",
+                    "minLength": 1,
                     "examples": [
                         "%YAML"
                     ]
