@@ -56,6 +56,16 @@
                         "description": "A comment rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "comment.line": {
+                        "title": "line comment rule region",
+                        "description": "A line comment rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "comment.block": {
+                        "title": "block comment rule region",
+                        "description": "A block comment rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "identifier": {
                         "title": "identifier rule region",
                         "description": "An identifier rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
