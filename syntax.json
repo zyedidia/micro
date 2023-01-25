@@ -101,6 +101,16 @@
                         "description": "A number constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "constant.number.integer": {
+                        "title": "integer number constant rule region",
+                        "description": "A integer number constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "constant.number.float": {
+                        "title": "float number constant rule region",
+                        "description": "A float number constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "constant.string": {
                         "title": "string constant rule region",
                         "description": "A string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
