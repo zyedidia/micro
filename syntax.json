@@ -121,6 +121,11 @@
                         "description": "A preprocessor rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "preproc.shebang": {
+                        "title": "shebang preprocessor rule region",
+                        "description": "A shebang preprocessor rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "type": {
                         "title": "type rule region",
                         "description": "A type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
