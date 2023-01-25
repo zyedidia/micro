@@ -61,6 +61,21 @@
                         "description": "A constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "constant.bool": {
+                        "title": "bool constant rule region",
+                        "description": "A bool constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "constant.bool.true": {
+                        "title": "true bool constant rule region",
+                        "description": "A true bool constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
+                    "constant.bool.false": {
+                        "title": "false bool constant rule region",
+                        "description": "A false bool constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
+                    },
                     "statement": {
                         "title": "statement rule region",
                         "description": "A statement rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
