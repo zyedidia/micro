@@ -155,6 +155,14 @@
                         "description": "A keyword type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
+                    "todo": {
+                        "title": "todo region",
+                        "description": "A todo rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region",
+                        "examples": [
+                            "(TODO|XXX|FIXME)"
+                        ]
+                    },
                     "include": {
                         "description": "An include\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "type": "string",
