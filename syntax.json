@@ -145,6 +145,11 @@
                         "title": "type rule region",
                         "description": "A type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
+                    },
+                    "type.keyword": {
+                        "title": "keyword type rule region",
+                        "description": "A keyword type rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "$ref": "#/definitions/string-or-region"
                     }
                 },
                 "additionalProperties": {
