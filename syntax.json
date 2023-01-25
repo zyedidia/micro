@@ -4,6 +4,7 @@
         "string-or-region": {
             "oneOf": [
                 {
+                    "title": "value",
                     "type": "string",
                     "minLength": 1
                 },
