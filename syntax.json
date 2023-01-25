@@ -178,12 +178,12 @@
                     },
                     "constant.string.escape": {
                         "title": "escape string constant rule region",
-                        "description": "A escape string constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "description": "A escape string constant rule\n`.builtin` suffix is not used\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "constant.string.format": {
                         "title": "string format specifier constant rule region",
-                        "description": "A string format specifier constant rule\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
+                        "description": "A string format specifier constant rule\n`.builtin` suffix is not used\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/colors.md#syntax-rules",
                         "$ref": "#/definitions/string-or-region"
                     },
                     "statement": {
