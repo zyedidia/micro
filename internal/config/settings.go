@@ -331,6 +331,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
+	"fakecursor":     false,
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
