@@ -20,6 +20,16 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	} else if option == "statusline" {
 		screen.Redraw()
 	} else if option == "filetype" {
+		config.InitRuntimeFiles()
+		err := config.ReadSettings()
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.InitGlobalSettings()
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		config.InitLocalSettings(b.Settings, b.Path)
 		b.UpdateRules()
 	} else if option == "fileformat" {
 		switch b.Settings["fileformat"].(string) {
