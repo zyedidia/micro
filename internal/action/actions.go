@@ -793,9 +793,12 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 			filename := strings.Join(args, " ")
 			fileinfo, err := os.Stat(filename)
 			if err != nil {
-				noPrompt := h.saveBufToFile(filename, action, callback)
-				if noPrompt {
-					h.completeAction(action)
+				if os.IsNotExist(err) {
+					noPrompt := h.saveBufToFile(filename, action, callback)
+					if noPrompt {
+						h.completeAction(action)
+						return
+					}
 				}
 			}
 			InfoBar.YNPrompt(
@@ -811,7 +814,6 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 			)
 		}
 	})
-
 	return false
 }
 
