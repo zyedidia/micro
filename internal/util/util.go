@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"net/http"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -492,4 +493,17 @@ func Unzip(src, dest string) error {
 	}
 
 	return nil
+}
+
+// HttpRequest returns a new http.Client for making custom requests (for lua plugins)
+func HttpRequest(method string, url string, headers []string) (resp *http.Response, err error) {
+	client := http.Client{}
+	req, err := http.NewRequest(method, url, nil)
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(headers); i += 2 {
+		req.Header.Add(headers[i], headers[i+1])
+	}
+	return client.Do(req)
 }
