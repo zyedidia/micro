@@ -29,6 +29,10 @@ colors`.
 Press Ctrl-w to move between splits, and type `> vsplit filename` or
 `> hsplit filename` to open a new split.
 
+* Windows Users: When entering commands into Micro such as changing directories
+or opening files, make sure not to end the command or file name with an escape
+character (backslash). Please forward slashes in Micro to avoid unusual behavior.
+
 ## Accessing more help
 
 Micro has a built-in help system which can be accessed with the `> help` command.
