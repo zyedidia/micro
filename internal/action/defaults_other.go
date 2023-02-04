@@ -97,6 +97,7 @@ var bufdefaults = map[string]string{
 	"MouseLeft":      "MousePress",
 	"MouseMiddle":    "PastePrimary",
 	"Ctrl-MouseLeft": "MouseMultiCursor",
+	"ShiftMouseLeft": "SelectToClick",
 
 	"Alt-n":        "SpawnMultiCursor",
 	"Alt-m":        "SpawnMultiCursorSelect",
@@ -179,4 +180,5 @@ var infodefaults = map[string]string{
 	"MouseWheelDown": "HistoryDown",
 	"MouseLeft":      "MousePress",
 	"MouseMiddle":    "PastePrimary",
+	"ShiftMouseLeft": "SelectToClick",
 }
