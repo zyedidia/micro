@@ -504,6 +504,22 @@ func (h *BufPane) SelectToEnd() bool {
 	return true
 }
 
+//SelectToClick selects the text from the last cursor to new click location
+func (h *BufPane) SelectToClick(e *tcell.EventMouse) bool {
+	mx, my := e.Position()
+	mouseLoc := h.LocFromVisual(buffer.Loc{mx, my})
+
+	if h.mouseReleased {
+		h.Cursor.Loc = mouseLoc
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+		h.Cursor.SetSelectionStart(h.Cursor.Loc)
+		h.mouseReleased = false
+	} else if !h.mouseReleased {
+		h.Cursor.SetSelectionEnd(mouseLoc)
+	}
+	return true
+}
+
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
 func (h *BufPane) InsertNewline() bool {
 	// Insert a newline
