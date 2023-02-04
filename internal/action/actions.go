@@ -698,6 +698,20 @@ func (h *BufPane) OutdentSelection() bool {
 	}
 	return false
 }
+func (h *BufPane) SelectToClick(e *tcell.EventMouse) bool {
+	mx, my := e.Position()
+	mouseLoc := h.LocFromVisual(buffer.Loc{mx, my})
+
+	if h.mouseReleased {
+		h.Cursor.Loc = mouseLoc
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+		h.Cursor.SetSelectionStart(h.Cursor.Loc)
+		h.mouseReleased = false
+	} else if !h.mouseReleased {
+		h.Cursor.SetSelectionEnd(mouseLoc)
+	}
+	return true
+}
 
 // Autocomplete cycles the suggestions and performs autocompletion if there are suggestions
 func (h *BufPane) Autocomplete() bool {
