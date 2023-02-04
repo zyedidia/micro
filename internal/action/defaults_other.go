@@ -179,4 +179,5 @@ var infodefaults = map[string]string{
 	"MouseWheelDown": "HistoryDown",
 	"MouseLeft":      "MousePress",
 	"MouseMiddle":    "PastePrimary",
+	"ShiftMouseLeft": "SelectToClick",
 }

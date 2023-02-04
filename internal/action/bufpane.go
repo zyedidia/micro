@@ -789,6 +789,7 @@ var BufKeyActions = map[string]BufKeyAction{
 var BufMouseActions = map[string]BufMouseAction{
 	"MousePress":       (*BufPane).MousePress,
 	"MouseMultiCursor": (*BufPane).MouseMultiCursor,
+	"SelectToClick":    (*BufPane).SelectToClick,
 }
 
 // MultiActions is a list of actions that should be executed multiple
