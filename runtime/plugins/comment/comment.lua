@@ -60,11 +60,17 @@ ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
 
+local last_ft
+
 function updateCommentType(buf)
-    if ft[buf.Settings["filetype"]] ~= nil and ft[buf.Settings["filetype"]] ~= nil then
-        buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
-    elseif buf.Settings["commenttype"] == nil then
-        buf.Settings["commenttype"] = "# %s"
+    if buf.Settings["commenttype"] == nil or last_ft ~= buf.Settings["filetype"] then
+        if ft[buf.Settings["filetype"]] ~= nil then
+            buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
+        else
+            buf.Settings["commenttype"] = "# %s"
+        end
+
+        last_ft = buf.Settings["filetype"]
     end
 end
 
