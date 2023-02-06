@@ -426,7 +426,7 @@ A select few keybindings are different on MacOS compared to other
 operating systems. This is because different OSes have different
 conventions for text editing defaults.
 
-```json
+```jsonc
 {
     "Up":             "CursorUp",
     "Down":           "CursorDown",
@@ -436,23 +436,23 @@ conventions for text editing defaults.
     "ShiftDown":      "SelectDown",
     "ShiftLeft":      "SelectLeft",
     "ShiftRight":     "SelectRight",
-    "AltLeft":        "WordLeft", (Mac)
-    "AltRight":       "WordRight", (Mac)
+    "AltLeft":        "WordLeft", // (Mac)
+    "AltRight":       "WordRight", // (Mac)
     "AltUp":          "MoveLinesUp",
     "AltDown":        "MoveLinesDown",
     "CtrlShiftRight": "SelectWordRight",
     "CtrlShiftLeft":  "SelectWordLeft",
     "AltLeft":        "StartOfTextToggle",
     "AltRight":       "EndOfLine",
-    "AltShiftRight":  "SelectWordRight", (Mac)
-    "AltShiftLeft":   "SelectWordLeft", (Mac)
-    "CtrlLeft":       "StartOfText", (Mac)
+    "AltShiftRight":  "SelectWordRight", // (Mac)
+    "AltShiftLeft":   "SelectWordLeft", // (Mac)
+    "CtrlLeft":       "StartOfText", // (Mac)
     "CtrlRight":      "EndOfLine", (Mac)
     "AltShiftLeft":   "SelectToStartOfTextToggle",
-    "CtrlShiftLeft":  "SelectToStartOfTextToggle", (Mac)
+    "CtrlShiftLeft":  "SelectToStartOfTextToggle", // (Mac)
     "ShiftHome":      "SelectToStartOfTextToggle",
     "AltShiftRight":  "SelectToEndOfLine",
-    "CtrlShiftRight": "SelectToEndOfLine", (Mac)
+    "CtrlShiftRight": "SelectToEndOfLine", // (Mac)
     "ShiftEnd":       "SelectToEndOfLine",
     "CtrlUp":         "CursorStart",
     "CtrlDown":       "CursorEnd",
@@ -541,7 +541,7 @@ conventions for text editing defaults.
 Keybindings can be specified for different pane types as well. For example, to
 make a binding that only affects the command bar, use the `command` subgroup:
 
-```
+```json
 {
     "command": {
         "Ctrl-w": "WordLeft"
@@ -553,7 +553,7 @@ The possible pane types are `buffer` (normal buffer), `command` (command bar),
 and `terminal` (terminal pane). The defaults for the command and terminal panes
 are given below:
 
-```
+```jsonc
 {
     "terminal": {
         "<Ctrl-q><Ctrl-q>": "Exit",
