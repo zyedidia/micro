@@ -95,7 +95,7 @@ you could rebind `Ctrl-g` to `> help`:
 
 ```json
 {
-    "Ctrl-g": "command-edit:help "
+    "Ctrl-g": "command-edit:help"
 }
 ```
 
