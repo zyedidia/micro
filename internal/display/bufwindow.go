@@ -627,6 +627,7 @@ func (w *BufWindow) displayBuffer() {
 			default:
 				if unicode.IsUpper(r) {
 					width = 2
+					totalwidth += 2
 					break
 				}
 				width = runewidth.RuneWidth(r)
