@@ -2,6 +2,7 @@ package display
 
 import (
 	"strconv"
+	"unicode"
 
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -624,6 +625,10 @@ func (w *BufWindow) displayBuffer() {
 				width = util.Min(ts, maxWidth-vloc.X)
 				totalwidth += ts
 			default:
+				if unicode.IsUpper(r) {
+					width = 2
+					break
+				}
 				width = runewidth.RuneWidth(r)
 				totalwidth += width
 			}
@@ -658,6 +663,13 @@ func (w *BufWindow) displayBuffer() {
 			}
 
 			for _, r := range word {
+				if unicode.IsUpper(r.r) {
+					draw('~', nil, r.style, true, true)
+					draw(r.r, r.combc, r.style, true, false)
+					bloc.X++
+					continue
+				}
+
 				draw(r.r, r.combc, r.style, true, true)
 
 				// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
