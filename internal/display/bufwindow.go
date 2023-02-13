@@ -2,6 +2,7 @@ package display
 
 import (
 	"strconv"
+	"unicode"
 
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -624,8 +625,12 @@ func (w *BufWindow) displayBuffer() {
 				width = util.Min(ts, maxWidth-vloc.X)
 				totalwidth += ts
 			default:
-				width = runewidth.RuneWidth(r)
-				totalwidth += width
+				if unicode.IsUpper(r) {
+					width = 2
+				} else {
+					width = runewidth.RuneWidth(r)
+					totalwidth += width
+				}
 			}
 
 			word = append(word, glyph{r, combc, curStyle, width})
@@ -658,17 +663,22 @@ func (w *BufWindow) displayBuffer() {
 			}
 
 			for _, r := range word {
-				draw(r.r, r.combc, r.style, true, true)
+				if unicode.IsUpper(r.r) {
+					draw('~', nil, r.style, true, true)
+					draw(r.r, r.combc, r.style, true, false)
+				} else {
+					draw(r.r, r.combc, r.style, true, true)
 
-				// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
-				if r.width > 1 {
-					char := ' '
-					if r.r != '\t' {
-						char = '@'
-					}
+					// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
+					if r.width > 1 {
+						char := ' '
+						if r.r != '\t' {
+							char = '@'
+						}
 
-					for i := 1; i < r.width; i++ {
-						draw(char, nil, r.style, true, false)
+						for i := 1; i < r.width; i++ {
+							draw(char, nil, r.style, true, false)
+						}
 					}
 				}
 				bloc.X++
