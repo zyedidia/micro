@@ -7,7 +7,7 @@ local buffer = import("micro/buffer")
 local ft = {}
 
 ft["apacheconf"] = "# %s"
-ft["bat"] = ":: %s"
+ft["batch"] = ":: %s"
 ft["c"] = "// %s"
 ft["c++"] = "// %s"
 ft["cmake"] = "# %s"
@@ -63,7 +63,7 @@ ft["zsh"] = "# %s"
 local last_ft
 
 function updateCommentType(buf)
-    if buf.Settings["commenttype"] == nil or last_ft ~= buf.Settings["filetype"] then
+    if buf.Settings["commenttype"] == nil or (last_ft ~= buf.Settings["filetype"] and last_ft ~= nil) then
         if ft[buf.Settings["filetype"]] ~= nil then
             buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
         else
