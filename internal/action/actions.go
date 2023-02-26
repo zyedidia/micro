@@ -1311,7 +1311,7 @@ func (h *BufPane) OpenFile() bool {
 	return true
 }
 
-// OpenFile opens a new file in the buffer
+// JumpLine asks the user to enter a line number to jump to
 func (h *BufPane) JumpLine() bool {
 	InfoBar.Prompt("> ", "goto ", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {

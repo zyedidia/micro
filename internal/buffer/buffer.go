@@ -474,7 +474,7 @@ func (b *Buffer) GetName() string {
 	return name
 }
 
-//SetName changes the name for this buffer
+// SetName changes the name for this buffer
 func (b *Buffer) SetName(s string) {
 	b.name = s
 }
