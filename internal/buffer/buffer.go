@@ -1211,6 +1211,41 @@ func (b *Buffer) DiffStatus(lineN int) DiffStatus {
 	return b.diff[lineN]
 }
 
+// FindNextDiffLine returns the line number of the next block of diffs.
+// If `startLine` is already in a block of diffs, lines in that block are skipped.
+func (b *Buffer) FindNextDiffLine(startLine int, forward bool) (int, error) {
+	if b.diff == nil {
+		return 0, errors.New("no diff data")
+	}
+	startStatus, ok := b.diff[startLine]
+	if !ok {
+		startStatus = DSUnchanged
+	}
+	curLine := startLine
+	for {
+		curStatus, ok := b.diff[curLine]
+		if !ok {
+			curStatus = DSUnchanged
+		}
+		if curLine < 0 || curLine > b.LinesNum() {
+			return 0, errors.New("no next diff hunk")
+		}
+		if curStatus != startStatus {
+			if startStatus != DSUnchanged && curStatus == DSUnchanged {
+				// Skip over the block of unchanged text
+				startStatus = DSUnchanged
+			} else {
+				return curLine, nil
+			}
+		}
+		if forward {
+			curLine++
+		} else {
+			curLine--
+		}
+	}
+}
+
 // SearchMatch returns true if the given location is within a match of the last search.
 // It is used for search highlighting
 func (b *Buffer) SearchMatch(pos Loc) bool {

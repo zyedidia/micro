@@ -708,6 +708,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"FindLiteral":               (*BufPane).FindLiteral,
 	"FindNext":                  (*BufPane).FindNext,
 	"FindPrevious":              (*BufPane).FindPrevious,
+	"DiffNext":                  (*BufPane).DiffNext,
+	"DiffPrevious":              (*BufPane).DiffPrevious,
 	"Center":                    (*BufPane).Center,
 	"Undo":                      (*BufPane).Undo,
 	"Redo":                      (*BufPane).Redo,

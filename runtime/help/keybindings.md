@@ -200,6 +200,8 @@ Find
 FindLiteral
 FindNext
 FindPrevious
+DiffPrevious
+DiffNext
 Undo
 Redo
 Copy
@@ -473,6 +475,8 @@ conventions for text editing defaults.
     "Alt-F":           "FindLiteral",
     "Ctrl-n":          "FindNext",
     "Ctrl-p":          "FindPrevious",
+    "Alt-[":           "DiffPrevious|CursorStart",
+    "Alt-]":           "DiffNext|CursorEnd",
     "Ctrl-z":          "Undo",
     "Ctrl-y":          "Redo",
     "Ctrl-c":          "CopyLine|Copy",
