@@ -12,12 +12,11 @@ import (
 // A Group represents a syntax group
 type Group uint8
 
-// Groups contains all of the groups that are defined
-// You can access them in the map via their string name
-var Groups map[string]Group
-
 // String returns the group name attached to the specific group
 func (g Group) String() string {
+	// Groups contains all of the groups that are defined
+	// You can access them in the map via their string name
+	var Groups map[string]Group
 	for k, v := range Groups {
 		if v == g {
 			return k
@@ -87,7 +86,11 @@ type region struct {
 }
 
 func init() {
-	Groups = make(map[string]Group)
+	Groups := make(map[string]Group)
+	// initialize some groups so the compiler doesn't complain and it's better
+	// that dogsleding
+	var Comment Group = 1
+	Groups["Comment"] = Comment
 }
 
 // MakeHeader takes a header (.hdr file) file and parses the header
@@ -301,7 +304,7 @@ func ParseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 		rule := v.(map[interface{}]interface{})
 		for k, val := range rule {
 			group := k
-
+			var Groups map[string]Group
 			switch object := val.(type) {
 			case string:
 				if k == "include" {
@@ -349,7 +352,8 @@ func ParseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 		}
 	}()
 
-	var numGroups Group
+	numGroups := prevRegion.group + 1
+	var Groups map[string]Group
 	r = new(region)
 	if _, ok := Groups[group]; !ok {
 		numGroups++
