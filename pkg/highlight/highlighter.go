@@ -49,19 +49,6 @@ func runePos(p int, str []byte) int {
 	return CharacterCount(str[:p])
 }
 
-func combineLineMatch(src, dst LineMatch) LineMatch {
-	for k, v := range src {
-		if g, ok := dst[k]; ok {
-			if g == 0 {
-				dst[k] = v
-			}
-		} else {
-			dst[k] = v
-		}
-	}
-	return dst
-}
-
 // A State represents the region at the end of a line
 type State *region
 
@@ -94,7 +81,7 @@ func NewHighlighter(def *Def) *Highlighter {
 // color's group (represented as one byte)
 type LineMatch map[int]Group
 
-func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool) []int {
+func findIndex(regex, skip *regexp.Regexp, str []byte, canMatchStart, canMatchEnd bool) []int {
 	regexStr := regex.String()
 	if strings.Contains(regexStr, "^") {
 		if !canMatchStart {
@@ -320,7 +307,6 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 func (h *Highlighter) HighlightStates(input LineStates) {
 	for i := 0; i < input.LinesNum(); i++ {
 		line := input.LineBytes(i)
-		// highlights := make(LineMatch)
 
 		if i == 0 || h.lastRegion == nil {
 			h.highlightEmptyRegion(nil, 0, true, i, line, true)
@@ -361,7 +347,6 @@ func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int)
 // for each line until it comes across a line whose state does not change
 // returns the number of the final line
 func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
-	// lines := input.LineData()
 
 	h.lastRegion = nil
 	if startline > 0 {
@@ -369,9 +354,7 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 	}
 	for i := startline; i < input.LinesNum(); i++ {
 		line := input.LineBytes(i)
-		// highlights := make(LineMatch)
 
-		// var match LineMatch
 		if i == 0 || h.lastRegion == nil {
 			h.highlightEmptyRegion(nil, 0, true, i, line, true)
 		} else {
