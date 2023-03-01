@@ -246,7 +246,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 
 	firstLoc := []int{lineLen, 0}
 	var firstRegion *region
-	for _, r := range h.Def.rules.regions {
+	for _, r := range h.Def.Rules.regions {
 		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
@@ -273,7 +273,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	}
 
 	fullHighlights := make([]Group, len(line))
-	for _, p := range h.Def.rules.patterns {
+	for _, p := range h.Def.Rules.patterns {
 		matches := findAllIndex(p.regex, line, start == 0, canMatchEnd)
 		for _, m := range matches {
 			for i := m[0]; i < m[1]; i++ {

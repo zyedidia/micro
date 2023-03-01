@@ -15,7 +15,6 @@ type Group uint8
 // Groups contains all of the groups that are defined
 // You can access them in the map via their string name
 var Groups map[string]Group
-var numGroups Group
 
 // String returns the group name attached to the specific group
 func (g Group) String() string {
@@ -30,11 +29,11 @@ func (g Group) String() string {
 // A Def is a full syntax definition for a language
 // It has a filetype, information about how to detect the filetype based
 // on filename or header (the first line of the file)
-// Then it has the rules which define how to highlight the file
+// Then it has the Rules which define how to highlight the file
 type Def struct {
 	*Header
 
-	rules *rules
+	Rules *rules
 }
 
 type Header struct {
@@ -64,7 +63,7 @@ type pattern struct {
 	regex *regexp.Regexp
 }
 
-// rules defines which patterns and regions can be used to highlight
+// Rules defines which patterns and regions can be used to highlight
 // a filetype
 type rules struct {
 	regions  []*region
@@ -74,8 +73,8 @@ type rules struct {
 
 // A region is a highlighted region (such as a multiline comment, or a string)
 // It belongs to a group, and has start and end regular expressions
-// A region also has rules of its own that only apply when matching inside the
-// region and also rules from the above region do not match inside this region
+// A region also has Rules of its own that only apply when matching inside the
+// region and also Rules from the above region do not match inside this region
 // Note that a region may contain more regions
 type region struct {
 	group      Group
@@ -158,15 +157,15 @@ func ParseFile(input []byte) (f *File, err error) {
 		}
 	}()
 
-	var rules map[interface{}]interface{}
-	if err = yaml.Unmarshal(input, &rules); err != nil {
+	var Rules map[interface{}]interface{}
+	if err := yaml.Unmarshal(input, &Rules); err != nil {
 		return nil, err
 	}
 
 	f = new(File)
-	f.yamlSrc = rules
+	f.yamlSrc = Rules
 
-	for k, v := range rules {
+	for k, v := range Rules {
 		if k == "filetype" {
 			filetype := v.(string)
 
@@ -191,21 +190,21 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 		}
 	}()
 
-	rules := f.yamlSrc
+	Rules := f.yamlSrc
 
 	s = new(Def)
 	s.Header = header
 
-	for k, v := range rules {
-		if k == "rules" {
+	for k, v := range Rules {
+		if k == "Rules" {
 			inputRules := v.([]interface{})
 
-			rules, err := parseRules(inputRules, nil)
+			Rules, err := ParseRules(inputRules, nil)
 			if err != nil {
 				return nil, err
 			}
 
-			s.rules = rules
+			s.Rules = Rules
 		}
 	}
 
@@ -214,8 +213,8 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 
 // HasIncludes returns whether this syntax def has any include statements
 func HasIncludes(d *Def) bool {
-	hasIncludes := len(d.rules.includes) > 0
-	for _, r := range d.rules.regions {
+	hasIncludes := len(d.Rules.includes) > 0
+	for _, r := range d.Rules.regions {
 		hasIncludes = hasIncludes || hasIncludesInRegion(r)
 	}
 	return hasIncludes
@@ -231,8 +230,8 @@ func hasIncludesInRegion(region *region) bool {
 
 // GetIncludes returns a list of filetypes that are included by this syntax def
 func GetIncludes(d *Def) []string {
-	includes := d.rules.includes
-	for _, r := range d.rules.regions {
+	includes := d.Rules.includes
+	for _, r := range d.Rules.regions {
 		includes = append(includes, getIncludesInRegion(r)...)
 	}
 	return includes
@@ -246,23 +245,23 @@ func getIncludesInRegion(region *region) []string {
 	return includes
 }
 
-// ResolveIncludes will sort out the rules for including other filetypes
+// ResolveIncludes will sort out the Rules for including other filetypes
 // You should call this after parsing all the Defs
 func ResolveIncludes(def *Def, files []*File) {
 	resolveIncludesInDef(files, def)
 }
 
 func resolveIncludesInDef(files []*File, d *Def) {
-	for _, lang := range d.rules.includes {
+	for _, lang := range d.Rules.includes {
 		for _, searchFile := range files {
 			if lang == searchFile.FileType {
 				searchDef, _ := ParseDef(searchFile, nil)
-				d.rules.patterns = append(d.rules.patterns, searchDef.rules.patterns...)
-				d.rules.regions = append(d.rules.regions, searchDef.rules.regions...)
+				d.Rules.patterns = append(d.Rules.patterns, searchDef.Rules.patterns...)
+				d.Rules.regions = append(d.Rules.regions, searchDef.Rules.regions...)
 			}
 		}
 	}
-	for _, r := range d.rules.regions {
+	for _, r := range d.Rules.regions {
 		resolveIncludesInRegion(files, r)
 		r.parent = nil
 	}
@@ -273,8 +272,8 @@ func resolveIncludesInRegion(files []*File, region *region) {
 		for _, searchFile := range files {
 			if lang == searchFile.FileType {
 				searchDef, _ := ParseDef(searchFile, nil)
-				region.rules.patterns = append(region.rules.patterns, searchDef.rules.patterns...)
-				region.rules.regions = append(region.rules.regions, searchDef.rules.regions...)
+				region.rules.patterns = append(region.rules.patterns, searchDef.Rules.patterns...)
+				region.rules.regions = append(region.rules.regions, searchDef.Rules.regions...)
 			}
 		}
 	}
@@ -284,7 +283,8 @@ func resolveIncludesInRegion(files []*File, region *region) {
 	}
 }
 
-func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
+// ParseRules parses the rules section of a syntax file
+func ParseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -295,6 +295,7 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 		}
 	}()
 	ru = new(rules)
+	var numGroups Group
 
 	for _, v := range input {
 		rule := v.(map[interface{}]interface{})
@@ -322,7 +323,7 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 				}
 			case map[interface{}]interface{}:
 				// region
-				region, err := parseRegion(group.(string), object, curRegion)
+				region, err := ParseRegion(group.(string), object, curRegion)
 				if err != nil {
 					return nil, err
 				}
@@ -336,7 +337,8 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 	return ru, nil
 }
 
-func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (r *region, err error) {
+// ParseRegion() parses a region from the yaml file
+func ParseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (r *region, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -347,6 +349,7 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 		}
 	}()
 
+	var numGroups Group
 	r = new(region)
 	if _, ok := Groups[group]; !ok {
 		numGroups++
@@ -394,7 +397,7 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 		r.limitGroup = r.group
 	}
 
-	r.rules, err = parseRules(regionInfo["rules"].([]interface{}), r)
+	r.rules, err = ParseRules(regionInfo["rules"].([]interface{}), r)
 
 	if err != nil {
 		return nil, err
