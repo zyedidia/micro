@@ -3,6 +3,8 @@ github.com/blang/semver v3.5.1+incompatible/go.mod h1:kRBLl5iJ+tD4TcOOxsy/0fnweb
 github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
 github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
 github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
+github.com/creack/pty v1.1.18 h1:n56/Zwd5o6whRC5PMGretI4IdRLlmBXYNjScPaBgsbY=
+github.com/creack/pty v1.1.18/go.mod h1:MOBLtS5ELjhRRrroQr9kyvTxUAFNvYEK993ew/Vr4O4=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c=
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
@@ -52,12 +54,10 @@ github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d h1:zmDMkh22zXOB7gz8
 github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d/go.mod h1:NDJSTTYWivnza6zkRapeX2/LwhKPEMQ7bJxqgDVT78I=
 github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s=
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
-github.com/zyedidia/pty v1.1.20 h1:mkZ5/UiEjZVMFzoXp8oyJAlbn3b380m5lvFrbx/NL/g=
-github.com/zyedidia/pty v1.1.20/go.mod h1:HWbpfrLoVM9FmU+/9NV+PzVQV8jSxgnQLk8fvx0q/i8=
 github.com/zyedidia/tcell/v2 v2.0.10-0.20221007181625-f562052bccb8 h1:53ULv4mmLyQDnqbjVxanckP57WSreWHwTmlLJrJEutY=
 github.com/zyedidia/tcell/v2 v2.0.10-0.20221007181625-f562052bccb8/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
-github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415 h1:752dTQ5OatJ9M5ULK2+9lor+nzyZz+LYDo3WGngg3Rc=
-github.com/zyedidia/terminal v0.0.0-20180726154117-533c623e2415/go.mod h1:8leT8G0Cm8NoJHdrrKHyR9MirWoF4YW7pZh06B6H+1E=
+github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef h1:LeB4Qs0Tss4r/Qh8pfsTTqagDYHysfKJLYzAH3MVfu0=
+github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef/go.mod h1:zeb8MJdcCObFKVvur3n2B4BANIPuo2Q8r4iiNs9Enx0=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
 golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
 golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4/go.mod h1:jJ57K6gSWd91VN4djpZkiMVwK6gcyfeH4XE8wZrZaV4=
