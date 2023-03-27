@@ -5,6 +5,8 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
+    - identifier.function: "\\b([A-Z][A-Za-z0-9_]+\\()"
+
     - type: "\\b(auto|float|double|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline)\\b"
     - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
     - type: "\\b[a-z_][0-9a-z_]+(_t|_T)\\b"
