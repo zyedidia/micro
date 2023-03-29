@@ -53,7 +53,8 @@ type HeaderYaml struct {
 type File struct {
 	FileType string
 
-	yamlSrc map[interface{}]interface{}
+	yamlSrc   map[interface{}]interface{}
+	cachedDef *Def
 }
 
 // A Pattern is one simple syntax rule
@@ -67,9 +68,10 @@ type pattern struct {
 // rules defines which patterns and regions can be used to highlight
 // a filetype
 type rules struct {
-	regions  []*region
-	patterns []*pattern
-	includes []string
+	regions      []*region
+	patterns     []*pattern
+	includes     []string
+	includesDone bool
 }
 
 // A region is a highlighted region (such as a multiline comment, or a string)
@@ -180,6 +182,9 @@ func ParseFile(input []byte) (f *File, err error) {
 
 // ParseDef parses an input syntax file into a highlight Def
 func ParseDef(f *File, header *Header) (s *Def, err error) {
+	if f.cachedDef != nil {
+		return f.cachedDef, nil
+	}
 	// This is just so if we have an error, we can exit cleanly and return the parse error to the user
 	defer func() {
 		if r := recover(); r != nil {
@@ -209,6 +214,7 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 		}
 	}
 
+	f.cachedDef = s
 	return s, err
 }
 
@@ -253,6 +259,9 @@ func ResolveIncludes(def *Def, files []*File) {
 }
 
 func resolveIncludesInDef(files []*File, d *Def) {
+	if d.rules.includesDone {
+		return
+	}
 	for _, lang := range d.rules.includes {
 		for _, searchFile := range files {
 			if lang == searchFile.FileType {
@@ -262,6 +271,7 @@ func resolveIncludesInDef(files []*File, d *Def) {
 			}
 		}
 	}
+	d.rules.includesDone = true
 	for _, r := range d.rules.regions {
 		resolveIncludesInRegion(files, r)
 		r.parent = nil
@@ -269,6 +279,9 @@ func resolveIncludesInDef(files []*File, d *Def) {
 }
 
 func resolveIncludesInRegion(files []*File, region *region) {
+	if region.rules.includesDone {
+		return
+	}
 	for _, lang := range region.rules.includes {
 		for _, searchFile := range files {
 			if lang == searchFile.FileType {
@@ -278,6 +291,7 @@ func resolveIncludesInRegion(files []*File, region *region) {
 			}
 		}
 	}
+	region.rules.includesDone = true
 	for _, r := range region.rules.regions {
 		resolveIncludesInRegion(files, r)
 		r.parent = region
