@@ -51,6 +51,11 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+            - default:
+                start: "\\$\\("
+                end: "\\)"
+                rules:
+                    - include: "shell"
 
     - constant.string:
         start: "'"
