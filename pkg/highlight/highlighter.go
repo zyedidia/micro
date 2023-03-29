@@ -157,7 +157,37 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
+	if lineLen == 0 {
+		if canMatchEnd {
+			h.lastRegion = curRegion
+		}
+
+		return highlights
+	}
+
+	firstLoc := []int{lineLen, 0}
+	var firstRegion *region
+	for _, r := range curRegion.rules.regions {
+		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
+		if loc != nil {
+			if loc[0] < firstLoc[0] {
+				firstLoc = loc
+				firstRegion = r
+			}
+		}
+	}
+
 	loc := findIndex(curRegion.end, curRegion.skip, line, start == 0, canMatchEnd)
+
+	if firstLoc[0] != lineLen && (loc == nil || firstLoc[0] < loc[0]) {
+		if !statesOnly {
+			highlights[start+firstLoc[0]] = firstRegion.limitGroup
+		}
+		h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, firstLoc[0]), curRegion, statesOnly)
+		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
+		return highlights
+	}
+
 	if loc != nil {
 		if !statesOnly {
 			highlights[start+loc[0]] = curRegion.limitGroup
@@ -175,35 +205,6 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 			h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, loc[0]), curRegion, statesOnly)
 		}
 		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, sliceStart(line, loc[1]), curRegion.parent, statesOnly)
-		return highlights
-	}
-
-	if lineLen == 0 {
-		if canMatchEnd {
-			h.lastRegion = curRegion
-		}
-
-		return highlights
-	}
-
-	firstLoc := []int{lineLen, 0}
-
-	var firstRegion *region
-	for _, r := range curRegion.rules.regions {
-		loc := findIndex(r.start, nil, line, start == 0, canMatchEnd)
-		if loc != nil {
-			if loc[0] < firstLoc[0] {
-				firstLoc = loc
-				firstRegion = r
-			}
-		}
-	}
-	if firstLoc[0] != lineLen {
-		if !statesOnly {
-			highlights[start+firstLoc[0]] = firstRegion.limitGroup
-		}
-		h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, firstLoc[0]), curRegion, statesOnly)
-		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
 		return highlights
 	}
 
