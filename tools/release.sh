@@ -20,6 +20,7 @@ echo "Creating new release"
 hub release create $tag \
     --message "$1${NL}${NL}$2" \
     --attach "binaries/micro-$1-osx.tar.gz" \
+    --attach "binaries/micro-$1-macos-arm64.tar.gz" \
     --attach "binaries/micro-$1-linux64.tar.gz" \
     --attach "binaries/micro-$1-linux64-static.tar.gz" \
     --attach "binaries/micro-$1-amd64.deb" \

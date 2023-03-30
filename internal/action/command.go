@@ -722,7 +722,7 @@ func (h *BufPane) GotoCmd(args []string) {
 			}
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
 			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
-			h.Cursor.GotoLoc(buffer.Loc{col, line})
+			h.GotoLoc(buffer.Loc{col, line})
 		} else {
 			line, err := strconv.Atoi(args[0])
 			if err != nil {
@@ -733,9 +733,8 @@ func (h *BufPane) GotoCmd(args []string) {
 				line = h.Buf.LinesNum() + 1 + line
 			}
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			h.Cursor.GotoLoc(buffer.Loc{0, line})
+			h.GotoLoc(buffer.Loc{0, line})
 		}
-		h.Relocate()
 	}
 }
 
@@ -834,12 +833,10 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			h.Cursor.SetSelectionStart(locs[0])
 			h.Cursor.SetSelectionEnd(locs[1])
-			h.Cursor.GotoLoc(locs[0])
+			h.GotoLoc(locs[0])
 			h.Buf.LastSearch = search
 			h.Buf.LastSearchRegex = true
 			h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
-
-			h.Relocate()
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
@@ -853,8 +850,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					h.Cursor.Loc = searchLoc
 					nreplaced++
 				} else if !canceled && !yes {
-					searchLoc = locs[0]
-					searchLoc.X += util.CharacterCount(replace)
+					searchLoc = locs[1]
 				} else if canceled {
 					h.Cursor.ResetSelection()
 					h.Buf.RelocateCursors()

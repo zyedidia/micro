@@ -1,0 +1,52 @@
+filetype: hare
+
+detect: 
+    filename: "\\.ha$"
+
+rules:
+    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
+
+    - type: "\\b(bool|char|str|rune|void)\\b"
+    - type: "\\b(f32|f64|uint|int|u8|u16|u32|u64|i8|i16|i32|i64|uintptr)\\b"
+
+    - statement: "\\b(case|else|for|if|switch)\\b"
+    - statement: "\\b(continue|break|return)\\b"
+
+    - special: "\\b(as|const|def|defer|enum|export|fn|is|let|match|static|struct|type|union|yield|_)\\b"
+    - preproc: "\\b(abort|alloc|append|assert|delete|free|insert|len|nullable|offset|size)\\b"
+    - preproc: "^use .+;"
+    - preproc: "\\@([a-zA-Z_][0-9a-zA-Z_]+)\\b"
+
+    - constant: "\\b(false|null|true)\\b"
+    - constant.number: "\\b(0x[0-9A-Fa-f]+(i(8|16|32|64)?|u(8|16|32|64)?|z)?)\\b"
+    - constant.number: "\\b(0o[0-7]+(i(8|16|32|64)?|u(8|16|32|64)?|z)?)\\b"
+    - constant.number: "\\b(0b[01]+(i(8|16|32|64)?|u(8|16|32|64)?|z)?)\\b"
+
+    - constant.specialChar: "\\\".*\\\""
+    - constant.specialChar: "`.*`"
+    - constant.specialChar: "'([^'\\\\]|\\\\(0|a|b|f|n|r|t|v|\\\\|'|\\\"|x[0-9A-Fa-f]{2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8}))'"
+
+    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)"
+    - symbol.brackets: "[(){}]|\\[|\\]"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - error: "..+"
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+

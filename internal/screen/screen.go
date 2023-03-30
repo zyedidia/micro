@@ -79,6 +79,10 @@ func ShowFakeCursor(x, y int) {
 	lastCursor.style = style
 }
 
+func UseFake() bool {
+	return util.FakeCursor || config.GetGlobalOption("fakecursor").(bool)
+}
+
 // ShowFakeCursorMulti is the same as ShowFakeCursor except it does not
 // reset previous locations of the cursor
 // Fake cursors are also necessary to display multiple cursors
@@ -91,7 +95,7 @@ func ShowFakeCursorMulti(x, y int) {
 // if enabled or using the terminal cursor otherwise
 // By default only the windows console will use a fake cursor
 func ShowCursor(x, y int) {
-	if util.FakeCursor {
+	if UseFake() {
 		ShowFakeCursor(x, y)
 	} else {
 		Screen.ShowCursor(x, y)
@@ -106,7 +110,7 @@ func SetContent(x, y int, mainc rune, combc []rune, style tcell.Style) {
 	}
 
 	Screen.SetContent(x, y, mainc, combc, style)
-	if util.FakeCursor && lastCursor.x == x && lastCursor.y == y {
+	if UseFake() && lastCursor.x == x && lastCursor.y == y {
 		lastCursor.r = mainc
 		lastCursor.style = style
 		lastCursor.combc = combc

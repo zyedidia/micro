@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
-
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -851,10 +851,27 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 				return
 			}
 			filename := strings.Join(args, " ")
-			noPrompt := h.saveBufToFile(filename, action, callback)
-			if noPrompt {
-				h.completeAction(action)
+			fileinfo, err := os.Stat(filename)
+			if err != nil {
+				if os.IsNotExist(err) {
+					noPrompt := h.saveBufToFile(filename, action, callback)
+					if noPrompt {
+						h.completeAction(action)
+						return
+					}
+				}
 			}
+			InfoBar.YNPrompt(
+				fmt.Sprintf("the file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
+				func(yes, canceled bool) {
+					if yes && !canceled {
+						noPrompt := h.saveBufToFile(filename, action, callback)
+						if noPrompt {
+							h.completeAction(action)
+						}
+					}
+				},
+			)
 		}
 	})
 	return false
@@ -939,11 +956,10 @@ func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
 		h.Cursor.SetSelectionEnd(match[1])
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-		h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
+		h.GotoLoc(h.Cursor.CurSelection[1])
 		h.Buf.LastSearch = str
 		h.Buf.LastSearchRegex = useRegex
 		h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
-		h.Relocate()
 	} else {
 		h.Cursor.ResetSelection()
 	}
@@ -965,12 +981,11 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.SetSelectionEnd(match[1])
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-				h.Cursor.GotoLoc(match[1])
+				h.GotoLoc(match[1])
 			} else {
-				h.Cursor.GotoLoc(h.searchOrig)
+				h.GotoLoc(h.searchOrig)
 				h.Cursor.ResetSelection()
 			}
-			h.Relocate()
 		}
 	}
 	findCallback := func(resp string, canceled bool) {
@@ -985,7 +1000,7 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.SetSelectionEnd(match[1])
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
+				h.GotoLoc(h.Cursor.CurSelection[1])
 				h.Buf.LastSearch = resp
 				h.Buf.LastSearchRegex = useRegex
 				h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
@@ -996,7 +1011,6 @@ func (h *BufPane) find(useRegex bool) bool {
 		} else {
 			h.Cursor.ResetSelection()
 		}
-		h.Relocate()
 	}
 	pattern := string(h.Cursor.GetSelection())
 	if eventCallback != nil && pattern != "" {
@@ -1040,11 +1054,10 @@ func (h *BufPane) FindNext() bool {
 		h.Cursor.SetSelectionEnd(match[1])
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-		h.Cursor.Loc = h.Cursor.CurSelection[1]
+		h.GotoLoc(h.Cursor.CurSelection[1])
 	} else {
 		h.Cursor.ResetSelection()
 	}
-	h.Relocate()
 	return true
 }
 
@@ -1067,11 +1080,10 @@ func (h *BufPane) FindPrevious() bool {
 		h.Cursor.SetSelectionEnd(match[1])
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-		h.Cursor.Loc = h.Cursor.CurSelection[1]
+		h.GotoLoc(h.Cursor.CurSelection[1])
 	} else {
 		h.Cursor.ResetSelection()
 	}
-	h.Relocate()
 	return true
 }
 

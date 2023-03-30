@@ -1,6 +1,6 @@
 <img alt="micro logo" src="./assets/micro-logo-drop.svg" width="500px"/>
 
-[![Build Status](https://travis-ci.org/zyedidia/micro.svg?branch=master)](https://travis-ci.org/zyedidia/micro)
+![Test Workflow](https://github.com/zyedidia/micro/actions/workflows/test.yaml/badge.svg)
 [![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
 [![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
@@ -202,6 +202,18 @@ If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) i
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
+
+### WSL and Windows Console
+
+If you use micro within WSL, it is highly recommended that you use the [Windows
+Terminal](https://apps.microsoft.com/store/detail/windows-terminal/9N0DX20HK701?hl=en-us&gl=us)
+instead of the default Windows Console.
+
+If you must use Windows Console for some reason, note that there is a bug in
+Windows Console WSL that causes a font change whenever micro tries to access
+the external clipboard via powershell. To fix this, use an internal clipboard
+with `set clipboard internal` (though your system clipboard will no longer be
+available in micro).
 
 ### Colors and syntax highlighting
 

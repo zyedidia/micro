@@ -22,7 +22,7 @@ func AssetDir(name string) ([]string, error) {
 	if err != nil {
 		return nil, err
 	}
-	names := make([]string, len(entries), len(entries))
+	names := make([]string, len(entries))
 	for i, entry := range entries {
 		names[i] = entry.Name()
 	}

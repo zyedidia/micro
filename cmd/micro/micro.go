@@ -3,12 +3,14 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
 	"regexp"
 	"runtime"
+	"runtime/pprof"
 	"sort"
 	"strconv"
 	"syscall"
@@ -37,6 +39,7 @@ var (
 	flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
 	flagOptions   = flag.Bool("options", false, "Show all option help")
 	flagDebug     = flag.Bool("debug", false, "Enable debug mode (prints debug info to ./log.txt)")
+	flagProfile   = flag.Bool("profile", false, "Enable CPU profiling (writes profile info to ./micro.prof)")
 	flagPlugin    = flag.String("plugin", "", "Plugin command")
 	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
 	optionFlags   map[string]*string
@@ -59,6 +62,9 @@ func InitFlags() {
 		fmt.Println("    \tShow all option help")
 		fmt.Println("-debug")
 		fmt.Println("    \tEnable debug mode (enables logging to ./log.txt)")
+		fmt.Println("-profile")
+		fmt.Println("    \tEnable CPU profiling (writes profile info to ./micro.prof")
+		fmt.Println("    \tso it can be analyzed later with \"go tool pprof micro.prof\")")
 		fmt.Println("-version")
 		fmt.Println("    \tShow the version number and information")
 
@@ -228,14 +234,20 @@ func main() {
 		os.Exit(0)
 	}()
 
-	// runtime.SetCPUProfileRate(400)
-	// f, _ := os.Create("micro.prof")
-	// pprof.StartCPUProfile(f)
-	// defer pprof.StopCPUProfile()
-
 	var err error
 
 	InitFlags()
+
+	if *flagProfile {
+		f, err := os.Create("micro.prof")
+		if err != nil {
+			log.Fatal("error creating CPU profile: ", err)
+		}
+		if err := pprof.StartCPUProfile(f); err != nil {
+			log.Fatal("error starting CPU profile: ", err)
+		}
+		defer pprof.StopCPUProfile()
+	}
 
 	InitLog()
 
@@ -435,6 +447,25 @@ func DoEvent() {
 			screen.Screen.Fini()
 		}
 		os.Exit(0)
+	}
+
+	if e, ok := event.(*tcell.EventError); ok {
+		log.Println("tcell event error: ", e.Error())
+
+		if e.Err() == io.EOF {
+			// shutdown due to terminal closing/becoming inaccessible
+			for _, b := range buffer.OpenBuffers {
+				if !b.Modified() {
+					b.Fini()
+				}
+			}
+
+			if screen.Screen != nil {
+				screen.Screen.Fini()
+			}
+			os.Exit(0)
+		}
+		return
 	}
 
 	ulua.Lock.Lock()
