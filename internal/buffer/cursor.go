@@ -433,7 +433,7 @@ func (c *Cursor) WordLeft() {
 
 // SubWordRight moves the cursor one sub-word to the right
 func (c *Cursor) SubWordRight() {
-	if (util.IsWhitespace(c.RuneUnder(c.X))) {
+	if util.IsWhitespace(c.RuneUnder(c.X)) {
 		for util.IsWhitespace(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 				c.Right()
@@ -443,7 +443,7 @@ func (c *Cursor) SubWordRight() {
 		}
 		return
 	}
-	if (util.IsNoneWordChar(c.RuneUnder(c.X))) {
+	if util.IsNoneWordChar(c.RuneUnder(c.X)) {
 		for util.IsNoneWordChar(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 				c.Right()
@@ -453,7 +453,7 @@ func (c *Cursor) SubWordRight() {
 		}
 		return
 	}
-	if (util.IsWordDelimiter(c.RuneUnder(c.X))) {
+	if util.IsWordDelimiter(c.RuneUnder(c.X)) {
 		for util.IsWordDelimiter(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 				c.Right()
@@ -461,22 +461,22 @@ func (c *Cursor) SubWordRight() {
 			}
 			c.Right()
 		}
-		if (util.IsWhitespace(c.RuneUnder(c.X))) {
+		if util.IsWhitespace(c.RuneUnder(c.X)) {
 			return
 		}
 	}
 	if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 		return
 	}
-	if (util.IsUpperLetter(c.RuneUnder(c.X)) &&
-		util.IsUpperLetter(c.RuneUnder(c.X + 1))) {
+	if util.IsUpperLetter(c.RuneUnder(c.X)) &&
+		util.IsUpperLetter(c.RuneUnder(c.X+1)) {
 		for util.IsUpperAlphanumeric(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
 				return
 			}
 			c.Right()
 		}
-		if (util.IsLowerAlphanumeric(c.RuneUnder(c.X))) {
+		if util.IsLowerAlphanumeric(c.RuneUnder(c.X)) {
 			c.Left()
 		}
 	} else {
@@ -493,7 +493,7 @@ func (c *Cursor) SubWordRight() {
 // SubWordLeft moves the cursor one sub-word to the left
 func (c *Cursor) SubWordLeft() {
 	c.Left()
-	if (util.IsWhitespace(c.RuneUnder(c.X))) {
+	if util.IsWhitespace(c.RuneUnder(c.X)) {
 		for util.IsWhitespace(c.RuneUnder(c.X)) {
 			if c.X == 0 {
 				return
@@ -503,7 +503,7 @@ func (c *Cursor) SubWordLeft() {
 		c.Right()
 		return
 	}
-	if (util.IsNoneWordChar(c.RuneUnder(c.X))) {
+	if util.IsNoneWordChar(c.RuneUnder(c.X)) {
 		for util.IsNoneWordChar(c.RuneUnder(c.X)) {
 			if c.X == 0 {
 				return
@@ -513,14 +513,14 @@ func (c *Cursor) SubWordLeft() {
 		c.Right()
 		return
 	}
-	if (util.IsWordDelimiter(c.RuneUnder(c.X))) {
+	if util.IsWordDelimiter(c.RuneUnder(c.X)) {
 		for util.IsWordDelimiter(c.RuneUnder(c.X)) {
 			if c.X == 0 {
 				return
 			}
 			c.Left()
 		}
-		if (util.IsWhitespace(c.RuneUnder(c.X))) {
+		if util.IsWhitespace(c.RuneUnder(c.X)) {
 			c.Right()
 			return
 		}
@@ -528,15 +528,15 @@ func (c *Cursor) SubWordLeft() {
 	if c.X == 0 {
 		return
 	}
-	if (util.IsUpperLetter(c.RuneUnder(c.X)) &&
-		util.IsUpperLetter(c.RuneUnder(c.X - 1))) {
+	if util.IsUpperLetter(c.RuneUnder(c.X)) &&
+		util.IsUpperLetter(c.RuneUnder(c.X-1)) {
 		for util.IsUpperAlphanumeric(c.RuneUnder(c.X)) {
 			if c.X == 0 {
 				return
 			}
 			c.Left()
 		}
-		if (!util.IsUpperAlphanumeric(c.RuneUnder(c.X))) {
+		if !util.IsUpperAlphanumeric(c.RuneUnder(c.X)) {
 			c.Right()
 		}
 	} else {
@@ -546,7 +546,7 @@ func (c *Cursor) SubWordLeft() {
 			}
 			c.Left()
 		}
-		if (!util.IsAlphanumeric(c.RuneUnder(c.X))) {
+		if !util.IsAlphanumeric(c.RuneUnder(c.X)) {
 			c.Right()
 		}
 	}
