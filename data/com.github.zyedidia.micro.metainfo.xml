@@ -5,6 +5,7 @@
 	<name>Micro Text Editor</name>
 	<summary>A modern and intuitive terminal-based text editor</summary>
 	<metadata_license>MIT</metadata_license>
+	<project_license>MIT</project_license>
 	<categories>
 		<category>Development</category>
 		<category>TextEditor</category>
