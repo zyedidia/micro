@@ -19,6 +19,7 @@
 			<image type="source">https://raw.githubusercontent.com/zyedidia/micro/master/assets/micro-solarized.png</image>
 		</screenshot>
 	</screenshots>
+	<content_rating type="oars-1.1" />
 	<url type="homepage">https://micro-editor.github.io</url>
 	<url type="bugtracker">https://github.com/zyedidia/micro/issues</url>
 </component>
