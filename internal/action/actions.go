@@ -1483,7 +1483,6 @@ func (h *BufPane) ShellInsert() bool {
 			h.Buf.Insert(h.Cursor.Loc, out)
 		}
 	})
-
 	return true
 }
 

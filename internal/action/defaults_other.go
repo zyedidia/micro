@@ -68,7 +68,7 @@ var bufdefaults = map[string]string{
 	"Ctrl-l":         "command-edit:goto ",
 	"Delete":         "Delete",
 	"Ctrl-b":         "ShellMode",
-	"Ctrl-Shift-b":   "ShellInsert",
+	"Alt-c":          "ShellInsert",
 	"Ctrl-q":         "Quit",
 	"Ctrl-e":         "CommandMode",
 	"Ctrl-w":         "NextSplit",
