@@ -235,6 +235,7 @@ ToggleRuler
 JumpLine
 ClearStatus
 ShellMode
+ShellInsert
 CommandMode
 Quit
 QuitAll
@@ -498,6 +499,7 @@ conventions for text editing defaults.
     "Ctrl-l":          "command-edit:goto ",
     "Delete":         "Delete",
     "Ctrl-b":          "ShellMode",
+    "Ctrl-Shift-b":    "ShellInsert",
     "Ctrl-q":          "Quit",
     "Ctrl-e":          "CommandMode",
     "Ctrl-w":          "NextSplit",
