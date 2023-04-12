@@ -8,7 +8,6 @@ import (
 	"os"
 	"os/exec"
 	"os/signal"
-	"strings"
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -59,15 +58,10 @@ func RunBackgroundShell(input string) (func() string, error) {
 	inputCmd := args[0]
 	return func() string {
 		output, err := RunCommand(input)
-		totalLines := strings.Split(output, "\n")
 
 		str := output
-		if len(totalLines) < 3 {
-			if err == nil {
-				str = fmt.Sprint(inputCmd, " exited without error")
-			} else {
-				str = fmt.Sprint(inputCmd, " exited with error: ", err, ": ", output)
-			}
+		if err != nil {
+			str = fmt.Sprint(inputCmd, " exited with error: ", err, ": ", output)
 		}
 		return str
 	}, nil

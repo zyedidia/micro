@@ -51,7 +51,7 @@ var optionValidators = map[string]optionValidator{
 	"colorcolumn":  validateNonNegativeValue,
 	"fileformat":   validateLineEnding,
 	"encoding":     validateEncoding,
-	"multimode":    validateMultiMode,
+	"multiopen":    validateMultiOpen,
 }
 
 func ReadSettings() error {
@@ -331,10 +331,11 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
+	"fakecursor":     false,
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
-	"multimode":      "tab",
+	"multiopen":      "tab",
 	"parsecursor":    false,
 	"paste":          false,
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
@@ -494,11 +495,11 @@ func validateEncoding(option string, value interface{}) error {
 	return err
 }
 
-func validateMultiMode(option string, value interface{}) error {
+func validateMultiOpen(option string, value interface{}) error {
 	val, ok := value.(string)
 
 	if !ok {
-		return errors.New("Expected string type for multimode")
+		return errors.New("Expected string type for multiopen")
 	}
 
 	switch val {
