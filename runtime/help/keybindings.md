@@ -499,7 +499,7 @@ conventions for text editing defaults.
     "Ctrl-l":          "command-edit:goto ",
     "Delete":         "Delete",
     "Ctrl-b":          "ShellMode",
-    "Alt-c":           "ShellInsert",
+    "Alt-t":           "ShellInsert",
     "Ctrl-q":          "Quit",
     "Ctrl-e":          "CommandMode",
     "Ctrl-w":          "NextSplit",
