@@ -17,7 +17,7 @@
 	<developer_name>Zachary Yedidia</developer_name>
 	<screenshots>
 		<screenshot type="default">
-			<caption>Micro Text Editor editing its source code.</caption>
+			<caption>Micro Text Editor editing its source code</caption>
 			<image type="source">https://raw.githubusercontent.com/zyedidia/micro/master/assets/micro-solarized.png</image>
 		</screenshot>
 	</screenshots>
