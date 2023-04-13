@@ -13,6 +13,21 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
+// RawCommand executes a "raw" command by passing the input
+// to an exec call constructed by piping the given input
+// to `/bin/sh` with the `-c` flag set. 
+func RawCommand(command string) (string, error) {
+	var err error
+	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("%s", command))
+	outputBytes := &bytes.Buffer{}
+	cmd.Stdout = outputBytes
+	cmd.Stderr = outputBytes
+	err = cmd.Start()
+	err = cmd.Wait() // wait for command to finish
+	outstring := outputBytes.String()
+	return outstring, err
+}
+
 // ExecCommand executes a command using exec
 // It returns any output/errors
 func ExecCommand(name string, arg ...string) (string, error) {
