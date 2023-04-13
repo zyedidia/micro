@@ -10,6 +10,7 @@ import (
 	"os/signal"
 
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
@@ -18,7 +19,8 @@ import (
 // to `/bin/sh` with the `-c` flag set. 
 func RawCommand(command string) (string, error) {
 	var err error
-	cmd := exec.Command("/bin/sh", "-c", fmt.Sprintf("%s", command))
+	bin := config.GetGlobalOption("shellinsertbinary").(string)
+	cmd := exec.Command(bin, "-c", fmt.Sprintf("%s", command))
 	outputBytes := &bytes.Buffer{}
 	cmd.Stdout = outputBytes
 	cmd.Stderr = outputBytes
