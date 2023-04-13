@@ -1479,13 +1479,16 @@ func (h *BufPane) ShellMode() bool {
 func (h *BufPane) ShellInsert() bool {
 	InfoBar.Prompt("& ", "", "Shell", nil, func(resp string, canceled bool) {
 		if !canceled {
-			out, _ := shell.RawCommand(resp)
-			h.Buf.Insert(h.Cursor.Loc, out)
+			c := h.Cursor
 
-			for i := 0; i < len(out); i++ {
-				h.Cursor.Left()
-			}
-			h.Cursor.SelectTo(h.Cursor.Loc)
+			h.Buf.Remove(c.CurSelection[0], c.CurSelection[1])
+
+			out, _ := shell.RawCommand(resp)
+			start := c.Loc
+			h.Buf.Insert(c.Loc, out)
+			end := c.Loc
+			c.SetSelectionStart(start)
+			c.SetSelectionEnd(end)
 		}
 	})
 	return true
