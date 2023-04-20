@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<component>
+<component type="desktop-application">
 	<id>io.github.zyedidia.micro</id>
 	<launchable type="desktop-id">micro.desktop</launchable>
 	<name>Micro Text Editor</name>
