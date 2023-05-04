@@ -2,7 +2,7 @@ filetype: xml
 
 detect:
     filename: "\\.(xml|sgml?|rng|svg|plist)$"
-    header: "<\\?xml.*\\?>"
+    signature: "<\\?xml.*\\?>"
 
 rules:
     - preproc:

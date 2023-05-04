@@ -267,13 +267,13 @@ detect:
 ```
 
 Micro will match this regex against a given filename to detect the filetype.
-You may also provide an optional `header` regex that will check the first line
-of the file. For example:
+You may also provide an optional `signature` regex that will check a certain
+amount of lines of a file to find specific marks. For example:
 
 ```
 detect:
     filename: "\\.ya?ml$"
-    header: "%YAML"
+    signature: "%YAML"
 ```
 
 ### Syntax rules

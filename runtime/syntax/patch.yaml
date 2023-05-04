@@ -2,7 +2,7 @@ filetype: patch
 
 detect:
     filename: "\\.(patch|diff)$"
-    header: "^diff"
+    signature: "^diff"
 
 rules:
     - brightgreen: "^\\+.*"

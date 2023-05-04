@@ -33,27 +33,26 @@ func (g Group) String() string {
 // Then it has the rules which define how to highlight the file
 type Def struct {
 	*Header
-
 	rules *rules
 }
 
 type Header struct {
-	FileType string
-	FtDetect [2]*regexp.Regexp
+	FileType       string
+	FileNameRegex  *regexp.Regexp
+	SignatureRegex *regexp.Regexp
 }
 
 type HeaderYaml struct {
 	FileType string `yaml:"filetype"`
 	Detect   struct {
-		FNameRgx  string `yaml:"filename"`
-		HeaderRgx string `yaml:"header"`
+		FNameRegexStr     string `yaml:"filename"`
+		SignatureRegexStr string `yaml:"signature"`
 	} `yaml:"detect"`
 }
 
 type File struct {
 	FileType string
-
-	yamlSrc map[interface{}]interface{}
+	yamlSrc  map[interface{}]interface{}
 }
 
 // A Pattern is one simple syntax rule
@@ -103,14 +102,14 @@ func MakeHeader(data []byte) (*Header, error) {
 	header := new(Header)
 	var err error
 	header.FileType = string(lines[0])
-	fnameRgx := string(lines[1])
-	headerRgx := string(lines[2])
+	fnameRegexStr := string(lines[1])
+	signatureRegexStr := string(lines[2])
 
-	if fnameRgx != "" {
-		header.FtDetect[0], err = regexp.Compile(fnameRgx)
+	if fnameRegexStr != "" {
+		header.FileNameRegex, err = regexp.Compile(fnameRegexStr)
 	}
-	if err == nil && headerRgx != "" {
-		header.FtDetect[1], err = regexp.Compile(headerRgx)
+	if err == nil && signatureRegexStr != "" {
+		header.SignatureRegex, err = regexp.Compile(signatureRegexStr)
 	}
 
 	if err != nil {
@@ -132,11 +131,11 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	header := new(Header)
 	header.FileType = hdrYaml.FileType
 
-	if hdrYaml.Detect.FNameRgx != "" {
-		header.FtDetect[0], err = regexp.Compile(hdrYaml.Detect.FNameRgx)
+	if hdrYaml.Detect.FNameRegexStr != "" {
+		header.FileNameRegex, err = regexp.Compile(hdrYaml.Detect.FNameRegexStr)
 	}
-	if err == nil && hdrYaml.Detect.HeaderRgx != "" {
-		header.FtDetect[1], err = regexp.Compile(hdrYaml.Detect.HeaderRgx)
+	if err == nil && hdrYaml.Detect.SignatureRegexStr != "" {
+		header.SignatureRegex, err = regexp.Compile(hdrYaml.Detect.SignatureRegexStr)
 	}
 
 	if err != nil {
@@ -144,6 +143,29 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	}
 
 	return header, nil
+}
+
+// MatchFileName will check the given file name with the stored regex
+func (header *Header) MatchFileName(filename string) bool {
+	if header.FileNameRegex != nil {
+		return header.FileNameRegex.MatchString(filename)
+	}
+
+	return false
+}
+
+// HasFileSignature checks the presence of a stored signature
+func (header *Header) HasFileSignature() bool {
+	return header.SignatureRegex != nil
+}
+
+// MatchFileSignature will check the given line with the stored regex
+func (header *Header) MatchFileSignature(line []byte) bool {
+	if header.SignatureRegex != nil {
+		return header.SignatureRegex.Match(line)
+	}
+
+	return false
 }
 
 func ParseFile(input []byte) (f *File, err error) {

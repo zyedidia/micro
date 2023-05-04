@@ -2,7 +2,7 @@ filetype: fish
 
 detect:
     filename: "\\.fish$"
-    header: "^#!.*/(env +)?fish( |$)"
+    signature: "^#!.*/(env +)?fish( |$)"
 
 rules:
       # Numbers
