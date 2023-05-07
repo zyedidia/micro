@@ -190,7 +190,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 
 	var firstRegion *region
 	for _, r := range curRegion.rules.regions {
-		loc := findIndex(r.start, nil, line, true, true)
+		loc := findIndex(r.start, r.skip, line, true, true)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
 				firstLoc = loc
@@ -247,7 +247,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 	firstLoc := []int{lineLen, 0}
 	var firstRegion *region
 	for _, r := range h.Def.rules.regions {
-		loc := findIndex(r.start, nil, line, true, true)
+		loc := findIndex(r.start, r.skip, line, true, true)
 		if loc != nil {
 			if loc[0] < firstLoc[0] {
 				firstLoc = loc
