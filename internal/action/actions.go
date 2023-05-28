@@ -1043,6 +1043,28 @@ func (h *BufPane) FindPrevious() bool {
 	return true
 }
 
+// DiffNext searches forward until the beginning of the next block of diffs
+func (h *BufPane) DiffNext() bool {
+	cur := h.Cursor.Loc.Y
+	dl, err := h.Buf.FindNextDiffLine(cur, true)
+	if err != nil {
+		return false
+	}
+	h.GotoLoc(buffer.Loc{0, dl})
+	return true
+}
+
+// DiffPrevious searches forward until the end of the previous block of diffs
+func (h *BufPane) DiffPrevious() bool {
+	cur := h.Cursor.Loc.Y
+	dl, err := h.Buf.FindNextDiffLine(cur, false)
+	if err != nil {
+		return false
+	}
+	h.GotoLoc(buffer.Loc{0, dl})
+	return true
+}
+
 // Undo undoes the last action
 func (h *BufPane) Undo() bool {
 	h.Buf.Undo()
@@ -1327,7 +1349,7 @@ func (h *BufPane) OpenFile() bool {
 	return true
 }
 
-// OpenFile opens a new file in the buffer
+// JumpLine asks the user to enter a line number to jump to
 func (h *BufPane) JumpLine() bool {
 	InfoBar.Prompt("> ", "goto ", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {

@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
@@ -446,6 +447,25 @@ func DoEvent() {
 			screen.Screen.Fini()
 		}
 		os.Exit(0)
+	}
+
+	if e, ok := event.(*tcell.EventError); ok {
+		log.Println("tcell event error: ", e.Error())
+
+		if e.Err() == io.EOF {
+			// shutdown due to terminal closing/becoming inaccessible
+			for _, b := range buffer.OpenBuffers {
+				if !b.Modified() {
+					b.Fini()
+				}
+			}
+
+			if screen.Screen != nil {
+				screen.Screen.Fini()
+			}
+			os.Exit(0)
+		}
+		return
 	}
 
 	ulua.Lock.Lock()
