@@ -17,6 +17,8 @@ rules:
     - type: "\\b(bool|bytearray|bytes|classmethod|complex|dict|enumerate|filter|float|frozenset|int|list|map|memoryview|object|property|range|reversed|set|slice|staticmethod|str|super|tuple|type|zip)\\b"
       # definitions
     - identifier: "def [a-zA-Z_0-9]+"
+    - identifier.function: "\\b([A-Z][A-Za-z0-9_]+\\()"
+
       # keywords
     - statement: "\\b(and|as|assert|async|await|break|case|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|match|nonlocal|not|or|pass|raise|return|try|while|with|yield)\\b"
       # decorators

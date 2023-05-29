@@ -4,7 +4,9 @@ detect:
     filename: "(\\.(c|C)$|\\.(h|H)$|\\.ii?$|\\.(def)$)"
 
 rules:
-    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
+    - identifier.function: "\\b([a-zA-Z_][A-Z0-9a-z_]+\\()"
+    - identifier.macro.function: "\\b([A-Z_][0-9A-Z_]+\\()"
+
     - type: "\\b(auto|float|double|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline)\\b"
     - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
     - type: "\\b[a-z_][0-9a-z_]+(_t|_T)\\b"
@@ -41,6 +43,8 @@ rules:
         rules:
             - error: "..+"
             - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
+
+    - identifier.include: "[\"<]\\b([^\">]+\\b)*[\">]"
 
     - comment:
         start: "//"
