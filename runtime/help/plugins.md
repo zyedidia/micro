@@ -65,6 +65,10 @@ which micro defines:
    by the user. Returns a boolean which defines whether the action should
    be canceled.
 
+* `onRune(rune)`: runs when the composed rune has been inserted
+
+* `preRune(rune)`: runs before the composed rune will be inserted
+
 For example a function which is run every time the user saves the buffer
 would be:
 
