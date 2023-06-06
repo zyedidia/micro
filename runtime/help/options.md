@@ -100,6 +100,13 @@ Here are the available options:
 
 	default value: `true`
 
+* `detectlimit`: if this is not set to 0, it will limit the amount of first
+   lines in a file that are matched to determine the filetype.
+   A higher limit means better accuracy of guessing the filetype, but also
+   taking more time.
+
+   default value: `100`
+
 * `diffgutter`: display diff indicators before lines.
 
 	default value: `false`

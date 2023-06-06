@@ -44,6 +44,7 @@ func init() {
 var optionValidators = map[string]optionValidator{
 	"autosave":     validateNonNegativeValue,
 	"clipboard":    validateClipboard,
+	"detectlimit":  validateNonNegativeValue,
 	"tabsize":      validatePositiveValue,
 	"scrollmargin": validateNonNegativeValue,
 	"scrollspeed":  validateNonNegativeValue,
@@ -280,6 +281,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"basename":       false,
 	"colorcolumn":    float64(0),
 	"cursorline":     true,
+	"detectlimit":    float64(100),
 	"diffgutter":     false,
 	"encoding":       "utf-8",
 	"eofnewline":     true,

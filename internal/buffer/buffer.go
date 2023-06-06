@@ -766,9 +766,15 @@ func (b *Buffer) UpdateRules() {
 		if length > 0 {
 			signatureMatch := false
 			if length > 1 {
+				detectlimit := util.IntOpt(b.Settings["detectlimit"])
+				lineCount := len(b.lines)
+				limit := lineCount
+				if detectlimit > 0 && lineCount > detectlimit {
+					limit = detectlimit
+				}
 				for i := 0; i < length && !signatureMatch; i++ {
 					if syntaxFiles[i].header.HasFileSignature() {
-						for j := 0; j < 100 && !signatureMatch; j++ {
+						for j := 0; j < limit && !signatureMatch; j++ {
 							if syntaxFiles[i].header.MatchFileSignature(b.lines[j].data) {
 								syntaxFile = syntaxFiles[i].fileName
 								b.SyntaxDef = syntaxFiles[i].syntaxDef
