@@ -170,10 +170,12 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 
 		for _, p := range curRegion.rules.patterns {
-			matches := findAllIndex(p.regex, line)
-			for _, m := range matches {
-				for i := m[0]; i < m[1]; i++ {
-					fullHighlights[i] = p.group
+			if curRegion.group == curRegion.limitGroup || p.group == curRegion.limitGroup {
+				matches := findAllIndex(p.regex, line)
+				for _, m := range matches {
+					for i := m[0]; i < m[1]; i++ {
+						fullHighlights[i] = p.group
+					}
 				}
 			}
 		}
@@ -198,7 +200,6 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 		if !statesOnly {
 			highlights[start+loc[1]] = curRegion.parent.group
-			h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, loc[0]), curRegion, statesOnly)
 		}
 		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, sliceStart(line, loc[1]), curRegion.parent, statesOnly)
 		return highlights
