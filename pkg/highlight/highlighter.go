@@ -134,16 +134,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	if lineLen == 0 {
-		if canMatchEnd {
-			h.lastRegion = curRegion
-		}
-
-		return highlights
-	}
-
 	firstLoc := []int{lineLen, 0}
-
 	var firstRegion *region
 	for _, r := range curRegion.rules.regions {
 		loc := findIndex(r.start, r.skip, line)
