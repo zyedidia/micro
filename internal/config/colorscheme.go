@@ -52,43 +52,55 @@ func InitColorscheme() error {
 	Colorscheme = make(map[string]tcell.Style)
 	DefStyle = tcell.StyleDefault
 
-	return LoadDefaultColorscheme()
+	c, err := LoadDefaultColorscheme()
+	if err == nil {
+		Colorscheme = c
+	}
+
+	return err
 }
 
 // LoadDefaultColorscheme loads the default colorscheme from $(ConfigDir)/colorschemes
-func LoadDefaultColorscheme() error {
-	return LoadColorscheme(GlobalSettings["colorscheme"].(string))
+func LoadDefaultColorscheme() (map[string]tcell.Style, error) {
+	var parsedColorschemes []string
+	return LoadColorscheme(GlobalSettings["colorscheme"].(string), &parsedColorschemes)
 }
 
 // LoadColorscheme loads the given colorscheme from a directory
-func LoadColorscheme(colorschemeName string) error {
+func LoadColorscheme(colorschemeName string, parsedColorschemes *[]string) (map[string]tcell.Style, error) {
+	c := make(map[string]tcell.Style)
 	file := FindRuntimeFile(RTColorscheme, colorschemeName)
 	if file == nil {
-		return errors.New(colorschemeName + " is not a valid colorscheme")
+		return c, errors.New(colorschemeName + " is not a valid colorscheme")
 	}
 	if data, err := file.Data(); err != nil {
-		return errors.New("Error loading colorscheme: " + err.Error())
+		return c, errors.New("Error loading colorscheme: " + err.Error())
 	} else {
-		Colorscheme, err = ParseColorscheme(string(data))
+		var err error
+		c, err = ParseColorscheme(file.Name(), string(data), parsedColorschemes)
 		if err != nil {
-			return err
+			return c, err
 		}
 	}
-	return nil
+	return c, nil
 }
 
 // ParseColorscheme parses the text definition for a colorscheme and returns the corresponding object
 // Colorschemes are made up of color-link statements linking a color group to a list of colors
 // For example, color-link keyword (blue,red) makes all keywords have a blue foreground and
 // red background
-func ParseColorscheme(text string) (map[string]tcell.Style, error) {
+func ParseColorscheme(name string, text string, parsedColorschemes *[]string) (map[string]tcell.Style, error) {
 	var err error
-	parser := regexp.MustCompile(`color-link\s+(\S*)\s+"(.*)"`)
-
+	colorParser := regexp.MustCompile(`color-link\s+(\S*)\s+"(.*)"`)
+	includeParser := regexp.MustCompile(`include\s+"(.*)"`)
 	lines := strings.Split(text, "\n")
-
 	c := make(map[string]tcell.Style)
 
+	if parsedColorschemes != nil {
+		*parsedColorschemes = append(*parsedColorschemes, name)
+	}
+
+lineLoop:
 	for _, line := range lines {
 		if strings.TrimSpace(line) == "" ||
 			strings.TrimSpace(line)[0] == '#' {
@@ -96,7 +108,30 @@ func ParseColorscheme(text string) (map[string]tcell.Style, error) {
 			continue
 		}
 
-		matches := parser.FindSubmatch([]byte(line))
+		matches := includeParser.FindSubmatch([]byte(line))
+		if len(matches) == 2 {
+			// support includes only in case parsedColorschemes are given
+			if parsedColorschemes != nil {
+				include := string(matches[1])
+				for _, name := range *parsedColorschemes {
+					// check for circular includes...
+					if name == include {
+						// ...and prevent them
+						continue lineLoop
+					}
+				}
+				includeScheme, err := LoadColorscheme(include, parsedColorschemes)
+				if err != nil {
+					return c, err
+				}
+				for k, v := range includeScheme {
+					c[k] = v
+				}
+			}
+			continue
+		}
+
+		matches = colorParser.FindSubmatch([]byte(line))
 		if len(matches) == 3 {
 			link := string(matches[1])
 			colors := string(matches[2])
