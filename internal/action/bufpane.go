@@ -397,11 +397,6 @@ func (h *BufPane) Name() string {
 
 func (h *BufPane) getReloadSetting() string {
 	reloadSetting := h.Buf.Settings["reload"]
-
-	if reloadSetting == nil {
-		return "prompt"
-	}
-
 	return reloadSetting.(string)
 }
 
@@ -421,9 +416,9 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 					h.Buf.ReOpen()
 				}
 			})
-		} else if (reload == "auto") {
+		} else if reload == "auto" {
 			h.Buf.ReOpen()
-		} else if (reload == "disabled") {
+		} else if reload == "disabled" {
 			h.Buf.DisableReload()
 		} else {
 			InfoBar.Message("Invalid reload setting")
