@@ -42,7 +42,7 @@ rules:
     - statement: " (-[A-Za-z]+|--[a-z]+)"
 
     - identifier: "\\$\\{[0-9A-Za-z_:!%&=+#~@*^$?, .\\-\\/\\[\\]]+\\}"
-    - identifier: "\\$[0-9A-Za-z_:!%&=+#~@*^$?,\\-\\/\\[\\]]+"
+    - identifier: "\\$[0-9A-Za-z_:!%&=+#~@*^$?,\\-\\[\\]]+"
 
     - constant.string:
         start: "\""
