@@ -48,12 +48,12 @@ rules:
         start: "\""
         end: "\""
         skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
     - constant.string:
         start: "'"
         end: "'"
+        skip: "\\\\."
         rules: []
 
     - comment:
