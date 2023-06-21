@@ -16,7 +16,7 @@ Micro will know what to do with it.
 
 You can use Ctrl + arrows to move word by word (Alt + arrows for Mac). Alt + left and right
 move the cursor to the start and end of the line (Ctrl + left/right for Mac), and Ctrl + up and down move the
-cursor the start and end of the buffer.
+cursor to the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
