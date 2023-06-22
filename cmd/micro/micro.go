@@ -420,7 +420,7 @@ func DoEvent() {
 	case <-config.Autosave:
 		ulua.Lock.Lock()
 		for _, b := range buffer.OpenBuffers {
-			b.Save()
+			b.AutoSave()
 		}
 		ulua.Lock.Unlock()
 	case <-shell.CloseTerms:
