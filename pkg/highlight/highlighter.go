@@ -134,8 +134,12 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	firstLoc := []int{lineLen, 0}
 	var firstRegion *region
+	firstLoc := []int{lineLen, 0}
+	endLoc := findIndex(curRegion.end, curRegion.skip, line)
+	if endLoc != nil {
+		firstLoc = endLoc
+	}
 	for _, r := range curRegion.rules.regions {
 		loc := findIndex(r.start, r.skip, line)
 		if loc != nil {
@@ -145,7 +149,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 			}
 		}
 	}
-	if firstLoc[0] != lineLen {
+	if firstRegion != nil && firstLoc[0] != lineLen {
 		if !statesOnly {
 			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
@@ -177,7 +181,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	loc := findIndex(curRegion.end, curRegion.skip, line)
+	loc := endLoc
 	if loc != nil {
 		if !statesOnly {
 			highlights[start+loc[0]] = curRegion.limitGroup
@@ -212,8 +216,8 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 		return highlights
 	}
 
-	firstLoc := []int{lineLen, 0}
 	var firstRegion *region
+	firstLoc := []int{lineLen, 0}
 	for _, r := range h.Def.rules.regions {
 		loc := findIndex(r.start, r.skip, line)
 		if loc != nil {
@@ -223,7 +227,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 			}
 		}
 	}
-	if firstLoc[0] != lineLen {
+	if firstRegion != nil && firstLoc[0] != lineLen {
 		if !statesOnly {
 			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
