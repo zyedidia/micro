@@ -168,8 +168,10 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 			if curRegion.group == curRegion.limitGroup || p.group == curRegion.limitGroup {
 				matches := findAllIndex(p.regex, line)
 				for _, m := range matches {
-					for i := m[0]; i < m[1]; i++ {
-						fullHighlights[i] = p.group
+					if ((endLoc == nil) || (m[0] < endLoc[0])) {
+						for i := m[0]; i < m[1]; i++ {
+							fullHighlights[i] = p.group
+						}
 					}
 				}
 			}
