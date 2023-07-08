@@ -1,7 +1,7 @@
 filetype: markdown
 
 detect:
-    filename: "\\.(md|mkd|mkdn|markdown)$"
+    filename: "\\.(livemd|md|mkd|mkdn|markdown)$"
 
 rules:
     # Tables (Github extension)

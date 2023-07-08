@@ -148,7 +148,19 @@ func (t *TabList) Display() {
 var Tabs *TabList
 
 func InitTabs(bufs []*buffer.Buffer) {
-	Tabs = NewTabList(bufs)
+	multiopen := config.GetGlobalOption("multiopen").(string)
+	if multiopen == "tab" {
+		Tabs = NewTabList(bufs)
+	} else {
+		Tabs = NewTabList(bufs[:1])
+		for _, b := range bufs[1:] {
+			if multiopen == "vsplit" {
+				MainTab().CurPane().VSplitBuf(b)
+			} else {  // default hsplit
+				MainTab().CurPane().HSplitBuf(b)
+			}
+		}
+	}
 }
 
 func MainTab() *Tab {

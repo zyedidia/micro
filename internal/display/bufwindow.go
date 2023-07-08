@@ -53,8 +53,10 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 			} else {
 				w.StartLine.Row = 0
 			}
-			w.Relocate()
+		}
 
+		if option == "softwrap" || option == "wordwrap" {
+			w.Relocate()
 			for _, c := range w.Buf.GetCursors() {
 				c.LastVisualX = c.GetVisualX()
 			}
@@ -81,12 +83,6 @@ func (w *BufWindow) Resize(width, height int) {
 	w.updateDisplayInfo()
 
 	w.Relocate()
-
-	if w.Buf.Settings["softwrap"].(bool) {
-		for _, c := range w.Buf.GetCursors() {
-			c.LastVisualX = c.GetVisualX()
-		}
-	}
 }
 
 // SetActive marks the window as active.
@@ -150,9 +146,17 @@ func (w *BufWindow) updateDisplayInfo() {
 		w.gutterOffset += w.maxLineNumLength + 1
 	}
 
+	prevBufWidth := w.bufWidth
+
 	w.bufWidth = w.Width - w.gutterOffset
 	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
 		w.bufWidth--
+	}
+
+	if w.bufWidth != prevBufWidth && w.Buf.Settings["softwrap"].(bool) {
+		for _, c := range w.Buf.GetCursors() {
+			c.LastVisualX = c.GetVisualX()
+		}
 	}
 }
 
@@ -219,7 +223,7 @@ func (w *BufWindow) Relocate() bool {
 		w.StartLine = c
 		ret = true
 	}
-	if c.GreaterThan(w.Scroll(w.StartLine, height-1-scrollmargin)) && c.LessThan(w.Scroll(bEnd, -scrollmargin+1)) {
+	if c.GreaterThan(w.Scroll(w.StartLine, height-1-scrollmargin)) && c.LessEqual(w.Scroll(bEnd, -scrollmargin)) {
 		w.StartLine = w.Scroll(c, -height+1+scrollmargin)
 		ret = true
 	} else if c.GreaterThan(w.Scroll(bEnd, -scrollmargin)) && c.GreaterThan(w.Scroll(w.StartLine, height-1)) {

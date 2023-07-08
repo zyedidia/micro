@@ -20,6 +20,16 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	} else if option == "statusline" {
 		screen.Redraw()
 	} else if option == "filetype" {
+		config.InitRuntimeFiles()
+		err := config.ReadSettings()
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.InitGlobalSettings()
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		config.InitLocalSettings(b.Settings, b.Path)
 		b.UpdateRules()
 	} else if option == "fileformat" {
 		switch b.Settings["fileformat"].(string) {
@@ -45,7 +55,26 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 				buf.HighlightSearch = nativeValue.(bool)
 			}
 		}
-	}
+	} else {
+		for _, pl := range config.Plugins {
+			if option == pl.Name {
+				if nativeValue.(bool) {
+					if !pl.Loaded {
+						pl.Load()
+					}
+					_, err := pl.Call("init")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
+				} else if !nativeValue.(bool) && pl.Loaded {
+					_, err := pl.Call("deinit")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
+				}
+			}
+		}
+ 	}
 
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, nativeValue)

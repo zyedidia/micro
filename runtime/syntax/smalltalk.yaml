@@ -1,0 +1,55 @@
+filetype: smalltalk
+
+detect: 
+    filename: "\\.(st|sources|changes)$"
+
+rules:
+    - statement: "\\b(self|nil|true|false|ifTrue|ifFalse|whileTrue|whileFalse)\\b"
+    - constant: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
+    - constant.number: "(?i)\\b0x[0-9a-fA-F][0-9a-f_]*\\b"
+    - constant.number: "(?i)\\b0b[01][01_]*\\b"
+    - constant.number: "(?i)\\b[0-9][0-9_]*(['.'][0-9_]+)?(e[\\-]?[0-9_]+)?\\b"
+    # Ruby "Symbols"
+    - constant: "(i?)([ 	]|^):[0-9A-Z_]+\\b"
+    - constant: "\\b(__FILE__|__LINE__)\\b"
+    - constant: "/([^/]|(\\\\/))*/[iomx]*|%r\\{([^}]|(\\\\}))*\\}[iomx]*"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules: []
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - symbol.brackets:
+                start: "#\\{"
+                end: "\\}"
+                rules:
+                    - default: ".*"
+
+    - constant.string.exec:
+        start: "`"
+        end: "`"
+        skip: "\\\\."
+        rules:
+            - symbol.brackets:
+                start: "#\\{"
+                end: "\\}"
+                rules:
+                    - default: ".*"
+
+    - constant.string: "%[QW]?\\{[^}]*\\}|%[QW]?\\([^)]*\\)|%[QW]?<[^>]*>|%[QW]?\\[[^]]*\\]|%[QW]?\\$[^$]*\\$|%[QW]?\\^[^^]*\\^|%[QW]?![^!]*!"
+    - constant.string: "%[qw]\\{[^}]*\\}|%[qw]\\([^)]*\\)|%[qw]<[^>]*>|%[qw]\\[[^]]*\\]|%[qw]\\$[^$]*\\$|%[qw]\\^[^^]*\\^|%[qw]![^!]*!"
+    - constant.string.exec: "%[x]\\{[^}]*\\}|%[x]\\([^)]*\\)|%[x]<[^>]*>|%[x]\\[[^]]*\\]|%[x]\\$[^$]*\\$|%[x]\\^[^^]*\\^|%[x]![^!]*!"
+    - symbol.operator: "[-+/*=<>!~%&|^]|\\b:"
+    - symbol.brackets: "([(){}]|\\[|\\])"
+    - constant.macro:
+        start: "<<-?'?EOT'?"
+        end: "^EOT"
+        rules: []
+
+    - preproc.shebang: "^#!.+?( |$)"

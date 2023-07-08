@@ -19,13 +19,13 @@ rules:
       # decorators
     - identifier.macro: "@[A-Za-z0-9_]+"
       # operators
-    - symbol.operator: "[-+*/|=%<>&~^]|\\b(in|isa|where)\\b"
+    - symbol.operator: "[:+*|=!%~<>/\\-?&\\\\÷∈∉∘]|\\b(in|isa|where)\\b"
+      # for some reason having ^ in the same regex with the other operators broke things
+    - symbol.operator: "\\^"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # numbers
     - constant.number: "\\b([0-9]+(_[0-9]+)*|0x[0-9a-fA-F]+(_[0-9a-fA-F]+)*|0b[01]+(_[01]+)*|0o[0-7]+(_[0-7]+)*|Inf(16|32|64)?|NaN(16|32|64)?)\\b"
-
-    - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^']){1}'"
 
     - constant.string:
         start: "\"\"\""
@@ -33,16 +33,25 @@ rules:
         rules: []
 
     - constant.string:
-        start: "\"[^\"]|\"$"
+        start: "\""
         end: "\""
-        rules: []
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{1,4}|U[0-9A-Fa-f]{1,8})"
 
-    - comment:
-        start: "#[^=]|#$"
-        end: "$"
+    # Lifted from Rust's syntax highlighting
+    - constant.string: "'(\\\\.|.)'"
+    - constant.string:
+        start: "'\""
+        end: "'"
         rules: []
 
     - comment:
         start: "#="
         end: "=#"
+        rules: []
+
+    - comment:
+        start: "#"
+        end: "$"
         rules: []

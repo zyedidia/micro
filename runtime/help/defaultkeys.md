@@ -23,7 +23,7 @@ can change it!
 | Shift-arrows                | Move and select text                                                                      |
 | Alt(Ctrl on Mac)-LeftArrow  | Move to the beginning of the current line                                                 |
 | Alt(Ctrl on Mac)-RightArrow | Move to the end of the current line                                                       |
-| Home                        | Move to the beginning of text on the current line                                                 |
+| Home                        | Move to the beginning of text on the current line                                         |
 | End                         | Move to the end of the current line                                                       |
 | Ctrl(Alt on Mac)-LeftArrow  | Move cursor one word left                                                                 |
 | Ctrl(Alt on Mac)-RightArrow | Move cursor one word right                                                                |
@@ -39,7 +39,7 @@ can change it!
 ### Tabs
 
 | Key     | Description of function   |
-|-------- |-------------------------  |
+|-------- |-------------------------- |
 | Ctrl-t  | Open a new tab            |
 | Alt-,   | Previous tab              |
 | Alt-.   | Next tab                  |
@@ -51,6 +51,10 @@ can change it!
 | Ctrl-f    | Find (opens prompt)                       |
 | Ctrl-n    | Find next instance of current search      |
 | Ctrl-p    | Find previous instance of current search  |
+
+Note: Ctrl-n and Ctrl-p should be used from the main buffer, not from inside
+the search prompt. After Ctrl-f, press enter to complete the search and then
+you can use Ctrl-n and Ctrl-p to cycle through matches.
 
 ### File Operations
 
@@ -83,6 +87,8 @@ can change it!
 | Alt-DownArrow                       | Move current line or selected lines down  |
 | Alt-Backspace or Alt-Ctrl-h         | Delete word left                          |
 | Ctrl-a                              | Select all                                |
+| Tab                                 | Indent selected text                      |
+| Shift-Tab                           | Unindent selected text                    |
 
 ### Macros
 

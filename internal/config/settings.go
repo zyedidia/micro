@@ -51,6 +51,7 @@ var optionValidators = map[string]optionValidator{
 	"colorcolumn":  validateNonNegativeValue,
 	"fileformat":   validateLineEnding,
 	"encoding":     validateEncoding,
+	"multiopen":    validateMultiOpen,
 }
 
 func ReadSettings() error {
@@ -235,6 +236,21 @@ func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) 
 	return RegisterGlobalOption(pl+"."+name, defaultvalue)
 }
 
+// RegisterCommonOption creates a new option
+func RegisterCommonOption(name string, defaultvalue interface{}) error {
+	if v, ok := GlobalSettings[name]; !ok {
+		defaultCommonSettings[name] = defaultvalue
+		GlobalSettings[name] = defaultvalue
+		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
+		if err != nil {
+			return errors.New("Error writing settings.json file: " + err.Error())
+		}
+	} else {
+		defaultCommonSettings[name] = v
+	}
+	return nil
+}
+
 // RegisterGlobalOption creates a new global-only option
 func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if v, ok := GlobalSettings[name]; !ok {
@@ -330,9 +346,11 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
+	"fakecursor":     false,
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
+	"multiopen":      "tab",
 	"parsecursor":    false,
 	"paste":          false,
 	"savehistory":    true,
@@ -340,6 +358,10 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"sucmd":          "sudo",
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},
+	"savehistory":    true,
+	"sucmd":          "sudo",
+	"tabhighlight":   false,
+	"tabreverse":     true,
 	"xterm":          false,
 }
 
@@ -489,4 +511,20 @@ func validateLineEnding(option string, value interface{}) error {
 func validateEncoding(option string, value interface{}) error {
 	_, err := htmlindex.Get(value.(string))
 	return err
+}
+
+func validateMultiOpen(option string, value interface{}) error {
+	val, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for multiopen")
+	}
+
+	switch val {
+	case "tab", "hsplit", "vsplit":
+	default:
+		return errors.New(option + " must be 'tab', 'hsplit', or 'vsplit'")
+	}
+
+	return nil
 }

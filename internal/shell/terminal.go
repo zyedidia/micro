@@ -2,6 +2,7 @@ package shell
 
 import (
 	"bytes"
+	"io"
 	"os/exec"
 	"strconv"
 
@@ -79,7 +80,7 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback f
 	if getOutput {
 		t.output = bytes.NewBuffer([]byte{})
 	}
-	Term, _, err := terminal.Start(&t.State, cmd, t.output)
+	Term, _, err := terminal.Start(&t.State, cmd)
 	if err != nil {
 		return err
 	}
@@ -128,7 +129,14 @@ func (t *Terminal) Close() {
 	// call the lua function that the user has given as a callback
 	if t.getOutput {
 		if t.callback != nil {
-			t.callback(t.output.String())
+			b, _ := io.ReadAll(t.Term.File())
+			Jobs <- JobFunction{
+				Function: func(out string, args []interface{}) {
+					t.callback(out)
+				},
+				Output: string(b),
+				Args:   nil,
+			}
 		}
 	}
 }

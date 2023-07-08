@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"regexp"
 	"runtime"
 	"strings"
@@ -790,10 +791,27 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 				return
 			}
 			filename := strings.Join(args, " ")
-			noPrompt := h.saveBufToFile(filename, action, callback)
-			if noPrompt {
-				h.completeAction(action)
+			fileinfo, err := os.Stat(filename)
+			if err != nil {
+				if os.IsNotExist(err) {
+					noPrompt := h.saveBufToFile(filename, action, callback)
+					if noPrompt {
+						h.completeAction(action)
+						return
+					}
+				}
 			}
+			InfoBar.YNPrompt(
+				fmt.Sprintf("the file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
+				func(yes, canceled bool) {
+					if yes && !canceled {
+						noPrompt := h.saveBufToFile(filename, action, callback)
+						if noPrompt {
+							h.completeAction(action)
+						}
+					}
+				},
+			)
 		}
 	})
 	return false
@@ -878,11 +896,10 @@ func (h *BufPane) Search(str string, useRegex bool, searchDown bool) error {
 		h.Cursor.SetSelectionEnd(match[1])
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-		h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
+		h.GotoLoc(h.Cursor.CurSelection[1])
 		h.Buf.LastSearch = str
 		h.Buf.LastSearchRegex = useRegex
 		h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
-		h.Relocate()
 	} else {
 		h.Cursor.ResetSelection()
 	}
@@ -904,12 +921,11 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.SetSelectionEnd(match[1])
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-				h.Cursor.GotoLoc(match[1])
+				h.GotoLoc(match[1])
 			} else {
-				h.Cursor.GotoLoc(h.searchOrig)
+				h.GotoLoc(h.searchOrig)
 				h.Cursor.ResetSelection()
 			}
-			h.Relocate()
 		}
 	}
 	findCallback := func(resp string, canceled bool) {
@@ -924,7 +940,7 @@ func (h *BufPane) find(useRegex bool) bool {
 				h.Cursor.SetSelectionEnd(match[1])
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 				h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-				h.Cursor.GotoLoc(h.Cursor.CurSelection[1])
+				h.GotoLoc(h.Cursor.CurSelection[1])
 				h.Buf.LastSearch = resp
 				h.Buf.LastSearchRegex = useRegex
 				h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
@@ -935,7 +951,6 @@ func (h *BufPane) find(useRegex bool) bool {
 		} else {
 			h.Cursor.ResetSelection()
 		}
-		h.Relocate()
 	}
 	pattern := string(h.Cursor.GetSelection())
 	if eventCallback != nil && pattern != "" {
@@ -979,11 +994,10 @@ func (h *BufPane) FindNext() bool {
 		h.Cursor.SetSelectionEnd(match[1])
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-		h.Cursor.Loc = h.Cursor.CurSelection[1]
+		h.GotoLoc(h.Cursor.CurSelection[1])
 	} else {
 		h.Cursor.ResetSelection()
 	}
-	h.Relocate()
 	return true
 }
 
@@ -1006,11 +1020,32 @@ func (h *BufPane) FindPrevious() bool {
 		h.Cursor.SetSelectionEnd(match[1])
 		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
 		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
-		h.Cursor.Loc = h.Cursor.CurSelection[1]
+		h.GotoLoc(h.Cursor.CurSelection[1])
 	} else {
 		h.Cursor.ResetSelection()
 	}
-	h.Relocate()
+	return true
+}
+
+// DiffNext searches forward until the beginning of the next block of diffs
+func (h *BufPane) DiffNext() bool {
+	cur := h.Cursor.Loc.Y
+	dl, err := h.Buf.FindNextDiffLine(cur, true)
+	if err != nil {
+		return false
+	}
+	h.GotoLoc(buffer.Loc{0, dl})
+	return true
+}
+
+// DiffPrevious searches forward until the end of the previous block of diffs
+func (h *BufPane) DiffPrevious() bool {
+	cur := h.Cursor.Loc.Y
+	dl, err := h.Buf.FindNextDiffLine(cur, false)
+	if err != nil {
+		return false
+	}
+	h.GotoLoc(buffer.Loc{0, dl})
 	return true
 }
 
@@ -1046,12 +1081,14 @@ func (h *BufPane) CopyLine() bool {
 	if h.Cursor.HasSelection() {
 		return false
 	}
+	origLoc := h.Cursor.Loc
 	h.Cursor.SelectLine()
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
 	h.freshClip = true
 	InfoBar.Message("Copied line")
 
 	h.Cursor.Deselect(true)
+	h.Cursor.Loc = origLoc
 	h.Relocate()
 	return true
 }
@@ -1267,15 +1304,12 @@ func (h *BufPane) JumpToMatchingBrace() bool {
 				} else {
 					h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
 				}
-				break
-			} else {
-				return false
+				h.Relocate()
+				return true
 			}
 		}
 	}
-
-	h.Relocate()
-	return true
+	return false
 }
 
 // SelectAll selects the entire buffer
@@ -1299,7 +1333,7 @@ func (h *BufPane) OpenFile() bool {
 	return true
 }
 
-// OpenFile opens a new file in the buffer
+// JumpLine asks the user to enter a line number to jump to
 func (h *BufPane) JumpLine() bool {
 	InfoBar.Prompt("> ", "goto ", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {

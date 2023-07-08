@@ -16,7 +16,7 @@ rules:
     - constant: "\\b(false|true|null|undefined|NaN)\\b"
     - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Math)\\b"
     - type: "\\b(Number|Object|RegExp|String|Symbol)\\b"
-    - type: "\\b(any|boolean|never|number|string|symbol)\\b"
+    - type: "\\b(any|unknown|boolean|never|number|string|symbol)\\b"
     - statement: "[-+/*=<>!~%?:&|]"
     - constant: "/[^*]([^/]|(\\\\/))*[^\\\\]/[gim]*"
     - constant: "\\\\[0-7][0-7]?[0-7]?|\\\\x[0-9a-fA-F]+|\\\\[bfnrt'\"\\?\\\\]"
@@ -41,4 +41,9 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
-    
+    - constant.string:
+        start: "`"
+        end: "`"
+        rules:
+            - constant.specialChar: "\\\\."
+            - identifier: "\\x24\\{.*?\\}"    

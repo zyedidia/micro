@@ -89,8 +89,8 @@ Here are the available options:
     binary.
 
 	The colorscheme can be selected from all the files in the 
-	~/.config/micro/colorschemes/ directory. Micro comes by default with three
-	colorschemes:
+	~/.config/micro/colorschemes/ directory. Micro comes by default with
+	three colorschemes:
 
 	You can read more about micro's colorschemes in the `colors` help topic
 	(`help colors`).
@@ -160,11 +160,11 @@ Here are the available options:
     on the file you open.
 
 * `hlsearch`: highlight all instances of the searched text after a successful
-   search. This highlighting can be turned off via `UnhighlightSearch` action
-   (triggered by Esc key by default) or toggled on/off via `ToggleHighlightSearch`
-   action. Note that these actions don't change `hlsearch` setting.
-   As long as `hlsearch` is set to true, after the next search the highlighting
-   is turned on again.
+   search. This highlighting can be temporarily turned off via the
+   `UnhighlightSearch` action (triggered by the Esc key by default) or toggled
+   on/off via the `ToggleHighlightSearch` action. Note that these actions don't
+   change the `hlsearch` setting. As long as `hlsearch` is set to true, the next
+   search will have the highlighting turned on again.
 
 	default value: `false`
 
@@ -223,6 +223,15 @@ Here are the available options:
 
 	default value: `true`
 
+* `multiopen`: specifies how to layout multiple files opened at startup.
+   Most useful as a command-line option, like `-multiopen vsplit`. Possible
+   values correspond to commands (see `> help commands`) that open files:
+    * `tab`: open each file in a separate tab.
+    * `vsplit`: open files side-by-side.
+    * `hsplit`: open files stacked top to bottom.
+
+	default value: `tab`
+
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
    the terminal keybinding (not Ctrl-v, which is micro's default paste
@@ -238,7 +247,7 @@ Here are the available options:
    given line and column 0. Note that with this option enabled it is not possible
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
    It is also possible to open a file with a certain cursor location by using the
-   `+LINE,COL` flag syntax. See `micro -help` for the command line options.
+   `+LINE:COL` flag syntax. See `micro -help` for the command line options.
 
     default value: `false`
 
@@ -275,9 +284,9 @@ Here are the available options:
 
 	default value: `true`
 
-* `relativeruler`: make line numbers display relatively. If set to true, all lines except
-	for the line that the cursor is located will display the distance from the 
-	cursor's line. 
+* `relativeruler`: make line numbers display relatively. If set to true, all
+   lines except for the line that the cursor is located will display the distance
+   from the cursor's line. 
 
 	default value: `false` 
 
@@ -337,7 +346,8 @@ Here are the available options:
 
 * `statusformatl`: format string definition for the left-justified part of the
    statusline. Special directives should be placed inside `$()`. Special
-   directives include: `filename`, `modified`, `line`, `col`, `opt`, `bind`.
+   directives include: `filename`, `modified`, `line`, `col`, `lines`,
+   `percentage`, `opt`, `bind`.
    The `opt` and `bind` directives take either an option or an action afterward
    and fill in the value of the option or the key bound to the action.
 
@@ -369,11 +379,24 @@ Here are the available options:
 
 	default value: `false`
 
+* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
+  colors with respect to the tab bar.
+
+	default value: false
+
+* `tabreverse`: reverses the tab bar colors when active.
+
+	default value: true
+
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
 	default value: `4`
 
-* `tabstospaces`: use spaces instead of tabs.
+* `tabstospaces`: use spaces instead of tabs. Note: This option will be
+   overridden by [the `ftoptions` plugin](https://github.com/zyedidia/micro/blob/master/runtime/plugins/ftoptions/ftoptions.lua)
+   for certain filetypes. To disable this behavior, add `"ftoptions": false` to
+   your config. See [issue #2213](https://github.com/zyedidia/micro/issues/2213)
+   for more details.
 
 	default value: `false`
 
@@ -452,7 +475,7 @@ so that you can see what the formatting should look like.
     "filetype": "unknown",
     "incsearch": true,
     "ftoptions": true,
-    "ignorecase": false,
+    "ignorecase": true,
     "indentchar": " ",
     "infobar": true,
     "initlua": true,
@@ -491,6 +514,8 @@ so that you can see what the formatting should look like.
     "sucmd": "sudo",
     "syntax": true,
     "tabmovement": false,
+    "tabhighlight": true,
+    "tabreverse": false,
     "tabsize": 4,
     "tabstospaces": false,
     "useprimary": true,

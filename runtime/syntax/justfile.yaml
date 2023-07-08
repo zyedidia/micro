@@ -1,0 +1,40 @@
+# For more information, see https://github.com/casey/just
+filetype: 'justfile'
+
+detect:
+    filename: "(^\\.?[Jj]ustfile|\\.just)$"
+    header: "^#!.*/(env +)?[bg]?just --justfile"
+
+rules:
+    - preproc: "\\<(ifeq|ifdef|ifneq|ifndef|else|endif)\\>"
+    - statement: "^(export|include|override)\\>"
+    - symbol.operator: "^[^:=	]+:"
+    - symbol.operator: "([=,%]|\\+=|\\?=|:=|&&|\\|\\|)"
+    - statement: "\\$\\((abspath|addprefix|addsuffix|and|basename|call|dir)[[:space:]]"
+    - statement: "\\$\\((error|eval|filter|filter-out|findstring|firstword)[[:space:]]"
+    - statement: "\\$\\((flavor|foreach|if|info|join|lastword|notdir|or)[[:space:]]"
+    - statement: "\\$\\((origin|patsubst|realpath|shell|sort|strip|suffix)[[:space:]]"
+    - statement: "\\$\\((value|warning|wildcard|word|wordlist|words)[[:space:]]"
+    # default functions - probably shouldn't be overwritten by assignment
+    - statement: "\\b(arch|os|os_family|env_var|invocation_directory|justfile|justfile_directory|just_executable|lowercase|quote|replace|trim|trim_end|trim_end|trim_end_match|trim_end_matches|trim_start|trim_start_match|trim_start_matches|uppercase)\\b"
+    - identifier: "^.+:"
+    - identifier: "[()$]"
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+    - identifier: "\\$+(\\{[^} ]+\\}|\\([^) ]+\\))"
+    - identifier: "\\$[@^<*?%|+]|\\$\\([@^<*?%+-][DF]\\)"
+    - identifier: "\\$\\$|\\\\.?"
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []

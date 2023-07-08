@@ -23,7 +23,7 @@ rules:
     - statement: "\\\\%"
     # comments
     - comment:
-        start: "[^\\\\]%"
+        start: "[^\\\\]%|^%"
         end: "$"
         rules: []
     - comment:

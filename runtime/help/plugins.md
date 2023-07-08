@@ -287,6 +287,7 @@ The packages and functions are listed below (in Go type signatures):
     - `String(b []byte) string`: converts a byte array to a string.
     - `RuneStr(r rune) string`: converts a rune to a string.
     - `Unzip(src, dest string) error`: unzips a file to given folder.
+    - `HttpRequest(method string, url string, headers []string) (http.Response, error)`: makes a http request.
 
 This may seem like a small list of available functions but some of the objects
 returned by the functions have many methods. The Lua plugin may access any
@@ -401,7 +402,7 @@ There are 6 default plugins that come pre-installed with micro. These are
 
 * `autoclose`: automatically closes brackets, quotes, etc...
 * `comment`: provides automatic commenting for a number of languages
-* `ftoptions`: alters some default options depending on the filetype
+* `ftoptions`: alters some default options (notably indentation) depending on the filetype
 * `linter`: provides extensible linting for many languages
 * `literate`: provides advanced syntax highlighting for the Literate
    programming tool.

@@ -22,6 +22,13 @@ mv micro micro-$1
 tar -czf micro-$1-osx.tar.gz micro-$1
 mv micro-$1-osx.tar.gz binaries
 
+# Mac ARM64
+echo "MacOS ARM64"
+GOOS=darwin GOARCH=arm64 make build
+mv micro micro-$1
+tar -czf micro-$1-macos-arm64.tar.gz micro-$1
+mv micro-$1-macos-arm64.tar.gz binaries
+
 # Linux
 echo "Linux 64"
 GOOS=linux GOARCH=amd64 make build

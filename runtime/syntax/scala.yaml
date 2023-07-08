@@ -1,7 +1,7 @@
 filetype: scala
 
 detect:
-    filename: "\\.scala$"
+    filename: "\\.sc(ala)?$|\\.sbt$"
 
 rules:
     - type: "\\b(boolean|byte|char|double|float|int|long|new|short|this|transient|void)\\b"

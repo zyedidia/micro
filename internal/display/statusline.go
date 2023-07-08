@@ -47,6 +47,12 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 		}
 		return ""
 	},
+	"lines": func(b *buffer.Buffer) string {
+		return strconv.Itoa(b.LinesNum())
+	},
+	"percentage": func(b *buffer.Buffer) string {
+		return strconv.Itoa((b.GetActiveCursor().Y + 1) * 100 / b.LinesNum())
+	},
 }
 
 func SetStatusInfoFnLua(fn string) {
@@ -60,7 +66,7 @@ func SetStatusInfoFnLua(fn string) {
 		return
 	}
 	statusInfo[fn] = func(b *buffer.Buffer) string {
-		if pl == nil || !pl.IsEnabled() {
+		if pl == nil || !pl.IsLoaded() {
 			return ""
 		}
 		val, err := pl.Call(plFn, luar.New(ulua.L, b))
@@ -104,7 +110,9 @@ func (s *StatusLine) Display() {
 	// autocomplete suggestions (for the buffer, not for the infowindow)
 	if b.HasSuggestions && len(b.Suggestions) > 1 {
 		statusLineStyle := config.DefStyle.Reverse(true)
-		if style, ok := config.Colorscheme["statusline"]; ok {
+		if style, ok := config.Colorscheme["statusline.suggestions"]; ok {
+			statusLineStyle = style
+		} else if style, ok := config.Colorscheme["statusline"]; ok {
 			statusLineStyle = style
 		}
 		x := 0
@@ -161,8 +169,16 @@ func (s *StatusLine) Display() {
 	rightText = formatParser.ReplaceAllFunc(rightText, formatter)
 
 	statusLineStyle := config.DefStyle.Reverse(true)
-	if style, ok := config.Colorscheme["statusline"]; ok {
-		statusLineStyle = style
+	if s.win.IsActive() {
+		if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
+	} else {
+		if style, ok := config.Colorscheme["statusline.inactive"]; ok {
+			statusLineStyle = style
+		} else if style, ok := config.Colorscheme["statusline"]; ok {
+			statusLineStyle = style
+		}
 	}
 
 	leftLen := util.StringWidth(leftText, util.CharacterCount(leftText), 1)
