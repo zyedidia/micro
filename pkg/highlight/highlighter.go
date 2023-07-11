@@ -134,7 +134,65 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	loc := findIndex(curRegion.end, curRegion.skip, line)
+	var firstRegion *region
+	firstLoc := []int{lineLen, 0}
+	searchNesting := true
+	endLoc := findIndex(curRegion.end, curRegion.skip, line)
+	if endLoc != nil {
+		if start == endLoc[0] {
+			searchNesting = false
+		} else {
+			firstLoc = endLoc
+		}
+	}
+	if searchNesting {
+		for _, r := range curRegion.rules.regions {
+			loc := findIndex(r.start, r.skip, line)
+			if loc != nil {
+				if loc[0] < firstLoc[0] {
+					firstLoc = loc
+					firstRegion = r
+				}
+			}
+		}
+	}
+	if firstRegion != nil && firstLoc[0] != lineLen {
+		if !statesOnly {
+			highlights[start+firstLoc[0]] = firstRegion.limitGroup
+		}
+		h.highlightEmptyRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), statesOnly)
+		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
+		return highlights
+	}
+
+	if !statesOnly {
+		fullHighlights := make([]Group, lineLen)
+		for i := 0; i < len(fullHighlights); i++ {
+			fullHighlights[i] = curRegion.group
+		}
+
+		if searchNesting {
+			for _, p := range curRegion.rules.patterns {
+				if curRegion.group == curRegion.limitGroup || p.group == curRegion.limitGroup {
+					matches := findAllIndex(p.regex, line)
+					for _, m := range matches {
+						if ((endLoc == nil) || (m[0] < endLoc[0])) {
+							for i := m[0]; i < m[1]; i++ {
+								fullHighlights[i] = p.group
+							}
+						}
+					}
+				}
+			}
+		}
+		for i, h := range fullHighlights {
+			if i == 0 || h != fullHighlights[i-1] {
+				highlights[start+i] = h
+			}
+		}
+	}
+
+	loc := endLoc
 	if loc != nil {
 		if !statesOnly {
 			highlights[start+loc[0]] = curRegion.limitGroup
@@ -148,60 +206,9 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 		if !statesOnly {
 			highlights[start+loc[1]] = curRegion.parent.group
-			h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, loc[0]), curRegion, statesOnly)
 		}
 		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, sliceStart(line, loc[1]), curRegion.parent, statesOnly)
 		return highlights
-	}
-
-	if lineLen == 0 {
-		if canMatchEnd {
-			h.lastRegion = curRegion
-		}
-
-		return highlights
-	}
-
-	firstLoc := []int{lineLen, 0}
-
-	var firstRegion *region
-	for _, r := range curRegion.rules.regions {
-		loc := findIndex(r.start, r.skip, line)
-		if loc != nil {
-			if loc[0] < firstLoc[0] {
-				firstLoc = loc
-				firstRegion = r
-			}
-		}
-	}
-	if firstLoc[0] != lineLen {
-		if !statesOnly {
-			highlights[start+firstLoc[0]] = firstRegion.limitGroup
-		}
-		h.highlightRegion(highlights, start, false, lineNum, sliceEnd(line, firstLoc[0]), curRegion, statesOnly)
-		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
-		return highlights
-	}
-
-	if !statesOnly {
-		fullHighlights := make([]Group, lineLen)
-		for i := 0; i < len(fullHighlights); i++ {
-			fullHighlights[i] = curRegion.group
-		}
-
-		for _, p := range curRegion.rules.patterns {
-			matches := findAllIndex(p.regex, line)
-			for _, m := range matches {
-				for i := m[0]; i < m[1]; i++ {
-					fullHighlights[i] = p.group
-				}
-			}
-		}
-		for i, h := range fullHighlights {
-			if i == 0 || h != fullHighlights[i-1] {
-				highlights[start+i] = h
-			}
-		}
 	}
 
 	if canMatchEnd {
@@ -220,8 +227,8 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 		return highlights
 	}
 
-	firstLoc := []int{lineLen, 0}
 	var firstRegion *region
+	firstLoc := []int{lineLen, 0}
 	for _, r := range h.Def.rules.regions {
 		loc := findIndex(r.start, r.skip, line)
 		if loc != nil {
@@ -231,7 +238,7 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 			}
 		}
 	}
-	if firstLoc[0] != lineLen {
+	if firstRegion != nil && firstLoc[0] != lineLen {
 		if !statesOnly {
 			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
