@@ -150,9 +150,16 @@ func Init() error {
 	drawChan = make(chan bool, 8)
 
 	// Should we enable true color?
-	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
+	truecolor := (config.GetGlobalOption("truecolor").(string) == "auto") ||
+		(config.GetGlobalOption("truecolor").(string) == "on") ||
+		(os.Getenv("MICRO_TRUECOLOR") == "1")
 
-	if !truecolor {
+	if truecolor {
+		if (config.GetGlobalOption("truecolor").(string) == "on") ||
+			(os.Getenv("MICRO_TRUECOLOR") == "1") {
+			os.Setenv("COLORTERM", "truecolor")
+		}
+	} else {
 		os.Setenv("TCELL_TRUECOLOR", "disable")
 	}
 

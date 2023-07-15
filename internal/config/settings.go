@@ -35,6 +35,7 @@ var optionValidators = map[string]optionValidator{
 	"scrollmargin":    validateNonNegativeValue,
 	"scrollspeed":     validateNonNegativeValue,
 	"tabsize":         validatePositiveValue,
+	"truecolor":       validateChoice,
 }
 
 // a list of settings with pre-defined choices
@@ -44,6 +45,7 @@ var OptionChoices = map[string][]string{
 	"matchbracestyle": {"underline", "highlight"},
 	"multiopen":       {"tab", "hsplit", "vsplit"},
 	"reload":          {"prompt", "auto", "disabled"},
+	"truecolor":       {"auto", "on", "off"},
 }
 
 // a list of settings that can be globally and locally modified and their
@@ -95,6 +97,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabmovement":     false,
 	"tabsize":         float64(4),
 	"tabstospaces":    false,
+	"truecolor":       "off",
 	"useprimary":      true,
 	"wordwrap":        false,
 }
