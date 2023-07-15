@@ -462,6 +462,19 @@ Here are the available options:
 
     default value: `false`
 
+* `truecolor`: controls whether micro will use true colors (24-bit colors) when
+   using a colorscheme with true colors, such as `solarized-tc` or `atom-dark`.
+   * `auto`: enable usage of true color if micro detects that it is supported by
+      the terminal, otherwise disable it.
+   * `on`: force usage of true color even if micro does not detect its support
+      by the terminal (of course this is not guaranteed to work well unless the
+      terminal actually supports true color).
+   * `off`: disable true color usage.
+
+   Note: The change will take effect after the next start of `micro`.
+
+   default value: `auto`
+
 * `useprimary` (only useful on unix): defines whether or not micro will use the
    primary clipboard to copy selections in the background. This does not affect
    the normal clipboard using `Ctrl-c` and `Ctrl-v`.
