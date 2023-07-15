@@ -47,7 +47,9 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Syntax highlighting for over [130 languages](runtime/syntax).
 - Color scheme support.
   - By default, micro comes with 16, 256, and true color themes.
-- True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it).
+- True color support
+  - set the option `truecolor` to `on` or leave it set to default `auto` and set the environment variable `MICRO_TRUECOLOR` to 1 to enable it
+  - terminal auto detection takes place in case the option `truecolor` is set to `auto` without `MICRO_TRUECOLOR` being set
 - Copy and paste with the system clipboard.
 - Small and simple.
 - Easily configurable.
