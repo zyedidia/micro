@@ -1293,19 +1293,24 @@ func (h *BufPane) paste(clip string) {
 // JumpToMatchingBrace moves the cursor to the matching brace if it is
 // currently on a brace
 func (h *BufPane) JumpToMatchingBrace() bool {
-	for _, bp := range buffer.BracePairs {
-		r := h.Cursor.RuneUnder(h.Cursor.X)
-		rl := h.Cursor.RuneUnder(h.Cursor.X - 1)
-		if r == bp[0] || r == bp[1] || rl == bp[0] || rl == bp[1] {
-			matchingBrace, left, found := h.Buf.FindMatchingBrace(bp, h.Cursor.Loc)
-			if found {
-				if left {
-					h.Cursor.GotoLoc(matchingBrace)
-				} else {
-					h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
+	for _, pair := range h.Buf.Settings["bracepairs"].([]interface{}) {
+		strPair := pair.(string)
+		if util.CharacterCountInString(strPair) == 2 {
+			runes := []rune(strPair)
+			bp := [2]rune{runes[0], runes[1]}
+			r := h.Cursor.RuneUnder(h.Cursor.X)
+			rl := h.Cursor.RuneUnder(h.Cursor.X - 1)
+			if r == bp[0] || r == bp[1] || rl == bp[0] || rl == bp[1] {
+				matchingBrace, left, found := h.Buf.FindMatchingBrace(bp, h.Cursor.Loc)
+				if found {
+					if left {
+						h.Cursor.GotoLoc(matchingBrace)
+					} else {
+						h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
+					}
+					h.Relocate()
+					return true
 				}
-				h.Relocate()
-				return true
 			}
 		}
 	}

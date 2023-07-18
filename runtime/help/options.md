@@ -54,6 +54,11 @@ Here are the available options:
 
     default value: `false`
 
+* `bracepairs`: controls which characters shall be handled as start and end
+   of brace pairs.
+
+   default value: `"()", "{}", "[]"`
+
 * `clipboard`: specifies how micro should access the system clipboard.
    Possible values are:
     * `external`: accesses clipboard via an external tool, such as xclip/xsel
