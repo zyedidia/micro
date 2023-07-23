@@ -121,7 +121,7 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 			}
 			dlen = len(data)
 		} else if dlen > 0 {
-			if endings == FFAuto {
+			if la.Endings == FFAuto {
 				la.Endings = FFUnix
 			}
 		}
