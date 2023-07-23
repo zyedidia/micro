@@ -386,7 +386,7 @@ Here are the available options:
 
 * `tabreverse`: reverses the tab bar colors when active.
 
-	default value: true
+	default value: `true`
 
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
