@@ -382,7 +382,7 @@ Here are the available options:
 * `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
   colors with respect to the tab bar.
 
-	default value: false
+	default value: `false`
 
 * `tabreverse`: reverses the tab bar colors when active.
 
