@@ -210,10 +210,18 @@ Here are the available options:
 
 	default value: `false`
 
-* `matchbrace`: underline matching braces for '()', '{}', '[]' when the cursor
-   is on a brace character.
+* `matchbrace`: show matching braces for '()', '{}', '[]' when the cursor
+   is on a brace character or next to it.
 
     default value: `true`
+
+* `matchbracestyle`: whether to underline or highlight matching braces when
+  `matchbrace` is enabled. The color of highlight is determined by the `match-brace`
+  field in the current theme. Possible values:
+  * `underline`: underline matching braces.
+  * `highlight`: use `match-brace` style from the current theme.
+
+   default value: `underline`
 
 * `mkparents`: if a file is opened on a path that does not exist, the file
    cannot be saved because the parent directories don't exist. This option lets
@@ -495,6 +503,7 @@ so that you can see what the formatting should look like.
     "linter": true,
     "literate": true,
     "matchbrace": true,
+    "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
     "parsecursor": false,
