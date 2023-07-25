@@ -492,6 +492,7 @@ so that you can see what the formatting should look like.
     "linter": true,
     "literate": true,
     "matchbrace": true,
+    "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
     "parsecursor": false,
