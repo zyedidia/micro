@@ -210,7 +210,8 @@ Here are the available options:
     default value: `true`
 
 * `matchbracestyle`: whether to underline or highlight matching braces when
-  `matchbrace` is enabled. The color of highlight is determined by the `match-brace` field in the current theme. Possible values:
+  `matchbrace` is enabled. The color of highlight is determined by the `match-brace`
+  field in the current theme. Possible values:
   * `underline`: underline matching braces.
   * `highlight`: use `match-brace` style from the current theme.
 
