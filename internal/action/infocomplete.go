@@ -216,6 +216,13 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 			if strings.HasPrefix("terminal", input) {
 				suggestions = append(suggestions, "terminal")
 			}
+		case "matchbracestyle":
+			if strings.HasPrefix("underline", input) {
+				suggestions = append(suggestions, "underline")
+			}
+			if strings.HasPrefix("highlight", input) {
+				suggestions = append(suggestions, "highlight")
+			}
 		}
 	}
 	sort.Strings(suggestions)
