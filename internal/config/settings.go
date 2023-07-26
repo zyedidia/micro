@@ -42,16 +42,17 @@ func init() {
 
 // Options with validators
 var optionValidators = map[string]optionValidator{
-	"autosave":     validateNonNegativeValue,
-	"clipboard":    validateClipboard,
-	"tabsize":      validatePositiveValue,
-	"scrollmargin": validateNonNegativeValue,
-	"scrollspeed":  validateNonNegativeValue,
-	"colorscheme":  validateColorscheme,
-	"colorcolumn":  validateNonNegativeValue,
-	"fileformat":   validateLineEnding,
-	"encoding":     validateEncoding,
-	"multiopen":    validateMultiOpen,
+	"autosave":        validateNonNegativeValue,
+	"clipboard":       validateClipboard,
+	"tabsize":         validatePositiveValue,
+	"scrollmargin":    validateNonNegativeValue,
+	"scrollspeed":     validateNonNegativeValue,
+	"colorscheme":     validateColorscheme,
+	"colorcolumn":     validateNonNegativeValue,
+	"fileformat":      validateLineEnding,
+	"encoding":        validateEncoding,
+	"multiopen":       validateMultiOpen,
+	"matchbracestyle": validateMatchBraceStyle,
 }
 
 func ReadSettings() error {
@@ -523,6 +524,22 @@ func validateMultiOpen(option string, value interface{}) error {
 	case "tab", "hsplit", "vsplit":
 	default:
 		return errors.New(option + " must be 'tab', 'hsplit', or 'vsplit'")
+	}
+
+	return nil
+}
+
+func validateMatchBraceStyle(option string, value interface{}) error {
+	val, ok := value.(string)
+
+	if !ok {
+		errors.New("Expected string type for matchhighlightstyle")
+    }
+
+	switch val {
+	case "enum", "underline", "highlight":
+	default:
+		return errors.New(option + " must be 'underline' or 'highlight'")
 	}
 
 	return nil
