@@ -534,10 +534,10 @@ func validateMatchBraceStyle(option string, value interface{}) error {
 
 	if !ok {
 		errors.New("Expected string type for matchhighlightstyle")
-    }
+	}
 
 	switch val {
-	case "enum", "underline", "highlight":
+	case "underline", "highlight":
 	default:
 		return errors.New(option + " must be 'underline' or 'highlight'")
 	}
