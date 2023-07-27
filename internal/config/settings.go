@@ -533,7 +533,7 @@ func validateMatchBraceStyle(option string, value interface{}) error {
 	val, ok := value.(string)
 
 	if !ok {
-		errors.New("Expected string type for matchhighlightstyle")
+		errors.New("Expected string type for matchbracestyle")
 	}
 
 	switch val {
