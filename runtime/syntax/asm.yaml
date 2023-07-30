@@ -1,7 +1,7 @@
 filetype: asm
 
 detect:
-    filename: "\\.(S|s|asm)$"
+    filename: "\\.(S|s|asm|inc)$"
 
 rules:
     # This file is made for NASM assembly
@@ -57,6 +57,14 @@ rules:
     - statement: "\\b(?i)(crc32|pcmpestri|pcmpestrm|pcmpistri|pcmpistrm|pcmpgtq)(?-i)\\b"
     - statement: "\\b(?i)(vfmaddpd|vfmaddps|vfmaddsd|vfmaddss|vfmaddsubpd|vfmaddsubps|vfmsubaddpd|vfmsubaddps|vfmsubpd|vfmsubps|vfmsubsd|vfmsubss|vfnmaddpd|vfnmaddps|vfnmaddsd|vfnmaddss|vfnmsubps|vfnmsubsd|vfnmsubss)(?-i)\\b"
 
+      # Added with Intel VT-x
+    - statement:
+    - statement:
+
+      # Xeon Phi Instructions
+    - statement:
+    - statement:
+
       # Crypto
     - statement: "\\b(?i)(aesenc|aesenclast|aesdec|aesdeclast|aeskeygenassist|aesimc)(?-i)\\b"
     - statement: "\\b(?i)(sha1rnds4|sha1nexte|sha1msg1|sha1msg2|sha256rnds2|sha256msg1|sha256msg2)(?-i)\\b"
@@ -84,8 +92,10 @@ rules:
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
 
       ## Other
-    - statement: "\\b(?i)(extern|global|section|segment|_start|\\.text|\\.data|\\.bss)(?-i)\\b"
-    - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do)(?-i)\\b"
+    - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
+    - statement: "\\b(?i)(\.text|\.data|\.rdata|.rodata|.pdata|\.xdata|\.bss)(?-i)\\b"
+    - statement: "\\b(?i)(strict|rel|abs|org|bits)(?-i)\\b"
+    - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _]+:"
 
     - constant.string:
