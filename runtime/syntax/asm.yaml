@@ -111,7 +111,7 @@ rules:
     - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
     - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
     - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
-    - identifier: "[a-z A-Z 0-9 _]+:"
+    - identifier: "[a-z A-Z 0-9 _ .]+:"
 
     - constant.string:
         start: "\""
@@ -125,7 +125,7 @@ rules:
         end: "'"
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: ""
 
     - constant.string:
         start: "`"
