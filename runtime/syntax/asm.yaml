@@ -58,12 +58,12 @@ rules:
     - statement: "\\b(?i)(vfmaddpd|vfmaddps|vfmaddsd|vfmaddss|vfmaddsubpd|vfmaddsubps|vfmsubaddpd|vfmsubaddps|vfmsubpd|vfmsubps|vfmsubsd|vfmsubss|vfnmaddpd|vfnmaddps|vfnmaddsd|vfnmaddss|vfnmsubps|vfnmsubsd|vfnmsubss)(?-i)\\b"
 
       # Added with Intel VT-x
-    - statement:
-    - statement:
+    #- statement:
+    #- statement:
 
       # Xeon Phi Instructions
-    - statement:
-    - statement:
+    #- statement:
+    #- statement:
 
       # Crypto
     - statement: "\\b(?i)(aesenc|aesenclast|aesdec|aesdeclast|aeskeygenassist|aesimc)(?-i)\\b"
