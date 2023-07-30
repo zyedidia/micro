@@ -116,9 +116,9 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
-        skip: "\\\\."
+        skip: ""
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: ""
 
     - constant.string:
         start: "'"
