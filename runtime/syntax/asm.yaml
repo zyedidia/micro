@@ -113,22 +113,22 @@ rules:
     - identifier: "[a-z A-Z 0-9 _ .]+:"
 
     - constant.string:
-        start: "\""
-        end: "\""
+        start: '"'
+        end: '[" $]'
         skip: ""
         rules:
             - constant.specialChar: ""
 
     - constant.string:
         start: "'"
-        end: "'"
+        end: "[' $]"
         skip: "\\\\."
         rules:
             - constant.specialChar: ""
 
     - constant.string:
         start: "`"
-        end: "`"
+        end: "[` $]"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
