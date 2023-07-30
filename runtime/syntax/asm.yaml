@@ -93,7 +93,7 @@ rules:
 
       ## Other
     - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
-    - statement: "\\b(?i)(\.text|\.data|\.rdata|.rodata|.pdata|\.xdata|\.bss)(?-i)\\b"
+    - statement: "\\b(?i)(text|data|rdata|rodata|.pdata|xdata|bss)(?-i)\\b"
     - statement: "\\b(?i)(strict|rel|abs|org|bits)(?-i)\\b"
     - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _]+:"
