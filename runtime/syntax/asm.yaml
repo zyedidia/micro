@@ -116,12 +116,10 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
-        skip: "\\\\."
 
     - constant.string:
         start: "'"
         end: "'"
-        skip: "\\\\."
 
     - constant.string:
         start: "`"
