@@ -92,7 +92,7 @@ rules:
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
 
       ## Macros (NASM)
-    - preproc: "\\b(?i)(Infinity|QNaN|SNaN|float8|float16|bfloat16|float32|float64|float80m|float80e|float128l|float128h)(?-i)\\b"
+    - preproc: "\\b(?i)(Infinity|_?QNaN?_|SNaN|float8|float16|bfloat16|float32|float64|float80m|float80e|float128l|float128h)(?-i)\\b"
     
       ## Other
     - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
