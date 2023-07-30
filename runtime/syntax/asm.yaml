@@ -66,7 +66,7 @@ rules:
     - statement: "\\b(?i)(vpmultishiftqb|vpopcnt|vprold|vprolq|vprolvd|vprolvq|vprord|vprorq|vprorvd|vprorvq|vpscatterdd|vpscatterdq|vpscatterqd|vpscatterqq|vpshld|vpshldv|vpshrd|vpshrdv|vpshufbitqmb|vpsllvd|vpsllvq|vpsllvw|vpsravd|vpsravq|vpsravw|vpsrlvd|vpsrlvq|vpsrlvw|vpternlogd|vpternlogq|vptestmb|vptestmd|vptestmq|vptestmw|vptestnmb|vptestnmd|vptestnmq|vptestnmw|vrangepd|vrangeps|vrangesd|vrangess|vrcp14pd|vrcp14ps|vrcp14sd|vrcp14ss|vrcpph|vrcpsh)(?-i)\\b"
     - statement: "\\b(?i)(vreducepd|vreduceph|vreduceps|vreducesd|vreducesh|vreducess|vrndscalepd|vrndscaleph|vrndscaleps|vrndscalesd|vrndscalesh|vrndscaless|vrsqrt14pd|vrsqrt14ps|vrsqrt14sd|vrsqrt14ss|vrsqrtph|vrsqrtsh|vscalefpd|vscalefph|vscalefps|vscalefsd|vscalefsh|vscalefss|vscatterdpd|vscatterdps|vscatterqpd|vscatterqps|vshuff32x4|vshuff64x2|vshufi32x4|vshufi64x2|vsqrtph|vsqrtsh|vsubph|vsubsh|vtestpd|vtestps|vucomish|vzeroall|vzeroupper)(?-i)\\b"
     - statement: "\\b(?i)(wait|wbinvd|wbnoinvd|wrfsbase|wrgsbase|wrmsr|wrpkru|wrssd|wrssq|wrussd|wrussq|xabort|xacquire|xadd|xbegin|xchg|xend|xgetbv|xlat|xlatb|xor|xorpd|xorps|xrelease|xresldtrk|xrstor|xrstors|xsave|xsavec|xsaveopt|xsaves|xsetbv|xsusldtrk|xtest)(?-i)\\b"
-    
+
       # VMX Instructions
     - statement: "\\b(?i)(invept|invvpid|vmcall|vmclear|vmfunc|vmlaunch|vmptrld|vmptrst|vmread|vmresume|vmresume|vmwrite|vmxoff|vmxon)(?-i)\\b"
 
@@ -118,18 +118,16 @@ rules:
         end: "\""
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
-            
-    - constant.string:
-        start: "`"
-        end: "`"
-        skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\."
 
     - constant.string:
         start: "'"
         end: "'"
+        skip: "\\\\."
+        rules:
+
+    - constant.string:
+        start: "`"
+        end: "`"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
