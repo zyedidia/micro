@@ -104,7 +104,7 @@ rules:
     - preproc: "\\b__\\?+\\b(?i)(utf16|utf16le|utf16be|utf32|utf32le|utf32be)(?-i)\\b+\\?__\\b"
 
       ## Other
-    - preproc: "\\.\\b(?i)(text|data|rdata|rodata|pdata|xdata|bss)(?-i)\\b"
+    - preproc: "\\b\\.\\b(?i)(text|data|rdata|rodata|pdata|xdata|bss)(?-i)\\b"
     - preproc: "\\b(?i)(strict|rel|abs|org|bits|equ|times|dup)(?-i)\\b"
     - preproc: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|dy|dz|du)(?-i)\\b"
     - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
