@@ -1,7 +1,7 @@
 filetype: asm
 
 detect:
-    filename: "\\.(S|s|asm)$"
+    filename: "\\.(S|s|asm|inc)$"
 
 rules:
     # This file is made for NASM assembly
