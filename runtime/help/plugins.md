@@ -50,6 +50,8 @@ which micro defines:
 
 * `postinit()`: initialization function called after `init()`.
 
+* `onSetActive(bufpane)`: runs when changing the currently active panel.
+
 * `onBufferOpen(buf)`: runs when a buffer is opened. The input contains
    the buffer object.
 
