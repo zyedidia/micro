@@ -12,6 +12,13 @@ errors it will print `No issues!`.
 
 You can read more about how to write syntax files (and colorschemes) in the [colors](../help/colors.md) documentation.
 
+You can also use on the fly syntax file check via
+[Visual Studio Code YAML Red Hat][yaml] extension as there is a JSON schema
+available for such purposes. It's useful if you do all Micro development via
+Visual Studio Code.
+
+[yaml]: https://marketplace.visualstudio.com/items?itemName=redhat.vscode-yaml
+
 # Legacy '.micro' filetype
 
 Micro used to use the `.micro` filetype for syntax files which is no longer supported. If you have `.micro`
