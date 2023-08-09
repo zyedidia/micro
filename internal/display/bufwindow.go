@@ -767,8 +767,14 @@ func (w *BufWindow) displayScrollBar() {
 			scrollBarStyle = style
 		}
 
+		scrollBarChar := config.GetGlobalOption("scrollbarchar").(string)
+		if util.CharacterCountInString(scrollBarChar) != 1 {
+			scrollBarChar = "|"
+		}
+		scrollBarRune := []rune(scrollBarChar)
+
 		for y := barstart; y < util.Min(barstart+barsize, w.Y+w.bufHeight); y++ {
-			screen.SetContent(scrollX, y, '|', nil, scrollBarStyle)
+			screen.SetContent(scrollX, y, scrollBarRune[0], nil, scrollBarStyle)
 		}
 	}
 }

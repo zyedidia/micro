@@ -1,7 +1,7 @@
 filetype: dockerfile
 
 detect:
-    filename: "(Dockerfile[^/]*$|\\.dockerfile$)"
+    filename: "((Docker|Container)file[^/]*$|\\.(docker|container)file$)"
 
 rules:
     ## Keywords
