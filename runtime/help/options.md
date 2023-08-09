@@ -223,8 +223,8 @@ Here are the available options:
 
 	default value: `true`
 
-* `multimode`: specifies how to layout multiple files opened at startup.
-   Most useful as a command-line option, like `-multimode vsplit`. Possible
+* `multiopen`: specifies how to layout multiple files opened at startup.
+   Most useful as a command-line option, like `-multiopen vsplit`. Possible
    values correspond to commands (see `> help commands`) that open files:
     * `tab`: open each file in a separate tab.
     * `vsplit`: open files side-by-side.
@@ -310,6 +310,10 @@ Here are the available options:
 * `scrollbar`: display a scroll bar
 
     default value: `false`
+
+* `scrollbarchar`: specifies the character used for displaying the scrollbar
+
+    default value: `|`
 
 * `scrollmargin`: margin at which the view starts scrolling when the cursor
    approaches the edge of the view.

@@ -28,7 +28,7 @@ func LoadAllPlugins() error {
 func RunPluginFn(fn string, args ...lua.LValue) error {
 	var reterr error
 	for _, p := range Plugins {
-		if !p.IsEnabled() {
+		if !p.IsLoaded() {
 			continue
 		}
 		_, err := p.Call(fn, args...)
@@ -42,11 +42,11 @@ func RunPluginFn(fn string, args ...lua.LValue) error {
 // RunPluginFnBool runs a function in all plugins and returns
 // false if any one of them returned false
 // also returns an error if any of the plugins had an error
-func RunPluginFnBool(fn string, args ...lua.LValue) (bool, error) {
+func RunPluginFnBool(settings map[string]interface{}, fn string, args ...lua.LValue) (bool, error) {
 	var reterr error
 	retbool := true
 	for _, p := range Plugins {
-		if !p.IsEnabled() {
+		if !p.IsLoaded() || (settings != nil && settings[p.Name] == false) {
 			continue
 		}
 		val, err := p.Call(fn, args...)
@@ -71,11 +71,11 @@ type Plugin struct {
 	Info    *PluginInfo   // json file containing info
 	Srcs    []RuntimeFile // lua files
 	Loaded  bool
-	Default bool // pre-installed plugin
+	Default bool          // pre-installed plugin
 }
 
-// IsEnabled returns if a plugin is enabled
-func (p *Plugin) IsEnabled() bool {
+// IsLoaded returns if a plugin is enabled
+func (p *Plugin) IsLoaded() bool {
 	if v, ok := GlobalSettings[p.Name]; ok {
 		return v.(bool) && p.Loaded
 	}
@@ -101,7 +101,7 @@ func (p *Plugin) Load() error {
 		}
 	}
 	p.Loaded = true
-	RegisterGlobalOption(p.Name, true)
+	RegisterCommonOption(p.Name, true)
 	return nil
 }
 
@@ -133,7 +133,7 @@ func (p *Plugin) Call(fn string, args ...lua.LValue) (lua.LValue, error) {
 func FindPlugin(name string) *Plugin {
 	var pl *Plugin
 	for _, p := range Plugins {
-		if !p.IsEnabled() {
+		if !p.IsLoaded() {
 			continue
 		}
 		if p.Name == name {

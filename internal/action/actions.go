@@ -4,11 +4,11 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"os"
 	"regexp"
 	"runtime"
 	"strings"
 	"time"
-
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -791,10 +791,27 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 				return
 			}
 			filename := strings.Join(args, " ")
-			noPrompt := h.saveBufToFile(filename, action, callback)
-			if noPrompt {
-				h.completeAction(action)
+			fileinfo, err := os.Stat(filename)
+			if err != nil {
+				if os.IsNotExist(err) {
+					noPrompt := h.saveBufToFile(filename, action, callback)
+					if noPrompt {
+						h.completeAction(action)
+						return
+					}
+				}
 			}
+			InfoBar.YNPrompt(
+				fmt.Sprintf("the file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
+				func(yes, canceled bool) {
+					if yes && !canceled {
+						noPrompt := h.saveBufToFile(filename, action, callback)
+						if noPrompt {
+							h.completeAction(action)
+						}
+					}
+				},
+			)
 		}
 	})
 	return false
@@ -1007,6 +1024,28 @@ func (h *BufPane) FindPrevious() bool {
 	} else {
 		h.Cursor.ResetSelection()
 	}
+	return true
+}
+
+// DiffNext searches forward until the beginning of the next block of diffs
+func (h *BufPane) DiffNext() bool {
+	cur := h.Cursor.Loc.Y
+	dl, err := h.Buf.FindNextDiffLine(cur, true)
+	if err != nil {
+		return false
+	}
+	h.GotoLoc(buffer.Loc{0, dl})
+	return true
+}
+
+// DiffPrevious searches forward until the end of the previous block of diffs
+func (h *BufPane) DiffPrevious() bool {
+	cur := h.Cursor.Loc.Y
+	dl, err := h.Buf.FindNextDiffLine(cur, false)
+	if err != nil {
+		return false
+	}
+	h.GotoLoc(buffer.Loc{0, dl})
 	return true
 }
 
@@ -1294,7 +1333,7 @@ func (h *BufPane) OpenFile() bool {
 	return true
 }
 
-// OpenFile opens a new file in the buffer
+// JumpLine asks the user to enter a line number to jump to
 func (h *BufPane) JumpLine() bool {
 	InfoBar.Prompt("> ", "goto ", "Command", nil, func(resp string, canceled bool) {
 		if !canceled {

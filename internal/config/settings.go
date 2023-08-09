@@ -51,7 +51,7 @@ var optionValidators = map[string]optionValidator{
 	"colorcolumn":  validateNonNegativeValue,
 	"fileformat":   validateLineEnding,
 	"encoding":     validateEncoding,
-	"multimode":    validateMultiMode,
+	"multiopen":    validateMultiOpen,
 }
 
 func ReadSettings() error {
@@ -236,6 +236,21 @@ func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) 
 	return RegisterGlobalOption(pl+"."+name, defaultvalue)
 }
 
+// RegisterCommonOption creates a new option
+func RegisterCommonOption(name string, defaultvalue interface{}) error {
+	if v, ok := GlobalSettings[name]; !ok {
+		defaultCommonSettings[name] = defaultvalue
+		GlobalSettings[name] = defaultvalue
+		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
+		if err != nil {
+			return errors.New("Error writing settings.json file: " + err.Error())
+		}
+	} else {
+		defaultCommonSettings[name] = v
+	}
+	return nil
+}
+
 // RegisterGlobalOption creates a new global-only option
 func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if v, ok := GlobalSettings[name]; !ok {
@@ -331,15 +346,17 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
+	"fakecursor":     false,
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
-	"multimode":      "tab",
+	"multiopen":      "tab",
 	"parsecursor":    false,
 	"paste":          false,
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},
 	"savehistory":    true,
+	"scrollbarchar":  "|",
 	"sucmd":          "sudo",
 	"tabhighlight":   false,
 	"tabreverse":     true,
@@ -494,11 +511,11 @@ func validateEncoding(option string, value interface{}) error {
 	return err
 }
 
-func validateMultiMode(option string, value interface{}) error {
+func validateMultiOpen(option string, value interface{}) error {
 	val, ok := value.(string)
 
 	if !ok {
-		return errors.New("Expected string type for multimode")
+		return errors.New("Expected string type for multiopen")
 	}
 
 	switch val {

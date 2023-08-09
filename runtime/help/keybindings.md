@@ -16,7 +16,7 @@ Micro will know what to do with it.
 
 You can use Ctrl + arrows to move word by word (Alt + arrows for Mac). Alt + left and right
 move the cursor to the start and end of the line (Ctrl + left/right for Mac), and Ctrl + up and down move the
-cursor the start and end of the buffer.
+cursor to the start and end of the buffer.
 
 You can hold shift with all of these movement actions to select while moving.
 
@@ -30,8 +30,8 @@ following in the `bindings.json` file.
 
 ```json
 {
-	"Ctrl-y": "Undo",
-	"Ctrl-z": "Redo"
+    "Ctrl-y": "Undo",
+    "Ctrl-z": "Redo"
 }
 ```
 
@@ -200,6 +200,8 @@ Find
 FindLiteral
 FindNext
 FindPrevious
+DiffPrevious
+DiffNext
 Undo
 Redo
 Copy
@@ -461,29 +463,31 @@ conventions for text editing defaults.
     "Alt-{":          "ParagraphPrevious",
     "Alt-}":          "ParagraphNext",
     "Enter":          "InsertNewline",
-    "Ctrl-h":          "Backspace",
+    "Ctrl-h":         "Backspace",
     "Backspace":      "Backspace",
     "Alt-CtrlH":      "DeleteWordLeft",
     "Alt-Backspace":  "DeleteWordLeft",
     "Tab":            "Autocomplete|IndentSelection|InsertTab",
     "Backtab":        "OutdentSelection|OutdentLine",
-    "Ctrl-o":          "OpenFile",
-    "Ctrl-s":          "Save",
-    "Ctrl-f":          "Find",
-    "Alt-F":           "FindLiteral",
-    "Ctrl-n":          "FindNext",
-    "Ctrl-p":          "FindPrevious",
-    "Ctrl-z":          "Undo",
-    "Ctrl-y":          "Redo",
-    "Ctrl-c":          "CopyLine|Copy",
-    "Ctrl-x":          "Cut",
-    "Ctrl-k":          "CutLine",
-    "Ctrl-d":          "DuplicateLine",
-    "Ctrl-v":          "Paste",
-    "Ctrl-a":          "SelectAll",
-    "Ctrl-t":          "AddTab",
-    "Alt-,":           "PreviousTab",
-    "Alt-.":           "NextTab",
+    "Ctrl-o":         "OpenFile",
+    "Ctrl-s":         "Save",
+    "Ctrl-f":         "Find",
+    "Alt-F":          "FindLiteral",
+    "Ctrl-n":         "FindNext",
+    "Ctrl-p":         "FindPrevious",
+    "Alt-[":          "DiffPrevious|CursorStart",
+    "Alt-]":          "DiffNext|CursorEnd",
+    "Ctrl-z":         "Undo",
+    "Ctrl-y":         "Redo",
+    "Ctrl-c":         "CopyLine|Copy",
+    "Ctrl-x":         "Cut",
+    "Ctrl-k":         "CutLine",
+    "Ctrl-d":         "DuplicateLine",
+    "Ctrl-v":         "Paste",
+    "Ctrl-a":         "SelectAll",
+    "Ctrl-t":         "AddTab",
+    "Alt-,":          "PreviousTab",
+    "Alt-.":          "NextTab",
     "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
@@ -492,17 +496,17 @@ conventions for text editing defaults.
     "PageDown":       "CursorPageDown",
     "CtrlPageUp":     "PreviousTab",
     "CtrlPageDown":   "NextTab",
-    "Ctrl-g":          "ToggleHelp",
+    "Ctrl-g":         "ToggleHelp",
     "Alt-g":          "ToggleKeyMenu",
-    "Ctrl-r":          "ToggleRuler",
-    "Ctrl-l":          "command-edit:goto ",
+    "Ctrl-r":         "ToggleRuler",
+    "Ctrl-l":         "command-edit:goto ",
     "Delete":         "Delete",
-    "Ctrl-b":          "ShellMode",
-    "Ctrl-q":          "Quit",
-    "Ctrl-e":          "CommandMode",
-    "Ctrl-w":          "NextSplit",
-    "Ctrl-u":          "ToggleMacro",
-    "Ctrl-j":          "PlayMacro",
+    "Ctrl-b":         "ShellMode",
+    "Ctrl-q":         "Quit",
+    "Ctrl-e":         "CommandMode",
+    "Ctrl-w":         "NextSplit",
+    "Ctrl-u":         "ToggleMacro",
+    "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
 
     // Emacs-style keybindings
@@ -526,6 +530,7 @@ conventions for text editing defaults.
     "MouseMiddle":    "PastePrimary",
     "Ctrl-MouseLeft": "MouseMultiCursor",
 
+    // Multi-cursor bindings
     "Alt-n":        "SpawnMultiCursor",
     "AltShiftUp":   "SpawnMultiCursorUp",
     "AltShiftDown": "SpawnMultiCursorDown",

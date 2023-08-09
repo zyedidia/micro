@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+	<id>io.github.zyedidia.micro</id>
+	<launchable type="desktop-id">micro.desktop</launchable>
+	<name>Micro Text Editor</name>
+	<summary>A modern and intuitive terminal-based text editor</summary>
+	<description>
+		<p>
+				Amicro is a terminal-based text editor that aims to be easy to use and
+				intuitive, while also taking advantage of the capabilities of modern terminals.
+				It comes as a single, batteries-included, static binary with no dependencies;
+				you can download and use it right now!
+		</p>
+		<p>
+			As its name indicates, micro aims to be somewhat of a successor to the nano
+			editor by being easy to install and use. It strives to be enjoyable as a full-
+			time editor for people who prefer to work in a terminal, or those who regularly
+			edit files over SSH.
+		</p>
+	</description>
+	<metadata_license>MIT</metadata_license>
+	<project_license>MIT</project_license>
+	<categories>
+		<category>Development</category>
+		<category>TextEditor</category>
+	</categories>
+	<releases>
+			<release version="2.0.11" date="2022-08-01"/>
+	</releases>
+	<provides>
+		<binary>micro</binary>
+		<id>com.github.zyedidia.micro</id>
+	</provides>
+	<developer_name>Zachary Yedidia</developer_name>
+	<screenshots>
+		<screenshot type="default">
+			<caption>Micro Text Editor editing its source code</caption>
+			<image type="source">https://raw.githubusercontent.com/zyedidia/micro/master/assets/micro-solarized.png</image>
+		</screenshot>
+	</screenshots>
+	<content_rating type="oars-1.1" />
+	<url type="homepage">https://micro-editor.github.io</url>
+	<url type="bugtracker">https://github.com/zyedidia/micro/issues</url>
+</component>
