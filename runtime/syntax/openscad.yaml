@@ -1,0 +1,27 @@
+filetype: openscad
+
+detect:
+    filename: "\\.scad$"
+
+rules:
+    - identifier: "\\$?[a-zA-Z_][a-zA-Z0-9_]*"
+    - statement: "\\b(sin|cos|tan|asin|acos|atan|atan2|log|len|str|search|version|version_num|norm|cross|parent_module|children|dxf_dim|dxf_cross)\\b"
+    - special: "\\b(cube|cylinder|sphere|square|circle|polygon|minkowski|hull|linear_extrude|rotate_extrude|import|color|offset|projection|render|scale|resize|rotate|translate|mirror|multmatrix|intersection_for|let|echo|if|else|difference|union|intersection|for|module)\\b" 
+    - type: "(\\$fa|\\$fs|\\$fn|\\$t|\\$vpr|\\$vpt|\\$vpd|\\$vpf|\\$children|\\$preview)"
+    - type: "(\\$fa|\\$fs|\\$fn|\\$t|\\$vpr|\\$vpt|\\$vpd|\\$vpf|\\$children|\\$preview)"
+    - symbol.operator: "[+\\-*/%^<>#=!&|,.;:]"
+    - symbol.brackets: "[(){}]|\\[|\\]"
+    - constant.number: "\\b\\d+\\.?\\d*\\b"
+    - constant.number: "\\b(PI|undef)\\b"
+    - constant.bool: "(\\b(true|false)\\b)"
+    - comment:
+            start: "//"
+            end: "$"
+            rules:
+                - todo: "(TODO):?"
+    
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO):?"
