@@ -1582,9 +1582,7 @@ func (h *BufPane) QuitAll() bool {
 	}
 
 	quit := func() {
-		for _, b := range buffer.OpenBuffers {
-			b.Close()
-		}
+		buffer.CloseOpenBuffers()
 		screen.Screen.Fini()
 		InfoBar.Close()
 		runtime.Goexit()
