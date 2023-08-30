@@ -6,7 +6,7 @@ color-link constant.number              "#acacac"
 color-link constant.string              "#b7ab79"
 color-link current-line-number  "#acacac,#232323"
 color-link cursor-line                  "#2c2c2c"
-color-link alt-line                     "#222222" #for altlinecolors option
+color-link alt-line                     "#222222" # for altlinecolors option
 color-link divider                      "#282828"
 color-link error                        "#D2A8A1"
 color-link diff-added                   "#00AF00"
