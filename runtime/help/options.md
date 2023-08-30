@@ -418,6 +418,11 @@ Here are the available options:
 
     Default value: `false`
 
+* `altlinecolors`: alternate line background colors, `alt-line` color must
+   be specified in the active colorscheme for this option.
+  
+	default value: `false`
+
 ---
 
 Plugin options: all plugins come with a special option to enable or disable
@@ -519,7 +524,8 @@ so that you can see what the formatting should look like.
     "tabsize": 4,
     "tabstospaces": false,
     "useprimary": true,
-    "xterm": false
+    "xterm": false,
+    "altlinecolors": false
 }
 ```
 
