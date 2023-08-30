@@ -315,6 +315,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabstospaces":   false,
 	"useprimary":     true,
 	"wordwrap":       false,
+	"altlinecolors":  false,
 }
 
 func GetInfoBarOffset() int {
