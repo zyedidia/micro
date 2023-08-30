@@ -490,7 +490,7 @@ func (w *BufWindow) displayBuffer() {
 
 		draw := func(r rune, combc []rune, style tcell.Style, highlight bool, showcursor bool) {
 			if b.Settings["altlinecolors"].(bool) {
-				// altlinecolors: apply alt line color on symbols bg
+				// altlinecolors: apply alt line color to characters bg
 				if (vloc.Y + w.StartLine.Line)%2 == 0 && !currentLine {
 					if s, ok := config.Colorscheme["alt-line"]; ok {
 						fg, _, _ := s.Decompose()
@@ -554,7 +554,7 @@ func (w *BufWindow) displayBuffer() {
 					}
 
 					if b.Settings["altlinecolors"].(bool) {
-						//altlinecolors: apply alt line color on lines with selection
+						//altlinecolors: apply alt line color to lines with selection
 						if (vloc.Y + w.StartLine.Line)%2 == 0 && selectionOnLine {
 							if s, ok := config.Colorscheme["alt-line"]; ok {
 								fg, _, _ := s.Decompose()
@@ -730,7 +730,7 @@ func (w *BufWindow) displayBuffer() {
 
 		style := config.DefStyle
 		if b.Settings["altlinecolors"].(bool){
-			// altlinecolors: apply alt line color on remaining empty line
+			// altlinecolors: apply alt line color to remaining empty line
 			if (vloc.Y + w.StartLine.Line)%2 == 0 {
 				if s, ok := config.Colorscheme["alt-line"]; ok {
 					fg, _, _ := s.Decompose()
