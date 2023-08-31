@@ -489,23 +489,6 @@ func (w *BufWindow) displayBuffer() {
 		bloc.X = bslice
 
 		draw := func(r rune, combc []rune, style tcell.Style, highlight bool, showcursor bool) {
-			if b.Settings["altlinecolors"].(bool) {
-				// altlinecolors: apply alt line color to characters bg
-				if (vloc.Y + w.StartLine.Line)%2 == 0 && !currentLine {
-					if s, ok := config.Colorscheme["alt-line"]; ok {
-						fg, _, _ := s.Decompose()
-						style = style.Background(fg)
-					}
-				}
-				// altlinecolors: don't let alt line color overlap color column
-				if s, ok := config.Colorscheme["color-column"]; ok {
-					if colorcolumn != 0 && vloc.X-w.gutterOffset+w.StartCol == colorcolumn {
-						fg, _, _ := s.Decompose()
-						style = style.Background(fg)
-					}
-				}
-			}
-			
 			if nColsBeforeStart <= 0 && vloc.Y >= 0 {
 				if highlight {
 					if w.Buf.HighlightSearch && w.Buf.SearchMatch(bloc) {
@@ -522,17 +505,7 @@ func (w *BufWindow) displayBuffer() {
 					// over cursor-line and color-column
 					dontOverrideBackground := origBg != defBg
 
-					// altlinecolors: var to track lines with selection
-					selectionOnLine := false
-					
 					for _, c := range cursors {
-						if b.Settings["altlinecolors"].(bool) {
-							// altlinecolors: track lines with selection
-							if c.HasSelection() && (bloc.Y >= c.CurSelection[0].Y && bloc.Y <= c.CurSelection[1].Y) {
-								selectionOnLine = true
-							}
-						}
-						
 						if c.HasSelection() &&
 							(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
 								bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
@@ -541,6 +514,15 @@ func (w *BufWindow) displayBuffer() {
 
 							if s, ok := config.Colorscheme["selection"]; ok {
 								style = s
+							}
+						}
+
+						if b.Settings["altlinecolors"].(bool) {
+							if bloc.Y%2 == 0 && !dontOverrideBackground {
+								if s, ok := config.Colorscheme["alt-line"]; ok {
+									fg, _, _ := s.Decompose()
+									style = style.Background(fg)
+								}
 							}
 						}
 
@@ -553,16 +535,6 @@ func (w *BufWindow) displayBuffer() {
 						}
 					}
 
-					if b.Settings["altlinecolors"].(bool) {
-						// altlinecolors: apply alt line color to lines with selection
-						if (vloc.Y + w.StartLine.Line)%2 == 0 && selectionOnLine {
-							if s, ok := config.Colorscheme["alt-line"]; ok {
-								fg, _, _ := s.Decompose()
-								style = style.Background(fg)
-							}
-						}
-					}
-					
 					for _, m := range b.Messages {
 						if bloc.GreaterEqual(m.Start) && bloc.LessThan(m.End) ||
 							bloc.LessThan(m.End) && bloc.GreaterEqual(m.Start) {
@@ -729,16 +701,14 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		style := config.DefStyle
-		if b.Settings["altlinecolors"].(bool){
-			// altlinecolors: apply alt line color to remaining empty line
-			if (vloc.Y + w.StartLine.Line)%2 == 0 {
+		if b.Settings["altlinecolors"].(bool) {
+			if bloc.Y%2 == 0 {
 				if s, ok := config.Colorscheme["alt-line"]; ok {
 					fg, _, _ := s.Decompose()
 					style = style.Background(fg)
 				}
 			}
 		}
-		
 		for _, c := range cursors {
 			if b.Settings["cursorline"].(bool) && w.active &&
 				!c.HasSelection() && c.Y == bloc.Y {
