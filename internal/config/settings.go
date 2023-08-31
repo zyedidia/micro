@@ -272,6 +272,7 @@ func GetGlobalOption(name string) interface{} {
 }
 
 var defaultCommonSettings = map[string]interface{}{
+	"altlinecolors":  false,
 	"autoindent":     true,
 	"autosu":         false,
 	"backup":         true,
@@ -315,7 +316,6 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabstospaces":   false,
 	"useprimary":     true,
 	"wordwrap":       false,
-	"altlinecolors":  false,
 }
 
 func GetInfoBarOffset() int {
