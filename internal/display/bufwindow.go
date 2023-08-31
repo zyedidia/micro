@@ -522,12 +522,12 @@ func (w *BufWindow) displayBuffer() {
 					// over cursor-line and color-column
 					dontOverrideBackground := origBg != defBg
 
-					//altlinecolors: var to track lines with selection
+					// altlinecolors: var to track lines with selection
 					selectionOnLine := false
 					
 					for _, c := range cursors {
 						if b.Settings["altlinecolors"].(bool) {
-							//altlinecolors: track lines with selection
+							// altlinecolors: track lines with selection
 							if c.HasSelection() && (bloc.Y >= c.CurSelection[0].Y && bloc.Y <= c.CurSelection[1].Y) {
 								selectionOnLine = true
 							}
@@ -554,7 +554,7 @@ func (w *BufWindow) displayBuffer() {
 					}
 
 					if b.Settings["altlinecolors"].(bool) {
-						//altlinecolors: apply alt line color to lines with selection
+						// altlinecolors: apply alt line color to lines with selection
 						if (vloc.Y + w.StartLine.Line)%2 == 0 && selectionOnLine {
 							if s, ok := config.Colorscheme["alt-line"]; ok {
 								fg, _, _ := s.Decompose()
