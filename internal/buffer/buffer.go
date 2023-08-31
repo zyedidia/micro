@@ -430,6 +430,15 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	return b
 }
 
+// CloseOpenBuffers removes all open buffers
+func CloseOpenBuffers() {
+	for i, buf := range OpenBuffers {
+		buf.Fini()
+		OpenBuffers[i] = nil
+	}
+	OpenBuffers = OpenBuffers[:0]
+}
+
 // Close removes this buffer from the list of open buffers
 func (b *Buffer) Close() {
 	for i, buf := range OpenBuffers {
