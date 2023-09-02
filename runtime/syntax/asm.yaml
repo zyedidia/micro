@@ -1,7 +1,7 @@
 filetype: asm
 
 detect:
-    filename: "\\.(S|s|asm)$"
+    filename: "\\.(S|s|asm|inc)$"
 
 rules:
     # This file is made for NASM assembly
@@ -55,7 +55,23 @@ rules:
     - statement: "\\b(?i)(mpsadbw|phminposuw|pmulld|pmuldq|pblendvb|pblendw|pminsb|pmaxsb|pminuw|pmaxuw|pminud|pmaxud|pminsd|pmaxsd|pinsrb|pinsrd/pinsrq|pextrb|pextrw|pextrd/pextrq|pmovsxbw|pmovzxbw|pmovsxbd|pmovzxbd|pmovsxbq|pmovzxbq|pmovsxwd|pmovzxwd|pmovsxwq|pmovzxwq|pmovsxdq|pmovzxdq|ptest|pcmpeqq|packusdw|movntdqa)(?-i)\\b"
     - statement: "\\b(?i)(extrq|insertq|movntsd|movntss)(?-i)\\b"
     - statement: "\\b(?i)(crc32|pcmpestri|pcmpestrm|pcmpistri|pcmpistrm|pcmpgtq)(?-i)\\b"
-    - statement: "\\b(?i)(vfmaddpd|vfmaddps|vfmaddsd|vfmaddss|vfmaddsubpd|vfmaddsubps|vfmsubaddpd|vfmsubaddps|vfmsubpd|vfmsubps|vfmsubsd|vfmsubss|vfnmaddpd|vfnmaddps|vfnmaddsd|vfnmaddss|vfnmsubps|vfnmsubsd|vfnmsubss)(?-i)\\b"
+    - statement: "\\b(?i)(vcvtsh2ss|vcvtsh2usi|vcvtsi2sh|vcvtss2sh|vcvtss2usi|vcvttpd2qq|vcvttpd2udq|vcvttpd2uqq|vcvttph2dq|vcvttph2qq|vcvttph2udq|vcvttph2uqq|vcvttph2uw|vcvttph2w|vcvttps2qq|vcvttps2udq|vcvttps2uqq|vcvttsd2usi|vcvttsh2si|vcvttsh2usi|vcvttss2usi|vcvtudq2pd|vcvtudq2ph|vcvtudq2ps|vcvtuqq2pd|vcvtuqq2ph|vcvtuqq2ps|vcvtusi2sd|vcvtusi2sh|vcvtusi2ss|vcvtuw2ph|vcvtw2ph|vdbpsadbw|vdivph|vdivsh|vdpbf16ps|verr|verw)(?-i)\\b"
+    - statement: "\\b(?i)(vaddph|vaddsh|valignd|valignq|vblendmpd|vblendmps|vbroadcast|vcmpph|vcmpsh|vcomish|vcompresspd|vcompressps|vcompressw|vcvtdq2ph|vcvtne2ps2bf16|vcvtneps2bf16|vcvtpd2ph|vcvtpd2qq|vcvtpd2udq|vcvtpd2uqq|vcvtph2dq|vcvtph2pd|vcvtph2ps|vcvtph2psx|vcvtph2qq|vcvtph2udq|vcvtph2uqq|vcvtph2uw|vcvtph2w|vcvtps2ph|vcvtps2phx|vcvtps2qq|vcvtps2udq|vcvtps2uqq|vcvtqq2pd|vcvtqq2ph|vcvtqq2ps|vcvtsd2sh|vcvtsd2usi|vcvtsh2sd|vcvtsh2si)(?-i)\\b"
+    - statement: "\\b(?i)(vexpandpd|vexpandps|vextractf128|vextractf32x4|vextractf32x8|vextractf64x2|vextractf64x4|vextracti128|vextracti32x4|vextracti32x8|vextracti64x2|vextracti64x4|vfcmaddcph|vfcmaddcsh|vfcmulcph|vfcmulcsh|vfixupimmpd|vfixupimmps|vfixupimmsd|vfixupimmss|vfmadd132pd|vfmadd132ph|vfmadd132ps|vfmadd132sd|vfmadd132sh|vfmadd132ss|vfmadd213pd|vfmadd213ph|vfmadd213ps|vfmadd213sd|vfmadd213sh|vfmadd213ss|vfmadd231pd|vfmadd231ph|vfmadd231ps|vfmadd231sd|vfmadd231sh|vfmadd231ss|vfmaddcph|vfmaddcsh|vfmaddsub132pd|vfmaddsub132ph|vfmaddsub132ps|vfmaddsub213pd|vfmaddsub213ph|vfmaddsub213ps|vfmaddsub231pd|vfmaddsub231ph|vfmaddsub231ps)(?-i)\\b"
+    - statement: "\\b(?i)(vfmsub132pd|vfmsub132ph|vfmsub132ps|vfmsub132sd|vfmsub132sh|vfmsub132ss|vfmsub213pd|vfmsub213ph|vfmsub213ps|vfmsub213sd|vfmsub213sh|vfmsub213ss|vfmsub231pd|vfmsub231ph|vfmsub231ps|vfmsub231sd|vfmsub231sh|vfmsub231ss|vfmsubadd132pd|vfmsubadd132ph|vfmsubadd132ps|vfmsubadd213pd|vfmsubadd213ph|vfmsubadd213ps|vfmsubadd231pd|vfmsubadd231ph|vfmsubadd231ps|vfmulcph|vfmulcsh)(?-i)\\b"
+    - statement: "\\b(?i)(vfnmadd132pd|vfnmadd132ph|vfnmadd132ps|vfnmadd132sd|vfnmadd132sh|vfnmadd132ss|vfnmadd213pd|vfnmadd213ph|vfnmadd213ps|vfnmadd213sd|vfnmadd213sh|vfnmadd213ss|vfnmadd231pd|vfnmadd231ph|vfnmadd231ps|vfnmadd231sd|vfnmadd231sh|vfnmadd231ss|vfnmsub132pd|vfnmsub132ph|vfnmsub132ps|vfnmsub132sd|vfnmsub132sh|vfnmsub132ss|vfnmsub213pd|vfnmsub213ph|vfnmsub213ps|vfnmsub213sd|vfnmsub213sh|vfnmsub213ss|vfnmsub231pd|vfnmsub231ph|vfnmsub231ps|vfnmsub231sd|vfnmsub231sh|vfnmsub231ss|vfpclasspd|vfpclassph|vfpclassps|vfpclasssd|vfpclasssh|vfpclassss|vgatherdpd|vgatherdps|vgatherqpd|vgatherqps)(?-i)\\b"
+    - statement: "\\b(?i)(vgetexppd|vgetexpph|vgetexpps|vgetexpsd|vgetexpsh|vgetexpss|vgetmantpd|vgetmantph|vgetmantps|vgetmantsd|vgetmantsh|vgetmantss|vinsertf128|vinsertf32x4|vinsertf32x8|vinsertf64x2|vinsertf64x4|vinserti128|vinserti32x4|vinserti32x8|vinserti64x2|vinserti64x4|vmaskmov|vmaxph|vmaxsh|vminph|vminsh|vmovdqa32|vmovdqa64|vmovdqu16|vmovdqu32|vmovdqu64|vmovdqu8)(?-i)\\b"
+    - statement: "\\b(?i)(vmovsh|vmovw|vmulph|vmulsh|vp2intersectd|vp2intersectq|vpblendd|vpblendmb|vpblendmd|vpblendmq|vpblendmw|vpbroadcast|vpbroadcastb|vpbroadcastd|vpbroadcastm|vpbroadcastq|vpbroadcastw|vpcmpb|vpcmpd|vpcmpq|vpcmpub|vpcmpud|vpcmpuq|vpcmpuw|vpcmpw|vpcompressb|vpcompressd|vpcompressq|vpconflictd|vpconflictq|vpdpbusd|vpdpbusds|vpdpwssd|vpdpwssds|vperm2f128|vperm2i128|vpermb|vpermd|vpermi2b|vpermi2d|vpermi2pd|vpermi2ps|vpermi2q|vpermi2w)(?-i)\\b"
+    - statement: "\\b(?i)(vpermilpd|vpermilps|vpermpd|vpermps|vpermq|vpermt2b|vpermt2d|vpermt2pd|vpermt2ps|vpermt2q|vpermt2w|vpermw|vpexpandb|vpexpandd|vpexpandq|vpexpandw|vpgatherdd|vpgatherdd|vpgatherdq|vpgatherdq|vpgatherqd|vpgatherqd|vpgatherqq|vpgatherqq|vplzcntd|vplzcntq|vpmadd52huq|vpmadd52luq|vpmaskmov|vpmovb2m|vpmovd2m|vpmovdb|vpmovdw|vpmovm2b|vpmovm2d|vpmovm2q|vpmovm2w|vpmovq2m|vpmovqb|vpmovqd|vpmovqw|vpmovsdb|vpmovsdw|vpmovsqb|vpmovsqd|vpmovsqw|vpmovswb|vpmovusdb|vpmovusdw|vpmovusqb|vpmovusqd|vpmovusqw|vpmovuswb|vpmovw2m|vpmovwb)(?-i)\\b"
+    - statement: "\\b(?i)(vpmultishiftqb|vpopcnt|vprold|vprolq|vprolvd|vprolvq|vprord|vprorq|vprorvd|vprorvq|vpscatterdd|vpscatterdq|vpscatterqd|vpscatterqq|vpshld|vpshldv|vpshrd|vpshrdv|vpshufbitqmb|vpsllvd|vpsllvq|vpsllvw|vpsravd|vpsravq|vpsravw|vpsrlvd|vpsrlvq|vpsrlvw|vpternlogd|vpternlogq|vptestmb|vptestmd|vptestmq|vptestmw|vptestnmb|vptestnmd|vptestnmq|vptestnmw|vrangepd|vrangeps|vrangesd|vrangess|vrcp14pd|vrcp14ps|vrcp14sd|vrcp14ss|vrcpph|vrcpsh)(?-i)\\b"
+    - statement: "\\b(?i)(vreducepd|vreduceph|vreduceps|vreducesd|vreducesh|vreducess|vrndscalepd|vrndscaleph|vrndscaleps|vrndscalesd|vrndscalesh|vrndscaless|vrsqrt14pd|vrsqrt14ps|vrsqrt14sd|vrsqrt14ss|vrsqrtph|vrsqrtsh|vscalefpd|vscalefph|vscalefps|vscalefsd|vscalefsh|vscalefss|vscatterdpd|vscatterdps|vscatterqpd|vscatterqps|vshuff32x4|vshuff64x2|vshufi32x4|vshufi64x2|vsqrtph|vsqrtsh|vsubph|vsubsh|vtestpd|vtestps|vucomish|vzeroall|vzeroupper)(?-i)\\b"
+    - statement: "\\b(?i)(wait|wbinvd|wbnoinvd|wrfsbase|wrgsbase|wrmsr|wrpkru|wrssd|wrssq|wrussd|wrussq|xabort|xacquire|xadd|xbegin|xchg|xend|xgetbv|xlat|xlatb|xor|xorpd|xorps|xrelease|xresldtrk|xrstor|xrstors|xsave|xsavec|xsaveopt|xsaves|xsetbv|xsusldtrk|xtest)(?-i)\\b"
+
+      # VMX Instructions
+    - statement: "\\b(?i)(invept|invvpid|vmcall|vmclear|vmfunc|vmlaunch|vmptrld|vmptrst|vmread|vmresume|vmresume|vmwrite|vmxoff|vmxon)(?-i)\\b"
+
+      # Xeon Phi Instructions
+    - statement: "\\b(?i)(prefetchwt1|v4fmaddps|v4fmaddss|v4fnmaddps|v4fnmaddss|vexp2pd|vexp2ps|vgatherpf0dpd|vgatherpf0dps|vgatherpf0qpd|vgatherpf0qps|vgatherpf1dpd|vgatherpf1dps|vgatherpf1qpd|vgatherpf1qps|vp4dpwssd|vp4dpwssds|vrcp28pd|vrcp28ps|vrcp28sd|vrcp28ss|vrsqrt28pd|vrsqrt28ps|vrsqrt28sd|vrsqrt28ss|vscatterpf0dpd|vscatterpf0dps|vscatterpf0qpd|vscatterpf0qps|vscatterpf1dpd|vscatterpf1dps|vscatterpf1qpd|vscatterpf1qps)(?-i)\\b"
 
       # Crypto
     - statement: "\\b(?i)(aesenc|aesenclast|aesdec|aesdeclast|aeskeygenassist|aesimc)(?-i)\\b"
@@ -70,34 +86,49 @@ rules:
     - identifier: "\\b(?i)(fp_dp|fp_ip|eax|ebx|ecx|edx|ebp|esi|r8d|r9d|r10d|r11d|edi|esp|r12d|r13d|r14d|r15d|eip|eflags|mxcsr)(?-i)\\b"
     - identifier: "\\b(?i)(mm0|mm1|mm2|mm3|mm4|mm5|mm6|mm7|rax|rbx|rcx|rdx|rbp|rsi|r8|r9|r10|r11|rdi|rsp|r12|r13|r14|r15|rip|rflags|cr0|cr1|cr2|cr3|cr4|cr5|cr6|cr7|cr8|cr9|cr10|cr11|cr12|cr13|cr14|cr15|msw|dr0|dr1|dr2|dr3|r4|dr5|dr6|dr7|dr8|dr9|dr10|dr11|dr12|dr13|dr14|dr15)(?-i)\\b"
     - identifier: "\\b(?i)(st0|st1|st2|st3|st4|st5|st6|st7)(?-i)\\b"
-    - identifier: "\\b(?i)(xmm0|xmm1|xmm2|xmm3|xmm4|xmm5|xmm6|xmm7|xmm8|xmm9|xmm10|xmm11|xmm12|xmm13|xmm14|xmm15)(?-i)\\b"
-    - identifier: "\\b(?i)(ymm0|ymm1|ymm2|ymm3|ymm4|ymm5|ymm6|ymm7|ymm8|ymm9|ymm10|ymm11|ymm12|ymm13|ymm14|ymm15)(?-i)\\b"
+    - identifier: "\\b(?i)(xmm0|xmm1|xmm2|xmm3|xmm4|xmm5|xmm6|xmm7|xmm8|xmm9|xmm10|xmm11|xmm12|xmm13|xmm14|xmm15|xmm16|xmm17|xmm18|xmm19|xmm20|xmm21|xmm22|xmm23|xmm24|xmm25|xmm26|xmm27|xmm28|xmm29|xmm30|xmm31)(?-i)\\b"
+    - identifier: "\\b(?i)(ymm0|ymm1|ymm2|ymm3|ymm4|ymm5|ymm6|ymm7|ymm8|ymm9|ymm10|ymm11|ymm12|ymm13|ymm14|ymm15|ymm16|ymm17|ymm18|ymm19|ymm20|ymm21|ymm22|ymm23|ymm24|ymm25|ymm26|ymm27|ymm28|ymm29|ymm30|ymm31)(?-i)\\b"
     - identifier: "\\b(?i)(zmm0|zmm1|zmm2|zmm3|zmm4|zmm5|zmm6|zmm7|zmm8|zmm9|zmm10|zmm11|zmm12|zmm13|zmm14|zmm15|zmm16|zmm17|zmm18|zmm19|zmm20|zmm21|zmm22|zmm23|zmm24|zmm25|zmm26|zmm27|zmm28|zmm29|zmm30|zmm31)(?-i)\\b"
 
       ## Constants
-      # Number - it works
-    - constant.number: "\\b(|h|A|0x)+[0-9]+(|h|A)+\\b"
+    - constant.number: "\\b[0-9]+\\b"
+    - constant.number: "\\b[0-9]+\\b\\."
     - constant.number: "\\b0x[0-9 a-f A-F]+\\b"
 
       ## Preprocessor (NASM)
     - preproc: "%+(\\+|\\?|\\?\\?|)[a-z A-Z 0-9]+"
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
 
+      ## Macros (NASM)
+    - preproc: "\\b__\\?+\\b(?i)(Infinity|QNaN|SNaN|float8|float16|bfloat16|float32|float64|float80m|float80e|float128l|float128h)(?-i)\\b+\\?__\\b"
+    - preproc: "\\b__\\?+\\b(?i)(utf16|utf16le|utf16be|utf32|utf32le|utf32be)(?-i)\\b+\\?__\\b"
+
       ## Other
-    - statement: "\\b(?i)(extern|global|section|segment|_start|\\.text|\\.data|\\.bss)(?-i)\\b"
-    - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do)(?-i)\\b"
-    - identifier: "[a-z A-Z 0-9 _]+:"
+    - preproc: "(^|[ \t])\\.\\b(?i)(text|data|rdata|rodata|pdata|xdata|bss)(?-i)\\b"
+    - preproc: "\\b(?i)(strict|rel|abs|org|bits|equ|times|dup)(?-i)\\b"
+    - preproc: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|dy|dz|du)(?-i)\\b"
+    - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
+    - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
+    - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
+    - identifier: "[a-z A-Z 0-9 _ .]+:"
 
     - constant.string:
-        start: "\""
-        end: "\""
-        skip: "\\\\."
+        start: '"'
+        end: '("|$)'
+        skip: ""
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: ""
 
     - constant.string:
         start: "'"
-        end: "'"
+        end: "('|$)"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: ""
+
+    - constant.string:
+        start: "`"
+        end: "(`|$)"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
