@@ -1,5 +1,6 @@
 # Twilight color scheme
 color-link default "#F8F8F8,#141414"
+color-link alt-line "#1B1B1B"
 color-link color-column "#1B1B1B"
 color-link comment "#5F5A60"
 color-link constant "#CF6A4C"
