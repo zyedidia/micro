@@ -58,6 +58,8 @@ github.com/zyedidia/tcell/v2 v2.0.10-0.20221007181625-f562052bccb8 h1:53ULv4mmLy
 github.com/zyedidia/tcell/v2 v2.0.10-0.20221007181625-f562052bccb8/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
 github.com/zyedidia/tcell/v2 v2.0.10-0.20230320201625-54f6acdada4a h1:W4TWa++Wk6uRGxZoxr2nPX1TpIEl+Wxv0mTtocG4TYc=
 github.com/zyedidia/tcell/v2 v2.0.10-0.20230320201625-54f6acdada4a/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
+github.com/zyedidia/tcell/v2 v2.0.10-0.20230831153116-061c5b2c7260 h1:SCAmAacT5BxZsmOFdFy5zwwi6nj1MjA60gydjKdTgXo=
+github.com/zyedidia/tcell/v2 v2.0.10-0.20230831153116-061c5b2c7260/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
 github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef h1:LeB4Qs0Tss4r/Qh8pfsTTqagDYHysfKJLYzAH3MVfu0=
 github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef/go.mod h1:zeb8MJdcCObFKVvur3n2B4BANIPuo2Q8r4iiNs9Enx0=
 golang.org/x/crypto v0.0.0-20190308221718-c2843e01d9a2/go.mod h1:djNgcEr1/C05ACkg1iLfiJU5Ep61QUkGW8qpdssI0+w=
