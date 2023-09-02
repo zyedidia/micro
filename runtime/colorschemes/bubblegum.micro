@@ -1,4 +1,5 @@
 color-link default "241,231"
+color-link alt-line "255"
 color-link comment "246,231"
 color-link constant "130,231"
 color-link constant.string "136,231"
