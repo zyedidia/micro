@@ -164,6 +164,7 @@ marked with a `-paper` suffix.
 Here is a list of the colorscheme groups that you can use:
 
 * default (color of the background and foreground for unhighlighted text)
+* alt-line (color of the alternated line background if the option is enabled)
 * comment
 * identifier
 * constant
