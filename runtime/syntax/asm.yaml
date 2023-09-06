@@ -90,23 +90,43 @@ rules:
     - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _]+:"
 
+    # String
     - constant.string:
-        start: "\""
-        end: "\""
+        start: '"'
+        end: '("|$)'
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - constant.specialChar: ""
 
     - constant.string:
         start: "'"
-        end: "'"
+        end: "('|$)"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: ""
+
+    - constant.string:
+        start: "`"
+        end: "(`|$)"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
 
+    # Comment
     - comment:
         start: ";"
         end: "$"
         rules:
-            - todo: "(TODO|XXX|FIXME):?"
+            - constant.specialChar: ""
 
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - constant.specialChar: ""
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - constant.specialChar: ""
