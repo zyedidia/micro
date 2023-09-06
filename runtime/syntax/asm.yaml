@@ -4,7 +4,7 @@ detect:
     filename: "\\.(S|s|asm|inc)$"
 
 rules:
-    # This file is made for NASM assembly
+    # This file is made for NASM Assembler
 
     ## Instructions
     # x86
@@ -76,14 +76,24 @@ rules:
     - identifier: "\\b(?i)mm[0-7](?-i)\\b"
     - identifier: "\\b(?i)(x|y|z)mm([0-9]|[1-2][0-9]|3[0-1])(?-i)\\b"
 
-      ## Preprocessor (NASM)
+      ## Preprocessor
     - preproc: "%+(\\+|\\?|\\?\\?|)[a-z A-Z 0-9]+"
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
 
-      ## Other
-    - statement: "\\b(?i)(extern|global|section|segment|_start|\\.text|\\.data|\\.bss)(?-i)\\b"
-    - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do)(?-i)\\b"
-    - identifier: "[a-z A-Z 0-9 _]+:"
+      ## Sections
+    - preproc: "(^|$|[ \t]|)\\.\\b(?i)(code|text|bss|rdata|rodata|pdata|xdata|data)(?-i)\\b"
+    - preproc: "(^|$|[ \t]|)\\.\\b(?i)(lrodata|ldata|lbss|tdata|tbss|comment|init_array|fini_array|note|other)(?-i)\\b"
+
+      ## Structs
+    - preproc: "\\b(?i)(istruc|iend|struc|endstruc)(?-i)\\b"
+
+      ## Directives
+    - preproc: "\\b(?i)(strict|rel|abs|org|bits|equ|times|dup)(?-i)\\b"
+    - preproc: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|dy|dz|du)(?-i)\\b"
+    - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
+    - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
+    - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
+    - identifier: "[a-z A-Z 0-9 _ .]+:"
 
       ## Constants
       # Numbers
