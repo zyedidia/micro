@@ -23,8 +23,8 @@ parts:
       snapcraftctl pull
       version="$(go run $SNAPCRAFT_PART_SRC/tools/build-version.go)"
       [ -n "$(echo $version | grep "dev")" ] && grade=devel || grade=stable
-      snapcraftctl set-version "2.0.12-snap"
-      snapcraftctl set-grade "stable"
+      snapcraftctl set-version "$version"
+      snapcraftctl set-grade "$grade"
     override-build: |
       make build-tags
       mkdir $SNAPCRAFT_PART_INSTALL/bin
