@@ -76,6 +76,11 @@ rules:
     - identifier: "\\b(?i)mm[0-7](?-i)\\b"
     - identifier: "\\b(?i)(x|y|z)mm([0-9]|[1-2][0-9]|3[0-1])(?-i)\\b"
 
+      ## Macros
+    - preproc: "(?-i)(^|$|[ \t]|)+\\b(__)\\?(NASM_MAJOR|NASM_MINOR|NASM_SUBMINOR|NASM_PATCHLEVEL|NASM_SNAPSHOT|NASM_VERSION_ID|NASM_VER|FILE|LINE|BITS|OUTPUT_FORMAT|DEBUG_FORMAT|DATE|TIME|DATE_NUM|TIME_NUM|UTC_DATE|UTC_TIME|UTC_DATE_NUM|UTC_TIME_NUM|POSIX_TIME|PASS)\\?(__)+\\b(^|$|[ \t]|)"
+    - preproc: "(?-i)(^|$|[ \t]|)+\\b(__)\\?(Infinity|QNaN|SNaN|float8|float16|bfloat16|float32|float64|float80m|float80e|float128l|float128h)\\?(__)+\\b(^|$|[ \t]|)"
+    - preproc: "(?-i)(^|$|[ \t]|)+\\b(__)\\?(utf16|utf16le|utf16be|utf32|utf32le|utf32be)\\?(__)+\\b(^|$|[ \t]|)"
+
       ## Preprocessor
     - preproc: "%+(\\+|\\?|\\?\\?|)[a-z A-Z 0-9]+"
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
