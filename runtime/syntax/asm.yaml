@@ -76,11 +76,6 @@ rules:
     - identifier: "\\b(?i)mm[0-7](?-i)\\b"
     - identifier: "\\b(?i)(x|y|z)mm([0-9]|[1-2][0-9]|3[0-1])(?-i)\\b"
 
-      ## Constants
-      # Number - it works
-    - constant.number: "\\b(|h|A|0x)+[0-9]+(|h|A)+\\b"
-    - constant.number: "\\b0x[0-9 a-f A-F]+\\b"
-
       ## Preprocessor (NASM)
     - preproc: "%+(\\+|\\?|\\?\\?|)[a-z A-Z 0-9]+"
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
@@ -90,7 +85,13 @@ rules:
     - statement: "\\b(?i)(db|dw|dd|dq|dt|ddq|do)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _]+:"
 
-    # String
+      ## Constants
+      # Numbers
+    - constant.number: "\\b[0-9]+\\b"
+    - constant.number: "\\b[0-9]+\\b\\."
+    - constant.number: "\\b0x[0-9 a-f A-F]+\\b"
+
+      # Strings
     - constant.string:
         start: '"'
         end: '("|$)'
@@ -112,7 +113,7 @@ rules:
         rules:
             - constant.specialChar: "\\\\."
 
-    # Comment
+      ## Comment
     - comment:
         start: ";"
         end: "$"
