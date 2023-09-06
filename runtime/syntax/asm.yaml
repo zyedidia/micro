@@ -88,16 +88,22 @@ rules:
       ## Sections
     - preproc: "(^|$|[ \t]|)\\.\\b(?i)(code|text|bss|rdata|rodata|pdata|xdata|data)(?-i)\\b"
     - preproc: "(^|$|[ \t]|)\\.\\b(?i)(lrodata|ldata|lbss|tdata|tbss|comment|init_array|fini_array|note|other)(?-i)\\b"
+    - preproc: "\\b(?i)(private|public|common|stack|class|overlay|absolute|flat)(?-i)\\b"
+    - preproc: "\\b(?i)(progbits|nobits|preinit_array|init_array|fini_array|note)(?-i)\\b"
+    - preproc: "\\b(?i)(alloc|noalloc|exec|noexec|write|nowrite|pointer)(?-i)\\b"
+    - preproc: "\\b(?i)(mixed|zerofill|no_dead_strip|live_support|strip_static_syms|debug)(?-i)\\b"
 
       ## Structs
     - preproc: "\\b(?i)(istruc|iend|struc|endstruc)(?-i)\\b"
 
       ## Directives
+    - preproc: "\\b(?i)(near|far|seg|wrt|align|alignb)(?-i)\\b"
     - preproc: "\\b(?i)(strict|rel|abs|org|bits|equ|times|dup)(?-i)\\b"
     - preproc: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|dy|dz|du)(?-i)\\b"
     - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
     - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
     - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
+    - statement: "\\b(?i)(export|import)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _ .]+:"
 
       ## Constants
