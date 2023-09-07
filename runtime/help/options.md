@@ -309,11 +309,30 @@ Here are the available options:
 
 * `scrollbar`: display a scroll bar
 
-    default value: `false`
+	default value: `false`
 
-* `scrollbarchar`: specifies the character used for displaying the scrollbar
+* `scrollbarchar`: specifies the character used for displaying the scrollbar.
+   This option allows you to define up to four characters:
+   The first represents the standard symbol for the scrollbar.
+   The second represents the up-arrow symbol.
+   The third represents the down-arrow symbol.
+   The fourth is used to display the scroll bar when it is only one character
+   high. 
+   The default is a double arrow symbol. On non-unicode capable terminals, it
+   is recommended to omit the character so that the default symbol is used.
+   On non-unicode capable terminals, try something like " ^vO" or "|AV"
 
-    default value: `|`
+	default value: `|`
+
+* `showscrollarrows`: This option enables arrow symbols for the scrollbar
+
+	default value: true
+
+* `scrollarrowsreverse`: by default the scrollbar is displayed reverse, the
+   arrows are not. With this setting the display of the arrows can be
+   reversed too.
+
+	default value: false
 
 * `scrollmargin`: margin at which the view starts scrolling when the cursor
    approaches the edge of the view.
