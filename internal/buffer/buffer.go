@@ -719,28 +719,30 @@ func (b *Buffer) UpdateRules() {
 		}
 	}
 
-	// search in the default syntax files
-	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
-		data, err := f.Data()
-		if err != nil {
-			screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
-			continue
-		}
+	if !foundDef {
+		// search in the default syntax files
+		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
+			data, err := f.Data()
+			if err != nil {
+				screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
+				continue
+			}
 
-		header, err = highlight.MakeHeader(data)
-		if err != nil {
-			screen.TermMessage("Error reading syntax header file", f.Name(), err)
-			continue
-		}
+			header, err = highlight.MakeHeader(data)
+			if err != nil {
+				screen.TermMessage("Error reading syntax header file", f.Name(), err)
+				continue
+			}
 
-		if ft == "unknown" || ft == "" {
-			if highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data) {
+			if ft == "unknown" || ft == "" {
+				if highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data) {
+					syntaxFile = f.Name()
+					break
+				}
+			} else if header.FileType == ft {
 				syntaxFile = f.Name()
 				break
 			}
-		} else if header.FileType == ft {
-			syntaxFile = f.Name()
-			break
 		}
 	}
 
