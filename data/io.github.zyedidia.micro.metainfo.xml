@@ -6,15 +6,15 @@
 	<summary>A modern and intuitive terminal-based text editor</summary>
 	<description>
 		<p>
-				Amicro is a terminal-based text editor that aims to be easy to use and
-				intuitive, while also taking advantage of the capabilities of modern terminals.
-				It comes as a single, batteries-included, static binary with no dependencies;
-				you can download and use it right now!
+			micro is a terminal-based text editor that aims to be easy to use and
+			intuitive, while also taking advantage of the capabilities of modern terminals.
+			It comes as a single, batteries-included, static binary with no dependencies;
+			you can download and use it right now!
 		</p>
 		<p>
 			As its name indicates, micro aims to be somewhat of a successor to the nano
-			editor by being easy to install and use. It strives to be enjoyable as a full-
-			time editor for people who prefer to work in a terminal, or those who regularly
+			editor by being easy to install and use. It strives to be enjoyable as a full-time
+			editor for people who prefer to work in a terminal, or those who regularly
 			edit files over SSH.
 		</p>
 	</description>
@@ -41,4 +41,9 @@
 	<content_rating type="oars-1.1" />
 	<url type="homepage">https://micro-editor.github.io</url>
 	<url type="bugtracker">https://github.com/zyedidia/micro/issues</url>
+	<url type="faq">https://micro-editor.github.io/about.html</url>
+	<url type="help">https://micro-editor.github.io/about.html</url>
+	<url type="contact">https://github.com/zyedidia</url>
+	<url type="vcs-browser">https://github.com/zyedidia/micro</url>
+	<url type="contribute">https://github.com/zyedidia/micro#contributing</url>
 </component>
