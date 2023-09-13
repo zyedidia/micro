@@ -57,7 +57,26 @@ rules:
             - include: "typescript"
 
     - default:
+        start: "<script[ ]+setup>"
+        end: "</script>"
+        rules:
+            - include: "javascript"
+
+    - default:
+        start: "<script[ ]+setup[ ]+lang=(\"ts\"|'ts')>"
+        end: "</script>"
+        rules:
+            - include: "typescript"
+
+    - default:
         start: "<style.*?>"
+        end: "</style.*?>"
+        limit-group: symbol.tag
+        rules:
+            - include: "css"
+
+    - default:
+        start: "<style[ ]+scoped.*?>"
         end: "</style.*?>"
         limit-group: symbol.tag
         rules:
