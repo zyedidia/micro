@@ -53,7 +53,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Extremely good mouse support.
   - This means mouse dragging to create a selection, double click to select by word, and triple click to select by line.
 - Cross-platform (it should work on all the platforms Go runs on).
-  - Note that while Windows is supported Mingw/Cygwin is not (see below).
+  - Note that while Windows is supported, Mingw/Cygwin is not (see below).
 - Plugin system (plugins are written in Lua).
   - micro has a built-in plugin manager to automatically install, remove, and update plugins.
 - Built-in diff gutter.
@@ -83,7 +83,7 @@ A desktop entry file and man page can be found in the [assets/packaging](https:/
 
 ### Pre-built binaries
 
-Pre-built binaries are distributed with [releases](https://github.com/zyedidia/micro/releases).
+Pre-built binaries are distributed in [releases](https://github.com/zyedidia/micro/releases).
 
 To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
@@ -132,7 +132,7 @@ On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/in
 snap install micro --classic
 ```
 
-Micro is also available through other package managers on Linux such dnf, AUR, Nix, and package managers
+Micro is also available through other package managers on Linux such as dnf, AUR, Nix, and package managers
 for other operating systems. These packages are not guaranteed to be up-to-date.
 
 <!-- * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled. -->
@@ -159,8 +159,8 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 **Note for Linux desktop environments:**
 
 For interfacing with the local system clipboard, the following tools need to be installed:
-* For X11 `xclip` or `xsel`
-* For [Wayland](https://wayland.freedesktop.org/) `wl-clipboard`
+* For X11, `xclip` or `xsel`
+* For [Wayland](https://wayland.freedesktop.org/), `wl-clipboard`
 
 Without these tools installed, micro will use an internal clipboard for copy and paste, but it won't be accessible to external applications.
 
@@ -221,7 +221,7 @@ If you open micro and it doesn't seem like syntax highlighting is working, this 
 you are using a terminal which does not support 256 color mode. Try changing the color scheme to `simple`
 by pressing <kbd>Ctrl-e</kbd> in micro and typing `set colorscheme simple`.
 
-If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
+If you are using the default Ubuntu terminal, to enable 256 color mode make sure your `TERM` variable is set
 to `xterm-256color`.
 
 Many of the Windows terminals don't support more than 16 colors, which means
@@ -240,7 +240,7 @@ winpty micro.exe ...
 
 Micro uses the amazing [tcell library](https://github.com/gdamore/tcell), but this
 means that micro is restricted to the platforms tcell supports. As a result, micro does not support
-Plan9, and Cygwin (although this may change in the future). Micro also doesn't support NaCl (which is deprecated anyway).
+Plan9 or Cygwin (although this may change in the future). Micro also doesn't support NaCl (which is deprecated anyway).
 
 ## Usage
 
