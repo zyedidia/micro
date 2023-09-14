@@ -73,7 +73,7 @@ rules:
     - statement: "\\b(?i)(getsec)(?-i)\\b"
 
       # VMX
-    - statement: "\\b(?i)(invept|invvpid|vmcall|vmclear|vmfunc|vmlaunch|vmptrld|vmptrst|vmread|vmresume|vmresume|vmwrite|vmxoff|vmxon)(?-i)\\b"
+    - statement: "\\b(?i)(invept|invvpid|vmcall|vmclear|vmfunc|vmlaunch|vmptrld|vmptrst|vmread|vmresume|vmwrite|vmxoff|vmxon)(?-i)\\b"
 
       # Xeon Phi
     - statement: "\\b(?i)(prefetchwt1|v4fmaddps|v4fmaddss|v4fnmaddps|v4fnmaddss|vexp2pd|vexp2ps|vgatherpf0dpd|vgatherpf0dps|vgatherpf0qpd|vgatherpf0qps)(?-i)\\b"
@@ -119,7 +119,7 @@ rules:
     - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
     - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
     - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
-    - statement: "\\b(?i)(export|import|library)(?-i)\\b"
+    - statement: "\\b(?i)(export|import|library|ccall|stdcall)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _ .]+:"
 
       ## Constants
