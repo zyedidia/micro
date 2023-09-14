@@ -78,8 +78,8 @@ func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback f
 	t.output = nil
 	if getOutput {
 		t.output = bytes.NewBuffer([]byte{})
+		cmd.Stdout = t.output
 	}
-	cmd.Stdout = t.output
 	Term, _, err := terminal.Start(&t.State, cmd)
 	if err != nil {
 		return err
