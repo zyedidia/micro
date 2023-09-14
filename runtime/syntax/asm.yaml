@@ -14,13 +14,13 @@ rules:
     - statement: "\\b(?i)(clui|clwb|cmc|cmovcc|cmp|cmppd|cmpps|cmps|cmpsb|cmpsd|cmpsd|cmpsq|cmpss|cmpsw|cmpxchg|cmpxchg16b|cmpxchg8b|comisd|comiss|cpuid|cqo|crc32|cvtdq2pd|cvtdq2ps|cvtpd2dq)(?-i)\\b"
     - statement: "\\b(?i)(cvtpd2pi|cvtpd2ps|cvtpi2pd|cvtpi2ps|cvtps2dq|cvtps2pd|cvtps2pi|cvtsd2si|cvtsd2ss|cvtsi2sd|cvtsi2ss|cvtss2sd|cvtss2si|cvttpd2dq|cvttpd2pi|cvttps2dq|cvttps2pi|cvttsd2si)(?-i)\\b"
     - statement: "\\b(?i)(cvttss2si|cwd|cwde|daa|das|dec|div|divpd|divps|divsd|divss|dppd|dpps|emms|encodekey128|encodekey256|endbr32|endbr64|enqcmd|enqcmds|enter|extractps|f2xm1|fabs|fadd|faddp)(?-i)\\b"
-    - statement: "\\b(?i)(fbld|fbstp|fchs|fclex|fcmovcc|fcom|fcomi|fcomip|fcomp|fcompp|fcos|fdecstp|fdiv|fdivp|fdivr|fdivrp|ffree|fiadd|ficom|ficomp|fidiv|fidivr|fild|fimul|fincstp|finit|fist)(?-i)\\b"
-    - statement: "\\b(?i)(fistp|fisttp|fisub|fisubr|fld|fld1|fldcw|fldenv|fldl2e|fldl2t|fldlg2|fldln2|fldpi|fldz|fmul|fmulp|fnclex|fninit|fnop|fnsave|fnstcw|fnstenv|fnstsw|fpatan|fprem|fprem1)(?-i)\\b"
-    - statement: "\\b(?i)(fptan|frndint|frstor|fsave|fscale|fsin|fsincos|fsqrt|fst|fstcw|fstenv|fstp|fstsw|fsub|fsubp|fsubr|fsubrp|ftst|fucom|fucomi|fucomip|fucomp|fucompp|fwait|fxam|fxch|fxrstor)(?-i)\\b"
-    - statement: "\\b(?i)(fxsave|fxtract|fyl2x|fyl2xp1|gf2p8affineinvqb|gf2p8affineqb|gf2p8mulb|haddpd|haddps|hlt|hreset|hsubpd|hsubps|idiv|imul|in|inc|incsspd|incsspq|ins|insb|insd|insertps|insw)(?-i)\\b"
-    - statement: "\\b(?i)(int|int1|int3|into|invd|invlpg|invpcid|iret|iretd|iretq|jmp|jcc|kaddb|kaddd|kaddq|kaddw|kandb|kandd|kandnb|kandnd|kandnq|kandnw|kandq|kandw|kmovb|kmovd|kmovq|kmovw|knotb)(?-i)\\b"
-    - statement: "\\b(?i)(knotd|knotq|knotw|korb|kord|korq|kortestb|kortestd|kortestq|kortestw|korw|kshiftlb|kshiftld|kshiftlq|kshiftlw|kshiftrb|kshiftrd|kshiftrq|kshiftrw|ktestb|ktestd|ktestq)(?-i)\\b"
-    - statement: "\\b(?i)(ktestw|kunpckbw|kunpckdq|kunpckwd|kxnorb|kxnord|kxnorq|kxnorw|kxorb|kxord|kxorq|kxorw|lahf|lar|lddqu|ldmxcsr|lds|ldtilecfg|lea|leave|les|lfence|lfs|lgdt|lgs|lidt|lldt)(?-i)\\b"
+    - statement: "\\b(?i)(fbld|fbstp|fchs|fclex|fcmovb|fcmove|fcmovbe|fcmovu|fcmovnb|fcmovne|fcmovnbe|fcmovnu|fcom|fcomi|fcomip|fcomp|fcompp|fcos|fdecstp|fdiv|fdivp|fdivr|fdivrp|ffree|fiadd|ficom|ficomp)(?-i)\\b"
+    - statement: "\\b(?i)(fidiv|fidivr|fild|fimul|fincstp|finit|fist|fistp|fisttp|fisub|fisubr|fld|fld1|fldcw|fldenv|fldl2e|fldl2t|fldlg2|fldln2|fldpi|fldz|fmul|fmulp|fnclex|fninit|fnop|fnsave|fnstcw)(?-i)\\b"
+    - statement: "\\b(?i)(fnstenv|fnstsw|fpatan|fprem|fprem1fptan|frndint|frstor|fsave|fscale|fsin|fsincos|fsqrt|fst|fstcw|fstenv|fstp|fstsw|fsub|fsubp|fsubr|fsubrp|ftst|fucom|fucomi|fucomip|fucomp|fucompp)(?-i)\\b"
+    - statement: "\\b(?i)(fwait|fxam|fxch|fxrstor|fxsave|fxtract|fyl2x|fyl2xp1|gf2p8affineinvqb|gf2p8affineqb|gf2p8mulb|haddpd|haddps|hlt|hreset|hsubpd|hsubps|idiv|imul|in|inc|incsspd|incsspq|ins|insb|insd)(?-i)\\b"
+    - statement: "\\b(?i)(insertps|insw|int|int1|int3|into|invd|invlpg|invpcid|iret|iretd|iretq|jmp|jcc|kaddb|kaddd|kaddq|kaddw|kandb|kandd|kandnb|kandnd|kandnq|kandnw|kandq|kandw|kmovb|kmovd|kmovq)(?-i)\\b"
+    - statement: "\\b(?i)(kmovw|knotb|knotd|knotq|knotw|korb|kord|korq|kortestb|kortestd|kortestq|kortestw|korw|kshiftlb|kshiftld|kshiftlq|kshiftlw|kshiftrb|kshiftrd|kshiftrq|kshiftrw|ktestb|ktestd)(?-i)\\b"
+    - statement: "\\b(?i)(ktestq|ktestw|kunpckbw|kunpckdq|kunpckwd|kxnorb|kxnord|kxnorq|kxnorw|kxorb|kxord|kxorq|kxorw|lahf|lar|lddqu|ldmxcsr|lds|ldtilecfg|lea|leave|les|lfence|lfs|lgdt|lgs|lidt|lldt)(?-i)\\b"
     - statement: "\\b(?i)(lmsw|loadiwkey|lock|lods|lodsb|lodsd|lodsq|lodsw|loop|loopcc|lsl|lss|ltr|lzcnt|maskmovdqu|maskmovq|maxpd|maxps|maxsd|maxss|mfence|minpd|minps|minsd|minss|monitor|mov|mov)(?-i)\\b"
     - statement: "\\b(?i)(mov|movapd|movaps|movbe|movd|movddup|movdir64b|movdiri|movdq2q|movdqa|movdqu|movhlps|movhpd|movhps|movlhps|movlpd|movlps|movmskpd|movmskps|movntdq|movntdqa|movnti)(?-i)\\b"
     - statement: "\\b(?i)(movntpd|movntps|movntq|movq|movq|movq2dq|movs|movsb|movsd|movsd|movshdup|movsldup|movsq|movss|movsw|movsx|movsxd|movupd|movups|movzx|mpsadbw|mul|mulpd|mulps|mulsd|mulss)(?-i)\\b"
@@ -110,7 +110,7 @@ rules:
     - preproc: "\\b(?i)(mixed|zerofill|no_dead_strip|live_support|strip_static_syms|debug)(?-i)\\b"
 
       ## Structs
-    - preproc: "\\b(?i)(istruc|iend|struc|endstruc)(?-i)\\b"
+    - preproc: "\\b(?i)(istruc|iend|struc|struct|endstruc|restruc)(?-i)\\b"
 
       ## Directives
     - preproc: "\\b(?i)(near|far|seg|wrt|align|alignb)(?-i)\\b"
@@ -119,7 +119,7 @@ rules:
     - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
     - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
     - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
-    - statement: "\\b(?i)(export|import)(?-i)\\b"
+    - statement: "\\b(?i)(export|import|library)(?-i)\\b"
     - identifier: "[a-z A-Z 0-9 _ .]+:"
 
       ## Constants
