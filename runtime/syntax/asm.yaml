@@ -11,7 +11,7 @@ rules:
     - statement: "\\b(?i)(aaa|aad|aam|aas|adc|adcx|add|addpd|addps|addsd|addss|addsubpd|addsubps|adox|aesdec|aesdec128kl|aesdec256kl|aesdeclast|aesdecwide128kl|aesdecwide256kl|aesenc|aesenc128kl)(?-i)\\b"
     - statement: "\\b(?i)(aesenc256kl|aesenclast|aesencwide128kl|aesencwide256kl|aesimc|aeskeygenassist|and|andn|andnpd|andnps|andpd|andps|arpl|bextr|blendpd|blendps|blendvpd|blendvps|blsi|blsmsk)(?-i)\\b"
     - statement: "\\b(?i)(blsr|bndcl|bndcn|bndcu|bndldx|bndmk|bndmov|bndstx|bound|bsf|bsr|bswap|bt|btc|btr|bts|bzhi|call|cbw|cdq|cdqe|clac|clc|cld|cldemote|clflush|clflushopt|cli|clrssbsy|clts)(?-i)\\b"
-    - statement: "\\b(?i)(clui|clwb|cmc|cmova|cmovae|cmovb|cmovbe|cmovc|cmove|cmovg|cmovge|cmovl|cmovle|cmovna|cmovnae|cmovnb|cmovnbe|cmovnc|cmovne|cmovng|cmovnge|cmovnl|cmovnle|cmovno|cmovnp|cmovns|cmovnz|cmovo|cmovp|cmovpe|cmovpo|cmovs|cmovz|cmp|cmppd|cmpps|cmps|cmpsb|cmpsd|cmpsd|cmpsq|cmpss|cmpsw|cmpxchg|cmpxchg16b|cmpxchg8b|comisd|comiss|cpuid|cqo|crc32|cvtdq2pd|cvtdq2ps|cvtpd2dq)(?-i)\\b"
+    - statement: "\\b(?i)(clui|clwb|cmc|cmova|cmovae|cmovb|cmovbe|cmovc|cmove|cmovg|cmovge|cmovl|cmovle|cmovna|cmovnae|cmovnb|cmovnbe|cmovnc|cmovne|cmovng|cmovnge|cmovnl|cmovnle|cmovno|cmovnp|cmovns|cmovnz|cmovo|cmovp|cmovpe|cmovpo|cmovs|cmovz|cmp|cmppd|cmpps|cmps|cmpsb|cmpsd|cmpsq|cmpss|cmpsw|cmpxchg|cmpxchg16b|cmpxchg8b|comisd|comiss|cpuid|cqo|crc32|cvtdq2pd|cvtdq2ps|cvtpd2dq)(?-i)\\b"
     - statement: "\\b(?i)(cvtpd2pi|cvtpd2ps|cvtpi2pd|cvtpi2ps|cvtps2dq|cvtps2pd|cvtps2pi|cvtsd2si|cvtsd2ss|cvtsi2sd|cvtsi2ss|cvtss2sd|cvtss2si|cvttpd2dq|cvttpd2pi|cvttps2dq|cvttps2pi|cvttsd2si)(?-i)\\b"
     - statement: "\\b(?i)(cvttss2si|cwd|cwde|daa|das|dec|div|divpd|divps|divsd|divss|dppd|dpps|emms|encodekey128|encodekey256|endbr32|endbr64|enqcmd|enqcmds|enter|extractps|f2xm1|fabs|fadd|faddp)(?-i)\\b"
     - statement: "\\b(?i)(fbld|fbstp|fchs|fclex|fcmovb|fcmove|fcmovbe|fcmovu|fcmovnb|fcmovne|fcmovnbe|fcmovnu|fcom|fcomi|fcomip|fcomp|fcompp|fcos|fdecstp|fdiv|fdivp|fdivr|fdivrp|ffree|fiadd|ficom|ficomp)(?-i)\\b"
@@ -21,9 +21,9 @@ rules:
     - statement: "\\b(?i)(insertps|insw|int|int1|int3|into|invd|invlpg|invpcid|iret|iretd|iretq|jmp|ja|jae|jb|jbe|jc|jcxz|jecxz|jrcxz|je|jg|jge|jl|jle|jna|jnae|jnb|jnbe|jnc|jne|jng|jnge|jnl|jnle|jno|jnp|jns|jnz|jo|jp|jpe|jpo|js|jz|kaddb|kaddd|kaddq|kaddw|kandb|kandd|kandnb|kandnd|kandnq|kandnw|kandq|kandw|kmovb|kmovd|kmovq)(?-i)\\b"
     - statement: "\\b(?i)(kmovw|knotb|knotd|knotq|knotw|korb|kord|korq|kortestb|kortestd|kortestq|kortestw|korw|kshiftlb|kshiftld|kshiftlq|kshiftlw|kshiftrb|kshiftrd|kshiftrq|kshiftrw|ktestb|ktestd)(?-i)\\b"
     - statement: "\\b(?i)(ktestq|ktestw|kunpckbw|kunpckdq|kunpckwd|kxnorb|kxnord|kxnorq|kxnorw|kxorb|kxord|kxorq|kxorw|lahf|lar|lddqu|ldmxcsr|lds|ldtilecfg|lea|leave|les|lfence|lfs|lgdt|lgs|lidt|lldt)(?-i)\\b"
-    - statement: "\\b(?i)(lmsw|loadiwkey|lock|lods|lodsb|lodsd|lodsq|lodsw|loop|loope|loopne|lsl|lss|ltr|lzcnt|maskmovdqu|maskmovq|maxpd|maxps|maxsd|maxss|mfence|minpd|minps|minsd|minss|monitor|mov|mov)(?-i)\\b"
+    - statement: "\\b(?i)(lmsw|loadiwkey|lock|lods|lodsb|lodsd|lodsq|lodsw|loop|loope|loopne|lsl|lss|ltr|lzcnt|maskmovdqu|maskmovq|maxpd|maxps|maxsd|maxss|mfence|minpd|minps|minsd|minss|monitor|mov)(?-i)\\b"
     - statement: "\\b(?i)(mov|movapd|movaps|movbe|movd|movddup|movdir64b|movdiri|movdq2q|movdqa|movdqu|movhlps|movhpd|movhps|movlhps|movlpd|movlps|movmskpd|movmskps|movntdq|movntdqa|movnti)(?-i)\\b"
-    - statement: "\\b(?i)(movntpd|movntps|movntq|movq|movq|movq2dq|movs|movsb|movsd|movsd|movshdup|movsldup|movsq|movss|movsw|movsx|movsxd|movupd|movups|movzx|mpsadbw|mul|mulpd|mulps|mulsd|mulss)(?-i)\\b"
+    - statement: "\\b(?i)(movntpd|movntps|movntq|movq|movq2dq|movs|movsb|movsd|movshdup|movsldup|movsq|movss|movsw|movsx|movsxd|movupd|movups|movzx|mpsadbw|mul|mulpd|mulps|mulsd|mulss)(?-i)\\b"
     - statement: "\\b(?i)(mulx|mwait|neg|nop|not|or|orpd|orps|out|outs|outsb|outsd|outsw|pabsb|pabsd|pabsq|pabsw|packssdw|packsswb|packusdw|packuswb|paddb|paddd|paddq|paddsb|paddsw|paddusb)(?-i)\\b"
     - statement: "\\b(?i)(paddusw|paddw|palignr|pand|pandn|pause|pavgb|pavgw|pblendvb|pblendw|pclmulqdq|pcmpeqb|pcmpeqd|pcmpeqq|pcmpeqw|pcmpestri|pcmpestrm|pcmpgtb|pcmpgtd|pcmpgtq|pcmpgtw)(?-i)\\b"
     - statement: "\\b(?i)(pcmpistri|pcmpistrm|pconfig|pdep|pext|pextrb|pextrd|pextrq|pextrw|phaddd|phaddsw|phaddw|phminposuw|phsubd|phsubsw|phsubw|pinsrb|pinsrd|pinsrq|pinsrw|pmaddubsw|pmaddwd)(?-i)\\b"
@@ -49,14 +49,14 @@ rules:
     - statement: "\\b(?i)(vfmsubadd231ps|vfmulcph|vfmulcsh|vfnmadd132pd|vfnmadd132ph|vfnmadd132ps|vfnmadd132sd|vfnmadd132sh|vfnmadd132ss|vfnmadd213pd|vfnmadd213ph|vfnmadd213ps|vfnmadd213sd)(?-i)\\b"
     - statement: "\\b(?i)(vfnmadd213sh|vfnmadd213ss|vfnmadd231pd|vfnmadd231ph|vfnmadd231ps|vfnmadd231sd|vfnmadd231sh|vfnmadd231ss|vfnmsub132pd|vfnmsub132ph|vfnmsub132ps|vfnmsub132sd|vfnmsub132sh)(?-i)\\b"
     - statement: "\\b(?i)(vfnmsub132ss|vfnmsub213pd|vfnmsub213ph|vfnmsub213ps|vfnmsub213sd|vfnmsub213sh|vfnmsub213ss|vfnmsub231pd|vfnmsub231ph|vfnmsub231ps|vfnmsub231sd|vfnmsub231sh|vfnmsub231ss)(?-i)\\b"
-    - statement: "\\b(?i)(vfpclasspd|vfpclassph|vfpclassps|vfpclasssd|vfpclasssh|vfpclassss|vgatherdpd|vgatherdpd|vgatherdps|vgatherdps|vgatherqpd|vgatherqpd|vgatherqps|vgatherqps|vgetexppd)(?-i)\\b"
+    - statement: "\\b(?i)(vfpclasspd|vfpclassph|vfpclassps|vfpclasssd|vfpclasssh|vfpclassss|vgatherdpd|vgatherdps|vgatherqpd|vgatherqps|vgetexppd)(?-i)\\b"
     - statement: "\\b(?i)(vgetexpph|vgetexpps|vgetexpsd|vgetexpsh|vgetexpss|vgetmantpd|vgetmantph|vgetmantps|vgetmantsd|vgetmantsh|vgetmantss|vinsertf128|vinsertf32x4|vinsertf32x8|vinsertf64x2)(?-i)\\b"
     - statement: "\\b(?i)(vinsertf64x4|vinserti128|vinserti32x4|vinserti32x8|vinserti64x2|vinserti64x4|vmaskmov|vmaxph|vmaxsh|vminph|vminsh|vmovdqa32|vmovdqa64|vmovdqu16|vmovdqu32|vmovdqu64)(?-i)\\b"
     - statement: "\\b(?i)(vmovdqu8|vmovsh|vmovw|vmulph|vmulsh|vp2intersectd|vp2intersectq|vpblendd|vpblendmb|vpblendmd|vpblendmq|vpblendmw|vpbroadcast|vpbroadcastb|vpbroadcastd|vpbroadcastm)(?-i)\\b"
     - statement: "\\b(?i)(vpbroadcastq|vpbroadcastw|vpcmpb|vpcmpd|vpcmpq|vpcmpub|vpcmpud|vpcmpuq|vpcmpuw|vpcmpw|vpcompressb|vpcompressd|vpcompressq|vpconflictd|vpconflictq|vpdpbusd|vpdpbusds)(?-i)\\b"
     - statement: "\\b(?i)(vpdpwssd|vpdpwssds|vperm2f128|vperm2i128|vpermb|vpermd|vpermi2b|vpermi2d|vpermi2pd|vpermi2ps|vpermi2q|vpermi2w|vpermilpd|vpermilps|vpermpd|vpermps|vpermq|vpermt2b)(?-i)\\b"
-    - statement: "\\b(?i)(vpermt2d|vpermt2pd|vpermt2ps|vpermt2q|vpermt2w|vpermw|vpexpandb|vpexpandd|vpexpandq|vpexpandw|vpgatherdd|vpgatherdd|vpgatherdq|vpgatherdq|vpgatherqd|vpgatherqd)(?-i)\\b"
-    - statement: "\\b(?i)(vpgatherqq|vpgatherqq|vplzcntd|vplzcntq|vpmadd52huq|vpmadd52luq|vpmaskmov|vpmovb2m|vpmovd2m|vpmovdb|vpmovdw|vpmovm2b|vpmovm2d|vpmovm2q|vpmovm2w|vpmovq2m|vpmovqb|vpmovqd)(?-i)\\b"
+    - statement: "\\b(?i)(vpermt2d|vpermt2pd|vpermt2ps|vpermt2q|vpermt2w|vpermw|vpexpandb|vpexpandd|vpexpandq|vpexpandw|vpgatherdd|vpgatherdq|vpgatherqd)(?-i)\\b"
+    - statement: "\\b(?i)(vpgatherqq|vplzcntd|vplzcntq|vpmadd52huq|vpmadd52luq|vpmaskmov|vpmovb2m|vpmovd2m|vpmovdb|vpmovdw|vpmovm2b|vpmovm2d|vpmovm2q|vpmovm2w|vpmovq2m|vpmovqb|vpmovqd)(?-i)\\b"
     - statement: "\\b(?i)(vpmovqw|vpmovsdb|vpmovsdw|vpmovsqb|vpmovsqd|vpmovsqw|vpmovswb|vpmovusdb|vpmovusdw|vpmovusqb|vpmovusqd|vpmovusqw|vpmovuswb|vpmovw2m|vpmovwb|vpmultishiftqb|vpopcnt|vprold)(?-i)\\b"
     - statement: "\\b(?i)(vprolq|vprolvd|vprolvq|vprord|vprorq|vprorvd|vprorvq|vpscatterdd|vpscatterdq|vpscatterqd|vpscatterqq|vpshld|vpshldv|vpshrd|vpshrdv|vpshufbitqmb|vpsllvd|vpsllvq|vpsllvw)(?-i)\\b"
     - statement: "\\b(?i)(vpsravd|vpsravq|vpsravw|vpsrlvd|vpsrlvq|vpsrlvw|vpternlogd|vpternlogq|vptestmb|vptestmd|vptestmq|vptestmw|vptestnmb|vptestnmd|vptestnmq|vptestnmw|vrangepd|vrangeps)(?-i)\\b"
@@ -102,6 +102,7 @@ rules:
     - preproc: "%\\[[. a-z A-Z 0-9]*\\]"
 
       ## Sections
+    - statement: "\\b(?i)(section|segment)(?-i)\\b"
     - preproc: "(^|$|[ \t]|)\\.\\b(?i)(code|text|bss|rdata|rodata|pdata|xdata|data)(?-i)\\b"
     - preproc: "(^|$|[ \t]|)\\.\\b(?i)(lrodata|ldata|lbss|tdata|tbss|comment|init_array|fini_array|note|other)(?-i)\\b"
     - preproc: "\\b(?i)(private|public|common|stack|class|overlay|absolute|flat)(?-i)\\b"
@@ -110,7 +111,7 @@ rules:
     - preproc: "\\b(?i)(mixed|zerofill|no_dead_strip|live_support|strip_static_syms|debug)(?-i)\\b"
 
       ## Structs
-    - preproc: "\\b(?i)(istruc|iend|struc|endstruc|struct|endstruct|ends|restruc)(?-i)\\b"
+    - preproc: "\\b(?i)(istruc|iend|at|struc|endstruc|struct|endstruct)(?-i)\\b"
 
       ## Directives
     - preproc: "\\b(?i)(near|far|seg|wrt|align|alignb)(?-i)\\b"
@@ -118,9 +119,14 @@ rules:
     - preproc: "\\b(?i)(db|dw|dd|dq|dt|ddq|do|dy|dz|du)(?-i)\\b"
     - preproc: "\\b(?i)(resb|resw|resd|resq|rest|resdq|reso|resy|resz)(?-i)\\b"
     - preproc: "\\b(?i)(byte|word|dword|qword|tword|oword|yword|zword)(?-i)\\b"
-    - statement: "\\b(?i)(extern|global|section|segment)(?-i)\\b"
-    - statement: "\\b(?i)(export|import|library|ccall|stdcall)(?-i)\\b"
-    - identifier: "[a-z A-Z 0-9 _ .]+:"
+    - preproc: "\\b(?i)(resident|nodata|parm|evex|vex|latevex|function|data|weak)(?-i)\\b"
+    - statement: "\\b(?i)(export|import|extern|required|global)(?-i)\\b"
+    - identifier: "[\\.(\\w+)]+:"
+
+      ## CPU and FLOAT
+    - statement: "\\b(?i)(CPU|FLOAT)(?-i)\\b"
+    - preproc: "\\b(?i)(PENTIUM|PPRO|P2|P3|KATMAI|P4|WILLAMETTE|PRESCOTT|X64|IA64|ALL)(?-i)\\b"
+    - preproc: "\\b(?i)(DAZ|NODAZ|NEAR|UP|DOWN|ZERO|DEFAULT)(?-i)\\b"
 
       ## Constants
       # Numbers
@@ -154,17 +160,5 @@ rules:
     - comment:
         start: ";"
         end: "$"
-        rules:
-            - constant.specialChar: ""
-
-    - comment:
-        start: "//"
-        end: "$"
-        rules:
-            - constant.specialChar: ""
-
-    - comment:
-        start: "/\\*"
-        end: "\\*/"
         rules:
             - constant.specialChar: ""
