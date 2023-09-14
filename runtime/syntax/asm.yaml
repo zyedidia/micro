@@ -1,7 +1,7 @@
 filetype: asm
 
 detect:
-    filename: "\\.(S|s|asm|inc)$"
+    filename: "\\.(S|s|asm|inc|nasm)$"
 
 rules:
       # This file is made for NASM Assembler #
@@ -21,7 +21,7 @@ rules:
     - statement: "\\b(?i)(insertps|insw|int|int1|int3|into|invd|invlpg|invpcid|iret|iretd|iretq|jmp|ja|jae|jb|jbe|jc|jcxz|jecxz|jrcxz|je|jg|jge|jl|jle|jna|jnae|jnb|jnbe|jnc|jne|jng|jnge|jnl|jnle|jno|jnp|jns|jnz|jo|jp|jpe|jpo|js|jz|kaddb|kaddd|kaddq|kaddw|kandb|kandd|kandnb|kandnd|kandnq|kandnw|kandq|kandw|kmovb|kmovd|kmovq)(?-i)\\b"
     - statement: "\\b(?i)(kmovw|knotb|knotd|knotq|knotw|korb|kord|korq|kortestb|kortestd|kortestq|kortestw|korw|kshiftlb|kshiftld|kshiftlq|kshiftlw|kshiftrb|kshiftrd|kshiftrq|kshiftrw|ktestb|ktestd)(?-i)\\b"
     - statement: "\\b(?i)(ktestq|ktestw|kunpckbw|kunpckdq|kunpckwd|kxnorb|kxnord|kxnorq|kxnorw|kxorb|kxord|kxorq|kxorw|lahf|lar|lddqu|ldmxcsr|lds|ldtilecfg|lea|leave|les|lfence|lfs|lgdt|lgs|lidt|lldt)(?-i)\\b"
-    - statement: "\\b(?i)(lmsw|loadiwkey|lock|lods|lodsb|lodsd|lodsq|lodsw|loop|loope|loopne|lsl|lss|ltr|lzcnt|maskmovdqu|maskmovq|maxpd|maxps|maxsd|maxss|mfence|minpd|minps|minsd|minss|monitor|mov)(?-i)\\b"
+    - statement: "\\b(?i)(lmsw|loadiwkey|lock|lods|lodsb|lodsd|lodsq|lodsw|loop|loope|loopne|lsl|lss|ltr|lzcnt|maskmovdqu|maskmovq|maxpd|maxps|maxsd|maxss|mfence|minpd|minps|minsd|minss|monitor)(?-i)\\b"
     - statement: "\\b(?i)(mov|movapd|movaps|movbe|movd|movddup|movdir64b|movdiri|movdq2q|movdqa|movdqu|movhlps|movhpd|movhps|movlhps|movlpd|movlps|movmskpd|movmskps|movntdq|movntdqa|movnti)(?-i)\\b"
     - statement: "\\b(?i)(movntpd|movntps|movntq|movq|movq2dq|movs|movsb|movsd|movshdup|movsldup|movsq|movss|movsw|movsx|movsxd|movupd|movups|movzx|mpsadbw|mul|mulpd|mulps|mulsd|mulss)(?-i)\\b"
     - statement: "\\b(?i)(mulx|mwait|neg|nop|not|or|orpd|orps|out|outs|outsb|outsd|outsw|pabsb|pabsd|pabsq|pabsw|packssdw|packsswb|packusdw|packuswb|paddb|paddd|paddq|paddsb|paddsw|paddusb)(?-i)\\b"
