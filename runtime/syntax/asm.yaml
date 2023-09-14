@@ -110,7 +110,7 @@ rules:
     - preproc: "\\b(?i)(mixed|zerofill|no_dead_strip|live_support|strip_static_syms|debug)(?-i)\\b"
 
       ## Structs
-    - preproc: "\\b(?i)(istruc|iend|struc|struct|endstruc|restruc)(?-i)\\b"
+    - preproc: "\\b(?i)(istruc|iend|struc|endstruc|struct|endstruct|ends|restruc)(?-i)\\b"
 
       ## Directives
     - preproc: "\\b(?i)(near|far|seg|wrt|align|alignb)(?-i)\\b"
