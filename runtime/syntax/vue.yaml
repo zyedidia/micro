@@ -22,7 +22,6 @@ rules:
             
             - include: "html"
 
-            
     - default:
         start: "<script(?:[ ]+setup)?>"
         end: "</script>"
