@@ -907,6 +907,30 @@ func (b *Buffer) UpdateRules() {
 	if b.Highlighter == nil || syntaxFile != "" {
 		if b.SyntaxDef != nil {
 			b.Settings["filetype"] = b.SyntaxDef.FileType
+		} else {
+			for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+				if f.Name() == "default" {
+					data, err := f.Data()
+					if err != nil {
+						screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
+
+					file, err := highlight.ParseFile(data)
+					if err != nil {
+						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
+
+					syndef, err := highlight.ParseDef(file, header)
+					if err != nil {
+						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
+					b.SyntaxDef = syndef
+					break
+				}
+			}
 		}
 	}
 
