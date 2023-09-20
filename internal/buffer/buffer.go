@@ -908,8 +908,6 @@ func (b *Buffer) UpdateRules() {
 		if b.SyntaxDef != nil {
 			b.Settings["filetype"] = b.SyntaxDef.FileType
 		}
-	} else {
-		b.SyntaxDef = &highlight.EmptyDef
 	}
 
 	if b.SyntaxDef != nil {
