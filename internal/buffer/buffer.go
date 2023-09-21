@@ -876,7 +876,7 @@ func (b *Buffer) UpdateRules() {
 		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
 			data, err := f.Data()
 			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
 			header, err := highlight.MakeHeaderYaml(data)
