@@ -221,6 +221,8 @@ If you open micro and it doesn't seem like syntax highlighting is working, this 
 you are using a terminal which does not support 256 color mode. Try changing the color scheme to `simple`
 by pressing <kbd>Ctrl-e</kbd> in micro and typing `set colorscheme simple`.
 
+Many modern terminal emulators (such as [Kitty](https://sw.kovidgoyal.net/kitty/) and [Alacritty](https://alacritty.org/)) support true color, which allows the use of over 16 million colors using RGB/HEX values. To enable true color support in micro, set the environment variable `MICRO_TRUECOLOR=1`, then choose a color scheme that supports true color. True color schemes have names that end with `-tc` (such as `dracula-tc`).
+
 If you are using the default Ubuntu terminal, to enable 256 make sure your `TERM` variable is set
 to `xterm-256color`.
 
