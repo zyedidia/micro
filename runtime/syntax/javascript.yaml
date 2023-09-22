@@ -10,12 +10,7 @@ rules:
     - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
     #- identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
     # ^ this is not correct usage of the identifier color
-    - symbol.brackets: "(\\{|\\})"
-    - symbol.brackets: "(\\(|\\))"
-    - symbol.brackets: "(\\[|\\])"
-    - symbol.brackets: "(\\{|\\})"
-    - symbol.brackets: "(\\(|\\))"
-    - symbol.brackets: "(\\[|\\])"
+    - symbol.brackets: "[(){}]|\\[|\\]"
     - symbol.operator: "([-+/*=<>!~%?:&|]|[.]{3})"
     - statement: "\\b(async|await|break|case|catch|const|continue|debugger|default)\\b"
     - statement: "\\b(delete|do|else|export|finally|for|function\\*?|class|extends)\\b"
@@ -73,7 +68,9 @@ rules:
     - comment:
         start: "/\\*"
         end: "\\*/"
+        skip: "\\\\."
         rules:
+            - constant.specialChar: "\\\\."
             # function documentation
             - identifier: "\\s\\*\\s.*"
             - todo: "(TODO|XXX|FIXME)"

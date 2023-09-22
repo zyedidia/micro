@@ -50,6 +50,8 @@ which micro defines:
 
 * `postinit()`: initialization function called after `init()`.
 
+* `onSetActive(bufpane)`: runs when changing the currently active panel.
+
 * `onBufferOpen(buf)`: runs when a buffer is opened. The input contains
    the buffer object.
 
@@ -64,6 +66,10 @@ which micro defines:
 * `preAction(bufpane)`: runs immediately before `Action` is triggered
    by the user. Returns a boolean which defines whether the action should
    be canceled.
+
+* `onRune(rune)`: runs when the composed rune has been inserted
+
+* `preRune(rune)`: runs before the composed rune will be inserted
 
 For example a function which is run every time the user saves the buffer
 would be:

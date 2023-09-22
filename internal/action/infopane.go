@@ -108,7 +108,11 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 		if done && h.HasPrompt && !hasYN {
 			resp := string(h.LineBytes(0))
 			hist := h.History[h.PromptType]
-			hist[h.HistoryNum] = resp
+			if resp != hist[h.HistoryNum] {
+				h.HistoryNum = len(hist) - 1
+				hist[h.HistoryNum] = resp
+				h.HistorySearch = false
+			}
 			if h.EventCallback != nil {
 				h.EventCallback(resp)
 			}
@@ -155,6 +159,18 @@ func (h *InfoPane) HistoryDown() {
 	h.DownHistory(h.History[h.PromptType])
 }
 
+// HistorySearchUp fetches the previous history item beginning with the text
+// in the infobuffer before cursor
+func (h *InfoPane) HistorySearchUp() {
+	h.SearchUpHistory(h.History[h.PromptType])
+}
+
+// HistorySearchDown fetches the next history item beginning with the text
+// in the infobuffer before cursor
+func (h *InfoPane) HistorySearchDown() {
+	h.SearchDownHistory(h.History[h.PromptType])
+}
+
 // Autocomplete begins autocompletion
 func (h *InfoPane) CommandComplete() {
 	b := h.Buf
@@ -198,9 +214,11 @@ func (h *InfoPane) AbortCommand() {
 
 // InfoKeyActions contains the list of all possible key actions the infopane could execute
 var InfoKeyActions = map[string]InfoKeyAction{
-	"HistoryUp":       (*InfoPane).HistoryUp,
-	"HistoryDown":     (*InfoPane).HistoryDown,
-	"CommandComplete": (*InfoPane).CommandComplete,
-	"ExecuteCommand":  (*InfoPane).ExecuteCommand,
-	"AbortCommand":    (*InfoPane).AbortCommand,
+	"HistoryUp":         (*InfoPane).HistoryUp,
+	"HistoryDown":       (*InfoPane).HistoryDown,
+	"HistorySearchUp":   (*InfoPane).HistorySearchUp,
+	"HistorySearchDown": (*InfoPane).HistorySearchDown,
+	"CommandComplete":   (*InfoPane).CommandComplete,
+	"ExecuteCommand":    (*InfoPane).ExecuteCommand,
+	"AbortCommand":      (*InfoPane).AbortCommand,
 }

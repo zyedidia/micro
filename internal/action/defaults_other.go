@@ -1,3 +1,4 @@
+//go:build !darwin
 // +build !darwin
 
 package action
@@ -43,6 +44,8 @@ var bufdefaults = map[string]string{
 	"Alt-F":          "FindLiteral",
 	"Ctrl-n":         "FindNext",
 	"Ctrl-p":         "FindPrevious",
+	"Alt-[":          "DiffPrevious|CursorStart",
+	"Alt-]":          "DiffNext|CursorEnd",
 	"Ctrl-z":         "Undo",
 	"Ctrl-y":         "Redo",
 	"Ctrl-c":         "CopyLine|Copy",

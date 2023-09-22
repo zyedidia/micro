@@ -35,6 +35,9 @@ Here is a list of terminal emulators and their status:
 
 * `foot`: supported.
 
+* `wezterm`: only copying (writing to clipboard) is supported.
+
+
 **Summary:** If you want copy and paste to work over SSH, then you
 should set `clipboard` to `terminal`, and make sure your terminal
 supports OSC 52.

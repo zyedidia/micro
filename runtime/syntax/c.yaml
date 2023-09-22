@@ -5,11 +5,10 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
-    - type: "\\b(auto|float|double|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline)\\b"
+    - type: "\\b(float|double|bool|char|int|short|long|enum|void|struct|union|typedef|(un)?signed|inline)\\b"
     - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
     - type: "\\b[a-z_][0-9a-z_]+(_t|_T)\\b"
-    - type.extended: "\\b(bool)\\b"
-    - statement: "\\b(volatile|register|restrict)\\b"
+    - statement: "\\b(auto|volatile|register|restrict|static|const|extern)\\b"
     - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
     - statement: "\\b(goto|continue|break|return)\\b"
     - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
@@ -17,7 +16,7 @@ rules:
     - statement: "__attribute__[[:space:]]*\\(\\([^)]*\\)\\)"
     - statement: "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
       # Operator Color
-    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)"
+    - symbol.operator: "[-+*/%=<>.:;,~&|^!?]|\\b(sizeof)\\b"
     - symbol.brackets: "[(){}]|\\[|\\]"
       # Integer Constants
     - constant.number: "(\\b([1-9][0-9]*|0[0-7]*|0[Xx][0-9A-Fa-f]+|0[Bb][01]+)([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"
@@ -25,7 +24,7 @@ rules:
     - constant.number: "(\\b(([0-9]*[.][0-9]+|[0-9]+[.][0-9]*)([Ee][+-]?[0-9]+)?|[0-9]+[Ee][+-]?[0-9]+)[FfLl]?\\b)"
       # Hexadecimal Floating Constants
     - constant.number: "(\\b0[Xx]([0-9A-Za-z]*[.][0-9A-Za-z]+|[0-9A-Za-z]+[.][0-9A-Za-z]*)[Pp][+-]?[0-9]+[FfLl]?\\b)"
-    - constant.number: "NULL"
+    - constant.bool: "(\\b(true|false|NULL|nullptr|TRUE|FALSE)\\b)"
 
     - constant.string:
         start: "\""
@@ -53,3 +52,4 @@ rules:
         end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
+

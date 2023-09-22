@@ -59,10 +59,20 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 
 	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
 	err = fn(w)
-	w.Flush()
 
-	if e := writeCloser.Close(); e != nil && err == nil {
-		err = e
+	if err2 := w.Flush(); err2 != nil && err == nil {
+		err = err2
+	}
+	// Call Sync() on the file to make sure the content is safely on disk.
+	// Does not work with sudo as we don't have direct access to the file.
+	if !withSudo {
+		f := writeCloser.(*os.File)
+		if err2 := f.Sync(); err2 != nil && err == nil {
+			err = err2
+		}
+	}
+	if err2 := writeCloser.Close(); err2 != nil && err == nil {
+		err = err2
 	}
 
 	if withSudo {

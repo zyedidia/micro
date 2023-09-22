@@ -236,6 +236,21 @@ func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) 
 	return RegisterGlobalOption(pl+"."+name, defaultvalue)
 }
 
+// RegisterCommonOption creates a new option
+func RegisterCommonOption(name string, defaultvalue interface{}) error {
+	if v, ok := GlobalSettings[name]; !ok {
+		defaultCommonSettings[name] = defaultvalue
+		GlobalSettings[name] = defaultvalue
+		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
+		if err != nil {
+			return errors.New("Error writing settings.json file: " + err.Error())
+		}
+	} else {
+		defaultCommonSettings[name] = v
+	}
+	return nil
+}
+
 // RegisterGlobalOption creates a new global-only option
 func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if v, ok := GlobalSettings[name]; !ok {
@@ -341,6 +356,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},
 	"savehistory":    true,
+	"scrollbarchar":  "|",
 	"sucmd":          "sudo",
 	"tabhighlight":   false,
 	"tabreverse":     true,

@@ -1,0 +1,358 @@
+{
+    "$comment": "https://github.com/zyedidia/micro",
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "options",
+    "description": "A micro editor config schema",
+    "type": "object",
+    "properties": {
+        "autoindent": {
+            "description": "Whether to use the same indentation as a previous line\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "autosave": {
+            "description": "A delay between automatic saves\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+        },
+        "autosu": {
+            "description": "Whether attempt to use super user privileges\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "backup": {
+            "description": "Whether to backup all open buffers\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "backupdir": {
+            "description": "A directory to store backups\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": ""
+        },
+        "basename": {
+            "description": "Whether to show a basename instead of a full path\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "clipboard": {
+            "description": "A way to access the system clipboard\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "external",
+                "terminal",
+                "internal"
+            ],
+            "default": "external"
+        },
+        "colorcolumn": {
+            "description": "A position to display a column\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+        },
+        "colorscheme": {
+            "description": "A color scheme\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "atom-dark",
+                "bubblegum",
+                "cmc-16",
+                "cmc-tc",
+                "darcula",
+                "default",
+                "dracula-tc",
+                "dukedark-tc",
+                "dukelight-tc",
+                "dukeubuntu-tc",
+                "geany",
+                "gotham",
+                "gruvbox",
+                "gruvbox-tc",
+                "material-tc",
+                "monokai-dark",
+                "monokai",
+                "one-dark",
+                "railscast",
+                "simple",
+                "solarized",
+                "solarized-tc",
+                "sunny-day",
+                "twilight",
+                "zenburn"
+            ],
+            "default": "default"
+        },
+        "cursorline": {
+            "description": "Whether to highlight a line with a cursor with a different color\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "diffgutter": {
+            "description": "Whether to display diff inticators before lines\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "divchars": {
+            "description": "Divider chars for vertical and horizontal splits\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "|-"
+        },
+        "divreverse": {
+            "description": "Whether to use inversed color scheme colors for splits\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "encoding": {
+            "description": "An encoding used to open and save files\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "utf-8"
+        },
+        "eofnewline": {
+            "description": "Whether to add a missing trailing new line\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "fastdirty": {
+            "description": "Whether to use a fast algorithm to determine whether a file is changed\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "fileformat": {
+            "description": "A line ending format\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "unix",
+                "dos"
+            ],
+            "default": "unix"
+        },
+        "filetype": {
+            "description": "A filetype for the current buffer\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "unknown"
+        },
+        "hlsearch": {
+            "description": "Whether to highlight all instances of a searched text after a successful search\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "incsearch": {
+            "description": "Whether to enable an incremental search in `Find` prompt\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "ignorecase": {
+            "description": "Whether to perform case-insensitive searches\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "indentchar": {
+            "description": "An indentation character\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "maxLength": 1,
+            "default": " "
+        },
+        "infobar": {
+            "description": "Whether to enable a line at the bottom where messages are printed\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "keepautoindent": {
+            "description": "Whether add a whitespace while using autoindent\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "keymenu": {
+            "description": "Whether to display nano-style key menu at the bottom\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "matchbrace": {
+            "description": "Whether to underline matching braces\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "mkparents": {
+            "description": "Whether to create missing directories\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "mouse": {
+            "description": "Whether to enable mouse support\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "paste": {
+            "description": "Whether to treat characters sent from the terminal in a single chunk as a paste event\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "parsecursor": {
+            "description": "Whether to extract a line number and a column to open files with from file names\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "permbackup": {
+            "description": "Whether to permanently save backups\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "pluginchannels": {
+            "description": "A file with list of plugin channels\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"
+        },
+        "pluginrepos": {
+            "description": "Plugin repositories\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "description": "A pluging repository\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+                "type": "string"
+            },
+            "default": []
+        },
+        "readonly": {
+            "description": "Whether to forbid buffer editing\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "rmtrailingws": {
+            "description": "Whether to remove trailing whitespaces\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "ruler": {
+            "description": "Whether to display line numbers\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "relativeruler": {
+            "description": "Whether to display relative line numbers\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "savecursor": {
+            "description": "Whether to save cursor position in files\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "savehistory": {
+            "description": "Whether to save command history between closing and re-opening editor\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "saveundo": {
+            "description": "Whether to save undo after closing file\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "scrollbar": {
+            "description": "Whether to save undo after closing file\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "scrollmargin": {
+            "description": "A margin at which a view starts scrolling when a cursor approaches an edge of a view\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "default": 3
+        },
+        "scrollspeed": {
+            "description": "Line count to scroll for one scroll event\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "default": 2
+        },
+        "smartpaste": {
+            "description": "Whether to add a leading whitespace while pasting multiple lines\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "softwrap": {
+            "description": "Whether to wrap long lines\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "splitbottom": {
+            "description": "Whether to create a new horizontal split below the current one\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "splitright": {
+            "description": "Whether to create a new vertical split right of the current one\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "statusformatl": {
+            "description": "Format string of left-justified part of the statusline\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)"
+        },
+        "statusformatr": {
+            "description": "Format string of right-justified part of the statusline\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help"
+        },
+        "statusline": {
+            "description": "Whether to display a status line\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "sudo"
+        },
+        "sucmd": {
+            "description": "A super user command\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "sudo",
+            "examples": [
+                "sudo",
+                "doas"
+            ]
+        },
+        "syntax": {
+            "description": "Whether to enable a syntax highlighting\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "tabmovement": {
+            "description": "Whether to navigate spaces at the beginning of lines as if they are tabs\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "tabhighlight": {
+            "description": "Whether to invert tab character colors\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "tabreverse": {
+            "description": "Whether to reverse tab bar colors\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "tabsize": {
+            "description": "A tab size\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "default": 4
+        },
+        "tabstospaces": {
+            "description": "Whether to use spaces instead of tabs\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "useprimary": {
+            "description": "Whether to use primary clipboard to copy selections in the background\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "wordwrap": {
+            "description": "Whether to wrap long lines by words\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "xterm": {
+            "description": "Whether to assume that the current terminal is `xterm`\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        }
+    },
+    "additionalProperties": false
+}

@@ -5,13 +5,12 @@ detect:
 
 rules:
       # Reserved words
-    - statement: "\\b(align|allowzero|and|asm|async|await|break|callconv|catch|comptime|const|continue|defer|else|errdefer|error|export|extern|fn|for|if|inline|noalias|noinline|nosuspend|or|orelse|packed|pub|resume|return|linksection|suspend|switch|test|threadlocal|try|unreachable|usingnamespace|var|volatile|while)\\b"
+    - statement: "\\b(addrspace|align|allowzero|and|asm|async|await|break|callconv|catch|comptime|const|continue|defer|else|errdefer|error|export|extern|fn|for|if|inline|noalias|noinline|nosuspend|or|orelse|packed|pub|resume|return|linksection|suspend|switch|test|threadlocal|try|unreachable|usingnamespace|var|volatile|while)\\b"
       # builtin functions
     - special: "@[a-zA-Z_]+"
       # Primitive Types
-    - type: "\\b(anyframe|anytype|anyerror|bool|comptime_int|comptime_float|enum|f(16|32|64|128)|isize|noreturn|struct|type|union|usize|void)\\b"
+    - type: "\\b(anyframe|anytype|anyerror|anyopaque|bool|comptime_int|comptime_float|enum|f(16|32|64|80|128)|i(8|16|32|64|128)|isize|noreturn|opaque|struct|type|union|u(8|16|32|64|128)|usize|void)\\b"
     - type: "\\b(c_u?(short|int|long(long)?)|c_longdouble|c_void)\\b"
-    - type: "\\b((i|u)[0-9]+)\\b"
 
      # Operators
     - symbol.operator: "[-!|=;%.+^*:&?<>~]"

@@ -25,6 +25,10 @@ type InfoBuf struct {
 	// It's a map of history type -> history array
 	History    map[string][]string
 	HistoryNum int
+	// HistorySearch indicates whether we are searching for history items
+	// beginning with HistorySearchPrefix
+	HistorySearch       bool
+	HistorySearchPrefix string
 
 	// Is the current message a message from the gutter
 	HasGutter bool
@@ -102,6 +106,7 @@ func (i *InfoBuf) Prompt(prompt string, msg string, ptype string, eventcb func(s
 		i.History[ptype] = append(i.History[ptype], "")
 	}
 	i.HistoryNum = len(i.History[ptype]) - 1
+	i.HistorySearch = false
 
 	i.PromptType = ptype
 	i.Msg = prompt

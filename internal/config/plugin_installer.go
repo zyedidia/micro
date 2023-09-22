@@ -363,7 +363,7 @@ func GetInstalledVersions(withCore bool) PluginVersions {
 	}
 
 	for _, p := range Plugins {
-		if !p.IsEnabled() {
+		if !p.IsLoaded() {
 			continue
 		}
 		version := GetInstalledPluginVersion(p.Name)
@@ -572,7 +572,7 @@ func (pv PluginVersions) install(out io.Writer) {
 // UninstallPlugin deletes the plugin folder of the given plugin
 func UninstallPlugin(out io.Writer, name string) {
 	for _, p := range Plugins {
-		if !p.IsEnabled() {
+		if !p.IsLoaded() {
 			continue
 		}
 		if p.Name == name {
@@ -605,7 +605,7 @@ func UpdatePlugins(out io.Writer, plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
 		for _, p := range Plugins {
-			if !p.IsEnabled() || p.Default {
+			if !p.IsLoaded() || p.Default {
 				continue
 			}
 			plugins = append(plugins, p.Name)

@@ -23,7 +23,7 @@ filetype: shell
 # Fix command (fc) files:
 # * bash-fc. (followed by a random string)
 detect:
-    filename: '(\.(sh|bash|ash|ebuild)$|(\.bash(rc|_aliases|_functions|_profile)|\.?profile|Pkgfile|pkgmk\.conf|rc\.conf|PKGBUILD|APKBUILD)$|bash-fc\.)'
+    filename: "(\\.(sh|bash|ash|ebuild)$|(\\.bash(rc|_aliases|_functions|_profile)|\\.?profile|Pkgfile|pkgmk\\.conf|rc\\.conf|PKGBUILD|APKBUILD)$|bash-fc\\.)"
     header: "^#!.*/(env +)?(ba)?(a)?(mk)?sh( |$)"
 
 rules:
@@ -31,7 +31,7 @@ rules:
     - constant.number: "\\b[0-9]+\\b"
       # Conditionals and control flow
     - statement: "\\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while)\\b"
-    - special: "(\\{|\\}|\\(|\\)|\\;|\\]|\\[|`|\\\\|\\$|<|>|!|=|&|\\|)"
+    - special: "[`$<>!=&~^\\{\\}\\(\\)\\;\\]\\[]+"
       # Shell commands
     - type: "\\b(cd|echo|export|let|set|umask|unset)\\b"
       # Common linux commands
@@ -39,22 +39,21 @@ rules:
       # Coreutils commands
     - type: "\\b(base64|basename|cat|chcon|chgrp|chmod|chown|chroot|cksum|comm|cp|csplit|cut|date|dd|df|dir|dircolors|dirname|du|env|expand|expr|factor|false|fmt|fold|head|hostid|id|install|join|link|ln|logname|ls|md5sum|mkdir|mkfifo|mknod|mktemp|mv|nice|nl|nohup|nproc|numfmt|od|paste|pathchk|pinky|pr|printenv|printf|ptx|pwd|readlink|realpath|rm|rmdir|runcon|seq|(sha1|sha224|sha256|sha384|sha512)sum|shred|shuf|sleep|sort|split|stat|stdbuf|stty|sum|sync|tac|tail|tee|test|time|timeout|touch|tr|true|truncate|tsort|tty|uname|unexpand|uniq|unlink|users|vdir|wc|who|whoami|yes)\\b"
       # Conditional flags
-    - statement: "--[a-z-]+"
-    - statement: "\\ -[a-z]+"
+    - statement: " (-[A-Za-z]+|--[a-z]+)"
 
-    - identifier: "\\$\\{?[0-9A-Za-z_!@#$*?-]+\\}?"
-    - identifier: "\\$\\{?[0-9A-Za-z_!@#$*?-]+\\}?"
+    - identifier: "\\$\\{[0-9A-Za-z_:!%&=+#~@*^$?, .\\-\\/\\[\\]]+\\}"
+    - identifier: "\\$[0-9A-Za-z_:!%&=+#~@*^$?,\\-\\[\\]]+"
 
     - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\."
+        rules: []
 
     - constant.string:
         start: "'"
         end: "'"
+        skip: "\\\\."
         rules: []
 
     - comment:
@@ -62,4 +61,3 @@ rules:
         end: "$"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-

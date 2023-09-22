@@ -129,6 +129,12 @@ Here are the available options:
 
 	default value: `true`
 
+* `fakecursor`: forces micro to render the cursor using terminal colors rather
+  than the actual terminal cursor. This is useful when the terminal's cursor is
+  slow or otherwise unavailable/undesirable to use.
+
+    default value: `false`
+
 * `fastdirty`: this determines what kind of algorithm micro uses to determine
    if a buffer is modified or not. When `fastdirty` is on, micro just uses a
    boolean `modified` that is set to `true` as soon as the user makes an edit.
@@ -310,6 +316,10 @@ Here are the available options:
 * `scrollbar`: display a scroll bar
 
     default value: `false`
+
+* `scrollbarchar`: specifies the character used for displaying the scrollbar
+
+    default value: `|`
 
 * `scrollmargin`: margin at which the view starts scrolling when the cursor
    approaches the edge of the view.

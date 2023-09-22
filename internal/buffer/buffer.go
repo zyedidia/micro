@@ -430,6 +430,15 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	return b
 }
 
+// CloseOpenBuffers removes all open buffers
+func CloseOpenBuffers() {
+	for i, buf := range OpenBuffers {
+		buf.Fini()
+		OpenBuffers[i] = nil
+	}
+	OpenBuffers = OpenBuffers[:0]
+}
+
 // Close removes this buffer from the list of open buffers
 func (b *Buffer) Close() {
 	for i, buf := range OpenBuffers {
@@ -474,7 +483,7 @@ func (b *Buffer) GetName() string {
 	return name
 }
 
-//SetName changes the name for this buffer
+// SetName changes the name for this buffer
 func (b *Buffer) SetName(s string) {
 	b.name = s
 }
@@ -690,6 +699,7 @@ func (b *Buffer) UpdateRules() {
 		header, err = highlight.MakeHeaderYaml(data)
 		if err != nil {
 			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
+			continue
 		}
 		file, err := highlight.ParseFile(data)
 		if err != nil {
@@ -1209,6 +1219,41 @@ func (b *Buffer) DiffStatus(lineN int) DiffStatus {
 	defer b.diffLock.RUnlock()
 	// Note that the zero value for DiffStatus is equal to DSUnchanged
 	return b.diff[lineN]
+}
+
+// FindNextDiffLine returns the line number of the next block of diffs.
+// If `startLine` is already in a block of diffs, lines in that block are skipped.
+func (b *Buffer) FindNextDiffLine(startLine int, forward bool) (int, error) {
+	if b.diff == nil {
+		return 0, errors.New("no diff data")
+	}
+	startStatus, ok := b.diff[startLine]
+	if !ok {
+		startStatus = DSUnchanged
+	}
+	curLine := startLine
+	for {
+		curStatus, ok := b.diff[curLine]
+		if !ok {
+			curStatus = DSUnchanged
+		}
+		if curLine < 0 || curLine > b.LinesNum() {
+			return 0, errors.New("no next diff hunk")
+		}
+		if curStatus != startStatus {
+			if startStatus != DSUnchanged && curStatus == DSUnchanged {
+				// Skip over the block of unchanged text
+				startStatus = DSUnchanged
+			} else {
+				return curLine, nil
+			}
+		}
+		if forward {
+			curLine++
+		} else {
+			curLine--
+		}
+	}
 }
 
 // SearchMatch returns true if the given location is within a match of the last search.

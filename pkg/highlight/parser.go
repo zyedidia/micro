@@ -109,7 +109,7 @@ func MakeHeader(data []byte) (*Header, error) {
 	if fnameRgx != "" {
 		header.FtDetect[0], err = regexp.Compile(fnameRgx)
 	}
-	if headerRgx != "" {
+	if err == nil && headerRgx != "" {
 		header.FtDetect[1], err = regexp.Compile(headerRgx)
 	}
 
@@ -135,7 +135,7 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	if hdrYaml.Detect.FNameRgx != "" {
 		header.FtDetect[0], err = regexp.Compile(hdrYaml.Detect.FNameRgx)
 	}
-	if hdrYaml.Detect.HeaderRgx != "" {
+	if err == nil && hdrYaml.Detect.HeaderRgx != "" {
 		header.FtDetect[1], err = regexp.Compile(hdrYaml.Detect.HeaderRgx)
 	}
 

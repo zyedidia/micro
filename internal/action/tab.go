@@ -1,9 +1,12 @@
 package action
 
 import (
+	luar "layeh.com/gopher-luar"
+
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/views"
 	"github.com/zyedidia/tcell/v2"
@@ -275,6 +278,11 @@ func (t *Tab) SetActive(i int) {
 		} else {
 			p.SetActive(false)
 		}
+	}
+
+	err := config.RunPluginFn("onSetActive", luar.New(ulua.L, MainTab().CurPane()))
+	if err != nil {
+		screen.TermMessage(err)
 	}
 }
 
