@@ -283,6 +283,8 @@ The packages and functions are listed below (in Go type signatures):
 
     - `Log(s string)`: writes a string to the log buffer.
     - `LogBuf() *Buffer`: returns the log buffer.
+    
+    - `NewCursor(b *Buffer, l Loc)`: creates a new cursor struct.
 * `micro/util`
     - `RuneAt(str string, idx int) string`: returns the utf8 rune at a
        given index within a string.
