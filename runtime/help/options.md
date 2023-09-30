@@ -206,7 +206,7 @@ Here are the available options:
 
 * `keymenu`: display the nano-style key menu at the bottom of the screen. Note
    that ToggleKeyMenu is bound to `Alt-g` by default and this is displayed in
-   the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
+   the statusline. To disable the key binding, bind `Alt-g` to `None`.
 
 	default value: `false`
 
