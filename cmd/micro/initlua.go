@@ -55,6 +55,7 @@ func luaImportMicro() *lua.LTable {
 		return action.Tabs
 	}))
 	ulua.L.SetField(pkg, "Lock", luar.New(ulua.L, ulua.Lock))
+	ulua.L.SetField(pkg, "Redraw", luar.New(ulua.L, screen.Redraw))
 
 	return pkg
 }

@@ -121,6 +121,11 @@ The packages and functions are listed below (in Go type signatures):
        current pane is not a BufPane.
 
     - `CurTab() *Tab`: returns the current tab.
+
+    - `Redraw()`: update the screen contents. In most cases micro itself
+       redraws the screen when needed, but in cases when it doesn't (e.g.
+       if a lua code is running asynchronously, e.g. in a timer callback)
+       this function can be used to explicitly request screen update.
 * `micro/config`
 	- `MakeCommand(name string, action func(bp *BufPane, args[]string),
                    completer buffer.Completer)`:
