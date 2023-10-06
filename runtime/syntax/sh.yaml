@@ -56,6 +56,12 @@ rules:
         skip: "\\\\."
         rules: []
 
+    - constant.string:
+        start: "<<[^\\s]+[-~.]*[A-Za-z0-9]+$"
+        end: "^[^\\s]+[A-Za-z0-9]+$"
+        skip: "\\\\."
+        rules: []
+
     - comment:
         start: "(^|\\s)#"
         end: "$"
