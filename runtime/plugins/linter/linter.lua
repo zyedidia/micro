@@ -141,6 +141,33 @@ function onSave(bp)
     return true
 end
 
+function onBufferOptionChanged(buf, option, old, new)
+    if option == "filetype" then
+        if old ~= new then
+            ft = old
+            for k, v in pairs(linters) do
+                local ftmatch = ft == v.filetype
+                if v.domatch then
+                    ftmatch = string.match(ft, v.filetype)
+                end
+
+                local hasOS = contains(v.os, runtime.GOOS)
+                if not hasOS and v.whitelist then
+                    ftmatch = false
+                end
+                if hasOS and not v.whitelist then
+                    ftmatch = false
+                end
+
+                if ftmatch then
+                    buf:ClearMessages(k)
+                end
+            end
+        end
+    end
+    return true
+end
+
 function lint(buf, linter, cmd, args, errorformat, loff, coff, callback)
     buf:ClearMessages(linter)
 
