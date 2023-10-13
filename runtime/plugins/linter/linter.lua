@@ -107,26 +107,29 @@ function contains(list, element)
     return false
 end
 
+function checkFtMatch(ft, v)
+    local ftmatch = ft == v.filetype
+    if v.domatch then
+        ftmatch = string.match(ft, v.filetype)
+    end
+
+    local hasOS = contains(v.os, runtime.GOOS)
+    if not hasOS and v.whitelist then
+        ftmatch = false
+    end
+    if hasOS and not v.whitelist then
+        ftmatch = false
+    end
+    return ftmatch
+end
+
 function runLinter(buf)
     local ft = buf:FileType()
     local file = buf.Path
     local dir = "." .. util.RuneStr(os.PathSeparator) .. filepath.Dir(file)
 
     for k, v in pairs(linters) do
-        local ftmatch = ft == v.filetype
-        if v.domatch then
-            ftmatch = string.match(ft, v.filetype)
-        end
-
-        local hasOS = contains(v.os, runtime.GOOS)
-        if not hasOS and v.whitelist then
-            ftmatch = false
-        end
-        if hasOS and not v.whitelist then
-            ftmatch = false
-        end
-
-        if ftmatch then
+        if checkFtMatch(ft, v) then
             local args = {}
             for k, arg in pairs(v.args) do
                 args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
@@ -145,20 +148,7 @@ function onBufferOptionChanged(buf, option, old, new)
     if option == "filetype" then
         if old ~= new then
             for k, v in pairs(linters) do
-                local ftmatch = old == v.filetype
-                if v.domatch then
-                    ftmatch = string.match(old, v.filetype)
-                end
-
-                local hasOS = contains(v.os, runtime.GOOS)
-                if not hasOS and v.whitelist then
-                    ftmatch = false
-                end
-                if hasOS and not v.whitelist then
-                    ftmatch = false
-                end
-
-                if ftmatch then
+                if checkFtMatch(old, v) then
                     buf:ClearMessages(k)
                 end
             end
