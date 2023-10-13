@@ -253,7 +253,7 @@ place them in  `~/.config/micro/syntax` and Micro will use those instead.
 
 You must start the syntax file by declaring the filetype:
 
-```
+```yaml
 filetype: go
 ```
 
@@ -261,7 +261,7 @@ filetype: go
 
 Then you must provide information about how to detect the filetype:
 
-```
+```yaml
 detect:
     filename: "\\.go$"
 ```
@@ -270,7 +270,7 @@ Micro will match this regex against a given filename to detect the filetype.
 You may also provide an optional `header` regex that will check the first line
 of the file. For example:
 
-```
+```yaml
 detect:
     filename: "\\.ya?ml$"
     header: "%YAML"
@@ -285,7 +285,7 @@ lines and may have rules of its own inside the region.
 
 Here are some example patterns in Go:
 
-```
+```yaml
 rules:
     - special: "\\b(break|case|continue|default|go|goto|range|return)\\b"
     - statement: "\\b(else|for|if|switch)\\b"
@@ -297,7 +297,7 @@ the ones defined above them.
 
 And here are some example regions for Go:
 
-```
+```yaml
 - constant.string:
     start: "\""
     end: "\""
@@ -329,7 +329,7 @@ string ends at the correct place.
 You may also explicitly mark skip regexes if you don't want them to be
 highlighted. For example:
 
-```
+```yaml
 - constant.string:
     start: "\""
     end: "\""
@@ -342,7 +342,7 @@ highlighted. For example:
 You may also include rules from other syntax files as embedded languages. For
 example, the following is possible for html:
 
-```
+```yaml
 - default:
     start: "<script.*?>"
     end: "</script.*?>"
