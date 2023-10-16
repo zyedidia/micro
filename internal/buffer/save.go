@@ -79,10 +79,10 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 	if withSudo {
 		// wait for dd to finish and restart the screen if we used sudo
 		err := cmd.Wait()
+		screen.TempStart(screenb)
 		if err != nil {
 			return err
 		}
-		screen.TempStart(screenb)
 	}
 
 	return
