@@ -361,7 +361,7 @@ func main() {
 
 	sigterm = make(chan os.Signal, 1)
 	sighup = make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT)
+	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
 	signal.Notify(sighup, syscall.SIGHUP)
 
 	// Here is the event loop which runs in a separate thread
