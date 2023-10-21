@@ -52,6 +52,7 @@ var optionValidators = map[string]optionValidator{
 	"fileformat":   validateLineEnding,
 	"encoding":     validateEncoding,
 	"multiopen":    validateMultiOpen,
+	"reload":       validateReload,
 }
 
 func ReadSettings() error {
@@ -294,6 +295,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"mkparents":      false,
 	"permbackup":     false,
 	"readonly":       false,
+	"reload":         "prompt",
 	"rmtrailingws":   false,
 	"ruler":          true,
 	"relativeruler":  false,
@@ -522,6 +524,22 @@ func validateMultiOpen(option string, value interface{}) error {
 	case "tab", "hsplit", "vsplit":
 	default:
 		return errors.New(option + " must be 'tab', 'hsplit', or 'vsplit'")
+	}
+
+	return nil
+}
+
+func validateReload(option string, value interface{}) error {
+	val, ok := value.(string)
+
+	if !ok {
+		return errors.New("Expected string type for reload")
+	}
+
+	switch val {
+	case "prompt", "auto", "disabled":
+	default:
+		return errors.New(option + " must be 'prompt', 'auto' or 'disabled'")
 	}
 
 	return nil
