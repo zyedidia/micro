@@ -1,7 +1,10 @@
 filetype: jinja2
 
+detect:
+    filename: "\\.(j2|jinja2)$"
+    priority: 0
+
 rules:
-  - include: "html"
   - special: "({{|}}|{%-?|-?%})"
   - default:
         start: "({%-?|{{)"

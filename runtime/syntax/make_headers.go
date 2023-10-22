@@ -9,6 +9,7 @@ import (
 	"os"
 	"strings"
 	"time"
+	"strconv"
 
 	yaml "gopkg.in/yaml.v2"
 )
@@ -18,6 +19,7 @@ type HeaderYaml struct {
 	Detect   struct {
 		FNameRgx  string `yaml:"filename"`
 		HeaderRgx string `yaml:"header"`
+		Priority  int    `yaml:"priority"`
 	} `yaml:"detect"`
 }
 
@@ -25,6 +27,7 @@ type Header struct {
 	FileType  string
 	FNameRgx  string
 	HeaderRgx string
+	Priority  int
 }
 
 func main() {
@@ -59,6 +62,7 @@ func encode(name string, c HeaderYaml) {
 	f.WriteString(c.FileType + "\n")
 	f.WriteString(c.Detect.FNameRgx + "\n")
 	f.WriteString(c.Detect.HeaderRgx + "\n")
+	f.WriteString(string(strconv.Itoa(c.Detect.Priority)[0]) + "\n")
 	f.Close()
 }
 
@@ -70,6 +74,7 @@ func decode(name string) Header {
 	hdr.FileType = string(strs[0])
 	hdr.FNameRgx = string(strs[1])
 	hdr.HeaderRgx = string(strs[2])
+	hdr.Priority, _ = strconv.Atoi(string(strs[3]))
 	fmt.Printf("took %v\n", time.Since(start))
 
 	return hdr

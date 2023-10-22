@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"strconv"
 
 	"gopkg.in/yaml.v2"
 )
@@ -40,6 +41,7 @@ type Def struct {
 type Header struct {
 	FileType string
 	FtDetect [2]*regexp.Regexp
+	Priority int
 }
 
 type HeaderYaml struct {
@@ -47,6 +49,7 @@ type HeaderYaml struct {
 	Detect   struct {
 		FNameRgx  string `yaml:"filename"`
 		HeaderRgx string `yaml:"header"`
+		Priority  int    `yaml:"priority"`
 	} `yaml:"detect"`
 }
 
@@ -97,7 +100,7 @@ func init() {
 // A yaml file might take ~400us to parse while a header file only takes ~20us
 func MakeHeader(data []byte) (*Header, error) {
 	lines := bytes.Split(data, []byte{'\n'})
-	if len(lines) < 3 {
+	if len(lines) < 4 {
 		return nil, errors.New("Header file has incorrect format")
 	}
 	header := new(Header)
@@ -105,12 +108,16 @@ func MakeHeader(data []byte) (*Header, error) {
 	header.FileType = string(lines[0])
 	fnameRgx := string(lines[1])
 	headerRgx := string(lines[2])
+	priorityStr := string(lines[3])
 
 	if fnameRgx != "" {
 		header.FtDetect[0], err = regexp.Compile(fnameRgx)
 	}
 	if err == nil && headerRgx != "" {
 		header.FtDetect[1], err = regexp.Compile(headerRgx)
+	}
+	if priorityStr != "" {
+		header.Priority, err = strconv.Atoi(priorityStr)
 	}
 
 	if err != nil {
@@ -131,6 +138,7 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 
 	header := new(Header)
 	header.FileType = hdrYaml.FileType
+	header.Priority = hdrYaml.Detect.Priority
 
 	if hdrYaml.Detect.FNameRgx != "" {
 		header.FtDetect[0], err = regexp.Compile(hdrYaml.Detect.FNameRgx)
