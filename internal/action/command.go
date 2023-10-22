@@ -697,6 +697,34 @@ func (h *BufPane) QuitCmd(args []string) {
 	h.Quit()
 }
 
+func convertLine(h *BufPane, line string) (int, error) {
+	lineNum := 0
+	var err error
+
+	// Check for special negative movement beginning from the end of the file
+	if strings.HasPrefix(line, "~") {
+		lineNum, err = strconv.Atoi(line[1:])
+		if err != nil {
+			return 0, err
+		}
+		lineNum = h.Buf.LinesNum() + 1 - lineNum
+	} else {
+		lineNum, err = strconv.Atoi(line)
+		if err != nil {
+			return 0, err
+		}
+
+		// Check for relative numbers
+		if strings.HasPrefix(line, "-") || strings.HasPrefix(line, "+") {
+			lineNum = h.Buf.GetActiveCursor().Y + 1 + lineNum
+		}
+	}
+
+	lineNum = util.Clamp(lineNum-1, 0, h.Buf.LinesNum()-1)
+
+	return lineNum, err
+}
+
 // GotoCmd is a command that will send the cursor to a certain
 // position in the buffer
 // For example: `goto line`, or `goto line:col`
@@ -704,37 +732,30 @@ func (h *BufPane) GotoCmd(args []string) {
 	if len(args) <= 0 {
 		InfoBar.Error("Not enough arguments")
 	} else {
+		line, col := 0, 0
+		var err error
 		h.RemoveAllMultiCursors()
 		if strings.Contains(args[0], ":") {
 			parts := strings.SplitN(args[0], ":", 2)
-			line, err := strconv.Atoi(parts[0])
+			line, err = convertLine(h, parts[0])
 			if err != nil {
 				InfoBar.Error(err)
 				return
 			}
-			col, err := strconv.Atoi(parts[1])
+			col, err = strconv.Atoi(parts[1])
 			if err != nil {
 				InfoBar.Error(err)
 				return
 			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
 			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
-			h.GotoLoc(buffer.Loc{col, line})
 		} else {
-			line, err := strconv.Atoi(args[0])
+			line, err = convertLine(h, args[0])
 			if err != nil {
 				InfoBar.Error(err)
 				return
 			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			h.GotoLoc(buffer.Loc{0, line})
 		}
+		h.GotoLoc(buffer.Loc{col, line})
 	}
 }
 
