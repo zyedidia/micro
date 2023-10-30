@@ -1274,9 +1274,10 @@ func (h *BufPane) PastePrimary() bool {
 func (h *BufPane) paste(clip string) {
 	if h.Buf.Settings["smartpaste"].(bool) {
 		if h.Cursor.X > 0 {
-			leadingPasteWS := util.GetLeadingWhitespace([]byte(clip))
-			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
-			clip = strings.ReplaceAll(clip[len(leadingPasteWS):], "\n"+string(leadingPasteWS), "\n"+string(leadingWS))
+			leadingPasteWS := string(util.GetLeadingWhitespace([]byte(clip)))
+			leadingWS := string(util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y)))
+			clip = strings.TrimPrefix(clip, leadingPasteWS)
+			clip = strings.ReplaceAll(clip, "\n"+leadingPasteWS, "\n"+leadingWS)
 		}
 	}
 
