@@ -206,7 +206,7 @@ Here are the available options:
 
 * `keymenu`: display the nano-style key menu at the bottom of the screen. Note
    that ToggleKeyMenu is bound to `Alt-g` by default and this is displayed in
-   the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
+   the statusline. To disable the key binding, bind `Alt-g` to `None`.
 
 	default value: `false`
 
@@ -280,6 +280,11 @@ Here are the available options:
    to only ever set this option locally using `setlocal`.
 
     default value: `false`
+
+* `reload`: controls the reload behavior of the current buffer in case the file
+   has changed. The available options are `prompt`, `auto` & `disabled`.
+
+   default value: `prompt`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
    lines. Note: This setting overrides `keepautoindent`

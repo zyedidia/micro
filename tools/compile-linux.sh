@@ -21,7 +21,7 @@ GOOS=linux GOARCH=386 go build -ldflags "-s -w -X main.Version=$1 -X main.Commit
 tar -czf micro-$1-linux32.tar.gz micro-$1
 mv micro-$1-linux32.tar.gz binaries
 echo "Linux arm 32"
-GOOS=linux GOARCH=arm go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE'" -o micro-$1/micro ./cmd/micro
+GOOS=linux GOARM=6 GOARCH=arm go build -ldflags "-s -w -X main.Version=$1 -X main.CommitHash=$HASH -X 'main.CompileDate=$DATE'" -o micro-$1/micro ./cmd/micro
 tar -czf micro-$1-linux-arm.tar.gz micro-$1
 mv micro-$1-linux-arm.tar.gz binaries
 echo "Linux arm 64"

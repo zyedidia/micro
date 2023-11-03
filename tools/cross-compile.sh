@@ -52,7 +52,7 @@ tar -czf micro-$1-linux32.tar.gz micro-$1
 mv micro-$1-linux32.tar.gz binaries
 
 echo "Linux ARM 32"
-GOOS=linux GOARCH=arm make build
+GOOS=linux GOARM=6 GOARCH=arm make build
 mv micro micro-$1
 tar -czf micro-$1-linux-arm.tar.gz micro-$1
 mv micro-$1-linux-arm.tar.gz binaries

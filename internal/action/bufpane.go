@@ -395,20 +395,34 @@ func (h *BufPane) Name() string {
 	return n
 }
 
+func (h *BufPane) getReloadSetting() string {
+	reloadSetting := h.Buf.Settings["reload"]
+	return reloadSetting.(string)
+}
+
 // HandleEvent executes the tcell event properly
 func (h *BufPane) HandleEvent(event tcell.Event) {
 	if h.Buf.ExternallyModified() && !h.Buf.ReloadDisabled {
-		InfoBar.YNPrompt("The file on disk has changed. Reload file? (y,n,esc)", func(yes, canceled bool) {
-			if canceled {
-				h.Buf.DisableReload()
-			}
-			if !yes || canceled {
-				h.Buf.UpdateModTime()
-			} else {
-				h.Buf.ReOpen()
-			}
-		})
+		reload := h.getReloadSetting()
 
+		if reload == "prompt" {
+			InfoBar.YNPrompt("The file on disk has changed. Reload file? (y,n,esc)", func(yes, canceled bool) {
+				if canceled {
+					h.Buf.DisableReload()
+				}
+				if !yes || canceled {
+					h.Buf.UpdateModTime()
+				} else {
+					h.Buf.ReOpen()
+				}
+			})
+		} else if reload == "auto" {
+			h.Buf.ReOpen()
+		} else if reload == "disabled" {
+			h.Buf.DisableReload()
+		} else {
+			InfoBar.Message("Invalid reload setting")
+		}
 	}
 
 	switch e := event.(type) {

@@ -116,12 +116,12 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 		dlen := len(data)
 		if dlen > 1 && data[dlen-2] == '\r' {
 			data = append(data[:dlen-2], '\n')
-			if endings == FFAuto {
+			if la.Endings == FFAuto {
 				la.Endings = FFDos
 			}
 			dlen = len(data)
 		} else if dlen > 0 {
-			if endings == FFAuto {
+			if la.Endings == FFAuto {
 				la.Endings = FFUnix
 			}
 		}
