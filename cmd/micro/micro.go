@@ -275,6 +275,7 @@ func main() {
 				continue
 			}
 			config.GlobalSettings[k] = nativeValue
+			config.VolatileSettings[k] = true
 		}
 	}
 
