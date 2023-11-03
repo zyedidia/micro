@@ -229,30 +229,26 @@ func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) 
 // RegisterCommonOption creates a new option
 func RegisterCommonOption(name string, defaultvalue interface{}) error {
 	if _, ok := GlobalSettings[name]; !ok {
-		defaultCommonSettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
 		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
 		if err != nil {
 			return errors.New("Error writing settings.json file: " + err.Error())
 		}
-	} else {
-		defaultCommonSettings[name] = defaultvalue
 	}
+	defaultCommonSettings[name] = defaultvalue
 	return nil
 }
 
 // RegisterGlobalOption creates a new global-only option
 func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 	if _, ok := GlobalSettings[name]; !ok {
-		DefaultGlobalOnlySettings[name] = defaultvalue
 		GlobalSettings[name] = defaultvalue
 		err := WriteSettings(filepath.Join(ConfigDir, "settings.json"))
 		if err != nil {
 			return errors.New("Error writing settings.json file: " + err.Error())
 		}
-	} else {
-		DefaultGlobalOnlySettings[name] = defaultvalue
 	}
+	DefaultGlobalOnlySettings[name] = defaultvalue
 	return nil
 }
 
