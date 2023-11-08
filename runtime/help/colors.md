@@ -180,6 +180,8 @@ Here is a list of the colorscheme groups that you can use:
 * tabbar (Color of the tabbar that lists open files)
 * indent-char (Color of the character which indicates tabs if the option is
   enabled)
+* match-brace (Color of the matching braces when the cursor is on a brace
+  character)
 * line-number
 * gutter-error
 * gutter-warning

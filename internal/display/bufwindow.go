@@ -558,6 +558,9 @@ func (w *BufWindow) displayBuffer() {
 					for _, mb := range matchingBraces {
 						if mb.X == bloc.X && mb.Y == bloc.Y {
 							style = style.Underline(true)
+							if s, ok := config.Colorscheme["match-brace"]; ok {
+								style = s
+							}
 						}
 					}
 				}
