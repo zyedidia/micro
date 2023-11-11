@@ -38,7 +38,7 @@ var optionValidators = map[string]optionValidator{
 }
 
 // a list of settings with pre-defined choices
-var optionChoices = map[string][]string{
+var OptionChoices = map[string][]string{
 	"clipboard":       {"internal", "external", "terminal"},
 	"fileformat":      {"unix", "dos"},
 	"matchbracestyle": {"underline", "highlight"},
@@ -473,7 +473,7 @@ func validateNonNegativeValue(option string, value interface{}) error {
 }
 
 func validateChoice(option string, value interface{}) error {
-	if choices, ok := optionChoices[option]; ok {
+	if choices, ok := OptionChoices[option]; ok {
 		val, ok := value.(string)
 		if !ok {
 			return errors.New("Expected string type for " + option)
