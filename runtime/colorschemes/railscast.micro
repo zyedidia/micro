@@ -31,3 +31,5 @@ color-link space "underline #e6e1dc,#2b2b2b"
 
 #the Python syntax definition are wrong. This is not how you should do decorators!
 color-link brightgreen "#edb753,#2b2b2b"
+
+color-link match-brace "#2b2b2b,#a5c261"
