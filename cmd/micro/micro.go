@@ -31,9 +31,6 @@ import (
 )
 
 var (
-	// Event channel
-	autosave chan bool
-
 	// Command line flags
 	flagVersion   = flag.Bool("version", false, "Show the version number and information")
 	flagConfigDir = flag.String("config-dir", "", "Specify a custom location for the configuration directory")
