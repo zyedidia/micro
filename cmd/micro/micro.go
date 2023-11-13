@@ -46,6 +46,8 @@ var (
 
 	sigterm chan os.Signal
 	sighup  chan os.Signal
+
+	timerChan chan func()
 )
 
 func InitFlags() {
@@ -364,6 +366,8 @@ func main() {
 	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
 	signal.Notify(sighup, syscall.SIGHUP)
 
+	timerChan = make(chan func())
+
 	// Here is the event loop which runs in a separate thread
 	go func() {
 		for {
@@ -429,6 +433,8 @@ func DoEvent() {
 		for len(screen.DrawChan()) > 0 {
 			<-screen.DrawChan()
 		}
+	case f := <-timerChan:
+		f()
 	case <-sighup:
 		for _, b := range buffer.OpenBuffers {
 			if !b.Modified() {
