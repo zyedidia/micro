@@ -55,7 +55,6 @@ func luaImportMicro() *lua.LTable {
 	ulua.L.SetField(pkg, "Tabs", luar.New(ulua.L, func() *action.TabList {
 		return action.Tabs
 	}))
-	ulua.L.SetField(pkg, "Lock", luar.New(ulua.L, &ulua.Lock))
 	ulua.L.SetField(pkg, "After", luar.New(ulua.L, func(t time.Duration, f func()) {
 		time.AfterFunc(t, func() {
 			timerChan <- f
