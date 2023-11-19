@@ -218,7 +218,15 @@ func InitRuntimeFiles() {
 
 	plugdir = filepath.Join("runtime", "plugins")
 	if files, err := rt.AssetDir(plugdir); err == nil {
+	outer:
 		for _, d := range files {
+			for _, p := range Plugins {
+				if p.Name == d {
+					log.Println(p.Name, "built-in plugin overridden by user-defined one")
+					continue outer
+				}
+			}
+
 			if srcs, err := rt.AssetDir(filepath.Join(plugdir, d)); err == nil {
 				p := new(Plugin)
 				p.Name = d
