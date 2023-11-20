@@ -407,7 +407,9 @@ func (w *BufWindow) displayBuffer() {
 					if found {
 						matchingBraces = append(matchingBraces, mb)
 						if !left {
-							matchingBraces = append(matchingBraces, curLoc)
+							if b.Settings["matchbracestyle"].(string) != "highlight" {
+								matchingBraces = append(matchingBraces, curLoc)
+							}
 						} else {
 							matchingBraces = append(matchingBraces, curLoc.Move(-1, b))
 						}
