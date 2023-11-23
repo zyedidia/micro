@@ -473,7 +473,8 @@ func DoEvent() {
 	}
 
 	ulua.Lock.Lock()
-	if action.InfoBar.HasPrompt {
+	_, resize := event.(*tcell.EventResize)
+	if action.InfoBar.HasPrompt && !resize {
 		action.InfoBar.HandleEvent(event)
 	} else {
 		action.Tabs.HandleEvent(event)
