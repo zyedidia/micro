@@ -6,6 +6,7 @@ description: |
   terminals.
 confinement: classic
 adopt-info: micro
+base: core20
 
 apps:
   micro:
@@ -15,9 +16,8 @@ parts:
   micro:
     source: .
     source-type: git
-    plugin: nil
+    plugin: go
     build-packages: [make]
-    build-snaps: [go]
     build-attributes: [no-patchelf]
     override-pull: |
       snapcraftctl pull

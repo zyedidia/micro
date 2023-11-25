@@ -129,6 +129,12 @@ Here are the available options:
 
 	default value: `true`
 
+* `fakecursor`: forces micro to render the cursor using terminal colors rather
+  than the actual terminal cursor. This is useful when the terminal's cursor is
+  slow or otherwise unavailable/undesirable to use.
+
+    default value: `false`
+
 * `fastdirty`: this determines what kind of algorithm micro uses to determine
    if a buffer is modified or not. When `fastdirty` is on, micro just uses a
    boolean `modified` that is set to `true` as soon as the user makes an edit.
@@ -200,7 +206,7 @@ Here are the available options:
 
 * `keymenu`: display the nano-style key menu at the bottom of the screen. Note
    that ToggleKeyMenu is bound to `Alt-g` by default and this is displayed in
-   the statusline. To disable this, simply by `Alt-g` to `UnbindKey`.
+   the statusline. To disable the key binding, bind `Alt-g` to `None`.
 
 	default value: `false`
 
@@ -275,6 +281,11 @@ Here are the available options:
 
     default value: `false`
 
+* `reload`: controls the reload behavior of the current buffer in case the file
+   has changed. The available options are `prompt`, `auto` & `disabled`.
+
+   default value: `prompt`
+
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
    lines. Note: This setting overrides `keepautoindent`
 
@@ -310,6 +321,10 @@ Here are the available options:
 * `scrollbar`: display a scroll bar
 
     default value: `false`
+
+* `scrollbarchar`: specifies the character used for displaying the scrollbar
+
+    default value: `|`
 
 * `scrollmargin`: margin at which the view starts scrolling when the cursor
    approaches the edge of the view.

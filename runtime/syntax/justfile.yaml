@@ -2,7 +2,7 @@
 filetype: 'justfile'
 
 detect:
-    filename: '(^\\.?[Jj]ustfile|\\.just)$'
+    filename: "(^\\.?[Jj]ustfile|\\.just)$"
     header: "^#!.*/(env +)?[bg]?just --justfile"
 
 rules:

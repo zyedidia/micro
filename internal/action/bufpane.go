@@ -306,7 +306,7 @@ func (h *BufPane) ResizePane(size int) {
 // PluginCB calls all plugin callbacks with a certain name and displays an
 // error if there is one and returns the aggregrate boolean response
 func (h *BufPane) PluginCB(cb string) bool {
-	b, err := config.RunPluginFnBool(cb, luar.New(ulua.L, h))
+	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h))
 	if err != nil {
 		screen.TermMessage(err)
 	}
@@ -315,7 +315,7 @@ func (h *BufPane) PluginCB(cb string) bool {
 
 // PluginCBRune is the same as PluginCB but also passes a rune to the plugins
 func (h *BufPane) PluginCBRune(cb string, r rune) bool {
-	b, err := config.RunPluginFnBool(cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
+	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
 	if err != nil {
 		screen.TermMessage(err)
 	}
@@ -395,20 +395,34 @@ func (h *BufPane) Name() string {
 	return n
 }
 
+func (h *BufPane) getReloadSetting() string {
+	reloadSetting := h.Buf.Settings["reload"]
+	return reloadSetting.(string)
+}
+
 // HandleEvent executes the tcell event properly
 func (h *BufPane) HandleEvent(event tcell.Event) {
 	if h.Buf.ExternallyModified() && !h.Buf.ReloadDisabled {
-		InfoBar.YNPrompt("The file on disk has changed. Reload file? (y,n,esc)", func(yes, canceled bool) {
-			if canceled {
-				h.Buf.DisableReload()
-			}
-			if !yes || canceled {
-				h.Buf.UpdateModTime()
-			} else {
-				h.Buf.ReOpen()
-			}
-		})
+		reload := h.getReloadSetting()
 
+		if reload == "prompt" {
+			InfoBar.YNPrompt("The file on disk has changed. Reload file? (y,n,esc)", func(yes, canceled bool) {
+				if canceled {
+					h.Buf.DisableReload()
+				}
+				if !yes || canceled {
+					h.Buf.UpdateModTime()
+				} else {
+					h.Buf.ReOpen()
+				}
+			})
+		} else if reload == "auto" {
+			h.Buf.ReOpen()
+		} else if reload == "disabled" {
+			h.Buf.DisableReload()
+		} else {
+			InfoBar.Message("Invalid reload setting")
+		}
 	}
 
 	switch e := event.(type) {
@@ -708,6 +722,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"FindLiteral":               (*BufPane).FindLiteral,
 	"FindNext":                  (*BufPane).FindNext,
 	"FindPrevious":              (*BufPane).FindPrevious,
+	"DiffNext":                  (*BufPane).DiffNext,
+	"DiffPrevious":              (*BufPane).DiffPrevious,
 	"Center":                    (*BufPane).Center,
 	"Undo":                      (*BufPane).Undo,
 	"Redo":                      (*BufPane).Redo,
