@@ -532,8 +532,12 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		}
 	}
 
-	for _, b := range buffer.OpenBuffers {
-		b.SetOptionNative(option, nativeValue)
+	if local {
+		MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
+	} else {
+		for _, b := range buffer.OpenBuffers {
+			b.SetOptionNative(option, nativeValue)
+		}
 	}
 
 	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
