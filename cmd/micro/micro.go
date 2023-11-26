@@ -46,6 +46,7 @@ var (
 
 	sigterm chan os.Signal
 	sighup  chan os.Signal
+	sigabrt chan os.Signal
 )
 
 func InitFlags() {
@@ -161,12 +162,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 	var input []byte
 	var err error
 	buffers := make([]*buffer.Buffer, 0, len(args))
-
 	btype := buffer.BTDefault
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
-		btype = buffer.BTStdout
-	}
-
 	files := make([]string, 0, len(args))
 	flagStartPos := buffer.Loc{-1, -1}
 	flagr := regexp.MustCompile(`^\+(\d+)(?::(\d+))?$`)
@@ -208,7 +204,11 @@ func LoadInput(args []string) []*buffer.Buffer {
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, buf)
 		}
-	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
+	} else {
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			btype = buffer.BTStdout
+		}
+		if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
@@ -218,9 +218,10 @@ func LoadInput(args []string) []*buffer.Buffer {
 			input = []byte{}
 		}
 		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
-	} else {
-		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		} else {
+			// Option 3, just open an empty buffer
+			buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		}
 	}
 
 	return buffers
@@ -363,6 +364,8 @@ func main() {
 	sighup = make(chan os.Signal, 1)
 	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
 	signal.Notify(sighup, syscall.SIGHUP)
+	sigabrt = make(chan os.Signal, 1)
+	signal.Notify(sigabrt, syscall.SIGABRT)
 
 	// Here is the event loop which runs in a separate thread
 	go func() {
@@ -447,6 +450,16 @@ func DoEvent() {
 			screen.Screen.Fini()
 		}
 		os.Exit(0)
+	case <-sigabrt:
+		for _, b := range buffer.OpenBuffers {
+			if !b.Modified() {
+				b.Fini()
+			}
+		}
+		if screen.Screen != nil {
+			screen.Screen.Fini()
+		}
+		os.Exit(6)
 	}
 
 	if e, ok := event.(*tcell.EventError); ok {

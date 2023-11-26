@@ -25,3 +25,12 @@ func (*BufPane) Suspend() bool {
 
 	return false
 }
+
+// Abort immediately terminates micro with exit code 6.
+// All unsaved changes will be lost.
+// This only works on linux and has no default binding.
+func (*BufPane) Abort() bool {
+	// abort the process
+	syscall.Kill(syscall.Getpid(), syscall.SIGABRT)
+	return false
+}
