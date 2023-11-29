@@ -601,7 +601,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		var word []glyph
-		if wordwrap {
+		if wordwrap && w.bufWidth > 0 {
 			word = make([]glyph, 0, w.bufWidth)
 		} else {
 			word = make([]glyph, 0, 1)
