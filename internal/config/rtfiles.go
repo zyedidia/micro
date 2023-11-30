@@ -40,8 +40,13 @@ var allFiles [][]RuntimeFile
 var realFiles [][]RuntimeFile
 
 func init() {
+	initRuntimeVars()
+}
+
+func initRuntimeVars() {
 	allFiles = make([][]RuntimeFile, NumTypes)
 	realFiles = make([][]RuntimeFile, NumTypes)
+	Plugins = Plugins[:0]
 }
 
 // NewRTFiletype creates a new RTFiletype
@@ -172,6 +177,8 @@ func InitRuntimeFiles() {
 		AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
 		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
 	}
+
+	initRuntimeVars()
 
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.yaml")
