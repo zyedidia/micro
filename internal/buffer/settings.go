@@ -86,6 +86,9 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 // SetOption sets a given option to a value just for this buffer
 func (b *Buffer) SetOption(option, value string) error {
 	if _, ok := b.Settings[option]; !ok {
+		if _, ok := config.DefaultGlobalOnlySettings[option]; ok {
+			return config.ErrGlobalOnlyOption
+		}
 		return config.ErrInvalidOption
 	}
 
