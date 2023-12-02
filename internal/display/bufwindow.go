@@ -620,7 +620,7 @@ func (w *BufWindow) displayBuffer() {
 		wordwidth := 0
 
 		totalwidth := w.StartCol - nColsBeforeStart
-		for len(line) > 0 {
+		for len(line) > 0 && vloc.X < maxWidth {
 			r, combc, size := util.DecodeCharacter(line)
 			line = line[size:]
 
