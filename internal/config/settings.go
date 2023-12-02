@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/zyedidia/glob"
-	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"golang.org/x/text/encoding/htmlindex"
 )
@@ -58,28 +57,21 @@ var optionValidators = map[string]optionValidator{
 func ReadSettings() error {
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		err := util.UnmarshalConfigJSONFile(filename, &parsedSettings)
+
 		if err != nil {
 			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
 		}
-		if !strings.HasPrefix(string(input), "null") {
-			// Unmarshal the input into the parsed map
-			err = json5.Unmarshal(input, &parsedSettings)
-			if err != nil {
-				settingsParseError = true
-				return errors.New("Error reading settings.json: " + err.Error())
-			}
 
-			// check if autosave is a boolean and convert it to float if so
-			if v, ok := parsedSettings["autosave"]; ok {
-				s, ok := v.(bool)
-				if ok {
-					if s {
-						parsedSettings["autosave"] = 8.0
-					} else {
-						parsedSettings["autosave"] = 0.0
-					}
+		// check if autosave is a boolean and convert it to float if so
+		if v, ok := parsedSettings["autosave"]; ok {
+			s, ok := v.(bool)
+			if ok {
+				if s {
+					parsedSettings["autosave"] = 8.0
+				} else {
+					parsedSettings["autosave"] = 0.0
 				}
 			}
 		}
