@@ -129,6 +129,11 @@ func (w *BufWindow) updateDisplayInfo() {
 		w.bufHeight--
 	}
 
+	scrollbarWidth := 0
+	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height && w.Width > 0 {
+		scrollbarWidth = 1
+	}
+
 	w.hasMessage = len(b.Messages) > 0
 
 	// We need to know the string length of the largest line number
@@ -146,12 +151,12 @@ func (w *BufWindow) updateDisplayInfo() {
 		w.gutterOffset += w.maxLineNumLength + 1
 	}
 
-	prevBufWidth := w.bufWidth
-
-	w.bufWidth = w.Width - w.gutterOffset
-	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
-		w.bufWidth--
+	if w.gutterOffset > w.Width-scrollbarWidth {
+		w.gutterOffset = w.Width - scrollbarWidth
 	}
+
+	prevBufWidth := w.bufWidth
+	w.bufWidth = w.Width - w.gutterOffset - scrollbarWidth
 
 	if w.bufWidth != prevBufWidth && w.Buf.Settings["softwrap"].(bool) {
 		for _, c := range w.Buf.GetCursors() {
@@ -277,13 +282,17 @@ func (w *BufWindow) drawGutter(vloc *buffer.Loc, bloc *buffer.Loc) {
 			break
 		}
 	}
-	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
-	vloc.X++
-	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
-	vloc.X++
+	for i := 0; i < 2 && vloc.X < w.gutterOffset; i++ {
+		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, char, nil, s)
+		vloc.X++
+	}
 }
 
 func (w *BufWindow) drawDiffGutter(backgroundStyle tcell.Style, softwrapped bool, vloc *buffer.Loc, bloc *buffer.Loc) {
+	if vloc.X >= w.gutterOffset {
+		return
+	}
+
 	symbol := ' '
 	styleName := ""
 
@@ -319,26 +328,28 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, vloc
 	} else {
 		lineInt = bloc.Y - cursorLine
 	}
-	lineNum := strconv.Itoa(util.Abs(lineInt))
+	lineNum := []rune(strconv.Itoa(util.Abs(lineInt)))
 
 	// Write the spaces before the line number if necessary
-	for i := 0; i < w.maxLineNumLength-len(lineNum); i++ {
+	for i := 0; i < w.maxLineNumLength-len(lineNum) && vloc.X < w.gutterOffset; i++ {
 		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		vloc.X++
 	}
 	// Write the actual line number
-	for _, ch := range lineNum {
+	for i := 0; i < len(lineNum) && vloc.X < w.gutterOffset; i++ {
 		if softwrapped {
 			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		} else {
-			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ch, nil, lineNumStyle)
+			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, lineNum[i], nil, lineNumStyle)
 		}
 		vloc.X++
 	}
 
 	// Write the extra space
-	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
-	vloc.X++
+	if vloc.X < w.gutterOffset {
+		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
+		vloc.X++
+	}
 }
 
 // getStyle returns the highlight style for the given character position
