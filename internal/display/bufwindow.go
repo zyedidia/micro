@@ -337,7 +337,7 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, vloc
 	}
 	// Write the actual line number
 	for i := 0; i < len(lineNum) && vloc.X < w.gutterOffset; i++ {
-		if softwrapped {
+		if softwrapped || (w.bufWidth == 0 && w.Buf.Settings["softwrap"] == true) {
 			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		} else {
 			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, lineNum[i], nil, lineNumStyle)
