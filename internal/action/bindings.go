@@ -41,6 +41,8 @@ func InitDefaultBindings() {
 
 // InitBindings intializes the bindings map by reading from bindings.json
 func InitBindings() {
+	InitDefaultBindings()
+
 	var parsed map[string]interface{}
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
@@ -56,10 +58,10 @@ func InitBindings() {
 		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json:", err.Error())
+			return
 		}
 	}
 
-	InitDefaultBindings()
 
 	for k, v := range parsed {
 		switch val := v.(type) {
