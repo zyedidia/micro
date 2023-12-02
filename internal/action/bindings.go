@@ -11,9 +11,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/tcell/v2"
 )
 
@@ -50,7 +50,7 @@ func InitBindings() {
 	createBindingsIfNotExist(filename)
 
 	if _, e = os.Stat(filename); e == nil {
-		err := UnmarshalJSONFile(filename, &parsed)
+		err := util.UnmarshalConfigJSONFile(filename, &parsed)
 
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json:", err.Error())
@@ -250,7 +250,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	createBindingsIfNotExist(filename)
 
 	if _, e = os.Stat(filename); e == nil {
-		err := UnmarshalJSONFile(filename, &parsed)
+		err := util.UnmarshalConfigJSONFile(filename, &parsed)
 
 		if err != nil {
 			return false, errors.New("Error reading bindings.json: " + err.Error())
@@ -296,7 +296,7 @@ func UnbindKey(k string) error {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		err := UnmarshalJSONFile(filename, &parsed)
+		err := util.UnmarshalConfigJSONFile(filename, &parsed)
 
 		if err != nil {
 			return errors.New("Error reading bindings.json: " + err.Error())
@@ -328,21 +328,6 @@ func UnbindKey(k string) error {
 		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return e
-}
-
-// Doesn't check if filename points to correct file
-func UnmarshalJSONFile(filename string, parsedData interface{}) error {
-	input, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return err
-	}
-
-	err = json5.Unmarshal(input, &parsedData)
-	if err != nil {
-		return err
-	}
-
-	return nil
 }
 
 var mouseEvents = map[string]tcell.ButtonMask{

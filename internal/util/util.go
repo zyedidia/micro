@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"os/user"
@@ -19,6 +20,8 @@ import (
 
 	"github.com/blang/semver"
 	runewidth "github.com/mattn/go-runewidth"
+
+	"github.com/zyedidia/json5"
 )
 
 var (
@@ -506,4 +509,24 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+// Doesn't check if filename points to correct file
+func UnmarshalConfigJSONFile(filename string, parsedData interface{}) error {
+	input, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	err = json5.Unmarshal(input, &parsedData)
+	if err != nil {
+		return err
+	}
+
+	// Check if file contains null and not even {}
+	if parsedData == nil {
+		return errors.New("root node of config file must be an object")
+	}
+
+	return nil
 }
