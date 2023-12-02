@@ -29,6 +29,16 @@ func createBindingsIfNotExist(fname string) {
 	}
 }
 
+func InitDefaultBindings() {
+	for p, bind := range Binder {
+		defaults := DefaultBindings(p)
+
+		for k, v := range defaults {
+			BindKey(k, v, bind)
+		}
+	}
+}
+
 // InitBindings intializes the bindings map by reading from bindings.json
 func InitBindings() {
 	var parsed map[string]interface{}
@@ -49,13 +59,7 @@ func InitBindings() {
 		}
 	}
 
-	for p, bind := range Binder {
-		defaults := DefaultBindings(p)
-
-		for k, v := range defaults {
-			BindKey(k, v, bind)
-		}
-	}
+	InitDefaultBindings()
 
 	for k, v := range parsed {
 		switch val := v.(type) {
