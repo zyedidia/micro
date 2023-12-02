@@ -43,25 +43,20 @@ func InitDefaultBindings() {
 func InitBindings() {
 	InitDefaultBindings()
 
+	var e error
 	var parsed map[string]interface{}
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 
-	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			screen.TermMessage("Error reading bindings.json file: " + err.Error())
-			return
-		}
+	if _, e = os.Stat(filename); e == nil {
+		err := UnmarshalJSONFile(filename, &parsed)
 
-		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json:", err.Error())
 			return
 		}
 	}
-
 
 	for k, v := range parsed {
 		switch val := v.(type) {
@@ -253,13 +248,10 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
-	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return false, errors.New("Error reading bindings.json file: " + err.Error())
-		}
 
-		err = json5.Unmarshal(input, &parsed)
+	if _, e = os.Stat(filename); e == nil {
+		err := UnmarshalJSONFile(filename, &parsed)
+
 		if err != nil {
 			return false, errors.New("Error reading bindings.json: " + err.Error())
 		}
@@ -304,12 +296,8 @@ func UnbindKey(k string) error {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return errors.New("Error reading bindings.json file: " + err.Error())
-		}
+		err := UnmarshalJSONFile(filename, &parsed)
 
-		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			return errors.New("Error reading bindings.json: " + err.Error())
 		}
@@ -340,6 +328,21 @@ func UnbindKey(k string) error {
 		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return e
+}
+
+// Doesn't check if filename points to correct file
+func UnmarshalJSONFile(filename string, parsedData interface{}) error {
+	input, err := ioutil.ReadFile(filename)
+	if err != nil {
+		return err
+	}
+
+	err = json5.Unmarshal(input, &parsedData)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 var mouseEvents = map[string]tcell.ButtonMask{
