@@ -189,12 +189,9 @@ func (n *Node) ResizeSplit(size int) bool {
 		// cannot resize a lone node
 		return false
 	}
-	ind := 0
-	for i, c := range n.parent.children {
-		if c.id == n.id {
-			ind = i
-		}
-	}
+
+	ind := n.getParentIndex();
+
 	if n.parent.Kind == STVert {
 		return n.parent.vResizeSplit(ind, size)
 	}
@@ -257,23 +254,13 @@ func (n *Node) markResize() {
 
 // vsplits a vertical split and returns the id of the new split
 func (n *Node) vVSplit(right bool) uint64 {
-	ind := 0
-	for i, c := range n.parent.children {
-		if c.id == n.id {
-			ind = i
-		}
-	}
+	ind := n.getParentIndex();
 	return n.parent.hVSplit(ind, right)
 }
 
 // hsplits a horizontal split
 func (n *Node) hHSplit(bottom bool) uint64 {
-	ind := 0
-	for i, c := range n.parent.children {
-		if c.id == n.id {
-			ind = i
-		}
-	}
+	ind := n.getParentIndex();
 	return n.parent.vHSplit(ind, bottom)
 }
 
@@ -460,12 +447,9 @@ func (n *Node) Unsplit() bool {
 	if !n.IsLeaf() || n.parent == nil {
 		return false
 	}
-	ind := 0
-	for i, c := range n.parent.children {
-		if c.id == n.id {
-			ind = i
-		}
-	}
+
+	ind := n.getParentIndex();
+
 	if n.parent.Kind == STVert {
 		n.parent.unsplit(ind, true)
 	} else {
@@ -476,6 +460,18 @@ func (n *Node) Unsplit() bool {
 		return n.parent.Unsplit()
 	}
 	return true
+}
+
+// Get index of split in parent
+func (n *Node) getParentIndex() int {
+	ind := 0
+	for i, c := range n.parent.children {
+		if c.id == n.id {
+			ind = i
+			break
+		}
+	}
+	return ind
 }
 
 // String returns the string form of the node and all children (used for debugging)
