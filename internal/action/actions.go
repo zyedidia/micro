@@ -793,25 +793,26 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 			filename := strings.Join(args, " ")
 			fileinfo, err := os.Stat(filename)
 			if err != nil {
-				if os.IsNotExist(err) {
+				if errors.Is(err, fs.ErrNotExist) || errors.Is(err, fs.ErrPermission) {
 					noPrompt := h.saveBufToFile(filename, action, callback)
 					if noPrompt {
 						h.completeAction(action)
 						return
 					}
 				}
-			}
-			InfoBar.YNPrompt(
-				fmt.Sprintf("the file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
-				func(yes, canceled bool) {
-					if yes && !canceled {
-						noPrompt := h.saveBufToFile(filename, action, callback)
-						if noPrompt {
-							h.completeAction(action)
+			} else {
+				InfoBar.YNPrompt(
+					fmt.Sprintf("The file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
+					func(yes, canceled bool) {
+						if yes && !canceled {
+							noPrompt := h.saveBufToFile(filename, action, callback)
+							if noPrompt {
+								h.completeAction(action)
+							}
 						}
-					}
-				},
-			)
+					},
+				)
+			}
 		}
 	})
 	return false
