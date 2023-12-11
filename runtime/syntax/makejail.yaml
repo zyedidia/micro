@@ -39,6 +39,6 @@ rules:
             - constant.specialChar: "\\\\."
 
     # Parameters: --arg1, --arg2 ... --argN
-    - special: "--[[:alnum:]\\-]+"
+    - special: "--[[:alnum:]\\-_]+"
 
     - constant.specialChar: "\\$"
