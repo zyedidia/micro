@@ -5,7 +5,7 @@ detect:
 
 rules:
     ## Instructions: https://appjail.readthedocs.io/en/latest/makejails/instructions/
-    - statement: "^[[:space:]]*(ADD|ARG|CLEAR|CMD|COPY|ENTRYPOINT|ENV|INCLUDE|MOUNT|PKG|RAW|REPLACE|RUN|SERVICE|SET|SYSRC|UMOUNT|USER|VAR|WORKDIR|EXEC|DESTROY|GLOBAL|DEVICE|LOGIN|OPTION|RESTART|STAGE|START|STOP|FROM)[[:space:]]?"
+    - statement: "^[[:space:]]*(ADD|ARG|CLEAR|CMD|COPY|ENTRYPOINT|ENV|INCLUDE|MOUNT|PKG|RAW|REPLACE|RUN|SERVICE|SET|SYSRC|UMOUNT|USER|VAR|VOLUME|WORKDIR|EXEC|DESTROY|GLOBAL|DEVICE|LOGIN|OPTION|RESTART|STAGE|START|STOP|FROM)[[:space:]]?"
 
     ## https://appjail.readthedocs.io/en/latest/makejails/instructions/#arg
     ## https://appjail.readthedocs.io/en/latest/makejails/instructions/#var
