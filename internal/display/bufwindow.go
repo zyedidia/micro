@@ -432,6 +432,7 @@ func (w *BufWindow) displayBuffer() {
 
 	softwrap := b.Settings["softwrap"].(bool)
 	wordwrap := softwrap && b.Settings["wordwrap"].(bool)
+	wrapindent := util.IntOpt(w.Buf.Settings["wrapindent"])
 
 	tabsize := util.IntOpt(b.Settings["tabsize"])
 	colorcolumn := util.IntOpt(b.Settings["colorcolumn"])
@@ -649,11 +650,19 @@ func (w *BufWindow) displayBuffer() {
 				if !softwrap {
 					break
 				} else {
+					// Get leading whitespaces before we wrap the line
+					ws := util.GetLeadingWhitespace(b.LineBytes(bloc.Y))
+
 					vloc.Y++
 					if vloc.Y >= w.bufHeight {
 						break
 					}
 					wrap()
+
+					// After we wrapped the line, add the visual width of the leading whitespaces to the visual X column
+					if wrapindent > -1 {
+						vloc.X += util.StringWidth(ws, len(ws), tabsize) + wrapindent
+					}
 				}
 			}
 
@@ -682,11 +691,19 @@ func (w *BufWindow) displayBuffer() {
 				if !softwrap {
 					break
 				} else {
+					// Get leading whitespaces before we wrap the line
+					ws := util.GetLeadingWhitespace(b.LineBytes(bloc.Y))
+
 					vloc.Y++
 					if vloc.Y >= w.bufHeight {
 						break
 					}
 					wrap()
+
+					// After we wrapped the line, add the visual width of the leading whitespaces to the visual X column
+					if wrapindent > -1 {
+						vloc.X += util.StringWidth(ws, len(ws), tabsize) + wrapindent
+					}
 				}
 			}
 		}
