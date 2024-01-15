@@ -315,7 +315,7 @@ func ReplaceHome(path string) (string, error) {
 // This is used for opening files like util.go:10:5 to specify a line and column
 // Special cases like Windows Absolute path (C:\myfile.txt:10:5) are handled correctly.
 func GetPathAndCursorPosition(path string) (string, []string) {
-	re := regexp.MustCompile(`([\s\S]+?)(?::(\d+))(?::(\d+))?`)
+	re := regexp.MustCompile(`([\s\S]+?)(?::(\d+))(?::(\d+))?$`)
 	match := re.FindStringSubmatch(path)
 	// no lines/columns were specified in the path, return just the path with no cursor location
 	if len(match) == 0 {
