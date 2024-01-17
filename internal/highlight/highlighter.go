@@ -102,8 +102,9 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		if !statesOnly {
 			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
-		h.highlightEmptyRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, util.SliceEnd(line, firstLoc[1]), statesOnly)
-		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, util.SliceEnd(line, firstLoc[1]), firstRegion, statesOnly)
+		slice := util.SliceEnd(line, firstLoc[1])
+		h.highlightEmptyRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, slice, statesOnly)
+		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, slice, firstRegion, statesOnly)
 		return highlights
 	}
 
