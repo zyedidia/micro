@@ -77,6 +77,24 @@ func colorschemeComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// filetypeComplete autocompletes filetype
+func filetypeComplete(input string) (string, []string) {
+	var suggestions []string
+
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		if strings.HasPrefix(f.Name(), input) {
+			suggestions = append(suggestions, f.Name())
+		}
+	}
+
+	var chosen string
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+
+	return chosen, suggestions
+}
+
 func contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -172,6 +190,8 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 		switch inputOpt {
 		case "colorscheme":
 			_, suggestions = colorschemeComplete(input)
+		case "filetype":
+			_, suggestions = filetypeComplete(input)
 		case "fileformat":
 			if strings.HasPrefix("unix", input) {
 				suggestions = append(suggestions, "unix")
