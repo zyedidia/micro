@@ -76,35 +76,35 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		}
 	}
 
-	var firstRegion *region
-	firstLoc := []int{lineLen, 0}
+	var nestedRegion *region
+	nestedLoc := []int{lineLen, 0}
 	searchNesting := true
 	endLoc := findIndex(curRegion.end, curRegion.skip, line)
 	if endLoc != nil {
 		if start == endLoc[0] {
 			searchNesting = false
 		} else {
-			firstLoc = endLoc
+			nestedLoc = endLoc
 		}
 	}
 	if searchNesting {
 		for _, r := range curRegion.rules.regions {
 			loc := findIndex(r.start, r.skip, line)
 			if loc != nil {
-				if loc[0] < firstLoc[0] {
-					firstLoc = loc
-					firstRegion = r
+				if loc[0] < nestedLoc[0] {
+					nestedLoc = loc
+					nestedRegion = r
 				}
 			}
 		}
 	}
-	if firstRegion != nil && firstLoc[0] != lineLen {
+	if nestedRegion != nil && nestedLoc[0] != lineLen {
 		if !statesOnly {
-			highlights[start+firstLoc[0]] = firstRegion.limitGroup
+			highlights[start+nestedLoc[0]] = nestedRegion.limitGroup
 		}
-		slice := util.SliceEnd(line, firstLoc[1])
-		h.highlightEmptyRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, slice, statesOnly)
-		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, slice, firstRegion, statesOnly)
+		slice := util.SliceEnd(line, nestedLoc[1])
+		h.highlightEmptyRegion(highlights, start+nestedLoc[1], canMatchEnd, lineNum, slice, statesOnly)
+		h.highlightRegion(highlights, start+nestedLoc[1], canMatchEnd, lineNum, slice, nestedRegion, statesOnly)
 		return highlights
 	}
 
