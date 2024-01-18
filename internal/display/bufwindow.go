@@ -517,6 +517,15 @@ func (w *BufWindow) displayBuffer() {
 							}
 						}
 
+						if b.Settings["altlinecolors"].(bool) {
+							if bloc.Y%2 == 0 && !dontOverrideBackground {
+								if s, ok := config.Colorscheme["alt-line"]; ok {
+									fg, _, _ := s.Decompose()
+									style = style.Background(fg)
+								}
+							}
+						}
+
 						if b.Settings["cursorline"].(bool) && w.active && !dontOverrideBackground &&
 							!c.HasSelection() && c.Y == bloc.Y {
 							if s, ok := config.Colorscheme["cursor-line"]; ok {
@@ -692,6 +701,14 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		style := config.DefStyle
+		if b.Settings["altlinecolors"].(bool) {
+			if bloc.Y%2 == 0 {
+				if s, ok := config.Colorscheme["alt-line"]; ok {
+					fg, _, _ := s.Decompose()
+					style = style.Background(fg)
+				}
+			}
+		}
 		for _, c := range cursors {
 			if b.Settings["cursorline"].(bool) && w.active &&
 				!c.HasSelection() && c.Y == bloc.Y {

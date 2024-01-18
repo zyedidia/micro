@@ -1,4 +1,5 @@
 color-link default "#e6e1dc,#2b2b2b"
+color-link alt-line "#242424"
 color-link comment "#bc9458,#2b2b2b"
 color-link statement "#cc7833,#2b2b2b"
 color-link constant "#a5c261,#2b2b2b"

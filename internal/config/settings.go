@@ -273,6 +273,7 @@ func GetGlobalOption(name string) interface{} {
 }
 
 var defaultCommonSettings = map[string]interface{}{
+	"altlinecolors":  false,
 	"autoindent":     true,
 	"autosu":         false,
 	"backup":         true,

@@ -11,6 +11,11 @@ if you have set either of the above environment variables).
 
 Here are the available options:
 
+* `altlinecolors`: alternate line background colors, `alt-line` color must
+   be specified in the active colorscheme for this option.
+  
+	default value: `false`
+
 * `autoindent`: when creating a new line, use the same indentation as the 
    previous line.
 
@@ -463,6 +468,7 @@ so that you can see what the formatting should look like.
 
 ```json
 {
+    "altlinecolors": false,
     "autoclose": true,
     "autoindent": true,
     "autosave": 0,

@@ -1,6 +1,7 @@
 #CaptainMcClellan's personal colour scheme.
 #Full colour edition.
 color-link default "#aaaaaa,#1e2124"
+color-link alt-line "#24272b"
 color-link comment "bold #555555"
 color-link constant "#008888"
 #color-link constant.string "#888800"
