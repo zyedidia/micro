@@ -48,7 +48,7 @@ var optionValidators = map[string]optionValidator{
 	"scrollmargin": validateNonNegativeValue,
 	"scrollspeed":  validateNonNegativeValue,
 	"colorscheme":  validateColorscheme,
-	"colorcolumn":  validateNonNegativeValue,
+	"colorcolumns": validateNonNegativeIntSlice,
 	"fileformat":   validateLineEnding,
 	"encoding":     validateEncoding,
 	"multiopen":    validateMultiOpen,
@@ -80,6 +80,27 @@ func ReadSettings() error {
 					} else {
 						parsedSettings["autosave"] = 0.0
 					}
+				}
+			}
+
+			// The json5 library parses all slices as []interface{}, so narrow the type to an []int
+			if v, ok := parsedSettings["colorcolumns"]; ok {
+				if ifaceSlice, ok := v.([]interface{}); ok {
+					intSlice := []int{}
+					for _, ifaceVal := range ifaceSlice {
+						if floatVal, ok := ifaceVal.(float64); ok {
+							intSlice = append(intSlice, int(floatVal))
+						}
+					}
+					parsedSettings["colorcolumns"] = intSlice
+				}
+			}
+
+			// colorcolumns used to be called colorcolumn, and was a float64 instead of an []int
+			if v, ok := parsedSettings["colorcolumn"]; ok {
+				if float, ok := v.(float64); ok {
+					parsedSettings["colorcolumns"] = []int{int(float)}
+					delete(parsedSettings, "colorcolumn")
 				}
 			}
 		}
@@ -278,7 +299,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"backup":         true,
 	"backupdir":      "",
 	"basename":       false,
-	"colorcolumn":    float64(0),
+	"colorcolumns":   []int{0},
 	"cursorline":     true,
 	"diffgutter":     false,
 	"encoding":       "utf-8",
@@ -400,22 +421,28 @@ func DefaultAllSettings() map[string]interface{} {
 // GetNativeValue parses and validates a value for a given option
 func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {
 	var native interface{}
-	kind := reflect.TypeOf(realValue).Kind()
-	if kind == reflect.Bool {
+	switch realValue.(type) {
+	case bool:
 		b, err := util.ParseBool(value)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
 		native = b
-	} else if kind == reflect.String {
+	case string:
 		native = value
-	} else if kind == reflect.Float64 {
+	case float64:
 		i, err := strconv.Atoi(value)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
 		native = float64(i)
-	} else {
+	case []int:
+		intSlice, err := util.IntSliceOpt(value)
+		if err != nil {
+			return nil, err
+		}
+		native = intSlice
+	default:
 		return nil, ErrInvalidValue
 	}
 
@@ -459,6 +486,22 @@ func validateNonNegativeValue(option string, value interface{}) error {
 
 	if nativeValue < 0 {
 		return errors.New(option + " must be non-negative")
+	}
+
+	return nil
+}
+
+func validateNonNegativeIntSlice(option string, value interface{}) error {
+	nativeValue, ok := value.([]int)
+
+	if !ok {
+		return errors.New("Expected int slice type for " + option)
+	}
+
+	for _, v := range nativeValue {
+		if v < 0 {
+			return errors.New(option + " must only contain non-negative values")
+		}
 	}
 
 	return nil

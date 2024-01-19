@@ -368,6 +368,38 @@ func IntOpt(opt interface{}) int {
 	return int(opt.(float64))
 }
 
+// IntSliceOpt turns a string slice or a stringed number into an []int.
+// The parsing is very relaxed, and will parse many different formats by only looking at
+// singular/grouped numbers (as well as negative symbols), and assumes everything else is a separator.
+func IntSliceOpt(opt interface{}) ([]int, error) {
+	switch opt := opt.(type) {
+	case []int:
+		if len(opt) == 0 {
+			return nil, errors.New("no number(s) provided")
+		}
+		return opt, nil
+	case string:
+		intSlice := []int{}
+		fields := strings.FieldsFunc(opt, func(r rune) bool {
+			return (r < '0' && r != '-') || r > '9'
+		})
+		if len(fields) == 0 {
+			return nil, errors.New("could not parse any numbers")
+		}
+		for _, field := range fields {
+			number, err := strconv.Atoi(field)
+			if err != nil {
+				return nil, errors.New(field + " is not a valid number")
+			}
+			intSlice = append(intSlice, number)
+		}
+
+		return intSlice, nil
+	default:
+		return nil, fmt.Errorf("unexpected IntSliceOpt type: %T", opt)
+	}
+}
+
 // GetCharPosInLine gets the char position of a visual x y
 // coordinate (this is necessary because tabs are 1 char but
 // 4 visual spaces)
