@@ -42,6 +42,10 @@ quotes here but these are not necessary when entering the command in micro.
 
    Note that `search` must be a valid regex (unless `-l` is passed). If one 
    of the arguments does not have any spaces in it, you may omit the quotes.
+   In case the search is done non-literal (without `-l`) the character `$` can't
+   be simply added, since `Regexp.Expand()` is used in the background to add
+   more complex template replacement functionality. To add a `$` a double `$$`
+   must be used.
 
 * `replaceall 'search' 'value'`: this will replace all occurrences of `search`
    with `value` without user confirmation.
