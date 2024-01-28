@@ -3,53 +3,9 @@ package highlight
 import (
 	"regexp"
 	"strings"
+
+	"github.com/zyedidia/micro/v2/internal/util"
 )
-
-func sliceStart(slc []byte, index int) []byte {
-	len := len(slc)
-	i := 0
-	totalSize := 0
-	for totalSize < len {
-		if i >= index {
-			return slc[totalSize:]
-		}
-
-		_, _, size := DecodeCharacter(slc[totalSize:])
-		totalSize += size
-		i++
-	}
-
-	return slc[totalSize:]
-}
-
-func sliceEnd(slc []byte, index int) []byte {
-	len := len(slc)
-	i := 0
-	totalSize := 0
-	for totalSize < len {
-		if i >= index {
-			return slc[:totalSize]
-		}
-
-		_, _, size := DecodeCharacter(slc[totalSize:])
-		totalSize += size
-		i++
-	}
-
-	return slc[:totalSize]
-}
-
-// RunePos returns the rune index of a given byte index
-// This could cause problems if the byte index is between code points
-func runePos(p int, str []byte) int {
-	if p < 0 {
-		return 0
-	}
-	if p >= len(str) {
-		return CharacterCount(str)
-	}
-	return CharacterCount(str[:p])
-}
 
 // A State represents the region at the end of a line
 type State *region
@@ -86,7 +42,7 @@ func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte) []int {
 	var strbytes []byte
 	if skip != nil {
 		strbytes = skip.ReplaceAllFunc(str, func(match []byte) []byte {
-			res := make([]byte, CharacterCount(match))
+			res := make([]byte, util.CharacterCount(match))
 			return res
 		})
 	} else {
@@ -98,20 +54,20 @@ func findIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte) []int {
 		return nil
 	}
 	// return []int{match.Index, match.Index + match.Length}
-	return []int{runePos(match[0], str), runePos(match[1], str)}
+	return []int{util.RunePos(str, match[0]), util.RunePos(str, match[1])}
 }
 
 func findAllIndex(regex *regexp.Regexp, str []byte) [][]int {
 	matches := regex.FindAllIndex(str, -1)
 	for i, m := range matches {
-		matches[i][0] = runePos(m[0], str)
-		matches[i][1] = runePos(m[1], str)
+		matches[i][0] = util.RunePos(str, m[0])
+		matches[i][1] = util.RunePos(str, m[1])
 	}
 	return matches
 }
 
 func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, curRegion *region, statesOnly bool) LineMatch {
-	lineLen := CharacterCount(line)
+	lineLen := util.CharacterCount(line)
 	if start == 0 {
 		if !statesOnly {
 			if _, ok := highlights[0]; !ok {
@@ -146,8 +102,8 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 		if !statesOnly {
 			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
-		h.highlightEmptyRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), statesOnly)
-		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
+		h.highlightEmptyRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, util.SliceEnd(line, firstLoc[1]), statesOnly)
+		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, util.SliceEnd(line, firstLoc[1]), firstRegion, statesOnly)
 		return highlights
 	}
 
@@ -187,13 +143,13 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 			if !statesOnly {
 				highlights[start+loc[1]] = 0
 			}
-			h.highlightEmptyRegion(highlights, start+loc[1], canMatchEnd, lineNum, sliceStart(line, loc[1]), statesOnly)
+			h.highlightEmptyRegion(highlights, start+loc[1], canMatchEnd, lineNum, util.SliceEnd(line, loc[1]), statesOnly)
 			return highlights
 		}
 		if !statesOnly {
 			highlights[start+loc[1]] = curRegion.parent.group
 		}
-		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, sliceStart(line, loc[1]), curRegion.parent, statesOnly)
+		h.highlightRegion(highlights, start+loc[1], canMatchEnd, lineNum, util.SliceEnd(line, loc[1]), curRegion.parent, statesOnly)
 		return highlights
 	}
 
@@ -205,7 +161,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 }
 
 func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canMatchEnd bool, lineNum int, line []byte, statesOnly bool) LineMatch {
-	lineLen := CharacterCount(line)
+	lineLen := util.CharacterCount(line)
 	if lineLen == 0 {
 		if canMatchEnd {
 			h.lastRegion = nil
@@ -228,8 +184,8 @@ func (h *Highlighter) highlightEmptyRegion(highlights LineMatch, start int, canM
 		if !statesOnly {
 			highlights[start+firstLoc[0]] = firstRegion.limitGroup
 		}
-		h.highlightEmptyRegion(highlights, start, false, lineNum, sliceEnd(line, firstLoc[0]), statesOnly)
-		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, sliceStart(line, firstLoc[1]), firstRegion, statesOnly)
+		h.highlightEmptyRegion(highlights, start, false, lineNum, util.SliceStart(line, firstLoc[0]), statesOnly)
+		h.highlightRegion(highlights, start+firstLoc[1], canMatchEnd, lineNum, util.SliceEnd(line, firstLoc[1]), firstRegion, statesOnly)
 		return highlights
 	}
 
