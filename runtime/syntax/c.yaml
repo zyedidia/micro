@@ -7,6 +7,8 @@ rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
     - type: "\\b(_Atomic|_BitInt|float|double|_Decimal32|_Decimal64|_Decimal128|_Complex|complex|_Imaginary|imaginary|_Bool|bool|char|int|short|long|enum|void|struct|union|typedef|typeof|typeof_unqual|(un)?signed|inline|_Noreturn)\\b"
     - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr))|char(8|16|32)|wchar)_t\\b"
+      # GCC float/decimal/fixed types
+    - type: "\\b(_Float16|__fp16|_Float32|_Float32x|_Float64|_Float64x|__float80|_Float128|_Float128x|__float128|__ibm128|__int128|_Fract|_Sat|_Accum)\\b"
     - type: "\\b[a-z_][0-9a-z_]+(_t|_T)\\b"
     - statement: "\\b(auto|volatile|register|restrict|_Alignas|alignas|_Alignof|alignof|static|const|constexpr|extern|_Thread_local|thread_local)\\b"
     - statement: "\\b(for|if|while|do|else|case|default|switch|_Generic|_Static_assert|static_assert)\\b"
@@ -16,7 +18,7 @@ rules:
     - preproc: "^[[:space:]]*_Pragma\\b"
       # GCC builtins
     - statement: "__attribute__[[:space:]]*\\(\\([^)]*\\)\\)"
-    - statement: "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
+    - statement: "__(aligned|asm|builtin|extension|hidden|inline|packed|restrict|section|typeof|weak)__"
       # Operator Color
     - symbol.operator: "[-+*/%=<>.:;,~&|^!?]|\\b(offsetof|sizeof)\\b"
     - symbol.brackets: "[(){}]|\\[|\\]"
