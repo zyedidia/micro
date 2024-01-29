@@ -10,6 +10,7 @@ rules:
       # Annotation
     - identifier.var: "@[A-Za-z]+"
 
+    - preproc: "^[[:space:]]*#[[:space:]]*(define|elif|else|endif|endregion|error|if|line|nullable|pragma|region|undef|warning)"
     - identifier: "([A-Za-z0-9_]*[[:space:]]*[()])"
     - type: "\\b(bool|byte|sbyte|char|decimal|double|float|IntPtr|int|uint|long|ulong|managed|unmanaged|nint|nuint|object|short|ushort|string|base|this|var|void)\\b"
     - statement: "\\b(alias|as|case|catch|checked|default|do|dynamic|else|finally|fixed|for|foreach|goto|if|is|lock|new|null|return|switch|throw|try|unchecked|when|while|with)\\b"
