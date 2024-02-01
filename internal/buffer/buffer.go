@@ -150,9 +150,11 @@ func (b *SharedBuffer) MarkModified(start, end int) {
 	end = util.Clamp(end, 0, len(b.lines)-1)
 
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
+		l := start
 		for i := start; i <= end; i++ {
-			b.Highlighter.Highlight(b, start, end)
+			l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
 		}
+		b.Highlighter.Highlight(b, start, l)
 	}
 
 	for i := start; i <= end; i++ {

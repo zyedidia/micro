@@ -91,7 +91,11 @@ func findAllIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte) [][]int
 	return matches
 }
 
-func (h *Highlighter) highlightRange(fullHighlights []Group, start int, end int, group Group) {
+func (h *Highlighter) highlightRange(fullHighlights []Group, start int, end int, group Group, statesOnly bool) {
+	if statesOnly {
+		return
+	}
+
 	if start <= end && end <= len(fullHighlights) {
 		for i := start; i < end; i++ {
 			fullHighlights[i] = group
@@ -100,10 +104,10 @@ func (h *Highlighter) highlightRange(fullHighlights []Group, start int, end int,
 	}
 }
 
-func (h *Highlighter) highlightPatterns(fullHighlights []Group, start int, lineNum int, line []byte, curRegion *region) {
+func (h *Highlighter) highlightPatterns(fullHighlights []Group, start int, lineNum int, line []byte, curRegion *region, statesOnly bool) {
 	lineLen := util.CharacterCount(line)
 	// log.Println("highlightPatterns: lineNum:", lineNum, "start:", start, "line:", string(line))
-	if lineLen == 0 {
+	if lineLen == 0 || statesOnly {
 		return
 	}
 
@@ -118,20 +122,20 @@ func (h *Highlighter) highlightPatterns(fullHighlights []Group, start int, lineN
 		if curRegion == nil || curRegion.group == curRegion.limitGroup || p.group == curRegion.limitGroup {
 			matches := findAllIndex(p.regex, nil, line)
 			for _, m := range matches {
-				h.highlightRange(fullHighlights, start+m[0], start+m[1], p.group)
+				h.highlightRange(fullHighlights, start+m[0], start+m[1], p.group, statesOnly)
 			}
 		}
 	}
 }
 
-func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNum int, line []byte, curRegion *region, regions []*region, nestedRegion bool) {
+func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNum int, line []byte, curRegion *region, regions []*region, nestedRegion bool, statesOnly bool) {
 	lineLen := util.CharacterCount(line)
 	// log.Println("highlightRegions: lineNum:", lineNum, "start:", start, "line:", string(line))
 	if lineLen == 0 {
 		return
 	}
 
-	h.highlightPatterns(fullHighlights, start, lineNum, line, curRegion)
+	h.highlightPatterns(fullHighlights, start, lineNum, line, curRegion, statesOnly)
 
 	lastStart := 0
 	regionStart := 0
@@ -177,8 +181,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 						// log.Println("start < end")
 						regionStart = startMatches[startIdx][0]
 						regionEnd = endMatches[endIdx][1]
-						h.highlightRange(fullHighlights, start+startMatches[startIdx][0], start+endMatches[endIdx][1], r.limitGroup)
-						h.highlightRegions(fullHighlights, start+startMatches[startIdx][1], lineNum, util.SliceStartEnd(line, startMatches[startIdx][1], endMatches[endIdx][0]), r, r.rules.regions, true)
+						h.highlightRange(fullHighlights, start+startMatches[startIdx][0], start+endMatches[endIdx][1], r.limitGroup, statesOnly)
+						h.highlightRegions(fullHighlights, start+startMatches[startIdx][1], lineNum, util.SliceStartEnd(line, startMatches[startIdx][1], endMatches[endIdx][0]), r, r.rules.regions, true, statesOnly)
 						if samePattern {
 							startIdx += 1
 						}
@@ -197,9 +201,9 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 						}
 						// start and end at the current line, but switched
 						// log.Println("end < start")
-						h.highlightRange(fullHighlights, start, start+endMatches[endIdx][1], r.limitGroup)
-						h.highlightRegions(fullHighlights, start, lineNum, util.SliceStart(line, endMatches[endIdx][0]), r, r.rules.regions, true)
-						h.highlightPatterns(fullHighlights, start+endMatches[endIdx][1], lineNum, util.SliceStartEnd(line, endMatches[endIdx][1], startMatches[startIdx][0]), nil)
+						h.highlightRange(fullHighlights, start, start+endMatches[endIdx][1], r.limitGroup, statesOnly)
+						h.highlightRegions(fullHighlights, start, lineNum, util.SliceStart(line, endMatches[endIdx][0]), r, r.rules.regions, true, statesOnly)
+						h.highlightPatterns(fullHighlights, start+endMatches[endIdx][1], lineNum, util.SliceStartEnd(line, endMatches[endIdx][1], startMatches[startIdx][0]), nil, statesOnly)
 						if curRegion != nil {
 							h.lastRegion = curRegion.parent
 						} else {
@@ -213,8 +217,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 					// log.Println("start ...")
 					regionStart = startMatches[startIdx][0]
 					regionEnd = 0
-					h.highlightRange(fullHighlights, start+startMatches[startIdx][0], lineLen, r.limitGroup)
-					h.highlightRegions(fullHighlights, start+startMatches[startIdx][1], lineNum, util.SliceEnd(line, startMatches[startIdx][1]), r, r.rules.regions, true)
+					h.highlightRange(fullHighlights, start+startMatches[startIdx][0], lineLen, r.limitGroup, statesOnly)
+					h.highlightRegions(fullHighlights, start+startMatches[startIdx][1], lineNum, util.SliceEnd(line, startMatches[startIdx][1]), r, r.rules.regions, true, statesOnly)
 					if lastStart <= startMatches[startIdx][0] {
 						lastStart = startMatches[startIdx][0]
 						h.lastRegion = r
@@ -227,8 +231,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 				for _, endMatch := range endMatches {
 					// end at the current, but start at the previous line
 					// log.Println("... end")
-					h.highlightRange(fullHighlights, start, start+endMatch[1], r.limitGroup)
-					h.highlightRegions(fullHighlights, start, lineNum, util.SliceStart(line, endMatch[0]), r, r.rules.regions, true)
+					h.highlightRange(fullHighlights, start, start+endMatch[1], r.limitGroup, statesOnly)
+					h.highlightRegions(fullHighlights, start, lineNum, util.SliceStart(line, endMatch[0]), r, r.rules.regions, true, statesOnly)
 					if curRegion != nil {
 						h.lastRegion = curRegion.parent
 					} else {
@@ -239,13 +243,13 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 				}
 			} else if len(startMatches) == 0 && len(endMatches) == 0 {
 				// no start and end found in this region
-				h.highlightRange(fullHighlights, start, lineLen, curRegion.group)
+				h.highlightRange(fullHighlights, start, lineLen, curRegion.group, statesOnly)
 			}
 		}
 	}
 }
 
-func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, line []byte, curRegion *region) LineMatch {
+func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, line []byte, curRegion *region, statesOnly bool) LineMatch {
 	lineLen := util.CharacterCount(line)
 	// log.Println("highlight: lineNum:", lineNum, "start:", start, "line:", string(line))
 	if lineLen == 0 {
@@ -253,11 +257,13 @@ func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, li
 	}
 
 	fullHighlights := make([]Group, lineLen)
-	h.highlightRegions(fullHighlights, start, lineNum, line, curRegion, h.Def.rules.regions, false)
+	h.highlightRegions(fullHighlights, start, lineNum, line, curRegion, h.Def.rules.regions, false, statesOnly)
 
-	for i, h := range fullHighlights {
-		if i == 0 || h != fullHighlights[i-1] {
-			highlights[i] = h
+	if !statesOnly {
+		for i, h := range fullHighlights {
+			if i == 0 || h != fullHighlights[i-1] {
+				highlights[i] = h
+			}
 		}
 	}
 
@@ -275,7 +281,7 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 	for i := 0; i < len(lines); i++ {
 		line := []byte(lines[i])
 		highlights := make(LineMatch)
-		lineMatches = append(lineMatches, h.highlight(highlights, 0, i, line, nil))
+		lineMatches = append(lineMatches, h.highlight(highlights, 0, i, line, nil, false))
 	}
 
 	return lineMatches
@@ -298,11 +304,37 @@ func (h *Highlighter) Highlight(input LineStates, startline, endline int) {
 		highlights := make(LineMatch)
 
 		var match LineMatch
-		match = h.highlight(highlights, 0, i, line, h.lastRegion)
+		match = h.highlight(highlights, 0, i, line, h.lastRegion, false)
 
 		input.SetState(i, h.lastRegion)
 		input.SetMatch(i, match)
 	}
+}
+
+// ReHighlightStates will scan down from `startline` and set the appropriate end of line state
+// for each line until it comes across a line whose state does not change
+// returns the number of the final line
+func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
+	h.lastRegion = nil
+	if startline > 0 {
+		h.lastRegion = input.State(startline - 1)
+	}
+	for i := startline; i < input.LinesNum(); i++ {
+		line := input.LineBytes(i)
+
+		h.highlight(nil, 0, i, line, h.lastRegion, true)
+
+		curState := h.lastRegion
+		lastState := input.State(i)
+
+		input.SetState(i, curState)
+
+		if curState == lastState {
+			return i
+		}
+	}
+
+	return input.LinesNum() - 1
 }
 
 // ReHighlightLine will rehighlight the state and match for a single line
@@ -316,7 +348,7 @@ func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
 	}
 
 	var match LineMatch
-	match = h.highlight(highlights, 0, lineN, line, h.lastRegion)
+	match = h.highlight(highlights, 0, lineN, line, h.lastRegion, false)
 
 	input.SetState(lineN, h.lastRegion)
 	input.SetMatch(lineN, match)
