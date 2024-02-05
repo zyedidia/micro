@@ -44,7 +44,8 @@ type searchState struct {
 // A Line contains the data in bytes as well as a highlight state, match
 // and a flag for whether the highlighting needs to be updated
 type Line struct {
-	data []byte
+	data  []byte
+	runes []rune
 
 	state highlight.State
 	match highlight.LineMatch
@@ -146,8 +147,10 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 
 		if err != nil {
 			if err == io.EOF {
+				runes, _ := util.DecodeCharacters(data)
 				la.lines = Append(la.lines, Line{
 					data:  data,
+					runes: runes,
 					state: nil,
 					match: nil,
 				})
@@ -155,8 +158,10 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 			// Last line was read
 			break
 		} else {
+			runes, _ := util.DecodeCharacters(data[:dlen-1])
 			la.lines = Append(la.lines, Line{
 				data:  data[:dlen-1],
+				runes: runes,
 				state: nil,
 				match: nil,
 			})
@@ -189,12 +194,14 @@ func (la *LineArray) Bytes() []byte {
 func (la *LineArray) newlineBelow(y int) {
 	la.lines = append(la.lines, Line{
 		data:  []byte{' '},
+		runes: []rune{},
 		state: nil,
 		match: nil,
 	})
 	copy(la.lines[y+2:], la.lines[y+1:])
 	la.lines[y+1] = Line{
 		data:  []byte{},
+		runes: []rune{},
 		state: la.lines[y].state,
 		match: nil,
 	}
