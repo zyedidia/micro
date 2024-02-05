@@ -647,7 +647,7 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 
 	size := 0
 	if len(b.lines) > 0 {
-		n, e := h.Write(b.lines[0].data)
+		n, e := h.Write(b.lines[0].data())
 		if e != nil {
 			return e
 		}
@@ -659,7 +659,7 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 				return e
 			}
 			size += n
-			n, e = h.Write(l.data)
+			n, e = h.Write(l.data())
 			if e != nil {
 				return e
 			}
@@ -707,7 +707,7 @@ func (b *Buffer) UpdateRules() {
 			continue
 		}
 
-		if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
+		if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data())) || header.FileType == ft {
 			syndef, err := highlight.ParseDef(file, header)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
@@ -735,7 +735,7 @@ func (b *Buffer) UpdateRules() {
 		}
 
 		if ft == "unknown" || ft == "" {
-			if highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data) {
+			if highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data()) {
 				syntaxFile = f.Name()
 				break
 			}
@@ -947,11 +947,11 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	if start < 1 || start >= end || end > len(b.lines) {
 		return
 	}
-	l := string(b.LineBytes(start - 1))
+	l := string(b.lines[start - 1].runes)
 	if end == len(b.lines) {
 		b.insert(
 			Loc{
-				util.CharacterCount(b.lines[end-1].data),
+				len(b.lines[end-1].runes),
 				end - 1,
 			},
 			[]byte{'\n'},
@@ -972,7 +972,7 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 	if start < 0 || start >= end || end >= len(b.lines) {
 		return
 	}
-	l := string(b.LineBytes(end))
+	l := string(b.lines[end].runes)
 	b.Insert(
 		Loc{0, start},
 		l+"\n",
@@ -1036,7 +1036,7 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, boo
 		}
 	} else if startChar == braceType[1] || leftChar == braceType[1] {
 		for y := start.Y; y >= 0; y-- {
-			l := []rune(string(b.lines[y].data))
+			l := b.lines[y].runes
 			xInit := len(l) - 1
 			if y == start.Y {
 				if leftChar == braceType[1] {
@@ -1083,7 +1083,8 @@ func (b *Buffer) Retab() {
 		}
 
 		l = bytes.TrimLeft(l, " \t")
-		b.lines[i].data = append(ws, l...)
+		runes,_ := util.DecodeCharacters(append(ws, l...))
+		b.lines[i].runes = runes
 		b.MarkModified(i, i)
 		dirty = true
 	}

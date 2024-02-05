@@ -158,7 +158,7 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 	found := 0
 	var deltas []Delta
 	for i := start.Y; i <= end.Y; i++ {
-		l := b.lines[i].data
+		l := b.lines[i].data()
 		charpos := 0
 
 		if start.Y == end.Y && i == start.Y {
