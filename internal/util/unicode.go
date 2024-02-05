@@ -64,6 +64,54 @@ func DecodeCharacterInString(str string) (rune, []rune, int) {
 	return r, combc, size
 }
 
+// DecodeCharacters returns the characters from an array of bytes
+func DecodeCharacters(b []byte) ([]rune, int) {
+	var runes []rune
+	size := 0
+
+	for len(b) > 0 {
+		r, s := utf8.DecodeRune(b)
+		runes = append(runes, r)
+		size += s
+		b = b[s:]
+		r, s = utf8.DecodeRune(b)
+
+		for isMark(r) {
+			runes = append(runes, r)
+			size += s
+
+			b = b[s:]
+			r, s = utf8.DecodeRune(b)
+		}
+	}
+
+	return runes, size
+}
+
+// DecodeCharactersInString returns characters from a string
+func DecodeCharactersInString(str string) ([]rune, int) {
+	var runes []rune
+	size := 0
+
+	for len(str) > 0 {
+		r, s := utf8.DecodeRuneInString(str)
+		runes = append(runes, r)
+		size += s
+		str = str[s:]
+		r, s = utf8.DecodeRuneInString(str)
+
+		for isMark(r) {
+			runes = append(runes, r)
+			size += s
+
+			str = str[s:]
+			r, s = utf8.DecodeRuneInString(str)
+		}
+	}
+
+	return runes, size
+}
+
 // CharacterCount returns the number of characters in a byte array
 // Similar to utf8.RuneCount but for unicode characters
 func CharacterCount(b []byte) int {
