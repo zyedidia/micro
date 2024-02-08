@@ -371,18 +371,13 @@ func (la *LineArray) End() Loc {
 	return Loc{len(la.lines[numlines-1].runes), numlines - 1}
 }
 
-// Line returns line n as an array of runes
-func (la *LineArray) Line(n int) []rune {
+// LineCharacters returns line n as an array of characters
+func (la *LineArray) LineCharacters(n int) []Character {
 	if n >= len(la.lines) || n < 0 {
-		return []rune{}
+		return []Character{}
 	}
 
-	var runes []rune
-	for _, r := range la.lines[n].runes {
-		runes = append(runes, r.combc[0:]...)
-	}
-
-	return runes
+	return la.lines[n].runes
 }
 
 // LineBytes returns line n as an array of bytes
