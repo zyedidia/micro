@@ -120,7 +120,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 
 	if b.Settings["rmtrailingws"].(bool) {
 		for i, l := range b.lines {
-			leftover := strings.TrimRightFunc(string(l.runes), unicode.IsSpace)
+			leftover := strings.TrimRightFunc(l.String(), unicode.IsSpace)
 			linelen := len(l.runes)
 			b.Remove(Loc{len(leftover), i}, Loc{linelen, i})
 		}
