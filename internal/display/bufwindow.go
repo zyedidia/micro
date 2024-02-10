@@ -763,18 +763,56 @@ func (w *BufWindow) displayScrollBar() {
 		barstart := w.Y + int(float64(w.StartLine.Line)/float64(w.Buf.LinesNum())*float64(w.Height))
 
 		scrollBarStyle := config.DefStyle.Reverse(true)
+		scrollArrowReverse := config.GetGlobalOption("scrollarrowsreverse")
+		scrollBarArrowStyle := config.DefStyle.Reverse(scrollArrowReverse.(bool))
 		if style, ok := config.Colorscheme["scrollbar"]; ok {
 			scrollBarStyle = style
 		}
 
-		scrollBarChar := config.GetGlobalOption("scrollbarchar").(string)
-		if util.CharacterCountInString(scrollBarChar) != 1 {
-			scrollBarChar = "|"
+		scrollBarCharConfig := config.GetGlobalOption("scrollbarchar")
+		scrollBarChar, upChar, downChar, singleChar := '|', '\u25B2', '\u25BC', '\u2B0D' // Defaults
+
+		switch chars := scrollBarCharConfig.(type) {
+		case string:
+			runes := []rune(chars)
+			if len(runes) >= 1 {
+				scrollBarChar = runes[0]
+			}
+			if len(runes) >= 2 {
+				upChar = runes[1]
+			}
+			if len(runes) >= 3 {
+				downChar = runes[2]
+			}
+			if len(runes) >= 4 {
+				singleChar = runes[3]
+			}
 		}
-		scrollBarRune := []rune(scrollBarChar)
+
+		showScrollArrows := config.GetGlobalOption("showscrollarrows").(bool)
 
 		for y := barstart; y < util.Min(barstart+barsize, w.Y+w.bufHeight); y++ {
-			screen.SetContent(scrollX, y, scrollBarRune[0], nil, scrollBarStyle)
+			if barsize >= 2 {
+				// Verwende ein anderes Zeichen für das oberste Zeichen der Scroll-Leiste
+				if y == barstart {
+					if showScrollArrows {
+						screen.SetContent(scrollX, y, upChar, nil, scrollBarArrowStyle)
+					} else {
+						screen.SetContent(scrollX, y, scrollBarChar, nil, scrollBarStyle)
+					}
+				} else if y == barstart+barsize-1 {
+					// Verwende ein anderes Zeichen für das unterste Zeichen der Scroll-Leiste
+					if showScrollArrows {
+						screen.SetContent(scrollX, y, downChar, nil, scrollBarArrowStyle)
+					} else {
+						screen.SetContent(scrollX, y, scrollBarChar, nil, scrollBarStyle)
+					}
+				} else {
+					screen.SetContent(scrollX, y, scrollBarChar, nil, scrollBarStyle)
+				}
+			} else {
+				screen.SetContent(scrollX, y, singleChar, nil, scrollBarArrowStyle)
+			}
 		}
 	}
 }
