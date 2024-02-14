@@ -151,7 +151,7 @@ func (b *SharedBuffer) MarkModified(start, end int) {
 
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
 		l := start
-		for i := start; i <= end; i++ {
+		for i := start; i <= end; i = l + 1 {
 			l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
 		}
 		b.Highlighter.Highlight(b, start, l)
