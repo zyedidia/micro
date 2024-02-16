@@ -139,7 +139,7 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 	regionEnd := 0
 	for _, r := range regions {
 		// log.Println("r.start:", r.start.String(), "r.end", r.end.String())
-		if !nestedRegion && curRegion != nil && (curRegion.group != r.group || curRegion.start != r.start) {
+		if !nestedRegion && curRegion != nil && curRegion != r {
 			continue
 		}
 		startMatches := findAllIndex(r.start, r.skip, line)
@@ -158,7 +158,7 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 					samePattern = true
 					if len(startMatches) == len(endMatches) {
 						// special case in the moment both are the same
-						if curRegion != nil && curRegion.group == r.group && curRegion.start == r.start {
+						if curRegion == r {
 							if len(startMatches) > 1 {
 								// end < start
 								continue startLoop
@@ -214,8 +214,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 				// start at the current, but end at the next line
 				// log.Println("start ...")
 				regionStart = startMatch[0]
-				regionEnd = 0
-				h.highlightRange(fullHighlights, start+startMatch[0], lineLen, r.limitGroup)
+				regionEnd = start + lineLen
+				h.highlightRange(fullHighlights, start+startMatch[0], start+lineLen, r.limitGroup)
 				h.highlightRegions(fullHighlights, start+startMatch[1], lineNum, util.SliceEnd(line, startMatch[1]), r, r.rules.regions, true)
 				if lastStart == 0 || startMatch[0] <= lastStart {
 					lastStart = startMatch[0]
@@ -223,7 +223,7 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 				}
 			}
 		}
-		if curRegion != nil && curRegion.group == r.group && curRegion.start == r.start {
+		if curRegion == r {
 			if (len(startMatches) == 0 && len(endMatches) > 0) || (samePattern && (len(startMatches) == len(endMatches))) {
 				for _, endMatch := range endMatches {
 					// end at the current, but start at the previous line
@@ -241,8 +241,16 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 				}
 			} else if len(startMatches) == 0 && len(endMatches) == 0 {
 				// no start and end found in this region
-				h.highlightRange(fullHighlights, start, lineLen, curRegion.group)
+				h.highlightRange(fullHighlights, start, start+lineLen, curRegion.group)
 			}
+		}
+	}
+
+	if curRegion != nil && !nestedRegion {
+		// current region still open
+		// log.Println("...")
+		if curRegion.rules != nil {
+			h.highlightRegions(fullHighlights, start, lineNum, line, curRegion, curRegion.rules.regions, true)
 		}
 	}
 }
