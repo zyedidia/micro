@@ -9,6 +9,7 @@ rules:
     - preproc: "\\<(ifeq|ifdef|ifneq|ifndef|else|endif)\\>"
     - statement: "^(export|include|override)\\>"
     - symbol.operator: "^[^:=	]+:"
+    - symbol.operator: "^ *[@!-]"
     - symbol.operator: "([=,%]|\\+=|\\?=|:=|&&|\\|\\|)"
     - statement: "\\$\\((abspath|addprefix|addsuffix|and|basename|call|dir)[[:space:]]"
     - statement: "\\$\\((error|eval|filter|filter-out|findstring|firstword)[[:space:]]"
@@ -25,12 +26,40 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+            - symbol.operator:
+                start: "\\{\\{"
+                end: "\\}\\}"
+                rules:
+                    - type: "."
     - constant.string:
         start: "'"
         end: "'"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+            - symbol.operator:
+                start: "\\{\\{"
+                end: "\\}\\}"
+                rules:
+                    - type: "."
+    - constant.string:
+        start: "```"
+        end: "```"
+        rules:
+            - type: "."
+            - include: "shell"
+    - constant.string:
+        start: "`"
+        end: "`"
+        skip: "\\\\."
+        rules:
+            - type: "."
+            - include: "shell"
+    - symbol.operator:
+        start: "\\{\\{"
+        end: "\\}\\}"
+        rules:
+            - type: "."
     - identifier: "\\$+(\\{[^} ]+\\}|\\([^) ]+\\))"
     - identifier: "\\$[@^<*?%|+]|\\$\\([@^<*?%+-][DF]\\)"
     - identifier: "\\$\\$|\\\\.?"
