@@ -1763,13 +1763,13 @@ func (h *BufPane) SpawnMultiCursor() bool {
 
 // SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
 func (h *BufPane) SpawnMultiCursorUp() bool {
-	if h.Cursor.Y == 0 {
+	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	if lastC.Y == 0 {
 		return false
 	}
-	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-	h.Cursor.Relocate()
+	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - 1})
+	c.Relocate()
 
-	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
 	h.Buf.AddCursor(c)
 	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 	h.Buf.MergeCursors()
@@ -1780,13 +1780,13 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 
 // SpawnMultiCursorDown creates additional cursor, at the same X (if possible), one Y more.
 func (h *BufPane) SpawnMultiCursorDown() bool {
-	if h.Cursor.Y+1 == h.Buf.LinesNum() {
+	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	if lastC.Y+1 == h.Buf.LinesNum() {
 		return false
 	}
-	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
-	h.Cursor.Relocate()
+	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y + 1})
+	c.Relocate()
 
-	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
 	h.Buf.AddCursor(c)
 	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 	h.Buf.MergeCursors()
