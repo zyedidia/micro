@@ -1828,11 +1828,23 @@ func (h *BufPane) SpawnMultiCursorSelect() bool {
 	return true
 }
 
-// MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
+// MouseMultiCursor is a mouse action which puts a new cursor at the mouse position,
+// or removes a cursor if it is already there
 func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
 	mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
+
+	if h.Buf.NumCursors() > 1 {
+		cursors := h.Buf.GetCursors()
+		for _, c := range cursors {
+			if c.Loc == mouseLoc {
+				h.Buf.RemoveCursor(c.Num)
+				return true
+			}
+		}
+	}
+
 	c := buffer.NewCursor(b, mouseLoc)
 	b.AddCursor(c)
 	b.MergeCursors()
