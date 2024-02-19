@@ -1764,16 +1764,29 @@ func (h *BufPane) SpawnMultiCursor() bool {
 // SpawnMultiCursorUpN is not an action
 func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
-	if n > 0 && lastC.Y == 0 {
-		return false
+	var c *buffer.Cursor
+	if !h.Buf.Settings["softwrap"].(bool) {
+		if n > 0 && lastC.Y == 0 {
+			return false
+		}
+		if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
+			return false
+		}
+		c = buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
+		c.LastVisualX = lastC.LastVisualX
+		c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
+		c.Relocate()
+	} else {
+		vloc := h.VLocFromLoc(lastC.Loc)
+		sloc := h.Scroll(vloc.SLoc, -n)
+		if sloc == vloc.SLoc {
+			return false
+		}
+		vloc.SLoc = sloc
+		vloc.VisualX = lastC.LastVisualX
+		c = buffer.NewCursor(h.Buf, h.LocFromVLoc(vloc))
+		c.LastVisualX = lastC.LastVisualX
 	}
-	if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
-		return false
-	}
-	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
-	c.LastVisualX = lastC.LastVisualX
-	c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
-	c.Relocate()
 
 	h.Buf.AddCursor(c)
 	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
