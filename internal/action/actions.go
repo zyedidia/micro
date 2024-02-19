@@ -1761,13 +1761,16 @@ func (h *BufPane) SpawnMultiCursor() bool {
 	return true
 }
 
-// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
-func (h *BufPane) SpawnMultiCursorUp() bool {
+// SpawnMultiCursorUpN is not an action
+func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
-	if lastC.Y == 0 {
+	if n > 0 && lastC.Y == 0 {
 		return false
 	}
-	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - 1})
+	if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
+		return false
+	}
+	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
 	c.Relocate()
 
 	h.Buf.AddCursor(c)
@@ -1778,20 +1781,14 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 	return true
 }
 
+// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
+func (h *BufPane) SpawnMultiCursorUp() bool {
+	return h.SpawnMultiCursorUpN(1)
+}
+
 // SpawnMultiCursorDown creates additional cursor, at the same X (if possible), one Y more.
 func (h *BufPane) SpawnMultiCursorDown() bool {
-	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
-	if lastC.Y+1 == h.Buf.LinesNum() {
-		return false
-	}
-	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y + 1})
-	c.Relocate()
-
-	h.Buf.AddCursor(c)
-	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
-	h.Buf.MergeCursors()
-	h.Relocate()
-	return true
+	return h.SpawnMultiCursorUpN(-1)
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
