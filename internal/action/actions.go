@@ -1772,6 +1772,9 @@ func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 		if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
 			return false
 		}
+
+		h.Buf.DeselectCursors()
+
 		c = buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
 		c.LastVisualX = lastC.LastVisualX
 		c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
@@ -1782,6 +1785,9 @@ func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 		if sloc == vloc.SLoc {
 			return false
 		}
+
+		h.Buf.DeselectCursors()
+
 		vloc.SLoc = sloc
 		vloc.VisualX = lastC.LastVisualX
 		c = buffer.NewCursor(h.Buf, h.LocFromVLoc(vloc))
