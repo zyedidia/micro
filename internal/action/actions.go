@@ -1771,6 +1771,8 @@ func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 		return false
 	}
 	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
+	c.LastVisualX = lastC.LastVisualX
+	c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
 	c.Relocate()
 
 	h.Buf.AddCursor(c)
