@@ -29,39 +29,15 @@ func isMark(r rune) bool {
 // DecodeCharacter returns the next character from an array of bytes
 // A character is a rune along with any accompanying combining runes
 func DecodeCharacter(b []byte) (rune, []rune, int) {
-	r, size := utf8.DecodeRune(b)
-	b = b[size:]
-	c, s := utf8.DecodeRune(b)
-
-	var combc []rune
-	for isMark(c) {
-		combc = append(combc, c)
-		size += s
-
-		b = b[s:]
-		c, s = utf8.DecodeRune(b)
-	}
-
-	return r, combc, size
+	combc, size := DecodeCombinedCharacter(b)
+	return combc[0], combc[1:], size
 }
 
 // DecodeCharacterInString returns the next character from a string
 // A character is a rune along with any accompanying combining runes
 func DecodeCharacterInString(str string) (rune, []rune, int) {
-	r, size := utf8.DecodeRuneInString(str)
-	str = str[size:]
-	c, s := utf8.DecodeRuneInString(str)
-
-	var combc []rune
-	for isMark(c) {
-		combc = append(combc, c)
-		size += s
-
-		str = str[s:]
-		c, s = utf8.DecodeRuneInString(str)
-	}
-
-	return r, combc, size
+	combc, size := DecodeCombinedCharacterInString(str)
+	return combc[0], combc[1:], size
 }
 
 // DecodeCombinedCharacter returns the next combined character
