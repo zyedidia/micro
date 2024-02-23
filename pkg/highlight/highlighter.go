@@ -188,7 +188,9 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 							h.lastEnd = start + endMatches[endIdx][1]
 							update = true
 						}
-						h.highlightRange(fullHighlights, start+startMatches[startIdx][0], start+endMatches[endIdx][1], r.limitGroup, statesOnly)
+						h.highlightRange(fullHighlights, start+startMatches[startIdx][0], start+startMatches[startIdx][1], r.limitGroup, statesOnly)
+						h.highlightRange(fullHighlights, start+startMatches[startIdx][1], start+endMatches[endIdx][0], r.group, statesOnly)
+						h.highlightRange(fullHighlights, start+endMatches[endIdx][0], start+endMatches[endIdx][1], r.limitGroup, statesOnly)
 						h.highlightRegions(fullHighlights, start+startMatches[startIdx][1], lineNum, util.SliceStartEnd(line, startMatches[startIdx][1], endMatches[endIdx][0]), r, r.rules.regions, true, statesOnly)
 						if samePattern {
 							startIdx += 1
@@ -210,7 +212,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 						// log.Println("end < start")
 						h.lastStart = start
 						h.lastEnd = start + endMatches[endIdx][1]
-						h.highlightRange(fullHighlights, start, start+endMatches[endIdx][1], r.limitGroup, statesOnly)
+						h.highlightRange(fullHighlights, start, start+endMatches[endIdx][0], r.group, statesOnly)
+						h.highlightRange(fullHighlights, start+endMatches[endIdx][0], start+endMatches[endIdx][1], r.limitGroup, statesOnly)
 						h.highlightRegions(fullHighlights, start, lineNum, util.SliceStart(line, endMatches[endIdx][0]), r, r.rules.regions, true, statesOnly)
 						h.highlightPatterns(fullHighlights, start+endMatches[endIdx][1], lineNum, util.SliceStartEnd(line, endMatches[endIdx][1], startMatches[startIdx][0]), nil, statesOnly)
 						if curRegion != nil {
@@ -226,7 +229,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 					// log.Println("start ...")
 					h.lastStart = start + startMatches[startIdx][0]
 					h.lastEnd = start + lineLen
-					h.highlightRange(fullHighlights, start+startMatches[startIdx][0], start+lineLen, r.limitGroup, statesOnly)
+					h.highlightRange(fullHighlights, start+startMatches[startIdx][0], start+startMatches[startIdx][1], r.limitGroup, statesOnly)
+					h.highlightRange(fullHighlights, start+startMatches[startIdx][1], start+lineLen, r.group, statesOnly)
 					h.highlightRegions(fullHighlights, start+startMatches[startIdx][1], lineNum, util.SliceEnd(line, startMatches[startIdx][1]), r, r.rules.regions, true, statesOnly)
 					if h.lastStart == 0 || h.lastStart <= start+startMatches[startIdx][0] {
 						h.lastRegion = r
@@ -241,7 +245,8 @@ func (h *Highlighter) highlightRegions(fullHighlights []Group, start int, lineNu
 					// log.Println("... end")
 					h.lastStart = start
 					h.lastEnd = start + endMatch[1]
-					h.highlightRange(fullHighlights, start, start+endMatch[1], r.limitGroup, statesOnly)
+					h.highlightRange(fullHighlights, start, start+endMatch[0], r.group, statesOnly)
+					h.highlightRange(fullHighlights, start+endMatch[0], start+endMatch[1], r.limitGroup, statesOnly)
 					h.highlightRegions(fullHighlights, start, lineNum, util.SliceStart(line, endMatch[0]), r, r.rules.regions, true, statesOnly)
 					if curRegion != nil {
 						h.lastRegion = r.parent
