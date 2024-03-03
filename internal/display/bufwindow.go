@@ -564,7 +564,7 @@ func (w *BufWindow) displayBuffer() {
 
 				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, combc, style)
 
-				if showcursor {
+				if showcursor && !b.Settings["hidecursor"].(bool) {
 					for _, c := range cursors {
 						if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
 							w.showCursor(w.X+vloc.X, w.Y+vloc.Y, c.Num == 0)
