@@ -129,9 +129,17 @@ func AddRuntimeFilesFromAssets(fileType RTFiletype, directory, pattern string) {
 	if err != nil {
 		return
 	}
+
+assetLoop:
 	for _, f := range files {
 		if ok, _ := path.Match(pattern, f); ok {
-			AddRuntimeFile(fileType, assetFile(path.Join(directory, f)))
+			af := assetFile(path.Join(directory, f))
+			for _, rf := range realFiles[fileType] {
+				if af.Name() == rf.Name() {
+					continue assetLoop
+				}
+			}
+			AddRuntimeFile(fileType, af)
 		}
 	}
 }
