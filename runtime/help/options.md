@@ -157,7 +157,7 @@ Here are the available options:
    an effect if the file is empty/newly created, because otherwise the fileformat
    will be automatically detected from the existing line endings.
 
-	default value: `unix`
+	default value: `unix` on Unix systems, `dos` on Windows
 
 * `filetype`: sets the filetype for the current buffer. Set this option to
   `off` to completely disable filetype detection.

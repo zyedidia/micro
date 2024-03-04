@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -284,7 +285,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"encoding":       "utf-8",
 	"eofnewline":     true,
 	"fastdirty":      false,
-	"fileformat":     "unix",
+	"fileformat":     defaultFileFormat(),
 	"filetype":       "unknown",
 	"hlsearch":       false,
 	"incsearch":      true,
@@ -317,6 +318,13 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabstospaces":   false,
 	"useprimary":     true,
 	"wordwrap":       false,
+}
+
+func defaultFileFormat() string {
+	if runtime.GOOS == "windows" {
+		return "dos"
+	}
+	return "unix"
 }
 
 func GetInfoBarOffset() int {
