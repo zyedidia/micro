@@ -1761,15 +1761,39 @@ func (h *BufPane) SpawnMultiCursor() bool {
 	return true
 }
 
-// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
-func (h *BufPane) SpawnMultiCursorUp() bool {
-	if h.Cursor.Y == 0 {
-		return false
-	}
-	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-	h.Cursor.Relocate()
+// SpawnMultiCursorUpN is not an action
+func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
+	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	var c *buffer.Cursor
+	if !h.Buf.Settings["softwrap"].(bool) {
+		if n > 0 && lastC.Y == 0 {
+			return false
+		}
+		if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
+			return false
+		}
 
-	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
+		h.Buf.DeselectCursors()
+
+		c = buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
+		c.LastVisualX = lastC.LastVisualX
+		c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
+		c.Relocate()
+	} else {
+		vloc := h.VLocFromLoc(lastC.Loc)
+		sloc := h.Scroll(vloc.SLoc, -n)
+		if sloc == vloc.SLoc {
+			return false
+		}
+
+		h.Buf.DeselectCursors()
+
+		vloc.SLoc = sloc
+		vloc.VisualX = lastC.LastVisualX
+		c = buffer.NewCursor(h.Buf, h.LocFromVLoc(vloc))
+		c.LastVisualX = lastC.LastVisualX
+	}
+
 	h.Buf.AddCursor(c)
 	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 	h.Buf.MergeCursors()
@@ -1778,20 +1802,14 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 	return true
 }
 
+// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
+func (h *BufPane) SpawnMultiCursorUp() bool {
+	return h.SpawnMultiCursorUpN(1)
+}
+
 // SpawnMultiCursorDown creates additional cursor, at the same X (if possible), one Y more.
 func (h *BufPane) SpawnMultiCursorDown() bool {
-	if h.Cursor.Y+1 == h.Buf.LinesNum() {
-		return false
-	}
-	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
-	h.Cursor.Relocate()
-
-	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-	h.Buf.AddCursor(c)
-	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
-	h.Buf.MergeCursors()
-	h.Relocate()
-	return true
+	return h.SpawnMultiCursorUpN(-1)
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection

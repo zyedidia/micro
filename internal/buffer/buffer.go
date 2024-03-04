@@ -568,6 +568,13 @@ func (b *Buffer) RelocateCursors() {
 	}
 }
 
+// DeselectCursors removes selection from all cursors
+func (b *Buffer) DeselectCursors() {
+	for _, c := range b.cursors {
+		c.Deselect(true)
+	}
+}
+
 // RuneAt returns the rune at a given location in the buffer
 func (b *Buffer) RuneAt(loc Loc) rune {
 	line := b.LineBytes(loc.Y)
