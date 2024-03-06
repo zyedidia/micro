@@ -24,10 +24,11 @@ type LineStates interface {
 
 // highlightStorage is used to store the found ranges
 type highlightStorage struct {
-	start  int
-	end    int
-	group  Group
-	region *region
+	start    int
+	end      int
+	group    Group
+	region   *region
+	children []*highlightStorage
 }
 
 // A Highlighter contains the information needed to highlight a string
@@ -89,60 +90,114 @@ func findAllIndex(regex *regexp.Regexp, skip *regexp.Regexp, str []byte) [][]int
 }
 
 func (h *Highlighter) removeRange(start int, end int, removeStart int) {
+	var children []highlightStorage
 	removeEnd := removeStart
 	for i := removeStart; i < len(h.storage); i++ {
-		next := h.storage[i]
-		if start < next.start && next.start < end {
-			// log.Println("removed: start:", next.start, "end:", next.end, "group:", next.group)
+		e := h.storage[i]
+		if start < e.start && e.start < end {
+			// log.Println("remove: start:", e.start, "end:", e.end, "group:", e.group)
 			removeEnd++
+			for childIdx, _ := range h.storage[i].children {
+				// log.Println("attached child: start:", h.storage[i].children[childIdx].start, "end:", h.storage[i].children[childIdx].end, "group:", h.storage[i].children[childIdx].group)
+				children = append(children, *(h.storage[i].children[childIdx]))
+			}
 		}
 	}
 	if removeStart < removeEnd {
 		h.storage = append(h.storage[:removeStart], h.storage[removeEnd:]...)
 	}
+
+	// remove possible children too
+childLoop:
+	for childIdx, _ := range children {
+		for storageIdx, _ := range h.storage {
+			if children[childIdx].start == h.storage[storageIdx].start && children[childIdx].end == h.storage[storageIdx].end && children[childIdx].group == h.storage[storageIdx].group && children[childIdx].region == h.storage[storageIdx].region {
+				// log.Println("remove child: start:", h.storage[storageIdx].start, "end:", h.storage[storageIdx].end, "group:", h.storage[storageIdx].group)
+				h.storage = append(h.storage[:storageIdx], h.storage[storageIdx+1:]...)
+				continue childLoop
+			}
+		}
+	}
 }
 
-func (h *Highlighter) storeRange(start int, end int, group Group, region *region) {
+func (h *Highlighter) storeRange(start int, end int, group Group, r *region, isPattern bool) {
 	// log.Println("storeRange: start:", start, "end:", end, "group:", group)
+	var parent *region
+	if isPattern {
+		parent = r
+	} else if r != nil {
+		parent = r.parent
+	}
+
+	updated := false
 	for k, e := range h.storage {
-		if e.region != nil && region != nil {
-			if e.region.parent == region.parent {
-				if region == e.region {
-					if group == e.group && start == e.end {
-						// same region, update ...
-						h.storage[k].end = end
-						// log.Println("exchanged to: start:", h.storage[k].start, "end:", h.storage[k].end, "group:", h.storage[k].group)
-						return
-					}
-				} else {
+		if r == e.region && group == e.group && start == e.end {
+			// same region, update ...
+			h.storage[k].end = end
+			// log.Println("exchanged to: start:", h.storage[k].start, "end:", h.storage[k].end, "group:", h.storage[k].group)
+			updated = true
+			start = h.storage[k].start
+		}
+	}
+
+	for k, e := range h.storage {
+		if e.region != nil && r != nil {
+			if e.region.parent == parent {
+				if r != e.region {
 					// sibling regions, search for overlaps ...
 					if start < e.start && end > e.start {
 						// overlap
-					} else if (start < e.start && end >= e.end) || (start <= e.start && end > e.end) {
+					} else if start == e.start && end == e.end {
+						// same match
+						continue
+					} else if start <= e.start && end >= e.end {
 						// larger match
 					} else if start >= e.start && end <= e.end {
-						// smaller or same match
+						// smaller match
 						return
 					} else {
 						continue
 					}
 
-					// log.Println("exchanged from: start:", e.start, "end:", e.end, "group:", e.group)
-					h.storage[k] = highlightStorage{start, end, group, region}
+					if !updated {
+						// log.Println("exchanged from: start:", e.start, "end:", e.end, "group:", e.group)
+						h.storage[k] = highlightStorage{start, end, group, r, nil}
 
-					// check and remove follow-ups matching the same
-					h.removeRange(start, end, k + 1)
+						// check and remove follow-ups matching the same
+						h.removeRange(start, end, k+1)
+					} else {
+						h.removeRange(start, end, k)
+					}
 					return
 				}
 			} else {
-				if region.parent != e.region && start >= e.start && end <= e.end {
+				if parent != e.region && start >= e.start && end <= e.end {
 					return
 				}
 			}
 		}
 	}
 
-	h.storage = append(h.storage, highlightStorage{start, end, group, region})
+	if !updated {
+		h.storage = append(h.storage, highlightStorage{start, end, group, r, nil})
+	}
+
+	// add possible child entry
+	if parent != nil {
+	storageLoop:
+		for k, e := range h.storage {
+			if e.region == parent && e.start < start && end < e.end {
+				for _, child := range h.storage[k].children {
+					if child == &(h.storage[len(h.storage)-1]) {
+						continue storageLoop
+					}
+				}
+
+				// log.Println("add child: start:", h.storage[k].start, "end:", h.storage[k].end, "group:", h.storage[k].group)
+				h.storage[k].children = append(h.storage[k].children, &(h.storage[len(h.storage)-1]))
+			}
+		}
+	}
 }
 
 func (h *Highlighter) highlightPatterns(start int, lineNum int, line []byte, curRegion *region) {
@@ -162,7 +217,7 @@ func (h *Highlighter) highlightPatterns(start int, lineNum int, line []byte, cur
 	for _, p := range patterns {
 		matches := findAllIndex(p.regex, nil, line)
 		for _, m := range matches {
-			h.storeRange(start+m[0], start+m[1], p.group, nil)
+			h.storeRange(start+m[0], start+m[1], p.group, curRegion, true)
 		}
 	}
 }
@@ -227,9 +282,9 @@ regionLoop:
 						h.lastEnd = start + endMatch[1]
 						update = true
 					}
-					h.storeRange(start+startMatch[0], start+startMatch[1], r.limitGroup, r)
-					h.storeRange(start+startMatch[1], start+endMatch[0], r.group, r)
-					h.storeRange(start+endMatch[0], start+endMatch[1], r.limitGroup, r)
+					h.storeRange(start+startMatch[0], start+startMatch[1], r.limitGroup, r, false)
+					h.storeRange(start+startMatch[1], start+endMatch[0], r.group, r, false)
+					h.storeRange(start+endMatch[0], start+endMatch[1], r.limitGroup, r, false)
 					h.highlightRegions(start+startMatch[1], lineNum, util.SliceStartEnd(line, startMatch[1], endMatch[0]), r, r.rules.regions, true)
 					if samePattern {
 						startIdx += 1
@@ -251,8 +306,8 @@ regionLoop:
 					// log.Println("end < start")
 					h.lastStart = start
 					h.lastEnd = start + endMatch[1]
-					h.storeRange(start, start+endMatch[0], r.group, r)
-					h.storeRange(start+endMatch[0], start+endMatch[1], r.limitGroup, r)
+					h.storeRange(start, start+endMatch[0], r.group, r, false)
+					h.storeRange(start+endMatch[0], start+endMatch[1], r.limitGroup, r, false)
 					h.highlightRegions(start, lineNum, util.SliceStart(line, endMatch[0]), r, r.rules.regions, true)
 					h.highlightPatterns(start+endMatch[1], lineNum, util.SliceStartEnd(line, endMatch[1], startMatch[0]), nil)
 					if curRegion != nil {
@@ -271,8 +326,8 @@ regionLoop:
 					h.lastEnd = start + lineLen - 1
 					h.lastRegion = r
 				}
-				h.storeRange(start+startMatch[0], start+startMatch[1], r.limitGroup, r)
-				h.storeRange(start+startMatch[1], start+lineLen, r.group, r)
+				h.storeRange(start+startMatch[0], start+startMatch[1], r.limitGroup, r, false)
+				h.storeRange(start+startMatch[1], start+lineLen, r.group, r, false)
 				h.highlightRegions(start+startMatch[1], lineNum, util.SliceEnd(line, startMatch[1]), r, r.rules.regions, true)
 				continue regionLoop
 			}
@@ -284,8 +339,8 @@ regionLoop:
 					// log.Println("... end")
 					h.lastStart = start
 					h.lastEnd = start + endMatch[1]
-					h.storeRange(start, start+endMatch[0], r.group, r)
-					h.storeRange(start+endMatch[0], start+endMatch[1], r.limitGroup, r)
+					h.storeRange(start, start+endMatch[0], r.group, r, false)
+					h.storeRange(start+endMatch[0], start+endMatch[1], r.limitGroup, r, false)
 					h.highlightRegions(start, lineNum, util.SliceStart(line, endMatch[0]), r, r.rules.regions, true)
 					if curRegion != nil {
 						h.lastRegion = r.parent
@@ -298,7 +353,7 @@ regionLoop:
 				}
 			} else if len(startMatches) == 0 && len(endMatches) == 0 {
 				// no start and end found in this region
-				h.storeRange(start, start+lineLen, curRegion.group, r)
+				h.storeRange(start, start+lineLen, curRegion.group, r, false)
 			}
 		}
 	}
