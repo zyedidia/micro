@@ -1498,6 +1498,25 @@ func (h *BufPane) ShellMode() bool {
 	return true
 }
 
+// ShellInsert runs a shell command and inserts it at the cursor position
+func (h *BufPane) ShellInsert() bool {
+	InfoBar.Prompt("& ", "", "Shell", nil, func(resp string, canceled bool) {
+		if !canceled {
+			c := h.Cursor
+
+			h.Buf.Remove(c.CurSelection[0], c.CurSelection[1])
+
+			out, _ := shell.RawCommand(resp)
+			start := c.Loc
+			h.Buf.Insert(c.Loc, out)
+			end := c.Loc
+			c.SetSelectionStart(start)
+			c.SetSelectionEnd(end)
+		}
+	})
+	return true
+}
+
 // CommandMode lets the user enter a command
 func (h *BufPane) CommandMode() bool {
 	InfoBar.Prompt("> ", "", "Command", nil, func(resp string, canceled bool) {

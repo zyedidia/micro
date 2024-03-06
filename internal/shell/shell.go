@@ -10,8 +10,25 @@ import (
 	"os/signal"
 
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
+
+// RawCommand executes a "raw" command by passing the input
+// to an exec call constructed by piping the given input
+// to `/bin/sh` with the `-c` flag set. 
+func RawCommand(command string) (string, error) {
+	var err error
+	bin := config.GetGlobalOption("shellinsertbinary").(string)
+	cmd := exec.Command(bin, "-c", fmt.Sprintf("%s", command))
+	outputBytes := &bytes.Buffer{}
+	cmd.Stdout = outputBytes
+	cmd.Stderr = outputBytes
+	err = cmd.Start()
+	err = cmd.Wait() // wait for command to finish
+	outstring := outputBytes.String()
+	return outstring, err
+}
 
 // ExecCommand executes a command using exec
 // It returns any output/errors

@@ -237,6 +237,7 @@ ToggleRuler
 JumpLine
 ClearStatus
 ShellMode
+ShellInsert
 CommandMode
 Quit
 QuitAll
@@ -501,12 +502,13 @@ conventions for text editing defaults.
     "Ctrl-r":         "ToggleRuler",
     "Ctrl-l":         "command-edit:goto ",
     "Delete":         "Delete",
-    "Ctrl-b":         "ShellMode",
-    "Ctrl-q":         "Quit",
-    "Ctrl-e":         "CommandMode",
-    "Ctrl-w":         "NextSplit",
-    "Ctrl-u":         "ToggleMacro",
-    "Ctrl-j":         "PlayMacro",
+    "Ctrl-b":          "ShellMode",
+    "Alt-t":           "ShellInsert",
+    "Ctrl-q":          "Quit",
+    "Ctrl-e":          "CommandMode",
+    "Ctrl-w":          "NextSplit",
+    "Ctrl-u":          "ToggleMacro",
+    "Ctrl-j":          "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
 
     // Emacs-style keybindings

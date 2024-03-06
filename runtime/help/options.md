@@ -335,6 +335,10 @@ Here are the available options:
 
 	default value: `2`
 
+* `shellinsertbinary`: path of the shell binary to use for inserting the output of shell commands
+
+	default value: `/bin/sh`
+
 * `smartpaste`: add leading whitespace when pasting multiple lines.
    This will attempt to preserve the current indentation level when pasting an
    unindented block.
