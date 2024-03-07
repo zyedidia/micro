@@ -42,6 +42,7 @@ type highlightStorage struct {
 	group    Group
 	region   *region
 	children []*highlightStorage
+	pattern  bool
 }
 
 // A Highlighter contains the information needed to highlight a string
@@ -51,6 +52,7 @@ type Highlighter struct {
 	lastEnd    int
 	Def        *Def
 	storage    []highlightStorage
+	removed    []highlightStorage
 }
 
 // NewHighlighter returns a new highlighter from the given syntax definition
@@ -110,6 +112,7 @@ func (h *Highlighter) removeRange(start int, end int, removeStart int) {
 		if start < e.start && e.start < end {
 			// log.Println("remove: start:", e.start, "end:", e.end, "group:", e.group)
 			removeEnd++
+			h.removed = append(h.removed, e)
 			for childIdx, _ := range h.storage[i].children {
 				// log.Println("attached child: start:", h.storage[i].children[childIdx].start, "end:", h.storage[i].children[childIdx].end, "group:", h.storage[i].children[childIdx].group)
 				children = append(children, *(h.storage[i].children[childIdx]))
@@ -159,7 +162,7 @@ func (h *Highlighter) storeRange(start int, end int, group Group, r *region, isP
 				if r != e.region {
 					// sibling regions, search for overlaps ...
 					if start < e.start && end > e.start {
-						// overlap
+						// overlap from left
 					} else if start == e.start && end == e.end {
 						// same match
 						continue
@@ -168,13 +171,16 @@ func (h *Highlighter) storeRange(start int, end int, group Group, r *region, isP
 					} else if start >= e.start && end <= e.end {
 						// smaller match
 						return
+					} else if start > e.start && start < e.end && end > e.end {
+						// overlap from right
+						return
 					} else {
 						continue
 					}
 
 					if !updated {
 						// log.Println("exchanged from: start:", e.start, "end:", e.end, "group:", e.group)
-						h.storage[k] = highlightStorage{start, end, group, r, nil}
+						h.storage[k] = highlightStorage{start, end, group, r, nil, isPattern}
 
 						// check and remove follow-ups matching the same
 						h.removeRange(start, end, k+1)
@@ -192,7 +198,7 @@ func (h *Highlighter) storeRange(start int, end int, group Group, r *region, isP
 	}
 
 	if !updated {
-		h.storage = append(h.storage, highlightStorage{start, end, group, r, nil})
+		h.storage = append(h.storage, highlightStorage{start, end, group, r, nil, isPattern})
 	}
 
 	// add possible child entry
@@ -395,8 +401,14 @@ func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, li
 	h.lastStart = -1
 	h.lastEnd = -1
 	h.storage = h.storage[:0]
+	h.removed = h.removed[:0]
 
 	h.highlightRegions(start, lineNum, line, curRegion, h.Def.rules.regions, false)
+
+	// check if entries have been removed by invalid region
+	for _, e := range h.removed {
+		h.storeRange(e.start, e.end, e.group, e.region, e.pattern)
+	}
 
 	fullHighlights := make([]Group, lineLen)
 
