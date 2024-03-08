@@ -44,6 +44,7 @@ func init() {
 // Options with validators
 var optionValidators = map[string]optionValidator{
 	"autosave":     validateNonNegativeValue,
+	"bracepairs":   validateBracePairs,
 	"clipboard":    validateClipboard,
 	"tabsize":      validatePositiveValue,
 	"scrollmargin": validateNonNegativeValue,
@@ -91,7 +92,7 @@ func ReadSettings() error {
 func verifySetting(option string, value reflect.Type, def reflect.Type) bool {
 	var interfaceArr []interface{}
 	switch option {
-	case "pluginrepos", "pluginchannels":
+	case "bracepairs", "pluginrepos", "pluginchannels":
 		return value.AssignableTo(reflect.TypeOf(interfaceArr))
 	default:
 		return def.AssignableTo(value)
@@ -279,6 +280,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"backup":         true,
 	"backupdir":      "",
 	"basename":       false,
+	"bracepairs":     []interface{}{"()", "{}", "[]"},
 	"colorcolumn":    float64(0),
 	"cursorline":     true,
 	"diffgutter":     false,
@@ -423,6 +425,16 @@ func GetNativeValue(option string, realValue interface{}, value string) (interfa
 			return nil, ErrInvalidValue
 		}
 		native = float64(i)
+	} else if kind == reflect.Slice {
+		var s []interface{}
+		parts := strings.Split(value, " ")
+		if len(parts) == 0 {
+			return nil, ErrInvalidValue
+		}
+		for _, pair := range parts {
+			s = append(s, pair)
+		}
+		native = s
 	} else {
 		return nil, ErrInvalidValue
 	}
@@ -467,6 +479,16 @@ func validateNonNegativeValue(option string, value interface{}) error {
 
 	if nativeValue < 0 {
 		return errors.New(option + " must be non-negative")
+	}
+
+	return nil
+}
+
+func validateBracePairs(option string, value interface{}) error {
+	_, ok := value.([]interface{})
+
+	if !ok {
+		return errors.New("Expected slice of strings")
 	}
 
 	return nil

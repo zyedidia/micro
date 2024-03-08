@@ -991,12 +991,6 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 	)
 }
 
-var BracePairs = [][2]rune{
-	{'(', ')'},
-	{'{', '}'},
-	{'[', ']'},
-}
-
 // FindMatchingBrace returns the location in the buffer of the matching bracket
 // It is given a brace type containing the open and closing character, (for example
 // '{' and '}') as well as the location to match from
