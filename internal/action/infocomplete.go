@@ -17,7 +17,7 @@ import (
 // CommandComplete autocompletes commands
 func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 	for cmd := range commands {
@@ -38,7 +38,7 @@ func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 // HelpComplete autocompletes help topics
 func HelpComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 
@@ -107,7 +107,7 @@ func contains(s []string, e string) bool {
 // OptionComplete autocompletes options
 func OptionComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 	for option := range config.GlobalSettings {
@@ -134,7 +134,7 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	completeValue := false
 	args := bytes.Split(l, []byte{' '})
@@ -230,7 +230,7 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 // PluginCmdComplete autocompletes the plugin command
 func PluginCmdComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 	for _, cmd := range PluginCmds {
@@ -252,7 +252,7 @@ func PluginComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	completeValue := false
 	args := bytes.Split(l, []byte{' '})
