@@ -1,0 +1,6 @@
+filetype: msbuild
+detect:
+    filename: "\\.(.*proj|props|targets|tasks)$"
+
+rules:
+    - include: "xml"
