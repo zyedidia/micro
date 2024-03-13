@@ -1015,7 +1015,7 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, boo
 		leftChar = curLine[start.X-1]
 	}
 	var i int
-	if startChar == braceType[0] || leftChar == braceType[0] {
+	if startChar == braceType[0] || (leftChar == braceType[0] && startChar != braceType[1]) {
 		for y := start.Y; y < b.LinesNum(); y++ {
 			l := []rune(string(b.LineBytes(y)))
 			xInit := 0
@@ -1046,24 +1046,24 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, boo
 			l := []rune(string(b.lines[y].data))
 			xInit := len(l) - 1
 			if y == start.Y {
-				if leftChar == braceType[1] {
-					xInit = start.X - 1
-				} else {
+				if startChar == braceType[1] {
 					xInit = start.X
+				} else {
+					xInit = start.X - 1
 				}
 			}
 			for x := xInit; x >= 0; x-- {
 				r := l[x]
-				if r == braceType[0] {
+				if r == braceType[1] {
+					i++
+				} else if r == braceType[0] {
 					i--
 					if i == 0 {
-						if leftChar == braceType[1] {
-							return Loc{x, y}, true, true
+						if startChar == braceType[1] {
+							return Loc{x, y}, false, true
 						}
-						return Loc{x, y}, false, true
+						return Loc{x, y}, true, true
 					}
-				} else if r == braceType[1] {
-					i++
 				}
 			}
 		}

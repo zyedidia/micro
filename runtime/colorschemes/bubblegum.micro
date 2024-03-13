@@ -26,3 +26,4 @@ color-link color-column "254"
 #No extended types (bool in C, &c.) and plain brackets
 color-link type.extended "241,231"
 color-link symbol.brackets "241,231"
+color-link match-brace "231,28"

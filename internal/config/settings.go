@@ -43,17 +43,18 @@ func init() {
 
 // Options with validators
 var optionValidators = map[string]optionValidator{
-	"autosave":     validateNonNegativeValue,
-	"clipboard":    validateClipboard,
-	"tabsize":      validatePositiveValue,
-	"scrollmargin": validateNonNegativeValue,
-	"scrollspeed":  validateNonNegativeValue,
-	"colorscheme":  validateColorscheme,
-	"colorcolumn":  validateNonNegativeValue,
-	"fileformat":   validateLineEnding,
-	"encoding":     validateEncoding,
-	"multiopen":    validateMultiOpen,
-	"reload":       validateReload,
+	"autosave":        validateNonNegativeValue,
+	"clipboard":       validateClipboard,
+	"tabsize":         validatePositiveValue,
+	"scrollmargin":    validateNonNegativeValue,
+	"scrollspeed":     validateNonNegativeValue,
+	"colorscheme":     validateColorscheme,
+	"colorcolumn":     validateNonNegativeValue,
+	"fileformat":      validateLineEnding,
+	"encoding":        validateEncoding,
+	"multiopen":       validateMultiOpen,
+	"reload":          validateReload,
+	"matchbracestyle": validateMatchBraceStyle,
 }
 
 func ReadSettings() error {
@@ -274,50 +275,51 @@ func GetGlobalOption(name string) interface{} {
 }
 
 var defaultCommonSettings = map[string]interface{}{
-	"autoindent":     true,
-	"autosu":         false,
-	"backup":         true,
-	"backupdir":      "",
-	"basename":       false,
-	"colorcolumn":    float64(0),
-	"cursorline":     true,
-	"diffgutter":     false,
-	"encoding":       "utf-8",
-	"eofnewline":     true,
-	"fastdirty":      false,
-	"fileformat":     defaultFileFormat(),
-	"filetype":       "unknown",
-	"hlsearch":       false,
-	"incsearch":      true,
-	"ignorecase":     true,
-	"indentchar":     " ",
-	"keepautoindent": false,
-	"matchbrace":     true,
-	"mkparents":      false,
-	"permbackup":     false,
-	"readonly":       false,
-	"reload":         "prompt",
-	"rmtrailingws":   false,
-	"ruler":          true,
-	"relativeruler":  false,
-	"savecursor":     false,
-	"saveundo":       false,
-	"scrollbar":      false,
-	"scrollmargin":   float64(3),
-	"scrollspeed":    float64(2),
-	"smartpaste":     true,
-	"softwrap":       false,
-	"splitbottom":    true,
-	"splitright":     true,
-	"statusformatl":  "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
-	"statusformatr":  "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
-	"statusline":     true,
-	"syntax":         true,
-	"tabmovement":    false,
-	"tabsize":        float64(4),
-	"tabstospaces":   false,
-	"useprimary":     true,
-	"wordwrap":       false,
+	"autoindent":      true,
+	"autosu":          false,
+	"backup":          true,
+	"backupdir":       "",
+	"basename":        false,
+	"colorcolumn":     float64(0),
+	"cursorline":      true,
+	"diffgutter":      false,
+	"encoding":        "utf-8",
+	"eofnewline":      true,
+	"fastdirty":       false,
+	"fileformat":      defaultFileFormat(),
+	"filetype":        "unknown",
+	"hlsearch":        false,
+	"incsearch":       true,
+	"ignorecase":      true,
+	"indentchar":      " ",
+	"keepautoindent":  false,
+	"matchbrace":      true,
+	"matchbracestyle": "underline",
+	"mkparents":       false,
+	"permbackup":      false,
+	"readonly":        false,
+	"reload":          "prompt",
+	"rmtrailingws":    false,
+	"ruler":           true,
+	"relativeruler":   false,
+	"savecursor":      false,
+	"saveundo":        false,
+	"scrollbar":       false,
+	"scrollmargin":    float64(3),
+	"scrollspeed":     float64(2),
+	"smartpaste":      true,
+	"softwrap":        false,
+	"splitbottom":     true,
+	"splitright":      true,
+	"statusformatl":   "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+	"statusformatr":   "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
+	"statusline":      true,
+	"syntax":          true,
+	"tabmovement":     false,
+	"tabsize":         float64(4),
+	"tabstospaces":    false,
+	"useprimary":      true,
+	"wordwrap":        false,
 }
 
 func defaultFileFormat() string {
@@ -548,6 +550,22 @@ func validateReload(option string, value interface{}) error {
 	case "prompt", "auto", "disabled":
 	default:
 		return errors.New(option + " must be 'prompt', 'auto' or 'disabled'")
+    }
+
+    return nil
+}
+
+func validateMatchBraceStyle(option string, value interface{}) error {
+	val, ok := value.(string)
+
+	if !ok {
+		errors.New("Expected string type for matchbracestyle")
+	}
+
+	switch val {
+	case "underline", "highlight":
+	default:
+		return errors.New(option + " must be 'underline' or 'highlight'")
 	}
 
 	return nil

@@ -43,3 +43,4 @@ color-link cursor-line "#44475A,#F8F8F2"
 color-link color-column "#44475A"
 color-link type.extended "default"
 
+color-link match-brace "#282A36,#FF79C6"

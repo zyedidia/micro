@@ -28,3 +28,4 @@ color-link color-column "#2D2F31"
 #No extended types (bool in C, etc.)
 #color-link type.extended "default"
 #Plain brackets
+color-link match-brace "#1D1F21,#62B1FE"
