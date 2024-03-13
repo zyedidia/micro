@@ -185,6 +185,9 @@ func (n *Node) hResizeSplit(i int, size int) bool {
 
 // ResizeSplit resizes a certain split to a given size
 func (n *Node) ResizeSplit(size int) bool {
+	if size <= 0 {
+		return false
+	}
 	if len(n.parent.children) <= 1 {
 		// cannot resize a lone node
 		return false
