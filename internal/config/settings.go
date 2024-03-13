@@ -286,7 +286,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"encoding":        "utf-8",
 	"eofnewline":      true,
 	"fastdirty":       false,
-	"fileformat":      "unix",
+	"fileformat":      defaultFileFormat(),
 	"filetype":        "unknown",
 	"hlsearch":        false,
 	"incsearch":       true,
