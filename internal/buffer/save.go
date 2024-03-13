@@ -2,7 +2,6 @@ package buffer
 
 import (
 	"bufio"
-	"bytes"
 	"errors"
 	"io"
 	"os"
@@ -10,6 +9,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"unicode"
 
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -120,10 +120,9 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 
 	if b.Settings["rmtrailingws"].(bool) {
 		for i, l := range b.lines {
-			leftover := util.CharacterCount(bytes.TrimRightFunc(l.data, unicode.IsSpace))
-
-			linelen := util.CharacterCount(l.data)
-			b.Remove(Loc{leftover, i}, Loc{linelen, i})
+			leftover := strings.TrimRightFunc(l.String(), unicode.IsSpace)
+			linelen := len(l.runes)
+			b.Remove(Loc{len(leftover), i}, Loc{linelen, i})
 		}
 
 		b.RelocateCursors()
@@ -183,7 +182,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 		}
 
 		// write lines
-		if fileSize, e = file.Write(b.lines[0].data); e != nil {
+		if fileSize, e = file.Write(b.lines[0].data()); e != nil {
 			return
 		}
 
@@ -191,10 +190,10 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 			if _, e = file.Write(eol); e != nil {
 				return
 			}
-			if _, e = file.Write(l.data); e != nil {
+			if _, e = file.Write(l.data()); e != nil {
 				return
 			}
-			fileSize += len(eol) + len(l.data)
+			fileSize += len(eol) + len(l.data())
 		}
 		return
 	}

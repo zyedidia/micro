@@ -88,7 +88,7 @@ func (b *Buffer) Backup() error {
 		eol := []byte{'\n'}
 
 		// write lines
-		if _, e = file.Write(b.lines[0].data); e != nil {
+		if _, e = file.Write(b.lines[0].data()); e != nil {
 			return
 		}
 
@@ -96,7 +96,7 @@ func (b *Buffer) Backup() error {
 			if _, e = file.Write(eol); e != nil {
 				return
 			}
-			if _, e = file.Write(l.data); e != nil {
+			if _, e = file.Write(l.data()); e != nil {
 				return
 			}
 		}
