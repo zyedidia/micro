@@ -23,7 +23,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
-	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -46,6 +45,8 @@ var (
 
 	sigterm chan os.Signal
 	sighup  chan os.Signal
+
+	timerChan chan func()
 )
 
 func InitFlags() {
@@ -365,6 +366,8 @@ func main() {
 	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
 	signal.Notify(sighup, syscall.SIGHUP)
 
+	timerChan = make(chan func())
+
 	// Here is the event loop which runs in a separate thread
 	go func() {
 		for {
@@ -415,21 +418,19 @@ func DoEvent() {
 	select {
 	case f := <-shell.Jobs:
 		// If a new job has finished while running in the background we should execute the callback
-		ulua.Lock.Lock()
 		f.Function(f.Output, f.Args)
-		ulua.Lock.Unlock()
 	case <-config.Autosave:
-		ulua.Lock.Lock()
 		for _, b := range buffer.OpenBuffers {
 			b.Save()
 		}
-		ulua.Lock.Unlock()
 	case <-shell.CloseTerms:
 	case event = <-screen.Events:
 	case <-screen.DrawChan():
 		for len(screen.DrawChan()) > 0 {
 			<-screen.DrawChan()
 		}
+	case f := <-timerChan:
+		f()
 	case <-sighup:
 		for _, b := range buffer.OpenBuffers {
 			if !b.Modified() {
@@ -473,12 +474,10 @@ func DoEvent() {
 		return
 	}
 
-	ulua.Lock.Lock()
 	_, resize := event.(*tcell.EventResize)
 	if action.InfoBar.HasPrompt && !resize {
 		action.InfoBar.HandleEvent(event)
 	} else {
 		action.Tabs.HandleEvent(event)
 	}
-	ulua.Lock.Unlock()
 }

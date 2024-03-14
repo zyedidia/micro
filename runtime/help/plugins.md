@@ -121,6 +121,11 @@ The packages and functions are listed below (in Go type signatures):
        current pane is not a BufPane.
 
     - `CurTab() *Tab`: returns the current tab.
+
+    - `After(t time.Duration, f func())`: run function `f` in the background
+       after time `t` elapses. See https://pkg.go.dev/time#Duration for the
+       usage of `time.Duration`.
+
 * `micro/config`
 	- `MakeCommand(name string, action func(bp *BufPane, args[]string),
                    completer buffer.Completer)`:
