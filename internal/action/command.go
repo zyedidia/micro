@@ -638,6 +638,11 @@ func (h *BufPane) ShowCmd(args []string) {
 	InfoBar.Message(option)
 }
 
+func parseKeyArg(arg string) string {
+	// If this is a raw escape sequence, convert it to its raw byte form
+	return strings.ReplaceAll(arg, "\\x1b", "\x1b")
+}
+
 // ShowKeyCmd displays the action that a key is bound to
 func (h *BufPane) ShowKeyCmd(args []string) {
 	if len(args) < 1 {
@@ -645,7 +650,7 @@ func (h *BufPane) ShowKeyCmd(args []string) {
 		return
 	}
 
-	event, err := findEvent(args[0])
+	event, err := findEvent(parseKeyArg(args[0]))
 	if err != nil {
 		InfoBar.Error(err)
 		return
@@ -664,7 +669,7 @@ func (h *BufPane) BindCmd(args []string) {
 		return
 	}
 
-	_, err := TryBindKey(args[0], args[1], true)
+	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -677,7 +682,7 @@ func (h *BufPane) UnbindCmd(args []string) {
 		return
 	}
 
-	err := UnbindKey(args[0])
+	err := UnbindKey(parseKeyArg(args[0]))
 	if err != nil {
 		InfoBar.Error(err)
 	}

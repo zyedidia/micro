@@ -88,6 +88,10 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 		return
 	}
 
+	if strings.HasPrefix(k, "\x1b") {
+		screen.Screen.RegisterRawSeq(k)
+	}
+
 	bind(event, v)
 
 	// switch e := event.(type) {
@@ -153,7 +157,6 @@ modSearch:
 			k = k[5:]
 			modifiers |= tcell.ModShift
 		case strings.HasPrefix(k, "\x1b"):
-			screen.Screen.RegisterRawSeq(k)
 			return RawEvent{
 				esc: k,
 			}, true
@@ -329,6 +332,10 @@ func UnbindKey(k string) error {
 					break
 				}
 			}
+		}
+
+		if strings.HasPrefix(k, "\x1b") {
+			screen.Screen.UnregisterRawSeq(k)
 		}
 
 		defaults := DefaultBindings("buffer")
