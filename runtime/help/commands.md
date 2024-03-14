@@ -21,12 +21,12 @@ quotes here but these are not necessary when entering the command in micro.
    This command will modify `bindings.json` and overwrite any bindings to
    `key` that already exist.
 
-* `help 'topic'?`: opens the corresponding help topic. If no topic is provided
+* `help ['topic']`: opens the corresponding help topic. If no topic is provided
    opens the default help screen. Help topics are stored as `.md` files in the
    `runtime/help` directory of the source tree, which is embedded in the final
    binary.
 
-* `save 'filename'?`: saves the current buffer. If the file is provided it
+* `save ['filename']`: saves the current buffer. If the file is provided it
    will 'save as' the filename.
 
 * `quit`: quits micro.
@@ -37,7 +37,7 @@ quotes here but these are not necessary when entering the command in micro.
    (e.g. +5 will jump 5 lines down), while ~ will perform a jump inward
    from the end of the file (e.g. ~5 jumps to the 5th-last line in the file).
 
-* `replace 'search' 'value' 'flags'?`: This will replace `search` with `value`. 
+* `replace 'search' 'value' ['flags']`: This will replace `search` with `value`. 
    The `flags` are optional. Possible flags are:
    * `-a`: Replace all occurrences at once
    * `-l`: Do a literal search instead of a regex search
@@ -62,15 +62,15 @@ quotes here but these are not necessary when entering the command in micro.
 * `run 'sh-command'`: runs the given shell command in the background. The 
    command's output will be displayed in one line when it finishes running.
 
-* `vsplit 'filename'`: opens a vertical split with `filename`. If no filename
+* `vsplit ['filename']`: opens a vertical split with `filename`. If no filename
    is provided, a vertical split is opened with an empty buffer.
 
-* `hsplit 'filename'`: same as `vsplit` but opens a horizontal split instead
+* `hsplit ['filename']`: same as `vsplit` but opens a horizontal split instead
    of a vertical split.
 
-* `tab 'filename'`: opens the given file in a new tab.
+* `tab ['filename']`: opens the given file in a new tab.
 
-* `tabmove '[-+]?n'`: Moves the active tab to another slot. `n` is an integer.
+* `tabmove '[-+]n'`: Moves the active tab to another slot. `n` is an integer.
    If `n` is prefixed with `-` or `+`, then it represents a relative position
    (e.g. `tabmove +2` moves the tab to the right by `2`). If `n` has no prefix,
    it represents an absolute position (e.g. `tabmove 2` moves the tab to slot `2`).
@@ -91,7 +91,7 @@ quotes here but these are not necessary when entering the command in micro.
 
 * `plugin remove 'pl'`: remove a plugin.
 
-* `plugin update 'pl'`: update a plugin (if no arguments are provided
+* `plugin update ['pl']`: update a plugin (if no arguments are provided
    updates all plugins).
 
 * `plugin search 'pl'`: search available plugins for a keyword.
@@ -116,10 +116,10 @@ quotes here but these are not necessary when entering the command in micro.
    the terminal and helps you see which bindings aren't possible and why. This
    is most useful for debugging keybindings.
 
-* `showkey`: Show the action(s) bound to a given key. For example
+* `showkey 'key'`: Show the action(s) bound to a given key. For example
    running `> showkey Ctrl-c` will display `Copy`.
 
-* `term exec?`: Open a terminal emulator running the given executable. If no
+* `term ['exec']`: Open a terminal emulator running the given executable. If no
    executable is given, this will open the default shell in the terminal
    emulator.
 
