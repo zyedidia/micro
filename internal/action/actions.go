@@ -51,58 +51,91 @@ func (h *BufPane) ScrollAdjust() {
 func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
+	// ignore click on the status line
+	if my >= h.BufView().Y+h.BufView().Height {
+		return false
+	}
 	mouseLoc := h.LocFromVisual(buffer.Loc{mx, my})
 	h.Cursor.Loc = mouseLoc
-	if h.mouseReleased {
-		if b.NumCursors() > 1 {
-			b.ClearCursors()
-			h.Relocate()
-			h.Cursor = h.Buf.GetActiveCursor()
-			h.Cursor.Loc = mouseLoc
-		}
-		if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
-			if h.doubleClick {
-				// Triple click
-				h.lastClickTime = time.Now()
 
-				h.tripleClick = true
-				h.doubleClick = false
-
-				h.Cursor.SelectLine()
-				h.Cursor.CopySelection(clipboard.PrimaryReg)
-			} else {
-				// Double click
-				h.lastClickTime = time.Now()
-
-				h.doubleClick = true
-				h.tripleClick = false
-
-				h.Cursor.SelectWord()
-				h.Cursor.CopySelection(clipboard.PrimaryReg)
-			}
-		} else {
-			h.doubleClick = false
-			h.tripleClick = false
+	if b.NumCursors() > 1 {
+		b.ClearCursors()
+		h.Relocate()
+		h.Cursor = h.Buf.GetActiveCursor()
+		h.Cursor.Loc = mouseLoc
+	}
+	if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
+		if h.doubleClick {
+			// Triple click
 			h.lastClickTime = time.Now()
 
-			h.Cursor.OrigSelection[0] = h.Cursor.Loc
-			h.Cursor.CurSelection[0] = h.Cursor.Loc
-			h.Cursor.CurSelection[1] = h.Cursor.Loc
-		}
-		h.mouseReleased = false
-	} else if !h.mouseReleased {
-		if h.tripleClick {
-			h.Cursor.AddLineToSelection()
-		} else if h.doubleClick {
-			h.Cursor.AddWordToSelection()
+			h.tripleClick = true
+			h.doubleClick = false
+
+			h.Cursor.SelectLine()
+			h.Cursor.CopySelection(clipboard.PrimaryReg)
 		} else {
-			h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+			// Double click
+			h.lastClickTime = time.Now()
+
+			h.doubleClick = true
+			h.tripleClick = false
+
+			h.Cursor.SelectWord()
+			h.Cursor.CopySelection(clipboard.PrimaryReg)
 		}
+	} else {
+		h.doubleClick = false
+		h.tripleClick = false
+		h.lastClickTime = time.Now()
+
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+		h.Cursor.CurSelection[0] = h.Cursor.Loc
+		h.Cursor.CurSelection[1] = h.Cursor.Loc
 	}
 
 	h.Cursor.StoreVisualX()
 	h.lastLoc = mouseLoc
 	h.Relocate()
+	return true
+}
+
+func (h *BufPane) MouseDrag(e *tcell.EventMouse) bool {
+	mx, my := e.Position()
+	// ignore drag on the status line
+	if my >= h.BufView().Y+h.BufView().Height {
+		return false
+	}
+	h.Cursor.Loc = h.LocFromVisual(buffer.Loc{mx, my})
+
+	if h.tripleClick {
+		h.Cursor.AddLineToSelection()
+	} else if h.doubleClick {
+		h.Cursor.AddWordToSelection()
+	} else {
+		h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+	}
+
+	h.Cursor.StoreVisualX()
+	h.Relocate()
+	return true
+}
+
+func (h *BufPane) MouseRelease(e *tcell.EventMouse) bool {
+	// We could finish the selection based on the release location as in the
+	// commented out code below, to allow text selections even in a terminal
+	// that doesn't support mouse motion events. But when the mouse click is
+	// within the scroll margin, that would cause a scroll and selection
+	// even for a simple mouse click, which is not good.
+	// if !h.doubleClick && !h.tripleClick {
+	// 	mx, my := e.Position()
+	// 	h.Cursor.Loc = h.LocFromVisual(buffer.Loc{mx, my})
+	// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+	// }
+
+	if h.Cursor.HasSelection() {
+		h.Cursor.CopySelection(clipboard.PrimaryReg)
+	}
 	return true
 }
 
@@ -1855,6 +1888,10 @@ func (h *BufPane) SpawnMultiCursorSelect() bool {
 func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
+	// ignore click on the status line
+	if my >= h.BufView().Y+h.BufView().Height {
+		return false
+	}
 	mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
 
 	if h.Buf.NumCursors() > 1 {
