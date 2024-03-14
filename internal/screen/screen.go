@@ -22,6 +22,10 @@ var Screen tcell.Screen
 // Events is the channel of tcell events
 var Events chan (tcell.Event)
 
+// RestartCallback is called when the screen is restarted after it was
+// temporarily shut down
+var RestartCallback func()
+
 // The lock is necessary since the screen is polled on a separate thread
 var lock sync.Mutex
 
@@ -134,6 +138,10 @@ func TempStart(screenWasNil bool) {
 	if !screenWasNil {
 		Init()
 		Unlock()
+
+		if RestartCallback != nil {
+			RestartCallback()
+		}
 	}
 }
 

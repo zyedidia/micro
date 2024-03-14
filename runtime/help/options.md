@@ -164,7 +164,7 @@ Here are the available options:
    an effect if the file is empty/newly created, because otherwise the fileformat
    will be automatically detected from the existing line endings.
 
-	default value: `unix`
+	default value: `unix` on Unix systems, `dos` on Windows
 
 * `filetype`: sets the filetype for the current buffer. Set this option to
   `off` to completely disable filetype detection.
@@ -178,6 +178,19 @@ Here are the available options:
    on/off via the `ToggleHighlightSearch` action. Note that these actions don't
    change the `hlsearch` setting. As long as `hlsearch` is set to true, the next
    search will have the highlighting turned on again.
+
+	default value: `false`
+
+* `hltaberrors`: highlight tabs when spaces are expected, and spaces when tabs
+   are expected. More precisely: if `tabstospaces` option is on, highlight
+   all tab characters; if `tabstospaces` is off, highlight space characters
+   in the initial indent part of the line.
+
+	default value: `false`
+
+* `hltrailingws`: highlight trailing whitespaces at ends of lines. Note that
+   it doesn't highlight newly added trailing whitespaces that naturally occur
+   while typing text. It highlights only nasty forgotten trailing whitespaces.
 
 	default value: `false`
 
@@ -217,10 +230,18 @@ Here are the available options:
 
 	default value: `false`
 
-* `matchbrace`: underline matching braces for '()', '{}', '[]' when the cursor
-   is on a brace character.
+* `matchbrace`: show matching braces for '()', '{}', '[]' when the cursor
+   is on a brace character or next to it.
 
     default value: `true`
+
+* `matchbracestyle`: whether to underline or highlight matching braces when
+  `matchbrace` is enabled. The color of highlight is determined by the `match-brace`
+  field in the current theme. Possible values:
+  * `underline`: underline matching braces.
+  * `highlight`: use `match-brace` style from the current theme.
+
+   default value: `underline`
 
 * `mkparents`: if a file is opened on a path that does not exist, the file
    cannot be saved because the parent directories don't exist. This option lets
@@ -502,6 +523,7 @@ so that you can see what the formatting should look like.
     "linter": true,
     "literate": true,
     "matchbrace": true,
+    "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
     "parsecursor": false,

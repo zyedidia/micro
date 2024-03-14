@@ -194,6 +194,7 @@ Here is a list of the colorscheme groups that you can use:
 * divider (Color of the divider between vertical splits)
 * message (Color of messages in the bottom line of the screen)
 * error-message (Color of error messages in the bottom line of the screen)
+* match-brace (Color of matching brackets when `matchbracestyle` is set to `highlight`)
 
 Colorschemes must be placed in the `~/.config/micro/colorschemes` directory to
 be used.

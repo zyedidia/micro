@@ -449,6 +449,10 @@ func DoEvent() {
 		os.Exit(0)
 	}
 
+	if event == nil {
+		return
+	}
+
 	if e, ok := event.(*tcell.EventError); ok {
 		log.Println("tcell event error: ", e.Error())
 
@@ -469,12 +473,11 @@ func DoEvent() {
 	}
 
 	ulua.Lock.Lock()
-	// if event != nil {
-	if action.InfoBar.HasPrompt {
+	_, resize := event.(*tcell.EventResize)
+	if action.InfoBar.HasPrompt && !resize {
 		action.InfoBar.HandleEvent(event)
 	} else {
 		action.Tabs.HandleEvent(event)
 	}
-	// }
 	ulua.Lock.Unlock()
 }

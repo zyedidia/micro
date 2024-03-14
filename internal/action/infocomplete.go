@@ -17,7 +17,7 @@ import (
 // CommandComplete autocompletes commands
 func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 	for cmd := range commands {
@@ -38,7 +38,7 @@ func CommandComplete(b *buffer.Buffer) ([]string, []string) {
 // HelpComplete autocompletes help topics
 func HelpComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 
@@ -77,6 +77,24 @@ func colorschemeComplete(input string) (string, []string) {
 	return chosen, suggestions
 }
 
+// filetypeComplete autocompletes filetype
+func filetypeComplete(input string) (string, []string) {
+	var suggestions []string
+
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		if strings.HasPrefix(f.Name(), input) {
+			suggestions = append(suggestions, f.Name())
+		}
+	}
+
+	var chosen string
+	if len(suggestions) == 1 {
+		chosen = suggestions[0]
+	}
+
+	return chosen, suggestions
+}
+
 func contains(s []string, e string) bool {
 	for _, a := range s {
 		if a == e {
@@ -89,7 +107,7 @@ func contains(s []string, e string) bool {
 // OptionComplete autocompletes options
 func OptionComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 	for option := range config.GlobalSettings {
@@ -116,7 +134,7 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	completeValue := false
 	args := bytes.Split(l, []byte{' '})
@@ -172,6 +190,8 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 		switch inputOpt {
 		case "colorscheme":
 			_, suggestions = colorschemeComplete(input)
+		case "filetype":
+			_, suggestions = filetypeComplete(input)
 		case "fileformat":
 			if strings.HasPrefix("unix", input) {
 				suggestions = append(suggestions, "unix")
@@ -196,6 +216,13 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 			if strings.HasPrefix("terminal", input) {
 				suggestions = append(suggestions, "terminal")
 			}
+		case "matchbracestyle":
+			if strings.HasPrefix("underline", input) {
+				suggestions = append(suggestions, "underline")
+			}
+			if strings.HasPrefix("highlight", input) {
+				suggestions = append(suggestions, "highlight")
+			}
 		}
 	}
 	sort.Strings(suggestions)
@@ -210,7 +237,7 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 // PluginCmdComplete autocompletes the plugin command
 func PluginCmdComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	var suggestions []string
 	for _, cmd := range PluginCmds {
@@ -232,7 +259,7 @@ func PluginComplete(b *buffer.Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
-	input, argstart := buffer.GetArg(b)
+	input, argstart := b.GetArg()
 
 	completeValue := false
 	args := bytes.Split(l, []byte{' '})

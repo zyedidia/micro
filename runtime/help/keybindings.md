@@ -409,8 +409,14 @@ mouse actions)
 
 ```
 MouseLeft
+MouseLeftDrag
+MouseLeftRelease
 MouseMiddle
+MouseMiddleDrag
+MouseMiddleRelease
 MouseRight
+MouseRightDrag
+MouseRightRelease
 MouseWheelUp
 MouseWheelDown
 MouseWheelLeft
@@ -524,11 +530,13 @@ conventions for text editing defaults.
     "Esc": "Escape",
 
     // Mouse bindings
-    "MouseWheelUp":   "ScrollUp",
-    "MouseWheelDown": "ScrollDown",
-    "MouseLeft":      "MousePress",
-    "MouseMiddle":    "PastePrimary",
-    "Ctrl-MouseLeft": "MouseMultiCursor",
+    "MouseWheelUp":     "ScrollUp",
+    "MouseWheelDown":   "ScrollDown",
+    "MouseLeft":        "MousePress",
+    "MouseLeftDrag":    "MouseDrag",
+    "MouseLeftRelease": "MouseRelease",
+    "MouseMiddle":      "PastePrimary",
+    "Ctrl-MouseLeft":   "MouseMultiCursor",
 
     // Multi-cursor bindings
     "Alt-n":        "SpawnMultiCursor",
@@ -634,10 +642,12 @@ are given below:
         "Esc": "AbortCommand",
 
         // Mouse bindings
-        "MouseWheelUp":   "HistoryUp",
-        "MouseWheelDown": "HistoryDown",
-        "MouseLeft":      "MousePress",
-        "MouseMiddle":    "PastePrimary"
+        "MouseWheelUp":     "HistoryUp",
+        "MouseWheelDown":   "HistoryDown",
+        "MouseLeft":        "MousePress",
+        "MouseLeftDrag":    "MouseDrag",
+        "MouseLeftRelease": "MouseRelease",
+        "MouseMiddle":      "PastePrimary"
     }
 }
 ```

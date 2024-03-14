@@ -51,58 +51,91 @@ func (h *BufPane) ScrollAdjust() {
 func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
+	// ignore click on the status line
+	if my >= h.BufView().Y+h.BufView().Height {
+		return false
+	}
 	mouseLoc := h.LocFromVisual(buffer.Loc{mx, my})
 	h.Cursor.Loc = mouseLoc
-	if h.mouseReleased {
-		if b.NumCursors() > 1 {
-			b.ClearCursors()
-			h.Relocate()
-			h.Cursor = h.Buf.GetActiveCursor()
-			h.Cursor.Loc = mouseLoc
-		}
-		if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
-			if h.doubleClick {
-				// Triple click
-				h.lastClickTime = time.Now()
 
-				h.tripleClick = true
-				h.doubleClick = false
-
-				h.Cursor.SelectLine()
-				h.Cursor.CopySelection(clipboard.PrimaryReg)
-			} else {
-				// Double click
-				h.lastClickTime = time.Now()
-
-				h.doubleClick = true
-				h.tripleClick = false
-
-				h.Cursor.SelectWord()
-				h.Cursor.CopySelection(clipboard.PrimaryReg)
-			}
-		} else {
-			h.doubleClick = false
-			h.tripleClick = false
+	if b.NumCursors() > 1 {
+		b.ClearCursors()
+		h.Relocate()
+		h.Cursor = h.Buf.GetActiveCursor()
+		h.Cursor.Loc = mouseLoc
+	}
+	if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
+		if h.doubleClick {
+			// Triple click
 			h.lastClickTime = time.Now()
 
-			h.Cursor.OrigSelection[0] = h.Cursor.Loc
-			h.Cursor.CurSelection[0] = h.Cursor.Loc
-			h.Cursor.CurSelection[1] = h.Cursor.Loc
-		}
-		h.mouseReleased = false
-	} else if !h.mouseReleased {
-		if h.tripleClick {
-			h.Cursor.AddLineToSelection()
-		} else if h.doubleClick {
-			h.Cursor.AddWordToSelection()
+			h.tripleClick = true
+			h.doubleClick = false
+
+			h.Cursor.SelectLine()
+			h.Cursor.CopySelection(clipboard.PrimaryReg)
 		} else {
-			h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+			// Double click
+			h.lastClickTime = time.Now()
+
+			h.doubleClick = true
+			h.tripleClick = false
+
+			h.Cursor.SelectWord()
+			h.Cursor.CopySelection(clipboard.PrimaryReg)
 		}
+	} else {
+		h.doubleClick = false
+		h.tripleClick = false
+		h.lastClickTime = time.Now()
+
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+		h.Cursor.CurSelection[0] = h.Cursor.Loc
+		h.Cursor.CurSelection[1] = h.Cursor.Loc
 	}
 
 	h.Cursor.StoreVisualX()
 	h.lastLoc = mouseLoc
 	h.Relocate()
+	return true
+}
+
+func (h *BufPane) MouseDrag(e *tcell.EventMouse) bool {
+	mx, my := e.Position()
+	// ignore drag on the status line
+	if my >= h.BufView().Y+h.BufView().Height {
+		return false
+	}
+	h.Cursor.Loc = h.LocFromVisual(buffer.Loc{mx, my})
+
+	if h.tripleClick {
+		h.Cursor.AddLineToSelection()
+	} else if h.doubleClick {
+		h.Cursor.AddWordToSelection()
+	} else {
+		h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+	}
+
+	h.Cursor.StoreVisualX()
+	h.Relocate()
+	return true
+}
+
+func (h *BufPane) MouseRelease(e *tcell.EventMouse) bool {
+	// We could finish the selection based on the release location as in the
+	// commented out code below, to allow text selections even in a terminal
+	// that doesn't support mouse motion events. But when the mouse click is
+	// within the scroll margin, that would cause a scroll and selection
+	// even for a simple mouse click, which is not good.
+	// if !h.doubleClick && !h.tripleClick {
+	// 	mx, my := e.Position()
+	// 	h.Cursor.Loc = h.LocFromVisual(buffer.Loc{mx, my})
+	// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+	// }
+
+	if h.Cursor.HasSelection() {
+		h.Cursor.CopySelection(clipboard.PrimaryReg)
+	}
 	return true
 }
 
@@ -211,7 +244,7 @@ func (h *BufPane) CursorLeft() bool {
 func (h *BufPane) CursorRight() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.Deselect(false)
-		h.Cursor.Loc = h.Cursor.Loc.Move(1, h.Buf)
+		h.Cursor.Right()
 	} else {
 		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := h.Buf.Settings["tabmovement"].(bool)
@@ -793,25 +826,26 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 			filename := strings.Join(args, " ")
 			fileinfo, err := os.Stat(filename)
 			if err != nil {
-				if os.IsNotExist(err) {
+				if errors.Is(err, fs.ErrNotExist) || errors.Is(err, fs.ErrPermission) {
 					noPrompt := h.saveBufToFile(filename, action, callback)
 					if noPrompt {
 						h.completeAction(action)
 						return
 					}
 				}
-			}
-			InfoBar.YNPrompt(
-				fmt.Sprintf("the file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
-				func(yes, canceled bool) {
-					if yes && !canceled {
-						noPrompt := h.saveBufToFile(filename, action, callback)
-						if noPrompt {
-							h.completeAction(action)
+			} else {
+				InfoBar.YNPrompt(
+					fmt.Sprintf("The file %s already exists in the directory, would you like to overwrite? Y/n", fileinfo.Name()),
+					func(yes, canceled bool) {
+						if yes && !canceled {
+							noPrompt := h.saveBufToFile(filename, action, callback)
+							if noPrompt {
+								h.completeAction(action)
+							}
 						}
-					}
-				},
-			)
+					},
+				)
+			}
 		}
 	})
 	return false
@@ -1273,9 +1307,13 @@ func (h *BufPane) PastePrimary() bool {
 
 func (h *BufPane) paste(clip string) {
 	if h.Buf.Settings["smartpaste"].(bool) {
-		if h.Cursor.X > 0 && len(util.GetLeadingWhitespace([]byte(strings.TrimLeft(clip, "\r\n")))) == 0 {
-			leadingWS := util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y))
-			clip = strings.ReplaceAll(clip, "\n", "\n"+string(leadingWS))
+		if h.Cursor.X > 0 {
+			leadingPasteWS := string(util.GetLeadingWhitespace([]byte(clip)))
+			if leadingPasteWS != " " && strings.Contains(clip, "\n"+leadingPasteWS) {
+				leadingWS := string(util.GetLeadingWhitespace(h.Buf.LineBytes(h.Cursor.Y)))
+				clip = strings.TrimPrefix(clip, leadingPasteWS)
+				clip = strings.ReplaceAll(clip, "\n"+leadingPasteWS, "\n"+leadingWS)
+			}
 		}
 	}
 
@@ -1711,7 +1749,7 @@ func (h *BufPane) PlayMacro() bool {
 		switch t := action.(type) {
 		case rune:
 			h.DoRuneInsert(t)
-		case func(*BufPane) bool:
+		case BufKeyAction:
 			t(h)
 		}
 	}
@@ -1760,15 +1798,39 @@ func (h *BufPane) SpawnMultiCursor() bool {
 	return true
 }
 
-// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
-func (h *BufPane) SpawnMultiCursorUp() bool {
-	if h.Cursor.Y == 0 {
-		return false
-	}
-	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-	h.Cursor.Relocate()
+// SpawnMultiCursorUpN is not an action
+func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
+	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	var c *buffer.Cursor
+	if !h.Buf.Settings["softwrap"].(bool) {
+		if n > 0 && lastC.Y == 0 {
+			return false
+		}
+		if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
+			return false
+		}
 
-	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
+		h.Buf.DeselectCursors()
+
+		c = buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
+		c.LastVisualX = lastC.LastVisualX
+		c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
+		c.Relocate()
+	} else {
+		vloc := h.VLocFromLoc(lastC.Loc)
+		sloc := h.Scroll(vloc.SLoc, -n)
+		if sloc == vloc.SLoc {
+			return false
+		}
+
+		h.Buf.DeselectCursors()
+
+		vloc.SLoc = sloc
+		vloc.VisualX = lastC.LastVisualX
+		c = buffer.NewCursor(h.Buf, h.LocFromVLoc(vloc))
+		c.LastVisualX = lastC.LastVisualX
+	}
+
 	h.Buf.AddCursor(c)
 	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 	h.Buf.MergeCursors()
@@ -1777,20 +1839,14 @@ func (h *BufPane) SpawnMultiCursorUp() bool {
 	return true
 }
 
+// SpawnMultiCursorUp creates additional cursor, at the same X (if possible), one Y less.
+func (h *BufPane) SpawnMultiCursorUp() bool {
+	return h.SpawnMultiCursorUpN(1)
+}
+
 // SpawnMultiCursorDown creates additional cursor, at the same X (if possible), one Y more.
 func (h *BufPane) SpawnMultiCursorDown() bool {
-	if h.Cursor.Y+1 == h.Buf.LinesNum() {
-		return false
-	}
-	h.Cursor.GotoLoc(buffer.Loc{h.Cursor.X, h.Cursor.Y + 1})
-	h.Cursor.Relocate()
-
-	c := buffer.NewCursor(h.Buf, buffer.Loc{h.Cursor.X, h.Cursor.Y - 1})
-	h.Buf.AddCursor(c)
-	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
-	h.Buf.MergeCursors()
-	h.Relocate()
-	return true
+	return h.SpawnMultiCursorUpN(-1)
 }
 
 // SpawnMultiCursorSelect adds a cursor at the beginning of each line of a selection
@@ -1827,11 +1883,27 @@ func (h *BufPane) SpawnMultiCursorSelect() bool {
 	return true
 }
 
-// MouseMultiCursor is a mouse action which puts a new cursor at the mouse position
+// MouseMultiCursor is a mouse action which puts a new cursor at the mouse position,
+// or removes a cursor if it is already there
 func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	b := h.Buf
 	mx, my := e.Position()
+	// ignore click on the status line
+	if my >= h.BufView().Y+h.BufView().Height {
+		return false
+	}
 	mouseLoc := h.LocFromVisual(buffer.Loc{X: mx, Y: my})
+
+	if h.Buf.NumCursors() > 1 {
+		cursors := h.Buf.GetCursors()
+		for _, c := range cursors {
+			if c.Loc == mouseLoc {
+				h.Buf.RemoveCursor(c.Num)
+				return true
+			}
+		}
+	}
+
 	c := buffer.NewCursor(b, mouseLoc)
 	b.AddCursor(c)
 	b.MergeCursors()

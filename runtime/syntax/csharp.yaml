@@ -10,10 +10,11 @@ rules:
       # Annotation
     - identifier.var: "@[A-Za-z]+"
 
+    - preproc: "^[[:space:]]*#[[:space:]]*(define|elif|else|endif|endregion|error|if|line|nullable|pragma|region|undef|warning)"
     - identifier: "([A-Za-z0-9_]*[[:space:]]*[()])"
-    - type: "\\b(bool|byte|sbyte|char|decimal|double|float|IntPtr|int|uint|long|ulong|object|short|ushort|string|base|this|var|void)\\b"
-    - statement: "\\b(alias|as|case|catch|checked|default|do|dynamic|else|finally|fixed|for|foreach|goto|if|is|lock|new|null|return|switch|throw|try|unchecked|while)\\b"
-    - statement: "\\b(abstract|async|class|const|delegate|enum|event|explicit|extern|get|implicit|in|internal|interface|namespace|operator|out|override|params|partial|private|protected|public|readonly|ref|sealed|set|sizeof|stackalloc|static|struct|typeof|unsafe|using|value|virtual|volatile|yield)\\b"
+    - type: "\\b(bool|byte|sbyte|char|decimal|double|float|IntPtr|int|uint|long|ulong|managed|unmanaged|nint|nuint|object|short|ushort|string|base|this|var|void)\\b"
+    - statement: "\\b(alias|as|case|catch|checked|default|do|dynamic|else|finally|fixed|for|foreach|goto|if|is|lock|new|null|return|switch|throw|try|unchecked|when|while|with)\\b"
+    - statement: "\\b(abstract|add|and|args|async|await|class|const|delegate|enum|event|explicit|extern|file|get|global|implicit|in|init|internal|interface|nameof|namespace|not|notnull|operator|or|out|override|params|partial|private|protected|public|readonly|record|ref|remove|required|scoped|sealed|set|sizeof|stackalloc|static|struct|typeof|unsafe|using|value|virtual|volatile|yield)\\b"
       # LINQ-only keywords (ones that cannot be used outside of a LINQ query - lots others can)
     - statement: "\\b(from|where|select|group|info|orderby|join|let|in|on|equals|by|ascending|descending)\\b"
     - special: "\\b(break|continue)\\b"

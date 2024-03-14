@@ -64,7 +64,7 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 
 // GetWord gets the most recent word separated by any separator
 // (whitespace, punctuation, any non alphanumeric character)
-func GetWord(b *Buffer) ([]byte, int) {
+func (b *Buffer) GetWord() ([]byte, int) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -83,7 +83,7 @@ func GetWord(b *Buffer) ([]byte, int) {
 }
 
 // GetArg gets the most recent word (separated by ' ' only)
-func GetArg(b *Buffer) (string, int) {
+func (b *Buffer) GetArg() (string, int) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -104,7 +104,7 @@ func GetArg(b *Buffer) (string, int) {
 // FileComplete autocompletes filenames
 func FileComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := GetArg(b)
+	input, argstart := b.GetArg()
 
 	sep := string(os.PathSeparator)
 	dirs := strings.Split(input, sep)
@@ -153,7 +153,7 @@ func FileComplete(b *Buffer) ([]string, []string) {
 // BufferComplete autocompletes based on previous words in the buffer
 func BufferComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := GetWord(b)
+	input, argstart := b.GetWord()
 
 	if argstart == -1 {
 		return []string{}, []string{}
