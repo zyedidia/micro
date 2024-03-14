@@ -34,10 +34,15 @@ var (
 	// ModifiedSettings is a map of settings which should be written to disk
 	// because they have been modified by the user in this session
 	ModifiedSettings map[string]bool
+
+	// VolatileSettings is a map of settings which should not be written to disk
+	// because they have been temporarily set for this session only
+	VolatileSettings map[string]bool
 )
 
 func init() {
 	ModifiedSettings = make(map[string]bool)
+	VolatileSettings = make(map[string]bool)
 	parsedSettings = make(map[string]interface{})
 }
 
@@ -176,7 +181,8 @@ func WriteSettings(filename string) error {
 		for k, v := range parsedSettings {
 			if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 				cur, okcur := GlobalSettings[k]
-				if def, ok := defaults[k]; ok && okcur && reflect.DeepEqual(cur, def) {
+				_, vol := VolatileSettings[k]
+				if def, ok := defaults[k]; ok && okcur && !vol && reflect.DeepEqual(cur, def) {
 					delete(parsedSettings, k)
 				}
 			}
