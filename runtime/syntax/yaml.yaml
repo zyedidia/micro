@@ -2,7 +2,7 @@ filetype: yaml
 
 detect:
     filename: "\\.ya?ml$"
-    header: "%YAML"
+    signature: "%YAML"
 
 rules:
     - type: "(^| )!!(binary|bool|float|int|map|null|omap|seq|set|str) "

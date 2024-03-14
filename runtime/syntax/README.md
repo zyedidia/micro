@@ -2,7 +2,7 @@
 
 Here are micro's syntax files.
 
-Each yaml file specifies how to detect the filetype based on file extension or headers (first line of the file).
+Each yaml file specifies how to detect the filetype based on file extension or given signature. The signature can be matched to all available lines of the file or to the value defined with the option `detectlimit` (to limit parse times) for a best "guess".
 Then there are patterns and regions linked to highlight groups which tell micro how to highlight that filetype.
 
 Making your own syntax files is very simple. I recommend you check the file after you are finished with the

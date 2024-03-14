@@ -2,7 +2,7 @@ filetype: sed
 
 detect: 
     filename: "\\.sed$"
-    header: "^#!.*bin/(env +)?sed( |$)"
+    signature: "^#!.*bin/(env +)?sed( |$)"
 
 rules:
     - symbol.operator: "[|^$.*+]"

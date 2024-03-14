@@ -2,7 +2,7 @@ filetype: python
 
 detect:
     filename: "\\.py(3)?$"
-    header: "^#!.*/(env +)?python(3)?$"
+    signature: "^#!.*/(env +)?python(3)?$"
 
 rules:
     # built-in objects
