@@ -375,7 +375,7 @@ func (h *BufPane) ReopenCmd(args []string) {
 
 func (h *BufPane) openHelp(page string) error {
 	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
-		return errors.New(fmt.Sprint("Unable to load help text", page, "\n", err))
+		return errors.New(fmt.Sprintf("Unable to load help text for %s: %v", page, err))
 	} else {
 		helpBuffer := buffer.NewBufferFromString(string(data), page+".md", buffer.BTHelp)
 		helpBuffer.SetName("Help " + page)
