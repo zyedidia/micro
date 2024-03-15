@@ -418,7 +418,7 @@ func DoEvent() {
 		f.Function(f.Output, f.Args)
 	case <-config.Autosave:
 		for _, b := range buffer.OpenBuffers {
-			b.Save()
+			b.AutoSave()
 		}
 	case <-shell.CloseTerms:
 	case event = <-screen.Events:

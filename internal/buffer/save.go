@@ -93,9 +93,14 @@ func (b *Buffer) Save() error {
 	return b.SaveAs(b.Path)
 }
 
+// AutoSave saves the buffer to its default path
+func (b *Buffer) AutoSave() error {
+	return b.saveToFile(b.Path, false, true)
+}
+
 // SaveAs saves the buffer to a specified path (filename), creating the file if it does not exist
 func (b *Buffer) SaveAs(filename string) error {
-	return b.saveToFile(filename, false)
+	return b.saveToFile(filename, false, false)
 }
 
 func (b *Buffer) SaveWithSudo() error {
@@ -103,10 +108,10 @@ func (b *Buffer) SaveWithSudo() error {
 }
 
 func (b *Buffer) SaveAsWithSudo(filename string) error {
-	return b.saveToFile(filename, true)
+	return b.saveToFile(filename, true, false)
 }
 
-func (b *Buffer) saveToFile(filename string, withSudo bool) error {
+func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error {
 	var err error
 	if b.Type.Readonly {
 		return errors.New("Cannot save readonly buffer")
@@ -118,7 +123,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool) error {
 		return errors.New("Save with sudo not supported on Windows")
 	}
 
-	if b.Settings["rmtrailingws"].(bool) {
+	if !autoSave && b.Settings["rmtrailingws"].(bool) {
 		for i, l := range b.lines {
 			leftover := util.CharacterCount(bytes.TrimRightFunc(l.data, unicode.IsSpace))
 
