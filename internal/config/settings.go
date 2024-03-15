@@ -20,6 +20,116 @@ import (
 
 type optionValidator func(string, interface{}) error
 
+// a list of settings that need option validators
+var optionValidators = map[string]optionValidator{
+	"autosave":        validateNonNegativeValue,
+	"clipboard":       validateChoice,
+	"colorcolumn":     validateNonNegativeValue,
+	"colorscheme":     validateColorscheme,
+	"detectlimit":     validateNonNegativeValue,
+	"encoding":        validateEncoding,
+	"fileformat":      validateChoice,
+	"matchbracestyle": validateChoice,
+	"multiopen":       validateChoice,
+	"reload":          validateChoice,
+	"scrollmargin":    validateNonNegativeValue,
+	"scrollspeed":     validateNonNegativeValue,
+	"tabsize":         validatePositiveValue,
+}
+
+// a list of settings with pre-defined choices
+var OptionChoices = map[string][]string{
+	"clipboard":       {"internal", "external", "terminal"},
+	"fileformat":      {"unix", "dos"},
+	"matchbracestyle": {"underline", "highlight"},
+	"multiopen":       {"tab", "hsplit", "vsplit"},
+	"reload":          {"prompt", "auto", "disabled"},
+}
+
+// a list of settings that can be globally and locally modified and their
+// default values
+var defaultCommonSettings = map[string]interface{}{
+	"autoindent":      true,
+	"autosu":          false,
+	"backup":          true,
+	"backupdir":       "",
+	"basename":        false,
+	"colorcolumn":     float64(0),
+	"cursorline":      true,
+	"detectlimit":     float64(100),
+	"diffgutter":      false,
+	"encoding":        "utf-8",
+	"eofnewline":      true,
+	"fastdirty":       false,
+	"fileformat":      defaultFileFormat(),
+	"filetype":        "unknown",
+	"hlsearch":        false,
+	"hltaberrors":     false,
+	"hltrailingws":    false,
+	"incsearch":       true,
+	"ignorecase":      true,
+	"indentchar":      " ",
+	"keepautoindent":  false,
+	"matchbrace":      true,
+	"matchbracestyle": "underline",
+	"mkparents":       false,
+	"permbackup":      false,
+	"readonly":        false,
+	"reload":          "prompt",
+	"rmtrailingws":    false,
+	"ruler":           true,
+	"relativeruler":   false,
+	"savecursor":      false,
+	"saveundo":        false,
+	"scrollbar":       false,
+	"scrollmargin":    float64(3),
+	"scrollspeed":     float64(2),
+	"smartpaste":      true,
+	"softwrap":        false,
+	"splitbottom":     true,
+	"splitright":      true,
+	"statusformatl":   "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+	"statusformatr":   "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
+	"statusline":      true,
+	"syntax":          true,
+	"tabmovement":     false,
+	"tabsize":         float64(4),
+	"tabstospaces":    false,
+	"useprimary":      true,
+	"wordwrap":        false,
+}
+
+// a list of settings that should only be globally modified and their
+// default values
+var DefaultGlobalOnlySettings = map[string]interface{}{
+	"autosave":       float64(0),
+	"clipboard":      "external",
+	"colorscheme":    "default",
+	"divchars":       "|-",
+	"divreverse":     true,
+	"fakecursor":     false,
+	"infobar":        true,
+	"keymenu":        false,
+	"mouse":          true,
+	"multiopen":      "tab",
+	"parsecursor":    false,
+	"paste":          false,
+	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
+	"pluginrepos":    []string{},
+	"savehistory":    true,
+	"scrollbarchar":  "|",
+	"sucmd":          "sudo",
+	"tabhighlight":   false,
+	"tabreverse":     true,
+	"xterm":          false,
+}
+
+// a list of settings that should never be globally modified
+var LocalSettings = []string{
+	"filetype",
+	"readonly",
+}
+
 var (
 	ErrInvalidOption = errors.New("Invalid option")
 	ErrInvalidValue  = errors.New("Invalid value")
@@ -44,23 +154,6 @@ func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
 	parsedSettings = make(map[string]interface{})
-}
-
-// Options with validators
-var optionValidators = map[string]optionValidator{
-	"autosave":        validateNonNegativeValue,
-	"clipboard":       validateClipboard,
-	"detectlimit":     validateNonNegativeValue,
-	"tabsize":         validatePositiveValue,
-	"scrollmargin":    validateNonNegativeValue,
-	"scrollspeed":     validateNonNegativeValue,
-	"colorscheme":     validateColorscheme,
-	"colorcolumn":     validateNonNegativeValue,
-	"fileformat":      validateLineEnding,
-	"encoding":        validateEncoding,
-	"multiopen":       validateMultiOpen,
-	"reload":          validateReload,
-	"matchbracestyle": validateMatchBraceStyle,
 }
 
 func ReadSettings() error {
@@ -258,57 +351,6 @@ func GetGlobalOption(name string) interface{} {
 	return GlobalSettings[name]
 }
 
-var defaultCommonSettings = map[string]interface{}{
-	"autoindent":      true,
-	"autosu":          false,
-	"backup":          true,
-	"backupdir":       "",
-	"basename":        false,
-	"colorcolumn":     float64(0),
-	"cursorline":      true,
-	"detectlimit":     float64(100),
-	"diffgutter":      false,
-	"encoding":        "utf-8",
-	"eofnewline":      true,
-	"fastdirty":       false,
-	"fileformat":      defaultFileFormat(),
-	"filetype":        "unknown",
-	"hlsearch":        false,
-	"hltaberrors":     false,
-	"hltrailingws":    false,
-	"incsearch":       true,
-	"ignorecase":      true,
-	"indentchar":      " ",
-	"keepautoindent":  false,
-	"matchbrace":      true,
-	"matchbracestyle": "underline",
-	"mkparents":       false,
-	"permbackup":      false,
-	"readonly":        false,
-	"reload":          "prompt",
-	"rmtrailingws":    false,
-	"ruler":           true,
-	"relativeruler":   false,
-	"savecursor":      false,
-	"saveundo":        false,
-	"scrollbar":       false,
-	"scrollmargin":    float64(3),
-	"scrollspeed":     float64(2),
-	"smartpaste":      true,
-	"softwrap":        false,
-	"splitbottom":     true,
-	"splitright":      true,
-	"statusformatl":   "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
-	"statusformatr":   "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
-	"statusline":      true,
-	"syntax":          true,
-	"tabmovement":     false,
-	"tabsize":         float64(4),
-	"tabstospaces":    false,
-	"useprimary":      true,
-	"wordwrap":        false,
-}
-
 func defaultFileFormat() string {
 	if runtime.GOOS == "windows" {
 		return "dos"
@@ -335,37 +377,6 @@ func DefaultCommonSettings() map[string]interface{} {
 		commonsettings[k] = v
 	}
 	return commonsettings
-}
-
-// a list of settings that should only be globally modified and their
-// default values
-var DefaultGlobalOnlySettings = map[string]interface{}{
-	"autosave":       float64(0),
-	"clipboard":      "external",
-	"colorscheme":    "default",
-	"divchars":       "|-",
-	"divreverse":     true,
-	"fakecursor":     false,
-	"infobar":        true,
-	"keymenu":        false,
-	"mouse":          true,
-	"multiopen":      "tab",
-	"parsecursor":    false,
-	"paste":          false,
-	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
-	"pluginrepos":    []string{},
-	"savehistory":    true,
-	"scrollbarchar":  "|",
-	"sucmd":          "sudo",
-	"tabhighlight":   false,
-	"tabreverse":     true,
-	"xterm":          false,
-}
-
-// a list of settings that should never be globally modified
-var LocalSettings = []string{
-	"filetype",
-	"readonly",
 }
 
 // DefaultGlobalSettings returns the default global settings for micro
@@ -461,6 +472,26 @@ func validateNonNegativeValue(option string, value interface{}) error {
 	return nil
 }
 
+func validateChoice(option string, value interface{}) error {
+	if choices, ok := OptionChoices[option]; ok {
+		val, ok := value.(string)
+		if !ok {
+			return errors.New("Expected string type for " + option)
+		}
+
+		for _, v := range choices {
+			if val == v {
+				return nil
+			}
+		}
+
+		choicesStr := strings.Join(choices, ", ")
+		return errors.New(option + " must be one of: " + choicesStr)
+	}
+
+	return errors.New("Option has no pre-defined choices")
+}
+
 func validateColorscheme(option string, value interface{}) error {
 	colorscheme, ok := value.(string)
 
@@ -475,85 +506,7 @@ func validateColorscheme(option string, value interface{}) error {
 	return nil
 }
 
-func validateClipboard(option string, value interface{}) error {
-	val, ok := value.(string)
-
-	if !ok {
-		return errors.New("Expected string type for clipboard")
-	}
-
-	switch val {
-	case "internal", "external", "terminal":
-	default:
-		return errors.New(option + " must be 'internal', 'external', or 'terminal'")
-	}
-
-	return nil
-}
-
-func validateLineEnding(option string, value interface{}) error {
-	endingType, ok := value.(string)
-
-	if !ok {
-		return errors.New("Expected string type for file format")
-	}
-
-	if endingType != "unix" && endingType != "dos" {
-		return errors.New("File format must be either 'unix' or 'dos'")
-	}
-
-	return nil
-}
-
 func validateEncoding(option string, value interface{}) error {
 	_, err := htmlindex.Get(value.(string))
 	return err
-}
-
-func validateMultiOpen(option string, value interface{}) error {
-	val, ok := value.(string)
-
-	if !ok {
-		return errors.New("Expected string type for multiopen")
-	}
-
-	switch val {
-	case "tab", "hsplit", "vsplit":
-	default:
-		return errors.New(option + " must be 'tab', 'hsplit', or 'vsplit'")
-	}
-
-	return nil
-}
-
-func validateReload(option string, value interface{}) error {
-	val, ok := value.(string)
-
-	if !ok {
-		return errors.New("Expected string type for reload")
-	}
-
-	switch val {
-	case "prompt", "auto", "disabled":
-	default:
-		return errors.New(option + " must be 'prompt', 'auto' or 'disabled'")
-    }
-
-    return nil
-}
-
-func validateMatchBraceStyle(option string, value interface{}) error {
-	val, ok := value.(string)
-
-	if !ok {
-		errors.New("Expected string type for matchbracestyle")
-	}
-
-	switch val {
-	case "underline", "highlight":
-	default:
-		return errors.New(option + " must be 'underline' or 'highlight'")
-	}
-
-	return nil
 }
