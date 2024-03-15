@@ -987,6 +987,9 @@ func (h *BufPane) find(useRegex bool) bool {
 		}
 	}
 	pattern := string(h.Cursor.GetSelection())
+	if useRegex && pattern != "" {
+		pattern = regexp.QuoteMeta(pattern)
+	}
 	if eventCallback != nil && pattern != "" {
 		eventCallback(pattern)
 	}
