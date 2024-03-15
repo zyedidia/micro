@@ -83,6 +83,8 @@ func (h *InfoPane) Close() {
 
 func (h *InfoPane) HandleEvent(event tcell.Event) {
 	switch e := event.(type) {
+	case *tcell.EventResize:
+		// TODO
 	case *tcell.EventKey:
 		ke := KeyEvent{
 			code: e.Key(),
