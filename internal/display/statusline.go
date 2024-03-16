@@ -53,6 +53,9 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 	"percentage": func(b *buffer.Buffer) string {
 		return strconv.Itoa((b.GetActiveCursor().Y + 1) * 100 / b.LinesNum())
 	},
+	"group": func(b *buffer.Buffer) string {
+		return b.GetGroup(b.GetActiveCursor().Loc).String()
+	},
 }
 
 func SetStatusInfoFnLua(fn string) {

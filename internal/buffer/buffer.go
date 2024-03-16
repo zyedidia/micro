@@ -157,8 +157,118 @@ func (b *SharedBuffer) MarkModified(start, end int) {
 		b.Highlighter.HighlightMatches(b, start, l)
 	}
 
+	b.DepthAssign(start, end + 1)
+
 	for i := start; i <= end; i++ {
 		b.LineArray.invalidateSearchMatches(i)
+	}
+}
+
+// TODO: A parser for the applicable language should parse the buffer and assign the AST depth of each line.
+// If different tokens from the same line have different depths, assign the minimum of them all.
+// Of course, it is also acceptable to use other algorithms that produce acceptable results, maybe
+// something like counting openning and closing brackets for the appropriate filetype.
+func (b *SharedBuffer) DepthAssign(start, end int) {
+	// TODO: When a parser for the applicable language would be overkill, add an entry to the runtime/syntax/*.yaml file to select one of the predefined algorithms.
+	ft := b.FileType()
+	offSide := ft == "cmake" || ft == "coffeescript" || ft == "elm" || ft == "gdscript" || ft == "haml" || ft == "makefile" || ft == "nim" || ft == "python" || ft == "python2" || ft == "yaml"
+	c := ft == "c" || ft == "c++"
+	modified := false
+	str := highlight.Groups["constant.string"];
+	cmt := highlight.Groups["comment"];
+	tod := highlight.Groups["todo"];
+	err := highlight.Groups["error"];
+	preproc := highlight.Groups["preproc"];
+
+	prevgrp := b.GetGroup(Loc{0, start}.left(b.LineArray))
+	prev_cmt_str := prevgrp == str || prevgrp == cmt || prevgrp == tod || prevgrp == err
+
+	for y := start; y < end; y++ {
+		min_d := 0
+		if offSide {
+			// depth set by indentation
+			l := b.LineBytes(y)
+			t := len(l)
+			w := len(util.GetLeadingWhitespace(l))
+			if t > w {
+				min_d = w
+			} else if y > 0 {
+				min_d = b.lines[y-1].min_depth
+			}
+		} else {
+			// depth set by braces
+			d := 0
+			if y > 0 {
+				d = b.lines[y-1].depth
+			}
+			min_d = d
+			l := []rune(string(b.LineBytes(y)))
+			for x := 0; x < len(l); x++ {
+				grp := b.GetGroup(Loc{x, y})
+				cmt_str := grp == str || grp == cmt || grp == tod || grp == err
+				if prev_cmt_str != cmt_str {
+					prev_cmt_str = cmt_str
+					if cmt_str {
+						d++
+					} else {
+						d--
+						if min_d > d {
+							min_d = d
+						}
+					}
+				}
+				if cmt_str {
+					continue
+				}
+				if c && grp == preproc && l[x] == '#' {
+					i := x + 1
+					for ; l[i] == ' ' || l[i] == '\t' ; i++ {}
+					if l[i] == 'i' && l[i+1] == 'f' { // if
+						d++
+					} else if l[i] == 'e' && (l[i+1] == 'l' || l[i+1] == 'n') { // else, elif, endif
+						d--
+						if min_d > d {
+							min_d = d
+						}
+						if l[i+1] == 'l' { // else, elif
+							d++
+						}
+					}
+				}
+				if l[x] == '{' || l[x] == '(' || l[x] == '[' {
+					d++
+				} else if (l[x] == '}' || l[x] == ')' || l[x] == ']') && d > 0 {
+					d--
+					if min_d > d {
+						min_d = d
+					}
+				}
+			}
+			if b.lines[y].depth != d {
+				b.lines[y].depth = d
+				modified = true
+				if y + 1 == end && end < b.LinesNum() {
+					end++
+				}
+			}
+		}
+		if b.lines[y].min_depth != min_d {
+			b.lines[y].min_depth = min_d
+			modified = true
+			if y + 1 == end && end < b.LinesNum() {
+				end++
+			}
+		}
+	}
+	if modified {
+		if start > 0 {
+			start--
+		}
+		for lineN := start; lineN < end; lineN++ {
+			if b.lines[lineN].collapsed && !b.FoldCollapsible(lineN) {
+				b.lines[lineN].collapsed = false
+			}
+		}
 	}
 }
 
@@ -511,8 +621,97 @@ func (b *Buffer) Remove(start, end Loc) {
 }
 
 // FileType returns the buffer's filetype
-func (b *Buffer) FileType() string {
+func (b *SharedBuffer) FileType() string {
 	return b.Settings["filetype"].(string)
+}
+
+// lineN is collapsible if min_depth(lineN) < min_depth(lineN+1)
+func (b *SharedBuffer) FoldCollapsible(lineN int) bool {
+	return lineN + 1 < b.LinesNum() && b.lines[lineN + 1].min_depth > b.lines[lineN].min_depth
+}
+
+// lineN is the end of a collapsible region if min_depth(lineN-1) > min_depth(lineN)
+func (b *SharedBuffer) FoldCollapseEnd(lineN int) bool {
+	return lineN > 0 && b.lines[lineN - 1].min_depth > b.lines[lineN].min_depth
+}
+
+// lineN is hidden if any collapsible parent is collapsed
+func (b *Buffer) Hidden(lineN int) bool {
+	d := b.lines[lineN].min_depth
+	for lineT := lineN - 1; lineT >= 0 && d > 0; lineT-- {
+		if d > b.lines[lineT].min_depth {
+			d = b.lines[lineT].min_depth
+			if b.lines[lineT].collapsed {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// lineN must be collapsible
+func (b *Buffer) FoldCollapseOne(lineN int, recursive bool) {
+	b.lines[lineN].collapsed = true
+	if !recursive {
+		return
+	}
+	d := b.lines[lineN].min_depth
+	for lineT := lineN + 1; lineT < b.LinesNum() && b.lines[lineT].min_depth > d; lineT++ {
+		if b.FoldCollapsible(lineT) {
+			b.lines[lineT].collapsed = true
+		}
+	}
+}
+
+// lineN should be collapsible
+func (b *Buffer) FoldExpandOne(lineN int, recursive bool) {
+	b.lines[lineN].collapsed = false
+	if !recursive {
+		return
+	}
+	d := b.lines[lineN].min_depth
+	for lineT := lineN + 1; lineT < b.LinesNum() && b.lines[lineT].min_depth > d; lineT++ {
+		b.lines[lineT].collapsed = false
+	}
+}
+
+// Expand all parent folds of lineN to make it visible.
+func (b *Buffer) FoldExpandOut(lineN int) {
+	d := b.lines[lineN].min_depth
+	for lineT := lineN - 1; lineT >= 0 && d > 0; lineT-- {
+		if d > b.lines[lineT].min_depth {
+			d = b.lines[lineT].min_depth
+			b.lines[lineT].collapsed = false
+		}
+	}
+}
+
+// FoldCollapse
+func (b *Buffer) FoldCollapse(lineN int, expand bool, recursive bool) bool {
+	// If this is not a collapsible line, collapse the region it pertains.
+	if !b.FoldCollapsible(lineN) {
+		for d := b.lines[lineN].min_depth; lineN >= 0 && b.lines[lineN].min_depth >= d; lineN-- {}
+	}
+	if lineN >= 0 {
+		if expand {
+			b.FoldExpandOne(lineN, recursive)
+		} else {
+			b.FoldCollapseOne(lineN, recursive)
+		}
+		return true
+	}
+	// Collapse everything
+	lineN = 0
+	for d := b.lines[lineN].min_depth; lineN < b.LinesNum() - 1; lineN++ {
+		if b.lines[lineN].min_depth == d && b.lines[lineN + 1].min_depth > d {
+			if expand {
+				b.FoldExpandOne(lineN, recursive)
+			} else {
+				b.FoldCollapseOne(lineN, recursive)
+			}
+		}
+	}
+	return true
 }
 
 // ExternallyModified returns whether the file being edited has
@@ -971,6 +1170,7 @@ func (b *Buffer) UpdateRules() {
 			go func() {
 				b.Highlighter.HighlightStates(b)
 				b.Highlighter.HighlightMatches(b, 0, b.End().Y)
+				b.DepthAssign(0, b.LinesNum())
 				screen.Redraw()
 			}()
 		}
@@ -1157,55 +1357,69 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, boo
 	if start.X-1 >= 0 && start.X-1 < len(curLine) {
 		leftChar = curLine[start.X-1]
 	}
+
+	this_open  := startChar == braceType[0];
+	left_open  := leftChar  == braceType[0];
+	this_close := startChar == braceType[1];
+	left_close := leftChar  == braceType[1];
+
+	startLoc := start
+	if !this_open && (left_open || left_close) {
+		startLoc.X--
+	}
+	startGroup := b.GetGroup(startLoc)
+
 	var i int
-	if startChar == braceType[0] || (leftChar == braceType[0] && startChar != braceType[1]) {
+	if this_open || (left_open && !this_close) {
 		for y := start.Y; y < b.LinesNum(); y++ {
-			l := []rune(string(b.LineBytes(y)))
+			l := []rune(string(b.lines[y].data))
 			xInit := 0
 			if y == start.Y {
-				if startChar == braceType[0] {
+				if this_open {
 					xInit = start.X
 				} else {
 					xInit = start.X - 1
 				}
 			}
 			for x := xInit; x < len(l); x++ {
+				curGroup := b.GetGroup(Loc{x, y})
+				if curGroup != startGroup {
+					continue
+				}
 				r := l[x]
 				if r == braceType[0] {
 					i++
 				} else if r == braceType[1] {
 					i--
 					if i == 0 {
-						if startChar == braceType[0] {
-							return Loc{x, y}, false, true
-						}
-						return Loc{x, y}, true, true
+						return Loc{x, y}, !this_open, true
 					}
 				}
 			}
 		}
-	} else if startChar == braceType[1] || leftChar == braceType[1] {
+	} else if this_close || left_close {
 		for y := start.Y; y >= 0; y-- {
 			l := []rune(string(b.lines[y].data))
 			xInit := len(l) - 1
 			if y == start.Y {
-				if startChar == braceType[1] {
+				if this_close {
 					xInit = start.X
 				} else {
 					xInit = start.X - 1
 				}
 			}
 			for x := xInit; x >= 0; x-- {
+				curGroup := b.GetGroup(Loc{x, y})
+				if curGroup != startGroup {
+					continue
+				}
 				r := l[x]
 				if r == braceType[1] {
 					i++
 				} else if r == braceType[0] {
 					i--
 					if i == 0 {
-						if startChar == braceType[1] {
-							return Loc{x, y}, false, true
-						}
-						return Loc{x, y}, true, true
+						return Loc{x, y}, !this_close, true
 					}
 				}
 			}
