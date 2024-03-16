@@ -1283,6 +1283,26 @@ func (h *BufPane) MoveLinesDown() bool {
 	return true
 }
 
+// FoldCollapse
+func (h *BufPane) FoldCollapse() bool {
+	return h.Buf.FoldCollapse(h.Cursor.Loc.Y, false, false)
+}
+
+// FoldCollapseRecursive
+func (h *BufPane) FoldCollapseRecursive() bool {
+	return h.Buf.FoldCollapse(h.Cursor.Loc.Y, false, true)
+}
+
+// FoldExpand
+func (h *BufPane) FoldExpand() bool {
+	return h.Buf.FoldCollapse(h.Cursor.Loc.Y, true, false)
+}
+
+// FoldExpandRecursive
+func (h *BufPane) FoldExpandRecursive() bool {
+	return h.Buf.FoldCollapse(h.Cursor.Loc.Y, true, true)
+}
+
 // Paste whatever is in the system clipboard into the buffer
 // Delete and paste if the user has a selection
 func (h *BufPane) Paste() bool {

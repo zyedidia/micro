@@ -290,17 +290,31 @@ func (w *BufWindow) diff(s1, s2 SLoc) int {
 // which means scrolling up. The returned location is guaranteed to be
 // within the buffer boundaries.
 func (w *BufWindow) Scroll(s SLoc, n int) SLoc {
-	if !w.Buf.Settings["softwrap"].(bool) {
-		s.Line += n
-		if s.Line < 0 {
-			s.Line = 0
-		}
-		if s.Line > w.Buf.LinesNum()-1 {
-			s.Line = w.Buf.LinesNum() - 1
-		}
-		return s
+	if w.Buf.Settings["softwrap"].(bool) {
+		// TODO: account for hidden lines when softwrap
+		return w.scroll(s, n)
 	}
-	return w.scroll(s, n)
+	incr := 1
+	if n < 0 {
+		incr = -1
+		n = -n;
+	}
+	for i := 0; i < n; {
+		s.Line += incr
+		if s.Line < 0 || s.Line >= w.Buf.LinesNum() {
+			break
+		}
+		if !w.Buf.Hidden(s.Line) {
+			i++
+		}
+	}
+	if s.Line < 0 {
+		s.Line = 0
+	}
+	if s.Line >= w.Buf.LinesNum() {
+		s.Line = w.Buf.LinesNum() - 1
+	}
+	return s
 }
 
 // Diff returns the difference (the vertical distance) between two SLocs.

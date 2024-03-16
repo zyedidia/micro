@@ -49,6 +49,9 @@ type Line struct {
 	state       highlight.State
 	match       highlight.LineMatch
 	rehighlight bool
+	collapsed   bool // TODO: This should a per-buffer attribute.
+	min_depth   int
+	depth       int
 	lock        sync.Mutex
 
 	// The search states for the line, used for highlighting of search matches,
@@ -362,6 +365,33 @@ func (la *LineArray) Match(lineN int) highlight.LineMatch {
 	return la.lines[lineN].match
 }
 
+func (la *LineArray) GetGroup(pos Loc) highlight.Group {
+	lMatch := la.Match(pos.Y)
+	closest := -1
+	for key := range lMatch {
+		if key > closest && key <= pos.X && lMatch[key] != 0 {
+			closest = key
+		}
+	}
+	if closest >= 0 {
+		return lMatch[closest]
+	}
+	for pos.Y > 0 {
+		pos.Y--
+		lMatch = la.Match(pos.Y)
+		closest = -1
+		for key := range lMatch {
+			if key > closest {
+				closest = key
+			}
+		}
+		if closest >= 0 {
+			return lMatch[closest]
+		}
+	}
+	return 0
+}
+
 func (la *LineArray) Rehighlight(lineN int) bool {
 	la.lines[lineN].lock.Lock()
 	defer la.lines[lineN].lock.Unlock()
@@ -372,6 +402,10 @@ func (la *LineArray) SetRehighlight(lineN int, on bool) {
 	la.lines[lineN].lock.Lock()
 	defer la.lines[lineN].lock.Unlock()
 	la.lines[lineN].rehighlight = on
+}
+
+func (la *LineArray) Collapsed(lineN int) bool {
+	return la.lines[lineN].collapsed
 }
 
 // SearchMatch returns true if the location `pos` is within a match
