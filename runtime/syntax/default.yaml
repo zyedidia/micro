@@ -5,12 +5,6 @@ detect:
 
 rules:
     # Mails
-    - special: "[[:alnum:].%_+-]+@[[:alnum:].-]+\\.[[:alpha:]]{2,}"
+    - special: "[[:alnum:].%_+-]+@[[:alnum:].-]+"
     # URLs
-    - identifier: "(https?|ftp|ssh)://\\S+\\.\\S+[^])>\\s,.]"
-
-    - comment:
-        start: "(^|\\s)#"
-        end: "$"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
+    - identifier: "(https?|ftp|ssh)://\\S*[^])>\\s,.]"
