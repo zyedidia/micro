@@ -43,6 +43,12 @@ quotes here but these are not necessary when entering the command in micro.
    Note that `search` must be a valid regex (unless `-l` is passed). If one 
    of the arguments does not have any spaces in it, you may omit the quotes.
 
+   In case the search is done non-literal (without `-l`), the 'value'
+   is interpreted as a template:
+   * `$3` or `${3}` substitutes the submatch of the 3rd (capturing group)
+   * `$foo` or `${foo}` substitutes the submatch of the (?P<foo>named group)
+   * You have to write `$$` to substitute a literal dollar.
+
 * `replaceall 'search' 'value'`: this will replace all occurrences of `search`
    with `value` without user confirmation.
 

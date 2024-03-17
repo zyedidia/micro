@@ -148,7 +148,7 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 // ReplaceRegex replaces all occurrences of 'search' with 'replace' in the given area
 // and returns the number of replacements made and the number of runes
 // added or removed on the last line of the range
-func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []byte) (int, int) {
+func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []byte, captureGroups bool) (int, int) {
 	if start.GreaterThan(end) {
 		start, end = end, start
 	}
@@ -172,9 +172,13 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 			l = util.SliceStart(l, end.X)
 		}
 		newText := search.ReplaceAllFunc(l, func(in []byte) []byte {
-			result := []byte{}
-			for _, submatches := range search.FindAllSubmatchIndex(in, -1) {
-				result = search.Expand(result, replace, in, submatches)
+			var result []byte
+			if captureGroups {
+				for _, submatches := range search.FindAllSubmatchIndex(in, -1) {
+					result = search.Expand(result, replace, in, submatches)
+				}
+			} else {
+				result = replace
 			}
 			found++
 			if i == end.Y {
