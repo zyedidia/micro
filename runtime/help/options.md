@@ -47,7 +47,7 @@ Here are the available options:
     default value: `false`
 
 * `backup`: micro will automatically keep backups of all open buffers. Backups
-   are stored in `~/.config/micro/backups` and are removed when the buffer is
+   are stored in `~/.local/state/micro/backups` and are removed when the buffer is
    closed cleanly. In the case of a system crash or a micro crash, the contents
    of the buffer can be recovered automatically by opening the file that was
    being edited before the crash, or manually by searching for the backup in
@@ -58,7 +58,7 @@ Here are the available options:
 
 * `backupdir`: the directory micro should place backups in. For the default
    value of `""` (empty string), the backup directory will be
-   `ConfigDir/backups`, which is `~/.config/micro/backups` by default. The
+   `StateDir/backups`, which is `~/.local/state/micro/backups` by default. The
    directory specified for backups will be created if it does not exist.
 
     default value: `""` (empty string)
@@ -348,18 +348,18 @@ Here are the available options:
 
 * `savecursor`: remember where the cursor was last time the file was opened and
    put it there when you open the file again. Information is saved to
-   `~/.config/micro/buffers/`
+   `~/.local/state/micro/buffers/`
 
 	default value: `false`
 
 * `savehistory`: remember command history between closing and re-opening
-   micro. Information is saved to `~/.config/micro/buffers/history`.
+   micro. Information is saved to `~/.local/state/micro/buffers/history`.
 
     default value: `true`
 
 * `saveundo`: when this option is on, undo is saved even after you close a file
    so if you close and reopen a file, you can keep undoing. Information is
-   saved to `~/.config/micro/buffers/`.
+   saved to `~/.local/state/micro/buffers/`.
 
 	default value: `false`
 
