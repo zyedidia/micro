@@ -908,11 +908,18 @@ func (b *Buffer) UpdateRules() {
 		if b.SyntaxDef != nil {
 			b.Settings["filetype"] = b.SyntaxDef.FileType
 		} else {
-			for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+			// search for the default file in the user's custom syntax files
+			for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
 				if f.Name() == "default" {
 					data, err := f.Data()
 					if err != nil {
 						screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+						continue
+					}
+
+					header, err = highlight.MakeHeaderYaml(data)
+					if err != nil {
+						screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
 						continue
 					}
 
@@ -929,6 +936,33 @@ func (b *Buffer) UpdateRules() {
 					}
 					b.SyntaxDef = syndef
 					break
+				}
+			}
+
+			if b.SyntaxDef == nil {
+				// search for the default file in the runtime files
+				for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+					if f.Name() == "default" {
+						data, err := f.Data()
+						if err != nil {
+							screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+							continue
+						}
+
+						file, err := highlight.ParseFile(data)
+						if err != nil {
+							screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+							continue
+						}
+
+						syndef, err := highlight.ParseDef(file, header)
+						if err != nil {
+							screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+							continue
+						}
+						b.SyntaxDef = syndef
+						break
+					}
 				}
 			}
 		}
