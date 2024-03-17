@@ -1,6 +1,9 @@
 # Options
 
-Micro stores all of the user configuration in its configuration directory.
+Micro stores all of the user configuration in its configuration directory, and
+all temporary/state files in its state directory.
+
+### Configuration directory
 
 Micro uses `$MICRO_CONFIG_HOME` as the configuration directory. If this
 environment variable is not set, it uses `$XDG_CONFIG_HOME/micro` instead. If
@@ -8,6 +11,17 @@ that environment variable is not set, it uses `~/.config/micro` as the
 configuration directory. In the documentation, we use `~/.config/micro` to
 refer to the configuration directory (even if it may in fact be somewhere else
 if you have set either of the above environment variables).
+
+### State directory
+
+Micro uses `$MICRO_STATE_HOME` as the state directory. If this environment
+variable is not set, it uses `$XDG_STATE_HOME/micro` instead. If that
+environment variable is not set, it uses `~/.local/state/micro` as the state
+directory. In the documentation, we use `~/.local/state/micro` to refer to the
+state directory (even if it may in fact be somewhere else if you have set either
+of the above environment variables).
+
+### List of options
 
 Here are the available options:
 
