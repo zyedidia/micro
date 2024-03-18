@@ -90,7 +90,7 @@ sends a list of key events, this can cause issues because micro
 will think you manually entered each character and may add closing
 brackets or automatic indentation, which will mess up the pasted
 text. To avoid this, you can temporarily enable the `paste` option
-while you perform the paste. When paste option is on, micro will 
+while you perform the paste. When paste option is on, micro will
 aggregate lists of multiple key events into larger paste events.
 It is a good idea to disable the `paste` option during normal use
 as occasionally if you are typing quickly, the terminal will send

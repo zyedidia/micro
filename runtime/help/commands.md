@@ -35,12 +35,12 @@ quotes here but these are not necessary when entering the command in micro.
    passed to jump inward from the end of the file; for example, -5 jumps
    to the 5th-last line in the file.
 
-* `replace 'search' 'value' ['flags']`: This will replace `search` with `value`. 
+* `replace 'search' 'value' ['flags']`: This will replace `search` with `value`.
    The `flags` are optional. Possible flags are:
    * `-a`: Replace all occurrences at once
    * `-l`: Do a literal search instead of a regex search
 
-   Note that `search` must be a valid regex (unless `-l` is passed). If one 
+   Note that `search` must be a valid regex (unless `-l` is passed). If one
    of the arguments does not have any spaces in it, you may omit the quotes.
 
    In case the search is done non-literal (without `-l`), the 'value'
@@ -63,7 +63,7 @@ quotes here but these are not necessary when entering the command in micro.
 
 * `show 'option'`: shows the current value of the given option.
 
-* `run 'sh-command'`: runs the given shell command in the background. The 
+* `run 'sh-command'`: runs the given shell command in the background. The
    command's output will be displayed in one line when it finishes running.
 
 * `vsplit ['filename']`: opens a vertical split with `filename`. If no filename
