@@ -93,7 +93,7 @@ and set this variable yourself.
 * `solarized-tc`: this is the solarized colorscheme for true color.
 * `atom-dark`: this colorscheme is based off of Atom's "dark" colorscheme.
 * `cmc-tc`: A true colour variant of the cmc theme.  It requires true color to
-  look its best. Use cmc-16 if your terminal doesn't support true color.
+   look its best. Use cmc-16 if your terminal doesn't support true color.
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
 * `material-tc`: Colorscheme based off of Google's Material Design palette
 

@@ -137,8 +137,8 @@ Here are the available options:
 	default value: `true`
 
 * `fakecursor`: forces micro to render the cursor using terminal colors rather
-  than the actual terminal cursor. This is useful when the terminal's cursor is
-  slow or otherwise unavailable/undesirable to use.
+   than the actual terminal cursor. This is useful when the terminal's cursor is
+   slow or otherwise unavailable/undesirable to use.
 
     default value: `false`
 
@@ -167,7 +167,7 @@ Here are the available options:
 	default value: `unix` on Unix systems, `dos` on Windows
 
 * `filetype`: sets the filetype for the current buffer. Set this option to
-  `off` to completely disable filetype detection.
+   `off` to completely disable filetype detection.
 
 	default value: `unknown`. This will be automatically overridden depending
     on the file you open.
@@ -203,11 +203,11 @@ Here are the available options:
 	default value: `true`
 
 * `indentchar`: sets the indentation character. This will not be inserted into
-  files; it is only a visual indicator that whitespace is present. If set to a
-  printing character, it functions as a subset of the "show invisibles"
-  setting available in many other text editors. The color of this character is
-  determined by the `indent-char` field in the current theme rather than the
-  default text color.
+   files; it is only a visual indicator that whitespace is present. If set to a
+   printing character, it functions as a subset of the "show invisibles"
+   setting available in many other text editors. The color of this character is
+   determined by the `indent-char` field in the current theme rather than the
+   default text color.
 
 	default value: ` ` (space)
 
@@ -236,10 +236,10 @@ Here are the available options:
     default value: `true`
 
 * `matchbracestyle`: whether to underline or highlight matching braces when
-  `matchbrace` is enabled. The color of highlight is determined by the `match-brace`
-  field in the current theme. Possible values:
-  * `underline`: underline matching braces.
-  * `highlight`: use `match-brace` style from the current theme.
+   `matchbrace` is enabled. The color of highlight is determined by the
+   `match-brace` field in the current theme. Possible values:
+    * `underline`: underline matching braces.
+    * `highlight`: use `match-brace` style from the current theme.
 
    default value: `underline`
 
@@ -422,7 +422,7 @@ Here are the available options:
 	default value: `false`
 
 * `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
-  colors with respect to the tab bar.
+   colors with respect to the tab bar.
 
 	default value: false
 
@@ -454,7 +454,7 @@ Here are the available options:
 	default value: `false`
 
 * `xterm`: micro will assume that the terminal it is running in conforms to
-  `xterm-256color` regardless of what the `$TERM` variable actually contains.
+   `xterm-256color` regardless of what the `$TERM` variable actually contains.
    Enabling this option may cause unwanted effects if your terminal in fact
    does not conform to the `xterm-256color` standard.
 

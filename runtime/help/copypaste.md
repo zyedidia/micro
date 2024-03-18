@@ -32,7 +32,7 @@ Here is a list of terminal emulators and their status:
 * `gnome-terminal`: does not support OSC 52.
 
 * `alacritty`: supported. Since 0.13.0, reading has been disabled by default.
-  To reenable it, set the `terminal.osc52` option to `CopyPaste`.
+   To reenable it, set the `terminal.osc52` option to `CopyPaste`.
 
 * `foot`: supported.
 
