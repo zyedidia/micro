@@ -8,7 +8,7 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 
 ## Colorschemes
 
-To change your colorscheme, press Ctrl-e in micro to bring up the command
+To change your colorscheme, press `Ctrl-e` in micro to bring up the command
 prompt, and type:
 
 ```

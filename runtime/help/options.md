@@ -268,7 +268,7 @@ Here are the available options:
 
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
-   the terminal keybinding (not Ctrl-v, which is micro's default paste
+   the terminal keybinding (not `Ctrl-v`, which is micro's default paste
    keybinding) then it is a good idea to enable this option during the paste
    and disable once the paste is over. See `> help copypaste` for details about
    copying and pasting in a terminal environment.
@@ -444,7 +444,7 @@ Here are the available options:
 
 * `useprimary` (only useful on unix): defines whether or not micro will use the
    primary clipboard to copy selections in the background. This does not affect
-   the normal clipboard using Ctrl-c and Ctrl-v.
+   the normal clipboard using `Ctrl-c` and `Ctrl-v`.
 
     default value: `true`
 

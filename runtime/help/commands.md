@@ -1,6 +1,6 @@
 # Command bar
 
-The command bar is opened by pressing Ctrl-e. It is a single-line buffer,
+The command bar is opened by pressing `Ctrl-e`. It is a single-line buffer,
 meaning that all keybindings from a normal buffer are supported (as well
 as mouse and selection).
 
