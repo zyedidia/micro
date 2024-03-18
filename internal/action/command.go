@@ -340,7 +340,15 @@ func ReloadConfig() {
 }
 
 func reloadRuntime(reloadAll bool) {
-	config.InitRuntimeFiles()
+	if reloadAll {
+		err := config.RunPluginFn("deinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+
+	config.InitRuntimeFiles(reloadAll)
+
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
@@ -351,10 +359,6 @@ func reloadRuntime(reloadAll bool) {
 	}
 
 	if reloadAll {
-		err = config.RunPluginFn("deinit")
-		if err != nil {
-			screen.TermMessage(err)
-		}
 		err = config.LoadAllPlugins()
 		if err != nil {
 			screen.TermMessage(err)

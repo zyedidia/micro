@@ -7,7 +7,7 @@ import (
 )
 
 func init() {
-	InitRuntimeFiles()
+	InitRuntimeFiles(true)
 }
 
 func TestAddFile(t *testing.T) {
