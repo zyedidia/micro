@@ -1,0 +1,7 @@
+filetype: Pipfile
+
+detect:
+  filename: "Pipfile$"
+
+rules:
+- include: toml
