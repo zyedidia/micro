@@ -12,11 +12,11 @@ is limited support among terminal emulators for the terminal clipboard
 (which uses the OSC 52 protocol to communicate clipboard contents).
 Here is a list of terminal emulators and their status:
 
-* Kitty: supported, but only writing is enabled by default. To enable
+* `Kitty`: supported, but only writing is enabled by default. To enable
   reading, add `read-primary` and `read-clipboard` to the
   `clipboard_control` option.
 
-* iTerm2: only copying (writing to clipboard) is supported. Must be enabled in
+* `iTerm2`: only copying (writing to clipboard) is supported. Must be enabled in
   `Preferences->General-> Selection->Applications in terminal may access clipboard`.
   You can use Command-v to paste.
 

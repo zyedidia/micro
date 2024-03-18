@@ -26,7 +26,7 @@ Modern terminals tend to have a palette of 16 user-configurable colors (these
 colors can often be configured in the terminal preferences), and additional
 color support comes in three flavors.
 
-* 16-color: A colorscheme that uses the 16 default colors will always work but
+* `16-color`: A colorscheme that uses the 16 default colors will always work but
   will only look good if the 16 default colors have been configured to the
   user's liking. Using a colorscheme that only uses the 16 colors from the
   terminal palette will also preserve the terminal's theme from other
@@ -34,7 +34,7 @@ color support comes in three flavors.
   applications. Default colorschemes of this type include `simple` and
   `solarized`.
 
-* 256-color: Almost all terminals support displaying an additional 240 colors
+* `256-color`: Almost all terminals support displaying an additional 240 colors
   on top of the 16 user-configurable colors (creating 256 colors total).
   Colorschemes which use 256-color are portable because they will look the
   same regardless of the configured 16-color palette. However, the color
@@ -42,7 +42,7 @@ color support comes in three flavors.
   Default 256-color colorschemes include `monokai`, `twilight`, `zenburn`,
   `darcula` and more.
 
-* true-color: Some terminals support displaying "true color" with 16 million
+* `true-color`: Some terminals support displaying "true color" with 16 million
   colors using standard RGB values. This mode will be able to support
   displaying any colorscheme, but it should be noted that the user-configured
   16-color palette is ignored when using true-color mode (this means the

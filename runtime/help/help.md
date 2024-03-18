@@ -39,17 +39,17 @@ this page.
 
 Here are the available help topics:
 
-* tutorial: A brief tutorial which gives an overview of all the other help
+* `tutorial`: A brief tutorial which gives an overview of all the other help
   topics
-* keybindings: Gives a full list of the default keybindings as well as how to
+* `keybindings`: Gives a full list of the default keybindings as well as how to
   rebind them
-* defaultkeys: Gives a more straight-forward list of the hotkey commands and
+* `defaultkeys`: Gives a more straight-forward list of the hotkey commands and
   what they do
-* commands: Gives a list of all the commands and what they do
-* options: Gives a list of all the options you can customize
-* plugins: Explains how micro's plugin system works and how to create your own
+* `commands`: Gives a list of all the commands and what they do
+* `options`: Gives a list of all the options you can customize
+* `plugins`: Explains how micro's plugin system works and how to create your own
   plugins
-* colors: Explains micro's colorscheme and syntax highlighting engine and how
+* `colors`: Explains micro's colorscheme and syntax highlighting engine and how
   to create your own colorschemes or add new languages to the engine
 
 For example, to open the help page on plugins you would run `> help plugins`.
