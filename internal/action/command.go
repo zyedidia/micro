@@ -379,6 +379,8 @@ func (h *BufPane) openHelp(page string) error {
 	} else {
 		helpBuffer := buffer.NewBufferFromString(string(data), page+".md", buffer.BTHelp)
 		helpBuffer.SetName("Help " + page)
+		helpBuffer.SetOptionNative("hltaberrors", false)
+		helpBuffer.SetOptionNative("hltrailingws", false)
 
 		if h.Buf.Type == buffer.BTHelp {
 			h.OpenBuffer(helpBuffer)
