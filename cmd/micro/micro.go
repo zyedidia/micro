@@ -285,8 +285,15 @@ func main() {
 		fmt.Println("Fatal: Micro could not initialize a Screen.")
 		os.Exit(1)
 	}
+
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
-	clipErr := clipboard.Initialize(m)
+	go func() {
+		clipErr := clipboard.Initialize(m)
+
+		if clipErr != nil {
+			log.Println(clipErr, " or change 'clipboard' option")
+		}
+	}()
 
 	defer func() {
 		if err := recover(); err != nil {
@@ -345,10 +352,6 @@ func main() {
 	err = config.RunPluginFn("postinit")
 	if err != nil {
 		screen.TermMessage(err)
-	}
-
-	if clipErr != nil {
-		log.Println(clipErr, " or change 'clipboard' option")
 	}
 
 	if a := config.GetGlobalOption("autosave").(float64); a > 0 {
