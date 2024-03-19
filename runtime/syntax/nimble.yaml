@@ -1,0 +1,8 @@
+filetype: nimble
+
+detect:
+    filename: "\\.nimble$"
+
+rules:
+    - include: "nim"
+    - statement: "\\b(task)\\b"
