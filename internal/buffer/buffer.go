@@ -770,7 +770,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if !foundDef {
-		// search in the default syntax files
+		// search for the syntax file in the runtime files
 		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 			data, err := f.Data()
 			if err != nil {
@@ -883,6 +883,7 @@ func (b *Buffer) UpdateRules() {
 				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
+
 			header, err := highlight.MakeHeaderYaml(data)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
