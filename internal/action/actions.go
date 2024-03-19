@@ -209,7 +209,7 @@ func (h *BufPane) CursorUp() bool {
 
 // CursorDown moves the cursor down
 func (h *BufPane) CursorDown() bool {
-	h.Cursor.Deselect(true)
+	h.Cursor.Deselect(false)
 	h.MoveCursorDown(1)
 	h.Relocate()
 	return true
