@@ -40,15 +40,12 @@ var allFiles [][]RuntimeFile
 var realFiles [][]RuntimeFile
 
 func init() {
-	initRuntimeVars(true)
+	initRuntimeVars()
 }
 
-func initRuntimeVars(reloadAll bool) {
+func initRuntimeVars() {
 	allFiles = make([][]RuntimeFile, NumTypes)
 	realFiles = make([][]RuntimeFile, NumTypes)
-	if reloadAll {
-		Plugins = Plugins[:0]
-	}
 }
 
 // NewRTFiletype creates a new RTFiletype
@@ -174,47 +171,91 @@ func ListRealRuntimeFiles(fileType RTFiletype) []RuntimeFile {
 }
 
 // InitRuntimeFiles initializes all assets file and the config directory
-func InitRuntimeFiles(reloadAll bool) {
+func InitRuntimeFiles() {
 	add := func(fileType RTFiletype, dir, pattern string) {
 		AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
 		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
 	}
 
-	initRuntimeVars(reloadAll)
+	initRuntimeVars()
 
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.yaml")
 	add(RTSyntaxHeader, "syntax", "*.hdr")
 	add(RTHelp, "help", "*.md")
+}
 
-	if reloadAll {
-		initlua := filepath.Join(ConfigDir, "init.lua")
-		if _, err := os.Stat(initlua); !os.IsNotExist(err) {
+// InitPlugins initializes the plugins
+func InitPlugins() {
+	Plugins = Plugins[:0]
+	initlua := filepath.Join(ConfigDir, "init.lua")
+
+	if _, err := os.Stat(initlua); !os.IsNotExist(err) {
+		p := new(Plugin)
+		p.Name = "initlua"
+		p.DirName = "initlua"
+		p.Srcs = append(p.Srcs, realFile(initlua))
+		Plugins = append(Plugins, p)
+	}
+
+	// Search ConfigDir for plugin-scripts
+	plugdir := filepath.Join(ConfigDir, "plug")
+	files, _ := ioutil.ReadDir(plugdir)
+
+	isID := regexp.MustCompile(`^[_A-Za-z0-9]+$`).MatchString
+
+	for _, d := range files {
+		plugpath := filepath.Join(plugdir, d.Name())
+		if stat, err := os.Stat(plugpath); err == nil && stat.IsDir() {
+			srcs, _ := ioutil.ReadDir(plugpath)
 			p := new(Plugin)
-			p.Name = "initlua"
-			p.DirName = "initlua"
-			p.Srcs = append(p.Srcs, realFile(initlua))
+			p.Name = d.Name()
+			p.DirName = d.Name()
+			for _, f := range srcs {
+				if strings.HasSuffix(f.Name(), ".lua") {
+					p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
+				} else if strings.HasSuffix(f.Name(), ".json") {
+					data, err := ioutil.ReadFile(filepath.Join(plugdir, d.Name(), f.Name()))
+					if err != nil {
+						continue
+					}
+					p.Info, err = NewPluginInfo(data)
+					if err != nil {
+						continue
+					}
+					p.Name = p.Info.Name
+				}
+			}
+
+			if !isID(p.Name) || len(p.Srcs) <= 0 {
+				log.Println(p.Name, "is not a plugin")
+				continue
+			}
 			Plugins = append(Plugins, p)
 		}
+	}
 
-		// Search ConfigDir for plugin-scripts
-		plugdir := filepath.Join(ConfigDir, "plug")
-		files, _ := ioutil.ReadDir(plugdir)
-
-		isID := regexp.MustCompile(`^[_A-Za-z0-9]+$`).MatchString
-
+	plugdir = filepath.Join("runtime", "plugins")
+	if files, err := rt.AssetDir(plugdir); err == nil {
+	outer:
 		for _, d := range files {
-			plugpath := filepath.Join(plugdir, d.Name())
-			if stat, err := os.Stat(plugpath); err == nil && stat.IsDir() {
-				srcs, _ := ioutil.ReadDir(plugpath)
+			for _, p := range Plugins {
+				if p.Name == d {
+					log.Println(p.Name, "built-in plugin overridden by user-defined one")
+					continue outer
+				}
+			}
+
+			if srcs, err := rt.AssetDir(filepath.Join(plugdir, d)); err == nil {
 				p := new(Plugin)
-				p.Name = d.Name()
-				p.DirName = d.Name()
+				p.Name = d
+				p.DirName = d
+				p.Default = true
 				for _, f := range srcs {
-					if strings.HasSuffix(f.Name(), ".lua") {
-						p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
-					} else if strings.HasSuffix(f.Name(), ".json") {
-						data, err := ioutil.ReadFile(filepath.Join(plugdir, d.Name(), f.Name()))
+					if strings.HasSuffix(f, ".lua") {
+						p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, d, f)))
+					} else if strings.HasSuffix(f, ".json") {
+						data, err := rt.Asset(filepath.Join(plugdir, d, f))
 						if err != nil {
 							continue
 						}
@@ -225,52 +266,11 @@ func InitRuntimeFiles(reloadAll bool) {
 						p.Name = p.Info.Name
 					}
 				}
-
 				if !isID(p.Name) || len(p.Srcs) <= 0 {
 					log.Println(p.Name, "is not a plugin")
 					continue
 				}
 				Plugins = append(Plugins, p)
-			}
-		}
-
-		plugdir = filepath.Join("runtime", "plugins")
-		if files, err := rt.AssetDir(plugdir); err == nil {
-		outer:
-			for _, d := range files {
-				for _, p := range Plugins {
-					if p.Name == d {
-						log.Println(p.Name, "built-in plugin overridden by user-defined one")
-						continue outer
-					}
-				}
-
-				if srcs, err := rt.AssetDir(filepath.Join(plugdir, d)); err == nil {
-					p := new(Plugin)
-					p.Name = d
-					p.DirName = d
-					p.Default = true
-					for _, f := range srcs {
-						if strings.HasSuffix(f, ".lua") {
-							p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, d, f)))
-						} else if strings.HasSuffix(f, ".json") {
-							data, err := rt.Asset(filepath.Join(plugdir, d, f))
-							if err != nil {
-								continue
-							}
-							p.Info, err = NewPluginInfo(data)
-							if err != nil {
-								continue
-							}
-							p.Name = p.Info.Name
-						}
-					}
-					if !isID(p.Name) || len(p.Srcs) <= 0 {
-						log.Println(p.Name, "is not a plugin")
-						continue
-					}
-					Plugins = append(Plugins, p)
-				}
 			}
 		}
 	}
