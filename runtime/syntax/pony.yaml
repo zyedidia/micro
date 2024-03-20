@@ -1,6 +1,6 @@
 filetype: pony
 
-detect: 
+detect:
     filename: "\\.pony$"
 
 rules:

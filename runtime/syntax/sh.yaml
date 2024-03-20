@@ -8,7 +8,7 @@ filetype: shell
 # File extensions:
 # * .sh
 # * .bash
-# * .ash 
+# * .ash
 # * .ebuild (Gentoo ebuild format)
 #
 # Special filenames:

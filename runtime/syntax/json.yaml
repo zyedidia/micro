@@ -10,7 +10,7 @@ rules:
     - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
     - constant: "\\b(null)\\b"
     - constant: "\\b(true|false)\\b"
-    - constant.string: 
+    - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."

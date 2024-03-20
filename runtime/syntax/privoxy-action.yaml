@@ -1,6 +1,6 @@
 filetype: privoxy-action
 
-detect: 
+detect:
     filename: "\\.action$"
 
 rules:

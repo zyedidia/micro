@@ -1,6 +1,6 @@
 filetype: lfe
 
-detect: 
+detect:
     filename: "lfe$|\\.lfe$"
 
 rules:

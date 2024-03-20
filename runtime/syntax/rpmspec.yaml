@@ -1,6 +1,6 @@
 filetype: rpmspec
 
-detect: 
+detect:
     filename: "\\.spec$|\\.rpmspec$"
 
 rules:

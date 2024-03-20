@@ -1,6 +1,6 @@
 filetype: vhdl
 
-detect: 
+detect:
     filename: "\\.vhdl?$"
 
 rules:

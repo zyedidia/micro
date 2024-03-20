@@ -12,7 +12,7 @@ rules:
     - constant.string:
         start: "^Subject:.*"
         end: "$"
-        rules: 
+        rules:
             - constant.specialChar: "\\\\."
     - statement: "<?[^@[:space:]]+@[^[:space:]]+>?"
     - default:

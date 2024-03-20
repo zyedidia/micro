@@ -1,6 +1,6 @@
 filetype: ruby
 
-detect: 
+detect:
     filename: "\\.(rb|rake|gemspec)$|^(.*[\\/])?(Gemfile|config.ru|Rakefile|Capfile|Vagrantfile|Guardfile|Appfile|Fastfile|Pluginfile|Podfile|\\.?[Bb]rewfile)$"
     signature: "^#!.*/(env +)?ruby( |$)"
 

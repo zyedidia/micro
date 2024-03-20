@@ -4,10 +4,10 @@ detect:
     filename: "\\.kts?$"
 
 rules:
-     
+
     # Operators
     - symbol.operator: ([.:;,+*|=!?\\%]|<|>|/|-|&)
-       
+
     # Statements Keywords
     - statement: \b(as|by|class|constructor|companion|const|fun|import|in|infix|interface|inline|is|out|operator|package|return|suspend|super|this|when|val|var)\b
     - statement.properties: \b(get|set)\b
@@ -16,9 +16,9 @@ rules:
     - statement.member: \b(override|lateinit|init)\b
     - statement.access: \b(internal|private|protected|public)\b
     - statement.parameter: \b(crossinline|noinline|reified|vararg)\b
-    
+
     # Expression and types
-    - type: \b(dynamic|object|throw|typealias)\b 
+    - type: \b(dynamic|object|throw|typealias)\b
 
     # Meta
     - statement.meta: \@(\bfile|delegate|field|get|property|receiver|set|setparam|param|)\b
@@ -26,10 +26,10 @@ rules:
     # Constant
     - constant: \b(true|false|null)
     - constant.number: ([0-9]+)
-    
+
     # Storage Types
     - type.storage: \b(Byte|UByte|Char|Double|Float|Int|UInt|Long|ULong|Short|UShort|Boolean|Unit|Nothing)\b
-    
+
     # Collections
     - type.collections: \b(Array)\b
 
@@ -44,17 +44,17 @@ rules:
 
     # Shebang Line
     - comment.shebang: ^(#!).*
-    
+
     # Line Comment
     - comment.line: "//.*"
-    
+
     # Block Comment
     - comment.block:
         start: "/\\*"
         end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-      
+
     # Doc Block Comment
     - comment.block:
         start: "/\\*\\*"

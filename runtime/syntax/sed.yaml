@@ -1,6 +1,6 @@
 filetype: sed
 
-detect: 
+detect:
     filename: "\\.sed$"
     signature: "^#!.*bin/(env +)?sed( |$)"
 

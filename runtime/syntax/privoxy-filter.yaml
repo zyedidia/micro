@@ -1,6 +1,6 @@
 filetype: privoxy-filter
 
-detect: 
+detect:
     filename: "\\.filter$"
 
 rules:

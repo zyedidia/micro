@@ -1,6 +1,6 @@
 filetype: mpd
 
-detect: 
+detect:
     filename: "mpd\\.conf$"
 
 rules:

@@ -1,6 +1,6 @@
 filetype: xresources
 
-detect: 
+detect:
     filename: "X(defaults|resources)$"
 
 rules:

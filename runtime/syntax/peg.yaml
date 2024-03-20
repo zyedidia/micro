@@ -1,6 +1,6 @@
 filetype: peg
 
-detect: 
+detect:
     filename: "\\.l?peg$"
 
 rules:

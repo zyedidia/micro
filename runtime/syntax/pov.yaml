@@ -1,6 +1,6 @@
 filetype: pov
 
-detect: 
+detect:
     filename: "\\.(pov|POV|povray|POVRAY)$"
 
 rules:

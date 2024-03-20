@@ -1,6 +1,6 @@
 filetype: sql
 
-detect: 
+detect:
     filename: "\\.sql$|sqliterc$"
 
 rules:

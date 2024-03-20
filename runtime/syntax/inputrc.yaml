@@ -1,6 +1,6 @@
 filetype: inputrc
 
-detect: 
+detect:
     filename: "inputrc$"
 
 rules:

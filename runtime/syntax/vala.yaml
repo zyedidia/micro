@@ -1,6 +1,6 @@
 filetype: vala
 
-detect: 
+detect:
     filename: "\\.vala$"
 
 rules:

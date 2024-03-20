@@ -1,6 +1,6 @@
 filetype: nim
 
-detect: 
+detect:
     filename: "\\.nims?$|nim.cfg"
 
 rules:
