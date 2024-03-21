@@ -129,7 +129,7 @@ you can use Ctrl-n and Ctrl-p to cycle through matches.
 
 ### Function keys.
 
-Warning! The function keys may not work in all terminals! 
+Warning! The function keys may not work in all terminals!
 
 | Key   | Description of function   |
 |------ |-------------------------- |

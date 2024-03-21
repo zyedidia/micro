@@ -127,98 +127,98 @@ The packages and functions are listed below (in Go type signatures):
        usage of `time.Duration`.
 
 * `micro/config`
-	- `MakeCommand(name string, action func(bp *BufPane, args[]string),
+    - `MakeCommand(name string, action func(bp *BufPane, args[]string),
                    completer buffer.Completer)`:
        create a command with the given name, and lua callback function when
        the command is run. A completer may also be given to specify how
        autocompletion should work with the custom command.
 
-	- `FileComplete`: autocomplete using files in the current directory
-	- `HelpComplete`: autocomplete using names of help documents
-	- `OptionComplete`: autocomplete using names of options
-	- `OptionValueComplete`: autocomplete using names of options, and valid
+    - `FileComplete`: autocomplete using files in the current directory
+    - `HelpComplete`: autocomplete using names of help documents
+    - `OptionComplete`: autocomplete using names of options
+    - `OptionValueComplete`: autocomplete using names of options, and valid
        values afterwards
-	- `NoComplete`: no autocompletion suggestions
+    - `NoComplete`: no autocompletion suggestions
 
-	- `TryBindKey(k, v string, overwrite bool) (bool, error)`: bind the key
+    - `TryBindKey(k, v string, overwrite bool) (bool, error)`: bind the key
        `k` to the string `v` in the `bindings.json` file.  If `overwrite` is
        true, this will overwrite any existing binding to key `k`. Returns true
        if the binding was made, and a possible error (for example writing to
        `bindings.json` can cause an error).
 
-	- `Reload()`: reload configuration files.
+    - `Reload()`: reload configuration files.
 
-	- `AddRuntimeFileFromMemory(filetype RTFiletype, filename, data string)`:
+    - `AddRuntimeFileFromMemory(filetype RTFiletype, filename, data string)`:
        add a runtime file to the `filetype` runtime filetype, with name
        `filename` and data `data`.
 
-	- `AddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype,
+    - `AddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype,
                                     directory, pattern string)`:
        add runtime files for the given plugin with the given RTFiletype from
        a directory within the plugin root. Only adds files that match the
        pattern using Go's `filepath.Match`
 
-	- `AddRuntimeFile(plugin string, filetype RTFiletype, filepath string)`:
+    - `AddRuntimeFile(plugin string, filetype RTFiletype, filepath string)`:
        add a given file inside the plugin root directory as a runtime file
        to the given RTFiletype category.
 
-	- `ListRuntimeFiles(fileType RTFiletype) []string`: returns a list of
+    - `ListRuntimeFiles(fileType RTFiletype) []string`: returns a list of
        names of runtime files of the given type.
 
-	- `ReadRuntimeFile(fileType RTFiletype, name string) string`: returns the
+    - `ReadRuntimeFile(fileType RTFiletype, name string) string`: returns the
        contents of a given runtime file.
 
-	- `NewRTFiletype() int`: creates a new RTFiletype, and returns its value.
+    - `NewRTFiletype() int`: creates a new RTFiletype, and returns its value.
 
-	- `RTColorscheme`: runtime files for colorschemes.
-	- `RTSyntax`: runtime files for syntax files.
-	- `RTHelp`: runtime files for help documents.
-	- `RTPlugin`: runtime files for plugin source code.
+    - `RTColorscheme`: runtime files for colorschemes.
+    - `RTSyntax`: runtime files for syntax files.
+    - `RTHelp`: runtime files for help documents.
+    - `RTPlugin`: runtime files for plugin source code.
 
-	- `RegisterCommonOption(pl string, name string, defaultvalue interface{})`:
+    - `RegisterCommonOption(pl string, name string, defaultvalue interface{})`:
        registers a new option with for the given plugin. The name of the
        option will be `pl.name`, and will have the given default value. Since
        this registers a common option, the option will be modifiable on a
        per-buffer basis, while also having a global value (in the
        GlobalSettings map).
 
-	- `RegisterGlobalOption(pl string, name string, defaultvalue interface{})`:
+    - `RegisterGlobalOption(pl string, name string, defaultvalue interface{})`:
        same as `RegisterCommonOption` but the option cannot be modified
        locally to each buffer.
 
-	- `GetGlobalOption(name string) interface{}`: returns the value of a
+    - `GetGlobalOption(name string) interface{}`: returns the value of a
        given plugin in the `GlobalSettings` map.
 
-	- `SetGlobalOption(option, value string) error`: sets an option to a
+    - `SetGlobalOption(option, value string) error`: sets an option to a
        given value. Same as using the `> set` command. This will parse the
        value to the actual value type.
 
-	- `SetGlobalOptionNative(option string, value interface{}) error`: sets
+    - `SetGlobalOptionNative(option string, value interface{}) error`: sets
        an option to a given value, where the type of value is the actual
        type of the value internally.
 * `micro/shell`
-	- `ExecCommand(name string, arg ...string) (string, error)`: runs an
+    - `ExecCommand(name string, arg ...string) (string, error)`: runs an
        executable with the given arguments, and pipes the output (stderr
        and stdout) of the executable to an internal buffer, which is
        returned as a string, along with a possible error.
 
-	- `RunCommand(input string) (string, error)`: same as `ExecCommand`,
+    - `RunCommand(input string) (string, error)`: same as `ExecCommand`,
        except this uses micro's argument parser to parse the arguments from
        the input. For example `cat 'hello world.txt' file.txt`, will pass
        two arguments in the `ExecCommand` argument list (quoting arguments
        will preserve spaces).
 
-	- `RunBackgroundShell(input string) (func() string, error)`: returns a
+    - `RunBackgroundShell(input string) (func() string, error)`: returns a
        function that will run the given shell command and return its output.
 
-	- `RunInteractiveShell(input string, wait bool, getOutput bool)
+    - `RunInteractiveShell(input string, wait bool, getOutput bool)
                           (string, error)`:
        temporarily closes micro and runs the given command in the terminal.
        If `wait` is true, micro will wait for the user to press enter before
        returning to text editing. If `getOutput` is true, micro redirect
        stdout from the command to the returned string.
 
-	- `JobStart(cmd string, onStdout, onStderr,
+    - `JobStart(cmd string, onStdout, onStderr,
                 onExit func(string, []interface{}), userargs ...interface{})
                 *exec.Cmd`:
        Starts a background job by running the shell on the given command
@@ -227,16 +227,16 @@ The packages and functions are listed below (in Go type signatures):
        be passed to the callbacks, along with the output as the first
        argument of the callback.
 
-	- `JobSpawn(cmd string, cmdArgs []string, onStdout, onStderr,
+    - `JobSpawn(cmd string, cmdArgs []string, onStdout, onStderr,
                 onExit func(string, []interface{}), userargs ...interface{})
                 *exec.Cmd`:
        same as `JobStart`, except doesn't run the command through the shell
        and instead takes as inputs the list of arguments.
 
-	- `JobStop(cmd *exec.Cmd)`: kills a job.
-	- `JobSend(cmd *exec.Cmd, data string)`: sends some data to a job's stdin.
+    - `JobStop(cmd *exec.Cmd)`: kills a job.
+    - `JobSend(cmd *exec.Cmd, data string)`: sends some data to a job's stdin.
 
-	- `RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool,
+    - `RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool,
                        callback func(out string, userargs []interface{}),
                        userargs []interface{}) error`:
        starts a terminal emulator from a given BufPane with the input command.
@@ -247,7 +247,7 @@ The packages and functions are listed below (in Go type signatures):
        optional user arguments. This function returns an error on systems
        where the terminal emulator is not supported.
 
-	- `TermEmuSupported`: true on systems where the terminal emulator is
+    - `TermEmuSupported`: true on systems where the terminal emulator is
        supported and false otherwise. Supported systems:
         * Linux
         * MacOS
