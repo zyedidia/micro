@@ -29,8 +29,23 @@ rules:
             - constant.specialChar: '\\.'
 
     - constant.string:
-        start: "r#+\""
-        end: "\"#+"
+        start: "r#\""
+        end: "\"#"
+        rules: []
+
+    - constant.string:
+        start: "r##\""
+        end: "\"##"
+        rules: []
+
+    - constant.string:
+        start: "r###\""
+        end: "\"###"
+        rules: []
+
+    - constant.string:
+        start: "r####+\""
+        end: "\"####+"
         rules: []
 
     # Character literals
