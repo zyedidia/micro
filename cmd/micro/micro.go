@@ -472,7 +472,10 @@ func DoEvent() {
 	}
 
 	_, resize := event.(*tcell.EventResize)
-	if action.InfoBar.HasPrompt && !resize {
+	if resize {
+		action.InfoBar.HandleEvent(event)
+		action.Tabs.HandleEvent(event)
+	} else if action.InfoBar.HasPrompt {
 		action.InfoBar.HandleEvent(event)
 	} else {
 		action.Tabs.HandleEvent(event)
