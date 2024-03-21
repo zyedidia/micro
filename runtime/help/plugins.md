@@ -5,7 +5,8 @@ folders containing Lua files and possibly other source files placed
 in `~/.config/micro/plug`. The plugin directory (within `plug`) should
 contain at least one Lua file and a `repo.json` file. The `repo.json` file
 provides additional information such as the name of the plugin, the
-plugin's website, dependencies, etc... [Here is an example `repo.json` file](https://github.com/micro-editor/updated-plugins/blob/master/go-plugin/repo.json)
+plugin's website, dependencies, etc...
+[Here is an example `repo.json` file](https://github.com/micro-editor/updated-plugins/blob/master/go-plugin/repo.json)
 from the go plugin, which has the following file structure:
 
 ```
@@ -82,7 +83,7 @@ end
 ```
 
 The `bp` variable is a reference to the bufpane the action is being executed
-within.  This is almost always the current bufpane.
+within. This is almost always the current bufpane.
 
 All available actions are listed in the keybindings section of the help.
 

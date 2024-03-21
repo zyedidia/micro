@@ -219,7 +219,7 @@ Here are the available options:
 * `keepautoindent`: when using autoindent, whitespace is added for you. This
    option determines if when you move to the next line without any insertions
    the whitespace that was added should be deleted to remove trailing
-   whitespace.  By default, the autoindent whitespace is deleted if the line
+   whitespace. By default, the autoindent whitespace is deleted if the line
    was left empty.
 
     default value: `false`
@@ -458,7 +458,7 @@ Here are the available options:
    Enabling this option may cause unwanted effects if your terminal in fact
    does not conform to the `xterm-256color` standard.
 
-    Default value: `false`
+    default value: `false`
 
 ---
 
