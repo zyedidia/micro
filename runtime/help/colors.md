@@ -236,7 +236,10 @@ Here's a list of subgroups used in micro's built-in syntax files.
 * type.keyword (If you want a special highlight for keywords like `private`)
 
 In the future, plugins may also be able to use color groups for styling.
-
+Last but not least it's even possible to use `include` followed by the
+colorscheme name as string to include a different colorscheme within a new one.
+Additionally the groups can then be extended or overwritten. The `default.micro`
+theme can be seen as an example, which links to the chosen default colorscheme.
 
 ## Syntax files
 
