@@ -1,6 +1,6 @@
 filetype: po
 
-detect: 
+detect:
     filename: "\\.pot?$"
 
 rules:

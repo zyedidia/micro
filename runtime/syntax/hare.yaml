@@ -1,6 +1,6 @@
 filetype: hare
 
-detect: 
+detect:
     filename: "\\.ha$"
 
 rules:

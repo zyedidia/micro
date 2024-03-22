@@ -51,11 +51,11 @@ rules:
     - constant: "\\b(__DATE__|__EOF__|__TIME__|__TIMESTAMP__|__VENDOR__|__VERSION__)\\b"
     # String literals
     # DoubleQuotedString
-    - constant.string: 
+    - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
-        rules: 
+        rules:
             - constant.specialChar: "\\\\."
     # WysiwygString
     - constant.string:
@@ -93,7 +93,7 @@ rules:
     - constant.string:
         start: "q\"<"
         end: "q\">"
-        rules: 
+        rules:
             - constant.specialChar: "\\\\."
     - constant.string:
         start: "q\"[^({[<\"][^\"]*$"
@@ -106,7 +106,7 @@ rules:
         rules:
             - constant.specialChar: "\\\\."
     # Comments
-    - comment: 
+    - comment:
         start: "//"
         end: "$"
         rules: []

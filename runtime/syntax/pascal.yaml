@@ -18,7 +18,7 @@ rules:
     - constant.string:
         start: "#[0-9]{1,}"
         end: "$"
-        rules: 
+        rules:
             - constant.specialChar: "\\\\."
     - constant.string:
         start: "'"

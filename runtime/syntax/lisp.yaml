@@ -1,6 +1,6 @@
 filetype: lisp
 
-detect: 
+detect:
     filename: "(emacs|zile)$|\\.(el|li?sp|scm|ss|rkt)$"
 
 rules:
