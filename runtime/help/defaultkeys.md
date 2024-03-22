@@ -52,9 +52,9 @@ can change it!
 | Ctrl-n    | Find next instance of current search      |
 | Ctrl-p    | Find previous instance of current search  |
 
-Note: Ctrl-n and Ctrl-p should be used from the main buffer, not from inside
-the search prompt. After Ctrl-f, press enter to complete the search and then
-you can use Ctrl-n and Ctrl-p to cycle through matches.
+Note: `Ctrl-n` and `Ctrl-p` should be used from the main buffer, not from inside
+the search prompt. After `Ctrl-f`, press enter to complete the search and then
+you can use `Ctrl-n` and `Ctrl-p` to cycle through matches.
 
 ### File Operations
 
@@ -129,7 +129,7 @@ you can use Ctrl-n and Ctrl-p to cycle through matches.
 
 ### Function keys.
 
-Warning! The function keys may not work in all terminals! 
+Warning! The function keys may not work in all terminals!
 
 | Key   | Description of function   |
 |------ |-------------------------- |

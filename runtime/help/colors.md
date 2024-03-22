@@ -8,7 +8,7 @@ This help page aims to cover two aspects of micro's syntax highlighting engine:
 
 ## Colorschemes
 
-To change your colorscheme, press Ctrl-e in micro to bring up the command
+To change your colorscheme, press `Ctrl-e` in micro to bring up the command
 prompt, and type:
 
 ```
@@ -93,7 +93,7 @@ and set this variable yourself.
 * `solarized-tc`: this is the solarized colorscheme for true color.
 * `atom-dark`: this colorscheme is based off of Atom's "dark" colorscheme.
 * `cmc-tc`: A true colour variant of the cmc theme.  It requires true color to
-  look its best. Use cmc-16 if your terminal doesn't support true color.
+   look its best. Use cmc-16 if your terminal doesn't support true color.
 * `gruvbox-tc`: The true color version of the gruvbox colorscheme
 * `material-tc`: Colorscheme based off of Google's Material Design palette
 
@@ -106,7 +106,7 @@ be found
 Custom colorschemes should be placed in the `~/.config/micro/colorschemes`
 directory.
 
-A number of custom directives are placed in a `.micro` file. Colorschemes are 
+A number of custom directives are placed in a `.micro` file. Colorschemes are
 typically only 18-30 lines in total.
 
 To create the colorscheme you need to link highlight groups with
@@ -152,7 +152,7 @@ Then you can use the terminals 256 colors by using their numbers 1-256 (numbers
 
 If the user's terminal supports true color, then you can also specify colors
 exactly using their hex codes. If the terminal is not true color but micro is
-told to use a true color colorscheme it will attempt to map the colors to the 
+told to use a true color colorscheme it will attempt to map the colors to the
 available 256 colors.
 
 Generally colorschemes which require true color terminals to look good are
@@ -213,7 +213,7 @@ that for highlighting strings. If it's not found, it will use constant instead.
 Micro tries to match the largest set of groups it can find in the colorscheme
 definitions, so if, for examle `constant.bool.true` is found then micro will
 use that. If `constant.bool.true` is not found but `constant.bool` is found
-micro will use `constant.bool`. If not, it uses `constant`. 
+micro will use `constant.bool`. If not, it uses `constant`.
 
 Here's a list of subgroups used in micro's built-in syntax files.
 
@@ -221,10 +221,10 @@ Here's a list of subgroups used in micro's built-in syntax files.
 * constant.bool
 * constant.bool.true
 * constant.bool.false
-* constant.number 
+* constant.number
 * constant.specialChar
 * constant.string
-* constant.string.url 
+* constant.string.url
 * identifier.class (Also used for functions)
 * identifier.macro
 * identifier.var
@@ -248,7 +248,7 @@ languages.
 
 Micro's builtin syntax highlighting tries very hard to be sane, sensible and
 provide ample coverage of the meaningful elements of a language. Micro has
-syntax files built in for over 100 languages now! However, there may be 
+syntax files built in for over 100 languages now! However, there may be
 situations where you find Micro's highlighting to be insufficient or not to
 your liking. The good news is that you can create your own syntax files, and
 place them in  `~/.config/micro/syntax` and Micro will use those instead.
