@@ -1,0 +1,7 @@
+filetype: scons
+
+detect:
+    filename: "(\\SConscript$|\\SConstruct$)"
+
+rules:
+    - include: "python"
