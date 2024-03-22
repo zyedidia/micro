@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"math"
 	"os"
 	"regexp"
 	"runtime"
@@ -510,6 +511,20 @@ func (h *BufPane) CursorStart() bool {
 func (h *BufPane) CursorEnd() bool {
 	h.Cursor.Deselect(true)
 	h.Cursor.Loc = h.Buf.End()
+	h.Cursor.StoreVisualX()
+	h.Relocate()
+	return true
+}
+
+// CursorRatio moves the cursor to a given ratio of the buffer.
+// For example, if ratio is 0.5, the cursor is moved to the center line.
+func (h *BufPane) CursorRatio(ratio float64) bool {
+	if ratio < 0 || ratio > 1 {
+		return false
+	}
+	targetLocation := buffer.Loc{0, int(math.Round(float64(h.Buf.End().Y) * ratio))}
+	h.Cursor.Deselect(true)
+	h.Cursor.Loc = targetLocation
 	h.Cursor.StoreVisualX()
 	h.Relocate()
 	return true

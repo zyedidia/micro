@@ -714,7 +714,12 @@ func (h *BufPane) QuitCmd(args []string) {
 // For example: `goto line`, or `goto line:col`
 func (h *BufPane) GotoCmd(args []string) {
 	if len(args) <= 0 {
-		InfoBar.Error("Not enough arguments")
+		// No argument given, alternate between jumping to the top or the bottom
+		if h.Cursor.Loc.Y > 0 {
+			h.CursorStart()
+		} else {
+			h.CursorEnd()
+		}
 	} else {
 		h.RemoveAllMultiCursors()
 		if strings.Contains(args[0], ":") {
@@ -735,6 +740,20 @@ func (h *BufPane) GotoCmd(args []string) {
 			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
 			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
 			h.GotoLoc(buffer.Loc{col, line})
+		} else if strings.HasSuffix(args[0], "%") { // Jump to a percentage, like 50%
+			percentage, err := strconv.Atoi(args[0][:len(args[0])-1])
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			h.CursorRatio(float64(percentage) * 0.01) // Convert from percentage to ratio with * 0.01
+		} else if strings.Count(args[0], ".") == 1 || strings.Count(args[0], ",") == 1 { // Jump to a ratio, like .5 or ,5 ?
+			ratio, err := strconv.ParseFloat(strings.ReplaceAll(args[0], ",", "."), 64)
+			if err != nil {
+				InfoBar.Error(err)
+				return
+			}
+			h.CursorRatio(ratio)
 		} else {
 			line, err := strconv.Atoi(args[0])
 			if err != nil {
