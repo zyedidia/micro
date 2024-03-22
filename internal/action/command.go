@@ -329,13 +329,30 @@ func (h *BufPane) ToggleLogCmd(args []string) {
 	}
 }
 
-// ReloadCmd reloads all files (syntax files, colorschemes...)
+// ReloadCmd reloads all files (syntax files, colorschemes, plugins...)
 func (h *BufPane) ReloadCmd(args []string) {
-	ReloadConfig()
+	reloadRuntime(true)
 }
 
+// ReloadConfig reloads only the configuration
 func ReloadConfig() {
+	reloadRuntime(false)
+}
+
+func reloadRuntime(reloadPlugins bool) {
+	if reloadPlugins {
+		err := config.RunPluginFn("deinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+
 	config.InitRuntimeFiles()
+
+	if reloadPlugins {
+		config.InitPlugins()
+	}
+
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
@@ -344,14 +361,36 @@ func ReloadConfig() {
 	if err != nil {
 		screen.TermMessage(err)
 	}
+
+	if reloadPlugins {
+		err = config.LoadAllPlugins()
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+
 	InitBindings()
 	InitCommands()
+
+	if reloadPlugins {
+		err = config.RunPluginFn("preinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.RunPluginFn("init")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.RunPluginFn("postinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 
 	err = config.InitColorscheme()
 	if err != nil {
 		screen.TermMessage(err)
 	}
-
 	for _, b := range buffer.OpenBuffers {
 		b.UpdateRules()
 	}

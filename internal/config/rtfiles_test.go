@@ -8,6 +8,7 @@ import (
 
 func init() {
 	InitRuntimeFiles()
+	InitPlugins()
 }
 
 func TestAddFile(t *testing.T) {

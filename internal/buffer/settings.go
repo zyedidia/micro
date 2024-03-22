@@ -74,7 +74,7 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 				}
 			}
 		}
- 	}
+	}
 
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, nativeValue)

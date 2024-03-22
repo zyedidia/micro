@@ -36,6 +36,8 @@ func startup(args []string) (tcell.SimulationScreen, error) {
 	}
 
 	config.InitRuntimeFiles()
+	config.InitPlugins()
+
 	err = config.ReadSettings()
 	if err != nil {
 		return nil, err

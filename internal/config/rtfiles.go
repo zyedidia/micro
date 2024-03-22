@@ -39,7 +39,7 @@ type RuntimeFile interface {
 var allFiles [][]RuntimeFile
 var realFiles [][]RuntimeFile
 
-func init() {
+func initRuntimeVars() {
 	allFiles = make([][]RuntimeFile, NumTypes)
 	realFiles = make([][]RuntimeFile, NumTypes)
 }
@@ -173,12 +173,19 @@ func InitRuntimeFiles() {
 		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
 	}
 
+	initRuntimeVars()
+
 	add(RTColorscheme, "colorschemes", "*.micro")
 	add(RTSyntax, "syntax", "*.yaml")
 	add(RTSyntaxHeader, "syntax", "*.hdr")
 	add(RTHelp, "help", "*.md")
+}
 
+// InitPlugins initializes the plugins
+func InitPlugins() {
+	Plugins = Plugins[:0]
 	initlua := filepath.Join(ConfigDir, "init.lua")
+
 	if _, err := os.Stat(initlua); !os.IsNotExist(err) {
 		p := new(Plugin)
 		p.Name = "initlua"
