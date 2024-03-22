@@ -56,6 +56,10 @@ which micro defines:
 * `onBufferOpen(buf)`: runs when a buffer is opened. The input contains
    the buffer object.
 
+* `onBufferOptionChanged(buf, option, old, new)`: runs when a option of the
+   settings of a buffer has changed. The input contains the buffer object,
+   the option, the old and the new value.
+
 * `onBufPaneOpen(bufpane)`: runs when a bufpane is opened. The input
    contains the bufpane object.
 

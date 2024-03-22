@@ -1,12 +1,22 @@
 package buffer
 
 import (
+	luar "layeh.com/gopher-luar"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
 func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+	oldValue := b.Settings[option]
 	b.Settings[option] = nativeValue
+
+	if oldValue != nativeValue {
+		_, err := config.RunPluginFnBool(b.Settings, "onBufferOptionChanged", luar.New(ulua.L, b), luar.New(ulua.L, option), luar.New(ulua.L, string(oldValue.(string))), luar.New(ulua.L, string(nativeValue.(string))))
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 
 	if option == "fastdirty" {
 		if !nativeValue.(bool) {
