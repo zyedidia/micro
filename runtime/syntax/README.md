@@ -21,7 +21,7 @@ syntax files that you would like to convert to the new filetype, you can use the
 $ go run syntax_converter.go c.micro > c.yaml
 ```
 
-Most the the syntax files here have been converted using that tool.
+Most the syntax files here have been converted using that tool.
 
 Note that the tool isn't perfect and though it is unlikely, you may run into some small issues that you will have to fix manually
 (about 4 files from this directory had issues after being converted).
