@@ -67,9 +67,6 @@ func combineLineMatch(src, dst LineMatch) LineMatch {
 // A State represents the region at the end of a line
 type State *region
 
-// EmptyDef is an empty definition.
-var EmptyDef = Def{nil, &rules{}}
-
 // LineStates is an interface for a buffer-like object which can also store the states and matches for every line
 type LineStates interface {
 	LineBytes(n int) []byte
@@ -176,7 +173,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 				if curRegion.group == curRegion.limitGroup || p.group == curRegion.limitGroup {
 					matches := findAllIndex(p.regex, line)
 					for _, m := range matches {
-						if ((endLoc == nil) || (m[0] < endLoc[0])) {
+						if (endLoc == nil) || (m[0] < endLoc[0]) {
 							for i := m[0]; i < m[1]; i++ {
 								fullHighlights[i] = p.group
 							}
