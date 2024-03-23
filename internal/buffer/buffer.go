@@ -57,7 +57,7 @@ var (
 	BTLog = BufType{2, true, true, false}
 	// BTScratch is a buffer that cannot be saved (for scratch work)
 	BTScratch = BufType{3, false, true, false}
-	// BTRaw is is a buffer that shows raw terminal events
+	// BTRaw is a buffer that shows raw terminal events
 	BTRaw = BufType{4, false, true, false}
 	// BTInfo is a buffer for inputting information
 	BTInfo = BufType{5, false, true, false}
