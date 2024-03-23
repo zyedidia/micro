@@ -2,7 +2,7 @@ filetype: html5
 
 detect:
     filename: "\\.htm[l]?5$"
-    signature: "<!DOCTYPE html5>"
+    header: "<!DOCTYPE html5>"
 
 rules:
     - error: "<[^!].*?>"

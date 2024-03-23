@@ -2,7 +2,7 @@ filetype: sage
 
 detect:
     filename: "\\.sage$"
-    signature: "^#!.*/(env +)?sage( |$)"
+    header: "^#!.*/(env +)?sage( |$)"
 
 rules:
 

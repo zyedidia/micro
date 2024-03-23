@@ -3,7 +3,7 @@ filetype: 'justfile'
 
 detect:
     filename: "(^\\.?[Jj]ustfile|\\.just)$"
-    signature: "^#!.*/(env +)?[bg]?just --justfile"
+    header: "^#!.*/(env +)?[bg]?just --justfile"
 
 rules:
     - preproc: "\\<(ifeq|ifdef|ifneq|ifndef|else|endif)\\>"

@@ -2,7 +2,7 @@ filetype: batch
 
 detect:
   filename: "(\\.bat$|\\.cmd$)"
-  # signature: ""
+  # header: ""
 
 rules:
   # Numbers
