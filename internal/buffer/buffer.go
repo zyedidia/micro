@@ -718,13 +718,14 @@ func (b *Buffer) UpdateRules() {
 			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
 			continue
 		}
-		file, err := highlight.ParseFile(data)
-		if err != nil {
-			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-			continue
-		}
 
 		if ((ft == "unknown" || ft == "") && header.MatchFileName(b.Path)) || header.FileType == ft {
+			file, err := highlight.ParseFile(data)
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+
 			syndef, err := highlight.ParseDef(file, header)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
