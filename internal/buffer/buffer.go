@@ -810,17 +810,20 @@ func (b *Buffer) UpdateRules() {
 				if detectlimit > 0 && lineCount > detectlimit {
 					limit = detectlimit
 				}
-				for i := 0; i < length && !signatureMatch; i++ {
-					if matches[i].header.HasFileSignature() {
-						for j := 0; j < limit && !signatureMatch; j++ {
-							if matches[i].header.MatchFileSignature(b.lines[j].data) {
-								syntaxFile = matches[i].fileName
-								if matches[i].syntaxDef != nil {
-									b.SyntaxDef = matches[i].syntaxDef
+
+			matchLoop:
+				for _, m := range matches {
+					if m.header.HasFileSignature() {
+						for i := 0; i < limit; i++ {
+							if m.header.MatchFileSignature(b.lines[i].data) {
+								syntaxFile = m.fileName
+								if m.syntaxDef != nil {
+									b.SyntaxDef = m.syntaxDef
 									foundDef = true
 								}
-								header = matches[i].header
+								header = m.header
 								signatureMatch = true
+								break matchLoop
 							}
 						}
 					}
