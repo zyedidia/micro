@@ -693,16 +693,16 @@ func (b *Buffer) UpdateRules() {
 		return
 	}
 
-	// syntaxFileBuffer is a helper structure
+	// syntaxFileInfo is an internal helper structure
 	// to store properties of one single syntax file
-	type syntaxFileBuffer struct {
+	type syntaxFileInfo struct {
 		header    *highlight.Header
 		fileName  string
 		syntaxDef *highlight.Def
 	}
 
-	fnameMatches := []syntaxFileBuffer{}
-	headerMatches := []syntaxFileBuffer{}
+	fnameMatches := []syntaxFileInfo{}
+	headerMatches := []syntaxFileInfo{}
 	syntaxFile := ""
 	foundDef := false
 	var header *highlight.Header
@@ -756,9 +756,9 @@ func (b *Buffer) UpdateRules() {
 			}
 
 			if matchedFileName {
-				fnameMatches = append(fnameMatches, syntaxFileBuffer{header, f.Name(), syndef})
+				fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), syndef})
 			} else if matchedFileHeader {
-				headerMatches = append(headerMatches, syntaxFileBuffer{header, f.Name(), syndef})
+				headerMatches = append(headerMatches, syntaxFileInfo{header, f.Name(), syndef})
 			}
 		}
 	}
@@ -780,10 +780,10 @@ func (b *Buffer) UpdateRules() {
 
 			if ft == "unknown" || ft == "" {
 				if header.MatchFileName(b.Path) {
-					fnameMatches = append(fnameMatches, syntaxFileBuffer{header, f.Name(), nil})
+					fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), nil})
 				}
 				if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
-					headerMatches = append(headerMatches, syntaxFileBuffer{header, f.Name(), nil})
+					headerMatches = append(headerMatches, syntaxFileInfo{header, f.Name(), nil})
 				}
 			} else if header.FileType == ft {
 				syntaxFile = f.Name()
