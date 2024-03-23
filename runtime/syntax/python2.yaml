@@ -2,7 +2,7 @@ filetype: python2
 
 detect:
     filename: "\\.py2$"
-    signature: "^#!.*/(env +)?python2$"
+    header: "^#!.*/(env +)?python2$"
 
 rules:
 

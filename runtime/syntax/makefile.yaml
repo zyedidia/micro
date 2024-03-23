@@ -2,7 +2,7 @@ filetype: makefile
 
 detect:
     filename: "([Mm]akefile|\\.ma?k)$"
-    signature: "^#!.*/(env +)?[bg]?make( |$)"
+    header: "^#!.*/(env +)?[bg]?make( |$)"
 
 rules:
     - preproc: "\\<(ifeq|ifdef|ifneq|ifndef|else|endif)\\>"

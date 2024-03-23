@@ -39,6 +39,7 @@ type Def struct {
 type Header struct {
 	FileType       string
 	FileNameRegex  *regexp.Regexp
+	HeaderRegex    *regexp.Regexp
 	SignatureRegex *regexp.Regexp
 }
 
@@ -46,6 +47,7 @@ type HeaderYaml struct {
 	FileType string `yaml:"filetype"`
 	Detect   struct {
 		FNameRegexStr     string `yaml:"filename"`
+		HeaderRegexStr    string `yaml:"header"`
 		SignatureRegexStr string `yaml:"signature"`
 	} `yaml:"detect"`
 }
@@ -103,10 +105,14 @@ func MakeHeader(data []byte) (*Header, error) {
 	var err error
 	header.FileType = string(lines[0])
 	fnameRegexStr := string(lines[1])
-	signatureRegexStr := string(lines[2])
+	headerRegexStr := string(lines[2])
+	signatureRegexStr := string(lines[3])
 
 	if fnameRegexStr != "" {
 		header.FileNameRegex, err = regexp.Compile(fnameRegexStr)
+	}
+	if err == nil && headerRegexStr != "" {
+		header.HeaderRegex, err = regexp.Compile(headerRegexStr)
 	}
 	if err == nil && signatureRegexStr != "" {
 		header.SignatureRegex, err = regexp.Compile(signatureRegexStr)
@@ -134,6 +140,9 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	if hdrYaml.Detect.FNameRegexStr != "" {
 		header.FileNameRegex, err = regexp.Compile(hdrYaml.Detect.FNameRegexStr)
 	}
+	if err == nil && hdrYaml.Detect.HeaderRegexStr != "" {
+		header.HeaderRegex, err = regexp.Compile(hdrYaml.Detect.HeaderRegexStr)
+	}
 	if err == nil && hdrYaml.Detect.SignatureRegexStr != "" {
 		header.SignatureRegex, err = regexp.Compile(hdrYaml.Detect.SignatureRegexStr)
 	}
@@ -154,6 +163,20 @@ func (header *Header) MatchFileName(filename string) bool {
 	return false
 }
 
+// HasFileHeader checks the presence of a stored header
+func (header *Header) HasFileHeader() bool {
+	return header.HeaderRegex != nil
+}
+
+// MatchFileHeader will check the given line with the stored regex
+func (header *Header) MatchFileHeader(line []byte) bool {
+	if header.HasFileHeader() {
+		return header.HeaderRegex.Match(line)
+	}
+
+	return false
+}
+
 // HasFileSignature checks the presence of a stored signature
 func (header *Header) HasFileSignature() bool {
 	return header.SignatureRegex != nil
@@ -161,7 +184,7 @@ func (header *Header) HasFileSignature() bool {
 
 // MatchFileSignature will check the given line with the stored regex
 func (header *Header) MatchFileSignature(line []byte) bool {
-	if header.SignatureRegex != nil {
+	if header.HasFileSignature() {
 		return header.SignatureRegex.Match(line)
 	}
 

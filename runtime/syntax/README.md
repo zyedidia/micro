@@ -2,7 +2,7 @@
 
 Here are micro's syntax files.
 
-Each yaml file specifies how to detect the filetype based on file extension.
+Each yaml file specifies how to detect the filetype based on file extension or if nothing matched based on headers (first line of the file).
 In case more than one file type matched a signature can be used to solve the ambiguity by parsing all available lines of the file or to the value defined with the option `detectlimit` (to limit parse times) for a best "guess".
 Then there are patterns and regions linked to highlight groups which tell micro how to highlight that filetype.
 

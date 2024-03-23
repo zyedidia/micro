@@ -682,30 +682,22 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 	return nil
 }
 
-// UpdateRules updates the syntax rules and filetype for this buffer
-// This is called when the colorscheme changes
-func (b *Buffer) UpdateRules() {
-	if !b.Type.Syntax {
-		return
-	}
-	ft := b.Settings["filetype"].(string)
-	if ft == "off" {
-		return
-	}
+// syntaxFileBuffer is a helper structure
+// to store properties of one single syntax file
+type syntaxFileBuffer struct {
+	header    *highlight.Header
+	fileName  string
+	syntaxDef *highlight.Def
+}
 
-	// syntaxFileBuffer is a helper structure
-	// to store properties of one single syntax file
-	type syntaxFileBuffer struct {
-		header    *highlight.Header
-		fileName  string
-		syntaxDef *highlight.Def
-	}
-
-	syntaxFiles := []syntaxFileBuffer{}
+// searchUserSyntax searches for the syntax file
+// in the user's custom syntax files
+func (b *Buffer) searchUserSyntax(ft string, syntaxFiles *[]syntaxFileBuffer, useHeader bool) (string, bool, *highlight.Header) {
 	syntaxFile := ""
 	foundDef := false
+	match := false
 	var header *highlight.Header
-	// search for the syntax file in the user's custom syntax files
+
 	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
 		data, err := f.Data()
 		if err != nil {
@@ -724,7 +716,13 @@ func (b *Buffer) UpdateRules() {
 			continue
 		}
 
-		if ((ft == "unknown" || ft == "") && header.MatchFileName(b.Path)) || header.FileType == ft {
+		if !useHeader {
+			match = header.MatchFileName(b.Path)
+		} else {
+			match = header.MatchFileHeader(b.lines[0].data)
+		}
+
+		if ((ft == "unknown" || ft == "") && match) || header.FileType == ft {
 			syndef, err := highlight.ParseDef(file, header)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
@@ -736,67 +734,107 @@ func (b *Buffer) UpdateRules() {
 				b.SyntaxDef = syndef
 				syntaxFile = f.Name()
 				break
+			}
+			if syntaxFiles != nil {
+				*syntaxFiles = append(*syntaxFiles, syntaxFileBuffer{header, f.Name(), syndef})
+			}
+		}
+	}
+
+	return syntaxFile, foundDef, header
+}
+
+// searchRuntimeHeader search in the runtime hdr files
+func (b *Buffer) searchRuntimeHeader(ft string, syntaxFiles *[]syntaxFileBuffer, useHeader bool) (string, *highlight.Header) {
+	syntaxFile := ""
+	var header *highlight.Header
+
+	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
+		data, err := f.Data()
+		if err != nil {
+			screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		header, err = highlight.MakeHeader(data)
+		if err != nil {
+			screen.TermMessage("Error reading syntax header file", f.Name(), err)
+			continue
+		}
+
+		if ft == "unknown" || ft == "" {
+			if !useHeader {
+				if header.MatchFileName(b.Path) && syntaxFiles != nil {
+					*syntaxFiles = append(*syntaxFiles, syntaxFileBuffer{header, f.Name(), nil})
+				}
 			} else {
-				syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), syndef})
+				if header.MatchFileHeader(b.lines[0].data) && syntaxFiles != nil {
+					*syntaxFiles = append(*syntaxFiles, syntaxFileBuffer{header, f.Name(), nil})
+				}
 			}
+		} else if header.FileType == ft {
+			syntaxFile = f.Name()
+			break
 		}
 	}
 
+	return syntaxFile, header
+}
+
+// UpdateRules updates the syntax rules and filetype for this buffer
+// This is called when the colorscheme changes
+func (b *Buffer) UpdateRules() {
+	if !b.Type.Syntax {
+		return
+	}
+	ft := b.Settings["filetype"].(string)
+	if ft == "off" {
+		return
+	}
+
+	syntaxFiles := []syntaxFileBuffer{}
+
+	// check for filenames first...
+	syntaxFile, foundDef, header := b.searchUserSyntax(ft, &syntaxFiles, false)
 	if !foundDef {
-		// search in the default syntax files
-		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
-			data, err := f.Data()
-			if err != nil {
-				screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
-				continue
-			}
+		syntaxFile, header = b.searchRuntimeHeader(ft, &syntaxFiles, false)
+	}
 
-			header, err = highlight.MakeHeader(data)
-			if err != nil {
-				screen.TermMessage("Error reading syntax header file", f.Name(), err)
-				continue
-			}
-
-			if ft == "unknown" || ft == "" {
-				if header.MatchFileName(b.Path) {
-					syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), nil})
-				}
-			} else if header.FileType == ft {
-				syntaxFile = f.Name()
-				break
-			}
+	// ...try the file header definition afterwards
+	if syntaxFile == "" {
+		syntaxFile, foundDef, header = b.searchUserSyntax(ft, &syntaxFiles, true)
+		if !foundDef {
+			syntaxFile, header = b.searchRuntimeHeader(ft, &syntaxFiles, true)
 		}
 	}
 
-	if syntaxFile == "" {
-		length := len(syntaxFiles)
-		if length > 0 {
-			signatureMatch := false
-			if length > 1 {
-				detectlimit := util.IntOpt(b.Settings["detectlimit"])
-				lineCount := len(b.lines)
-				limit := lineCount
-				if detectlimit > 0 && lineCount > detectlimit {
-					limit = detectlimit
-				}
-				for i := 0; i < length && !signatureMatch; i++ {
-					if syntaxFiles[i].header.HasFileSignature() {
-						for j := 0; j < limit && !signatureMatch; j++ {
-							if syntaxFiles[i].header.MatchFileSignature(b.lines[j].data) {
-								syntaxFile = syntaxFiles[i].fileName
-								b.SyntaxDef = syntaxFiles[i].syntaxDef
-								header = syntaxFiles[i].header
-								signatureMatch = true
-							}
+	length := len(syntaxFiles)
+	if length > 0 {
+		signatureMatch := false
+		if length > 1 {
+			detectlimit := util.IntOpt(b.Settings["detectlimit"])
+			lineCount := len(b.lines)
+			limit := lineCount
+			if detectlimit > 0 && lineCount > detectlimit {
+				limit = detectlimit
+			}
+			for i := 0; i < length && !signatureMatch; i++ {
+				if syntaxFiles[i].header.HasFileSignature() {
+					for j := 0; j < limit && !signatureMatch; j++ {
+						if syntaxFiles[i].header.MatchFileSignature(b.lines[j].data) {
+							syntaxFile = syntaxFiles[i].fileName
+							b.SyntaxDef = syntaxFiles[i].syntaxDef
+							header = syntaxFiles[i].header
+							signatureMatch = true
 						}
 					}
 				}
 			}
-			if length == 1 || !signatureMatch {
-				syntaxFile = syntaxFiles[0].fileName
-				b.SyntaxDef = syntaxFiles[0].syntaxDef
-				header = syntaxFiles[0].header
-			}
+		}
+		if length == 1 || !signatureMatch {
+			syntaxFile = syntaxFiles[0].fileName
+			b.SyntaxDef = syntaxFiles[0].syntaxDef
+			header = syntaxFiles[0].header
 		}
 	}
 

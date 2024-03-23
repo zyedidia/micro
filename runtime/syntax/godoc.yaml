@@ -5,7 +5,7 @@ filetype: godoc
 
 detect:
     filename: "\\.godoc$"
-    signature: package.*import
+    header: package.*import
 
 rules:
     - preproc: "^[^ ].*"
