@@ -31,9 +31,10 @@ quotes here but these are not necessary when entering the command in micro.
 
 * `quit`: quits micro.
 
-* `goto 'line'`: jumps to the given line number. A negative number can be
-   passed to jump inward from the end of the file; for example, -5 jumps
-   to the 5th-last line in the file.
+* `goto 'line[:col]'`: goes to the given absolute line (and optional column)
+   number.
+   A negative number can be passed to go inward from the end of the file.
+   Example: -5 goes to the 5th-last line in the file.
 
 * `replace 'search' 'value' ['flags']`: This will replace `search` with `value`.
    The `flags` are optional. Possible flags are:
