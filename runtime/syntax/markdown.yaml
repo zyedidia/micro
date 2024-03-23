@@ -47,3 +47,9 @@ rules:
         start: "`"
         end: "`"
         rules: []
+    
+    - default:
+        start: "^\\s*```shell"
+        end: "^\\s*```"
+        rules:
+          - include: "sh"
