@@ -702,6 +702,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	fnameMatches := []syntaxFileBuffer{}
+	headerMatches := []syntaxFileBuffer{}
 	syntaxFile := ""
 	foundDef := false
 	var header *highlight.Header
@@ -719,7 +720,19 @@ func (b *Buffer) UpdateRules() {
 			continue
 		}
 
-		if ((ft == "unknown" || ft == "") && header.MatchFileName(b.Path)) || header.FileType == ft {
+		matchedFileName := false
+		matchedFileHeader := false
+
+		if ft == "unknown" || ft == "" {
+			if header.MatchFileName(b.Path) {
+				matchedFileName = true
+			}
+			if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
+				matchedFileHeader = true
+			}
+		}
+
+		if matchedFileName || matchedFileHeader || header.FileType == ft {
 			file, err := highlight.ParseFile(data)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
@@ -737,8 +750,12 @@ func (b *Buffer) UpdateRules() {
 				syntaxFile = f.Name()
 				foundDef = true
 				break
-			} else {
+			}
+
+			if matchedFileName {
 				fnameMatches = append(fnameMatches, syntaxFileBuffer{header, f.Name(), syndef})
+			} else if matchedFileHeader {
+				headerMatches = append(headerMatches, syntaxFileBuffer{header, f.Name(), syndef})
 			}
 		}
 	}
@@ -762,6 +779,9 @@ func (b *Buffer) UpdateRules() {
 				if header.MatchFileName(b.Path) {
 					fnameMatches = append(fnameMatches, syntaxFileBuffer{header, f.Name(), nil})
 				}
+				if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
+					headerMatches = append(headerMatches, syntaxFileBuffer{header, f.Name(), nil})
+				}
 			} else if header.FileType == ft {
 				syntaxFile = f.Name()
 				break
@@ -770,7 +790,12 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if syntaxFile == "" {
-		length := len(fnameMatches)
+		matches := fnameMatches
+		if len(matches) == 0 {
+			matches = headerMatches
+		}
+
+		length := len(matches)
 		if length > 0 {
 			signatureMatch := false
 			if length > 1 {
@@ -781,15 +806,15 @@ func (b *Buffer) UpdateRules() {
 					limit = detectlimit
 				}
 				for i := 0; i < length && !signatureMatch; i++ {
-					if fnameMatches[i].header.HasFileSignature() {
+					if matches[i].header.HasFileSignature() {
 						for j := 0; j < limit && !signatureMatch; j++ {
-							if fnameMatches[i].header.MatchFileSignature(b.lines[j].data) {
-								syntaxFile = fnameMatches[i].fileName
-								if fnameMatches[i].syntaxDef != nil {
-									b.SyntaxDef = fnameMatches[i].syntaxDef
+							if matches[i].header.MatchFileSignature(b.lines[j].data) {
+								syntaxFile = matches[i].fileName
+								if matches[i].syntaxDef != nil {
+									b.SyntaxDef = matches[i].syntaxDef
 									foundDef = true
 								}
-								header = fnameMatches[i].header
+								header = matches[i].header
 								signatureMatch = true
 							}
 						}
@@ -797,12 +822,12 @@ func (b *Buffer) UpdateRules() {
 				}
 			}
 			if length == 1 || !signatureMatch {
-				syntaxFile = fnameMatches[0].fileName
-				if fnameMatches[0].syntaxDef != nil {
-					b.SyntaxDef = fnameMatches[0].syntaxDef
+				syntaxFile = matches[0].fileName
+				if matches[0].syntaxDef != nil {
+					b.SyntaxDef = matches[0].syntaxDef
 					foundDef = true
 				}
-				header = fnameMatches[0].header
+				header = matches[0].header
 			}
 		}
 	}
