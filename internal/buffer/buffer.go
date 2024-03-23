@@ -730,11 +730,11 @@ func (b *Buffer) UpdateRules() {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
-			foundDef = true
 
 			if header.FileType == ft {
 				b.SyntaxDef = syndef
 				syntaxFile = f.Name()
+				foundDef = true
 				break
 			} else {
 				syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), syndef})
@@ -784,7 +784,10 @@ func (b *Buffer) UpdateRules() {
 						for j := 0; j < limit && !signatureMatch; j++ {
 							if syntaxFiles[i].header.MatchFileSignature(b.lines[j].data) {
 								syntaxFile = syntaxFiles[i].fileName
-								b.SyntaxDef = syntaxFiles[i].syntaxDef
+								if syntaxFiles[i].syntaxDef != nil {
+									b.SyntaxDef = syntaxFiles[i].syntaxDef
+									foundDef = true
+								}
 								header = syntaxFiles[i].header
 								signatureMatch = true
 							}
@@ -794,7 +797,10 @@ func (b *Buffer) UpdateRules() {
 			}
 			if length == 1 || !signatureMatch {
 				syntaxFile = syntaxFiles[0].fileName
-				b.SyntaxDef = syntaxFiles[0].syntaxDef
+				if syntaxFiles[0].syntaxDef != nil {
+					b.SyntaxDef = syntaxFiles[0].syntaxDef
+					foundDef = true
+				}
 				header = syntaxFiles[0].header
 			}
 		}
