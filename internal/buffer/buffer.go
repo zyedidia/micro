@@ -701,7 +701,7 @@ func (b *Buffer) UpdateRules() {
 		syntaxDef *highlight.Def
 	}
 
-	syntaxFiles := []syntaxFileBuffer{}
+	fnameMatches := []syntaxFileBuffer{}
 	syntaxFile := ""
 	foundDef := false
 	var header *highlight.Header
@@ -738,7 +738,7 @@ func (b *Buffer) UpdateRules() {
 				foundDef = true
 				break
 			} else {
-				syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), syndef})
+				fnameMatches = append(fnameMatches, syntaxFileBuffer{header, f.Name(), syndef})
 			}
 		}
 	}
@@ -760,7 +760,7 @@ func (b *Buffer) UpdateRules() {
 
 			if ft == "unknown" || ft == "" {
 				if header.MatchFileName(b.Path) {
-					syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), nil})
+					fnameMatches = append(fnameMatches, syntaxFileBuffer{header, f.Name(), nil})
 				}
 			} else if header.FileType == ft {
 				syntaxFile = f.Name()
@@ -770,7 +770,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if syntaxFile == "" {
-		length := len(syntaxFiles)
+		length := len(fnameMatches)
 		if length > 0 {
 			signatureMatch := false
 			if length > 1 {
@@ -781,15 +781,15 @@ func (b *Buffer) UpdateRules() {
 					limit = detectlimit
 				}
 				for i := 0; i < length && !signatureMatch; i++ {
-					if syntaxFiles[i].header.HasFileSignature() {
+					if fnameMatches[i].header.HasFileSignature() {
 						for j := 0; j < limit && !signatureMatch; j++ {
-							if syntaxFiles[i].header.MatchFileSignature(b.lines[j].data) {
-								syntaxFile = syntaxFiles[i].fileName
-								if syntaxFiles[i].syntaxDef != nil {
-									b.SyntaxDef = syntaxFiles[i].syntaxDef
+							if fnameMatches[i].header.MatchFileSignature(b.lines[j].data) {
+								syntaxFile = fnameMatches[i].fileName
+								if fnameMatches[i].syntaxDef != nil {
+									b.SyntaxDef = fnameMatches[i].syntaxDef
 									foundDef = true
 								}
-								header = syntaxFiles[i].header
+								header = fnameMatches[i].header
 								signatureMatch = true
 							}
 						}
@@ -797,12 +797,12 @@ func (b *Buffer) UpdateRules() {
 				}
 			}
 			if length == 1 || !signatureMatch {
-				syntaxFile = syntaxFiles[0].fileName
-				if syntaxFiles[0].syntaxDef != nil {
-					b.SyntaxDef = syntaxFiles[0].syntaxDef
+				syntaxFile = fnameMatches[0].fileName
+				if fnameMatches[0].syntaxDef != nil {
+					b.SyntaxDef = fnameMatches[0].syntaxDef
 					foundDef = true
 				}
-				header = syntaxFiles[0].header
+				header = fnameMatches[0].header
 			}
 		}
 	}
