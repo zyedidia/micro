@@ -359,16 +359,3 @@ example, the following is possible for html:
     rules:
         - include: "css"
 ```
-
-## Syntax file headers
-
-Syntax file headers are an optimization and it is likely you do not need to
-worry about them.
-
-Syntax file headers are files that contain only the filetype and the detection
-regular expressions for a given syntax file. They have a `.hdr` suffix and are
-used by default only for the pre-installed syntax files. Header files allow
-micro to parse the syntax files much faster when checking the filetype of a
-certain file. Custom syntax files may provide header files in
-`~/.config/micro/syntax` as well but it is not necessary (only do this if you
-have many (100+) custom syntax files and want to improve performance).
