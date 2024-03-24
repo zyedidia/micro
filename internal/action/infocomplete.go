@@ -87,6 +87,10 @@ func filetypeComplete(input string) (string, []string) {
 		}
 	}
 
+	if strings.HasPrefix("unknown", input) {
+		suggestions = append(suggestions, "unknown")
+	}
+
 	var chosen string
 	if len(suggestions) == 1 {
 		chosen = suggestions[0]
