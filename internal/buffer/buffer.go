@@ -802,6 +802,8 @@ func (b *Buffer) UpdateRules() {
 		if length > 0 {
 			signatureMatch := false
 			if length > 1 {
+				// multiple matching syntax files found, try to resolve the ambiguity
+				// using signatures
 				detectlimit := util.IntOpt(b.Settings["detectlimit"])
 				lineCount := len(b.lines)
 				limit := lineCount
