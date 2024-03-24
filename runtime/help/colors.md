@@ -271,13 +271,40 @@ detect:
 ```
 
 Micro will match this regex against a given filename to detect the filetype.
-You may also provide an optional `signature` regex that will check a certain
-amount of lines of a file to find specific marks. For example:
+
+In addition to the `filename` regex (or even instead of it) you can provide
+a `header` regex that will check the first line of the line. For example:
 
 ```
 detect:
     filename: "\\.ya?ml$"
-    signature: "%YAML"
+    header: "%YAML"
+```
+
+This is useful in cases when the given file name is not sufficient to determine
+the filetype, e.g. with the above example, if a YAML file has no `.yaml`
+extension but may contain a `%YAML` directive in its first line.
+
+`filename` takes precedence over `header`, i.e. if there is a syntax file that
+matches the file with a filetype by the `filename` and another syntax file that
+matches the same file with another filetype by the `header`, the first filetype
+will be used.
+
+Finally, in addition to `filename` and/or `header` (but not instead of them)
+you may also provide an optional `signature` regex which is useful for resolving
+ambiguities when there are multiple syntax files matching the same file with
+different filetypes. If a `signature` regex is given, micro will match a certain
+amount of first lines in the file (this amount is determined by the `detectlimit`
+option) against this regex, and if any of the lines match, this syntax file's
+filetype will be preferred over other matching filetypes.
+
+For example, to distinguish C++ header files from C and Objective-C header files
+that have the same `.h` extension:
+
+```
+detect:
+    filename: "\\.c(c|pp|xx)$|\\.h(h|pp|xx)?$"
+    signature: "namespace|template|public|protected|private"
 ```
 
 ### Syntax rules
