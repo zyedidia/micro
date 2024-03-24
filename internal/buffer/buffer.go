@@ -720,6 +720,7 @@ func (b *Buffer) UpdateRules() {
 			continue
 		}
 
+		matchedFileType := false
 		matchedFileName := false
 		matchedFileHeader := false
 
@@ -730,9 +731,11 @@ func (b *Buffer) UpdateRules() {
 			if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
 				matchedFileHeader = true
 			}
+		} else if header.FileType == ft {
+			matchedFileType = true
 		}
 
-		if matchedFileName || matchedFileHeader || header.FileType == ft {
+		if matchedFileType || matchedFileName || matchedFileHeader {
 			file, err := highlight.ParseFile(data)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
@@ -745,7 +748,7 @@ func (b *Buffer) UpdateRules() {
 				continue
 			}
 
-			if header.FileType == ft {
+			if matchedFileType {
 				b.SyntaxDef = syndef
 				syntaxFile = f.Name()
 				foundDef = true
