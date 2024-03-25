@@ -693,15 +693,16 @@ func (b *Buffer) UpdateRules() {
 		return
 	}
 
-	// syntaxFileBuffer is a helper structure
+	// syntaxFileInfo is an internal helper structure
 	// to store properties of one single syntax file
-	type syntaxFileBuffer struct {
+	type syntaxFileInfo struct {
 		header    *highlight.Header
 		fileName  string
 		syntaxDef *highlight.Def
 	}
 
-	syntaxFiles := []syntaxFileBuffer{}
+	fnameMatches := []syntaxFileInfo{}
+	headerMatches := []syntaxFileInfo{}
 	syntaxFile := ""
 	foundDef := false
 	var header *highlight.Header
@@ -718,26 +719,46 @@ func (b *Buffer) UpdateRules() {
 			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
 			continue
 		}
-		file, err := highlight.ParseFile(data)
-		if err != nil {
-			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-			continue
+
+		matchedFileType := false
+		matchedFileName := false
+		matchedFileHeader := false
+
+		if ft == "unknown" || ft == "" {
+			if header.MatchFileName(b.Path) {
+				matchedFileName = true
+			}
+			if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
+				matchedFileHeader = true
+			}
+		} else if header.FileType == ft {
+			matchedFileType = true
 		}
 
-		if ((ft == "unknown" || ft == "") && header.MatchFileName(b.Path)) || header.FileType == ft {
+		if matchedFileType || matchedFileName || matchedFileHeader {
+			file, err := highlight.ParseFile(data)
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+
 			syndef, err := highlight.ParseDef(file, header)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
-			foundDef = true
 
-			if header.FileType == ft {
+			if matchedFileType {
 				b.SyntaxDef = syndef
 				syntaxFile = f.Name()
+				foundDef = true
 				break
-			} else {
-				syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), syndef})
+			}
+
+			if matchedFileName {
+				fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), syndef})
+			} else if matchedFileHeader {
+				headerMatches = append(headerMatches, syntaxFileInfo{header, f.Name(), syndef})
 			}
 		}
 	}
@@ -759,7 +780,10 @@ func (b *Buffer) UpdateRules() {
 
 			if ft == "unknown" || ft == "" {
 				if header.MatchFileName(b.Path) {
-					syntaxFiles = append(syntaxFiles, syntaxFileBuffer{header, f.Name(), nil})
+					fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), nil})
+				}
+				if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
+					headerMatches = append(headerMatches, syntaxFileInfo{header, f.Name(), nil})
 				}
 			} else if header.FileType == ft {
 				syntaxFile = f.Name()
@@ -769,33 +793,49 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if syntaxFile == "" {
-		length := len(syntaxFiles)
+		matches := fnameMatches
+		if len(matches) == 0 {
+			matches = headerMatches
+		}
+
+		length := len(matches)
 		if length > 0 {
 			signatureMatch := false
 			if length > 1 {
+				// multiple matching syntax files found, try to resolve the ambiguity
+				// using signatures
 				detectlimit := util.IntOpt(b.Settings["detectlimit"])
 				lineCount := len(b.lines)
 				limit := lineCount
 				if detectlimit > 0 && lineCount > detectlimit {
 					limit = detectlimit
 				}
-				for i := 0; i < length && !signatureMatch; i++ {
-					if syntaxFiles[i].header.HasFileSignature() {
-						for j := 0; j < limit && !signatureMatch; j++ {
-							if syntaxFiles[i].header.MatchFileSignature(b.lines[j].data) {
-								syntaxFile = syntaxFiles[i].fileName
-								b.SyntaxDef = syntaxFiles[i].syntaxDef
-								header = syntaxFiles[i].header
+
+			matchLoop:
+				for _, m := range matches {
+					if m.header.HasFileSignature() {
+						for i := 0; i < limit; i++ {
+							if m.header.MatchFileSignature(b.lines[i].data) {
+								syntaxFile = m.fileName
+								if m.syntaxDef != nil {
+									b.SyntaxDef = m.syntaxDef
+									foundDef = true
+								}
+								header = m.header
 								signatureMatch = true
+								break matchLoop
 							}
 						}
 					}
 				}
 			}
 			if length == 1 || !signatureMatch {
-				syntaxFile = syntaxFiles[0].fileName
-				b.SyntaxDef = syntaxFiles[0].syntaxDef
-				header = syntaxFiles[0].header
+				syntaxFile = matches[0].fileName
+				if matches[0].syntaxDef != nil {
+					b.SyntaxDef = matches[0].syntaxDef
+					foundDef = true
+				}
+				header = matches[0].header
 			}
 		}
 	}
