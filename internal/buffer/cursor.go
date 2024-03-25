@@ -69,6 +69,7 @@ func (c *Cursor) Goto(b Cursor) {
 // the current cursor its selection too
 func (c *Cursor) GotoLoc(l Loc) {
 	c.X, c.Y = l.X, l.Y
+	c.buf.FoldExpandOut(l.Y)
 	c.StoreVisualX()
 }
 
@@ -238,22 +239,35 @@ func (c *Cursor) AddLineToSelection() {
 
 // UpN moves the cursor up N lines (if possible)
 func (c *Cursor) UpN(amount int) {
-	proposedY := c.Y - amount
-	if proposedY < 0 {
-		proposedY = 0
-	} else if proposedY >= len(c.buf.lines) {
-		proposedY = len(c.buf.lines) - 1
+	incr := -1
+	if amount < 0 {
+		incr = 1
+	}
+	proposedY := c.Y
+	for amount != 0 {
+		proposedY += incr
+		if proposedY < 0 {
+			proposedY = 0
+			break
+		}
+		if proposedY >= len(c.buf.lines) {
+			proposedY = len(c.buf.lines) - 1
+			break
+		}
+		if !c.buf.Hidden(proposedY) {
+			amount += incr
+		}
 	}
 
 	bytes := c.buf.LineBytes(proposedY)
 	c.X = c.GetCharPosInLine(bytes, c.LastVisualX)
 
-	if c.X > util.CharacterCount(bytes) || (amount < 0 && proposedY == c.Y) {
+	if c.X > util.CharacterCount(bytes) || (incr > 0 && proposedY == c.Y) {
 		c.X = util.CharacterCount(bytes)
 		c.StoreVisualX()
 	}
 
-	if c.X < 0 || (amount > 0 && proposedY == c.Y) {
+	if c.X < 0 || (incr < 0 && proposedY == c.Y) {
 		c.X = 0
 		c.StoreVisualX()
 	}
