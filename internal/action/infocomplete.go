@@ -87,6 +87,9 @@ func filetypeComplete(input string) (string, []string) {
 		}
 	}
 
+	if strings.HasPrefix("off", input) {
+		suggestions = append(suggestions, "off")
+	}
 	if strings.HasPrefix("unknown", input) {
 		suggestions = append(suggestions, "unknown")
 	}
