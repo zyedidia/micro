@@ -538,6 +538,15 @@ func importTime() *lua.LTable {
 	L.SetField(pkg, "Minute", luar.New(L, time.Minute))
 	L.SetField(pkg, "Hour", luar.New(L, time.Hour))
 
+	// TODO: these raw Go timer APIs don't provide any synchronization
+	// with micro. Stop exposing them to lua once plugins switch to using
+	// the safer micro.After() interface instead. See issue #3209
+	L.SetField(pkg, "After", luar.New(L, time.After))
+	L.SetField(pkg, "AfterFunc", luar.New(L, time.AfterFunc))
+	L.SetField(pkg, "NewTicker", luar.New(L, time.NewTicker))
+	L.SetField(pkg, "NewTimer", luar.New(L, time.NewTimer))
+	L.SetField(pkg, "Tick", luar.New(L, time.Tick))
+
 	return pkg
 }
 
