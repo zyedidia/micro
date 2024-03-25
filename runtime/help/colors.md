@@ -236,6 +236,9 @@ Here's a list of subgroups used in micro's built-in syntax files.
 * type.keyword (If you want a special highlight for keywords like `private`)
 
 In the future, plugins may also be able to use color groups for styling.
+
+---
+
 Last but not least it's even possible to use `include` followed by the
 colorscheme name as string to include a different colorscheme within a new one.
 Additionally the groups can then be extended or overwritten. The `default.micro`
@@ -386,16 +389,3 @@ example, the following is possible for html:
     rules:
         - include: "css"
 ```
-
-## Syntax file headers
-
-Syntax file headers are an optimization and it is likely you do not need to
-worry about them.
-
-Syntax file headers are files that contain only the filetype and the detection
-regular expressions for a given syntax file. They have a `.hdr` suffix and are
-used by default only for the pre-installed syntax files. Header files allow
-micro to parse the syntax files much faster when checking the filetype of a
-certain file. Custom syntax files may provide header files in
-`~/.config/micro/syntax` as well but it is not necessary (only do this if you
-have many (100+) custom syntax files and want to improve performance).
