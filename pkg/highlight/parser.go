@@ -230,12 +230,12 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 		}
 	}()
 
-	rules := f.yamlSrc
+	src := f.yamlSrc
 
 	s = new(Def)
 	s.Header = header
 
-	for k, v := range rules {
+	for k, v := range src {
 		if k == "rules" {
 			inputRules := v.([]interface{})
 
@@ -246,6 +246,11 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 
 			s.rules = rules
 		}
+	}
+
+	if s.rules == nil {
+		// allow empty rules
+		s.rules = new(rules)
 	}
 
 	return s, err
