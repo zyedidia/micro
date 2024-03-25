@@ -690,6 +690,8 @@ func (b *Buffer) UpdateRules() {
 	}
 	ft := b.Settings["filetype"].(string)
 	if ft == "off" {
+		b.ClearMatches()
+		b.SyntaxDef = nil
 		return
 	}
 
