@@ -8,6 +8,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
+	"github.com/zyedidia/micro/v2/pkg/highlight"
 )
 
 // This file is meant (for now) for autocompletion in command mode, not
@@ -81,9 +82,44 @@ func colorschemeComplete(input string) (string, []string) {
 func filetypeComplete(input string) (string, []string) {
 	var suggestions []string
 
-	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-		if strings.HasPrefix(f.Name(), input) {
-			suggestions = append(suggestions, f.Name())
+	// Since we need to complete the file type instead of the file name
+	// we need to parse the RTSyntax* files and search for a matching FileType.
+	// The following logic can be simplified to the previos state again,
+	// in the moment the file names will represent the file types directly.
+	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			continue
+		}
+		header, err := highlight.MakeHeaderYaml(data)
+		if err != nil {
+			continue
+		}
+		// Prevent duplicated defaults
+		if header.FileType == "off" || header.FileType == "unknown" {
+			continue
+		}
+		if strings.HasPrefix(header.FileType, input) {
+			suggestions = append(suggestions, header.FileType)
+		}
+	}
+headerLoop:
+	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
+		data, err := f.Data()
+		if err != nil {
+			continue
+		}
+		header, err := highlight.MakeHeader(data)
+		if err != nil {
+			continue
+		}
+		for _, v := range suggestions {
+			if v == header.FileType {
+				continue headerLoop
+			}
+		}
+		if strings.HasPrefix(header.FileType, input) {
+			suggestions = append(suggestions, header.FileType)
 		}
 	}
 
