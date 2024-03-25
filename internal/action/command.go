@@ -41,6 +41,7 @@ func InitCommands() {
 		"unbind":     {(*BufPane).UnbindCmd, nil},
 		"quit":       {(*BufPane).QuitCmd, nil},
 		"goto":       {(*BufPane).GotoCmd, nil},
+		"jump":       {(*BufPane).JumpCmd, nil},
 		"save":       {(*BufPane).SaveCmd, nil},
 		"replace":    {(*BufPane).ReplaceCmd, nil},
 		"replaceall": {(*BufPane).ReplaceAllCmd, nil},
@@ -752,41 +753,65 @@ func (h *BufPane) QuitCmd(args []string) {
 // position in the buffer
 // For example: `goto line`, or `goto line:col`
 func (h *BufPane) GotoCmd(args []string) {
+	line, col, err := h.parseLineCol(args)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	if line < 0 {
+		line = h.Buf.LinesNum() + 1 + line
+	}
+	line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
+
+	h.RemoveAllMultiCursors()
+	h.GotoLoc(buffer.Loc{col, line})
+}
+
+// JumpCmd is a command that will send the cursor to a certain relative
+// position in the buffer
+// For example: `jump line`, `jump -line`, or `jump -line:col`
+func (h *BufPane) JumpCmd(args []string) {
+	line, col, err := h.parseLineCol(args)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	line = h.Buf.GetActiveCursor().Y + 1 + line
+	line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
+
+	h.RemoveAllMultiCursors()
+	h.GotoLoc(buffer.Loc{col, line})
+}
+
+// parseLineCol is a helper to parse the input of GotoCmd and JumpCmd
+func (h *BufPane) parseLineCol(args []string) (line int, col int, err error) {
 	if len(args) <= 0 {
-		InfoBar.Error("Not enough arguments")
+		return 0, 0, errors.New("Not enough arguments")
+	}
+
+	line, col = 0, 0
+	if strings.Contains(args[0], ":") {
+		parts := strings.SplitN(args[0], ":", 2)
+		line, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return 0, 0, err
+		}
+		col, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return 0, 0, err
+		}
 	} else {
-		h.RemoveAllMultiCursors()
-		if strings.Contains(args[0], ":") {
-			parts := strings.SplitN(args[0], ":", 2)
-			line, err := strconv.Atoi(parts[0])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			col, err := strconv.Atoi(parts[1])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
-			h.GotoLoc(buffer.Loc{col, line})
-		} else {
-			line, err := strconv.Atoi(args[0])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			h.GotoLoc(buffer.Loc{0, line})
+		line, err = strconv.Atoi(args[0])
+		if err != nil {
+			return 0, 0, err
 		}
 	}
+
+	return line, col, nil
 }
 
 // SaveCmd saves the buffer optionally with an argument file name
