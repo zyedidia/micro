@@ -209,9 +209,17 @@ func ParseFile(input []byte) (f *File, err error) {
 		if k == "filetype" {
 			filetype := v.(string)
 
+			if filetype == "" {
+				return nil, errors.New("empty filetype")
+			}
+
 			f.FileType = filetype
 			break
 		}
+	}
+
+	if f.FileType == "" {
+		return nil, errors.New("missing filetype")
 	}
 
 	return f, err
