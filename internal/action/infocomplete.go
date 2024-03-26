@@ -82,10 +82,10 @@ func colorschemeComplete(input string) (string, []string) {
 func filetypeComplete(input string) (string, []string) {
 	var suggestions []string
 
-	// Since we need to complete the file type instead of the file name
-	// we need to parse the RTSyntax* files and search for a matching FileType.
-	// The following logic can be simplified to the previos state again,
-	// in the moment the file names will represent the file types directly.
+	// We cannot match filetypes just by names of syntax files,
+	// since those names may be different from the actual filetype values
+	// specified inside syntax files (e.g. "c++" filetype in cpp.yaml).
+	// So we need to parse filetype values out of those files.
 	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
 		data, err := f.Data()
 		if err != nil {
