@@ -424,6 +424,7 @@ There are 6 default plugins that come pre-installed with micro. These are
 * `diff`: integrates the `diffgutter` option with Git. If you are in a Git
    directory, the diff gutter will show changes with respect to the most
    recent Git commit rather than the diff since opening the file.
+* `formatter`: provides extensible formatting for many languages.
 
 See `> help linter`, `> help comment`, and `> help status` for additional
 documentation specific to those plugins.

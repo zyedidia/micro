@@ -479,6 +479,7 @@ or disable them:
 * `diff`: integrates the `diffgutter` option with Git. If you are in a Git
    directory, the diff gutter will show changes with respect to the most
    recent Git commit rather than the diff since opening the file.
+* `formatter`: provides extensible formatting for many languages.
 
 Any option you set in the editor will be saved to the file
 ~/.config/micro/settings.json so, in effect, your configuration file will be
@@ -515,6 +516,7 @@ so that you can see what the formatting should look like.
     "fastdirty": false,
     "fileformat": "unix",
     "filetype": "unknown",
+    "formatter": true,
     "incsearch": true,
     "ftoptions": true,
     "ignorecase": true,
