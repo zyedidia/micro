@@ -1,4 +1,4 @@
-filename: jsonnet
+filetype: jsonnet
 
 detect:
     filename: "\\.jsonnet$"
