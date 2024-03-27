@@ -513,74 +513,69 @@ func (h *BufPane) NewTabCmd(args []string) {
 }
 
 func SetGlobalOptionNative(option string, nativeValue interface{}) error {
-	local := false
+	// check for local option first...
 	for _, s := range config.LocalSettings {
 		if s == option {
-			local = true
-			break
+			MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
+			return nil
 		}
 	}
 
-	if !local {
-		config.GlobalSettings[option] = nativeValue
-		config.ModifiedSettings[option] = true
-		delete(config.VolatileSettings, option)
+	// ...if it's not local continue with the globals
+	config.GlobalSettings[option] = nativeValue
+	config.ModifiedSettings[option] = true
+	delete(config.VolatileSettings, option)
 
-		if option == "colorscheme" {
-			// LoadSyntaxFiles()
-			config.InitColorscheme()
-			for _, b := range buffer.OpenBuffers {
-				b.UpdateRules()
-			}
-		} else if option == "infobar" || option == "keymenu" {
-			Tabs.Resize()
-		} else if option == "mouse" {
-			if !nativeValue.(bool) {
-				screen.Screen.DisableMouse()
-			} else {
-				screen.Screen.EnableMouse()
-			}
-		} else if option == "autosave" {
-			if nativeValue.(float64) > 0 {
-				config.SetAutoTime(int(nativeValue.(float64)))
-				config.StartAutoSave()
-			} else {
-				config.SetAutoTime(0)
-			}
-		} else if option == "paste" {
-			screen.Screen.SetPaste(nativeValue.(bool))
-		} else if option == "clipboard" {
-			m := clipboard.SetMethod(nativeValue.(string))
-			err := clipboard.Initialize(m)
-			if err != nil {
-				return err
-			}
+	if option == "colorscheme" {
+		// LoadSyntaxFiles()
+		config.InitColorscheme()
+		for _, b := range buffer.OpenBuffers {
+			b.UpdateRules()
+		}
+	} else if option == "infobar" || option == "keymenu" {
+		Tabs.Resize()
+	} else if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.Screen.DisableMouse()
 		} else {
-			for _, pl := range config.Plugins {
-				if option == pl.Name {
-					if nativeValue.(bool) && !pl.Loaded {
-						pl.Load()
-						_, err := pl.Call("init")
-						if err != nil && err != config.ErrNoSuchFunction {
-							screen.TermMessage(err)
-						}
-					} else if !nativeValue.(bool) && pl.Loaded {
-						_, err := pl.Call("deinit")
-						if err != nil && err != config.ErrNoSuchFunction {
-							screen.TermMessage(err)
-						}
+			screen.Screen.EnableMouse()
+		}
+	} else if option == "autosave" {
+		if nativeValue.(float64) > 0 {
+			config.SetAutoTime(int(nativeValue.(float64)))
+			config.StartAutoSave()
+		} else {
+			config.SetAutoTime(0)
+		}
+	} else if option == "paste" {
+		screen.Screen.SetPaste(nativeValue.(bool))
+	} else if option == "clipboard" {
+		m := clipboard.SetMethod(nativeValue.(string))
+		err := clipboard.Initialize(m)
+		if err != nil {
+			return err
+		}
+	} else {
+		for _, pl := range config.Plugins {
+			if option == pl.Name {
+				if nativeValue.(bool) && !pl.Loaded {
+					pl.Load()
+					_, err := pl.Call("init")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
+				} else if !nativeValue.(bool) && pl.Loaded {
+					_, err := pl.Call("deinit")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
 					}
 				}
 			}
 		}
 	}
 
-	if local {
-		MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
-	} else {
-		for _, b := range buffer.OpenBuffers {
-			b.SetOptionNative(option, nativeValue)
-		}
+	for _, b := range buffer.OpenBuffers {
+		b.SetOptionNative(option, nativeValue)
 	}
 
 	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
