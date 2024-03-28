@@ -1,0 +1,14 @@
+filetype: "ignore"
+
+detect:
+  filename: ".*ignore$"
+
+rules:
+  - statement: ".*$"           # files
+  - constant.string: ".*/$"    # directories
+  - diff-deleted: "^!.*"       # negated
+
+  - special: "/"
+  - identifier: "^!|\\?|\\*|\\[.*?]|\\."
+
+  - comment: "#.*$"
