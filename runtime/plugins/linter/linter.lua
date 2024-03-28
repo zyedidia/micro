@@ -8,6 +8,7 @@ local buffer = import("micro/buffer")
 local config = import("micro/config")
 local util = import("micro/util")
 local os = import("os")
+local regexp = import("regexp")
 
 local linters = {}
 
@@ -27,8 +28,8 @@ local linters = {}
 -- whitelist: should the OS list be a blacklist (do not run the linter for these OSs)
 --            or a whitelist (only run the linter for these OSs)
 --     optional param, default: false (should blacklist)
--- domatch: should the filetype be interpreted as a lua pattern to match with
---          the actual filetype, or should the linter only activate on an exact match
+-- domatch: should the filetype be interpreted as a regex pattern to match with
+--          the actual file path, or should the linter only activate on an exact match
 --     optional param, default: false (require exact match)
 -- loffset: line offset will be added to the line number returned by the linter
 --          useful if the linter returns 0-indexed lines
@@ -115,7 +116,7 @@ function runLinter(buf)
     for k, v in pairs(linters) do
         local ftmatch = ft == v.filetype
         if v.domatch then
-            ftmatch = string.match(ft, v.filetype)
+            ftmatch = regexp.MatchString(v.filetype, buf.AbsPath)
         end
 
         local hasOS = contains(v.os, runtime.GOOS)
