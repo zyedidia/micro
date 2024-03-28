@@ -488,6 +488,48 @@ func (h *BufPane) ParagraphNext() bool {
 	return true
 }
 
+// SelectParagraphPrevious select to the previous empty line, or beginning of the buffer if there's none
+func (h *BufPane) SelectParagraphPrevious() bool {
+	var line int
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	for line = h.Cursor.Y; line > 0; line-- {
+		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
+			h.Cursor.X = 0
+			h.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line found. move cursor to end of buffer
+	if line == 0 {
+		h.Cursor.Loc = h.Buf.Start()
+	}
+	h.Cursor.SelectTo(h.Cursor.Loc)
+	return true
+}
+
+// SelectParagraphNext select to the next empty line, or end of the buffer if there's none
+func (h *BufPane) SelectParagraphNext() bool {
+	var line int
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	for line = h.Cursor.Y; line < h.Buf.LinesNum(); line++ {
+		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
+			h.Cursor.X = 0
+			h.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line found. move cursor to end of buffer
+	if line == h.Buf.LinesNum() {
+		h.Cursor.Loc = h.Buf.End()
+	}
+	h.Cursor.SelectTo(h.Cursor.Loc)
+	return true
+}
+
 // Retab changes all tabs to spaces or all spaces to tabs depending
 // on the user's settings
 func (h *BufPane) Retab() bool {
