@@ -1,0 +1,62 @@
+filetype: requirements
+
+detect:
+  filename: "requirements(.*)?\\.(txt|in)$"
+
+rules:
+# numbers
+- constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?(\\..*)?\\b" #
+
+# strings
+- constant.string:
+    start: "\""
+    end: "(\"|$)"
+    skip: "\\\\."
+    rules: [{constant.specialChar: "\\\\."}]
+
+- constant.string:
+    start: "'"
+    end: "('|$)"
+    skip: "\\\\."
+    rules: [{constant.specialChar: "\\\\."}]
+
+# comments
+- comment:
+    start: "#"
+    end: "$"
+    rules:  # AKA Code tags (PEP 350)
+    - todo: "(TODO|FIXME|HACK|BUG|NOTE|FAQ|MNEMONIC|REQ|RFE|IDEA|PORT|\\?\\?\\?|!!!|GLOSS|SEE|TODOC|STAT|RVD|CRED):?"
+
+# extras
+- preproc: "\\[.*]"
+
+# constants
+- symbol.operator: "\\b(and|not|or|in)\\b"
+
+- constant: "\\b(os(_|\\.)name)\\b"
+- constant: "\\b(sys(_|\\.)platform)\\b"
+- constant: "\\b(platform\\.machine)\\b"
+- constant: "\\b(platform(_|\\.)python_implementation)\\b"
+- constant: "\\b(platform(_|\\.)release)\\b"
+- constant: "\\b(platform(_|\\.)system)\\b"
+- constant: "\\b(platform(_|\\.)version)\\b"
+- constant: "\\b(python_version)\\b"
+- constant: "\\b(python_full_version|platform.python_version)\\b"
+- constant: "\\b(implementation_name|sys\\.implementation\\.name)\\b"
+- constant: "\\b(implementation_version)\\b"
+
+# link
+- preproc:
+    start: "\\b((@\\s?|git\\+)?https?:)//b"
+    end: "\\b(\\s|$)\\b"
+    rules: []
+
+- constant:
+    start: "(@\\s?|git\\+)"
+    end: "(\\s|$)"
+    rules: []
+
+# operators
+- symbol.operator: "([~^:;,+*|=!\\%]|<|>|/|-|&)"
+
+- symbol.brackets: "([(){}]|\\[|\\])"
