@@ -279,7 +279,7 @@ detect:
 Micro will match this regex against a given filename to detect the filetype.
 
 In addition to the `filename` regex (or even instead of it) you can provide
-a `header` regex that will check the first line of the line. For example:
+a `header` regex that will check the first line of the file. For example:
 
 ```
 detect:
