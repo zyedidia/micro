@@ -20,7 +20,7 @@ type operation struct {
 
 func init() {
 	ulua.L = lua.NewState()
-	config.InitRuntimeFiles()
+	config.InitRuntimeFiles(true)
 	config.InitGlobalSettings()
 	config.GlobalSettings["backup"] = false
 	config.GlobalSettings["fastdirty"] = true

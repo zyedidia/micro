@@ -166,10 +166,14 @@ func ListRealRuntimeFiles(fileType RTFiletype) []RuntimeFile {
 	return realFiles[fileType]
 }
 
-// InitRuntimeFiles initializes all assets file and the config directory
-func InitRuntimeFiles() {
+// InitRuntimeFiles initializes all assets files and the config directory.
+// If `user` is false, InitRuntimeFiles ignores the config directory and
+// initializes asset files only.
+func InitRuntimeFiles(user bool) {
 	add := func(fileType RTFiletype, dir, pattern string) {
-		AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
+		if user {
+			AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
+		}
 		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
 	}
 

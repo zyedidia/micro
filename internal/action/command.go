@@ -348,7 +348,7 @@ func reloadRuntime(reloadPlugins bool) {
 		}
 	}
 
-	config.InitRuntimeFiles()
+	config.InitRuntimeFiles(true)
 
 	if reloadPlugins {
 		config.InitPlugins()
