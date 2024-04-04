@@ -46,10 +46,9 @@ type searchState struct {
 type Line struct {
 	data []byte
 
-	state       highlight.State
-	match       highlight.LineMatch
-	rehighlight bool
-	lock        sync.Mutex
+	state highlight.State
+	match highlight.LineMatch
+	lock  sync.Mutex
 
 	// The search states for the line, used for highlighting of search matches,
 	// separately from the syntax highlighting.
@@ -148,20 +147,18 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 		if err != nil {
 			if err == io.EOF {
 				la.lines = Append(la.lines, Line{
-					data:        data,
-					state:       nil,
-					match:       nil,
-					rehighlight: false,
+					data:  data,
+					state: nil,
+					match: nil,
 				})
 			}
 			// Last line was read
 			break
 		} else {
 			la.lines = Append(la.lines, Line{
-				data:        data[:dlen-1],
-				state:       nil,
-				match:       nil,
-				rehighlight: false,
+				data:  data[:dlen-1],
+				state: nil,
+				match: nil,
 			})
 		}
 		n++
@@ -191,17 +188,15 @@ func (la *LineArray) Bytes() []byte {
 // newlineBelow adds a newline below the given line number
 func (la *LineArray) newlineBelow(y int) {
 	la.lines = append(la.lines, Line{
-		data:        []byte{' '},
-		state:       nil,
-		match:       nil,
-		rehighlight: false,
+		data:  []byte{' '},
+		state: nil,
+		match: nil,
 	})
 	copy(la.lines[y+2:], la.lines[y+1:])
 	la.lines[y+1] = Line{
-		data:        []byte{},
-		state:       la.lines[y].state,
-		match:       nil,
-		rehighlight: false,
+		data:  []byte{},
+		state: la.lines[y].state,
+		match: nil,
 	}
 }
 
@@ -249,7 +244,6 @@ func (la *LineArray) split(pos Loc) {
 	la.lines[pos.Y].state = nil
 	la.lines[pos.Y].match = nil
 	la.lines[pos.Y+1].match = nil
-	la.lines[pos.Y].rehighlight = true
 	la.deleteToEnd(Loc{pos.X, pos.Y})
 }
 
@@ -367,18 +361,6 @@ func (la *LineArray) Match(lineN int) highlight.LineMatch {
 	la.lines[lineN].lock.Lock()
 	defer la.lines[lineN].lock.Unlock()
 	return la.lines[lineN].match
-}
-
-func (la *LineArray) Rehighlight(lineN int) bool {
-	la.lines[lineN].lock.Lock()
-	defer la.lines[lineN].lock.Unlock()
-	return la.lines[lineN].rehighlight
-}
-
-func (la *LineArray) SetRehighlight(lineN int, on bool) {
-	la.lines[lineN].lock.Lock()
-	defer la.lines[lineN].lock.Unlock()
-	la.lines[lineN].rehighlight = on
 }
 
 // Locks the whole LineArray
