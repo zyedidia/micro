@@ -328,11 +328,11 @@ func (la *LineArray) End() Loc {
 }
 
 // LineBytes returns line n as an array of bytes
-func (la *LineArray) LineBytes(n int) []byte {
-	if n >= len(la.lines) || n < 0 {
+func (la *LineArray) LineBytes(lineN int) []byte {
+	if lineN >= len(la.lines) || lineN < 0 {
 		return []byte{}
 	}
-	return la.lines[n].data
+	return la.lines[lineN].data
 }
 
 // State gets the highlight state for the given line number
