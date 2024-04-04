@@ -233,14 +233,14 @@ func (la *LineArray) insertByte(pos Loc, value byte) {
 
 // joinLines joins the two lines a and b
 func (la *LineArray) joinLines(a, b int) {
-	la.insert(Loc{len(la.lines[a].data), a}, la.lines[b].data)
+	la.lines[a].data = append(la.lines[a].data, la.lines[b].data...)
 	la.deleteLine(b)
 }
 
 // split splits a line at a given position
 func (la *LineArray) split(pos Loc) {
 	la.newlineBelow(pos.Y)
-	la.insert(Loc{0, pos.Y + 1}, la.lines[pos.Y].data[pos.X:])
+	la.lines[pos.Y+1].data = append(la.lines[pos.Y+1].data, la.lines[pos.Y].data[pos.X:]...)
 	la.lines[pos.Y+1].state = la.lines[pos.Y].state
 	la.lines[pos.Y].state = nil
 	la.lines[pos.Y].match = nil
