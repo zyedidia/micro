@@ -75,6 +75,7 @@ type LineArray struct {
 	lines    []Line
 	Endings  FileFormat
 	initsize uint64
+	lock     sync.Mutex
 }
 
 // Append efficiently appends lines together
@@ -206,6 +207,9 @@ func (la *LineArray) newlineBelow(y int) {
 
 // Inserts a byte array at a given location
 func (la *LineArray) insert(pos Loc, value []byte) {
+	la.lock.Lock()
+	defer la.lock.Unlock()
+
 	x, y := runeToByteIndex(pos.X, la.lines[pos.Y].data), pos.Y
 	for i := 0; i < len(value); i++ {
 		if value[i] == '\n' || (value[i] == '\r' && i < len(value)-1 && value[i+1] == '\n') {
@@ -251,6 +255,9 @@ func (la *LineArray) split(pos Loc) {
 
 // removes from start to end
 func (la *LineArray) remove(start, end Loc) []byte {
+	la.lock.Lock()
+	defer la.lock.Unlock()
+
 	sub := la.Substr(start, end)
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
@@ -372,6 +379,16 @@ func (la *LineArray) SetRehighlight(lineN int, on bool) {
 	la.lines[lineN].lock.Lock()
 	defer la.lines[lineN].lock.Unlock()
 	la.lines[lineN].rehighlight = on
+}
+
+// Locks the whole LineArray
+func (la *LineArray) Lock() {
+	la.lock.Lock()
+}
+
+// Unlocks the whole LineArray
+func (la *LineArray) Unlock() {
+	la.lock.Unlock()
 }
 
 // SearchMatch returns true if the location `pos` is within a match
