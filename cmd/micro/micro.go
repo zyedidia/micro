@@ -254,7 +254,7 @@ func main() {
 		screen.TermMessage(err)
 	}
 
-	config.InitRuntimeFiles()
+	config.InitRuntimeFiles(true)
 	config.InitPlugins()
 
 	err = config.ReadSettings()
