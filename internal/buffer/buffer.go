@@ -1180,7 +1180,11 @@ func (b *Buffer) Retab() {
 		}
 
 		l = bytes.TrimLeft(l, " \t")
+
+		b.Lock()
 		b.lines[i].data = append(ws, l...)
+		b.Unlock()
+
 		b.MarkModified(i, i)
 		dirty = true
 	}

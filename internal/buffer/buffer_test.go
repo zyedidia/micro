@@ -20,9 +20,7 @@ type operation struct {
 
 func init() {
 	ulua.L = lua.NewState()
-	// TODO: uncomment InitRuntimeFiles once we fix races between syntax
-	// highlighting and buffer editing.
-	// config.InitRuntimeFiles(false)
+	config.InitRuntimeFiles(false)
 	config.InitGlobalSettings()
 	config.GlobalSettings["backup"] = false
 	config.GlobalSettings["fastdirty"] = true
