@@ -1011,7 +1011,7 @@ func (b *Buffer) MergeCursors() {
 	b.EventHandler.active = b.curCursor
 }
 
-// UpdateCursors updates all the cursors indicies
+// UpdateCursors updates all the cursors indices
 func (b *Buffer) UpdateCursors() {
 	b.EventHandler.cursors = b.cursors
 	b.EventHandler.active = b.curCursor

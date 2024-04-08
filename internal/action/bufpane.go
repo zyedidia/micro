@@ -318,7 +318,7 @@ func (h *BufPane) ResizePane(size int) {
 }
 
 // PluginCB calls all plugin callbacks with a certain name and displays an
-// error if there is one and returns the aggregrate boolean response
+// error if there is one and returns the aggregate boolean response
 func (h *BufPane) PluginCB(cb string) bool {
 	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h))
 	if err != nil {

@@ -7,7 +7,7 @@ import (
 )
 
 // The InfoBuf displays messages and other info at the bottom of the screen.
-// It is respresented as a buffer and a message with a style.
+// It is represented as a buffer and a message with a style.
 type InfoBuf struct {
 	*buffer.Buffer
 
