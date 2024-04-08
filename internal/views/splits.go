@@ -205,7 +205,7 @@ func (n *Node) ResizeSplit(size int) bool {
 	return n.parent.hResizeSplit(ind, size)
 }
 
-// Resize sets this node's size and resizes all children accordlingly
+// Resize sets this node's size and resizes all children accordingly
 func (n *Node) Resize(w, h int) {
 	n.W, n.H = w, h
 

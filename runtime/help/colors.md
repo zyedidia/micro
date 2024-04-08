@@ -214,7 +214,7 @@ safe and recommended to use subgroups in your custom syntax files.
 For example if `constant.string` is found in your colorscheme, micro will us
 that for highlighting strings. If it's not found, it will use constant instead.
 Micro tries to match the largest set of groups it can find in the colorscheme
-definitions, so if, for examle `constant.bool.true` is found then micro will
+definitions, so if, for example `constant.bool.true` is found then micro will
 use that. If `constant.bool.true` is not found but `constant.bool` is found
 micro will use `constant.bool`. If not, it uses `constant`.
 
