@@ -363,7 +363,9 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 	h.lastRegion = nil
 	if startline > 0 {
 		input.Lock()
-		h.lastRegion = input.State(startline - 1)
+		if startline-1 < input.LinesNum() {
+			h.lastRegion = input.State(startline - 1)
+		}
 		input.Unlock()
 	}
 	for i := startline; ; i++ {
