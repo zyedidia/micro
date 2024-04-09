@@ -396,13 +396,14 @@ regionLoop:
 	}
 }
 
-func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, line []byte, curRegion *region) LineMatch {
+func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, line []byte, curRegion *region) (LineMatch, *region) {
 	lineLen := util.CharacterCount(line)
 	// log.Println("highlight: lineNum:", lineNum, "start:", start, "line:", string(line))
 	if lineLen == 0 {
-		return highlights
+		return highlights, curRegion
 	}
 
+	h.lastRegion = curRegion
 	h.lastStart = -1
 	h.lastEnd = -1
 	h.storage = h.storage[:0]
@@ -432,7 +433,7 @@ func (h *Highlighter) highlight(highlights LineMatch, start int, lineNum int, li
 		}
 	}
 
-	return highlights
+	return highlights, h.lastRegion
 }
 
 // HighlightString syntax highlights a string
@@ -446,7 +447,8 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 	for i := 0; i < len(lines); i++ {
 		line := []byte(lines[i])
 		highlights := make(LineMatch)
-		lineMatches = append(lineMatches, h.highlight(highlights, 0, i, line, nil))
+		match, _ := h.highlight(highlights, 0, i, line, nil)
+		lineMatches = append(lineMatches, match)
 	}
 
 	return lineMatches
@@ -455,11 +457,11 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 // Highlight sets the state and matches for each line from startline to endline
 // It sets all other matches in the buffer to nil to conserve memory
 func (h *Highlighter) Highlight(input LineStates, startline, endline int) {
-	h.lastRegion = nil
+	var curState *region
 	if startline > 0 {
 		input.Lock()
 		if startline-1 < input.LinesNum() {
-			h.lastRegion = input.State(startline - 1)
+			curState = input.State(startline - 1)
 		}
 		input.Unlock()
 	}
@@ -474,9 +476,10 @@ func (h *Highlighter) Highlight(input LineStates, startline, endline int) {
 		line := input.LineBytes(i)
 		highlights := make(LineMatch)
 
-		match := h.highlight(highlights, 0, i, line, h.lastRegion)
+		match, newState := h.highlight(highlights, 0, i, line, curState)
+		curState = newState
 
-		input.SetState(i, h.lastRegion)
+		input.SetState(i, curState)
 		input.SetMatch(i, match)
 		input.Unlock()
 	}
@@ -490,13 +493,14 @@ func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
 	line := input.LineBytes(lineN)
 	highlights := make(LineMatch)
 
-	h.lastRegion = nil
+	var curState *region
 	if lineN > 0 {
-		h.lastRegion = input.State(lineN - 1)
+		curState = input.State(lineN - 1)
 	}
 
-	match := h.highlight(highlights, 0, lineN, line, h.lastRegion)
+	match, newState := h.highlight(highlights, 0, lineN, line, curState)
+	curState = newState
 
-	input.SetState(lineN, h.lastRegion)
+	input.SetState(lineN, curState)
 	input.SetMatch(lineN, match)
 }
