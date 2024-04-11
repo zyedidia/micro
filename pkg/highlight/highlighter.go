@@ -454,8 +454,10 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 	return lineMatches
 }
 
-// Highlight sets the state and matches for each line from startline to endline
-// It sets all other matches in the buffer to nil to conserve memory
+// Highlight sets the state and matches for each line from startline to endline,
+// and also for some amount of lines after endline, until it detects a line
+// whose state does not change, which means that the lines after it do not change
+// their highlighting and therefore do not need to be updated.
 func (h *Highlighter) Highlight(input LineStates, startline, endline int) {
 	var curState *region
 	if startline > 0 {
@@ -466,7 +468,7 @@ func (h *Highlighter) Highlight(input LineStates, startline, endline int) {
 		input.Unlock()
 	}
 
-	for i := startline; i <= endline; i++ {
+	for i := startline; ; i++ {
 		input.Lock()
 		if i >= input.LinesNum() {
 			input.Unlock()
@@ -479,9 +481,18 @@ func (h *Highlighter) Highlight(input LineStates, startline, endline int) {
 		match, newState := h.highlight(highlights, 0, i, line, curState)
 		curState = newState
 
+		var lastState *region
+		if i >= endline {
+			lastState = input.State(i)
+		}
+
 		input.SetState(i, curState)
 		input.SetMatch(i, match)
 		input.Unlock()
+
+		if i >= endline && curState == lastState {
+			break
+		}
 	}
 }
 
