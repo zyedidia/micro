@@ -327,11 +327,6 @@ func (t *Tab) SetActive(i int) {
 			p.SetActive(false)
 		}
 	}
-
-	err := config.RunPluginFn("onSetActive", luar.New(ulua.L, MainTab().CurPane()))
-	if err != nil {
-		screen.TermMessage(err)
-	}
 }
 
 // GetPane returns the pane with the given split index

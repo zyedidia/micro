@@ -679,6 +679,10 @@ func (h *BufPane) Close() {
 
 // SetActive marks this pane as active.
 func (h *BufPane) SetActive(b bool) {
+	if h.IsActive() == b {
+		return
+	}
+
 	h.BWindow.SetActive(b)
 	if b {
 		// Display any gutter messages for this line
@@ -694,8 +698,12 @@ func (h *BufPane) SetActive(b bool) {
 		if none && InfoBar.HasGutter {
 			InfoBar.ClearGutter()
 		}
-	}
 
+		err := config.RunPluginFn("onSetActive", luar.New(ulua.L, h))
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute
