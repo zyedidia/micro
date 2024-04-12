@@ -150,6 +150,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
     * `choco install micro`.
     * `scoop install micro`.
+    * `winget install zyedidia.micro`
 * OpenBSD: Available in the ports tree and also available as a binary package.
     * `pkd_add -v micro`.
 * NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
