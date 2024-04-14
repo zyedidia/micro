@@ -415,6 +415,12 @@ func (h *BufPane) Name() string {
 	return n
 }
 
+// ReOpen reloads the file opened in the bufpane from disk
+func (h *BufPane) ReOpen() {
+	h.Buf.ReOpen()
+	h.Relocate()
+}
+
 func (h *BufPane) getReloadSetting() string {
 	reloadSetting := h.Buf.Settings["reload"]
 	return reloadSetting.(string)
@@ -433,11 +439,11 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				if !yes || canceled {
 					h.Buf.UpdateModTime()
 				} else {
-					h.Buf.ReOpen()
+					h.ReOpen()
 				}
 			})
 		} else if reload == "auto" {
-			h.Buf.ReOpen()
+			h.ReOpen()
 		} else if reload == "disabled" {
 			h.Buf.DisableReload()
 		} else {
