@@ -438,7 +438,7 @@ func (n *Node) VSplit(right bool) uint64 {
 	return n.hVSplit(0, right)
 }
 
-// unsplits the child of a split
+// unsplit the child of a split
 func (n *Node) unsplit(i int, h bool) {
 	copy(n.children[i:], n.children[i+1:])
 	n.children[len(n.children)-1] = nil
