@@ -408,22 +408,29 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	r.group = groupNum
 	r.parent = prevRegion
 
-	r.start, err = regexp.Compile(regionInfo["start"].(string))
-
-	if err != nil {
-		return nil, err
+	// start is mandatory
+	if _, ok := regionInfo["start"]; ok {
+		r.start, err = regexp.Compile(regionInfo["start"].(string))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("Missing start in %s", group)
 	}
 
-	r.end, err = regexp.Compile(regionInfo["end"].(string))
-
-	if err != nil {
-		return nil, err
+	// end is mandatory
+	if _, ok := regionInfo["end"]; ok {
+		r.end, err = regexp.Compile(regionInfo["end"].(string))
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("Missing end in %s", group)
 	}
 
 	// skip is optional
 	if _, ok := regionInfo["skip"]; ok {
 		r.skip, err = regexp.Compile(regionInfo["skip"].(string))
-
 		if err != nil {
 			return nil, err
 		}
