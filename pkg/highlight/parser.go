@@ -355,6 +355,10 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 
 			switch object := val.(type) {
 			case string:
+				if object == "" {
+					return nil, fmt.Errorf("Empty rule %s", k)
+				}
+
 				if k == "include" {
 					ru.includes = append(ru.includes, object)
 				} else {
@@ -409,8 +413,13 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	r.parent = prevRegion
 
 	// start is mandatory
-	if _, ok := regionInfo["start"]; ok {
-		r.start, err = regexp.Compile(regionInfo["start"].(string))
+	if start, ok := regionInfo["start"]; ok {
+		start := start.(string)
+		if start == "" {
+			return nil, fmt.Errorf("Empty start in %s", group)
+		}
+
+		r.start, err = regexp.Compile(start)
 		if err != nil {
 			return nil, err
 		}
@@ -419,8 +428,13 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	}
 
 	// end is mandatory
-	if _, ok := regionInfo["end"]; ok {
-		r.end, err = regexp.Compile(regionInfo["end"].(string))
+	if end, ok := regionInfo["end"]; ok {
+		end := end.(string)
+		if end == "" {
+			return nil, fmt.Errorf("Empty end in %s", group)
+		}
+
+		r.end, err = regexp.Compile(end)
 		if err != nil {
 			return nil, err
 		}
@@ -429,16 +443,25 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	}
 
 	// skip is optional
-	if _, ok := regionInfo["skip"]; ok {
-		r.skip, err = regexp.Compile(regionInfo["skip"].(string))
+	if skip, ok := regionInfo["skip"]; ok {
+		skip := skip.(string)
+		if skip == "" {
+			return nil, fmt.Errorf("Empty skip in %s", group)
+		}
+
+		r.skip, err = regexp.Compile(skip)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// limit-color is optional
-	if _, ok := regionInfo["limit-group"]; ok {
-		groupStr := regionInfo["limit-group"].(string)
+	if groupStr, ok := regionInfo["limit-group"]; ok {
+		groupStr := groupStr.(string)
+		if groupStr == "" {
+			return nil, fmt.Errorf("Empty limit-group in %s", group)
+		}
+
 		if _, ok := Groups[groupStr]; !ok {
 			numGroups++
 			Groups[groupStr] = numGroups
