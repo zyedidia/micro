@@ -753,6 +753,8 @@ func (b *Buffer) UpdateRules() {
 		return
 	}
 
+	b.SyntaxDef = nil
+
 	// syntaxFileInfo is an internal helper structure
 	// to store properties of one single syntax file
 	type syntaxFileInfo struct {
@@ -945,16 +947,14 @@ func (b *Buffer) UpdateRules() {
 		highlight.ResolveIncludes(b.SyntaxDef, files)
 	}
 
-	if b.Highlighter == nil || syntaxFile != "" {
-		if b.SyntaxDef != nil {
-			b.Settings["filetype"] = b.SyntaxDef.FileType
-		} else {
-			// search for the default file in the user's custom syntax files
-			b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
-			if b.SyntaxDef == nil {
-				// search for the default file in the runtime files
-				b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
-			}
+	if b.SyntaxDef != nil {
+		b.Settings["filetype"] = b.SyntaxDef.FileType
+	} else {
+		// search for the default file in the user's custom syntax files
+		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
+		if b.SyntaxDef == nil {
+			// search for the default file in the runtime files
+			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
 		}
 	}
 
