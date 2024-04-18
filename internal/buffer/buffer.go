@@ -911,6 +911,17 @@ func (b *Buffer) UpdateRules() {
 		b.SyntaxDef = findRuntimeSyntaxDef(syntaxFile, header)
 	}
 
+	if b.SyntaxDef != nil {
+		b.Settings["filetype"] = b.SyntaxDef.FileType
+	} else {
+		// search for the default file in the user's custom syntax files
+		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
+		if b.SyntaxDef == nil {
+			// search for the default file in the runtime files
+			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
+		}
+	}
+
 	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
 		includes := highlight.GetIncludes(b.SyntaxDef)
 
@@ -945,17 +956,6 @@ func (b *Buffer) UpdateRules() {
 		}
 
 		highlight.ResolveIncludes(b.SyntaxDef, files)
-	}
-
-	if b.SyntaxDef != nil {
-		b.Settings["filetype"] = b.SyntaxDef.FileType
-	} else {
-		// search for the default file in the user's custom syntax files
-		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
-		if b.SyntaxDef == nil {
-			// search for the default file in the runtime files
-			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
-		}
 	}
 
 	if b.SyntaxDef != nil {
