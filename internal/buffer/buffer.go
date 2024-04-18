@@ -727,7 +727,7 @@ func findRealRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.
 }
 
 // findRuntimeSyntaxDef finds a specific syntax definition
-// in the runtime files
+// in the built-in syntax files
 func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def {
 	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
 		if f.Name() == name {
@@ -830,7 +830,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if !foundDef {
-		// search for the syntax file in the runtime files
+		// search for the syntax file in the built-in syntax files
 		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 			data, err := f.Data()
 			if err != nil {
@@ -917,7 +917,7 @@ func (b *Buffer) UpdateRules() {
 		// search for the default file in the user's custom syntax files
 		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
 		if b.SyntaxDef == nil {
-			// search for the default file in the runtime files
+			// search for the default file in the built-in syntax files
 			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
 		}
 	}
