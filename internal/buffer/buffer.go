@@ -741,10 +741,10 @@ func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def 
 }
 
 func resolveIncludes(syndef *highlight.Def) {
-	if !highlight.HasIncludes(syndef) {
+	includes := highlight.GetIncludes(syndef)
+	if len(includes) == 0 {
 		return
 	}
-	includes := highlight.GetIncludes(syndef)
 
 	var files []*highlight.File
 	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
