@@ -740,6 +740,45 @@ func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def 
 	return nil
 }
 
+func resolveIncludes(syndef *highlight.Def) {
+	if !highlight.HasIncludes(syndef) {
+		return
+	}
+	includes := highlight.GetIncludes(syndef)
+
+	var files []*highlight.File
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		header, err := highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		for _, i := range includes {
+			if header.FileType == i {
+				file, err := highlight.ParseFile(data)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+				files = append(files, file)
+				break
+			}
+		}
+		if len(files) >= len(includes) {
+			break
+		}
+	}
+
+	highlight.ResolveIncludes(syndef, files)
+}
+
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
@@ -922,40 +961,8 @@ func (b *Buffer) UpdateRules() {
 		}
 	}
 
-	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
-		includes := highlight.GetIncludes(b.SyntaxDef)
-
-		var files []*highlight.File
-		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			data, err := f.Data()
-			if err != nil {
-				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			header, err := highlight.MakeHeaderYaml(data)
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			for _, i := range includes {
-				if header.FileType == i {
-					file, err := highlight.ParseFile(data)
-					if err != nil {
-						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-						continue
-					}
-					files = append(files, file)
-					break
-				}
-			}
-			if len(files) >= len(includes) {
-				break
-			}
-		}
-
-		highlight.ResolveIncludes(b.SyntaxDef, files)
+	if b.SyntaxDef != nil {
+		resolveIncludes(b.SyntaxDef)
 	}
 
 	if b.SyntaxDef != nil {
