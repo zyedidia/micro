@@ -392,3 +392,6 @@ example, the following is possible for html:
     rules:
         - include: "css"
 ```
+
+Note that nested include (i.e. including syntax files that include other syntax
+files) is not supported yet.
