@@ -403,13 +403,13 @@ func (h *BufPane) ReopenCmd(args []string) {
 		InfoBar.YNPrompt("Save file before reopen?", func(yes, canceled bool) {
 			if !canceled && yes {
 				h.Save()
-				h.Buf.ReOpen()
+				h.ReOpen()
 			} else if !canceled {
-				h.Buf.ReOpen()
+				h.ReOpen()
 			}
 		})
 	} else {
-		h.Buf.ReOpen()
+		h.ReOpen()
 	}
 }
 
