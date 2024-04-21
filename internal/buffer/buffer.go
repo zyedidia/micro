@@ -727,7 +727,7 @@ func findRealRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.
 }
 
 // findRuntimeSyntaxDef finds a specific syntax definition
-// in the runtime files
+// in the built-in syntax files
 func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def {
 	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
 		if f.Name() == name {
@@ -738,6 +738,45 @@ func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def 
 		}
 	}
 	return nil
+}
+
+func resolveIncludes(syndef *highlight.Def) {
+	includes := highlight.GetIncludes(syndef)
+	if len(includes) == 0 {
+		return
+	}
+
+	var files []*highlight.File
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		header, err := highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		for _, i := range includes {
+			if header.FileType == i {
+				file, err := highlight.ParseFile(data)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+				files = append(files, file)
+				break
+			}
+		}
+		if len(files) >= len(includes) {
+			break
+		}
+	}
+
+	highlight.ResolveIncludes(syndef, files)
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
@@ -752,6 +791,8 @@ func (b *Buffer) UpdateRules() {
 		b.SyntaxDef = nil
 		return
 	}
+
+	b.SyntaxDef = nil
 
 	// syntaxFileInfo is an internal helper structure
 	// to store properties of one single syntax file
@@ -828,7 +869,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if !foundDef {
-		// search for the syntax file in the runtime files
+		// search for the syntax file in the built-in syntax files
 		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 			data, err := f.Data()
 			if err != nil {
@@ -909,53 +950,19 @@ func (b *Buffer) UpdateRules() {
 		b.SyntaxDef = findRuntimeSyntaxDef(syntaxFile, header)
 	}
 
-	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
-		includes := highlight.GetIncludes(b.SyntaxDef)
-
-		var files []*highlight.File
-		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			data, err := f.Data()
-			if err != nil {
-				screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			header, err := highlight.MakeHeaderYaml(data)
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			for _, i := range includes {
-				if header.FileType == i {
-					file, err := highlight.ParseFile(data)
-					if err != nil {
-						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-						continue
-					}
-					files = append(files, file)
-					break
-				}
-			}
-			if len(files) >= len(includes) {
-				break
-			}
+	if b.SyntaxDef != nil {
+		b.Settings["filetype"] = b.SyntaxDef.FileType
+	} else {
+		// search for the default file in the user's custom syntax files
+		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
+		if b.SyntaxDef == nil {
+			// search for the default file in the built-in syntax files
+			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
 		}
-
-		highlight.ResolveIncludes(b.SyntaxDef, files)
 	}
 
-	if b.Highlighter == nil || syntaxFile != "" {
-		if b.SyntaxDef != nil {
-			b.Settings["filetype"] = b.SyntaxDef.FileType
-		} else {
-			// search for the default file in the user's custom syntax files
-			b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
-			if b.SyntaxDef == nil {
-				// search for the default file in the runtime files
-				b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
-			}
-		}
+	if b.SyntaxDef != nil {
+		resolveIncludes(b.SyntaxDef)
 	}
 
 	if b.SyntaxDef != nil {
