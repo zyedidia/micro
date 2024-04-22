@@ -395,3 +395,26 @@ example, the following is possible for html:
 
 Note that nested include (i.e. including syntax files that include other syntax
 files) is not supported yet.
+
+### Default syntax highlighting
+
+If micro cannot detect the filetype of the file, it falls back to using the
+default syntax highlighting for it, which highlights just the bare minimum:
+email addresses, URLs etc.
+
+Just like in other cases, you can override the default highlighting by adding
+your own custom `default.yaml` file to `~/.config/micro/syntax`.
+
+For example, if you work with various config files that use the `#` sign to mark
+the beginning of a comment, you can use the following custom `default.yaml` to
+highlight those comments by default:
+
+```
+filetype: unknown
+
+detect:
+    filename: ""
+
+rules:
+    - comment: "(^|\\s)#.*$"
+```
