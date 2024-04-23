@@ -147,6 +147,25 @@ func (t *TabList) Display() {
 	}
 }
 
+func (t *TabList) SetActive(a int) {
+	t.TabWindow.SetActive(a)
+
+	for i, p := range t.List {
+		if i == a {
+			if !p.isActive {
+				p.isActive = true
+
+				err := config.RunPluginFn("onSetActive", luar.New(ulua.L, p.CurPane()))
+				if err != nil {
+					screen.TermMessage(err)
+				}
+			}
+		} else {
+			p.isActive = false
+		}
+	}
+}
+
 // Tabs is the global tab list
 var Tabs *TabList
 
@@ -192,6 +211,9 @@ func MainTab() *Tab {
 type Tab struct {
 	*views.Node
 	*display.UIWindow
+
+	isActive bool
+
 	Panes  []Pane
 	active int
 
@@ -304,11 +326,6 @@ func (t *Tab) SetActive(i int) {
 		} else {
 			p.SetActive(false)
 		}
-	}
-
-	err := config.RunPluginFn("onSetActive", luar.New(ulua.L, MainTab().CurPane()))
-	if err != nil {
-		screen.TermMessage(err)
 	}
 }
 
