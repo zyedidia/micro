@@ -290,7 +290,11 @@ func NewBufPaneFromBuf(buf *buffer.Buffer, tab *Tab) *BufPane {
 func (h *BufPane) finishInitialize() {
 	h.initialRelocate()
 	h.initialized = true
-	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+
+	err := config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+	if err != nil {
+		screen.TermMessage(err)
+	}
 }
 
 // Resize resizes the pane
