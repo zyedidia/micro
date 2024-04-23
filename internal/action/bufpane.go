@@ -169,6 +169,10 @@ func BufMapEvent(k Event, action string) {
 			// if the action changed the current pane, update the reference
 			h = MainTab().CurPane()
 			success = innerSuccess
+			if h == nil {
+				// stop, in case the current pane is not a BufPane
+				break
+			}
 		}
 		return true
 	}
