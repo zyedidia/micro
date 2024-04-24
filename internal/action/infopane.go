@@ -140,9 +140,9 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	if !more {
 		action, more = InfoBufBindings.NextEvent(e, nil)
 		if action != nil && !more {
-			done := action(h.BufPane)
+			action(h.BufPane)
 			InfoBufBindings.ResetEvents()
-			return done
+			return true
 		} else if action == nil && !more {
 			InfoBufBindings.ResetEvents()
 		}
