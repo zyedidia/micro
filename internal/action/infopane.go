@@ -95,14 +95,10 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 		done := h.DoKeyEvent(ke)
 		hasYN := h.HasYN
 		if e.Key() == tcell.KeyRune && hasYN {
-			if (e.Rune() == 'y' || e.Rune() == 'Y') && hasYN {
-				h.YNResp = true
-				h.DonePrompt(false)
-
-				InfoBindings.ResetEvents()
-				InfoBufBindings.ResetEvents()
-			} else if (e.Rune() == 'n' || e.Rune() == 'N') && hasYN {
-				h.YNResp = false
+			y := e.Rune() == 'y' || e.Rune() == 'Y'
+			n := e.Rune() == 'n' || e.Rune() == 'N'
+			if y || n {
+				h.YNResp = y
 				h.DonePrompt(false)
 
 				InfoBindings.ResetEvents()
