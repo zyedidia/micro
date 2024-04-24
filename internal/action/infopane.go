@@ -124,7 +124,10 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	}
 }
 
-// DoKeyEvent executes a key event for the command bar, doing any overridden actions
+// DoKeyEvent executes a key event for the command bar, doing any overridden actions.
+// Returns true if the action was executed OR if there are more keys remaining
+// to process before executing an action (if this is a key sequence event).
+// Returns false if no action found.
 func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	action, more := InfoBindings.NextEvent(e, nil)
 	if action != nil && !more {

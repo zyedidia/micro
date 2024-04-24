@@ -540,7 +540,10 @@ func (h *BufPane) Bindings() *KeyTree {
 }
 
 // DoKeyEvent executes a key event by finding the action it is bound
-// to and executing it (possibly multiple times for multiple cursors)
+// to and executing it (possibly multiple times for multiple cursors).
+// Returns true if the action was executed OR if there are more keys
+// remaining to process before executing an action (if this is a key
+// sequence event). Returns false if no action found.
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	binds := h.Bindings()
 	action, more := binds.NextEvent(e, nil)
