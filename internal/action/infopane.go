@@ -143,6 +143,20 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	}
 
 	if !more {
+		// If no infopane action found, try to find a bufpane action.
+		//
+		// TODO: this is buggy. For example, if the command bar has the following
+		// two bindings:
+		//
+		//   "<Ctrl-x><Ctrl-p>": "HistoryUp",
+		//   "<Ctrl-x><Ctrl-v>": "Paste",
+		//
+		// the 2nd binding (with a bufpane action) doesn't work, since <Ctrl-x>
+		// has been already consumed by the 1st binding (with an infopane action).
+		//
+		// We should either iterate both InfoBindings and InfoBufBindings keytrees
+		// together, or just use the same keytree for both infopane and bufpane
+		// bindings.
 		action, more = InfoBufBindings.NextEvent(e, nil)
 		if action != nil && !more {
 			action(h.BufPane)
