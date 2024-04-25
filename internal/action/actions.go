@@ -113,7 +113,7 @@ func (h *BufPane) MouseDrag(e *tcell.EventMouse) bool {
 	} else if h.doubleClick {
 		h.Cursor.AddWordToSelection()
 	} else {
-		h.Cursor.SetSelectionEnd(h.Cursor.Loc)
+		h.Cursor.SelectTo(h.Cursor.Loc)
 	}
 
 	h.Cursor.StoreVisualX()
