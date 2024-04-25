@@ -251,6 +251,24 @@ func findEvent(k string) (Event, error) {
 	return event, nil
 }
 
+func eventsEqual(e1 Event, e2 Event) bool {
+	seq1, ok1 := e1.(KeySequenceEvent)
+	seq2, ok2 := e2.(KeySequenceEvent)
+	if ok1 && ok2 {
+		if len(seq1.keys) != len(seq2.keys) {
+			return false
+		}
+		for i := 0; i < len(seq1.keys); i++ {
+			if seq1.keys[i] != seq2.keys[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	return e1 == e2
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
@@ -278,7 +296,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		found := false
 		for ev := range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
+				if eventsEqual(e, key) {
 					if overwrite {
 						parsed[ev] = v
 					}
@@ -327,7 +345,7 @@ func UnbindKey(k string) error {
 
 		for ev := range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
+				if eventsEqual(e, key) {
 					delete(parsed, ev)
 					break
 				}
