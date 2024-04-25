@@ -166,6 +166,22 @@ func (t *TabList) SetActive(a int) {
 	}
 }
 
+// ResetMouse resets the mouse release state after the screen was stopped
+// or the pane changed.
+// This prevents situations in which mouse releases are received at the wrong place
+// and the mouse state is still pressed.
+func (t *TabList) ResetMouse() {
+	for _, tab := range t.List {
+		tab.release = true
+
+		for _, p := range tab.Panes {
+			if bp, ok := p.(*BufPane); ok {
+				bp.resetMouse()
+			}
+		}
+	}
+}
+
 // Tabs is the global tab list
 var Tabs *TabList
 
@@ -184,20 +200,7 @@ func InitTabs(bufs []*buffer.Buffer) {
 		}
 	}
 
-	screen.RestartCallback = func() {
-		// The mouse could be released after the screen was stopped, so that
-		// we couldn't catch the mouse release event and would erroneously think
-		// that it is still pressed. So need to reset the mouse release state
-		// after the screen is restarted.
-		for _, t := range Tabs.List {
-			t.release = true
-			for _, p := range t.Panes {
-				if bp, ok := p.(*BufPane); ok {
-					bp.resetMouse()
-				}
-			}
-		}
-	}
+	screen.RestartCallback = Tabs.ResetMouse
 }
 
 func MainTab() *Tab {
