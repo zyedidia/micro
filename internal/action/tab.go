@@ -124,6 +124,12 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 					return
 				}
 			}
+		case tcell.ButtonNone:
+			if t.List[t.Active()].release {
+				// Mouse release received, while already released
+				t.ResetMouse()
+				return
+			}
 		case tcell.WheelUp:
 			if my == t.Y {
 				t.Scroll(4)
@@ -172,6 +178,10 @@ func (t *TabList) SetActive(a int) {
 // and the mouse state is still pressed.
 func (t *TabList) ResetMouse() {
 	for _, tab := range t.List {
+		if !tab.release && tab.resizing != nil {
+			tab.resizing = nil
+		}
+
 		tab.release = true
 
 		for _, p := range tab.Panes {
