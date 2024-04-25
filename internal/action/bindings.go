@@ -294,21 +294,23 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		}
 
 		found := false
-		for ev := range parsed {
+		var ev string
+		for ev = range parsed {
 			if e, err := findEvent(ev); err == nil {
 				if eventsEqual(e, key) {
-					if overwrite {
-						parsed[ev] = v
-					}
 					found = true
 					break
 				}
 			}
 		}
 
-		if found && !overwrite {
-			return true, nil
-		} else if !found {
+		if found {
+			if overwrite {
+				parsed[ev] = v
+			} else {
+				return true, nil
+			}
+		} else {
 			parsed[k] = v
 		}
 
