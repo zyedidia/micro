@@ -81,6 +81,10 @@ func (t *TermPane) SetID(i uint64) {
 	t.id = i
 }
 
+func (t *TermPane) Name() string {
+	return t.Terminal.Name()
+}
+
 func (t *TermPane) SetTab(tab *Tab) {
 	t.tab = tab
 }
