@@ -1003,6 +1003,9 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 						h.completeAction(action)
 						return
 					}
+				} else {
+					InfoBar.Error(err)
+					return
 				}
 			} else {
 				InfoBar.YNPrompt(
