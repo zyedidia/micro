@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"os/signal"
@@ -164,7 +165,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
 		// Check if the parent dirs don't exist
-		if _, statErr := os.Stat(dirname); os.IsNotExist(statErr) {
+		if _, statErr := os.Stat(dirname); errors.Is(statErr, fs.ErrNotExist) {
 			// Prompt to make sure they want to create the dirs that are missing
 			if b.Settings["mkparents"].(bool) {
 				// Create all leading dir(s) since they don't exist
