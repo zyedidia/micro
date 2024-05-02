@@ -1,1 +1,61 @@
+filetype: carbon
 
+detect:
+    filename: "\\.carbon$"
+
+rules:
+    # function definition
+    - identifier: "fn [a-z0-9_]+"
+      # Reserved words
+    - statement: "\\b(impl|Main|extend|partial|Self|Int|UInt|Base|template|as|library)\\b"
+      # Constants
+    - constant: "\\b[A-Z][A-Z_0-9]+\\b"
+      # Numbers
+    - constant.number: "\\b[0-9]+\\b"
+      # Booleans
+    - constant: "\\b(true|false)\\b"
+      # Traits/Enums/Structs/Types/etc.
+    - type: "\\b[A-Z]+[a-zA-Z_0-9]*[a-z]+[a-zA-Z_0-9]*\\b"
+      # Builtin types that start with lowercase.
+    - type: "\\b(package|import|fn|var|for|return|class|api|i8|i16|i32|i64|i128|i256|u8|u16|u32|u64|u128|u256|f8|f16|f32|f64|f128|if|else|auto|let|File|while|match|case|default|returned|base|bool|virtual|abstract|String)\\b"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: '\\.'
+        rules:
+            - constant.specialChar: '\\.'
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        rules: []
+
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules:
+          - parameters: "\{0\}"
+
+    # Character literals
+    # NOTE: This is an ugly hack to work around the fact that rust uses
+    # single quotes both for character literals and lifetimes.
+    # Match all character literals.
+    - constant.string: "'(\\\\.|.)'"
+    # Match the '"' literal which would otherwise match
+    # as a double quoted string and destroy the highlighting.
+    - constant.string:
+        start: "'\""
+        end: "'"
+        rules: []
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - special:
+        start: "#!\\["
+        end: "\\]"
+        rules: []
