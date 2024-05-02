@@ -34,8 +34,7 @@ rules:
     - constant.string:
         start: "\"\"\""
         end: "\"\"\""
-        rules:
-          - parameters: "\{0\}"
+        rules: []
 
     # Character literals
     # NOTE: This is an ugly hack to work around the fact that rust uses
