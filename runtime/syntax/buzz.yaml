@@ -4,16 +4,12 @@ detect:
     filename: "\\.buzz$"
 
 rules:
-    # built-in objects
-    - constant: "\\b(range|namespace|typeof|type|zdef|void|static|var|const|extern|import|export|from|test|as|in|while|if|else|fun|try|catch|throw|constructor|return|switch|default|break|for|foreach|do|until|continue|resolve|resume|yield|any|out)\\b"
-      # built-in functions
-    - identifier: "\\b(void|static|var|const|extern|import|export|from|test|as|in|while|if|else|fun|try|catch|throw|constructor|return|switch|default|break|for|foreach|do|until|continue|resolve|resume|yield)\\b"
+    # keywords
+    - keywords: "\\b(range|namespace|typeof|type|zdef|void|static|var|const|extern|import|export|from|test|as|in|while|if|else|fun|try|catch|throw|constructor|return|switch|default|break|for|foreach|do|until|continue|resolve|resume|yield|any|out)\\b"
       # special method names
-    - identifier: "\\b(!|and|or|band|bor|xor|\\?\\?)\\b"
+    - symbol.operator: "\\b(!|and|or|band|bor|xor|\\?\\?)\\b"
       # definitions
     - identifier: "def [a-zA-Z_0-9]+"
-      # keywords
-    - statement: "\\b(and|as|assert|async|await|break|case|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|match|nonlocal|not|or|pass|raise|return|try|while|with|yield)\\b"
       # keywords (declaration)
     - statements: "\\b(enum|object|protocol)\\b"
       # constants (true, false, null, this)
