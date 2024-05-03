@@ -1,4 +1,4 @@
-filetype: python
+filetype: buzz
 
 detect:
     filename: "\\.buzz$"
