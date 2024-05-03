@@ -13,7 +13,7 @@ rules:
       # keywords (declaration)
     - statements: "\\b(enum|object|protocol)\\b"
       # constants (true, false, null, this)
-    - constants: "\\b(true|false|null|this)\\b"
+    - constant: "\\b(true|false|null|this)\\b"
       # constants (types)
     - type: "\\b(ud|str|int|float|obj|fib|bool|pat|type|any)\\b\\??"
       # decorators
