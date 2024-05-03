@@ -49,5 +49,5 @@ rules:
     - comment:
         start: "\\|"
         end: "$"
-        rules:  # AKA Code tags (PEP 350)
+        rules:
             - todo: "(TODO|FIXME|HACK|BUG|NOTE|FAQ|MNEMONIC|REQ|RFE|IDEA|PORT|\\?\\?\\?|!!!|GLOSS|SEE|TODOC|STAT|RVD|CRED):?"
