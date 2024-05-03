@@ -2,7 +2,6 @@ filetype: python
 
 detect:
     filename: "\\.buzz$"
-    header: "^#!.*/(env +)?python(3)?$"
 
 rules:
     # built-in objects
