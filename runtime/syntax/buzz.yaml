@@ -5,7 +5,7 @@ detect:
 
 rules:
     # keywords
-    - keywords: "\\b(range|namespace|typeof|type|zdef|void|static|var|const|extern|import|export|from|test|as|in|while|if|else|fun|try|catch|throw|constructor|return|switch|default|break|for|foreach|do|until|continue|resolve|resume|yield|any|out)\\b"
+    - statement: "\\b(range|namespace|typeof|type|zdef|void|static|var|const|extern|import|export|from|test|as|in|while|if|else|fun|try|catch|throw|constructor|return|switch|default|break|for|foreach|do|until|continue|resolve|resume|yield|any|out)\\b"
       # special method names
     - symbol.operator: "\\b(!|and|or|band|bor|xor|\\?\\?)\\b"
       # definitions
