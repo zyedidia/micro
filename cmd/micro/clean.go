@@ -39,7 +39,12 @@ func CleanConfig() {
 	}
 
 	fmt.Println("Cleaning default settings")
-	config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+
+	settingsFile := filepath.Join(config.ConfigDir, "settings.json")
+	err := config.WriteSettings(settingsFile)
+	if err != nil {
+		fmt.Println("Error writing settings.json file: " + err.Error())
+	}
 
 	// detect unused options
 	var unusedOptions []string
@@ -74,9 +79,9 @@ func CleanConfig() {
 				delete(config.GlobalSettings, s)
 			}
 
-			err := config.OverwriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+			err := config.OverwriteSettings(settingsFile)
 			if err != nil {
-				fmt.Println("Error writing settings.json file: " + err.Error())
+				fmt.Println("Error overwriting settings.json file: " + err.Error())
 			}
 
 			fmt.Println("Removed unused options")
