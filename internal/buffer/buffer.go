@@ -1280,7 +1280,7 @@ func (b *Buffer) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (b *Buffer) updateDiffSync() {
+func (b *Buffer) updateDiff(synchronous bool) {
 	b.diffLock.Lock()
 	defer b.diffLock.Unlock()
 
@@ -1291,7 +1291,16 @@ func (b *Buffer) updateDiffSync() {
 	}
 
 	differ := dmp.New()
-	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(b.Bytes()))
+
+	if !synchronous {
+		b.Lock()
+	}
+	bytes := b.Bytes()
+	if !synchronous {
+		b.Unlock()
+	}
+
+	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(bytes))
 	diffs := differ.DiffMainRunes(baseRunes, bufferRunes, false)
 	lineN := 0
 
@@ -1333,11 +1342,11 @@ func (b *Buffer) UpdateDiff() {
 	}
 
 	if lineCount < 1000 {
-		b.updateDiffSync()
+		b.updateDiff(true)
 	} else if lineCount < 30000 {
 		b.updateDiffTimer = time.AfterFunc(500*time.Millisecond, func() {
 			b.updateDiffTimer = nil
-			b.updateDiffSync()
+			b.updateDiff(false)
 			screen.Redraw()
 		})
 	} else {
