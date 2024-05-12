@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -24,7 +25,7 @@ var Binder = map[string]func(e Event, action string){
 }
 
 func createBindingsIfNotExist(fname string) {
-	if _, e := os.Stat(fname); os.IsNotExist(e) {
+	if _, e := os.Stat(fname); errors.Is(e, fs.ErrNotExist) {
 		ioutil.WriteFile(fname, []byte("{}"), 0644)
 	}
 }
