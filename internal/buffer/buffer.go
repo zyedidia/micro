@@ -237,10 +237,6 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	}
 
-	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
-	readonly := os.IsPermission(err)
-	f.Close()
-
 	fileInfo, serr := os.Stat(filename)
 	if serr != nil && !os.IsNotExist(serr) {
 		return nil, serr
@@ -248,6 +244,13 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	if serr == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
+	if serr == nil && !fileInfo.Mode().IsRegular() {
+		return nil, errors.New("Error: " + filename + " is not a regular file and cannot be opened")
+	}
+
+	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	readonly := os.IsPermission(err)
+	f.Close()
 
 	file, err := os.Open(filename)
 	if err == nil {
