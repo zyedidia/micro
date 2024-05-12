@@ -162,6 +162,17 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	// Removes any tilde and replaces with the absolute path to home
 	absFilename, _ := util.ReplaceHome(filename)
 
+	fileInfo, err := os.Stat(absFilename)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if err == nil && fileInfo.IsDir() {
+		return errors.New("Error: " + absFilename + " is a directory and cannot be saved")
+	}
+	if err == nil && !fileInfo.Mode().IsRegular() {
+		return errors.New("Error: " + absFilename + " is not a regular file and cannot be saved")
+	}
+
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
 		// Check if the parent dirs don't exist
