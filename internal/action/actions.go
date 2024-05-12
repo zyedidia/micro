@@ -1480,9 +1480,7 @@ func (h *BufPane) HalfPageDown() bool {
 func (h *BufPane) ToggleDiffGutter() bool {
 	if !h.Buf.Settings["diffgutter"].(bool) {
 		h.Buf.Settings["diffgutter"] = true
-		h.Buf.UpdateDiff(func(synchronous bool) {
-			screen.Redraw()
-		})
+		h.Buf.UpdateDiff()
 		InfoBar.Message("Enabled diff gutter")
 	} else {
 		h.Buf.Settings["diffgutter"] = false
