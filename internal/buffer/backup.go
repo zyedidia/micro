@@ -1,8 +1,10 @@
 package buffer
 
 import (
+	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"sync/atomic"
@@ -73,7 +75,7 @@ func (b *Buffer) Backup() error {
 	if backupdir == "" || err != nil {
 		backupdir = filepath.Join(config.ConfigDir, "backups")
 	}
-	if _, err := os.Stat(backupdir); os.IsNotExist(err) {
+	if _, err := os.Stat(backupdir); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(backupdir, os.ModePerm)
 	}
 
