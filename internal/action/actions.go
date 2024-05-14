@@ -745,8 +745,8 @@ func (h *BufPane) Autocomplete() bool {
 	}
 	r := h.Cursor.RuneUnder(h.Cursor.X)
 	prev := h.Cursor.RuneUnder(h.Cursor.X - 1)
-	if !util.IsAutocomplete(prev) || !util.IsNonAlphaNumeric(r) {
-		// don't autocomplete if cursor is on alpha numeric character (middle of a word)
+	if !util.IsAutocomplete(prev) || util.IsWordChar(r) {
+		// don't autocomplete if cursor is within a word
 		return false
 	}
 

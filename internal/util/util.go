@@ -218,10 +218,17 @@ func FSize(f *os.File) int64 {
 	return fi.Size()
 }
 
-// IsWordChar returns whether or not the string is a 'word character'
-// Word characters are defined as numbers, letters, or '_'
+// IsWordChar returns whether or not a rune is a 'word character'
+// Word characters are defined as numbers, letters or '_'
 func IsWordChar(r rune) bool {
 	return unicode.IsLetter(r) || unicode.IsNumber(r) || r == '_'
+}
+
+// IsNonWordChar returns whether or not a rune is not a 'word character'
+// Non word characters are defined as all characters not being numbers, letters or '_'
+// See IsWordChar()
+func IsNonWordChar(r rune) bool {
+	return !IsWordChar(r)
 }
 
 // Spaces returns a string with n spaces
@@ -445,14 +452,9 @@ func Clamp(val, min, max int) int {
 	return val
 }
 
-// IsNonAlphaNumeric returns if the rune is not a number of letter or underscore.
-func IsNonAlphaNumeric(c rune) bool {
-	return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
-}
-
 // IsAutocomplete returns whether a character should begin an autocompletion.
 func IsAutocomplete(c rune) bool {
-	return c == '.' || !IsNonAlphaNumeric(c)
+	return c == '.' || IsWordChar(c)
 }
 
 // ParseSpecial replaces escaped ts with '\t'.
