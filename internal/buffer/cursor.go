@@ -410,6 +410,17 @@ func (c *Cursor) WordRight() {
 		}
 		c.Right()
 	}
+	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) &&
+		util.IsNonWordChar(c.RuneUnder(c.X+1)) {
+		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				c.Right()
+				return
+			}
+			c.Right()
+		}
+		return
+	}
 	c.Right()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
 		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
@@ -427,6 +438,17 @@ func (c *Cursor) WordLeft() {
 			return
 		}
 		c.Left()
+	}
+	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) &&
+		util.IsNonWordChar(c.RuneUnder(c.X-1)) {
+		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		c.Right()
+		return
 	}
 	c.Left()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
