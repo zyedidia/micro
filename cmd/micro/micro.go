@@ -450,10 +450,6 @@ func DoEvent() {
 		os.Exit(0)
 	}
 
-	if event == nil {
-		return
-	}
-
 	if e, ok := event.(*tcell.EventError); ok {
 		log.Println("tcell event error: ", e.Error())
 
@@ -473,13 +469,20 @@ func DoEvent() {
 		return
 	}
 
-	_, resize := event.(*tcell.EventResize)
-	if resize {
-		action.InfoBar.HandleEvent(event)
-		action.Tabs.HandleEvent(event)
-	} else if action.InfoBar.HasPrompt {
-		action.InfoBar.HandleEvent(event)
-	} else {
-		action.Tabs.HandleEvent(event)
+	if event != nil {
+		_, resize := event.(*tcell.EventResize)
+		if resize {
+			action.InfoBar.HandleEvent(event)
+			action.Tabs.HandleEvent(event)
+		} else if action.InfoBar.HasPrompt {
+			action.InfoBar.HandleEvent(event)
+		} else {
+			action.Tabs.HandleEvent(event)
+		}
+	}
+
+	err := config.RunPluginFn("onAnyEvent")
+	if err != nil {
+		screen.TermMessage(err)
 	}
 }

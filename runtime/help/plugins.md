@@ -72,6 +72,10 @@ which micro defines:
 
 * `preRune(bufpane, rune)`: runs before the composed rune will be inserted
 
+* `onAnyEvent()`: runs when literally anything happens. It is useful for
+   detecting various changes of micro's state that cannot be detected
+   using other callbacks.
+
 For example a function which is run every time the user saves the buffer
 would be:
 
