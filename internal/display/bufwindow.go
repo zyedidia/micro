@@ -384,18 +384,7 @@ func (w *BufWindow) displayBuffer() {
 
 	if b.ModifiedThisFrame {
 		if b.Settings["diffgutter"].(bool) {
-			b.UpdateDiff(func(synchronous bool) {
-				// If the diff was updated asynchronously, the outer call to
-				// displayBuffer might already be completed and we need to
-				// schedule a redraw in order to display the new diff.
-				// Note that this cannot lead to an infinite recursion
-				// because the modifications were cleared above so there won't
-				// be another call to UpdateDiff when displayBuffer is called
-				// during the redraw.
-				if !synchronous {
-					screen.Redraw()
-				}
-			})
+			b.UpdateDiff()
 		}
 		b.ModifiedThisFrame = false
 	}

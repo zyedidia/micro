@@ -1280,7 +1280,7 @@ func (b *Buffer) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (b *Buffer) updateDiffSync() {
+func (b *Buffer) updateDiff(synchronous bool) {
 	b.diffLock.Lock()
 	defer b.diffLock.Unlock()
 
@@ -1291,7 +1291,16 @@ func (b *Buffer) updateDiffSync() {
 	}
 
 	differ := dmp.New()
-	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(b.Bytes()))
+
+	if !synchronous {
+		b.Lock()
+	}
+	bytes := b.Bytes()
+	if !synchronous {
+		b.Unlock()
+	}
+
+	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(bytes))
 	diffs := differ.DiffMainRunes(baseRunes, bufferRunes, false)
 	lineN := 0
 
@@ -1320,13 +1329,9 @@ func (b *Buffer) updateDiffSync() {
 
 // UpdateDiff computes the diff between the diff base and the buffer content.
 // The update may be performed synchronously or asynchronously.
-// UpdateDiff calls the supplied callback when the update is complete.
-// The argument passed to the callback is set to true if and only if
-// the update was performed synchronously.
 // If an asynchronous update is already pending when UpdateDiff is called,
-// UpdateDiff does not schedule another update, in which case the callback
-// is not called.
-func (b *Buffer) UpdateDiff(callback func(bool)) {
+// UpdateDiff does not schedule another update.
+func (b *Buffer) UpdateDiff() {
 	if b.updateDiffTimer != nil {
 		return
 	}
@@ -1337,20 +1342,18 @@ func (b *Buffer) UpdateDiff(callback func(bool)) {
 	}
 
 	if lineCount < 1000 {
-		b.updateDiffSync()
-		callback(true)
+		b.updateDiff(true)
 	} else if lineCount < 30000 {
 		b.updateDiffTimer = time.AfterFunc(500*time.Millisecond, func() {
 			b.updateDiffTimer = nil
-			b.updateDiffSync()
-			callback(false)
+			b.updateDiff(false)
+			screen.Redraw()
 		})
 	} else {
 		// Don't compute diffs for very large files
 		b.diffLock.Lock()
 		b.diff = make(map[int]DiffStatus)
 		b.diffLock.Unlock()
-		callback(true)
 	}
 }
 
@@ -1362,9 +1365,7 @@ func (b *Buffer) SetDiffBase(diffBase []byte) {
 	} else {
 		b.diffBaseLineCount = strings.Count(string(diffBase), "\n")
 	}
-	b.UpdateDiff(func(synchronous bool) {
-		screen.Redraw()
-	})
+	b.UpdateDiff()
 }
 
 // DiffStatus returns the diff status for a line in the buffer
