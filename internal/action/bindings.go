@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+	"runtime"
 
 	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -177,8 +178,8 @@ modSearch:
 		k = string(unicode.ToUpper(rune(k[0]))) + k[1:]
 		if code, ok := keyEvents["Ctrl"+k]; ok {
 			var r tcell.Key
-			// Special case for escape, for some reason tcell doesn't send it with the esc character
-			if code < 256 && code != 27 {
+			// Special case for escape for unix, for some reason tcell doesn't send it with the esc character
+			if code < 256 && (runtime.GOOS == "windows" || code != 27) {
 				r = code
 			}
 			// It is, we're done.
@@ -193,8 +194,8 @@ modSearch:
 	// See if we can find the key in bindingKeys
 	if code, ok := keyEvents[k]; ok {
 		var r tcell.Key
-		// Special case for escape, for some reason tcell doesn't send it with the esc character
-		if code < 256 && code != 27 {
+		// Special case for escape for unix, for some reason tcell doesn't send it with the esc character
+		if code < 256 && (runtime.GOOS == "windows" || code != 27) {
 			r = code
 		}
 		return KeyEvent{
