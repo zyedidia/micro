@@ -30,10 +30,10 @@ rules:
     # Numbers
     - constant.number: "\\b[0-9]+\\b"
       # Conditionals and control flow
-    - statement: "\\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|local|read|return|select|shift|then|time|until|while)\\b"
+    - statement: "\\b(case|do|done|elif|else|esac|exit|fi|for|function|if|in|return|select|then|until|while)\\b"
     - special: "[`$<>!=&~^\\{\\}\\(\\)\\;\\]\\[]+"
       # Shell commands
-    - type: "\\b(cd|echo|export|let|set|umask|unset)\\b"
+    - type: "\\b(cd|echo|export|let|local|read|set|shift|time|umask|unset)\\b"
       # Common linux commands
     - type: "\\b((g|ig)?awk|bash|dash|find|\\w{0,4}grep|kill|killall|\\w{0,4}less|make|pkill|sed|sh|tar)\\b"
       # Coreutils commands
