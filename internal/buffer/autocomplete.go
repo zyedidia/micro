@@ -73,11 +73,11 @@ func (b *Buffer) GetWord() ([]byte, int) {
 		return []byte{}, -1
 	}
 
-	if util.IsNonAlphaNumeric(b.RuneAt(c.Loc.Move(-1, b))) {
+	if util.IsNonWordChar(b.RuneAt(c.Loc.Move(-1, b))) {
 		return []byte{}, c.X
 	}
 
-	args := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+	args := bytes.FieldsFunc(l, util.IsNonWordChar)
 	input := args[len(args)-1]
 	return input, c.X - util.CharacterCount(input)
 }
@@ -166,7 +166,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 	var suggestions []string
 	for i := c.Y; i >= 0; i-- {
 		l := b.LineBytes(i)
-		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		words := bytes.FieldsFunc(l, util.IsNonWordChar)
 		for _, w := range words {
 			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
 				strw := string(w)
@@ -179,7 +179,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 	}
 	for i := c.Y + 1; i < b.LinesNum(); i++ {
 		l := b.LineBytes(i)
-		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		words := bytes.FieldsFunc(l, util.IsNonWordChar)
 		for _, w := range words {
 			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
 				strw := string(w)

@@ -283,6 +283,22 @@ func (h *BufPane) WordLeft() bool {
 	return true
 }
 
+// SubWordRight moves the cursor one sub-word to the right
+func (h *BufPane) SubWordRight() bool {
+	h.Cursor.Deselect(false)
+	h.Cursor.SubWordRight()
+	h.Relocate()
+	return true
+}
+
+// SubWordLeft moves the cursor one sub-word to the left
+func (h *BufPane) SubWordLeft() bool {
+	h.Cursor.Deselect(true)
+	h.Cursor.SubWordLeft()
+	h.Relocate()
+	return true
+}
+
 // SelectUp selects up one line
 func (h *BufPane) SelectUp() bool {
 	if !h.Cursor.HasSelection() {
@@ -354,6 +370,28 @@ func (h *BufPane) SelectWordLeft() bool {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
 	h.Cursor.WordLeft()
+	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
+	return true
+}
+
+// SelectSubWordRight selects the sub-word to the right of the cursor
+func (h *BufPane) SelectSubWordRight() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	h.Cursor.SubWordRight()
+	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
+	return true
+}
+
+// SelectSubWordLeft selects the sub-word to the left of the cursor
+func (h *BufPane) SelectSubWordLeft() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
+	}
+	h.Cursor.SubWordLeft()
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
@@ -622,6 +660,28 @@ func (h *BufPane) DeleteWordLeft() bool {
 	return true
 }
 
+// DeleteSubWordRight deletes the sub-word to the right of the cursor
+func (h *BufPane) DeleteSubWordRight() bool {
+	h.SelectSubWordRight()
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+	h.Relocate()
+	return true
+}
+
+// DeleteSubWordLeft deletes the sub-word to the left of the cursor
+func (h *BufPane) DeleteSubWordLeft() bool {
+	h.SelectSubWordLeft()
+	if h.Cursor.HasSelection() {
+		h.Cursor.DeleteSelection()
+		h.Cursor.ResetSelection()
+	}
+	h.Relocate()
+	return true
+}
+
 // Delete deletes the next character
 func (h *BufPane) Delete() bool {
 	if h.Cursor.HasSelection() {
@@ -745,8 +805,8 @@ func (h *BufPane) Autocomplete() bool {
 	}
 	r := h.Cursor.RuneUnder(h.Cursor.X)
 	prev := h.Cursor.RuneUnder(h.Cursor.X - 1)
-	if !util.IsAutocomplete(prev) || !util.IsNonAlphaNumeric(r) {
-		// don't autocomplete if cursor is on alpha numeric character (middle of a word)
+	if !util.IsAutocomplete(prev) || util.IsWordChar(r) {
+		// don't autocomplete if cursor is within a word
 		return false
 	}
 
