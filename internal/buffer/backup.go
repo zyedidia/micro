@@ -87,7 +87,12 @@ func (b *Buffer) Backup() error {
 		}
 
 		// end of line
-		eol := []byte{'\n'}
+		var eol []byte
+		if b.Endings == FFDos {
+			eol = []byte{'\r', '\n'}
+		} else {
+			eol = []byte{'\n'}
+		}
 
 		// write lines
 		if _, e = file.Write(b.lines[0].data); e != nil {
