@@ -82,6 +82,9 @@ func (b *Buffer) Backup() error {
 	name := filepath.Join(backupdir, util.EscapePath(b.AbsPath))
 
 	err = overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
+		b.Lock()
+		defer b.Unlock()
+
 		if len(b.lines) == 0 {
 			return
 		}
