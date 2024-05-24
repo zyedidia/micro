@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -408,14 +409,37 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-// EscapePath replaces every path separator in a given path with a %
-func EscapePath(path string) string {
+// EscapePathUrl encodes the path in URL query form
+func EscapePathUrl(path string) string {
+	return url.QueryEscape(filepath.ToSlash(path))
+}
+
+// EscapePathLegacy replaces every path separator in a given path with a %
+func EscapePathLegacy(path string) string {
 	path = filepath.ToSlash(path)
 	if runtime.GOOS == "windows" {
 		// ':' is not valid in a path name on Windows but is ok on Unix
 		path = strings.ReplaceAll(path, ":", "%")
 	}
 	return strings.ReplaceAll(path, "/", "%")
+}
+
+// DetermineEscapePath escapes a path, determining whether it should be escaped
+// using URL encoding (preferred, since it encodes unambiguously) or
+// legacy encoding with '%' (for backward compatibility, if the legacy-escaped
+// path exists in the given directory).
+func DetermineEscapePath(dir string, path string) string {
+	url := filepath.Join(dir, EscapePathUrl(path))
+	if _, err := os.Stat(url); err == nil {
+		return url
+	}
+
+	legacy := filepath.Join(dir, EscapePathLegacy(path))
+	if _, err := os.Stat(legacy); err == nil {
+		return legacy
+	}
+
+	return url
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
