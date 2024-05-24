@@ -147,7 +147,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `eopkg install micro` (Solus).
     * `pacstall -I micro` (Pacstall).
     * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
-* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
+* Windows: [Chocolatey](https://chocolatey.org), [Scoop](https://github.com/lukesampson/scoop) and [Winget](https://github.com/microsoft/winget-cli).
     * `choco install micro`.
     * `scoop install micro`.
     * `winget install zyedidia.micro`
