@@ -37,6 +37,10 @@ content using `Ctrl-v`.
 
 Now press `F2` to save current file and `Ctrl-q` to close it.
 
+To preview the changes, run `git diff` by pressing `Ctrl-b` ("shell mode")
+and entering the command. You will see changes only to the second file
+`plugin.go`, because the first file is not saved yet.
+
 Hit `Ctrl-q` again and micro will prompt if you want to save the first file
 before closing. Press `y` and you're done.
 
