@@ -79,7 +79,7 @@ func (b *Buffer) Backup() error {
 		os.Mkdir(backupdir, os.ModePerm)
 	}
 
-	name := filepath.Join(backupdir, util.EscapePath(b.AbsPath))
+	name := util.DetermineEscapePath(backupdir, b.AbsPath)
 
 	err = overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
 		b.Lock()
@@ -123,7 +123,7 @@ func (b *Buffer) RemoveBackup() {
 	if !b.Settings["backup"].(bool) || b.Settings["permbackup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return
 	}
-	f := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
+	f := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "backups"), b.AbsPath)
 	os.Remove(f)
 }
 
@@ -131,13 +131,13 @@ func (b *Buffer) RemoveBackup() {
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
 	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
-		backupfile := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
+		backupfile := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "backups"), b.AbsPath)
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
 			if err == nil {
 				defer backup.Close()
 				t := info.ModTime()
-				msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), util.EscapePath(b.AbsPath))
+				msg := fmt.Sprintf(backupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), backupfile)
 				choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
 
 				if choice%3 == 0 {
