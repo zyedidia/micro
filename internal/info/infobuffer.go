@@ -143,13 +143,12 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 		if i.PromptCallback != nil {
 			if canceled {
 				i.Replace(i.Start(), i.End(), "")
-				i.PromptCallback("", true)
 				h := i.History[i.PromptType]
 				i.History[i.PromptType] = h[:len(h)-1]
+				i.PromptCallback("", true)
 			} else {
 				resp := string(i.LineBytes(0))
 				i.Replace(i.Start(), i.End(), "")
-				i.PromptCallback(resp, false)
 				h := i.History[i.PromptType]
 				h[len(h)-1] = resp
 
@@ -160,6 +159,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 						break
 					}
 				}
+				i.PromptCallback(resp, false)
 			}
 			// i.PromptCallback = nil
 		}
