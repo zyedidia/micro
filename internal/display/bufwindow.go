@@ -138,7 +138,7 @@ func (w *BufWindow) updateDisplayInfo() {
 
 	// We need to know the string length of the largest line number
 	// so we can pad appropriately when displaying line numbers
-	w.maxLineNumLength = len(strconv.Itoa(b.LinesNum()))
+	w.maxLineNumLength = 1 + len(strconv.Itoa(b.LinesNum()))
 
 	w.gutterOffset = 0
 	if w.hasMessage {
@@ -217,6 +217,7 @@ func (w *BufWindow) Relocate() bool {
 	activeC := w.Buf.GetActiveCursor()
 	scrollmargin := int(b.Settings["scrollmargin"].(float64))
 
+	b.FoldExpandOut(activeC.Loc.Y)
 	c := w.SLocFromLoc(activeC.Loc)
 	bStart := SLoc{0, 0}
 	bEnd := w.SLocFromLoc(b.End())
@@ -330,8 +331,21 @@ func (w *BufWindow) drawLineNum(lineNumStyle tcell.Style, softwrapped bool, vloc
 	}
 	lineNum := []rune(strconv.Itoa(util.Abs(lineInt)))
 
+	// Indicate if this is a collapsed region
+	fold := ' '
+	if w.Buf.FoldCollapsible(bloc.Y) {
+		if w.Buf.Collapsed(bloc.Y) {
+			fold = '+'
+		} else {
+			fold = '-'
+		}
+	} else if w.Buf.FoldCollapseEnd(bloc.Y) {
+		fold = '^'
+	}
+	screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, fold, nil, lineNumStyle)
+	vloc.X++
 	// Write the spaces before the line number if necessary
-	for i := 0; i < w.maxLineNumLength-len(lineNum) && vloc.X < w.gutterOffset; i++ {
+	for i := 0; i < w.maxLineNumLength-1-len(lineNum) && vloc.X < w.gutterOffset; i++ {
 		screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, ' ', nil, lineNumStyle)
 		vloc.X++
 	}
@@ -454,6 +468,13 @@ func (w *BufWindow) displayBuffer() {
 	curStyle := config.DefStyle
 	for ; vloc.Y < w.bufHeight; vloc.Y++ {
 		vloc.X = 0
+
+		for bloc.Y < b.LinesNum() && b.Hidden(bloc.Y) {
+			bloc.Y++
+		}
+		if bloc.Y >= b.LinesNum() {
+			break
+		}
 
 		currentLine := false
 		for _, c := range cursors {
