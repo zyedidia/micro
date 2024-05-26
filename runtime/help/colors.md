@@ -214,7 +214,7 @@ safe and recommended to use subgroups in your custom syntax files.
 For example if `constant.string` is found in your colorscheme, micro will us
 that for highlighting strings. If it's not found, it will use constant instead.
 Micro tries to match the largest set of groups it can find in the colorscheme
-definitions, so if, for examle `constant.bool.true` is found then micro will
+definitions, so if, for example `constant.bool.true` is found then micro will
 use that. If `constant.bool.true` is not found but `constant.bool` is found
 micro will use `constant.bool`. If not, it uses `constant`.
 
@@ -391,4 +391,30 @@ example, the following is possible for html:
     end: "</style.*?>"
     rules:
         - include: "css"
+```
+
+Note that nested include (i.e. including syntax files that include other syntax
+files) is not supported yet.
+
+### Default syntax highlighting
+
+If micro cannot detect the filetype of the file, it falls back to using the
+default syntax highlighting for it, which highlights just the bare minimum:
+email addresses, URLs etc.
+
+Just like in other cases, you can override the default highlighting by adding
+your own custom `default.yaml` file to `~/.config/micro/syntax`.
+
+For example, if you work with various config files that use the `#` sign to mark
+the beginning of a comment, you can use the following custom `default.yaml` to
+highlight those comments by default:
+
+```
+filetype: unknown
+
+detect:
+    filename: ""
+
+rules:
+    - comment: "(^|\\s)#.*$"
 ```

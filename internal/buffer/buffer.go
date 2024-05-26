@@ -682,6 +682,103 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 	return nil
 }
 
+func parseDefFromFile(f config.RuntimeFile, header *highlight.Header) *highlight.Def {
+	data, err := f.Data()
+	if err != nil {
+		screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+		return nil
+	}
+
+	if header == nil {
+		header, err = highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
+			return nil
+		}
+	}
+
+	file, err := highlight.ParseFile(data)
+	if err != nil {
+		screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+		return nil
+	}
+
+	syndef, err := highlight.ParseDef(file, header)
+	if err != nil {
+		screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+		return nil
+	}
+
+	return syndef
+}
+
+// findRealRuntimeSyntaxDef finds a specific syntax definition
+// in the user's custom syntax files
+func findRealRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def {
+	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+		if f.Name() == name {
+			syndef := parseDefFromFile(f, header)
+			if syndef != nil {
+				return syndef
+			}
+		}
+	}
+	return nil
+}
+
+// findRuntimeSyntaxDef finds a specific syntax definition
+// in the built-in syntax files
+func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def {
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		if f.Name() == name {
+			syndef := parseDefFromFile(f, header)
+			if syndef != nil {
+				return syndef
+			}
+		}
+	}
+	return nil
+}
+
+func resolveIncludes(syndef *highlight.Def) {
+	includes := highlight.GetIncludes(syndef)
+	if len(includes) == 0 {
+		return
+	}
+
+	var files []*highlight.File
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		header, err := highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		for _, i := range includes {
+			if header.FileType == i {
+				file, err := highlight.ParseFile(data)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+				files = append(files, file)
+				break
+			}
+		}
+		if len(files) >= len(includes) {
+			break
+		}
+	}
+
+	highlight.ResolveIncludes(syndef, files)
+}
+
 // UpdateRules updates the syntax rules and filetype for this buffer
 // This is called when the colorscheme changes
 func (b *Buffer) UpdateRules() {
@@ -694,6 +791,8 @@ func (b *Buffer) UpdateRules() {
 		b.SyntaxDef = nil
 		return
 	}
+
+	b.SyntaxDef = nil
 
 	// syntaxFileInfo is an internal helper structure
 	// to store properties of one single syntax file
@@ -710,6 +809,10 @@ func (b *Buffer) UpdateRules() {
 	var header *highlight.Header
 	// search for the syntax file in the user's custom syntax files
 	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+		if f.Name() == "default" {
+			continue
+		}
+
 		data, err := f.Data()
 		if err != nil {
 			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
@@ -766,7 +869,7 @@ func (b *Buffer) UpdateRules() {
 	}
 
 	if !foundDef {
-		// search in the default syntax files
+		// search for the syntax file in the built-in syntax files
 		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
 			data, err := f.Data()
 			if err != nil {
@@ -844,72 +947,22 @@ func (b *Buffer) UpdateRules() {
 
 	if syntaxFile != "" && !foundDef {
 		// we found a syntax file using a syntax header file
-		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			if f.Name() == syntaxFile {
-				data, err := f.Data()
-				if err != nil {
-					screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-
-				file, err := highlight.ParseFile(data)
-				if err != nil {
-					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-
-				syndef, err := highlight.ParseDef(file, header)
-				if err != nil {
-					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-				b.SyntaxDef = syndef
-				break
-			}
-		}
+		b.SyntaxDef = findRuntimeSyntaxDef(syntaxFile, header)
 	}
 
-	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
-		includes := highlight.GetIncludes(b.SyntaxDef)
-
-		var files []*highlight.File
-		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			data, err := f.Data()
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-			header, err := highlight.MakeHeaderYaml(data)
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			for _, i := range includes {
-				if header.FileType == i {
-					file, err := highlight.ParseFile(data)
-					if err != nil {
-						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-						continue
-					}
-					files = append(files, file)
-					break
-				}
-			}
-			if len(files) >= len(includes) {
-				break
-			}
-		}
-
-		highlight.ResolveIncludes(b.SyntaxDef, files)
-	}
-
-	if b.Highlighter == nil || syntaxFile != "" {
-		if b.SyntaxDef != nil {
-			b.Settings["filetype"] = b.SyntaxDef.FileType
-		}
+	if b.SyntaxDef != nil {
+		b.Settings["filetype"] = b.SyntaxDef.FileType
 	} else {
-		b.SyntaxDef = &highlight.EmptyDef
+		// search for the default file in the user's custom syntax files
+		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
+		if b.SyntaxDef == nil {
+			// search for the default file in the built-in syntax files
+			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
+		}
+	}
+
+	if b.SyntaxDef != nil {
+		resolveIncludes(b.SyntaxDef)
 	}
 
 	if b.SyntaxDef != nil {
@@ -1011,7 +1064,7 @@ func (b *Buffer) MergeCursors() {
 	b.EventHandler.active = b.curCursor
 }
 
-// UpdateCursors updates all the cursors indicies
+// UpdateCursors updates all the cursors indices
 func (b *Buffer) UpdateCursors() {
 	b.EventHandler.cursors = b.cursors
 	b.EventHandler.active = b.curCursor
@@ -1180,7 +1233,11 @@ func (b *Buffer) Retab() {
 		}
 
 		l = bytes.TrimLeft(l, " \t")
+
+		b.Lock()
 		b.lines[i].data = append(ws, l...)
+		b.Unlock()
+
 		b.MarkModified(i, i)
 		dirty = true
 	}
@@ -1223,7 +1280,7 @@ func (b *Buffer) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (b *Buffer) updateDiffSync() {
+func (b *Buffer) updateDiff(synchronous bool) {
 	b.diffLock.Lock()
 	defer b.diffLock.Unlock()
 
@@ -1234,7 +1291,16 @@ func (b *Buffer) updateDiffSync() {
 	}
 
 	differ := dmp.New()
-	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(b.Bytes()))
+
+	if !synchronous {
+		b.Lock()
+	}
+	bytes := b.Bytes()
+	if !synchronous {
+		b.Unlock()
+	}
+
+	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(bytes))
 	diffs := differ.DiffMainRunes(baseRunes, bufferRunes, false)
 	lineN := 0
 
@@ -1263,13 +1329,9 @@ func (b *Buffer) updateDiffSync() {
 
 // UpdateDiff computes the diff between the diff base and the buffer content.
 // The update may be performed synchronously or asynchronously.
-// UpdateDiff calls the supplied callback when the update is complete.
-// The argument passed to the callback is set to true if and only if
-// the update was performed synchronously.
 // If an asynchronous update is already pending when UpdateDiff is called,
-// UpdateDiff does not schedule another update, in which case the callback
-// is not called.
-func (b *Buffer) UpdateDiff(callback func(bool)) {
+// UpdateDiff does not schedule another update.
+func (b *Buffer) UpdateDiff() {
 	if b.updateDiffTimer != nil {
 		return
 	}
@@ -1280,20 +1342,18 @@ func (b *Buffer) UpdateDiff(callback func(bool)) {
 	}
 
 	if lineCount < 1000 {
-		b.updateDiffSync()
-		callback(true)
+		b.updateDiff(true)
 	} else if lineCount < 30000 {
 		b.updateDiffTimer = time.AfterFunc(500*time.Millisecond, func() {
 			b.updateDiffTimer = nil
-			b.updateDiffSync()
-			callback(false)
+			b.updateDiff(false)
+			screen.Redraw()
 		})
 	} else {
 		// Don't compute diffs for very large files
 		b.diffLock.Lock()
 		b.diff = make(map[int]DiffStatus)
 		b.diffLock.Unlock()
-		callback(true)
 	}
 }
 
@@ -1305,9 +1365,7 @@ func (b *Buffer) SetDiffBase(diffBase []byte) {
 	} else {
 		b.diffBaseLineCount = strings.Count(string(diffBase), "\n")
 	}
-	b.UpdateDiff(func(synchronous bool) {
-		screen.Redraw()
-	})
+	b.UpdateDiff()
 }
 
 // DiffStatus returns the diff status for a line in the buffer

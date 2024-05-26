@@ -67,9 +67,6 @@ func combineLineMatch(src, dst LineMatch) LineMatch {
 // A State represents the region at the end of a line
 type State *region
 
-// EmptyDef is an empty definition.
-var EmptyDef = Def{nil, &rules{}}
-
 // LineStates is an interface for a buffer-like object which can also store the states and matches for every line
 type LineStates interface {
 	LineBytes(n int) []byte
@@ -77,6 +74,8 @@ type LineStates interface {
 	State(lineN int) State
 	SetState(lineN int, s State)
 	SetMatch(lineN int, m LineMatch)
+	Lock()
+	Unlock()
 }
 
 // A Highlighter contains the information needed to highlight a string
@@ -303,7 +302,13 @@ func (h *Highlighter) HighlightString(input string) []LineMatch {
 
 // HighlightStates correctly sets all states for the buffer
 func (h *Highlighter) HighlightStates(input LineStates) {
-	for i := 0; i < input.LinesNum(); i++ {
+	for i := 0; ; i++ {
+		input.Lock()
+		if i >= input.LinesNum() {
+			input.Unlock()
+			break
+		}
+
 		line := input.LineBytes(i)
 		// highlights := make(LineMatch)
 
@@ -316,6 +321,7 @@ func (h *Highlighter) HighlightStates(input LineStates) {
 		curState := h.lastRegion
 
 		input.SetState(i, curState)
+		input.Unlock()
 	}
 }
 
@@ -324,7 +330,9 @@ func (h *Highlighter) HighlightStates(input LineStates) {
 // This assumes that all the states are set correctly
 func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int) {
 	for i := startline; i <= endline; i++ {
+		input.Lock()
 		if i >= input.LinesNum() {
+			input.Unlock()
 			break
 		}
 
@@ -339,6 +347,7 @@ func (h *Highlighter) HighlightMatches(input LineStates, startline, endline int)
 		}
 
 		input.SetMatch(i, match)
+		input.Unlock()
 	}
 }
 
@@ -350,9 +359,19 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 
 	h.lastRegion = nil
 	if startline > 0 {
-		h.lastRegion = input.State(startline - 1)
+		input.Lock()
+		if startline-1 < input.LinesNum() {
+			h.lastRegion = input.State(startline - 1)
+		}
+		input.Unlock()
 	}
-	for i := startline; i < input.LinesNum(); i++ {
+	for i := startline; ; i++ {
+		input.Lock()
+		if i >= input.LinesNum() {
+			input.Unlock()
+			break
+		}
+
 		line := input.LineBytes(i)
 		// highlights := make(LineMatch)
 
@@ -366,6 +385,7 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 		lastState := input.State(i)
 
 		input.SetState(i, curState)
+		input.Unlock()
 
 		if curState == lastState {
 			return i
@@ -377,6 +397,9 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 
 // ReHighlightLine will rehighlight the state and match for a single line
 func (h *Highlighter) ReHighlightLine(input LineStates, lineN int) {
+	input.Lock()
+	defer input.Unlock()
+
 	line := input.LineBytes(lineN)
 	highlights := make(LineMatch)
 
