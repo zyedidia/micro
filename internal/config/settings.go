@@ -51,7 +51,6 @@ var defaultCommonSettings = map[string]interface{}{
 	"autoindent":      true,
 	"autosu":          false,
 	"backup":          true,
-	"backupdir":       "",
 	"basename":        false,
 	"colorcolumn":     float64(0),
 	"cursorline":      true,
@@ -72,7 +71,6 @@ var defaultCommonSettings = map[string]interface{}{
 	"matchbrace":      true,
 	"matchbracestyle": "underline",
 	"mkparents":       false,
-	"permbackup":      false,
 	"readonly":        false,
 	"reload":          "prompt",
 	"rmtrailingws":    false,
@@ -102,6 +100,7 @@ var defaultCommonSettings = map[string]interface{}{
 // default values
 var DefaultGlobalOnlySettings = map[string]interface{}{
 	"autosave":       float64(0),
+	"backupdir":      "",
 	"clipboard":      "external",
 	"colorscheme":    "default",
 	"divchars":       "|-",
@@ -113,6 +112,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"multiopen":      "tab",
 	"parsecursor":    false,
 	"paste":          false,
+	"permbackup":     false,
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},
 	"savehistory":    true,

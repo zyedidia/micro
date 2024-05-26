@@ -71,7 +71,7 @@ func (b *Buffer) Backup() error {
 		return nil
 	}
 
-	backupdir, err := util.ReplaceHome(b.Settings["backupdir"].(string))
+	backupdir, err := util.ReplaceHome(config.GlobalSettings["backupdir"].(string))
 	if backupdir == "" || err != nil {
 		backupdir = filepath.Join(config.ConfigDir, "backups")
 	}
@@ -120,7 +120,7 @@ func (b *Buffer) Backup() error {
 
 // RemoveBackup removes any backup file associated with this buffer
 func (b *Buffer) RemoveBackup() {
-	if !b.Settings["backup"].(bool) || b.Settings["permbackup"].(bool) || b.Path == "" || b.Type != BTDefault {
+	if !b.Settings["backup"].(bool) || config.GlobalSettings["permbackup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return
 	}
 	f := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
@@ -130,7 +130,7 @@ func (b *Buffer) RemoveBackup() {
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
-	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
+	if b.Settings["backup"].(bool) && !config.GlobalSettings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
 		backupfile := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
