@@ -35,7 +35,7 @@ cut the `PluginInfo` structure into clipboard using `Ctrl-x`.
 Press `Ctrl-w` again to switch back to second file and paste the clipboard
 content using `Ctrl-v`.
 
-Now press `F2` to save current file and `Ctrl-q` to close it.
+Now press `Ctrl-s` (or `F2`) to save current file and `Ctrl-q` to close it.
 
 To preview the changes, run `git diff` by pressing `Ctrl-b` ("shell mode")
 and entering the command. You will see changes only to the second file
@@ -48,16 +48,15 @@ Congratulations with completing your first mouseless tutorial with micro.
 
 ## Settings
 
-In micro, your settings are stored in `~/.config/micro/settings.json`, a file
-that is created the first time you run micro. You can edit the `settings.json`
-file directly, or you can use `> set option value` command from micro, which
-modifies `settings.json` file too, so that the setting will stick even after
-you close micro.
+In micro, your settings are stored in `~/.config/micro/settings.json`, which
+is created on the first run. It can be edited directly, or you can invoke
+`> set option value` command from `micro`. With the command changes are
+applied  immediately and then saved into `settings.json`.
 
-You can also set options temporary for the local buffer without saving then.
-For example, if you have two splits open, and you type `> setlocal tabsize 2`,
-the tabsize will only be 2 in the current buffer, and micro will not save
-this local change to the `settings.json` file.
+Options can also be set without saving them, using `setlocal` command. Local
+means the setting is not global. For example, if you have two splits open,
+and you type `> setlocal tabsize 2`, the tabsize will only be 2 in the
+current buffer, and micro will not update `settings.json` file.
 
 You can also set options for specific file types in `settings.json`. If you
 want the `tabsize` to be 2 only in Ruby files, and 4 otherwise:
