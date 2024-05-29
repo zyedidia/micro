@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
@@ -553,4 +554,38 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+type FileWriter interface {
+	Overwrite(name string, isBackup bool) error
+	BackupDir() string
+	KeepBackup() bool
+}
+
+// SafeWrite performs the following actions, while using the given FileWriter interface:
+// 1. Create or update a backup file first at the given location
+// 1.1. If this fails remove the corrupted backup file and return with error
+// 2. Create or update the target file
+// 2.1. If this fails keep the backup file and return with error
+// 3. Remove the backup file, in case it shouldn't be kept and return
+func SafeWrite(name string, fwriter FileWriter) (err error) {
+	if _, err = os.Stat(fwriter.BackupDir()); errors.Is(err, fs.ErrNotExist) {
+		os.Mkdir(fwriter.BackupDir(), os.ModePerm)
+	}
+
+	backupName := filepath.Join(fwriter.BackupDir(), EscapePath(name))
+	if err = fwriter.Overwrite(backupName, true); err != nil {
+		os.Remove(backupName)
+		return
+	}
+
+	if err = fwriter.Overwrite(name, false); err != nil {
+		return
+	}
+
+	if !fwriter.KeepBackup() {
+		os.Remove(backupName)
+	}
+
+	return
 }
