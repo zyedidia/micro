@@ -89,6 +89,59 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 	return
 }
 
+func (b *Buffer) Overwrite(name string, isBackup bool, withSudo bool) (err error) {
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return
+	}
+
+	var size int
+	fwriter := func(file io.Writer) (e error) {
+		if len(b.lines) == 0 {
+			return
+		}
+
+		// end of line
+		var eol []byte
+		if b.Endings == FFDos {
+			eol = []byte{'\r', '\n'}
+		} else {
+			eol = []byte{'\n'}
+		}
+
+		// write lines
+		if size, err = file.Write(b.lines[0].data); err != nil {
+			return
+		}
+
+		for _, l := range b.lines[1:] {
+			if _, err = file.Write(eol); err != nil {
+				return
+			}
+			if _, err = file.Write(l.data); err != nil {
+				return
+			}
+			size += len(eol) + len(l.data)
+		}
+		return
+	}
+
+	if err = overwriteFile(name, enc, fwriter, withSudo); err != nil {
+		return
+	}
+
+	if !isBackup && !b.Settings["fastdirty"].(bool) {
+		if size > LargeFileThreshold {
+			// For large files 'fastdirty' needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
+	}
+
+	return err
+}
+
 // Save saves the buffer to its default path
 func (b *Buffer) Save() error {
 	return b.SaveAs(b.Path)
@@ -153,19 +206,18 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		err = b.Serialize()
 	}()
 
-	// Removes any tilde and replaces with the absolute path to home
-	absFilename, _ := util.ReplaceHome(filename)
-
-	fileInfo, err := os.Stat(absFilename)
+	fileInfo, err := os.Stat(filename)
 	if err != nil && !errors.Is(err, fs.ErrNotExist) {
 		return err
 	}
 	if err == nil && fileInfo.IsDir() {
-		return errors.New("Error: " + absFilename + " is a directory and cannot be saved")
+		return errors.New("Error: " + filename + " is a directory and cannot be saved")
 	}
 	if err == nil && !fileInfo.Mode().IsRegular() {
-		return errors.New("Error: " + absFilename + " is not a regular file and cannot be saved")
+		return errors.New("Error: " + filename + " is not a regular file and cannot be saved")
 	}
+
+	absFilename, _ := filepath.Abs(filename)
 
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
@@ -184,60 +236,50 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		}
 	}
 
-	var fileSize int
-
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
-	if err != nil {
+	if err = b.safeWrite(absFilename, withSudo); err != nil {
 		return err
 	}
 
-	fwriter := func(file io.Writer) (e error) {
-		if len(b.lines) == 0 {
-			return
-		}
-
-		// end of line
-		var eol []byte
-		if b.Endings == FFDos {
-			eol = []byte{'\r', '\n'}
-		} else {
-			eol = []byte{'\n'}
-		}
-
-		// write lines
-		if fileSize, e = file.Write(b.lines[0].data); e != nil {
-			return
-		}
-
-		for _, l := range b.lines[1:] {
-			if _, e = file.Write(eol); e != nil {
-				return
-			}
-			if _, e = file.Write(l.data); e != nil {
-				return
-			}
-			fileSize += len(eol) + len(l.data)
-		}
-		return
-	}
-
-	if err = overwriteFile(absFilename, enc, fwriter, withSudo); err != nil {
-		return err
-	}
-
-	if !b.Settings["fastdirty"].(bool) {
-		if fileSize > LargeFileThreshold {
-			// For large files 'fastdirty' needs to be on
-			b.Settings["fastdirty"] = true
-		} else {
-			calcHash(b, &b.origHash)
-		}
-	}
-
-	b.Path = filename
-	absPath, _ := filepath.Abs(filename)
-	b.AbsPath = absPath
+	b.Path, _ = util.ReplaceHome(filename)
+	b.AbsPath = absFilename
 	b.isModified = false
 	b.UpdateRules()
 	return err
+}
+
+// safeWrite performs the following actions:
+// 1. Create a backup directory if it doesn't exist
+// 2. Create or update a backup file first at the given location
+// 2.1. If this fails remove the corrupted backup file and return with error
+// 3. Create or update the target file
+// 3.1. If this fails keep the backup file and return with error
+// 4. Remove the backup file, in case it shouldn't be kept and return
+func (b *Buffer) safeWrite(name string, withSudo bool) error {
+	backupDir := b.BackupDir()
+	if _, err := os.Stat(backupDir); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		if err = os.Mkdir(backupDir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	backupName := util.DetermineEscapePath(backupDir, name)
+	if err := b.Overwrite(backupName, true, withSudo); err != nil {
+		os.Remove(backupName)
+		return err
+	}
+	b.keepBackup = true
+
+	if err := b.Overwrite(name, false, withSudo); err != nil {
+		return err
+	}
+	b.keepBackup = false
+
+	if !b.KeepBackup() {
+		os.Remove(backupName)
+	}
+
+	return nil
 }
