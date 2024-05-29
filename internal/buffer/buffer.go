@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"path"
@@ -238,7 +239,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	fileInfo, serr := os.Stat(filename)
-	if serr != nil && !os.IsNotExist(serr) {
+	if serr != nil && !errors.Is(serr, fs.ErrNotExist) {
 		return nil, serr
 	}
 	if serr == nil && fileInfo.IsDir() {
@@ -249,7 +250,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
-	readonly := os.IsPermission(err)
+	readonly := errors.Is(err, fs.ErrPermission)
 	f.Close()
 
 	file, err := os.Open(filename)
@@ -258,7 +259,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	var buf *Buffer
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else if err != nil {
@@ -392,7 +393,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	// we know the filetype now, so update per-filetype settings
 	config.UpdateFileTypeLocals(b.Settings, b.Settings["filetype"].(string))
 
-	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)
 	}
 
