@@ -102,6 +102,7 @@ type SharedBuffer struct {
 	diff              map[int]DiffStatus
 
 	requestedBackup bool
+	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
 	// are viewing a file that is constantly changing
