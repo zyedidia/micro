@@ -403,9 +403,12 @@ func (c *Cursor) SelectTo(loc Loc) {
 
 // WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
+	if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+		c.Right()
+		return
+	}
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-			c.Right()
 			return
 		}
 		c.Right()
@@ -414,7 +417,6 @@ func (c *Cursor) WordRight() {
 		util.IsNonWordChar(c.RuneUnder(c.X+1)) {
 		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-				c.Right()
 				return
 			}
 			c.Right()
@@ -432,6 +434,10 @@ func (c *Cursor) WordRight() {
 
 // WordLeft moves the cursor one word to the left
 func (c *Cursor) WordLeft() {
+	if c.X == 0 {
+		c.Left()
+		return
+	}
 	c.Left()
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == 0 {
@@ -462,10 +468,13 @@ func (c *Cursor) WordLeft() {
 
 // SubWordRight moves the cursor one sub-word to the right
 func (c *Cursor) SubWordRight() {
+	if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+		c.Right()
+		return
+	}
 	if util.IsWhitespace(c.RuneUnder(c.X)) {
 		for util.IsWhitespace(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-				c.Right()
 				return
 			}
 			c.Right()
@@ -475,7 +484,6 @@ func (c *Cursor) SubWordRight() {
 	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
 		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-				c.Right()
 				return
 			}
 			c.Right()
@@ -485,7 +493,6 @@ func (c *Cursor) SubWordRight() {
 	if util.IsSubwordDelimiter(c.RuneUnder(c.X)) {
 		for util.IsSubwordDelimiter(c.RuneUnder(c.X)) {
 			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-				c.Right()
 				return
 			}
 			c.Right()
@@ -521,6 +528,10 @@ func (c *Cursor) SubWordRight() {
 
 // SubWordLeft moves the cursor one sub-word to the left
 func (c *Cursor) SubWordLeft() {
+	if c.X == 0 {
+		c.Left()
+		return
+	}
 	c.Left()
 	if util.IsWhitespace(c.RuneUnder(c.X)) {
 		for util.IsWhitespace(c.RuneUnder(c.X)) {
