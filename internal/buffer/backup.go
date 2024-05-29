@@ -65,23 +65,32 @@ func (b *Buffer) RequestBackup() {
 	}
 }
 
+func (b *Buffer) backupDir() string {
+	backupdir, err := util.ReplaceHome(b.Settings["backupdir"].(string))
+	if backupdir == "" || err != nil {
+		backupdir = filepath.Join(config.ConfigDir, "backups")
+	}
+	return backupdir
+}
+
+func (b *Buffer) keepBackup() bool {
+	return b.forceKeepBackup || b.Settings["permbackup"].(bool)
+}
+
 // Backup saves the current buffer to ConfigDir/backups
 func (b *Buffer) Backup() error {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return nil
 	}
 
-	backupdir, err := util.ReplaceHome(b.Settings["backupdir"].(string))
-	if backupdir == "" || err != nil {
-		backupdir = filepath.Join(config.ConfigDir, "backups")
-	}
+	backupdir := b.backupDir()
 	if _, err := os.Stat(backupdir); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(backupdir, os.ModePerm)
 	}
 
 	name := util.DetermineEscapePath(backupdir, b.AbsPath)
 
-	err = overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
+	err := overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
 		b.Lock()
 		defer b.Unlock()
 
@@ -120,7 +129,7 @@ func (b *Buffer) Backup() error {
 
 // RemoveBackup removes any backup file associated with this buffer
 func (b *Buffer) RemoveBackup() {
-	if !b.Settings["backup"].(bool) || b.Settings["permbackup"].(bool) || b.Path == "" || b.Type != BTDefault {
+	if !b.Settings["backup"].(bool) || b.keepBackup() || b.Path == "" || b.Type != BTDefault {
 		return
 	}
 	f := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "backups"), b.AbsPath)
