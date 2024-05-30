@@ -44,6 +44,9 @@ var (
 	Stdout *bytes.Buffer
 	// Sigterm is a channel where micro exits when written
 	Sigterm chan os.Signal
+
+	// To be used for file writes before umask is applied
+	FileMode os.FileMode = 0666
 )
 
 func init() {
