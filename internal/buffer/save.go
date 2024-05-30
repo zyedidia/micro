@@ -57,7 +57,7 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 
 			return
 		}
-	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666); err != nil {
+	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, util.FileMode); err != nil {
 		return
 	}
 
