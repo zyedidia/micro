@@ -15,6 +15,7 @@ import (
 	"github.com/micro-editor/json5"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/micro-editor/tcell/v2"
 )
 
@@ -26,7 +27,7 @@ var Binder = map[string]func(e Event, action string){
 
 func createBindingsIfNotExist(fname string) {
 	if _, e := os.Stat(fname); errors.Is(e, fs.ErrNotExist) {
-		ioutil.WriteFile(fname, []byte("{}"), 0644)
+		ioutil.WriteFile(fname, []byte("{}"), util.FileMode)
 	}
 }
 
@@ -305,7 +306,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		BindKey(k, v, Binder["buffer"])
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		return true, ioutil.WriteFile(filename, append(txt, '\n'), util.FileMode)
 	}
 	return false, e
 }
@@ -355,7 +356,7 @@ func UnbindKey(k string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		return ioutil.WriteFile(filename, append(txt, '\n'), util.FileMode)
 	}
 	return e
 }
