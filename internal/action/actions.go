@@ -358,7 +358,7 @@ func (h *BufPane) SelectWordRight() bool {
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.Cursor.WordRight()
+	h.Cursor.WordEnd()
 	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
