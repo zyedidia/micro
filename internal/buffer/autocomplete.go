@@ -2,7 +2,7 @@ package buffer
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"sort"
 	"strings"
@@ -109,15 +109,15 @@ func FileComplete(b *Buffer) ([]string, []string) {
 	sep := string(os.PathSeparator)
 	dirs := strings.Split(input, sep)
 
-	var files []os.FileInfo
+	var files []fs.DirEntry
 	var err error
 	if len(dirs) > 1 {
 		directories := strings.Join(dirs[:len(dirs)-1], sep) + sep
 
 		directories, _ = util.ReplaceHome(directories)
-		files, err = ioutil.ReadDir(directories)
+		files, err = os.ReadDir(directories)
 	} else {
-		files, err = ioutil.ReadDir(".")
+		files, err = os.ReadDir(".")
 	}
 
 	if err != nil {
