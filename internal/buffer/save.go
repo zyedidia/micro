@@ -25,6 +25,29 @@ import (
 // because hashing is too slow
 const LargeFileThreshold = 50000
 
+type BufferWriter struct {
+	b        *Buffer
+	withSudo bool
+}
+
+func (w BufferWriter) Overwrite(name string, isBackup bool) error {
+	var withSudo bool
+	if isBackup {
+		withSudo = false
+	} else {
+		withSudo = w.withSudo
+	}
+	return w.b.Overwrite(name, isBackup, withSudo)
+}
+
+func (w BufferWriter) BackupDir() string {
+	return w.b.BackupDir()
+}
+
+func (w BufferWriter) KeepBackup() bool {
+	return w.b.KeepBackup()
+}
+
 // overwriteFile opens the given file for writing, truncating if one exists, and then calls
 // the supplied function with the file as io.Writer object, also making sure the file is
 // closed afterwards.
@@ -87,6 +110,59 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 	}
 
 	return
+}
+
+func (b *Buffer) Overwrite(name string, isBackup bool, withSudo bool) (err error) {
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return
+	}
+
+	var size int
+	fwriter := func(file io.Writer) (e error) {
+		if len(b.lines) == 0 {
+			return
+		}
+
+		// end of line
+		var eol []byte
+		if b.Endings == FFDos {
+			eol = []byte{'\r', '\n'}
+		} else {
+			eol = []byte{'\n'}
+		}
+
+		// write lines
+		if size, err = file.Write(b.lines[0].data); err != nil {
+			return
+		}
+
+		for _, l := range b.lines[1:] {
+			if _, err = file.Write(eol); err != nil {
+				return
+			}
+			if _, err = file.Write(l.data); err != nil {
+				return
+			}
+			size += len(eol) + len(l.data)
+		}
+		return
+	}
+
+	if err = overwriteFile(name, enc, fwriter, withSudo); err != nil {
+		return
+	}
+
+	if !isBackup && !b.Settings["fastdirty"].(bool) {
+		if size > LargeFileThreshold {
+			// For large files 'fastdirty' needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
+	}
+
+	return err
 }
 
 // Save saves the buffer to its default path
@@ -162,6 +238,9 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		return errors.New("Error: " + absFilename + " is not a regular file and cannot be stored")
 	}
 
+	// Resolve path separators
+	absFilename, _ = filepath.Abs(absFilename)
+
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
 		// Check if the parent dirs don't exist
@@ -179,59 +258,13 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		}
 	}
 
-	var fileSize int
-
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
-	if err != nil {
+	w := BufferWriter{b, withSudo}
+	if err = util.SafeWrite(absFilename, w); err != nil {
 		return err
-	}
-
-	fwriter := func(file io.Writer) (e error) {
-		if len(b.lines) == 0 {
-			return
-		}
-
-		// end of line
-		var eol []byte
-		if b.Endings == FFDos {
-			eol = []byte{'\r', '\n'}
-		} else {
-			eol = []byte{'\n'}
-		}
-
-		// write lines
-		if fileSize, e = file.Write(b.lines[0].data); e != nil {
-			return
-		}
-
-		for _, l := range b.lines[1:] {
-			if _, e = file.Write(eol); e != nil {
-				return
-			}
-			if _, e = file.Write(l.data); e != nil {
-				return
-			}
-			fileSize += len(eol) + len(l.data)
-		}
-		return
-	}
-
-	if err = overwriteFile(absFilename, enc, fwriter, withSudo); err != nil {
-		return err
-	}
-
-	if !b.Settings["fastdirty"].(bool) {
-		if fileSize > LargeFileThreshold {
-			// For large files 'fastdirty' needs to be on
-			b.Settings["fastdirty"] = true
-		} else {
-			calcHash(b, &b.origHash)
-		}
 	}
 
 	b.Path = filename
-	absPath, _ := filepath.Abs(filename)
-	b.AbsPath = absPath
+	b.AbsPath = absFilename
 	b.isModified = false
 	b.UpdateRules()
 	return err

@@ -65,23 +65,32 @@ func (b *Buffer) RequestBackup() {
 	}
 }
 
+func (b *Buffer) BackupDir() string {
+	backupdir, err := util.ReplaceHome(config.GlobalSettings["backupdir"].(string))
+	if backupdir == "" || err != nil {
+		backupdir = filepath.Join(config.ConfigDir, "backups")
+	}
+	return backupdir
+}
+
+func (b *Buffer) KeepBackup() bool {
+	return config.GlobalSettings["permbackup"].(bool)
+}
+
 // Backup saves the current buffer to ConfigDir/backups
 func (b *Buffer) Backup() error {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return nil
 	}
 
-	backupdir, err := util.ReplaceHome(config.GlobalSettings["backupdir"].(string))
-	if backupdir == "" || err != nil {
-		backupdir = filepath.Join(config.ConfigDir, "backups")
-	}
+	backupdir := b.BackupDir()
 	if _, err := os.Stat(backupdir); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(backupdir, os.ModePerm)
 	}
 
 	name := filepath.Join(backupdir, util.EscapePath(b.AbsPath))
 
-	err = overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
+	err := overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
 		b.Lock()
 		defer b.Unlock()
 
