@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -161,6 +160,6 @@ func main() {
 		return
 	}
 
-	data, _ := ioutil.ReadFile(os.Args[1])
+	data, _ := os.ReadFile(os.Args[1])
 	fmt.Print(generateFile(parseFile(string(data), os.Args[1])))
 }

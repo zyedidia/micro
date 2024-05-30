@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"encoding/gob"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -91,7 +90,7 @@ func CleanConfig() {
 
 	// detect incorrectly formatted buffer/ files
 	buffersPath := filepath.Join(config.ConfigDir, "buffers")
-	files, err := ioutil.ReadDir(buffersPath)
+	files, err := os.ReadDir(buffersPath)
 	if err == nil {
 		var badFiles []string
 		var buffer buffer.SerializedBuffer
