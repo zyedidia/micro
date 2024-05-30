@@ -41,7 +41,7 @@ func main() {
 	`
 			infoPlistData := []byte(rawInfoPlistString)
 
-			err := ioutil.WriteFile("/tmp/micro-info.plist", infoPlistData, 0644)
+			err := ioutil.WriteFile("/tmp/micro-info.plist", infoPlistData, 0666)
 			check(err)
 			fmt.Println("-linkmode external -extldflags -Wl,-sectcreate,__TEXT,__info_plist,/tmp/micro-info.plist")
 		}

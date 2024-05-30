@@ -42,6 +42,9 @@ var (
 
 	// Stdout is a buffer that is written to stdout when micro closes
 	Stdout *bytes.Buffer
+
+	// To be used for file writes before umask is applied
+	FileMode os.FileMode = 0666
 )
 
 func init() {
