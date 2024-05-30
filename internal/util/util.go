@@ -46,6 +46,9 @@ var (
 	Sigterm chan os.Signal
 )
 
+// To be used for file writes before umask is applied
+const FileMode os.FileMode = 0666
+
 func init() {
 	var err error
 	SemVersion, err = semver.Make(Version)

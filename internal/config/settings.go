@@ -356,7 +356,7 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		err = ioutil.WriteFile(filename, append(txt, '\n'), util.FileMode)
 	}
 	return err
 }
@@ -378,7 +378,7 @@ func OverwriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		err = ioutil.WriteFile(filename, append(txt, '\n'), util.FileMode)
 	}
 	return err
 }
