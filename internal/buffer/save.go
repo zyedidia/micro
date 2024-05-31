@@ -103,6 +103,9 @@ func (b *Buffer) overwrite(name string, isBackup bool, withSudo bool) (err error
 
 	var size int
 	fwriter := func(file io.Writer) (e error) {
+		b.Lock()
+		defer b.Unlock()
+
 		if len(b.lines) == 0 {
 			return
 		}
