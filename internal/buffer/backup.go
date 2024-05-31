@@ -3,7 +3,6 @@ package buffer
 import (
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -13,7 +12,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"golang.org/x/text/encoding"
 )
 
 const backupMsg = `A backup was detected for this file. This likely means that micro
@@ -77,7 +75,7 @@ func (b *Buffer) keepBackup() bool {
 	return b.forceKeepBackup || b.Settings["permbackup"].(bool)
 }
 
-// Backup saves the current buffer to ConfigDir/backups
+// Backup saves the current buffer to the backups directory
 func (b *Buffer) Backup() error {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return nil
@@ -89,38 +87,25 @@ func (b *Buffer) Backup() error {
 	}
 
 	name := util.DetermineEscapePath(backupdir, b.AbsPath)
-
-	err := overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
-		b.Lock()
-		defer b.Unlock()
-
-		if len(b.lines) == 0 {
-			return
+	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
+		_, err = b.overwrite(name, false)
+		if err == nil {
+			b.requestedBackup = false
 		}
+		return err
+	}
 
-		// end of line
-		var eol []byte
-		if b.Endings == FFDos {
-			eol = []byte{'\r', '\n'}
-		} else {
-			eol = []byte{'\n'}
-		}
-
-		// write lines
-		if _, e = file.Write(b.lines[0].data); e != nil {
-			return
-		}
-
-		for _, l := range b.lines[1:] {
-			if _, e = file.Write(eol); e != nil {
-				return
-			}
-			if _, e = file.Write(l.data); e != nil {
-				return
-			}
-		}
-		return
-	}, false)
+	tmp := util.AppendBackupSuffix(name)
+	_, err := b.overwrite(tmp, false)
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	err = os.Rename(tmp, name)
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
 
 	b.requestedBackup = false
 
@@ -132,7 +117,7 @@ func (b *Buffer) RemoveBackup() {
 	if !b.Settings["backup"].(bool) || b.keepBackup() || b.Path == "" || b.Type != BTDefault {
 		return
 	}
-	f := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "backups"), b.AbsPath)
+	f := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
 	os.Remove(f)
 }
 
@@ -140,7 +125,7 @@ func (b *Buffer) RemoveBackup() {
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
 	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
-		backupfile := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "backups"), b.AbsPath)
+		backupfile := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
 			if err == nil {
