@@ -1,14 +1,12 @@
 package buffer
 
 import (
+	"bytes"
 	"encoding/gob"
 	"errors"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
-
-	"golang.org/x/text/encoding"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -31,16 +29,18 @@ func (b *Buffer) Serialize() error {
 		return nil
 	}
 
-	name := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
-
-	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
-		err := gob.NewEncoder(file).Encode(SerializedBuffer{
-			b.EventHandler,
-			b.GetActiveCursor().Loc,
-			b.ModTime,
-		})
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(SerializedBuffer{
+		b.EventHandler,
+		b.GetActiveCursor().Loc,
+		b.ModTime,
+	})
+	if err != nil {
 		return err
-	}, false)
+	}
+
+	name := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
+	return util.SafeWrite(name, buf.Bytes(), true)
 }
 
 // Unserialize loads the buffer info from config.ConfigDir/buffers
