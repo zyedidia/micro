@@ -149,6 +149,26 @@ var (
 	VolatileSettings map[string]bool
 )
 
+type SettingsWriter struct {
+	txt []byte
+}
+
+func (w SettingsWriter) Overwrite(name string, isBackup bool) error {
+	return os.WriteFile(name, w.txt, util.FileMode)
+}
+
+func (w SettingsWriter) BackupDir() string {
+	backupdir, err := util.ReplaceHome(GlobalSettings["backupdir"].(string))
+	if backupdir == "" || err != nil {
+		backupdir = filepath.Join(ConfigDir, "backups")
+	}
+	return backupdir
+}
+
+func (w SettingsWriter) KeepBackup() bool {
+	return GlobalSettings["permbackup"].(bool)
+}
+
 func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
@@ -289,8 +309,10 @@ func WriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		var w SettingsWriter
+		w.txt, _ = json.MarshalIndent(parsedSettings, "", "    ")
+		w.txt = append(w.txt, '\n')
+		err = util.SafeWrite(filename, w)
 	}
 	return err
 }
@@ -311,8 +333,10 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		var w SettingsWriter
+		w.txt, _ = json.MarshalIndent(parsedSettings, "", "    ")
+		w.txt = append(w.txt, '\n')
+		err = util.SafeWrite(filename, w)
 	}
 	return err
 }
