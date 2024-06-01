@@ -24,9 +24,13 @@ var Binder = map[string]func(e Event, action string){
 	"terminal": TermMapEvent,
 }
 
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
+
 func createBindingsIfNotExist(fname string) {
 	if _, e := os.Stat(fname); errors.Is(e, fs.ErrNotExist) {
-		os.WriteFile(fname, []byte("{}"), util.FileMode)
+		writeFile(fname, []byte("{}"))
 	}
 }
 
@@ -305,7 +309,8 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		BindKey(k, v, Binder["buffer"])
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		txt = append(txt, '\n')
+		return true, writeFile(filename, txt)
 	}
 	return false, e
 }
@@ -355,7 +360,8 @@ func UnbindKey(k string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		txt = append(txt, '\n')
+		return writeFile(filename, txt)
 	}
 	return e
 }
