@@ -1,14 +1,12 @@
 package buffer
 
 import (
+	"bytes"
 	"encoding/gob"
 	"errors"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
-
-	"golang.org/x/text/encoding"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -22,6 +20,31 @@ type SerializedBuffer struct {
 	ModTime      time.Time
 }
 
+type SerializedWriter struct {
+	b *Buffer
+}
+
+func (w SerializedWriter) Overwrite(name string, isBackup bool) (err error) {
+	var buf bytes.Buffer
+	err = gob.NewEncoder(&buf).Encode(SerializedBuffer{
+		w.b.EventHandler,
+		w.b.GetActiveCursor().Loc,
+		w.b.ModTime,
+	})
+	if err != nil {
+		return
+	}
+	return os.WriteFile(name, buf.Bytes(), util.FileMode)
+}
+
+func (w SerializedWriter) BackupDir() string {
+	return w.b.BackupDir()
+}
+
+func (w SerializedWriter) KeepBackup() bool {
+	return w.b.KeepBackup()
+}
+
 // Serialize serializes the buffer to config.ConfigDir/buffers
 func (b *Buffer) Serialize() error {
 	if !b.Settings["savecursor"].(bool) && !b.Settings["saveundo"].(bool) {
@@ -32,15 +55,8 @@ func (b *Buffer) Serialize() error {
 	}
 
 	name := filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath))
-
-	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
-		err := gob.NewEncoder(file).Encode(SerializedBuffer{
-			b.EventHandler,
-			b.GetActiveCursor().Loc,
-			b.ModTime,
-		})
-		return err
-	}, false)
+	w := SerializedWriter{b}
+	return util.SafeWrite(name, w)
 }
 
 // Unserialize loads the buffer info from config.ConfigDir/buffers
