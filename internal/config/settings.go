@@ -150,6 +150,10 @@ var (
 	VolatileSettings map[string]bool
 )
 
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
+
 func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
@@ -341,7 +345,8 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }
@@ -362,8 +367,9 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }
