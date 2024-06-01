@@ -24,9 +24,29 @@ var Binder = map[string]func(e Event, action string){
 	"terminal": TermMapEvent,
 }
 
+type BindingsWriter struct {
+	txt []byte
+}
+
+func (w BindingsWriter) Overwrite(name string, isBackup bool) error {
+	return os.WriteFile(name, w.txt, util.FileMode)
+}
+
+func (w BindingsWriter) BackupDir() string {
+	backupdir, err := util.ReplaceHome(config.GlobalSettings["backupdir"].(string))
+	if backupdir == "" || err != nil {
+		backupdir = filepath.Join(config.ConfigDir, "backups")
+	}
+	return backupdir
+}
+
+func (w BindingsWriter) KeepBackup() bool {
+	return config.GlobalSettings["permbackup"].(bool)
+}
+
 func createBindingsIfNotExist(fname string) {
 	if _, e := os.Stat(fname); errors.Is(e, fs.ErrNotExist) {
-		os.WriteFile(fname, []byte("{}"), util.FileMode)
+		util.SafeWrite(fname, BindingsWriter{[]byte("{}")})
 	}
 }
 
@@ -317,8 +337,10 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 
 		BindKey(k, v, Binder["buffer"])
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		var w BindingsWriter
+		w.txt, _ = json.MarshalIndent(parsed, "", "    ")
+		w.txt = append(w.txt, '\n')
+		return true, util.SafeWrite(filename, w)
 	}
 	return false, e
 }
@@ -367,8 +389,10 @@ func UnbindKey(k string) error {
 			delete(config.Bindings["buffer"], k)
 		}
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return os.WriteFile(filename, append(txt, '\n'), util.FileMode)
+		var w BindingsWriter
+		w.txt, _ = json.MarshalIndent(parsed, "", "    ")
+		w.txt = append(w.txt, '\n')
+		return util.SafeWrite(filename, w)
 	}
 	return e
 }
