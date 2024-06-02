@@ -159,6 +159,7 @@ func (i *InfoBuf) DonePrompt(canceled bool) {
 						break
 					}
 				}
+
 				i.PromptCallback(resp, false)
 			}
 			// i.PromptCallback = nil
