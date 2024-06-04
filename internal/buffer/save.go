@@ -266,6 +266,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		return err
 	}
 
+	b.requestedBackup = false
 	b.Path = filename
 	b.AbsPath = absFilename
 	b.isModified = false

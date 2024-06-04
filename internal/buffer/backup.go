@@ -68,12 +68,12 @@ func init() {
 
 func (b *Buffer) RequestBackup() {
 	if !b.requestedBackup {
+		b.requestedBackup = true
 		select {
 		case backupRequestChan <- b:
 		default:
 			// channel is full
 		}
-		b.requestedBackup = true
 	}
 }
 
@@ -91,7 +91,7 @@ func (b *Buffer) KeepBackup() bool {
 
 // Backup saves the current buffer to BackupDir()
 func (b *Buffer) Backup() error {
-	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
+	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault || !b.requestedBackup {
 		return nil
 	}
 
