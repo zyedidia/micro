@@ -1179,6 +1179,7 @@ func (h *BufPane) CopyLine() bool {
 		return false
 	}
 	origLoc := h.Cursor.Loc
+	origLastVisualX := h.Cursor.LastVisualX
 	h.Cursor.SelectLine()
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
 	h.freshClip = true
@@ -1186,6 +1187,7 @@ func (h *BufPane) CopyLine() bool {
 
 	h.Cursor.Deselect(true)
 	h.Cursor.Loc = origLoc
+	h.Cursor.LastVisualX = origLastVisualX
 	h.Relocate()
 	return true
 }
