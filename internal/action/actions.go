@@ -1181,6 +1181,9 @@ func (h *BufPane) CopyLine() bool {
 	origLoc := h.Cursor.Loc
 	origLastVisualX := h.Cursor.LastVisualX
 	h.Cursor.SelectLine()
+	if !h.Cursor.HasSelection() {
+		return false
+	}
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
 	h.freshClip = true
 	InfoBar.Message("Copied line")
