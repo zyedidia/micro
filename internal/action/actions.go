@@ -1164,20 +1164,18 @@ func (h *BufPane) Redo() bool {
 
 // Copy the selection to the system clipboard
 func (h *BufPane) Copy() bool {
-	if h.Cursor.HasSelection() {
-		h.Cursor.CopySelection(clipboard.ClipboardReg)
-		h.freshClip = true
-		InfoBar.Message("Copied selection")
+	if !h.Cursor.HasSelection() {
+		return false
 	}
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.freshClip = true
+	InfoBar.Message("Copied selection")
 	h.Relocate()
 	return true
 }
 
 // CopyLine copies the current line to the clipboard
 func (h *BufPane) CopyLine() bool {
-	if h.Cursor.HasSelection() {
-		return false
-	}
 	origLoc := h.Cursor.Loc
 	origLastVisualX := h.Cursor.LastVisualX
 	h.Cursor.SelectLine()
