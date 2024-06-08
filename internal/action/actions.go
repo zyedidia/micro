@@ -1072,6 +1072,15 @@ func (h *BufPane) UnhighlightSearch() bool {
 	return true
 }
 
+// ResetSearch resets the last used search term
+func (h *BufPane) ResetSearch() bool {
+	if h.Buf.LastSearch != "" {
+		h.Buf.LastSearch = ""
+		return true
+	}
+	return false
+}
+
 // FindNext searches forwards for the last used search term
 func (h *BufPane) FindNext() bool {
 	if h.Buf.LastSearch == "" {

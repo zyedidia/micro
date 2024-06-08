@@ -815,6 +815,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleRuler":               (*BufPane).ToggleRuler,
 	"ToggleHighlightSearch":     (*BufPane).ToggleHighlightSearch,
 	"UnhighlightSearch":         (*BufPane).UnhighlightSearch,
+	"ResetSearch":               (*BufPane).ResetSearch,
 	"ClearStatus":               (*BufPane).ClearStatus,
 	"ShellMode":                 (*BufPane).ShellMode,
 	"CommandMode":               (*BufPane).CommandMode,
