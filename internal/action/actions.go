@@ -1279,11 +1279,44 @@ func (h *BufPane) Duplicate() bool {
 	return true
 }
 
-// DuplicateLine duplicates the current line
+// DuplicateLine duplicates the current line. If there is a selection, DuplicateLine
+// duplicates all the lines that are (fully or partially) in the selection.
 func (h *BufPane) DuplicateLine() bool {
-	h.Cursor.End()
-	h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
-	InfoBar.Message("Duplicated line")
+	if h.Cursor.HasSelection() {
+		origLoc := h.Cursor.Loc
+		origLastVisualX := h.Cursor.LastVisualX
+		origSelection := h.Cursor.CurSelection
+
+		start := h.Cursor.CurSelection[0]
+		end := h.Cursor.CurSelection[1]
+		if start.GreaterThan(end) {
+			start, end = end, start
+		}
+		if end.X == 0 {
+			end = end.Move(-1, h.Buf)
+		}
+
+		h.Cursor.Deselect(true)
+		h.Cursor.Loc = end
+		h.Cursor.End()
+		for y := start.Y; y <= end.Y; y++ {
+			h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(y)))
+		}
+
+		h.Cursor.Loc = origLoc
+		h.Cursor.LastVisualX = origLastVisualX
+		h.Cursor.CurSelection = origSelection
+
+		if start.Y < end.Y {
+			InfoBar.Message(fmt.Sprintf("Duplicated %d lines", end.Y-start.Y+1))
+		} else {
+			InfoBar.Message("Duplicated line")
+		}
+	} else {
+		h.Cursor.End()
+		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
+		InfoBar.Message("Duplicated line")
+	}
 	h.Relocate()
 	return true
 }
