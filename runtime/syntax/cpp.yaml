@@ -29,12 +29,36 @@ rules:
     - symbol.operator: "[-+*/%=<>.:;,~&|^!?]|\\b(sizeof|alignof|typeid|(and|or|xor|not)(_eq)?|bitor|compl|bitand|(const|dynamic|reinterpret|static)_cast)\\b"
       # Parenthetical Color
     - symbol.brackets: "[(){}]|\\[|\\]"
+
       # Integer Literals
-    - constant.number: "(\\b([1-9][0-9']*|0[0-7']*|0[Xx][0-9a-fA-F']+|0[Bb][01]+)([Uu]?[Ll][Ll]?|[Ll][Ll]?[Uu]?)?\\b)"
+    - constant.number: "(\\b([0-9]|0[0-7]|0[Xx][0-9A-Fa-f]|0[Bb][01])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"      # Base case (Without ' separtor)
+    - constant.number: "(\\b([1-9][0-9']*[0-9])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"                            # Decimal
+    - constant.number: "(\\b(0[0-7][0-7']*[0-7])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"                           # Oct
+    - constant.number: "(\\b(0[Xx][0-9A-Fa-f][0-9A-Fa-f']*[0-9A-Fa-f])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"     # Hex
+    - constant.number: "(\\b(0[Bb][01][01']*[01])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"                          # Binary
+
       # Decimal Floating-point Literals
-    - constant.number: "(\\b(([0-9']*[.][0-9']+|[0-9']+[.][0-9']*)([Ee][+-]?[0-9']+)?|[0-9']+[Ee][+-]?[0-9']+)[FfLl]?\\b)"
+    - constant.number: "(([0-9]?[.]?[0-9]+)([Ee][+-]?[0-9]+)?[FfLl]?\\b)"                                       # Base case optional interger part with exponent base case
+    - constant.number: "(\\b([0-9]+[.][0-9]?)([Ee][+-]?[0-9]+)?[FfLl]?)"                                        # Base case optional fractional part with exponent base case
+    - constant.number: "(([0-9]?[.]?[0-9]+)([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"                            # Base case optional interger part with exponent
+    - constant.number: "(\\b([0-9]+[.][0-9]?)([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"                             # Base case optional fractional part with exponent
+
+    - constant.number: "(([0-9][0-9']*[0-9])?[.]?([0-9][0-9']*[0-9])+([Ee][+-]?[0-9]+)?[FfLl]?\\b)"             # Optional interger part with exponent base case
+    - constant.number: "(\\b([0-9][0-9']*[0-9])+[.]([0-9][0-9']*[0-9])?([Ee][+-]?[0-9]+)?[FfLl]?)"              # Optional fractional part with exponent base case
+    - constant.number: "(([0-9][0-9']*[0-9])?[.]?([0-9][0-9']*[0-9])+([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"  # Optional interger part with exponent
+    - constant.number: "(\\b([0-9][0-9']*[0-9])+[.]([0-9][0-9']*[0-9])?([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"   # Optional fractional part with exponent
+
       # Hexadecimal Floating-point Literals
-    - constant.number: "(\\b0[Xx]([0-9a-zA-Z']*[.][0-9a-zA-Z']+|[0-9a-zA-Z']+[.][0-9a-zA-Z']*)[Pp][+-]?[0-9']+[FfLl]?\\b)"
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z]?[.]?[0-9a-zA-Z]+)([Pp][+-]?[0-9]+)?[FfLl]?\\b)"                   # Base case optional interger part with exponent base case
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z]+[.][0-9a-zA-Z]?)([Pp][+-]?[0-9]+)?[FfLl]?)"                       # Base case optional fractional part with exponent base case
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z]?[.]?[0-9a-zA-Z]+)([Pp][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"        # Base case optional interger part with exponent
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z]+[.][0-9a-zA-Z]?)([Pp][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"            # Base case optional fractional part with exponent
+
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])?[.]?([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])+([Pp][+-]?[0-9]+)?[FfLl]?\\b)"             # Optional interger part with exponent base case
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])+[.]([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])?([Pp][+-]?[0-9]+)?[FfLl]?)"                 # Optional fractional part with exponent base case
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])?[.]?([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])+([Pp][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"  # Optional interger part with exponent
+    - constant.number: "(\\b0[Xx]([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])+[.]([0-9a-zA-Z][0-9a-zA-Z']*[0-9a-zA-Z])?([Pp][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"      # Optional fractional part with exponent
+
     - constant.bool: "(\\b(true|false|NULL|nullptr|TRUE|FALSE)\\b)"
 
     - constant.string:
@@ -47,9 +71,10 @@ rules:
     - constant.string:
         start: "'"
         end: "'"
-        skip: "\\\\."
+        skip: "(\\\\.)|(\\b[1-9][0-9']+[0-9]|0[0-7']+[0-7]|0[Xx][0-9A-Fa-f][0-9A-Fa-f']+[0-9A-Fa-f]|0[Bb][01][01']*[01]\\b)"
         rules:
-            - error: "..+"
+              # TODO: Revert back to - error: "..+" once #3127 is merged
+            - error: "[[:graph:]]{2,}'"
             - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 
     - comment:
