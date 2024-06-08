@@ -1211,6 +1211,7 @@ func (h *BufPane) CutLine() bool {
 	h.lastCutTime = time.Now()
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
+	h.Cursor.StoreVisualX()
 	InfoBar.Message("Cut line")
 	h.Relocate()
 	return true
@@ -1256,6 +1257,7 @@ func (h *BufPane) DeleteLine() bool {
 	}
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
+	h.Cursor.StoreVisualX()
 	InfoBar.Message("Deleted line")
 	h.Relocate()
 	return true
