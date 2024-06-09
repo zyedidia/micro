@@ -1202,12 +1202,10 @@ func (h *BufPane) CutLine() bool {
 		return false
 	}
 	if h.freshClip && time.Since(h.lastCutTime) < 10*time.Second {
-		if h.Cursor.HasSelection() {
-			if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
-				InfoBar.Error(err)
-			} else {
-				clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
-			}
+		if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
+			InfoBar.Error(err)
+		} else {
+			clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
 		}
 	} else {
 		h.Copy()
