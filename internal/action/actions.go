@@ -1246,6 +1246,7 @@ func (h *BufPane) CutLine() bool {
 	if h.freshClip && time.Since(h.lastCutTime) < 10*time.Second {
 		if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
 			InfoBar.Error(err)
+			return false
 		} else {
 			clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
 			totalLines = strings.Count(clip, "\n") + nlines
