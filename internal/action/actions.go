@@ -1201,7 +1201,7 @@ func (h *BufPane) CutLine() bool {
 	if !h.Cursor.HasSelection() {
 		return false
 	}
-	if h.freshClip {
+	if h.freshClip && time.Since(h.lastCutTime) < 10*time.Second {
 		if h.Cursor.HasSelection() {
 			if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
 				InfoBar.Error(err)
@@ -1209,7 +1209,7 @@ func (h *BufPane) CutLine() bool {
 				clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
 			}
 		}
-	} else if time.Since(h.lastCutTime)/time.Second > 10*time.Second || !h.freshClip {
+	} else {
 		h.Copy()
 	}
 	h.freshClip = true
