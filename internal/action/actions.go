@@ -1268,19 +1268,22 @@ func (h *BufPane) CutLine() bool {
 	return true
 }
 
-// DuplicateLine duplicates the current line or selection
-func (h *BufPane) DuplicateLine() bool {
-	var infoMessage = "Duplicated line"
-	if h.Cursor.HasSelection() {
-		infoMessage = "Duplicated selection"
-		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
-	} else {
-		h.Cursor.End()
-		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
-		// h.Cursor.Right()
+// Duplicate the selection
+func (h *BufPane) Duplicate() bool {
+	if !h.Cursor.HasSelection() {
+		return false
 	}
+	h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
+	InfoBar.Message("Duplicated selection")
+	h.Relocate()
+	return true
+}
 
-	InfoBar.Message(infoMessage)
+// DuplicateLine duplicates the current line
+func (h *BufPane) DuplicateLine() bool {
+	h.Cursor.End()
+	h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
+	InfoBar.Message("Duplicated line")
 	h.Relocate()
 	return true
 }

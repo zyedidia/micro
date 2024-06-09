@@ -494,7 +494,7 @@ conventions for text editing defaults.
     "Ctrl-c":         "Copy|CopyLine",
     "Ctrl-x":         "Cut|CutLine",
     "Ctrl-k":         "CutLine",
-    "Ctrl-d":         "DuplicateLine",
+    "Ctrl-d":         "Duplicate|DuplicateLine",
     "Ctrl-v":         "Paste",
     "Ctrl-a":         "SelectAll",
     "Ctrl-t":         "AddTab",

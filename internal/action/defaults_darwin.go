@@ -48,7 +48,7 @@ var bufdefaults = map[string]string{
 	"Ctrl-c":         "Copy|CopyLine",
 	"Ctrl-x":         "Cut|CutLine",
 	"Ctrl-k":         "CutLine",
-	"Ctrl-d":         "DuplicateLine",
+	"Ctrl-d":         "Duplicate|DuplicateLine",
 	"Ctrl-v":         "Paste",
 	"Ctrl-a":         "SelectAll",
 	"Ctrl-t":         "AddTab",
