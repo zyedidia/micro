@@ -235,7 +235,8 @@ type BufPane struct {
 	// It is used for clearing the clipboard to replace it with fresh cut lines.
 	lastCutTime time.Time
 
-	// freshClip returns true if the clipboard has never been pasted.
+	// freshClip returns true if one or more lines have been cut to the clipboard
+	// and have never been pasted yet.
 	freshClip bool
 
 	// Was the last mouse event actually a double click?

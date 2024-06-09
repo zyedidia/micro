@@ -1188,7 +1188,7 @@ func (h *BufPane) Copy() bool {
 		return false
 	}
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
-	h.freshClip = true
+	h.freshClip = false
 	InfoBar.Message("Copied selection")
 	h.Relocate()
 	return true
@@ -1206,7 +1206,7 @@ func (h *BufPane) CopyLine() bool {
 		return false
 	}
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
-	h.freshClip = true
+	h.freshClip = false
 	if nlines > 1 {
 		InfoBar.Message(fmt.Sprintf("Copied %d lines", nlines))
 	} else {
@@ -1228,7 +1228,7 @@ func (h *BufPane) Cut() bool {
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
-	h.freshClip = true
+	h.freshClip = false
 	InfoBar.Message("Cut selection")
 
 	h.Relocate()
@@ -1251,7 +1251,7 @@ func (h *BufPane) CutLine() bool {
 			totalLines = strings.Count(clip, "\n") + nlines
 		}
 	} else {
-		h.Copy()
+		h.Cursor.CopySelection(clipboard.ClipboardReg)
 	}
 	h.freshClip = true
 	h.lastCutTime = time.Now()
