@@ -1162,6 +1162,26 @@ func (h *BufPane) Redo() bool {
 	return true
 }
 
+func (h *BufPane) selectLines() int {
+	if h.Cursor.HasSelection() {
+		start := h.Cursor.CurSelection[0]
+		end := h.Cursor.CurSelection[1]
+		if start.GreaterThan(end) {
+			start, end = end, start
+		}
+		if end.X == 0 {
+			end = end.Move(-1, h.Buf)
+		}
+
+		h.Cursor.Deselect(true)
+		h.Cursor.SetSelectionStart(buffer.Loc{0, start.Y})
+		h.Cursor.SetSelectionEnd(buffer.Loc{0, end.Y + 1})
+	} else {
+		h.Cursor.SelectLine()
+	}
+	return h.Cursor.CurSelection[1].Y - h.Cursor.CurSelection[0].Y
+}
+
 // Copy the selection to the system clipboard
 func (h *BufPane) Copy() bool {
 	if !h.Cursor.HasSelection() {
@@ -1174,21 +1194,28 @@ func (h *BufPane) Copy() bool {
 	return true
 }
 
-// CopyLine copies the current line to the clipboard
+// CopyLine copies the current line to the clipboard. If there is a selection,
+// CopyLine copies all the lines that are (fully or partially) in the selection.
 func (h *BufPane) CopyLine() bool {
 	origLoc := h.Cursor.Loc
 	origLastVisualX := h.Cursor.LastVisualX
-	h.Cursor.SelectLine()
-	if !h.Cursor.HasSelection() {
+	origSelection := h.Cursor.CurSelection
+
+	nlines := h.selectLines()
+	if nlines == 0 {
 		return false
 	}
 	h.Cursor.CopySelection(clipboard.ClipboardReg)
 	h.freshClip = true
-	InfoBar.Message("Copied line")
+	if nlines > 1 {
+		InfoBar.Message(fmt.Sprintf("Copied %d lines", nlines))
+	} else {
+		InfoBar.Message("Copied line")
+	}
 
-	h.Cursor.Deselect(true)
 	h.Cursor.Loc = origLoc
 	h.Cursor.LastVisualX = origLastVisualX
+	h.Cursor.CurSelection = origSelection
 	h.Relocate()
 	return true
 }
@@ -1208,10 +1235,11 @@ func (h *BufPane) Cut() bool {
 	return true
 }
 
-// CutLine cuts the current line to the clipboard
+// CutLine cuts the current line to the clipboard. If there is a selection,
+// CutLine cuts all the lines that are (fully or partially) in the selection.
 func (h *BufPane) CutLine() bool {
-	h.Cursor.SelectLine()
-	if !h.Cursor.HasSelection() {
+	nlines := h.selectLines()
+	if nlines == 0 {
 		return false
 	}
 	if h.freshClip && time.Since(h.lastCutTime) < 10*time.Second {
@@ -1228,7 +1256,11 @@ func (h *BufPane) CutLine() bool {
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
 	h.Cursor.StoreVisualX()
-	InfoBar.Message("Cut line")
+	if nlines > 1 {
+		InfoBar.Message(fmt.Sprintf("Cut %d lines", nlines))
+	} else {
+		InfoBar.Message("Cut line")
+	}
 	h.Relocate()
 	return true
 }
@@ -1250,16 +1282,21 @@ func (h *BufPane) DuplicateLine() bool {
 	return true
 }
 
-// DeleteLine deletes the current line
+// DeleteLine deletes the current line. If there is a selection, DeleteLine
+// deletes all the lines that are (fully or partially) in the selection.
 func (h *BufPane) DeleteLine() bool {
-	h.Cursor.SelectLine()
-	if !h.Cursor.HasSelection() {
+	nlines := h.selectLines()
+	if nlines == 0 {
 		return false
 	}
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
 	h.Cursor.StoreVisualX()
-	InfoBar.Message("Deleted line")
+	if nlines > 1 {
+		InfoBar.Message(fmt.Sprintf("Deleted %d lines", nlines))
+	} else {
+		InfoBar.Message("Deleted line")
+	}
 	h.Relocate()
 	return true
 }
