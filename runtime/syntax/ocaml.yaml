@@ -12,7 +12,7 @@ rules:
       #patterns
     - statement: "\\b(fun|function|functor|match|try|with)\\b"
       #patterns-modifiers
-    - statement: "\\b(as|when|of)\\b" 
+    - statement: "\\b(as|when|of)\\b"
       #conditions
     - statement: "\\b(if|then|else)\\b"
       #blocs

@@ -35,7 +35,9 @@ func startup(args []string) (tcell.SimulationScreen, error) {
 		return nil, err
 	}
 
-	config.InitRuntimeFiles()
+	config.InitRuntimeFiles(true)
+	config.InitPlugins()
+
 	err = config.ReadSettings()
 	if err != nil {
 		return nil, err
@@ -107,7 +109,10 @@ func handleEvent() {
 	if e != nil {
 		screen.Events <- e
 	}
-	DoEvent()
+
+	for len(screen.DrawChan()) > 0 || len(screen.Events) > 0 {
+		DoEvent()
+	}
 }
 
 func injectKey(key tcell.Key, r rune, mod tcell.ModMask) {
@@ -149,6 +154,16 @@ func openFile(file string) {
 	injectKey(tcell.KeyEnter, rune(tcell.KeyEnter), tcell.ModNone)
 }
 
+func findBuffer(file string) *buffer.Buffer {
+	var buf *buffer.Buffer
+	for _, b := range buffer.OpenBuffers {
+		if b.Path == file {
+			buf = b
+		}
+	}
+	return buf
+}
+
 func createTestFile(name string, content string) (string, error) {
 	testf, err := ioutil.TempFile("", name)
 	if err != nil {
@@ -188,14 +203,7 @@ func TestSimpleEdit(t *testing.T) {
 
 	openFile(file)
 
-	var buf *buffer.Buffer
-	for _, b := range buffer.OpenBuffers {
-		if b.Path == file {
-			buf = b
-		}
-	}
-
-	if buf == nil {
+	if findBuffer(file) == nil {
 		t.Errorf("Could not find buffer %s", file)
 		return
 	}
@@ -233,6 +241,11 @@ func TestMouse(t *testing.T) {
 	defer os.Remove(file)
 
 	openFile(file)
+
+	if findBuffer(file) == nil {
+		t.Errorf("Could not find buffer %s", file)
+		return
+	}
 
 	// buffer:
 	// base content
@@ -296,6 +309,11 @@ func TestSearchAndReplace(t *testing.T) {
 	defer os.Remove(file)
 
 	openFile(file)
+
+	if findBuffer(file) == nil {
+		t.Errorf("Could not find buffer %s", file)
+		return
+	}
 
 	injectKey(tcell.KeyCtrlE, rune(tcell.KeyCtrlE), tcell.ModCtrl)
 	injectString(fmt.Sprintf("replaceall %s %s", "foo", "test_string"))

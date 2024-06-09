@@ -36,15 +36,15 @@ following in the `bindings.json` file.
 ```
 
 **Note:** The syntax `<Modifier><key>` is equivalent to `<Modifier>-<key>`. In
-addition, Ctrl-Shift bindings are not supported by terminals, and are the same
-as simply Ctrl bindings. This means that `CtrlG`, `Ctrl-G`, and `Ctrl-g` all
-mean the same thing. However, for Alt this is not the case: `AltG` and `Alt-G`
+addition, `Ctrl-Shift` bindings are not supported by terminals, and are the same
+as simply `Ctrl` bindings. This means that `CtrlG`, `Ctrl-G`, and `Ctrl-g` all
+mean the same thing. However, for `Alt` this is not the case: `AltG` and `Alt-G`
 mean `Alt-Shift-g`, while `Alt-g` does not require the Shift modifier.
 
 In addition to editing your `~/.config/micro/bindings.json`, you can run
 `>bind <keycombo> <action>` For a list of bindable actions, see below.
 
-You can also chain commands when rebinding. For example, if you want Alt-s to
+You can also chain commands when rebinding. For example, if you want `Alt-s` to
 save and quit you can bind it like so:
 
 ```json
@@ -178,12 +178,18 @@ SelectToStartOfText
 SelectToStartOfTextToggle
 WordRight
 WordLeft
+SubWordRight
+SubWordLeft
 SelectWordRight
 SelectWordLeft
+SelectSubWordRight
+SelectSubWordLeft
 MoveLinesUp
 MoveLinesDown
 DeleteWordRight
 DeleteWordLeft
+DeleteSubWordRight
+DeleteSubWordLeft
 SelectLine
 SelectToStartOfLine
 SelectToEndOfLine
@@ -409,8 +415,14 @@ mouse actions)
 
 ```
 MouseLeft
+MouseLeftDrag
+MouseLeftRelease
 MouseMiddle
+MouseMiddleDrag
+MouseMiddleRelease
 MouseRight
+MouseRightDrag
+MouseRightRelease
 MouseWheelUp
 MouseWheelDown
 MouseWheelLeft
@@ -524,11 +536,13 @@ conventions for text editing defaults.
     "Esc": "Escape",
 
     // Mouse bindings
-    "MouseWheelUp":   "ScrollUp",
-    "MouseWheelDown": "ScrollDown",
-    "MouseLeft":      "MousePress",
-    "MouseMiddle":    "PastePrimary",
-    "Ctrl-MouseLeft": "MouseMultiCursor",
+    "MouseWheelUp":     "ScrollUp",
+    "MouseWheelDown":   "ScrollDown",
+    "MouseLeft":        "MousePress",
+    "MouseLeftDrag":    "MouseDrag",
+    "MouseLeftRelease": "MouseRelease",
+    "MouseMiddle":      "PastePrimary",
+    "Ctrl-MouseLeft":   "MouseMultiCursor",
 
     // Multi-cursor bindings
     "Alt-n":        "SpawnMultiCursor",
@@ -634,10 +648,12 @@ are given below:
         "Esc": "AbortCommand",
 
         // Mouse bindings
-        "MouseWheelUp":   "HistoryUp",
-        "MouseWheelDown": "HistoryDown",
-        "MouseLeft":      "MousePress",
-        "MouseMiddle":    "PastePrimary"
+        "MouseWheelUp":     "HistoryUp",
+        "MouseWheelDown":   "HistoryDown",
+        "MouseLeft":        "MousePress",
+        "MouseLeftDrag":    "MouseDrag",
+        "MouseLeftRelease": "MouseRelease",
+        "MouseMiddle":      "PastePrimary"
     }
 }
 ```

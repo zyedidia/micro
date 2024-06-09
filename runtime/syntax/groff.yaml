@@ -1,6 +1,6 @@
 filetype: groff
 
-detect: 
+detect:
     filename: "\\.m[ems]$|\\.rof|\\.tmac$|^tmac."
 
 rules:

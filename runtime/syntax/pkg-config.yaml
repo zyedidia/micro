@@ -1,6 +1,6 @@
 filetype: pc
 
-detect: 
+detect:
     filename: "\\.pc$"
 
 rules:

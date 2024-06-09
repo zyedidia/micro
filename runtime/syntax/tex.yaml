@@ -1,6 +1,6 @@
 filetype: tex
 
-detect: 
+detect:
     filename: "\\.tex$|\\.bib$|\\.cls$"
 
 rules:

@@ -14,7 +14,7 @@ rules:
       # definitions
     - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
       # keywords
-    - statement: "\\b(baremodule|begin|break|catch|const|continue|do|else|elseif|end|export|finally|for|function|global|if|import|let|local|macro|module|quote|return|struct|try|using|while)\\b"
+    - statement: "\\b(baremodule|begin|break|catch|const|continue|do|else|elseif|end|export|finally|for|function|global|if|import|let|local|macro|module|public|quote|return|struct|try|using|while)\\b"
     - statement: "\\b(abstract\\s+type|primitive\\s+type|mutable\\s+struct)\\b"
       # decorators
     - identifier.macro: "@[A-Za-z0-9_]+"

@@ -1,5 +1,5 @@
 # godoc
-# example: go doc -all | micro 
+# example: go doc -all | micro
 
 filetype: godoc
 

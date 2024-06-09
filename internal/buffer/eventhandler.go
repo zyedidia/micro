@@ -106,6 +106,10 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 		c.Relocate()
 		c.LastVisualX = c.GetVisualX()
 	}
+
+	if useUndo {
+		eh.updateTrailingWs(t)
+	}
 }
 
 // ExecuteTextEvent runs a text event
@@ -290,6 +294,7 @@ func (eh *EventHandler) UndoOneEvent() {
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
 		t.C = *eh.cursors[teCursor.Num]
 		eh.cursors[teCursor.Num].Goto(teCursor)
+		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
 	} else {
 		teCursor.Num = -1
 	}
@@ -333,6 +338,7 @@ func (eh *EventHandler) RedoOneEvent() {
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
 		t.C = *eh.cursors[teCursor.Num]
 		eh.cursors[teCursor.Num].Goto(teCursor)
+		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
 	} else {
 		teCursor.Num = -1
 	}
@@ -341,4 +347,59 @@ func (eh *EventHandler) RedoOneEvent() {
 	eh.UndoTextEvent(t)
 
 	eh.UndoStack.Push(t)
+}
+
+// updateTrailingWs updates the cursor's trailing whitespace status after a text event
+func (eh *EventHandler) updateTrailingWs(t *TextEvent) {
+	if len(t.Deltas) != 1 {
+		return
+	}
+	text := t.Deltas[0].Text
+	start := t.Deltas[0].Start
+	end := t.Deltas[0].End
+
+	c := eh.cursors[eh.active]
+	isEol := func(loc Loc) bool {
+		return loc.X == util.CharacterCount(eh.buf.LineBytes(loc.Y))
+	}
+	if t.EventType == TextEventInsert && c.Loc == end && isEol(end) {
+		var addedTrailingWs bool
+		addedAfterWs := false
+		addedWsOnly := false
+		if start.Y == end.Y {
+			addedTrailingWs = util.HasTrailingWhitespace(text)
+			addedWsOnly = util.IsBytesWhitespace(text)
+			addedAfterWs = start.X > 0 && util.IsWhitespace(c.buf.RuneAt(Loc{start.X - 1, start.Y}))
+		} else {
+			lastnl := bytes.LastIndex(text, []byte{'\n'})
+			addedTrailingWs = util.HasTrailingWhitespace(text[lastnl+1:])
+		}
+
+		if addedTrailingWs && !(addedAfterWs && addedWsOnly) {
+			c.NewTrailingWsY = c.Y
+		} else if !addedTrailingWs {
+			c.NewTrailingWsY = -1
+		}
+	} else if t.EventType == TextEventRemove && c.Loc == start && isEol(start) {
+		removedAfterWs := util.HasTrailingWhitespace(eh.buf.LineBytes(start.Y))
+		var removedWsOnly bool
+		if start.Y == end.Y {
+			removedWsOnly = util.IsBytesWhitespace(text)
+		} else {
+			firstnl := bytes.Index(text, []byte{'\n'})
+			removedWsOnly = util.IsBytesWhitespace(text[:firstnl])
+		}
+
+		if removedAfterWs && !removedWsOnly {
+			c.NewTrailingWsY = c.Y
+		} else if !removedAfterWs {
+			c.NewTrailingWsY = -1
+		}
+	} else if c.NewTrailingWsY != -1 && start.Y != end.Y && c.Loc.GreaterThan(start) &&
+		((t.EventType == TextEventInsert && c.Y == c.NewTrailingWsY+(end.Y-start.Y)) ||
+			(t.EventType == TextEventRemove && c.Y == c.NewTrailingWsY-(end.Y-start.Y))) {
+		// The cursor still has its new trailingws
+		// but its line number was shifted by insert or remove of lines above
+		c.NewTrailingWsY = c.Y
+	}
 }

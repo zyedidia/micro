@@ -100,11 +100,20 @@ func (k KeySequenceEvent) Name() string {
 	return buf.String()
 }
 
+type MouseState int
+
+const (
+	MousePress = iota
+	MouseDrag
+	MouseRelease
+)
+
 // MouseEvent is a mouse event with a mouse button and
 // any possible key modifiers
 type MouseEvent struct {
-	btn tcell.ButtonMask
-	mod tcell.ModMask
+	btn   tcell.ButtonMask
+	mod   tcell.ModMask
+	state MouseState
 }
 
 func (m MouseEvent) Name() string {
@@ -122,9 +131,17 @@ func (m MouseEvent) Name() string {
 		mod = "Ctrl-"
 	}
 
+	state := ""
+	switch m.state {
+	case MouseDrag:
+		state = "Drag"
+	case MouseRelease:
+		state = "Release"
+	}
+
 	for k, v := range mouseEvents {
 		if v == m.btn {
-			return fmt.Sprintf("%s%s", mod, k)
+			return fmt.Sprintf("%s%s%s", mod, k, state)
 		}
 	}
 	return ""

@@ -13,7 +13,7 @@ rules:
     - symbol.operator: "[-+/*=<>?:!~%&|^]"
     - constant.number: "\\b([0-9]+|0x[0-9a-fA-F]*)\\b"
 
-    - comment: 
+    - comment:
         start: "//"
         end: "$"
         rules:

@@ -33,27 +33,28 @@ func (g Group) String() string {
 // Then it has the rules which define how to highlight the file
 type Def struct {
 	*Header
-
 	rules *rules
 }
 
 type Header struct {
-	FileType string
-	FtDetect [2]*regexp.Regexp
+	FileType       string
+	FileNameRegex  *regexp.Regexp
+	HeaderRegex    *regexp.Regexp
+	SignatureRegex *regexp.Regexp
 }
 
 type HeaderYaml struct {
 	FileType string `yaml:"filetype"`
 	Detect   struct {
-		FNameRgx  string `yaml:"filename"`
-		HeaderRgx string `yaml:"header"`
+		FNameRegexStr     string `yaml:"filename"`
+		HeaderRegexStr    string `yaml:"header"`
+		SignatureRegexStr string `yaml:"signature"`
 	} `yaml:"detect"`
 }
 
 type File struct {
 	FileType string
-
-	yamlSrc map[interface{}]interface{}
+	yamlSrc  map[interface{}]interface{}
 }
 
 // A Pattern is one simple syntax rule
@@ -97,20 +98,24 @@ func init() {
 // A yaml file might take ~400us to parse while a header file only takes ~20us
 func MakeHeader(data []byte) (*Header, error) {
 	lines := bytes.Split(data, []byte{'\n'})
-	if len(lines) < 3 {
+	if len(lines) < 4 {
 		return nil, errors.New("Header file has incorrect format")
 	}
 	header := new(Header)
 	var err error
 	header.FileType = string(lines[0])
-	fnameRgx := string(lines[1])
-	headerRgx := string(lines[2])
+	fnameRegexStr := string(lines[1])
+	headerRegexStr := string(lines[2])
+	signatureRegexStr := string(lines[3])
 
-	if fnameRgx != "" {
-		header.FtDetect[0], err = regexp.Compile(fnameRgx)
+	if fnameRegexStr != "" {
+		header.FileNameRegex, err = regexp.Compile(fnameRegexStr)
 	}
-	if err == nil && headerRgx != "" {
-		header.FtDetect[1], err = regexp.Compile(headerRgx)
+	if err == nil && headerRegexStr != "" {
+		header.HeaderRegex, err = regexp.Compile(headerRegexStr)
+	}
+	if err == nil && signatureRegexStr != "" {
+		header.SignatureRegex, err = regexp.Compile(signatureRegexStr)
 	}
 
 	if err != nil {
@@ -132,11 +137,14 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	header := new(Header)
 	header.FileType = hdrYaml.FileType
 
-	if hdrYaml.Detect.FNameRgx != "" {
-		header.FtDetect[0], err = regexp.Compile(hdrYaml.Detect.FNameRgx)
+	if hdrYaml.Detect.FNameRegexStr != "" {
+		header.FileNameRegex, err = regexp.Compile(hdrYaml.Detect.FNameRegexStr)
 	}
-	if err == nil && hdrYaml.Detect.HeaderRgx != "" {
-		header.FtDetect[1], err = regexp.Compile(hdrYaml.Detect.HeaderRgx)
+	if err == nil && hdrYaml.Detect.HeaderRegexStr != "" {
+		header.HeaderRegex, err = regexp.Compile(hdrYaml.Detect.HeaderRegexStr)
+	}
+	if err == nil && hdrYaml.Detect.SignatureRegexStr != "" {
+		header.SignatureRegex, err = regexp.Compile(hdrYaml.Detect.SignatureRegexStr)
 	}
 
 	if err != nil {
@@ -144,6 +152,37 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	}
 
 	return header, nil
+}
+
+// MatchFileName will check the given file name with the stored regex
+func (header *Header) MatchFileName(filename string) bool {
+	if header.FileNameRegex != nil {
+		return header.FileNameRegex.MatchString(filename)
+	}
+
+	return false
+}
+
+func (header *Header) MatchFileHeader(firstLine []byte) bool {
+	if header.HeaderRegex != nil {
+		return header.HeaderRegex.Match(firstLine)
+	}
+
+	return false
+}
+
+// HasFileSignature checks the presence of a stored signature
+func (header *Header) HasFileSignature() bool {
+	return header.SignatureRegex != nil
+}
+
+// MatchFileSignature will check the given line with the stored regex
+func (header *Header) MatchFileSignature(line []byte) bool {
+	if header.SignatureRegex != nil {
+		return header.SignatureRegex.Match(line)
+	}
+
+	return false
 }
 
 func ParseFile(input []byte) (f *File, err error) {
@@ -170,9 +209,17 @@ func ParseFile(input []byte) (f *File, err error) {
 		if k == "filetype" {
 			filetype := v.(string)
 
+			if filetype == "" {
+				return nil, errors.New("empty filetype")
+			}
+
 			f.FileType = filetype
 			break
 		}
+	}
+
+	if f.FileType == "" {
+		return nil, errors.New("missing filetype")
 	}
 
 	return f, err
@@ -191,12 +238,12 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 		}
 	}()
 
-	rules := f.yamlSrc
+	src := f.yamlSrc
 
 	s = new(Def)
 	s.Header = header
 
-	for k, v := range rules {
+	for k, v := range src {
 		if k == "rules" {
 			inputRules := v.([]interface{})
 
@@ -207,6 +254,11 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 
 			s.rules = rules
 		}
+	}
+
+	if s.rules == nil {
+		// allow empty rules
+		s.rules = new(rules)
 	}
 
 	return s, err
@@ -303,6 +355,10 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 
 			switch object := val.(type) {
 			case string:
+				if object == "" {
+					return nil, fmt.Errorf("Empty rule %s", k)
+				}
+
 				if k == "include" {
 					ru.includes = append(ru.includes, object)
 				} else {
@@ -356,30 +412,56 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 	r.group = groupNum
 	r.parent = prevRegion
 
-	r.start, err = regexp.Compile(regionInfo["start"].(string))
+	// start is mandatory
+	if start, ok := regionInfo["start"]; ok {
+		start := start.(string)
+		if start == "" {
+			return nil, fmt.Errorf("Empty start in %s", group)
+		}
 
-	if err != nil {
-		return nil, err
+		r.start, err = regexp.Compile(start)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("Missing start in %s", group)
 	}
 
-	r.end, err = regexp.Compile(regionInfo["end"].(string))
+	// end is mandatory
+	if end, ok := regionInfo["end"]; ok {
+		end := end.(string)
+		if end == "" {
+			return nil, fmt.Errorf("Empty end in %s", group)
+		}
 
-	if err != nil {
-		return nil, err
+		r.end, err = regexp.Compile(end)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("Missing end in %s", group)
 	}
 
 	// skip is optional
-	if _, ok := regionInfo["skip"]; ok {
-		r.skip, err = regexp.Compile(regionInfo["skip"].(string))
+	if skip, ok := regionInfo["skip"]; ok {
+		skip := skip.(string)
+		if skip == "" {
+			return nil, fmt.Errorf("Empty skip in %s", group)
+		}
 
+		r.skip, err = regexp.Compile(skip)
 		if err != nil {
 			return nil, err
 		}
 	}
 
 	// limit-color is optional
-	if _, ok := regionInfo["limit-group"]; ok {
-		groupStr := regionInfo["limit-group"].(string)
+	if groupStr, ok := regionInfo["limit-group"]; ok {
+		groupStr := groupStr.(string)
+		if groupStr == "" {
+			return nil, fmt.Errorf("Empty limit-group in %s", group)
+		}
+
 		if _, ok := Groups[groupStr]; !ok {
 			numGroups++
 			Groups[groupStr] = numGroups

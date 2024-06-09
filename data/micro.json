@@ -170,9 +170,18 @@
             "default": false
         },
         "matchbrace": {
-            "description": "Whether to underline matching braces\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "description": "Whether to show matching braces\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": true
+        },
+        "matchbracestyle": {
+            "description": "Whether to underline or highlight matching braces\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "underline",
+                "highlight"
+            ],
+            "default": "underline"
         },
         "mkparents": {
             "description": "Whether to create missing directories\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",

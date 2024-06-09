@@ -1,6 +1,6 @@
 filetype: smalltalk
 
-detect: 
+detect:
     filename: "\\.(st|sources|changes)$"
 
 rules:

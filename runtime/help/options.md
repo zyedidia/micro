@@ -11,10 +11,10 @@ if you have set either of the above environment variables).
 
 Here are the available options:
 
-* `autoindent`: when creating a new line, use the same indentation as the 
+* `autoindent`: when creating a new line, use the same indentation as the
    previous line.
 
-	default value: `true`
+    default value: `true`
 
 * `autosave`: automatically save the buffer every n seconds, where n is the
    value of the autosave option. Also when quitting on a modified buffer, micro
@@ -77,32 +77,39 @@ Here are the available options:
    specified column. This is useful if you want column 80 to be highlighted
    special for example.
 
-	default value: `0`
+    default value: `0`
 
-* `colorscheme`: loads the colorscheme stored in 
+* `colorscheme`: loads the colorscheme stored in
    $(configDir)/colorschemes/`option`.micro, This setting is `global only`.
 
-	default value: `default`
+    default value: `default`
 
-    Note that the default colorschemes (default, solarized, and solarized-tc)
-    are not located in configDir, because they are embedded in the micro
-    binary.
+   Note that the default colorschemes (default, solarized, and solarized-tc)
+   are not located in configDir, because they are embedded in the micro
+   binary.
 
-	The colorscheme can be selected from all the files in the 
-	~/.config/micro/colorschemes/ directory. Micro comes by default with
-	three colorschemes:
+   The colorscheme can be selected from all the files in the
+   ~/.config/micro/colorschemes/ directory. Micro comes by default with
+   three colorschemes:
 
-	You can read more about micro's colorschemes in the `colors` help topic
-	(`help colors`).
+   You can read more about micro's colorschemes in the `colors` help topic
+   (`help colors`).
 
 * `cursorline`: highlight the line that the cursor is on in a different color
    (the color is defined by the colorscheme you are using).
 
-	default value: `true`
+    default value: `true`
+
+* `detectlimit`: if this is not set to 0, it will limit the amount of first
+   lines in a file that are matched to determine the filetype.
+   A higher limit means better accuracy of guessing the filetype, but also
+   taking more time.
+
+   default value: `100`
 
 * `diffgutter`: display diff indicators before lines.
 
-	default value: `false`
+    default value: `false`
 
 * `divchars`: specifies the "divider" characters used for the dividing line
    between vertical/horizontal splits. The first character is for vertical
@@ -127,11 +134,11 @@ Here are the available options:
 * `eofnewline`: micro will automatically add a newline to the end of the
    file if one does not exist.
 
-	default value: `true`
+    default value: `true`
 
 * `fakecursor`: forces micro to render the cursor using terminal colors rather
-  than the actual terminal cursor. This is useful when the terminal's cursor is
-  slow or otherwise unavailable/undesirable to use.
+   than the actual terminal cursor. This is useful when the terminal's cursor is
+   slow or otherwise unavailable/undesirable to use.
 
     default value: `false`
 
@@ -144,7 +151,7 @@ Here are the available options:
    intensive. This option will be automatically disabled if the file size
    exceeds 50KB.
 
-	default value: `false`
+    default value: `false`
 
 * `fileformat`: this determines what kind of line endings micro will use for
    the file. Unix line endings are just `\n` (linefeed) whereas dos line
@@ -157,12 +164,12 @@ Here are the available options:
    an effect if the file is empty/newly created, because otherwise the fileformat
    will be automatically detected from the existing line endings.
 
-	default value: `unix`
+    default value: `unix` on Unix systems, `dos` on Windows
 
 * `filetype`: sets the filetype for the current buffer. Set this option to
-  `off` to completely disable filetype detection.
+   `off` to completely disable filetype detection.
 
-	default value: `unknown`. This will be automatically overridden depending
+    default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
 * `hlsearch`: highlight all instances of the searched text after a successful
@@ -172,48 +179,69 @@ Here are the available options:
    change the `hlsearch` setting. As long as `hlsearch` is set to true, the next
    search will have the highlighting turned on again.
 
-	default value: `false`
+    default value: `false`
+
+* `hltaberrors`: highlight tabs when spaces are expected, and spaces when tabs
+   are expected. More precisely: if `tabstospaces` option is on, highlight
+   all tab characters; if `tabstospaces` is off, highlight space characters
+   in the initial indent part of the line.
+
+    default value: `false`
+
+* `hltrailingws`: highlight trailing whitespaces at ends of lines. Note that
+   it doesn't highlight newly added trailing whitespaces that naturally occur
+   while typing text. It highlights only nasty forgotten trailing whitespaces.
+
+    default value: `false`
 
 * `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
-	default value: `true`
+    default value: `true`
 
 * `ignorecase`: perform case-insensitive searches.
 
-	default value: `true`
+    default value: `true`
 
 * `indentchar`: sets the indentation character. This will not be inserted into
-  files; it is only a visual indicator that whitespace is present. If set to a
-  printing character, it functions as a subset of the "show invisibles"
-  setting available in many other text editors. The color of this character is
-  determined by the `indent-char` field in the current theme rather than the
-  default text color.
+   files; it is only a visual indicator that whitespace is present. If set to a
+   printing character, it functions as a subset of the "show invisibles"
+   setting available in many other text editors. The color of this character is
+   determined by the `indent-char` field in the current theme rather than the
+   default text color.
 
-	default value: ` ` (space)
+    default value: ` ` (space)
 
 * `infobar`: enables the line at the bottom of the editor where messages are
    printed. This option is `global only`.
 
-	default value: `true`
+    default value: `true`
 
 * `keepautoindent`: when using autoindent, whitespace is added for you. This
    option determines if when you move to the next line without any insertions
    the whitespace that was added should be deleted to remove trailing
-   whitespace.  By default, the autoindent whitespace is deleted if the line
+   whitespace. By default, the autoindent whitespace is deleted if the line
    was left empty.
 
-	default value: `false`
+    default value: `false`
 
 * `keymenu`: display the nano-style key menu at the bottom of the screen. Note
    that ToggleKeyMenu is bound to `Alt-g` by default and this is displayed in
    the statusline. To disable the key binding, bind `Alt-g` to `None`.
 
-	default value: `false`
+    default value: `false`
 
-* `matchbrace`: underline matching braces for '()', '{}', '[]' when the cursor
-   is on a brace character.
+* `matchbrace`: show matching braces for '()', '{}', '[]' when the cursor
+   is on a brace character or next to it.
 
     default value: `true`
+
+* `matchbracestyle`: whether to underline or highlight matching braces when
+   `matchbrace` is enabled. The color of highlight is determined by the `match-brace`
+   field in the current theme. Possible values:
+    * `underline`: underline matching braces.
+    * `highlight`: use `match-brace` style from the current theme.
+
+    default value: `underline`
 
 * `mkparents`: if a file is opened on a path that does not exist, the file
    cannot be saved because the parent directories don't exist. This option lets
@@ -227,7 +255,7 @@ Here are the available options:
    example, because the terminal has access to the local clipboard and micro
    does not).
 
-	default value: `true`
+    default value: `true`
 
 * `multiopen`: specifies how to layout multiple files opened at startup.
    Most useful as a command-line option, like `-multiopen vsplit`. Possible
@@ -236,11 +264,11 @@ Here are the available options:
     * `vsplit`: open files side-by-side.
     * `hsplit`: open files stacked top to bottom.
 
-	default value: `tab`
+    default value: `tab`
 
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
-   the terminal keybinding (not Ctrl-v, which is micro's default paste
+   the terminal keybinding (not `Ctrl-v`, which is micro's default paste
    keybinding) then it is a good idea to enable this option during the paste
    and disable once the paste is over. See `> help copypaste` for details about
    copying and pasting in a terminal environment.
@@ -287,25 +315,28 @@ Here are the available options:
    default value: `prompt`
 
 * `rmtrailingws`: micro will automatically trim trailing whitespaces at ends of
-   lines. Note: This setting overrides `keepautoindent`
+   lines.
+   Note: This setting overrides `keepautoindent` and isn't used at timed `autosave`
+   or forced `autosave` in case the buffer didn't change. A manual save will
+   involve the action regardless if the buffer has been changed or not.
 
-	default value: `false`
+    default value: `false`
 
 * `ruler`: display line numbers.
 
-	default value: `true`
+    default value: `true`
 
 * `relativeruler`: make line numbers display relatively. If set to true, all
    lines except for the line that the cursor is located will display the distance
-   from the cursor's line. 
+   from the cursor's line.
 
-	default value: `false` 
+    default value: `false`
 
 * `savecursor`: remember where the cursor was last time the file was opened and
    put it there when you open the file again. Information is saved to
    `~/.config/micro/buffers/`
 
-	default value: `false`
+    default value: `false`
 
 * `savehistory`: remember command history between closing and re-opening
    micro. Information is saved to `~/.config/micro/buffers/history`.
@@ -316,7 +347,7 @@ Here are the available options:
    so if you close and reopen a file, you can keep undoing. Information is
    saved to `~/.config/micro/buffers/`.
 
-	default value: `false`
+    default value: `false`
 
 * `scrollbar`: display a scroll bar
 
@@ -329,31 +360,31 @@ Here are the available options:
 * `scrollmargin`: margin at which the view starts scrolling when the cursor
    approaches the edge of the view.
 
-	default value: `3`
+    default value: `3`
 
 * `scrollspeed`: amount of lines to scroll for one scroll event.
 
-	default value: `2`
+    default value: `2`
 
 * `smartpaste`: add leading whitespace when pasting multiple lines.
    This will attempt to preserve the current indentation level when pasting an
    unindented block.
 
-	default value: `true`
+    default value: `true`
 
 * `softwrap`: wrap lines that are too long to fit on the screen.
 
-	default value: `false`
+    default value: `false`
 
 * `splitbottom`: when a horizontal split is created, create it below the
    current split.
 
-	default value: `true`
+    default value: `true`
 
 * `splitright`: when a vertical split is created, create it to the right of the
    current split.
 
-	default value: `true`
+    default value: `true`
 
 * `statusformatl`: format string definition for the left-justified part of the
    statusline. Special directives should be placed inside `$()`. Special
@@ -372,36 +403,36 @@ Here are the available options:
 
 * `statusline`: display the status line at the bottom of the screen.
 
-	default value: `true`
+    default value: `true`
 
 * `sucmd`: specifies the super user command. On most systems this is "sudo" but
    on BSD it can be "doas." This option can be customized and is only used when
    saving with su.
 
-	default value: `sudo`
+    default value: `sudo`
 
 * `syntax`: enables syntax highlighting.
 
-	default value: `true`
+    default value: `true`
 
 * `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
    (e.g. move over 4 spaces at once). This option only does anything if
    `tabstospaces` is on.
 
-	default value: `false`
+    default value: `false`
 
 * `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
-  colors with respect to the tab bar.
+   colors with respect to the tab bar.
 
-	default value: false
+    default value: false
 
 * `tabreverse`: reverses the tab bar colors when active.
 
-	default value: true
+    default value: true
 
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
-	default value: `4`
+    default value: `4`
 
 * `tabstospaces`: use spaces instead of tabs. Note: This option will be
    overridden by [the `ftoptions` plugin](https://github.com/zyedidia/micro/blob/master/runtime/plugins/ftoptions/ftoptions.lua)
@@ -409,18 +440,18 @@ Here are the available options:
    your config. See [issue #2213](https://github.com/zyedidia/micro/issues/2213)
    for more details.
 
-	default value: `false`
+    default value: `false`
 
 * `useprimary` (only useful on unix): defines whether or not micro will use the
    primary clipboard to copy selections in the background. This does not affect
-   the normal clipboard using Ctrl-c and Ctrl-v.
+   the normal clipboard using `Ctrl-c` and `Ctrl-v`.
 
-	default value: `true`
+    default value: `true`
 
 * `wordwrap`: wrap long lines by words, i.e. break at spaces. This option
    only does anything if `softwrap` is on.
 
-	default value: `false`
+    default value: `false`
 
 * `wrapindent`: maintain indentation of wrapped lines
     * `-1`: disabled, wrapped lines begin in the first column
@@ -434,7 +465,7 @@ Here are the available options:
    Enabling this option may cause unwanted effects if your terminal in fact
    does not conform to the `xterm-256color` standard.
 
-    Default value: `false`
+    default value: `false`
 
 ---
 
@@ -457,7 +488,7 @@ or disable them:
    recent Git commit rather than the diff since opening the file.
 
 Any option you set in the editor will be saved to the file
-~/.config/micro/settings.json so, in effect, your configuration file will be 
+~/.config/micro/settings.json so, in effect, your configuration file will be
 created for you. If you'd like to take your configuration with you to another
 machine, simply copy the settings.json to the other machine.
 
@@ -502,6 +533,7 @@ so that you can see what the formatting should look like.
     "linter": true,
     "literate": true,
     "matchbrace": true,
+    "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
     "parsecursor": false,
@@ -558,14 +590,14 @@ all files except Go files, and `tabsize` 4 for all files except Ruby files:
 
 ```json
 {
-	"ft:go": {
-		"tabstospaces": false
-	},
-	"ft:ruby": {
-		"tabsize": 2
-	},
-	"tabstospaces": true,
-	"tabsize": 4
+    "ft:go": {
+        "tabstospaces": false
+    },
+    "ft:ruby": {
+        "tabsize": 2
+    },
+    "tabstospaces": true,
+    "tabsize": 4
 }
 ```
 
@@ -573,13 +605,13 @@ Or similarly you can match with globs:
 
 ```json
 {
-	"*.go": {
-		"tabstospaces": false
-	},
-	"*.rb": {
-		"tabsize": 2
-	},
-	"tabstospaces": true,
-	"tabsize": 4
+    "*.go": {
+        "tabstospaces": false
+    },
+    "*.rb": {
+        "tabsize": 2
+    },
+    "tabstospaces": true,
+    "tabsize": 4
 }
 ```

@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
@@ -47,14 +48,18 @@ func luaImportMicro() *lua.LTable {
 	ulua.L.SetField(pkg, "InfoBar", luar.New(ulua.L, action.GetInfoBar))
 	ulua.L.SetField(pkg, "Log", luar.New(ulua.L, log.Println))
 	ulua.L.SetField(pkg, "SetStatusInfoFn", luar.New(ulua.L, display.SetStatusInfoFnLua))
-	ulua.L.SetField(pkg, "CurPane", luar.New(ulua.L, func() action.Pane {
+	ulua.L.SetField(pkg, "CurPane", luar.New(ulua.L, func() *action.BufPane {
 		return action.MainTab().CurPane()
 	}))
 	ulua.L.SetField(pkg, "CurTab", luar.New(ulua.L, action.MainTab))
 	ulua.L.SetField(pkg, "Tabs", luar.New(ulua.L, func() *action.TabList {
 		return action.Tabs
 	}))
-	ulua.L.SetField(pkg, "Lock", luar.New(ulua.L, &ulua.Lock))
+	ulua.L.SetField(pkg, "After", luar.New(ulua.L, func(t time.Duration, f func()) {
+		time.AfterFunc(t, func() {
+			timerChan <- f
+		})
+	}))
 
 	return pkg
 }

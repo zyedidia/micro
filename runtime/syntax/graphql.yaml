@@ -32,7 +32,7 @@ rules:
 
     - symbol: "(:|=|\\||\\(|\\)|\\{|\\}|\\[|\\])"
 
-    - constant.bool: "\\b(true|false)\\b"  
+    - constant.bool: "\\b(true|false)\\b"
 
     - constant.string:
         start: "\""

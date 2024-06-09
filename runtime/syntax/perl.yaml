@@ -1,6 +1,6 @@
 filetype: perl
 
-detect: 
+detect:
     filename: "\\.p[lmp]$"
     header: "^#!.*/(env +)?perl( |$)"
 
@@ -10,13 +10,13 @@ rules:
 
     - special: "\\-\\>"
     - symbol: "(,|\\.)"
-    
+
     #regexes
     - identifier.macro: "m?\\/.*?\\/[a-z]*"
     - identifier.macro: "m?\\|.*?\\|[a-z]*"
     - identifier.macro: "\\bs/.*?/.*?/[a-z]*"
     - identifier.macro: "\\bs\\|.*?\\|.*?\\|[a-z]*"
-    
+
     - constant.string:
         start: '"'
         end: '"'
@@ -29,19 +29,19 @@ rules:
         end: "'"
         skip: "\\\\'"
         rules: []
-    
+
     - comment:
         start: "#"
         end: "$"
         rules: []
-    
+
     - constant.string: "\"\\(.*\\)\"|qq?\\|.*\\||qq?\\{.*\\}|qq?\\/.*\\/"
     - constant.number: "\\b([0-9]*[.])?[0-9]+"
     - constant.number: "\\b[0-9]+"
     - constant.number: "\\b0x[a-f0-9]+"
     - constant.string.url: "`(.+?)`"
     - identifier.var: '[\\$@%].[a-zA-Z0-9_]*'
-    
+
     - preproc:
         start: "(^use| = new)"
         end: ";"

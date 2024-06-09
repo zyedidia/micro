@@ -64,7 +64,7 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 
 // GetWord gets the most recent word separated by any separator
 // (whitespace, punctuation, any non alphanumeric character)
-func GetWord(b *Buffer) ([]byte, int) {
+func (b *Buffer) GetWord() ([]byte, int) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -73,17 +73,17 @@ func GetWord(b *Buffer) ([]byte, int) {
 		return []byte{}, -1
 	}
 
-	if util.IsNonAlphaNumeric(b.RuneAt(c.Loc.Move(-1, b))) {
+	if util.IsNonWordChar(b.RuneAt(c.Loc.Move(-1, b))) {
 		return []byte{}, c.X
 	}
 
-	args := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+	args := bytes.FieldsFunc(l, util.IsNonWordChar)
 	input := args[len(args)-1]
 	return input, c.X - util.CharacterCount(input)
 }
 
 // GetArg gets the most recent word (separated by ' ' only)
-func GetArg(b *Buffer) (string, int) {
+func (b *Buffer) GetArg() (string, int) {
 	c := b.GetActiveCursor()
 	l := b.LineBytes(c.Y)
 	l = util.SliceStart(l, c.X)
@@ -104,7 +104,7 @@ func GetArg(b *Buffer) (string, int) {
 // FileComplete autocompletes filenames
 func FileComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := GetArg(b)
+	input, argstart := b.GetArg()
 
 	sep := string(os.PathSeparator)
 	dirs := strings.Split(input, sep)
@@ -153,7 +153,7 @@ func FileComplete(b *Buffer) ([]string, []string) {
 // BufferComplete autocompletes based on previous words in the buffer
 func BufferComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
-	input, argstart := GetWord(b)
+	input, argstart := b.GetWord()
 
 	if argstart == -1 {
 		return []string{}, []string{}
@@ -166,7 +166,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 	var suggestions []string
 	for i := c.Y; i >= 0; i-- {
 		l := b.LineBytes(i)
-		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		words := bytes.FieldsFunc(l, util.IsNonWordChar)
 		for _, w := range words {
 			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
 				strw := string(w)
@@ -179,7 +179,7 @@ func BufferComplete(b *Buffer) ([]string, []string) {
 	}
 	for i := c.Y + 1; i < b.LinesNum(); i++ {
 		l := b.LineBytes(i)
-		words := bytes.FieldsFunc(l, util.IsNonAlphaNumeric)
+		words := bytes.FieldsFunc(l, util.IsNonWordChar)
 		for _, w := range words {
 			if bytes.HasPrefix(w, input) && util.CharacterCount(w) > inputLen {
 				strw := string(w)

@@ -46,10 +46,9 @@ type searchState struct {
 type Line struct {
 	data []byte
 
-	state       highlight.State
-	match       highlight.LineMatch
-	rehighlight bool
-	lock        sync.Mutex
+	state highlight.State
+	match highlight.LineMatch
+	lock  sync.Mutex
 
 	// The search states for the line, used for highlighting of search matches,
 	// separately from the syntax highlighting.
@@ -75,6 +74,7 @@ type LineArray struct {
 	lines    []Line
 	Endings  FileFormat
 	initsize uint64
+	lock     sync.Mutex
 }
 
 // Append efficiently appends lines together
@@ -147,20 +147,18 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 		if err != nil {
 			if err == io.EOF {
 				la.lines = Append(la.lines, Line{
-					data:        data,
-					state:       nil,
-					match:       nil,
-					rehighlight: false,
+					data:  data,
+					state: nil,
+					match: nil,
 				})
 			}
 			// Last line was read
 			break
 		} else {
 			la.lines = Append(la.lines, Line{
-				data:        data[:dlen-1],
-				state:       nil,
-				match:       nil,
-				rehighlight: false,
+				data:  data[:dlen-1],
+				state: nil,
+				match: nil,
 			})
 		}
 		n++
@@ -190,22 +188,23 @@ func (la *LineArray) Bytes() []byte {
 // newlineBelow adds a newline below the given line number
 func (la *LineArray) newlineBelow(y int) {
 	la.lines = append(la.lines, Line{
-		data:        []byte{' '},
-		state:       nil,
-		match:       nil,
-		rehighlight: false,
+		data:  []byte{' '},
+		state: nil,
+		match: nil,
 	})
 	copy(la.lines[y+2:], la.lines[y+1:])
 	la.lines[y+1] = Line{
-		data:        []byte{},
-		state:       la.lines[y].state,
-		match:       nil,
-		rehighlight: false,
+		data:  []byte{},
+		state: la.lines[y].state,
+		match: nil,
 	}
 }
 
 // Inserts a byte array at a given location
 func (la *LineArray) insert(pos Loc, value []byte) {
+	la.lock.Lock()
+	defer la.lock.Unlock()
+
 	x, y := runeToByteIndex(pos.X, la.lines[pos.Y].data), pos.Y
 	for i := 0; i < len(value); i++ {
 		if value[i] == '\n' || (value[i] == '\r' && i < len(value)-1 && value[i+1] == '\n') {
@@ -233,24 +232,26 @@ func (la *LineArray) insertByte(pos Loc, value byte) {
 
 // joinLines joins the two lines a and b
 func (la *LineArray) joinLines(a, b int) {
-	la.insert(Loc{len(la.lines[a].data), a}, la.lines[b].data)
+	la.lines[a].data = append(la.lines[a].data, la.lines[b].data...)
 	la.deleteLine(b)
 }
 
 // split splits a line at a given position
 func (la *LineArray) split(pos Loc) {
 	la.newlineBelow(pos.Y)
-	la.insert(Loc{0, pos.Y + 1}, la.lines[pos.Y].data[pos.X:])
+	la.lines[pos.Y+1].data = append(la.lines[pos.Y+1].data, la.lines[pos.Y].data[pos.X:]...)
 	la.lines[pos.Y+1].state = la.lines[pos.Y].state
 	la.lines[pos.Y].state = nil
 	la.lines[pos.Y].match = nil
 	la.lines[pos.Y+1].match = nil
-	la.lines[pos.Y].rehighlight = true
 	la.deleteToEnd(Loc{pos.X, pos.Y})
 }
 
 // removes from start to end
 func (la *LineArray) remove(start, end Loc) []byte {
+	la.lock.Lock()
+	defer la.lock.Unlock()
+
 	sub := la.Substr(start, end)
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
@@ -327,11 +328,11 @@ func (la *LineArray) End() Loc {
 }
 
 // LineBytes returns line n as an array of bytes
-func (la *LineArray) LineBytes(n int) []byte {
-	if n >= len(la.lines) || n < 0 {
+func (la *LineArray) LineBytes(lineN int) []byte {
+	if lineN >= len(la.lines) || lineN < 0 {
 		return []byte{}
 	}
-	return la.lines[n].data
+	return la.lines[lineN].data
 }
 
 // State gets the highlight state for the given line number
@@ -362,16 +363,14 @@ func (la *LineArray) Match(lineN int) highlight.LineMatch {
 	return la.lines[lineN].match
 }
 
-func (la *LineArray) Rehighlight(lineN int) bool {
-	la.lines[lineN].lock.Lock()
-	defer la.lines[lineN].lock.Unlock()
-	return la.lines[lineN].rehighlight
+// Locks the whole LineArray
+func (la *LineArray) Lock() {
+	la.lock.Lock()
 }
 
-func (la *LineArray) SetRehighlight(lineN int, on bool) {
-	la.lines[lineN].lock.Lock()
-	defer la.lines[lineN].lock.Unlock()
-	la.lines[lineN].rehighlight = on
+// Unlocks the whole LineArray
+func (la *LineArray) Unlock() {
+	la.lock.Unlock()
 }
 
 // SearchMatch returns true if the location `pos` is within a match

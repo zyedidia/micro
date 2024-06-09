@@ -1,4 +1,5 @@
-//+build ignore
+//go:build ignore
+// +build ignore
 
 package main
 
@@ -16,15 +17,17 @@ import (
 type HeaderYaml struct {
 	FileType string `yaml:"filetype"`
 	Detect   struct {
-		FNameRgx  string `yaml:"filename"`
-		HeaderRgx string `yaml:"header"`
+		FNameRgx     string `yaml:"filename"`
+		HeaderRgx    string `yaml:"header"`
+		SignatureRgx string `yaml:"signature"`
 	} `yaml:"detect"`
 }
 
 type Header struct {
-	FileType  string
-	FNameRgx  string
-	HeaderRgx string
+	FileType     string
+	FNameRgx     string
+	HeaderRgx    string
+	SignatureRgx string
 }
 
 func main() {
@@ -59,6 +62,7 @@ func encode(name string, c HeaderYaml) {
 	f.WriteString(c.FileType + "\n")
 	f.WriteString(c.Detect.FNameRgx + "\n")
 	f.WriteString(c.Detect.HeaderRgx + "\n")
+	f.WriteString(c.Detect.SignatureRgx + "\n")
 	f.Close()
 }
 
@@ -70,6 +74,7 @@ func decode(name string) Header {
 	hdr.FileType = string(strs[0])
 	hdr.FNameRgx = string(strs[1])
 	hdr.HeaderRgx = string(strs[2])
+	hdr.SignatureRgx = string(strs[3])
 	fmt.Printf("took %v\n", time.Since(start))
 
 	return hdr

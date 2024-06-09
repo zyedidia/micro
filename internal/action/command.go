@@ -41,6 +41,7 @@ func InitCommands() {
 		"unbind":     {(*BufPane).UnbindCmd, nil},
 		"quit":       {(*BufPane).QuitCmd, nil},
 		"goto":       {(*BufPane).GotoCmd, nil},
+		"jump":       {(*BufPane).JumpCmd, nil},
 		"save":       {(*BufPane).SaveCmd, nil},
 		"replace":    {(*BufPane).ReplaceCmd, nil},
 		"replaceall": {(*BufPane).ReplaceAllCmd, nil},
@@ -329,13 +330,30 @@ func (h *BufPane) ToggleLogCmd(args []string) {
 	}
 }
 
-// ReloadCmd reloads all files (syntax files, colorschemes...)
+// ReloadCmd reloads all files (syntax files, colorschemes, plugins...)
 func (h *BufPane) ReloadCmd(args []string) {
-	ReloadConfig()
+	reloadRuntime(true)
 }
 
+// ReloadConfig reloads only the configuration
 func ReloadConfig() {
-	config.InitRuntimeFiles()
+	reloadRuntime(false)
+}
+
+func reloadRuntime(reloadPlugins bool) {
+	if reloadPlugins {
+		err := config.RunPluginFn("deinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+
+	config.InitRuntimeFiles(true)
+
+	if reloadPlugins {
+		config.InitPlugins()
+	}
+
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
@@ -344,14 +362,36 @@ func ReloadConfig() {
 	if err != nil {
 		screen.TermMessage(err)
 	}
+
+	if reloadPlugins {
+		err = config.LoadAllPlugins()
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+
 	InitBindings()
 	InitCommands()
+
+	if reloadPlugins {
+		err = config.RunPluginFn("preinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.RunPluginFn("init")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.RunPluginFn("postinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 
 	err = config.InitColorscheme()
 	if err != nil {
 		screen.TermMessage(err)
 	}
-
 	for _, b := range buffer.OpenBuffers {
 		b.UpdateRules()
 	}
@@ -363,22 +403,24 @@ func (h *BufPane) ReopenCmd(args []string) {
 		InfoBar.YNPrompt("Save file before reopen?", func(yes, canceled bool) {
 			if !canceled && yes {
 				h.Save()
-				h.Buf.ReOpen()
+				h.ReOpen()
 			} else if !canceled {
-				h.Buf.ReOpen()
+				h.ReOpen()
 			}
 		})
 	} else {
-		h.Buf.ReOpen()
+		h.ReOpen()
 	}
 }
 
 func (h *BufPane) openHelp(page string) error {
 	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
-		return errors.New(fmt.Sprint("Unable to load help text", page, "\n", err))
+		return errors.New(fmt.Sprintf("Unable to load help text for %s: %v", page, err))
 	} else {
 		helpBuffer := buffer.NewBufferFromString(string(data), page+".md", buffer.BTHelp)
 		helpBuffer.SetName("Help " + page)
+		helpBuffer.SetOptionNative("hltaberrors", false)
+		helpBuffer.SetOptionNative("hltrailingws", false)
 
 		if h.Buf.Type == buffer.BTHelp {
 			h.OpenBuffer(helpBuffer)
@@ -471,61 +513,61 @@ func (h *BufPane) NewTabCmd(args []string) {
 }
 
 func SetGlobalOptionNative(option string, nativeValue interface{}) error {
-	local := false
+	// check for local option first...
 	for _, s := range config.LocalSettings {
 		if s == option {
-			local = true
-			break
+			MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
+			return nil
 		}
 	}
 
-	if !local {
-		config.GlobalSettings[option] = nativeValue
-		config.ModifiedSettings[option] = true
+	// ...if it's not local continue with the globals
+	config.GlobalSettings[option] = nativeValue
+	config.ModifiedSettings[option] = true
+	delete(config.VolatileSettings, option)
 
-		if option == "colorscheme" {
-			// LoadSyntaxFiles()
-			config.InitColorscheme()
-			for _, b := range buffer.OpenBuffers {
-				b.UpdateRules()
-			}
-		} else if option == "infobar" || option == "keymenu" {
-			Tabs.Resize()
-		} else if option == "mouse" {
-			if !nativeValue.(bool) {
-				screen.Screen.DisableMouse()
-			} else {
-				screen.Screen.EnableMouse()
-			}
-		} else if option == "autosave" {
-			if nativeValue.(float64) > 0 {
-				config.SetAutoTime(int(nativeValue.(float64)))
-				config.StartAutoSave()
-			} else {
-				config.SetAutoTime(0)
-			}
-		} else if option == "paste" {
-			screen.Screen.SetPaste(nativeValue.(bool))
-		} else if option == "clipboard" {
-			m := clipboard.SetMethod(nativeValue.(string))
-			err := clipboard.Initialize(m)
-			if err != nil {
-				return err
-			}
+	if option == "colorscheme" {
+		// LoadSyntaxFiles()
+		config.InitColorscheme()
+		for _, b := range buffer.OpenBuffers {
+			b.UpdateRules()
+		}
+	} else if option == "infobar" || option == "keymenu" {
+		Tabs.Resize()
+	} else if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.Screen.DisableMouse()
 		} else {
-			for _, pl := range config.Plugins {
-				if option == pl.Name {
-					if nativeValue.(bool) && !pl.Loaded {
-						pl.Load()
-						_, err := pl.Call("init")
-						if err != nil && err != config.ErrNoSuchFunction {
-							screen.TermMessage(err)
-						}
-					} else if !nativeValue.(bool) && pl.Loaded {
-						_, err := pl.Call("deinit")
-						if err != nil && err != config.ErrNoSuchFunction {
-							screen.TermMessage(err)
-						}
+			screen.Screen.EnableMouse()
+		}
+	} else if option == "autosave" {
+		if nativeValue.(float64) > 0 {
+			config.SetAutoTime(int(nativeValue.(float64)))
+			config.StartAutoSave()
+		} else {
+			config.SetAutoTime(0)
+		}
+	} else if option == "paste" {
+		screen.Screen.SetPaste(nativeValue.(bool))
+	} else if option == "clipboard" {
+		m := clipboard.SetMethod(nativeValue.(string))
+		err := clipboard.Initialize(m)
+		if err != nil {
+			return err
+		}
+	} else {
+		for _, pl := range config.Plugins {
+			if option == pl.Name {
+				if nativeValue.(bool) && !pl.Loaded {
+					pl.Load()
+					_, err := pl.Call("init")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
+				} else if !nativeValue.(bool) && pl.Loaded {
+					_, err := pl.Call("deinit")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
 					}
 				}
 			}
@@ -634,6 +676,11 @@ func (h *BufPane) ShowCmd(args []string) {
 	InfoBar.Message(option)
 }
 
+func parseKeyArg(arg string) string {
+	// If this is a raw escape sequence, convert it to its raw byte form
+	return strings.ReplaceAll(arg, "\\x1b", "\x1b")
+}
+
 // ShowKeyCmd displays the action that a key is bound to
 func (h *BufPane) ShowKeyCmd(args []string) {
 	if len(args) < 1 {
@@ -641,7 +688,7 @@ func (h *BufPane) ShowKeyCmd(args []string) {
 		return
 	}
 
-	event, err := findEvent(args[0])
+	event, err := findEvent(parseKeyArg(args[0]))
 	if err != nil {
 		InfoBar.Error(err)
 		return
@@ -660,7 +707,7 @@ func (h *BufPane) BindCmd(args []string) {
 		return
 	}
 
-	_, err := TryBindKey(args[0], args[1], true)
+	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -673,7 +720,7 @@ func (h *BufPane) UnbindCmd(args []string) {
 		return
 	}
 
-	err := UnbindKey(args[0])
+	err := UnbindKey(parseKeyArg(args[0]))
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -701,41 +748,65 @@ func (h *BufPane) QuitCmd(args []string) {
 // position in the buffer
 // For example: `goto line`, or `goto line:col`
 func (h *BufPane) GotoCmd(args []string) {
+	line, col, err := h.parseLineCol(args)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	if line < 0 {
+		line = h.Buf.LinesNum() + 1 + line
+	}
+	line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
+
+	h.RemoveAllMultiCursors()
+	h.GotoLoc(buffer.Loc{col, line})
+}
+
+// JumpCmd is a command that will send the cursor to a certain relative
+// position in the buffer
+// For example: `jump line`, `jump -line`, or `jump -line:col`
+func (h *BufPane) JumpCmd(args []string) {
+	line, col, err := h.parseLineCol(args)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	line = h.Buf.GetActiveCursor().Y + 1 + line
+	line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
+
+	h.RemoveAllMultiCursors()
+	h.GotoLoc(buffer.Loc{col, line})
+}
+
+// parseLineCol is a helper to parse the input of GotoCmd and JumpCmd
+func (h *BufPane) parseLineCol(args []string) (line int, col int, err error) {
 	if len(args) <= 0 {
-		InfoBar.Error("Not enough arguments")
+		return 0, 0, errors.New("Not enough arguments")
+	}
+
+	line, col = 0, 0
+	if strings.Contains(args[0], ":") {
+		parts := strings.SplitN(args[0], ":", 2)
+		line, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return 0, 0, err
+		}
+		col, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return 0, 0, err
+		}
 	} else {
-		h.RemoveAllMultiCursors()
-		if strings.Contains(args[0], ":") {
-			parts := strings.SplitN(args[0], ":", 2)
-			line, err := strconv.Atoi(parts[0])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			col, err := strconv.Atoi(parts[1])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
-			h.GotoLoc(buffer.Loc{col, line})
-		} else {
-			line, err := strconv.Atoi(args[0])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			h.GotoLoc(buffer.Loc{0, line})
+		line, err = strconv.Atoi(args[0])
+		if err != nil {
+			return 0, 0, err
 		}
 	}
+
+	return line, col, nil
 }
 
 // SaveCmd saves the buffer optionally with an argument file name
@@ -810,7 +881,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		end = h.Cursor.CurSelection[1]
 	}
 	if all {
-		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace)
+		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace, !noRegex)
 	} else {
 		inRange := func(l buffer.Loc) bool {
 			return l.GreaterEqual(start) && l.LessEqual(end)
@@ -840,7 +911,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
-					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace)
+					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace, !noRegex)
 
 					searchLoc = locs[0]
 					searchLoc.X += nrunes + locs[0].Diff(locs[1], h.Buf)

@@ -88,6 +88,10 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 		return
 	}
 
+	if strings.HasPrefix(k, "\x1b") {
+		screen.Screen.RegisterRawSeq(k)
+	}
+
 	bind(event, v)
 
 	// switch e := event.(type) {
@@ -153,7 +157,6 @@ modSearch:
 			k = k[5:]
 			modifiers |= tcell.ModShift
 		case strings.HasPrefix(k, "\x1b"):
-			screen.Screen.RegisterRawSeq(k)
 			return RawEvent{
 				esc: k,
 			}, true
@@ -201,11 +204,20 @@ modSearch:
 		}, true
 	}
 
+	var mstate MouseState = MousePress
+	if strings.HasSuffix(k, "Drag") {
+		k = k[:len(k)-4]
+		mstate = MouseDrag
+	} else if strings.HasSuffix(k, "Release") {
+		k = k[:len(k)-7]
+		mstate = MouseRelease
+	}
 	// See if we can find the key in bindingMouse
 	if code, ok := mouseEvents[k]; ok {
 		return MouseEvent{
-			btn: code,
-			mod: modifiers,
+			btn:   code,
+			mod:   modifiers,
+			state: mstate,
 		}, true
 	}
 
@@ -239,6 +251,24 @@ func findEvent(k string) (Event, error) {
 	return event, nil
 }
 
+func eventsEqual(e1 Event, e2 Event) bool {
+	seq1, ok1 := e1.(KeySequenceEvent)
+	seq2, ok2 := e2.(KeySequenceEvent)
+	if ok1 && ok2 {
+		if len(seq1.keys) != len(seq2.keys) {
+			return false
+		}
+		for i := 0; i < len(seq1.keys); i++ {
+			if seq1.keys[i] != seq2.keys[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	return e1 == e2
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
@@ -264,21 +294,23 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		}
 
 		found := false
-		for ev := range parsed {
+		var ev string
+		for ev = range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
-					if overwrite {
-						parsed[ev] = v
-					}
+				if eventsEqual(e, key) {
 					found = true
 					break
 				}
 			}
 		}
 
-		if found && !overwrite {
-			return true, nil
-		} else if !found {
+		if found {
+			if overwrite {
+				parsed[ev] = v
+			} else {
+				return true, nil
+			}
+		} else {
 			parsed[k] = v
 		}
 
@@ -315,11 +347,15 @@ func UnbindKey(k string) error {
 
 		for ev := range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
+				if eventsEqual(e, key) {
 					delete(parsed, ev)
 					break
 				}
 			}
+		}
+
+		if strings.HasPrefix(k, "\x1b") {
+			screen.Screen.UnregisterRawSeq(k)
 		}
 
 		defaults := DefaultBindings("buffer")

@@ -5,7 +5,7 @@ detect:
 
 rules:
     - identifier: "\\b[A-Za-z_0-9-]*\\b"
-    
+
     - statement: "\\b(?i:(if|else|then|do|loop|case|endcase|of|endof|begin|while|repeat|until|again|unloop|leave|exit|done|next|\\?do|\\+do|\\-do|\\+loop|\\-loop|\\?leave))\\b"
 
     - statement: "(^:|;$)"

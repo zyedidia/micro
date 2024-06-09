@@ -8,7 +8,7 @@ file:
 
 ```json
 {
-    "Alt-g": "comment.comment"
+    "Alt-g": "lua:comment.comment"
 }
 ```
 

@@ -1,4 +1,4 @@
-filename: jsonnet
+filetype: jsonnet
 
 detect:
     filename: "\\.jsonnet$"
@@ -49,7 +49,7 @@ rules:
         skip: "\\\\\""
         rules:
             - constant.specialChar: "\\\\\""
-            
+
     # single-quoted verbatim string
     - constant.string:
         start: "@'"
