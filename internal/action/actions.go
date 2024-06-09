@@ -1193,6 +1193,21 @@ func (h *BufPane) CopyLine() bool {
 	return true
 }
 
+// Cut the selection to the system clipboard
+func (h *BufPane) Cut() bool {
+	if !h.Cursor.HasSelection() {
+		return false
+	}
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	h.freshClip = true
+	InfoBar.Message("Cut selection")
+
+	h.Relocate()
+	return true
+}
+
 // CutLine cuts the current line to the clipboard
 func (h *BufPane) CutLine() bool {
 	h.Cursor.SelectLine()
@@ -1214,21 +1229,6 @@ func (h *BufPane) CutLine() bool {
 	h.Cursor.ResetSelection()
 	h.Cursor.StoreVisualX()
 	InfoBar.Message("Cut line")
-	h.Relocate()
-	return true
-}
-
-// Cut the selection to the system clipboard
-func (h *BufPane) Cut() bool {
-	if !h.Cursor.HasSelection() {
-		return false
-	}
-	h.Cursor.CopySelection(clipboard.ClipboardReg)
-	h.Cursor.DeleteSelection()
-	h.Cursor.ResetSelection()
-	h.freshClip = true
-	InfoBar.Message("Cut selection")
-
 	h.Relocate()
 	return true
 }
