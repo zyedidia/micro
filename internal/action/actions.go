@@ -1220,17 +1220,17 @@ func (h *BufPane) CutLine() bool {
 
 // Cut the selection to the system clipboard
 func (h *BufPane) Cut() bool {
-	if h.Cursor.HasSelection() {
-		h.Cursor.CopySelection(clipboard.ClipboardReg)
-		h.Cursor.DeleteSelection()
-		h.Cursor.ResetSelection()
-		h.freshClip = true
-		InfoBar.Message("Cut selection")
-
-		h.Relocate()
-		return true
+	if !h.Cursor.HasSelection() {
+		return false
 	}
-	return false
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	h.freshClip = true
+	InfoBar.Message("Cut selection")
+
+	h.Relocate()
+	return true
 }
 
 // DuplicateLine duplicates the current line or selection
