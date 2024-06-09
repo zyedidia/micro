@@ -1230,7 +1230,7 @@ func (h *BufPane) Cut() bool {
 		h.Relocate()
 		return true
 	}
-	return h.CutLine()
+	return false
 }
 
 // DuplicateLine duplicates the current line or selection
