@@ -89,7 +89,9 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 		ke := KeyEvent{
 			code: e.Key(),
 			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
+		}
+		if e.Key() == tcell.KeyRune {
+			ke.r = e.Rune()
 		}
 
 		done := h.DoKeyEvent(ke)

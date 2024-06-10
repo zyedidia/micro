@@ -128,7 +128,9 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 		ke := KeyEvent{
 			code: e.Key(),
 			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
+		}
+		if e.Key() == tcell.KeyRune {
+			ke.r = e.Rune()
 		}
 		action, more := TermBindings.NextEvent(ke, nil)
 
