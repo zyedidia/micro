@@ -125,11 +125,7 @@ func (t *TermPane) Unsplit() {
 // copy-paste
 func (t *TermPane) HandleEvent(event tcell.Event) {
 	if e, ok := event.(*tcell.EventKey); ok {
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 		action, more := TermBindings.NextEvent(ke, nil)
 
 		if !more {

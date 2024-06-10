@@ -469,11 +469,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 		h.paste(e.Text())
 		h.Relocate()
 	case *tcell.EventKey:
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 
 		done := h.DoKeyEvent(ke)
 		if !done && e.Key() == tcell.KeyRune {

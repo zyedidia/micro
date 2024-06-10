@@ -86,11 +86,7 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	case *tcell.EventResize:
 		// TODO
 	case *tcell.EventKey:
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 
 		done := h.DoKeyEvent(ke)
 		hasYN := h.HasYN
