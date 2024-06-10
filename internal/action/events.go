@@ -44,6 +44,17 @@ func metaToAlt(mod tcell.ModMask) tcell.ModMask {
 	return mod
 }
 
+func keyEvent(e *tcell.EventKey) KeyEvent {
+	ke := KeyEvent{
+		code: e.Key(),
+		mod:  metaToAlt(e.Modifiers()),
+	}
+	if e.Key() == tcell.KeyRune {
+		ke.r = e.Rune()
+	}
+	return ke
+}
+
 func (k KeyEvent) Name() string {
 	if k.any {
 		return "<any>"
@@ -155,14 +166,7 @@ func (m MouseEvent) Name() string {
 func ConstructEvent(event tcell.Event) (Event, error) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-		}
-		if e.Key() == tcell.KeyRune {
-			ke.r = e.Rune()
-		}
-		return ke, nil
+		return keyEvent(e), nil
 	case *tcell.EventRaw:
 		return RawEvent{
 			esc: e.EscSeq(),
