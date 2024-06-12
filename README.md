@@ -138,18 +138,19 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 
 <!-- * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled. -->
 
-* Linux: Available in distro-specific package managers.
-    * `dnf install micro` (Fedora).
-    * `apt install micro` (Ubuntu and Debian).
-    * `pacman -S micro` (Arch Linux).
-    * `emerge app-editors/micro` (Gentoo).
-    * `zypper install micro-editor` (SUSE)
-    * `eopkg install micro` (Solus).
-    * `pacstall -I micro` (Pacstall).
-    * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
-* Linux: Available in distro-agnostic package managers.
-    * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
-    * `flox install micro` (with [Flox](https://flox.dev))
+* Linux:
+    * distro-specific package managers:
+        * `dnf install micro` (Fedora).
+        * `apt install micro` (Ubuntu and Debian).
+        * `pacman -S micro` (Arch Linux).
+        * `emerge app-editors/micro` (Gentoo).
+        * `zypper install micro-editor` (SUSE)
+        * `eopkg install micro` (Solus).
+        * `pacstall -I micro` (Pacstall).
+        * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
+    * distro-agnostic package managers:
+        * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
+        * `flox install micro` (with [Flox](https://flox.dev))
 * Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
     * `choco install micro`.
     * `scoop install micro`.
