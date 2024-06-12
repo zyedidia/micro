@@ -1,0 +1,43 @@
+filetype: meson
+
+detect:
+    filename: "(meson\\.build|meson_options.txt|meson\\.options)"
+
+rules:
+
+    # refer to https://mesonbuild.com/Syntax.html
+
+    - statement: "\\b(elif|else|if|endif)\\b"
+    - statement: "\\b(foreach|endforeach)\\b"
+    - statement: "\\b(continue|break)\\b"
+    - statement: "\\b(and|not|or|in)\\b"
+
+    # meson builtins
+    - identifier: "\\b(build_machine|host_machine|meson|option|target_machine|add_global_arguments|add_global_link_arguments)\\b"
+    - identifier: "\\b(add_languages|add_project_arguments|add_project_dependencies|add_project_link_arguments|add_test_setup|alias_target)\\b"
+    - identifier: "\\b(assert|benchmark|both_libraries|build_target|configuration_data|configure_file|custom_target|debug)\\b"
+    - identifier: "\\b(declare_dependency|dependency|disabler|environment|error|executable|files|find_program|generator|get_option|get_variable|import)\\b"
+    - identifier: "\\b(include_directories|install_data|install_emptydir|install_headers|install_man|install_subdir|install_symlink|is_disabler)\\b"
+    - identifier: "\\b(is_variable|jar|join_paths|library|message|project|range|run_command|run_target|set_variable|shared_library|shared_module)\\b"
+    - identifier: "\\b(static_library|structured_sources|subdir|subdir_done|subproject|summary|test|unset_variable|vcs_tag|warning)\\b"
+
+    - constant.bool: "\\b(true|false)\\b"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+
+    # multiline strings do not support escape sequences
+    - constant.string:
+        start: "'''"
+        end: "'''"
+        rules: []
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\[abfnrtv\\\\']"
+            - constant.specialChar: "\\\\([0-7]{1,3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|N\\{[^\\}]+\\})"
