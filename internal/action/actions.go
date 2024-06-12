@@ -1243,7 +1243,7 @@ func (h *BufPane) CutLine() bool {
 		return false
 	}
 	totalLines := nlines
-	if h.freshClip && time.Since(h.lastCutTime) < 10*time.Second {
+	if h.freshClip {
 		if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
 			InfoBar.Error(err)
 			return false
@@ -1255,7 +1255,6 @@ func (h *BufPane) CutLine() bool {
 		h.Cursor.CopySelection(clipboard.ClipboardReg)
 	}
 	h.freshClip = true
-	h.lastCutTime = time.Now()
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
 	h.Cursor.StoreVisualX()

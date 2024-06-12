@@ -231,10 +231,6 @@ type BufPane struct {
 	lastClickTime time.Time
 	lastLoc       buffer.Loc
 
-	// lastCutTime stores when the last ctrl+k was issued.
-	// It is used for clearing the clipboard to replace it with fresh cut lines.
-	lastCutTime time.Time
-
 	// freshClip returns true if one or more lines have been cut to the clipboard
 	// and have never been pasted yet.
 	freshClip bool
