@@ -1,7 +1,7 @@
 filetype: python
 
 detect:
-    filename: "\\.py(3)?$"
+    filename: "\\.py(3|w)?$"
     header: "^#!.*/(env +)?python(3)?$"
 
 rules:
