@@ -11,9 +11,9 @@ import (
 	"strings"
 	"unicode"
 
-	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/tcell/v2"
 )
 
@@ -29,31 +29,32 @@ func createBindingsIfNotExist(fname string) {
 	}
 }
 
-// InitBindings intializes the bindings map by reading from bindings.json
-func InitBindings() {
-	var parsed map[string]interface{}
-
-	filename := filepath.Join(config.ConfigDir, "bindings.json")
-	createBindingsIfNotExist(filename)
-
-	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			screen.TermMessage("Error reading bindings.json file: " + err.Error())
-			return
-		}
-
-		err = json5.Unmarshal(input, &parsed)
-		if err != nil {
-			screen.TermMessage("Error reading bindings.json:", err.Error())
-		}
-	}
-
+func InitDefaultBindings() {
 	for p, bind := range Binder {
 		defaults := DefaultBindings(p)
 
 		for k, v := range defaults {
 			BindKey(k, v, bind)
+		}
+	}
+}
+
+// InitBindings intializes the bindings map by reading from bindings.json
+func InitBindings() {
+	InitDefaultBindings()
+
+	var e error
+	var parsed map[string]interface{}
+
+	filename := filepath.Join(config.ConfigDir, "bindings.json")
+	createBindingsIfNotExist(filename)
+
+	if _, e = os.Stat(filename); e == nil {
+		err := util.UnmarshalConfigJSONFile(filename, &parsed)
+
+		if err != nil {
+			screen.TermMessage("Error reading bindings.json:", err.Error())
+			return
 		}
 	}
 
@@ -264,13 +265,10 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
-	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return false, errors.New("Error reading bindings.json file: " + err.Error())
-		}
 
-		err = json5.Unmarshal(input, &parsed)
+	if _, e = os.Stat(filename); e == nil {
+		err := util.UnmarshalConfigJSONFile(filename, &parsed)
+
 		if err != nil {
 			return false, errors.New("Error reading bindings.json: " + err.Error())
 		}
@@ -317,12 +315,8 @@ func UnbindKey(k string) error {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
-		if err != nil {
-			return errors.New("Error reading bindings.json file: " + err.Error())
-		}
+		err := util.UnmarshalConfigJSONFile(filename, &parsed)
 
-		err = json5.Unmarshal(input, &parsed)
 		if err != nil {
 			return errors.New("Error reading bindings.json: " + err.Error())
 		}
