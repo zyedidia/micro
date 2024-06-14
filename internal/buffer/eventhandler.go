@@ -253,11 +253,11 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	ExecuteTextEvent(t, eh.buf)
 }
 
-// Undo the first event in the undo stack
-func (eh *EventHandler) Undo() {
+// Undo the first event in the undo stack. Returns false if the stack is empty.
+func (eh *EventHandler) Undo() bool {
 	t := eh.UndoStack.Peek()
 	if t == nil {
-		return
+		return false
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
@@ -266,15 +266,16 @@ func (eh *EventHandler) Undo() {
 	for {
 		t = eh.UndoStack.Peek()
 		if t == nil {
-			return
+			break
 		}
 
 		if t.Time.UnixNano()/int64(time.Millisecond) < endTime {
-			return
+			break
 		}
 
 		eh.UndoOneEvent()
 	}
+	return true
 }
 
 // UndoOneEvent undoes one event
@@ -303,11 +304,11 @@ func (eh *EventHandler) UndoOneEvent() {
 	eh.RedoStack.Push(t)
 }
 
-// Redo the first event in the redo stack
-func (eh *EventHandler) Redo() {
+// Redo the first event in the redo stack. Returns false if the stack is empty.
+func (eh *EventHandler) Redo() bool {
 	t := eh.RedoStack.Peek()
 	if t == nil {
-		return
+		return false
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
@@ -316,15 +317,16 @@ func (eh *EventHandler) Redo() {
 	for {
 		t = eh.RedoStack.Peek()
 		if t == nil {
-			return
+			break
 		}
 
 		if t.Time.UnixNano()/int64(time.Millisecond) > endTime {
-			return
+			break
 		}
 
 		eh.RedoOneEvent()
 	}
+	return true
 }
 
 // RedoOneEvent redoes one event
