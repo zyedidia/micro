@@ -207,9 +207,8 @@ func (h *BufPane) MoveCursorDown(n int) {
 			vloc.VisualX = h.Cursor.LastVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 			if util.IntOpt(h.Buf.Settings["wrapindent"]) > -1 {
-				movingtorow := vloc.SLoc.Row
-				// Reset cursor's X position if moving down to row 0 of another paragraph
-				if movingtorow == 0 {
+				// Reset cursor's X position if moving to row 0 of another paragraph
+				if vloc.SLoc.Row == 0 {
 					h.Cursor.LastVisualX = vloc.VisualX
 					vloc.VisualX = 0
 				} else {
