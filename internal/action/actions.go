@@ -1163,7 +1163,9 @@ func (h *BufPane) DiffPrevious() bool {
 
 // Undo undoes the last action
 func (h *BufPane) Undo() bool {
-	h.Buf.Undo()
+	if !h.Buf.Undo() {
+		return false
+	}
 	InfoBar.Message("Undid action")
 	h.Relocate()
 	return true
@@ -1171,7 +1173,9 @@ func (h *BufPane) Undo() bool {
 
 // Redo redoes the last action
 func (h *BufPane) Redo() bool {
-	h.Buf.Redo()
+	if !h.Buf.Redo() {
+		return false
+	}
 	InfoBar.Message("Redid action")
 	h.Relocate()
 	return true
