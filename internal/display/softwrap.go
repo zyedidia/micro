@@ -1,6 +1,8 @@
 package display
 
 import (
+	"bytes"
+
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -80,6 +82,16 @@ func (w *BufWindow) getVLocFromLoc(loc buffer.Loc) VLoc {
 
 	wordwrap := w.Buf.Settings["wordwrap"].(bool)
 	tabsize := util.IntOpt(w.Buf.Settings["tabsize"])
+	wrapindent := util.IntOpt(w.Buf.Settings["wrapindent"])
+
+	// On wrapindent, count leading space to set correct VisualX on up, down action
+	getLeadingVisualSpaces := func() int {
+		line := w.Buf.LineBytes(vloc.Line)
+		leadingwhitespace := util.GetLeadingWhitespace(line)
+		leadingtabscount := bytes.Count(leadingwhitespace, []byte{'\t'})
+		leadingvisualspaces := leadingtabscount*int(w.Buf.Settings["tabsize"].(float64)) + (len(leadingwhitespace) - leadingtabscount)
+		return leadingvisualspaces
+	}
 
 	line := w.Buf.LineBytes(loc.Y)
 	x := 0
@@ -121,6 +133,9 @@ func (w *BufWindow) getVLocFromLoc(loc buffer.Loc) VLoc {
 		if vloc.VisualX+wordwidth > w.bufWidth && vloc.VisualX > 0 {
 			vloc.Row++
 			vloc.VisualX = 0
+			if wrapindent > -1 {
+				vloc.VisualX = getLeadingVisualSpaces() + wrapindent
+			}
 		}
 
 		if x == loc.X {
@@ -137,6 +152,9 @@ func (w *BufWindow) getVLocFromLoc(loc buffer.Loc) VLoc {
 		if vloc.VisualX >= w.bufWidth {
 			vloc.Row++
 			vloc.VisualX = 0
+			if wrapindent > -1 {
+				vloc.VisualX = getLeadingVisualSpaces() + wrapindent
+			}
 		}
 	}
 	return vloc

@@ -404,6 +404,19 @@ func (h *BufPane) initialRelocate() {
 	h.Relocate()
 }
 
+// For up + down actions with wrapindent, adjust visual X position
+// of cursor to respect softwrap + wordwrap
+func (h *BufPane) AdjustXCursorOnWrapindent(vloc display.VLoc) {
+	// Recalculate the vloc to account for tricky softwrap wordwrap logic
+	vlocafterlinewrap := h.VLocFromLoc(h.Cursor.Loc)
+	// Visual difference in line lengths due to additional 'faked'
+	// spacing from wordwrap, wrapindent
+	VisualXDiff := vloc.VisualX - vlocafterlinewrap.VisualX
+	for i := 0; i < util.Abs(VisualXDiff); i++ {
+		h.Cursor.Left()
+	}
+}
+
 // ID returns this pane's split id.
 func (h *BufPane) ID() uint64 {
 	return h.splitID
