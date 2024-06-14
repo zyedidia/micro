@@ -172,19 +172,11 @@ func (h *BufPane) MoveCursorUp(n int) {
 			h.Cursor.Loc = h.Buf.Start()
 			h.Cursor.LastVisualX = 0
 		} else {
-			// store the row the cursor is moving from
-			movingfromrow := vloc.SLoc.Row
 			vloc.SLoc = sloc
 			vloc.VisualX = h.Cursor.LastVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 			if util.IntOpt(h.Buf.Settings["wrapindent"]) > -1 {
-				// Reset cursor's X position if we moved up from row 0 to another paragraph
-				if movingfromrow == 0 {
-					h.Cursor.LastVisualX = vloc.VisualX
-					vloc.VisualX = 0
-				} else {
-					h.AdjustXCursorOnWrapindent(vloc)
-				}
+				vloc = h.AdjustXCursorOnWrapindent(vloc)
 			}
 		}
 	}
@@ -207,13 +199,7 @@ func (h *BufPane) MoveCursorDown(n int) {
 			vloc.VisualX = h.Cursor.LastVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 			if util.IntOpt(h.Buf.Settings["wrapindent"]) > -1 {
-				// Reset cursor's X position if moving to row 0 of another paragraph
-				if vloc.SLoc.Row == 0 {
-					h.Cursor.LastVisualX = vloc.VisualX
-					vloc.VisualX = 0
-				} else {
-					h.AdjustXCursorOnWrapindent(vloc)
-				}
+				vloc = h.AdjustXCursorOnWrapindent(vloc)
 			}
 		}
 	}
