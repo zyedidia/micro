@@ -175,9 +175,6 @@ func (h *BufPane) MoveCursorUp(n int) {
 			vloc.SLoc = sloc
 			vloc.VisualX = h.Cursor.LastVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
-			if util.IntOpt(h.Buf.Settings["wrapindent"]) > -1 {
-				vloc = h.AdjustXCursorOnWrapindent(vloc)
-			}
 		}
 	}
 }
@@ -198,9 +195,6 @@ func (h *BufPane) MoveCursorDown(n int) {
 			vloc.SLoc = sloc
 			vloc.VisualX = h.Cursor.LastVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
-			if util.IntOpt(h.Buf.Settings["wrapindent"]) > -1 {
-				vloc = h.AdjustXCursorOnWrapindent(vloc)
-			}
 		}
 	}
 }
