@@ -150,10 +150,10 @@ func BufMapEvent(k Event, action string) {
 		actionfns = append(actionfns, afn)
 	}
 	bufAction := func(h *BufPane, te *tcell.EventMouse) bool {
-		cursors := h.Buf.GetCursors()
 		success := true
 		for i, a := range actionfns {
 			innerSuccess := true
+			cursors := h.Buf.GetCursors()
 			for j, c := range cursors {
 				if c == nil {
 					continue
@@ -589,6 +589,9 @@ func (h *BufPane) execAction(action BufAction, name string, cursor int, te *tcel
 
 			return success
 		}
+	} else {
+		// do nothing but return true, to not break the chain
+		return true
 	}
 
 	return false
