@@ -1089,7 +1089,7 @@ func (b *Buffer) ClearCursors() {
 	b.cursors = b.cursors[:1]
 	b.UpdateCursors()
 	b.curCursor = 0
-	b.GetActiveCursor().ResetSelection()
+	b.GetActiveCursor().Deselect(true)
 }
 
 // MoveLinesUp moves the range of lines up one row
