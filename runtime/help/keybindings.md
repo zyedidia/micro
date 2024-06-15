@@ -237,6 +237,8 @@ StartOfText
 StartOfTextToggle
 ParagraphPrevious
 ParagraphNext
+SelectToParagraphPrevious
+SelectToParagraphNext
 ToggleHelp
 ToggleDiffGutter
 ToggleRuler
