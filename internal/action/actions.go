@@ -2013,6 +2013,9 @@ func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 // SkipMultiCursor moves the current multiple cursor to the next available position
 func (h *BufPane) SkipMultiCursor() bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	if !lastC.HasSelection() {
+		return false
+	}
 	sel := lastC.GetSelection()
 	searchStart := lastC.CurSelection[1]
 
