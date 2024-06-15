@@ -2053,6 +2053,7 @@ func (h *BufPane) RemoveMultiCursor() bool {
 		h.Buf.UpdateCursors()
 	} else if h.multiWord {
 		h.multiWord = false
+		h.Cursor.Deselect(true)
 	} else {
 		return false
 	}
