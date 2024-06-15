@@ -1068,6 +1068,9 @@ func (h *BufPane) ToggleHighlightSearch() bool {
 
 // UnhighlightSearch unhighlights all instances of the last used search term
 func (h *BufPane) UnhighlightSearch() bool {
+	if !h.Buf.HighlightSearch {
+		return false
+	}
 	h.Buf.HighlightSearch = false
 	return true
 }
@@ -1632,12 +1635,18 @@ func (h *BufPane) Escape() bool {
 
 // Deselect deselects on the current cursor
 func (h *BufPane) Deselect() bool {
+	if !h.Cursor.HasSelection() {
+		return false
+	}
 	h.Cursor.Deselect(true)
 	return true
 }
 
 // ClearInfo clears the infobar
 func (h *BufPane) ClearInfo() bool {
+	if InfoBar.Msg == "" {
+		return false
+	}
 	InfoBar.Message("")
 	return true
 }
@@ -1728,6 +1737,10 @@ func (h *BufPane) AddTab() bool {
 // PreviousTab switches to the previous tab in the tab list
 func (h *BufPane) PreviousTab() bool {
 	tabsLen := len(Tabs.List)
+	if tabsLen == 1 {
+		return false
+	}
+
 	a := Tabs.Active() + tabsLen
 	Tabs.SetActive((a - 1) % tabsLen)
 
@@ -1736,8 +1749,13 @@ func (h *BufPane) PreviousTab() bool {
 
 // NextTab switches to the next tab in the tab list
 func (h *BufPane) NextTab() bool {
+	tabsLen := len(Tabs.List)
+	if tabsLen == 1 {
+		return false
+	}
+
 	a := Tabs.Active()
-	Tabs.SetActive((a + 1) % len(Tabs.List))
+	Tabs.SetActive((a + 1) % tabsLen)
 
 	return true
 }
@@ -1773,6 +1791,10 @@ func (h *BufPane) Unsplit() bool {
 
 // NextSplit changes the view to the next split
 func (h *BufPane) NextSplit() bool {
+	if len(h.tab.Panes) == 1 {
+		return false
+	}
+
 	a := h.tab.active
 	if a < len(h.tab.Panes)-1 {
 		a++
@@ -1787,6 +1809,10 @@ func (h *BufPane) NextSplit() bool {
 
 // PreviousSplit changes the view to the previous split
 func (h *BufPane) PreviousSplit() bool {
+	if len(h.tab.Panes) == 1 {
+		return false
+	}
+
 	a := h.tab.active
 	if a > 0 {
 		a--
