@@ -2023,8 +2023,10 @@ func (h *BufPane) RemoveMultiCursor() bool {
 		h.Buf.RemoveCursor(h.Buf.NumCursors() - 1)
 		h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
 		h.Buf.UpdateCursors()
-	} else {
+	} else if h.multiWord {
 		h.multiWord = false
+	} else {
+		return false
 	}
 	h.Relocate()
 	return true
@@ -2032,8 +2034,12 @@ func (h *BufPane) RemoveMultiCursor() bool {
 
 // RemoveAllMultiCursors removes all cursors except the base cursor
 func (h *BufPane) RemoveAllMultiCursors() bool {
-	h.Buf.ClearCursors()
-	h.multiWord = false
+	if h.Buf.NumCursors() > 1 || h.multiWord {
+		h.Buf.ClearCursors()
+		h.multiWord = false
+	} else {
+		return false
+	}
 	h.Relocate()
 	return true
 }
