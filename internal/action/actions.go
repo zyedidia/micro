@@ -1577,10 +1577,9 @@ func (h *BufPane) ToggleRuler() bool {
 	return true
 }
 
-// ClearStatus clears the messenger bar
+// ClearStatus clears the infobar. It is an alias for ClearInfo.
 func (h *BufPane) ClearStatus() bool {
-	InfoBar.Message("")
-	return true
+	return h.ClearInfo()
 }
 
 // ToggleHelp toggles the help screen
