@@ -132,12 +132,12 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 				return
 			}
 		case tcell.WheelUp:
-			if my == t.Y {
+			if my == t.Y && len(t.List) > 1 {
 				t.Scroll(4)
 				return
 			}
 		case tcell.WheelDown:
-			if my == t.Y {
+			if my == t.Y && len(t.List) > 1 {
 				t.Scroll(-4)
 				return
 			}
