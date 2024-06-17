@@ -11,6 +11,8 @@ jobs:
     - uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        cache: false
+
     - uses: actions/checkout@v4
 
     - name: Build
