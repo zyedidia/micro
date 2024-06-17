@@ -26,7 +26,23 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	} else if option == "statusline" {
 		screen.Redraw()
 	} else if option == "filetype" {
-		config.InitLocalSettings(b.Settings, b.Path)
+		settings := config.ParsedSettings()
+		settings["filetype"] = nativeValue
+		config.InitLocalSettings(settings, b.Path)
+		for k, v := range config.DefaultCommonSettings() {
+			if k == "filetype" {
+				continue
+			}
+			if _, ok := config.VolatileSettings[k]; ok {
+				// filetype should not override volatile settings
+				continue
+			}
+			if _, ok := settings[k]; ok {
+				b.SetOptionNative(k, settings[k])
+			} else {
+				b.SetOptionNative(k, v)
+			}
+		}
 		b.UpdateRules()
 	} else if option == "fileformat" {
 		switch b.Settings["fileformat"].(string) {
