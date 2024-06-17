@@ -1,7 +1,8 @@
 name: Nightly builds
 on:
+  workflow_dispatch: # Allows manual trigger
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: '0 0 * * *'
 jobs:
   nightly:
     strategy:
