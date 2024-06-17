@@ -41,6 +41,8 @@ var (
 
 	// Stdout is a buffer that is written to stdout when micro closes
 	Stdout *bytes.Buffer
+	// Sigterm is a channel where micro exits when written
+	Sigterm chan os.Signal
 )
 
 func init() {
