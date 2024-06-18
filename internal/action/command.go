@@ -354,13 +354,23 @@ func reloadRuntime(reloadPlugins bool) {
 		config.InitPlugins()
 	}
 
+	oldParsedSettings := config.ParsedSettings()
+
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
 	}
-	err = config.InitGlobalSettings()
-	if err != nil {
-		screen.TermMessage(err)
+
+	parsedSettings := config.ParsedSettings()
+	defaultGlobals := config.DefaultGlobalSettings()
+	for k := range defaultGlobals {
+		if _, ok := parsedSettings[k]; ok {
+			SetGlobalOptionNative(k, parsedSettings[k])
+			continue
+		}
+		if _, ok := oldParsedSettings[k]; ok {
+			SetGlobalOptionNative(k, defaultGlobals[k])
+		}
 	}
 
 	if reloadPlugins {
