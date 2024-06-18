@@ -154,10 +154,10 @@ var (
 func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
-	parsedSettings = make(map[string]interface{})
 }
 
 func ReadSettings() error {
+	parsedSettings = make(map[string]interface{})
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
@@ -187,6 +187,14 @@ func ReadSettings() error {
 		}
 	}
 	return nil
+}
+
+func ParsedSettings() map[string]interface{} {
+	s := make(map[string]interface{})
+	for k, v := range parsedSettings {
+		s[k] = v
+	}
+	return s
 }
 
 func verifySetting(option string, value reflect.Type, def reflect.Type) bool {

@@ -357,10 +357,16 @@ func reloadRuntime(reloadPlugins bool) {
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
-	}
-	err = config.InitGlobalSettings()
-	if err != nil {
-		screen.TermMessage(err)
+	} else {
+		parsedSettings := config.ParsedSettings()
+		defaultSettings := config.DefaultAllSettings()
+		for k := range defaultSettings {
+			if _, ok := parsedSettings[k]; ok {
+				SetGlobalOptionNative(k, parsedSettings[k])
+			} else {
+				SetGlobalOptionNative(k, defaultSettings[k])
+			}
+		}
 	}
 
 	if reloadPlugins {
@@ -393,6 +399,10 @@ func reloadRuntime(reloadPlugins bool) {
 		screen.TermMessage(err)
 	}
 	for _, b := range buffer.OpenBuffers {
+		config.InitLocalSettings(b.Settings, b.Path)
+		for k, v := range b.Settings {
+			b.SetOptionNative(k, v)
+		}
 		b.UpdateRules()
 	}
 }
