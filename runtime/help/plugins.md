@@ -288,11 +288,14 @@ The packages and functions are listed below (in Go type signatures):
     - `NewBufferFromFile(path string) (*Buffer, error)`: creates a new
        buffer by reading from disk at the given path.
 
+    - `NewCursor(b *Buffer, l Loc)`: creates a new cursor struct.
+
     - `ByteOffset(pos Loc, buf *Buffer) int`: returns the byte index of the
        given position in a buffer.
 
     - `Log(s string)`: writes a string to the log buffer.
     - `LogBuf() *Buffer`: returns the log buffer.
+    
 * `micro/util`
     - `RuneAt(str string, idx int) string`: returns the utf8 rune at a
        given index within a string.
