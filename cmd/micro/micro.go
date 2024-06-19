@@ -357,7 +357,7 @@ func main() {
 	}
 
 	if a := config.GetGlobalOption("autosave").(float64); a > 0 {
-		config.SetAutoTime(int(a))
+		config.SetAutoTime(a)
 		config.StartAutoSave()
 	}
 
