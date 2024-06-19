@@ -147,6 +147,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
         * `zypper install micro-editor` (SUSE)
         * `eopkg install micro` (Solus).
         * `pacstall -I micro` (Pacstall).
+        * `apt-get install micro` (ALT Linux)
         * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
     * distro-agnostic package managers:
         * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
