@@ -471,7 +471,7 @@ runtime.
 
 ## Default plugins
 
-There are 7 default plugins that come pre-installed with micro. These are
+The following plugins come pre-installed with micro:
 
 * `autoclose`: automatically closes brackets, quotes, etc...
 * `comment`: provides automatic commenting for a number of languages
