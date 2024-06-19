@@ -23,14 +23,20 @@ func SetAutoTime(a int) {
 
 func StartAutoSave() {
 	go func() {
+		autolock.Lock()
+		a := autotime
+		autolock.Unlock()
+		if a < 1 {
+			return
+		}
 		for {
+			time.Sleep(time.Duration(a) * time.Second)
 			autolock.Lock()
 			a := autotime
 			autolock.Unlock()
 			if a < 1 {
 				break
 			}
-			time.Sleep(time.Duration(a) * time.Second)
 			Autosave <- true
 		}
 	}()
