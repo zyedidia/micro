@@ -21,13 +21,6 @@ func SetAutoTime(a int) {
 	autolock.Unlock()
 }
 
-func GetAutoTime() int {
-	autolock.Lock()
-	a := autotime
-	autolock.Unlock()
-	return a
-}
-
 func StartAutoSave() {
 	go func() {
 		for {
