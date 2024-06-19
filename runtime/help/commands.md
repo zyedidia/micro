@@ -107,13 +107,18 @@ quotes here but these are not necessary when entering the command in micro.
 
 * `plugin available`: show available plugins that can be installed.
 
-* `reload`: reloads all runtime files.
+* `reload`: reloads all runtime files (settings, keybindings, syntax files,
+   colorschemes, plugins). All plugins will be unloaded by running their
+   `deinit()` function (if it exists), and then loaded again by calling the
+   `preinit()`, `init()` and `postinit()` functions (if they exist).
 
 * `cd 'path'`: Change the working directory to the given `path`.
 
 * `pwd`: Print the current working directory.
 
 * `open 'filename'`: Open a file in the current buffer.
+
+* `reopen`: Reopens the current file from disk.
 
 * `reset 'option'`: resets the given option to its default value
 

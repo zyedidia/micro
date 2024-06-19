@@ -1,11 +1,15 @@
 # Plugins
 
+This help topic is about creating plugins. If you need help installing or
+managing plugins, look for `plugin` commands in `help commands`. If you want to
+enable or disable a plugin, look for `Plugin options` in `help options`.
+
 Micro supports creating plugins with a simple Lua system. Plugins are
 folders containing Lua files and possibly other source files placed
 in `~/.config/micro/plug`. The plugin directory (within `plug`) should
 contain at least one Lua file and a `repo.json` file. The `repo.json` file
 provides additional information such as the name of the plugin, the
-plugin's website, dependencies, etc...
+plugin's website, dependencies, etc.
 [Here is an example `repo.json` file](https://github.com/micro-editor/updated-plugins/blob/master/go-plugin/repo.json)
 from the go plugin, which has the following file structure:
 
@@ -19,9 +23,9 @@ from the go plugin, which has the following file structure:
 
 The `go.lua` file contains the main code for the plugin, though the
 code may be distributed across multiple Lua files. The `repo.json`
-file contains information about the plugin such as the website,
+file contains information about the plugin, such as the website,
 description, version, and any requirements. Plugins may also
-have additional files which can be added to micro's runtime files,
+have additional files that can be added to micro's runtime files,
 of which there are 5 types:
 
 * Colorschemes
@@ -31,17 +35,16 @@ of which there are 5 types:
 * Syntax header files
 
 In most cases, a plugin will want to add help files, but in certain
-cases a plugin may also want to add colorschemes or syntax files. It
-is unlikely for a plugin to need to add plugin files at runtime or
-syntax header files. No directory structure is enforced but keeping
-runtime files in their own directories is good practice.
+cases a plugin may also want to add colorschemes or syntax files.
+No directory structure is enforced, but keeping runtime files in their
+own directories is good practice.
 
 ## Lua callbacks
 
-Plugins use Lua but also have access to many functions both from micro
-and from the Go standard library. Many callbacks are also defined which
-are called when certain events happen. Here is the list of callbacks
-which micro defines:
+Plugins use Lua but also have access to many functions, both from micro
+and from the Go standard library. Plugins can also define functions that micro
+will call when certain events happen. Here is the list of callbacks
+that micro defines:
 
 * `init()`: this function should be used for your plugin initialization.
    This function is called after buffers have been initialized.
@@ -49,7 +52,12 @@ which micro defines:
 * `preinit()`: initialization function called before buffers have been
    initialized.
 
-* `postinit()`: initialization function called after `init()`.
+* `postinit()`: initialization function called after the `init()` function of
+   all plugins has been called.
+
+* `deinit()`: cleanup function called when your plugin is unloaded or reloaded.
+
+* `onSetActive(bufpane)`: runs when changing the currently active panel.
 
 * `onBufferOpen(buf)`: runs when a buffer is opened. The input contains
    the buffer object.
@@ -76,7 +84,7 @@ which micro defines:
    detecting various changes of micro's state that cannot be detected
    using other callbacks.
 
-For example a function which is run every time the user saves the buffer
+For example, a function that is run every time the user saves the buffer
 would be:
 
 ```lua
@@ -96,8 +104,8 @@ should be relocated to the cursor or not after the action is complete.
 
 ## Accessing micro functions
 
-Some of micro's internal information is exposed in the form of packages which
-can be imported by Lua plugins. A package can be imported in Lua and a value
+Some of micro's internal information is exposed in the form of packages, which
+can be imported by Lua plugins. A package can be imported in Lua, and a value
 within it can be accessed using the following syntax:
 
 ```lua
@@ -105,7 +113,7 @@ local micro = import("micro")
 micro.Log("Hello")
 ```
 
-The packages and functions are listed below (in Go type signatures):
+The packages and their contents are listed below (in Go type signatures):
 
 * `micro`
     - `TermMessage(msg interface{}...)`: temporarily close micro and print a
@@ -114,7 +122,7 @@ The packages and functions are listed below (in Go type signatures):
     - `TermError(filename string, lineNum int, err string)`: temporarily close
        micro and print an error formatted as `filename, lineNum: err`.
 
-    - `InfoBar()`: return the infobar BufPane object.
+    - `InfoBar() *InfoPane`: return the infobar BufPane object.
 
     - `Log(msg interface{}...)`: write a message to `log.txt` (requires
        `-debug` flag, or binary built with `build-dbg`).
@@ -127,16 +135,28 @@ The packages and functions are listed below (in Go type signatures):
 
     - `CurTab() *Tab`: returns the current tab.
 
+    - `Tabs() *TabList`: returns the global tab list.
+
     - `After(t time.Duration, f func())`: run function `f` in the background
        after time `t` elapses. See https://pkg.go.dev/time#Duration for the
        usage of `time.Duration`.
+
+    Relevant links:
+    [Time](https://pkg.go.dev/time#Duration)
+    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
+    [InfoPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#InfoPane)
+    [Tab](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#Tab)
+    [TabList](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#TabList)
+    [interface{} / any](https://go.dev/tour/methods/14)
 
 * `micro/config`
     - `MakeCommand(name string, action func(bp *BufPane, args[]string),
                    completer buffer.Completer)`:
        create a command with the given name, and lua callback function when
        the command is run. A completer may also be given to specify how
-       autocompletion should work with the custom command.
+       autocompletion should work with the custom command. Any lua function
+       that takes a Buffer argument and returns a pair of string arrays is a
+       valid completer, as are the built in completers below:
 
     - `FileComplete`: autocomplete using files in the current directory
     - `HelpComplete`: autocomplete using names of help documents
@@ -181,26 +201,38 @@ The packages and functions are listed below (in Go type signatures):
     - `RTPlugin`: runtime files for plugin source code.
 
     - `RegisterCommonOption(pl string, name string, defaultvalue interface{})`:
-       registers a new option with for the given plugin. The name of the
+       registers a new option for the given plugin. The name of the
        option will be `pl.name`, and will have the given default value. Since
        this registers a common option, the option will be modifiable on a
        per-buffer basis, while also having a global value (in the
        GlobalSettings map).
 
     - `RegisterGlobalOption(pl string, name string, defaultvalue interface{})`:
-       same as `RegisterCommonOption` but the option cannot be modified
+       same as `RegisterCommonOption`, but the option cannot be modified
        locally to each buffer.
 
     - `GetGlobalOption(name string) interface{}`: returns the value of a
        given plugin in the `GlobalSettings` map.
 
     - `SetGlobalOption(option, value string) error`: sets an option to a
-       given value. Same as using the `> set` command. This will parse the
-       value to the actual value type.
+       given value. Same as using the `> set` command. This will try to convert
+       the value into the proper type for the option. Can return an error if the
+       option name is not valid, or the value can not be converted.
 
     - `SetGlobalOptionNative(option string, value interface{}) error`: sets
        an option to a given value, where the type of value is the actual
-       type of the value internally.
+       type of the value internally. Can return an error if the provided value
+       is not valid for the given option.
+
+    - `ConfigDir`: the path to micro's currently active config directory.
+
+    Relevant links:
+    [Buffer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Buffer)
+    [buffer.Completer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Completer)
+    [Error](https://pkg.go.dev/builtin#error)
+    [interface{} / any](https://go.dev/tour/methods/14)
+    [filepath.Match](https://pkg.go.dev/path/filepath#Match)
+
 * `micro/shell`
     - `ExecCommand(name string, arg ...string) (string, error)`: runs an
        executable with the given arguments, and pipes the output (stderr
@@ -209,7 +241,7 @@ The packages and functions are listed below (in Go type signatures):
 
     - `RunCommand(input string) (string, error)`: same as `ExecCommand`,
        except this uses micro's argument parser to parse the arguments from
-       the input. For example `cat 'hello world.txt' file.txt`, will pass
+       the input. For example, `cat 'hello world.txt' file.txt`, will pass
        two arguments in the `ExecCommand` argument list (quoting arguments
        will preserve spaces).
 
@@ -220,7 +252,7 @@ The packages and functions are listed below (in Go type signatures):
                           (string, error)`:
        temporarily closes micro and runs the given command in the terminal.
        If `wait` is true, micro will wait for the user to press enter before
-       returning to text editing. If `getOutput` is true, micro redirect
+       returning to text editing. If `getOutput` is true, micro will redirect
        stdout from the command to the returned string.
 
     - `JobStart(cmd string, onStdout, onStderr,
@@ -230,13 +262,14 @@ The packages and functions are listed below (in Go type signatures):
        (using `sh -c`). Three callbacks can be provided which will be called
        when the command generates stdout, stderr, or exits. The userargs will
        be passed to the callbacks, along with the output as the first
-       argument of the callback.
+       argument of the callback. Returns the started command.
 
     - `JobSpawn(cmd string, cmdArgs []string, onStdout, onStderr,
                 onExit func(string, []interface{}), userargs ...interface{})
                 *exec.Cmd`:
        same as `JobStart`, except doesn't run the command through the shell
-       and instead takes as inputs the list of arguments.
+       and instead takes as inputs the list of arguments. Returns the started
+       command.
 
     - `JobStop(cmd *exec.Cmd)`: kills a job.
     - `JobSend(cmd *exec.Cmd, data string)`: sends some data to a job's stdin.
@@ -245,10 +278,10 @@ The packages and functions are listed below (in Go type signatures):
                        callback func(out string, userargs []interface{}),
                        userargs []interface{}) error`:
        starts a terminal emulator from a given BufPane with the input command.
-       If `wait` is true it will wait for the user to exit by pressing enter
-       once the executable has terminated and if `getOutput` is true it will
-       redirect the stdout of the process to a pipe which will be passed to
-       the callback which is a function that takes a string and a list of
+       If `wait` is true, it will wait for the user to exit by pressing enter
+       once the executable has terminated, and if `getOutput` is true, it will
+       redirect the stdout of the process to a pipe, which will be passed to
+       the callback, which is a function that takes a string and a list of
        optional user arguments. This function returns an error on systems
        where the terminal emulator is not supported.
 
@@ -260,15 +293,20 @@ The packages and functions are listed below (in Go type signatures):
         * OpenBSD
         * FreeBSD
 
+    Relevant links:
+    [Cmd](https://pkg.go.dev/os/exec#Cmd)
+    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
+    [Error](https://pkg.go.dev/builtin#error)
+
 * `micro/buffer`
     - `NewMessage(owner string, msg string, start, end, Loc, kind MsgType)
                   *Message`:
-       creates a new message with an owner over a range given by the start
+       creates a new message with an owner over a range defined by the start
        and end locations.
 
     - `NewMessageAtLine(owner string, msg string, line int, kindMsgType)
                         *Message`:
-       creates a new message with owner, type and message at a given line.
+       creates a new message with owner, type, and text at a given line.
 
     - `MTInfo`: info message.
     - `MTWarning`: warning message.
@@ -278,7 +316,9 @@ The packages and functions are listed below (in Go type signatures):
     - `SLoc(line, row int) display.SLoc`: creates a new scrolling location struct.
 
     - `BTDefault`: default buffer type.
+    - `BTHelp`: help buffer type.
     - `BTLog`: log buffer type.
+    - `BTScratch`: scratch buffer type (cannot be saved).
     - `BTRaw`: raw buffer type.
     - `BTInfo`: info buffer type.
 
@@ -286,13 +326,22 @@ The packages and functions are listed below (in Go type signatures):
        given text at a certain path.
 
     - `NewBufferFromFile(path string) (*Buffer, error)`: creates a new
-       buffer by reading from disk at the given path.
+       buffer by reading the file at the given path from disk. Returns an error
+       if the read operation fails (for example, due to the file not existing).
 
     - `ByteOffset(pos Loc, buf *Buffer) int`: returns the byte index of the
        given position in a buffer.
 
     - `Log(s string)`: writes a string to the log buffer.
     - `LogBuf() *Buffer`: returns the log buffer.
+
+    Relevant links:
+    [Message](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Message)
+    [Loc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Loc)
+    [display.SLoc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/display#SLoc)
+    [Buffer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Buffer)
+    [Error](https://pkg.go.dev/builtin#error)
+
 * `micro/util`
     - `RuneAt(str string, idx int) string`: returns the utf8 rune at a
        given index within a string.
@@ -303,17 +352,26 @@ The packages and functions are listed below (in Go type signatures):
     - `String(b []byte) string`: converts a byte array to a string.
     - `RuneStr(r rune) string`: converts a rune to a string.
     - `Unzip(src, dest string) error`: unzips a file to given folder.
-    - `HttpRequest(method string, url string, headers []string) (http.Response, error)`: makes a http request.
+    - `Version`: micro's version number or commit hash
+    - `SemVersion`: micro's semantic version
+    - `HttpRequest(method string, url string, headers []string)
+                  (http.Response, error)`: makes a http request.
+    - `CharacterCountInString(str string) int`: returns the number of
+       characters in a string
+    - `RuneStr(r rune) string`: converts a rune to a string.
 
-This may seem like a small list of available functions but some of the objects
+    Relevant links:
+    [Rune](https://pkg.go.dev/builtin#rune)
+
+This may seem like a small list of available functions, but some of the objects
 returned by the functions have many methods. The Lua plugin may access any
 public methods of an object returned by any of the functions above.
-Unfortunately it is not possible to list all the available functions on this
+Unfortunately, it is not possible to list all the available functions on this
 page. Please go to the internal documentation at
 https://pkg.go.dev/github.com/zyedidia/micro/v2/internal to see the full list
 of available methods. Note that only methods of types that are available to
 plugins via the functions above can be called from a plugin. For an even more
-detailed reference see the source code on Github.
+detailed reference, see the source code on Github.
 
 For example, with a BufPane object called `bp`, you could call the `Save`
 function in Lua with `bp:Save()`.
@@ -336,7 +394,7 @@ micro.InfoBar():Message()
 It is possible for your lua code to access many of the functions in the Go
 standard library.
 
-Simply import the package you'd like and then you can use it. For example:
+Simply import the package you'd like, and then you can use it. For example:
 
 ```lua
 local ioutil = import("io/ioutil")
@@ -359,39 +417,37 @@ end
 
 Here are the packages from the Go standard library that you can access.
 Nearly all functions from these packages are supported. For an exact
-list of which functions are supported you can look through `lua.go`
+list of functions that are supported, you can look through `lua.go`
 (which should be easy to understand).
 
-```
-fmt
-io
-io/ioutil
-net
-math
-math/rand
-os
-runtime
-path
-filepath
-strings
-regexp
-errors
-time
-unicode/utf8
-archive/zip
-net/http
-```
+* [fmt](https://pkg.go.dev/fmt)
+* [io](https://pkg.go.dev/io)
+* [io/ioutil](https://pkg.go.dev/io/ioutil)
+* [net](https://pkg.go.dev/net)
+* [math](https://pkg.go.dev/math)
+* [math/rand](https://pkg.go.dev/math/rand)
+* [os](https://pkg.go.dev/os)
+* [runtime](https://pkg.go.dev/runtime)
+* [path](https://pkg.go.dev/path)
+* [filepath](https://pkg.go.dev/filepath)
+* [strings](https://pkg.go.dev/strings)
+* [regexp](https://pkg.go.dev/regexp)
+* [errors](https://pkg.go.dev/errors)
+* [time](https://pkg.go.dev/time)
+* [unicode/utf8](https://pkg.go.dev/unicode/utf8)
+* [archive/zip](https://pkg.go.dev/archive/zip)
+* [net/http](https://pkg.go.dev/net/http)
 
-For documentation for each of these functions, see the Go standard
-library documentation at https://golang.org/pkg/ (for the packages
-exposed to micro plugins). The Lua standard library is also available
-to plugins though it is rather small.
+The following functions from the go-humanize package are also available:
 
-The following functions are also available from the go-humanize package:
+* `humanize`:
+    - `Bytes(s uint64) string`: produces a human readable representation of
+       an SI size.
+    - `Ordinal(x int) string`: gives you the input number in a rank/ordinal
+       format.
 
-The `humanize` package exposes:
-* `Bytes`
-* `Ordinal`
+[The Lua standard library](https://www.lua.org/manual/5.1/manual.html#5) is also
+available to plugins, though it is rather small.
 
 ## Adding help files, syntax files, or colorschemes in your plugin
 
@@ -399,7 +455,7 @@ You can use the `AddRuntimeFile(name string, type config.RTFiletype,
                                 path string)`
 function to add various kinds of files to your plugin. For example, if you'd
 like to add a help topic to your plugin called `test`, you would create a
-`test.md` file, and call the function:
+`test.md` file and call the function:
 
 ```lua
 config = import("micro/config")
@@ -407,7 +463,7 @@ config.AddRuntimeFile("test", config.RTHelp, "test.md")
 ```
 
 Use `AddRuntimeFilesFromDirectory(name, type, dir, pattern)` to add a number of
-files to the runtime. To read the content of a runtime file use
+files to the runtime. To read the content of a runtime file, use
 `ReadRuntimeFile(fileType, name string)` or `ListRuntimeFiles(fileType string)`
 for all runtime files. In addition, there is `AddRuntimeFileFromMemory` which
 adds a runtime file based on a string that may have been constructed at
@@ -415,11 +471,12 @@ runtime.
 
 ## Default plugins
 
-There are 6 default plugins that come pre-installed with micro. These are
+The following plugins come pre-installed with micro:
 
 * `autoclose`: automatically closes brackets, quotes, etc...
 * `comment`: provides automatic commenting for a number of languages
-* `ftoptions`: alters some default options (notably indentation) depending on the filetype
+* `ftoptions`: alters some default options (notably indentation) depending on
+   the filetype
 * `linter`: provides extensible linting for many languages
 * `literate`: provides advanced syntax highlighting for the Literate
    programming tool.
@@ -437,7 +494,7 @@ your own plugins.
 
 ## Plugin Manager
 
-Micro also has a built in plugin manager which you can invoke with the
+Micro also has a built in plugin manager, which you can invoke with the
 `> plugin ...` command, or in the shell with `micro -plugin ...`.
 
 For the valid commands you can use, see the `commands` help topic.
@@ -450,7 +507,7 @@ directly link third-party plugins to allow installation through the plugin
 manager with the `pluginrepos` option.
 
 If you'd like to publish a plugin you've made as an official plugin, you should
-upload your plugin online (to Github preferably) and add a `repo.json` file.
+upload your plugin online (preferably to Github) and add a `repo.json` file.
 This file will contain the metadata for your plugin. Here is an example:
 
 ```json
@@ -471,9 +528,9 @@ This file will contain the metadata for your plugin. Here is an example:
 }]
 ```
 
-Then open a pull request at github.com/micro-editor/plugin-channel adding a
+Then open a pull request at github.com/micro-editor/plugin-channel, adding a
 link to the raw `repo.json` that is in your plugin repository.
 
-To make updating the plugin work, the first line of your plugins lua code
+To make updating the plugin work, the first line of your plugin's lua code
 should contain the version of the plugin. (Like this: `VERSION = "1.0.0"`)
 Please make sure to use [semver](http://semver.org/) for versioning.
