@@ -38,24 +38,6 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 }
 
 func main() {
-	tags, err := exec.Command("git", "tag").Output()
-	if err != nil {
-		log.Println("git tag:", err)
-		if e, ok := err.(*exec.ExitError); ok {
-			log.Print(string(e.Stderr))
-		}
-	}
-	if len(tags) == 0 {
-		// no tags found -- fetch them
-		err = exec.Command("git", "fetch", "--tags").Run()
-		if err != nil {
-			log.Println("git fetch --tags:", err)
-			if e, ok := err.(*exec.ExitError); ok {
-				log.Print(string(e.Stderr))
-			}
-		}
-	}
-
 	// Find the last vX.X.X Tag and get how many builds we are ahead of it.
 	versionStr, ahead := getTag("--match", "v*")
 	version, err := semver.ParseTolerant(versionStr)
