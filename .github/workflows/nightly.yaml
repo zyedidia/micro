@@ -1,7 +1,8 @@
 name: Nightly builds
 on:
+  workflow_dispatch: # Allows manual trigger
   schedule:
-    - cron:  '0 0 * * *'
+    - cron: '0 0 * * *'
 jobs:
   nightly:
     strategy:
@@ -14,11 +15,14 @@ jobs:
       uses: actions/setup-go@v5
       with:
         go-version: ${{ matrix.go-version }}
+        cache: false
 
     - name: Checkout
       uses: actions/checkout@v4
       with:
         ref: master
+        fetch-depth: 0
+        fetch-tags: true
 
     - name: Build
       run: tools/cross-compile.sh

@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os/exec"
 	"strings"
 
@@ -19,13 +20,17 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 	} else {
 		tagParts := strings.Split(string(tag), "-")
 		if len(tagParts) == 3 {
-			if ahead, err := semver.NewPRVersion(tagParts[1]); err == nil {
+			ahead, err := semver.NewPRVersion(tagParts[1])
+			if err == nil {
 				return tagParts[0], &ahead
 			}
+			log.Printf("semver.NewPRVersion(%s): %v", tagParts[1], err)
 		} else if len(tagParts) == 4 {
-			if ahead, err := semver.NewPRVersion(tagParts[2]); err == nil {
+			ahead, err := semver.NewPRVersion(tagParts[2])
+			if err == nil {
 				return tagParts[0] + "-" + tagParts[1], &ahead
 			}
+			log.Printf("semver.NewPRVersion(%s): %v", tagParts[2], err)
 		}
 
 		return string(tag), nil
@@ -33,15 +38,12 @@ func getTag(match ...string) (string, *semver.PRVersion) {
 }
 
 func main() {
-	if tags, err := exec.Command("git", "tag").Output(); err != nil || len(tags) == 0 {
-		// no tags found -- fetch them
-		exec.Command("git", "fetch", "--tags").Run()
-	}
 	// Find the last vX.X.X Tag and get how many builds we are ahead of it.
 	versionStr, ahead := getTag("--match", "v*")
 	version, err := semver.ParseTolerant(versionStr)
 	if err != nil {
 		// no version tag found so just return what ever we can find.
+		log.Printf("semver.ParseTolerant(%s): %v", versionStr, err)
 		fmt.Println("0.0.0-unknown")
 		return
 	}
@@ -66,6 +68,8 @@ func main() {
 	if pr, err := semver.NewPRVersion(tag); err == nil {
 		// append the tag as pre-release name
 		version.Pre = append(version.Pre, pr)
+	} else {
+		log.Printf("semver.NewPRVersion(%s): %v", tag, err)
 	}
 
 	if ahead != nil {
