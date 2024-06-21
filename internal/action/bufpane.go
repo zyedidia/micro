@@ -231,11 +231,8 @@ type BufPane struct {
 	lastClickTime time.Time
 	lastLoc       buffer.Loc
 
-	// lastCutTime stores when the last ctrl+k was issued.
-	// It is used for clearing the clipboard to replace it with fresh cut lines.
-	lastCutTime time.Time
-
-	// freshClip returns true if the clipboard has never been pasted.
+	// freshClip returns true if one or more lines have been cut to the clipboard
+	// and have never been pasted yet.
 	freshClip bool
 
 	// Was the last mouse event actually a double click?
@@ -779,6 +776,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"CopyLine":                  (*BufPane).CopyLine,
 	"Cut":                       (*BufPane).Cut,
 	"CutLine":                   (*BufPane).CutLine,
+	"Duplicate":                 (*BufPane).Duplicate,
 	"DuplicateLine":             (*BufPane).DuplicateLine,
 	"DeleteLine":                (*BufPane).DeleteLine,
 	"MoveLinesUp":               (*BufPane).MoveLinesUp,
@@ -905,6 +903,7 @@ var MultiActions = map[string]bool{
 	"Copy":                      true,
 	"Cut":                       true,
 	"CutLine":                   true,
+	"Duplicate":                 true,
 	"DuplicateLine":             true,
 	"DeleteLine":                true,
 	"MoveLinesUp":               true,
