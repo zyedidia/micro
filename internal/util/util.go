@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -41,6 +43,9 @@ var (
 
 	// Stdout is a buffer that is written to stdout when micro closes
 	Stdout *bytes.Buffer
+
+	// To be used for file writes before umask is applied
+	FileMode os.FileMode = 0666
 )
 
 func init() {
@@ -396,14 +401,34 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-// EscapePath replaces every path separator in a given path with a %
-func EscapePath(path string) string {
+// EscapePathUrl encodes the path in URL query form
+func EscapePathUrl(path string) string {
+	return url.QueryEscape(filepath.ToSlash(path))
+}
+
+// EscapePathLegacy replaces every path separator in a given path with a %
+func EscapePathLegacy(path string) string {
 	path = filepath.ToSlash(path)
 	if runtime.GOOS == "windows" {
 		// ':' is not valid in a path name on Windows but is ok on Unix
 		path = strings.ReplaceAll(path, ":", "%")
 	}
 	return strings.ReplaceAll(path, "/", "%")
+}
+
+// EscapePath is a helper to apply the URL or legacy approach
+func EscapePath(path string) string {
+	url := EscapePathUrl(path)
+	if _, err := os.Stat(url); err == nil {
+		return url
+	}
+
+	legacy := EscapePathLegacy(path)
+	if _, err := os.Stat(legacy); err == nil {
+		return legacy
+	}
+
+	return url
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
@@ -582,4 +607,38 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+type FileWriter interface {
+	Overwrite(name string, isBackup bool) error
+	BackupDir() string
+	KeepBackup() bool
+}
+
+// SafeWrite performs the following actions, while using the given FileWriter interface:
+// 1. Create or update a backup file first at the given location
+// 1.1. If this fails remove the corrupted backup file and return with error
+// 2. Create or update the target file
+// 2.1. If this fails keep the backup file and return with error
+// 3. Remove the backup file, in case it shouldn't be kept and return
+func SafeWrite(name string, fwriter FileWriter) (err error) {
+	if _, err = os.Stat(fwriter.BackupDir()); errors.Is(err, fs.ErrNotExist) {
+		os.Mkdir(fwriter.BackupDir(), os.ModePerm)
+	}
+
+	backupName := filepath.Join(fwriter.BackupDir(), EscapePath(name))
+	if err = fwriter.Overwrite(backupName, true); err != nil {
+		os.Remove(backupName)
+		return
+	}
+
+	if err = fwriter.Overwrite(name, false); err != nil {
+		return
+	}
+
+	if !fwriter.KeepBackup() {
+		os.Remove(backupName)
+	}
+
+	return
 }

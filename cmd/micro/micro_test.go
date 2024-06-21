@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -26,7 +25,7 @@ func init() {
 func startup(args []string) (tcell.SimulationScreen, error) {
 	var err error
 
-	tempDir, err = ioutil.TempDir("", "micro_test")
+	tempDir, err = os.MkdirTemp("", "micro_test")
 	if err != nil {
 		return nil, err
 	}
@@ -165,7 +164,7 @@ func findBuffer(file string) *buffer.Buffer {
 }
 
 func createTestFile(name string, content string) (string, error) {
-	testf, err := ioutil.TempFile("", name)
+	testf, err := os.CreateTemp("", name)
 	if err != nil {
 		return "", err
 	}
@@ -223,7 +222,7 @@ func TestSimpleEdit(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Error(err)
 		return
@@ -275,7 +274,7 @@ func TestMouse(t *testing.T) {
 	// base content
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Error(err)
 		return
@@ -321,7 +320,7 @@ func TestSearchAndReplace(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
 		t.Error(err)
 		return
@@ -337,7 +336,7 @@ func TestSearchAndReplace(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err = ioutil.ReadFile(file)
+	data, err = os.ReadFile(file)
 	if err != nil {
 		t.Error(err)
 		return

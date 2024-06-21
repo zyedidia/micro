@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -52,7 +51,6 @@ var defaultCommonSettings = map[string]interface{}{
 	"autoindent":      true,
 	"autosu":          false,
 	"backup":          true,
-	"backupdir":       "",
 	"basename":        false,
 	"colorcolumn":     float64(0),
 	"cursorline":      true,
@@ -73,7 +71,6 @@ var defaultCommonSettings = map[string]interface{}{
 	"matchbrace":      true,
 	"matchbracestyle": "underline",
 	"mkparents":       false,
-	"permbackup":      false,
 	"readonly":        false,
 	"reload":          "prompt",
 	"rmtrailingws":    false,
@@ -103,6 +100,7 @@ var defaultCommonSettings = map[string]interface{}{
 // default values
 var DefaultGlobalOnlySettings = map[string]interface{}{
 	"autosave":       float64(0),
+	"backupdir":      "",
 	"clipboard":      "external",
 	"colorscheme":    "default",
 	"divchars":       "|-",
@@ -114,6 +112,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"multiopen":      "tab",
 	"parsecursor":    false,
 	"paste":          false,
+	"permbackup":     false,
 	"pluginchannels": []string{"https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"},
 	"pluginrepos":    []string{},
 	"savehistory":    true,
@@ -150,6 +149,26 @@ var (
 	VolatileSettings map[string]bool
 )
 
+type SettingsWriter struct {
+	txt []byte
+}
+
+func (w SettingsWriter) Overwrite(name string, isBackup bool) error {
+	return os.WriteFile(name, w.txt, util.FileMode)
+}
+
+func (w SettingsWriter) BackupDir() string {
+	backupdir, err := util.ReplaceHome(GlobalSettings["backupdir"].(string))
+	if backupdir == "" || err != nil {
+		backupdir = filepath.Join(ConfigDir, "backups")
+	}
+	return backupdir
+}
+
+func (w SettingsWriter) KeepBackup() bool {
+	return GlobalSettings["permbackup"].(bool)
+}
+
 func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
@@ -159,7 +178,7 @@ func init() {
 func ReadSettings() error {
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
@@ -290,8 +309,10 @@ func WriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		var w SettingsWriter
+		w.txt, _ = json.MarshalIndent(parsedSettings, "", "    ")
+		w.txt = append(w.txt, '\n')
+		err = util.SafeWrite(filename, w)
 	}
 	return err
 }
@@ -312,8 +333,10 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		var w SettingsWriter
+		w.txt, _ = json.MarshalIndent(parsedSettings, "", "    ")
+		w.txt = append(w.txt, '\n')
+		err = util.SafeWrite(filename, w)
 	}
 	return err
 }

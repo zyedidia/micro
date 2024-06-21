@@ -2,7 +2,6 @@ package buffer
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"sync/atomic"
@@ -11,7 +10,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"golang.org/x/text/encoding"
 )
 
 const backupMsg = `A backup was detected for this file. This likely means that micro
@@ -31,6 +29,22 @@ The backup was created on %s, and the file is
 Options: [r]ecover, [i]gnore, [a]bort: `
 
 var backupRequestChan chan *Buffer
+
+type BackupWriter struct {
+	b *Buffer
+}
+
+func (w BackupWriter) Overwrite(name string, isBackup bool) error {
+	return w.b.Overwrite(name, true, false)
+}
+
+func (w BackupWriter) BackupDir() string {
+	return w.b.BackupDir()
+}
+
+func (bw BackupWriter) KeepBackup() bool {
+	return false
+}
 
 func backupThread() {
 	for {
@@ -54,54 +68,36 @@ func init() {
 
 func (b *Buffer) RequestBackup() {
 	if !b.requestedBackup {
+		b.requestedBackup = true
 		select {
 		case backupRequestChan <- b:
 		default:
 			// channel is full
 		}
-		b.requestedBackup = true
 	}
 }
 
-// Backup saves the current buffer to ConfigDir/backups
-func (b *Buffer) Backup() error {
-	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
-		return nil
-	}
-
-	backupdir, err := util.ReplaceHome(b.Settings["backupdir"].(string))
+func (b *Buffer) BackupDir() string {
+	backupdir, err := util.ReplaceHome(config.GlobalSettings["backupdir"].(string))
 	if backupdir == "" || err != nil {
 		backupdir = filepath.Join(config.ConfigDir, "backups")
 	}
-	if _, err := os.Stat(backupdir); os.IsNotExist(err) {
-		os.Mkdir(backupdir, os.ModePerm)
+	return backupdir
+}
+
+func (b *Buffer) KeepBackup() bool {
+	return config.GlobalSettings["permbackup"].(bool)
+}
+
+// Backup saves the current buffer to BackupDir()
+func (b *Buffer) Backup() error {
+	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault || !b.requestedBackup {
+		return nil
 	}
 
-	name := filepath.Join(backupdir, util.EscapePath(b.AbsPath))
-
-	err = overwriteFile(name, encoding.Nop, func(file io.Writer) (e error) {
-		if len(b.lines) == 0 {
-			return
-		}
-
-		// end of line
-		eol := []byte{'\n'}
-
-		// write lines
-		if _, e = file.Write(b.lines[0].data); e != nil {
-			return
-		}
-
-		for _, l := range b.lines[1:] {
-			if _, e = file.Write(eol); e != nil {
-				return
-			}
-			if _, e = file.Write(l.data); e != nil {
-				return
-			}
-		}
-		return
-	}, false)
+	name := filepath.Join(b.BackupDir(), util.EscapePath(b.AbsPath))
+	w := BackupWriter{b}
+	err := util.SafeWrite(name, w)
 
 	b.requestedBackup = false
 
@@ -110,18 +106,18 @@ func (b *Buffer) Backup() error {
 
 // RemoveBackup removes any backup file associated with this buffer
 func (b *Buffer) RemoveBackup() {
-	if !b.Settings["backup"].(bool) || b.Settings["permbackup"].(bool) || b.Path == "" || b.Type != BTDefault {
+	if !b.Settings["backup"].(bool) || config.GlobalSettings["permbackup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return
 	}
-	f := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
+	f := filepath.Join(b.BackupDir(), util.EscapePath(b.AbsPath))
 	os.Remove(f)
 }
 
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
-	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
-		backupfile := filepath.Join(config.ConfigDir, "backups", util.EscapePath(b.AbsPath))
+	if b.Settings["backup"].(bool) && !config.GlobalSettings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
+		backupfile := filepath.Join(b.BackupDir(), util.EscapePath(b.AbsPath))
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
 			if err == nil {
