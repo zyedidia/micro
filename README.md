@@ -156,7 +156,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `choco install micro`.
     * `scoop install micro`.
 * OpenBSD: Available in the ports tree and also available as a binary package.
-    * `pkd_add -v micro`.
+    * `pkg_add -v micro`.
 * NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
     * `pkg_add micro`
 * macOS: Available in package managers.
