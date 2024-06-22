@@ -101,15 +101,18 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 	c := make(chan os.Signal, 1)
 	signal.Reset(os.Interrupt)
 	signal.Notify(c, os.Interrupt)
-	cmd.Start()
-	err = cmd.Wait()
+	err = cmd.Start()
+	if err == nil {
+		err = cmd.Wait()
+		if wait {
+			// This is just so we don't return right away and let the user press enter to return
+			screen.TermMessage("")
+		}
+	} else {
+		screen.TermMessage(err)
+	}
 
 	output := outputBytes.String()
-
-	if wait {
-		// This is just so we don't return right away and let the user press enter to return
-		screen.TermMessage("")
-	}
 
 	// Start the screen back up
 	screen.TempStart(screenb)
