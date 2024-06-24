@@ -553,7 +553,6 @@ func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
 	} else if option == "autosave" {
 		if nativeValue.(float64) > 0 {
 			config.SetAutoTime(nativeValue.(float64))
-			config.StartAutoSave()
 		} else {
 			config.SetAutoTime(0)
 		}

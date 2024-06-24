@@ -356,9 +356,9 @@ func main() {
 		log.Println(clipErr, " or change 'clipboard' option")
 	}
 
+	config.StartAutoSave()
 	if a := config.GetGlobalOption("autosave").(float64); a > 0 {
 		config.SetAutoTime(a)
-		config.StartAutoSave()
 	}
 
 	screen.Events = make(chan tcell.Event)
