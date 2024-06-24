@@ -7,7 +7,9 @@ detect:
 rules:
     - statement: "(chain|define|table)"
     - symbol: "(=)"
-    - diff-modified: "(flush|type|counter)"
+    - special: "\\b(hook|policy|type)\\b"
+    - special: "\\b(icmp|icmpv6|iif|iifname|ip|ip6|oif|oifname|tcp|udp)\\b"
+    - statement: "\\b(accept|define|drop|flush|goto|jump)\\b"
     - constant.string.char: "(;)"
     - constant.string: '([\"]{1})(.*)([\"]{1})'
     - type: "(\\#\\!)"
