@@ -193,6 +193,7 @@ DeleteSubWordLeft
 SelectLine
 SelectToStartOfLine
 SelectToEndOfLine
+Deselect
 InsertNewline
 InsertSpace
 Backspace
@@ -240,12 +241,16 @@ ParagraphNext
 ToggleHelp
 ToggleDiffGutter
 ToggleRuler
+ToggleKeyMenu
+ToggleHighlightSearch
 JumpLine
+ClearInfo
 ClearStatus
 ShellMode
 CommandMode
 Quit
 QuitAll
+ForceQuit
 AddTab
 PreviousTab
 NextTab
