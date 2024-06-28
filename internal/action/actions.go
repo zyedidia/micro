@@ -1072,8 +1072,20 @@ func (h *BufPane) UnhighlightSearch() bool {
 	return true
 }
 
+// ResetSearch resets the last used search term
+func (h *BufPane) ResetSearch() bool {
+	if h.Buf.LastSearch != "" {
+		h.Buf.LastSearch = ""
+		return true
+	}
+	return false
+}
+
 // FindNext searches forwards for the last used search term
 func (h *BufPane) FindNext() bool {
+	if h.Buf.LastSearch == "" {
+		return false
+	}
 	// If the cursor is at the start of a selection and we search we want
 	// to search from the end of the selection in the case that
 	// the selection is a search result in which case we wouldn't move at
@@ -1100,6 +1112,9 @@ func (h *BufPane) FindNext() bool {
 
 // FindPrevious searches backwards for the last used search term
 func (h *BufPane) FindPrevious() bool {
+	if h.Buf.LastSearch == "" {
+		return false
+	}
 	// If the cursor is at the end of a selection and we search we want
 	// to search from the beginning of the selection in the case that
 	// the selection is a search result in which case we wouldn't move at
