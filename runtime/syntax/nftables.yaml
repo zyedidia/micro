@@ -1,0 +1,18 @@
+filetype: nftables
+
+detect:
+    filename: "nftables.conf$"
+    header: "^flush +ruleset"
+    
+rules:
+    - type: "\\b(chain|counter|map|ruleset|set|table)\\b"
+    - symbol: "(=)"
+    - special: "\\b(hook|policy|type)\\b"
+    - special: "\\b(icmp|icmpv6|iif|iifname|ip|ip6|oif|oifname|tcp|udp)\\b"
+    - statement: "\\b(accept|define|drop|flush|goto|jump)\\b"
+    - constant.string.char: "(;)"
+    - constant.string: '([\"]{1})(.*)([\"]{1})'
+    - identifier.var: "\\b(\\$[a-zA-Z_][a-zA-Z0-9_-]*)\\b"
+    - comment: "(^|[[:space:]])#([^{].*)?$"
+    - indent-char.whitespace: "[[:space:]]+$"
+    - indent-char: "    + +| +  +"
