@@ -759,6 +759,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SelectToEndOfLine":         (*BufPane).SelectToEndOfLine,
 	"ParagraphPrevious":         (*BufPane).ParagraphPrevious,
 	"ParagraphNext":             (*BufPane).ParagraphNext,
+	"SelectToParagraphPrevious": (*BufPane).SelectToParagraphPrevious,
+	"SelectToParagraphNext":     (*BufPane).SelectToParagraphNext,
 	"InsertNewline":             (*BufPane).InsertNewline,
 	"Backspace":                 (*BufPane).Backspace,
 	"Delete":                    (*BufPane).Delete,

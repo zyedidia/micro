@@ -490,38 +490,84 @@ func (h *BufPane) SelectToEndOfLine() bool {
 	return true
 }
 
-// ParagraphPrevious moves the cursor to the previous empty line, or beginning of the buffer if there's none
-func (h *BufPane) ParagraphPrevious() bool {
+func (h *BufPane) paragraphPrevious() {
 	var line int
+	// Skip to the first non-empty line
 	for line = h.Cursor.Y; line > 0; line-- {
+		if len(h.Buf.LineBytes(line)) != 0 {
+			break
+		}
+	}
+	// Find the first empty line
+	for ; line > 0; line-- {
 		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
 			h.Cursor.X = 0
 			h.Cursor.Y = line
 			break
 		}
 	}
-	// If no empty line found. move cursor to end of buffer
+	// If no empty line was found, move the cursor to the start of the buffer
 	if line == 0 {
 		h.Cursor.Loc = h.Buf.Start()
 	}
+}
+
+func (h *BufPane) paragraphNext() {
+	var line int
+	// Skip to the first non-empty line
+	for line = h.Cursor.Y; line < h.Buf.LinesNum(); line++ {
+		if len(h.Buf.LineBytes(line)) != 0 {
+			break
+		}
+	}
+	// Find the first empty line
+	for ; line < h.Buf.LinesNum(); line++ {
+		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
+			h.Cursor.X = 0
+			h.Cursor.Y = line
+			break
+		}
+	}
+	// If no empty line was found, move the cursor to the end of the buffer
+	if line == h.Buf.LinesNum() {
+		h.Cursor.Loc = h.Buf.End()
+	}
+}
+
+// ParagraphPrevious moves the cursor to the first empty line that comes before the paragraph closest to the cursor, or beginning of the buffer if there isn't a paragraph
+func (h *BufPane) ParagraphPrevious() bool {
+	h.Cursor.Deselect(true)
+	h.paragraphPrevious()
 	h.Relocate()
 	return true
 }
 
-// ParagraphNext moves the cursor to the next empty line, or end of the buffer if there's none
+// ParagraphNext moves the cursor to the first empty line that comes after the paragraph closest to the cursor, or end of the buffer if there isn't a paragraph
 func (h *BufPane) ParagraphNext() bool {
-	var line int
-	for line = h.Cursor.Y; line < h.Buf.LinesNum(); line++ {
-		if len(h.Buf.LineBytes(line)) == 0 && line != h.Cursor.Y {
-			h.Cursor.X = 0
-			h.Cursor.Y = line
-			break
-		}
+	h.Cursor.Deselect(true)
+	h.paragraphNext()
+	h.Relocate()
+	return true
+}
+
+// SelectToParagraphPrevious selects to the first empty line that comes before the paragraph closest to the cursor, or beginning of the buffer if there isn't a paragraph
+func (h *BufPane) SelectToParagraphPrevious() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	// If no empty line found. move cursor to end of buffer
-	if line == h.Buf.LinesNum() {
-		h.Cursor.Loc = h.Buf.End()
+	h.paragraphPrevious()
+	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.Relocate()
+	return true
+}
+
+// SelectToParagraphNext selects to the first empty line that comes after the paragraph closest to the cursor, or end of the buffer if there isn't a paragraph
+func (h *BufPane) SelectToParagraphNext() bool {
+	if !h.Cursor.HasSelection() {
+		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
+	h.paragraphNext()
+	h.Cursor.SelectTo(h.Cursor.Loc)
 	h.Relocate()
 	return true
 }
