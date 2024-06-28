@@ -40,8 +40,7 @@ var (
 	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
 	optionFlags   map[string]*string
 
-	sigterm chan os.Signal
-	sighup  chan os.Signal
+	sighup chan os.Signal
 
 	timerChan chan func()
 )
@@ -360,9 +359,9 @@ func main() {
 
 	screen.Events = make(chan tcell.Event)
 
-	sigterm = make(chan os.Signal, 1)
+	util.Sigterm = make(chan os.Signal, 1)
 	sighup = make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
+	signal.Notify(util.Sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
 	signal.Notify(sighup, syscall.SIGHUP)
 
 	timerChan = make(chan func())
@@ -437,7 +436,7 @@ func DoEvent() {
 			}
 		}
 		os.Exit(0)
-	case <-sigterm:
+	case <-util.Sigterm:
 		for _, b := range buffer.OpenBuffers {
 			if !b.Modified() {
 				b.Fini()
