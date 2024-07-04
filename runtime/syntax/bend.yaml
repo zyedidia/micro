@@ -15,14 +15,12 @@ rules:
     - statement: "\\b(Node|Leaf|Tree)\\b"
       # constants (true, false, null, this)
     - constant: "\\b(true|false|True|False)\\b"
-      # constants (types)
-    - type: "\\b(ud|str|int|float|obj|fib|bool|pat|type|any)\\b\\??"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
       # extra operators
     - symbol.operator: "(\\+|\\-|\\/|%|\\*|>>|<<|\\\\|\\^|&|~|!>)"
       # Comparision operators
-    - symbol.operator: "(==|!=|<=?|>=?|\\bis\\b|\\?\\?)"
+    - symbol.operator: "(==|!=|<=?|>=?|\\?\\?)"
       # numbers
     - constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
     - constant.number: "\\b0b(_?[01])+\\b"     # bin
