@@ -13,7 +13,7 @@ rules:
     - identifier: "def [a-zA-Z_0-9]+"
       # keywords (declaration)
     - statement: "\\b(Node|Leaf|Tree)\\b"
-      # constants (true, false, null, this)
+      # constants (true, false)
     - constant: "\\b(true|false|True|False)\\b"
       # parentheses
     - symbol.brackets: "([(){}]|\\[|\\])"
