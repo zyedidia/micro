@@ -1184,7 +1184,8 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 	var i int
 	if char == braceType[0] {
 		for y := start.Y; y < b.LinesNum(); y++ {
-			sortedGroups := b.GetSortedSyntaxGroupIndices(y)
+			var sortedGroups []int
+			sortedGroupsPopulated := false
 			l := []rune(string(b.LineBytes(y)))
 			xInit := 0
 			if y == start.Y {
@@ -1192,10 +1193,22 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 			}
 			for x := xInit; x < len(l); x++ {
 				r := l[x]
-				if r == braceType[0] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
-					i++
-				} else if r == braceType[1] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
-					i--
+				if r == braceType[0] {
+					if !sortedGroupsPopulated {
+						sortedGroups = b.GetSortedSyntaxGroupIndices(y)
+						sortedGroupsPopulated = true
+					}
+					if !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
+						i++
+					}
+				} else if r == braceType[1] {
+					if !sortedGroupsPopulated {
+						sortedGroups = b.GetSortedSyntaxGroupIndices(y)
+						sortedGroupsPopulated = true
+					}
+					if !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
+						i--
+					}
 					if i == 0 {
 						return Loc{x, y}, true
 					}
@@ -1204,7 +1217,8 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 		}
 	} else if char == braceType[1] {
 		for y := start.Y; y >= 0; y-- {
-			sortedGroups := b.GetSortedSyntaxGroupIndices(y)
+			var sortedGroups []int
+			sortedGroupsPopulated := false
 			l := []rune(string(b.lines[y].data))
 			xInit := len(l) - 1
 			if y == start.Y {
@@ -1212,10 +1226,22 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 			}
 			for x := xInit; x >= 0; x-- {
 				r := l[x]
-				if r == braceType[1] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups){
-					i++
-				} else if r == braceType[0] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups){
-					i--
+				if r == braceType[1] {
+					if !sortedGroupsPopulated {
+						sortedGroups = b.GetSortedSyntaxGroupIndices(y)
+						sortedGroupsPopulated = true
+					}
+				 	if !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
+						i++
+					}
+				} else if r == braceType[0]{
+					if !sortedGroupsPopulated {
+						sortedGroups = b.GetSortedSyntaxGroupIndices(y)
+						sortedGroupsPopulated = true
+					}
+					if !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
+						i--
+					}
 					if i == 0 {
 						return Loc{x, y}, true
 					}
