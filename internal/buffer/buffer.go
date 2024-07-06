@@ -1141,7 +1141,8 @@ var BracePairs = [][2]rune{
 	{'[', ']'},
 }
 
-func (b *Buffer) getSortedSyntaxIndices(lineN int) []int {
+// Returns the indices of syntax groups in ascending order
+func (b *Buffer) GetSortedSyntaxGroupIndices(lineN int) []int {
 	keys := make([]int, 0, len(b.Match(lineN)))
 	for k := range b.Match(lineN) {
 		keys = append(keys, k)
@@ -1151,9 +1152,13 @@ func (b *Buffer) getSortedSyntaxIndices(lineN int) []int {
 }
 
 // Returns the Group (syntax highlight group ID) at the specified location and a boolean
-// that indicates if a group is found or not
-func (b *Buffer) GetGroupAtLoc(loc Loc) (highlight.Group, bool) {
-	sortedIndices := b.getSortedSyntaxIndices(loc.Y)
+// that indicates if a group is found or not.
+// This optionally accepts sorted Group indices returned from GetSortedSyntaxGroupIndices()
+// which can be reused on the same line.
+func (b *Buffer) GetGroupAtLoc(loc Loc, sortedIndices []int) (highlight.Group, bool) {
+ 	if sortedIndices == nil {
+		sortedIndices = b.GetSortedSyntaxGroupIndices(loc.Y)
+ 	}
 	i := sort.SearchInts(sortedIndices, loc.X)
 	if i == 0 || i == len(sortedIndices) {
 		return 0, false
@@ -1164,8 +1169,8 @@ func (b *Buffer) GetGroupAtLoc(loc Loc) (highlight.Group, bool) {
 	return b.Match(loc.Y)[sortedIndices[i - 1]], true
 }
 
-func (b *Buffer) isLocInStringOrComment(loc Loc) bool {
-	g, gFound := b.GetGroupAtLoc(loc)
+func (b *Buffer) isLocInStringOrComment(loc Loc, sortedIndices []int) bool {
+	g, gFound := b.GetGroupAtLoc(loc, sortedIndices)
 	if gFound && (g.String() == "constant.string" || strings.Contains(g.String(), "comment")) {
 		return true
 	}
@@ -1173,12 +1178,13 @@ func (b *Buffer) isLocInStringOrComment(loc Loc) bool {
 }
 
 func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc, bool) {
-	if b.isLocInStringOrComment(start) {
+	if b.isLocInStringOrComment(start, nil) {
 		return start, false
 	}
 	var i int
 	if char == braceType[0] {
 		for y := start.Y; y < b.LinesNum(); y++ {
+			sortedGroups := b.GetSortedSyntaxGroupIndices(y)
 			l := []rune(string(b.LineBytes(y)))
 			xInit := 0
 			if y == start.Y {
@@ -1186,9 +1192,9 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 			}
 			for x := xInit; x < len(l); x++ {
 				r := l[x]
-				if r == braceType[0] && !b.isLocInStringOrComment(Loc{x, y}) {
+				if r == braceType[0] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
 					i++
-				} else if r == braceType[1] && !b.isLocInStringOrComment(Loc{x, y}) {
+				} else if r == braceType[1] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups) {
 					i--
 					if i == 0 {
 						return Loc{x, y}, true
@@ -1198,6 +1204,7 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 		}
 	} else if char == braceType[1] {
 		for y := start.Y; y >= 0; y-- {
+			sortedGroups := b.GetSortedSyntaxGroupIndices(y)
 			l := []rune(string(b.lines[y].data))
 			xInit := len(l) - 1
 			if y == start.Y {
@@ -1205,9 +1212,9 @@ func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc
 			}
 			for x := xInit; x >= 0; x-- {
 				r := l[x]
-				if r == braceType[1] && !b.isLocInStringOrComment(Loc{x, y}){
+				if r == braceType[1] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups){
 					i++
-				} else if r == braceType[0] && !b.isLocInStringOrComment(Loc{x, y}){
+				} else if r == braceType[0] && !b.isLocInStringOrComment(Loc{x, y}, sortedGroups){
 					i--
 					if i == 0 {
 						return Loc{x, y}, true
