@@ -22,7 +22,7 @@ rules:
     - constant: "\\b(Nothing|Just|Left|Right|LT|EQ|GT)\\b"
 
     - constant: "\\(\\)"  # Unit
-    - constant.number: "\\b(0[xX][0-9A-Fa-f]+|0[oO][0-7]+|[-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?)\\b"
+    - constant.number: "\\b(0[xX][0-9A-Fa-f]+|0[oO][0-7]+|0[bB][01]+|[-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?)\\b"
 
     # Data classes
     - identifier.class: "\\b(Additive|Applicative|Bounded|Data|Enum|Eq|Floating|Foldable|Fractional|Functor|Integral|Monad|MonadPlus|Monoid|Num|Ord|Read|Real|RealFloat|RealFrac|Semigroup|Show|Traversable|Typeable|Zip)[ ]"
