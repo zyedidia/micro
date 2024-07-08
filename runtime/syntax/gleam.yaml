@@ -5,6 +5,7 @@ detect:
 
 rules:
     - identifier: "\\b[a-z][a-z0-9_]*\\b"
+    # ignored variables and words reserved for future
     - ignore: "(\\b(_[a-z][a-z0-9_]*)\\b|\\b(auto|delegate|derive|echo|else|implement|macro|test)\\b)"
     - identifier.class: "[a-z][a-z0-9_]*\\("
     - statement: "\\b(import|as|assert|case|const|if|let|panic|todo|use|opaque|pub|type|fn)\\b"
@@ -22,7 +23,8 @@ rules:
     - symbol: "(\\.\\.|\\.|,|:)"
     - symbol.brackets: "({|}|\\(|\\)|\\[|\\]|<<|>>)"
     - symbol.operator: "(^\\s+\\|>|<>|<-|->|\\+\\.|\\-\\.|/\\.|\\*\\.|%\\.|\\+|\\-|/|\\*|%|=)"
-    - constant.number: "\\b(0[bBoOxX][a-fA-F0-9][a-fA-F0-9_\\.]*|[0-9][0-9_\\.]*)\\b"
+    - constant.number: "\\b[0-9](_?[0-9]+)*(\\.([0-9](_?[0-9]+)*)?(e-?[0-9]+)?)?\\b"
+    - constant.number: "\\b0([bB][01](_?[01]+)*|[oO][0-7](_?[0-7]+)*|[xX][0-9A-Fa-f](_?[0-9A-Fa-f]+)*)\\b"
     - constant.bool: "\\s(<|>|<\\.|>\\.|<=|>=|<=\\.|>=\\.|==|!=|==\\.|&&|\\|\\||\\|)\\s"
     - constant.bool.true: "True"
     - constant.bool.false: "False"
