@@ -9,7 +9,8 @@ rules:
     - symbol: "(=)"
     - special: "\\b(hook|policy|type)\\b"
     - special: "\\b(icmp|icmpv6|iif|iifname|ip|ip6|oif|oifname|tcp|udp)\\b"
-    - statement: "\\b(accept|define|drop|flush|goto|jump)\\b"
+    - statement: "\\b(accept|drop|goto|jump|log|masquerade|reject)\\b"
+    - preproc: "\\b(add|define|flush|include|delete)\\b"
     - symbol: "[-=/:;,@]"
     - symbol.operator: "[<>.&|^!]|\\b(and|ge|gt|le|lt|or|xor)\\b"
     - constant.string: '([\"]{1})(.*)([\"]{1})'
