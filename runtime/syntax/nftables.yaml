@@ -5,10 +5,10 @@ detect:
     header: "^(#!.*/(env +)?nft( |$)|flush +ruleset)"
     
 rules:
-    - type: "\\b(chain|counter|map|ruleset|set|table)\\b"
-    - symbol: "(=)"
-    - special: "\\b(hook|policy|type)\\b"
-    - special: "\\b(icmp|icmpv6|iif|iifname|ip|ip6|oif|oifname|tcp|udp)\\b"
+    - type: "\\b(chain|counter|map|rule|ruleset|set|table)\\b"
+    - type: "\\b(ether|icmp|icmpv6|icmpx|inet|ip|ip6|ipv4|ipv6|tcp|udp)\\b"
+    - special: "\\b(elements|hook|policy|priority|type)\\b"
+    - identifier: "\\b(ct|iif|iifname|meta|oif|oifname|th)\\b"
     - statement: "\\b(accept|drop|goto|jump|log|masquerade|reject)\\b"
     - preproc: "\\b(add|define|flush|include|delete)\\b"
     - symbol: "[-=/:;,@]"
