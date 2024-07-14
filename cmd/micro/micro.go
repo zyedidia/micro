@@ -422,6 +422,7 @@ func DoEvent() {
 			b.AutoSave()
 		}
 	case <-shell.CloseTerms:
+		action.Tabs.CloseTerms()
 	case event = <-screen.Events:
 	case <-screen.DrawChan():
 		for len(screen.DrawChan()) > 0 {

@@ -188,6 +188,17 @@ func (t *TabList) ResetMouse() {
 	}
 }
 
+// CloseTerms notifies term panes that a terminal job has finished.
+func (t *TabList) CloseTerms() {
+	for _, tab := range t.List {
+		for _, p := range tab.Panes {
+			if tp, ok := p.(*TermPane); ok {
+				tp.HandleTermClose()
+			}
+		}
+	}
+}
+
 // Tabs is the global tab list
 var Tabs *TabList
 
