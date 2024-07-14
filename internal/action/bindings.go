@@ -256,8 +256,11 @@ func eventsEqual(e1 Event, e2 Event) bool {
 	return e1 == e2
 }
 
-// TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
-// Returns true if the keybinding already existed and a possible error
+// TryBindKey tries to bind a key to an action. If there is already a binding
+// for this key and `overwrite` is true, TryBindKey replaces this binding with
+// the new one and writes the new binding to `bindings.json`.
+// Returns true if the new binding has been applied, and a possible error
+// if failed to write to `bindings.json`.
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	var e error
 	var parsed map[string]interface{}
@@ -303,8 +306,12 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 
 		BindKey(k, v, Binder["buffer"])
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		if overwrite {
+			txt, _ := json.MarshalIndent(parsed, "", "    ")
+			return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		}
+
+		return true, nil
 	}
 	return false, e
 }

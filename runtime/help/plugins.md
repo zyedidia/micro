@@ -166,8 +166,8 @@ The packages and their contents are listed below (in Go type signatures):
     - `NoComplete`: no autocompletion suggestions
 
     - `TryBindKey(k, v string, overwrite bool) (bool, error)`: bind the key
-       `k` to the string `v` in the `bindings.json` file.  If `overwrite` is
-       true, this will overwrite any existing binding to key `k`. Returns true
+       `k` to the action `v`. If `overwrite` is true, this will overwrite any
+       existing binding to key `k` in the `bindings.json` file. Returns true
        if the binding was made, and a possible error (for example writing to
        `bindings.json` can cause an error).
 
