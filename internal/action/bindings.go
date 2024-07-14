@@ -298,7 +298,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 			if overwrite {
 				parsed[ev] = v
 			} else {
-				return true, nil
+				return parsed[ev] == v, nil
 			}
 		} else {
 			parsed[k] = v
