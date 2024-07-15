@@ -480,13 +480,13 @@ func OptionIsValid(option string, value interface{}) error {
 // Option validators
 
 func validatePositiveValue(option string, value interface{}) error {
-	tabsize, ok := value.(float64)
+	nativeValue, ok := value.(float64)
 
 	if !ok {
 		return errors.New("Expected numeric type for " + option)
 	}
 
-	if tabsize < 1 {
+	if nativeValue < 1 {
 		return errors.New(option + " must be greater than 0")
 	}
 
