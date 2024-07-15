@@ -456,11 +456,11 @@ func GetNativeValue(option string, realValue interface{}, value string) (interfa
 	} else if kind == reflect.String {
 		native = value
 	} else if kind == reflect.Float64 {
-		i, err := strconv.Atoi(value)
+		f, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
-		native = float64(i)
+		native = f
 	} else {
 		return nil, ErrInvalidValue
 	}
