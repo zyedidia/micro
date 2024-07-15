@@ -11,6 +11,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/blang/semver"
 	"github.com/micro-editor/json5"
@@ -129,7 +130,10 @@ func (pc PluginChannels) Fetch(out io.Writer) PluginPackages {
 
 // Fetch retrieves all available PluginPackages from the given channel
 func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
-	resp, err := http.Get(string(pc))
+	client := http.Client {
+		Timeout: 30 * time.Second,
+	}
+	resp, err := client.Get(string(pc))
 	if err != nil {
 		fmt.Fprintln(out, "Failed to query plugin channel:\n", err)
 		return nil
@@ -149,7 +153,10 @@ func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 
 // Fetch retrieves all available PluginPackages from the given repository
 func (pr PluginRepository) Fetch(out io.Writer) PluginPackages {
-	resp, err := http.Get(string(pr))
+	client := http.Client {
+		Timeout: 30 * time.Second,
+	}
+	resp, err := client.Get(string(pr))
 	if err != nil {
 		fmt.Fprintln(out, "Failed to query plugin repository:\n", err)
 		return nil
@@ -405,7 +412,10 @@ func GetInstalledPluginVersion(name string) string {
 // DownloadAndInstall downloads and installs the given plugin and version
 func (pv *PluginVersion) DownloadAndInstall(out io.Writer) error {
 	fmt.Fprintf(out, "Downloading %q (%s) from %q\n", pv.pack.Name, pv.Version, pv.Url)
-	resp, err := http.Get(pv.Url)
+	client := http.Client {
+		Timeout: 30 * time.Second,
+	}
+	resp, err := client.Get(pv.Url)
 	if err != nil {
 		return err
 	}
