@@ -241,6 +241,7 @@ ToggleHelp
 ToggleDiffGutter
 ToggleRuler
 JumpLine
+ResetSearch
 ClearStatus
 ShellMode
 CommandMode
