@@ -127,7 +127,8 @@ Here are the available options:
     default value: `true`
 
 * `encoding`: the encoding to open and save files with. Supported encodings
-   are listed at https://www.w3.org/TR/encoding/.
+   are listed at https://www.w3.org/TR/encoding/. The name of the encoding can
+   end in `-bom` to open and save files with BOM (byte order mark).
 
     default value: `utf-8`
 
