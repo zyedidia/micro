@@ -19,12 +19,14 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/dimchansky/utfbom"
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -354,6 +356,11 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			return NewBufferFromString("", "", btype)
 		}
 		if !hasBackup {
+			var bomenc encoding.Encoding
+			if r, bomenc = skipBOM(b, r); bomenc != nil {
+				enc = bomenc
+			}
+
 			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
 
 			var ff FileFormat = FFAuto
@@ -427,6 +434,50 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	OpenBuffers = append(OpenBuffers, b)
 
 	return b
+}
+
+// skipBOM returns a reader where BOM is skipped and the encoding that is
+// detected
+func skipBOM(b *Buffer, r io.Reader) (io.Reader, encoding.Encoding) {
+	var offset int64
+	seeker, _ := r.(io.Seeker)
+	if seeker != nil {
+		var err error
+		if offset, err = seeker.Seek(0, io.SeekCurrent); err != nil {
+			seeker = nil
+		}
+	}
+
+	sr, bom := utfbom.Skip(r)
+	if bom == utfbom.Unknown {
+		return sr, nil
+	} else if enc, encname := bomToEncoding(bom); enc != nil {
+		b.Settings["encoding"] = encname
+		return sr, enc
+	}
+
+	if seeker != nil {
+		if _, err := seeker.Seek(offset, io.SeekStart); err == nil {
+			return r, nil
+		}
+	}
+
+	b.Settings["fastdirty"] = true
+	b.isModified = true
+	return r, nil
+}
+
+func bomToEncoding(bom utfbom.Encoding) (encoding.Encoding, string) {
+	switch bom {
+	case utfbom.UTF8:
+		return unicode.UTF8, "utf-8-bom"
+	case utfbom.UTF16BigEndian:
+		return unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM), "utf-16be-bom"
+	case utfbom.UTF16LittleEndian:
+		return unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM), "utf-16le-bom"
+	default:
+		return nil, ""
+	}
 }
 
 // CloseOpenBuffers removes all open buffers
