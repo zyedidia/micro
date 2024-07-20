@@ -150,27 +150,29 @@ func BufMapEvent(k Event, action string) {
 		actionfns = append(actionfns, afn)
 	}
 	bufAction := func(h *BufPane, te *tcell.EventMouse) bool {
-		cursors := h.Buf.GetCursors()
-		success := true
 		for i, a := range actionfns {
-			innerSuccess := true
-			for j, c := range cursors {
-				if c == nil {
-					continue
+			var success bool
+			if _, ok := MultiActions[names[i]]; ok {
+				success = true
+				for _, c := range h.Buf.GetCursors() {
+					h.Buf.SetCurCursor(c.Num)
+					h.Cursor = c
+					success = success && h.execAction(a, names[i], te)
 				}
-				h.Buf.SetCurCursor(c.Num)
-				h.Cursor = c
-				if i == 0 || (success && types[i-1] == '&') || (!success && types[i-1] == '|') || (types[i-1] == ',') {
-					innerSuccess = innerSuccess && h.execAction(a, names[i], j, te)
-				} else {
-					break
-				}
+			} else {
+				h.Buf.SetCurCursor(0)
+				h.Cursor = h.Buf.GetActiveCursor()
+				success = h.execAction(a, names[i], te)
 			}
+
 			// if the action changed the current pane, update the reference
 			h = MainTab().CurPane()
-			success = innerSuccess
 			if h == nil {
 				// stop, in case the current pane is not a BufPane
+				break
+			}
+
+			if (!success && types[i] == '&') || (success && types[i] == '|') {
 				break
 			}
 		}
@@ -562,36 +564,33 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 	return more
 }
 
-func (h *BufPane) execAction(action BufAction, name string, cursor int, te *tcell.EventMouse) bool {
+func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse) bool {
 	if name != "Autocomplete" && name != "CycleAutocompleteBack" {
 		h.Buf.HasSuggestions = false
 	}
 
-	_, isMulti := MultiActions[name]
-	if (!isMulti && cursor == 0) || isMulti {
-		if h.PluginCB("pre" + name) {
-			var success bool
-			switch a := action.(type) {
-			case BufKeyAction:
-				success = a(h)
-			case BufMouseAction:
-				success = a(h, te)
-			}
-			success = success && h.PluginCB("on"+name)
+	if !h.PluginCB("pre" + name) {
+		return false
+	}
 
-			if isMulti {
-				if recordingMacro {
-					if name != "ToggleMacro" && name != "PlayMacro" {
-						curmacro = append(curmacro, action)
-					}
-				}
-			}
+	var success bool
+	switch a := action.(type) {
+	case BufKeyAction:
+		success = a(h)
+	case BufMouseAction:
+		success = a(h, te)
+	}
+	success = success && h.PluginCB("on"+name)
 
-			return success
+	if _, ok := MultiActions[name]; ok {
+		if recordingMacro {
+			if name != "ToggleMacro" && name != "PlayMacro" {
+				curmacro = append(curmacro, action)
+			}
 		}
 	}
 
-	return false
+	return success
 }
 
 func (h *BufPane) completeAction(action string) {
