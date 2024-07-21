@@ -10,11 +10,9 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 
 	if option == "fastdirty" {
 		if !nativeValue.(bool) {
-			if !b.Modified() {
-				e := calcHash(b, &b.origHash)
-				if e == ErrFileTooLarge {
-					b.Settings["fastdirty"] = false
-				}
+			e := calcHash(b, &b.origHash)
+			if e == ErrFileTooLarge {
+				b.Settings["fastdirty"] = true
 			}
 		}
 	} else if option == "statusline" {
