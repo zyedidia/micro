@@ -362,9 +362,9 @@ func reloadRuntime(reloadPlugins bool) {
 		defaultSettings := config.DefaultAllSettings()
 		for k := range defaultSettings {
 			if _, ok := parsedSettings[k]; ok {
-				err = SetGlobalOptionNative(k, parsedSettings[k])
+				err = doSetGlobalOptionNative(k, parsedSettings[k])
 			} else {
-				err = SetGlobalOptionNative(k, defaultSettings[k])
+				err = doSetGlobalOptionNative(k, defaultSettings[k])
 			}
 			if err != nil {
 				screen.TermMessage(err)
@@ -525,15 +525,7 @@ func (h *BufPane) NewTabCmd(args []string) {
 	}
 }
 
-func SetGlobalOptionNative(option string, nativeValue interface{}) error {
-	// check for local option first...
-	for _, s := range config.LocalSettings {
-		if s == option {
-			return MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
-		}
-	}
-
-	// ...if it's not local continue with the globals
+func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
 	config.GlobalSettings[option] = nativeValue
 	config.ModifiedSettings[option] = true
 	delete(config.VolatileSettings, option)
@@ -586,6 +578,23 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		}
 	}
 
+	return nil
+}
+
+func SetGlobalOptionNative(option string, nativeValue interface{}) error {
+	// check for local option first...
+	for _, s := range config.LocalSettings {
+		if s == option {
+			return MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
+		}
+	}
+
+	// ...if it's not local continue with the globals...
+	if err := doSetGlobalOptionNative(option, nativeValue); err != nil {
+		return err
+	}
+
+	// ...at last check the buffer locals
 	for _, b := range buffer.OpenBuffers {
 		if err := b.SetOptionNative(option, nativeValue); err != nil {
 			return err
