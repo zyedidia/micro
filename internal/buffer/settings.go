@@ -1,6 +1,8 @@
 package buffer
 
 import (
+	"crypto/md5"
+
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
@@ -13,7 +15,12 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 			if !b.Modified() {
 				e := calcHash(b, &b.origHash)
 				if e == ErrFileTooLarge {
-					b.Settings["fastdirty"] = false
+					b.Settings["fastdirty"] = true
+				}
+			} else {
+				b.origHash = [md5.Size]byte{}
+				if b.Size() > LargeFileThreshold {
+					b.Settings["fastdirty"] = true
 				}
 			}
 		}
