@@ -361,6 +361,10 @@ func reloadRuntime(reloadPlugins bool) {
 		parsedSettings := config.ParsedSettings()
 		defaultSettings := config.DefaultAllSettings()
 		for k := range defaultSettings {
+			if k == "fileformat" {
+				// reload should not override auto-detected file format
+				continue
+			}
 			if _, ok := parsedSettings[k]; ok {
 				SetGlobalOptionNative(k, parsedSettings[k])
 			} else {
