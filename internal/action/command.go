@@ -366,9 +366,12 @@ func reloadRuntime(reloadPlugins bool) {
 				continue
 			}
 			if _, ok := parsedSettings[k]; ok {
-				SetGlobalOptionNative(k, parsedSettings[k])
+				err = SetGlobalOptionNative(k, parsedSettings[k])
 			} else {
-				SetGlobalOptionNative(k, defaultSettings[k])
+				err = SetGlobalOptionNative(k, defaultSettings[k])
+			}
+			if err != nil {
+				screen.TermMessage(err)
 			}
 		}
 	}
@@ -530,8 +533,7 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 	// check for local option first...
 	for _, s := range config.LocalSettings {
 		if s == option {
-			MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
-			return nil
+			return MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
 		}
 	}
 
@@ -589,7 +591,9 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 	}
 
 	for _, b := range buffer.OpenBuffers {
-		b.SetOptionNative(option, nativeValue)
+		if err := b.SetOptionNative(option, nativeValue); err != nil {
+			return err
+		}
 	}
 
 	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
