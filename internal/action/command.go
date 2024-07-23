@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -531,6 +532,10 @@ func (h *BufPane) NewTabCmd(args []string) {
 }
 
 func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
+	if reflect.DeepEqual(config.GlobalSettings[option], nativeValue) {
+		return nil
+	}
+
 	config.GlobalSettings[option] = nativeValue
 	config.ModifiedSettings[option] = true
 	delete(config.VolatileSettings, option)
