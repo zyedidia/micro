@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -594,8 +595,10 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 	}
 
 	// ...if it's not local continue with the globals...
-	if err := doSetGlobalOptionNative(option, nativeValue); err != nil {
-		return err
+	if !reflect.DeepEqual(config.GlobalSettings[option], nativeValue) {
+		if err := doSetGlobalOptionNative(option, nativeValue); err != nil {
+			return err
+		}
 	}
 
 	// ...at last check the buffer locals
