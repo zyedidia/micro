@@ -274,6 +274,10 @@ func main() {
 				screen.TermMessage(err)
 				continue
 			}
+			if err = config.OptionIsValid(k, nativeValue); err != nil {
+				screen.TermMessage(err)
+				continue
+			}
 			config.GlobalSettings[k] = nativeValue
 			config.VolatileSettings[k] = true
 		}
