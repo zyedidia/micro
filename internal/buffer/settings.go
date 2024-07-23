@@ -9,6 +9,10 @@ import (
 )
 
 func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
 	if reflect.DeepEqual(b.Settings[option], nativeValue) {
 		return nil
 	}

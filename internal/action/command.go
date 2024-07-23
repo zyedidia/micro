@@ -592,6 +592,10 @@ func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
 }
 
 func SetGlobalOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
 	// check for local option first...
 	for _, s := range config.LocalSettings {
 		if s == option {
