@@ -1,11 +1,17 @@
 package buffer
 
 import (
+	"reflect"
+
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
 func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+	if reflect.DeepEqual(b.Settings[option], nativeValue) {
+		return nil
+	}
+
 	b.Settings[option] = nativeValue
 
 	if option == "fastdirty" {
