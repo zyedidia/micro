@@ -1793,27 +1793,38 @@ func (h *BufPane) AddTab() bool {
 
 // PreviousTab switches to the previous tab in the tab list
 func (h *BufPane) PreviousTab() bool {
-	tabsLen := len(Tabs.List)
-	if tabsLen == 1 {
+	if Tabs.Active() == 0 {
 		return false
 	}
-
-	a := Tabs.Active() + tabsLen
-	Tabs.SetActive((a - 1) % tabsLen)
-
+	Tabs.SetActive(Tabs.Active() - 1)
 	return true
 }
 
 // NextTab switches to the next tab in the tab list
 func (h *BufPane) NextTab() bool {
-	tabsLen := len(Tabs.List)
-	if tabsLen == 1 {
+	if Tabs.Active() == len(Tabs.List)-1 {
 		return false
 	}
+	Tabs.SetActive(Tabs.Active() + 1)
+	return true
+}
 
-	a := Tabs.Active()
-	Tabs.SetActive((a + 1) % tabsLen)
+// FirstTab switches to the first tab in the tab list
+func (h *BufPane) FirstTab() bool {
+	if Tabs.Active() == 0 {
+		return false
+	}
+	Tabs.SetActive(0)
+	return true
+}
 
+// LastTab switches to the last tab in the tab list
+func (h *BufPane) LastTab() bool {
+	lastTabIndex := len(Tabs.List) - 1
+	if Tabs.Active() == lastTabIndex {
+		return false
+	}
+	Tabs.SetActive(lastTabIndex)
 	return true
 }
 
@@ -1848,36 +1859,38 @@ func (h *BufPane) Unsplit() bool {
 
 // NextSplit changes the view to the next split
 func (h *BufPane) NextSplit() bool {
-	if len(h.tab.Panes) == 1 {
+	if h.tab.active == len(h.tab.Panes)-1 {
 		return false
 	}
-
-	a := h.tab.active
-	if a < len(h.tab.Panes)-1 {
-		a++
-	} else {
-		a = 0
-	}
-
-	h.tab.SetActive(a)
-
+	h.tab.SetActive(h.tab.active + 1)
 	return true
 }
 
 // PreviousSplit changes the view to the previous split
 func (h *BufPane) PreviousSplit() bool {
-	if len(h.tab.Panes) == 1 {
+	if h.tab.active == 0 {
 		return false
 	}
+	h.tab.SetActive(h.tab.active - 1)
+	return true
+}
 
-	a := h.tab.active
-	if a > 0 {
-		a--
-	} else {
-		a = len(h.tab.Panes) - 1
+// FirstSplit changes the view to the first split
+func (h *BufPane) FirstSplit() bool {
+	if h.tab.active == 0 {
+		return false
 	}
-	h.tab.SetActive(a)
+	h.tab.SetActive(0)
+	return true
+}
 
+// LastSplit changes the view to the last split
+func (h *BufPane) LastSplit() bool {
+	lastPaneIdx := len(h.tab.Panes) - 1
+	if h.tab.active == lastPaneIdx {
+		return false
+	}
+	h.tab.SetActive(lastPaneIdx)
 	return true
 }
 
