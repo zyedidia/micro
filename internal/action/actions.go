@@ -1793,6 +1793,9 @@ func (h *BufPane) PreviousTab() bool {
 	if tabsLen == 1 {
 		return false
 	}
+	if Tabs.Active() == 0 {
+		return false
+	}
 
 	a := Tabs.Active() + tabsLen
 	Tabs.SetActive((a - 1) % tabsLen)
@@ -1806,10 +1809,40 @@ func (h *BufPane) NextTab() bool {
 	if tabsLen == 1 {
 		return false
 	}
+	lastTabIndex := len(Tabs.List) - 1
+	if Tabs.Active() == lastTabIndex {
+		return false
+	}
 
 	a := Tabs.Active()
 	Tabs.SetActive((a + 1) % tabsLen)
 
+	return true
+}
+
+// FirstTab switches to the first tab in the tab list
+func (h *BufPane) FirstTab() bool {
+	if len(Tabs.List) == 1 {
+		return false
+	}
+	if Tabs.Active() == 0 {
+		return false
+	}
+	Tabs.SetActive(0)
+	return true
+}
+
+// LastTab switches to the last tab in the tab list
+func (h *BufPane) LastTab() bool {
+	tabsLen := len(Tabs.List)
+	if tabsLen == 1 {
+		return false
+	}
+	lastTabIndex := tabsLen - 1
+	if Tabs.Active() == lastTabIndex {
+		return false
+	}
+	Tabs.SetActive(lastTabIndex)
 	return true
 }
 
@@ -1847,6 +1880,10 @@ func (h *BufPane) NextSplit() bool {
 	if len(h.tab.Panes) == 1 {
 		return false
 	}
+	lastTabIndex := len(h.tab.Panes) - 1
+	if h.tab.active == lastTabIndex {
+		return false
+	}
 
 	a := h.tab.active
 	if a < len(h.tab.Panes)-1 {
@@ -1865,6 +1902,9 @@ func (h *BufPane) PreviousSplit() bool {
 	if len(h.tab.Panes) == 1 {
 		return false
 	}
+	if h.tab.active == 0 {
+		return false
+	}
 
 	a := h.tab.active
 	if a > 0 {
@@ -1874,6 +1914,31 @@ func (h *BufPane) PreviousSplit() bool {
 	}
 	h.tab.SetActive(a)
 
+	return true
+}
+
+// FirstSplit changes the view to the first split
+func (h *BufPane) FirstSplit() bool {
+	if len(h.tab.Panes) == 1 {
+		return false
+	}
+	if h.tab.active == 0 {
+		return false
+	}
+	h.tab.SetActive(0)
+	return true
+}
+
+// LastSplit changes the view to the last split
+func (h *BufPane) LastSplit() bool {
+	if len(h.tab.Panes) == 1 {
+		return false
+	}
+	lastTabIndex := len(h.tab.Panes) - 1
+	if h.tab.active == lastTabIndex {
+		return false
+	}
+	h.tab.SetActive(lastTabIndex)
 	return true
 }
 

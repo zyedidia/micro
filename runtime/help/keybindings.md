@@ -253,11 +253,15 @@ QuitAll
 AddTab
 PreviousTab
 NextTab
+FirstTab
+LastTab
 NextSplit
 Unsplit
 VSplit
 HSplit
 PreviousSplit
+FirstSplit
+LastSplit
 ToggleMacro
 PlayMacro
 Suspend (Unix only)
@@ -502,16 +506,16 @@ conventions for text editing defaults.
     "Ctrl-v":         "Paste",
     "Ctrl-a":         "SelectAll",
     "Ctrl-t":         "AddTab",
-    "Alt-,":          "PreviousTab",
-    "Alt-.":          "NextTab",
+    "Alt-,":          "PreviousTab|LastTab",
+    "Alt-.":          "NextTab|FirstTab",
     "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
-    "CtrlPageUp":     "PreviousTab",
-    "CtrlPageDown":   "NextTab",
+    "CtrlPageUp":     "PreviousTab|LastTab",
+    "CtrlPageDown":   "NextTab|FirstTab",
     "Ctrl-g":         "ToggleHelp",
     "Alt-g":          "ToggleKeyMenu",
     "Ctrl-r":         "ToggleRuler",
@@ -520,7 +524,7 @@ conventions for text editing defaults.
     "Ctrl-b":         "ShellMode",
     "Ctrl-q":         "Quit",
     "Ctrl-e":         "CommandMode",
-    "Ctrl-w":         "NextSplit",
+    "Ctrl-w":         "NextSplit|FirstSplit",
     "Ctrl-u":         "ToggleMacro",
     "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
