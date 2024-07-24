@@ -607,6 +607,65 @@ func (h *BufPane) CursorEnd() bool {
 	return true
 }
 
+// SelectWord selects the current word under the cursor if there is no selection already
+func (h *BufPane) SelectWord() bool {
+	if h.Cursor.HasSelection() {
+		return false
+	}
+	h.Cursor.SelectWord()
+	return h.Cursor.HasSelection()
+}
+
+// SelectNextTextOccurrence selects the next occurrence of the currently selected text
+func (h *BufPane) SelectNextTextOccurrence() bool {
+	if !h.Cursor.HasSelection() {
+		return false
+	}
+	if h.Buf.NumCursors() > 1 {
+		return false
+	}
+	selectedText := string(h.Cursor.GetSelection())
+	searchLoc := h.Cursor.Loc
+	match, found, err := h.Buf.FindNext(selectedText, h.Buf.Start(), h.Buf.End(), searchLoc, true, false)
+	if err != nil {
+		return false
+	}
+	if found {
+		h.Cursor.SetSelectionStart(match[0])
+		h.Cursor.SetSelectionEnd(match[1])
+		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+		h.GotoLoc(h.Cursor.CurSelection[1])
+		return true
+	}
+	return false
+}
+
+// SelectPreviousTextOccurrence selects the previous occurrence of the currently selected text
+func (h *BufPane) SelectPreviousTextOccurrence() bool {
+	if !h.Cursor.HasSelection() {
+		return false
+	}
+	if h.Buf.NumCursors() > 1 {
+		return false
+	}
+	selectedText := string(h.Cursor.GetSelection())
+	searchLoc := h.Cursor.CurSelection[0]
+	match, found, err := h.Buf.FindNext(selectedText, h.Buf.Start(), h.Buf.End(), searchLoc, false, false)
+	if err != nil {
+		return false
+	}
+	if found {
+		h.Cursor.SetSelectionStart(match[0])
+		h.Cursor.SetSelectionEnd(match[1])
+		h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
+		h.Cursor.OrigSelection[1] = h.Cursor.CurSelection[1]
+		h.GotoLoc(h.Cursor.CurSelection[1])
+		return true
+	}
+	return false
+}
+
 // SelectToStart selects the text from the cursor to the start of the buffer
 func (h *BufPane) SelectToStart() bool {
 	if !h.Cursor.HasSelection() {
@@ -1136,6 +1195,21 @@ func (h *BufPane) ResetSearch() bool {
 		return true
 	}
 	return false
+}
+
+// FindSelected sets the currently selected text as the search term
+func (h *BufPane) FindSelected() bool {
+	if !h.Cursor.HasSelection() {
+		return false
+	}
+	selectedText := string(h.Cursor.GetSelection())
+	if selectedText == h.Buf.LastSearch {
+		return false
+	}
+	h.Buf.HighlightSearch = h.Buf.Settings["hlsearch"].(bool)
+	h.Buf.LastSearchRegex = false
+	h.Buf.LastSearch = selectedText
+	return true
 }
 
 // FindNext searches forwards for the last used search term

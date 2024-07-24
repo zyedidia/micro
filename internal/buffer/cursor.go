@@ -14,6 +14,31 @@ func InBounds(pos Loc, buf *Buffer) bool {
 	return true
 }
 
+// GetWordLocations returns the location boundaries for a word under the cursor
+func GetWordLocations(c *Cursor) ([2]Loc, bool) {
+	if len(c.buf.LineBytes(c.Y)) == 0 {
+		return [2]Loc{}, false
+	}
+	if !util.IsWordChar(c.RuneUnder(c.X)) {
+		return [2]Loc{}, false
+	}
+
+	forward, backward := c.X, c.X
+
+	var locs [2]Loc
+	for backward > 0 && util.IsWordChar(c.RuneUnder(backward-1)) {
+		backward--
+	}
+	locs[0] = Loc{backward, c.Y}
+
+	lineLen := util.CharacterCount(c.buf.LineBytes(c.Y)) - 1
+	for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
+		forward++
+	}
+	locs[1] = Loc{forward, c.Y}.Move(1, c.buf)
+	return locs, true
+}
+
 // The Cursor struct stores the location of the cursor in the buffer
 // as well as the selection
 type Cursor struct {
@@ -325,34 +350,26 @@ func (c *Cursor) Relocate() {
 
 // SelectWord selects the word the cursor is currently on
 func (c *Cursor) SelectWord() {
-	if len(c.buf.LineBytes(c.Y)) == 0 {
+	locations, found := GetWordLocations(c)
+	if !found {
 		return
 	}
 
-	if !util.IsWordChar(c.RuneUnder(c.X)) {
-		c.SetSelectionStart(c.Loc)
-		c.SetSelectionEnd(c.Loc.Move(1, c.buf))
-		c.OrigSelection = c.CurSelection
-		return
-	}
-
-	forward, backward := c.X, c.X
-
-	for backward > 0 && util.IsWordChar(c.RuneUnder(backward-1)) {
-		backward--
-	}
-
-	c.SetSelectionStart(Loc{backward, c.Y})
+	c.SetSelectionStart(locations[0])
 	c.OrigSelection[0] = c.CurSelection[0]
 
-	lineLen := util.CharacterCount(c.buf.LineBytes(c.Y)) - 1
-	for forward < lineLen && util.IsWordChar(c.RuneUnder(forward+1)) {
-		forward++
-	}
-
-	c.SetSelectionEnd(Loc{forward, c.Y}.Move(1, c.buf))
+	c.SetSelectionEnd(locations[1])
 	c.OrigSelection[1] = c.CurSelection[1]
 	c.Loc = c.CurSelection[1]
+}
+
+// GetWord returns the word the cursor is currently on
+func (c *Cursor) GetWord() []byte {
+	locations, found := GetWordLocations(c)
+	if !found {
+		return []byte{}
+	}
+	return c.buf.Substr(locations[0], locations[1])
 }
 
 // AddWordToSelection adds the word the cursor is currently on
