@@ -2099,6 +2099,41 @@ func (h *BufPane) SkipMultiCursor() bool {
 	return true
 }
 
+// SkipMultiCursorBack moves the current multiple cursor to the previously available position
+func (h *BufPane) SkipMultiCursorBack() bool {
+	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
+	if !lastC.HasSelection() {
+		return false
+	}
+	sel := lastC.GetSelection()
+	searchStart := lastC.CurSelection[0]
+
+	search := string(sel)
+	search = regexp.QuoteMeta(search)
+	if h.multiWord {
+		search = "\\b" + search + "\\b"
+	}
+
+	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, false, true)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+	if found {
+		lastC.SetSelectionStart(match[0])
+		lastC.SetSelectionEnd(match[1])
+		lastC.OrigSelection[0] = lastC.CurSelection[0]
+		lastC.OrigSelection[1] = lastC.CurSelection[1]
+		lastC.Loc = lastC.CurSelection[1]
+
+		h.Buf.MergeCursors()
+		h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)
+	} else {
+		InfoBar.Message("No matches found")
+	}
+	h.Relocate()
+	return true
+}
+
 // RemoveMultiCursor removes the latest multiple cursor
 func (h *BufPane) RemoveMultiCursor() bool {
 	if h.Buf.NumCursors() > 1 {
