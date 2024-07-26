@@ -409,7 +409,7 @@ func reloadRuntime(reloadPlugins bool) {
 	for _, b := range buffer.OpenBuffers {
 		config.InitLocalSettings(b.Settings, b.Path)
 		for k, v := range b.Settings {
-			b.SetOptionNative(k, v)
+			b.DoSetOptionNative(k, v)
 		}
 		b.UpdateRules()
 	}
@@ -610,6 +610,7 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		if err := b.SetOptionNative(option, nativeValue); err != nil {
 			return err
 		}
+		delete(b.LocalSettings, option)
 	}
 
 	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
@@ -646,6 +647,7 @@ func (h *BufPane) ResetCmd(args []string) {
 	}
 	if _, ok := defaultLocals[option]; ok {
 		h.Buf.SetOptionNative(option, defaultLocals[option])
+		delete(h.Buf.LocalSettings, option)
 		return
 	}
 	InfoBar.Error(config.ErrInvalidOption)

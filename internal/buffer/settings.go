@@ -7,15 +7,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
-func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
-	if err := config.OptionIsValid(option, nativeValue); err != nil {
-		return err
-	}
-
-	if reflect.DeepEqual(b.Settings[option], nativeValue) {
-		return nil
-	}
-
+func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 	b.Settings[option] = nativeValue
 
 	if option == "fastdirty" {
@@ -39,10 +31,14 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 				// filetype should not override volatile settings
 				continue
 			}
+			if _, ok := b.LocalSettings[k]; ok {
+				// filetype should not override local settings
+				continue
+			}
 			if _, ok := settings[k]; ok {
-				b.SetOptionNative(k, settings[k])
+				b.DoSetOptionNative(k, settings[k])
 			} else {
-				b.SetOptionNative(k, v)
+				b.DoSetOptionNative(k, v)
 			}
 		}
 		b.UpdateRules()
@@ -94,6 +90,19 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, nativeValue)
 	}
+}
+
+func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(b.Settings[option], nativeValue) {
+		return nil
+	}
+
+	b.DoSetOptionNative(option, nativeValue)
+	b.LocalSettings[option] = true
 
 	return nil
 }
