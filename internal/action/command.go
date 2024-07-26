@@ -410,7 +410,7 @@ func reloadRuntime(reloadPlugins bool) {
 	for _, b := range buffer.OpenBuffers {
 		config.InitLocalSettings(b.Settings, b.Path)
 		for k, v := range b.Settings {
-			b.SetOptionNative(k, v)
+			b.DoSetOptionNative(k, v)
 		}
 		b.UpdateRules()
 	}
@@ -610,9 +610,8 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 
 	// ...at last check the buffer locals
 	for _, b := range buffer.OpenBuffers {
-		if err := b.SetOptionNative(option, nativeValue); err != nil {
-			return err
-		}
+		b.DoSetOptionNative(option, nativeValue)
+		delete(b.LocalSettings, option)
 	}
 
 	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
