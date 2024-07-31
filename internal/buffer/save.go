@@ -16,7 +16,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"golang.org/x/text/encoding"
-	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/transform"
 )
 
@@ -174,7 +173,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 
 	var fileSize int
 
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	enc, err := util.GetEncoding(b.Settings["encoding"].(string))
 	if err != nil {
 		return err
 	}

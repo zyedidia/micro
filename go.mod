@@ -2,6 +2,7 @@ module github.com/zyedidia/micro/v2
 
 require (
 	github.com/blang/semver v3.5.1+incompatible
+	github.com/dimchansky/utfbom v1.1.1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-errors/errors v1.0.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
