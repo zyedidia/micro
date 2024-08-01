@@ -97,6 +97,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabstospaces":    false,
 	"useprimary":      true,
 	"wordwrap":        false,
+	"wrapindent":      float64(-1),
 }
 
 // a list of settings that should only be globally modified and their
