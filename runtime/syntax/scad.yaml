@@ -1,0 +1,69 @@
+filetype: OpenSCAD
+
+# OpenSCAD is a functional programming language used for representing
+# 2D/3D models for use in the program of the same name.
+#
+# The following documents were used as reference material:
+# https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language
+# https://openscad.org/cheatsheet/index.html
+
+detect:
+    filename: "\\.scad$"
+
+rules:
+    - identifier: "\\b(function|module) +[a-z0-9_]+"
+
+    - statement: "\\b(abs|acos|asin|assert|atan|atan2|ceil)\\b"
+    - statement: "\\b(child|children|chr|circle|color)\\b"
+    - statement: "\\b(concat|cos|cross|cube|cylinder)\\b"
+    - statement: "\\b(difference|dxf_cross|dxf_dim|each)\\b"
+    - statement: "\\b(echo|else|exp|floor|for|function|hull)\\b"
+    - statement: "\\b(if|import|import_dxf|intersection)\\b"
+    - statement: "\\b(intersection_for|is_bool|is_function)\\b"
+    - statement: "\\b(is_list|is_num|is_string|is_undef|len)\\b"
+    - statement: "\\b(let|linear_extrude|ln|log|lookup|max)\\b"
+    - statement: "\\b(min|minkowski|mirror|module|multmatrix)\\b"
+    - statement: "\\b(norm|offset|ord|parent_module|polygon)\\b"
+    - statement: "\\b(polyhedron|pow|projection|rands|render)\\b"
+    - statement: "\\b(resize|rotate|rotate_extrude|round)\\b"
+    - statement: "\\b(scale|search|sign|sin|sphere|sqrt)\\b"
+    - statement: "\\b(square|str|surface|tan|text|translate)\\b"
+    - statement: "\\b(union|version|version_num)\\b"
+
+    - symbol: "[,\\.;:?]"
+    - symbol.operator: "[-+*/%^<>!=]|[<=>!]=|&&|\\|\\|"
+    - symbol.brackets: "[{(<>)}]|\\[|\\]"
+
+    # modifiers that change interpretation of the subtree after it
+    - special: "[#%!*]"
+
+    # special variables start with a dollar sign
+    - special: "\\$[a-z]+\\b"
+
+    - preproc:
+        start: "^ *(use|include) <"
+        end: ">;?"
+        rules: []
+
+    - constant.number: "\\b[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?\\b"
+    - constant.number: "\\b(PI|inf|nan)\\b"
+    - constant.bool: "\\b(true|false)\\b"
+    - constant: "\\b(undef)\\b"
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
