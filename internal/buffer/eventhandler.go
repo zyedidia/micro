@@ -293,7 +293,6 @@ func (eh *EventHandler) UndoOneEvent() {
 	// Set the cursor in the right place
 	teCursor := t.C
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
 		eh.cursors[teCursor.Num].Goto(teCursor)
 		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
 	} else {
@@ -338,7 +337,6 @@ func (eh *EventHandler) RedoOneEvent() {
 
 	teCursor := t.C
 	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
 		eh.cursors[teCursor.Num].Goto(teCursor)
 		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
 	} else {
