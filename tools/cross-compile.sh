@@ -2,7 +2,10 @@
 
 set -e
 
-VERSION="$(go run tools/build-version.go)"
+VERSION="$1"
+if [ -z "$VERSION" ]; then
+	VERSION="$(go run tools/build-version.go)"
+fi
 
 mkdir -p binaries
 mkdir -p micro-$VERSION
