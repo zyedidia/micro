@@ -2,10 +2,7 @@
 
 set -e
 
-HASH="$(git rev-parse --short HEAD)"
 VERSION="$(go run tools/build-version.go)"
-DATE="$(go run tools/build-date.go)"
-ADDITIONAL_GO_LINKER_FLAGS="$(go run tools/info-plist.go $VERSION)"
 
 mkdir -p binaries
 mkdir -p micro-$VERSION
