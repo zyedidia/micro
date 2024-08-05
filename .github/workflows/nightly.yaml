@@ -25,7 +25,7 @@ jobs:
         fetch-tags: true
 
     - name: Build
-      run: tools/cross-compile.sh
+      run: tools/cross-compile.sh nightly
 
     - name: Tag
       uses: rickstaa/action-create-tag@v1
