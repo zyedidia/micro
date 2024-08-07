@@ -176,31 +176,18 @@ modSearch:
 		// see if the key is in bindingKeys with the Ctrl prefix.
 		k = string(unicode.ToUpper(rune(k[0]))) + k[1:]
 		if code, ok := keyEvents["Ctrl"+k]; ok {
-			var r tcell.Key
-			// Special case for escape, for some reason tcell doesn't send it with the esc character
-			if code < 256 && code != 27 {
-				r = code
-			}
-			// It is, we're done.
 			return KeyEvent{
 				code: code,
 				mod:  modifiers,
-				r:    rune(r),
 			}, true
 		}
 	}
 
 	// See if we can find the key in bindingKeys
 	if code, ok := keyEvents[k]; ok {
-		var r tcell.Key
-		// Special case for escape, for some reason tcell doesn't send it with the esc character
-		if code < 256 && code != 27 {
-			r = code
-		}
 		return KeyEvent{
 			code: code,
 			mod:  modifiers,
-			r:    rune(r),
 		}, true
 	}
 
@@ -251,6 +238,24 @@ func findEvent(k string) (Event, error) {
 	return event, nil
 }
 
+func eventsEqual(e1 Event, e2 Event) bool {
+	seq1, ok1 := e1.(KeySequenceEvent)
+	seq2, ok2 := e2.(KeySequenceEvent)
+	if ok1 && ok2 {
+		if len(seq1.keys) != len(seq2.keys) {
+			return false
+		}
+		for i := 0; i < len(seq1.keys); i++ {
+			if seq1.keys[i] != seq2.keys[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	return e1 == e2
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
@@ -276,21 +281,23 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		}
 
 		found := false
-		for ev := range parsed {
+		var ev string
+		for ev = range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
-					if overwrite {
-						parsed[ev] = v
-					}
+				if eventsEqual(e, key) {
 					found = true
 					break
 				}
 			}
 		}
 
-		if found && !overwrite {
-			return true, nil
-		} else if !found {
+		if found {
+			if overwrite {
+				parsed[ev] = v
+			} else {
+				return true, nil
+			}
+		} else {
 			parsed[k] = v
 		}
 
@@ -327,7 +334,7 @@ func UnbindKey(k string) error {
 
 		for ev := range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
+				if eventsEqual(e, key) {
 					delete(parsed, ev)
 					break
 				}

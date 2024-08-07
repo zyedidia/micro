@@ -95,6 +95,11 @@ func (b *Buffer) Save() error {
 
 // AutoSave saves the buffer to its default path
 func (b *Buffer) AutoSave() error {
+	// Doing full b.Modified() check every time would be costly, due to the hash
+	// calculation. So use just isModified even if fastdirty is not set.
+	if !b.isModified {
+		return nil
+	}
 	return b.saveToFile(b.Path, false, true)
 }
 

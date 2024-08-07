@@ -198,7 +198,7 @@ func (h *BufPane) TabMoveCmd(args []string) {
 	idxTo = util.Clamp(idxTo, 0, len(Tabs.List)-1)
 
 	activeTab := Tabs.List[idxFrom]
-	Tabs.RemoveTab(activeTab.ID())
+	Tabs.RemoveTab(activeTab.Panes[0].ID())
 	Tabs.List = append(Tabs.List, nil)
 	copy(Tabs.List[idxTo+1:], Tabs.List[idxTo:])
 	Tabs.List[idxTo] = activeTab
@@ -403,13 +403,13 @@ func (h *BufPane) ReopenCmd(args []string) {
 		InfoBar.YNPrompt("Save file before reopen?", func(yes, canceled bool) {
 			if !canceled && yes {
 				h.Save()
-				h.Buf.ReOpen()
+				h.ReOpen()
 			} else if !canceled {
-				h.Buf.ReOpen()
+				h.ReOpen()
 			}
 		})
 	} else {
-		h.Buf.ReOpen()
+		h.ReOpen()
 	}
 }
 

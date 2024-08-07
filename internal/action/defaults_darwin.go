@@ -62,6 +62,8 @@ var bufdefaults = map[string]string{
 	"PageDown":       "CursorPageDown",
 	"CtrlPageUp":     "PreviousTab",
 	"CtrlPageDown":   "NextTab",
+	"ShiftPageUp":    "SelectPageUp",
+	"ShiftPageDown":  "SelectPageDown",
 	"Ctrl-g":         "ToggleHelp",
 	"Alt-g":          "ToggleKeyMenu",
 	"Ctrl-r":         "ToggleRuler",

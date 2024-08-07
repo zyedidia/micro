@@ -86,21 +86,19 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	case *tcell.EventResize:
 		// TODO
 	case *tcell.EventKey:
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 
 		done := h.DoKeyEvent(ke)
 		hasYN := h.HasYN
 		if e.Key() == tcell.KeyRune && hasYN {
-			if (e.Rune() == 'y' || e.Rune() == 'Y') && hasYN {
-				h.YNResp = true
+			y := e.Rune() == 'y' || e.Rune() == 'Y'
+			n := e.Rune() == 'n' || e.Rune() == 'N'
+			if y || n {
+				h.YNResp = y
 				h.DonePrompt(false)
-			} else if (e.Rune() == 'n' || e.Rune() == 'N') && hasYN {
-				h.YNResp = false
-				h.DonePrompt(false)
+
+				InfoBindings.ResetEvents()
+				InfoBufBindings.ResetEvents()
 			}
 		}
 		if e.Key() == tcell.KeyRune && !done && !hasYN {
@@ -124,7 +122,10 @@ func (h *InfoPane) HandleEvent(event tcell.Event) {
 	}
 }
 
-// DoKeyEvent executes a key event for the command bar, doing any overridden actions
+// DoKeyEvent executes a key event for the command bar, doing any overridden actions.
+// Returns true if the action was executed OR if there are more keys remaining
+// to process before executing an action (if this is a key sequence event).
+// Returns false if no action found.
 func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	action, more := InfoBindings.NextEvent(e, nil)
 	if action != nil && !more {
@@ -138,11 +139,25 @@ func (h *InfoPane) DoKeyEvent(e KeyEvent) bool {
 	}
 
 	if !more {
+		// If no infopane action found, try to find a bufpane action.
+		//
+		// TODO: this is buggy. For example, if the command bar has the following
+		// two bindings:
+		//
+		//   "<Ctrl-x><Ctrl-p>": "HistoryUp",
+		//   "<Ctrl-x><Ctrl-v>": "Paste",
+		//
+		// the 2nd binding (with a bufpane action) doesn't work, since <Ctrl-x>
+		// has been already consumed by the 1st binding (with an infopane action).
+		//
+		// We should either iterate both InfoBindings and InfoBufBindings keytrees
+		// together, or just use the same keytree for both infopane and bufpane
+		// bindings.
 		action, more = InfoBufBindings.NextEvent(e, nil)
 		if action != nil && !more {
-			done := action(h.BufPane)
+			action(h.BufPane)
 			InfoBufBindings.ResetEvents()
-			return done
+			return true
 		} else if action == nil && !more {
 			InfoBufBindings.ResetEvents()
 		}

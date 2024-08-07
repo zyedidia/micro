@@ -81,6 +81,10 @@ func (t *TermPane) SetID(i uint64) {
 	t.id = i
 }
 
+func (t *TermPane) Name() string {
+	return t.Terminal.Name()
+}
+
 func (t *TermPane) SetTab(tab *Tab) {
 	t.tab = tab
 }
@@ -121,11 +125,7 @@ func (t *TermPane) Unsplit() {
 // copy-paste
 func (t *TermPane) HandleEvent(event tcell.Event) {
 	if e, ok := event.(*tcell.EventKey); ok {
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 		action, more := TermBindings.NextEvent(ke, nil)
 
 		if !more {
@@ -159,9 +159,9 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 		if t.Status != shell.TTDone {
 			t.WriteString(event.EscSeq())
 		}
-	} else if e, ok := event.(*tcell.EventMouse); e != nil && (!ok || t.State.Mode(terminal.ModeMouseMask)) {
+	} else if e, ok := event.(*tcell.EventMouse); !ok || t.State.Mode(terminal.ModeMouseMask) {
 		// t.WriteString(event.EscSeq())
-	} else if e != nil {
+	} else {
 		x, y := e.Position()
 		v := t.GetView()
 		x -= v.X
@@ -188,7 +188,12 @@ func (t *TermPane) HandleEvent(event tcell.Event) {
 			t.mouseReleased = true
 		}
 	}
+}
 
+// HandleTermClose is called when a terminal has finished its job
+// and should be closed. If that terminal is this termpane's terminal,
+// HandleTermClose will close the terminal and the termpane itself.
+func (t *TermPane) HandleTermClose() {
 	if t.Status == shell.TTClose {
 		t.Quit()
 	}

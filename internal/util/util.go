@@ -41,6 +41,8 @@ var (
 
 	// Stdout is a buffer that is written to stdout when micro closes
 	Stdout *bytes.Buffer
+	// Sigterm is a channel where micro exits when written
+	Sigterm chan os.Signal
 )
 
 func init() {
@@ -218,10 +220,68 @@ func FSize(f *os.File) int64 {
 	return fi.Size()
 }
 
-// IsWordChar returns whether or not the string is a 'word character'
-// Word characters are defined as numbers, letters, or '_'
+// IsWordChar returns whether or not a rune is a 'word character'
+// Word characters are defined as numbers, letters or sub-word delimiters
 func IsWordChar(r rune) bool {
-	return unicode.IsLetter(r) || unicode.IsNumber(r) || r == '_'
+	return IsAlphanumeric(r) || IsSubwordDelimiter(r)
+}
+
+// IsNonWordChar returns whether or not a rune is not a 'word character'
+// Non word characters are defined as all characters not being numbers, letters or sub-word delimiters
+// See IsWordChar()
+func IsNonWordChar(r rune) bool {
+	return !IsWordChar(r)
+}
+
+// IsUpperWordChar returns whether or not a rune is an 'upper word character'
+// Upper word characters are defined as numbers, upper-case letters or sub-word delimiters
+func IsUpperWordChar(r rune) bool {
+	return IsUpperAlphanumeric(r) || IsSubwordDelimiter(r)
+}
+
+// IsLowerWordChar returns whether or not a rune is a 'lower word character'
+// Lower word characters are defined as numbers, lower-case letters or sub-word delimiters
+func IsLowerWordChar(r rune) bool {
+	return IsLowerAlphanumeric(r) || IsSubwordDelimiter(r)
+}
+
+// IsSubwordDelimiter returns whether or not a rune is a 'sub-word delimiter character'
+// i.e. is considered a part of the word and is used as a delimiter between sub-words of the word.
+// For now the only sub-word delimiter character is '_'.
+func IsSubwordDelimiter(r rune) bool {
+	return r == '_'
+}
+
+// IsAlphanumeric returns whether or not a rune is an 'alphanumeric character'
+// Alphanumeric characters are defined as numbers or letters
+func IsAlphanumeric(r rune) bool {
+	return unicode.IsLetter(r) || unicode.IsNumber(r)
+}
+
+// IsUpperAlphanumeric returns whether or not a rune is an 'upper alphanumeric character'
+// Upper alphanumeric characters are defined as numbers or upper-case letters
+func IsUpperAlphanumeric(r rune) bool {
+	return IsUpperLetter(r) || unicode.IsNumber(r)
+}
+
+// IsLowerAlphanumeric returns whether or not a rune is a 'lower alphanumeric character'
+// Lower alphanumeric characters are defined as numbers or lower-case letters
+func IsLowerAlphanumeric(r rune) bool {
+	return IsLowerLetter(r) || unicode.IsNumber(r)
+}
+
+// IsUpperLetter returns whether or not a rune is an 'upper letter character'
+// Upper letter characters are defined as upper-case letters
+func IsUpperLetter(r rune) bool {
+	// unicode.IsUpper() returns true for letters only
+	return unicode.IsUpper(r)
+}
+
+// IsLowerLetter returns whether or not a rune is a 'lower letter character'
+// Lower letter characters are defined as lower-case letters
+func IsLowerLetter(r rune) bool {
+	// unicode.IsLower() returns true for letters only
+	return unicode.IsLower(r)
 }
 
 // Spaces returns a string with n spaces
@@ -445,14 +505,9 @@ func Clamp(val, min, max int) int {
 	return val
 }
 
-// IsNonAlphaNumeric returns if the rune is not a number of letter or underscore.
-func IsNonAlphaNumeric(c rune) bool {
-	return !unicode.IsLetter(c) && !unicode.IsNumber(c) && c != '_'
-}
-
 // IsAutocomplete returns whether a character should begin an autocompletion.
 func IsAutocomplete(c rune) bool {
-	return c == '.' || !IsNonAlphaNumeric(c)
+	return c == '.' || IsWordChar(c)
 }
 
 // ParseSpecial replaces escaped ts with '\t'.

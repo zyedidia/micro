@@ -150,25 +150,31 @@ func BufMapEvent(k Event, action string) {
 		actionfns = append(actionfns, afn)
 	}
 	bufAction := func(h *BufPane, te *tcell.EventMouse) bool {
-		cursors := h.Buf.GetCursors()
-		success := true
 		for i, a := range actionfns {
-			innerSuccess := true
-			for j, c := range cursors {
-				if c == nil {
-					continue
+			var success bool
+			if _, ok := MultiActions[names[i]]; ok {
+				success = true
+				for _, c := range h.Buf.GetCursors() {
+					h.Buf.SetCurCursor(c.Num)
+					h.Cursor = c
+					success = success && h.execAction(a, names[i], te)
 				}
-				h.Buf.SetCurCursor(c.Num)
-				h.Cursor = c
-				if i == 0 || (success && types[i-1] == '&') || (!success && types[i-1] == '|') || (types[i-1] == ',') {
-					innerSuccess = innerSuccess && h.execAction(a, names[i], j, te)
-				} else {
-					break
-				}
+			} else {
+				h.Buf.SetCurCursor(0)
+				h.Cursor = h.Buf.GetActiveCursor()
+				success = h.execAction(a, names[i], te)
 			}
+
 			// if the action changed the current pane, update the reference
 			h = MainTab().CurPane()
-			success = innerSuccess
+			if h == nil {
+				// stop, in case the current pane is not a BufPane
+				break
+			}
+
+			if (!success && types[i] == '&') || (success && types[i] == '|') {
+				break
+			}
 		}
 		return true
 	}
@@ -290,7 +296,11 @@ func NewBufPaneFromBuf(buf *buffer.Buffer, tab *Tab) *BufPane {
 func (h *BufPane) finishInitialize() {
 	h.initialRelocate()
 	h.initialized = true
-	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+
+	err := config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+	if err != nil {
+		screen.TermMessage(err)
+	}
 }
 
 // Resize resizes the pane
@@ -415,6 +425,12 @@ func (h *BufPane) Name() string {
 	return n
 }
 
+// ReOpen reloads the file opened in the bufpane from disk
+func (h *BufPane) ReOpen() {
+	h.Buf.ReOpen()
+	h.Relocate()
+}
+
 func (h *BufPane) getReloadSetting() string {
 	reloadSetting := h.Buf.Settings["reload"]
 	return reloadSetting.(string)
@@ -433,11 +449,11 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				if !yes || canceled {
 					h.Buf.UpdateModTime()
 				} else {
-					h.Buf.ReOpen()
+					h.ReOpen()
 				}
 			})
 		} else if reload == "auto" {
-			h.Buf.ReOpen()
+			h.ReOpen()
 		} else if reload == "disabled" {
 			h.Buf.DisableReload()
 		} else {
@@ -455,11 +471,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 		h.paste(e.Text())
 		h.Relocate()
 	case *tcell.EventKey:
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 
 		done := h.DoKeyEvent(ke)
 		if !done && e.Key() == tcell.KeyRune {
@@ -486,11 +498,16 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 			// Mouse event with no click - mouse was just released.
 			// If there were multiple mouse buttons pressed, we don't know which one
 			// was actually released, so we assume they all were released.
+			pressed := len(h.mousePressed) > 0
 			for me := range h.mousePressed {
 				delete(h.mousePressed, me)
 
 				me.state = MouseRelease
 				h.DoMouseEvent(me, e)
+			}
+			if !pressed {
+				// Propagate the mouse release in case the press wasn't for this BufPane
+				Tabs.ResetMouse()
 			}
 		}
 	}
@@ -530,7 +547,10 @@ func (h *BufPane) Bindings() *KeyTree {
 }
 
 // DoKeyEvent executes a key event by finding the action it is bound
-// to and executing it (possibly multiple times for multiple cursors)
+// to and executing it (possibly multiple times for multiple cursors).
+// Returns true if the action was executed OR if there are more keys
+// remaining to process before executing an action (if this is a key
+// sequence event). Returns false if no action found.
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	binds := h.Bindings()
 	action, more := binds.NextEvent(e, nil)
@@ -544,36 +564,33 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 	return more
 }
 
-func (h *BufPane) execAction(action BufAction, name string, cursor int, te *tcell.EventMouse) bool {
+func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse) bool {
 	if name != "Autocomplete" && name != "CycleAutocompleteBack" {
 		h.Buf.HasSuggestions = false
 	}
 
-	_, isMulti := MultiActions[name]
-	if (!isMulti && cursor == 0) || isMulti {
-		if h.PluginCB("pre" + name) {
-			var success bool
-			switch a := action.(type) {
-			case BufKeyAction:
-				success = a(h)
-			case BufMouseAction:
-				success = a(h, te)
-			}
-			success = success && h.PluginCB("on"+name)
+	if !h.PluginCB("pre" + name) {
+		return false
+	}
 
-			if isMulti {
-				if recordingMacro {
-					if name != "ToggleMacro" && name != "PlayMacro" {
-						curmacro = append(curmacro, action)
-					}
-				}
-			}
+	var success bool
+	switch a := action.(type) {
+	case BufKeyAction:
+		success = a(h)
+	case BufMouseAction:
+		success = a(h, te)
+	}
+	success = success && h.PluginCB("on"+name)
 
-			return success
+	if _, ok := MultiActions[name]; ok {
+		if recordingMacro {
+			if name != "ToggleMacro" && name != "PlayMacro" {
+				curmacro = append(curmacro, action)
+			}
 		}
 	}
 
-	return false
+	return success
 }
 
 func (h *BufPane) completeAction(action string) {
@@ -679,6 +696,10 @@ func (h *BufPane) Close() {
 
 // SetActive marks this pane as active.
 func (h *BufPane) SetActive(b bool) {
+	if h.IsActive() == b {
+		return
+	}
+
 	h.BWindow.SetActive(b)
 	if b {
 		// Display any gutter messages for this line
@@ -694,8 +715,12 @@ func (h *BufPane) SetActive(b bool) {
 		if none && InfoBar.HasGutter {
 			InfoBar.ClearGutter()
 		}
-	}
 
+		err := config.RunPluginFn("onSetActive", luar.New(ulua.L, h))
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute
@@ -716,10 +741,16 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SelectRight":               (*BufPane).SelectRight,
 	"WordRight":                 (*BufPane).WordRight,
 	"WordLeft":                  (*BufPane).WordLeft,
+	"SubWordRight":              (*BufPane).SubWordRight,
+	"SubWordLeft":               (*BufPane).SubWordLeft,
 	"SelectWordRight":           (*BufPane).SelectWordRight,
 	"SelectWordLeft":            (*BufPane).SelectWordLeft,
+	"SelectSubWordRight":        (*BufPane).SelectSubWordRight,
+	"SelectSubWordLeft":         (*BufPane).SelectSubWordLeft,
 	"DeleteWordRight":           (*BufPane).DeleteWordRight,
 	"DeleteWordLeft":            (*BufPane).DeleteWordLeft,
+	"DeleteSubWordRight":        (*BufPane).DeleteSubWordRight,
+	"DeleteSubWordLeft":         (*BufPane).DeleteSubWordLeft,
 	"SelectLine":                (*BufPane).SelectLine,
 	"SelectToStartOfLine":       (*BufPane).SelectToStartOfLine,
 	"SelectToStartOfText":       (*BufPane).SelectToStartOfText,
@@ -727,6 +758,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SelectToEndOfLine":         (*BufPane).SelectToEndOfLine,
 	"ParagraphPrevious":         (*BufPane).ParagraphPrevious,
 	"ParagraphNext":             (*BufPane).ParagraphNext,
+	"SelectToParagraphPrevious": (*BufPane).SelectToParagraphPrevious,
+	"SelectToParagraphNext":     (*BufPane).SelectToParagraphNext,
 	"InsertNewline":             (*BufPane).InsertNewline,
 	"Backspace":                 (*BufPane).Backspace,
 	"Delete":                    (*BufPane).Delete,
@@ -779,6 +812,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleRuler":               (*BufPane).ToggleRuler,
 	"ToggleHighlightSearch":     (*BufPane).ToggleHighlightSearch,
 	"UnhighlightSearch":         (*BufPane).UnhighlightSearch,
+	"ResetSearch":               (*BufPane).ResetSearch,
 	"ClearStatus":               (*BufPane).ClearStatus,
 	"ShellMode":                 (*BufPane).ShellMode,
 	"CommandMode":               (*BufPane).CommandMode,
@@ -846,10 +880,16 @@ var MultiActions = map[string]bool{
 	"SelectRight":               true,
 	"WordRight":                 true,
 	"WordLeft":                  true,
+	"SubWordRight":              true,
+	"SubWordLeft":               true,
 	"SelectWordRight":           true,
 	"SelectWordLeft":            true,
+	"SelectSubWordRight":        true,
+	"SelectSubWordLeft":         true,
 	"DeleteWordRight":           true,
 	"DeleteWordLeft":            true,
+	"DeleteSubWordRight":        true,
+	"DeleteSubWordLeft":         true,
 	"SelectLine":                true,
 	"SelectToStartOfLine":       true,
 	"SelectToStartOfText":       true,
