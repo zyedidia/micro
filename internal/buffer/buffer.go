@@ -367,6 +367,9 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 				case "dos":
 					ff = FFDos
 				}
+			} else {
+				// in case of autodetection treat as locally set
+				b.LocalSettings["fileformat"] = true
 			}
 
 			b.LineArray = NewLineArray(uint64(size), ff, reader)
