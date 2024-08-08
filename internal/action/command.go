@@ -634,16 +634,10 @@ func (h *BufPane) ResetCmd(args []string) {
 	}
 
 	option := args[0]
+	defaults := config.DefaultAllSettings()
 
-	defaultGlobals := config.DefaultGlobalSettings()
-	defaultLocals := config.DefaultCommonSettings()
-
-	if _, ok := defaultGlobals[option]; ok {
-		SetGlobalOptionNative(option, defaultGlobals[option])
-		return
-	}
-	if _, ok := defaultLocals[option]; ok {
-		h.Buf.SetOptionNative(option, defaultLocals[option])
+	if _, ok := defaults[option]; ok {
+		SetGlobalOptionNative(option, defaults[option])
 		return
 	}
 	InfoBar.Error(config.ErrInvalidOption)
