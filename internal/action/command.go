@@ -410,6 +410,10 @@ func reloadRuntime(reloadPlugins bool) {
 	for _, b := range buffer.OpenBuffers {
 		config.InitLocalSettings(b.Settings, b.Path)
 		for k, v := range b.Settings {
+			if _, ok := b.LocalSettings[k]; ok {
+				// reload should not override local settings
+				continue
+			}
 			b.DoSetOptionNative(k, v)
 		}
 		b.UpdateRules()
