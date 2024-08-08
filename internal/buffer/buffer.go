@@ -1140,46 +1140,133 @@ var BracePairs = [][2]rune{
 	{'[', ']'},
 }
 
+func (b *Buffer) findOpeningBrace(braceType [2]rune, start Loc) (Loc, bool) {
+	// Bound guard
+	start = clamp(start, b.LineArray)
+	if len(b.lines) == 0 {
+		return start, false
+	}
+
+	i := 1
+	// If we are on a closing brace, let the counter be incremented below when we traverse
+	curLine := []rune(string(b.LineBytes(start.Y)))
+	if start.X >= 0 && start.X < len(curLine) {
+		startChar := curLine[start.X]
+		if startChar == braceType[1] {
+			i = 0
+		}
+	}
+
+	for y := start.Y; y >= 0; y-- {
+		l := []rune(string(b.lines[y].data))
+		xInit := len(l) - 1
+		if y == start.Y && start.X < len(curLine) {
+			xInit = start.X
+		}
+		for x := xInit; x >= 0; x-- {
+			r := l[x]
+			if r == braceType[1] {
+				i++
+			} else if r == braceType[0] {
+				i--
+				if i == 0 {
+					return Loc{x, y}, true
+				}
+			}
+		}
+	}
+	return start, false
+}
+
+// Returns the opening brace in current brace scope starting at the start location and a boolean
+// indicating if an opening brace is found
+func (b *Buffer) FindOpeningBrace(start Loc) (Loc, bool) {
+	currentDist := -1
+	currentMb := Loc{-1, -1}
+	for _, bp := range BracePairs {
+		mb, found := b.findOpeningBrace(bp, start)
+		if found {
+			dist := DiffLA(start, mb, b.LineArray)
+			if currentDist < 0 || dist < currentDist {
+				currentMb = mb
+				currentDist = dist
+			}
+		}
+	}
+
+	if currentDist == -1 {
+		return start, false
+	} else {
+		return currentMb, true
+	}
+}
+
+func (b *Buffer) findClosingBrace(braceType [2]rune, start Loc) (Loc, bool) {
+	// Bound guard
+	start = clamp(start, b.LineArray)
+	if len(b.lines) == 0 {
+		return start, false
+	}
+
+	i := 1
+	// If we are on an opening brace, let the counter be incremented below when we traverse
+	curLine := []rune(string(b.LineBytes(start.Y)))
+	if start.X >= 0 && start.X < len(curLine) {
+		startChar := curLine[start.X]
+		if startChar == braceType[0] {
+			i = 0
+		}
+	}
+
+	for y := start.Y; y < b.LinesNum(); y++ {
+		l := []rune(string(b.LineBytes(y)))
+		xInit := 0
+		if y == start.Y && start.X >= 0 {
+			xInit = start.X
+		}
+		for x := xInit; x < len(l); x++ {
+			r := l[x]
+			if r == braceType[0] {
+				i++
+			} else if r == braceType[1] {
+				i--
+				if i == 0 {
+					return Loc{x, y}, true
+				}
+			}
+		}
+	}
+	return start, false
+}
+
+// Returns the closing brace in current brace scope starting at the start location and a boolean
+// indicating if an closing brace is found
+func (b *Buffer) FindClosingBrace(start Loc) (Loc, bool) {
+	currentDist := -1
+	currentMb := Loc{-1, -1}
+	for _, bp := range BracePairs {
+		mb, found := b.findClosingBrace(bp, start)
+		if found {
+			dist := DiffLA(start, mb, b.LineArray)
+			if currentDist < 0 || dist < currentDist {
+				currentMb = mb
+				currentDist = dist
+			}
+		}
+	}
+
+	if currentDist == -1 {
+		return start, false
+	} else {
+		return currentMb, true
+	}
+}
+
 func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc, bool) {
-	var i int
 	if char == braceType[0] {
-		for y := start.Y; y < b.LinesNum(); y++ {
-			l := []rune(string(b.LineBytes(y)))
-			xInit := 0
-			if y == start.Y {
-				xInit = start.X
-			}
-			for x := xInit; x < len(l); x++ {
-				r := l[x]
-				if r == braceType[0] {
-					i++
-				} else if r == braceType[1] {
-					i--
-					if i == 0 {
-						return Loc{x, y}, true
-					}
-				}
-			}
-		}
+		return b.findClosingBrace(braceType, start)
 	} else if char == braceType[1] {
-		for y := start.Y; y >= 0; y-- {
-			l := []rune(string(b.lines[y].data))
-			xInit := len(l) - 1
-			if y == start.Y {
-				xInit = start.X
-			}
-			for x := xInit; x >= 0; x-- {
-				r := l[x]
-				if r == braceType[1] {
-					i++
-				} else if r == braceType[0] {
-					i--
-					if i == 0 {
-						return Loc{x, y}, true
-					}
-				}
-			}
-		}
+		return b.findOpeningBrace(braceType, start)
 	}
 	return start, false
 }
