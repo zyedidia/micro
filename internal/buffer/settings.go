@@ -1,35 +1,46 @@
 package buffer
 
 import (
+	"reflect"
+
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
-func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 	b.Settings[option] = nativeValue
 
 	if option == "fastdirty" {
 		if !nativeValue.(bool) {
-			if !b.Modified() {
-				e := calcHash(b, &b.origHash)
-				if e == ErrFileTooLarge {
-					b.Settings["fastdirty"] = false
-				}
+			e := calcHash(b, &b.origHash)
+			if e == ErrFileTooLarge {
+				b.Settings["fastdirty"] = true
 			}
 		}
 	} else if option == "statusline" {
 		screen.Redraw()
 	} else if option == "filetype" {
-		config.InitRuntimeFiles(true)
-		err := config.ReadSettings()
-		if err != nil {
-			screen.TermMessage(err)
+		settings := config.ParsedSettings()
+		settings["filetype"] = nativeValue
+		config.InitLocalSettings(settings, b.Path)
+		for k, v := range config.DefaultCommonSettings() {
+			if k == "filetype" {
+				continue
+			}
+			if _, ok := config.VolatileSettings[k]; ok {
+				// filetype should not override volatile settings
+				continue
+			}
+			if _, ok := b.LocalSettings[k]; ok {
+				// filetype should not override local settings
+				continue
+			}
+			if _, ok := settings[k]; ok {
+				b.DoSetOptionNative(k, settings[k])
+			} else {
+				b.DoSetOptionNative(k, v)
+			}
 		}
-		err = config.InitGlobalSettings()
-		if err != nil {
-			screen.TermMessage(err)
-		}
-		config.InitLocalSettings(b.Settings, b.Path)
 		b.UpdateRules()
 	} else if option == "fileformat" {
 		switch b.Settings["fileformat"].(string) {
@@ -79,6 +90,19 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, nativeValue)
 	}
+}
+
+func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
+	if reflect.DeepEqual(b.Settings[option], nativeValue) {
+		return nil
+	}
+
+	b.DoSetOptionNative(option, nativeValue)
+	b.LocalSettings[option] = true
 
 	return nil
 }

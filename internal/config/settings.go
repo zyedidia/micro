@@ -153,10 +153,72 @@ var (
 func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
-	parsedSettings = make(map[string]interface{})
+}
+
+func validateParsedSettings() error {
+	var err error
+	defaults := DefaultAllSettings()
+	for k, v := range parsedSettings {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			if strings.HasPrefix(k, "ft:") {
+				for k1, v1 := range v.(map[string]interface{}) {
+					if _, ok := defaults[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(defaults[k1])) {
+						err = fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k1, reflect.TypeOf(v1), defaults[k1], reflect.TypeOf(defaults[k1]))
+						parsedSettings[k].(map[string]interface{})[k1] = defaults[k1]
+						continue
+					}
+					if e := OptionIsValid(k1, v1); e != nil {
+						err = e
+						parsedSettings[k].(map[string]interface{})[k1] = defaults[k1]
+					}
+				}
+			} else {
+				if _, e := glob.Compile(k); e != nil {
+					err = errors.New("Error with glob setting " + k + ": " + e.Error())
+					continue
+				}
+				for k1, v1 := range v.(map[string]interface{}) {
+					if _, ok := defaults[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(defaults[k1])) {
+						err = fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k1, reflect.TypeOf(v1), defaults[k1], reflect.TypeOf(defaults[k1]))
+						parsedSettings[k].(map[string]interface{})[k1] = defaults[k1]
+						continue
+					}
+					if e := OptionIsValid(k1, v1); e != nil {
+						err = e
+						parsedSettings[k].(map[string]interface{})[k1] = defaults[k1]
+					}
+				}
+			}
+			continue
+		}
+
+		if k == "autosave" {
+			// if autosave is a boolean convert it to float
+			s, ok := v.(bool)
+			if ok {
+				if s {
+					parsedSettings["autosave"] = 8.0
+				} else {
+					parsedSettings["autosave"] = 0.0
+				}
+			}
+			continue
+		}
+		if _, ok := defaults[k]; ok && !verifySetting(k, reflect.TypeOf(v), reflect.TypeOf(defaults[k])) {
+			err = fmt.Errorf("Global Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v), defaults[k], reflect.TypeOf(defaults[k]))
+			parsedSettings[k] = defaults[k]
+			continue
+		}
+		if e := OptionIsValid(k, v); e != nil {
+			err = e
+			parsedSettings[k] = defaults[k]
+		}
+	}
+	return err
 }
 
 func ReadSettings() error {
+	parsedSettings = make(map[string]interface{})
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
 		input, err := ioutil.ReadFile(filename)
@@ -171,21 +233,21 @@ func ReadSettings() error {
 				settingsParseError = true
 				return errors.New("Error reading settings.json: " + err.Error())
 			}
-
-			// check if autosave is a boolean and convert it to float if so
-			if v, ok := parsedSettings["autosave"]; ok {
-				s, ok := v.(bool)
-				if ok {
-					if s {
-						parsedSettings["autosave"] = 8.0
-					} else {
-						parsedSettings["autosave"] = 0.0
-					}
-				}
+			err = validateParsedSettings()
+			if err != nil {
+				return err
 			}
 		}
 	}
 	return nil
+}
+
+func ParsedSettings() map[string]interface{} {
+	s := make(map[string]interface{})
+	for k, v := range parsedSettings {
+		s[k] = v
+	}
+	return s
 }
 
 func verifySetting(option string, value reflect.Type, def reflect.Type) bool {
@@ -206,11 +268,6 @@ func InitGlobalSettings() error {
 
 	for k, v := range parsedSettings {
 		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-			if _, ok := GlobalSettings[k]; ok && !verifySetting(k, reflect.TypeOf(v), reflect.TypeOf(GlobalSettings[k])) {
-				err = fmt.Errorf("Global Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v), GlobalSettings[k], reflect.TypeOf(GlobalSettings[k]))
-				continue
-			}
-
 			GlobalSettings[k] = v
 		}
 	}
@@ -220,40 +277,25 @@ func InitGlobalSettings() error {
 // InitLocalSettings scans the json in settings.json and sets the options locally based
 // on whether the filetype or path matches ft or glob local settings
 // Must be called after ReadSettings
-func InitLocalSettings(settings map[string]interface{}, path string) error {
-	var parseError error
+func InitLocalSettings(settings map[string]interface{}, path string) {
 	for k, v := range parsedSettings {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 			if strings.HasPrefix(k, "ft:") {
 				if settings["filetype"].(string) == k[3:] {
 					for k1, v1 := range v.(map[string]interface{}) {
-						if _, ok := settings[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(settings[k1])) {
-							parseError = fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1]))
-							continue
-						}
 						settings[k1] = v1
 					}
 				}
 			} else {
-				g, err := glob.Compile(k)
-				if err != nil {
-					parseError = errors.New("Error with glob setting " + k + ": " + err.Error())
-					continue
-				}
-
+				g, _ := glob.Compile(k)
 				if g.MatchString(path) {
 					for k1, v1 := range v.(map[string]interface{}) {
-						if _, ok := settings[k1]; ok && !verifySetting(k1, reflect.TypeOf(v1), reflect.TypeOf(settings[k1])) {
-							parseError = fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", k, reflect.TypeOf(v1), settings[k1], reflect.TypeOf(settings[k1]))
-							continue
-						}
 						settings[k1] = v1
 					}
 				}
 			}
 		}
 	}
-	return parseError
 }
 
 // WriteSettings writes the settings to the specified filename as JSON
@@ -418,18 +460,15 @@ func GetNativeValue(option string, realValue interface{}, value string) (interfa
 	} else if kind == reflect.String {
 		native = value
 	} else if kind == reflect.Float64 {
-		i, err := strconv.Atoi(value)
+		f, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
-		native = float64(i)
+		native = f
 	} else {
 		return nil, ErrInvalidValue
 	}
 
-	if err := OptionIsValid(option, native); err != nil {
-		return nil, err
-	}
 	return native, nil
 }
 
@@ -445,13 +484,13 @@ func OptionIsValid(option string, value interface{}) error {
 // Option validators
 
 func validatePositiveValue(option string, value interface{}) error {
-	tabsize, ok := value.(float64)
+	nativeValue, ok := value.(float64)
 
 	if !ok {
 		return errors.New("Expected numeric type for " + option)
 	}
 
-	if tabsize < 1 {
+	if nativeValue < 1 {
 		return errors.New(option + " must be greater than 0")
 	}
 
