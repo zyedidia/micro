@@ -66,9 +66,9 @@ local last_ft
 function updateCommentType(buf)
     if buf.Settings["commenttype"] == nil or (last_ft ~= buf.Settings["filetype"] and last_ft ~= nil) then
         if ft[buf.Settings["filetype"]] ~= nil then
-            buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
+            buf:SetOptionNative("commenttype", ft[buf.Settings["filetype"]])
         else
-            buf.Settings["commenttype"] = "# %s"
+            buf:SetOptionNative("commenttype", "# %s")
         end
 
         last_ft = buf.Settings["filetype"]
