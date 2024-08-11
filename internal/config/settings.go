@@ -273,7 +273,7 @@ func verifySetting(option string, value interface{}, def interface{}) error {
 // Must be called after ReadSettings
 func InitGlobalSettings() error {
 	var err error
-	GlobalSettings = DefaultGlobalSettings()
+	GlobalSettings = DefaultAllSettings()
 
 	for k, v := range parsedSettings {
 		if !strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
@@ -319,7 +319,7 @@ func WriteSettings(filename string) error {
 
 	var err error
 	if _, e := os.Stat(ConfigDir); e == nil {
-		defaults := DefaultGlobalSettings()
+		defaults := DefaultAllSettings()
 
 		// remove any options froms parsedSettings that have since been marked as default
 		for k, v := range parsedSettings {
@@ -354,7 +354,7 @@ func OverwriteSettings(filename string) error {
 
 	var err error
 	if _, e := os.Stat(ConfigDir); e == nil {
-		defaults := DefaultGlobalSettings()
+		defaults := DefaultAllSettings()
 		for k, v := range GlobalSettings {
 			if def, ok := defaults[k]; !ok || !reflect.DeepEqual(v, def) {
 				if _, wr := ModifiedSettings[k]; wr {
@@ -420,8 +420,8 @@ func GetInfoBarOffset() int {
 	return offset
 }
 
-// DefaultCommonSettings returns the default global settings for micro
-// Note that colorscheme is a global only option
+// DefaultCommonSettings returns a map of all common buffer settings
+// and their default values
 func DefaultCommonSettings() map[string]interface{} {
 	commonsettings := make(map[string]interface{})
 	for k, v := range defaultCommonSettings {
@@ -430,21 +430,8 @@ func DefaultCommonSettings() map[string]interface{} {
 	return commonsettings
 }
 
-// DefaultGlobalSettings returns the default global settings for micro
-// Note that colorscheme is a global only option
-func DefaultGlobalSettings() map[string]interface{} {
-	globalsettings := make(map[string]interface{})
-	for k, v := range defaultCommonSettings {
-		globalsettings[k] = v
-	}
-	for k, v := range DefaultGlobalOnlySettings {
-		globalsettings[k] = v
-	}
-	return globalsettings
-}
-
-// DefaultAllSettings returns a map of all settings and their
-// default values (both common and global settings)
+// DefaultAllSettings returns a map of all common buffer & global-only settings
+// and their default values
 func DefaultAllSettings() map[string]interface{} {
 	allsettings := make(map[string]interface{})
 	for k, v := range defaultCommonSettings {
