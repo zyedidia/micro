@@ -361,6 +361,11 @@ func reloadRuntime(reloadPlugins bool) {
 		parsedSettings := config.ParsedSettings()
 		defaultSettings := config.DefaultAllSettings()
 		for k := range defaultSettings {
+			if _, ok := config.VolatileSettings[k]; ok {
+				// reload should not override volatile settings
+				continue
+			}
+
 			if _, ok := parsedSettings[k]; ok {
 				err = doSetGlobalOptionNative(k, parsedSettings[k])
 			} else {
