@@ -5,7 +5,6 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z][0-9a-z_]{2,}\\b"
-    - functions: "\\b[A-Z][0-9a-z_]{2,}\\b"
       #declarations
     - statement: "\\b(let|val|method|in|and|rec|private|virtual|constraint)\\b"
       #structure items
