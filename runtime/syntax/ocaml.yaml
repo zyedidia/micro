@@ -5,6 +5,7 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z][0-9a-z_]{2,}\\b"
+    - functions: "\\b[A-Z][0-9a-z_]{2,}\\b"
       #declarations
     - statement: "\\b(let|val|method|in|and|rec|private|virtual|constraint)\\b"
       #structure items
@@ -17,6 +18,7 @@ rules:
     - statement: "\\b(if|then|else)\\b"
       #blocs
     - type: "\\b(begin|end|object|struct|sig|for|while|do|done|to|downto)\\b"
+    - type: "'[0-9A-Za-z_]+"
       #constantes
     - constant.bool: "\\b(true|false)\\b"
       #modules/classes
@@ -24,8 +26,8 @@ rules:
       #expr modifiers
     - special: "\\b(new|ref|mutable|lazy|assert|raise)\\b"
     - constant.string:
-        start: "'"
-        end: "'"
+        start: "'(.|\\\\(([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})|[abfnrtv'\\\"\\\\]))'"
+        end: ""
         skip: "\\\\."
         rules:
             - constant.specialChar: "%."
