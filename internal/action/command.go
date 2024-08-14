@@ -761,6 +761,7 @@ func (h *BufPane) GotoCmd(args []string) {
 	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
 
 	h.RemoveAllMultiCursors()
+	h.Cursor.Deselect(true)
 	h.GotoLoc(buffer.Loc{col, line})
 }
 
@@ -779,6 +780,7 @@ func (h *BufPane) JumpCmd(args []string) {
 	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
 
 	h.RemoveAllMultiCursors()
+	h.Cursor.Deselect(true)
 	h.GotoLoc(buffer.Loc{col, line})
 }
 
