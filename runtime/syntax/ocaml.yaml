@@ -24,13 +24,11 @@ rules:
     - special: "\\b(include|inherit|initializer)\\b"
       #expr modifiers
     - special: "\\b(new|ref|mutable|lazy|assert|raise)\\b"
-    - constant.string:
-        start: "'(.|\\\\(([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})|[abfnrtv'\\\"\\\\]))'"
-        end: ""
-        rules:
-            - constant.specialChar: "%."
-            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
-            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+      #character literal
+    - constant.string: "'(\\\\[0-7]{3}|\\\\x[A-Fa-f0-9]{2}|\\\\u[A-Fa-f0-9]{4}|\\\\U[A-Fa-f0-9]{8}|\\\\[abfnrtv'\\\"\\\\]|.)'"
+    - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+    - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+      #string literal
     - constant.string:
         start: "\""
         end: "\""
