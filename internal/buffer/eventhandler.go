@@ -291,13 +291,9 @@ func (eh *EventHandler) UndoOneEvent() {
 	eh.UndoTextEvent(t)
 
 	// Set the cursor in the right place
-	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
-		eh.cursors[teCursor.Num].Goto(teCursor)
-		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
-	} else {
-		teCursor.Num = -1
+	if t.C.Num >= 0 && t.C.Num < len(eh.cursors) {
+		eh.cursors[t.C.Num].Goto(t.C)
+		eh.cursors[t.C.Num].NewTrailingWsY = t.C.NewTrailingWsY
 	}
 
 	// Push it to the redo stack
@@ -336,13 +332,9 @@ func (eh *EventHandler) RedoOneEvent() {
 		return
 	}
 
-	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
-		eh.cursors[teCursor.Num].Goto(teCursor)
-		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
-	} else {
-		teCursor.Num = -1
+	if t.C.Num >= 0 && t.C.Num < len(eh.cursors) {
+		eh.cursors[t.C.Num].Goto(t.C)
+		eh.cursors[t.C.Num].NewTrailingWsY = t.C.NewTrailingWsY
 	}
 
 	// Modifies the text event
