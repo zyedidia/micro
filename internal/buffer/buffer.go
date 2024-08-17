@@ -658,7 +658,11 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 		size += n
 
 		for _, l := range b.lines[1:] {
-			n, _ = h.Write([]byte{'\n'})
+			if b.Endings == FFDos {
+				n, _ = h.Write([]byte{'\r', '\n'})
+			} else {
+				n, _ = h.Write([]byte{'\n'})
+			}
 			size += n
 			n, _ = h.Write(l.data)
 			size += n
