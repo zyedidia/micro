@@ -654,22 +654,13 @@ func calcHash(b *Buffer, out *[md5.Size]byte) error {
 
 	size := 0
 	if len(b.lines) > 0 {
-		n, e := h.Write(b.lines[0].data)
-		if e != nil {
-			return e
-		}
+		n, _ := h.Write(b.lines[0].data)
 		size += n
 
 		for _, l := range b.lines[1:] {
-			n, e = h.Write([]byte{'\n'})
-			if e != nil {
-				return e
-			}
+			n, _ = h.Write([]byte{'\n'})
 			size += n
-			n, e = h.Write(l.data)
-			if e != nil {
-				return e
-			}
+			n, _ = h.Write(l.data)
 			size += n
 		}
 	}
