@@ -663,9 +663,13 @@ func (h *BufPane) DoRuneInsert(r rune) {
 func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
 	e.splitID = MainTab().GetNode(h.splitID).VSplit(right)
-	MainTab().Panes = append(MainTab().Panes, e)
+	currentPaneIdx := MainTab().GetPane(h.splitID)
+	if right {
+		currentPaneIdx++
+	}
+	MainTab().AddPane(e, currentPaneIdx)
 	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
+	MainTab().SetActive(currentPaneIdx)
 	return e
 }
 
@@ -673,9 +677,13 @@ func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 func (h *BufPane) HSplitIndex(buf *buffer.Buffer, bottom bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
 	e.splitID = MainTab().GetNode(h.splitID).HSplit(bottom)
-	MainTab().Panes = append(MainTab().Panes, e)
+	currentPaneIdx := MainTab().GetPane(h.splitID)
+	if bottom {
+		currentPaneIdx++
+	}
+	MainTab().AddPane(e, currentPaneIdx)
 	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
+	MainTab().SetActive(currentPaneIdx)
 	return e
 }
 
