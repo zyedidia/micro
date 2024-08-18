@@ -1472,10 +1472,14 @@ func (h *BufPane) paste(clip string) {
 func (h *BufPane) JumpToMatchingBrace() bool {
 	matchingBrace, left, found := h.Buf.FindMatchingBrace(h.Cursor.Loc)
 	if found {
-		if left {
-			h.Cursor.GotoLoc(matchingBrace)
+		if h.Buf.Settings["matchbraceleft"].(bool) {
+			if left {
+				h.Cursor.GotoLoc(matchingBrace)
+			} else {
+				h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
+			}
 		} else {
-			h.Cursor.GotoLoc(matchingBrace.Move(1, h.Buf))
+			h.Cursor.GotoLoc(matchingBrace)
 		}
 		h.Relocate()
 		return true

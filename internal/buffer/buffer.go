@@ -1193,17 +1193,19 @@ func (b *Buffer) FindMatchingBrace(start Loc) (Loc, bool, bool) {
 		}
 	}
 
-	// failed to find matching brace for the given location, so try to find matching
-	// brace for the location one character left of it
-	if start.X-1 >= 0 && start.X-1 < len(curLine) {
-		leftChar := curLine[start.X-1]
-		left := Loc{start.X - 1, start.Y}
+	if b.Settings["matchbraceleft"].(bool) {
+		// failed to find matching brace for the given location, so try to find matching
+		// brace for the location one character left of it
+		if start.X-1 >= 0 && start.X-1 < len(curLine) {
+			leftChar := curLine[start.X-1]
+			left := Loc{start.X - 1, start.Y}
 
-		for _, bp := range BracePairs {
-			if leftChar == bp[0] || leftChar == bp[1] {
-				mb, found := b.findMatchingBrace(bp, left, leftChar)
-				if found {
-					return mb, true, true
+			for _, bp := range BracePairs {
+				if leftChar == bp[0] || leftChar == bp[1] {
+					mb, found := b.findMatchingBrace(bp, left, leftChar)
+					if found {
+						return mb, true, true
+					}
 				}
 			}
 		}
