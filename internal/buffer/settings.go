@@ -18,6 +18,7 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 				if !b.isModified {
 					calcHash(b, &b.origHash)
 				} else {
+					// prevent using an old stale origHash value
 					b.origHash = [md5.Size]byte{}
 				}
 			}
