@@ -12,15 +12,13 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 
 	if option == "fastdirty" {
 		if !nativeValue.(bool) {
-			if !b.isModified {
-				e := calcHash(b, &b.origHash)
-				if e == ErrFileTooLarge {
-					b.Settings["fastdirty"] = true
-				}
+			if b.Size() > LargeFileThreshold {
+				b.Settings["fastdirty"] = true
 			} else {
-				b.origHash = [md5.Size]byte{}
-				if b.Size() > LargeFileThreshold {
-					b.Settings["fastdirty"] = true
+				if !b.isModified {
+					calcHash(b, &b.origHash)
+				} else {
+					b.origHash = [md5.Size]byte{}
 				}
 			}
 		}
