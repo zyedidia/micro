@@ -127,7 +127,7 @@ func (pc PluginChannels) Fetch(out io.Writer) PluginPackages {
 
 // Fetch retrieves all available PluginPackages from the given channel
 func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
-	client := http.Client {
+	client := http.Client{
 		Timeout: 30 * time.Second,
 	}
 	resp, err := client.Get(string(pc))
@@ -150,7 +150,7 @@ func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 
 // Fetch retrieves all available PluginPackages from the given repository
 func (pr PluginRepository) Fetch(out io.Writer) PluginPackages {
-	client := http.Client {
+	client := http.Client{
 		Timeout: 30 * time.Second,
 	}
 	resp, err := client.Get(string(pr))
@@ -398,7 +398,7 @@ func GetInstalledPluginVersion(name string) string {
 // DownloadAndInstall downloads and installs the given plugin and version
 func (pv *PluginVersion) DownloadAndInstall(out io.Writer) error {
 	fmt.Fprintf(out, "Downloading %q (%s) from %q\n", pv.pack.Name, pv.Version, pv.Url)
-	client := http.Client {
+	client := http.Client{
 		Timeout: 30 * time.Second,
 	}
 	resp, err := client.Get(pv.Url)
@@ -650,6 +650,7 @@ func UpdatePlugins(out io.Writer, plugins []string) {
 func PluginCommand(out io.Writer, cmd string, args []string) {
 	switch cmd {
 	case "install":
+		fmt.Fprintln(out, "Downloading plugin, please wait...")
 		installedVersions := GetInstalledVersions(false)
 		for _, plugin := range args {
 			pp := GetAllPluginPackages(out).Get(plugin)
@@ -693,6 +694,7 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 			fmt.Fprintln(out, "No plugins removed")
 		}
 	case "update":
+		fmt.Fprintln(out, "Updating plugins, please wait...")
 		UpdatePlugins(out, args)
 	case "list":
 		plugins := GetInstalledVersions(false)
@@ -701,6 +703,7 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 			fmt.Fprintf(out, "%s (%s)\n", p.Pack().Name, p.Version)
 		}
 	case "search":
+		fmt.Fprintln(out, "Fetching plugins, please wait...")
 		plugins := SearchPlugin(out, args)
 		fmt.Fprintln(out, len(plugins), " plugins found")
 		for _, p := range plugins {
@@ -709,6 +712,7 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 		}
 		fmt.Fprintln(out, "----------------")
 	case "available":
+		fmt.Fprintln(out, "Fetching plugins, please wait...")
 		packages := GetAllPluginPackages(out)
 		fmt.Fprintln(out, "Available Plugins:")
 		for _, pkg := range packages {
