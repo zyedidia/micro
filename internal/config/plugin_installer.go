@@ -128,7 +128,7 @@ func (pc PluginChannels) Fetch(out io.Writer) PluginPackages {
 // Fetch retrieves all available PluginPackages from the given channel
 func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 	client := http.Client {
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 	resp, err := client.Get(string(pc))
 	if err != nil {
@@ -151,7 +151,7 @@ func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 // Fetch retrieves all available PluginPackages from the given repository
 func (pr PluginRepository) Fetch(out io.Writer) PluginPackages {
 	client := http.Client {
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 	resp, err := client.Get(string(pr))
 	if err != nil {
@@ -399,7 +399,7 @@ func GetInstalledPluginVersion(name string) string {
 func (pv *PluginVersion) DownloadAndInstall(out io.Writer) error {
 	fmt.Fprintf(out, "Downloading %q (%s) from %q\n", pv.pack.Name, pv.Version, pv.Url)
 	client := http.Client {
-		Timeout: 10 * time.Second,
+		Timeout: 30 * time.Second,
 	}
 	resp, err := client.Get(pv.Url)
 	if err != nil {
