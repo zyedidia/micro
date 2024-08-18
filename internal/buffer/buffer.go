@@ -64,10 +64,6 @@ var (
 	// BTStdout is a buffer that only writes to stdout
 	// when closed
 	BTStdout = BufType{6, false, true, true}
-
-	// ErrFileTooLarge is returned when the file is too large to hash
-	// (fastdirty is automatically enabled)
-	ErrFileTooLarge = errors.New("File is too large to hash")
 )
 
 // SharedBuffer is a struct containing info that is shared among buffers
@@ -554,7 +550,11 @@ func (b *Buffer) ReOpen() error {
 
 	err = b.UpdateModTime()
 	if !b.Settings["fastdirty"].(bool) {
-		calcHash(b, &b.origHash)
+		if len(data) > LargeFileThreshold {
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
 	}
 	b.isModified = false
 	b.RelocateCursors()
@@ -649,37 +649,23 @@ func (b *Buffer) Size() int {
 }
 
 // calcHash calculates md5 hash of all lines in the buffer
-func calcHash(b *Buffer, out *[md5.Size]byte) error {
+func calcHash(b *Buffer, out *[md5.Size]byte) {
 	h := md5.New()
 
-	size := 0
 	if len(b.lines) > 0 {
-		n, e := h.Write(b.lines[0].data)
-		if e != nil {
-			return e
-		}
-		size += n
+		h.Write(b.lines[0].data)
 
 		for _, l := range b.lines[1:] {
-			n, e = h.Write([]byte{'\n'})
-			if e != nil {
-				return e
+			if b.Endings == FFDos {
+				h.Write([]byte{'\r', '\n'})
+			} else {
+				h.Write([]byte{'\n'})
 			}
-			size += n
-			n, e = h.Write(l.data)
-			if e != nil {
-				return e
-			}
-			size += n
+			h.Write(l.data)
 		}
-	}
-
-	if size > LargeFileThreshold {
-		return ErrFileTooLarge
 	}
 
 	h.Sum((*out)[:0])
-	return nil
 }
 
 func parseDefFromFile(f config.RuntimeFile, header *highlight.Header) *highlight.Def {
