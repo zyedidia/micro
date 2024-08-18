@@ -231,7 +231,19 @@ Here are the available options:
     default value: `false`
 
 * `matchbrace`: show matching braces for '()', '{}', '[]' when the cursor
-   is on a brace character or next to it.
+   is on a brace character or (if `matchbraceleft` is enabled) next to it.
+
+    default value: `true`
+
+* `matchbraceleft`: simulate I-beam cursor behavior (cursor located not on a
+   character but "between" characters): when showing matching braces, if there
+   is no brace character directly under the cursor, match the brace character
+   to the left of the cursor instead. Also when jumping to the matching brace,
+   move the cursor either to the matching brace character or to the character
+   next to it, depending on whether the initial cursor position was on the
+   brace character or next to it (i.e. "inside" or "outside" the braces).
+   With `matchbraceleft` disabled, micro will only match the brace directly
+   under the cursor and will only jump to precisely to the matching brace.
 
     default value: `true`
 
@@ -526,6 +538,7 @@ so that you can see what the formatting should look like.
     "linter": true,
     "literate": true,
     "matchbrace": true,
+    "matchbraceleft": true,
     "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
