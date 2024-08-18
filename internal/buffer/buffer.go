@@ -550,7 +550,11 @@ func (b *Buffer) ReOpen() error {
 
 	err = b.UpdateModTime()
 	if !b.Settings["fastdirty"].(bool) {
-		calcHash(b, &b.origHash)
+		if len(data) > LargeFileThreshold {
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
 	}
 	b.isModified = false
 	b.RelocateCursors()
