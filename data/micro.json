@@ -305,8 +305,8 @@
         },
         "statusline": {
             "description": "Whether to display a status line\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
-            "type": "string",
-            "default": "sudo"
+            "type": "boolean",
+            "default": true
         },
         "sucmd": {
             "description": "A super user command\nhttps://github.com/zyedidia/micro/blob/master/runtime/help/options.md#options",
