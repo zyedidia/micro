@@ -2,12 +2,54 @@ package buffer
 
 import (
 	"crypto/md5"
+	"reflect"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 )
 
-func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+func (b *Buffer) ReloadSettings(reloadFiletype bool) {
+	settings := config.ParsedSettings()
+
+	if _, ok := b.LocalSettings["filetype"]; !ok && reloadFiletype {
+		// need to update filetype before updating other settings based on it
+		b.Settings["filetype"] = "unknown"
+		if v, ok := settings["filetype"]; ok {
+			b.Settings["filetype"] = v
+		}
+	}
+
+	// update syntax rules, which will also update filetype if needed
+	b.UpdateRules()
+	settings["filetype"] = b.Settings["filetype"]
+
+	config.InitLocalSettings(settings, b.Path)
+	for k, v := range config.DefaultCommonSettings() {
+		if k == "filetype" {
+			// prevent recursion
+			continue
+		}
+		if _, ok := config.VolatileSettings[k]; ok {
+			// reload should not override volatile settings
+			continue
+		}
+		if _, ok := b.LocalSettings[k]; ok {
+			// reload should not override local settings
+			continue
+		}
+		if _, ok := settings[k]; ok {
+			b.DoSetOptionNative(k, settings[k])
+		} else {
+			b.DoSetOptionNative(k, v)
+		}
+	}
+}
+
+func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
+	if reflect.DeepEqual(b.Settings[option], nativeValue) {
+		return
+	}
+
 	b.Settings[option] = nativeValue
 
 	if option == "fastdirty" {
@@ -26,17 +68,7 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	} else if option == "statusline" {
 		screen.Redraw()
 	} else if option == "filetype" {
-		config.InitRuntimeFiles(true)
-		err := config.ReadSettings()
-		if err != nil {
-			screen.TermMessage(err)
-		}
-		err = config.InitGlobalSettings()
-		if err != nil {
-			screen.TermMessage(err)
-		}
-		config.InitLocalSettings(b.Settings, b.Path)
-		b.UpdateRules()
+		b.ReloadSettings(false)
 	} else if option == "fileformat" {
 		switch b.Settings["fileformat"].(string) {
 		case "unix":
@@ -85,6 +117,15 @@ func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, nativeValue)
 	}
+}
+
+func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
+	b.DoSetOptionNative(option, nativeValue)
+	b.LocalSettings[option] = true
 
 	return nil
 }

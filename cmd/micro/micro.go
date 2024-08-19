@@ -273,6 +273,10 @@ func main() {
 				screen.TermMessage(err)
 				continue
 			}
+			if err = config.OptionIsValid(k, nativeValue); err != nil {
+				screen.TermMessage(err)
+				continue
+			}
 			config.GlobalSettings[k] = nativeValue
 			config.VolatileSettings[k] = true
 		}
@@ -352,9 +356,9 @@ func main() {
 		log.Println(clipErr, " or change 'clipboard' option")
 	}
 
+	config.StartAutoSave()
 	if a := config.GetGlobalOption("autosave").(float64); a > 0 {
-		config.SetAutoTime(int(a))
-		config.StartAutoSave()
+		config.SetAutoTime(a)
 	}
 
 	screen.Events = make(chan tcell.Event)

@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -357,10 +358,24 @@ func reloadRuntime(reloadPlugins bool) {
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
-	}
-	err = config.InitGlobalSettings()
-	if err != nil {
-		screen.TermMessage(err)
+	} else {
+		parsedSettings := config.ParsedSettings()
+		defaultSettings := config.DefaultAllSettings()
+		for k := range defaultSettings {
+			if _, ok := config.VolatileSettings[k]; ok {
+				// reload should not override volatile settings
+				continue
+			}
+
+			if _, ok := parsedSettings[k]; ok {
+				err = doSetGlobalOptionNative(k, parsedSettings[k])
+			} else {
+				err = doSetGlobalOptionNative(k, defaultSettings[k])
+			}
+			if err != nil {
+				screen.TermMessage(err)
+			}
+		}
 	}
 
 	if reloadPlugins {
@@ -393,7 +408,7 @@ func reloadRuntime(reloadPlugins bool) {
 		screen.TermMessage(err)
 	}
 	for _, b := range buffer.OpenBuffers {
-		b.UpdateRules()
+		b.ReloadSettings(true)
 	}
 }
 
@@ -512,16 +527,11 @@ func (h *BufPane) NewTabCmd(args []string) {
 	}
 }
 
-func SetGlobalOptionNative(option string, nativeValue interface{}) error {
-	// check for local option first...
-	for _, s := range config.LocalSettings {
-		if s == option {
-			MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
-			return nil
-		}
+func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
+	if reflect.DeepEqual(config.GlobalSettings[option], nativeValue) {
+		return nil
 	}
 
-	// ...if it's not local continue with the globals
 	config.GlobalSettings[option] = nativeValue
 	config.ModifiedSettings[option] = true
 	delete(config.VolatileSettings, option)
@@ -542,8 +552,7 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		}
 	} else if option == "autosave" {
 		if nativeValue.(float64) > 0 {
-			config.SetAutoTime(int(nativeValue.(float64)))
-			config.StartAutoSave()
+			config.SetAutoTime(nativeValue.(float64))
 		} else {
 			config.SetAutoTime(0)
 		}
@@ -574,8 +583,30 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		}
 	}
 
+	return nil
+}
+
+func SetGlobalOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
+	}
+
+	// check for local option first...
+	for _, s := range config.LocalSettings {
+		if s == option {
+			return MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
+		}
+	}
+
+	// ...if it's not local continue with the globals...
+	if err := doSetGlobalOptionNative(option, nativeValue); err != nil {
+		return err
+	}
+
+	// ...at last check the buffer locals
 	for _, b := range buffer.OpenBuffers {
-		b.SetOptionNative(option, nativeValue)
+		b.DoSetOptionNative(option, nativeValue)
+		delete(b.LocalSettings, option)
 	}
 
 	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
@@ -602,16 +633,10 @@ func (h *BufPane) ResetCmd(args []string) {
 	}
 
 	option := args[0]
+	defaults := config.DefaultAllSettings()
 
-	defaultGlobals := config.DefaultGlobalSettings()
-	defaultLocals := config.DefaultCommonSettings()
-
-	if _, ok := defaultGlobals[option]; ok {
-		SetGlobalOptionNative(option, defaultGlobals[option])
-		return
-	}
-	if _, ok := defaultLocals[option]; ok {
-		h.Buf.SetOptionNative(option, defaultLocals[option])
+	if _, ok := defaults[option]; ok {
+		SetGlobalOptionNative(option, defaults[option])
 		return
 	}
 	InfoBar.Error(config.ErrInvalidOption)
