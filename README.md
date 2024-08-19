@@ -152,9 +152,10 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * distro-agnostic package managers:
         * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
         * `flox install micro` (with [Flox](https://flox.dev))
-* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
+* Windows: [Chocolatey](https://chocolatey.org), [Scoop](https://scoop.sh/) and [WinGet](https://learn.microsoft.com/en-us/windows/package-manager/winget/).
     * `choco install micro`.
     * `scoop install micro`.
+    * `winget install zyedidia.micro`
 * OpenBSD: Available in the ports tree and also available as a binary package.
     * `pkg_add -v micro`.
 * NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
