@@ -17,20 +17,18 @@ rules:
     - statement: "\\b(if|then|else)\\b"
       #blocs
     - type: "\\b(begin|end|object|struct|sig|for|while|do|done|to|downto)\\b"
+    - type: "'[0-9A-Za-z_]+"
       #constantes
     - constant.bool: "\\b(true|false)\\b"
       #modules/classes
     - special: "\\b(include|inherit|initializer)\\b"
       #expr modifiers
     - special: "\\b(new|ref|mutable|lazy|assert|raise)\\b"
-    - constant.string:
-        start: "'"
-        end: "'"
-        skip: "\\\\."
-        rules:
-            - constant.specialChar: "%."
-            - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
-            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+      #character literal
+    - constant.string: "'(\\\\[0-7]{3}|\\\\x[A-Fa-f0-9]{2}|\\\\u[A-Fa-f0-9]{4}|\\\\U[A-Fa-f0-9]{8}|\\\\[abfnrtv'\\\"\\\\]|.)'"
+    - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
+    - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+      #string literal
     - constant.string:
         start: "\""
         end: "\""
