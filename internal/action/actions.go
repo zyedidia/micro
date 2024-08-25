@@ -1955,6 +1955,14 @@ func (h *BufPane) SpawnMultiCursor() bool {
 	return true
 }
 
+// SpawnCursorAtLoc spawns a new cursor at a location and merges the cursors
+func (h *BufPane) SpawnCursorAtLoc(loc buffer.Loc) *buffer.Cursor {
+	c := buffer.NewCursor(h.Buf, loc)
+	h.Buf.AddCursor(c)
+	h.Buf.MergeCursors()
+	return c
+}
+
 // SpawnMultiCursorUpN is not an action
 func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
