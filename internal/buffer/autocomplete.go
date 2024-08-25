@@ -49,16 +49,23 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 		b.CurSuggestion = len(b.Suggestions) - 1
 	}
 
-	c := b.GetActiveCursor()
-	start := c.Loc
-	end := c.Loc
-	if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
-		start = end.Move(-util.CharacterCountInString(b.Completions[prevSuggestion]), b)
-	}
+	b.performAutoComplete(prevSuggestion)
 
-	b.Replace(start, end, b.Completions[b.CurSuggestion])
 	if len(b.Suggestions) > 1 {
 		b.HasSuggestions = true
+	}
+}
+
+func (b *Buffer) performAutoComplete(prevSuggestion int) {
+	for _, cur := range b.cursors {
+		curLoc := cur.Loc
+		curStart := curLoc
+		curEnd := curLoc
+
+		if prevSuggestion < len(b.Suggestions) && prevSuggestion >= 0 {
+			curStart = curEnd.Move(-util.CharacterCountInString(b.Completions[prevSuggestion]), b)
+		}
+		b.Replace(curStart, curEnd, b.Completions[b.CurSuggestion])
 	}
 }
 
