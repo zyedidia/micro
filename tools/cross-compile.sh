@@ -20,8 +20,8 @@ cp assets/micro-logo-mark.svg micro-$VERSION/micro.svg
 create_artefact_generic()
 {
 	mv micro micro-$VERSION/
-	tar -czf micro-$VERSION-$1.tgz micro-$VERSION
-	sha256sum micro-$VERSION-$1.tgz > micro-$VERSION-$1.tgz.sha
+	tar -czf micro-$VERSION-$1.tar.gz micro-$VERSION
+	sha256sum micro-$VERSION-$1.tar.gz > micro-$VERSION-$1.tar.gz.sha
 	mv micro-$VERSION-$1.* binaries
 	rm micro-$VERSION/micro
 }
