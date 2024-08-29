@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
@@ -614,4 +615,42 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+// SafeWrite performs the following actions:
+// 1. If not exists try to write the file and return
+// 2. Create a derived temporary file first
+// 2.1. If this fails remove the corrupted temporary file and return with error
+// 3. Rename the temporary to the target file or overwrite the target file
+// 3.1. If this fails remove the temporary in case of rename otherwise keep the file and return with error
+// 4. Remove the temporary file
+func SafeWrite(path string, bytes []byte, rename bool) error {
+	if _, err := os.Stat(path); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		return os.WriteFile(path, bytes, FileMode)
+	}
+
+	tmp := AppendBackupSuffix(path)
+	err := os.WriteFile(tmp, bytes, FileMode)
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
+
+	if rename {
+		err = os.Rename(tmp, path)
+	} else {
+		err = os.WriteFile(path, bytes, FileMode)
+	}
+	if err != nil {
+		if rename {
+			os.Remove(tmp)
+		}
+		return err
+	}
+
+	os.Remove(tmp)
+	return nil
 }
