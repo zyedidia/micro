@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
 	"net/url"
 	"os"
@@ -620,4 +621,76 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+// SafeWrite writes bytes to a file in a "safe" way, preventing loss of the
+// contents of the file if it fails to write the new contents.
+// This means that the file is not overwritten directly but by writing to a
+// temporary file first.
+//
+// If rename is true, write is performed atomically, by renaming the temporary
+// file to the target file after the data is successfully written to the
+// temporary file. This guarantees that the file will not remain in a corrupted
+// state, but it also has limitations, e.g. the file should not be a symlink
+// (otherwise SafeWrite silently replaces this symlink with a regular file),
+// the file creation date in Linux is not preserved (since the file inode
+// changes) etc. Use SafeWrite with rename=true for files that are only created
+// and used by micro for its own needs and are not supposed to be used directly
+// by the user.
+//
+// If rename is false, write is performed by overwriting the target file after
+// the data is successfully written to the temporary file.
+// This means that the target file may remain corrupted if overwrite fails,
+// but in such case the temporary file is preserved as a backup so the file
+// can be recovered later. So it is less convenient than atomic write but more
+// universal. Use SafeWrite with rename=false for files that may be managed
+// directly by the user, like settings.json and bindings.json.
+func SafeWrite(path string, bytes []byte, rename bool) error {
+	var err error
+	if _, err = os.Stat(path); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		// Force rename for new files!
+		rename = true
+	}
+
+	var file *os.File
+	if !rename {
+		file, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE, FileMode)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+	}
+
+	tmp := AppendBackupSuffix(path)
+	err = os.WriteFile(tmp, bytes, FileMode)
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
+
+	if rename {
+		err = os.Rename(tmp, path)
+	} else {
+		err = file.Truncate(0)
+		if err == nil {
+			_, err = file.Write(bytes)
+		}
+		if err == nil {
+			err = file.Sync()
+		}
+	}
+	if err != nil {
+		if rename {
+			os.Remove(tmp)
+		}
+		return err
+	}
+
+	if !rename {
+		os.Remove(tmp)
+	}
+	return nil
 }
