@@ -4,35 +4,39 @@ detect:
     filename: "\\.hs$"
 
 rules:
+    - symbol.operator: "[!#$%&:*+/<=>?@.\\\\^\\|~\\p{Sm}\\-]+"
+
+    # Identifiers (with or without a module name)
+    - type: "\\b([A-Z][A-Za-z0-9_]*\\.)*[A-Z]+[A-Za-z0-9_']*\\b"
+    - default: "\\b([A-Z][A-Za-z0-9_]*\\.)*[a-z][A-Za-z0-9_']*\\b"
+
+    - statement: ";"
+    - symbol.bracket: "[\\(\\)\\[\\]\\{\\}]"
+    - special: "`[A-Za-z0-9']+`"
+
     # Keywords
-    - statement: "\\b(as|case|of|class|data|default|deriving|do|forall|foreign|hiding|if|then|else|import|infix|infixl|infixr|instance|let|in|mdo|module|newtype|qualified|type|where)\\b"
+    - statement: "\\b(case|of|class|data|default|deriving|do|forall|foreign|hiding|if|then|else|import|infix|infixl|infixr|instance|let|in|mdo|module|newtype|qualified|type|where)\\b"
 
-      # Various symbols
-    - symbol: "(\\||@|!|:|_|~|=|\\\\|;|\\(\\)|,|\\[|\\]|\\{|\\})"
-
-      # Operators
-    - symbol.operator: "(==|/=|&&|\\|\\||<|>|<=|>=)"
-
-      # Various symbols
-    - special: "(->|<-)"
-    - symbol: "\\.|\\$"
-
-      # Data constructors
+    # Data constructors
     - constant.bool: "\\b(True|False)\\b"
     - constant: "\\b(Nothing|Just|Left|Right|LT|EQ|GT)\\b"
 
-      # Data classes
-    - identifier.class: "\\b(Read|Show|Enum|Eq|Ord|Data|Bounded|Typeable|Num|Real|Fractional|Integral|RealFrac|Floating|RealFloat|Monad|MonadPlus|Functor|Foldable|Additive|Zip)[ ]"
+    - constant: "\\(\\)"  # Unit
+    - constant.number: "\\b(0[xX][0-9A-Fa-f]+|0[oO][0-7]+|0[bB][01]+|[-]?[0-9]+([.][0-9]+)?([eE][+-]?[0-9]+)?)\\b"
 
-      # Strings
+    # Data classes
+    - identifier.class: "\\b(Additive|Applicative|Bounded|Data|Enum|Eq|Floating|Foldable|Fractional|Functor|Integral|Monad|MonadPlus|Monoid|Num|Ord|Read|Real|RealFloat|RealFrac|Semigroup|Show|Traversable|Typeable|Zip)[ ]"
+
+    # Strings
     - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
         rules:
-            - constant.specialChar: "\\\\."
+            - special: "\\\\&"
+            - constant.specialChar: "\\\\([abfnrtv\"'\\\\]|[0-9]+|x[0-9a-fA-F]+|o[0-7]+|NUL|SOH|STX|ETX|EOT|ENQ|ACK|BEL|BS|HT|LF|VT|FF|CR|SO|SI|DLE|DC[1-4]|NAK|SYN|ETB|CAN|EM|SUB|ESC|FS|GS|RS|US|SP|DEL)"
 
-      # Comments
+    # Comments
     - comment:
         start: "--"
         end: "$"
@@ -45,4 +49,4 @@ rules:
         rules:
             - todo: "(TODO|XXX|FIXME):?"
 
-    - identifier.micro: "undefined"
+    - identifier.macro: "undefined"
