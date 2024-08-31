@@ -32,7 +32,7 @@ install: generate
 install-all: install
 
 fetch-tags:
-	git fetch --tags
+	git fetch --tags --force
 
 generate:
 	GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) go generate ./runtime
