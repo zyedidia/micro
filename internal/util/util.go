@@ -412,6 +412,10 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
+func AppendBackupSuffix(path string) string {
+	return path + ".micro-backup"
+}
+
 // EscapePathUrl encodes the path in URL query form
 func EscapePathUrl(path string) string {
 	return url.QueryEscape(filepath.ToSlash(path))
