@@ -15,7 +15,6 @@ import (
 	"github.com/zyedidia/glob"
 	"github.com/zyedidia/json5"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"golang.org/x/text/encoding/htmlindex"
 )
 
 type optionValidator func(string, interface{}) error
@@ -542,6 +541,6 @@ func validateColorscheme(option string, value interface{}) error {
 }
 
 func validateEncoding(option string, value interface{}) error {
-	_, err := htmlindex.Get(value.(string))
+	_, err := util.GetEncoding(value.(string))
 	return err
 }

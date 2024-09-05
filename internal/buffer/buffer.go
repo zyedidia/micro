@@ -25,7 +25,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
-	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -341,7 +340,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.Settings["filetype"] = settings["filetype"]
 		b.Settings["syntax"] = settings["syntax"]
 
-		enc, err := htmlindex.Get(settings["encoding"].(string))
+		enc, err := util.GetEncoding(settings["encoding"].(string))
 		if err != nil {
 			enc = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
@@ -540,7 +539,7 @@ func (b *Buffer) ReOpen() error {
 		return err
 	}
 
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	enc, err := util.GetEncoding(b.Settings["encoding"].(string))
 	if err != nil {
 		return err
 	}
