@@ -22,29 +22,29 @@ rules:
     - type: "\\b(bool|str|isize|usize|((i|u)(8|16|32|64))|f32|f64)\\b"
 
     - constant.string:
-        start: "\""
+        start: "[bc]?\""
         end: "\""
         skip: '\\.'
         rules:
             - constant.specialChar: '\\.'
 
     - constant.string:
-        start: "r#\""
+        start: "[bc]?r#\""
         end: "\"#"
         rules: []
 
     - constant.string:
-        start: "r##\""
+        start: "[bc]?r##\""
         end: "\"##"
         rules: []
 
     - constant.string:
-        start: "r###\""
+        start: "[bc]?r###\""
         end: "\"###"
         rules: []
 
     - constant.string:
-        start: "r####+\""
+        start: "[bc]?r####+\""
         end: "\"####+"
         rules: []
 
