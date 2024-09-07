@@ -57,8 +57,13 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		return
 	}
 
-	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
+	tw := transform.NewWriter(writeCloser, enc.NewEncoder())
+	w := bufio.NewWriter(tw)
 	err = fn(w)
+
+	if err2 := tw.Close(); err2 != nil && err == nil {
+		err = err2
+	}
 
 	if err2 := w.Flush(); err2 != nil && err == nil {
 		err = err2
