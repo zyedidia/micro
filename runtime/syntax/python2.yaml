@@ -32,12 +32,10 @@ rules:
     - constant.string:
         start: "\"\"\""
         end: "\"\"\""
-        rules: []
 
     - constant.string:
         start: "'''"
         end: "'''"
-        rules: []
 
     - constant.string:
         start: "\""
@@ -56,5 +54,4 @@ rules:
     - comment:
         start: "#"
         end: "$"
-        rules: []
 

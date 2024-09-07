@@ -29,14 +29,11 @@ rules:
     - preproc:
         start: "(^use| = new)"
         end: ";"
-        rules: []
 
     - identifier.macro:
         start: "<<EOSQL"
         end: "EOSQL"
-        rules: []
 
     - comment:
         start: "#"
         end: "$"
-        rules: []

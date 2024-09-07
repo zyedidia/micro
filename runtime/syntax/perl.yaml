@@ -28,12 +28,10 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\'"
-        rules: []
 
     - comment:
         start: "#"
         end: "$"
-        rules: []
 
     - constant.string: "\"\\(.*\\)\"|qq?\\|.*\\||qq?\\{.*\\}|qq?\\/.*\\/"
     - constant.number: "\\b([0-9]*[.])?[0-9]+"
@@ -45,14 +43,11 @@ rules:
     - preproc:
         start: "(^use| = new)"
         end: ";"
-        rules: []
 
     - comment:
         start: "^="
         end: "^=cut"
-        rules: []
 
     - identifier.macro:
         start: "<< 'STOP'"
         end: "STOP"
-        rules: []

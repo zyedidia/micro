@@ -45,7 +45,6 @@ rules:
     - constant.string:
         start: "\\[\\["
         end: "\\]\\]"
-        rules: []
 
 # support first few lengths of "long brackets" explicitly
 # brackets longer than that will give false positives
@@ -53,22 +52,18 @@ rules:
     - constant.string:
         start: "\\[=\\["
         end: "\\]=\\]"
-        rules: []
 
     - constant.string:
         start: "\\[==\\["
         end: "\\]==\\]"
-        rules: []
 
     - constant.string:
         start: "\\[===\\["
         end: "\\]===\\]"
-        rules: []
 
     - constant.string:
         start: "\\[====+\\["
         end: "\\]====+\\]"
-        rules: []
 
     - comment.block:
         start: "\\-\\-\\[\\["

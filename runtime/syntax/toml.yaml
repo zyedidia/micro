@@ -27,11 +27,9 @@ rules:
     - constant.string:
         start: "'''"
         end: "'{3,5}"
-        rules: []
     - constant.string:
         start: "'"
         end: "'"
-        rules: []
     # Integer
     - constant.number: '[+-]?(\d+_)*\d+\b'
     - constant.number: '(0x([[:xdigit:]]+_)*[[:xdigit:]]+|0o([0-7]_)*[0-7]+|0b([01]+_)*[01]+)'

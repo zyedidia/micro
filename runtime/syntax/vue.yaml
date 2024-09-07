@@ -27,7 +27,6 @@ rules:
             - comment.block:
                 start: "<!\\-\\-"
                 end: "\\-\\->"
-                rules: []
 
             # Bootstrap
             - symbol.tag.extended: "(?i)<[/]?(b-alert|b-aspect|b-avatar|b-badge|b-icon|b-breadcrumb|b-button-group|b-button-toolbar|b-button|b-calendar|b-card-text|b-card-input|b-card|b-carousel-slide|b-carousel|b-collapse|b-dropdown|b-dropdown-item|b-dropdown-divider|b-embed|b-form-checkbox-group|b-form-checkbox|b-form-datepicker|b-form-file|b-form-group|b-form-input|b-form-radio|b-form-rating|b-form-select|b-form-spinbutton|b-form-tags|b-form-textarea|b-form|b-form-timepicker|b-img-lazy|b-img|b-input-group|b-jumbotron|b-input|b-container|b-row|b-col|b-link|b-list-group|b-list-group-item|b-media|b-modal|b-nav|b-nav-item|b-nav-item-dropdown|b-nav-text|b-nav-form|b-navbar|b-navbar-brand|b-navbar-toggle|b-navbar-nav|b-overlay|b-pagination|b-pagination-nav|b-popover|b-progress|b-progress-bar|b-sidebar|b-skeleton-wrapper|b-skeleton|b-spinner|b-table|b-table-lite|b-table-simple|b-tabs|b-tab|b-time|b-toast|b-tooltip)\\b"

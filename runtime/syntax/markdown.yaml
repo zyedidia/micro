@@ -46,4 +46,3 @@ rules:
     - special:
         start: "`"
         end: "`"
-        rules: []

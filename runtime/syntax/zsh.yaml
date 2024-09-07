@@ -43,10 +43,8 @@ rules:
     - constant.string:
         start: "'"
         end: "'"
-        rules: []
 
     - comment:
         start: "(^|\\s)#"
         end: "$"
-        rules: []
 

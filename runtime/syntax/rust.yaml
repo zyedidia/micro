@@ -31,22 +31,18 @@ rules:
     - constant.string:
         start: "[bc]?r#\""
         end: "\"#"
-        rules: []
 
     - constant.string:
         start: "[bc]?r##\""
         end: "\"##"
-        rules: []
 
     - constant.string:
         start: "[bc]?r###\""
         end: "\"###"
-        rules: []
 
     - constant.string:
         start: "[bc]?r####+\""
         end: "\"####+"
-        rules: []
 
     # Character literals
     # NOTE: This is an ugly hack to work around the fact that rust uses
@@ -58,7 +54,6 @@ rules:
     - constant.string:
         start: "'\""
         end: "'"
-        rules: []
 
     - comment:
         start: "//"
@@ -75,4 +70,3 @@ rules:
     - special:
         start: "#!\\["
         end: "\\]"
-        rules: []

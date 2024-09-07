@@ -28,7 +28,6 @@ rules:
     - preproc:
         start: "^ *(use|include) <"
         end: ">;?"
-        rules: []
 
     - constant.number: "\\b[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?|PI|inf|nan\\b"
     - constant.bool: "\\b(true|false)\\b"

@@ -20,11 +20,9 @@ rules:
     - comment:
         start: "//"
         end: "$"
-        rules: []
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
     - todo: "TODO:?"
     - constant.string:
         start: "\""
