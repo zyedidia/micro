@@ -371,7 +371,6 @@ highlighted. For example:
     start: "\""
     end: "\""
     skip: "\\."
-    rules: []
 ```
 
 #### Includes
