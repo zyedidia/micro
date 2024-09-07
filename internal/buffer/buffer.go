@@ -19,6 +19,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/dimchansky/utfbom"
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
@@ -353,7 +354,24 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			return NewBufferFromString("", "", btype)
 		}
 		if !hasBackup {
-			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
+			sr, bom := utfbom.Skip(r)
+			encname := ""
+
+			switch bom {
+			case utfbom.UTF8:
+				enc, encname = unicode.UTF8, "utf-8-bom"
+			case utfbom.UTF16BigEndian:
+				enc, encname = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM), "utf-16be-bom"
+			case utfbom.UTF16LittleEndian:
+				enc, encname = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM), "utf-16le-bom"
+			}
+
+			if encname != "" {
+				b.Settings["encoding"] = encname
+				b.LocalSettings["encoding"] = true
+			}
+
+			reader := bufio.NewReader(transform.NewReader(sr, enc.NewDecoder()))
 
 			var ff FileFormat = FFAuto
 
