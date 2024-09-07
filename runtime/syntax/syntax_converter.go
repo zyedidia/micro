@@ -149,7 +149,6 @@ func generateFile(filetype, syntax, header string, rules []interface{}) string {
 			output += fmt.Sprintf("    - %s:\n", rule.color)
 			output += fmt.Sprintf("        start: \"%s\"\n", strings.Replace(strings.Replace(rule.start, "\\", "\\\\", -1), "\"", "\\\"", -1))
 			output += fmt.Sprintf("        end: \"%s\"\n", strings.Replace(strings.Replace(rule.end, "\\", "\\\\", -1), "\"", "\\\"", -1))
-			output += fmt.Sprintf("        rules: []\n\n")
 		}
 	}
 
