@@ -7,6 +7,7 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"runtime/pprof"
@@ -222,6 +223,35 @@ func LoadInput(args []string) []*buffer.Buffer {
 	return buffers
 }
 
+func checkBackup(name string) error {
+	target := filepath.Join(config.ConfigDir, name)
+	backup := util.AppendBackupSuffix(target)
+	if info, err := os.Stat(backup); err == nil {
+		input, err := os.ReadFile(backup)
+		if err == nil {
+			t := info.ModTime()
+			msg := fmt.Sprintf(buffer.BackupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), backup)
+			choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
+
+			if choice%3 == 0 {
+				// recover
+				err := os.WriteFile(target, input, util.FileMode)
+				if err != nil {
+					return err
+				}
+				return os.Remove(backup)
+			} else if choice%3 == 1 {
+				// delete
+				return os.Remove(backup)
+			} else if choice%3 == 2 {
+				// abort
+				return errors.New("Aborted")
+			}
+		}
+	}
+	return nil
+}
+
 func exit(rc int) {
 	for _, b := range buffer.OpenBuffers {
 		if !b.Modified() {
@@ -268,6 +298,12 @@ func main() {
 
 	config.InitRuntimeFiles(true)
 	config.InitPlugins()
+
+	err = checkBackup("settings.json")
+	if err != nil {
+		screen.TermMessage(err)
+		exit(1)
+	}
 
 	err = config.ReadSettings()
 	if err != nil {
@@ -327,6 +363,12 @@ func main() {
 	err = config.LoadAllPlugins()
 	if err != nil {
 		screen.TermMessage(err)
+	}
+
+	err = checkBackup("bindings.json")
+	if err != nil {
+		screen.TermMessage(err)
+		exit(1)
 	}
 
 	action.InitBindings()
