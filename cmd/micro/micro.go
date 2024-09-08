@@ -98,7 +98,7 @@ func InitFlags() {
 		fmt.Println("Version:", util.Version)
 		fmt.Println("Commit hash:", util.CommitHash)
 		fmt.Println("Compiled on", util.CompileDate)
-		os.Exit(0)
+		exit(0)
 	}
 
 	if *flagOptions {
@@ -114,7 +114,7 @@ func InitFlags() {
 			fmt.Printf("-%s value\n", k)
 			fmt.Printf("    \tDefault value: '%v'\n", v)
 		}
-		os.Exit(0)
+		exit(0)
 	}
 
 	if util.Debug == "OFF" && *flagDebug {
@@ -135,7 +135,7 @@ func DoPluginFlags() {
 			CleanConfig()
 		}
 
-		os.Exit(0)
+		exit(0)
 	}
 }
 
@@ -222,12 +222,26 @@ func LoadInput(args []string) []*buffer.Buffer {
 	return buffers
 }
 
+func exit(rc int) {
+	for _, b := range buffer.OpenBuffers {
+		if !b.Modified() {
+			b.Fini()
+		}
+	}
+
+	if screen.Screen != nil {
+		screen.Screen.Fini()
+	}
+
+	os.Exit(rc)
+}
+
 func main() {
 	defer func() {
 		if util.Stdout.Len() > 0 {
 			fmt.Fprint(os.Stdout, util.Stdout.String())
 		}
-		os.Exit(0)
+		exit(0)
 	}()
 
 	var err error
@@ -287,7 +301,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("Fatal: Micro could not initialize a Screen.")
-		os.Exit(1)
+		exit(1)
 	}
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
 	clipErr := clipboard.Initialize(m)
@@ -306,7 +320,7 @@ func main() {
 			for _, b := range buffer.OpenBuffers {
 				b.Backup()
 			}
-			os.Exit(1)
+			exit(1)
 		}
 	}()
 
@@ -434,23 +448,9 @@ func DoEvent() {
 	case f := <-timerChan:
 		f()
 	case <-sighup:
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-		os.Exit(0)
+		exit(0)
 	case <-util.Sigterm:
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-
-		if screen.Screen != nil {
-			screen.Screen.Fini()
-		}
-		os.Exit(0)
+		exit(0)
 	}
 
 	if e, ok := event.(*tcell.EventError); ok {
@@ -458,16 +458,7 @@ func DoEvent() {
 
 		if e.Err() == io.EOF {
 			// shutdown due to terminal closing/becoming inaccessible
-			for _, b := range buffer.OpenBuffers {
-				if !b.Modified() {
-					b.Fini()
-				}
-			}
-
-			if screen.Screen != nil {
-				screen.Screen.Fini()
-			}
-			os.Exit(0)
+			exit(0)
 		}
 		return
 	}
