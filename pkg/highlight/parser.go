@@ -258,7 +258,7 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 
 	if s.rules == nil {
 		// allow empty rules
-		s.rules = new(rules)
+		s.rules = &rules{}
 	}
 
 	return s, err
