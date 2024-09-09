@@ -47,7 +47,6 @@ function onBufferOpen(buf)
     syntaxFile = syntaxFile .. "            - special:\n"
     syntaxFile = syntaxFile .. "                start: \"@\\\\{\"\n"
     syntaxFile = syntaxFile .. "                end: \"\\\\}\"\n"
-    syntaxFile = syntaxFile .. "                rules: []\n"
     syntaxFile = syntaxFile .. "            - include: " .. codetype .. "\n"
 
     config.AddRuntimeFileFromMemory(config.RTSyntax, "literate.yaml", syntaxFile)

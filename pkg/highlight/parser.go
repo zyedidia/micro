@@ -258,7 +258,7 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 
 	if s.rules == nil {
 		// allow empty rules
-		s.rules = new(rules)
+		s.rules = &rules{}
 	}
 
 	return s, err
@@ -476,10 +476,17 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 		r.limitGroup = r.group
 	}
 
-	r.rules, err = parseRules(regionInfo["rules"].([]interface{}), r)
+	// rules are optional
+	if rules, ok := regionInfo["rules"]; ok {
+		r.rules, err = parseRules(rules.([]interface{}), r)
+		if err != nil {
+			return nil, err
+		}
+	}
 
-	if err != nil {
-		return nil, err
+	if r.rules == nil {
+		// allow empty rules
+		r.rules = &rules{}
 	}
 
 	return r, nil

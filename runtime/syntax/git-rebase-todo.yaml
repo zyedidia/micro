@@ -16,4 +16,3 @@ rules:
     - comment.line:
         start: "^#"
         end: "$"
-        rules: []

@@ -75,7 +75,6 @@ rules:
 
         start: "\\|\\|\\| *$"
         end: "^ *\\|\\|\\|"
-        rules: []
 
     # multi-line comment
     - comment:

@@ -14,19 +14,15 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
-        rules: []
 
     - constant.string:
         start: "''"
         end: "''"
-        rules: []
 
     - comment:
         start: "#"
         end: "$"
-        rules: []
 
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []

@@ -8,11 +8,9 @@ rules:
     - identifier:
         start: "\\{"
         end: "\\}"
-        rules: []
     - identifier:
         start: "\\["
         end: "\\]"
-        rules: []
     # numbers
     - constant.number: "\\b[0-9]+(\\.[0-9]+)?([[:space:]](pt|mm|cm|in|ex|em|bp|pc|dd|cc|nd|nc|sp))?\\b"
     # let brackets have the default color again
@@ -25,8 +23,6 @@ rules:
     - comment:
         start: "[^\\\\]%|^%"
         end: "$"
-        rules: []
     - comment:
         start: "\\\\begin\\{comment\\}"
         end: "\\\\end\\{comment\\}"
-        rules: []
