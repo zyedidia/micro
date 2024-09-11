@@ -121,6 +121,10 @@ func SetContent(x, y int, mainc rune, combc []rune, style tcell.Style) {
 	}
 }
 
+func Show() {
+	Screen.Show()
+}
+
 // TempFini shuts the screen down temporarily
 func TempFini() bool {
 	screenWasNil := Screen == nil
