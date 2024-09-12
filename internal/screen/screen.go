@@ -33,6 +33,12 @@ var lock sync.Mutex
 // written to even if no event user event has occurred
 var drawChan chan bool
 
+// rawSeq is the list of raw escape sequences that are bound to some actions
+// via keybindings and thus should be parsed by tcell. We need to register
+// them in tcell every time we reinitialize the screen, so we need to remember
+// them in a list
+var rawSeq = make([]string, 0)
+
 // Lock locks the screen lock
 func Lock() {
 	lock.Lock()
@@ -121,6 +127,34 @@ func SetContent(x, y int, mainc rune, combc []rune, style tcell.Style) {
 	}
 }
 
+// RegisterRawSeq registers a raw escape sequence that should be parsed by tcell
+func RegisterRawSeq(r string) {
+	for _, seq := range rawSeq {
+		if seq == r {
+			return
+		}
+	}
+	rawSeq = append(rawSeq, r)
+
+	if Screen != nil {
+		Screen.RegisterRawSeq(r)
+	}
+}
+
+// UnregisterRawSeq unregisters a raw escape sequence that should be parsed by tcell
+func UnregisterRawSeq(r string) {
+	for i, seq := range rawSeq {
+		if seq == r {
+			rawSeq[i] = rawSeq[len(rawSeq)-1]
+			rawSeq = rawSeq[:len(rawSeq)-1]
+		}
+	}
+
+	if Screen != nil {
+		Screen.UnregisterRawSeq(r)
+	}
+}
+
 // TempFini shuts the screen down temporarily
 func TempFini() bool {
 	screenWasNil := Screen == nil
@@ -193,6 +227,10 @@ func Init() error {
 
 	if config.GetGlobalOption("mouse").(bool) {
 		Screen.EnableMouse()
+	}
+
+	for _, r := range rawSeq {
+		Screen.RegisterRawSeq(r)
 	}
 
 	return nil

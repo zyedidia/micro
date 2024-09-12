@@ -89,7 +89,7 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 	}
 
 	if strings.HasPrefix(k, "\x1b") {
-		screen.Screen.RegisterRawSeq(k)
+		screen.RegisterRawSeq(k)
 	}
 
 	bind(event, v)
@@ -342,7 +342,7 @@ func UnbindKey(k string) error {
 		}
 
 		if strings.HasPrefix(k, "\x1b") {
-			screen.Screen.UnregisterRawSeq(k)
+			screen.UnregisterRawSeq(k)
 		}
 
 		defaults := DefaultBindings("buffer")
