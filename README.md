@@ -180,15 +180,16 @@ You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/mi
 recommended because it doesn't build micro with version information (necessary for the plugin manager),
 and doesn't disable debug mode.
 
-### Fully static binary
+### Fully static or dynamically linked binary
 
-By default, the micro binary will dynamically link with core system libraries (this is generally
-recommended for security and portability). However, there is a fully static prebuilt binary that
-is provided for amd64 as `linux-static.tar.gz`, and to build a fully static binary from source, run
+By default, the micro binary is linked statically to increase the portability of the prebuilt binaries.
+This behavior can simply be overriden by providing `CGO_ENABLED=1` to the build target.
 
 ```
-CGO_ENABLED=0 make build
+CGO_ENABLED=1 make build
 ```
+
+Afterwards the micro binary will dynamically link with the present core system libraries.
 
 ### macOS terminal
 
