@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
@@ -26,7 +25,7 @@ func init() {
 func startup(args []string) (tcell.SimulationScreen, error) {
 	var err error
 
-	tempDir, err = ioutil.TempDir("", "micro_test")
+	tempDir, err = os.MkdirTemp("", "micro_test")
 	if err != nil {
 		return nil, err
 	}
@@ -164,20 +163,22 @@ func findBuffer(file string) *buffer.Buffer {
 	return buf
 }
 
-func createTestFile(name string, content string) (string, error) {
-	testf, err := ioutil.TempFile("", name)
+func createTestFile(t *testing.T, content string) string {
+	f, err := os.CreateTemp(t.TempDir(), "")
 	if err != nil {
-		return "", err
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	if _, err := f.WriteString(content); err != nil {
+		t.Fatal(err)
 	}
 
-	if _, err := testf.Write([]byte(content)); err != nil {
-		return "", err
-	}
-	if err := testf.Close(); err != nil {
-		return "", err
-	}
-
-	return testf.Name(), nil
+	return f.Name()
 }
 
 func TestMain(m *testing.M) {
@@ -194,18 +195,12 @@ func TestMain(m *testing.M) {
 }
 
 func TestSimpleEdit(t *testing.T) {
-	file, err := createTestFile("micro_simple_edit_test", "base content")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer os.Remove(file)
+	file := createTestFile(t, "base content")
 
 	openFile(file)
 
 	if findBuffer(file) == nil {
-		t.Errorf("Could not find buffer %s", file)
-		return
+		t.Fatalf("Could not find buffer %s", file)
 	}
 
 	injectKey(tcell.KeyEnter, rune(tcell.KeyEnter), tcell.ModNone)
@@ -223,28 +218,21 @@ func TestSimpleEdit(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, "firstfoobar\nbase content\n", string(data))
 }
 
 func TestMouse(t *testing.T) {
-	file, err := createTestFile("micro_mouse_test", "base content")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer os.Remove(file)
+	file := createTestFile(t, "base content")
 
 	openFile(file)
 
 	if findBuffer(file) == nil {
-		t.Errorf("Could not find buffer %s", file)
-		return
+		t.Fatalf("Could not find buffer %s", file)
 	}
 
 	// buffer:
@@ -275,10 +263,9 @@ func TestMouse(t *testing.T) {
 	// base content
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, "firstline\nsecondline\nbase content\n", string(data))
@@ -301,18 +288,12 @@ Ernleȝe test_string æðelen
 `
 
 func TestSearchAndReplace(t *testing.T) {
-	file, err := createTestFile("micro_search_replace_test", srTestStart)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer os.Remove(file)
+	file := createTestFile(t, srTestStart)
 
 	openFile(file)
 
 	if findBuffer(file) == nil {
-		t.Errorf("Could not find buffer %s", file)
-		return
+		t.Fatalf("Could not find buffer %s", file)
 	}
 
 	injectKey(tcell.KeyCtrlE, rune(tcell.KeyCtrlE), tcell.ModCtrl)
@@ -321,10 +302,9 @@ func TestSearchAndReplace(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, srTest2, string(data))
@@ -337,10 +317,9 @@ func TestSearchAndReplace(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err = ioutil.ReadFile(file)
+	data, err = os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, srTest3, string(data))
