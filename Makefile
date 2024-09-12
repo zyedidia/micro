@@ -21,8 +21,7 @@ build-quick:
 build-dbg:
 	go build -trimpath -ldflags "-s -w $(ADDITIONAL_GO_LINKER_FLAGS) $(DEBUGVAR)" ./cmd/micro
 
-build-tags: fetch-tags generate
-	go build -trimpath -ldflags "-s -w $(GOVARS) $(ADDITIONAL_GO_LINKER_FLAGS)" ./cmd/micro
+build-tags: fetch-tags build
 
 build-all: build
 
