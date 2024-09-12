@@ -21,22 +21,6 @@ To see more screenshots of micro, showcasing some of the default color schemes, 
  
 You can also check out the website for Micro at https://micro-editor.github.io.
 
-## Table of Contents
-
-- [Features](#features)
-- [Installation](#installation)
-  - [Prebuilt binaries](#pre-built-binaries)
-  - [Package Managers](#package-managers)
-  - [Building from source](#building-from-source)
-  - [Fully static binary](#fully-static-binary)
-  - [macOS terminal](#macos-terminal)
-  - [Linux clipboard support](#linux-clipboard-support)
-  - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
-  - [Cygwin, Mingw, Plan9](#cygwin-mingw-plan9)
-- [Usage](#usage)
-- [Documentation and Help](#documentation-and-help)
-- [Contributing](#contributing)
-
 - - -
 
 ## Features
