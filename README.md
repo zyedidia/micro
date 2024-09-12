@@ -88,7 +88,7 @@ Pre-built binaries are distributed in [releases](https://github.com/zyedidia/mic
 
 To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
-#### Quick-install script
+#### Third-party quick-install script
 
 ```bash
 curl https://getmic.ro | bash
