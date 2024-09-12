@@ -8,7 +8,7 @@ jobs:
   release:
     strategy:
       matrix:
-        go-version: [1.19.x]
+        go-version: [1.23.x]
         os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
