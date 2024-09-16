@@ -349,6 +349,16 @@ func (t *Tab) SetActive(i int) {
 	}
 }
 
+// AddPane adds a pane at a given index
+func (t *Tab) AddPane(pane Pane, i int) {
+	if len(t.Panes) == i {
+		t.Panes = append(t.Panes, pane)
+		return
+	}
+	t.Panes = append(t.Panes[:i+1], t.Panes[i:]...)
+	t.Panes[i] = pane
+}
+
 // GetPane returns the pane with the given split index
 func (t *Tab) GetPane(splitid uint64) int {
 	for i, p := range t.Panes {
