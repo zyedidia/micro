@@ -2167,14 +2167,16 @@ func (h *BufPane) MouseMultiCursor(e *tcell.EventMouse) bool {
 	return true
 }
 
-// SkipMultiCursor moves the current multiple cursor to the next available position
-func (h *BufPane) SkipMultiCursor() bool {
+func (h *BufPane) skipMultiCursor(forward bool) bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
 	if !lastC.HasSelection() {
 		return false
 	}
 	sel := lastC.GetSelection()
 	searchStart := lastC.CurSelection[1]
+	if !forward {
+		searchStart = lastC.CurSelection[0]
+	}
 
 	search := string(sel)
 	search = regexp.QuoteMeta(search)
@@ -2182,7 +2184,7 @@ func (h *BufPane) SkipMultiCursor() bool {
 		search = "\\b" + search + "\\b"
 	}
 
-	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, true, true)
+	match, found, err := h.Buf.FindNext(search, h.Buf.Start(), h.Buf.End(), searchStart, forward, true)
 	if err != nil {
 		InfoBar.Error(err)
 	}
@@ -2200,6 +2202,16 @@ func (h *BufPane) SkipMultiCursor() bool {
 	}
 	h.Relocate()
 	return true
+}
+
+// SkipMultiCursor moves the current multiple cursor to the next available position
+func (h *BufPane) SkipMultiCursor() bool {
+	return h.skipMultiCursor(true)
+}
+
+// SkipMultiCursorBack moves the current multiple cursor to the previous available position
+func (h *BufPane) SkipMultiCursorBack() bool {
+	return h.skipMultiCursor(false)
 }
 
 // RemoveMultiCursor removes the latest multiple cursor

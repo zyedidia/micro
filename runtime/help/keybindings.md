@@ -274,6 +274,7 @@ SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
+SkipMultiCursorBack
 None
 JumpToMatchingBrace
 Autocomplete

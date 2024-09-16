@@ -851,6 +851,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"RemoveMultiCursor":         (*BufPane).RemoveMultiCursor,
 	"RemoveAllMultiCursors":     (*BufPane).RemoveAllMultiCursors,
 	"SkipMultiCursor":           (*BufPane).SkipMultiCursor,
+	"SkipMultiCursorBack":       (*BufPane).SkipMultiCursorBack,
 	"JumpToMatchingBrace":       (*BufPane).JumpToMatchingBrace,
 	"JumpLine":                  (*BufPane).JumpLine,
 	"Deselect":                  (*BufPane).Deselect,
