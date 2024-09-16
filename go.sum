@@ -54,14 +54,6 @@ github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d h1:zmDMkh22zXOB7gz8
 github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d/go.mod h1:NDJSTTYWivnza6zkRapeX2/LwhKPEMQ7bJxqgDVT78I=
 github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s=
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
-github.com/zyedidia/tcell/v2 v2.0.9 h1:FxXRkE62N0GPHES7EMLtp2rteYqC9r1kVid8vJN1kOE=
-github.com/zyedidia/tcell/v2 v2.0.9/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
-github.com/zyedidia/tcell/v2 v2.0.10-0.20221007181625-f562052bccb8 h1:53ULv4mmLyQDnqbjVxanckP57WSreWHwTmlLJrJEutY=
-github.com/zyedidia/tcell/v2 v2.0.10-0.20221007181625-f562052bccb8/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
-github.com/zyedidia/tcell/v2 v2.0.10-0.20230320201625-54f6acdada4a h1:W4TWa++Wk6uRGxZoxr2nPX1TpIEl+Wxv0mTtocG4TYc=
-github.com/zyedidia/tcell/v2 v2.0.10-0.20230320201625-54f6acdada4a/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
-github.com/zyedidia/tcell/v2 v2.0.10-0.20230831153116-061c5b2c7260 h1:SCAmAacT5BxZsmOFdFy5zwwi6nj1MjA60gydjKdTgXo=
-github.com/zyedidia/tcell/v2 v2.0.10-0.20230831153116-061c5b2c7260/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
 github.com/zyedidia/tcell/v2 v2.0.10 h1:6fbbYAx/DYc9A//4jU1OeBrxtc9qJxYCZXCtGQbtTWU=
 github.com/zyedidia/tcell/v2 v2.0.10/go.mod h1:i4NNlquIQXFeNecrOgxDQQJdu+7LmTi3g62asvmwUws=
 github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef h1:LeB4Qs0Tss4r/Qh8pfsTTqagDYHysfKJLYzAH3MVfu0=
