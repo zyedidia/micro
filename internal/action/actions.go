@@ -1238,101 +1238,179 @@ func (h *BufPane) Redo() bool {
 	return true
 }
 
+func (h *BufPane) selectLines() int {
+	if h.Cursor.HasSelection() {
+		start := h.Cursor.CurSelection[0]
+		end := h.Cursor.CurSelection[1]
+		if start.GreaterThan(end) {
+			start, end = end, start
+		}
+		if end.X == 0 {
+			end = end.Move(-1, h.Buf)
+		}
+
+		h.Cursor.Deselect(true)
+		h.Cursor.SetSelectionStart(buffer.Loc{0, start.Y})
+		h.Cursor.SetSelectionEnd(buffer.Loc{0, end.Y + 1})
+	} else {
+		h.Cursor.SelectLine()
+	}
+	return h.Cursor.CurSelection[1].Y - h.Cursor.CurSelection[0].Y
+}
+
 // Copy the selection to the system clipboard
 func (h *BufPane) Copy() bool {
-	if h.Cursor.HasSelection() {
-		h.Cursor.CopySelection(clipboard.ClipboardReg)
-		h.freshClip = true
-		InfoBar.Message("Copied selection")
-	}
-	h.Relocate()
-	return true
-}
-
-// CopyLine copies the current line to the clipboard
-func (h *BufPane) CopyLine() bool {
-	if h.Cursor.HasSelection() {
-		return false
-	}
-	origLoc := h.Cursor.Loc
-	h.Cursor.SelectLine()
-	h.Cursor.CopySelection(clipboard.ClipboardReg)
-	h.freshClip = true
-	InfoBar.Message("Copied line")
-
-	h.Cursor.Deselect(true)
-	h.Cursor.Loc = origLoc
-	h.Relocate()
-	return true
-}
-
-// CutLine cuts the current line to the clipboard
-func (h *BufPane) CutLine() bool {
-	h.Cursor.SelectLine()
 	if !h.Cursor.HasSelection() {
 		return false
 	}
-	if h.freshClip {
-		if h.Cursor.HasSelection() {
-			if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
-				InfoBar.Error(err)
-			} else {
-				clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
-			}
-		}
-	} else if time.Since(h.lastCutTime)/time.Second > 10*time.Second || !h.freshClip {
-		h.Copy()
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.freshClip = false
+	InfoBar.Message("Copied selection")
+	h.Relocate()
+	return true
+}
+
+// CopyLine copies the current line to the clipboard. If there is a selection,
+// CopyLine copies all the lines that are (fully or partially) in the selection.
+func (h *BufPane) CopyLine() bool {
+	origLoc := h.Cursor.Loc
+	origLastVisualX := h.Cursor.LastVisualX
+	origSelection := h.Cursor.CurSelection
+
+	nlines := h.selectLines()
+	if nlines == 0 {
+		return false
 	}
-	h.freshClip = true
-	h.lastCutTime = time.Now()
-	h.Cursor.DeleteSelection()
-	h.Cursor.ResetSelection()
-	InfoBar.Message("Cut line")
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.freshClip = false
+	if nlines > 1 {
+		InfoBar.Message(fmt.Sprintf("Copied %d lines", nlines))
+	} else {
+		InfoBar.Message("Copied line")
+	}
+
+	h.Cursor.Loc = origLoc
+	h.Cursor.LastVisualX = origLastVisualX
+	h.Cursor.CurSelection = origSelection
 	h.Relocate()
 	return true
 }
 
 // Cut the selection to the system clipboard
 func (h *BufPane) Cut() bool {
-	if h.Cursor.HasSelection() {
-		h.Cursor.CopySelection(clipboard.ClipboardReg)
-		h.Cursor.DeleteSelection()
-		h.Cursor.ResetSelection()
-		h.freshClip = true
-		InfoBar.Message("Cut selection")
-
-		h.Relocate()
-		return true
+	if !h.Cursor.HasSelection() {
+		return false
 	}
-	return h.CutLine()
-}
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	h.freshClip = false
+	InfoBar.Message("Cut selection")
 
-// DuplicateLine duplicates the current line or selection
-func (h *BufPane) DuplicateLine() bool {
-	var infoMessage = "Duplicated line"
-	if h.Cursor.HasSelection() {
-		infoMessage = "Duplicated selection"
-		h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
-	} else {
-		h.Cursor.End()
-		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
-		// h.Cursor.Right()
-	}
-
-	InfoBar.Message(infoMessage)
 	h.Relocate()
 	return true
 }
 
-// DeleteLine deletes the current line
-func (h *BufPane) DeleteLine() bool {
-	h.Cursor.SelectLine()
+// CutLine cuts the current line to the clipboard. If there is a selection,
+// CutLine cuts all the lines that are (fully or partially) in the selection.
+func (h *BufPane) CutLine() bool {
+	nlines := h.selectLines()
+	if nlines == 0 {
+		return false
+	}
+	totalLines := nlines
+	if h.freshClip {
+		if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
+			InfoBar.Error(err)
+			return false
+		} else {
+			clipboard.WriteMulti(clip+string(h.Cursor.GetSelection()), clipboard.ClipboardReg, h.Cursor.Num, h.Buf.NumCursors())
+			totalLines = strings.Count(clip, "\n") + nlines
+		}
+	} else {
+		h.Cursor.CopySelection(clipboard.ClipboardReg)
+	}
+	h.freshClip = true
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	h.Cursor.StoreVisualX()
+	if totalLines > 1 {
+		InfoBar.Message(fmt.Sprintf("Cut %d lines", totalLines))
+	} else {
+		InfoBar.Message("Cut line")
+	}
+	h.Relocate()
+	return true
+}
+
+// Duplicate the selection
+func (h *BufPane) Duplicate() bool {
 	if !h.Cursor.HasSelection() {
+		return false
+	}
+	h.Buf.Insert(h.Cursor.CurSelection[1], string(h.Cursor.GetSelection()))
+	InfoBar.Message("Duplicated selection")
+	h.Relocate()
+	return true
+}
+
+// DuplicateLine duplicates the current line. If there is a selection, DuplicateLine
+// duplicates all the lines that are (fully or partially) in the selection.
+func (h *BufPane) DuplicateLine() bool {
+	if h.Cursor.HasSelection() {
+		origLoc := h.Cursor.Loc
+		origLastVisualX := h.Cursor.LastVisualX
+		origSelection := h.Cursor.CurSelection
+
+		start := h.Cursor.CurSelection[0]
+		end := h.Cursor.CurSelection[1]
+		if start.GreaterThan(end) {
+			start, end = end, start
+		}
+		if end.X == 0 {
+			end = end.Move(-1, h.Buf)
+		}
+
+		h.Cursor.Deselect(true)
+		h.Cursor.Loc = end
+		h.Cursor.End()
+		for y := start.Y; y <= end.Y; y++ {
+			h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(y)))
+		}
+
+		h.Cursor.Loc = origLoc
+		h.Cursor.LastVisualX = origLastVisualX
+		h.Cursor.CurSelection = origSelection
+
+		if start.Y < end.Y {
+			InfoBar.Message(fmt.Sprintf("Duplicated %d lines", end.Y-start.Y+1))
+		} else {
+			InfoBar.Message("Duplicated line")
+		}
+	} else {
+		h.Cursor.End()
+		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
+		InfoBar.Message("Duplicated line")
+	}
+	h.Relocate()
+	return true
+}
+
+// DeleteLine deletes the current line. If there is a selection, DeleteLine
+// deletes all the lines that are (fully or partially) in the selection.
+func (h *BufPane) DeleteLine() bool {
+	nlines := h.selectLines()
+	if nlines == 0 {
 		return false
 	}
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
-	InfoBar.Message("Deleted line")
+	h.Cursor.StoreVisualX()
+	if nlines > 1 {
+		InfoBar.Message(fmt.Sprintf("Deleted %d lines", nlines))
+	} else {
+		InfoBar.Message("Deleted line")
+	}
 	h.Relocate()
 	return true
 }

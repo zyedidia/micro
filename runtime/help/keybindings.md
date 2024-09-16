@@ -278,6 +278,14 @@ Autocomplete
 The `StartOfTextToggle` and `SelectToStartOfTextToggle` actions toggle between
 jumping to the start of the text (first) and start of the line.
 
+The `CutLine` action cuts the current line and adds it to the previously cut
+lines in the clipboard since the last paste (rather than just replaces the
+clipboard contents with this line). So you can cut multiple, not necessarily
+consecutive lines to the clipboard just by pressing `Ctrl-k` multiple times,
+without selecting them. If you want the more traditional behavior i.e. just
+rewrite the clipboard every time, you can use `CopyLine,DeleteLine` action
+instead of `CutLine`.
+
 You can also bind some mouse actions (these must be bound to mouse buttons)
 
 ```
@@ -495,10 +503,10 @@ conventions for text editing defaults.
     "Alt-]":          "DiffNext|CursorEnd",
     "Ctrl-z":         "Undo",
     "Ctrl-y":         "Redo",
-    "Ctrl-c":         "CopyLine|Copy",
-    "Ctrl-x":         "Cut",
+    "Ctrl-c":         "Copy|CopyLine",
+    "Ctrl-x":         "Cut|CutLine",
     "Ctrl-k":         "CutLine",
-    "Ctrl-d":         "DuplicateLine",
+    "Ctrl-d":         "Duplicate|DuplicateLine",
     "Ctrl-v":         "Paste",
     "Ctrl-a":         "SelectAll",
     "Ctrl-t":         "AddTab",
@@ -621,8 +629,8 @@ are given below:
         "Backtab":        "CycleAutocompleteBack",
         "Ctrl-z":         "Undo",
         "Ctrl-y":         "Redo",
-        "Ctrl-c":         "CopyLine|Copy",
-        "Ctrl-x":         "Cut",
+        "Ctrl-c":         "Copy|CopyLine",
+        "Ctrl-x":         "Cut|CutLine",
         "Ctrl-k":         "CutLine",
         "Ctrl-v":         "Paste",
         "Home":           "StartOfTextToggle",
