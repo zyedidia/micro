@@ -168,6 +168,9 @@ CursorLeft
 CursorRight
 CursorStart
 CursorEnd
+SelectWord
+SelectNextTextOccurrence
+SelectPreviousTextOccurrence
 SelectToStart
 SelectToEnd
 SelectUp
@@ -204,6 +207,7 @@ SaveAll
 SaveAs
 Find
 FindLiteral
+FindSelected
 FindNext
 FindPrevious
 DiffPrevious
