@@ -5,14 +5,21 @@ VERSION = $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH
 HASH = $(shell git rev-parse --short HEAD)
 DATE = $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/build-date.go)
-ADDITIONAL_GO_LINKER_FLAGS = $(shell GOOS=$(shell go env GOHOSTOS) \
-	GOARCH=$(shell go env GOHOSTARCH) \
-	go run tools/info-plist.go "$(shell go env GOOS)" "$(VERSION)")
 GOBIN ?= $(shell go env GOPATH)/bin
 GOVARS = -X github.com/zyedidia/micro/v2/internal/util.Version=$(VERSION) -X github.com/zyedidia/micro/v2/internal/util.CommitHash=$(HASH) -X 'github.com/zyedidia/micro/v2/internal/util.CompileDate=$(DATE)'
-CGO_ENABLED := $(if $(CGO_ENABLED),$(CGO_ENABLED),0)
 DEBUGVAR = -X github.com/zyedidia/micro/v2/internal/util.Debug=ON
 VSCODE_TESTS_BASE_URL = 'https://raw.githubusercontent.com/microsoft/vscode/e6a45f4242ebddb7aa9a229f85555e8a3bd987e2/src/vs/editor/test/common/model/'
+CGO_ENABLED := $(if $(CGO_ENABLED),$(CGO_ENABLED),0)
+
+ADDITIONAL_GO_LINKER_FLAGS := ""
+GOHOSTOS = $(shell go env GOHOSTOS)
+ifeq ($(GOHOSTOS), darwin)
+	# Native darwin resp. macOS builds need external and dynamic linking
+	ADDITIONAL_GO_LINKER_FLAGS += $(shell GOOS=$(GOHOSTOS) \
+		GOARCH=$(shell go env GOHOSTARCH) \
+		go run tools/info-plist.go "$(shell go env GOOS)" "$(VERSION)")
+	CGO_ENABLED = 1
+endif
 
 build: generate build-quick
 

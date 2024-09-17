@@ -191,6 +191,9 @@ CGO_ENABLED=1 make build
 
 Afterwards the micro binary will dynamically link with the present core system libraries.
 
+**Note for Mac:**
+Native macOS builds are done with `CGO_ENABLED=1` forced set to support adding the "Information Property List" in the linker step.
+
 ### macOS terminal
 
 If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
