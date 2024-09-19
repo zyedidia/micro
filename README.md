@@ -18,7 +18,7 @@ Here is a picture of micro editing its source code.
 ![Screenshot](./assets/micro-solarized.png)
 
 To see more screenshots of micro, showcasing some of the default color schemes, see [here](https://micro-editor.github.io).
- 
+
 You can also check out the website for Micro at https://micro-editor.github.io.
 
 - - -
@@ -180,15 +180,19 @@ You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/mi
 recommended because it doesn't build micro with version information (necessary for the plugin manager),
 and doesn't disable debug mode.
 
-### Fully static binary
+### Fully static or dynamically linked binary
 
-By default, the micro binary will dynamically link with core system libraries (this is generally
-recommended for security and portability). However, there is a fully static prebuilt binary that
-is provided for amd64 as `linux-static.tar.gz`, and to build a fully static binary from source, run
+By default, the micro binary is linked statically to increase the portability of the prebuilt binaries.
+This behavior can simply be overriden by providing `CGO_ENABLED=1` to the build target.
 
 ```
-CGO_ENABLED=0 make build
+CGO_ENABLED=1 make build
 ```
+
+Afterwards the micro binary will dynamically link with the present core system libraries.
+
+**Note for Mac:**
+Native macOS builds are done with `CGO_ENABLED=1` forced set to support adding the "Information Property List" in the linker step.
 
 ### macOS terminal
 

@@ -54,8 +54,12 @@ if ./tools/package-deb.sh $VERSION; then
 fi
 create_artefact_generic "linux64"
 
-echo "Linux 64 fully static"
-CGO_ENABLED=0 GOOS=linux GOARCH=amd64 make build
+echo "Linux 64 fully static (same as linux64)"
+# It is kept for the next release only to support...
+# https://github.com/benweissmann/getmic.ro/blob/f90870e948afab8be9ec40884050044b59ed5b7c/index.sh#L197-L204
+# ...and allow a fluent switch via:
+# https://github.com/benweissmann/getmic.ro/pull/40
+GOOS=linux GOARCH=amd64 make build
 create_artefact_generic "linux64-static"
 
 echo "Linux 32"
