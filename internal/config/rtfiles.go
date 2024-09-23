@@ -99,10 +99,6 @@ func (af assetFile) Data() ([]byte, error) {
 	return rt.Asset(string(af))
 }
 
-func (nf namedFile) Name() string {
-	return nf.name
-}
-
 // AddRuntimeFile registers a file for the given filetype
 func AddRuntimeFile(fileType RTFiletype, file RuntimeFile) {
 	allFiles[fileType] = append(allFiles[fileType], file)

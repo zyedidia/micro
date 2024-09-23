@@ -285,11 +285,6 @@ func (la *LineArray) deleteLines(y1, y2 int) {
 	la.lines = la.lines[:y1+copy(la.lines[y1:], la.lines[y2+1:])]
 }
 
-// DeleteByte deletes the byte at a position
-func (la *LineArray) deleteByte(pos Loc) {
-	la.lines[pos.Y].data = la.lines[pos.Y].data[:pos.X+copy(la.lines[pos.Y].data[pos.X:], la.lines[pos.Y].data[pos.X+1:])]
-}
-
 // Substr returns the string representation between two locations
 func (la *LineArray) Substr(start, end Loc) []byte {
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
