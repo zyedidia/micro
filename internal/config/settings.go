@@ -123,6 +123,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"tabhighlight":   false,
 	"tabreverse":     true,
 	"xterm":          false,
+	"truecolor":      false,
 }
 
 // a list of settings that should never be globally modified
