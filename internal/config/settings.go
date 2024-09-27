@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -151,6 +150,10 @@ var (
 	VolatileSettings map[string]bool
 )
 
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
+
 func init() {
 	ModifiedSettings = make(map[string]bool)
 	VolatileSettings = make(map[string]bool)
@@ -217,7 +220,7 @@ func ReadSettings() error {
 	parsedSettings = make(map[string]interface{})
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
@@ -342,7 +345,8 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }
@@ -363,8 +367,9 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }

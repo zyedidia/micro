@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -43,6 +45,9 @@ var (
 	Stdout *bytes.Buffer
 	// Sigterm is a channel where micro exits when written
 	Sigterm chan os.Signal
+
+	// To be used for file writes before umask is applied
+	FileMode os.FileMode = 0666
 )
 
 func init() {
@@ -398,14 +403,38 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-// EscapePath replaces every path separator in a given path with a %
-func EscapePath(path string) string {
+func AppendBackupSuffix(path string) string {
+	return path + ".micro-backup"
+}
+
+// EscapePathUrl encodes the path in URL query form
+func EscapePathUrl(path string) string {
+	return url.QueryEscape(filepath.ToSlash(path))
+}
+
+// EscapePathLegacy replaces every path separator in a given path with a %
+func EscapePathLegacy(path string) string {
 	path = filepath.ToSlash(path)
 	if runtime.GOOS == "windows" {
 		// ':' is not valid in a path name on Windows but is ok on Unix
 		path = strings.ReplaceAll(path, ":", "%")
 	}
 	return strings.ReplaceAll(path, "/", "%")
+}
+
+// DetermineEscapePath is a helper to apply the URL or legacy approach
+func DetermineEscapePath(dir string, path string) string {
+	url := filepath.Join(dir, EscapePathUrl(path))
+	if _, err := os.Stat(url); err == nil {
+		return url
+	}
+
+	legacy := filepath.Join(dir, EscapePathLegacy(path))
+	if _, err := os.Stat(legacy); err == nil {
+		return legacy
+	}
+
+	return url
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
@@ -584,4 +613,42 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+// SafeWrite performs the following actions:
+// 1. If not exists try to write the file and return
+// 2. Create a derived temporary file first
+// 2.1. If this fails remove the corrupted temporary file and return with error
+// 3. Rename the temporary to the target file or overwrite the target file
+// 3.1. If this fails remove the temporary in case of rename otherwise keep the file and return with error
+// 4. Remove the temporary file
+func SafeWrite(name string, bytes []byte, rename bool) error {
+	if _, err := os.Stat(name); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		return os.WriteFile(name, bytes, FileMode)
+	}
+
+	tmp := AppendBackupSuffix(name)
+	err := os.WriteFile(tmp, bytes, FileMode)
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
+
+	if rename {
+		err = os.Rename(tmp, name)
+	} else {
+		err = os.WriteFile(name, bytes, FileMode)
+	}
+	if err != nil {
+		if rename {
+			os.Remove(tmp)
+		}
+		return err
+	}
+
+	os.Remove(tmp)
+	return nil
 }
