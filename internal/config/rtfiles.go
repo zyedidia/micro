@@ -62,12 +62,6 @@ type realFile string
 // some asset file
 type assetFile string
 
-// some file on filesystem but with a different name
-type namedFile struct {
-	realFile
-	name string
-}
-
 // a file with the data stored in memory
 type memoryFile struct {
 	name string
