@@ -11,6 +11,8 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"sync/atomic"
+	"time"
 	"unicode"
 
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -30,6 +32,48 @@ type wrappedFile struct {
 	screenb     bool
 	cmd         *exec.Cmd
 	sigChan     chan os.Signal
+}
+
+type saveResponse struct {
+	size int
+	err  error
+}
+
+type saveRequest struct {
+	buf              *Buffer
+	path             string
+	withSudo         bool
+	newFile          bool
+	saveResponseChan chan saveResponse
+}
+
+var saveRequestChan chan saveRequest
+var backupRequestChan chan *Buffer
+
+func init() {
+	saveRequestChan = make(chan saveRequest, 10)
+	backupRequestChan = make(chan *Buffer, 10)
+
+	go func() {
+		duration := backupSeconds * float64(time.Second)
+		backupTicker := time.NewTicker(time.Duration(duration))
+
+		for {
+			select {
+			case sr := <-saveRequestChan:
+				size, err := sr.buf.safeWrite(sr.path, sr.withSudo, sr.newFile)
+				sr.saveResponseChan <- saveResponse{size, err}
+			case <-backupTicker.C:
+				for len(backupRequestChan) > 0 {
+					b := <-backupRequestChan
+					bfini := atomic.LoadInt32(&(b.fini)) != 0
+					if !bfini {
+						b.Backup()
+					}
+				}
+			}
+		}
+	}()
 }
 
 func openFile(name string, withSudo bool) (wrappedFile, error) {
@@ -267,13 +311,16 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		}
 	}
 
-	size, err := b.safeWrite(absFilename, withSudo, newFile)
+	saveResponseChan := make(chan saveResponse)
+	saveRequestChan <- saveRequest{b, absFilename, withSudo, newFile, saveResponseChan}
+	result := <-saveResponseChan
+	err = result.err
 	if err != nil {
 		return err
 	}
 
 	if !b.Settings["fastdirty"].(bool) {
-		if size > LargeFileThreshold {
+		if result.size > LargeFileThreshold {
 			// For large files 'fastdirty' needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
