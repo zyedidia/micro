@@ -6,8 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"sync/atomic"
-	"time"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -34,27 +32,7 @@ The backup was created on %s and its path is:
 
 Options: [r]ecover, [i]gnore, [a]bort: `
 
-var backupRequestChan chan *Buffer
-
-func backupThread() {
-	for {
-		time.Sleep(time.Second * 8)
-
-		for len(backupRequestChan) > 0 {
-			b := <-backupRequestChan
-			bfini := atomic.LoadInt32(&(b.fini)) != 0
-			if !bfini {
-				b.Backup()
-			}
-		}
-	}
-}
-
-func init() {
-	backupRequestChan = make(chan *Buffer, 10)
-
-	go backupThread()
-}
+const backupSeconds = 8
 
 func (b *Buffer) RequestBackup() {
 	if !b.requestedBackup {
