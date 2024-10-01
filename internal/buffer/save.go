@@ -11,6 +11,9 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"sync"
+	"sync/atomic"
+	"time"
 	"unicode"
 
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -23,6 +26,45 @@ import (
 // LargeFileThreshold is the number of bytes when fastdirty is forced
 // because hashing is too slow
 const LargeFileThreshold = 50000
+
+type buf2save struct {
+	*Buffer
+	path     string
+	withSudo bool
+	cb       func(error)
+}
+
+var saveRequestChan chan buf2save
+var backupRequestChan chan *Buffer
+
+func init() {
+	saveRequestChan = make(chan buf2save, 10)
+	backupRequestChan = make(chan *Buffer, 10)
+
+	go func() {
+		var elapsed <-chan time.Time
+		duration := backupSeconds * float64(time.Second)
+		t := time.NewTimer(time.Duration(duration))
+		elapsed = t.C
+
+		for {
+			select {
+			case b2s := <-saveRequestChan:
+				err := b2s.safeWrite(b2s.path, b2s.withSudo)
+				b2s.cb(err)
+			case <-elapsed:
+				t.Reset(time.Duration(duration))
+				for len(backupRequestChan) > 0 {
+					b := <-backupRequestChan
+					bfini := atomic.LoadInt32(&(b.fini)) != 0
+					if !bfini {
+						b.Backup()
+					}
+				}
+			}
+		}
+	}()
+}
 
 func (b *Buffer) fileWriter(file io.Writer) (int, error) {
 	b.Lock()
@@ -233,7 +275,18 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		}
 	}
 
-	if err = b.safeWrite(absFilename, withSudo); err != nil {
+	var wg sync.WaitGroup
+	cb := func(e error) {
+		defer wg.Done()
+		err = e
+	}
+	b2s := buf2save{b, absFilename, withSudo, cb}
+
+	wg.Add(1)
+	saveRequestChan <- b2s
+	wg.Wait()
+
+	if err != nil {
 		return err
 	}
 
