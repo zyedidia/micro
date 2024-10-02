@@ -16,7 +16,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/transform"
 )
@@ -25,10 +24,46 @@ import (
 // because hashing is too slow
 const LargeFileThreshold = 50000
 
-// overwriteFile opens the given file for writing, truncating if one exists, and then calls
-// the supplied function with the file as io.Writer object, also making sure the file is
-// closed afterwards.
-func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error, withSudo bool) (err error) {
+func (b *Buffer) writeFile(file io.Writer) (int, error) {
+	b.Lock()
+	defer b.Unlock()
+
+	if len(b.lines) == 0 {
+		return 0, nil
+	}
+
+	// end of line
+	var eol []byte
+	if b.Endings == FFDos {
+		eol = []byte{'\r', '\n'}
+	} else {
+		eol = []byte{'\n'}
+	}
+
+	// write lines
+	size, err := file.Write(b.lines[0].data)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, l := range b.lines[1:] {
+		if _, err = file.Write(eol); err != nil {
+			return 0, err
+		}
+		if _, err = file.Write(l.data); err != nil {
+			return 0, err
+		}
+		size += len(eol) + len(l.data)
+	}
+	return size, nil
+}
+
+func (b *Buffer) overwriteFile(name string, withSudo bool) (int, error) {
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return 0, err
+	}
+
 	var writeCloser io.WriteCloser
 	var screenb bool
 	var cmd *exec.Cmd
@@ -38,7 +73,7 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
 
 		if writeCloser, err = cmd.StdinPipe(); err != nil {
-			return
+			return 0, err
 		}
 
 		c = make(chan os.Signal, 1)
@@ -55,14 +90,14 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 			signal.Notify(util.Sigterm, os.Interrupt)
 			signal.Stop(c)
 
-			return
+			return 0, err
 		}
 	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, util.FileMode); err != nil {
-		return
+		return 0, err
 	}
 
 	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
-	err = fn(w)
+	size, err := b.writeFile(w)
 
 	if err2 := w.Flush(); err2 != nil && err == nil {
 		err = err2
@@ -88,55 +123,8 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		signal.Stop(c)
 
 		if err != nil {
-			return err
+			return size, err
 		}
-	}
-
-	return
-}
-
-func (b *Buffer) overwrite(name string, withSudo bool) (int, error) {
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
-	if err != nil {
-		return 0, err
-	}
-
-	var size int
-	fwriter := func(file io.Writer) error {
-		b.Lock()
-		defer b.Unlock()
-
-		if len(b.lines) == 0 {
-			return err
-		}
-
-		// end of line
-		var eol []byte
-		if b.Endings == FFDos {
-			eol = []byte{'\r', '\n'}
-		} else {
-			eol = []byte{'\n'}
-		}
-
-		// write lines
-		if size, err = file.Write(b.lines[0].data); err != nil {
-			return err
-		}
-
-		for _, l := range b.lines[1:] {
-			if _, err = file.Write(eol); err != nil {
-				return err
-			}
-			if _, err = file.Write(l.data); err != nil {
-				return err
-			}
-			size += len(eol) + len(l.data)
-		}
-		return err
-	}
-
-	if err = overwriteFile(name, enc, fwriter, withSudo); err != nil {
-		return size, err
 	}
 
 	return size, err
@@ -285,14 +273,14 @@ func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error
 	}
 
 	backupName := util.DetermineEscapePath(backupDir, path)
-	_, err := b.overwrite(backupName, false)
+	_, err := b.overwriteFile(backupName, false)
 	if err != nil {
 		os.Remove(backupName)
 		return 0, err
 	}
 
 	b.forceKeepBackup = true
-	size, err := b.overwrite(path, withSudo)
+	size, err := b.overwriteFile(path, withSudo)
 	if err != nil {
 		if newFile {
 			os.Remove(path)
