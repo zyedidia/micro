@@ -48,13 +48,13 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		// need to start the process now, otherwise when we flush the file
 		// contents to its stdin it might hang because the kernel's pipe size
 		// is too small to handle the full file contents all at once
-		if e := cmd.Start(); e != nil && err == nil {
+		if err = cmd.Start(); err != nil {
 			screen.TempStart(screenb)
 
 			signal.Notify(util.Sigterm, os.Interrupt)
 			signal.Stop(c)
 
-			return err
+			return
 		}
 	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666); err != nil {
 		return
