@@ -31,6 +31,7 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 	var writeCloser io.WriteCloser
 	var screenb bool
 	var cmd *exec.Cmd
+	var c chan os.Signal
 
 	if withSudo {
 		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
@@ -39,20 +40,21 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 			return
 		}
 
-		c := make(chan os.Signal, 1)
+		c = make(chan os.Signal, 1)
+		signal.Reset(os.Interrupt)
 		signal.Notify(c, os.Interrupt)
-		go func() {
-			<-c
-			cmd.Process.Kill()
-		}()
 
 		screenb = screen.TempFini()
 		// need to start the process now, otherwise when we flush the file
 		// contents to its stdin it might hang because the kernel's pipe size
 		// is too small to handle the full file contents all at once
-		if e := cmd.Start(); e != nil && err == nil {
+		if err = cmd.Start(); err != nil {
 			screen.TempStart(screenb)
-			return err
+
+			signal.Notify(util.Sigterm, os.Interrupt)
+			signal.Stop(c)
+
+			return
 		}
 	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666); err != nil {
 		return
@@ -80,6 +82,10 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		// wait for dd to finish and restart the screen if we used sudo
 		err := cmd.Wait()
 		screen.TempStart(screenb)
+
+		signal.Notify(util.Sigterm, os.Interrupt)
+		signal.Stop(c)
+
 		if err != nil {
 			return err
 		}
