@@ -99,7 +99,7 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	requestedBackup bool
+	RequestedBackup bool
 	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they

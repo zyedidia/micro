@@ -489,6 +489,8 @@ func DoEvent() {
 		}
 	case f := <-timerChan:
 		f()
+	case b := <-buffer.BackupCompleteChan:
+		b.RequestedBackup = false
 	case <-sighup:
 		exit(0)
 	case <-util.Sigterm:
