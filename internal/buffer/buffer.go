@@ -30,8 +30,6 @@ import (
 	"golang.org/x/text/transform"
 )
 
-const backupTime = 8000
-
 var (
 	// OpenBuffers is a list of the currently open buffers
 	OpenBuffers []*Buffer
