@@ -34,14 +34,20 @@ Options: [r]ecover, [i]gnore, [a]bort: `
 
 const backupSeconds = 8
 
+var BackupCompleteChan chan *Buffer
+
+func init() {
+	BackupCompleteChan = make(chan *Buffer, 10)
+}
+
 func (b *Buffer) RequestBackup() {
-	if !b.requestedBackup {
+	if !b.RequestedBackup {
 		select {
 		case backupRequestChan <- b:
 		default:
 			// channel is full
 		}
-		b.requestedBackup = true
+		b.RequestedBackup = true
 	}
 }
 
@@ -72,7 +78,7 @@ func (b *Buffer) Backup() error {
 	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
 		_, err = b.overwriteFile(name)
 		if err == nil {
-			b.requestedBackup = false
+			BackupCompleteChan <- b
 		}
 		return err
 	}
@@ -89,7 +95,7 @@ func (b *Buffer) Backup() error {
 		return err
 	}
 
-	b.requestedBackup = false
+	BackupCompleteChan <- b
 
 	return err
 }
