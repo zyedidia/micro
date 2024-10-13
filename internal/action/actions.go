@@ -1723,7 +1723,7 @@ func (h *BufPane) ToggleHelp() bool {
 	if h.Buf.Type == buffer.BTHelp {
 		h.Quit()
 	} else {
-		h.openHelp("help")
+		h.openHelp("help", true, false)
 	}
 	return true
 }

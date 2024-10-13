@@ -428,7 +428,7 @@ func (h *BufPane) ReopenCmd(args []string) {
 	}
 }
 
-func (h *BufPane) openHelp(page string) error {
+func (h *BufPane) openHelp(page string, hsplit bool, forceSplit bool) error {
 	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
 		return errors.New(fmt.Sprintf("Unable to load help text for %s: %v", page, err))
 	} else {
@@ -437,10 +437,12 @@ func (h *BufPane) openHelp(page string) error {
 		helpBuffer.SetOptionNative("hltaberrors", false)
 		helpBuffer.SetOptionNative("hltrailingws", false)
 
-		if h.Buf.Type == buffer.BTHelp {
+		if h.Buf.Type == buffer.BTHelp && !forceSplit {
 			h.OpenBuffer(helpBuffer)
-		} else {
+		} else if hsplit {
 			h.HSplitBuf(helpBuffer)
+		} else {
+			h.VSplitBuf(helpBuffer)
 		}
 	}
 	return nil
@@ -450,15 +452,49 @@ func (h *BufPane) openHelp(page string) error {
 func (h *BufPane) HelpCmd(args []string) {
 	if len(args) < 1 {
 		// Open the default help if the user just typed "> help"
-		h.openHelp("help")
+		h.openHelp("help", true, false)
 	} else {
-		if config.FindRuntimeFile(config.RTHelp, args[0]) != nil {
-			err := h.openHelp(args[0])
+		var topics []string
+		hsplit := true
+		forceSplit := false
+		const errSplit = "hsplit and vsplit are not allowed at the same time"
+		for _, arg := range args {
+			switch arg {
+			case "-vsplit":
+				if forceSplit {
+					InfoBar.Error(errSplit)
+					return
+				}
+				hsplit = false
+				forceSplit = true
+			case "-hsplit":
+				if forceSplit {
+					InfoBar.Error(errSplit)
+					return
+				}
+				hsplit = true
+				forceSplit = true
+			default:
+				topics = append(topics, arg)
+			}
+		}
+
+		if len(topics) < 1 {
+			// Do the same as without arg
+			h.openHelp("help", hsplit, forceSplit)
+			return
+		}
+		if len(topics) > 1 {
+			forceSplit = true
+		}
+
+		if config.FindRuntimeFile(config.RTHelp, topics[0]) != nil {
+			err := h.openHelp(topics[0], hsplit, forceSplit)
 			if err != nil {
 				InfoBar.Error(err)
 			}
 		} else {
-			InfoBar.Error("Sorry, no help for ", args[0])
+			InfoBar.Error("Sorry, no help for ", topics[0])
 		}
 	}
 }
