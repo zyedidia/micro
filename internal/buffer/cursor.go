@@ -67,8 +67,9 @@ func (c *Cursor) Buf() *Buffer {
 // Goto puts the cursor at the given cursor's location and gives
 // the current cursor its selection too
 func (c *Cursor) Goto(b Cursor) {
-	c.X, c.Y, c.LastVisualX, c.LastWrappedVisualX = b.X, b.Y, b.LastVisualX, b.LastWrappedVisualX
+	c.X, c.Y = b.X, b.Y
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
+	c.StoreVisualX()
 }
 
 // GotoLoc puts the cursor at the given cursor's location and gives
