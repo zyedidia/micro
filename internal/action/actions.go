@@ -170,10 +170,10 @@ func (h *BufPane) MoveCursorUp(n int) {
 		if sloc == vloc.SLoc {
 			// we are at the beginning of buffer
 			h.Cursor.Loc = h.Buf.Start()
-			h.Cursor.LastVisualX = 0
+			h.Cursor.StoreVisualX()
 		} else {
 			vloc.SLoc = sloc
-			vloc.VisualX = h.Cursor.LastVisualX
+			vloc.VisualX = h.Cursor.LastWrappedVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 		}
 	}
@@ -189,11 +189,10 @@ func (h *BufPane) MoveCursorDown(n int) {
 		if sloc == vloc.SLoc {
 			// we are at the end of buffer
 			h.Cursor.Loc = h.Buf.End()
-			vloc = h.VLocFromLoc(h.Cursor.Loc)
-			h.Cursor.LastVisualX = vloc.VisualX
+			h.Cursor.StoreVisualX()
 		} else {
 			vloc.SLoc = sloc
-			vloc.VisualX = h.Cursor.LastVisualX
+			vloc.VisualX = h.Cursor.LastWrappedVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 		}
 	}
@@ -889,7 +888,7 @@ func (h *BufPane) InsertTab() bool {
 	b := h.Buf
 	indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
 	tabBytes := len(indent)
-	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
+	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX(false) % tabBytes)
 	b.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
 	h.Relocate()
 	return true
@@ -1275,6 +1274,7 @@ func (h *BufPane) Copy() bool {
 func (h *BufPane) CopyLine() bool {
 	origLoc := h.Cursor.Loc
 	origLastVisualX := h.Cursor.LastVisualX
+	origLastWrappedVisualX := h.Cursor.LastWrappedVisualX
 	origSelection := h.Cursor.CurSelection
 
 	nlines := h.selectLines()
@@ -1291,6 +1291,7 @@ func (h *BufPane) CopyLine() bool {
 
 	h.Cursor.Loc = origLoc
 	h.Cursor.LastVisualX = origLastVisualX
+	h.Cursor.LastWrappedVisualX = origLastWrappedVisualX
 	h.Cursor.CurSelection = origSelection
 	h.Relocate()
 	return true
@@ -1360,6 +1361,7 @@ func (h *BufPane) DuplicateLine() bool {
 	if h.Cursor.HasSelection() {
 		origLoc := h.Cursor.Loc
 		origLastVisualX := h.Cursor.LastVisualX
+		origLastWrappedVisualX := h.Cursor.LastWrappedVisualX
 		origSelection := h.Cursor.CurSelection
 
 		start := h.Cursor.CurSelection[0]
@@ -1380,6 +1382,7 @@ func (h *BufPane) DuplicateLine() bool {
 
 		h.Cursor.Loc = origLoc
 		h.Cursor.LastVisualX = origLastVisualX
+		h.Cursor.LastWrappedVisualX = origLastWrappedVisualX
 		h.Cursor.CurSelection = origSelection
 
 		if start.Y < end.Y {
@@ -2070,6 +2073,7 @@ func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 
 		c = buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
 		c.LastVisualX = lastC.LastVisualX
+		c.LastWrappedVisualX = lastC.LastWrappedVisualX
 		c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
 		c.Relocate()
 	} else {
@@ -2082,9 +2086,10 @@ func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 		h.Buf.DeselectCursors()
 
 		vloc.SLoc = sloc
-		vloc.VisualX = lastC.LastVisualX
+		vloc.VisualX = lastC.LastWrappedVisualX
 		c = buffer.NewCursor(h.Buf, h.LocFromVLoc(vloc))
 		c.LastVisualX = lastC.LastVisualX
+		c.LastWrappedVisualX = lastC.LastWrappedVisualX
 	}
 
 	h.Buf.AddCursor(c)
