@@ -107,7 +107,7 @@ function commentLine(bp, lineN, indentLen)
         bp.Cursor.Y = curpos.Y
     end
     bp.Cursor:Relocate()
-    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+    bp.Cursor:StoreVisualX()
 end
 
 function uncommentLine(bp, lineN, commentRegex)
@@ -135,7 +135,7 @@ function uncommentLine(bp, lineN, commentRegex)
         end
     end
     bp.Cursor:Relocate()
-    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+    bp.Cursor:StoreVisualX()
 end
 
 function toggleCommentLine(bp, lineN, commentRegex)
