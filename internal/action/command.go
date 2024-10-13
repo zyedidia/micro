@@ -501,7 +501,7 @@ func (h *BufPane) HelpCmd(args []string) {
 	}
 }
 
-// VSplitCmd opens a vertical split with file given in the first argument
+// VSplitCmd opens one or more vertical splits with the files given as arguments
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufPane) VSplitCmd(args []string) {
 	if len(args) == 0 {
@@ -510,16 +510,18 @@ func (h *BufPane) VSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	for _, a := range args {
+		buf, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.VSplitBuf(buf)
+		h.VSplitBuf(buf)
+	}
 }
 
-// HSplitCmd opens a horizontal split with file given in the first argument
+// HSplitCmd opens one or more horizontal splits with the files given as arguments
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufPane) HSplitCmd(args []string) {
 	if len(args) == 0 {
@@ -528,13 +530,15 @@ func (h *BufPane) HSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	for _, a := range args {
+		buf, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.HSplitBuf(buf)
+		h.HSplitBuf(buf)
+	}
 }
 
 // EvalCmd evaluates a lua expression
