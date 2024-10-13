@@ -21,8 +21,9 @@ quotes here but these are not necessary when entering the command in micro.
    This command will modify `bindings.json` and overwrite any bindings to
    `key` that already exist.
 
-* `help ['topic'] ['flags']`: opens the corresponding help topic.
-   If no topic is provided opens the default help screen.
+* `help ['topic'] ['flags']`: opens the corresponding help topics.
+   If no topic is provided opens the default help screen. If multiple topics are
+   provided (separated via ` `) they are opened all as splits.
    Help topics are stored as `.md` files in the `runtime/help` directory of
    the source tree, which is embedded in the final binary.
    The `flags` are optional.

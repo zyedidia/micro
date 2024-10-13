@@ -488,13 +488,15 @@ func (h *BufPane) HelpCmd(args []string) {
 			forceSplit = true
 		}
 
-		if config.FindRuntimeFile(config.RTHelp, topics[0]) != nil {
-			err := h.openHelp(topics[0], hsplit, forceSplit)
-			if err != nil {
-				InfoBar.Error(err)
+		for _, topic := range topics {
+			if config.FindRuntimeFile(config.RTHelp, topic) != nil {
+				err := h.openHelp(topic, hsplit, forceSplit)
+				if err != nil {
+					InfoBar.Error(err)
+				}
+			} else {
+				InfoBar.Error("Sorry, no help for ", topic)
 			}
-		} else {
-			InfoBar.Error("Sorry, no help for ", topics[0])
 		}
 	}
 }
