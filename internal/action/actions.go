@@ -657,7 +657,7 @@ func (h *BufPane) InsertNewline() bool {
 			h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y - 1}, buffer.Loc{X: util.CharacterCount(line), Y: h.Cursor.Y - 1})
 		}
 	}
-	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
+	h.Cursor.StoreVisualX()
 	h.Relocate()
 	return true
 }
@@ -687,7 +687,7 @@ func (h *BufPane) Backspace() bool {
 			h.Buf.Remove(loc.Move(-1, h.Buf), loc)
 		}
 	}
-	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
+	h.Cursor.StoreVisualX()
 	h.Relocate()
 	return true
 }

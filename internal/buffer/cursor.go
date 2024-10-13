@@ -100,7 +100,7 @@ func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
 // Start moves the cursor to the start of the line it is on
 func (c *Cursor) Start() {
 	c.X = 0
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // StartOfText moves the cursor to the first non-whitespace rune of
@@ -131,7 +131,7 @@ func (c *Cursor) IsStartOfText() bool {
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
 	c.X = util.CharacterCount(c.buf.LineBytes(c.Y))
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // CopySelection copies the user's selection to either "primary"
