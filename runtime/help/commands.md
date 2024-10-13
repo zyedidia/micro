@@ -76,7 +76,8 @@ quotes here but these are not necessary when entering the command in micro.
    command's output will be displayed in one line when it finishes running.
 
 * `vsplit ['filename']`: opens a vertical split with `filename`. If no filename
-   is provided, a vertical split is opened with an empty buffer.
+   is provided, a vertical split is opened with an empty buffer. If multiple
+   files are provided (separated via ` `) they are opened all as splits.
 
 * `hsplit ['filename']`: same as `vsplit` but opens a horizontal split instead
    of a vertical split.
