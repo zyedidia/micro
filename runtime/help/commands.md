@@ -82,7 +82,9 @@ quotes here but these are not necessary when entering the command in micro.
 * `hsplit ['filename']`: same as `vsplit` but opens a horizontal split instead
    of a vertical split.
 
-* `tab ['filename']`: opens the given file in a new tab.
+* `tab ['filename']`: opens the given file in a new tab. If no filename
+   is provided, a tab is opened with an empty buffer. If multiple files are
+   provided (separated via ` `) they are opened all as tabs.
 
 * `tabmove '[-+]n'`: Moves the active tab to another slot. `n` is an integer.
    If `n` is prefixed with `-` or `+`, then it represents a relative position

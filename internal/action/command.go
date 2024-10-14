@@ -546,7 +546,8 @@ func (h *BufPane) EvalCmd(args []string) {
 	InfoBar.Error("Eval unsupported")
 }
 
-// NewTabCmd opens the given file in a new tab
+// NewTabCmd opens one or more tabs with the files given as arguments
+// If no file is given, it opens an empty buffer in a new tab
 func (h *BufPane) NewTabCmd(args []string) {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
