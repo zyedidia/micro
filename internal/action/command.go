@@ -450,12 +450,12 @@ func (h *BufPane) openHelp(page string, hsplit bool, forceSplit bool) error {
 
 // HelpCmd tries to open the given help page in a horizontal split
 func (h *BufPane) HelpCmd(args []string) {
+	hsplit := config.GlobalSettings["helpsplit"] == "hsplit"
 	if len(args) < 1 {
 		// Open the default help if the user just typed "> help"
-		h.openHelp("help", true, false)
+		h.openHelp("help", hsplit, false)
 	} else {
 		var topics []string
-		hsplit := true
 		forceSplit := false
 		const errSplit = "hsplit and vsplit are not allowed at the same time"
 		for _, arg := range args {

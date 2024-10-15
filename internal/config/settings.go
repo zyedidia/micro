@@ -29,6 +29,7 @@ var optionValidators = map[string]optionValidator{
 	"detectlimit":     validateNonNegativeValue,
 	"encoding":        validateEncoding,
 	"fileformat":      validateChoice,
+	"helpsplit":       validateChoice,
 	"matchbracestyle": validateChoice,
 	"multiopen":       validateChoice,
 	"reload":          validateChoice,
@@ -41,6 +42,7 @@ var optionValidators = map[string]optionValidator{
 var OptionChoices = map[string][]string{
 	"clipboard":       {"internal", "external", "terminal"},
 	"fileformat":      {"unix", "dos"},
+	"helpsplit":       {"hsplit", "vsplit"},
 	"matchbracestyle": {"underline", "highlight"},
 	"multiopen":       {"tab", "hsplit", "vsplit"},
 	"reload":          {"prompt", "auto", "disabled"},
@@ -109,6 +111,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"divchars":       "|-",
 	"divreverse":     true,
 	"fakecursor":     false,
+	"helpsplit":      "hsplit",
 	"infobar":        true,
 	"keymenu":        false,
 	"mouse":          true,
