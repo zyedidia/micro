@@ -27,8 +27,10 @@ quotes here but these are not necessary when entering the command in micro.
    Help topics are stored as `.md` files in the `runtime/help` directory of
    the source tree, which is embedded in the final binary.
    The `flags` are optional.
-   * `-hsplit`: Opens the help topic in a horizontal split (default for initial split)
+   * `-hsplit`: Opens the help topic in a horizontal split
    * `-vsplit`: Opens the help topic in a vertical split
+
+   The default split type is defined by the global `helpsplit` option.
 
 * `save ['filename']`: saves the current buffer. If the file is provided it
    will 'save as' the filename.
