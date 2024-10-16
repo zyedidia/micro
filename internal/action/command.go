@@ -448,7 +448,10 @@ func (h *BufPane) openHelp(page string, hsplit bool, forceSplit bool) error {
 	return nil
 }
 
-// HelpCmd tries to open the given help page in a horizontal split
+// HelpCmd tries to open the given help page according to the split type
+// configured with the "helpsplit" option. It can be overriden by the optional
+// arguments "-vpslit" or "-hsplit". In case more than one help page is given
+// as argument then it opens all of them with the defined split type.
 func (h *BufPane) HelpCmd(args []string) {
 	hsplit := config.GlobalSettings["helpsplit"] == "hsplit"
 	if len(args) < 1 {
