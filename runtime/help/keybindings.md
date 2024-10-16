@@ -168,6 +168,7 @@ CursorLeft
 CursorRight
 CursorStart
 CursorEnd
+CursorToView
 SelectToStart
 SelectToEnd
 SelectUp

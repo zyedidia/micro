@@ -160,6 +160,24 @@ func (h *BufPane) Center() bool {
 	return true
 }
 
+// CursorToView moves the cursor within the view if it's currently out of view.
+// The cursor is moved to an offset of 25% from the top of the view.
+func (h *BufPane) CursorToView() bool {
+	v := h.GetView()
+	height := h.BufView().Height
+	cursorSloc := h.SLocFromLoc(h.Cursor.Loc)
+	if cursorSloc.LessThan(v.StartLine) || cursorSloc.GreaterThan(h.Scroll(v.StartLine, height-1)) {
+		h.Cursor.Deselect(true)
+		h.Cursor.GotoLoc(h.LocFromVLoc(display.VLoc{
+			SLoc:    h.Scroll(v.StartLine, height/4),
+			VisualX: 0,
+		}))
+		h.RemoveAllMultiCursors()
+		return true
+	}
+	return false
+}
+
 // MoveCursorUp is not an action
 func (h *BufPane) MoveCursorUp(n int) {
 	if !h.Buf.Settings["softwrap"].(bool) {
