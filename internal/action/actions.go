@@ -160,6 +160,22 @@ func (h *BufPane) Center() bool {
 	return true
 }
 
+// CursorToView moves the cursor to the current view
+func (h *BufPane) CursorToView() bool {
+	v := h.GetView()
+	h.Cursor.Deselect(true)
+	loc := h.Cursor.Loc
+	if(loc.Y < v.StartLine.Line || loc.Y > v.StartLine.Line + h.BufView().Height - 1) {
+		scrollmargin := int(h.Buf.Settings["scrollmargin"].(float64))
+		h.Cursor.GotoLoc(h.LocFromVLoc(display.VLoc{
+			SLoc: h.Scroll(v.StartLine, scrollmargin),
+			VisualX: 0,
+		}))
+		h.RemoveAllMultiCursors()
+	}
+	return true
+}
+
 // MoveCursorUp is not an action
 func (h *BufPane) MoveCursorUp(n int) {
 	if !h.Buf.Settings["softwrap"].(bool) {

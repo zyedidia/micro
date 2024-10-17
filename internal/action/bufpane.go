@@ -738,6 +738,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"CursorRight":               (*BufPane).CursorRight,
 	"CursorStart":               (*BufPane).CursorStart,
 	"CursorEnd":                 (*BufPane).CursorEnd,
+	"CursorToView":              (*BufPane).CursorToView,
 	"SelectToStart":             (*BufPane).SelectToStart,
 	"SelectToEnd":               (*BufPane).SelectToEnd,
 	"SelectUp":                  (*BufPane).SelectUp,
