@@ -177,10 +177,14 @@ Here is a list of the colorscheme groups that you can use:
 * todo
 * selection (Color of the text selection)
 * statusline (Color of the statusline)
+* statusline.inactive (Color of the statusline of inactive split panes)
+* statusline.suggestions (Color of the autocomplete suggestions menu)
 * tabbar (Color of the tabbar that lists open files)
+* tabbar.active (Color of the active tab in the tabbar)
 * indent-char (Color of the character which indicates tabs if the option is
   enabled)
 * line-number
+* gutter-info
 * gutter-error
 * gutter-warning
 * diff-added
