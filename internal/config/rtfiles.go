@@ -62,12 +62,6 @@ type realFile string
 // some asset file
 type assetFile string
 
-// some file on filesystem but with a different name
-type namedFile struct {
-	realFile
-	name string
-}
-
 // a file with the data stored in memory
 type memoryFile struct {
 	name string
@@ -97,10 +91,6 @@ func (af assetFile) Name() string {
 
 func (af assetFile) Data() ([]byte, error) {
 	return rt.Asset(string(af))
-}
-
-func (nf namedFile) Name() string {
-	return nf.name
 }
 
 // AddRuntimeFile registers a file for the given filetype
