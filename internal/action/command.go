@@ -139,23 +139,25 @@ func (h *BufPane) TextFilterCmd(args []string) {
 		InfoBar.Error("usage: textfilter arguments")
 		return
 	}
-	sel := h.Cursor.GetSelection()
-	if len(sel) == 0 {
-		h.Cursor.SelectWord()
-		sel = h.Cursor.GetSelection()
+	for _, c := range h.Buf.GetCursors() {
+		sel := c.GetSelection()
+		if len(sel) == 0 {
+			c.SelectWord()
+			sel = c.GetSelection()
+		}
+		var bout, berr bytes.Buffer
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Stdin = strings.NewReader(string(sel))
+		cmd.Stderr = &berr
+		cmd.Stdout = &bout
+		err := cmd.Run()
+		if err != nil {
+			InfoBar.Error(err.Error() + " " + berr.String())
+			return
+		}
+		c.DeleteSelection()
+		h.Buf.Insert(c.Loc, bout.String())
 	}
-	var bout, berr bytes.Buffer
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdin = strings.NewReader(string(sel))
-	cmd.Stderr = &berr
-	cmd.Stdout = &bout
-	err := cmd.Run()
-	if err != nil {
-		InfoBar.Error(err.Error() + " " + berr.String())
-		return
-	}
-	h.Cursor.DeleteSelection()
-	h.Buf.Insert(h.Cursor.Loc, bout.String())
 }
 
 // TabMoveCmd moves the current tab to a given index (starts at 1). The
