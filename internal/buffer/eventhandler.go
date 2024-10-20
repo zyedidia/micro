@@ -104,7 +104,7 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 		c.OrigSelection[0] = move(c.OrigSelection[0])
 		c.OrigSelection[1] = move(c.OrigSelection[1])
 		c.Relocate()
-		c.LastVisualX = c.GetVisualX()
+		c.StoreVisualX()
 	}
 
 	if useUndo {

@@ -21,7 +21,7 @@ function lines(b)
 end
 
 function vcol(b)
-    return tostring(b:GetActiveCursor():GetVisualX())
+    return tostring(b:GetActiveCursor():GetVisualX(false))
 end
 
 function bytes(b)

@@ -170,10 +170,10 @@ func (h *BufPane) MoveCursorUp(n int) {
 		if sloc == vloc.SLoc {
 			// we are at the beginning of buffer
 			h.Cursor.Loc = h.Buf.Start()
-			h.Cursor.LastVisualX = 0
+			h.Cursor.StoreVisualX()
 		} else {
 			vloc.SLoc = sloc
-			vloc.VisualX = h.Cursor.LastVisualX
+			vloc.VisualX = h.Cursor.LastWrappedVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 		}
 	}
@@ -189,11 +189,10 @@ func (h *BufPane) MoveCursorDown(n int) {
 		if sloc == vloc.SLoc {
 			// we are at the end of buffer
 			h.Cursor.Loc = h.Buf.End()
-			vloc = h.VLocFromLoc(h.Cursor.Loc)
-			h.Cursor.LastVisualX = vloc.VisualX
+			h.Cursor.StoreVisualX()
 		} else {
 			vloc.SLoc = sloc
-			vloc.VisualX = h.Cursor.LastVisualX
+			vloc.VisualX = h.Cursor.LastWrappedVisualX
 			h.Cursor.Loc = h.LocFromVLoc(vloc)
 		}
 	}
@@ -657,7 +656,7 @@ func (h *BufPane) InsertNewline() bool {
 			h.Buf.Remove(buffer.Loc{X: 0, Y: h.Cursor.Y - 1}, buffer.Loc{X: util.CharacterCount(line), Y: h.Cursor.Y - 1})
 		}
 	}
-	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
+	h.Cursor.StoreVisualX()
 	h.Relocate()
 	return true
 }
@@ -687,7 +686,7 @@ func (h *BufPane) Backspace() bool {
 			h.Buf.Remove(loc.Move(-1, h.Buf), loc)
 		}
 	}
-	h.Cursor.LastVisualX = h.Cursor.GetVisualX()
+	h.Cursor.StoreVisualX()
 	h.Relocate()
 	return true
 }
@@ -889,7 +888,7 @@ func (h *BufPane) InsertTab() bool {
 	b := h.Buf
 	indent := b.IndentString(util.IntOpt(b.Settings["tabsize"]))
 	tabBytes := len(indent)
-	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX() % tabBytes)
+	bytesUntilIndent := tabBytes - (h.Cursor.GetVisualX(false) % tabBytes)
 	b.Insert(h.Cursor.Loc, indent[:bytesUntilIndent])
 	h.Relocate()
 	return true
@@ -1275,6 +1274,7 @@ func (h *BufPane) Copy() bool {
 func (h *BufPane) CopyLine() bool {
 	origLoc := h.Cursor.Loc
 	origLastVisualX := h.Cursor.LastVisualX
+	origLastWrappedVisualX := h.Cursor.LastWrappedVisualX
 	origSelection := h.Cursor.CurSelection
 
 	nlines := h.selectLines()
@@ -1291,6 +1291,7 @@ func (h *BufPane) CopyLine() bool {
 
 	h.Cursor.Loc = origLoc
 	h.Cursor.LastVisualX = origLastVisualX
+	h.Cursor.LastWrappedVisualX = origLastWrappedVisualX
 	h.Cursor.CurSelection = origSelection
 	h.Relocate()
 	return true
@@ -1360,6 +1361,7 @@ func (h *BufPane) DuplicateLine() bool {
 	if h.Cursor.HasSelection() {
 		origLoc := h.Cursor.Loc
 		origLastVisualX := h.Cursor.LastVisualX
+		origLastWrappedVisualX := h.Cursor.LastWrappedVisualX
 		origSelection := h.Cursor.CurSelection
 
 		start := h.Cursor.CurSelection[0]
@@ -1380,6 +1382,7 @@ func (h *BufPane) DuplicateLine() bool {
 
 		h.Cursor.Loc = origLoc
 		h.Cursor.LastVisualX = origLastVisualX
+		h.Cursor.LastWrappedVisualX = origLastWrappedVisualX
 		h.Cursor.CurSelection = origSelection
 
 		if start.Y < end.Y {
@@ -2058,35 +2061,20 @@ func (h *BufPane) SpawnCursorAtLoc(loc buffer.Loc) *buffer.Cursor {
 // SpawnMultiCursorUpN is not an action
 func (h *BufPane) SpawnMultiCursorUpN(n int) bool {
 	lastC := h.Buf.GetCursor(h.Buf.NumCursors() - 1)
-	var c *buffer.Cursor
-	if !h.Buf.Settings["softwrap"].(bool) {
-		if n > 0 && lastC.Y == 0 {
-			return false
-		}
-		if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
-			return false
-		}
-
-		h.Buf.DeselectCursors()
-
-		c = buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
-		c.LastVisualX = lastC.LastVisualX
-		c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
-		c.Relocate()
-	} else {
-		vloc := h.VLocFromLoc(lastC.Loc)
-		sloc := h.Scroll(vloc.SLoc, -n)
-		if sloc == vloc.SLoc {
-			return false
-		}
-
-		h.Buf.DeselectCursors()
-
-		vloc.SLoc = sloc
-		vloc.VisualX = lastC.LastVisualX
-		c = buffer.NewCursor(h.Buf, h.LocFromVLoc(vloc))
-		c.LastVisualX = lastC.LastVisualX
+	if n > 0 && lastC.Y == 0 {
+		return false
 	}
+	if n < 0 && lastC.Y+1 == h.Buf.LinesNum() {
+		return false
+	}
+
+	h.Buf.DeselectCursors()
+
+	c := buffer.NewCursor(h.Buf, buffer.Loc{lastC.X, lastC.Y - n})
+	c.LastVisualX = lastC.LastVisualX
+	c.LastWrappedVisualX = lastC.LastWrappedVisualX
+	c.X = c.GetCharPosInLine(h.Buf.LineBytes(c.Y), c.LastVisualX)
+	c.Relocate()
 
 	h.Buf.AddCursor(c)
 	h.Buf.SetCurCursor(h.Buf.NumCursors() - 1)

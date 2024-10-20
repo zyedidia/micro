@@ -20,8 +20,14 @@ type Cursor struct {
 	buf *Buffer
 	Loc
 
-	// Last cursor x position
+	// Last visual x position of the cursor. Used in cursor up/down movements
+	// for remembering the original x position when moving to a line that is
+	// shorter than current x position.
 	LastVisualX int
+	// Similar to LastVisualX but takes softwrapping into account, i.e. last
+	// visual x position in a visual (wrapped) line on the screen, which may be
+	// different from the line in the buffer.
+	LastWrappedVisualX int
 
 	// The current selection as a range of character numbers (inclusive)
 	CurSelection [2]Loc
@@ -61,8 +67,9 @@ func (c *Cursor) Buf() *Buffer {
 // Goto puts the cursor at the given cursor's location and gives
 // the current cursor its selection too
 func (c *Cursor) Goto(b Cursor) {
-	c.X, c.Y, c.LastVisualX = b.X, b.Y, b.LastVisualX
+	c.X, c.Y = b.X, b.Y
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
+	c.StoreVisualX()
 }
 
 // GotoLoc puts the cursor at the given cursor's location and gives
@@ -73,8 +80,8 @@ func (c *Cursor) GotoLoc(l Loc) {
 }
 
 // GetVisualX returns the x value of the cursor in visual spaces
-func (c *Cursor) GetVisualX() int {
-	if c.buf.GetVisualX != nil {
+func (c *Cursor) GetVisualX(wrap bool) int {
+	if wrap && c.buf.GetVisualX != nil {
 		return c.buf.GetVisualX(c.Loc)
 	}
 
@@ -100,7 +107,7 @@ func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
 // Start moves the cursor to the start of the line it is on
 func (c *Cursor) Start() {
 	c.X = 0
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // StartOfText moves the cursor to the first non-whitespace rune of
@@ -131,7 +138,7 @@ func (c *Cursor) IsStartOfText() bool {
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
 	c.X = util.CharacterCount(c.buf.LineBytes(c.Y))
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // CopySelection copies the user's selection to either "primary"
@@ -615,5 +622,6 @@ func (c *Cursor) RuneUnder(x int) rune {
 }
 
 func (c *Cursor) StoreVisualX() {
-	c.LastVisualX = c.GetVisualX()
+	c.LastVisualX = c.GetVisualX(false)
+	c.LastWrappedVisualX = c.GetVisualX(true)
 }
