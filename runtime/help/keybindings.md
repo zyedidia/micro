@@ -277,6 +277,8 @@ SkipMultiCursor
 SkipMultiCursorBack
 None
 JumpToMatchingBrace
+JumpToOpeningBrace
+JumpToClosingBrace
 Autocomplete
 ```
 
@@ -539,6 +541,8 @@ conventions for text editing defaults.
     "Ctrl-u":         "ToggleMacro",
     "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
+    "Alt-<":          "JumpToOpeningBrace",
+    "Alt->":          "JumpToClosingBrace",
 
     // Emacs-style keybindings
     "Alt-f": "WordRight",
