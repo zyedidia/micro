@@ -20,6 +20,9 @@ import (
 
 	"github.com/blang/semver"
 	runewidth "github.com/mattn/go-runewidth"
+	"golang.org/x/text/encoding"
+	"golang.org/x/text/encoding/htmlindex"
+	tunicode "golang.org/x/text/encoding/unicode"
 )
 
 var (
@@ -503,6 +506,31 @@ func Clamp(val, min, max int) int {
 		val = max
 	}
 	return val
+}
+
+// GetEncoding returns the encoding for a given name which may end in '-bom'
+func GetEncoding(name string) (encoding.Encoding, error) {
+	withBOM := strings.HasSuffix(name, "-bom")
+	if withBOM {
+		name = strings.TrimSuffix(name, "-bom")
+	}
+
+	enc, err := htmlindex.Get(name)
+	if err != nil || !withBOM {
+		return enc, err
+	}
+
+	n, _ := htmlindex.Name(enc)
+	switch strings.ToLower(n) {
+	case "utf-8":
+		return tunicode.UTF8BOM, nil
+	case "utf-16be":
+		return tunicode.UTF16(tunicode.BigEndian, tunicode.UseBOM), nil
+	case "utf-16le":
+		return tunicode.UTF16(tunicode.LittleEndian, tunicode.UseBOM), nil
+	default:
+		return nil, errors.New("Encoding does not support BOM")
+	}
 }
 
 // IsAutocomplete returns whether a character should begin an autocompletion.
