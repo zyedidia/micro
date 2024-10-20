@@ -106,6 +106,10 @@ echo "Windows 64"
 GOOS=windows GOARCH=amd64 make build
 create_artefact_windows "win64"
 
+echo "Windows ARM64"
+GOOS=windows GOARCH=arm64 make build
+create_artefact_windows "win-arm64"
+
 echo "Windows 32"
 GOOS=windows GOARCH=386 make build
 create_artefact_windows "win32"
