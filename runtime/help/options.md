@@ -172,6 +172,13 @@ Here are the available options:
     default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `helpsplit`: sets the split type to be used by the `help` command.
+   Possible values:
+    * `vsplit`: open help in a vertical split pane
+    * `hsplit`: open help in a horizontal split pane
+
+    default value: `hsplit`
+
 * `hlsearch`: highlight all instances of the searched text after a successful
    search. This highlighting can be temporarily turned off via the
    `UnhighlightSearch` action (triggered by the Esc key by default) or toggled

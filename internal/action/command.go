@@ -428,7 +428,7 @@ func (h *BufPane) ReopenCmd(args []string) {
 	}
 }
 
-func (h *BufPane) openHelp(page string) error {
+func (h *BufPane) openHelp(page string, hsplit bool, forceSplit bool) error {
 	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
 		return errors.New(fmt.Sprintf("Unable to load help text for %s: %v", page, err))
 	} else {
@@ -437,33 +437,74 @@ func (h *BufPane) openHelp(page string) error {
 		helpBuffer.SetOptionNative("hltaberrors", false)
 		helpBuffer.SetOptionNative("hltrailingws", false)
 
-		if h.Buf.Type == buffer.BTHelp {
+		if h.Buf.Type == buffer.BTHelp && !forceSplit {
 			h.OpenBuffer(helpBuffer)
-		} else {
+		} else if hsplit {
 			h.HSplitBuf(helpBuffer)
+		} else {
+			h.VSplitBuf(helpBuffer)
 		}
 	}
 	return nil
 }
 
-// HelpCmd tries to open the given help page in a horizontal split
+// HelpCmd tries to open the given help page according to the split type
+// configured with the "helpsplit" option. It can be overriden by the optional
+// arguments "-vpslit" or "-hsplit". In case more than one help page is given
+// as argument then it opens all of them with the defined split type.
 func (h *BufPane) HelpCmd(args []string) {
+	hsplit := config.GlobalSettings["helpsplit"] == "hsplit"
 	if len(args) < 1 {
 		// Open the default help if the user just typed "> help"
-		h.openHelp("help")
+		h.openHelp("help", hsplit, false)
 	} else {
-		if config.FindRuntimeFile(config.RTHelp, args[0]) != nil {
-			err := h.openHelp(args[0])
-			if err != nil {
-				InfoBar.Error(err)
+		var topics []string
+		forceSplit := false
+		const errSplit = "hsplit and vsplit are not allowed at the same time"
+		for _, arg := range args {
+			switch arg {
+			case "-vsplit":
+				if forceSplit {
+					InfoBar.Error(errSplit)
+					return
+				}
+				hsplit = false
+				forceSplit = true
+			case "-hsplit":
+				if forceSplit {
+					InfoBar.Error(errSplit)
+					return
+				}
+				hsplit = true
+				forceSplit = true
+			default:
+				topics = append(topics, arg)
 			}
-		} else {
-			InfoBar.Error("Sorry, no help for ", args[0])
+		}
+
+		if len(topics) < 1 {
+			// Do the same as without arg
+			h.openHelp("help", hsplit, forceSplit)
+			return
+		}
+		if len(topics) > 1 {
+			forceSplit = true
+		}
+
+		for _, topic := range topics {
+			if config.FindRuntimeFile(config.RTHelp, topic) != nil {
+				err := h.openHelp(topic, hsplit, forceSplit)
+				if err != nil {
+					InfoBar.Error(err)
+				}
+			} else {
+				InfoBar.Error("Sorry, no help for ", topic)
+			}
 		}
 	}
 }
 
-// VSplitCmd opens a vertical split with file given in the first argument
+// VSplitCmd opens one or more vertical splits with the files given as arguments
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufPane) VSplitCmd(args []string) {
 	if len(args) == 0 {
@@ -472,16 +513,18 @@ func (h *BufPane) VSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	for _, a := range args {
+		buf, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.VSplitBuf(buf)
+		h.VSplitBuf(buf)
+	}
 }
 
-// HSplitCmd opens a horizontal split with file given in the first argument
+// HSplitCmd opens one or more horizontal splits with the files given as arguments
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufPane) HSplitCmd(args []string) {
 	if len(args) == 0 {
@@ -490,13 +533,15 @@ func (h *BufPane) HSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	for _, a := range args {
+		buf, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.HSplitBuf(buf)
+		h.HSplitBuf(buf)
+	}
 }
 
 // EvalCmd evaluates a lua expression
@@ -504,7 +549,8 @@ func (h *BufPane) EvalCmd(args []string) {
 	InfoBar.Error("Eval unsupported")
 }
 
-// NewTabCmd opens the given file in a new tab
+// NewTabCmd opens one or more tabs with the files given as arguments
+// If no file is given, it opens an empty buffer in a new tab
 func (h *BufPane) NewTabCmd(args []string) {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
