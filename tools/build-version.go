@@ -47,14 +47,15 @@ func main() {
 		fmt.Println("0.0.0-unknown")
 		return
 	}
-	// Get the tag of the current revision.
-	tag, _ := getTag("--exact-match")
-	if tag == versionStr {
+	if ahead == nil {
 		// Seems that we are going to build a release.
 		// So the version number should already be correct.
 		fmt.Println(version.String())
 		return
 	}
+
+	// Get the tag of the current revision.
+	tag, _ := getTag("--exact-match")
 
 	// If we don't have any tag assume "dev"
 	if tag == "" || strings.HasPrefix(tag, "nightly") {
@@ -72,10 +73,8 @@ func main() {
 		log.Printf("semver.NewPRVersion(%s): %v", tag, err)
 	}
 
-	if ahead != nil {
-		// if we know how many commits we are ahead of the last release, append that too.
-		version.Pre = append(version.Pre, *ahead)
-	}
+	// append how many commits we are ahead of the last release
+	version.Pre = append(version.Pre, *ahead)
 
 	fmt.Println(version.String())
 }
