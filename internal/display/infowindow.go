@@ -122,15 +122,7 @@ func (i *InfoWindow) displayBuffer() {
 
 			}
 
-			rw := runewidth.RuneWidth(r)
-			for j := 0; j < rw; j++ {
-				c := r
-				if j > 0 {
-					c = ' '
-					combc = nil
-				}
-				screen.SetContent(vlocX, i.Y, c, combc, style)
-			}
+			screen.SetContent(vlocX, i.Y, r, combc, style)
 			vlocX++
 		}
 		nColsBeforeStart--
