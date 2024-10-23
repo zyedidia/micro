@@ -1676,50 +1676,58 @@ func (h *BufPane) PageDown() bool {
 
 // SelectPageUp selects up one page
 func (h *BufPane) SelectPageUp() bool {
+	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
+	scrollAmount := h.BufView().Height - pageOverlap
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.MoveCursorUp(h.BufView().Height)
+	h.MoveCursorUp(scrollAmount)
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.ScrollUp(scrollAmount)
 	h.Relocate()
 	return true
 }
 
 // SelectPageDown selects down one page
 func (h *BufPane) SelectPageDown() bool {
+	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
+	scrollAmount := h.BufView().Height - pageOverlap
 	if !h.Cursor.HasSelection() {
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
 	}
-	h.MoveCursorDown(h.BufView().Height)
+	h.MoveCursorDown(scrollAmount)
 	h.Cursor.SelectTo(h.Cursor.Loc)
+	h.ScrollDown(scrollAmount)
+	h.ScrollAdjust()
 	h.Relocate()
 	return true
 }
 
-// CursorPageUp places the cursor a page up
+// CursorPageUp places the cursor a page up,
+// moving the view to keep cursor at the same relative position in the view
 func (h *BufPane) CursorPageUp() bool {
 	h.Cursor.Deselect(true)
-
-	if h.Cursor.HasSelection() {
-		h.Cursor.Loc = h.Cursor.CurSelection[0]
-		h.Cursor.ResetSelection()
-		h.Cursor.StoreVisualX()
+	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
+	scrollAmount := h.BufView().Height - pageOverlap
+	h.MoveCursorUp(scrollAmount)
+	if h.Cursor.Num == 0 {
+		h.ScrollUp(scrollAmount)
 	}
-	h.MoveCursorUp(h.BufView().Height)
 	h.Relocate()
 	return true
 }
 
-// CursorPageDown places the cursor a page up
+// CursorPageDown places the cursor a page down,
+// moving the view to keep cursor at the same relative position in the view
 func (h *BufPane) CursorPageDown() bool {
 	h.Cursor.Deselect(false)
-
-	if h.Cursor.HasSelection() {
-		h.Cursor.Loc = h.Cursor.CurSelection[1]
-		h.Cursor.ResetSelection()
-		h.Cursor.StoreVisualX()
+	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
+	scrollAmount := h.BufView().Height - pageOverlap
+	h.MoveCursorDown(scrollAmount)
+	if h.Cursor.Num == 0 {
+		h.ScrollDown(scrollAmount)
+		h.ScrollAdjust()
 	}
-	h.MoveCursorDown(h.BufView().Height)
 	h.Relocate()
 	return true
 }
