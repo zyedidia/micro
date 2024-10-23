@@ -160,6 +160,52 @@ func (h *BufPane) Center() bool {
 	return true
 }
 
+// CursorToViewTop moves the cursor to the top of the view,
+// offset by scrollmargin unless at the beginning or end of the file
+func (h *BufPane) CursorToViewTop() bool {
+	v := h.GetView()
+	h.Buf.ClearCursors()
+	scrollmargin := int(h.Buf.Settings["scrollmargin"].(float64))
+	bStart := display.SLoc{0, 0}
+	if v.StartLine == bStart {
+		scrollmargin = 0
+	}
+	h.Cursor.GotoLoc(h.LocFromVLoc(display.VLoc{
+		SLoc:    h.Scroll(v.StartLine, scrollmargin),
+		VisualX: 0,
+	}))
+	return true
+}
+
+// CursorToViewCenter moves the cursor to the center of the view
+func (h *BufPane) CursorToViewCenter() bool {
+	v := h.GetView()
+	h.Buf.ClearCursors()
+	h.Cursor.GotoLoc(h.LocFromVLoc(display.VLoc{
+		SLoc:    h.Scroll(v.StartLine, h.BufView().Height/2),
+		VisualX: 0,
+	}))
+	return true
+}
+
+// CursorToViewBottom moves the cursor to the bottom of the view,
+// offset by scrollmargin unless at the beginning or end of the file
+func (h *BufPane) CursorToViewBottom() bool {
+	v := h.GetView()
+	h.Buf.ClearCursors()
+	scrollmargin := int(h.Buf.Settings["scrollmargin"].(float64))
+	bEnd := h.SLocFromLoc(h.Buf.End())
+	lastLine := h.Scroll(v.StartLine, h.BufView().Height-1)
+	if lastLine == bEnd {
+		scrollmargin = 0
+	}
+	h.Cursor.GotoLoc(h.LocFromVLoc(display.VLoc{
+		SLoc:    h.Scroll(lastLine, -scrollmargin),
+		VisualX: 0,
+	}))
+	return true
+}
+
 // MoveCursorUp is not an action
 func (h *BufPane) MoveCursorUp(n int) {
 	if !h.Buf.Settings["softwrap"].(bool) {
