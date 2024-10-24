@@ -1300,7 +1300,13 @@ func (h *BufPane) selectLines() int {
 	} else {
 		h.Cursor.SelectLine()
 	}
-	return h.Cursor.CurSelection[1].Y - h.Cursor.CurSelection[0].Y
+
+	nlines := h.Cursor.CurSelection[1].Y - h.Cursor.CurSelection[0].Y
+	if nlines == 0 && h.Cursor.HasSelection() {
+		// selected last line and it is not empty
+		nlines++
+	}
+	return nlines
 }
 
 // Copy the selection to the system clipboard
