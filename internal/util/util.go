@@ -233,18 +233,6 @@ func IsNonWordChar(r rune) bool {
 	return !IsWordChar(r)
 }
 
-// IsUpperWordChar returns whether or not a rune is an 'upper word character'
-// Upper word characters are defined as numbers, upper-case letters or sub-word delimiters
-func IsUpperWordChar(r rune) bool {
-	return IsUpperAlphanumeric(r) || IsSubwordDelimiter(r)
-}
-
-// IsLowerWordChar returns whether or not a rune is a 'lower word character'
-// Lower word characters are defined as numbers, lower-case letters or sub-word delimiters
-func IsLowerWordChar(r rune) bool {
-	return IsLowerAlphanumeric(r) || IsSubwordDelimiter(r)
-}
-
 // IsSubwordDelimiter returns whether or not a rune is a 'sub-word delimiter character'
 // i.e. is considered a part of the word and is used as a delimiter between sub-words of the word.
 // For now the only sub-word delimiter character is '_'.
@@ -508,11 +496,6 @@ func Clamp(val, min, max int) int {
 // IsAutocomplete returns whether a character should begin an autocompletion.
 func IsAutocomplete(c rune) bool {
 	return c == '.' || IsWordChar(c)
-}
-
-// ParseSpecial replaces escaped ts with '\t'.
-func ParseSpecial(s string) string {
-	return strings.ReplaceAll(s, "\\t", "\t")
 }
 
 // String converts a byte array to a string (for lua plugins)
