@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -29,8 +29,6 @@ import (
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
-
-const backupTime = 8000
 
 var (
 	// OpenBuffers is a list of the currently open buffers
@@ -101,7 +99,8 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	requestedBackup bool
+	RequestedBackup bool
+	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
 	// are viewing a file that is constantly changing
@@ -232,17 +231,20 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	}
 
-	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
-	readonly := os.IsPermission(err)
-	f.Close()
-
 	fileInfo, serr := os.Stat(filename)
-	if serr != nil && !os.IsNotExist(serr) {
+	if serr != nil && !errors.Is(serr, fs.ErrNotExist) {
 		return nil, serr
 	}
 	if serr == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
+	if serr == nil && !fileInfo.Mode().IsRegular() {
+		return nil, errors.New("Error: " + filename + " is not a regular file and cannot be opened")
+	}
+
+	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	readonly := errors.Is(err, fs.ErrPermission)
+	f.Close()
 
 	file, err := os.Open(filename)
 	if err == nil {
@@ -250,7 +252,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	var buf *Buffer
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else if err != nil {
@@ -395,7 +397,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	// init local settings again now that we know the filetype
 	config.InitLocalSettings(b.Settings, b.Path)
 
-	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)
 	}
 
@@ -546,7 +548,7 @@ func (b *Buffer) ReOpen() error {
 	}
 
 	reader := bufio.NewReader(transform.NewReader(file, enc.NewDecoder()))
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	txt := string(data)
 
 	if err != nil {

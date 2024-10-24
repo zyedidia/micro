@@ -5,17 +5,20 @@ import (
 	"bytes"
 	"errors"
 	"io"
+	"io/fs"
 	"os"
 	"os/exec"
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"sync"
+	"sync/atomic"
+	"time"
 	"unicode"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/transform"
 )
@@ -24,10 +27,85 @@ import (
 // because hashing is too slow
 const LargeFileThreshold = 50000
 
-// overwriteFile opens the given file for writing, truncating if one exists, and then calls
-// the supplied function with the file as io.Writer object, also making sure the file is
-// closed afterwards.
-func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error, withSudo bool) (err error) {
+type buf2save struct {
+	*Buffer
+	path     string
+	withSudo bool
+	cb       func(error)
+}
+
+var saveRequestChan chan buf2save
+var backupRequestChan chan *Buffer
+
+func init() {
+	saveRequestChan = make(chan buf2save, 10)
+	backupRequestChan = make(chan *Buffer, 10)
+
+	go func() {
+		var elapsed <-chan time.Time
+		duration := backupSeconds * float64(time.Second)
+		t := time.NewTimer(time.Duration(duration))
+		elapsed = t.C
+
+		for {
+			select {
+			case b2s := <-saveRequestChan:
+				err := b2s.safeWrite(b2s.path, b2s.withSudo)
+				b2s.cb(err)
+			case <-elapsed:
+				t.Reset(time.Duration(duration))
+				for len(backupRequestChan) > 0 {
+					b := <-backupRequestChan
+					bfini := atomic.LoadInt32(&(b.fini)) != 0
+					if !bfini {
+						b.Backup()
+					}
+				}
+			}
+		}
+	}()
+}
+
+func (b *Buffer) fileWriter(file io.Writer) (int, error) {
+	b.Lock()
+	defer b.Unlock()
+
+	if len(b.lines) == 0 {
+		return 0, nil
+	}
+
+	// end of line
+	var eol []byte
+	if b.Endings == FFDos {
+		eol = []byte{'\r', '\n'}
+	} else {
+		eol = []byte{'\n'}
+	}
+
+	// write lines
+	size, err := file.Write(b.lines[0].data)
+	if err != nil {
+		return 0, err
+	}
+
+	for _, l := range b.lines[1:] {
+		if _, err = file.Write(eol); err != nil {
+			return 0, err
+		}
+		if _, err = file.Write(l.data); err != nil {
+			return 0, err
+		}
+		size += len(eol) + len(l.data)
+	}
+	return size, nil
+}
+
+func (b *Buffer) overwriteFile(name string, isBackup bool, withSudo bool) error {
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return err
+	}
+
 	var writeCloser io.WriteCloser
 	var screenb bool
 	var cmd *exec.Cmd
@@ -37,7 +115,7 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
 
 		if writeCloser, err = cmd.StdinPipe(); err != nil {
-			return
+			return err
 		}
 
 		c = make(chan os.Signal, 1)
@@ -54,14 +132,14 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 			signal.Notify(util.Sigterm, os.Interrupt)
 			signal.Stop(c)
 
-			return
+			return err
 		}
-	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666); err != nil {
-		return
+	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, util.FileMode); err != nil {
+		return err
 	}
 
 	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
-	err = fn(w)
+	size, err := b.fileWriter(w)
 
 	if err2 := w.Flush(); err2 != nil && err == nil {
 		err = err2
@@ -91,7 +169,16 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 		}
 	}
 
-	return
+	if !isBackup && !b.Settings["fastdirty"].(bool) {
+		if size > LargeFileThreshold {
+			// For large files 'fastdirty' needs to be on
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
+	}
+
+	return err
 }
 
 // Save saves the buffer to its default path
@@ -158,13 +245,23 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		err = b.Serialize()
 	}()
 
-	// Removes any tilde and replaces with the absolute path to home
-	absFilename, _ := util.ReplaceHome(filename)
+	fileInfo, err := os.Stat(filename)
+	if err != nil && !errors.Is(err, fs.ErrNotExist) {
+		return err
+	}
+	if err == nil && fileInfo.IsDir() {
+		return errors.New("Error: " + filename + " is a directory and cannot be saved")
+	}
+	if err == nil && !fileInfo.Mode().IsRegular() {
+		return errors.New("Error: " + filename + " is not a regular file and cannot be saved")
+	}
+
+	absFilename, _ := filepath.Abs(filename)
 
 	// Get the leading path to the file | "." is returned if there's no leading path provided
 	if dirname := filepath.Dir(absFilename); dirname != "." {
 		// Check if the parent dirs don't exist
-		if _, statErr := os.Stat(dirname); os.IsNotExist(statErr) {
+		if _, statErr := os.Stat(dirname); errors.Is(statErr, fs.ErrNotExist) {
 			// Prompt to make sure they want to create the dirs that are missing
 			if b.Settings["mkparents"].(bool) {
 				// Create all leading dir(s) since they don't exist
@@ -178,60 +275,61 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		}
 	}
 
-	var fileSize int
+	var wg sync.WaitGroup
+	cb := func(e error) {
+		defer wg.Done()
+		err = e
+	}
+	b2s := buf2save{b, absFilename, withSudo, cb}
 
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	wg.Add(1)
+	saveRequestChan <- b2s
+	wg.Wait()
+
 	if err != nil {
 		return err
 	}
 
-	fwriter := func(file io.Writer) (e error) {
-		if len(b.lines) == 0 {
-			return
-		}
-
-		// end of line
-		var eol []byte
-		if b.Endings == FFDos {
-			eol = []byte{'\r', '\n'}
-		} else {
-			eol = []byte{'\n'}
-		}
-
-		// write lines
-		if fileSize, e = file.Write(b.lines[0].data); e != nil {
-			return
-		}
-
-		for _, l := range b.lines[1:] {
-			if _, e = file.Write(eol); e != nil {
-				return
-			}
-			if _, e = file.Write(l.data); e != nil {
-				return
-			}
-			fileSize += len(eol) + len(l.data)
-		}
-		return
-	}
-
-	if err = overwriteFile(absFilename, enc, fwriter, withSudo); err != nil {
-		return err
-	}
-
-	if !b.Settings["fastdirty"].(bool) {
-		if fileSize > LargeFileThreshold {
-			// For large files 'fastdirty' needs to be on
-			b.Settings["fastdirty"] = true
-		} else {
-			calcHash(b, &b.origHash)
-		}
-	}
-
-	b.Path = filename
-	absPath, _ := filepath.Abs(filename)
-	b.AbsPath = absPath
+	b.Path, _ = util.ReplaceHome(filename)
+	b.AbsPath = absFilename
 	b.isModified = false
 	b.UpdateRules()
 	return err
+}
+
+// safeWrite performs the following actions:
+// 1. Create a backup directory if it doesn't exist
+// 2. Create or update a backup file first at the given location
+// 2.1. If this fails remove the corrupted backup file and return with error
+// 3. Create or update the target file
+// 3.1. If this fails keep the backup file and return with error
+// 4. Remove the backup file, in case it shouldn't be kept and return
+func (b *Buffer) safeWrite(path string, withSudo bool) error {
+	backupDir := b.backupDir()
+	if _, err := os.Stat(backupDir); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		if err = os.Mkdir(backupDir, os.ModePerm); err != nil {
+			return err
+		}
+	}
+
+	backupName := util.DetermineEscapePath(backupDir, path)
+	if err := b.overwriteFile(backupName, true, withSudo); err != nil {
+		os.Remove(backupName)
+		return err
+	}
+	b.forceKeepBackup = true
+
+	if err := b.overwriteFile(path, false, withSudo); err != nil {
+		return err
+	}
+	b.forceKeepBackup = false
+
+	if !b.keepBackup() {
+		os.Remove(backupName)
+	}
+
+	return nil
 }
