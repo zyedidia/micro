@@ -124,7 +124,7 @@ func (w *TabWindow) Display() {
 			rw := runewidth.RuneWidth(r)
 			for j := 0; j < rw; j++ {
 				c := r
-				if j > 0 {
+				if x+rw-j >= w.Width {
 					c = ' '
 				}
 				if x == w.Width-1 && !done {
