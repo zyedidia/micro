@@ -1925,6 +1925,30 @@ func (h *BufPane) AddTab() bool {
 	return true
 }
 
+// MoveTabLeft swap the current active tab with the previous tab in the tab list
+func (h *BufPane) MoveTabLeft() bool {
+	if Tabs.Active() == 0 {
+		return false
+	}
+	t := Tabs.List[Tabs.Active()]
+	Tabs.List[Tabs.Active()] = Tabs.List[Tabs.Active()-1]
+	Tabs.List[Tabs.Active()-1] = t
+	Tabs.SetActive(Tabs.Active()-1)
+	return true
+}
+
+// MoveTabRight swap the current active tab with the next tab in the tab list
+func (h *BufPane) MoveTabRight() bool {
+	if Tabs.Active() == len(Tabs.List)-1 {
+		return false
+	}
+	t := Tabs.List[Tabs.Active()]
+	Tabs.List[Tabs.Active()] = Tabs.List[Tabs.Active()+1]
+	Tabs.List[Tabs.Active()+1] = t
+	Tabs.SetActive(Tabs.Active()+1)
+	return true
+}
+
 // PreviousTab switches to the previous tab in the tab list
 func (h *BufPane) PreviousTab() bool {
 	if Tabs.Active() == 0 {

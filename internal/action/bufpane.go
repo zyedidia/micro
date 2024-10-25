@@ -831,6 +831,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"QuitAll":                   (*BufPane).QuitAll,
 	"ForceQuit":                 (*BufPane).ForceQuit,
 	"AddTab":                    (*BufPane).AddTab,
+	"MoveTabLeft":               (*BufPane).MoveTabLeft,
+	"MoveTabRight":              (*BufPane).MoveTabRight,
 	"PreviousTab":               (*BufPane).PreviousTab,
 	"NextTab":                   (*BufPane).NextTab,
 	"FirstTab":                  (*BufPane).FirstTab,
