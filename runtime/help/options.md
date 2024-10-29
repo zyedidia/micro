@@ -285,6 +285,13 @@ Here are the available options:
 
     default value: `tab`
 
+* `pageoverlap`: the number of lines from the current view to keep in view
+   when paging up or down. If this is set to 2, for instance, and you page
+   down, the last two lines of the previous page will be the first two lines
+   of the next page.
+
+    default value: `2`
+
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
    the terminal keybinding (not `Ctrl-v`, which is micro's default paste
