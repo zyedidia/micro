@@ -5,35 +5,36 @@ package main
 
 import (
 	"fmt"
+	"os"
 
-	"github.com/bitfield/script"
 	"github.com/magefile/mage/sh"
 )
 
 var (
-	GOOS, _    = script.Exec("go env GOHOSTOS").String()
-	GOARCH, _  = script.Exec("go env GOHOSTARCH").String()
-	doublet    = map[string]string{"GOOS": GOOS, "GOARCH": GOARCH}
-	VERSION, _ = sh.OutputWith(doublet, "go", "run", "tools/build-version.go", "2>", "/dev/null")
-
-	HASH, _                    = script.Exec("git rev-parse --short HEAD").String()
-	DATE, _                    = script.Exec("echo $(GOOS=$(go env GOHOSTOS) GOARCH=$(go env GOHOSTARCH) go run tools/build-date.go)").String()
-	GOBIN, _                   = script.Exec("echo $(go env GOPATH)/bin").String()
+	GOOS, _                    = sh.Output("go", "env", "GOHOSTOS")
+	GOARCH, _                  = sh.Output("go", "env", "GOHOSTARCH")
+	VERSION, _                 = sh.Output("go", "run", "tools/build-version.go")
+	HASH, _                    = sh.Output("git", "rev-parse", "--short", "HEAD")
+	DATE, _                    = sh.Output("go", "run", "tools/build-date.go")
+	GOBIN, _                   = sh.Output("go", "env", "GOPATH)/bin")
 	DEBUGVAR                   = "-X github.com/zyedidia/micro/v2/internal/util.Debug=ON"
 	VSCODE_TESTS_BASE_URL      = "'https://raw.githubusercontent.com/microsoft/vscode/e6a45f4242ebddb7aa9a229f85555e8a3bd987e2/src/vs/editor/test/common/model/'"
-	GOHOSTOS, _                = script.Exec("go env GOHOSTOS").String()
-	GOHOSTARCH, _              = script.Exec("go env GOHOSTARCH").String()
-	GOVARS                     = fmt.Sprintf("-X github.com/zyedidia/micro/v2/internal/util.Version=%s-X github.com/zyedidia/micro/v2/internal/util.CommitHash=%s -X 'github.com/zyedidia/micro/v2/internal/util.CompileDate=%s'", VERSION, HASH, DATE)
-	CGO_ENABLED, _             = script.Exec("go env CGO_ENABLED").String()
+	GOHOSTOS, _                = sh.Output("go", "env", "GOHOSTOS")
+	GOHOSTARCH, _              = sh.Output("go", "env", "GOHOSTARCH")
+	GOVARS                     = fmt.Sprintf("-X github.com/zyedidia/micro/v2/internal/util.Version=%s -X github.com/zyedidia/micro/v2/internal/util.CommitHash=%s -X 'github.com/zyedidia/micro/v2/internal/util.CompileDate=%s'", VERSION, HASH, DATE)
+	CGO_ENABLED, _             = sh.Output("go", "env", "CGO_ENABLED")
 	ADDITIONAL_GO_LINKER_FLAGS = ""
 )
 
 func init() {
 	if GOHOSTOS == "Darwin" {
-		//DARWIN_FLAGS, _ := script.Exec("echo $(GOOS=$(go env GOHOSTOS) GOARCH=$(go env GOHOSTARCH) go run tools/info-plist.go $(go env GOOS) $(GOOS=$(go env GOHOSTOS) GOARCH=$(go env GOHOSTARCH) go run tools/build-version.go)").String()
+		//DARWIN_FLAGS, _ := sh.Output("echo", GOOS, GOARCH, "go", "run", "tools/info-plist.go", GOOS, GOARCH, "go" "run" "tools/build-version.go")
 		//ADDITIONAL_GO_LINKER_FLAGS += DARWIN_FLAGS
 		CGO_ENABLED = "1"
 	}
+	os.Setenv("GOOS", GOOS)
+	os.Setenv("GOARCH", GOARCH)
+	os.Setenv("CGO_ENABLED", CGO_ENABLED)
 }
 
 var Default = Build
@@ -44,19 +45,17 @@ func Build() {
 }
 
 func Build_quick() error {
-	env := map[string]string{"CGO_ENABLED": CGO_ENABLED}
-	fmt.Println(doublet)
+	fmt.Println(GOVARS)
 	flagld := fmt.Sprintf("-s -w %s %s", GOVARS, ADDITIONAL_GO_LINKER_FLAGS)
-	if err := sh.RunWith(env, "go", "build", "-trimpath", "-ldflags "+`"`+flagld+`"`, "./cmd/micro"); err != nil {
+	if err := sh.Run("go", "build", "-trimpath", "-ldflags="+flagld, "./cmd/micro"); err != nil {
 		return err
 	}
 	return nil
 }
 
 func Build_dbg() error {
-	env := map[string]string{"CGO_ENABLED": CGO_ENABLED}
 	flagld := fmt.Sprintf(`"%s"`, "%s %s", ADDITIONAL_GO_LINKER_FLAGS, DEBUGVAR)
-	if err := sh.RunWith(env, "go", "build", "-trimpath", "-ldflags", flagld, "./cmd/micro"); err != nil {
+	if err := sh.Run("go", "build", "-trimpath", "-ldflags="+flagld, "./cmd/micro"); err != nil {
 		return err
 	}
 	return nil
@@ -74,7 +73,7 @@ func Build_all() {
 func Install() error {
 	Generate()
 	flagld := fmt.Sprintf(`"%s"`, "-s -w %s %s", GOVARS, ADDITIONAL_GO_LINKER_FLAGS)
-	if err := sh.Run("go", "install", "-ldflags", flagld, "./cmd/micro"); err != nil {
+	if err := sh.Run("go", "install", "-ldflags="+flagld, "./cmd/micro"); err != nil {
 		return err
 	}
 	return nil
@@ -92,8 +91,7 @@ func Fetch_tags() error {
 }
 
 func Generate() error {
-	env := map[string]string{"GOOS": GOHOSTOS, "GOARCH": GOHOSTARCH}
-	if err := sh.RunWith(env, "go", "generate", "./runtime"); err != nil {
+	if err := sh.Run("go", "generate", "./runtime"); err != nil {
 		return err
 	}
 	return nil
