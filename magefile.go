@@ -28,8 +28,8 @@ var (
 
 func init() {
 	if GOHOSTOS == "Darwin" {
-		//DARWIN_FLAGS, _ := sh.Output("echo", GOOS, GOARCH, "go", "run", "tools/info-plist.go", GOOS, GOARCH, "go" "run" "tools/build-version.go")
-		//ADDITIONAL_GO_LINKER_FLAGS += DARWIN_FLAGS
+		DARWIN_FLAGS, _ := sh.Output(GOOS, GOARCH, "go", "run", "tools/info-plist.go", `"`+GOOS+`"`, `"`+VERSION+`"`)
+		ADDITIONAL_GO_LINKER_FLAGS += DARWIN_FLAGS
 		CGO_ENABLED = "1"
 	}
 	os.Setenv("GOOS", GOOS)
