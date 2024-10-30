@@ -230,7 +230,7 @@ func checkBackup(name string) error {
 		input, err := os.ReadFile(backup)
 		if err == nil {
 			t := info.ModTime()
-			msg := fmt.Sprintf(buffer.BackupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), backup)
+			msg := fmt.Sprintf(buffer.BackupMsg, target, t.Format("Mon Jan _2 at 15:04, 2006"), backup)
 			choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
 
 			if choice%3 == 0 {
