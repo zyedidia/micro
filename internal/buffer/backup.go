@@ -14,11 +14,15 @@ import (
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
-const BackupMsg = `A backup was detected for this file. This likely means that micro
-crashed while editing this file, or another instance of micro is currently
-editing this file.
+const BackupMsg = `A backup was detected for:
 
-The backup was created on %s, and the file is
+%s
+
+This likely means that micro crashed while editing this file,
+or another instance of micro is currently editing this file,
+or an error occurred while saving this file so it may be corrupted.
+
+The backup was created on %s and its path is:
 
 %s
 
@@ -131,7 +135,7 @@ func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
 			if err == nil {
 				defer backup.Close()
 				t := info.ModTime()
-				msg := fmt.Sprintf(BackupMsg, t.Format("Mon Jan _2 at 15:04, 2006"), backupfile)
+				msg := fmt.Sprintf(BackupMsg, b.Path, t.Format("Mon Jan _2 at 15:04, 2006"), backupfile)
 				choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
 
 				if choice%3 == 0 {
