@@ -45,7 +45,6 @@ func Build() {
 }
 
 func Build_quick() error {
-	fmt.Println(GOVARS)
 	flagld := fmt.Sprintf("-s -w %s %s", GOVARS, ADDITIONAL_GO_LINKER_FLAGS)
 	if err := sh.Run("go", "build", "-trimpath", "-ldflags="+flagld, "./cmd/micro"); err != nil {
 		return err
