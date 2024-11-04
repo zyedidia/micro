@@ -60,6 +60,7 @@ ft["yaml"] = "# %s"
 ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
+ft["openscad"] = "// %s"
 
 local last_ft
 

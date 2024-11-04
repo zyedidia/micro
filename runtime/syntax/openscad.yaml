@@ -1,0 +1,48 @@
+filetype: openscad
+
+detect:
+    filename: "\\.scad$"
+
+rules:
+    - statement: "\\b(module|function|include|use|let|for|if|else|true|false)\\b"
+    - statement: "\\b(child|each|assign)\\b"
+    - statement: "\\b(intersection_for|import|export)\\b"
+
+    - function: "\\b(circle|square|polygon|cube|sphere|cylinder|polyhedron|translate|rotate|scale|resize|mirror|multmatrix|color|offset|minkowski|hull|projection|surface|render|linear_extrude|rotate_extrude|dxf_linear_extrude|dxf_rotate_extrude)\\b"
+
+    - constant: "\\b(pi|undef)\\b"
+
+    - identifier: "\\b($fn|$fa|$fs|$t|$children)\\b"
+    - identifier: "\\b(x|y|z)\\b"
+    - identifier: "\\b(dx|dy|dz|angle|center|height|radius|diameter|r1|r2|h1|h2|points|paths|convexity|size|thickness|anchor)\\b"
+
+    - symbol.brackets: "[(){}\\[\\]]"
+    - symbol: "(\\*|//|/|%|\\+|-|\\^|>|>=|<|<=|!=|==|=|[\\.]{2}|!|&&|\\|\\|)"
+  
+    - constant.number: "\\b((0[xX](([0-9A-Fa-f]+\\.[0-9A-Fa-f]*)|(\\.?[0-9A-Fa-f]+))([pP][-+]?[0-9]+)?)|((([0-9]+\\.[0-9]*)|(\\.?[0-9]+))([eE][-+]?[0-9]+)?))"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([abfnrtvz\\'\"]|[0-9]{1,3}|x[0-9a-fA-F][0-9a-fA-F]|u\\{[0-9a-fA-F]+\\})"
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([abfnrtvz\\'\"]|[0-9]{1,3}|x[0-9a-fA-F][0-9a-fA-F]|u\\{[0-9a-fA-F]+\\})"
+
+    - comment.block:
+        start: "\\/\\*"
+        end: "\\*\\/"
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
+
+    - comment:
+        start: "\\/\\/|\\#"
+        end: "$"
+        rules:
+            - todo: "(TODO|NOTE|FIXME):?"
