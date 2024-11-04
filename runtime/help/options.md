@@ -24,7 +24,7 @@ Here are the available options:
 
     default value: `0`
 
-* `autosu`: When a file is saved that the user doesn't have permission to
+* `autosu`: when a file is saved that the user doesn't have permission to
    modify, micro will ask if the user would like to use super user
    privileges to save the file. If this option is enabled, micro will
    automatically attempt to use super user privileges to save without
