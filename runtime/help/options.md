@@ -32,6 +32,12 @@ Here are the available options:
 
     default value: `false`
 
+* `background`: whether to display the current theme's background color.
+   If this option is disabled, the background color of the current theme
+   will not be used and instead the terminal's default color will be shown.
+
+    default value: `true`
+
 * `backup`: micro will automatically keep backups of all open buffers. Backups
    are stored in `~/.config/micro/backups` and are removed when the buffer is
    closed cleanly. In the case of a system crash or a micro crash, the contents
@@ -524,6 +530,7 @@ so that you can see what the formatting should look like.
     "autoindent": true,
     "autosave": 0,
     "autosu": false,
+    "background": true,
     "backup": true,
     "backupdir": "",
     "basename": false,
