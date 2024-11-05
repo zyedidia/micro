@@ -48,7 +48,40 @@ var (
 
 	// To be used for file writes before umask is applied
 	FileMode os.FileMode = 0666
+
+	// To be used for fails on (over-)write with safe writes
+	ErrOverwrite = OverwriteError{}
 )
+
+const OverwriteFailMsg = `An error occurred while writing to the file:
+
+%s
+
+The file may be corrupted now. The good news is that it has been
+successfully backed up. Next time you open this file with Micro,
+Micro will ask if you want to recover it from the backup.
+
+The backup path is:
+
+%s`
+
+// OverwriteError is a custom error to add additional information
+type OverwriteError struct {
+	What       error
+	BackupName string
+}
+
+func (e OverwriteError) Error() string {
+	return fmt.Sprintf(OverwriteFailMsg, e.What, e.BackupName)
+}
+
+func (e OverwriteError) Is(target error) bool {
+	return target == ErrOverwrite
+}
+
+func (e OverwriteError) Unwrap() error {
+	return e.What
+}
 
 func init() {
 	var err error
@@ -679,6 +712,8 @@ func SafeWrite(path string, bytes []byte, rename bool) error {
 	if err != nil {
 		if rename {
 			os.Remove(tmp)
+		} else {
+			err = OverwriteError{err, tmp}
 		}
 		return err
 	}
