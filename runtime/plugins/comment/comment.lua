@@ -37,6 +37,7 @@ ft["nginx"] = "# %s"
 ft["nim"] = "# %s"
 ft["objc"] = "// %s"
 ft["ocaml"] = "(* %s *)"
+ft["openscad"] = "// %s"
 ft["pascal"] = "{ %s }"
 ft["perl"] = "# %s"
 ft["php"] = "// %s"
@@ -60,7 +61,6 @@ ft["yaml"] = "# %s"
 ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
-ft["openscad"] = "// %s"
 
 local last_ft
 
