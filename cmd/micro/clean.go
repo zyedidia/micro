@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"encoding/gob"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -11,6 +12,7 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 func shouldContinue() bool {
@@ -42,7 +44,11 @@ func CleanConfig() {
 	settingsFile := filepath.Join(config.ConfigDir, "settings.json")
 	err := config.WriteSettings(settingsFile)
 	if err != nil {
-		fmt.Println("Error writing settings.json file: " + err.Error())
+		if errors.Is(err, util.ErrOverwrite) {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println("Error writing settings.json file: " + err.Error())
+		}
 	}
 
 	// detect unused options
@@ -80,7 +86,11 @@ func CleanConfig() {
 
 			err := config.OverwriteSettings(settingsFile)
 			if err != nil {
-				fmt.Println("Error overwriting settings.json file: " + err.Error())
+				if errors.Is(err, util.ErrOverwrite) {
+					fmt.Println(err.Error())
+				} else {
+					fmt.Println("Error overwriting settings.json file: " + err.Error())
+				}
 			}
 
 			fmt.Println("Removed unused options")
