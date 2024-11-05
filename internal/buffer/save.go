@@ -305,6 +305,10 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	result := <-saveResponseChan
 	err = result.err
 	if err != nil {
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+			err = errors.Unwrap(err)
+		}
 		return err
 	}
 
@@ -354,6 +358,7 @@ func (b *Buffer) safeWrite(path string, withSudo bool) (int, error) {
 
 	size, err := file.Write(b)
 	if err != nil {
+		err = util.OverwriteError{err, backupName}
 		return size, err
 	}
 	b.forceKeepBackup = false
