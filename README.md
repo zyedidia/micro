@@ -75,7 +75,9 @@ To uninstall micro, simply remove the binary, and the configuration directory at
 #### Third-party quick-install script
 
 ```bash
-curl https://getmic.ro | bash
+curl https://getmic.ro | sudo sh
+sudo mv micro /usr/bin # optional
+micro --version
 ```
 
 The script will place the micro binary in the current directory. From there, you can move it to a directory on your path of your choosing (e.g. `sudo mv micro /usr/bin`). See its [GitHub repository](https://github.com/benweissmann/getmic.ro) for more information.
