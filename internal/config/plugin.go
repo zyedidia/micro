@@ -143,15 +143,3 @@ func FindPlugin(name string) *Plugin {
 	}
 	return pl
 }
-
-// FindAnyPlugin does not require the plugin to be enabled
-func FindAnyPlugin(name string) *Plugin {
-	var pl *Plugin
-	for _, p := range Plugins {
-		if p.Name == name {
-			pl = p
-			break
-		}
-	}
-	return pl
-}
