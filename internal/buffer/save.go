@@ -24,7 +24,63 @@ import (
 // because hashing is too slow
 const LargeFileThreshold = 50000
 
-func (b *Buffer) writeFile(file io.Writer) (int, error) {
+type wrappedFile struct {
+	writeCloser io.WriteCloser
+	withSudo    bool
+	screenb     bool
+	cmd         *exec.Cmd
+	sigChan     chan os.Signal
+}
+
+func openFile(name string, withSudo bool) (wrappedFile, error) {
+	var err error
+	var writeCloser io.WriteCloser
+	var screenb bool
+	var cmd *exec.Cmd
+	var sigChan chan os.Signal
+
+	if withSudo {
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		writeCloser, err = cmd.StdinPipe()
+		if err != nil {
+			return wrappedFile{}, err
+		}
+
+		sigChan = make(chan os.Signal, 1)
+		signal.Reset(os.Interrupt)
+		signal.Notify(sigChan, os.Interrupt)
+
+		screenb = screen.TempFini()
+		// need to start the process now, otherwise when we flush the file
+		// contents to its stdin it might hang because the kernel's pipe size
+		// is too small to handle the full file contents all at once
+		err = cmd.Start()
+		if err != nil {
+			screen.TempStart(screenb)
+
+			signal.Notify(util.Sigterm, os.Interrupt)
+			signal.Stop(sigChan)
+
+			return wrappedFile{}, err
+		}
+	} else {
+		writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE, util.FileMode)
+		if err != nil {
+			return wrappedFile{}, err
+		}
+	}
+
+	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
+}
+
+func (wf wrappedFile) Write(b *Buffer) (int, error) {
+	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	if err != nil {
+		return 0, err
+	}
+
+	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, enc.NewEncoder()))
+
 	b.Lock()
 	defer b.Unlock()
 
@@ -38,6 +94,14 @@ func (b *Buffer) writeFile(file io.Writer) (int, error) {
 		eol = []byte{'\r', '\n'}
 	} else {
 		eol = []byte{'\n'}
+	}
+
+	if !wf.withSudo {
+		f := wf.writeCloser.(*os.File)
+		err = f.Truncate(0)
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	// write lines
@@ -55,78 +119,45 @@ func (b *Buffer) writeFile(file io.Writer) (int, error) {
 		}
 		size += len(eol) + len(l.data)
 	}
-	return size, nil
+
+	err = file.Flush()
+	if err == nil && !wf.withSudo {
+		// Call Sync() on the file to make sure the content is safely on disk.
+		f := wf.writeCloser.(*os.File)
+		err = f.Sync()
+	}
+	return size, err
 }
 
-func (b *Buffer) overwriteFile(name string, withSudo bool) (int, error) {
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+func (wf wrappedFile) Close() error {
+	err := wf.writeCloser.Close()
+	if wf.withSudo {
+		// wait for dd to finish and restart the screen if we used sudo
+		err := wf.cmd.Wait()
+		screen.TempStart(wf.screenb)
+
+		signal.Notify(util.Sigterm, os.Interrupt)
+		signal.Stop(wf.sigChan)
+
+		if err != nil {
+			return err
+		}
+	}
+	return err
+}
+
+func (b *Buffer) overwriteFile(name string) (int, error) {
+	file, err := openFile(name, false)
 	if err != nil {
 		return 0, err
 	}
 
-	var writeCloser io.WriteCloser
-	var screenb bool
-	var cmd *exec.Cmd
-	var c chan os.Signal
+	size, err := file.Write(b)
 
-	if withSudo {
-		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
-
-		if writeCloser, err = cmd.StdinPipe(); err != nil {
-			return 0, err
-		}
-
-		c = make(chan os.Signal, 1)
-		signal.Reset(os.Interrupt)
-		signal.Notify(c, os.Interrupt)
-
-		screenb = screen.TempFini()
-		// need to start the process now, otherwise when we flush the file
-		// contents to its stdin it might hang because the kernel's pipe size
-		// is too small to handle the full file contents all at once
-		if err = cmd.Start(); err != nil {
-			screen.TempStart(screenb)
-
-			signal.Notify(util.Sigterm, os.Interrupt)
-			signal.Stop(c)
-
-			return 0, err
-		}
-	} else if writeCloser, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, util.FileMode); err != nil {
-		return 0, err
-	}
-
-	w := bufio.NewWriter(transform.NewWriter(writeCloser, enc.NewEncoder()))
-	size, err := b.writeFile(w)
-
-	if err2 := w.Flush(); err2 != nil && err == nil {
+	err2 := file.Close()
+	if err2 != nil && err == nil {
 		err = err2
 	}
-	// Call Sync() on the file to make sure the content is safely on disk.
-	// Does not work with sudo as we don't have direct access to the file.
-	if !withSudo {
-		f := writeCloser.(*os.File)
-		if err2 := f.Sync(); err2 != nil && err == nil {
-			err = err2
-		}
-	}
-	if err2 := writeCloser.Close(); err2 != nil && err == nil {
-		err = err2
-	}
-
-	if withSudo {
-		// wait for dd to finish and restart the screen if we used sudo
-		err := cmd.Wait()
-		screen.TempStart(screenb)
-
-		signal.Notify(util.Sigterm, os.Interrupt)
-		signal.Stop(c)
-
-		if err != nil {
-			return size, err
-		}
-	}
-
 	return size, err
 }
 
@@ -262,6 +293,17 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 // This means that the file is not overwritten directly but by writing to the
 // backup file first.
 func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error) {
+	file, err := openFile(path, withSudo)
+	if err != nil {
+		return 0, err
+	}
+
+	defer func() {
+		if newFile && err != nil {
+			os.Remove(path)
+		}
+	}()
+
 	backupDir := b.backupDir()
 	if _, err := os.Stat(backupDir); err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
@@ -273,24 +315,26 @@ func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error
 	}
 
 	backupName := util.DetermineEscapePath(backupDir, path)
-	_, err := b.overwriteFile(backupName, false)
+	_, err = b.overwriteFile(backupName)
 	if err != nil {
 		os.Remove(backupName)
 		return 0, err
 	}
 
 	b.forceKeepBackup = true
-	size, err := b.overwriteFile(path, withSudo)
+	size, err := file.Write(b)
 	if err != nil {
-		if newFile {
-			os.Remove(path)
-		}
 		return size, err
 	}
 	b.forceKeepBackup = false
 
 	if !b.keepBackup() {
 		os.Remove(backupName)
+	}
+
+	err2 := file.Close()
+	if err2 != nil && err == nil {
+		err = err2
 	}
 
 	return size, err
