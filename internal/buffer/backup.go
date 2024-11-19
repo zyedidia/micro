@@ -88,7 +88,7 @@ func (b *Buffer) Backup() error {
 
 	name := util.DetermineEscapePath(backupdir, b.AbsPath)
 	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
-		_, err = b.overwriteFile(name, false)
+		_, err = b.overwriteFile(name)
 		if err == nil {
 			b.requestedBackup = false
 		}
@@ -96,7 +96,7 @@ func (b *Buffer) Backup() error {
 	}
 
 	tmp := util.AppendBackupSuffix(name)
-	_, err := b.overwriteFile(tmp, false)
+	_, err := b.overwriteFile(tmp)
 	if err != nil {
 		os.Remove(tmp)
 		return err
