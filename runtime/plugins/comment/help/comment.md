@@ -38,7 +38,6 @@ but it is only available for certain filetypes:
 * dockerfile: `# %s`
 * elm: `-- %s`
 * fish: `# %s`
-* freest: `-- %s`
 * gdscript: `# %s`
 * glsl: `// %s`
 * go: `// %s`
