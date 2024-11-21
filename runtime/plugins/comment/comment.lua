@@ -84,10 +84,10 @@ end
 
 function commentLine(bp, lineN, indentLen)
     local line = bp.Buf:Line(lineN)
+    local commentType = bp.Buf.Settings["commenttype"]
+    local indent = string.sub(line, 1, indentLen)
     local trimmedLine = string.sub(line, indentLen + 1)
     trimmedLine = trimmedLine:gsub("%%", "%%%%")
-    local indent = string.sub(line, 1, indentLen)
-    local commentType = bp.Buf.Settings["commenttype"]
     local commentedLine = commentType:gsub("%%s", trimmedLine)
     bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), indent .. commentedLine)
 end
@@ -198,5 +198,3 @@ function init()
     config.TryBindKey("CtrlUnderscore", "lua:comment.comment", false)
     config.AddRuntimeFile("comment", config.RTHelp, "help/comment.md")
 end
-
--- So if im just writting, what finger do i use th e most to input spaces. Funnily engouh, I mostly use the right hand do do that, and not my left hand at all. That's quite insteresting. Altough iut must be said, I've been looking at how my hands moving while typing, and ids anything but efficient :( But oh well. it only goes to show how ineficient typing on a regular key board can be :/

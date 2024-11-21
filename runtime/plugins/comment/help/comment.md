@@ -19,7 +19,8 @@ the binding:
 > comment
 ```
 
-If you have a selection of text, or multiple cursors, the plugin will comment all the selected lines.
+If you have a selection of text, or multiple cursors, the plugin
+will comment all the selected lines.
 
 The comment type will be auto detected based on the filetype,
 but it is only available for certain filetypes:
