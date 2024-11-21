@@ -19,8 +19,7 @@ the binding:
 > comment
 ```
 
-If you have a selection, the plugin will comment all the lines
-selected.
+If you have a selection of text, or multiple cursors, the plugin will comment all the selected lines.
 
 The comment type will be auto detected based on the filetype,
 but it is only available for certain filetypes:
@@ -38,6 +37,7 @@ but it is only available for certain filetypes:
 * dockerfile: `# %s`
 * elm: `-- %s`
 * fish: `# %s`
+* freest: `-- %s`
 * gdscript: `# %s`
 * glsl: `// %s`
 * go: `// %s`
