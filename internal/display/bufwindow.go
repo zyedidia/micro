@@ -449,7 +449,7 @@ func (w *BufWindow) displayBuffer() {
 
 		currentLine := false
 		for _, c := range cursors {
-			if bloc.Y == c.Y && w.active {
+			if !c.HasSelection() && bloc.Y == c.Y && w.active {
 				currentLine = true
 				break
 			}
