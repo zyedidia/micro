@@ -42,6 +42,7 @@ rules:
   # Boolean and inf, nan without sign
   - constant.bool.true: '\btrue\b'
   - constant.bool.false: '\bfalse\b'
+  - constant: '\bnull\b'
   # Comments
   - comment:
       start: '//'
