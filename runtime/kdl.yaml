@@ -49,17 +49,7 @@ rules:
       end: '$'
       rules:
         - todo: '(TODO|FIXME|XXX|NOTE)'
-  # Slashdash comments
+  # Not supporting "Slashdash comments"
   # https://github.com/kdl-org/kdl/blob/de1dbd2c330c9193b836499db241787484627c3b/SPEC.md#L77-L79
   # vscode extension realizes this with lookahead and lookbehind, the regex feature cannot be used in micro
-  # https://github.com/kdl-org/vscode-kdl/blob/646d7b819d72b2f0d9dd05102a305506bafa3cf6/syntaxes/kdl.tmLanguage.json#L182-L199
-  # https://github.com/zyedidia/micro/issues/901#issuecomment-354931928
-  # So simplified it, it means this is inaccurate
-  - comment.block:
-      start: '^\s*/-'
-      end: '\s'
-      rules: []
-  - comment.block:
-      start: '/-{'
-      end: '}'
-      rules: []
+  # It is hard to support much of the use case, so it is omitted
