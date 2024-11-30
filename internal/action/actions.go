@@ -256,9 +256,10 @@ func (h *BufPane) CursorUp() bool {
 func (h *BufPane) CursorDown() bool {
 	selectionEndNewline := h.Cursor.HasSelection() && h.Cursor.CurSelection[1].X == 0
 	h.Cursor.Deselect(false)
-	h.MoveCursorDown(1)
 	if selectionEndNewline {
 		h.Cursor.Start()
+	} else {
+		h.MoveCursorDown(1)
 	}
 	h.Relocate()
 	return true
@@ -1739,6 +1740,9 @@ func (h *BufPane) CursorPageDown() bool {
 	h.Cursor.Deselect(false)
 	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
 	scrollAmount := h.BufView().Height - pageOverlap
+	if selectionEndNewline {
+		scrollAmount--
+	}
 	h.MoveCursorDown(scrollAmount)
 	if h.Cursor.Num == 0 {
 		h.ScrollDown(scrollAmount)
