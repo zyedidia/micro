@@ -293,7 +293,6 @@ func (h *BufPane) CursorLeft() bool {
 func (h *BufPane) CursorRight() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.Deselect(false)
-		h.Cursor.Right()
 	} else {
 		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := h.Buf.Settings["tabmovement"].(bool)
