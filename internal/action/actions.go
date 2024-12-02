@@ -46,6 +46,14 @@ func (h *BufPane) ScrollAdjust() {
 	h.SetView(v)
 }
 
+// ScrollReachedEnd returns true if the view is at the end of the buffer,
+// i.e. the last line of the buffer is in the view.
+func (h *BufPane) ScrollReachedEnd() bool {
+	v := h.GetView()
+	end := h.SLocFromLoc(h.Buf.End())
+	return h.Diff(v.StartLine, end) < h.BufView().Height
+}
+
 // MousePress is the event that should happen when a normal click happens
 // This is almost always bound to left click
 func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
@@ -1707,7 +1715,7 @@ func (h *BufPane) SelectPageDown() bool {
 	}
 	h.MoveCursorDown(scrollAmount)
 	h.Cursor.SelectTo(h.Cursor.Loc)
-	if h.Cursor.Num == 0 {
+	if h.Cursor.Num == 0 && !h.ScrollReachedEnd() {
 		h.ScrollDown(scrollAmount)
 		h.ScrollAdjust()
 	}
@@ -1736,7 +1744,7 @@ func (h *BufPane) CursorPageDown() bool {
 	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
 	scrollAmount := h.BufView().Height - pageOverlap
 	h.MoveCursorDown(scrollAmount)
-	if h.Cursor.Num == 0 {
+	if h.Cursor.Num == 0 && !h.ScrollReachedEnd() {
 		h.ScrollDown(scrollAmount)
 		h.ScrollAdjust()
 	}
