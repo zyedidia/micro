@@ -397,11 +397,11 @@ standard library.
 Simply import the package you'd like, and then you can use it. For example:
 
 ```lua
-local ioutil = import("io/ioutil")
+local os = import("os")
 local fmt = import("fmt")
 local micro = import("micro")
 
-local data, err = ioutil.ReadFile("SomeFile.txt")
+local data, err = os.ReadFile("SomeFile.txt")
 
 if err ~= nil then
     micro.InfoBar():Error("Error reading file: SomeFile.txt")
@@ -422,7 +422,6 @@ list of functions that are supported, you can look through `lua.go`
 
 * [fmt](https://pkg.go.dev/fmt)
 * [io](https://pkg.go.dev/io)
-* [io/ioutil](https://pkg.go.dev/io/ioutil)
 * [net](https://pkg.go.dev/net)
 * [math](https://pkg.go.dev/math)
 * [math/rand](https://pkg.go.dev/math/rand)

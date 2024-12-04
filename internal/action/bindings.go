@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -25,7 +24,7 @@ var Binder = map[string]func(e Event, action string){
 
 func createBindingsIfNotExist(fname string) {
 	if _, e := os.Stat(fname); os.IsNotExist(e) {
-		ioutil.WriteFile(fname, []byte("{}"), 0644)
+		os.WriteFile(fname, []byte("{}"), 0644)
 	}
 }
 
@@ -37,7 +36,7 @@ func InitBindings() {
 	createBindingsIfNotExist(filename)
 
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json file: " + err.Error())
 			return
@@ -265,7 +264,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			return false, errors.New("Error reading bindings.json file: " + err.Error())
 		}
@@ -304,7 +303,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		BindKey(k, v, Binder["buffer"])
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		return true, os.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return false, e
 }
@@ -317,7 +316,7 @@ func UnbindKey(k string) error {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			return errors.New("Error reading bindings.json file: " + err.Error())
 		}
@@ -354,7 +353,7 @@ func UnbindKey(k string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		return os.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return e
 }

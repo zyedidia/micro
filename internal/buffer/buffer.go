@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
@@ -546,7 +545,7 @@ func (b *Buffer) ReOpen() error {
 	}
 
 	reader := bufio.NewReader(transform.NewReader(file, enc.NewDecoder()))
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	txt := string(data)
 
 	if err != nil {

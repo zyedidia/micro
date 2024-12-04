@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"math"
 	"math/rand"
 	"net"
@@ -137,10 +136,10 @@ func importIo() *lua.LTable {
 func importIoUtil() *lua.LTable {
 	pkg := L.NewTable()
 
-	L.SetField(pkg, "ReadAll", luar.New(L, ioutil.ReadAll))
-	L.SetField(pkg, "ReadDir", luar.New(L, ioutil.ReadDir))
-	L.SetField(pkg, "ReadFile", luar.New(L, ioutil.ReadFile))
-	L.SetField(pkg, "WriteFile", luar.New(L, ioutil.WriteFile))
+	L.SetField(pkg, "ReadAll", luar.New(L, io.ReadAll))
+	L.SetField(pkg, "ReadDir", luar.New(L, os.ReadDir))
+	L.SetField(pkg, "ReadFile", luar.New(L, os.ReadFile))
+	L.SetField(pkg, "WriteFile", luar.New(L, os.WriteFile))
 
 	return pkg
 }

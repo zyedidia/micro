@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -222,7 +221,7 @@ func ReadSettings() error {
 	parsedSettings = make(map[string]interface{})
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
@@ -347,7 +346,7 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		err = os.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return err
 }
@@ -369,7 +368,7 @@ func OverwriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		err = os.WriteFile(filename, append(txt, '\n'), 0644)
 	}
 	return err
 }

@@ -1,10 +1,10 @@
-//+build ignore
+//go:build ignore
+// +build ignore
 
 package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"regexp"
@@ -210,7 +210,7 @@ func main() {
 	var tests []test
 
 	for _, filename := range os.Args[1:] {
-		source, err := ioutil.ReadFile(filename)
+		source, err := os.ReadFile(filename)
 		if err != nil {
 			log.Fatalln(err)
 		}

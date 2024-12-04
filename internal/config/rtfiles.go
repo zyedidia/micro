@@ -2,7 +2,6 @@ package config
 
 import (
 	"errors"
-	"io/ioutil"
 	"log"
 	"os"
 	"path"
@@ -81,7 +80,7 @@ func (rf realFile) Name() string {
 }
 
 func (rf realFile) Data() ([]byte, error) {
-	return ioutil.ReadFile(string(rf))
+	return os.ReadFile(string(rf))
 }
 
 func (af assetFile) Name() string {
@@ -107,7 +106,7 @@ func AddRealRuntimeFile(fileType RTFiletype, file RuntimeFile) {
 // AddRuntimeFilesFromDirectory registers each file from the given directory for
 // the filetype which matches the file-pattern
 func AddRuntimeFilesFromDirectory(fileType RTFiletype, directory, pattern string) {
-	files, _ := ioutil.ReadDir(directory)
+	files, _ := os.ReadDir(directory)
 	for _, f := range files {
 		if ok, _ := filepath.Match(pattern, f.Name()); !f.IsDir() && ok {
 			fullPath := filepath.Join(directory, f.Name())
@@ -194,14 +193,14 @@ func InitPlugins() {
 
 	// Search ConfigDir for plugin-scripts
 	plugdir := filepath.Join(ConfigDir, "plug")
-	files, _ := ioutil.ReadDir(plugdir)
+	files, _ := os.ReadDir(plugdir)
 
 	isID := regexp.MustCompile(`^[_A-Za-z0-9]+$`).MatchString
 
 	for _, d := range files {
 		plugpath := filepath.Join(plugdir, d.Name())
 		if stat, err := os.Stat(plugpath); err == nil && stat.IsDir() {
-			srcs, _ := ioutil.ReadDir(plugpath)
+			srcs, _ := os.ReadDir(plugpath)
 			p := new(Plugin)
 			p.Name = d.Name()
 			p.DirName = d.Name()
@@ -209,7 +208,7 @@ func InitPlugins() {
 				if strings.HasSuffix(f.Name(), ".lua") {
 					p.Srcs = append(p.Srcs, realFile(filepath.Join(plugdir, d.Name(), f.Name())))
 				} else if strings.HasSuffix(f.Name(), ".json") {
-					data, err := ioutil.ReadFile(filepath.Join(plugdir, d.Name(), f.Name()))
+					data, err := os.ReadFile(filepath.Join(plugdir, d.Name(), f.Name()))
 					if err != nil {
 						continue
 					}
