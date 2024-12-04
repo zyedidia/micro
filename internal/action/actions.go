@@ -262,8 +262,13 @@ func (h *BufPane) CursorUp() bool {
 
 // CursorDown moves the cursor down
 func (h *BufPane) CursorDown() bool {
+	selectionEndNewline := h.Cursor.HasSelection() && h.Cursor.CurSelection[1].X == 0
 	h.Cursor.Deselect(false)
-	h.MoveCursorDown(1)
+	if selectionEndNewline {
+		h.Cursor.Start()
+	} else {
+		h.MoveCursorDown(1)
+	}
 	h.Relocate()
 	return true
 }
@@ -297,7 +302,6 @@ func (h *BufPane) CursorLeft() bool {
 func (h *BufPane) CursorRight() bool {
 	if h.Cursor.HasSelection() {
 		h.Cursor.Deselect(false)
-		h.Cursor.Right()
 	} else {
 		tabstospaces := h.Buf.Settings["tabstospaces"].(bool)
 		tabmovement := h.Buf.Settings["tabmovement"].(bool)
@@ -1740,13 +1744,20 @@ func (h *BufPane) CursorPageUp() bool {
 // CursorPageDown places the cursor a page down,
 // moving the view to keep cursor at the same relative position in the view
 func (h *BufPane) CursorPageDown() bool {
+	selectionEndNewline := h.Cursor.HasSelection() && h.Cursor.CurSelection[1].X == 0
 	h.Cursor.Deselect(false)
 	pageOverlap := int(h.Buf.Settings["pageoverlap"].(float64))
 	scrollAmount := h.BufView().Height - pageOverlap
+	if selectionEndNewline {
+		scrollAmount--
+	}
 	h.MoveCursorDown(scrollAmount)
 	if h.Cursor.Num == 0 && !h.ScrollReachedEnd() {
 		h.ScrollDown(scrollAmount)
 		h.ScrollAdjust()
+	}
+	if selectionEndNewline {
+		h.Cursor.Start()
 	}
 	h.Relocate()
 	return true
