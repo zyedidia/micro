@@ -312,6 +312,19 @@ func InitLocalSettings(settings map[string]interface{}, path string) {
 	}
 }
 
+func WriteJson(filename string, v interface{}) error {
+		file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		file.Truncate(0)
+		enc := json.NewEncoder(file)
+		enc.SetEscapeHTML(false)
+		enc.SetIndent("", "    ")
+		return enc.Encode(v)
+}
+
 // WriteSettings writes the settings to the specified filename as JSON
 func WriteSettings(filename string) error {
 	if settingsParseError {
@@ -346,8 +359,7 @@ func WriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		err = WriteJson(filename, parsedSettings)
 	}
 	return err
 }
@@ -368,8 +380,7 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		err = WriteJson(filename, settings)
 	}
 	return err
 }
