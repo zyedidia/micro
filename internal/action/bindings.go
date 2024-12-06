@@ -1,7 +1,6 @@
 package action
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io/ioutil"
@@ -303,8 +302,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 
 		BindKey(k, v, Binder["buffer"])
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		return true, config.WriteJson(filename, parsed)
 	}
 	return false, e
 }
@@ -353,8 +351,7 @@ func UnbindKey(k string) error {
 			delete(config.Bindings["buffer"], k)
 		}
 
-		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		return config.WriteJson(filename, parsed)
 	}
 	return e
 }
