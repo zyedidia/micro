@@ -313,12 +313,11 @@ func InitLocalSettings(settings map[string]interface{}, path string) {
 }
 
 func WriteJson(filename string, v interface{}) error {
-		file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE, 0644)
+		file, err := os.OpenFile(filename, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 		if err != nil {
 			return err
 		}
 		defer file.Close()
-		file.Truncate(0)
 		enc := json.NewEncoder(file)
 		enc.SetEscapeHTML(false)
 		enc.SetIndent("", "    ")
