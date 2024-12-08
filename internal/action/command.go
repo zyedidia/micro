@@ -950,10 +950,12 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	nreplaced := 0
 	start := h.Buf.Start()
 	end := h.Buf.End()
+	searchLoc := h.Cursor.Loc
 	selection := h.Cursor.HasSelection()
 	if selection {
 		start = h.Cursor.CurSelection[0]
 		end = h.Cursor.CurSelection[1]
+		searchLoc = start // otherwise me might start at the end
 	}
 	if all {
 		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace, !noRegex)
@@ -962,7 +964,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			return l.GreaterEqual(start) && l.LessEqual(end)
 		}
 
-		searchLoc := h.Cursor.Loc
+		prevMatchEnd := buffer.Loc{-1, -1}
 		var doReplacement func()
 		doReplacement = func() {
 			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, true)
@@ -974,6 +976,17 @@ func (h *BufPane) ReplaceCmd(args []string) {
 				h.Cursor.ResetSelection()
 				h.Buf.RelocateCursors()
 
+				return
+			}
+
+			if prevMatchEnd == locs[1] {
+				// skip empty match right after previous match
+				if searchLoc == end {
+					searchLoc = start
+				} else {
+					searchLoc = searchLoc.Move(1, h.Buf)
+				}
+				doReplacement()
 				return
 			}
 
@@ -1002,6 +1015,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					h.Buf.RelocateCursors()
 					return
 				}
+				prevMatchEnd = searchLoc
 				doReplacement()
 			})
 		}
