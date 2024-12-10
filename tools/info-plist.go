@@ -37,7 +37,7 @@ func main() {
 	</plist>
 	`
 
-	err := os.WriteFile("/tmp/micro-info.plist", []byte(rawInfoPlist), 0644)
+	err := os.WriteFile("/tmp/micro-info.plist", []byte(rawInfoPlist), 0666)
 	if err != nil {
 		panic(err)
 	}
