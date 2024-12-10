@@ -36,7 +36,6 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 	w.View = new(View)
 	w.X, w.Y, w.Width, w.Height = x, y, width, height
 	w.SetBuffer(buf)
-	w.active = true
 
 	w.sline = NewStatusLine(w)
 
