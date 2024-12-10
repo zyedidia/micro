@@ -666,7 +666,6 @@ func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 	}
 	MainTab().AddPane(e, currentPaneIdx)
 	MainTab().Resize()
-	MainTab().SetActive(currentPaneIdx)
 	return e
 }
 
@@ -680,18 +679,23 @@ func (h *BufPane) HSplitIndex(buf *buffer.Buffer, bottom bool) *BufPane {
 	}
 	MainTab().AddPane(e, currentPaneIdx)
 	MainTab().Resize()
-	MainTab().SetActive(currentPaneIdx)
 	return e
 }
 
 // VSplitBuf opens the given buffer in a new vertical split.
 func (h *BufPane) VSplitBuf(buf *buffer.Buffer) *BufPane {
-	return h.VSplitIndex(buf, h.Buf.Settings["splitright"].(bool))
+	e := h.VSplitIndex(buf, h.Buf.Settings["splitright"].(bool))
+	MainTab().SetActive(MainTab().GetPane(e.ID()))
+	e.SetActive(true)
+	return e
 }
 
 // HSplitBuf opens the given buffer in a new horizontal split.
 func (h *BufPane) HSplitBuf(buf *buffer.Buffer) *BufPane {
-	return h.HSplitIndex(buf, h.Buf.Settings["splitbottom"].(bool))
+	e := h.HSplitIndex(buf, h.Buf.Settings["splitbottom"].(bool))
+	MainTab().SetActive(MainTab().GetPane(e.ID()))
+	e.SetActive(true)
+	return e
 }
 
 // Close this pane.
