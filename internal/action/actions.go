@@ -1211,6 +1211,14 @@ func (h *BufPane) FindNext() bool {
 	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
+	} else if found && searchLoc == match[0] && match[0] == match[1] {
+		// skip empty match at present cursor location
+		if searchLoc == h.Buf.End() {
+			searchLoc = h.Buf.Start()
+		} else {
+			searchLoc = searchLoc.Move(1, h.Buf)
+		}
+		match, found, _ = h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.Buf.LastSearchRegex)
 	}
 	if found {
 		h.Cursor.SetSelectionStart(match[0])
@@ -1240,6 +1248,14 @@ func (h *BufPane) FindPrevious() bool {
 	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
+	} else if found && searchLoc == match[0] && match[0] == match[1] {
+		// skip empty match at present cursor location
+		if searchLoc == h.Buf.Start() {
+			searchLoc = h.Buf.End()
+		} else {
+			searchLoc = searchLoc.Move(-1, h.Buf)
+		}
+		match, found, _ = h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.Buf.LastSearchRegex)
 	}
 	if found {
 		h.Cursor.SetSelectionStart(match[0])
