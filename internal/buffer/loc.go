@@ -47,6 +47,16 @@ func (l Loc) LessEqual(b Loc) bool {
 	return l == b
 }
 
+// Clamp clamps a loc between start and end
+func (l Loc) Clamp(start, end Loc) Loc {
+	if l.GreaterEqual(end) {
+		return end
+	} else if l.LessThan(start) {
+		return start
+	}
+	return l
+}
+
 // The following functions require a buffer to know where newlines are
 
 // Diff returns the distance between two locations
@@ -139,10 +149,5 @@ func ByteOffset(pos Loc, buf *Buffer) int {
 
 // clamps a loc within a buffer
 func clamp(pos Loc, la *LineArray) Loc {
-	if pos.GreaterEqual(la.End()) {
-		return la.End()
-	} else if pos.LessThan(la.Start()) {
-		return la.Start()
-	}
-	return pos
+	return pos.Clamp(la.Start(), la.End())
 }
