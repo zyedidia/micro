@@ -89,7 +89,7 @@ Here are the available options:
    binary.
 
    The colorscheme can be selected from all the files in the
-   ~/.config/micro/colorschemes/ directory. Micro comes by default with
+   `~/.config/micro/colorschemes/` directory. Micro comes by default with
    three colorschemes:
 
    You can read more about micro's colorschemes in the `colors` help topic
@@ -293,7 +293,7 @@ Here are the available options:
     default value: `2`
 
 * `parsecursor`: if enabled, this will cause micro to parse filenames such as
-   file.txt:10:5 as requesting to open `file.txt` with the cursor at line 10
+   `file.txt:10:5` as requesting to open `file.txt` with the cursor at line 10
    and column 5. The column number can also be dropped to open the file at a
    given line and column 0. Note that with this option enabled it is not possible
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
@@ -444,7 +444,7 @@ Here are the available options:
 * `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
    colors with respect to the tab bar.
 
-    default value: false
+    default value: `false`
 
 * `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
    (e.g. move over 4 spaces at once). This option only does anything if
@@ -454,7 +454,7 @@ Here are the available options:
 
 * `tabreverse`: reverses the tab bar colors when active.
 
-    default value: true
+    default value: `true`
 
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
@@ -507,13 +507,13 @@ or disable them:
    recent Git commit rather than the diff since opening the file.
 
 Any option you set in the editor will be saved to the file
-~/.config/micro/settings.json so, in effect, your configuration file will be
+`~/.config/micro/settings.json` so, in effect, your configuration file will be
 created for you. If you'd like to take your configuration with you to another
-machine, simply copy the settings.json to the other machine.
+machine, simply copy `settings.json` to the other machine.
 
 ## Settings.json file
 
-The settings.json file should go in your configuration directory (by default
+The `settings.json` file should go in your configuration directory (by default
 at `~/.config/micro`), and should contain only options which have been modified
 from their default setting. Here is the full list of options in json format,
 so that you can see what the formatting should look like.
