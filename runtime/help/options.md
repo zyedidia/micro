@@ -201,11 +201,11 @@ Here are the available options:
 
     default value: `false`
 
-* `incsearch`: enable incremental search in "Find" prompt (matching as you type).
+* `ignorecase`: perform case-insensitive searches.
 
     default value: `true`
 
-* `ignorecase`: perform case-insensitive searches.
+* `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
     default value: `true`
 
@@ -292,15 +292,6 @@ Here are the available options:
 
     default value: `2`
 
-* `paste`: treat characters sent from the terminal in a single chunk as a paste
-   event rather than a series of manual key presses. If you are pasting using
-   the terminal keybinding (not `Ctrl-v`, which is micro's default paste
-   keybinding) then it is a good idea to enable this option during the paste
-   and disable once the paste is over. See `> help copypaste` for details about
-   copying and pasting in a terminal environment.
-
-    default value: `false`
-
 * `parsecursor`: if enabled, this will cause micro to parse filenames such as
    file.txt:10:5 as requesting to open `file.txt` with the cursor at line 10
    and column 5. The column number can also be dropped to open the file at a
@@ -308,6 +299,15 @@ Here are the available options:
    to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
    It is also possible to open a file with a certain cursor location by using the
    `+LINE:COL` flag syntax. See `micro -help` for the command line options.
+
+    default value: `false`
+
+* `paste`: treat characters sent from the terminal in a single chunk as a paste
+   event rather than a series of manual key presses. If you are pasting using
+   the terminal keybinding (not `Ctrl-v`, which is micro's default paste
+   keybinding) then it is a good idea to enable this option during the paste
+   and disable once the paste is over. See `> help copypaste` for details about
+   copying and pasting in a terminal environment.
 
     default value: `false`
 
@@ -335,6 +335,12 @@ Here are the available options:
 
     default value: `false`
 
+* `relativeruler`: make line numbers display relatively. If set to true, all
+   lines except for the line that the cursor is located will display the distance
+   from the cursor's line.
+
+    default value: `false`
+
 * `reload`: controls the reload behavior of the current buffer in case the file
    has changed. The available options are `prompt`, `auto` & `disabled`.
 
@@ -351,12 +357,6 @@ Here are the available options:
 * `ruler`: display line numbers.
 
     default value: `true`
-
-* `relativeruler`: make line numbers display relatively. If set to true, all
-   lines except for the line that the cursor is located will display the distance
-   from the cursor's line.
-
-    default value: `false`
 
 * `savecursor`: remember where the cursor was last time the file was opened and
    put it there when you open the file again. Information is saved to
@@ -441,14 +441,14 @@ Here are the available options:
 
     default value: `true`
 
-* `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
-   (e.g. move over 4 spaces at once). This option only does anything if
-   `tabstospaces` is on.
+* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
+   colors with respect to the tab bar.
 
     default value: `false`
 
-* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
-   colors with respect to the tab bar.
+* `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
+   (e.g. move over 4 spaces at once). This option only does anything if
+   `tabstospaces` is on.
 
     default value: `false`
 
@@ -532,18 +532,24 @@ so that you can see what the formatting should look like.
     "colorscheme": "default",
     "comment": true,
     "cursorline": true,
+    "detectlimit": 100,
     "diff": true,
     "diffgutter": false,
     "divchars": "|-",
     "divreverse": true,
     "encoding": "utf-8",
     "eofnewline": true,
+    "fakecursor": false,
     "fastdirty": false,
     "fileformat": "unix",
     "filetype": "unknown",
-    "incsearch": true,
     "ftoptions": true,
+    "helpsplit": "hsplit",
+    "hlsearch": false,
+    "hltaberrors": false,
+    "hltrailingws": false,
     "ignorecase": true,
+    "incsearch": true,
     "indentchar": " ",
     "infobar": true,
     "initlua": true,
@@ -556,6 +562,8 @@ so that you can see what the formatting should look like.
     "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
+    "multiopen": "tab",
+    "pageoverlap": 2,
     "parsecursor": false,
     "paste": false,
     "permbackup": false,
@@ -565,12 +573,14 @@ so that you can see what the formatting should look like.
     "pluginrepos": [],
     "readonly": false,
     "relativeruler": false,
+    "reload": "prompt",
     "rmtrailingws": false,
     "ruler": true,
     "savecursor": false,
     "savehistory": true,
     "saveundo": false,
     "scrollbar": false,
+    "scrollbarchar": "|",
     "scrollmargin": 3,
     "scrollspeed": 2,
     "smartpaste": true,
@@ -583,12 +593,13 @@ so that you can see what the formatting should look like.
     "statusline": true,
     "sucmd": "sudo",
     "syntax": true,
-    "tabmovement": false,
     "tabhighlight": true,
+    "tabmovement": false,
     "tabreverse": false,
     "tabsize": 4,
     "tabstospaces": false,
     "useprimary": true,
+    "wordwrap": false,
     "xterm": false
 }
 ```
