@@ -79,21 +79,15 @@ Here are the available options:
 
     default value: `0`
 
-* `colorscheme`: loads the colorscheme stored in
-   $(configDir)/colorschemes/`option`.micro, This setting is `global only`.
+* `colorscheme`: loads the colorscheme stored in `(option).micro`.
+   The colorscheme can be selected from all the files in the
+   `~/.config/micro/colorschemes/` directory. This setting is `global only`.
+   Note: The colorschemes that micro comes with by default are not located in
+   `colorschemes/`, because they are embedded in the micro binary. You can see
+   the list of default colorschemes and read more about micro's colorschemes in
+   the `colors` help topic (`help colors`).
 
     default value: `default`
-
-   Note that the default colorschemes (default, solarized, and solarized-tc)
-   are not located in configDir, because they are embedded in the micro
-   binary.
-
-   The colorscheme can be selected from all the files in the
-   `~/.config/micro/colorschemes/` directory. Micro comes by default with
-   three colorschemes:
-
-   You can read more about micro's colorschemes in the `colors` help topic
-   (`help colors`).
 
 * `cursorline`: highlight the line that the cursor is on in a different color
    (the color is defined by the colorscheme you are using).
