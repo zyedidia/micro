@@ -9,7 +9,6 @@ import (
 	"os"
 	"os/signal"
 	"regexp"
-	"runtime"
 	"runtime/pprof"
 	"sort"
 	"strconv"
@@ -205,7 +204,8 @@ func LoadInput(args []string) []*buffer.Buffer {
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, buf)
 		}
-	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
+	}
+	if !isatty.IsTerminal(os.Stdin.Fd()) {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
@@ -215,7 +215,8 @@ func LoadInput(args []string) []*buffer.Buffer {
 			input = []byte{}
 		}
 		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
-	} else {
+	}
+	if len(buffers) == 0 {
 		// Option 3, just open an empty buffer
 		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
 	}
@@ -333,13 +334,6 @@ func main() {
 	buffer.SetMessager(action.InfoBar)
 	args := flag.Args()
 	b := LoadInput(args)
-
-	if len(b) == 0 {
-		// No buffers to open
-		screen.Screen.Fini()
-		runtime.Goexit()
-	}
-
 	action.InitTabs(b)
 
 	err = config.RunPluginFn("init")
