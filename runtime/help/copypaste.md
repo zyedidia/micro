@@ -10,34 +10,33 @@ If possible, setting the `clipboard` option to `terminal` will give
 best results because it will work over SSH and locally. However, there
 is limited support among terminal emulators for the terminal clipboard
 (which uses the OSC 52 protocol to communicate clipboard contents).
-Here is a list of terminal emulators and their status:
-
-* `Kitty`: supported, but only writing is enabled by default. To enable
-   reading, add `read-primary` and `read-clipboard` to the
-   `clipboard_control` option.
-
-* `iTerm2`: only copying (writing to clipboard) is supported. Must be enabled in
-   `Preferences->General-> Selection->Applications in terminal may access clipboard`.
-   You can use `Command-v` to paste.
-
-* `st`: supported.
-
-* `rxvt-unicode`: not natively supported, but there is a Perl extension
-   [here](http://anti.teamidiot.de/static/nei/*/Code/urxvt/).
-
-* `xterm`: supported, but disabled by default. It can be enabled by putting
-   the following in `.Xresources` or `.Xdefaults`:
-   `XTerm*disallowedWindowOps: 20,21,SetXprop`.
-
-* `gnome-terminal`: does not support OSC 52.
+Here is a list of terminal emulators and their status, sorted alphabetically:
 
 * `alacritty`: supported. Since 0.13.0, reading has been disabled by default.
    To reenable it, set the `terminal.osc52` option to `CopyPaste`.
 
 * `foot`: supported.
 
+* `gnome-terminal`: does not support OSC 52.
+
+* `iTerm2`: only copying (writing to clipboard) is supported. Must be enabled in
+   `Preferences->General-> Selection->Applications in terminal may access clipboard`.
+   You can use `Command-v` to paste.
+
+* `Kitty`: supported, but only writing is enabled by default. To enable
+   reading, add `read-primary` and `read-clipboard` to the
+   `clipboard_control` option.
+
+* `rxvt-unicode`: not natively supported, but there is a Perl extension
+   [here](http://anti.teamidiot.de/static/nei/*/Code/urxvt/).
+
+* `st`: supported.
+
 * `wezterm`: only copying (writing to clipboard) is supported.
 
+* `xterm`: supported, but disabled by default. It can be enabled by putting
+   the following in `.Xresources` or `.Xdefaults`:
+   `XTerm*disallowedWindowOps: 20,21,SetXprop`.
 
 **Summary:** If you want copy and paste to work over SSH, then you
 should set `clipboard` to `terminal`, and make sure your terminal
