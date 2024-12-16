@@ -27,6 +27,9 @@ Here is a list of terminal emulators and their status, sorted alphabetically:
    reading, add `read-primary` and `read-clipboard` to the
    `clipboard_control` option.
 
+* `Konsole`: only copying (writing to clipboard) is supported.
+   [Available since 24.12](https://invent.kde.org/utilities/konsole/-/merge_requests/767).
+
 * `rxvt-unicode`: not natively supported, but there is a Perl extension
    [here](http://anti.teamidiot.de/static/nei/*/Code/urxvt/).
 
