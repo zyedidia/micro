@@ -4,7 +4,6 @@ detect:
     filename: "\\.kbd$"
 
 rules:
-    - default: "\\([a-z-]+"
     - symbol.operator: "@|\\$"
     - symbol.brackets: "[()]"
     - constant.number: "\\b[0-9]+\\b"
