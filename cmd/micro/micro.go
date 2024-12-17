@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"runtime/pprof"
@@ -99,7 +99,7 @@ func InitFlags() {
 		fmt.Println("Version:", util.Version)
 		fmt.Println("Commit hash:", util.CommitHash)
 		fmt.Println("Compiled on", util.CompileDate)
-		os.Exit(0)
+		exit(0)
 	}
 
 	if *flagOptions {
@@ -115,7 +115,7 @@ func InitFlags() {
 			fmt.Printf("-%s value\n", k)
 			fmt.Printf("    \tDefault value: '%v'\n", v)
 		}
-		os.Exit(0)
+		exit(0)
 	}
 
 	if util.Debug == "OFF" && *flagDebug {
@@ -136,7 +136,7 @@ func DoPluginFlags() {
 			CleanConfig()
 		}
 
-		os.Exit(0)
+		exit(0)
 	}
 }
 
@@ -209,7 +209,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
-		input, err = ioutil.ReadAll(os.Stdin)
+		input, err = io.ReadAll(os.Stdin)
 		if err != nil {
 			screen.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
@@ -223,12 +223,55 @@ func LoadInput(args []string) []*buffer.Buffer {
 	return buffers
 }
 
+func checkBackup(name string) error {
+	target := filepath.Join(config.ConfigDir, name)
+	backup := util.AppendBackupSuffix(target)
+	if info, err := os.Stat(backup); err == nil {
+		input, err := os.ReadFile(backup)
+		if err == nil {
+			t := info.ModTime()
+			msg := fmt.Sprintf(buffer.BackupMsg, target, t.Format("Mon Jan _2 at 15:04, 2006"), backup)
+			choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
+
+			if choice%3 == 0 {
+				// recover
+				err := os.WriteFile(target, input, util.FileMode)
+				if err != nil {
+					return err
+				}
+				return os.Remove(backup)
+			} else if choice%3 == 1 {
+				// delete
+				return os.Remove(backup)
+			} else if choice%3 == 2 {
+				// abort
+				return errors.New("Aborted")
+			}
+		}
+	}
+	return nil
+}
+
+func exit(rc int) {
+	for _, b := range buffer.OpenBuffers {
+		if !b.Modified() {
+			b.Fini()
+		}
+	}
+
+	if screen.Screen != nil {
+		screen.Screen.Fini()
+	}
+
+	os.Exit(rc)
+}
+
 func main() {
 	defer func() {
 		if util.Stdout.Len() > 0 {
 			fmt.Fprint(os.Stdout, util.Stdout.String())
 		}
-		os.Exit(0)
+		exit(0)
 	}()
 
 	var err error
@@ -255,6 +298,12 @@ func main() {
 
 	config.InitRuntimeFiles(true)
 	config.InitPlugins()
+
+	err = checkBackup("settings.json")
+	if err != nil {
+		screen.TermMessage(err)
+		exit(1)
+	}
 
 	err = config.ReadSettings()
 	if err != nil {
@@ -288,7 +337,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("Fatal: Micro could not initialize a Screen.")
-		os.Exit(1)
+		exit(1)
 	}
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
 	clipErr := clipboard.Initialize(m)
@@ -307,13 +356,19 @@ func main() {
 			for _, b := range buffer.OpenBuffers {
 				b.Backup()
 			}
-			os.Exit(1)
+			exit(1)
 		}
 	}()
 
 	err = config.LoadAllPlugins()
 	if err != nil {
 		screen.TermMessage(err)
+	}
+
+	err = checkBackup("bindings.json")
+	if err != nil {
+		screen.TermMessage(err)
+		exit(1)
 	}
 
 	action.InitBindings()
@@ -434,24 +489,12 @@ func DoEvent() {
 		}
 	case f := <-timerChan:
 		f()
+	case b := <-buffer.BackupCompleteChan:
+		b.RequestedBackup = false
 	case <-sighup:
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-		os.Exit(0)
+		exit(0)
 	case <-util.Sigterm:
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-
-		if screen.Screen != nil {
-			screen.Screen.Fini()
-		}
-		os.Exit(0)
+		exit(0)
 	}
 
 	if e, ok := event.(*tcell.EventError); ok {
@@ -459,16 +502,7 @@ func DoEvent() {
 
 		if e.Err() == io.EOF {
 			// shutdown due to terminal closing/becoming inaccessible
-			for _, b := range buffer.OpenBuffers {
-				if !b.Modified() {
-					b.Fini()
-				}
-			}
-
-			if screen.Screen != nil {
-				screen.Screen.Fini()
-			}
-			os.Exit(0)
+			exit(0)
 		}
 		return
 	}
