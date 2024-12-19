@@ -6,6 +6,40 @@ import (
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
+func padRegexp(r *regexp.Regexp) (*regexp.Regexp, *regexp.Regexp, *regexp.Regexp, *regexp.Regexp) {
+	rPadStart := regexp.MustCompile(".(?:"+r.String()+")")
+	rPadEnd := regexp.MustCompile("(?:"+r.String()+").")
+	rPadBoth := regexp.MustCompile(".(?:"+r.String()+").")
+	return r, rPadStart, rPadEnd, rPadBoth
+}
+
+func findLineParams(b *Buffer, start, end Loc, i int, rPadded [4]*regexp.Regexp) ([]byte, int, *regexp.Regexp) {
+	l := b.LineBytes(i)
+	charpos := 0
+	ri := 0 // rPadNone
+
+	if i == end.Y {
+		nchars := util.CharacterCount(l)
+		end.X = util.Clamp(end.X, 0, nchars)
+		if end.X < nchars {
+			l = util.SliceStart(l, end.X+1)
+			ri = 2 // rPadEnd
+		}
+	}
+
+	if i == start.Y {
+		nchars := util.CharacterCount(l)
+		start.X = util.Clamp(start.X, 0, nchars)
+		if start.X > 0 {
+			charpos = start.X-1
+			l = util.SliceEnd(l, charpos)
+			ri += 1 // rPadNone -> rPadStart, rPadEnd -> rPadBoth
+		}
+	}
+
+	return l, charpos, rPadded[ri]
+}
+
 func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
 	if start.Y > b.LinesNum()-1 {
@@ -21,33 +55,23 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 		start, end = end, start
 	}
 
-	for i := start.Y; i <= end.Y; i++ {
-		l := b.LineBytes(i)
-		charpos := 0
+	rPadNone, rPadStart, rPadEnd, rPadBoth := padRegexp(r)
+	rPadded := [4]*regexp.Regexp{rPadNone, rPadStart, rPadEnd, rPadBoth}
 
-		if i == start.Y && start.Y == end.Y {
-			nchars := util.CharacterCount(l)
-			start.X = util.Clamp(start.X, 0, nchars)
-			end.X = util.Clamp(end.X, 0, nchars)
-			l = util.SliceStart(l, end.X)
-			l = util.SliceEnd(l, start.X)
-			charpos = start.X
-		} else if i == start.Y {
-			nchars := util.CharacterCount(l)
-			start.X = util.Clamp(start.X, 0, nchars)
-			l = util.SliceEnd(l, start.X)
-			charpos = start.X
-		} else if i == end.Y {
-			nchars := util.CharacterCount(l)
-			end.X = util.Clamp(end.X, 0, nchars)
-			l = util.SliceStart(l, end.X)
-		}
+	for i := start.Y; i <= end.Y; i++ {
+		l, charpos, r := findLineParams(b, start, end, i, rPadded)
 
 		match := r.FindIndex(l)
 
 		if match != nil {
 			start := Loc{charpos + util.RunePos(l, match[0]), i}
+			if r == rPadStart || r == rPadBoth {
+				start = start.Move(1, b)
+			}
 			end := Loc{charpos + util.RunePos(l, match[1]), i}
+			if r == rPadEnd || r == rPadBoth {
+				end = end.Move(-1, b)
+			}
 			return [2]Loc{start, end}, true
 		}
 	}
@@ -69,34 +93,24 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 		start, end = end, start
 	}
 
-	for i := end.Y; i >= start.Y; i-- {
-		l := b.LineBytes(i)
-		charpos := 0
+	rPadNone, rPadStart, rPadEnd, rPadBoth := padRegexp(r)
+	rPadded := [4]*regexp.Regexp{rPadNone, rPadStart, rPadEnd, rPadBoth}
 
-		if i == start.Y && start.Y == end.Y {
-			nchars := util.CharacterCount(l)
-			start.X = util.Clamp(start.X, 0, nchars)
-			end.X = util.Clamp(end.X, 0, nchars)
-			l = util.SliceStart(l, end.X)
-			l = util.SliceEnd(l, start.X)
-			charpos = start.X
-		} else if i == start.Y {
-			nchars := util.CharacterCount(l)
-			start.X = util.Clamp(start.X, 0, nchars)
-			l = util.SliceEnd(l, start.X)
-			charpos = start.X
-		} else if i == end.Y {
-			nchars := util.CharacterCount(l)
-			end.X = util.Clamp(end.X, 0, nchars)
-			l = util.SliceStart(l, end.X)
-		}
+	for i := end.Y; i >= start.Y; i-- {
+		l, charpos, r := findLineParams(b, start, end, i, rPadded)
 
 		allMatches := r.FindAllIndex(l, -1)
 
 		if allMatches != nil {
 			match := allMatches[len(allMatches)-1]
 			start := Loc{charpos + util.RunePos(l, match[0]), i}
+			if r == rPadStart || r == rPadBoth {
+				start = start.Move(1, b)
+			}
 			end := Loc{charpos + util.RunePos(l, match[1]), i}
+			if r == rPadEnd || r == rPadBoth {
+				end = end.Move(-1, b)
+			}
 			return [2]Loc{start, end}, true
 		}
 	}
