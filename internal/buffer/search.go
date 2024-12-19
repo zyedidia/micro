@@ -6,7 +6,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
-func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
+func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([]Loc, bool) {
 	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
 	if start.Y > b.LinesNum()-1 {
 		start.X = lastcn - 1
@@ -43,18 +43,24 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 			l = util.SliceStart(l, end.X)
 		}
 
-		match := r.FindIndex(l)
+		match := r.FindSubmatchIndex(l)
 
 		if match != nil {
-			start := Loc{charpos + util.RunePos(l, match[0]), i}
-			end := Loc{charpos + util.RunePos(l, match[1]), i}
-			return [2]Loc{start, end}, true
+			loc := make([]Loc, len(match))
+			for j, x := range match {
+				if x == -1 { // submatch doesn't occur in match
+					loc[j] = Loc{-1, -1}
+				} else {
+					loc[j] = Loc{charpos + util.RunePos(l, x), i}
+				}
+			}
+			return loc, true
 		}
 	}
-	return [2]Loc{}, false
+	return []Loc{}, false
 }
 
-func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
+func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([]Loc, bool) {
 	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
 	if start.Y > b.LinesNum()-1 {
 		start.X = lastcn - 1
@@ -91,33 +97,35 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 			l = util.SliceStart(l, end.X)
 		}
 
-		allMatches := r.FindAllIndex(l, -1)
+		allMatches := r.FindAllSubmatchIndex(l, -1)
 
 		if allMatches != nil {
 			match := allMatches[len(allMatches)-1]
-			start := Loc{charpos + util.RunePos(l, match[0]), i}
-			end := Loc{charpos + util.RunePos(l, match[1]), i}
-			return [2]Loc{start, end}, true
+			loc := make([]Loc, len(match))
+			for j, x := range match {
+				if x == -1 { // submatch doesn't occur in match
+					loc[j] = Loc{-1, -1}
+				} else {
+					loc[j] = Loc{charpos + util.RunePos(l, x), i}
+				}
+			}
+			return loc, true
 		}
 	}
-	return [2]Loc{}, false
+	return []Loc{}, false
 }
 
-// FindNext finds the next occurrence of a given string in the buffer
-// It returns the start and end location of the match (if found) and
-// a boolean indicating if it was found
+// FindNextSubmatch finds the next occurrence of a given string in the
+// buffer. It returns the start and end location of the match and of
+// all submatches (if found) and a boolean indicating if it was found.
 // May also return an error if the search regex is invalid
-func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bool) ([2]Loc, bool, error) {
+func (b *Buffer) FindNextSubmatch(s string, start, end, from Loc, down bool) ([]Loc, bool, error) {
 	if s == "" {
-		return [2]Loc{}, false, nil
+		return []Loc{}, false, nil
 	}
 
 	var r *regexp.Regexp
 	var err error
-
-	if !useRegex {
-		s = regexp.QuoteMeta(s)
-	}
 
 	if b.Settings["ignorecase"].(bool) {
 		r, err = regexp.Compile("(?i)" + s)
@@ -126,11 +134,11 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 	}
 
 	if err != nil {
-		return [2]Loc{}, false, err
+		return []Loc{}, false, err
 	}
 
 	var found bool
-	var l [2]Loc
+	var l []Loc
 	if down {
 		l, found = b.findDown(r, from, end)
 		if !found {
@@ -143,6 +151,22 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 		}
 	}
 	return l, found, nil
+}
+
+// FindNext finds the next occurrence of a given string in the buffer
+// It returns the start and end location of the match (if found) and
+// a boolean indicating if it was found
+// May also return an error if the search regex is invalid
+func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bool) ([2]Loc, bool, error) {
+	if !useRegex {
+		s = regexp.QuoteMeta(s)
+	}
+	l, found, err := b.FindNextSubmatch(s, start, end, from, down)
+	if found {
+		return [2]Loc{l[0], l[1]}, found, err
+	} else {
+		return [2]Loc{}, found, err
+	}
 }
 
 // ReplaceRegex replaces all occurrences of 'search' with 'replace' in the given area
