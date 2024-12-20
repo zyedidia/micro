@@ -1394,11 +1394,37 @@ func (h *BufPane) Cut() bool {
 
 // CutLine cuts the current line to the clipboard. If there is a selection,
 // CutLine cuts all the lines that are (fully or partially) in the selection.
+// CutLine will replace the clipboard's current buffer.
 func (h *BufPane) CutLine() bool {
+	totalLines := h.selectLines()
+	if totalLines == 0 {
+		return false
+	}
+
+	h.Cursor.CopySelection(clipboard.ClipboardReg)
+	h.freshClip = true
+	h.Cursor.DeleteSelection()
+	h.Cursor.ResetSelection()
+	h.Cursor.StoreVisualX()
+	if totalLines > 1 {
+		InfoBar.Message(fmt.Sprintf("Cut %d lines", totalLines))
+	} else {
+		InfoBar.Message("Cut line")
+	}
+
+	h.Relocate()
+	return true
+}
+
+// CutLineAppend cuts the current line to the clipboard. If there is a selection,
+// CutLineAppend cuts all the lines that are (fully or partially) in the selection.
+// CutLineAppend will append the selection to the clipboard's buffer.
+func (h *BufPane) CutLineAppend() bool {
 	nlines := h.selectLines()
 	if nlines == 0 {
 		return false
 	}
+
 	totalLines := nlines
 	if h.freshClip {
 		if clip, err := clipboard.Read(clipboard.ClipboardReg); err != nil {
@@ -1411,15 +1437,17 @@ func (h *BufPane) CutLine() bool {
 	} else {
 		h.Cursor.CopySelection(clipboard.ClipboardReg)
 	}
+
 	h.freshClip = true
 	h.Cursor.DeleteSelection()
 	h.Cursor.ResetSelection()
 	h.Cursor.StoreVisualX()
-	if totalLines > 1 {
-		InfoBar.Message(fmt.Sprintf("Cut %d lines", totalLines))
+	if nlines > 1 {
+		InfoBar.Message(fmt.Sprintf("Cut %d lines. Total lines in buffer: %d.", nlines, totalLines))
 	} else {
-		InfoBar.Message("Cut line")
+		InfoBar.Message(fmt.Sprintf("Cut line. Total lines in buffer: %d.", totalLines))
 	}
+
 	h.Relocate()
 	return true
 }
