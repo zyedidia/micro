@@ -6,6 +6,7 @@ local utf8 = import("utf8")
 
 config.RegisterCommonOption("autoclose", "pairs", {"\"\"", "''", "``", "()", "{}", "[]"})
 config.RegisterCommonOption("autoclose", "newlinePairs", {"()", "{}", "[]"})
+config.AddRuntimeFile("autoclose", config.RTHelp, "help/autoclose.md")
 
 function charAt(str, i)
     -- lua indexing is one off from go
