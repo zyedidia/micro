@@ -40,8 +40,8 @@ github.com/xo/terminfo v0.0.0-20200218205459-454e5b68f9e8 h1:woqigIZtZUZxws1zZA9
 github.com/xo/terminfo v0.0.0-20200218205459-454e5b68f9e8/go.mod h1:6Yhx5ZJl5942QrNRWLwITArVT9okUXc5c3brgWJMoDc=
 github.com/yuin/goldmark v1.4.13/go.mod h1:6yULJ656Px+3vBD8DxQVa3kxgyrAnzto9xy5taEt/CY=
 github.com/yuin/gopher-lua v0.0.0-20190206043414-8bfc7677f583/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
-github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb h1:ZkM6LRnq40pR1Ox0hTHlnpkcOTuFIDQpZ1IN8rKKhX0=
-github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb/go.mod h1:gqRgreBUhTSL0GeU64rtZ3Uq3wtjOa/TB2YfrtkCbVQ=
+github.com/yuin/gopher-lua v1.1.1 h1:kYKnWBjvbNP4XLT3+bPEwAXJx262OhaHDWDVOPjL46M=
+github.com/yuin/gopher-lua v1.1.1/go.mod h1:GBR0iDaNXjAgGg9zfCvksxSRnQx76gclCIb7kdAd1Pw=
 github.com/zyedidia/clipper v0.1.1 h1:HBgguFNDq/QmSQKBnhy4sMKzILINr139VEgAhftOUTw=
 github.com/zyedidia/clipper v0.1.1/go.mod h1:7YApPNiiTZTXdKKZG92G50qj6mnWEX975Sdu65J7YpQ=
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBYj5/td9WC0mw4g1xDBPovIqmHew=

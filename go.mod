@@ -10,7 +10,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sergi/go-diff v1.1.0
 	github.com/stretchr/testify v1.4.0
-	github.com/yuin/gopher-lua v0.0.0-20191220021717-ab39c6098bdb
+	github.com/yuin/gopher-lua v1.1.1
 	github.com/zyedidia/clipper v0.1.1
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
 	github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d
