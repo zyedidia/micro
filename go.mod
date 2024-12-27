@@ -18,7 +18,7 @@ require (
 	github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef
 	golang.org/x/text v0.3.8
 	gopkg.in/yaml.v2 v2.2.8
-	layeh.com/gopher-luar v1.0.7
+	layeh.com/gopher-luar v1.0.11
 )
 
 require (
@@ -37,6 +37,6 @@ replace github.com/kballard/go-shellquote => github.com/zyedidia/go-shellquote v
 
 replace github.com/mattn/go-runewidth => github.com/zyedidia/go-runewidth v0.0.12
 
-replace layeh.com/gopher-luar => github.com/layeh/gopher-luar v1.0.7
+replace layeh.com/gopher-luar v1.0.11 => github.com/layeh/gopher-luar v1.0.11
 
 go 1.17
