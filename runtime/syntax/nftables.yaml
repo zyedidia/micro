@@ -12,12 +12,14 @@ rules:
     - statement: "\\b(accept|drop|goto|jump|log|masquerade|reject|limit|queue)\\b"
     - preproc: "\\b(add|define|flush|include|delete)\\b"
     - symbol.operator: "[<>.&|^!=:;,@]|\\b(and|ge|gt|le|lt|or|xor)\\b"
+      # string constants
     - constant.string: '([\+\-\*/][\"]{1})(.*)([\"]{1})'
     - constant.string:
         start: "\""
         end: "\""
       # Integer Constants
-    - constant.number: "\\b((0x)?[0-9a-fA-F.]+)\\b"
+    - constant.number: "\\b([0-9]+)\\b"
+    - constant.number: "\\b(0x[0-9a-fA-F]+)\\b"
     - identifier.var: "[$@][a-zA-Z_.][a-zA-Z0-9_/.-]*"
     - comment: "(^|[[:space:]])#([^{].*)?$"
     - indent-char.whitespace: "[[:space:]]+$"
