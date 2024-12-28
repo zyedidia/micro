@@ -890,7 +890,10 @@ func (h *BufPane) SaveCmd(args []string) {
 	if len(args) == 0 {
 		h.Save()
 	} else {
-		h.Buf.SaveAs(args[0])
+		err := h.Buf.SaveAs(args[0])
+		if err != nil {
+			InfoBar.Error(err)
+		}
 	}
 }
 
