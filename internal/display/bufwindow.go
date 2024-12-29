@@ -699,13 +699,9 @@ func (w *BufWindow) displayBuffer() {
 			for _, r := range word {
 				draw(r.r, r.combc, r.style, true, true)
 
-				// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
+				// Draw space for incomplete wide runes
 				if r.width > 1 {
 					char := ' '
-					if r.r != '\t' {
-						char = '@'
-					}
-
 					for i := 1; i < r.width; i++ {
 						draw(char, nil, r.style, true, false)
 					}
