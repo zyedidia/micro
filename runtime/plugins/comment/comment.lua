@@ -3,6 +3,7 @@ VERSION = "1.0.0"
 local util = import("micro/util")
 local config = import("micro/config")
 local buffer = import("micro/buffer")
+local micro = import("micro")
 
 local ft = {}
 
@@ -61,17 +62,20 @@ ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
 
-local last_ft
-
 function updateCommentType(buf)
-    if buf.Settings["commenttype"] == nil or (last_ft ~= buf.Settings["filetype"] and last_ft ~= nil) then
-        if ft[buf.Settings["filetype"]] ~= nil then
-            buf:SetOptionNative("commenttype", ft[buf.Settings["filetype"]])
-        else
-            buf:SetOptionNative("commenttype", "# %s")
+    -- NOTE: Don't use SetOptionNative() to set "comment.type",
+    -- otherwise "comment.type" can't be reset by a "filetype" change.
+    if buf.Settings["comment.type"] == "" then
+        if buf.Settings["commenttype"] ~= nil then
+            micro.InfoBar():Error("\"commenttype\" option has been renamed to \"comment.type\"",
+                                  ", please update your configuration")
         end
 
-        last_ft = buf.Settings["filetype"]
+        if ft[buf.Settings["filetype"]] ~= nil then
+            buf.Settings["comment.type"] = ft[buf.Settings["filetype"]]
+        else
+            buf.Settings["comment.type"] = "# %s"
+        end
     end
 end
 
@@ -88,7 +92,7 @@ function commentLine(bp, lineN, indentLen)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
@@ -114,7 +118,7 @@ function uncommentLine(bp, lineN, commentRegex)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
@@ -178,7 +182,7 @@ end
 function comment(bp, args)
     updateCommentType(bp.Buf)
 
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
 
     if bp.Cursor:HasSelection() then
@@ -202,6 +206,10 @@ end
 
 function string.starts(String,Start)
     return string.sub(String,1,string.len(Start))==Start
+end
+
+function preinit()
+    config.RegisterCommonOption("comment", "type", "")
 end
 
 function init()
