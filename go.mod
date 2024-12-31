@@ -5,7 +5,7 @@ require (
 	github.com/dustin/go-humanize v1.0.0
 	github.com/go-errors/errors v1.0.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
-	github.com/mattn/go-isatty v0.0.11
+	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-runewidth v0.0.7
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sergi/go-diff v1.1.0
@@ -30,7 +30,7 @@ require (
 	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/xo/terminfo v0.0.0-20200218205459-454e5b68f9e8 // indirect
 	github.com/zyedidia/poller v1.0.1 // indirect
-	golang.org/x/sys v0.0.0-20220722155257-8c9f86f7a55f // indirect
+	golang.org/x/sys v0.6.0 // indirect
 )
 
 replace github.com/kballard/go-shellquote => github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655
