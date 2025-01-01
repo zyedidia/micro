@@ -5,7 +5,7 @@ import (
 
 	"github.com/blang/semver"
 
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
 )
 
 func TestDependencyResolving(t *testing.T) {
