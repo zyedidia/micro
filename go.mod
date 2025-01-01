@@ -38,4 +38,4 @@ replace github.com/mattn/go-runewidth => github.com/zyedidia/go-runewidth v0.0.1
 
 replace layeh.com/gopher-luar v1.0.11 => github.com/layeh/gopher-luar v1.0.11
 
-go 1.17
+go 1.19
