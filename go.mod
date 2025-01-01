@@ -7,6 +7,7 @@ require (
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mattn/go-isatty v0.0.20
 	github.com/mattn/go-runewidth v0.0.7
+	github.com/micro-editor/json5 v1.0.1-micro
 	github.com/micro-editor/tcell/v2 v2.0.11
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sergi/go-diff v1.1.0
@@ -14,9 +15,8 @@ require (
 	github.com/yuin/gopher-lua v1.1.1
 	github.com/zyedidia/clipper v0.1.1
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
-	github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d
 	github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef
-	golang.org/x/text v0.3.8
+	golang.org/x/text v0.4.0
 	gopkg.in/yaml.v2 v2.2.8
 	layeh.com/gopher-luar v1.0.11
 )
