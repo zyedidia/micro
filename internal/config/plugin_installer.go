@@ -15,7 +15,7 @@ import (
 
 	"github.com/blang/semver"
 	lua "github.com/yuin/gopher-lua"
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
