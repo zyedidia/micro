@@ -83,8 +83,8 @@ func startup(args []string) (tcell.SimulationScreen, error) {
 		return nil, errors.New("No buffers opened")
 	}
 
-	action.InitTabs(b)
 	action.InitGlobals()
+	action.InitTabs(b)
 
 	err = config.RunPluginFn("init")
 	if err != nil {
