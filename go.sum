@@ -25,6 +25,8 @@ github.com/lucasb-eyer/go-colorful v1.0.3 h1:QIbQXiugsb+q10B+MI+7DI1oQLdmnep86tW
 github.com/lucasb-eyer/go-colorful v1.0.3/go.mod h1:R4dSotOR9KMtayYi1e77YzuveK+i7ruzyGqttikkLy0=
 github.com/mattn/go-isatty v0.0.20 h1:xfD0iDuEKnDkl03q4limB+vH+GxLEtL/jb4xVJSWWEY=
 github.com/mattn/go-isatty v0.0.20/go.mod h1:W+V8PltTTMOvKvAeJH7IuucS94S2C6jfK/D7dTCTo3Y=
+github.com/micro-editor/go-shellquote v0.0.0-20250101105543-feb6c39314f5 h1:D7BPnsedXiKo/e8RTFX419/52ICNhU8UKPQGZ/0yiLc=
+github.com/micro-editor/go-shellquote v0.0.0-20250101105543-feb6c39314f5/go.mod h1:zaPgW/fDiW4MUfEwxpC+GB/bhvX44NJaNHmRAC9auHQ=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -48,8 +50,6 @@ github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBY
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
 github.com/zyedidia/go-runewidth v0.0.12 h1:aHWj8qL3aH7caRzoPBJXe1pEaZBXHpKtfTuiBo5p74Q=
 github.com/zyedidia/go-runewidth v0.0.12/go.mod h1:vF8djYdLmG8BJaUZ4CznFYCJ3pFR8m4B4VinTvTTarU=
-github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655 h1:Z3RhH6hvcSx7eX6Q/pP6YVsgea/1eMDG99vtWwi3nK4=
-github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655/go.mod h1:1sTqqO+kcYzZp43M5VsJe1tns9IzlSeC9jB6c2+o/5Y=
 github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d h1:zmDMkh22zXOB7gz8jFaI4GpI7llsPgzm38/jG0UgxjE=
 github.com/zyedidia/json5 v0.0.0-20200102012142-2da050b1a98d/go.mod h1:NDJSTTYWivnza6zkRapeX2/LwhKPEMQ7bJxqgDVT78I=
 github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s=
