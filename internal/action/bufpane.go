@@ -13,7 +13,7 @@ import (
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 type BufAction interface{}
