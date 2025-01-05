@@ -6,7 +6,7 @@ require (
 	github.com/go-errors/errors v1.0.1
 	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51
 	github.com/mattn/go-isatty v0.0.20
-	github.com/mattn/go-runewidth v0.0.7
+	github.com/mattn/go-runewidth v0.0.16
 	github.com/micro-editor/json5 v1.0.1-micro
 	github.com/micro-editor/tcell/v2 v2.0.11
 	github.com/mitchellh/go-homedir v1.1.0
@@ -27,6 +27,7 @@ require (
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
+	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/zyedidia/poller v1.0.1 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 )
