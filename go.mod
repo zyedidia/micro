@@ -32,7 +32,7 @@ require (
 	golang.org/x/sys v0.6.0 // indirect
 )
 
-replace github.com/kballard/go-shellquote => github.com/zyedidia/go-shellquote v0.0.0-20200613203517-eccd813c0655
+replace github.com/kballard/go-shellquote => github.com/micro-editor/go-shellquote v0.0.0-20250101105543-feb6c39314f5
 
 replace github.com/mattn/go-runewidth => github.com/zyedidia/go-runewidth v0.0.12
 
