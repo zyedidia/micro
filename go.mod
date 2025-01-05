@@ -27,14 +27,11 @@ require (
 	github.com/gdamore/encoding v1.0.0 // indirect
 	github.com/lucasb-eyer/go-colorful v1.0.3 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/rivo/uniseg v0.1.0 // indirect
 	github.com/zyedidia/poller v1.0.1 // indirect
 	golang.org/x/sys v0.6.0 // indirect
 )
 
 replace github.com/kballard/go-shellquote => github.com/micro-editor/go-shellquote v0.0.0-20250101105543-feb6c39314f5
-
-replace github.com/mattn/go-runewidth => github.com/zyedidia/go-runewidth v0.0.12
 
 replace layeh.com/gopher-luar v1.0.11 => github.com/layeh/gopher-luar v1.0.11
 
