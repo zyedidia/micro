@@ -34,7 +34,17 @@ func overwriteFile(name string, enc encoding.Encoding, fn func(io.Writer) error,
 	var c chan os.Signal
 
 	if withSudo {
-		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		sucmd := config.GlobalSettings["sucmd"].(string)
+		if runtime.GOOS == "windows" {
+			exe, err := os.Executable()
+			if err == nil {
+				cmd = exec.Command(sucmd, exe, "-write", name)
+			} else {
+				return err
+			}
+		} else {
+			cmd = exec.Command(sucmd, "dd", "bs=4k", "of="+name)
+		}
 
 		if writeCloser, err = cmd.StdinPipe(); err != nil {
 			return
@@ -129,9 +139,6 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	}
 	if b.Type.Scratch {
 		return errors.New("Cannot save scratch buffer")
-	}
-	if withSudo && runtime.GOOS == "windows" {
-		return errors.New("Save with sudo not supported on Windows")
 	}
 
 	if !autoSave && b.Settings["rmtrailingws"].(bool) {
