@@ -1,12 +1,16 @@
 package info
 
 import (
+	"bytes"
 	"encoding/gob"
+	"errors"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
@@ -17,24 +21,23 @@ func (i *InfoBuf) LoadHistory() {
 	if config.GetGlobalOption("savehistory").(bool) {
 		file, err := os.Open(filepath.Join(config.ConfigDir, "buffers", "history"))
 		var decodedMap map[string][]string
-		if err == nil {
-			defer file.Close()
-			decoder := gob.NewDecoder(file)
-			err = decoder.Decode(&decodedMap)
-
-			if err != nil {
-				i.Error("Error loading history:", err)
-				return
+		if err != nil {
+			if !errors.Is(err, fs.ErrNotExist) {
+				i.Error("Error loading history: ", err)
 			}
+			return
+		}
+
+		defer file.Close()
+		err = gob.NewDecoder(file).Decode(&decodedMap)
+		if err != nil {
+			i.Error("Error decoding history: ", err)
+			return
 		}
 
 		if decodedMap != nil {
 			i.History = decodedMap
-		} else {
-			i.History = make(map[string][]string)
 		}
-	} else {
-		i.History = make(map[string][]string)
 	}
 }
 
@@ -49,16 +52,18 @@ func (i *InfoBuf) SaveHistory() {
 			}
 		}
 
-		file, err := os.Create(filepath.Join(config.ConfigDir, "buffers", "history"))
-		if err == nil {
-			defer file.Close()
-			encoder := gob.NewEncoder(file)
+		var buf bytes.Buffer
+		err := gob.NewEncoder(&buf).Encode(i.History)
+		if err != nil {
+			screen.TermMessage("Error encoding history: ", err)
+			return
+		}
 
-			err = encoder.Encode(i.History)
-			if err != nil {
-				i.Error("Error saving history:", err)
-				return
-			}
+		filename := filepath.Join(config.ConfigDir, "buffers", "history")
+		err = util.SafeWrite(filename, buf.Bytes(), true)
+		if err != nil {
+			screen.TermMessage("Error saving history: ", err)
+			return
 		}
 	}
 }
