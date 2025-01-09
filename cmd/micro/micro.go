@@ -384,6 +384,13 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	// Check history backup before InitGlobals(), since it is loaded there.
+	err = checkBackup(filepath.Join("buffers", "history"))
+	if err != nil {
+		screen.TermMessage(err)
+		exit(1)
+	}
+
 	action.InitGlobals()
 	buffer.SetMessager(action.InfoBar)
 	args := flag.Args()
