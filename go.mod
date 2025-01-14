@@ -9,13 +9,13 @@ require (
 	github.com/mattn/go-runewidth v0.0.16
 	github.com/micro-editor/json5 v1.0.1-micro
 	github.com/micro-editor/tcell/v2 v2.0.11
+	github.com/micro-editor/terminal v0.0.0-20250105114944-ffd0fc59e777
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sergi/go-diff v1.1.0
 	github.com/stretchr/testify v1.4.0
 	github.com/yuin/gopher-lua v1.1.1
 	github.com/zyedidia/clipper v0.1.1
 	github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3
-	github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef
 	golang.org/x/text v0.4.0
 	gopkg.in/yaml.v2 v2.2.8
 	layeh.com/gopher-luar v1.0.11

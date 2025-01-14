@@ -10,7 +10,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/micro-editor/tcell/v2"
-	"github.com/zyedidia/terminal"
+	"github.com/micro-editor/terminal"
 )
 
 type TermKeyAction func(*TermPane)

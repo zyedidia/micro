@@ -7,7 +7,7 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/terminal"
+	"github.com/micro-editor/terminal"
 )
 
 type TermType int

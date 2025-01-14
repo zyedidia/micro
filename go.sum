@@ -35,6 +35,8 @@ github.com/micro-editor/json5 v1.0.1-micro h1:5Y4MuzhkmW0sQQNPvrIVevIOKi557qsznw
 github.com/micro-editor/json5 v1.0.1-micro/go.mod h1:cmlPHZ1JKOXNse0/3zwwKj/GUpzAVkzx4lZDkpHl4q0=
 github.com/micro-editor/tcell/v2 v2.0.11 h1:USjdpBSmbocx2yPARbY19KcUSj+ZerScrdmBqGjzoX4=
 github.com/micro-editor/tcell/v2 v2.0.11/go.mod h1:kVYk6NOwYJrboL/7IA7cCupk4o2NzyF/0UMLjeEJN/s=
+github.com/micro-editor/terminal v0.0.0-20250105114944-ffd0fc59e777 h1:ddEDJwVqnxd8Yxtr6ZlUBBH3Kyf90jLHMJAbmU1bjuA=
+github.com/micro-editor/terminal v0.0.0-20250105114944-ffd0fc59e777/go.mod h1:soCc8JsxxfCZd3y08pX67F16Bni5L/xtcAnqEswzs44=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -57,8 +59,6 @@ github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3 h1:oMHjjTLfGXVuyOQBY
 github.com/zyedidia/glob v0.0.0-20170209203856-dd4023a66dc3/go.mod h1:YKbIYP//Eln8eDgAJGI3IDvR3s4Tv9Z9TGIOumiyQ5c=
 github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s=
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
-github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef h1:LeB4Qs0Tss4r/Qh8pfsTTqagDYHysfKJLYzAH3MVfu0=
-github.com/zyedidia/terminal v0.0.0-20230315200948-4b3bcf6dddef/go.mod h1:zeb8MJdcCObFKVvur3n2B4BANIPuo2Q8r4iiNs9Enx0=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190626150813-e07cf5db2756/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
