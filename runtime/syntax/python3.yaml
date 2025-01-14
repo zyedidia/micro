@@ -5,22 +5,50 @@ detect:
     header: "^#!.*/(env +)?python(3)?$"
 
 rules:
-    # built-in objects
-    - constant: "\\b(Ellipsis|None|self|cls|True|False)\\b"
       # built-in attributes
     - constant: "\\b(__bases__|__builtin__|__class__|__debug__|__dict__|__doc__|__file__|__members__|__methods__|__name__|__self__)\\b"
       # built-in functions
     - identifier: "\\b(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes|callable|chr|classmethod|compile|complex|delattr|dir|divmod|eval|exec|format|getattr|globals|hasattr|hash|help|hex|id|input|isinstance|issubclass|iter|len|locals|max|min|next|nonlocal|oct|open|ord|pow|print|repr|round|setattr|sorted|sum|vars|__import__)\\b"
+    - identifier: "\\b(classmethod|enumerate|filter|map|object|property|reversed|slice|staticmethod|super|type|zip)\\b" # New one, previously "type"
       # special method names
     - identifier: "\\b__(abs|add|and|call|cmp|coerce|complex|concat|contains|delattr|delitem|delslice|del|dict|divmod|div|float|getattr|getitem|getslice|hash|hex|iadd|iand|iconcat|ifloordiv|ilshift|imatmul|imod|imul|init|int|invert|inv|ior|ipow|irshift|isub|iter|itruediv|ixor|len|long|lshift|mod|mul|neg|next|nonzero|oct|or|pos|pow|radd|rand|rcmp|rdivmod|rdiv|repeat|repr|rlshift|rmod|rmul|ror|rpow|rrshift|rshift|rsub|rxor|setattr|setitem|setslice|str|sub|xor)__\\b"
-      # types
-    - type: "\\b(bool|bytearray|bytes|classmethod|complex|dict|enumerate|filter|float|frozenset|int|list|map|memoryview|object|property|range|reversed|set|slice|staticmethod|str|super|tuple|type|zip)\\b"
       # definitions
     - identifier: "def [a-zA-Z_0-9]+"
+      # Basic variable assign
+    - identifier.var: "((^|\\s+|\\()[\\w]+(\\s|,)?)+=" # New one
+      # Variable assignment to another variable
+    - identifier.var: "=\\s?[\\w]+" # New one
+      # Variables followed by ':' (for typing), '.' operand (call a function i.e. dict.items()) and as placeholders inside 'for' loop
+    - identifier.var: "[\\w]+((\\.|\\s)\\b|: )" # New one
+      # Variables stated after specific keywords
+    - identifier.var: "(return|while|for|if|and|or|in)\\s[a-zA-Z_0-9]+\\s?" # New one
+      # Variables followed or preceded by comparative operands.
+    - identifier.var: "[a-zA-Z0-9_]+\\s(<|>|<=|>=|!=|==)\\s([a-zA-Z0-9_]+)?:?$" # New one
+      # Variables followed/preceded by normal or compound assignment
+    - identifier.var: "(\\+|\\-|\\/|\\*)\\s\\w+" # New one
+    - identifier.var: "(^|\\s+|\\()\\w+\\s(\\+|\\-|\\/|\\*)?=?" # New one
+      # Variables inside any type of brackets. NOTE: variables with anything but integers or float, won't work.
+      # Dictionaries highlight variables as 'types' (because of the ':') instead of a regular variable
+    - identifier.var: "(\\(|\\[|{)([\\w]+|[\\d_]+(\\.[\\d_])*)((,|:)\\s([\\w]+|[\\d_]+(\\.[\\d_])*)?){0,},?(\\)|\\]|})\\s?(:|=)?" # New one
+      # Iterator slicing and key assignment
+    - identifier.var: "\\b[\\w]+(\\[[\\w:.\\(\\)\\s/*-+]+\\])" # New one
+      # Custom function call
+    - identifier: "[\\w]+\\("  # New one
+      # Functions called with dot operand
+    - identifier: "\\.[a-z]+\\(?"  # New one
+      # Import, class and error statements
+    - identifier.class: "(import|from|as|class|except)\\s[\\w]+((,\\s[\\w]+)+|:)?" # New one
       # keywords
     - statement: "\\b(and|as|assert|async|await|break|case|class|continue|def|del|elif|else|except|finally|for|from|global|if|import|in|is|lambda|match|nonlocal|not|or|pass|raise|return|try|while|with|yield)\\b"
       # decorators
     - preproc: "^\\s*@[^(]*"
+      # From `typing` module and other modules
+    - type: "(:|->)\\s[a-zA-Z]+(\\[[a-zA-Z]+(,\\s[a-zA-Z]+)?\\])?\\s?:?"  # New one
+      # Types in basic library (no modules imported)
+    - type.keyword: "\\b(str|int|float|complex|list|tuple|range|dict|set|frozenset|bool|bytes|bytearray|memoryview|NoneType)\\b" # New one
+      # built-in objects. NOTE: Changed to this location to take precedence
+    - constant: "\\b(Ellipsis|None|self|cls|True|False)\\b"
+    - constant.bool: "\\b(True|False)\\b"  # New one
       # operators
     - symbol.operator: "([~^.:;,+*|=!\\%@]|<|>|/|-|&)"
       # parentheses
@@ -45,6 +73,8 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+            # f-string format
+            - constant.specialChar: "\\{[\\w\\d/*-+.\\s\\(\\)]*?\\}" # New one
 
     - constant.string:
         start: "'"
@@ -52,6 +82,11 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
+            # f-string format
+            - constant.specialChar: "\\{[\\w\\d/*-+.\\s\\(\\)]*?\\}" # New one
+
+      # NOTE: Requires unique symbols %&#... Currently not working presumably missing specific rules
+    - constant.string.url: "(http(s)?:\\/\\/w{3}\\.)?[\\w]+(\\.[a-z]{,3})+((\\/[\\w]+){1,})?" # New one
 
     - comment:
         start: "#"
