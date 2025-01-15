@@ -1,12 +1,9 @@
 package action
 
 import (
-	luar "layeh.com/gopher-luar"
-
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
-	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/views"
 	"github.com/micro-editor/tcell/v2"
@@ -153,17 +150,9 @@ func (t *TabList) SetActive(a int) {
 	t.TabWindow.SetActive(a)
 
 	for i, p := range t.List {
-		if i == a {
-			if !p.isActive {
-				p.isActive = true
-
-				err := config.RunPluginFn("onSetActive", luar.New(ulua.L, p.CurPane()))
-				if err != nil {
-					screen.TermMessage(err)
-				}
-			}
-		} else {
-			p.isActive = false
+		p.isActive = i == a
+		if h := p.CurPane(); h != nil { // h == nil for 'raw' tab
+			h.SetActive(i == a)
 		}
 	}
 }
@@ -210,12 +199,13 @@ func InitTabs(bufs []*buffer.Buffer) {
 		Tabs = NewTabList(bufs[:1])
 		for _, b := range bufs[1:] {
 			if multiopen == "vsplit" {
-				MainTab().CurPane().VSplitBuf(b)
+				MainTab().CurPane().VSplitIndex(b, true)
 			} else {  // default hsplit
-				MainTab().CurPane().HSplitBuf(b)
+				MainTab().CurPane().HSplitIndex(b, true)
 			}
 		}
 	}
+	MainTab().CurPane().SetActive(true)
 
 	screen.RestartCallback = Tabs.ResetMouse
 }
