@@ -66,7 +66,9 @@ bindings, tab is bound as
 
 This means that if the `Autocomplete` action is successful, the chain will
 abort. Otherwise, it will try `IndentSelection`, and if that fails too, it
-will execute `InsertTab`.
+will execute `InsertTab`. To use `,`, `|` or `&` in an action (as an argument
+to a command, for example), escape it with `\` or wrap it in single or double
+quotes.
 
 ## Binding commands
 

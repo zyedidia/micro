@@ -320,6 +320,28 @@ func RunePos(b []byte, i int) int {
 	return CharacterCount(b[:i])
 }
 
+// IndexAnyUnquoted returns the first position in s of a character from chars.
+// Escaped (with backslash) and quoted (with single or double quotes) characters
+// are ignored. Returns -1 if not successful
+func IndexAnyUnquoted(s, chars string) int {
+	var e bool
+	var q rune
+	for i, r := range s {
+		if e {
+			e = false
+		} else if (q == 0 || q == '"') && r == '\\' {
+			e = true
+		} else if r == q {
+			q = 0
+		} else if q == 0 && (r == '\'' || r == '"') {
+			q = r
+		} else if q == 0 && strings.IndexRune(chars, r) >= 0 {
+			return i
+		}
+	}
+	return -1
+}
+
 // MakeRelative will attempt to make a relative path between path and base
 func MakeRelative(path, base string) (string, error) {
 	if len(path) > 0 {
