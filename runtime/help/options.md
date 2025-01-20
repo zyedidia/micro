@@ -415,11 +415,11 @@ Here are the available options:
 * `statusformatl`: format string definition for the left-justified part of the
    statusline. Special directives should be placed inside `$()`. Special
    directives include: `filename`, `modified`, `line`, `col`, `lines`,
-   `percentage`, `opt`, `bind`.
+   `percentage`, `opt`, `overwrite`, `bind`.
    The `opt` and `bind` directives take either an option or an action afterward
    and fill in the value of the option or the key bound to the action.
 
-    default value: `$(filename) $(modified)($(line),$(col)) $(status.paste)|
+    default value: `$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)|
                     ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)`
 
 * `statusformatr`: format string definition for the right-justified part of the
@@ -578,7 +578,7 @@ so that you can see what the formatting should look like.
     "splitbottom": true,
     "splitright": true,
     "status": true,
-    "statusformatl": "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+    "statusformatl": "$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
     "statusformatr": "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
     "statusline": true,
     "sucmd": "sudo",
