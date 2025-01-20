@@ -100,9 +100,7 @@ func BufMapEvent(k Event, action string) {
 			break
 		}
 
-		// TODO: fix problem when complex bindings have these
-		// characters (escape them?)
-		idx := strings.IndexAny(action, "&|,")
+		idx := util.IndexAnyUnquoted(action, "&|,")
 		a := action
 		if idx >= 0 {
 			a = action[:idx]
