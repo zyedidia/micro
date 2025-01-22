@@ -1917,7 +1917,7 @@ func (h *BufPane) Quit() bool {
 			}
 		}
 
-		if config.GlobalSettings["autosave"].(float64) > 0 {
+		if config.GlobalSettings["autosave"].(float64) > 0 && h.Buf.Path != "" {
 			// autosave on means we automatically save when quitting
 			h.SaveCB("Quit", func() {
 				h.ForceQuit()
