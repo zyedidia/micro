@@ -209,6 +209,11 @@ type Buffer struct {
 	LastSearchRegex bool
 	// HighlightSearch enables highlighting all instances of the last successful search
 	HighlightSearch bool
+
+	// OverwriteMode indicates that we are in overwrite mode (toggled by
+	// Insert key by default) i.e. that typing a character shall replace the
+	// character under the cursor instead of inserting a character before it.
+	OverwriteMode bool
 }
 
 // NewBufferFromFileAtLoc opens a new buffer with a given cursor location

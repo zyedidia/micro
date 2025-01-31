@@ -224,8 +224,6 @@ type BufPane struct {
 	// (possibly multiple) buttons were pressed previously.
 	mousePressed map[MouseEvent]bool
 
-	// We need to keep track of insert key press toggle
-	isOverwriteMode bool
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
@@ -358,9 +356,6 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
 	h.resetMouse()
-	// Set isOverwriteMode to false, because we assume we are in the default
-	// mode when editor is opened
-	h.isOverwriteMode = false
 	h.lastClickTime = time.Time{}
 }
 
@@ -639,7 +634,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			c.ResetSelection()
 		}
 
-		if h.isOverwriteMode {
+		if h.Buf.OverwriteMode {
 			next := c.Loc
 			next.X++
 			h.Buf.Replace(c.Loc, next, string(r))

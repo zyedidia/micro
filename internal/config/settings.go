@@ -93,7 +93,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"softwrap":        false,
 	"splitbottom":     true,
 	"splitright":      true,
-	"statusformatl":   "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+	"statusformatl":   "$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
 	"statusformatr":   "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
 	"statusline":      true,
 	"syntax":          true,

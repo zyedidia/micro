@@ -1864,7 +1864,7 @@ func (h *BufPane) CommandMode() bool {
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
 func (h *BufPane) ToggleOverwriteMode() bool {
-	h.isOverwriteMode = !h.isOverwriteMode
+	h.Buf.OverwriteMode = !h.Buf.OverwriteMode
 	return true
 }
 
