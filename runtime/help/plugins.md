@@ -354,7 +354,6 @@ The packages and their contents are listed below (in Go type signatures):
     - `IsWordChar(s string) bool`: returns true if the first rune in a
        string is a word character.
     - `String(b []byte) string`: converts a byte array to a string.
-    - `RuneStr(r rune) string`: converts a rune to a string.
     - `Unzip(src, dest string) error`: unzips a file to given folder.
     - `Version`: micro's version number or commit hash
     - `SemVersion`: micro's semantic version
