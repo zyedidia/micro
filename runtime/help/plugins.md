@@ -344,6 +344,9 @@ The packages and their contents are listed below (in Go type signatures):
     - `Log(s string)`: writes a string to the log buffer.
     - `LogBuf() *Buffer`: returns the log buffer.
 
+    - `NewRegexpGroup(s string)`: creates a `RegexpGroup`, which is used for
+       searching a buffer.
+
     Relevant links:
     [Message](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Message)
     [Loc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Loc)
