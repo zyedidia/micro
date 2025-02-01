@@ -9,6 +9,11 @@ type Loc struct {
 	X, Y int
 }
 
+// IsValid returns true if the argument is an actual buffer location
+func (l Loc) IsValid() bool {
+	return l.X >= 0 && l.Y >= 0
+}
+
 // LessThan returns true if b is smaller
 func (l Loc) LessThan(b Loc) bool {
 	if l.Y < b.Y {
