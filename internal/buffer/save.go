@@ -18,7 +18,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/transform"
 )
 
@@ -118,12 +117,7 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 }
 
 func (wf wrappedFile) Write(b *Buffer) (int, error) {
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
-	if err != nil {
-		return 0, err
-	}
-
-	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, enc.NewEncoder()))
+	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, b.encoding.NewEncoder()))
 
 	b.Lock()
 	defer b.Unlock()
@@ -142,7 +136,7 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 
 	if !wf.withSudo {
 		f := wf.writeCloser.(*os.File)
-		err = f.Truncate(0)
+		err := f.Truncate(0)
 		if err != nil {
 			return 0, err
 		}
