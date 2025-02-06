@@ -25,6 +25,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
@@ -86,6 +87,8 @@ type SharedBuffer struct {
 	Settings map[string]interface{}
 	// LocalSettings customized by the user for this buffer only
 	LocalSettings map[string]bool
+
+	encoding encoding.Encoding
 
 	Suggestions   []string
 	Completions   []string
@@ -348,9 +351,9 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.Settings["filetype"] = settings["filetype"]
 		b.Settings["syntax"] = settings["syntax"]
 
-		enc, err := htmlindex.Get(settings["encoding"].(string))
+		b.encoding, err = htmlindex.Get(settings["encoding"].(string))
 		if err != nil {
-			enc = unicode.UTF8
+			b.encoding = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
 		}
 
@@ -361,7 +364,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			return NewBufferFromString("", "", btype)
 		}
 		if !hasBackup {
-			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
+			reader := bufio.NewReader(transform.NewReader(r, b.encoding.NewDecoder()))
 
 			var ff FileFormat = FFAuto
 
