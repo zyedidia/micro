@@ -9,6 +9,7 @@ following filetypes and linters:
 * **c++**: g++
 * **d**: dmd
 * **go**: go build
+* **go**: go vet
 * **haskell**: hlint
 * **java**: javac
 * **javascript**: jshint
@@ -16,12 +17,16 @@ following filetypes and linters:
 * **literate**: lit
 * **lua**: luacheck
 * **nim**: nim
+* **nix**: nix-linter
 * **objective-c**: clang
-* **python**: pyflakes
+* **python**: flake8
 * **python**: mypy
+* **python**: pyflakes
 * **python**: pylint
 * **python**: ruff
+* **rust**: cargo clippy
 * **shell**: shfmt
+* **shell**: shellcheck
 * **swift**: swiftc (MacOS and Linux only)
 * **yaml**: yamllint
 
