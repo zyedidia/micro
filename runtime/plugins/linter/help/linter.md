@@ -20,6 +20,7 @@ following filetypes and linters:
 * **python**: pyflakes
 * **python**: mypy
 * **python**: pylint
+* **python**: ruff
 * **shell**: shfmt
 * **swift**: swiftc (MacOS and Linux only)
 * **yaml**: yamllint
