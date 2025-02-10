@@ -11,6 +11,7 @@ import (
 	"time"
 
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -18,7 +19,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/micro-editor/tcell/v2"
 )
 
 // ScrollUp is not an action
@@ -1438,12 +1438,13 @@ func (h *BufPane) Duplicate() bool {
 // DuplicateLine duplicates the current line. If there is a selection, DuplicateLine
 // duplicates all the lines that are (fully or partially) in the selection.
 func (h *BufPane) DuplicateLine() bool {
-	if h.Cursor.HasSelection() {
-		origLoc := h.Cursor.Loc
-		origLastVisualX := h.Cursor.LastVisualX
-		origLastWrappedVisualX := h.Cursor.LastWrappedVisualX
-		origSelection := h.Cursor.CurSelection
+	loc := h.Cursor.Loc
+	lastVisualX := h.Cursor.LastVisualX
+	lastWrappedVisualX := h.Cursor.LastWrappedVisualX
+	curSelection := h.Cursor.CurSelection
+	origSelection := h.Cursor.OrigSelection
 
+	if h.Cursor.HasSelection() {
 		start := h.Cursor.CurSelection[0]
 		end := h.Cursor.CurSelection[1]
 		if start.GreaterThan(end) {
@@ -1460,11 +1461,6 @@ func (h *BufPane) DuplicateLine() bool {
 			h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(y)))
 		}
 
-		h.Cursor.Loc = origLoc
-		h.Cursor.LastVisualX = origLastVisualX
-		h.Cursor.LastWrappedVisualX = origLastWrappedVisualX
-		h.Cursor.CurSelection = origSelection
-
 		if start.Y < end.Y {
 			InfoBar.Message(fmt.Sprintf("Duplicated %d lines", end.Y-start.Y+1))
 		} else {
@@ -1475,6 +1471,13 @@ func (h *BufPane) DuplicateLine() bool {
 		h.Buf.Insert(h.Cursor.Loc, "\n"+string(h.Buf.LineBytes(h.Cursor.Y)))
 		InfoBar.Message("Duplicated line")
 	}
+
+	h.Cursor.Loc = loc
+	h.Cursor.LastVisualX = lastVisualX
+	h.Cursor.LastWrappedVisualX = lastWrappedVisualX
+	h.Cursor.CurSelection = curSelection
+	h.Cursor.OrigSelection = origSelection
+
 	h.Relocate()
 	return true
 }
