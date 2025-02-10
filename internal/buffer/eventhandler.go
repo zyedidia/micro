@@ -113,25 +113,24 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 }
 
 // ExecuteTextEvent runs a text event
+// The deltas are processed in reverse order and afterwards reversed
 func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
-	if t.EventType == TextEventInsert {
-		for _, d := range t.Deltas {
+	for i := len(t.Deltas) - 1; i >= 0; i-- {
+		d := t.Deltas[i]
+		if t.EventType == TextEventInsert {
 			buf.insert(d.Start, d.Text)
-		}
-	} else if t.EventType == TextEventRemove {
-		for i, d := range t.Deltas {
+		} else if t.EventType == TextEventRemove {
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
-		}
-	} else if t.EventType == TextEventReplace {
-		for i, d := range t.Deltas {
+		} else { // TextEventReplace
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
 			buf.insert(d.Start, d.Text)
 			t.Deltas[i].Start = d.Start
 			t.Deltas[i].End = Loc{d.Start.X + util.CharacterCount(d.Text), d.Start.Y}
 		}
-		for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
-			t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
-		}
+	}
+
+	for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
+		t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
 	}
 }
 

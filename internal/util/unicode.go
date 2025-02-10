@@ -26,6 +26,28 @@ func isMark(r rune) bool {
 	return unicode.In(r, unicode.Mark)
 }
 
+// PreviousRunePos returns the position of the rune preceding the one starting
+// at `i` in the given byte slice, or -1 if there is no valid rune
+func PreviousRunePos(b []byte, i int) int {
+	r, size := utf8.DecodeLastRune(b[:i])
+	if r == utf8.RuneError {
+		return -1
+	} else {
+		return i - size
+	}
+}
+
+// NextRunePos returns the position of the rune following the one starting
+// at `i` in the given byte slice, or -1 if there is no valid rune
+func NextRunePos(b []byte, i int) int {
+	r, size := utf8.DecodeRune(b[i:])
+	if r == utf8.RuneError {
+		return -1
+	} else {
+		return i + size
+	}
+}
+
 // DecodeCharacter returns the next character from an array of bytes
 // A character is a rune along with any accompanying combining runes
 func DecodeCharacter(b []byte) (rune, []rune, int) {
@@ -93,4 +115,15 @@ func CharacterCountInString(str string) int {
 	}
 
 	return s
+}
+
+// BytePosFromCharPos returns the position of the byte in `b` that
+// starts first rune of the character indexed by `ci`
+func BytePosFromCharPos(b []byte, ci int) int {
+	i := 0
+	for j := 0; j < ci; j++ {
+		_, _, size := DecodeCharacter(b[i:])
+		i += size
+	}
+	return i
 }

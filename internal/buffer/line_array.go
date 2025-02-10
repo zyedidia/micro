@@ -285,8 +285,12 @@ func (la *LineArray) deleteLines(y1, y2 int) {
 	la.lines = la.lines[:y1+copy(la.lines[y1:], la.lines[y2+1:])]
 }
 
-// Substr returns the string representation between two locations
+// Substr returns the string representation between two locations, or nil
+// if the the locations are invalid or `end` precedes `start`
 func (la *LineArray) Substr(start, end Loc) []byte {
+	if start.LessThan(la.Start()) || start.GreaterThan(end) || end.GreaterThan(la.End()) {
+		return nil
+	}
 	startX := runeToByteIndex(start.X, la.lines[start.Y].data)
 	endX := runeToByteIndex(end.X, la.lines[end.Y].data)
 	if start.Y == end.Y {
