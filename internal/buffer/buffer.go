@@ -19,13 +19,13 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/dimchansky/utfbom"
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
-	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
@@ -346,7 +346,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.Settings["filetype"] = settings["filetype"]
 		b.Settings["syntax"] = settings["syntax"]
 
-		enc, err := htmlindex.Get(settings["encoding"].(string))
+		enc, err := util.GetEncoding(settings["encoding"].(string))
 		if err != nil {
 			enc = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
@@ -359,7 +359,24 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			return NewBufferFromString("", "", btype)
 		}
 		if !hasBackup {
-			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
+			sr, bom := utfbom.Skip(r)
+			encname := ""
+
+			switch bom {
+			case utfbom.UTF8:
+				enc, encname = unicode.UTF8, "utf-8-bom"
+			case utfbom.UTF16BigEndian:
+				enc, encname = unicode.UTF16(unicode.BigEndian, unicode.IgnoreBOM), "utf-16be-bom"
+			case utfbom.UTF16LittleEndian:
+				enc, encname = unicode.UTF16(unicode.LittleEndian, unicode.IgnoreBOM), "utf-16le-bom"
+			}
+
+			if encname != "" {
+				b.Settings["encoding"] = encname
+				b.LocalSettings["encoding"] = true
+			}
+
+			reader := bufio.NewReader(transform.NewReader(sr, enc.NewDecoder()))
 
 			var ff FileFormat = FFAuto
 
@@ -545,7 +562,7 @@ func (b *Buffer) ReOpen() error {
 		return err
 	}
 
-	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+	enc, err := util.GetEncoding(b.Settings["encoding"].(string))
 	if err != nil {
 		return err
 	}
