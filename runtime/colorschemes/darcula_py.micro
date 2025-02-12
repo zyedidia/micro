@@ -1,0 +1,52 @@
+# Language related syntax
+color-link default "#A5B09E,#242424"
+color-link comment "italic #777777"
+color-link constant "bold #007364,#242424"        # None, self, Ellipse, cls, default for True and False*
+color-link constant.bool "bold #CB4B16,#242424"   # True && False
+color-link constant.number "bold #005A89"         # New: Float and int
+color-link constant.specialChar "italic #BF723F"  # New: Escape characters and {} inside string
+color-link constant.string "#6A8759,#242424"      # Single or double quotes, and docstring
+color-link constant.string.char "#6A8759,#242424" # unknown
+color-link constant.string.url "italic #777777"   # New: does not work*
+color-link identifier "italic #FFC66D,#242424"    # built in functions, def functions and function calls with or without dot
+color-link identifier.var "bold #A5B09E"          # New: Variables, attributes, placeholders*
+color-link identifier.class "bold #007364"        # New: As stated and few more*
+color-link message "bold #D33682,#C242424"        # As intended both for errors and some others
+color-link preproc "italic #3F8CBF,#242424"       # Statement preceded by an @
+color-link statement "#915010,#242424"            # Several keywords*
+color-link symbol "bold #CCCCCC,#242424"          # Default color
+color-link type "#817CCF,#242424"                 # Type hint in both inside and outisde of functions
+color-link type.keyword "#817CCF,#242424"         # Built-in types*
+color-link symbol.brackets "bold #AF7B27"         # New*
+color-link symbol.operator "bold #BF723F"         # New*
+color-link special "#CC8242,#242424"              # unknown
+color-link underlined "#D33682,#242424"           # unknown
+color-link error "bold #CB4B16,#242424"           # unknown
+color-link todo "bold #D33682,#242424"            # NOTE TODO*
+
+# Micro appearance
+color-link hlsearch "#CCCCCC,#32593D"
+color-link statusline "#FFC66D,#2C2C2C"
+color-link tabbar "#242424,#CCCCCC"
+color-link indent-char "#4F4F4F,#242424"
+color-link line-number "#977000,#2C2C2C"
+color-link current-line-number "#FFC66D,#242424"
+# 36, 37, 38 affected if "diffgutter" is set to true in "settings.json"
+color-link diff-added "#00AF00"
+color-link diff-modified "#FFAF00"
+color-link diff-deleted "#D70000"
+color-link gutter-error "#D33682,#242424"         # >> language error
+color-link gutter-warning "#36D387,#242424"       # >> i.e. spell checking
+color-link cursor-line "#2C2C2C"
+color-link color-column "#2C2C2C"
+color-link divider "#777777"                      # New
+color-link selection "#2C2C2C,#777777"            # New
+
+# No extended types; Plain brackets.
+color-link type.extended "default"
+color-link symbol.tag "#AE81FF,#242424"
+color-link match-brace "#242424,#7A9EC2"
+color-link tab-error "#D75F5F"
+color-link trailingws "#777777"
+
+# *NOTE* review the python3.yaml for more detail
