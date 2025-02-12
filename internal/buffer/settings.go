@@ -13,7 +13,9 @@ import (
 func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	settings := config.ParsedSettings()
 
-	if _, ok := b.LocalSettings["filetype"]; !ok && reloadFiletype {
+	_, local := b.LocalSettings["filetype"]
+	_, volatile := config.VolatileSettings["filetype"]
+	if reloadFiletype && !local && !volatile {
 		// need to update filetype before updating other settings based on it
 		b.Settings["filetype"] = "unknown"
 		if v, ok := settings["filetype"]; ok {
