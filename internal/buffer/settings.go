@@ -17,9 +17,14 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	_, volatile := config.VolatileSettings["filetype"]
 	if reloadFiletype && !local && !volatile {
 		// need to update filetype before updating other settings based on it
+		oldValue := b.Settings["filetype"]
 		b.Settings["filetype"] = "unknown"
 		if v, ok := settings["filetype"]; ok {
 			b.Settings["filetype"] = v
+		}
+		curValue := b.Settings["filetype"]
+		if oldValue != curValue {
+			b.doCallbacks("filetype", oldValue, curValue)
 		}
 	}
 
@@ -119,15 +124,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		}
 	}
 
-	if b.OptionCallback != nil {
-		b.OptionCallback(option, nativeValue)
-	}
-
-	if err := config.RunPluginFn("onBufferOptionChanged",
-		luar.New(ulua.L, b), luar.New(ulua.L, option),
-		luar.New(ulua.L, oldValue), luar.New(ulua.L, nativeValue)); err != nil {
-		screen.TermMessage(err)
-	}
+	b.doCallbacks(option, oldValue, nativeValue)
 }
 
 func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
@@ -153,4 +150,16 @@ func (b *Buffer) SetOption(option, value string) error {
 	}
 
 	return b.SetOptionNative(option, nativeValue)
+}
+
+func (b *Buffer) doCallbacks(option string, oldValue interface{}, newValue interface{}) {
+	if b.OptionCallback != nil {
+		b.OptionCallback(option, newValue)
+	}
+
+	if err := config.RunPluginFn("onBufferOptionChanged",
+		luar.New(ulua.L, b), luar.New(ulua.L, option),
+		luar.New(ulua.L, oldValue), luar.New(ulua.L, newValue)); err != nil {
+		screen.TermMessage(err)
+	}
 }
