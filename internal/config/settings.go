@@ -140,6 +140,8 @@ var (
 	ErrInvalidOption = errors.New("Invalid option")
 	ErrInvalidValue  = errors.New("Invalid value")
 
+	ErrGlobalOnlyOption = errors.New("This option can't be set locally")
+
 	// The options that the user can set
 	GlobalSettings map[string]interface{}
 
