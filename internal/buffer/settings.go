@@ -12,27 +12,29 @@ import (
 
 func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	settings := config.ParsedSettings()
+	oldValue := b.Settings["filetype"]
 
 	_, local := b.LocalSettings["filetype"]
 	_, volatile := config.VolatileSettings["filetype"]
 	if reloadFiletype && !local && !volatile {
 		// need to update filetype before updating other settings based on it
-		oldValue := b.Settings["filetype"]
+		config.InitLocalSettings(settings, b.Path)
 		b.Settings["filetype"] = "unknown"
 		if v, ok := settings["filetype"]; ok {
 			b.Settings["filetype"] = v
-		}
-		curValue := b.Settings["filetype"]
-		if oldValue != curValue {
-			b.doCallbacks("filetype", oldValue, curValue)
 		}
 	}
 
 	// update syntax rules, which will also update filetype if needed
 	b.UpdateRules()
-	settings["filetype"] = b.Settings["filetype"]
 
-	config.InitLocalSettings(settings, b.Path)
+	curValue := b.Settings["filetype"]
+	if oldValue != curValue {
+		settings["filetype"] = curValue
+		config.InitLocalSettings(settings, b.Path)
+		b.doCallbacks("filetype", oldValue, curValue)
+	}
+
 	for k, v := range config.DefaultCommonSettings() {
 		if k == "filetype" {
 			// prevent recursion
