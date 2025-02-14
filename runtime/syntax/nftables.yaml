@@ -7,7 +7,7 @@ detect:
 rules:
     - type: "\\b(chain|counter|map|rule|ruleset|set|table)\\b"
     - type: "\\b(ether|inet|i(cm)?p(x|(v?(4|6))?)|tcp|udp|8021q)\\b"
-    - special: "\\b(elements|hook|policy|priority|type|state)\\b"
+    - special: "\\b(element(s)?|hook|policy|priority|type|state)\\b"
     - identifier: "\\b(ct|iif|iifname|meta|oif|oifname|th|dport|sport|saddr|daddr|l4proto)\\b"
     - statement: "\\b(accept|drop|goto|jump|log|masquerade|reject|limit|queue)\\b"
     - preproc: "\\b(add|define|flush|include|delete)\\b"
@@ -24,3 +24,8 @@ rules:
     - comment: "(^|[[:space:]])#([^{].*)?$"
     - indent-char.whitespace: "[[:space:]]+$"
     - indent-char: "    + +| +  +"
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|FIXME):?"
