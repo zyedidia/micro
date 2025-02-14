@@ -12,6 +12,7 @@ import (
 
 func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	settings := config.ParsedSettings()
+	config.UpdatePathGlobLocals(settings, b.AbsPath)
 
 	_, local := b.LocalSettings["filetype"]
 	_, volatile := config.VolatileSettings["filetype"]
@@ -26,7 +27,6 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	// update syntax rules, which will also update filetype if needed
 	b.UpdateRules()
 
-	config.UpdatePathGlobLocals(settings, b.AbsPath)
 	config.UpdateFileTypeLocals(settings, b.Settings["filetype"].(string))
 	for k, v := range config.DefaultCommonSettings() {
 		if k == "filetype" {
