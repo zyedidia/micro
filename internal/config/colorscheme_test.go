@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 func TestSimpleStringToStyle(t *testing.T) {

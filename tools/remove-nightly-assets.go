@@ -9,7 +9,7 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
 )
 
 func main() {

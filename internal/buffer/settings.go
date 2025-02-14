@@ -5,7 +5,9 @@ import (
 	"reflect"
 
 	"github.com/zyedidia/micro/v2/internal/config"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	luar "layeh.com/gopher-luar"
 )
 
 func (b *Buffer) ReloadSettings(reloadFiletype bool) {
@@ -46,7 +48,8 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 }
 
 func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
-	if reflect.DeepEqual(b.Settings[option], nativeValue) {
+	oldValue := b.Settings[option]
+	if reflect.DeepEqual(oldValue, nativeValue) {
 		return
 	}
 
@@ -116,6 +119,12 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, nativeValue)
+	}
+
+	if err := config.RunPluginFn("onBufferOptionChanged",
+		luar.New(ulua.L, b), luar.New(ulua.L, option),
+		luar.New(ulua.L, oldValue), luar.New(ulua.L, nativeValue)); err != nil {
+		screen.TermMessage(err)
 	}
 }
 

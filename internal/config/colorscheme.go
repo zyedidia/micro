@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 // DefStyle is Micro's default style

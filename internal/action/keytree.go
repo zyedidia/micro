@@ -3,7 +3,7 @@ package action
 import (
 	"bytes"
 
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 type PaneKeyAction func(Pane) bool

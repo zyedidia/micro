@@ -18,7 +18,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 // ScrollUp is not an action
@@ -1864,7 +1864,7 @@ func (h *BufPane) CommandMode() bool {
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
 func (h *BufPane) ToggleOverwriteMode() bool {
-	h.isOverwriteMode = !h.isOverwriteMode
+	h.Buf.OverwriteMode = !h.Buf.OverwriteMode
 	return true
 }
 
@@ -1917,7 +1917,7 @@ func (h *BufPane) Quit() bool {
 			}
 		}
 
-		if config.GlobalSettings["autosave"].(float64) > 0 {
+		if config.GlobalSettings["autosave"].(float64) > 0 && h.Buf.Path != "" {
 			// autosave on means we automatically save when quitting
 			h.SaveCB("Quit", func() {
 				h.ForceQuit()

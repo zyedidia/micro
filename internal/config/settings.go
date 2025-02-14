@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/zyedidia/glob"
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"golang.org/x/text/encoding/htmlindex"
 )
@@ -69,8 +69,8 @@ var defaultCommonSettings = map[string]interface{}{
 	"hlsearch":        false,
 	"hltaberrors":     false,
 	"hltrailingws":    false,
-	"incsearch":       true,
 	"ignorecase":      true,
+	"incsearch":       true,
 	"indentchar":      " ",
 	"keepautoindent":  false,
 	"matchbrace":      true,
@@ -80,10 +80,10 @@ var defaultCommonSettings = map[string]interface{}{
 	"pageoverlap":     float64(2),
 	"permbackup":      false,
 	"readonly":        false,
+	"relativeruler":   false,
 	"reload":          "prompt",
 	"rmtrailingws":    false,
 	"ruler":           true,
-	"relativeruler":   false,
 	"savecursor":      false,
 	"saveundo":        false,
 	"scrollbar":       false,
@@ -93,7 +93,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"softwrap":        false,
 	"splitbottom":     true,
 	"splitright":      true,
-	"statusformatl":   "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+	"statusformatl":   "$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
 	"statusformatr":   "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
 	"statusline":      true,
 	"syntax":          true,
