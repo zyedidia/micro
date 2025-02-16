@@ -41,7 +41,7 @@ rules:
     - constant.bool: "\\b(true|false|null)\\b"
 
     # Annotations
-    - identifier: "@[A-Za-z_$][A-Za-z0-9_$]*\\b"
+    - identifier: "@[A-Za-z_$][\\w$]*\\b"
 
     # Single-quoted strings
     - constant.string:
@@ -61,7 +61,7 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
-            - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][a-zA-Z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
+            - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
             - identifier: "\\x24[{].*[}]"
 
     # Triple-double-quoted strings
@@ -71,7 +71,7 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
-            - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][a-zA-Z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
+            - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
             - identifier:
                 start: "[$][{]"
                 end: "[}]"

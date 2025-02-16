@@ -14,7 +14,7 @@ rules:
     - symbol: "[-=/:;,@]"
     - symbol.operator: "[<>.&|^!]|\\b(and|ge|gt|le|lt|or|xor)\\b"
     - constant.string: '([\"]{1})(.*)([\"]{1})'
-    - identifier.var: "[$@][a-zA-Z_.][a-zA-Z0-9_/.-]*"
+    - identifier.var: "[$@][a-zA-Z_.][\\w/.-]*"
     - comment: "(^|[[:space:]])#([^{].*)?$"
     - indent-char.whitespace: "[[:space:]]+$"
     - indent-char: "    + +| +  +"

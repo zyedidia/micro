@@ -22,7 +22,7 @@ rules:
         end: '"'
         skip: '\\"'
         rules:
-            - identifier.var: '[\\$@%].[a-zA-Z0-9_]*'
+            - identifier.var: '[\\$@%].\w*'
 
     - constant.string:
         start: "'"
@@ -38,7 +38,7 @@ rules:
     - constant.number: "\\b[0-9]+"
     - constant.number: "\\b0x[a-f0-9]+"
     - constant.string.url: "`(.+?)`"
-    - identifier.var: '[\\$@%].[a-zA-Z0-9_]*'
+    - identifier.var: '[\\$@%].\w*'
 
     - preproc:
         start: "(^use| = new)"

@@ -19,7 +19,7 @@ rules:
     - preproc: "(ifarch|ifnarch|ifos|ifnos)"
     - constant.string: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
     - statement: "%(if|else|endif|define|global|undefine)"
-    - statement: "%_?([A-Z_a-z_0-9_]*)"
+    - statement: "%_?(\\w*)"
     - statement:
         start: "%\\{"
         end: "\\}"

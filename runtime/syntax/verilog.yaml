@@ -7,7 +7,7 @@ rules:
     - preproc: "\\b(module|package|program|endmodule|endpackage|endprogram)\\b"
     - type.keyword: "\\b(task|interface|class|endtask|endinterface|endclass)\\b"
     # builtin functions like $display
-    - special: "\\$[0-9A-Za-z_]+"
+    - special: "\\$\\w+"
 
     # Verilog keywords
     - statement: "\\b(always|and|assign|automatic|begin|buf|bufif0|bufif1|case|casex|casez|cell|cmos|config)\\b"
@@ -38,7 +38,7 @@ rules:
     - constant.number: "\\b[0-9]+\\b"
     - constant.number: "\\b'[su]?[dboh][0-9xzXZa-fA-F]+\\b"
     # .asdf(...) argument syntax
-    - special: "\\.((\\*)|([A-Za-z][A-Za-z0-9_]*))"
+    - special: "\\.((\\*)|([A-Za-z]\\w*))"
 
     - constant.string:
         start: "\""

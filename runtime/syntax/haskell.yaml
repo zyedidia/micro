@@ -7,8 +7,8 @@ rules:
     - symbol.operator: "[!#$%&:*+/<=>?@.\\\\^\\|~\\p{Sm}\\-]+"
 
     # Identifiers (with or without a module name)
-    - type: "\\b([A-Z][A-Za-z0-9_]*\\.)*[A-Z]+[A-Za-z0-9_']*\\b"
-    - default: "\\b([A-Z][A-Za-z0-9_]*\\.)*[a-z][A-Za-z0-9_']*\\b"
+    - type: "\\b([A-Z]\\w*\\.)*[A-Z]+[\\w']*\\b"
+    - default: "\\b([A-Z]\\w*\\.)*[a-z][\\w']*\\b"
 
     - statement: ";"
     - symbol.bracket: "[\\(\\)\\[\\]\\{\\}]"

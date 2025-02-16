@@ -17,7 +17,7 @@ rules:
     - statement: "\\b(if|then|else)\\b"
       #blocs
     - type: "\\b(begin|end|object|struct|sig|for|while|do|done|to|downto)\\b"
-    - type: "'[0-9A-Za-z_]+"
+    - type: "'\\w+"
       #constantes
     - constant.bool: "\\b(true|false)\\b"
       #modules/classes

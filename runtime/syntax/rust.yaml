@@ -17,7 +17,7 @@ rules:
       # Booleans
     - constant: "\\b(true|false)\\b"
       # Traits/Enums/Structs/Types/etc.
-    - type: "\\b[A-Z]+[a-zA-Z_0-9]*[a-z]+[a-zA-Z_0-9]*\\b"
+    - type: "\\b[A-Z]+\\w*[a-z]+\\w*\\b"
       # Builtin types that start with lowercase.
     - type: "\\b(bool|str|isize|usize|((i|u)(8|16|32|64))|f32|f64)\\b"
 

@@ -14,7 +14,7 @@ rules:
     # Types
     - type: "\\b(AABB|Array|Basis|Color|Dictionary|NodePath|Object|Plane|PoolByteArray|PoolColorArray|PoolIntArray|PoolRealArray|PoolVector2Array|PoolVector3Array|Quat|Rect2|RID|String|Transform|Transform2D|Vector2|Vector3)\\b"
     # Definitions
-    - identifier: "func [a-zA-Z_0-9]+"
+    - identifier: "func \\w+"
     # Keywords
     - statement: "\\b(and|as|assert|break|breakpoint|class|const|continue|elif|else|enum|export|extends|for|func|if|in|is|map|master|mastersync|match|not|onready|or|pass|remote|remotesync|return|self|setget|slave|slavesync|signal|sync|tool|var|while|yield)\\b"
 

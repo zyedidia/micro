@@ -14,7 +14,7 @@ rules:
     # the standard library
     - identifier: "\\bstd\\.(extVar|thisFile|type|length|objectHas|objectFields|objectHasAll|objectFieldsAll|prune|mapWithKey|abs|sign|max|min|pow|exp|log|exponent|mantissa|floor|ceil|sqrt|sin|cos|tan|asin|acos|atan|mod|assertEqual|toString|codepoint|char|substr|findSubstr|startsWith|endsWith|split|splitLimit|strReplace|asciiUpper|asciiLower|stringChars|format|escapeStringDollars|escapeStringPython|parseInt|parseOctal|parseHex|parseJson|encodeUTF8|decodeUTF8|manifestIni|manifestPython|manifestPythonVars|manifestJsonEx|manifestYamlDoc|manifestYamlStream|manifestXmlJsonml|makeArray|count|find|map|mapWithIndex|filterMap|filter|foldl|foldr|range|join|lines|flattenArrays|sort|uniq|set|setInter|setUnion|setDiff|setMember|base64|base64DecodeBytes|base64Decode|md5|mergePatch|trace)\\b"
     # unquoted object keys
-    - type: "[_a-zA-Z][_a-zA-Z0-9]*\\s*:"
+    - type: "[_a-zA-Z]\\w*\\s*:"
     # object key separator
     - statement: ":"
     # keywords

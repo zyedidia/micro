@@ -10,7 +10,7 @@ rules:
     - special: "\\bnil\\b"
     - preproc: "\\b[tT]b>"
     - constant.string: "\\\"(\\\\.|[^\"])*\\\""
-    - constant.specialChar: "'[A-Za-z][A-Za-z0-9_-]+"
+    - constant.specialChar: "'[A-Za-z][\\w-]+"
     - constant.specialChar: "\\\\.?"
     - comment: "(^|[[:space:]]);.*"
     - indent-char.whitespace: "[[:space:]]+$"

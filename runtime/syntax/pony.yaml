@@ -18,7 +18,7 @@ rules:
     - symbol.operator: "(\\-|\\+|\\*|/|\\!|%|<<|>>)"
     - symbol.operator: "(==|!=|<=|>=|<|>)"
     - statement: "\\b(is|isnt|not|and|or|xor)\\b"
-    - type: "\\b(_*[A-Z][_a-zA-Z0-9\\']*)\\b"
+    - type: "\\b(_*[A-Z][\\w\\']*)\\b"
     - constant: "\\b(this)\\b"
     - constant.bool: "\\b(true|false)\\b"
     - constant.number: "\\b((0b[0-1_]*)|(0o[0-7_]*)|(0x[0-9a-fA-F_]*)|([0-9_]+(\\.[0-9_]+)?((e|E)(\\\\+|-)?[0-9_]+)?))\\b"

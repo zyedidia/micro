@@ -12,11 +12,11 @@ rules:
     - statement: "-(e|d|f|r|g|u|w|x|L)\\b"
     - statement: "-(eq|ne|gt|lt|ge|le|s|n|z)\\b"
       # Highlight variables ... official portage ones in red, all others in bright red
-    - preproc: "\\$\\{?[a-zA-Z_0-9]+\\}?"
+    - preproc: "\\$\\{?\\w+\\}?"
     - special: "\\b(ARCH|HOMEPAGE|DESCRIPTION|IUSE|SRC_URI|LICENSE|SLOT|KEYWORDS|FILESDIR|WORKDIR|(P|R)?DEPEND|PROVIDE|DISTDIR|RESTRICT|USERLAND)\\b"
     - special: "\\b(S|D|T|PV|PF|P|PN|A)\\b|\\bC(XX)?FLAGS\\b|\\bLDFLAGS\\b|\\bC(HOST|TARGET|BUILD)\\b"
       # Highlight portage commands
-    - identifier: "\\buse(_(with|enable))?\\b [!a-zA-Z0-9_+ -]*|inherit.*"
+    - identifier: "\\buse(_(with|enable))?\\b [!\\w+ -]*|inherit.*"
     - statement: "\\be(begin|end|conf|install|make|warn|infon?|error|log|patch|new(group|user))\\b"
     - statement: "\\bdie\\b|\\buse(_(with|enable))?\\b|\\binherit\\b|\\bhas\\b|\\b(has|best)_version\\b|\\bunpack\\b"
     - statement: "\\b(do|new)(ins|s?bin|doc|lib(\\.so|\\.a)|man|info|exe|initd|confd|envd|pam|menu|icon)\\b"

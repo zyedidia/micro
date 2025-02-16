@@ -14,7 +14,7 @@ rules:
 - type: "\\b(canvas)\\b"
 
 # functions
-- identifier.function: "[a-zA-Z_0-9]+\\("
+- identifier.function: "\\w+\\("
 
 # built-in functions
 - type: "\\b(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes)\\b"
