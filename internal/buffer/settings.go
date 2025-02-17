@@ -25,9 +25,9 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 
 	// update syntax rules, which will also update filetype if needed
 	b.UpdateRules()
-	settings["filetype"] = b.Settings["filetype"]
 
-	config.InitLocalSettings(settings, b.Path)
+	config.UpdatePathGlobLocals(settings, b.AbsPath)
+	config.UpdateFileTypeLocals(settings, b.Settings["filetype"].(string))
 	for k, v := range config.DefaultCommonSettings() {
 		if k == "filetype" {
 			// prevent recursion
