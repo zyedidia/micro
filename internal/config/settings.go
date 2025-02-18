@@ -312,7 +312,9 @@ func UpdateFileTypeLocals(settings map[string]interface{}, filetype string) {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && strings.HasPrefix(k, "ft:") {
 			if filetype == k[3:] {
 				for k1, v1 := range v.(map[string]interface{}) {
-					settings[k1] = v1
+					if k1 != "filetype" {
+						settings[k1] = v1
+					}
 				}
 			}
 		}
