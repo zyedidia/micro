@@ -38,6 +38,7 @@ var (
 	flagProfile   = flag.Bool("profile", false, "Enable CPU profiling (writes profile info to ./micro.prof)")
 	flagPlugin    = flag.String("plugin", "", "Plugin command")
 	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
+	flagWrite     = flag.String("write", "", "Write file (internal)")
 	optionFlags   map[string]*string
 
 	sighup chan os.Signal
@@ -223,6 +224,22 @@ func LoadInput(args []string) []*buffer.Buffer {
 	return buffers
 }
 
+func write(name string) (err error) {
+	var f *os.File
+
+	if f, err = os.OpenFile(name, os.O_WRONLY|os.O_CREATE, 0666); err != nil {
+		return
+	}
+	if err = f.Truncate(0); err != nil {
+		return
+	}
+	if _, err = io.Copy(f, os.Stdin); err != nil {
+		return
+	}
+
+	return f.Close()
+}
+
 func main() {
 	defer func() {
 		if util.Stdout.Len() > 0 {
@@ -244,6 +261,14 @@ func main() {
 			log.Fatal("error starting CPU profile: ", err)
 		}
 		defer pprof.StopCPUProfile()
+	}
+
+	if *flagWrite != "" {
+		if err := write(*flagWrite); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+		return
 	}
 
 	InitLog()
