@@ -1794,12 +1794,12 @@ func (h *BufPane) HalfPageDown() bool {
 
 // ToggleDiffGutter turns the diff gutter off and on
 func (h *BufPane) ToggleDiffGutter() bool {
-	if !h.Buf.Settings["diffgutter"].(bool) {
-		h.Buf.Settings["diffgutter"] = true
+	diffgutter := !h.Buf.Settings["diffgutter"].(bool)
+	h.Buf.SetOptionNative("diffgutter", diffgutter)
+	if diffgutter {
 		h.Buf.UpdateDiff()
 		InfoBar.Message("Enabled diff gutter")
 	} else {
-		h.Buf.Settings["diffgutter"] = false
 		InfoBar.Message("Disabled diff gutter")
 	}
 	return true
@@ -1807,11 +1807,11 @@ func (h *BufPane) ToggleDiffGutter() bool {
 
 // ToggleRuler turns line numbers off and on
 func (h *BufPane) ToggleRuler() bool {
-	if !h.Buf.Settings["ruler"].(bool) {
-		h.Buf.Settings["ruler"] = true
+	ruler := !h.Buf.Settings["ruler"].(bool)
+	h.Buf.SetOptionNative("ruler", ruler)
+	if ruler {
 		InfoBar.Message("Enabled ruler")
 	} else {
-		h.Buf.Settings["ruler"] = false
 		InfoBar.Message("Disabled ruler")
 	}
 	return true

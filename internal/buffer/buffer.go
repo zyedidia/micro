@@ -325,28 +325,17 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.AbsPath = absPath
 		b.Path = path
 
-		// this is a little messy since we need to know some settings to read
-		// the file properly, but some settings depend on the filetype, which
-		// we don't know until reading the file. We first read the settings
-		// into a local variable and then use that to determine the encoding,
-		// readonly, and fileformat necessary for reading the file and
-		// assigning the filetype.
-		settings := config.DefaultCommonSettings()
 		b.Settings = config.DefaultCommonSettings()
 		b.LocalSettings = make(map[string]bool)
 		for k, v := range config.GlobalSettings {
 			if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
 				// make sure setting is not global-only
-				settings[k] = v
 				b.Settings[k] = v
 			}
 		}
-		config.InitLocalSettings(settings, absPath)
-		b.Settings["readonly"] = settings["readonly"]
-		b.Settings["filetype"] = settings["filetype"]
-		b.Settings["syntax"] = settings["syntax"]
+		config.UpdatePathGlobLocals(b.Settings, absPath)
 
-		enc, err := htmlindex.Get(settings["encoding"].(string))
+		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
 		if err != nil {
 			enc = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
@@ -366,7 +355,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			if size == 0 {
 				// for empty files, use the fileformat setting instead of
 				// autodetection
-				switch settings["fileformat"] {
+				switch b.Settings["fileformat"] {
 				case "unix":
 					ff = FFUnix
 				case "dos":
@@ -397,8 +386,8 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	}
 
 	b.UpdateRules()
-	// init local settings again now that we know the filetype
-	config.InitLocalSettings(b.Settings, b.Path)
+	// we know the filetype now, so update per-filetype settings
+	config.UpdateFileTypeLocals(b.Settings, b.Settings["filetype"].(string))
 
 	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
 		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)

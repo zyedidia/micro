@@ -12,8 +12,13 @@ import (
 
 func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	settings := config.ParsedSettings()
+	config.UpdatePathGlobLocals(settings, b.AbsPath)
 
-	if _, ok := b.LocalSettings["filetype"]; !ok && reloadFiletype {
+	oldFiletype := b.Settings["filetype"].(string)
+
+	_, local := b.LocalSettings["filetype"]
+	_, volatile := config.VolatileSettings["filetype"]
+	if reloadFiletype && !local && !volatile {
 		// need to update filetype before updating other settings based on it
 		b.Settings["filetype"] = "unknown"
 		if v, ok := settings["filetype"]; ok {
@@ -23,9 +28,14 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 
 	// update syntax rules, which will also update filetype if needed
 	b.UpdateRules()
-	settings["filetype"] = b.Settings["filetype"]
 
-	config.InitLocalSettings(settings, b.Path)
+	curFiletype := b.Settings["filetype"].(string)
+	if oldFiletype != curFiletype {
+		b.doCallbacks("filetype", oldFiletype, curFiletype)
+	}
+
+	config.UpdateFileTypeLocals(settings, curFiletype)
+
 	for k, v := range config.DefaultCommonSettings() {
 		if k == "filetype" {
 			// prevent recursion
@@ -117,15 +127,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		}
 	}
 
-	if b.OptionCallback != nil {
-		b.OptionCallback(option, nativeValue)
-	}
-
-	if err := config.RunPluginFn("onBufferOptionChanged",
-		luar.New(ulua.L, b), luar.New(ulua.L, option),
-		luar.New(ulua.L, oldValue), luar.New(ulua.L, nativeValue)); err != nil {
-		screen.TermMessage(err)
-	}
+	b.doCallbacks(option, oldValue, nativeValue)
 }
 
 func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
@@ -151,4 +153,16 @@ func (b *Buffer) SetOption(option, value string) error {
 	}
 
 	return b.SetOptionNative(option, nativeValue)
+}
+
+func (b *Buffer) doCallbacks(option string, oldValue interface{}, newValue interface{}) {
+	if b.OptionCallback != nil {
+		b.OptionCallback(option, newValue)
+	}
+
+	if err := config.RunPluginFn("onBufferOptionChanged",
+		luar.New(ulua.L, b), luar.New(ulua.L, option),
+		luar.New(ulua.L, oldValue), luar.New(ulua.L, newValue)); err != nil {
+		screen.TermMessage(err)
+	}
 }
