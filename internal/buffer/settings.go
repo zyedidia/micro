@@ -7,6 +7,8 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"golang.org/x/text/encoding/htmlindex"
+	"golang.org/x/text/encoding/unicode"
 	luar "layeh.com/gopher-luar"
 )
 
@@ -97,6 +99,12 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 			b.UpdateRules()
 		}
 	} else if option == "encoding" {
+		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+		if err != nil {
+			enc = unicode.UTF8
+			b.Settings["encoding"] = "utf-8"
+		}
+		b.encoding = enc
 		b.isModified = true
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
