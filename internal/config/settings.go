@@ -116,6 +116,8 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"helpsplit":      "hsplit",
 	"infobar":        true,
 	"keymenu":        false,
+	"lockbindings":   false,
+	"locksettings":   false,
 	"mouse":          true,
 	"multiopen":      "tab",
 	"parsecursor":    false,

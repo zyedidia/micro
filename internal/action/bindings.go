@@ -256,6 +256,13 @@ func eventsEqual(e1 Event, e2 Event) bool {
 	return e1 == e2
 }
 
+func TryBindKeyPlug(k, v string, overwrite bool) (bool, error) {
+	if l, ok := config.GlobalSettings["lockbindings"]; ok && l.(bool) {
+		return false, errors.New("bindings.json file locked by user for all plugins")
+	}
+	return TryBindKey(k, v, overwrite)
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
