@@ -4,6 +4,7 @@ local micro = import("micro")
 local buffer = import("micro/buffer")
 local config = import("micro/config")
 local shell = import("micro/shell")
+local filepath = import("filepath")
 local humanize = import("humanize")
 local strings = import("strings")
 
@@ -34,24 +35,23 @@ function size(b)
     return humanize.Bytes(b:Size())
 end
 
-function branch(b)
+local function parseRevision(b, opt)
     if b.Type.Kind ~= buffer.BTInfo then
-        local branch, err = shell.ExecCommand("git", "rev-parse", "--abbrev-ref", "HEAD")
+        local dir = filepath.Dir(b.Path)
+        local str, err = shell.ExecCommand("git", "-C", dir, "rev-parse", opt, "HEAD")
         if err == nil then
-            return strings.TrimSpace(branch)
+            return strings.TrimSpace(str)
         end
-        return ""
     end
+    return ""
+end
+
+function branch(b)
+    return parseRevision(b, "--abbrev-ref")
 end
 
 function hash(b)
-    if b.Type.Kind ~= 5 then
-        local hash, err = shell.ExecCommand("git", "rev-parse", "--short", "HEAD")
-        if err == nil then
-            return strings.TrimSpace(hash)
-        end
-        return ""
-    end
+    return parseRevision(b, "--short")
 end
 
 function paste(b)
