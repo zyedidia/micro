@@ -1,0 +1,71 @@
+# PRQL syntax highlighting file for micro - https://micro-editor.github.io/
+# https://prql-lang.org/
+# https://github.com/PRQL/prql
+filetype: prql
+
+detect:
+    filename: "\\.prql$"
+
+rules:
+    - statement: "\\b(let|module)\\b"
+
+      # Types
+    - type: "\\b(u?int(8|16|32|64)?|float(32|64)|bool|text|date|time|timestamp)\\b"
+    - type.keyword: "\\b(enum)\\b"
+    - constant.bool: "\\b(true|false|null|this|that)\\b"
+
+      # Built-in functions
+    - identifier: "\\b(abs|floor|ceil|pi|exp|ln|log10|log|sqrt|degrees|radians|cos|acos|sin|asin|tan|atan|pow|round)\\b" # Math module
+    - identifier: "\\b(min|max|sum|average|stddev|all|any|concat_array|count)\\b" # Aggregate functions
+    - identifier: "\\b(lag|lead|first|last|rank|rank_dense|row_number)\\b" # Window functions
+    - identifier: "\\b(tuple_every|tuple_map|tuple_zip|_eq|_is_null)\\b" # Tuple functions
+    - identifier: "\\b(as|in|from_text)\\b" # Misc
+    - identifier: "\\b(lower|upper|ltrim|rtrim|trim|length|extract|replace|starts_with|contains|ends_with)\\b" # Text module
+    - identifier: "\\b(to_text)\\b" # Date module
+    - identifier: "\\b(read_parquet|read_csv)\\b" # File-reading functions
+
+      # Modules
+    - identifier.class: "\\b(math|text|date|prql)\\b"
+
+      # Transforms
+    - statement: "\\b(aggregate|derive|filter|from|group|join|select|sort|take|window)\\b"
+
+      # Operators
+    - symbol.operator: "([~^.:;,+*|=!\\%@]|<|>|/|-|&)"
+
+      # Brackets
+    - symbol.brackets: "(\\{|\\})"
+    - symbol.brackets: "(\\(|\\))"
+    - symbol.brackets: "(\\[|\\])"
+
+      # Numbers and strings
+    - constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
+    - constant.number: "\\b0b(_?[01])+\\b"     # bin
+    - constant.number: "\\b0o(_?[0-7])+\\b"    # oct
+    - constant.number: "\\b0x(_?[0-9a-fA-F])+\\b" # hex
+    - constant: "\\b[0-9]+(years|months|weeks|days|hours|minutes|seconds|milliseconds|microseconds)\\b"
+
+    - constant.string:
+        start: "[frs]?\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\[bfnrt'\\\"\\\\]"
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u{[0-9A-Fa-f]{1,6}})"
+
+    - constant.string:
+        start: "[frs]?'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u{[0-9A-Fa-f]{1,6}})"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules:
+            - todo: "(TODO|FIXME|NOTE):?"
+
+      # Decorators
+    - preproc: "@\\{([a-z]+(=[a-z0-9]+,?)?)*\\}"
