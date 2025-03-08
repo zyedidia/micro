@@ -3,8 +3,8 @@ package main
 import (
 	"bufio"
 	"encoding/gob"
+	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"sort"
@@ -12,6 +12,7 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 func shouldContinue() bool {
@@ -39,7 +40,16 @@ func CleanConfig() {
 	}
 
 	fmt.Println("Cleaning default settings")
-	config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+
+	settingsFile := filepath.Join(config.ConfigDir, "settings.json")
+	err := config.WriteSettings(settingsFile)
+	if err != nil {
+		if errors.Is(err, util.ErrOverwrite) {
+			fmt.Println(err.Error())
+		} else {
+			fmt.Println("Error writing settings.json file: " + err.Error())
+		}
+	}
 
 	// detect unused options
 	var unusedOptions []string
@@ -67,16 +77,20 @@ func CleanConfig() {
 			fmt.Printf("%s (value: %v)\n", s, config.GlobalSettings[s])
 		}
 
-		fmt.Printf("These options will be removed from %s\n", filepath.Join(config.ConfigDir, "settings.json"))
+		fmt.Printf("These options will be removed from %s\n", settingsFile)
 
 		if shouldContinue() {
 			for _, s := range unusedOptions {
 				delete(config.GlobalSettings, s)
 			}
 
-			err := config.OverwriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+			err := config.OverwriteSettings(settingsFile)
 			if err != nil {
-				fmt.Println("Error writing settings.json file: " + err.Error())
+				if errors.Is(err, util.ErrOverwrite) {
+					fmt.Println(err.Error())
+				} else {
+					fmt.Println("Error overwriting settings.json file: " + err.Error())
+				}
 			}
 
 			fmt.Println("Removed unused options")
@@ -85,12 +99,13 @@ func CleanConfig() {
 	}
 
 	// detect incorrectly formatted buffer/ files
-	files, err := ioutil.ReadDir(filepath.Join(config.ConfigDir, "buffers"))
+	buffersPath := filepath.Join(config.ConfigDir, "buffers")
+	files, err := os.ReadDir(buffersPath)
 	if err == nil {
 		var badFiles []string
 		var buffer buffer.SerializedBuffer
 		for _, f := range files {
-			fname := filepath.Join(config.ConfigDir, "buffers", f.Name())
+			fname := filepath.Join(buffersPath, f.Name())
 			file, e := os.Open(fname)
 
 			if e == nil {
@@ -105,9 +120,9 @@ func CleanConfig() {
 		}
 
 		if len(badFiles) > 0 {
-			fmt.Printf("Detected %d files with an invalid format in %s\n", len(badFiles), filepath.Join(config.ConfigDir, "buffers"))
+			fmt.Printf("Detected %d files with an invalid format in %s\n", len(badFiles), buffersPath)
 			fmt.Println("These files store cursor and undo history.")
-			fmt.Printf("Removing badly formatted files in %s\n", filepath.Join(config.ConfigDir, "buffers"))
+			fmt.Printf("Removing badly formatted files in %s\n", buffersPath)
 
 			if shouldContinue() {
 				removed := 0

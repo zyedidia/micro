@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -25,12 +25,11 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
-
-const backupTime = 8000
 
 var (
 	// OpenBuffers is a list of the currently open buffers
@@ -89,6 +88,8 @@ type SharedBuffer struct {
 	// LocalSettings customized by the user for this buffer only
 	LocalSettings map[string]bool
 
+	encoding encoding.Encoding
+
 	Suggestions   []string
 	Completions   []string
 	CurSuggestion int
@@ -101,7 +102,8 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	requestedBackup bool
+	RequestedBackup bool
+	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
 	// are viewing a file that is constantly changing
@@ -237,17 +239,20 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	}
 
-	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
-	readonly := os.IsPermission(err)
-	f.Close()
-
 	fileInfo, serr := os.Stat(filename)
-	if serr != nil && !os.IsNotExist(serr) {
+	if serr != nil && !errors.Is(serr, fs.ErrNotExist) {
 		return nil, serr
 	}
 	if serr == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
+	if serr == nil && !fileInfo.Mode().IsRegular() {
+		return nil, errors.New("Error: " + filename + " is not a regular file and cannot be opened")
+	}
+
+	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	readonly := errors.Is(err, fs.ErrPermission)
+	f.Close()
 
 	file, err := os.Open(filename)
 	if err == nil {
@@ -255,7 +260,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	var buf *Buffer
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else if err != nil {
@@ -335,9 +340,9 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		}
 		config.UpdatePathGlobLocals(b.Settings, absPath)
 
-		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+		b.encoding, err = htmlindex.Get(b.Settings["encoding"].(string))
 		if err != nil {
-			enc = unicode.UTF8
+			b.encoding = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
 		}
 
@@ -348,7 +353,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			return NewBufferFromString("", "", btype)
 		}
 		if !hasBackup {
-			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
+			reader := bufio.NewReader(transform.NewReader(r, b.encoding.NewDecoder()))
 
 			var ff FileFormat = FFAuto
 
@@ -389,7 +394,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	// we know the filetype now, so update per-filetype settings
 	config.UpdateFileTypeLocals(b.Settings, b.Settings["filetype"].(string))
 
-	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)
 	}
 
@@ -540,7 +545,7 @@ func (b *Buffer) ReOpen() error {
 	}
 
 	reader := bufio.NewReader(transform.NewReader(file, enc.NewDecoder()))
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	txt := string(data)
 
 	if err != nil {
