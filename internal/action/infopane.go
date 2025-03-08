@@ -193,11 +193,19 @@ func (h *InfoPane) CommandComplete() {
 	b := h.Buf
 	c := b.GetActiveCursor()
 
+	cc := buffer.AutocompleteCursorCheck(c)
+	rc := buffer.AutocompleteRuneCheck(c)
+
 	// Cycling commands
-	if !buffer.AutocompleteCheck(c) {
+	if !b.HasSuggestions && !cc && !rc {
 		return
 	}
+
 	if b.HasSuggestions {
+		if !cc {
+			return
+		}
+
 		prevSuggestion := b.CycleAutocomplete(true)
 		b.PerformSingleAutocomplete(prevSuggestion, c)
 		return

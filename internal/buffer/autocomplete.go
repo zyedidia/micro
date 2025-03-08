@@ -23,17 +23,21 @@ func (b *Buffer) GetSuggestions() {
 
 }
 
-func AutocompleteCheck(cursor *Cursor) bool {
-	if cursor.HasSelection() {
-		return false
-	}
-	if cursor.X == 0 {
-		return false
-	}
+func AutocompleteRuneCheck(cursor *Cursor) bool {
 	r := cursor.RuneUnder(cursor.X)
 	prev := cursor.RuneUnder(cursor.X - 1)
 	if !util.IsAutocomplete(prev) || util.IsWordChar(r) {
 		// don't autocomplete if cursor is within a word
+		return false
+	}
+	return true
+}
+
+func AutocompleteCursorCheck(cursor *Cursor) bool {
+	if cursor.HasSelection() {
+		return false
+	}
+	if cursor.X == 0 {
 		return false
 	}
 	return true
