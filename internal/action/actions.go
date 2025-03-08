@@ -1900,6 +1900,9 @@ func (h *BufPane) ForceQuit() bool {
 		h.Unsplit()
 	} else if len(Tabs.List) > 1 {
 		Tabs.RemoveTab(h.splitID)
+		if e := MainTab().CurPane(); e != nil { // e == nil for 'raw' tab
+			e.SetActive(true)
+		}
 	} else {
 		screen.Screen.Fini()
 		InfoBar.Close()
