@@ -23,7 +23,7 @@ rules:
     - preproc: "<%|%>"
     - red: "&[^;[[:space:]]]*;"
     - statement: "\\b(BEGIN|END|alias|and|begin|break|case|class|def|defined\\?|do|else|elsif|end|ensure|false|for|if|in|module|next|nil|not|or|redo|rescue|retry|return|self|super|then|true|undef|unless|until|when|while|yield)\\b"
-    - identifier.var: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
+    - identifier.var: "(\\$|@|@@)?\\b[A-Z]+\\w*"
     - magenta: "(?i)([  ]|^):[0-9A-Z_]+\\b"
     - identifier.macro: "\\b(__FILE__|__LINE__)\\b"
     - brightmagenta: "!/([^/]|(\\\\/))*/[iomx]*|%r\\{([^}]|(\\\\}))*\\}[iomx]*"
