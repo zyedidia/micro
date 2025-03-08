@@ -135,6 +135,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
         * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
     * distro-agnostic package managers:
         * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
+        * `dbin add micro` OR in case you want to use test micro without installing it or anything at all: `wget -qO- "https://raw.githubusercontent.com/xplshn/dbin/master/stubdl" | sh -s -- run micro` (with [Dbin](https://github.com/xplshn/dbin))
         * `flox install micro` (with [Flox](https://flox.dev))
 * Windows: [Chocolatey](https://chocolatey.org), [Scoop](https://scoop.sh/) and [WinGet](https://learn.microsoft.com/en-us/windows/package-manager/winget/).
     * `choco install micro`.
