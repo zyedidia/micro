@@ -119,10 +119,17 @@ func CharacterCountInString(str string) int {
 }
 
 // BytePosFromCharPos returns the position of the byte in `b` that
-// starts first rune of the character indexed by `ci`
+// starts first rune of the character indexed by `ci`. If `ci` is
+// not a valid position, then -1 is returned
 func BytePosFromCharPos(b []byte, ci int) int {
+	if ci < 0 {
+		return -1
+	}
 	i := 0
 	for j := 0; j < ci; j++ {
+		if i >= len(b) {
+			return -1
+		}
 		_, _, size := DecodeCharacter(b[i:])
 		i += size
 	}

@@ -323,6 +323,20 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 	}
 }
 
+// Expand returns the template, with variables replaced by submatches.
+// It is analogous to `(*regexp.Regexp).Expand`
+func (b *Buffer) Expand(re any, template []byte, match []Loc) (string, error) {
+	rgrp, err := regexpGroup(re)
+	if err != nil {
+		return "", err
+	}
+	l := b.LineBytes(match[0].Y)
+	m := util.RangeMap(match, func(_ int, pos Loc) int {
+		return util.BytePosFromCharPos(l, pos.X)
+	})
+	return string(rgrp[0].Expand(nil, template, l, m)), nil
+}
+
 func (b *Buffer) replaceAllFuncFunc(re any, start, end Loc, find bufferFind, repl func(match []Loc) []byte) (int, Loc, error) {
 	charsEnd := util.CharacterCount(b.LineBytes(end.Y))
 	var deltas []Delta
@@ -343,9 +357,9 @@ func (b *Buffer) replaceAllFuncFunc(re any, start, end Loc, find bufferFind, rep
 
 // ReplaceAll replaces all matches of the regexp `re` in the given area. The
 // new text is obtained from `template` by replacing each variable with the
-// corresponding submatch as in `Regexp.Expand`. The function returns the
-// number of replacements made, the new end position and any error that
-// occured during regexp compilation
+// corresponding submatch as in `(*regexp.Regexp).Expand`. The function
+// returns the number of replacements made, the new end position and any
+// error that occured during regexp compilation
 func (b *Buffer) ReplaceAll(re any, start, end Loc, template []byte) (int, Loc, error) {
 	var replace []byte
 
