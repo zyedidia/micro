@@ -128,7 +128,11 @@ func (b *Buffer) FindDown(re any, start, end Loc) ([]Loc, error) {
 	return b.findDownFunc(re, start, end, (*regexp.Regexp).FindSubmatchIndex)
 }
 
-func (b *Buffer) findUpFunc(re any, start, end Loc, find bytesFind) ([]Loc, error) {
+// FindUp returns a slice containing the start and end positions
+// of the last match of `re` between `start` and `end` plus those
+// of all submatches (capturing groups), or nil if no match exists.
+// The start and end positions of an unused submatch are invalid.
+func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
 	rgrp, err := regexpGroup(re)
 	if err != nil {
 		return nil, err
@@ -155,7 +159,14 @@ func (b *Buffer) findUpFunc(re any, start, end Loc, find bytesFind) ([]Loc, erro
 		to := Loc{charCount, i}.Clamp(start, end)
 
 		b.findAllFuncFunc(rgrp, from, to, func(b *Buffer, re any, start, end Loc) ([]Loc, error) {
-			return b.findDownFunc(rgrp, start, end, find)
+			return b.findDownFunc(rgrp, start, end, func(r *regexp.Regexp, l []byte) []int {
+				allMatches := r.FindAllSubmatchIndex(l, -1)
+				if allMatches != nil {
+					return allMatches[len(allMatches)-1]
+				} else {
+					return nil
+				}
+			})
 		}, func(match []Loc) {
 			locs = match
 		})
@@ -165,21 +176,6 @@ func (b *Buffer) findUpFunc(re any, start, end Loc, find bytesFind) ([]Loc, erro
 		}
 	}
 	return nil, nil
-}
-
-// FindUp returns a slice containing the start and end positions
-// of the last match of `re` between `start` and `end` plus those
-// of all submatches (capturing groups), or nil if no match exists.
-// The start and end positions of an unused submatch are invalid.
-func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
-	return b.findUpFunc(re, start, end, func(r *regexp.Regexp, l []byte) []int {
-		allMatches := r.FindAllSubmatchIndex(l, -1)
-		if allMatches != nil {
-			return allMatches[len(allMatches)-1]
-		} else {
-			return nil
-		}
-	})
 }
 
 func (b *Buffer) findAllFuncFunc(re any, start, end Loc, find bufferFind, f func([]Loc)) (int, error) {
