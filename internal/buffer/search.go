@@ -121,17 +121,10 @@ func (b *Buffer) findDownFunc(re any, start, end Loc, find bytesFind) ([]Loc, er
 type bufferFind func(*Buffer, any, Loc, Loc) ([]Loc, error)
 
 // FindDown returns a slice containing the start and end positions
-// of the first match of `re` between `start` and `end`, or nil
-// if no match exists.
-func (b *Buffer) FindDown(re any, start, end Loc) ([]Loc, error) {
-	return b.findDownFunc(re, start, end, (*regexp.Regexp).FindIndex)
-}
-
-// FindDownSubmatch returns a slice containing the start and end positions
 // of the first match of `re` between `start` and `end` plus those
 // of all submatches (capturing groups), or nil if no match exists.
 // The start and end positions of an unused submatch are invalid.
-func (b *Buffer) FindDownSubmatch(re any, start, end Loc) ([]Loc, error) {
+func (b *Buffer) FindDown(re any, start, end Loc) ([]Loc, error) {
 	return b.findDownFunc(re, start, end, (*regexp.Regexp).FindSubmatchIndex)
 }
 
@@ -175,24 +168,10 @@ func (b *Buffer) findUpFunc(re any, start, end Loc, find bytesFind) ([]Loc, erro
 }
 
 // FindUp returns a slice containing the start and end positions
-// of the last match of `re` between `start` and `end`, or nil
-// if no match exists.
-func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
-	return b.findUpFunc(re, start, end, func(re *regexp.Regexp, l []byte) []int {
-		allMatches := re.FindAllIndex(l, -1)
-		if allMatches != nil {
-			return allMatches[len(allMatches)-1]
-		} else {
-			return nil
-		}
-	})
-}
-
-// FindUpSubmatch returns a slice containing the start and end positions
 // of the last match of `re` between `start` and `end` plus those
 // of all submatches (capturing groups), or nil if no match exists.
 // The start and end positions of an unused submatch are invalid.
-func (b *Buffer) FindUpSubmatch(re any, start, end Loc) ([]Loc, error) {
+func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
 	return b.findUpFunc(re, start, end, func(r *regexp.Regexp, l []byte) []int {
 		allMatches := r.FindAllSubmatchIndex(l, -1)
 		if allMatches != nil {
@@ -228,42 +207,22 @@ func (b *Buffer) findAllFuncFunc(re any, start, end Loc, find bufferFind, f func
 	return n, nil
 }
 
-// FindAllFunc calls the function `f` once for each match between `start`
-// and `end` of the regexp given by `re`. The argument of `f` is the slice
-// containing the start and end positions of the match. FindAllFunc returns
-// the number of matches plus any error that occured when compiling the regexp.
+// FindAllFunc calls the function `f` once for each match between
+// `start` and `end` of the regexp given by `re`. The argument of `f` is the
+// slice containing the start and end positions of the match and all submatches
+// (capturing groups). FindAllFunc returns the number of matches plus
+// any error that occured when compiling the regexp.
 func (b *Buffer) FindAllFunc(re any, start, end Loc, f func([]Loc)) (int, error) {
 	return b.findAllFuncFunc(re, start, end, (*Buffer).FindDown, f)
 }
 
-// FindAll returns a slice containing the start and end positions of all
-// matches between `start` and `end` of the regexp given by `re`, plus any
-// error that occured when compiling the regexp. If no match is found, the
-// slice returned is nil.
-func (b *Buffer) FindAll(re any, start, end Loc) ([][]Loc, error) {
-	var matches [][]Loc
-	_, err := b.FindAllFunc(re, start, end, func(match []Loc) {
-		matches = append(matches, match)
-	})
-	return matches, err
-}
-
-// FindAllSubmatchFunc calls the function `f` once for each match between
-// `start` and `end` of the regexp given by `re`. The argument of `f` is the
-// slice containing the start and end positions of the match and all submatches
-// (capturing groups). FindAllSubmatch Func returns the number of matches plus
-// any error that occured when compiling the regexp.
-func (b *Buffer) FindAllSubmatchFunc(re any, start, end Loc, f func([]Loc)) (int, error) {
-	return b.findAllFuncFunc(re, start, end, (*Buffer).FindDownSubmatch, f)
-}
-
-// FindAllSubmatch returns a slice containing the start and end positions of
+// FindAll returns a slice containing the start and end positions of
 // all matches and all submatches (capturing groups) between `start` and `end`
 // of the regexp given by `re`, plus any error that occured when compiling
 // the regexp. If no match is found, the slice returned is nil.
-func (b *Buffer) FindAllSubmatch(re any, start, end Loc) ([][]Loc, error) {
+func (b *Buffer) FindAll(re any, start, end Loc) ([][]Loc, error) {
 	var matches [][]Loc
-	_, err := b.FindAllSubmatchFunc(re, start, end, func(match []Loc) {
+	_, err := b.FindAllFunc(re, start, end, func(match []Loc) {
 		matches = append(matches, match)
 	})
 	return matches, err
@@ -388,20 +347,11 @@ func (b *Buffer) ReplaceAllLiteral(re any, start, end Loc, repl []byte) (int, Lo
 	})
 }
 
-// ReplaceAllFunc replaces all matches of the regexp `re` with `repl(match)`
-// in the given area, where `match` is the slice containing start and end
-// positions of the match. The function returns the number of replacements
-// made, the new end position and any error that occured during regexp
-// compilation
-func (b *Buffer) ReplaceAllFunc(re any, start, end Loc, repl func(match []Loc) []byte) (int, Loc, error) {
-	return b.replaceAllFuncFunc(re, start, end, (*Buffer).FindDown, repl)
-}
-
-// ReplaceAllSubmatchFunc replaces all matches of the regexp `re` with
+// ReplaceAllFunc replaces all matches of the regexp `re` with
 // `repl(match)` in the given area, where `match` is the slice containing
 // start and end positions of the match and all submatches. The function
 // returns the number of replacements made, the new end position and any
 // error that occured during regexp compilation
-func (b *Buffer) ReplaceAllSubmatchFunc(re any, start, end Loc, repl func(match []Loc) []byte) (int, Loc, error) {
-	return b.replaceAllFuncFunc(re, start, end, (*Buffer).FindDownSubmatch, repl)
+func (b *Buffer) ReplaceAllFunc(re any, start, end Loc, repl func(match []Loc) []byte) (int, Loc, error) {
+	return b.replaceAllFuncFunc(re, start, end, (*Buffer).FindDown, repl)
 }
