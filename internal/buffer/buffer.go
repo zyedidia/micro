@@ -223,12 +223,12 @@ type Buffer struct {
 func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer, error) {
 	var err error
 	filename := path
-	if config.GetGlobalOption("parsecursor").(bool) && cursorLoc.IsVoid() {
+	if config.GetGlobalOption("parsecursor").(bool) && !cursorLoc.IsValid() {
 		var cursorPos []string
 		filename, cursorPos = util.GetPathAndCursorPosition(filename)
 		cursorLoc, err = ParseCursorLocation(cursorPos)
 		if err != nil {
-			cursorLoc = LocVoid()
+			cursorLoc = Loc{-1, -1}
 		}
 	}
 
@@ -280,7 +280,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 // It will return an empty buffer if the path does not exist
 // and an error if the file is a directory
 func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
-	return NewBufferFromFileAtLoc(path, btype, LocVoid())
+	return NewBufferFromFileAtLoc(path, btype, Loc{-1, -1})
 }
 
 // NewBufferFromStringAtLoc creates a new buffer containing the given string with a cursor loc
@@ -290,7 +290,7 @@ func NewBufferFromStringAtLoc(text, path string, btype BufType, cursorLoc Loc) *
 
 // NewBufferFromString creates a new buffer containing the given string
 func NewBufferFromString(text, path string, btype BufType) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path, LocVoid(), btype)
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, Loc{-1, -1}, btype)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path

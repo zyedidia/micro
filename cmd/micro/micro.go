@@ -165,7 +165,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 	}
 
 	files := make([]string, 0, len(args))
-	flagStartPos := buffer.LocVoid()
+	flagStartPos := buffer.Loc{-1, -1}
 	flagr := regexp.MustCompile(`^\+(\d+)(?::(\d+))?$`)
 	for _, a := range args {
 		match := flagr.FindStringSubmatch(a)

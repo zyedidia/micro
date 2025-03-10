@@ -9,14 +9,9 @@ type Loc struct {
 	X, Y int
 }
 
-// LocVoid returns a Loc strictly smaller then any valid buffer location
-func LocVoid() Loc {
-	return Loc{-1, -1}
-}
-
-// IsVoid returns true if the location l is void
-func (l Loc) IsVoid() bool {
-	return l == LocVoid()
+// IsValid returns true if the argument is an actual buffer location
+func (l Loc) IsValid() bool {
+	return l.X >= 0 && l.Y >= 0
 }
 
 // LessThan returns true if b is smaller

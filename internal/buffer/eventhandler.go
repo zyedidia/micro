@@ -194,7 +194,7 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],
 		EventType: TextEventInsert,
-		Deltas:    []Delta{{text, start, LocVoid()}},
+		Deltas:    []Delta{{text, start, Loc{-1, -1}}},
 		Time:      time.Now(),
 	}
 	eh.DoTextEvent(e, true)

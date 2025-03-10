@@ -110,7 +110,7 @@ func (b *Buffer) findDownFunc(re any, start, end Loc, find bytesFind) ([]Loc, er
 					}
 					return Loc{x, i}
 				} else { // start or end of unused submatch
-					return LocVoid()
+					return Loc{-1, -1}
 				}
 			}), nil
 		}
@@ -130,7 +130,7 @@ func (b *Buffer) FindDown(re any, start, end Loc) ([]Loc, error) {
 // FindDownSubmatch returns a slice containing the start and end positions
 // of the first match of `re` between `start` and `end` plus those
 // of all submatches (capturing groups), or nil if no match exists.
-// The start and end positions of an unused submatch are void.
+// The start and end positions of an unused submatch are invalid.
 func (b *Buffer) FindDownSubmatch(re any, start, end Loc) ([]Loc, error) {
 	return b.findDownFunc(re, start, end, (*regexp.Regexp).FindSubmatchIndex)
 }
@@ -191,7 +191,7 @@ func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
 // FindUpSubmatch returns a slice containing the start and end positions
 // of the last match of `re` between `start` and `end` plus those
 // of all submatches (capturing groups), or nil if no match exists.
-// The start and end positions of an unused submatch are void.
+// The start and end positions of an unused submatch are invalid.
 func (b *Buffer) FindUpSubmatch(re any, start, end Loc) ([]Loc, error) {
 	return b.findUpFunc(re, start, end, func(r *regexp.Regexp, l []byte) []int {
 		allMatches := r.FindAllSubmatchIndex(l, -1)
@@ -275,7 +275,7 @@ func (b *Buffer) FindAllSubmatch(re any, start, end Loc) ([][]Loc, error) {
 func (b *Buffer) MatchedStrings(locs []Loc) []string {
 	strs := make([]string, len(locs)/2)
 	for i := 0; 2*i < len(locs); i += 2 {
-		if !locs[2*i].IsVoid() {
+		if locs[2*i].IsValid() {
 			strs[i] = string(b.Substr(locs[2*i], locs[2*i+1]))
 		}
 	}
@@ -346,7 +346,7 @@ func (b *Buffer) replaceAllFuncFunc(re any, start, end Loc, find bufferFind, rep
 	})
 
 	if err != nil {
-		return -1, LocVoid(), err
+		return -1, Loc{-1, -1}, err
 	}
 
 	b.MultipleReplace(deltas)
