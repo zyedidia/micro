@@ -12,7 +12,7 @@ rules:
       # Ones that can't be in the same regex because they include non-words.
       # The nil? one has to be after the constants.
     - statement: "\\b(nil\\?|as(\\?|\\b)|is_a\\?|responds_to\\?)"
-    - type: "(\\$|@|@@)?\\b[A-Z]+[0-9A-Z_a-z]*"
+    - type: "(\\$|@|@@)?\\b[A-Z]+\\w*"
       # Crystal "symbols"
     - constant:  "([ 	]|^):[0-9A-Z_]+\\b"
       # Some unique things we want to stand out

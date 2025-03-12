@@ -6,11 +6,11 @@ detect:
 rules:
     - symbol.brackets: "\\(|\\)"
     - type: "defun|define-syntax|define|defmacro|defmodule|export"
-    - constant: "\\ [A-Za-z][A-Za-z0-9_-]+\\ "
+    - constant: "\\ [A-Za-z][\\w-]+\\ "
     - symbol.operator: "\\(([\\-+*/<>]|<=|>=)|'"
     - constant.number: "\\b[0-9]+\\b"
     - constant.string: "\\\"(\\\\.|[^\"])*\\\""
-    - special: "['|`][A-Za-z][A-Za-z0-9_\\-]+"
+    - special: "['|`][A-Za-z][\\w\\-]+"
     - constant.specialChar: "\\\\.?"
     - comment: "(^|[[:space:]]);.*"
     - indent-char.whitespace: "[[:space:]]+$"
