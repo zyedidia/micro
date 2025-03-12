@@ -101,13 +101,28 @@ func (b *Buffer) GetArg() (string, int) {
 	return input, argstart
 }
 
+// Complete filenames or buffer words
+func Complete(b *Buffer) ([]string, []string) {
+	completions, suggestions := FileComplete(b)
+	if len(completions) != 0 || len(suggestions) != 0 {
+		return completions, suggestions
+	}
+	return BufferComplete(b)
+}
+
+func IsQuoteOrBraceStart(r rune) bool {
+	return r == '"' || r == '\'' || r == '(' || r == '[' || r == '{'
+}
+
 // FileComplete autocompletes filenames
 func FileComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	input, argstart := b.GetArg()
+	// Allow completion of paths inside quotes and braces
+	path_start := strings.LastIndexFunc(input, IsQuoteOrBraceStart) + 1
 
 	sep := string(os.PathSeparator)
-	dirs := strings.Split(input, sep)
+	dirs := strings.Split(input[path_start:], sep)
 
 	var files []fs.DirEntry
 	var err error
@@ -144,7 +159,7 @@ func FileComplete(b *Buffer) ([]string, []string) {
 		} else {
 			complete = suggestions[i]
 		}
-		completions[i] = util.SliceEndStr(complete, c.X-argstart)
+		completions[i] = util.SliceEndStr(complete, c.X-argstart-path_start)
 	}
 
 	return completions, suggestions
