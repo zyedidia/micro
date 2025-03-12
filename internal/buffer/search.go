@@ -54,20 +54,6 @@ func regexpData(re any) (*RegexpData, error) {
 type bytesFind func(*regexp.Regexp, []byte) []int
 
 func (b *Buffer) findDownFunc(redata *RegexpData, start, end Loc, find bytesFind) []Loc {
-	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
-	if start.Y > b.LinesNum()-1 {
-		start.X = lastcn - 1
-	}
-	if end.Y > b.LinesNum()-1 {
-		end.X = lastcn
-	}
-	start.Y = util.Clamp(start.Y, 0, b.LinesNum()-1)
-	end.Y = util.Clamp(end.Y, 0, b.LinesNum()-1)
-
-	if start.GreaterThan(end) {
-		start, end = end, start
-	}
-
 	for i := start.Y; i <= end.Y; i++ {
 		l := b.LineBytes(i)
 		from, to := 0, len(l)
@@ -135,6 +121,9 @@ func (b *Buffer) FindDown(re string, start, end Loc) ([]Loc, error) {
 }
 
 func (b *Buffer) FindRegexpDown(redata *RegexpData, start, end Loc) []Loc {
+	if start.GreaterThan(end) {
+		return nil
+	}
 	return b.findDownFunc(redata, start, end, (*regexp.Regexp).FindSubmatchIndex)
 }
 
@@ -151,18 +140,8 @@ func (b *Buffer) FindUp(re string, start, end Loc) ([]Loc, error) {
 }
 
 func (b *Buffer) FindRegexpUp(redata *RegexpData, start, end Loc) []Loc {
-	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
-	if start.Y > b.LinesNum()-1 {
-		start.X = lastcn - 1
-	}
-	if end.Y > b.LinesNum()-1 {
-		end.X = lastcn
-	}
-	start.Y = util.Clamp(start.Y, 0, b.LinesNum()-1)
-	end.Y = util.Clamp(end.Y, 0, b.LinesNum()-1)
-
 	if start.GreaterThan(end) {
-		start, end = end, start
+		return nil
 	}
 
 	var locs []Loc
@@ -270,6 +249,10 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 	redata, err := NewRegexpData(s)
 	if err != nil {
 		return [2]Loc{}, false, err
+	}
+
+	if start.GreaterThan(end) {
+		start, end = end, start
 	}
 
 	var match []Loc
