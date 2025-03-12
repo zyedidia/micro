@@ -249,8 +249,20 @@ The packages and their contents are listed below (in Go type signatures):
        two arguments in the `ExecCommand` argument list (quoting arguments
        will preserve spaces).
 
-    - `RunBackgroundShell(input string) (func() string, error)`: returns a
-       function that will run the given shell command and return its output.
+    - **Deprecated** `RunBackgroundShell(input string) (func() string, error)`:
+       returns a function that will run the given shell command and return
+       its output.
+
+    - `ExecBackgroundCommand(cb func(string, error), name string, args ...string)`:
+       executes a command in the background by accepting a optional callback
+       function for the command output or error if any, the command name and
+       a list of arguments.
+
+    - `RunBackgroundCommand(input string, cb func(string, error)) error`:
+       runs a shell command in the background by accepting an input for
+       running the command and an optional callback function for the 
+       command output or error if any.
+       It returns an error if it fails to split the input command
 
     - `RunInteractiveShell(input string, wait bool, getOutput bool)
                           (string, error)`:
