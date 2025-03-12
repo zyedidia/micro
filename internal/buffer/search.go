@@ -9,45 +9,52 @@ import (
 )
 
 // RegexpGroup combines a Regexp with padded versions.
-// We want "^" and "$" to match only the beginning/end of a line, not that
-// of the search region somewhere in the middle of a line. In that case we
-// use padded regexps to require a rune before or after the match. (This
-// also affects other empty-string patters like "\\b".)
-type RegexpGroup [4]*regexp.Regexp
+type RegexpData struct {
+	// We want "^" and "$" to match only the beginning/end of a line, not that
+	// of the search region somewhere in the middle of a line. In that case we
+	// use padded regexps to require a rune before or after the match. (This
+	// also affects other empty-string patters like "\\b".)
+	regex [4]*regexp.Regexp
+}
+
+// Regexp returns the Regexp determining the RegexpData
+func (redata *RegexpData) Regexp() *regexp.Regexp {
+	return redata.regex[0]
+}
 
 const (
 	padStart = 1 << iota
 	padEnd
 )
 
-// NewRegexpGroup creates a RegexpGroup from a string
-func NewRegexpGroup(s string) (RegexpGroup, error) {
-	var rgrp RegexpGroup
+// NewRegexpData creates RegexpData from a string
+func NewRegexpData(s string) (*RegexpData, error) {
+	var regex [4]*regexp.Regexp
 	var err error
-	rgrp[0], err = regexp.Compile(s)
+	regex[0], err = regexp.Compile(s)
 	if err == nil {
-		rgrp[padStart] = regexp.MustCompile(".(?:" + s + ")")
-		rgrp[padEnd] = regexp.MustCompile("(?:" + s + ").")
-		rgrp[padStart|padEnd] = regexp.MustCompile(".(?:" + s + ").")
+		regex[padStart] = regexp.MustCompile(".(?:" + s + ")")
+		regex[padEnd] = regexp.MustCompile("(?:" + s + ").")
+		regex[padStart|padEnd] = regexp.MustCompile(".(?:" + s + ").")
 	}
-	return rgrp, err
+	return &RegexpData{regex}, err
 }
 
-func regexpGroup(re any) (RegexpGroup, error) {
+func regexpData(re any) (*RegexpData, error) {
 	switch re := re.(type) {
-	case RegexpGroup:
+	case *RegexpData:
 		return re, nil
 	case string:
-		return NewRegexpGroup(re)
+		return NewRegexpData(re)
 	default:
-		return RegexpGroup{}, fmt.Errorf(`cannot convert "%v" (of type %[1]T) to type RegexpGroup`, re)
+		return &RegexpData{}, fmt.Errorf(`cannot convert "%v" (of type %[1]T) to type RegexpData`, re)
 	}
 }
 
 type bytesFind func(*regexp.Regexp, []byte) []int
 
 func (b *Buffer) findDownFunc(re any, start, end Loc, find bytesFind) ([]Loc, error) {
-	rgrp, err := regexpGroup(re)
+	redata, err := regexpData(re)
 	if err != nil {
 		return nil, err
 	}
@@ -90,7 +97,7 @@ func (b *Buffer) findDownFunc(re any, start, end Loc, find bytesFind) ([]Loc, er
 		}
 
 		s := l[from:to]
-		match := find(rgrp[padMode], s)
+		match := find(redata.regex[padMode], s)
 
 		if match != nil {
 			if padMode&padStart != 0 {
@@ -133,7 +140,7 @@ func (b *Buffer) FindDown(re any, start, end Loc) ([]Loc, error) {
 // of all submatches (capturing groups), or nil if no match exists.
 // The start and end positions of an unused submatch are invalid.
 func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
-	rgrp, err := regexpGroup(re)
+	redata, err := regexpData(re)
 	if err != nil {
 		return nil, err
 	}
@@ -158,8 +165,8 @@ func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
 		from := Loc{0, i}.Clamp(start, end)
 		to := Loc{charCount, i}.Clamp(start, end)
 
-		b.findAllFuncFunc(rgrp, from, to, func(b *Buffer, re any, start, end Loc) ([]Loc, error) {
-			return b.findDownFunc(rgrp, start, end, func(r *regexp.Regexp, l []byte) []int {
+		b.findAllFuncFunc(redata, from, to, func(b *Buffer, re any, start, end Loc) ([]Loc, error) {
+			return b.findDownFunc(redata, start, end, func(r *regexp.Regexp, l []byte) []int {
 				allMatches := r.FindAllSubmatchIndex(l, -1)
 				if allMatches != nil {
 					return allMatches[len(allMatches)-1]
@@ -179,14 +186,14 @@ func (b *Buffer) FindUp(re any, start, end Loc) ([]Loc, error) {
 }
 
 func (b *Buffer) findAllFuncFunc(re any, start, end Loc, find bufferFind, f func([]Loc)) (int, error) {
-	rgrp, err := regexpGroup(re)
+	redata, err := regexpData(re)
 	if err != nil {
 		return -1, err
 	}
 	n := 0
 	loc := start
 	for {
-		match, _ := find(b, rgrp, loc, end)
+		match, _ := find(b, redata, loc, end)
 		if match == nil {
 			break
 		}
@@ -254,21 +261,21 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 		s = "(?i)" + s
 	}
 
-	rgrp, err := NewRegexpGroup(s)
+	redata, err := NewRegexpData(s)
 	if err != nil {
 		return [2]Loc{}, false, err
 	}
 
 	var match []Loc
 	if down {
-		match, _ = b.FindDown(rgrp, from, end)
+		match, _ = b.FindDown(redata, from, end)
 		if match == nil {
-			match, _ = b.FindDown(rgrp, start, end)
+			match, _ = b.FindDown(redata, start, end)
 		}
 	} else {
-		match, _ = b.FindUp(rgrp, from, start)
+		match, _ = b.FindUp(redata, from, start)
 		if match == nil {
-			match, _ = b.FindUp(rgrp, end, start)
+			match, _ = b.FindUp(redata, end, start)
 		}
 	}
 	if match != nil {
@@ -281,7 +288,7 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 // Expand returns the template, with variables replaced by submatches.
 // It is analogous to `(*regexp.Regexp).Expand`
 func (b *Buffer) Expand(re any, template []byte, match []Loc) (string, error) {
-	rgrp, err := regexpGroup(re)
+	redata, err := regexpData(re)
 	if err != nil {
 		return "", err
 	}
@@ -289,7 +296,7 @@ func (b *Buffer) Expand(re any, template []byte, match []Loc) (string, error) {
 	m := util.RangeMap(match, func(_ int, pos Loc) int {
 		return util.BytePosFromCharPos(l, pos.X)
 	})
-	return string(rgrp[0].Expand(nil, template, l, m)), nil
+	return string(redata.regex[0].Expand(nil, template, l, m)), nil
 }
 
 func (b *Buffer) replaceAllFuncFunc(re any, start, end Loc, find bufferFind, repl func(match []Loc) []byte) (int, Loc, error) {

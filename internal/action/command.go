@@ -961,7 +961,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			return
 		}
 	} else {
-		rgrp, err := buffer.NewRegexpGroup(search)
+		redata, err := buffer.NewRegexpData(search)
 		if err != nil {
 			InfoBar.Error(err)
 			return
@@ -974,7 +974,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		lastMatchEnd := buffer.Loc{-1, -1}
 		var doReplacement func()
 		doReplacement = func() {
-			locs, _ := h.Buf.FindDown(rgrp, searchLoc, end)
+			locs, _ := h.Buf.FindDown(redata, searchLoc, end)
 			if locs == nil || !inRange(locs[0]) || !inRange(locs[1]) {
 				h.Cursor.ResetSelection()
 				h.Buf.RelocateCursors()
