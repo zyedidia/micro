@@ -1,0 +1,52 @@
+# Language related syntax
+color-link default "#FF9366,#333333"
+color-link comment "#756F52,#333333"
+color-link constant "bold #7D7075,#333333"
+color-link constant.bool "bold #005A89,#333333"   # True && False
+color-link constant.number "bold #817CCF"
+color-link constant.specialChar "italic #747FE6"  # New: Escape characters and {} inside string
+color-link constant.string "#FFCA7A,#333333"
+color-link constant.string.char "#BDE6AD,#333333"
+color-link constant.string.url "italic #777777"   # New: does not work*
+color-link identifier "#FF9366,#333333"
+color-link identifier.var "bold #66D9EF"          # New: Variables, attributes, placeholders*
+color-link identifier.class "bold #AE81FF"        # New: As stated and few more*
+color-link message "bold #00C799,#C242424"        # As intended both for errors and some others
+color-link preproc "italic #FFB5FA,#333333"       # Statement preceded by an @
+color-link statement "#F92672,#333333"
+color-link symbol "bold #CCCCCC,#333333"          # Default color
+color-link type "#007364,#333333"                 # Type hint in both inside and outisde of functions
+color-link type.keyword "#007364,#333333"         # Built-in types*
+color-link symbol.brackets "bold #B8009A"         # New*
+color-link symbol.operator "bold #F92672,#333333"
+color-link special "#A6E22E,#333333"
+color-link underlined "#D33682,#333333"
+color-link error "bold #CB4B16,#333333"
+color-link todo "bold #D33682,#333333"
+
+# Micro appearance
+color-link hlsearch "#777777,#FFCA7A"
+color-link statusline "#FFC66D,#3E3E3E"
+color-link tabbar "#242424,#CCCCCC"
+color-link indent-char "#4F4F4F,#333333"
+color-link line-number "#977000,#2C2C2C"
+color-link current-line-number "#00C799,#333333"
+# 36, 37, 38 affected if "diffgutter" is set to true in "settings.json"
+color-link diff-added "#00AF00"
+color-link diff-modified "#FFAF00"
+color-link diff-deleted "#D70000"
+color-link gutter-error "#66D2FF,#333333"         # >> language error
+color-link gutter-warning "#A5B09E,#333333"       # >> i.e. spell checking
+color-link cursor-line "#3E3E3E"
+color-link color-column "#3E3E3E"
+color-link divider "#777777"                      # New
+color-link selection "#2C2C2C,#777777"            # New
+
+# No extended types; Plain brackets.
+color-link type.extended "default"
+color-link symbol.tag "#AE81FF,#333333"
+color-link match-brace "#333333,#AE81FF"
+color-link tab-error "#D75F5F"
+color-link trailingws "#777777"
+
+# *NOTE* review the python3.yaml for more detail
