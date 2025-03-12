@@ -322,11 +322,16 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 		}
 	}
 
+	newPath := b.Path != filename
 	b.Path = filename
 	b.AbsPath = absFilename
 	b.isModified = false
 	b.UpdateModTime()
-	b.ReloadSettings(true)
+
+	if newPath {
+		// need to update glob-based and filetype-based settings
+		b.ReloadSettings(true)
+	}
 
 	err = b.Serialize()
 	return err
