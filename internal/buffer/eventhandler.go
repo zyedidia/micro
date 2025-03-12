@@ -30,6 +30,8 @@ type TextEvent struct {
 	C Cursor
 
 	EventType int
+	// If there are several deltas for the same line, they must not overlap
+	// and be ordered by increasing start position
 	Deltas    []Delta
 	Time      time.Time
 }
@@ -113,9 +115,10 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 }
 
 // ExecuteTextEvent runs a text event
-// The deltas are processed in reverse order and afterwards reversed
 func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 	for i := len(t.Deltas) - 1; i >= 0; i-- {
+		// Processing the deltas in increasing order would require
+		// to recompute the positions of the later deltas
 		d := t.Deltas[i]
 		if t.EventType == TextEventInsert {
 			buf.insert(d.Start, d.Text)
