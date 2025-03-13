@@ -7,6 +7,7 @@ local buffer = import("micro/buffer")
 local ft = {}
 
 ft["apacheconf"] = "# %s"
+ft["asm"] = "; %s"
 ft["batch"] = ":: %s"
 ft["c"] = "// %s"
 ft["c++"] = "// %s"
