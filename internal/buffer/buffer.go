@@ -21,10 +21,10 @@ import (
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/highlight"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/micro/v2/pkg/highlight"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"

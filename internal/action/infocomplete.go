@@ -7,8 +7,8 @@ import (
 
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/highlight"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/micro/v2/pkg/highlight"
 )
 
 // This file is meant (for now) for autocompletion in command mode, not
