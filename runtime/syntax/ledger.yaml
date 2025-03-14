@@ -1,6 +1,6 @@
 filetype: ledger
 
-detect: 
+detect:
     filename: "(^|\\.|/)(ledger|ldgr|beancount|bnct)$"
 
 rules:

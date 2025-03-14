@@ -1,6 +1,6 @@
 filetype: salt
 
-detect: 
+detect:
     filename: "\\.sls$"
 
 rules:

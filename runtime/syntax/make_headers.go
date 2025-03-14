@@ -1,11 +1,11 @@
-//+build ignore
+//go:build ignore
+// +build ignore
 
 package main
 
 import (
 	"bytes"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 	"time"
@@ -16,22 +16,24 @@ import (
 type HeaderYaml struct {
 	FileType string `yaml:"filetype"`
 	Detect   struct {
-		FNameRgx  string `yaml:"filename"`
-		HeaderRgx string `yaml:"header"`
+		FNameRgx     string `yaml:"filename"`
+		HeaderRgx    string `yaml:"header"`
+		SignatureRgx string `yaml:"signature"`
 	} `yaml:"detect"`
 }
 
 type Header struct {
-	FileType  string
-	FNameRgx  string
-	HeaderRgx string
+	FileType     string
+	FNameRgx     string
+	HeaderRgx    string
+	SignatureRgx string
 }
 
 func main() {
 	if len(os.Args) > 1 {
 		os.Chdir(os.Args[1])
 	}
-	files, _ := ioutil.ReadDir(".")
+	files, _ := os.ReadDir(".")
 	for _, f := range files {
 		fname := f.Name()
 		if strings.HasSuffix(fname, ".yaml") {
@@ -43,7 +45,7 @@ func main() {
 func convert(name string) {
 	filename := name + ".yaml"
 	var hdr HeaderYaml
-	source, err := ioutil.ReadFile(filename)
+	source, err := os.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
@@ -59,17 +61,19 @@ func encode(name string, c HeaderYaml) {
 	f.WriteString(c.FileType + "\n")
 	f.WriteString(c.Detect.FNameRgx + "\n")
 	f.WriteString(c.Detect.HeaderRgx + "\n")
+	f.WriteString(c.Detect.SignatureRgx + "\n")
 	f.Close()
 }
 
 func decode(name string) Header {
 	start := time.Now()
-	data, _ := ioutil.ReadFile(name + ".hdr")
+	data, _ := os.ReadFile(name + ".hdr")
 	strs := bytes.Split(data, []byte{'\n'})
 	var hdr Header
 	hdr.FileType = string(strs[0])
 	hdr.FNameRgx = string(strs[1])
 	hdr.HeaderRgx = string(strs[2])
+	hdr.SignatureRgx = string(strs[3])
 	fmt.Printf("took %v\n", time.Since(start))
 
 	return hdr

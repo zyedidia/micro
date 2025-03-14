@@ -1,6 +1,6 @@
 filetype: pony
 
-detect: 
+detect:
     filename: "\\.pony$"
 
 rules:
@@ -26,12 +26,10 @@ rules:
     - comment:
         start: "\"\"\"[^\"]*"
         end: "\"\"\""
-        rules: []
 
     - comment: "(^|[[:space:]])//.*"
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
 
     - todo: "TODO:?"

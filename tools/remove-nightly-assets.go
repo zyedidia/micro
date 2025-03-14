@@ -4,12 +4,12 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os/exec"
 	"strings"
 
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
 )
 
 func main() {
@@ -19,7 +19,7 @@ func main() {
 		return
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
 	var data interface{}
 

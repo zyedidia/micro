@@ -7,7 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -25,12 +25,11 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"github.com/zyedidia/micro/v2/pkg/highlight"
+	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
 )
-
-const backupTime = 8000
 
 var (
 	// OpenBuffers is a list of the currently open buffers
@@ -57,17 +56,13 @@ var (
 	BTLog = BufType{2, true, true, false}
 	// BTScratch is a buffer that cannot be saved (for scratch work)
 	BTScratch = BufType{3, false, true, false}
-	// BTRaw is is a buffer that shows raw terminal events
+	// BTRaw is a buffer that shows raw terminal events
 	BTRaw = BufType{4, false, true, false}
 	// BTInfo is a buffer for inputting information
 	BTInfo = BufType{5, false, true, false}
 	// BTStdout is a buffer that only writes to stdout
 	// when closed
 	BTStdout = BufType{6, false, true, true}
-
-	// ErrFileTooLarge is returned when the file is too large to hash
-	// (fastdirty is automatically enabled)
-	ErrFileTooLarge = errors.New("File is too large to hash")
 )
 
 // SharedBuffer is a struct containing info that is shared among buffers
@@ -90,6 +85,10 @@ type SharedBuffer struct {
 
 	// Settings customized by the user
 	Settings map[string]interface{}
+	// LocalSettings customized by the user for this buffer only
+	LocalSettings map[string]bool
+
+	encoding encoding.Encoding
 
 	Suggestions   []string
 	Completions   []string
@@ -103,7 +102,8 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	requestedBackup bool
+	RequestedBackup bool
+	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
 	// are viewing a file that is constantly changing
@@ -211,6 +211,11 @@ type Buffer struct {
 	LastSearchRegex bool
 	// HighlightSearch enables highlighting all instances of the last successful search
 	HighlightSearch bool
+
+	// OverwriteMode indicates that we are in overwrite mode (toggled by
+	// Insert key by default) i.e. that typing a character shall replace the
+	// character under the cursor instead of inserting a character before it.
+	OverwriteMode bool
 }
 
 // NewBufferFromFileAtLoc opens a new buffer with a given cursor location
@@ -234,17 +239,20 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		return nil, err
 	}
 
-	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
-	readonly := os.IsPermission(err)
-	f.Close()
-
 	fileInfo, serr := os.Stat(filename)
-	if serr != nil && !os.IsNotExist(serr) {
+	if serr != nil && !errors.Is(serr, fs.ErrNotExist) {
 		return nil, serr
 	}
 	if serr == nil && fileInfo.IsDir() {
 		return nil, errors.New("Error: " + filename + " is a directory and cannot be opened")
 	}
+	if serr == nil && !fileInfo.Mode().IsRegular() {
+		return nil, errors.New("Error: " + filename + " is not a regular file and cannot be opened")
+	}
+
+	f, err := os.OpenFile(filename, os.O_WRONLY, 0)
+	readonly := errors.Is(err, fs.ErrPermission)
+	f.Close()
 
 	file, err := os.Open(filename)
 	if err == nil {
@@ -252,7 +260,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	}
 
 	var buf *Buffer
-	if os.IsNotExist(err) {
+	if errors.Is(err, fs.ErrNotExist) {
 		// File does not exist -- create an empty buffer with that name
 		buf = NewBufferFromString("", filename, btype)
 	} else if err != nil {
@@ -322,29 +330,19 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		b.AbsPath = absPath
 		b.Path = path
 
-		// this is a little messy since we need to know some settings to read
-		// the file properly, but some settings depend on the filetype, which
-		// we don't know until reading the file. We first read the settings
-		// into a local variable and then use that to determine the encoding,
-		// readonly, and fileformat necessary for reading the file and
-		// assigning the filetype.
-		settings := config.DefaultCommonSettings()
 		b.Settings = config.DefaultCommonSettings()
+		b.LocalSettings = make(map[string]bool)
 		for k, v := range config.GlobalSettings {
 			if _, ok := config.DefaultGlobalOnlySettings[k]; !ok {
 				// make sure setting is not global-only
-				settings[k] = v
 				b.Settings[k] = v
 			}
 		}
-		config.InitLocalSettings(settings, absPath)
-		b.Settings["readonly"] = settings["readonly"]
-		b.Settings["filetype"] = settings["filetype"]
-		b.Settings["syntax"] = settings["syntax"]
+		config.UpdatePathGlobLocals(b.Settings, absPath)
 
-		enc, err := htmlindex.Get(settings["encoding"].(string))
+		b.encoding, err = htmlindex.Get(b.Settings["encoding"].(string))
 		if err != nil {
-			enc = unicode.UTF8
+			b.encoding = unicode.UTF8
 			b.Settings["encoding"] = "utf-8"
 		}
 
@@ -355,19 +353,22 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 			return NewBufferFromString("", "", btype)
 		}
 		if !hasBackup {
-			reader := bufio.NewReader(transform.NewReader(r, enc.NewDecoder()))
+			reader := bufio.NewReader(transform.NewReader(r, b.encoding.NewDecoder()))
 
 			var ff FileFormat = FFAuto
 
 			if size == 0 {
 				// for empty files, use the fileformat setting instead of
 				// autodetection
-				switch settings["fileformat"] {
+				switch b.Settings["fileformat"] {
 				case "unix":
 					ff = FFUnix
 				case "dos":
 					ff = FFDos
 				}
+			} else {
+				// in case of autodetection treat as locally set
+				b.LocalSettings["fileformat"] = true
 			}
 
 			b.LineArray = NewLineArray(uint64(size), ff, reader)
@@ -390,10 +391,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 	}
 
 	b.UpdateRules()
-	// init local settings again now that we know the filetype
-	config.InitLocalSettings(b.Settings, b.Path)
+	// we know the filetype now, so update per-filetype settings
+	config.UpdateFileTypeLocals(b.Settings, b.Settings["filetype"].(string))
 
-	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(config.ConfigDir, "buffers")); errors.Is(err, fs.ErrNotExist) {
 		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)
 	}
 
@@ -544,7 +545,7 @@ func (b *Buffer) ReOpen() error {
 	}
 
 	reader := bufio.NewReader(transform.NewReader(file, enc.NewDecoder()))
-	data, err := ioutil.ReadAll(reader)
+	data, err := io.ReadAll(reader)
 	txt := string(data)
 
 	if err != nil {
@@ -554,7 +555,11 @@ func (b *Buffer) ReOpen() error {
 
 	err = b.UpdateModTime()
 	if !b.Settings["fastdirty"].(bool) {
-		calcHash(b, &b.origHash)
+		if len(data) > LargeFileThreshold {
+			b.Settings["fastdirty"] = true
+		} else {
+			calcHash(b, &b.origHash)
+		}
 	}
 	b.isModified = false
 	b.RelocateCursors()
@@ -565,6 +570,13 @@ func (b *Buffer) ReOpen() error {
 func (b *Buffer) RelocateCursors() {
 	for _, c := range b.cursors {
 		c.Relocate()
+	}
+}
+
+// DeselectCursors removes selection from all cursors
+func (b *Buffer) DeselectCursors() {
+	for _, c := range b.cursors {
+		c.Deselect(true)
 	}
 }
 
@@ -642,37 +654,120 @@ func (b *Buffer) Size() int {
 }
 
 // calcHash calculates md5 hash of all lines in the buffer
-func calcHash(b *Buffer, out *[md5.Size]byte) error {
+func calcHash(b *Buffer, out *[md5.Size]byte) {
 	h := md5.New()
 
-	size := 0
 	if len(b.lines) > 0 {
-		n, e := h.Write(b.lines[0].data)
-		if e != nil {
-			return e
-		}
-		size += n
+		h.Write(b.lines[0].data)
 
 		for _, l := range b.lines[1:] {
-			n, e = h.Write([]byte{'\n'})
-			if e != nil {
-				return e
+			if b.Endings == FFDos {
+				h.Write([]byte{'\r', '\n'})
+			} else {
+				h.Write([]byte{'\n'})
 			}
-			size += n
-			n, e = h.Write(l.data)
-			if e != nil {
-				return e
-			}
-			size += n
+			h.Write(l.data)
 		}
-	}
-
-	if size > LargeFileThreshold {
-		return ErrFileTooLarge
 	}
 
 	h.Sum((*out)[:0])
+}
+
+func parseDefFromFile(f config.RuntimeFile, header *highlight.Header) *highlight.Def {
+	data, err := f.Data()
+	if err != nil {
+		screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+		return nil
+	}
+
+	if header == nil {
+		header, err = highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
+			return nil
+		}
+	}
+
+	file, err := highlight.ParseFile(data)
+	if err != nil {
+		screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+		return nil
+	}
+
+	syndef, err := highlight.ParseDef(file, header)
+	if err != nil {
+		screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+		return nil
+	}
+
+	return syndef
+}
+
+// findRealRuntimeSyntaxDef finds a specific syntax definition
+// in the user's custom syntax files
+func findRealRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def {
+	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+		if f.Name() == name {
+			syndef := parseDefFromFile(f, header)
+			if syndef != nil {
+				return syndef
+			}
+		}
+	}
 	return nil
+}
+
+// findRuntimeSyntaxDef finds a specific syntax definition
+// in the built-in syntax files
+func findRuntimeSyntaxDef(name string, header *highlight.Header) *highlight.Def {
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		if f.Name() == name {
+			syndef := parseDefFromFile(f, header)
+			if syndef != nil {
+				return syndef
+			}
+		}
+	}
+	return nil
+}
+
+func resolveIncludes(syndef *highlight.Def) {
+	includes := highlight.GetIncludes(syndef)
+	if len(includes) == 0 {
+		return
+	}
+
+	var files []*highlight.File
+	for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
+		data, err := f.Data()
+		if err != nil {
+			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		header, err := highlight.MakeHeaderYaml(data)
+		if err != nil {
+			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+			continue
+		}
+
+		for _, i := range includes {
+			if header.FileType == i {
+				file, err := highlight.ParseFile(data)
+				if err != nil {
+					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+					continue
+				}
+				files = append(files, file)
+				break
+			}
+		}
+		if len(files) >= len(includes) {
+			break
+		}
+	}
+
+	highlight.ResolveIncludes(syndef, files)
 }
 
 // UpdateRules updates the syntax rules and filetype for this buffer
@@ -683,13 +778,32 @@ func (b *Buffer) UpdateRules() {
 	}
 	ft := b.Settings["filetype"].(string)
 	if ft == "off" {
+		b.ClearMatches()
+		b.SyntaxDef = nil
 		return
 	}
+
+	b.SyntaxDef = nil
+
+	// syntaxFileInfo is an internal helper structure
+	// to store properties of one single syntax file
+	type syntaxFileInfo struct {
+		header    *highlight.Header
+		fileName  string
+		syntaxDef *highlight.Def
+	}
+
+	fnameMatches := []syntaxFileInfo{}
+	headerMatches := []syntaxFileInfo{}
 	syntaxFile := ""
 	foundDef := false
 	var header *highlight.Header
 	// search for the syntax file in the user's custom syntax files
 	for _, f := range config.ListRealRuntimeFiles(config.RTSyntax) {
+		if f.Name() == "default" {
+			continue
+		}
+
 		data, err := f.Data()
 		if err != nil {
 			screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
@@ -701,118 +815,145 @@ func (b *Buffer) UpdateRules() {
 			screen.TermMessage("Error parsing header for syntax file " + f.Name() + ": " + err.Error())
 			continue
 		}
-		file, err := highlight.ParseFile(data)
-		if err != nil {
-			screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-			continue
+
+		matchedFileType := false
+		matchedFileName := false
+		matchedFileHeader := false
+
+		if ft == "unknown" || ft == "" {
+			if header.MatchFileName(b.Path) {
+				matchedFileName = true
+			}
+			if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
+				matchedFileHeader = true
+			}
+		} else if header.FileType == ft {
+			matchedFileType = true
 		}
 
-		if ((ft == "unknown" || ft == "") && highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data)) || header.FileType == ft {
+		if matchedFileType || matchedFileName || matchedFileHeader {
+			file, err := highlight.ParseFile(data)
+			if err != nil {
+				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
+				continue
+			}
+
 			syndef, err := highlight.ParseDef(file, header)
 			if err != nil {
 				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
 				continue
 			}
-			b.SyntaxDef = syndef
-			syntaxFile = f.Name()
-			foundDef = true
-			break
+
+			if matchedFileType {
+				b.SyntaxDef = syndef
+				syntaxFile = f.Name()
+				foundDef = true
+				break
+			}
+
+			if matchedFileName {
+				fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), syndef})
+			} else if matchedFileHeader {
+				headerMatches = append(headerMatches, syntaxFileInfo{header, f.Name(), syndef})
+			}
 		}
 	}
 
-	// search in the default syntax files
-	for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
-		data, err := f.Data()
-		if err != nil {
-			screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
-			continue
-		}
+	if !foundDef {
+		// search for the syntax file in the built-in syntax files
+		for _, f := range config.ListRuntimeFiles(config.RTSyntaxHeader) {
+			data, err := f.Data()
+			if err != nil {
+				screen.TermMessage("Error loading syntax header file " + f.Name() + ": " + err.Error())
+				continue
+			}
 
-		header, err = highlight.MakeHeader(data)
-		if err != nil {
-			screen.TermMessage("Error reading syntax header file", f.Name(), err)
-			continue
-		}
+			header, err = highlight.MakeHeader(data)
+			if err != nil {
+				screen.TermMessage("Error reading syntax header file", f.Name(), err)
+				continue
+			}
 
-		if ft == "unknown" || ft == "" {
-			if highlight.MatchFiletype(header.FtDetect, b.Path, b.lines[0].data) {
+			if ft == "unknown" || ft == "" {
+				if header.MatchFileName(b.Path) {
+					fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), nil})
+				}
+				if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
+					headerMatches = append(headerMatches, syntaxFileInfo{header, f.Name(), nil})
+				}
+			} else if header.FileType == ft {
 				syntaxFile = f.Name()
 				break
 			}
-		} else if header.FileType == ft {
-			syntaxFile = f.Name()
-			break
+		}
+	}
+
+	if syntaxFile == "" {
+		matches := fnameMatches
+		if len(matches) == 0 {
+			matches = headerMatches
+		}
+
+		length := len(matches)
+		if length > 0 {
+			signatureMatch := false
+			if length > 1 {
+				// multiple matching syntax files found, try to resolve the ambiguity
+				// using signatures
+				detectlimit := util.IntOpt(b.Settings["detectlimit"])
+				lineCount := len(b.lines)
+				limit := lineCount
+				if detectlimit > 0 && lineCount > detectlimit {
+					limit = detectlimit
+				}
+
+			matchLoop:
+				for _, m := range matches {
+					if m.header.HasFileSignature() {
+						for i := 0; i < limit; i++ {
+							if m.header.MatchFileSignature(b.lines[i].data) {
+								syntaxFile = m.fileName
+								if m.syntaxDef != nil {
+									b.SyntaxDef = m.syntaxDef
+									foundDef = true
+								}
+								header = m.header
+								signatureMatch = true
+								break matchLoop
+							}
+						}
+					}
+				}
+			}
+			if length == 1 || !signatureMatch {
+				syntaxFile = matches[0].fileName
+				if matches[0].syntaxDef != nil {
+					b.SyntaxDef = matches[0].syntaxDef
+					foundDef = true
+				}
+				header = matches[0].header
+			}
 		}
 	}
 
 	if syntaxFile != "" && !foundDef {
 		// we found a syntax file using a syntax header file
-		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			if f.Name() == syntaxFile {
-				data, err := f.Data()
-				if err != nil {
-					screen.TermMessage("Error loading syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-
-				file, err := highlight.ParseFile(data)
-				if err != nil {
-					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-
-				syndef, err := highlight.ParseDef(file, header)
-				if err != nil {
-					screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-					continue
-				}
-				b.SyntaxDef = syndef
-				break
-			}
-		}
+		b.SyntaxDef = findRuntimeSyntaxDef(syntaxFile, header)
 	}
 
-	if b.SyntaxDef != nil && highlight.HasIncludes(b.SyntaxDef) {
-		includes := highlight.GetIncludes(b.SyntaxDef)
-
-		var files []*highlight.File
-		for _, f := range config.ListRuntimeFiles(config.RTSyntax) {
-			data, err := f.Data()
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-			header, err := highlight.MakeHeaderYaml(data)
-			if err != nil {
-				screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-				continue
-			}
-
-			for _, i := range includes {
-				if header.FileType == i {
-					file, err := highlight.ParseFile(data)
-					if err != nil {
-						screen.TermMessage("Error parsing syntax file " + f.Name() + ": " + err.Error())
-						continue
-					}
-					files = append(files, file)
-					break
-				}
-			}
-			if len(files) >= len(includes) {
-				break
-			}
-		}
-
-		highlight.ResolveIncludes(b.SyntaxDef, files)
-	}
-
-	if b.Highlighter == nil || syntaxFile != "" {
-		if b.SyntaxDef != nil {
-			b.Settings["filetype"] = b.SyntaxDef.FileType
-		}
+	if b.SyntaxDef != nil {
+		b.Settings["filetype"] = b.SyntaxDef.FileType
 	} else {
-		b.SyntaxDef = &highlight.EmptyDef
+		// search for the default file in the user's custom syntax files
+		b.SyntaxDef = findRealRuntimeSyntaxDef("default", nil)
+		if b.SyntaxDef == nil {
+			// search for the default file in the built-in syntax files
+			b.SyntaxDef = findRuntimeSyntaxDef("default", nil)
+		}
+	}
+
+	if b.SyntaxDef != nil {
+		resolveIncludes(b.SyntaxDef)
 	}
 
 	if b.SyntaxDef != nil {
@@ -914,7 +1055,7 @@ func (b *Buffer) MergeCursors() {
 	b.EventHandler.active = b.curCursor
 }
 
-// UpdateCursors updates all the cursors indicies
+// UpdateCursors updates all the cursors indices
 func (b *Buffer) UpdateCursors() {
 	b.EventHandler.cursors = b.cursors
 	b.EventHandler.active = b.curCursor
@@ -939,7 +1080,7 @@ func (b *Buffer) ClearCursors() {
 	b.cursors = b.cursors[:1]
 	b.UpdateCursors()
 	b.curCursor = 0
-	b.GetActiveCursor().ResetSelection()
+	b.GetActiveCursor().Deselect(true)
 }
 
 // MoveLinesUp moves the range of lines up one row
@@ -990,34 +1131,14 @@ var BracePairs = [][2]rune{
 	{'[', ']'},
 }
 
-// FindMatchingBrace returns the location in the buffer of the matching bracket
-// It is given a brace type containing the open and closing character, (for example
-// '{' and '}') as well as the location to match from
-// TODO: maybe can be more efficient with utf8 package
-// returns the location of the matching brace
-// if the boolean returned is true then the original matching brace is one character left
-// of the starting location
-func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, bool) {
-	curLine := []rune(string(b.LineBytes(start.Y)))
-	startChar := ' '
-	if start.X >= 0 && start.X < len(curLine) {
-		startChar = curLine[start.X]
-	}
-	leftChar := ' '
-	if start.X-1 >= 0 && start.X-1 < len(curLine) {
-		leftChar = curLine[start.X-1]
-	}
+func (b *Buffer) findMatchingBrace(braceType [2]rune, start Loc, char rune) (Loc, bool) {
 	var i int
-	if startChar == braceType[0] || leftChar == braceType[0] {
+	if char == braceType[0] {
 		for y := start.Y; y < b.LinesNum(); y++ {
 			l := []rune(string(b.LineBytes(y)))
 			xInit := 0
 			if y == start.Y {
-				if startChar == braceType[0] {
-					xInit = start.X
-				} else {
-					xInit = start.X - 1
-				}
+				xInit = start.X
 			}
 			for x := xInit; x < len(l); x++ {
 				r := l[x]
@@ -1026,42 +1147,76 @@ func (b *Buffer) FindMatchingBrace(braceType [2]rune, start Loc) (Loc, bool, boo
 				} else if r == braceType[1] {
 					i--
 					if i == 0 {
-						if startChar == braceType[0] {
-							return Loc{x, y}, false, true
-						}
-						return Loc{x, y}, true, true
+						return Loc{x, y}, true
 					}
 				}
 			}
 		}
-	} else if startChar == braceType[1] || leftChar == braceType[1] {
+	} else if char == braceType[1] {
 		for y := start.Y; y >= 0; y-- {
 			l := []rune(string(b.lines[y].data))
 			xInit := len(l) - 1
 			if y == start.Y {
-				if leftChar == braceType[1] {
-					xInit = start.X - 1
-				} else {
-					xInit = start.X
-				}
+				xInit = start.X
 			}
 			for x := xInit; x >= 0; x-- {
 				r := l[x]
-				if r == braceType[0] {
+				if r == braceType[1] {
+					i++
+				} else if r == braceType[0] {
 					i--
 					if i == 0 {
-						if leftChar == braceType[1] {
-							return Loc{x, y}, true, true
-						}
-						return Loc{x, y}, false, true
+						return Loc{x, y}, true
 					}
-				} else if r == braceType[1] {
-					i++
 				}
 			}
 		}
 	}
-	return start, true, false
+	return start, false
+}
+
+// If there is a brace character (for example '{' or ']') at the given start location,
+// FindMatchingBrace returns the location of the matching brace for it (for example '}'
+// or '['). The second returned value is true if there was no matching brace found
+// for given starting location but it was found for the location one character left
+// of it. The third returned value is true if the matching brace was found at all.
+func (b *Buffer) FindMatchingBrace(start Loc) (Loc, bool, bool) {
+	// TODO: maybe can be more efficient with utf8 package
+	curLine := []rune(string(b.LineBytes(start.Y)))
+
+	// first try to find matching brace for the given location (it has higher priority)
+	if start.X >= 0 && start.X < len(curLine) {
+		startChar := curLine[start.X]
+
+		for _, bp := range BracePairs {
+			if startChar == bp[0] || startChar == bp[1] {
+				mb, found := b.findMatchingBrace(bp, start, startChar)
+				if found {
+					return mb, false, true
+				}
+			}
+		}
+	}
+
+	if b.Settings["matchbraceleft"].(bool) {
+		// failed to find matching brace for the given location, so try to find matching
+		// brace for the location one character left of it
+		if start.X-1 >= 0 && start.X-1 < len(curLine) {
+			leftChar := curLine[start.X-1]
+			left := Loc{start.X - 1, start.Y}
+
+			for _, bp := range BracePairs {
+				if leftChar == bp[0] || leftChar == bp[1] {
+					mb, found := b.findMatchingBrace(bp, left, leftChar)
+					if found {
+						return mb, true, true
+					}
+				}
+			}
+		}
+	}
+
+	return start, false, false
 }
 
 // Retab changes all tabs to spaces or vice versa
@@ -1083,7 +1238,11 @@ func (b *Buffer) Retab() {
 		}
 
 		l = bytes.TrimLeft(l, " \t")
+
+		b.Lock()
 		b.lines[i].data = append(ws, l...)
+		b.Unlock()
+
 		b.MarkModified(i, i)
 		dirty = true
 	}
@@ -1126,7 +1285,7 @@ func (b *Buffer) Write(bytes []byte) (n int, err error) {
 	return len(bytes), nil
 }
 
-func (b *Buffer) updateDiffSync() {
+func (b *Buffer) updateDiff(synchronous bool) {
 	b.diffLock.Lock()
 	defer b.diffLock.Unlock()
 
@@ -1137,7 +1296,16 @@ func (b *Buffer) updateDiffSync() {
 	}
 
 	differ := dmp.New()
-	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(b.Bytes()))
+
+	if !synchronous {
+		b.Lock()
+	}
+	bytes := b.Bytes()
+	if !synchronous {
+		b.Unlock()
+	}
+
+	baseRunes, bufferRunes, _ := differ.DiffLinesToRunes(string(b.diffBase), string(bytes))
 	diffs := differ.DiffMainRunes(baseRunes, bufferRunes, false)
 	lineN := 0
 
@@ -1166,13 +1334,9 @@ func (b *Buffer) updateDiffSync() {
 
 // UpdateDiff computes the diff between the diff base and the buffer content.
 // The update may be performed synchronously or asynchronously.
-// UpdateDiff calls the supplied callback when the update is complete.
-// The argument passed to the callback is set to true if and only if
-// the update was performed synchronously.
 // If an asynchronous update is already pending when UpdateDiff is called,
-// UpdateDiff does not schedule another update, in which case the callback
-// is not called.
-func (b *Buffer) UpdateDiff(callback func(bool)) {
+// UpdateDiff does not schedule another update.
+func (b *Buffer) UpdateDiff() {
 	if b.updateDiffTimer != nil {
 		return
 	}
@@ -1183,20 +1347,18 @@ func (b *Buffer) UpdateDiff(callback func(bool)) {
 	}
 
 	if lineCount < 1000 {
-		b.updateDiffSync()
-		callback(true)
+		b.updateDiff(true)
 	} else if lineCount < 30000 {
 		b.updateDiffTimer = time.AfterFunc(500*time.Millisecond, func() {
 			b.updateDiffTimer = nil
-			b.updateDiffSync()
-			callback(false)
+			b.updateDiff(false)
+			screen.Redraw()
 		})
 	} else {
 		// Don't compute diffs for very large files
 		b.diffLock.Lock()
 		b.diff = make(map[int]DiffStatus)
 		b.diffLock.Unlock()
-		callback(true)
 	}
 }
 
@@ -1208,9 +1370,7 @@ func (b *Buffer) SetDiffBase(diffBase []byte) {
 	} else {
 		b.diffBaseLineCount = strings.Count(string(diffBase), "\n")
 	}
-	b.UpdateDiff(func(synchronous bool) {
-		screen.Redraw()
-	})
+	b.UpdateDiff()
 }
 
 // DiffStatus returns the diff status for a line in the buffer

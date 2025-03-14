@@ -1,6 +1,6 @@
 filetype: vala
 
-detect: 
+detect:
     filename: "\\.vala$"
 
 rules:
@@ -19,7 +19,6 @@ rules:
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
 
     - todo: "TODO:?"
     - indent-char.whitespace: "[[:space:]]+$"

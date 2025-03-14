@@ -1,6 +1,6 @@
 filetype: sed
 
-detect: 
+detect:
     filename: "\\.sed$"
     header: "^#!.*bin/(env +)?sed( |$)"
 

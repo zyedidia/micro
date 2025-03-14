@@ -1,10 +1,10 @@
 filetype: vhdl
 
-detect: 
+detect:
     filename: "\\.vhdl?$"
 
 rules:
-    - type: "(i)\\b(string|integer|natural|positive|(un)?signed|std_u?logic(_vector)?|bit(_vector)?|boolean|u?x01z?|array|range)\\b"
+    - type: "(?i)\\b(string|integer|natural|positive|(un)?signed|std_u?logic(_vector)?|bit(_vector)?|boolean|u?x01z?|array|range)\\b"
     - identifier: "(?i)library[[:space:]]+[a-zA-Z_0-9]+"
     - identifier: "(?i)use[[:space:]]+[a-zA-Z_0-9\\.]+"
     - identifier: "(?i)component[[:space:]]+[a-zA-Z_0-9]+"

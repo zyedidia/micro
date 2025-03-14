@@ -4,13 +4,13 @@ detect:
     filename: "\\.svelte$"
 
 rules:
-    - default: 
+    - default:
         start: "<script>"
         end: "</script>"
         rules:
             - include: "javascript"
 
-    - default: 
+    - default:
         start: "<script lang=\"ts\">"
         end: "</script>"
         rules:

@@ -1,0 +1,91 @@
+filetype: log
+
+detect:
+    filename: "(\\.log|log\\.txt)$"
+
+rules:
+- diff-modified: "\\b(WARN(ING)?|[Ww]arn(ing)?|w(r)?n|w|W/)\\b"
+- diff-modified: "\\b(CRITICAL|[Cc]ritical)\\b"
+
+- constant: "\\b(INFO(RMATION)?|[Ii]nfo(rmation)?|[Ii]n(f)?|i|I/)\\b"
+- constant: "\\b(DEBUG|[Dd]ebug|dbug|dbg|de|d|D/)\\b"
+- constant: "\\b(VERBOSE|[Vv]erbose|V/)\\b"
+- constant: "\\b(ALERT|[Aa]lert)\\b"
+
+- preproc: "\\b(TRACE|Trace|NOTICE|VERBOSE|verb|vrb|vb|v)\\b"
+
+- gutter-error: "\\b(ERROR|[Ee]rr(or)?|[Ee]r(or)?|e|E\\x2F)\\b"
+- gutter-error: "\\b(FATAL|[Ff]atal)\\b"
+- gutter-error: "\\b(EMERGENCY|[Ee]mergency)\\b"
+- gutter-error: "\\b(FAIL(URE)?|[Ff]ail(ure)?)\\b"
+
+# constants
+- constant.bool.true: "\\b(YES|yes|Y|y|ON|on|TRUE|True|true)\\b"
+- constant.bool.false: "\\b(NO|no|N|n|OFF|off|FALSE|False|false)\\b"
+- constant.bool.false: "\\b(None|null|nil)\\b"
+
+# numbers
+- constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
+- constant.number: "\\b0b(_?[01])+\\b"      # bin
+- constant.number: "\\b0o(_?[0-7])+\\b"     # oct
+- constant.number: "\\b0x(_?[0-9a-f])+\\b"  # hex
+
+# operators
+- symbol.operator: "([~^.:;,+*|=!\\%]|<|>|/|-|&)"
+
+# parentheses
+- symbol.brackets: "([(){}]|\\[|\\])"
+
+# string
+- constant.string:
+    start: "\""
+    end: "(\"|$)"
+    skip: "\\\\."
+    rules:
+      - constant.specialChar: "\\\\."
+
+- constant.string:
+    start: "'"
+    end: "('|$)"
+    skip: "\\\\."
+    rules:
+      - constant.specialChar: "\\\\."
+
+# file
+- preproc: "\\b(FILE|File|file)\\b"
+
+# time
+- identifier: "\\b((([Mm]on|[Tt]ues|[Ww]ed(nes)?|[Tt]hur(s)?|[Ff]ri|[Ss]at(ur)?|[Ss]un)(day)?\\s)?([Jj]an(uary)?|[Ff]eb(ruary)?|[Mm]ar(ch)?|[Aa]pr(il)?|[Mm]ay|[Jj]un(e)?|[Jj]ul(y)?|[Aa]ug(ust)?|[Aa]go|[Ss]ep(tember)?|[Oo]ct(ober)?|[Nn]ov(ember)?|[Dd]ec(ember)?)\\s\\d{1,2},?(\\s\\d{4})?)\\b"  # date
+- identifier: "\\b(\\d{2,4}[-/\\.]?\\d{2,3}[-/\\.]?\\d{2,4})\\b"  # date
+- identifier: "\\b(\\d{2}:\\d{2}(:\\d{2})?([\\.,]?\\d{1,8}[\\.\\+,]?\\d{1,8}?)?([\\.\\+,]?\\d{1,8}[\\.\\+,]?\\d{1,8}?)?([\\.\\+,]?\\d{1,8}?)?(\\s-\\d{0,4})?)\\b"  # time
+- identifier: "^([0-2][0-9][0-2][0-9][-/]?[0-9][0-9][-/]?[0-9][0-9])"
+# - identifier: "^([0-2][0-9][0-2][0-9][-/]?[0-9][0-9][-/]?[0-9][0-9]\\s[0-9][0-9]:[0-9][0-9](:[0-9][0-9])?(\\.?[0-9][0-9][0-9])?)"
+- identifier: "^(\\d{4}[-/]?\\d{2}[-/]?\\d{2}\\s\\d{2}:\\d{2}(:\\d{2})?(\\.?\\d{2,8})?)"
+- identifier: "^([0-2][0-9]|[0-2]-?[0-9][0-9]-?[0-9][0-9])\\-([0-1][0-9])\\-([0-3][0-9]) ([0-2][0-9])\\:([0-5][0-9])\\:([0-5][0-9]),([0-9][0-9][0-9])"
+# Complete precision:
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))"
+# No milliseconds:
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))"
+# No Seconds:
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))"
+# Putting it all together:
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d([+-][0-2]\\d:[0-5]\\d|Z))"
+# Complete precision:
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+)"
+# No milliseconds
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d)"
+#  No Seconds
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d)"
+# Putting it all together
+- identifier: "^(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d\\.\\d+)|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d:[0-5]\\d)|(\\d{4}-[01]\\d-[0-3]\\dT[0-2]\\d:[0-5]\\d)"
+
+# link
+- constant.string.url:
+    start: "https?://"
+    end: "\\s"
+
+# path
+# - constant.string.url: "\\b(.+)/([^/]+)\\b"  # linux
+# - constant.string.url: "\\b(^[a-zA-Z]:)\\b"  # windowns
+
+- diff-modified: "([Cc]ommit:)\\s\\w+\\[\\w+]"

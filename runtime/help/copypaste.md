@@ -12,13 +12,13 @@ is limited support among terminal emulators for the terminal clipboard
 (which uses the OSC 52 protocol to communicate clipboard contents).
 Here is a list of terminal emulators and their status:
 
-* Kitty: supported, but only writing is enabled by default. To enable
-  reading, add `read-primary` and `read-clipboard` to the
-  `clipboard_control` option.
+* `Kitty`: supported, but only writing is enabled by default. To enable
+   reading, add `read-primary` and `read-clipboard` to the
+   `clipboard_control` option.
 
-* iTerm2: only copying (writing to clipboard) is supported. Must be enabled in
-  `Preferences->General-> Selection->Applications in terminal may access clipboard`.
-  You can use Command-v to paste.
+* `iTerm2`: only copying (writing to clipboard) is supported. Must be enabled in
+   `Preferences->General-> Selection->Applications in terminal may access clipboard`.
+   You can use `Command-v` to paste.
 
 * `st`: supported.
 
@@ -31,7 +31,8 @@ Here is a list of terminal emulators and their status:
 
 * `gnome-terminal`: does not support OSC 52.
 
-* `alacritty`: supported.
+* `alacritty`: supported. Since 0.13.0, reading has been disabled by default.
+   To reenable it, set the `terminal.osc52` option to `CopyPaste`.
 
 * `foot`: supported.
 
@@ -48,12 +49,12 @@ supports OSC 52.
 
 The recommended method of pasting is the following:
 
-* If you are not working over SSH, use the micro keybinding (Ctrl-v
+* If you are not working over SSH, use the micro keybinding (`Ctrl-v`
   by default) to perform pastes. If on Linux, install `xclip` or
   `xsel` beforehand.
 
 * If you are working over SSH, use the terminal keybinding
-  (Ctrl-Shift-v or Command-v) to perform pastes. If your terminal
+  (`Ctrl-Shift-v` or `Command-v`) to perform pastes. If your terminal
   does not support bracketed paste, when performing a paste first
   enable the `paste` option, and when finished disable the option.
 
@@ -62,8 +63,8 @@ The recommended method of pasting is the following:
 Micro is an application that runs within the terminal. This means
 that the terminal sends micro events, such as key events, mouse
 events, resize events, and paste events. Micro's default keybinding
-for paste is Ctrl-v. This means that when micro receives the key
-event saying Ctrl-v has been pressed from the terminal, it will
+for paste is `Ctrl-v`. This means that when micro receives the key
+event saying `Ctrl-v` has been pressed from the terminal, it will
 attempt to access the system clipboard and effect a paste. The
 system clipboard will be accessed through `pbpaste` on MacOS
 (installed by default), `xclip` or `xsel` on Linux (these
@@ -76,8 +77,8 @@ For certain keypresses, the terminal will not send an event to
 micro and will instead do something itself. In this document,
 such keypresses will be called "terminal keybindings." Often
 there will be a terminal keybinding for pasting and copying. On
-MacOS these are Command-v and Command-c and on Linux Ctrl-Shift-v
-and Ctrl-Shift-c. When the terminal keybinding for paste is
+MacOS these are Command-v and Command-c and on Linux `Ctrl-Shift-v`
+and `Ctrl-Shift-c`. When the terminal keybinding for paste is
 executed, your terminal will access the system clipboard, and send
 micro either a paste event or a list of key events (one key for each
 character in the paste), depending on whether or not your terminal
@@ -89,7 +90,7 @@ sends a list of key events, this can cause issues because micro
 will think you manually entered each character and may add closing
 brackets or automatic indentation, which will mess up the pasted
 text. To avoid this, you can temporarily enable the `paste` option
-while you perform the paste. When paste option is on, micro will 
+while you perform the paste. When paste option is on, micro will
 aggregate lists of multiple key events into larger paste events.
 It is a good idea to disable the `paste` option during normal use
 as occasionally if you are typing quickly, the terminal will send
@@ -100,7 +101,7 @@ entered.
 
 When working over SSH, micro is running on the remote machine and
 your terminal is running on your local machine. Therefore if you
-would like to paste, using Ctrl-v (micro's keybinding) will not
+would like to paste, using `Ctrl-v` (micro's keybinding) will not
 work because when micro attempts to access the system clipboard,
 it will access the remote machine's clipboard rather than the local
 machine's clipboard. On the other hand, the terminal keybinding
@@ -113,12 +114,12 @@ the network as a paste event, which is what you want.
 
 The recommended method of copying is the following:
 
-* If you are not working over SSH, use the micro keybinding (Ctrl-c by
+* If you are not working over SSH, use the micro keybinding (`Ctrl-c` by
   default) to perform copies. If on Linux, install `xclip` or `xsel`
   beforehand.
 
 * If you are working over SSH, use the terminal keybinding
-  (Ctrl-Shift-c or Command-c) to perform copies. You must first disable
+  (`Ctrl-Shift-c` or `Command-c`) to perform copies. You must first disable
   the `mouse` option to perform a terminal selection, and you may wish
   to disable line numbers and diff indicators (`ruler` and `diffgutter`
   options) and close other splits. This method will only be able to copy
@@ -129,14 +130,14 @@ Copying follows a similar discussion to the one above about pasting.
 The primary difference is before performing a copy, the application
 doing the copy must be told what text needs to be copied.
 
-Micro has a keybinding (Ctrl-c) for copying and will access the system
+Micro has a keybinding (`Ctrl-c`) for copying and will access the system
 clipboard to perform the copy. The text that micro will copy into is
 the text that is currently selected in micro (usually such text is
 displayed with a white background). When the `mouse` option is enabled,
 the mouse can be used to select text, as well as other keybindings,
 such as ShiftLeft, etc...
 
-The terminal also has a keybinding (Ctrl-Shift-c or Command-c) to perform
+The terminal also has a keybinding (`Ctrl-Shift-c` or `Command-c`) to perform
 a copy, and the text that it copies is the text selected by the terminal's
 selection (*not* micro's selection). To select text with the terminal
 selection, micro's mouse support must first be disabled by turning the

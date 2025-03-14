@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 func TestSimpleStringToStyle(t *testing.T) {
@@ -65,7 +65,7 @@ color-link constant "#AE81FF,#282828"
 color-link constant.string "#E6DB74,#282828"
 color-link constant.string.char "#BDE6AD,#282828"`
 
-	c, err := ParseColorscheme(testColorscheme)
+	c, err := ParseColorscheme("testColorscheme", testColorscheme, nil)
 	assert.Nil(t, err)
 
 	fg, bg, _ := c["comment"].Decompose()

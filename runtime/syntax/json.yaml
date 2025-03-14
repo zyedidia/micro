@@ -10,7 +10,7 @@ rules:
     - constant.number: "\\b[-+]?([0-9]+[EePp][+-]?[0-9]+)[fFlL]?"
     - constant: "\\b(null)\\b"
     - constant: "\\b(true|false)\\b"
-    - constant.string: 
+    - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
@@ -25,3 +25,15 @@ rules:
 
     - statement: "\\\"(\\\\\"|[^\"])*\\\"[[:space:]]*:\"  \"'(\\'|[^'])*'[[:space:]]*:"
     - constant: "\\\\u[0-9a-fA-F]{4}|\\\\[bfnrt'\"/\\\\]"
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

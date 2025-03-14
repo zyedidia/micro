@@ -1,6 +1,6 @@
 filetype: haml
 
-detect: 
+detect:
     filename: "\\.haml$"
 
 rules:

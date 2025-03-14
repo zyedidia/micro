@@ -17,7 +17,6 @@ import (
 	"regexp"
 	"runtime"
 	"strings"
-	"sync"
 	"time"
 	"unicode/utf8"
 
@@ -27,7 +26,6 @@ import (
 )
 
 var L *lua.LState
-var Lock sync.Mutex
 
 // LoadFile loads a lua file
 func LoadFile(module string, file string, data []byte) error {
@@ -127,6 +125,7 @@ func importIo() *lua.LTable {
 	L.SetField(pkg, "MultiWriter", luar.New(L, io.MultiWriter))
 	L.SetField(pkg, "NewSectionReader", luar.New(L, io.NewSectionReader))
 	L.SetField(pkg, "Pipe", luar.New(L, io.Pipe))
+	L.SetField(pkg, "ReadAll", luar.New(L, io.ReadAll))
 	L.SetField(pkg, "ReadAtLeast", luar.New(L, io.ReadAtLeast))
 	L.SetField(pkg, "ReadFull", luar.New(L, io.ReadFull))
 	L.SetField(pkg, "TeeReader", luar.New(L, io.TeeReader))
@@ -372,6 +371,8 @@ func importOs() *lua.LTable {
 	L.SetField(pkg, "PathListSeparator", luar.New(L, os.PathListSeparator))
 	L.SetField(pkg, "PathSeparator", luar.New(L, os.PathSeparator))
 	L.SetField(pkg, "Pipe", luar.New(L, os.Pipe))
+	L.SetField(pkg, "ReadDir", luar.New(L, os.ReadDir))
+	L.SetField(pkg, "ReadFile", luar.New(L, os.ReadFile))
 	L.SetField(pkg, "Readlink", luar.New(L, os.Readlink))
 	L.SetField(pkg, "Remove", luar.New(L, os.Remove))
 	L.SetField(pkg, "RemoveAll", luar.New(L, os.RemoveAll))
@@ -390,6 +391,7 @@ func importOs() *lua.LTable {
 	L.SetField(pkg, "TempDir", luar.New(L, os.TempDir))
 	L.SetField(pkg, "Truncate", luar.New(L, os.Truncate))
 	L.SetField(pkg, "UserHomeDir", luar.New(L, os.UserHomeDir))
+	L.SetField(pkg, "WriteFile", luar.New(L, os.WriteFile))
 
 	return pkg
 }
@@ -523,27 +525,31 @@ func importErrors() *lua.LTable {
 func importTime() *lua.LTable {
 	pkg := L.NewTable()
 
-	L.SetField(pkg, "After", luar.New(L, time.After))
 	L.SetField(pkg, "Sleep", luar.New(L, time.Sleep))
-	L.SetField(pkg, "Tick", luar.New(L, time.Tick))
 	L.SetField(pkg, "Since", luar.New(L, time.Since))
 	L.SetField(pkg, "FixedZone", luar.New(L, time.FixedZone))
 	L.SetField(pkg, "LoadLocation", luar.New(L, time.LoadLocation))
-	L.SetField(pkg, "NewTicker", luar.New(L, time.NewTicker))
 	L.SetField(pkg, "Date", luar.New(L, time.Date))
 	L.SetField(pkg, "Now", luar.New(L, time.Now))
 	L.SetField(pkg, "Parse", luar.New(L, time.Parse))
 	L.SetField(pkg, "ParseDuration", luar.New(L, time.ParseDuration))
 	L.SetField(pkg, "ParseInLocation", luar.New(L, time.ParseInLocation))
 	L.SetField(pkg, "Unix", luar.New(L, time.Unix))
-	L.SetField(pkg, "AfterFunc", luar.New(L, time.AfterFunc))
-	L.SetField(pkg, "NewTimer", luar.New(L, time.NewTimer))
 	L.SetField(pkg, "Nanosecond", luar.New(L, time.Nanosecond))
 	L.SetField(pkg, "Microsecond", luar.New(L, time.Microsecond))
 	L.SetField(pkg, "Millisecond", luar.New(L, time.Millisecond))
 	L.SetField(pkg, "Second", luar.New(L, time.Second))
 	L.SetField(pkg, "Minute", luar.New(L, time.Minute))
 	L.SetField(pkg, "Hour", luar.New(L, time.Hour))
+
+	// TODO: these raw Go timer APIs don't provide any synchronization
+	// with micro. Stop exposing them to lua once plugins switch to using
+	// the safer micro.After() interface instead. See issue #3209
+	L.SetField(pkg, "After", luar.New(L, time.After))
+	L.SetField(pkg, "AfterFunc", luar.New(L, time.AfterFunc))
+	L.SetField(pkg, "NewTicker", luar.New(L, time.NewTicker))
+	L.SetField(pkg, "NewTimer", luar.New(L, time.NewTimer))
+	L.SetField(pkg, "Tick", luar.New(L, time.Tick))
 
 	return pkg
 }

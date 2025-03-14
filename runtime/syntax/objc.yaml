@@ -2,6 +2,7 @@ filetype: objective-c
 
 detect:
     filename: "\\.(m|mm|h)$"
+    signature: "(obj|objective)-c|#import|@(encode|end|interface|implementation|selector|protocol|synchronized|try|catch|finally|property|optional|required|import|autoreleasepool)"
 
 rules:
     - type: "\\b(float|double|CGFloat|id|bool|BOOL|Boolean|char|int|short|long|sizeof|enum|void|static|const|struct|union|typedef|extern|(un)?signed|inline|Class|SEL|IMP|NS(U)?Integer)\\b"

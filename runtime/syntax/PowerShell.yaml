@@ -5,7 +5,6 @@ filetype: powershell
 
 detect:
     filename: "\\.ps(1|m1|d1)$"
-    #header: ""
 
 rules:
     # - comment.block:           # Block Comment

@@ -1,6 +1,6 @@
 filetype: yum
 
-detect: 
+detect:
     filename: "\\.repo$|yum.*\\.conf$"
 
 rules:

@@ -1,6 +1,6 @@
 filetype: man
 
-detect: 
+detect:
     filename: "\\.[1-9]x?$"
 
 rules:

@@ -6,11 +6,11 @@ detect:
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
     - type: "\\b(F64|I8|U8|I16|U16|I32|U32|I64|U64|sizeof|enum|U0|static|extern|struct|union|class|intern|public|argc|argv|asm)\\b"
-    
+
     - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
     - statement: "\\b(try|catch|throw|goto|continue|break|return)\\b"
     - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|help_index|ifjit|ifaot|exe)"
-     
+
       # Operator Color
     - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&)"
     - symbol.brackets: "[(){}]|\\[|\\]"

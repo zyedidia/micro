@@ -4,7 +4,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"regexp"
 	"strings"
@@ -137,7 +136,7 @@ func generateFile(filetype, syntax, header string, rules []interface{}) string {
 	output += fmt.Sprintf("detect: \n    filename: \"%s\"\n", strings.Replace(strings.Replace(syntax, "\\", "\\\\", -1), "\"", "\\\"", -1))
 
 	if header != "" {
-		output += fmt.Sprintf("    header: \"%s\"\n", strings.Replace(strings.Replace(header, "\\", "\\\\", -1), "\"", "\\\"", -1))
+		output += fmt.Sprintf("    signature: \"%s\"\n", strings.Replace(strings.Replace(header, "\\", "\\\\", -1), "\"", "\\\"", -1))
 	}
 
 	output += "\nrules:\n"
@@ -149,7 +148,6 @@ func generateFile(filetype, syntax, header string, rules []interface{}) string {
 			output += fmt.Sprintf("    - %s:\n", rule.color)
 			output += fmt.Sprintf("        start: \"%s\"\n", strings.Replace(strings.Replace(rule.start, "\\", "\\\\", -1), "\"", "\\\"", -1))
 			output += fmt.Sprintf("        end: \"%s\"\n", strings.Replace(strings.Replace(rule.end, "\\", "\\\\", -1), "\"", "\\\"", -1))
-			output += fmt.Sprintf("        rules: []\n\n")
 		}
 	}
 
@@ -162,6 +160,6 @@ func main() {
 		return
 	}
 
-	data, _ := ioutil.ReadFile(os.Args[1])
+	data, _ := os.ReadFile(os.Args[1])
 	fmt.Print(generateFile(parseFile(string(data), os.Args[1])))
 }

@@ -50,11 +50,11 @@ function preInsertNewline(bp)
     for i = 1, #autoNewlinePairs do
         if curRune == charAt(autoNewlinePairs[i], 1) then
             if nextRune == charAt(autoNewlinePairs[i], 2) then
-                bp:InsertNewline()
-                bp:InsertTab()
                 bp.Buf:Insert(-bp.Cursor.Loc, "\n" .. ws)
                 bp:StartOfLine()
                 bp:CursorLeft()
+                bp:InsertNewline()
+                bp:InsertTab()
                 return false
             end
         end

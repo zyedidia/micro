@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"regexp"
 	"strconv"
 	"strings"
@@ -41,6 +42,7 @@ func InitCommands() {
 		"unbind":     {(*BufPane).UnbindCmd, nil},
 		"quit":       {(*BufPane).QuitCmd, nil},
 		"goto":       {(*BufPane).GotoCmd, nil},
+		"jump":       {(*BufPane).JumpCmd, nil},
 		"save":       {(*BufPane).SaveCmd, nil},
 		"replace":    {(*BufPane).ReplaceCmd, nil},
 		"replaceall": {(*BufPane).ReplaceAllCmd, nil},
@@ -137,23 +139,25 @@ func (h *BufPane) TextFilterCmd(args []string) {
 		InfoBar.Error("usage: textfilter arguments")
 		return
 	}
-	sel := h.Cursor.GetSelection()
-	if len(sel) == 0 {
-		h.Cursor.SelectWord()
-		sel = h.Cursor.GetSelection()
+	for _, c := range h.Buf.GetCursors() {
+		sel := c.GetSelection()
+		if len(sel) == 0 {
+			c.SelectWord()
+			sel = c.GetSelection()
+		}
+		var bout, berr bytes.Buffer
+		cmd := exec.Command(args[0], args[1:]...)
+		cmd.Stdin = strings.NewReader(string(sel))
+		cmd.Stderr = &berr
+		cmd.Stdout = &bout
+		err := cmd.Run()
+		if err != nil {
+			InfoBar.Error(err.Error() + " " + berr.String())
+			return
+		}
+		c.DeleteSelection()
+		h.Buf.Insert(c.Loc, bout.String())
 	}
-	var bout, berr bytes.Buffer
-	cmd := exec.Command(args[0], args[1:]...)
-	cmd.Stdin = strings.NewReader(string(sel))
-	cmd.Stderr = &berr
-	cmd.Stdout = &bout
-	err := cmd.Run()
-	if err != nil {
-		InfoBar.Error(err.Error() + " " + berr.String())
-		return
-	}
-	h.Cursor.DeleteSelection()
-	h.Buf.Insert(h.Cursor.Loc, bout.String())
 }
 
 // TabMoveCmd moves the current tab to a given index (starts at 1). The
@@ -197,10 +201,11 @@ func (h *BufPane) TabMoveCmd(args []string) {
 	idxTo = util.Clamp(idxTo, 0, len(Tabs.List)-1)
 
 	activeTab := Tabs.List[idxFrom]
-	Tabs.RemoveTab(activeTab.ID())
+	Tabs.RemoveTab(activeTab.Panes[0].ID())
 	Tabs.List = append(Tabs.List, nil)
 	copy(Tabs.List[idxTo+1:], Tabs.List[idxTo:])
 	Tabs.List[idxTo] = activeTab
+	Tabs.Resize()
 	Tabs.UpdateNames()
 	Tabs.SetActive(idxTo)
 	// InfoBar.Message(fmt.Sprintf("Moved tab from slot %d to %d", idxFrom+1, idxTo+1))
@@ -329,31 +334,84 @@ func (h *BufPane) ToggleLogCmd(args []string) {
 	}
 }
 
-// ReloadCmd reloads all files (syntax files, colorschemes...)
+// ReloadCmd reloads all files (syntax files, colorschemes, plugins...)
 func (h *BufPane) ReloadCmd(args []string) {
-	ReloadConfig()
+	reloadRuntime(true)
 }
 
+// ReloadConfig reloads only the configuration
 func ReloadConfig() {
-	config.InitRuntimeFiles()
+	reloadRuntime(false)
+}
+
+func reloadRuntime(reloadPlugins bool) {
+	if reloadPlugins {
+		err := config.RunPluginFn("deinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
+
+	config.InitRuntimeFiles(true)
+
+	if reloadPlugins {
+		config.InitPlugins()
+	}
+
 	err := config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
+	} else {
+		parsedSettings := config.ParsedSettings()
+		defaultSettings := config.DefaultAllSettings()
+		for k := range defaultSettings {
+			if _, ok := config.VolatileSettings[k]; ok {
+				// reload should not override volatile settings
+				continue
+			}
+
+			if _, ok := parsedSettings[k]; ok {
+				err = doSetGlobalOptionNative(k, parsedSettings[k])
+			} else {
+				err = doSetGlobalOptionNative(k, defaultSettings[k])
+			}
+			if err != nil {
+				screen.TermMessage(err)
+			}
+		}
 	}
-	err = config.InitGlobalSettings()
-	if err != nil {
-		screen.TermMessage(err)
+
+	if reloadPlugins {
+		err = config.LoadAllPlugins()
+		if err != nil {
+			screen.TermMessage(err)
+		}
 	}
+
 	InitBindings()
 	InitCommands()
+
+	if reloadPlugins {
+		err = config.RunPluginFn("preinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.RunPluginFn("init")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+		err = config.RunPluginFn("postinit")
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 
 	err = config.InitColorscheme()
 	if err != nil {
 		screen.TermMessage(err)
 	}
-
 	for _, b := range buffer.OpenBuffers {
-		b.UpdateRules()
+		b.ReloadSettings(true)
 	}
 }
 
@@ -363,50 +421,93 @@ func (h *BufPane) ReopenCmd(args []string) {
 		InfoBar.YNPrompt("Save file before reopen?", func(yes, canceled bool) {
 			if !canceled && yes {
 				h.Save()
-				h.Buf.ReOpen()
+				h.ReOpen()
 			} else if !canceled {
-				h.Buf.ReOpen()
+				h.ReOpen()
 			}
 		})
 	} else {
-		h.Buf.ReOpen()
+		h.ReOpen()
 	}
 }
 
-func (h *BufPane) openHelp(page string) error {
+func (h *BufPane) openHelp(page string, hsplit bool, forceSplit bool) error {
 	if data, err := config.FindRuntimeFile(config.RTHelp, page).Data(); err != nil {
-		return errors.New(fmt.Sprint("Unable to load help text", page, "\n", err))
+		return errors.New(fmt.Sprintf("Unable to load help text for %s: %v", page, err))
 	} else {
 		helpBuffer := buffer.NewBufferFromString(string(data), page+".md", buffer.BTHelp)
 		helpBuffer.SetName("Help " + page)
+		helpBuffer.SetOptionNative("hltaberrors", false)
+		helpBuffer.SetOptionNative("hltrailingws", false)
 
-		if h.Buf.Type == buffer.BTHelp {
+		if h.Buf.Type == buffer.BTHelp && !forceSplit {
 			h.OpenBuffer(helpBuffer)
-		} else {
+		} else if hsplit {
 			h.HSplitBuf(helpBuffer)
+		} else {
+			h.VSplitBuf(helpBuffer)
 		}
 	}
 	return nil
 }
 
-// HelpCmd tries to open the given help page in a horizontal split
+// HelpCmd tries to open the given help page according to the split type
+// configured with the "helpsplit" option. It can be overriden by the optional
+// arguments "-vpslit" or "-hsplit". In case more than one help page is given
+// as argument then it opens all of them with the defined split type.
 func (h *BufPane) HelpCmd(args []string) {
+	hsplit := config.GlobalSettings["helpsplit"] == "hsplit"
 	if len(args) < 1 {
 		// Open the default help if the user just typed "> help"
-		h.openHelp("help")
+		h.openHelp("help", hsplit, false)
 	} else {
-		if config.FindRuntimeFile(config.RTHelp, args[0]) != nil {
-			err := h.openHelp(args[0])
-			if err != nil {
-				InfoBar.Error(err)
+		var topics []string
+		forceSplit := false
+		const errSplit = "hsplit and vsplit are not allowed at the same time"
+		for _, arg := range args {
+			switch arg {
+			case "-vsplit":
+				if forceSplit {
+					InfoBar.Error(errSplit)
+					return
+				}
+				hsplit = false
+				forceSplit = true
+			case "-hsplit":
+				if forceSplit {
+					InfoBar.Error(errSplit)
+					return
+				}
+				hsplit = true
+				forceSplit = true
+			default:
+				topics = append(topics, arg)
 			}
-		} else {
-			InfoBar.Error("Sorry, no help for ", args[0])
+		}
+
+		if len(topics) < 1 {
+			// Do the same as without arg
+			h.openHelp("help", hsplit, forceSplit)
+			return
+		}
+		if len(topics) > 1 {
+			forceSplit = true
+		}
+
+		for _, topic := range topics {
+			if config.FindRuntimeFile(config.RTHelp, topic) != nil {
+				err := h.openHelp(topic, hsplit, forceSplit)
+				if err != nil {
+					InfoBar.Error(err)
+				}
+			} else {
+				InfoBar.Error("Sorry, no help for ", topic)
+			}
 		}
 	}
 }
 
-// VSplitCmd opens a vertical split with file given in the first argument
+// VSplitCmd opens one or more vertical splits with the files given as arguments
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufPane) VSplitCmd(args []string) {
 	if len(args) == 0 {
@@ -415,16 +516,18 @@ func (h *BufPane) VSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	for _, a := range args {
+		buf, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.VSplitBuf(buf)
+		h.VSplitBuf(buf)
+	}
 }
 
-// HSplitCmd opens a horizontal split with file given in the first argument
+// HSplitCmd opens one or more horizontal splits with the files given as arguments
 // If no file is given, it opens an empty buffer in a new split
 func (h *BufPane) HSplitCmd(args []string) {
 	if len(args) == 0 {
@@ -433,13 +536,15 @@ func (h *BufPane) HSplitCmd(args []string) {
 		return
 	}
 
-	buf, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
-	if err != nil {
-		InfoBar.Error(err)
-		return
-	}
+	for _, a := range args {
+		buf, err := buffer.NewBufferFromFile(a, buffer.BTDefault)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 
-	h.HSplitBuf(buf)
+		h.HSplitBuf(buf)
+	}
 }
 
 // EvalCmd evaluates a lua expression
@@ -447,7 +552,8 @@ func (h *BufPane) EvalCmd(args []string) {
 	InfoBar.Error("Eval unsupported")
 }
 
-// NewTabCmd opens the given file in a new tab
+// NewTabCmd opens one or more tabs with the files given as arguments
+// If no file is given, it opens an empty buffer in a new tab
 func (h *BufPane) NewTabCmd(args []string) {
 	width, height := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
@@ -470,73 +576,98 @@ func (h *BufPane) NewTabCmd(args []string) {
 	}
 }
 
-func SetGlobalOptionNative(option string, nativeValue interface{}) error {
-	local := false
-	for _, s := range config.LocalSettings {
-		if s == option {
-			local = true
-			break
-		}
+func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
+	if reflect.DeepEqual(config.GlobalSettings[option], nativeValue) {
+		return nil
 	}
 
-	if !local {
-		config.GlobalSettings[option] = nativeValue
-		config.ModifiedSettings[option] = true
+	config.GlobalSettings[option] = nativeValue
+	config.ModifiedSettings[option] = true
+	delete(config.VolatileSettings, option)
 
-		if option == "colorscheme" {
-			// LoadSyntaxFiles()
-			config.InitColorscheme()
-			for _, b := range buffer.OpenBuffers {
-				b.UpdateRules()
-			}
-		} else if option == "infobar" || option == "keymenu" {
-			Tabs.Resize()
-		} else if option == "mouse" {
-			if !nativeValue.(bool) {
-				screen.Screen.DisableMouse()
-			} else {
-				screen.Screen.EnableMouse()
-			}
-		} else if option == "autosave" {
-			if nativeValue.(float64) > 0 {
-				config.SetAutoTime(int(nativeValue.(float64)))
-				config.StartAutoSave()
-			} else {
-				config.SetAutoTime(0)
-			}
-		} else if option == "paste" {
-			screen.Screen.SetPaste(nativeValue.(bool))
-		} else if option == "clipboard" {
-			m := clipboard.SetMethod(nativeValue.(string))
-			err := clipboard.Initialize(m)
-			if err != nil {
-				return err
-			}
+	if option == "colorscheme" {
+		// LoadSyntaxFiles()
+		config.InitColorscheme()
+		for _, b := range buffer.OpenBuffers {
+			b.UpdateRules()
+		}
+	} else if option == "infobar" || option == "keymenu" {
+		Tabs.Resize()
+	} else if option == "mouse" {
+		if !nativeValue.(bool) {
+			screen.Screen.DisableMouse()
 		} else {
-			for _, pl := range config.Plugins {
-				if option == pl.Name {
-					if nativeValue.(bool) && !pl.Loaded {
-						pl.Load()
-						_, err := pl.Call("init")
-						if err != nil && err != config.ErrNoSuchFunction {
-							screen.TermMessage(err)
-						}
-					} else if !nativeValue.(bool) && pl.Loaded {
-						_, err := pl.Call("deinit")
-						if err != nil && err != config.ErrNoSuchFunction {
-							screen.TermMessage(err)
-						}
+			screen.Screen.EnableMouse()
+		}
+	} else if option == "autosave" {
+		if nativeValue.(float64) > 0 {
+			config.SetAutoTime(nativeValue.(float64))
+		} else {
+			config.SetAutoTime(0)
+		}
+	} else if option == "paste" {
+		screen.Screen.SetPaste(nativeValue.(bool))
+	} else if option == "clipboard" {
+		m := clipboard.SetMethod(nativeValue.(string))
+		err := clipboard.Initialize(m)
+		if err != nil {
+			return err
+		}
+	} else {
+		for _, pl := range config.Plugins {
+			if option == pl.Name {
+				if nativeValue.(bool) && !pl.Loaded {
+					pl.Load()
+					_, err := pl.Call("init")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
+					}
+				} else if !nativeValue.(bool) && pl.Loaded {
+					_, err := pl.Call("deinit")
+					if err != nil && err != config.ErrNoSuchFunction {
+						screen.TermMessage(err)
 					}
 				}
 			}
 		}
 	}
 
-	for _, b := range buffer.OpenBuffers {
-		b.SetOptionNative(option, nativeValue)
+	return nil
+}
+
+func SetGlobalOptionNative(option string, nativeValue interface{}) error {
+	if err := config.OptionIsValid(option, nativeValue); err != nil {
+		return err
 	}
 
-	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+	// check for local option first...
+	for _, s := range config.LocalSettings {
+		if s == option {
+			return MainTab().CurPane().Buf.SetOptionNative(option, nativeValue)
+		}
+	}
+
+	// ...if it's not local continue with the globals...
+	if err := doSetGlobalOptionNative(option, nativeValue); err != nil {
+		return err
+	}
+
+	// ...at last check the buffer locals
+	for _, b := range buffer.OpenBuffers {
+		b.DoSetOptionNative(option, nativeValue)
+		delete(b.LocalSettings, option)
+	}
+
+	err := config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+	if err != nil {
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+			err = errors.Unwrap(err)
+		}
+		return err
+	}
+
+	return nil
 }
 
 func SetGlobalOption(option, value string) error {
@@ -560,16 +691,10 @@ func (h *BufPane) ResetCmd(args []string) {
 	}
 
 	option := args[0]
+	defaults := config.DefaultAllSettings()
 
-	defaultGlobals := config.DefaultGlobalSettings()
-	defaultLocals := config.DefaultCommonSettings()
-
-	if _, ok := defaultGlobals[option]; ok {
-		SetGlobalOptionNative(option, defaultGlobals[option])
-		return
-	}
-	if _, ok := defaultLocals[option]; ok {
-		h.Buf.SetOptionNative(option, defaultLocals[option])
+	if _, ok := defaults[option]; ok {
+		SetGlobalOptionNative(option, defaults[option])
 		return
 	}
 	InfoBar.Error(config.ErrInvalidOption)
@@ -634,6 +759,11 @@ func (h *BufPane) ShowCmd(args []string) {
 	InfoBar.Message(option)
 }
 
+func parseKeyArg(arg string) string {
+	// If this is a raw escape sequence, convert it to its raw byte form
+	return strings.ReplaceAll(arg, "\\x1b", "\x1b")
+}
+
 // ShowKeyCmd displays the action that a key is bound to
 func (h *BufPane) ShowKeyCmd(args []string) {
 	if len(args) < 1 {
@@ -641,7 +771,7 @@ func (h *BufPane) ShowKeyCmd(args []string) {
 		return
 	}
 
-	event, err := findEvent(args[0])
+	event, err := findEvent(parseKeyArg(args[0]))
 	if err != nil {
 		InfoBar.Error(err)
 		return
@@ -660,9 +790,13 @@ func (h *BufPane) BindCmd(args []string) {
 		return
 	}
 
-	_, err := TryBindKey(args[0], args[1], true)
+	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true)
 	if err != nil {
-		InfoBar.Error(err)
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+		} else {
+			InfoBar.Error(err)
+		}
 	}
 }
 
@@ -673,9 +807,13 @@ func (h *BufPane) UnbindCmd(args []string) {
 		return
 	}
 
-	err := UnbindKey(args[0])
+	err := UnbindKey(parseKeyArg(args[0]))
 	if err != nil {
-		InfoBar.Error(err)
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+		} else {
+			InfoBar.Error(err)
+		}
 	}
 }
 
@@ -701,41 +839,67 @@ func (h *BufPane) QuitCmd(args []string) {
 // position in the buffer
 // For example: `goto line`, or `goto line:col`
 func (h *BufPane) GotoCmd(args []string) {
+	line, col, err := h.parseLineCol(args)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	if line < 0 {
+		line = h.Buf.LinesNum() + 1 + line
+	}
+	line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
+
+	h.RemoveAllMultiCursors()
+	h.Cursor.Deselect(true)
+	h.GotoLoc(buffer.Loc{col, line})
+}
+
+// JumpCmd is a command that will send the cursor to a certain relative
+// position in the buffer
+// For example: `jump line`, `jump -line`, or `jump -line:col`
+func (h *BufPane) JumpCmd(args []string) {
+	line, col, err := h.parseLineCol(args)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	line = h.Buf.GetActiveCursor().Y + 1 + line
+	line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
+	col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
+
+	h.RemoveAllMultiCursors()
+	h.Cursor.Deselect(true)
+	h.GotoLoc(buffer.Loc{col, line})
+}
+
+// parseLineCol is a helper to parse the input of GotoCmd and JumpCmd
+func (h *BufPane) parseLineCol(args []string) (line int, col int, err error) {
 	if len(args) <= 0 {
-		InfoBar.Error("Not enough arguments")
+		return 0, 0, errors.New("Not enough arguments")
+	}
+
+	line, col = 0, 0
+	if strings.Contains(args[0], ":") {
+		parts := strings.SplitN(args[0], ":", 2)
+		line, err = strconv.Atoi(parts[0])
+		if err != nil {
+			return 0, 0, err
+		}
+		col, err = strconv.Atoi(parts[1])
+		if err != nil {
+			return 0, 0, err
+		}
 	} else {
-		h.RemoveAllMultiCursors()
-		if strings.Contains(args[0], ":") {
-			parts := strings.SplitN(args[0], ":", 2)
-			line, err := strconv.Atoi(parts[0])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			col, err := strconv.Atoi(parts[1])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			col = util.Clamp(col-1, 0, util.CharacterCount(h.Buf.LineBytes(line)))
-			h.GotoLoc(buffer.Loc{col, line})
-		} else {
-			line, err := strconv.Atoi(args[0])
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if line < 0 {
-				line = h.Buf.LinesNum() + 1 + line
-			}
-			line = util.Clamp(line-1, 0, h.Buf.LinesNum()-1)
-			h.GotoLoc(buffer.Loc{0, line})
+		line, err = strconv.Atoi(args[0])
+		if err != nil {
+			return 0, 0, err
 		}
 	}
+
+	return line, col, nil
 }
 
 // SaveCmd saves the buffer optionally with an argument file name
@@ -743,7 +907,7 @@ func (h *BufPane) SaveCmd(args []string) {
 	if len(args) == 0 {
 		h.Save()
 	} else {
-		h.Buf.SaveAs(args[0])
+		h.saveBufToFile(args[0], "SaveAs", nil)
 	}
 }
 
@@ -804,19 +968,21 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	nreplaced := 0
 	start := h.Buf.Start()
 	end := h.Buf.End()
+	searchLoc := h.Cursor.Loc
 	selection := h.Cursor.HasSelection()
 	if selection {
 		start = h.Cursor.CurSelection[0]
 		end = h.Cursor.CurSelection[1]
+		searchLoc = start // otherwise me might start at the end
 	}
 	if all {
-		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace)
+		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace, !noRegex)
 	} else {
 		inRange := func(l buffer.Loc) bool {
 			return l.GreaterEqual(start) && l.LessEqual(end)
 		}
 
-		searchLoc := h.Cursor.Loc
+		lastMatchEnd := buffer.Loc{-1, -1}
 		var doReplacement func()
 		doReplacement = func() {
 			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, true)
@@ -831,6 +997,18 @@ func (h *BufPane) ReplaceCmd(args []string) {
 				return
 			}
 
+			if lastMatchEnd == locs[1] {
+				// skip empty match right after previous match
+				if searchLoc == end {
+					searchLoc = start
+					lastMatchEnd = buffer.Loc{-1, -1}
+				} else {
+					searchLoc = searchLoc.Move(1, h.Buf)
+				}
+				doReplacement()
+				return
+			}
+
 			h.Cursor.SetSelectionStart(locs[0])
 			h.Cursor.SetSelectionEnd(locs[1])
 			h.GotoLoc(locs[0])
@@ -840,7 +1018,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
-					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace)
+					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace, !noRegex)
 
 					searchLoc = locs[0]
 					searchLoc.X += nrunes + locs[0].Diff(locs[1], h.Buf)
@@ -856,6 +1034,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					h.Buf.RelocateCursors()
 					return
 				}
+				lastMatchEnd = searchLoc
 				doReplacement()
 			})
 		}

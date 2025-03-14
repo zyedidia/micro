@@ -10,7 +10,6 @@ rules:
     - special:
         start: "^```"
         end: "^```"
-        rules: []
       # heading lines
     - special:  "^#{1,3}.*"
       # unordered list items

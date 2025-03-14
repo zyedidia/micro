@@ -1,6 +1,6 @@
 filetype: privoxy-config
 
-detect: 
+detect:
     filename: "privoxy/config$"
 
 rules:

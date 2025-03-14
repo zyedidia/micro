@@ -11,6 +11,7 @@ import (
 
 	shellquote "github.com/kballard/go-shellquote"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // ExecCommand executes a command using exec
@@ -95,27 +96,29 @@ func RunInteractiveShell(input string, wait bool, getOutput bool) (string, error
 	cmd.Stderr = os.Stderr
 
 	// This is a trap for Ctrl-C so that it doesn't kill micro
-	// Instead we trap Ctrl-C to kill the program we're running
+	// micro is killed if the signal is ignored only on Windows, so it is
+	// received
 	c := make(chan os.Signal, 1)
+	signal.Reset(os.Interrupt)
 	signal.Notify(c, os.Interrupt)
-	go func() {
-		for range c {
-			cmd.Process.Kill()
+	err = cmd.Start()
+	if err == nil {
+		err = cmd.Wait()
+		if wait {
+			// This is just so we don't return right away and let the user press enter to return
+			screen.TermMessage("")
 		}
-	}()
-
-	cmd.Start()
-	err = cmd.Wait()
+	} else {
+		screen.TermMessage(err)
+	}
 
 	output := outputBytes.String()
 
-	if wait {
-		// This is just so we don't return right away and let the user press enter to return
-		screen.TermMessage("")
-	}
-
 	// Start the screen back up
 	screen.TempStart(screenb)
+
+	signal.Notify(util.Sigterm, os.Interrupt)
+	signal.Stop(c)
 
 	return output, err
 }

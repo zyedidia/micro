@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/zyedidia/tcell/v2"
+	"github.com/micro-editor/tcell/v2"
 )
 
 type Event interface {
@@ -44,6 +44,17 @@ func metaToAlt(mod tcell.ModMask) tcell.ModMask {
 	return mod
 }
 
+func keyEvent(e *tcell.EventKey) KeyEvent {
+	ke := KeyEvent{
+		code: e.Key(),
+		mod:  metaToAlt(e.Modifiers()),
+	}
+	if e.Key() == tcell.KeyRune {
+		ke.r = e.Rune()
+	}
+	return ke
+}
+
 func (k KeyEvent) Name() string {
 	if k.any {
 		return "<any>"
@@ -68,7 +79,7 @@ func (k KeyEvent) Name() string {
 		if k.code == tcell.KeyRune {
 			s = string(k.r)
 		} else {
-			s = fmt.Sprintf("Key[%d,%d]", k.code, int(k.r))
+			s = fmt.Sprintf("Key[%d]", k.code)
 		}
 	}
 	if len(m) != 0 {
@@ -100,11 +111,20 @@ func (k KeySequenceEvent) Name() string {
 	return buf.String()
 }
 
+type MouseState int
+
+const (
+	MousePress = iota
+	MouseDrag
+	MouseRelease
+)
+
 // MouseEvent is a mouse event with a mouse button and
 // any possible key modifiers
 type MouseEvent struct {
-	btn tcell.ButtonMask
-	mod tcell.ModMask
+	btn   tcell.ButtonMask
+	mod   tcell.ModMask
+	state MouseState
 }
 
 func (m MouseEvent) Name() string {
@@ -122,9 +142,17 @@ func (m MouseEvent) Name() string {
 		mod = "Ctrl-"
 	}
 
+	state := ""
+	switch m.state {
+	case MouseDrag:
+		state = "Drag"
+	case MouseRelease:
+		state = "Release"
+	}
+
 	for k, v := range mouseEvents {
 		if v == m.btn {
-			return fmt.Sprintf("%s%s", mod, k)
+			return fmt.Sprintf("%s%s%s", mod, k, state)
 		}
 	}
 	return ""
@@ -138,11 +166,7 @@ func (m MouseEvent) Name() string {
 func ConstructEvent(event tcell.Event) (Event, error) {
 	switch e := event.(type) {
 	case *tcell.EventKey:
-		return KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}, nil
+		return keyEvent(e), nil
 	case *tcell.EventRaw:
 		return RawEvent{
 			esc: e.EscSeq(),

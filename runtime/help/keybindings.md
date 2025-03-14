@@ -36,15 +36,15 @@ following in the `bindings.json` file.
 ```
 
 **Note:** The syntax `<Modifier><key>` is equivalent to `<Modifier>-<key>`. In
-addition, Ctrl-Shift bindings are not supported by terminals, and are the same
-as simply Ctrl bindings. This means that `CtrlG`, `Ctrl-G`, and `Ctrl-g` all
-mean the same thing. However, for Alt this is not the case: `AltG` and `Alt-G`
+addition, `Ctrl-Shift` bindings are not supported by terminals, and are the same
+as simply `Ctrl` bindings. This means that `CtrlG`, `Ctrl-G`, and `Ctrl-g` all
+mean the same thing. However, for `Alt` this is not the case: `AltG` and `Alt-G`
 mean `Alt-Shift-g`, while `Alt-g` does not require the Shift modifier.
 
 In addition to editing your `~/.config/micro/bindings.json`, you can run
 `>bind <keycombo> <action>` For a list of bindable actions, see below.
 
-You can also chain commands when rebinding. For example, if you want Alt-s to
+You can also chain commands when rebinding. For example, if you want `Alt-s` to
 save and quit you can bind it like so:
 
 ```json
@@ -66,7 +66,9 @@ bindings, tab is bound as
 
 This means that if the `Autocomplete` action is successful, the chain will
 abort. Otherwise, it will try `IndentSelection`, and if that fails too, it
-will execute `InsertTab`.
+will execute `InsertTab`. To use `,`, `|` or `&` in an action (as an argument
+to a command, for example), escape it with `\` or wrap it in single or double
+quotes.
 
 ## Binding commands
 
@@ -168,30 +170,39 @@ CursorLeft
 CursorRight
 CursorStart
 CursorEnd
+CursorToViewTop
+CursorToViewCenter
+CursorToViewBottom
 SelectToStart
 SelectToEnd
 SelectUp
 SelectDown
 SelectLeft
 SelectRight
-SelectToStartOfText
-SelectToStartOfTextToggle
 WordRight
 WordLeft
+SubWordRight
+SubWordLeft
 SelectWordRight
 SelectWordLeft
-MoveLinesUp
-MoveLinesDown
+SelectSubWordRight
+SelectSubWordLeft
 DeleteWordRight
 DeleteWordLeft
+DeleteSubWordRight
+DeleteSubWordLeft
 SelectLine
 SelectToStartOfLine
+SelectToStartOfText
+SelectToStartOfTextToggle
 SelectToEndOfLine
+ParagraphPrevious
+ParagraphNext
+SelectToParagraphPrevious
+SelectToParagraphNext
 InsertNewline
-InsertSpace
 Backspace
 Delete
-Center
 InsertTab
 Save
 SaveAll
@@ -200,21 +211,28 @@ Find
 FindLiteral
 FindNext
 FindPrevious
-DiffPrevious
 DiffNext
+DiffPrevious
+Center
 Undo
 Redo
 Copy
 CopyLine
 Cut
 CutLine
+Duplicate
 DuplicateLine
 DeleteLine
+MoveLinesUp
+MoveLinesDown
 IndentSelection
 OutdentSelection
+Autocomplete
+CycleAutocompleteBack
 OutdentLine
 IndentLine
 Paste
+PastePrimary
 SelectAll
 OpenFile
 Start
@@ -225,29 +243,37 @@ SelectPageUp
 SelectPageDown
 HalfPageUp
 HalfPageDown
-StartOfLine
-EndOfLine
 StartOfText
 StartOfTextToggle
-ParagraphPrevious
-ParagraphNext
+StartOfLine
+EndOfLine
 ToggleHelp
+ToggleKeyMenu
 ToggleDiffGutter
 ToggleRuler
-JumpLine
+ToggleHighlightSearch
+UnhighlightSearch
+ResetSearch
 ClearStatus
 ShellMode
 CommandMode
+ToggleOverwriteMode
+Escape
 Quit
 QuitAll
+ForceQuit
 AddTab
 PreviousTab
 NextTab
+FirstTab
+LastTab
 NextSplit
+PreviousSplit
+FirstSplit
+LastSplit
 Unsplit
 VSplit
 HSplit
-PreviousSplit
 ToggleMacro
 PlayMacro
 Suspend (Unix only)
@@ -260,13 +286,24 @@ SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
-None
+SkipMultiCursorBack
 JumpToMatchingBrace
-Autocomplete
+JumpLine
+Deselect
+ClearInfo
+None
 ```
 
 The `StartOfTextToggle` and `SelectToStartOfTextToggle` actions toggle between
 jumping to the start of the text (first) and start of the line.
+
+The `CutLine` action cuts the current line and adds it to the previously cut
+lines in the clipboard since the last paste (rather than just replaces the
+clipboard contents with this line). So you can cut multiple, not necessarily
+consecutive lines to the clipboard just by pressing `Ctrl-k` multiple times,
+without selecting them. If you want the more traditional behavior i.e. just
+rewrite the clipboard every time, you can use `CopyLine,DeleteLine` action
+instead of `CutLine`.
 
 You can also bind some mouse actions (these must be bound to mouse buttons)
 
@@ -409,8 +446,14 @@ mouse actions)
 
 ```
 MouseLeft
+MouseLeftDrag
+MouseLeftRelease
 MouseMiddle
+MouseMiddleDrag
+MouseMiddleRelease
 MouseRight
+MouseRightDrag
+MouseRightRelease
 MouseWheelUp
 MouseWheelDown
 MouseWheelLeft
@@ -479,23 +522,25 @@ conventions for text editing defaults.
     "Alt-]":          "DiffNext|CursorEnd",
     "Ctrl-z":         "Undo",
     "Ctrl-y":         "Redo",
-    "Ctrl-c":         "CopyLine|Copy",
-    "Ctrl-x":         "Cut",
+    "Ctrl-c":         "Copy|CopyLine",
+    "Ctrl-x":         "Cut|CutLine",
     "Ctrl-k":         "CutLine",
-    "Ctrl-d":         "DuplicateLine",
+    "Ctrl-d":         "Duplicate|DuplicateLine",
     "Ctrl-v":         "Paste",
     "Ctrl-a":         "SelectAll",
     "Ctrl-t":         "AddTab",
-    "Alt-,":          "PreviousTab",
-    "Alt-.":          "NextTab",
+    "Alt-,":          "PreviousTab|LastTab",
+    "Alt-.":          "NextTab|FirstTab",
     "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
-    "CtrlPageUp":     "PreviousTab",
-    "CtrlPageDown":   "NextTab",
+    "CtrlPageUp":     "PreviousTab|LastTab",
+    "CtrlPageDown":   "NextTab|FirstTab",
+    "ShiftPageUp":    "SelectPageUp",
+    "ShiftPageDown":  "SelectPageDown",
     "Ctrl-g":         "ToggleHelp",
     "Alt-g":          "ToggleKeyMenu",
     "Ctrl-r":         "ToggleRuler",
@@ -504,7 +549,7 @@ conventions for text editing defaults.
     "Ctrl-b":         "ShellMode",
     "Ctrl-q":         "Quit",
     "Ctrl-e":         "CommandMode",
-    "Ctrl-w":         "NextSplit",
+    "Ctrl-w":         "NextSplit|FirstSplit",
     "Ctrl-u":         "ToggleMacro",
     "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
@@ -524,11 +569,13 @@ conventions for text editing defaults.
     "Esc": "Escape",
 
     // Mouse bindings
-    "MouseWheelUp":   "ScrollUp",
-    "MouseWheelDown": "ScrollDown",
-    "MouseLeft":      "MousePress",
-    "MouseMiddle":    "PastePrimary",
-    "Ctrl-MouseLeft": "MouseMultiCursor",
+    "MouseWheelUp":     "ScrollUp",
+    "MouseWheelDown":   "ScrollDown",
+    "MouseLeft":        "MousePress",
+    "MouseLeftDrag":    "MouseDrag",
+    "MouseLeftRelease": "MouseRelease",
+    "MouseMiddle":      "PastePrimary",
+    "Ctrl-MouseLeft":   "MouseMultiCursor",
 
     // Multi-cursor bindings
     "Alt-n":        "SpawnMultiCursor",
@@ -601,8 +648,8 @@ are given below:
         "Backtab":        "CycleAutocompleteBack",
         "Ctrl-z":         "Undo",
         "Ctrl-y":         "Redo",
-        "Ctrl-c":         "CopyLine|Copy",
-        "Ctrl-x":         "Cut",
+        "Ctrl-c":         "Copy|CopyLine",
+        "Ctrl-x":         "Cut|CutLine",
         "Ctrl-k":         "CutLine",
         "Ctrl-v":         "Paste",
         "Home":           "StartOfTextToggle",
@@ -634,10 +681,12 @@ are given below:
         "Esc": "AbortCommand",
 
         // Mouse bindings
-        "MouseWheelUp":   "HistoryUp",
-        "MouseWheelDown": "HistoryDown",
-        "MouseLeft":      "MousePress",
-        "MouseMiddle":    "PastePrimary"
+        "MouseWheelUp":     "HistoryUp",
+        "MouseWheelDown":   "HistoryDown",
+        "MouseLeft":        "MousePress",
+        "MouseLeftDrag":    "MouseDrag",
+        "MouseLeftRelease": "MouseRelease",
+        "MouseMiddle":      "PastePrimary"
     }
 }
 ```

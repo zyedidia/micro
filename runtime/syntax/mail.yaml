@@ -12,14 +12,12 @@ rules:
     - constant.string:
         start: "^Subject:.*"
         end: "$"
-        rules: 
+        rules:
             - constant.specialChar: "\\\\."
     - statement: "<?[^@[:space:]]+@[^[:space:]]+>?"
     - default:
         start: "^\\n\\n"
         end: ".*"
-        rules: []
     - comment:
         start: "^>.*"
         end: "$"
-        rules: []

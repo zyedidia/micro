@@ -1,6 +1,6 @@
 filetype: puppet
 
-detect: 
+detect:
     filename: "\\.pp$"
 
 rules:

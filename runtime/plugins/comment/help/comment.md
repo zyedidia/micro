@@ -8,7 +8,7 @@ file:
 
 ```json
 {
-    "Alt-g": "comment.comment"
+    "Alt-g": "lua:comment.comment"
 }
 ```
 
@@ -47,6 +47,7 @@ but it is only available for certain filetypes:
 * java: `// %s`
 * javascript: `// %s`
 * jinja2: `{# %s #}`
+* json: `// %s`
 * julia: `# %s`
 * kotlin: `// %s`
 * lua: `-- %s`

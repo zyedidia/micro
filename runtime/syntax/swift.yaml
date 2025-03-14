@@ -2,31 +2,32 @@ filetype: swift
 
 detect:
     filename: "\\.swift$"
+    header: "^#!.*bin/(env +)?swift( |$)"
 
 rules:
- 
+
     # Patterns
     - type: \b(_)\b
-    
+
     # Operators
     - symbol.operator: ([.:;,+*|=!?\\%]|<|>|/|-|&)
-    
+
     # Declaration Keywords
     - statement.declaration: \b(associatedtype|class|deinit|enum|extension|fileprivate|func|import|init)\b
     - statement.declaration: \b(inout|internal|let|open|operator|private|protocol|public|static|struct|subscript|typealias|var)\b
-    
+
     # Statements Keywords
     - statement: \b(break|case|continue|default|defer|do|else|fallthrough|for|guard)\b
     - statement: \b(if|inif|repeat|return|switch|where|while)\b
-    
+
     # keyword.reserved
     - statement.reserved: \b(associativity|convenience|dynamic|didSet|final|get|infix|indirect|lazy|left|mutating)\b
     - statement.reserved: \b(none|nonmutating|override|postfix|precedence|prefix|Protocol|required)\b
     - statement.reserved: \b(right|set|Type|unowned|weak|willSet)\b
-    
+
     # Expression and types
     - type: \b(as|Any|catch|is|rethrows|super|self|throw|throws|try)\b
-    
+
     - statement.built_in: \b(abs|advance|alignof|alignofValue|anyGenerator|assert|assertionFailure|bridgeFromObjectiveC)\b
     - statement.built_in: \b(bridgeFromObjectiveCUnconditional|bridgeToObjectiveC|bridgeToObjectiveCUnconditional|contains)\b
     - statement.built_in: \b(count|countElements|countLeadingZeros|debugPrint|debugPrintln|distance|dropFirst|dropLast|dump|encodeBitsAsWords)\b
@@ -44,7 +45,7 @@ rules:
     - statement.meta: \@\b(autoclosure|available|convention|exported|IBAction|IBDesignable|IBOutlet|IBInspectable|infix)\b
     - statement.meta: \@\b(lazy|noreturn|noescape|nonobjc|NSApplicationMain|NSCopying|NSManaged|objc|prefix|postfix)\b
     - statement.meta: \@\b(required|testable|warn_unused_result|UIApplicationMain)\b
-  
+
     #preprocessor
     - preproc: ^[[:space:]]*#[[:space:]]*(define|else|elseif|endif|if|selector)\b
     - preproc.DebugIdentifier: \b(__COLUMN__|__FILE__|__FUNCTION__|__LINE__)\b
@@ -53,12 +54,12 @@ rules:
     # Constant
     - constant: \b(true|false|nil)
     - constant.number: ([0-9]+)
-    
+
     # Storage Types
     - type.storage: \b((U)?Int(8|16|32|64))\b
     - type.storage: \b(Int|UInt|String|Bit|Bool|Character|Double|Optional|Float|Range)\b
     - type.storage: \b(AnyObject)\b
-    
+
     # Collections
     - type.collections: \b(Array|Dictionary|Set)\b
 
@@ -80,17 +81,17 @@ rules:
 
     # Doc Comment
     - comment.doc: (///).*
-    
+
     # Line Comment
     - comment.line: "//.*"
-    
+
     # Block Comment
     - comment.block:
         start: "/\\*"
         end: "\\*/"
         rules:
             - todo: "(TODO|XXX|FIXME):?"
-      
+
     # Doc Block Comment
     - comment.block:
         start: "/\\*\\*"

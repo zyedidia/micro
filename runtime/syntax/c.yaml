@@ -5,18 +5,22 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
-    - type: "\\b(float|double|bool|char|int|short|long|enum|void|struct|union|typedef|(un)?signed|inline)\\b"
-    - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
+    - type: "\\b(_Atomic|_BitInt|float|double|_Decimal32|_Decimal64|_Decimal128|_Complex|complex|_Imaginary|imaginary|_Bool|bool|char|int|short|long|enum|void|struct|union|typedef|typeof|typeof_unqual|(un)?signed|inline|_Noreturn)\\b"
+    - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr))|char(8|16|32)|wchar)_t\\b"
+      # GCC float/decimal/fixed types
+    - type: "\\b(_Float16|__fp16|_Float32|_Float32x|_Float64|_Float64x|__float80|_Float128|_Float128x|__float128|__ibm128|__int128|_Fract|_Sat|_Accum)\\b"
     - type: "\\b[a-z_][0-9a-z_]+(_t|_T)\\b"
-    - statement: "\\b(auto|volatile|register|restrict|static|const|extern)\\b"
-    - statement: "\\b(for|if|while|do|else|case|default|switch)\\b"
+    - statement: "\\b(auto|volatile|register|restrict|_Alignas|alignas|_Alignof|alignof|static|const|constexpr|extern|_Thread_local|thread_local)\\b"
+    - statement: "\\b(for|if|while|do|else|case|default|switch|_Generic|_Static_assert|static_assert)\\b"
     - statement: "\\b(goto|continue|break|return)\\b"
-    - preproc: "^[[:space:]]*#[[:space:]]*(define|pragma|include|(un|ifn?)def|endif|el(if|se)|if|warning|error)"
+    - statement: "\\b(asm|fortran)\\b"
+    - preproc: "^[[:space:]]*#[[:space:]]*(define|embed|pragma|include|(un|ifn?)def|endif|el(if|ifdef|ifndef|se)|if|line|warning|error|__has_include|__has_embed|__has_c_attribute)"
+    - preproc: "^[[:space:]]*_Pragma\\b"
       # GCC builtins
     - statement: "__attribute__[[:space:]]*\\(\\([^)]*\\)\\)"
-    - statement: "__(aligned|asm|builtin|hidden|inline|packed|restrict|section|typeof|weak)__"
+    - statement: "__(aligned|asm|builtin|extension|hidden|inline|packed|restrict|section|typeof|weak)__"
       # Operator Color
-    - symbol.operator: "[-+*/%=<>.:;,~&|^!?]|\\b(sizeof)\\b"
+    - symbol.operator: "[-+*/%=<>.:;,~&|^!?]|\\b(offsetof|sizeof)\\b"
     - symbol.brackets: "[(){}]|\\[|\\]"
       # Integer Constants
     - constant.number: "(\\b([1-9][0-9]*|0[0-7]*|0[Xx][0-9A-Fa-f]+|0[Bb][01]+)([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"

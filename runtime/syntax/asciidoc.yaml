@@ -28,7 +28,7 @@ rules:
       # Paragraph Title
     - statement: "^\\..*$"
 
-      # source 
+      # source
     - identifier: "^\\[(source,.+|NOTE|TIP|IMPORTANT|WARNING|CAUTION)\\]"
 
       # Other markup

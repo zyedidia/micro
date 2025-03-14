@@ -1,6 +1,6 @@
 filetype: pov
 
-detect: 
+detect:
     filename: "\\.(pov|POV|povray|POVRAY)$"
 
 rules:
@@ -17,5 +17,4 @@ rules:
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
 

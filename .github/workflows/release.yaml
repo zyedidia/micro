@@ -1,0 +1,36 @@
+name: Release builds
+on:
+  workflow_dispatch: # Allows manual trigger
+  # push:
+  #   tags:
+  #     - 'v*.*.*' # automatically react on semantic versioned tags
+jobs:
+  release:
+    strategy:
+      matrix:
+        go-version: [1.23.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Setup
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache: false
+
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Build
+      run: tools/cross-compile.sh
+
+    - name: Publish
+      uses: softprops/action-gh-release@v2
+      with:
+        files: binaries/*
+
+    - name: Cleanup
+      run: rm -rf binaries

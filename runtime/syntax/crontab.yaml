@@ -1,7 +1,7 @@
 filetype: crontab
 
 detect:
-    filename: "crontab$"
+    filename: "crontab$|/tmp/crontab\\.\\w+$"
     header: "^#.*?/etc/crontab"
 
 rules:
@@ -16,7 +16,7 @@ rules:
 
     - statement: "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(([\\*0-9,\\-\\/]+)|(\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b))\\s+(([\\*0-9,\\-\\/]+)|(\\b(sun|mon|tue|wed|thu|fri|sat)\\b))\\s+(.*)$\\n?"
     - constant:  "^([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+([\\*0-9,\\-\\/]+)\\s+(([\\*0-9,\\-\\/]+)|(\\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\\b))\\s+(([\\*0-9,\\-\\/]+)|(\\b(sun|mon|tue|wed|thu|fri|sat)\\b))"
-    
+
       # Shell Values
     - type: "^[A-Z]+\\="
 

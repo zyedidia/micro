@@ -23,7 +23,6 @@ rules:
     - comment:
         start: "//"
         end: "$"
-        rules: []
     - comment:
         start: "/\\*"
         end: "\\*/"
@@ -46,4 +45,4 @@ rules:
         end: "`"
         rules:
             - constant.specialChar: "\\\\."
-            - identifier: "\\x24\\{.*?\\}"    
+            - identifier: "\\x24\\{.*?\\}"

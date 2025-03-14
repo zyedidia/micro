@@ -1,0 +1,64 @@
+filetype: "kvlang"
+
+detect:
+    filename: "\\.kv$"
+
+rules:
+# layouts
+- special: "\\b[a-z].+"
+- identifier: "\\b(self|app|root)\\b"
+
+- type: "\\b[A-Z].+"
+- type: "\\b(AnchorLayout|BoxLayout|FloatLayout|RelativeLayout|GridLayout|PageLayout|StackLayout)\\b"
+
+- type: "\\b(canvas)\\b"
+
+# functions
+- identifier.function: "[a-zA-Z_0-9]+\\("
+
+# built-in functions
+- type: "\\b(abs|all|any|ascii|bin|bool|breakpoint|bytearray|bytes)\\b"
+- type: "\\b(callable|chr|classmethod|compile|copyright|credits|oct)\\b"
+- type: "\\b(delattr|dict|dir|display|divmod|enumerate|eval|filter)\\b"
+- type: "\\b(float|format|frozenset|get_ipython|getattr|globals|type)\\b"
+- type: "\\b(hash|help|hex|id|input|int|isinstance|issubclass|iter|len)\\b"
+- type: "\\b(license|list|locals|map|max|memoryview|min|next|object)\\b"
+- type: "\\b(open|ord|pow|print|property|range|repr|reversed|round|set)\\b"
+- type: "\\b(setattr|slice|sorted|staticmethod|hasattr|super|tuple|str)\\b"
+- type: "\\b(vars|zip|exec|sum|complex)\\b"
+
+# keywords
+- statement.built_in: "\\b(and|as|assert|async|await|break|class|continue|def)\\b"
+- statement.built_in: "\\b(del|elif|else|except|finally|for|from|global|if)\\b"
+- statement.built_in: "\\b(import|in|is|lambda|nonlocal|not|or|pass|raise)\\b"
+- statement.built_in: "\\b(return|try|while|with|yield|match|case)\\b"
+
+# operators
+- symbol.operator: "([~^.:;,+*|=!\\%]|<|>|/|-|&)"
+
+# parentheses
+- symbol.brackets: "([(){}]|\\[|\\])"
+
+# numbers
+- constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
+- constant.number: "\\b0b(_?[01])+\\b"     # bin
+- constant.number: "\\b0o(_?[0-7])+\\b"    # oct
+- constant.number: "\\b0x(_?[0-9a-f])+\\b" # hex
+
+- constant.bool.none: "\\b(None)\\b"
+- constant.bool.true: "\\b(True)\\b"
+- constant.bool.false: "\\b(False)\\b"
+
+# strings
+- constant.string:
+    start: "\""
+    end: "(\"|$)"
+    skip: "\\\\."
+- constant.string:
+    start: "'"
+    end: "('|$)"
+    skip: "\\\\."
+
+- comment:
+    start: "#"
+    end: "$"

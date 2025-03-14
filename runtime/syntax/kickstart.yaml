@@ -1,6 +1,6 @@
 filetype: kickstart
 
-detect: 
+detect:
     filename: "\\.ks$|\\.kickstart$"
 
 rules:

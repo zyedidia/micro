@@ -104,7 +104,11 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 		c.OrigSelection[0] = move(c.OrigSelection[0])
 		c.OrigSelection[1] = move(c.OrigSelection[1])
 		c.Relocate()
-		c.LastVisualX = c.GetVisualX()
+		c.StoreVisualX()
+	}
+
+	if useUndo {
+		eh.updateTrailingWs(t)
 	}
 }
 
@@ -249,11 +253,11 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	ExecuteTextEvent(t, eh.buf)
 }
 
-// Undo the first event in the undo stack
-func (eh *EventHandler) Undo() {
+// Undo the first event in the undo stack. Returns false if the stack is empty.
+func (eh *EventHandler) Undo() bool {
 	t := eh.UndoStack.Peek()
 	if t == nil {
-		return
+		return false
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
@@ -262,15 +266,16 @@ func (eh *EventHandler) Undo() {
 	for {
 		t = eh.UndoStack.Peek()
 		if t == nil {
-			return
+			break
 		}
 
 		if t.Time.UnixNano()/int64(time.Millisecond) < endTime {
-			return
+			break
 		}
 
 		eh.UndoOneEvent()
 	}
+	return true
 }
 
 // UndoOneEvent undoes one event
@@ -286,23 +291,20 @@ func (eh *EventHandler) UndoOneEvent() {
 	eh.UndoTextEvent(t)
 
 	// Set the cursor in the right place
-	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
-		eh.cursors[teCursor.Num].Goto(teCursor)
-	} else {
-		teCursor.Num = -1
+	if t.C.Num >= 0 && t.C.Num < len(eh.cursors) {
+		eh.cursors[t.C.Num].Goto(t.C)
+		eh.cursors[t.C.Num].NewTrailingWsY = t.C.NewTrailingWsY
 	}
 
 	// Push it to the redo stack
 	eh.RedoStack.Push(t)
 }
 
-// Redo the first event in the redo stack
-func (eh *EventHandler) Redo() {
+// Redo the first event in the redo stack. Returns false if the stack is empty.
+func (eh *EventHandler) Redo() bool {
 	t := eh.RedoStack.Peek()
 	if t == nil {
-		return
+		return false
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
@@ -311,15 +313,16 @@ func (eh *EventHandler) Redo() {
 	for {
 		t = eh.RedoStack.Peek()
 		if t == nil {
-			return
+			break
 		}
 
 		if t.Time.UnixNano()/int64(time.Millisecond) > endTime {
-			return
+			break
 		}
 
 		eh.RedoOneEvent()
 	}
+	return true
 }
 
 // RedoOneEvent redoes one event
@@ -329,16 +332,68 @@ func (eh *EventHandler) RedoOneEvent() {
 		return
 	}
 
-	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
-		eh.cursors[teCursor.Num].Goto(teCursor)
-	} else {
-		teCursor.Num = -1
+	if t.C.Num >= 0 && t.C.Num < len(eh.cursors) {
+		eh.cursors[t.C.Num].Goto(t.C)
+		eh.cursors[t.C.Num].NewTrailingWsY = t.C.NewTrailingWsY
 	}
 
 	// Modifies the text event
 	eh.UndoTextEvent(t)
 
 	eh.UndoStack.Push(t)
+}
+
+// updateTrailingWs updates the cursor's trailing whitespace status after a text event
+func (eh *EventHandler) updateTrailingWs(t *TextEvent) {
+	if len(t.Deltas) != 1 {
+		return
+	}
+	text := t.Deltas[0].Text
+	start := t.Deltas[0].Start
+	end := t.Deltas[0].End
+
+	c := eh.cursors[eh.active]
+	isEol := func(loc Loc) bool {
+		return loc.X == util.CharacterCount(eh.buf.LineBytes(loc.Y))
+	}
+	if t.EventType == TextEventInsert && c.Loc == end && isEol(end) {
+		var addedTrailingWs bool
+		addedAfterWs := false
+		addedWsOnly := false
+		if start.Y == end.Y {
+			addedTrailingWs = util.HasTrailingWhitespace(text)
+			addedWsOnly = util.IsBytesWhitespace(text)
+			addedAfterWs = start.X > 0 && util.IsWhitespace(c.buf.RuneAt(Loc{start.X - 1, start.Y}))
+		} else {
+			lastnl := bytes.LastIndex(text, []byte{'\n'})
+			addedTrailingWs = util.HasTrailingWhitespace(text[lastnl+1:])
+		}
+
+		if addedTrailingWs && !(addedAfterWs && addedWsOnly) {
+			c.NewTrailingWsY = c.Y
+		} else if !addedTrailingWs {
+			c.NewTrailingWsY = -1
+		}
+	} else if t.EventType == TextEventRemove && c.Loc == start && isEol(start) {
+		removedAfterWs := util.HasTrailingWhitespace(eh.buf.LineBytes(start.Y))
+		var removedWsOnly bool
+		if start.Y == end.Y {
+			removedWsOnly = util.IsBytesWhitespace(text)
+		} else {
+			firstnl := bytes.Index(text, []byte{'\n'})
+			removedWsOnly = util.IsBytesWhitespace(text[:firstnl])
+		}
+
+		if removedAfterWs && !removedWsOnly {
+			c.NewTrailingWsY = c.Y
+		} else if !removedAfterWs {
+			c.NewTrailingWsY = -1
+		}
+	} else if c.NewTrailingWsY != -1 && start.Y != end.Y && c.Loc.GreaterThan(start) &&
+		((t.EventType == TextEventInsert && c.Y == c.NewTrailingWsY+(end.Y-start.Y)) ||
+			(t.EventType == TextEventRemove && c.Y == c.NewTrailingWsY-(end.Y-start.Y))) {
+		// The cursor still has its new trailingws
+		// but its line number was shifted by insert or remove of lines above
+		c.NewTrailingWsY = c.Y
+	}
 }

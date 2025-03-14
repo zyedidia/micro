@@ -8,7 +8,7 @@ rules:
     - statement: "\\b(library|require|break|else|for|function|if|ifelse|in|next|names|switch|repeat|print|try|tryCatch|isTRUE|return|while)\\b"
     - constant: "\\b(T|TRUE|F|FALSE|NULL|Inf|NaN|NA|NA_integer_|NA_real_|NA_complex_|NA_character_)\\b"
     - constant.number: "(\\b[0-9]+\\b|\\b0x[0-9A-Fa-f]+\\b)"
-    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&|\\^|\\$)" 
+    - symbol.operator: "([.:;,+*|=!\\%]|<|>|/|-|&|\\^|\\$)"
 
     - comment:
         start: "#"

@@ -1,0 +1,31 @@
+filetype: gomod
+
+detect:
+    filename: "go.mod"
+
+rules:
+    # URL
+    - type: "(^|[ \\t])+\\b([a-zA-Z0-9-]+\\.?)+(/[a-zA-Z0-9-_\\.]+)*\\b"
+
+    # Keywords
+    - special: "(^|[ \\t])+\\b(module|go)\\b"
+    - preproc: "(^|[ \\t])+\\b(toolchain|require|exclude|replace|retract)\\b"
+    - symbol.operator: "=>"
+
+    # Brackets
+    - type: "(\\(|\\))"
+
+    # Go version
+    - type: "(^|[ \\t])+([0-9]+\\.?)+"
+
+    # Version
+    - constant.string: "(^|[ \\t])+v([0-9]+\\.?){3}.*"
+    - constant.number: "(^|[ \\t])+v([0-9]+\\.?){3}"
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(indirect):?"
+
+# (^|[ \\t])+ means after start of string or space or tab character

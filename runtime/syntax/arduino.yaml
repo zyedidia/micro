@@ -4,9 +4,9 @@ detect:
     filename: "\\.?ino$"
 
 rules:
-    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b" 
+    - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"
 
-      ## 
+      ## Sized (u)int types
     - type: "\\b((s?size)|((u_?)?int(8|16|32|64|ptr)))_t\\b"
 
       ## Constants
@@ -33,7 +33,7 @@ rules:
     - type: "\\b(boolean|byte|char|float|int|long|word)\\b"
 
       ## Control Structions
-    - statement: "\\b(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\\b" 
+    - statement: "\\b(case|class|default|do|double|else|false|for|if|new|null|private|protected|public|short|signed|static|String|switch|this|throw|try|true|unsigned|void|while)\\b"
     - statement: "\\b(goto|continue|break|return)\\b"
 
       ## Math
@@ -66,7 +66,7 @@ rules:
       ## Structure
     - identifier: "\\b(setup|loop)\\b"
 
-      ## 
+      ##
     - statement: "^[[:space:]]*#[[:space:]]*(define|include(_next)?|(un|ifn?)def|endif|el(if|se)|if|warning|error|pragma)"
 
       ## GCC builtins

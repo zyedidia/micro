@@ -3,7 +3,7 @@ package action
 var termdefaults = map[string]string{
 	"<Ctrl-q><Ctrl-q>": "Exit",
 	"<Ctrl-e><Ctrl-e>": "CommandMode",
-	"<Ctrl-w><Ctrl-w>": "NextSplit",
+	"<Ctrl-w><Ctrl-w>": "NextSplit|FirstSplit",
 }
 
 // DefaultBindings returns a map containing micro's default keybindings

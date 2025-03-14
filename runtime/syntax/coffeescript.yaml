@@ -36,7 +36,7 @@ rules:
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\."
-     
+
     - constant.string:
         start: "'"
         end: "'"
