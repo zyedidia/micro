@@ -275,10 +275,10 @@ The packages and their contents are listed below (in Go type signatures):
                 onExit func(string, []interface{}), userargs ...interface{})
                 *exec.Cmd`:
        Starts a background job by running the shell on the given command
-       (using `sh -c`). Three callbacks can be provided which will be called
-       when the command generates stdout, stderr, or exits. The userargs will
-       be passed to the callbacks, along with the output as the first
-       argument of the callback. Returns the started command.
+       (using `sh -c` or `cmd /v:on /c`). Three callbacks can be provided which
+       will be called when the command generates stdout, stderr, or exits.
+       The userargs will be passed to the callbacks, along with the output
+       as the first argument of the callback. Returns the started command.
 
     - `JobSpawn(cmd string, cmdArgs []string, onStdout, onStderr,
                 onExit func(string, []interface{}), userargs ...interface{})
