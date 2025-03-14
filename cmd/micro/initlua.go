@@ -105,7 +105,18 @@ func luaImportMicroShell() *lua.LTable {
 		go func() {
 			output, runErr := f()
 			if cb != nil {
-				cb(output, runErr)
+				wrapperFunc := func(output string, args []interface{}) {
+					errVal, ok := args[0].(error)
+					if ok {
+						cb(output, errVal)
+					} else {
+						cb(output, nil)
+					}
+				}
+				var passArgs []interface{}
+				passArgs = append(passArgs, runErr)
+				jobFunc := shell.JobFunction{wrapperFunc, output, passArgs}
+				shell.Jobs <- jobFunc
 			}
 		}()
 	}))
