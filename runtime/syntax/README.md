@@ -33,6 +33,19 @@ Micro syntax files are almost identical to Nano's, except for some key differenc
 * Micro does not use `icolor`. Instead, for a case insensitive match, use the case insensitive flag (`i`) in the regular expression
     * For example, `icolor green ".*"` would become `color green "(?i).*"`
 
+# Incompatibilities with older versions of micro
+
+With PR [#3458](https://github.com/zyedidia/micro/pull/3458) resp. commit
+[a9b513a](https://github.com/zyedidia/micro/commit/a9b513a28adaaa7782505dc1e284e1a0132cb66f)
+empty `rules: []` definitions are removed from all syntax files, since
+`rules` are no longer mandatory.
+Unfortunately they are mandatory for `micro` versions up to and including `v2.0.14`.
+
+To use newer syntax definitions from this repository with older `micro` versions
+you have to add these `rules: []` to all regions not including `rules` already.
+Otherwise you need to use syntax definitions before the above mentioned PR
+for example from version [v2.0.14](https://github.com/zyedidia/micro/tree/v2.0.14).
+
 # Using with colorschemes
 
 Not all of these files have been converted to use micro's colorscheme feature. Most of them just hardcode the colors, which can be problematic depending on the colorscheme you use.
