@@ -4,7 +4,7 @@ detect:
     filename: "\\.(S|s|asm)$"
 
 rules:
-    # This file is made for NASM assembly
+    # This file is made mainly for NASM assembly
 
     ## Instructions
     # x86
@@ -108,3 +108,16 @@ rules:
         rules:
             - todo: "(TODO|XXX|FIXME):?"
 
+    ## C-like comments (supported by some assemblers)
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
