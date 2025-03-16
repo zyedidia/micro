@@ -249,7 +249,7 @@ regionLoop:
 		}
 		startMatches := findAllIndex(r.start, r.skip, line)
 		endMatches := findAllIndex(r.end, r.skip, line)
-		samePattern := false
+		samePattern := r.start.String() == r.end.String()
 	startLoop:
 		for startIdx := 0; startIdx < len(startMatches); startIdx++ {
 			// log.Println("startIdx:", startIdx, "of", len(startMatches))
@@ -258,22 +258,13 @@ regionLoop:
 				// log.Println("startIdx:", startIdx, "of", len(startMatches), "/ endIdx:", endIdx, "of", len(endMatches), "/ h.lastStart:", h.lastStart, "/ h.lastEnd:", h.lastEnd)
 				endMatch := endMatches[endIdx]
 				if startMatch[0] == endMatch[0] {
-					// start and end are the same (pattern)
-					// log.Println("start == end")
-					samePattern = true
-					if len(startMatches) == len(endMatches) {
-						// special case in the moment both are the same
+					if samePattern {
+						// start and end are the same
+						// log.Println("start == end")
 						if curRegion == r {
-							if len(startMatches) > 1 {
-								// end < start
-								continue startLoop
-							} else if len(startMatches) > 0 {
-								// ... end
-								startIdx = len(startMatches)
-								continue startLoop
-							}
+							continue startLoop
 						} else {
-							// start ... or start < end
+							continue
 						}
 					}
 				} else if startMatch[1] <= endMatch[0] {
@@ -339,7 +330,10 @@ regionLoop:
 			}
 		}
 		if curRegion == r {
-			if (len(startMatches) == 0 && len(endMatches) > 0) || (samePattern && (len(startMatches) == len(endMatches))) {
+			if len(startMatches) == 0 && len(endMatches) == 0 {
+				// no start and end found in this region
+				h.storeRange(start, start+lineLen, curRegion.group, r, false)
+			} else if (len(startMatches) == 0 && len(endMatches) > 0) || (samePattern && len(endMatches) > 0) {
 				for _, endMatch := range endMatches {
 					// end at the current line
 					// log.Println("... end")
@@ -357,9 +351,6 @@ regionLoop:
 					h.highlightRegions(start+endMatch[1], lineNum, util.SliceEnd(line, endMatch[1]), curRegion, h.Def.rules.regions, false)
 					break
 				}
-			} else if len(startMatches) == 0 && len(endMatches) == 0 {
-				// no start and end found in this region
-				h.storeRange(start, start+lineLen, curRegion.group, r, false)
 			}
 		}
 	}
