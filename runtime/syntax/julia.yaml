@@ -10,14 +10,14 @@ rules:
     - constant.bool: "\\b(true|false)\\b"
     - constant: "\\b(nothing|missing)\\b"
       # built-in attributes
-    - constant: "__[A-Za-z0-9_]+__"
+    - constant: "__\\w+__"
       # definitions
-    - identifier: "[A-Za-z_][A-Za-z0-9_]*[[:space:]]*[(]"
+    - identifier: "[A-Za-z_]\\w*[[:space:]]*[(]"
       # keywords
     - statement: "\\b(baremodule|begin|break|catch|const|continue|do|else|elseif|end|export|finally|for|function|global|if|import|let|local|macro|module|public|quote|return|struct|try|using|while)\\b"
     - statement: "\\b(abstract\\s+type|primitive\\s+type|mutable\\s+struct)\\b"
       # decorators
-    - identifier.macro: "@[A-Za-z0-9_]+"
+    - identifier.macro: "@\\w+"
       # operators
     - symbol.operator: "[:+*|=!%~<>/\\-?&\\\\÷∈∉∘]|\\b(in|isa|where)\\b"
       # for some reason having ^ in the same regex with the other operators broke things

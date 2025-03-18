@@ -5,12 +5,12 @@ detect:
 
 rules:
     - type: "(?i)\\b(string|integer|natural|positive|(un)?signed|std_u?logic(_vector)?|bit(_vector)?|boolean|u?x01z?|array|range)\\b"
-    - identifier: "(?i)library[[:space:]]+[a-zA-Z_0-9]+"
-    - identifier: "(?i)use[[:space:]]+[a-zA-Z_0-9\\.]+"
-    - identifier: "(?i)component[[:space:]]+[a-zA-Z_0-9]+"
-    - identifier: "(?i)(architecture|configuration)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+of[[:space:]]+[a-zA-Z_0-9]+"
-    - identifier: "(?i)(entity|package)[[:space:]]+[a-zA-Z_0-9]+[[:space:]]+is"
-    - identifier: "(?i)end[[:space:]]+((architecture|entity|component|process|package|generate)[[:space:]]+)?[a-zA-Z_0-9]+"
+    - identifier: "(?i)library[[:space:]]+\\w+"
+    - identifier: "(?i)use[[:space:]]+[\\w\\.]+"
+    - identifier: "(?i)component[[:space:]]+\\w+"
+    - identifier: "(?i)(architecture|configuration)[[:space:]]+\\w+[[:space:]]+of[[:space:]]+\\w+"
+    - identifier: "(?i)(entity|package)[[:space:]]+\\w+[[:space:]]+is"
+    - identifier: "(?i)end[[:space:]]+((architecture|entity|component|process|package|generate)[[:space:]]+)?\\w+"
     - statement: "(?i)\\b(abs|access|after|alias|all|and|architecture|assert|attribute)\\b"
     - statement: "(?i)\\b(begin|block|body|buffer|bus|case|component|configuration|constant)\\b"
     - statement: "(?i)\\b(disconnect|downto|else|elsif|end|entity|exit)\\b"

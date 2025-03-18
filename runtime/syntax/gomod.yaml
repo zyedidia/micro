@@ -5,7 +5,7 @@ detect:
 
 rules:
     # URL
-    - type: "(^|[ \\t])+\\b([a-zA-Z0-9-]+\\.?)+(/[a-zA-Z0-9-_\\.]+)*\\b"
+    - type: "(^|[ \\t])+\\b([\\w-]+\\.?)+(/[\\w-\\.]+)*\\b"
 
     # Keywords
     - special: "(^|[ \\t])+\\b(module|go)\\b"
