@@ -3,6 +3,7 @@ package buffer
 import (
 	"fmt"
 	"regexp"
+	"regexp/syntax"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -33,9 +34,13 @@ func NewRegexpData(s string) (*RegexpData, error) {
 	var err error
 	regex[0], err = regexp.Compile(s)
 	if err == nil {
-		regex[padStart] = regexp.MustCompile(".(?:" + s + ")")
-		regex[padEnd] = regexp.MustCompile("(?:" + s + ").")
-		regex[padStart|padEnd] = regexp.MustCompile(".(?:" + s + ").")
+		regex[padStart], err = regexp.Compile(".(?:" + s + ")")
+		if err == nil {
+			regex[padEnd] = regexp.MustCompile("(?:" + s + ").")
+			regex[padStart|padEnd] = regexp.MustCompile(".(?:" + s + ").")
+		} else {
+			err = &syntax.Error{syntax.ErrorCode(`possibly \Q without \E`), s}
+		}
 	}
 	return &RegexpData{regex}, err
 }
