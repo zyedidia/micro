@@ -3,7 +3,6 @@ package shell
 import (
 	"bytes"
 	"errors"
-	"fmt"
 	"io"
 	"os"
 	"os/exec"
@@ -48,7 +47,7 @@ func RunCommand(input string) (string, error) {
 // RunBackgroundShell runs a shell command in the background
 // It returns a function which will run the command and returns a string
 // message result
-func RunBackgroundShell(input string) (func() string, error) {
+func RunBackgroundShell(input string) (func() (string, error), error) {
 	args, err := shellquote.Split(input)
 	if err != nil {
 		return nil, err
@@ -56,15 +55,8 @@ func RunBackgroundShell(input string) (func() string, error) {
 	if len(args) == 0 {
 		return nil, errors.New("No arguments")
 	}
-	inputCmd := args[0]
-	return func() string {
-		output, err := RunCommand(input)
-
-		str := output
-		if err != nil {
-			str = fmt.Sprint(inputCmd, " exited with error: ", err, ": ", output)
-		}
-		return str
+	return func() (string, error) {
+		return RunCommand(input)
 	}, nil
 }
 
