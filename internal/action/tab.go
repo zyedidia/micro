@@ -211,7 +211,7 @@ func InitTabs(bufs []*buffer.Buffer) {
 		for _, b := range bufs[1:] {
 			if multiopen == "vsplit" {
 				MainTab().CurPane().VSplitBuf(b)
-			} else {  // default hsplit
+			} else { // default hsplit
 				MainTab().CurPane().HSplitBuf(b)
 			}
 		}
