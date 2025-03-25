@@ -208,7 +208,13 @@ func getKeyBinds(binds []string) string {
 	var sb strings.Builder
 
 	for _, b := range binds {
-		sb.WriteString(b + ": " + config.Bindings["buffer"][b] + ", ")
+		action, exists := config.Bindings["buffer"][b]
+
+		if !exists {
+			action = "None"
+		}
+
+		sb.WriteString(b + ": " + action + ", ")
 	}
 
 	return strings.TrimSuffix(sb.String(), ", ")
