@@ -6,6 +6,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -13,7 +14,6 @@ import (
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/micro-editor/tcell/v2"
 )
 
 type BufAction interface{}

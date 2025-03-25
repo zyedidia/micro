@@ -71,7 +71,7 @@ type Plugin struct {
 	Info    *PluginInfo   // json file containing info
 	Srcs    []RuntimeFile // lua files
 	Loaded  bool
-	Default bool          // pre-installed plugin
+	Default bool // pre-installed plugin
 }
 
 // IsLoaded returns if a plugin is enabled

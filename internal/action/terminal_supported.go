@@ -1,4 +1,4 @@
-// +build linux darwin dragonfly openbsd_amd64 freebsd
+//go:build linux || darwin || dragonfly || openbsd_amd64 || freebsd
 
 package action
 

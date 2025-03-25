@@ -3,8 +3,8 @@ package config
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/micro-editor/tcell/v2"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSimpleStringToStyle(t *testing.T) {

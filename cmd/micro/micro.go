@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -26,7 +27,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/micro-editor/tcell/v2"
 )
 
 var (
