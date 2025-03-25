@@ -1,6 +1,8 @@
 package display
 
 import (
+	"strings"
+
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -178,10 +180,8 @@ func (i *InfoWindow) displayBuffer() {
 	}
 }
 
-var keydisplay = []string{"^Q Quit, ^S Save, ^O Open, ^G Help, ^E Command Bar, ^K Cut Line", "^F Find, ^Z Undo, ^Y Redo, ^A Select All, ^D Duplicate Line, ^T New Tab"}
-
 func (i *InfoWindow) displayKeyMenu() {
-	// TODO: maybe make this based on the actual keybindings
+	keydisplay := getKeyDisplay()
 
 	for y := 0; y < len(keydisplay); y++ {
 		for x := 0; x < i.Width; x++ {
@@ -192,6 +192,26 @@ func (i *InfoWindow) displayKeyMenu() {
 			}
 		}
 	}
+}
+
+func getKeyDisplay() []string {
+	keybinds := strings.Split(config.GlobalSettings["helpbindings"].(string), ",")
+	mid := len(keybinds) / 2
+
+	return []string{
+		getKeyBinds(keybinds[:mid]),
+		getKeyBinds(keybinds[mid:]),
+	}
+}
+
+func getKeyBinds(binds []string) string {
+	var sb strings.Builder
+
+	for _, b := range binds {
+		sb.WriteString(b + ": " + config.Bindings["buffer"][b] + ", ")
+	}
+
+	return strings.TrimSuffix(sb.String(), ", ")
 }
 
 func (i *InfoWindow) totalSize() int {
@@ -267,7 +287,7 @@ func (i *InfoWindow) Display() {
 		}
 		keymenuOffset := 0
 		if config.GetGlobalOption("keymenu").(bool) {
-			keymenuOffset = len(keydisplay)
+			keymenuOffset = len(getKeyDisplay())
 		}
 
 		draw := func(r rune, s tcell.Style) {

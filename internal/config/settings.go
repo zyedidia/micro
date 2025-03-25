@@ -65,6 +65,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"fastdirty":       false,
 	"fileformat":      defaultFileFormat(),
 	"filetype":        "unknown",
+	"helpbindings":    "Ctrl-q,Ctrl-s,Ctrl-o,Ctrl-g,Ctrl-e,Ctrl-k,Ctrl-f,Ctrl-z,Ctrl-y,Ctrl-a,Ctrl-d,Ctrl-t",
 	"hlsearch":        false,
 	"hltaberrors":     false,
 	"hltrailingws":    false,
