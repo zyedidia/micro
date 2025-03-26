@@ -1,6 +1,7 @@
 package display
 
 import (
+	"slices"
 	"strings"
 
 	runewidth "github.com/mattn/go-runewidth"
@@ -195,7 +196,7 @@ func (i *InfoWindow) displayKeyMenu() {
 }
 
 func getKeyDisplay() []string {
-	keybinds := strings.Split(config.GlobalSettings["helpbindings"].(string), ",")
+	keybinds := strings.Split(config.GlobalSettings["helpactions"].(string), ",")
 	mid := len(keybinds) / 2
 
 	return []string{
@@ -205,19 +206,37 @@ func getKeyDisplay() []string {
 }
 
 func getKeyBinds(binds []string) string {
-	var sb strings.Builder
+	var keys = make(map[string][]string, 0)
 
-	for _, b := range binds {
-		action, exists := config.Bindings["buffer"][b]
-
-		if !exists {
-			action = "None"
+	for k, v := range config.Bindings["buffer"] {
+		for _, sub := range binds {
+			if strings.Contains(v, sub) {
+				keys[sub] = append(keys[sub], k)
+			}
 		}
-
-		sb.WriteString(b + ": " + action + ", ")
 	}
 
-	return strings.TrimSuffix(sb.String(), ", ")
+	var sb strings.Builder
+
+	for i, bind := range binds {
+		slices.Sort(keys[bind])
+
+		sb.WriteString(bind + ": ")
+
+		for j, key := range keys[bind] {
+			sb.WriteString(key)
+
+			if len(keys[bind])-1 != j {
+				sb.WriteString(", ")
+			}
+		}
+
+		if len(binds)-1 != i {
+			sb.WriteString(" | ")
+		}
+	}
+
+	return sb.String()
 }
 
 func (i *InfoWindow) totalSize() int {
