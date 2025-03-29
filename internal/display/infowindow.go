@@ -1,6 +1,7 @@
 package display
 
 import (
+	"regexp"
 	"slices"
 	"strings"
 
@@ -205,33 +206,34 @@ func getKeyDisplay() []string {
 	}
 }
 
-func getKeyBinds(binds []string) string {
-	var keys = make(map[string][]string, 0)
+func getKeyBinds(actions []string) string {
+	keys := make(map[string][]string, 0)
+	re := regexp.MustCompile(`[&|,]+`)
 
-	for k, v := range config.Bindings["buffer"] {
-		for _, sub := range binds {
-			if strings.Contains(v, sub) {
-				keys[sub] = append(keys[sub], k)
+	for key, binding := range config.Bindings["buffer"] {
+		for _, action := range actions {
+			if slices.Index(re.Split(binding, -1), action) != -1 {
+				keys[action] = append(keys[action], key)
 			}
 		}
 	}
 
 	var sb strings.Builder
 
-	for i, bind := range binds {
-		slices.Sort(keys[bind])
+	for i, action := range actions {
+		slices.Sort(keys[action])
 
-		sb.WriteString(bind + ": ")
+		sb.WriteString(action + ": ")
 
-		for j, key := range keys[bind] {
+		for j, key := range keys[action] {
 			sb.WriteString(key)
 
-			if len(keys[bind])-1 != j {
+			if len(keys[action])-1 != j {
 				sb.WriteString(", ")
 			}
 		}
 
-		if len(binds)-1 != i {
+		if len(actions)-1 != i {
 			sb.WriteString(" | ")
 		}
 	}
