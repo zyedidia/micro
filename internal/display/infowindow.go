@@ -213,7 +213,13 @@ func getKeyBinds(actions []string) string {
 	for key, binding := range config.Bindings["buffer"] {
 		for _, action := range actions {
 			if slices.Index(re.Split(binding, -1), action) != -1 {
-				keys[action] = append(keys[action], key)
+				k := key
+
+				if strings.Contains(key, "Ctrl-") {
+					k = "^" + key[len(key)-1:]
+				}
+
+				keys[action] = append(keys[action], k)
 			}
 		}
 	}
@@ -223,6 +229,7 @@ func getKeyBinds(actions []string) string {
 	for i, action := range actions {
 		slices.Sort(keys[action])
 
+		// TODO Those hard coded keys could also be editable in the settings file - making it a bit more customizable
 		sb.WriteString(action + ": ")
 
 		for j, key := range keys[action] {
@@ -234,7 +241,7 @@ func getKeyBinds(actions []string) string {
 		}
 
 		if len(actions)-1 != i {
-			sb.WriteString(" | ")
+			sb.WriteString(" - ")
 		}
 	}
 
