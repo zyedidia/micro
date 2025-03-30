@@ -18,8 +18,8 @@ type InfoWindow struct {
 	*info.InfoBuf
 	*View
 
-	keydisplay []string
 	hscroll    int
+	keydisplay []string
 }
 
 func (i *InfoWindow) errStyle() tcell.Style {
