@@ -479,7 +479,30 @@ func (n *Node) Unsplit() bool {
 	if n.parent.IsLeaf() {
 		return n.parent.Unsplit()
 	}
+
+	n.parent.simplify()
 	return true
+}
+
+// Simplify removes unnecessary chained parents
+func (n *Node) simplify() {
+	if n.parent == nil || len(n.children) != 1 {
+		return
+	}
+
+	ind := 0
+	for i, c := range n.parent.children {
+		if c.id == n.id {
+			ind = i
+		}
+	}
+
+	parent := n.parent
+	kind := n.Kind
+	parent.children[ind] = n.children[0]
+	parent.children[ind].parent = parent
+	parent.children[ind].Kind = kind
+	parent.simplify()
 }
 
 // String returns the string form of the node and all children (used for debugging)
