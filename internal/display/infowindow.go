@@ -18,7 +18,8 @@ type InfoWindow struct {
 	*info.InfoBuf
 	*View
 
-	hscroll int
+	keydisplay []string
+	hscroll    int
 }
 
 func (i *InfoWindow) errStyle() tcell.Style {
@@ -47,6 +48,8 @@ func NewInfoWindow(b *info.InfoBuf) *InfoWindow {
 	iw := new(InfoWindow)
 	iw.InfoBuf = b
 	iw.View = new(View)
+
+	iw.keydisplay = getKeyDisplay()
 
 	iw.Width, iw.Y = screen.Screen.Size()
 	iw.Y--
@@ -183,14 +186,12 @@ func (i *InfoWindow) displayBuffer() {
 }
 
 func (i *InfoWindow) displayKeyMenu() {
-	keydisplay := getKeyDisplay()
-
-	for y := 0; y < len(keydisplay); y++ {
+	for y := 0; y < len(i.keydisplay); y++ {
 		for x := 0; x < i.Width; x++ {
-			if x < len(keydisplay[y]) {
-				screen.SetContent(x, i.Y-len(keydisplay)+y, rune(keydisplay[y][x]), nil, i.defStyle())
+			if x < len(i.keydisplay[y]) {
+				screen.SetContent(x, i.Y-len(i.keydisplay)+y, rune(i.keydisplay[y][x]), nil, i.defStyle())
 			} else {
-				screen.SetContent(x, i.Y-len(keydisplay)+y, ' ', nil, i.defStyle())
+				screen.SetContent(x, i.Y-len(i.keydisplay)+y, ' ', nil, i.defStyle())
 			}
 		}
 	}
@@ -229,7 +230,7 @@ func getKeyBinds(actions []string) string {
 	for i, action := range actions {
 		slices.Sort(keys[action])
 
-		// TODO Those hard coded keys could also be editable in the settings file - making it a bit more customizable
+		// TODO Those hardcoded keys could also be editable in the settings file
 		sb.WriteString(action + ": ")
 
 		for j, key := range keys[action] {
@@ -241,7 +242,7 @@ func getKeyBinds(actions []string) string {
 		}
 
 		if len(actions)-1 != i {
-			sb.WriteString(" - ")
+			sb.WriteString(" | ")
 		}
 	}
 
@@ -321,7 +322,7 @@ func (i *InfoWindow) Display() {
 		}
 		keymenuOffset := 0
 		if config.GetGlobalOption("keymenu").(bool) {
-			keymenuOffset = len(getKeyDisplay())
+			keymenuOffset = len(i.keydisplay)
 		}
 
 		draw := func(r rune, s tcell.Style) {
