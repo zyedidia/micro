@@ -483,6 +483,7 @@ func (n *Node) Unsplit() bool {
 // Simplify removes unnecessary chained parents
 func (n *Node) simplify() {
 	if n.parent == nil || len(n.children) != 1 {
+		n.markResize()
 		return
 	}
 
