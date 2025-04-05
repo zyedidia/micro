@@ -439,11 +439,12 @@ func (n *Node) VSplit(right bool) uint64 {
 }
 
 // unsplits the child of a split
-func (n *Node) unsplit(i int, h bool) {
+func (n *Node) unsplit(i int) {
 	copy(n.children[i:], n.children[i+1:])
 	n.children[len(n.children)-1] = nil
 	n.children = n.children[:len(n.children)-1]
 
+	h := n.Kind == STVert
 	nonrs, numr := n.getResizeInfo(h)
 	if numr == 0 {
 		// This means that this was the last child
@@ -470,12 +471,7 @@ func (n *Node) Unsplit() bool {
 			ind = i
 		}
 	}
-	if n.parent.Kind == STVert {
-		n.parent.unsplit(ind, true)
-	} else {
-		n.parent.unsplit(ind, false)
-	}
-
+	n.parent.unsplit(ind)
 	if n.parent.IsLeaf() {
 		return n.parent.Unsplit()
 	}
