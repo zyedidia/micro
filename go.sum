@@ -35,8 +35,8 @@ github.com/micro-editor/json5 v1.0.1-micro h1:5Y4MuzhkmW0sQQNPvrIVevIOKi557qsznw
 github.com/micro-editor/json5 v1.0.1-micro/go.mod h1:cmlPHZ1JKOXNse0/3zwwKj/GUpzAVkzx4lZDkpHl4q0=
 github.com/micro-editor/tcell/v2 v2.0.11 h1:USjdpBSmbocx2yPARbY19KcUSj+ZerScrdmBqGjzoX4=
 github.com/micro-editor/tcell/v2 v2.0.11/go.mod h1:kVYk6NOwYJrboL/7IA7cCupk4o2NzyF/0UMLjeEJN/s=
-github.com/micro-editor/terminal v0.0.0-20250105114944-ffd0fc59e777 h1:ddEDJwVqnxd8Yxtr6ZlUBBH3Kyf90jLHMJAbmU1bjuA=
-github.com/micro-editor/terminal v0.0.0-20250105114944-ffd0fc59e777/go.mod h1:soCc8JsxxfCZd3y08pX67F16Bni5L/xtcAnqEswzs44=
+github.com/micro-editor/terminal v0.0.0-20250324214352-e587e959c6b5 h1:czSkYUNmHuWS2lv8VreufENEXZNOCGZcXd744YKf8yM=
+github.com/micro-editor/terminal v0.0.0-20250324214352-e587e959c6b5/go.mod h1:OszIG7ockt4osicVHq6gI2QmV4PBDK6H5/Bj8GDGv4Q=
 github.com/mitchellh/go-homedir v1.1.0 h1:lukF9ziXFxDFPkA1vsr5zpc1XuPDn/wFntq5mG+4E0Y=
 github.com/mitchellh/go-homedir v1.1.0/go.mod h1:SfyaCUpYCn1Vlf4IUYiD9fPX4A5wJrkLzIz1N1q0pr0=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
@@ -61,8 +61,9 @@ github.com/zyedidia/poller v1.0.1 h1:Tt9S3AxAjXwWGNiC2TUdRJkQDZSzCBNVQ4xXiQ7440s
 github.com/zyedidia/poller v1.0.1/go.mod h1:vZXJOHGDcuK08GXhF6IAY0ZFd2WcgOR5DOTp84Uk5eE=
 golang.org/x/sys v0.0.0-20190204203706-41f3e6584952/go.mod h1:STP8DvDyc/dI5b8T5hshtkjS+E42TnysNCUPdjciGhY=
 golang.org/x/sys v0.0.0-20190626150813-e07cf5db2756/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.6.0 h1:MVltZSvRTcU2ljQOhs94SXPftV6DCNnZViHeQps87pQ=
 golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+golang.org/x/sys v0.28.0 h1:Fksou7UEQUWlKvIdsqzJmUmCX3cZuD2+P3XyyzwMhlA=
+golang.org/x/sys v0.28.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.4.0 h1:BrVqGRd7+k1DiOgtnFvAkoQEWQvBc25ouMJM6429SFg=
 golang.org/x/text v0.4.0/go.mod h1:mrYo+phRRbMaCq/xk9113O4dZlRixOauAjOtrjsXDZ8=
