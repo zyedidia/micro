@@ -153,7 +153,7 @@ func (h *BufPane) ScrollUpAction() bool {
 	return true
 }
 
-// ScrollDownAction scrolls the view up
+// ScrollDownAction scrolls the view down
 func (h *BufPane) ScrollDownAction() bool {
 	h.ScrollDown(util.IntOpt(h.Buf.Settings["scrollspeed"]))
 	return true
