@@ -439,11 +439,12 @@ func (n *Node) VSplit(right bool) uint64 {
 }
 
 // unsplits the child of a split
-func (n *Node) unsplit(i int, h bool) {
+func (n *Node) unsplit(i int) {
 	copy(n.children[i:], n.children[i+1:])
 	n.children[len(n.children)-1] = nil
 	n.children = n.children[:len(n.children)-1]
 
+	h := n.Kind == STVert
 	nonrs, numr := n.getResizeInfo(h)
 	if numr == 0 {
 		// This means that this was the last child
@@ -470,16 +471,60 @@ func (n *Node) Unsplit() bool {
 			ind = i
 		}
 	}
-	if n.parent.Kind == STVert {
-		n.parent.unsplit(ind, true)
-	} else {
-		n.parent.unsplit(ind, false)
-	}
-
+	n.parent.unsplit(ind)
 	if n.parent.IsLeaf() {
 		return n.parent.Unsplit()
 	}
+
+	n.parent.flatten()
 	return true
+}
+
+// flattens the tree by removing unnecessary intermediate parents that have only one child
+// and handles the side effect of it
+func (n *Node) flatten() {
+	if n.parent == nil {
+		return
+	}
+
+	ind := 0
+	for i, c := range n.parent.children {
+		if c.id == n.id {
+			ind = i
+		}
+	}
+
+	if len(n.children) == 1 {
+		// Replace current node with child node to remove chained parent
+		n.parent.children[ind] = n.children[0]
+		n.parent.children[ind].parent = n.parent
+		if n.children[0].IsLeaf() {
+			n.parent.children[ind].Kind = n.Kind
+		} else {
+			// Flatten the child node that replaced the current node
+			n.parent.children[ind].flatten()
+		}
+	} else if !n.IsLeaf() && n.Kind == n.parent.Kind {
+		// If we have the same kind as the parent (cuased by previous flattening),
+		// replace this node with our children.
+		origsize := len(n.parent.children)
+
+		// Let's say we have 5 children and want to replace [2] with its children [a] [b] [c]
+		// [0] [1] [2] [3] [4] --> [0] [1] [a] [b] [c] [3] [4]
+		// insertcount will be `3 - 1 = 2` in this case
+		insertcount := len(n.children) - 1
+		n.parent.children = append(n.parent.children, make([]*Node, insertcount)...)
+		if ind != origsize-1 {
+			copy(n.parent.children[(ind+insertcount+1):], n.parent.children[(ind+1):origsize])
+		}
+		for i := 0; i < len(n.children); i++ {
+			n.parent.children[ind+i] = n.children[i]
+			n.parent.children[ind+i].parent = n.parent
+		}
+	}
+
+	// Update propW and propH since the parent of the children might have been updated
+	n.parent.markSizes()
 }
 
 // String returns the string form of the node and all children (used for debugging)
