@@ -6,8 +6,8 @@ import (
 	"io"
 	"sync"
 
+	"github.com/zyedidia/micro/v2/internal/highlight"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/micro/v2/pkg/highlight"
 )
 
 // Finds the byte index of the nth rune in a byte slice
