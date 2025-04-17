@@ -236,9 +236,9 @@ type BufPane struct {
 	// Was the last mouse event actually a double click?
 	// Useful for detecting triple clicks -- if a double click is detected
 	// but the last mouse event was actually a double click, it's a triple click
-	doubleClick bool
+	DoubleClick bool
 	// Same here, just to keep track for mouse move events
-	tripleClick bool
+	TripleClick bool
 
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
