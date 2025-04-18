@@ -1907,30 +1907,29 @@ func (h *BufPane) ForceQuit() bool {
 	return true
 }
 
+// closePrompt displays a prompt to save the buffer before closing it to proceed
+// with a different action or command
+func (h *BufPane) closePrompt(action string, callback func()) {
+	InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
+		if !canceled && !yes {
+			callback()
+		} else if !canceled && yes {
+			h.SaveCB(action, callback)
+		}
+	})
+}
+
 // Quit this will close the current tab or view that is open
 func (h *BufPane) Quit() bool {
-	if h.Buf.Modified() {
-		for _, b := range buffer.OpenBuffers {
-			if b != h.Buf && b.SharedBuffer == h.Buf.SharedBuffer {
-				h.ForceQuit()
-				return true
-			}
-		}
-
+	if h.Buf.Modified() && !h.Buf.Shared() {
 		if config.GlobalSettings["autosave"].(float64) > 0 && h.Buf.Path != "" {
 			// autosave on means we automatically save when quitting
 			h.SaveCB("Quit", func() {
 				h.ForceQuit()
 			})
 		} else {
-			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
-				if !canceled && !yes {
-					h.ForceQuit()
-				} else if !canceled && yes {
-					h.SaveCB("Quit", func() {
-						h.ForceQuit()
-					})
-				}
+			h.closePrompt("Quit", func() {
+				h.ForceQuit()
 			})
 		}
 	} else {
