@@ -635,6 +635,13 @@ func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
 	return nil
 }
 
+func SetGlobalOptionNativePlug(option string, nativeValue interface{}) error {
+	if l, ok := config.GlobalSettings["locksettings"]; ok && l.(bool) {
+		return errors.New("settings.json file locked by user for all plugins")
+	}
+	return SetGlobalOptionNative(option, nativeValue)
+}
+
 func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 	if err := config.OptionIsValid(option, nativeValue); err != nil {
 		return err
@@ -668,6 +675,13 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 	}
 
 	return nil
+}
+
+func SetGlobalOptionPlug(option, value string) error {
+	if l, ok := config.GlobalSettings["locksettings"]; ok && l.(bool) {
+		return errors.New("settings.json file locked by user for all plugins")
+	}
+	return SetGlobalOption(option, value)
 }
 
 func SetGlobalOption(option, value string) error {
