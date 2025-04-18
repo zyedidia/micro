@@ -1909,14 +1909,7 @@ func (h *BufPane) ForceQuit() bool {
 
 // Quit this will close the current tab or view that is open
 func (h *BufPane) Quit() bool {
-	if h.Buf.Modified() {
-		for _, b := range buffer.OpenBuffers {
-			if b != h.Buf && b.SharedBuffer == h.Buf.SharedBuffer {
-				h.ForceQuit()
-				return true
-			}
-		}
-
+	if h.Buf.Modified() && !h.Buf.Shared() {
 		if config.GlobalSettings["autosave"].(float64) > 0 && h.Buf.Path != "" {
 			// autosave on means we automatically save when quitting
 			h.SaveCB("Quit", func() {

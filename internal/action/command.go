@@ -308,7 +308,7 @@ func (h *BufPane) OpenCmd(args []string) {
 			}
 			h.OpenBuffer(b)
 		}
-		if h.Buf.Modified() {
+		if h.Buf.Modified() && !h.Buf.Shared() {
 			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && !yes {
 					open()
@@ -1121,7 +1121,7 @@ func (h *BufPane) TermCmd(args []string) {
 
 	for i, p := range ps {
 		if p.ID() == h.ID() {
-			if h.Buf.Modified() {
+			if h.Buf.Modified() && !h.Buf.Shared() {
 				InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
 					if !canceled && !yes {
 						term(i, false)
