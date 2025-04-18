@@ -6,7 +6,7 @@ detect:
 rules:
     - preproc: "\\b(contract|library|pragma)\\b"
     - constant.number: "\\b[-]?([0-9]+|0x[0-9a-fA-F]+)\\b"
-    - identifier: "[a-zA-Z][_a-zA-Z0-9]*[[:space:]]*"
+    - identifier: "[a-zA-Z]\\w*[[:space:]]*"
     - statement: "\\b(assembly|break|continue|do|for|function|if|else|new|return|returns|while)\\b"
     - special: "\\b(\\.send|throw)\\b" # make sure they are very visible
     - type.keyword: "\\b(anonymous|constant|indexed|payable|public|private|external|internal)\\b"
