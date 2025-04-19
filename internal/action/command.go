@@ -819,12 +819,17 @@ func (h *BufPane) UnbindCmd(args []string) {
 
 // RunCmd runs a shell command in the background
 func (h *BufPane) RunCmd(args []string) {
-	runf, err := shell.RunBackgroundShell(shellquote.Join(args...))
+	runCmd := shellquote.Join(args...)
+	runf, err := shell.RunBackgroundShell(runCmd)
 	if err != nil {
 		InfoBar.Error(err)
 	} else {
 		go func() {
-			InfoBar.Message(runf())
+			output, runErr := runf()
+			if runErr != nil {
+				output = fmt.Sprint(runCmd, " exited with error: ", err)
+			}
+			InfoBar.Message(output)
 			screen.Redraw()
 		}()
 	}
