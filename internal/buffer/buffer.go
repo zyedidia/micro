@@ -620,6 +620,16 @@ func (b *Buffer) WordAt(loc Loc) []byte {
 	return b.Substr(start, end)
 }
 
+// Shared returns if there are other buffers with the same file as this buffer
+func (b *Buffer) Shared() bool {
+	for _, buf := range OpenBuffers {
+		if buf != b && buf.SharedBuffer == b.SharedBuffer {
+			return true
+		}
+	}
+	return false
+}
+
 // Modified returns if this buffer has been modified since
 // being opened
 func (b *Buffer) Modified() bool {
