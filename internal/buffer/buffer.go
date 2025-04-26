@@ -9,7 +9,6 @@ import (
 	"io"
 	"io/fs"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -479,7 +478,7 @@ func (b *Buffer) GetName() string {
 		name = b.Path
 	}
 	if b.Settings["basename"].(bool) {
-		return path.Base(name)
+		return filepath.Base(name)
 	}
 	return name
 }
