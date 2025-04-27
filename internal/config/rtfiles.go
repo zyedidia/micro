@@ -4,7 +4,6 @@ import (
 	"errors"
 	"log"
 	"os"
-	"path"
 	"path/filepath"
 	"regexp"
 	"strings"
@@ -84,8 +83,8 @@ func (rf realFile) Data() ([]byte, error) {
 }
 
 func (af assetFile) Name() string {
-	fn := path.Base(string(af))
-	return fn[:len(fn)-len(path.Ext(fn))]
+	fn := filepath.Base(string(af))
+	return fn[:len(fn)-len(filepath.Ext(fn))]
 }
 
 func (af assetFile) Data() ([]byte, error) {
@@ -125,8 +124,8 @@ func AddRuntimeFilesFromAssets(fileType RTFiletype, directory, pattern string) {
 
 assetLoop:
 	for _, f := range files {
-		if ok, _ := path.Match(pattern, f); ok {
-			af := assetFile(path.Join(directory, f))
+		if ok, _ := filepath.Match(pattern, f); ok {
+			af := assetFile(filepath.Join(directory, f))
 			for _, rf := range realFiles[fileType] {
 				if af.Name() == rf.Name() {
 					continue assetLoop
@@ -167,7 +166,7 @@ func InitRuntimeFiles(user bool) {
 		if user {
 			AddRuntimeFilesFromDirectory(fileType, filepath.Join(ConfigDir, dir), pattern)
 		}
-		AddRuntimeFilesFromAssets(fileType, path.Join("runtime", dir), pattern)
+		AddRuntimeFilesFromAssets(fileType, filepath.Join("runtime", dir), pattern)
 	}
 
 	initRuntimeVars()
@@ -300,7 +299,7 @@ func PluginAddRuntimeFile(plugin string, filetype RTFiletype, filePath string) e
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRealRuntimeFile(filetype, realFile(fullpath))
 	} else {
-		fullpath = path.Join("runtime", "plugins", pldir, filePath)
+		fullpath = filepath.Join("runtime", "plugins", pldir, filePath)
 		AddRuntimeFile(filetype, assetFile(fullpath))
 	}
 	return nil
@@ -317,7 +316,7 @@ func PluginAddRuntimeFilesFromDirectory(plugin string, filetype RTFiletype, dire
 	if _, err := os.Stat(fullpath); err == nil {
 		AddRuntimeFilesFromDirectory(filetype, fullpath, pattern)
 	} else {
-		fullpath = path.Join("runtime", "plugins", pldir, directory)
+		fullpath = filepath.Join("runtime", "plugins", pldir, directory)
 		AddRuntimeFilesFromAssets(filetype, fullpath, pattern)
 	}
 	return nil
