@@ -1,6 +1,7 @@
 # Syntax Files
 
-Here are micro's syntax files.
+Here are micro's syntax files. You can copy any of these to `~/.config/micro/syntax` and adjust however you like.
+Most of them originate from Nano, specifically from [this repository](https://github.com/scopatz/nanorc).
 
 Each yaml file specifies how to detect the filetype based on file extension or header (first line of the line).
 In addition, a signature can be provided to help resolving ambiguities when multiple matching filetypes are detected.
@@ -21,17 +22,6 @@ Most of the syntax files here have been converted using that tool.
 
 Note that the tool isn't perfect and though it is unlikely, you may run into some small issues that you will have to fix manually
 (about 4 files from this directory had issues after being converted).
-
-# Micro syntax highlighting files
-
-These are the syntax highlighting files for micro. To install them, just
-put all the syntax files in `~/.config/micro/syntax`.
-
-They are taken from Nano, specifically from [this repository](https://github.com/scopatz/nanorc).
-Micro syntax files are almost identical to Nano's, except for some key differences:
-
-* Micro does not use `icolor`. Instead, for a case insensitive match, use the case insensitive flag (`i`) in the regular expression
-    * For example, `icolor green ".*"` would become `color green "(?i).*"`
 
 # Incompatibilities with older versions of micro
 
