@@ -28,7 +28,7 @@ rules:
         start: "%\\{__"
         end: "\\}"
 
-    - statement: "\\$(RPM_BUILD_ROOT)\\>"
+    - statement: "\\$(RPM_BUILD_ROOT)\\b"
     - special: "^%(build$|changelog|check$|clean$|description)"
     - special: "^%(files|install$|package|prep$)"
     - special: "^%(pre|preun|pretrans|post|postun|posttrans)"
