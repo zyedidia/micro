@@ -45,6 +45,7 @@ func RunCommand(input string) (string, error) {
 	return ExecCommand(inputCmd, args[1:]...)
 }
 
+// **Deprecated, don't use**
 // RunBackgroundShell runs a shell command in the background
 // It returns a function which will run the command and returns a string
 // message result
@@ -66,6 +67,47 @@ func RunBackgroundShell(input string) (func() string, error) {
 		}
 		return str
 	}, nil
+}
+
+// ExecBackgroundCommand executes a command in the background by accepting
+// a optional callback function for the command output or error if any,
+// the command name and a list of arguments.
+func ExecBackgroundCommand(cb func(string, error), name string, args ...string) {
+	go func() {
+		output, runErr := ExecCommand(name, args[0:]...)
+		if cb != nil {
+			wrapperFunc := func(output string, args []interface{}) {
+				errVal, ok := args[0].(error)
+				if ok {
+					cb(output, errVal)
+				} else {
+					cb(output, nil)
+				}
+			}
+
+			var passArgs []interface{}
+			passArgs = append(passArgs, runErr)
+			jobFunc := JobFunction{wrapperFunc, output, passArgs}
+			Jobs <- jobFunc
+		}
+	}()
+}
+
+// RunBackgroundCommand runs a shell command in the background by accepting
+// an input for running the command and an optional callback function for
+// the command output or error if any.
+// It returns an error if it fails to split the input command
+func RunBackgroundCommand(input string, cb func(string, error)) error {
+	args, err := shellquote.Split(input)
+	if err != nil {
+		return err
+	}
+	if len(args) == 0 {
+		return errors.New("No arguments")
+	}
+
+	ExecBackgroundCommand(cb, args[0], args[1:]...)
+	return nil
 }
 
 // RunInteractiveShell runs a shellcommand interactively
