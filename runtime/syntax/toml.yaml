@@ -38,7 +38,7 @@ rules:
     - constant.number: '[+-]?(\d+_)*\d+(\.(\d+_)*\d+)?[Ee][+-]?(\d+_)*\d+'
     - constant.number: '(\+|-)(inf|nan)'
     # Bare key, keys starting with a digit or dash are ambiguous with numbers and are skipped
-    - identifier: '\b[A-Za-z_][A-Za-z0-9_-]*\b'
+    - identifier: '\b[A-Za-z_][\w-]*\b'
     # Boolean and inf, nan without sign
     - constant.bool.true: '\btrue\b'
     - constant.bool.false: '\bfalse\b'
