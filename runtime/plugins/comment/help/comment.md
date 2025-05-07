@@ -80,10 +80,10 @@ but it is only available for certain filetypes:
 * zsh: `# %s`
 
 If your filetype is not available here, you can simply modify
-the `commenttype` option:
+the `comment.type` option:
 
 ```
-set commenttype "/* %s */"
+set comment.type "/* %s */"
 ```
 
 Or in your `settings.json`:
@@ -91,7 +91,7 @@ Or in your `settings.json`:
 ```json
 {
     "*.c": {
-        "commenttype": "/* %s */"
+        "comment.type": "/* %s */"
     }
 }
 ```
