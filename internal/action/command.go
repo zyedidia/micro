@@ -1073,8 +1073,8 @@ func (h *BufPane) openTerm(args []string, newtab bool) {
 		h.AddTab()
 		id = MainTab().Panes[pane].ID()
 	} else {
-		for i, p := range h.tab.Panes {
-			if p.ID() == h.ID() {
+		for i, p := range MainTab().Panes {
+			if p.IsActive() {
 				pane = i
 				id = p.ID()
 				p.Close()
