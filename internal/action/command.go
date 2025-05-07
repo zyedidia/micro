@@ -1059,10 +1059,42 @@ func (h *BufPane) ReplaceAllCmd(args []string) {
 	h.ReplaceCmd(append(args, "-a"))
 }
 
+func (h *BufPane) openTerm(args []string, newtab bool) {
+	t := new(shell.Terminal)
+	err := t.Start(args, false, true, nil, nil)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	pane := 0
+	id := h.ID()
+	if newtab {
+		h.AddTab()
+		id = MainTab().Panes[pane].ID()
+	} else {
+		for i, p := range h.tab.Panes {
+			if p.ID() == h.ID() {
+				pane = i
+				id = p.ID()
+				p.Close()
+				break
+			}
+		}
+	}
+
+	v := h.GetView()
+	tp, err := NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+	MainTab().Panes[pane] = tp
+	MainTab().SetActive(pane)
+}
+
 // TermCmd opens a terminal in the current view
 func (h *BufPane) TermCmd(args []string) {
-	ps := h.tab.Panes
-
 	if !TermEmuSupported {
 		InfoBar.Error("Terminal emulator not supported on this system")
 		return
@@ -1077,52 +1109,19 @@ func (h *BufPane) TermCmd(args []string) {
 		args = []string{sh}
 	}
 
-	term := func(i int, newtab bool) {
-		t := new(shell.Terminal)
-		err := t.Start(args, false, true, nil, nil)
-		if err != nil {
-			InfoBar.Error(err)
-			return
-		}
-
-		id := h.ID()
-		if newtab {
-			h.AddTab()
-			i = 0
-			id = MainTab().Panes[0].ID()
-		} else {
-			MainTab().Panes[i].Close()
-		}
-
-		v := h.GetView()
-		tp, err := NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
-		if err != nil {
-			InfoBar.Error(err)
-			return
-		}
-		MainTab().Panes[i] = tp
-		MainTab().SetActive(i)
-	}
-
 	// If there is only one open file we make a new tab instead of overwriting it
 	newtab := len(MainTab().Panes) == 1 && len(Tabs.List) == 1
-
 	if newtab {
-		term(0, true)
+		h.openTerm(args, true)
 		return
 	}
 
-	for i, p := range ps {
-		if p.ID() == h.ID() {
-			if h.Buf.Modified() && !h.Buf.Shared() {
-				h.closePrompt("Save", func() {
-					term(i, false)
-				})
-			} else {
-				term(i, false)
-			}
-			break
-		}
+	if h.Buf.Modified() && !h.Buf.Shared() {
+		h.closePrompt("Save", func() {
+			h.openTerm(args, false)
+		})
+	} else {
+		h.openTerm(args, false)
 	}
 }
 
