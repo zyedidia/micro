@@ -171,6 +171,16 @@ func SliceStartStr(str string, index int) string {
 	return str[:totalSize]
 }
 
+// SliceStartEnd combines SliceStart and SliceEnd into one
+func SliceStartEnd(slc []byte, start int, end int) []byte {
+	return SliceEnd(SliceStart(slc, end), start)
+}
+
+// SliceStartEndStr is the same as SliceStartEnd but for strings
+func SliceStartEndStr(str string, start int, end int) string {
+	return SliceEndStr(SliceStartStr(str, end), start)
+}
+
 // SliceVisualEnd will take a byte slice and slice off the start
 // up to a given visual index. If the index is in the middle of a
 // rune the number of visual columns into the rune will be returned
