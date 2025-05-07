@@ -1121,6 +1121,7 @@ func (h *BufPane) TermCmd(args []string) {
 			} else {
 				term(i, false)
 			}
+			break
 		}
 	}
 }
