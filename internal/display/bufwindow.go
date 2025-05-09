@@ -248,8 +248,9 @@ func (w *BufWindow) Relocate() bool {
 			w.StartCol = cx
 			ret = true
 		}
-		if cx+w.gutterOffset+rw > w.StartCol+w.Width {
-			w.StartCol = cx - w.Width + w.gutterOffset + rw
+
+		if cx+rw > w.StartCol+w.bufWidth {
+			w.StartCol = cx - w.bufWidth + rw
 			ret = true
 		}
 	}
