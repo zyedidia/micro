@@ -364,6 +364,32 @@ The packages and their contents are listed below (in Go type signatures):
     Relevant links:
     [Rune](https://pkg.go.dev/builtin#rune)
 
+* `micro/overlay`
+    - `CreateOverlay(draw func()) OverlayHandle`: creates and registers a new
+       overlay, and returns the OverlayHandle associated with it.
+    - `DestroyOverlay(handle OverlayHandle)`: deregisters an existing overlay
+       via its handle.
+    - `DrawText(text string, x, y, w, h int, style tcell.Style)`: draws styled
+       text clipped to the bounds of the provided screen rectangle.
+    - `DrawRect(x, y, w, h int, style tcell.Style)`: draws a rectangle to the
+       provided screen coordinates.
+    - `BufPaneScreenRect(bp BufPane) overlay.Rect`: returns the bounds of a
+       BufPane in screen coordinates.
+    - `BufPaneScreenLoc(bp BufPane, l Loc) Loc`: converts from line/column
+       coordinates to screen coordinates.
+    - `Style() tcell.Style`: returns a default (empty) tcell.Style.
+    - `GetColor(name string) tcell.Style`: takes in a syntax group and returns
+       the colorscheme's style for that group.
+    - `StringToStyle(str string) tcell.Style`: returns a style from a string.
+       The string must be in the format "extra foregroundcolor,backgroundcolor".
+       The "extra" can be bold, reverse, italic or underline.
+    - `Redraw()`: schedules a redraw of the entire screen.
+
+    Relevant links:
+    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
+    [tcell.Style](https://pkg.go.dev/github.com/micro-editor/tcell/v2#Style)
+    
+
 This may seem like a small list of available functions, but some of the objects
 returned by the functions have many methods. The Lua plugin may access any
 public methods of an object returned by any of the functions above.
