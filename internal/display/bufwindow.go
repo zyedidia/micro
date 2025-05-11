@@ -61,6 +61,12 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 				c.LastWrappedVisualX = c.GetVisualX(true)
 			}
 		}
+
+		if option == "diffgutter" || option == "ruler" || option == "scrollbar" ||
+			option == "statusline" {
+			w.updateDisplayInfo()
+			w.Relocate()
+		}
 	}
 	b.GetVisualX = func(loc buffer.Loc) int {
 		return w.VLocFromLoc(loc).VisualX
