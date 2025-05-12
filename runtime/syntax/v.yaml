@@ -16,7 +16,7 @@ rules:
     - identifier.platform: "\\b(amd64|aarch64|x64|x32|little_endian|big_endian)\\b"
     - identifier.other: "\\b(debug|test|js|glibc|prealloc|no_bounds_checking)\\b"
 
-    - identifier.class: "\\b([A-Z][A-Za-z0-9_]*)\\b"
+    - identifier.class: "\\b([A-Z]\\w*)\\b"
     - identifier.function: "\\b([a-z_]+\\()"
     - symbol.operator: "\\b(i[ns])\\b|[-+/*<>!=~*%&:|,.?]"
     - symbol.attribute:

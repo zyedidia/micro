@@ -15,7 +15,7 @@ rules:
     - special: "\\b(as|const|def|defer|enum|export|fn|is|let|match|static|struct|type|union|yield|_)\\b"
     - preproc: "\\b(abort|alloc|append|assert|delete|free|insert|len|nullable|offset|size)\\b"
     - preproc: "^use .+;"
-    - preproc: "\\@([a-zA-Z_][0-9a-zA-Z_]+)\\b"
+    - preproc: "\\@([a-zA-Z_]\\w+)\\b"
 
     - constant: "\\b(false|null|true)\\b"
     - constant.number: "\\b(0x[0-9A-Fa-f]+(i(8|16|32|64)?|u(8|16|32|64)?|z)?)\\b"

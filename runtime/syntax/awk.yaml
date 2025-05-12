@@ -5,7 +5,7 @@ detect:
     header: "^#!.*bin/(env +)?awk( |$)"
 
 rules:
-    - preproc: "\\$[A-Za-z0-9_!@#$*?\\-]+"
+    - preproc: "\\$[\\w!@#$*?\\-]+"
     - preproc: "\\b(ARGC|ARGIND|ARGV|BINMODE|CONVFMT|ENVIRON|ERRNO|FIELDWIDTHS)\\b"
     - preproc: "\\b(FILENAME|FNR|FS|IGNORECASE|LINT|NF|NR|OFMT|OFS|ORS)\\b"
     - preproc: "\\b(PROCINFO|RS|RT|RSTART|RLENGTH|SUBSEP|TEXTDOMAIN)\\b"

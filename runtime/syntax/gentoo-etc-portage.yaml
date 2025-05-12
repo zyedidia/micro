@@ -5,8 +5,8 @@ detect:
 
 rules:
     # Use flags:
-    - constant.bool.false: "[[:space:]]+\\+?[a-zA-Z0-9_-]+"
-    - constant.bool.true: "[[:space:]]+-[a-zA-Z0-9_-]+"
+    - constant.bool.false: "[[:space:]]+\\+?[\\w-]+"
+    - constant.bool.true: "[[:space:]]+-[\\w-]+"
     # Likely version numbers:
     - special: "-[[:digit:]].*([[:space:]]|$)"
     # Accepted arches:
