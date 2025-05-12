@@ -1,6 +1,7 @@
 package display
 
 import (
+	"math"
 	"strconv"
 
 	runewidth "github.com/mattn/go-runewidth"
@@ -136,7 +137,7 @@ func (w *BufWindow) updateDisplayInfo() {
 	}
 
 	scrollbarWidth := 0
-	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height && w.Width > 0 {
+	if w.Buf.Settings["scrollbar"].(bool) && w.visualLineNum() > 1 && w.Width > 0 {
 		scrollbarWidth = 1
 	}
 
@@ -803,29 +804,56 @@ func (w *BufWindow) displayStatusLine() {
 	}
 }
 
+// Number of visual lines in buffer (consider rows as lines)
+func (w *BufWindow) visualLineNum() int {
+	if w.Buf.Settings["softwrap"].(bool) {
+		t := 0
+		for l := 0; l < w.Buf.LinesNum(); l++ {
+			t += w.getRowCount(l)
+		}
+		return t
+	} else {
+		return w.Buf.LinesNum()
+	}
+}
+
 func (w *BufWindow) displayScrollBar() {
-	if w.Buf.Settings["scrollbar"].(bool) && w.Buf.LinesNum() > w.Height {
-		scrollX := w.X + w.Width - 1
-		barsize := int(float64(w.Height) / float64(w.Buf.LinesNum()) * float64(w.Height))
-		if barsize < 1 {
-			barsize = 1
+	visualLinesNum := w.visualLineNum()
+	if !w.Buf.Settings["scrollbar"].(bool) || visualLinesNum <= 1 {
+		return
+	}
+	
+	startLine := 0
+	if w.Buf.Settings["softwrap"].(bool) {
+		// Calculate how many visual lines are above startLine.Line
+		for i := w.StartLine.Line - 1; i >= 0; i-- {
+			startLine += w.getRowCount(i)
 		}
-		barstart := w.Y + int(float64(w.StartLine.Line)/float64(w.Buf.LinesNum())*float64(w.Height))
+		startLine += w.StartLine.Row
+	} else {
+		startLine = w.StartLine.Line 
+	}
+	
+	scrollRange := visualLinesNum + w.bufHeight - 1
+	scrollRatio := float64(w.bufHeight) / float64(scrollRange)
 
-		scrollBarStyle := config.DefStyle.Reverse(true)
-		if style, ok := config.Colorscheme["scrollbar"]; ok {
-			scrollBarStyle = style
-		}
+	barSize := util.Max(1, int(scrollRatio*float64(w.bufHeight)))
+	barStart := w.Y + util.Min(w.bufHeight-1, int(math.Ceil(float64(startLine)*scrollRatio)))
+	barX := w.X + w.Width - 1
 
-		scrollBarChar := config.GetGlobalOption("scrollbarchar").(string)
-		if util.CharacterCountInString(scrollBarChar) != 1 {
-			scrollBarChar = "|"
-		}
-		scrollBarRune := []rune(scrollBarChar)
+	scrollBarStyle := config.DefStyle.Reverse(true)
+	if customStyle, ok := config.Colorscheme["scrollbar"]; ok {
+		scrollBarStyle = customStyle
+	}
 
-		for y := barstart; y < util.Min(barstart+barsize, w.Y+w.bufHeight); y++ {
-			screen.SetContent(scrollX, y, scrollBarRune[0], nil, scrollBarStyle)
-		}
+	scrollBarChar := config.GetGlobalOption("scrollbarchar").(string)
+	if util.CharacterCountInString(scrollBarChar) != 1 {
+		scrollBarChar = "|"
+	}
+	scrollBarRune := []rune(scrollBarChar)[0]
+
+	for y := barStart; y < util.Min(barStart+barSize, w.Y+w.bufHeight); y++ {
+		screen.SetContent(barX, y, scrollBarRune, nil, scrollBarStyle)
 	}
 }
 
