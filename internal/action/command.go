@@ -945,17 +945,8 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 	replace := []byte(replaceStr)
 
-	var regex *regexp.Regexp
-	var err error
 	if h.Buf.Settings["ignorecase"].(bool) {
-		regex, err = regexp.Compile("(?im)" + search)
-	} else {
-		regex, err = regexp.Compile("(?m)" + search)
-	}
-	if err != nil {
-		// There was an error with the user's regex
-		InfoBar.Error(err)
-		return
+		search = "(?i)" + search
 	}
 
 	nreplaced := 0
@@ -969,21 +960,32 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		searchLoc = start // otherwise me might start at the end
 	}
 	if all {
-		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace, !noRegex)
+		var err error
+		if noRegex {
+			nreplaced, _, err = h.Buf.ReplaceAllLiteral(search, start, end, replace)
+		} else {
+			nreplaced, _, err = h.Buf.ReplaceAll(search, start, end, replace)
+		}
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
 	} else {
+		rgrp, err := buffer.NewRegexpGroup(search)
+		if err != nil {
+			InfoBar.Error(err)
+			return
+		}
+
 		inRange := func(l buffer.Loc) bool {
 			return l.GreaterEqual(start) && l.LessEqual(end)
 		}
 
-		lastMatchEnd := buffer.Loc{-1, -1}
+		lastMatchEnd := buffer.LocVoid()
 		var doReplacement func()
 		doReplacement = func() {
-			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, true)
-			if err != nil {
-				InfoBar.Error(err)
-				return
-			}
-			if !found || !inRange(locs[0]) || !inRange(locs[1]) {
+			locs, _ := h.Buf.FindDown(rgrp, searchLoc, end)
+			if locs == nil || !inRange(locs[0]) || !inRange(locs[1]) {
 				h.Cursor.ResetSelection()
 				h.Buf.RelocateCursors()
 
@@ -994,7 +996,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 				// skip empty match right after previous match
 				if searchLoc == end {
 					searchLoc = start
-					lastMatchEnd = buffer.Loc{-1, -1}
+					lastMatchEnd = buffer.LocVoid()
 				} else {
 					searchLoc = searchLoc.Move(1, h.Buf)
 				}
@@ -1011,12 +1013,14 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
-					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace, !noRegex)
+					if noRegex {
+						_, searchLoc, _ = h.Buf.ReplaceAllLiteral(search, locs[0], locs[1], replace)
+					} else {
+						_, searchLoc, _ = h.Buf.ReplaceAll(search, locs[0], locs[1], replace)
+					}
 
-					searchLoc = locs[0]
-					searchLoc.X += nrunes + locs[0].Diff(locs[1], h.Buf)
 					if end.Y == locs[1].Y {
-						end = end.Move(nrunes, h.Buf)
+						end = buffer.Loc{end.X + searchLoc.X - locs[1].X, end.Y}
 					}
 					h.Cursor.Loc = searchLoc
 					nreplaced++
