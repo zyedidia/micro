@@ -1891,11 +1891,11 @@ func (h *BufPane) ClearInfo() bool {
 	return true
 }
 
-// ForceQuit closes the current tab or view even if there are unsaved changes
+// ForceQuit closes the tab or view even if there are unsaved changes
 // (no prompt)
 func (h *BufPane) ForceQuit() bool {
 	h.Buf.Close()
-	if len(MainTab().Panes) > 1 {
+	if len(h.tab.Panes) > 1 {
 		h.Unsplit()
 	} else if len(Tabs.List) > 1 {
 		Tabs.RemoveTab(h.splitID)

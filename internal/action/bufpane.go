@@ -652,28 +652,28 @@ func (h *BufPane) DoRuneInsert(r rune) {
 // VSplitIndex opens the given buffer in a vertical split on the given side.
 func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
-	e.splitID = MainTab().GetNode(h.splitID).VSplit(right)
-	currentPaneIdx := MainTab().GetPane(h.splitID)
+	e.splitID = h.tab.GetNode(h.splitID).VSplit(right)
+	currentPaneIdx := h.tab.GetPane(h.splitID)
 	if right {
 		currentPaneIdx++
 	}
-	MainTab().AddPane(e, currentPaneIdx)
-	MainTab().Resize()
-	MainTab().SetActive(currentPaneIdx)
+	h.tab.AddPane(e, currentPaneIdx)
+	h.tab.Resize()
+	h.tab.SetActive(currentPaneIdx)
 	return e
 }
 
 // HSplitIndex opens the given buffer in a horizontal split on the given side.
 func (h *BufPane) HSplitIndex(buf *buffer.Buffer, bottom bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
-	e.splitID = MainTab().GetNode(h.splitID).HSplit(bottom)
-	currentPaneIdx := MainTab().GetPane(h.splitID)
+	e.splitID = h.tab.GetNode(h.splitID).HSplit(bottom)
+	currentPaneIdx := h.tab.GetPane(h.splitID)
 	if bottom {
 		currentPaneIdx++
 	}
-	MainTab().AddPane(e, currentPaneIdx)
-	MainTab().Resize()
-	MainTab().SetActive(currentPaneIdx)
+	h.tab.AddPane(e, currentPaneIdx)
+	h.tab.Resize()
+	h.tab.SetActive(currentPaneIdx)
 	return e
 }
 
