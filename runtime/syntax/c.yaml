@@ -42,7 +42,8 @@ rules:
         end: "'"
         skip: "\\\\."
         rules:
-            - error: "..+"
+              # TODO: Revert back to - error: "..+" once #3127 is merged
+            - error: "[[:graph:]]{2,}'"
             - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2}|u[0-9A-Fa-f]{4}|U[0-9A-Fa-f]{8})"
 
     - comment:
