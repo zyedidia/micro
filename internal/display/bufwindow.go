@@ -137,7 +137,7 @@ func (w *BufWindow) updateDisplayInfo() {
 	}
 
 	scrollbarWidth := 0
-	if w.Buf.Settings["scrollbar"].(bool) && w.visualLineNum() > 1 && w.Width > 0 {
+	if w.Buf.Settings["scrollbar"].(bool) && w.isScrollable() && w.Width > 0 {
 		scrollbarWidth = 1
 	}
 
@@ -804,37 +804,33 @@ func (w *BufWindow) displayStatusLine() {
 	}
 }
 
-// Number of visual lines in buffer (consider rows as lines)
-func (w *BufWindow) visualLineNum() int {
-	if w.Buf.Settings["softwrap"].(bool) {
-		t := 0
-		for l := 0; l < w.Buf.LinesNum(); l++ {
-			t += w.getRowCount(l)
-		}
-		return t
-	} else {
-		return w.Buf.LinesNum()
-	}
+func (w *BufWindow) isScrollable() bool {
+    return w.Buf.LinesNum() > 1 || (w.Buf.LinesNum() == 1 && w.getRowCount(0) > 1)
 }
 
 func (w *BufWindow) displayScrollBar() {
-	visualLinesNum := w.visualLineNum()
-	if !w.Buf.Settings["scrollbar"].(bool) || visualLinesNum <= 1 {
+	if !w.Buf.Settings["scrollbar"].(bool) || !w.isScrollable() {
 		return
 	}
 	
+	totalLines := 0
 	startLine := 0
 	if w.Buf.Settings["softwrap"].(bool) {
-		// Calculate how many visual lines are above startLine.Line
-		for i := w.StartLine.Line - 1; i >= 0; i-- {
-			startLine += w.getRowCount(i)
+		// Assume rows as lines; compute total lines and how many precede the start line
+		for i := 0; i < w.Buf.LinesNum(); i++ {
+			rc := w.getRowCount(i)
+		    totalLines += rc
+		    if i < w.StartLine.Line {
+		        startLine += rc
+		    }
 		}
 		startLine += w.StartLine.Row
 	} else {
+		totalLines = w.Buf.LinesNum()
 		startLine = w.StartLine.Line 
 	}
 	
-	scrollRange := visualLinesNum + w.bufHeight - 1
+	scrollRange := totalLines + w.bufHeight - 1
 	scrollRatio := float64(w.bufHeight) / float64(scrollRange)
 
 	barSize := util.Max(1, int(scrollRatio*float64(w.bufHeight)))
