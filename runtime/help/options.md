@@ -462,6 +462,17 @@ Here are the available options:
 
     default value: `false`
 
+* `truecolor`: controls the usage of the true color support/mode.
+   * `auto`: will evaluate if the terminal is capable to handle true color.
+      This option can be overriden by setting `$MICRO_TRUECOLOR` to `1`.
+   * `on`: will force the usage of true color, but will need terminal support
+      to work properly.
+   * `off`: disable true color support.
+
+   Note: The change will take effect after the next start of `micro`.
+
+   default value: `auto`
+
 * `useprimary` (only useful on unix): defines whether or not micro will use the
    primary clipboard to copy selections in the background. This does not affect
    the normal clipboard using `Ctrl-c` and `Ctrl-v`.
