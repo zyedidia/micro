@@ -1,11 +1,12 @@
-.TH micro 1 "2025-08-16"
+.TH micro 1 "2025-09-03"
 .SH NAME
 micro \- A modern and intuitive terminal-based text editor
 .SH SYNOPSIS
 .B micro
 .RI [ OPTION ]...\&
 .RI [ FILE ]...\&
-.RI [+ LINE [: COL ]]
+.RI [+ LINE [: COL ]]\&
+.RI [+/ REGEX ]
 .br
 .B micro
 .RI [ OPTION ]...\&
@@ -38,6 +39,11 @@ Specify a custom location for the configuration directory
 .IR FILE \ + LINE [: COL ]
 .RS 4
 Specify a line and column to start the cursor at when opening a buffer
+.RE
+.PP
+.RI +/ REGEX
+.RS 4
+Specify a regex to search for when opening a buffer
 .RE
 .PP
 .B \-options
