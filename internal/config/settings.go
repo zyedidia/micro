@@ -70,7 +70,9 @@ var defaultCommonSettings = map[string]interface{}{
 	"hltrailingws":    false,
 	"ignorecase":      true,
 	"incsearch":       true,
-	"indentchar":      " ",
+	"indenttabchar":   " ",
+	"indentspacechar": " ",
+	"spacechar":       " ",
 	"keepautoindent":  false,
 	"matchbrace":      true,
 	"matchbraceleft":  true,
@@ -164,12 +166,23 @@ func init() {
 	VolatileSettings = make(map[string]bool)
 }
 
+func checkDeprecatedSettings(checkmap map[string]interface{}) {
+	indentchar, hasindentchar := checkmap["indentchar"]
+	_, hasindenttabchar := checkmap["indenttabchar"]
+	if hasindentchar && !hasindenttabchar {
+		checkmap["indenttabchar"] = indentchar
+	}
+}
+
 func validateParsedSettings() error {
 	var err error
 	defaults := DefaultAllSettings()
+
+	checkDeprecatedSettings(parsedSettings)
 	for k, v := range parsedSettings {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 			if strings.HasPrefix(k, "ft:") {
+				checkDeprecatedSettings(v.(map[string]interface{}))
 				for k1, v1 := range v.(map[string]interface{}) {
 					if _, ok := defaults[k1]; ok {
 						if e := verifySetting(k1, v1, defaults[k1]); e != nil {
@@ -185,6 +198,7 @@ func validateParsedSettings() error {
 					delete(parsedSettings, k)
 					continue
 				}
+				checkDeprecatedSettings(v.(map[string]interface{}))
 				for k1, v1 := range v.(map[string]interface{}) {
 					if _, ok := defaults[k1]; ok {
 						if e := verifySetting(k1, v1, defaults[k1]); e != nil {
@@ -210,6 +224,7 @@ func validateParsedSettings() error {
 			}
 			continue
 		}
+
 		if _, ok := defaults[k]; ok {
 			if e := verifySetting(k, v, defaults[k]); e != nil {
 				err = e
