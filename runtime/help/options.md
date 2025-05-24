@@ -203,12 +203,22 @@ Here are the available options:
 
     default value: `true`
 
-* `indentchar`: sets the indentation character. This will not be inserted into
-   files; it is only a visual indicator that whitespace is present. If set to a
-   printing character, it functions as a subset of the "show invisibles"
-   setting available in many other text editors. The color of this character is
-   determined by the `indent-char` field in the current theme rather than the
-   default text color.
+* `indenttabchar`: sets the indentation character for tabs. This will not be
+   inserted into files; it is only a visual indicator that whitespace is present.
+   If set to a printing character, it functions as a subset of the
+   "show invisibles" setting available in many other text editors. The color of
+   this character is determined by the `indent-char` field in the current theme
+   rather than the default text color.
+
+    default value: ` ` (space)
+
+* `indentspacechar`: same as `indenttabchar` except for spaces that are at
+   locations that are divisible by `tabsize`.
+
+    default value: ` ` (space)
+
+* `spacechar`: same as `indenttabchar` but for all spaces. `indentspacechar`
+   takes precedence over this option.
 
     default value: ` ` (space)
 
