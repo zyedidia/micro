@@ -7,7 +7,7 @@ rules:
     # function definition
     - identifier: "fn [a-z0-9_]+"
       # Reserved words
-    - statement: "\\b(abstract|alignof|as|async|await|become|box|break|const|continue|crate|do|dyn|else|enum|extern|false|final|fn|for|gen|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|try|unsafe|unsized|use|virtual|where|while|yield)\\b"
+    - statement: "\\b(abstract|alignof|as|async|await|become|box|break|const|continue|crate|do|dyn|else|enum|extern|false|final|fn|for|gen|if|impl|in|let|loop|macro|match|mod|move|mut|offsetof|override|priv|pub|pure|ref|return|sizeof|static|self|struct|super|true|trait|type|typeof|try|union|unsafe|unsized|use|virtual|where|while|yield)\\b"
       # macros
     - special: "[a-z_]+!"
       # Constants
