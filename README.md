@@ -18,24 +18,8 @@ Here is a picture of micro editing its source code.
 ![Screenshot](./assets/micro-solarized.png)
 
 To see more screenshots of micro, showcasing some of the default color schemes, see [here](https://micro-editor.github.io).
- 
+
 You can also check out the website for Micro at https://micro-editor.github.io.
-
-## Table of Contents
-
-- [Features](#features)
-- [Installation](#installation)
-  - [Prebuilt binaries](#pre-built-binaries)
-  - [Package Managers](#package-managers)
-  - [Building from source](#building-from-source)
-  - [Fully static binary](#fully-static-binary)
-  - [macOS terminal](#macos-terminal)
-  - [Linux clipboard support](#linux-clipboard-support)
-  - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
-  - [Cygwin, Mingw, Plan9](#cygwin-mingw-plan9)
-- [Usage](#usage)
-- [Documentation and Help](#documentation-and-help)
-- [Contributing](#contributing)
 
 - - -
 
@@ -88,7 +72,7 @@ Pre-built binaries are distributed in [releases](https://github.com/zyedidia/mic
 
 To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
-#### Quick-install script
+#### Third-party quick-install script
 
 ```bash
 curl https://getmic.ro | bash
@@ -178,7 +162,7 @@ Without these tools installed, micro will use an internal clipboard for copy and
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.16 or greater and Go modules are enabled.
+Make sure that you have Go version 1.19 or greater and Go modules are enabled.
 
 ```
 git clone https://github.com/zyedidia/micro
@@ -196,15 +180,19 @@ You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/mi
 recommended because it doesn't build micro with version information (necessary for the plugin manager),
 and doesn't disable debug mode.
 
-### Fully static binary
+### Fully static or dynamically linked binary
 
-By default, the micro binary will dynamically link with core system libraries (this is generally
-recommended for security and portability). However, there is a fully static prebuilt binary that
-is provided for amd64 as `linux-static.tar.gz`, and to build a fully static binary from source, run
+By default, the micro binary is linked statically to increase the portability of the prebuilt binaries.
+This behavior can simply be overriden by providing `CGO_ENABLED=1` to the build target.
 
 ```
-CGO_ENABLED=0 make build
+CGO_ENABLED=1 make build
 ```
+
+Afterwards the micro binary will dynamically link with the present core system libraries.
+
+**Note for Mac:**
+Native macOS builds are done with `CGO_ENABLED=1` forced set to support adding the "Information Property List" in the linker step.
 
 ### macOS terminal
 

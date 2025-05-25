@@ -66,7 +66,9 @@ bindings, tab is bound as
 
 This means that if the `Autocomplete` action is successful, the chain will
 abort. Otherwise, it will try `IndentSelection`, and if that fails too, it
-will execute `InsertTab`.
+will execute `InsertTab`. To use `,`, `|` or `&` in an action (as an argument
+to a command, for example), escape it with `\` or wrap it in single or double
+quotes.
 
 ## Binding commands
 
@@ -168,14 +170,15 @@ CursorLeft
 CursorRight
 CursorStart
 CursorEnd
+CursorToViewTop
+CursorToViewCenter
+CursorToViewBottom
 SelectToStart
 SelectToEnd
 SelectUp
 SelectDown
 SelectLeft
 SelectRight
-SelectToStartOfText
-SelectToStartOfTextToggle
 WordRight
 WordLeft
 SubWordRight
@@ -184,20 +187,22 @@ SelectWordRight
 SelectWordLeft
 SelectSubWordRight
 SelectSubWordLeft
-MoveLinesUp
-MoveLinesDown
 DeleteWordRight
 DeleteWordLeft
 DeleteSubWordRight
 DeleteSubWordLeft
 SelectLine
 SelectToStartOfLine
+SelectToStartOfText
+SelectToStartOfTextToggle
 SelectToEndOfLine
+ParagraphPrevious
+ParagraphNext
+SelectToParagraphPrevious
+SelectToParagraphNext
 InsertNewline
-InsertSpace
 Backspace
 Delete
-Center
 InsertTab
 Save
 SaveAll
@@ -206,21 +211,28 @@ Find
 FindLiteral
 FindNext
 FindPrevious
-DiffPrevious
 DiffNext
+DiffPrevious
+Center
 Undo
 Redo
 Copy
 CopyLine
 Cut
 CutLine
+Duplicate
 DuplicateLine
 DeleteLine
+MoveLinesUp
+MoveLinesDown
 IndentSelection
 OutdentSelection
+Autocomplete
+CycleAutocompleteBack
 OutdentLine
 IndentLine
 Paste
+PastePrimary
 SelectAll
 OpenFile
 Start
@@ -231,33 +243,37 @@ SelectPageUp
 SelectPageDown
 HalfPageUp
 HalfPageDown
-StartOfLine
-EndOfLine
 StartOfText
 StartOfTextToggle
-ParagraphPrevious
-ParagraphNext
-SelectToParagraphPrevious
-SelectToParagraphNext
+StartOfLine
+EndOfLine
 ToggleHelp
+ToggleKeyMenu
 ToggleDiffGutter
 ToggleRuler
-JumpLine
+ToggleHighlightSearch
+UnhighlightSearch
 ResetSearch
-ClearInfo
 ClearStatus
 ShellMode
 CommandMode
+ToggleOverwriteMode
+Escape
 Quit
 QuitAll
+ForceQuit
 AddTab
 PreviousTab
 NextTab
+FirstTab
+LastTab
 NextSplit
+PreviousSplit
+FirstSplit
+LastSplit
 Unsplit
 VSplit
 HSplit
-PreviousSplit
 ToggleMacro
 PlayMacro
 Suspend (Unix only)
@@ -270,13 +286,24 @@ SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
-None
+SkipMultiCursorBack
 JumpToMatchingBrace
-Autocomplete
+JumpLine
+Deselect
+ClearInfo
+None
 ```
 
 The `StartOfTextToggle` and `SelectToStartOfTextToggle` actions toggle between
 jumping to the start of the text (first) and start of the line.
+
+The `CutLine` action cuts the current line and adds it to the previously cut
+lines in the clipboard since the last paste (rather than just replaces the
+clipboard contents with this line). So you can cut multiple, not necessarily
+consecutive lines to the clipboard just by pressing `Ctrl-k` multiple times,
+without selecting them. If you want the more traditional behavior i.e. just
+rewrite the clipboard every time, you can use `CopyLine,DeleteLine` action
+instead of `CutLine`.
 
 You can also bind some mouse actions (these must be bound to mouse buttons)
 
@@ -495,23 +522,23 @@ conventions for text editing defaults.
     "Alt-]":          "DiffNext|CursorEnd",
     "Ctrl-z":         "Undo",
     "Ctrl-y":         "Redo",
-    "Ctrl-c":         "CopyLine|Copy",
-    "Ctrl-x":         "Cut",
+    "Ctrl-c":         "Copy|CopyLine",
+    "Ctrl-x":         "Cut|CutLine",
     "Ctrl-k":         "CutLine",
-    "Ctrl-d":         "DuplicateLine",
+    "Ctrl-d":         "Duplicate|DuplicateLine",
     "Ctrl-v":         "Paste",
     "Ctrl-a":         "SelectAll",
     "Ctrl-t":         "AddTab",
-    "Alt-,":          "PreviousTab",
-    "Alt-.":          "NextTab",
+    "Alt-,":          "PreviousTab|LastTab",
+    "Alt-.":          "NextTab|FirstTab",
     "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
-    "CtrlPageUp":     "PreviousTab",
-    "CtrlPageDown":   "NextTab",
+    "CtrlPageUp":     "PreviousTab|LastTab",
+    "CtrlPageDown":   "NextTab|FirstTab",
     "ShiftPageUp":    "SelectPageUp",
     "ShiftPageDown":  "SelectPageDown",
     "Ctrl-g":         "ToggleHelp",
@@ -522,7 +549,7 @@ conventions for text editing defaults.
     "Ctrl-b":         "ShellMode",
     "Ctrl-q":         "Quit",
     "Ctrl-e":         "CommandMode",
-    "Ctrl-w":         "NextSplit",
+    "Ctrl-w":         "NextSplit|FirstSplit",
     "Ctrl-u":         "ToggleMacro",
     "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
@@ -621,8 +648,8 @@ are given below:
         "Backtab":        "CycleAutocompleteBack",
         "Ctrl-z":         "Undo",
         "Ctrl-y":         "Redo",
-        "Ctrl-c":         "CopyLine|Copy",
-        "Ctrl-x":         "Cut",
+        "Ctrl-c":         "Copy|CopyLine",
+        "Ctrl-x":         "Cut|CutLine",
         "Ctrl-k":         "CutLine",
         "Ctrl-v":         "Paste",
         "Home":           "StartOfTextToggle",

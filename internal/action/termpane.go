@@ -4,13 +4,13 @@ import (
 	"errors"
 	"runtime"
 
+	"github.com/micro-editor/tcell/v2"
+	"github.com/micro-editor/terminal"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
-	"github.com/zyedidia/tcell/v2"
-	"github.com/zyedidia/terminal"
 )
 
 type TermKeyAction func(*TermPane)

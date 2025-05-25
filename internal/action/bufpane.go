@@ -6,6 +6,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -13,7 +14,6 @@ import (
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
 type BufAction interface{}
@@ -100,9 +100,7 @@ func BufMapEvent(k Event, action string) {
 			break
 		}
 
-		// TODO: fix problem when complex bindings have these
-		// characters (escape them?)
-		idx := strings.IndexAny(action, "&|,")
+		idx := util.IndexAnyUnquoted(action, "&|,")
 		a := action
 		if idx >= 0 {
 			a = action[:idx]
@@ -226,26 +224,21 @@ type BufPane struct {
 	// (possibly multiple) buttons were pressed previously.
 	mousePressed map[MouseEvent]bool
 
-	// We need to keep track of insert key press toggle
-	isOverwriteMode bool
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
 	lastLoc       buffer.Loc
 
-	// lastCutTime stores when the last ctrl+k was issued.
-	// It is used for clearing the clipboard to replace it with fresh cut lines.
-	lastCutTime time.Time
-
-	// freshClip returns true if the clipboard has never been pasted.
+	// freshClip returns true if one or more lines have been cut to the clipboard
+	// and have never been pasted yet.
 	freshClip bool
 
 	// Was the last mouse event actually a double click?
 	// Useful for detecting triple clicks -- if a double click is detected
 	// but the last mouse event was actually a double click, it's a triple click
-	doubleClick bool
+	DoubleClick bool
 	// Same here, just to keep track for mouse move events
-	tripleClick bool
+	TripleClick bool
 
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
@@ -363,9 +356,6 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
 	h.resetMouse()
-	// Set isOverwriteMode to false, because we assume we are in the default
-	// mode when editor is opened
-	h.isOverwriteMode = false
 	h.lastClickTime = time.Time{}
 }
 
@@ -644,7 +634,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			c.ResetSelection()
 		}
 
-		if h.isOverwriteMode {
+		if h.Buf.OverwriteMode {
 			next := c.Loc
 			next.X++
 			h.Buf.Replace(c.Loc, next, string(r))
@@ -663,9 +653,13 @@ func (h *BufPane) DoRuneInsert(r rune) {
 func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
 	e.splitID = MainTab().GetNode(h.splitID).VSplit(right)
-	MainTab().Panes = append(MainTab().Panes, e)
+	currentPaneIdx := MainTab().GetPane(h.splitID)
+	if right {
+		currentPaneIdx++
+	}
+	MainTab().AddPane(e, currentPaneIdx)
 	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
+	MainTab().SetActive(currentPaneIdx)
 	return e
 }
 
@@ -673,9 +667,13 @@ func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 func (h *BufPane) HSplitIndex(buf *buffer.Buffer, bottom bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
 	e.splitID = MainTab().GetNode(h.splitID).HSplit(bottom)
-	MainTab().Panes = append(MainTab().Panes, e)
+	currentPaneIdx := MainTab().GetPane(h.splitID)
+	if bottom {
+		currentPaneIdx++
+	}
+	MainTab().AddPane(e, currentPaneIdx)
 	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
+	MainTab().SetActive(currentPaneIdx)
 	return e
 }
 
@@ -733,6 +731,9 @@ var BufKeyActions = map[string]BufKeyAction{
 	"CursorRight":               (*BufPane).CursorRight,
 	"CursorStart":               (*BufPane).CursorStart,
 	"CursorEnd":                 (*BufPane).CursorEnd,
+	"CursorToViewTop":           (*BufPane).CursorToViewTop,
+	"CursorToViewCenter":        (*BufPane).CursorToViewCenter,
+	"CursorToViewBottom":        (*BufPane).CursorToViewBottom,
 	"SelectToStart":             (*BufPane).SelectToStart,
 	"SelectToEnd":               (*BufPane).SelectToEnd,
 	"SelectUp":                  (*BufPane).SelectUp,
@@ -780,6 +781,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"CopyLine":                  (*BufPane).CopyLine,
 	"Cut":                       (*BufPane).Cut,
 	"CutLine":                   (*BufPane).CutLine,
+	"Duplicate":                 (*BufPane).Duplicate,
 	"DuplicateLine":             (*BufPane).DuplicateLine,
 	"DeleteLine":                (*BufPane).DeleteLine,
 	"MoveLinesUp":               (*BufPane).MoveLinesUp,
@@ -824,8 +826,12 @@ var BufKeyActions = map[string]BufKeyAction{
 	"AddTab":                    (*BufPane).AddTab,
 	"PreviousTab":               (*BufPane).PreviousTab,
 	"NextTab":                   (*BufPane).NextTab,
+	"FirstTab":                  (*BufPane).FirstTab,
+	"LastTab":                   (*BufPane).LastTab,
 	"NextSplit":                 (*BufPane).NextSplit,
 	"PreviousSplit":             (*BufPane).PreviousSplit,
+	"FirstSplit":                (*BufPane).FirstSplit,
+	"LastSplit":                 (*BufPane).LastSplit,
 	"Unsplit":                   (*BufPane).Unsplit,
 	"VSplit":                    (*BufPane).VSplitAction,
 	"HSplit":                    (*BufPane).HSplitAction,
@@ -841,6 +847,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"RemoveMultiCursor":         (*BufPane).RemoveMultiCursor,
 	"RemoveAllMultiCursors":     (*BufPane).RemoveAllMultiCursors,
 	"SkipMultiCursor":           (*BufPane).SkipMultiCursor,
+	"SkipMultiCursorBack":       (*BufPane).SkipMultiCursorBack,
 	"JumpToMatchingBrace":       (*BufPane).JumpToMatchingBrace,
 	"JumpLine":                  (*BufPane).JumpLine,
 	"Deselect":                  (*BufPane).Deselect,
@@ -907,6 +914,7 @@ var MultiActions = map[string]bool{
 	"Copy":                      true,
 	"Cut":                       true,
 	"CutLine":                   true,
+	"Duplicate":                 true,
 	"DuplicateLine":             true,
 	"DeleteLine":                true,
 	"MoveLinesUp":               true,

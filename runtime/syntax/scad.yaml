@@ -1,0 +1,52 @@
+filetype: OpenSCAD
+
+# OpenSCAD is a functional programming language used for representing
+# 2D/3D models for use in the program of the same name.
+#
+# The following documents were used as reference material:
+# https://en.wikibooks.org/wiki/OpenSCAD_User_Manual/The_OpenSCAD_Language
+# https://openscad.org/cheatsheet/index.html
+
+detect:
+    filename: "\\.scad$"
+
+rules:
+    - identifier: "\\b(function|module) +[a-z0-9_]+"
+
+    - statement: "\\b(abs|acos|asin|assert|atan|atan2|ceil|child|children|chr|circle|color|concat|cos|cross|cube|cylinder|difference|dxf_cross|dxf_dim|each|echo|else|exp|floor|for|function|hull|if|import|import_dxf|intersection|intersection_for|is_bool|is_function|is_list|is_num|is_string|is_undef|len|let|linear_extrude|ln|log|lookup|max|min|minkowski|mirror|module|multmatrix|norm|offset|ord|parent_module|polygon|polyhedron|pow|projection|rands|render|resize|rotate|rotate_extrude|round|scale|search|sign|sin|sphere|sqrt|square|str|surface|tan|text|translate|union|version|version_num)\\b"
+
+    - symbol: "[,\\.;:?]"
+    - symbol.operator: "[-+*/%^<>!=]|[<=>!]=|&&|\\|\\|"
+    - symbol.brackets: "[{(<>)}]|\\[|\\]"
+
+    # modifiers that change interpretation of the subtree after it
+    - special: "[#%!*]"
+
+    # special variables start with a dollar sign
+    - special: "\\B\\$[a-z]+\\b"
+
+    - preproc:
+        start: "^ *(use|include) <"
+        end: ">;?"
+
+    - constant.number: "\\b[-+]?[0-9]*\\.?[0-9]+([eE][-+]?[0-9]+)?|PI|inf|nan\\b"
+    - constant.bool: "\\b(true|false)\\b"
+    - constant: "\\b(undef)\\b"
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\."
+
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - comment:
+        start: "/\\*"
+        end: "\\*/"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"

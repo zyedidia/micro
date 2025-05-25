@@ -6,7 +6,9 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"net/http"
+	"net/url"
 	"os"
 	"os/user"
 	"path/filepath"
@@ -43,7 +45,43 @@ var (
 	Stdout *bytes.Buffer
 	// Sigterm is a channel where micro exits when written
 	Sigterm chan os.Signal
+
+	// To be used for fails on (over-)write with safe writes
+	ErrOverwrite = OverwriteError{}
 )
+
+// To be used for file writes before umask is applied
+const FileMode os.FileMode = 0666
+
+const OverwriteFailMsg = `An error occurred while writing to the file:
+
+%s
+
+The file may be corrupted now. The good news is that it has been
+successfully backed up. Next time you open this file with Micro,
+Micro will ask if you want to recover it from the backup.
+
+The backup path is:
+
+%s`
+
+// OverwriteError is a custom error to add additional information
+type OverwriteError struct {
+	What       error
+	BackupName string
+}
+
+func (e OverwriteError) Error() string {
+	return fmt.Sprintf(OverwriteFailMsg, e.What, e.BackupName)
+}
+
+func (e OverwriteError) Is(target error) bool {
+	return target == ErrOverwrite
+}
+
+func (e OverwriteError) Unwrap() error {
+	return e.What
+}
 
 func init() {
 	var err error
@@ -233,18 +271,6 @@ func IsNonWordChar(r rune) bool {
 	return !IsWordChar(r)
 }
 
-// IsUpperWordChar returns whether or not a rune is an 'upper word character'
-// Upper word characters are defined as numbers, upper-case letters or sub-word delimiters
-func IsUpperWordChar(r rune) bool {
-	return IsUpperAlphanumeric(r) || IsSubwordDelimiter(r)
-}
-
-// IsLowerWordChar returns whether or not a rune is a 'lower word character'
-// Lower word characters are defined as numbers, lower-case letters or sub-word delimiters
-func IsLowerWordChar(r rune) bool {
-	return IsLowerAlphanumeric(r) || IsSubwordDelimiter(r)
-}
-
 // IsSubwordDelimiter returns whether or not a rune is a 'sub-word delimiter character'
 // i.e. is considered a part of the word and is used as a delimiter between sub-words of the word.
 // For now the only sub-word delimiter character is '_'.
@@ -332,6 +358,28 @@ func RunePos(b []byte, i int) int {
 	return CharacterCount(b[:i])
 }
 
+// IndexAnyUnquoted returns the first position in s of a character from chars.
+// Escaped (with backslash) and quoted (with single or double quotes) characters
+// are ignored. Returns -1 if not successful
+func IndexAnyUnquoted(s, chars string) int {
+	var e bool
+	var q rune
+	for i, r := range s {
+		if e {
+			e = false
+		} else if (q == 0 || q == '"') && r == '\\' {
+			e = true
+		} else if r == q {
+			q = 0
+		} else if q == 0 && (r == '\'' || r == '"') {
+			q = r
+		} else if q == 0 && strings.IndexRune(chars, r) >= 0 {
+			return i
+		}
+	}
+	return -1
+}
+
 // MakeRelative will attempt to make a relative path between path and base
 func MakeRelative(path, base string) (string, error) {
 	if len(path) > 0 {
@@ -398,14 +446,41 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-// EscapePath replaces every path separator in a given path with a %
-func EscapePath(path string) string {
+func AppendBackupSuffix(path string) string {
+	return path + ".micro-backup"
+}
+
+// EscapePathUrl encodes the path in URL query form
+func EscapePathUrl(path string) string {
+	return url.QueryEscape(filepath.ToSlash(path))
+}
+
+// EscapePathLegacy replaces every path separator in a given path with a %
+func EscapePathLegacy(path string) string {
 	path = filepath.ToSlash(path)
 	if runtime.GOOS == "windows" {
 		// ':' is not valid in a path name on Windows but is ok on Unix
 		path = strings.ReplaceAll(path, ":", "%")
 	}
 	return strings.ReplaceAll(path, "/", "%")
+}
+
+// DetermineEscapePath escapes a path, determining whether it should be escaped
+// using URL encoding (preferred, since it encodes unambiguously) or
+// legacy encoding with '%' (for backward compatibility, if the legacy-escaped
+// path exists in the given directory).
+func DetermineEscapePath(dir string, path string) string {
+	url := filepath.Join(dir, EscapePathUrl(path))
+	if _, err := os.Stat(url); err == nil {
+		return url
+	}
+
+	legacy := filepath.Join(dir, EscapePathLegacy(path))
+	if _, err := os.Stat(legacy); err == nil {
+		return legacy
+	}
+
+	return url
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
@@ -510,11 +585,6 @@ func IsAutocomplete(c rune) bool {
 	return c == '.' || IsWordChar(c)
 }
 
-// ParseSpecial replaces escaped ts with '\t'.
-func ParseSpecial(s string) string {
-	return strings.ReplaceAll(s, "\\t", "\t")
-}
-
 // String converts a byte array to a string (for lua plugins)
 func String(s []byte) string {
 	return string(s)
@@ -584,4 +654,78 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 		req.Header.Add(headers[i], headers[i+1])
 	}
 	return client.Do(req)
+}
+
+// SafeWrite writes bytes to a file in a "safe" way, preventing loss of the
+// contents of the file if it fails to write the new contents.
+// This means that the file is not overwritten directly but by writing to a
+// temporary file first.
+//
+// If rename is true, write is performed atomically, by renaming the temporary
+// file to the target file after the data is successfully written to the
+// temporary file. This guarantees that the file will not remain in a corrupted
+// state, but it also has limitations, e.g. the file should not be a symlink
+// (otherwise SafeWrite silently replaces this symlink with a regular file),
+// the file creation date in Linux is not preserved (since the file inode
+// changes) etc. Use SafeWrite with rename=true for files that are only created
+// and used by micro for its own needs and are not supposed to be used directly
+// by the user.
+//
+// If rename is false, write is performed by overwriting the target file after
+// the data is successfully written to the temporary file.
+// This means that the target file may remain corrupted if overwrite fails,
+// but in such case the temporary file is preserved as a backup so the file
+// can be recovered later. So it is less convenient than atomic write but more
+// universal. Use SafeWrite with rename=false for files that may be managed
+// directly by the user, like settings.json and bindings.json.
+func SafeWrite(path string, bytes []byte, rename bool) error {
+	var err error
+	if _, err = os.Stat(path); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return err
+		}
+		// Force rename for new files!
+		rename = true
+	}
+
+	var file *os.File
+	if !rename {
+		file, err = os.OpenFile(path, os.O_WRONLY|os.O_CREATE, FileMode)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+	}
+
+	tmp := AppendBackupSuffix(path)
+	err = os.WriteFile(tmp, bytes, FileMode)
+	if err != nil {
+		os.Remove(tmp)
+		return err
+	}
+
+	if rename {
+		err = os.Rename(tmp, path)
+	} else {
+		err = file.Truncate(0)
+		if err == nil {
+			_, err = file.Write(bytes)
+		}
+		if err == nil {
+			err = file.Sync()
+		}
+	}
+	if err != nil {
+		if rename {
+			os.Remove(tmp)
+		} else {
+			err = OverwriteError{err, tmp}
+		}
+		return err
+	}
+
+	if !rename {
+		os.Remove(tmp)
+	}
+	return nil
 }

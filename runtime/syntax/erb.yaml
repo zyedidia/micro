@@ -19,7 +19,6 @@ rules:
     - default:
         start: "<%"
         end: "%>"
-        rules: []
 
     - preproc: "<%|%>"
     - red: "&[^;[[:space:]]]*;"
@@ -37,6 +36,5 @@ rules:
     - identifier.macro:
         start: "<<-?'?EOT'?"
         end: "^EOT"
-        rules: []
 
     - todo: "(XXX|TODO|FIXME|\\?\\?\\?)"

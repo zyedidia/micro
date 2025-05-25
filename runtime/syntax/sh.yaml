@@ -41,26 +41,23 @@ rules:
       # Conditional flags
     - statement: "\\s+(-[A-Za-z]+|--[a-z]+)"
 
-    - identifier: "\\$\\{[0-9A-Za-z_:!%&=+#~@*^$?, .\\-\\/\\[\\]]+\\}"
-    - identifier: "\\$[0-9A-Za-z_:!%&=+#~@*^$?,\\-\\[\\]]+"
+    - identifier: "\\$\\{[\\w:!%&=+#~@*^$?, .\\-\\/\\[\\]]+\\}"
+    - identifier: "\\$([0-9_!#@*$?-]|[A-Za-z_]\\w*)"
 
     - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
-        rules: []
 
     - constant.string:
         start: "'"
         end: "'"
         skip: "\\\\."
-        rules: []
 
     - constant.string:
         start: "<<[^\\s]+[-~.]*[A-Za-z0-9]+$"
         end: "^[^\\s]+[A-Za-z0-9]+$"
         skip: "\\\\."
-        rules: []
 
     - comment:
         start: "(^|\\s)#"

@@ -47,6 +47,12 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 		}
 		return ""
 	},
+	"overwrite": func(b *buffer.Buffer) string {
+		if b.OverwriteMode && !b.Type.Readonly {
+			return "[ovwr] "
+		}
+		return ""
+	},
 	"lines": func(b *buffer.Buffer) string {
 		return strconv.Itoa(b.LinesNum())
 	},

@@ -15,7 +15,6 @@ rules:
     - constant.string:
         start: "'$"
         end: "';$"
-        rules: []
 
     - comment: "(^|[[:space:]])#([^{].*)?$"
     - indent-char.whitespace: "[[:space:]]+$"

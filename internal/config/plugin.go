@@ -71,7 +71,7 @@ type Plugin struct {
 	Info    *PluginInfo   // json file containing info
 	Srcs    []RuntimeFile // lua files
 	Loaded  bool
-	Default bool          // pre-installed plugin
+	Default bool // pre-installed plugin
 }
 
 // IsLoaded returns if a plugin is enabled
@@ -136,18 +136,6 @@ func FindPlugin(name string) *Plugin {
 		if !p.IsLoaded() {
 			continue
 		}
-		if p.Name == name {
-			pl = p
-			break
-		}
-	}
-	return pl
-}
-
-// FindAnyPlugin does not require the plugin to be enabled
-func FindAnyPlugin(name string) *Plugin {
-	var pl *Plugin
-	for _, p := range Plugins {
 		if p.Name == name {
 			pl = p
 			break

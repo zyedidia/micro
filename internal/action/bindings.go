@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode"
 
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/tcell/v2"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 var Binder = map[string]func(e Event, action string){
@@ -23,9 +24,13 @@ var Binder = map[string]func(e Event, action string){
 	"terminal": TermMapEvent,
 }
 
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
+
 func createBindingsIfNotExist(fname string) {
-	if _, e := os.Stat(fname); os.IsNotExist(e) {
-		ioutil.WriteFile(fname, []byte("{}"), 0644)
+	if _, e := os.Stat(fname); errors.Is(e, fs.ErrNotExist) {
+		writeFile(fname, []byte("{}"))
 	}
 }
 
@@ -37,7 +42,7 @@ func InitBindings() {
 	createBindingsIfNotExist(filename)
 
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json file: " + err.Error())
 			return
@@ -89,7 +94,7 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 	}
 
 	if strings.HasPrefix(k, "\x1b") {
-		screen.Screen.RegisterRawSeq(k)
+		screen.RegisterRawSeq(k)
 	}
 
 	bind(event, v)
@@ -265,7 +270,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			return false, errors.New("Error reading bindings.json file: " + err.Error())
 		}
@@ -304,7 +309,8 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		BindKey(k, v, Binder["buffer"])
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		return true, writeFile(filename, txt)
 	}
 	return false, e
 }
@@ -317,7 +323,7 @@ func UnbindKey(k string) error {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			return errors.New("Error reading bindings.json file: " + err.Error())
 		}
@@ -342,7 +348,7 @@ func UnbindKey(k string) error {
 		}
 
 		if strings.HasPrefix(k, "\x1b") {
-			screen.Screen.UnregisterRawSeq(k)
+			screen.UnregisterRawSeq(k)
 		}
 
 		defaults := DefaultBindings("buffer")
@@ -354,7 +360,8 @@ func UnbindKey(k string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		return writeFile(filename, txt)
 	}
 	return e
 }

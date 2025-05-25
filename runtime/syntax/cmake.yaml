@@ -30,7 +30,6 @@ rules:
     - preproc:
         start: "\\$(\\{|ENV\\{)"
         end: "\\}"
-        rules: []
 
     - identifier.macro: "\\b(APPLE|UNIX|WIN32|CYGWIN|BORLAND|MINGW|MSVC(_IDE|60|71|80|90)?)\\b"
 

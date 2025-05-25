@@ -66,7 +66,7 @@ function preinit()
     end
 
     makeLinter("gcc", "c", "gcc", {"-fsyntax-only", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
-    makeLinter("g++", "c++", "gcc", {"-fsyntax-only","-std=c++14", "-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
+    makeLinter("g++", "c++", "g++", {"-fsyntax-only","-Wall", "-Wextra", "%f"}, "%f:%l:%c:.+: %m")
     makeLinter("dmd", "d", "dmd", {"-color=off", "-o-", "-w", "-wi", "-c", "%f"}, "%f%(%l%):.+: %m")
     makeLinter("eslint", "javascript", "eslint", {"-f","compact","%f"}, "%f: line %l, col %c, %m")
     makeLinter("gobuild", "go", "go", {"build", "-o", devnull, "%d"}, "%f:%l:%c:? %m")
@@ -82,6 +82,7 @@ function preinit()
     makeLinter("pyflakes", "python", "pyflakes", {"%f"}, "%f:%l:.-:? %m")
     makeLinter("mypy", "python", "mypy", {"%f"}, "%f:%l: %m")
     makeLinter("pylint", "python", "pylint", {"--output-format=parseable", "--reports=no", "%f"}, "%f:%l: %m")
+    makeLinter("ruff", "python", "ruff", {"check", "--output-format=concise", "%f"}, "%f:%l:%c: %m")
     makeLinter("flake8", "python", "flake8", {"%f"}, "%f:%l:%c: %m")
     makeLinter("shfmt", "shell", "shfmt", {"%f"}, "%f:%l:%c: %m")
     makeLinter("shellcheck", "shell", "shellcheck", {"-f", "gcc", "%f"}, "%f:%l:%c:.+: %m")
@@ -107,26 +108,29 @@ function contains(list, element)
     return false
 end
 
+function checkFtMatch(ft, v)
+    local ftmatch = ft == v.filetype
+    if v.domatch then
+        ftmatch = string.match(ft, v.filetype)
+    end
+
+    local hasOS = contains(v.os, runtime.GOOS)
+    if not hasOS and v.whitelist then
+        ftmatch = false
+    end
+    if hasOS and not v.whitelist then
+        ftmatch = false
+    end
+    return ftmatch
+end
+
 function runLinter(buf)
     local ft = buf:FileType()
     local file = buf.Path
     local dir = "." .. util.RuneStr(os.PathSeparator) .. filepath.Dir(file)
 
     for k, v in pairs(linters) do
-        local ftmatch = ft == v.filetype
-        if v.domatch then
-            ftmatch = string.match(ft, v.filetype)
-        end
-
-        local hasOS = contains(v.os, runtime.GOOS)
-        if not hasOS and v.whitelist then
-            ftmatch = false
-        end
-        if hasOS and not v.whitelist then
-            ftmatch = false
-        end
-
-        if ftmatch then
+        if checkFtMatch(ft, v) then
             local args = {}
             for k, arg in pairs(v.args) do
                 args[k] = arg:gsub("%%f", file):gsub("%%d", dir)
@@ -138,6 +142,19 @@ end
 
 function onSave(bp)
     runLinter(bp.Buf)
+    return true
+end
+
+function onBufferOptionChanged(buf, option, old, new)
+    if option == "filetype" then
+        if old ~= new then
+            for k, v in pairs(linters) do
+                if checkFtMatch(old, v) then
+                    buf:ClearMessages(k)
+                end
+            end
+        end
+    end
     return true
 end
 

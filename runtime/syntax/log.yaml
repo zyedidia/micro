@@ -83,7 +83,6 @@ rules:
 - constant.string.url:
     start: "https?://"
     end: "\\s"
-    rules: []
 
 # path
 # - constant.string.url: "\\b(.+)/([^/]+)\\b"  # linux

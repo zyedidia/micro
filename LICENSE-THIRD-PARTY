@@ -430,7 +430,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 github.com/gdamore/tcell/LICENSE
 ================
-github.com/zyedidia/tcell/LICENSE (fork)
+github.com/micro-editor/tcell/LICENSE (fork)
 ================
 
 
@@ -1048,7 +1048,7 @@ Exhibit B - "Incompatible With Secondary Licenses" Notice
 
 github.com/flynn/json5/LICENSE
 ================
-github.com/zyedidia/json5/LICENSE (fork)
+github.com/micro-editor/json5/LICENSE (fork)
 ================
 
 Decoder code based on package encoding/json from the Go language.
@@ -1108,7 +1108,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 github.com/james4k/terminal/LICENSE
 ================
-github.com/zyedidia/terminal/LICENSE (fork)
+github.com/micro-editor/terminal/LICENSE (fork)
 ================
 
 Copyright (C) 2013 James Gray

@@ -17,7 +17,6 @@ rules:
     - default:
         start: ">"
         end: "<"
-        rules: []
 
     - symbol.tag: "<|>"
     - constant.string.url: "(ftp(s)?|http(s)?|git|chrome)://[^ 	]+"

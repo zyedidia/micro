@@ -75,7 +75,6 @@ rules:
             - identifier:
                 start: "[$][{]"
                 end: "[}]"
-                rules: []
 
     # Triple-single-quoted strings
     - constant.string:
@@ -90,7 +89,6 @@ rules:
     - constant.string:
         start: "[$]/"
         end: "/[$]"
-        rules: []
 
     # Single-line comments
     - comment:
@@ -110,4 +108,3 @@ rules:
     - comment:
         start: "/[*][*]@?"
         end: "[*]/"
-        rules: []

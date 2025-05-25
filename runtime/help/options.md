@@ -79,21 +79,15 @@ Here are the available options:
 
     default value: `0`
 
-* `colorscheme`: loads the colorscheme stored in
-   $(configDir)/colorschemes/`option`.micro, This setting is `global only`.
+* `colorscheme`: use the given colorscheme. This setting is `global only`.
+   The colorscheme can be either one of the colorschemes that micro comes with
+   by default (such as `default`, `solarized` or `solarized-tc`) which are
+   embedded in the micro binary, or a custom colorscheme stored in
+   `~/.config/micro/colorschemes/$(option).micro` where `$(option)` is the
+   option value. You can read more about micro's colorschemes and see the list
+   of default colorschemes in `> help colors`.
 
     default value: `default`
-
-   Note that the default colorschemes (default, solarized, and solarized-tc)
-   are not located in configDir, because they are embedded in the micro
-   binary.
-
-   The colorscheme can be selected from all the files in the
-   ~/.config/micro/colorschemes/ directory. Micro comes by default with
-   three colorschemes:
-
-   You can read more about micro's colorschemes in the `colors` help topic
-   (`help colors`).
 
 * `cursorline`: highlight the line that the cursor is on in a different color
    (the color is defined by the colorscheme you are using).
@@ -172,6 +166,13 @@ Here are the available options:
     default value: `unknown`. This will be automatically overridden depending
     on the file you open.
 
+* `helpsplit`: sets the split type to be used by the `help` command.
+   Possible values:
+    * `vsplit`: open help in a vertical split pane
+    * `hsplit`: open help in a horizontal split pane
+
+    default value: `hsplit`
+
 * `hlsearch`: highlight all instances of the searched text after a successful
    search. This highlighting can be temporarily turned off via the
    `UnhighlightSearch` action (triggered by the Esc key by default) or toggled
@@ -194,11 +195,11 @@ Here are the available options:
 
     default value: `false`
 
-* `incsearch`: enable incremental search in "Find" prompt (matching as you type).
+* `ignorecase`: perform case-insensitive searches.
 
     default value: `true`
 
-* `ignorecase`: perform case-insensitive searches.
+* `incsearch`: enable incremental search in "Find" prompt (matching as you type).
 
     default value: `true`
 
@@ -278,22 +279,29 @@ Here are the available options:
 
     default value: `tab`
 
+* `pageoverlap`: the number of lines from the current view to keep in view
+   when paging up or down. If this is set to 2, for instance, and you page
+   down, the last two lines of the previous page will be the first two lines
+   of the next page.
+
+    default value: `2`
+
+* `parsecursor`: if enabled, this will cause micro to parse filenames such as
+   `file.txt:10:5` as requesting to open `file.txt` with the cursor at line 10
+   and column 5. The column number can also be dropped to open the file at a
+   given line and column 0. Note that with this option enabled it is not possible
+   to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
+   It is also possible to open a file with a certain cursor location by using the
+   `+LINE:COL` flag syntax. See `micro -help` for the command line options.
+
+    default value: `false`
+
 * `paste`: treat characters sent from the terminal in a single chunk as a paste
    event rather than a series of manual key presses. If you are pasting using
    the terminal keybinding (not `Ctrl-v`, which is micro's default paste
    keybinding) then it is a good idea to enable this option during the paste
    and disable once the paste is over. See `> help copypaste` for details about
    copying and pasting in a terminal environment.
-
-    default value: `false`
-
-* `parsecursor`: if enabled, this will cause micro to parse filenames such as
-   file.txt:10:5 as requesting to open `file.txt` with the cursor at line 10
-   and column 5. The column number can also be dropped to open the file at a
-   given line and column 0. Note that with this option enabled it is not possible
-   to open a file such as `file.txt:10:5`, where `:10:5` is part of the filename.
-   It is also possible to open a file with a certain cursor location by using the
-   `+LINE:COL` flag syntax. See `micro -help` for the command line options.
 
     default value: `false`
 
@@ -321,6 +329,12 @@ Here are the available options:
 
     default value: `false`
 
+* `relativeruler`: make line numbers display relatively. If set to true, all
+   lines except for the line that the cursor is located will display the distance
+   from the cursor's line.
+
+    default value: `false`
+
 * `reload`: controls the reload behavior of the current buffer in case the file
    has changed. The available options are `prompt`, `auto` & `disabled`.
 
@@ -337,12 +351,6 @@ Here are the available options:
 * `ruler`: display line numbers.
 
     default value: `true`
-
-* `relativeruler`: make line numbers display relatively. If set to true, all
-   lines except for the line that the cursor is located will display the distance
-   from the cursor's line.
-
-    default value: `false`
 
 * `savecursor`: remember where the cursor was last time the file was opened and
    put it there when you open the file again. Information is saved to
@@ -401,11 +409,11 @@ Here are the available options:
 * `statusformatl`: format string definition for the left-justified part of the
    statusline. Special directives should be placed inside `$()`. Special
    directives include: `filename`, `modified`, `line`, `col`, `lines`,
-   `percentage`, `opt`, `bind`.
+   `percentage`, `opt`, `overwrite`, `bind`.
    The `opt` and `bind` directives take either an option or an action afterward
    and fill in the value of the option or the key bound to the action.
 
-    default value: `$(filename) $(modified)($(line),$(col)) $(status.paste)|
+    default value: `$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)|
                     ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)`
 
 * `statusformatr`: format string definition for the right-justified part of the
@@ -427,20 +435,20 @@ Here are the available options:
 
     default value: `true`
 
+* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
+   colors with respect to the tab bar.
+
+    default value: `false`
+
 * `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
    (e.g. move over 4 spaces at once). This option only does anything if
    `tabstospaces` is on.
 
     default value: `false`
 
-* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
-   colors with respect to the tab bar.
-
-    default value: false
-
 * `tabreverse`: reverses the tab bar colors when active.
 
-    default value: true
+    default value: `true`
 
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
@@ -493,13 +501,13 @@ or disable them:
    recent Git commit rather than the diff since opening the file.
 
 Any option you set in the editor will be saved to the file
-~/.config/micro/settings.json so, in effect, your configuration file will be
+`~/.config/micro/settings.json` so, in effect, your configuration file will be
 created for you. If you'd like to take your configuration with you to another
-machine, simply copy the settings.json to the other machine.
+machine, simply copy the `settings.json` to the other machine.
 
 ## Settings.json file
 
-The settings.json file should go in your configuration directory (by default
+The `settings.json` file should go in your configuration directory (by default
 at `~/.config/micro`), and should contain only options which have been modified
 from their default setting. Here is the full list of options in json format,
 so that you can see what the formatting should look like.
@@ -518,18 +526,24 @@ so that you can see what the formatting should look like.
     "colorscheme": "default",
     "comment": true,
     "cursorline": true,
+    "detectlimit": 100,
     "diff": true,
     "diffgutter": false,
     "divchars": "|-",
     "divreverse": true,
     "encoding": "utf-8",
     "eofnewline": true,
+    "fakecursor": false,
     "fastdirty": false,
     "fileformat": "unix",
     "filetype": "unknown",
-    "incsearch": true,
     "ftoptions": true,
+    "helpsplit": "hsplit",
+    "hlsearch": false,
+    "hltaberrors": false,
+    "hltrailingws": false,
     "ignorecase": true,
+    "incsearch": true,
     "indentchar": " ",
     "infobar": true,
     "initlua": true,
@@ -542,6 +556,8 @@ so that you can see what the formatting should look like.
     "matchbracestyle": "underline",
     "mkparents": false,
     "mouse": true,
+    "multiopen": "tab",
+    "pageoverlap": 2,
     "parsecursor": false,
     "paste": false,
     "permbackup": false,
@@ -551,12 +567,14 @@ so that you can see what the formatting should look like.
     "pluginrepos": [],
     "readonly": false,
     "relativeruler": false,
+    "reload": "prompt",
     "rmtrailingws": false,
     "ruler": true,
     "savecursor": false,
     "savehistory": true,
     "saveundo": false,
     "scrollbar": false,
+    "scrollbarchar": "|",
     "scrollmargin": 3,
     "scrollspeed": 2,
     "smartpaste": true,
@@ -564,17 +582,18 @@ so that you can see what the formatting should look like.
     "splitbottom": true,
     "splitright": true,
     "status": true,
-    "statusformatl": "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+    "statusformatl": "$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
     "statusformatr": "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
     "statusline": true,
     "sucmd": "sudo",
     "syntax": true,
-    "tabmovement": false,
     "tabhighlight": true,
+    "tabmovement": false,
     "tabreverse": false,
     "tabsize": 4,
     "tabstospaces": false,
     "useprimary": true,
+    "wordwrap": false,
     "xterm": false
 }
 ```
