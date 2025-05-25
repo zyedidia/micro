@@ -494,7 +494,7 @@ func (w *BufWindow) displayBuffer() {
 		}
 		bloc.X = bslice
 
-		draw := func(r rune, combc []rune, style tcell.Style, highlight bool, showcursor bool) {
+		draw := func(r rune, combc []rune, validrune bool, style tcell.Style, highlight bool, showcursor bool) {
 			if nColsBeforeStart <= 0 && vloc.Y >= 0 {
 				if highlight {
 					if w.Buf.HighlightSearch && w.Buf.SearchMatch(bloc) {
@@ -571,9 +571,20 @@ func (w *BufWindow) displayBuffer() {
 						}
 					}
 
-					if r == '\t' {
-						indentrunes := []rune(b.Settings["indentchar"].(string))
-						// if empty indentchar settings, use space
+					if r == '\t' || (r == ' ' && bloc.X < blineLen && validrune) {
+						var indentrunes []rune
+						switch r {
+						case '\t':
+							indentrunes = []rune(b.Settings["indenttabchar"].(string))
+						case ' ':
+							if bloc.X%tabsize == 0 && bloc.X < leadingwsEnd {
+								indentrunes = []rune(b.Settings["indentspacechar"].(string))
+							} else {
+								indentrunes = []rune(b.Settings["spacechar"].(string))
+							}
+						}
+
+						// if no override for current character, use space
 						if len(indentrunes) == 0 {
 							indentrunes = []rune{' '}
 						}
@@ -692,7 +703,7 @@ func (w *BufWindow) displayBuffer() {
 			// If a word (or just a wide rune) does not fit in the window
 			if vloc.X+wordwidth > maxWidth && vloc.X > w.gutterOffset {
 				for vloc.X < maxWidth {
-					draw(' ', nil, config.DefStyle, false, false)
+					draw(' ', nil, false, config.DefStyle, false, false)
 				}
 
 				// We either stop or we wrap to draw the word in the next line
@@ -708,7 +719,7 @@ func (w *BufWindow) displayBuffer() {
 			}
 
 			for _, r := range word {
-				draw(r.r, r.combc, r.style, true, true)
+				draw(r.r, r.combc, true, r.style, true, true)
 
 				// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
 				if r.width > 1 {
@@ -718,7 +729,7 @@ func (w *BufWindow) displayBuffer() {
 					}
 
 					for i := 1; i < r.width; i++ {
-						draw(char, nil, r.style, true, false)
+						draw(char, nil, false, r.style, true, false)
 					}
 				}
 				bloc.X++
@@ -764,7 +775,7 @@ func (w *BufWindow) displayBuffer() {
 
 		if vloc.X != maxWidth {
 			// Display newline within a selection
-			draw(' ', nil, config.DefStyle, true, true)
+			draw(' ', nil, false, config.DefStyle, true, true)
 		}
 
 		bloc.X = w.StartCol

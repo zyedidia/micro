@@ -70,7 +70,9 @@ var defaultCommonSettings = map[string]interface{}{
 	"hltrailingws":    false,
 	"ignorecase":      true,
 	"incsearch":       true,
-	"indentchar":      " ",
+	"indenttabchar":   " ",
+	"indentspacechar": " ",
+	"spacechar":       " ",
 	"keepautoindent":  false,
 	"matchbrace":      true,
 	"matchbraceleft":  true,
@@ -210,6 +212,13 @@ func validateParsedSettings() error {
 			}
 			continue
 		}
+
+		if k == "indentchar" {
+			// migrate to "indenttabchar" from "indentchar"
+			parsedSettings["indenttabchar"] = v
+			err = errors.New("indentchar has been deprecated, use indenttabchar instead")
+		}
+
 		if _, ok := defaults[k]; ok {
 			if e := verifySetting(k, v, defaults[k]); e != nil {
 				err = e
