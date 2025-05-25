@@ -125,6 +125,7 @@ func importIo() *lua.LTable {
 	L.SetField(pkg, "MultiWriter", luar.New(L, io.MultiWriter))
 	L.SetField(pkg, "NewSectionReader", luar.New(L, io.NewSectionReader))
 	L.SetField(pkg, "Pipe", luar.New(L, io.Pipe))
+	L.SetField(pkg, "ReadAll", luar.New(L, io.ReadAll))
 	L.SetField(pkg, "ReadAtLeast", luar.New(L, io.ReadAtLeast))
 	L.SetField(pkg, "ReadFull", luar.New(L, io.ReadFull))
 	L.SetField(pkg, "TeeReader", luar.New(L, io.TeeReader))
@@ -370,6 +371,8 @@ func importOs() *lua.LTable {
 	L.SetField(pkg, "PathListSeparator", luar.New(L, os.PathListSeparator))
 	L.SetField(pkg, "PathSeparator", luar.New(L, os.PathSeparator))
 	L.SetField(pkg, "Pipe", luar.New(L, os.Pipe))
+	L.SetField(pkg, "ReadDir", luar.New(L, os.ReadDir))
+	L.SetField(pkg, "ReadFile", luar.New(L, os.ReadFile))
 	L.SetField(pkg, "Readlink", luar.New(L, os.Readlink))
 	L.SetField(pkg, "Remove", luar.New(L, os.Remove))
 	L.SetField(pkg, "RemoveAll", luar.New(L, os.RemoveAll))
@@ -388,6 +391,7 @@ func importOs() *lua.LTable {
 	L.SetField(pkg, "TempDir", luar.New(L, os.TempDir))
 	L.SetField(pkg, "Truncate", luar.New(L, os.Truncate))
 	L.SetField(pkg, "UserHomeDir", luar.New(L, os.UserHomeDir))
+	L.SetField(pkg, "WriteFile", luar.New(L, os.WriteFile))
 
 	return pkg
 }
@@ -423,7 +427,6 @@ func importPath() *lua.LTable {
 func importFilePath() *lua.LTable {
 	pkg := L.NewTable()
 
-	L.SetField(pkg, "Join", luar.New(L, filepath.Join))
 	L.SetField(pkg, "Abs", luar.New(L, filepath.Abs))
 	L.SetField(pkg, "Base", luar.New(L, filepath.Base))
 	L.SetField(pkg, "Clean", luar.New(L, filepath.Clean))

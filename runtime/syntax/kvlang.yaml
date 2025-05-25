@@ -54,14 +54,11 @@ rules:
     start: "\""
     end: "(\"|$)"
     skip: "\\\\."
-    rules: []
 - constant.string:
     start: "'"
     end: "('|$)"
     skip: "\\\\."
-    rules: []
 
 - comment:
     start: "#"
     end: "$"
-    rules: []

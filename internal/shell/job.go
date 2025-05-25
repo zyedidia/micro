@@ -78,8 +78,10 @@ func JobSpawn(cmdName string, cmdArgs []string, onStdout, onStderr, onExit func(
 	go func() {
 		// Run the process in the background and create the onExit callback
 		proc.Run()
-		jobFunc := JobFunction{onExit, outbuf.String(), userargs}
-		Jobs <- jobFunc
+		if onExit != nil {
+			jobFunc := JobFunction{onExit, outbuf.String(), userargs}
+			Jobs <- jobFunc
+		}
 	}()
 
 	return &Job{proc, stdin}

@@ -12,7 +12,6 @@ rules:
     - special:
         start: "asm"
         end: "end"
-        rules: []
     - constant.number: "\\$[0-9A-Fa-f]+"
     - constant.number: "\\b[+-]?[0-9]+([.]?[0-9]+)?(?i:e[+-]?[0-9]+)?"
     - constant.string:
@@ -29,17 +28,13 @@ rules:
     - preproc:
         start: "{\\$"
         end: "}"
-        rules: []
     - comment:
         start: "//"
         end: "$"
-        rules: []
     - comment:
         start: "\\(\\*"
         end: "\\*\\)"
-        rules: []
     - comment:
         start: "({)(?:[^$])"
         end: "}"
-        rules: []
 

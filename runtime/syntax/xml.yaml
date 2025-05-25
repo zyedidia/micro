@@ -8,12 +8,10 @@ rules:
     - preproc:
         start: "<!DOCTYPE"
         end: "[/]?>"
-        rules: []
 
     - comment:
         start: "<!--"
         end: "-->"
-        rules: []
 
     - symbol.tag:
         start: "<\\??"
@@ -22,7 +20,6 @@ rules:
             - identifier:
                 start: " "
                 end: "="
-                rules: []
             - constant.string:
                 start: "\""
                 end: "\""

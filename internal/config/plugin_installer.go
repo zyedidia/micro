@@ -5,7 +5,6 @@ import (
 	"bytes"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -14,8 +13,8 @@ import (
 	"sync"
 
 	"github.com/blang/semver"
+	"github.com/micro-editor/json5"
 	lua "github.com/yuin/gopher-lua"
-	"github.com/zyedidia/json5"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/util"
 )
@@ -396,7 +395,7 @@ func (pv *PluginVersion) DownloadAndInstall(out io.Writer) error {
 		return err
 	}
 	defer resp.Body.Close()
-	data, err := ioutil.ReadAll(resp.Body)
+	data, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}

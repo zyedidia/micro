@@ -19,7 +19,6 @@ rules:
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
 
     - todo: "TODO:?"
     - indent-char.whitespace: "[[:space:]]+$"

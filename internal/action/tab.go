@@ -3,13 +3,13 @@ package action
 import (
 	luar "layeh.com/gopher-luar"
 
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/views"
-	"github.com/zyedidia/tcell/v2"
 )
 
 // The TabList is a list of tabs and a window to display the tab bar
@@ -211,7 +211,7 @@ func InitTabs(bufs []*buffer.Buffer) {
 		for _, b := range bufs[1:] {
 			if multiopen == "vsplit" {
 				MainTab().CurPane().VSplitBuf(b)
-			} else {  // default hsplit
+			} else { // default hsplit
 				MainTab().CurPane().HSplitBuf(b)
 			}
 		}
@@ -347,6 +347,16 @@ func (t *Tab) SetActive(i int) {
 			p.SetActive(false)
 		}
 	}
+}
+
+// AddPane adds a pane at a given index
+func (t *Tab) AddPane(pane Pane, i int) {
+	if len(t.Panes) == i {
+		t.Panes = append(t.Panes, pane)
+		return
+	}
+	t.Panes = append(t.Panes[:i+1], t.Panes[i:]...)
+	t.Panes[i] = pane
 }
 
 // GetPane returns the pane with the given split index

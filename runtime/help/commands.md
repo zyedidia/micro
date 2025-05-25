@@ -21,10 +21,16 @@ quotes here but these are not necessary when entering the command in micro.
    This command will modify `bindings.json` and overwrite any bindings to
    `key` that already exist.
 
-* `help ['topic']`: opens the corresponding help topic. If no topic is provided
-   opens the default help screen. Help topics are stored as `.md` files in the
-   `runtime/help` directory of the source tree, which is embedded in the final
-   binary.
+* `help ['topic'] ['flags']`: opens the corresponding help topics.
+   If no topic is provided opens the default help screen. If multiple topics are
+   provided (separated via ` `) they are opened all as splits.
+   Help topics are stored as `.md` files in the `runtime/help` directory of
+   the source tree, which is embedded in the final binary.
+   The `flags` are optional.
+   * `-hsplit`: Opens the help topic in a horizontal split
+   * `-vsplit`: Opens the help topic in a vertical split
+
+   The default split type is defined by the global `helpsplit` option.
 
 * `save ['filename']`: saves the current buffer. If the file is provided it
    will 'save as' the filename.
@@ -72,12 +78,15 @@ quotes here but these are not necessary when entering the command in micro.
    command's output will be displayed in one line when it finishes running.
 
 * `vsplit ['filename']`: opens a vertical split with `filename`. If no filename
-   is provided, a vertical split is opened with an empty buffer.
+   is provided, a vertical split is opened with an empty buffer. If multiple
+   files are provided (separated via ` `) they are opened all as splits.
 
 * `hsplit ['filename']`: same as `vsplit` but opens a horizontal split instead
    of a vertical split.
 
-* `tab ['filename']`: opens the given file in a new tab.
+* `tab ['filename']`: opens the given file in a new tab. If no filename
+   is provided, a tab is opened with an empty buffer. If multiple files are
+   provided (separated via ` `) they are opened all as tabs.
 
 * `tabmove '[-+]n'`: Moves the active tab to another slot. `n` is an integer.
    If `n` is prefixed with `-` or `+`, then it represents a relative position

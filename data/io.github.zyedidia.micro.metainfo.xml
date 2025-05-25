@@ -25,6 +25,7 @@
 		<category>TextEditor</category>
 	</categories>
 	<releases>
+			<release version="2.0.14" date="2024-08-27"/>
 			<release version="2.0.13" date="2023-10-22"/>
 			<release version="2.0.12" date="2023-09-06"/>
 			<release version="2.0.11" date="2022-08-01"/>

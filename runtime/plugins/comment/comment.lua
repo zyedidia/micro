@@ -66,9 +66,9 @@ local last_ft
 function updateCommentType(buf)
     if buf.Settings["commenttype"] == nil or (last_ft ~= buf.Settings["filetype"] and last_ft ~= nil) then
         if ft[buf.Settings["filetype"]] ~= nil then
-            buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
+            buf:SetOptionNative("commenttype", ft[buf.Settings["filetype"]])
         else
-            buf.Settings["commenttype"] = "# %s"
+            buf:SetOptionNative("commenttype", "# %s")
         end
 
         last_ft = buf.Settings["filetype"]
@@ -107,7 +107,7 @@ function commentLine(bp, lineN, indentLen)
         bp.Cursor.Y = curpos.Y
     end
     bp.Cursor:Relocate()
-    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+    bp.Cursor:StoreVisualX()
 end
 
 function uncommentLine(bp, lineN, commentRegex)
@@ -135,7 +135,7 @@ function uncommentLine(bp, lineN, commentRegex)
         end
     end
     bp.Cursor:Relocate()
-    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+    bp.Cursor:StoreVisualX()
 end
 
 function toggleCommentLine(bp, lineN, commentRegex)
