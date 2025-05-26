@@ -55,6 +55,14 @@ func InitColorscheme() error {
 	c, err := LoadDefaultColorscheme()
 	if err == nil {
 		Colorscheme = c
+	} else {
+		// The colorscheme setting seems broken (maybe because we have not validated
+		// it earlier, see comment in verifySetting()). So reset it to the default
+		// colorscheme and try again.
+		GlobalSettings["colorscheme"] = DefaultGlobalOnlySettings["colorscheme"]
+		if c, err2 := LoadDefaultColorscheme(); err2 == nil {
+			Colorscheme = c
+		}
 	}
 
 	return err
