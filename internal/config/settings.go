@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -12,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zyedidia/glob"
 	"github.com/micro-editor/json5"
+	"github.com/zyedidia/glob"
 	"github.com/zyedidia/micro/v2/internal/util"
 	"golang.org/x/text/encoding/htmlindex"
 )
@@ -37,6 +36,7 @@ var optionValidators = map[string]optionValidator{
 	"scrollmargin":    validateNonNegativeValue,
 	"scrollspeed":     validateNonNegativeValue,
 	"tabsize":         validatePositiveValue,
+	"truecolor":       validateChoice,
 }
 
 // a list of settings with pre-defined choices
@@ -47,6 +47,7 @@ var OptionChoices = map[string][]string{
 	"matchbracestyle": {"underline", "highlight"},
 	"multiopen":       {"tab", "hsplit", "vsplit"},
 	"reload":          {"prompt", "auto", "disabled"},
+	"truecolor":       {"auto", "on", "off"},
 }
 
 // a list of settings that can be globally and locally modified and their
@@ -100,6 +101,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"tabmovement":     false,
 	"tabsize":         float64(4),
 	"tabstospaces":    false,
+	"truecolor":       "auto",
 	"useprimary":      true,
 	"wordwrap":        false,
 }
@@ -155,6 +157,10 @@ var (
 	// because they have been temporarily set for this session only
 	VolatileSettings map[string]bool
 )
+
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
 
 func init() {
 	ModifiedSettings = make(map[string]bool)
@@ -222,7 +228,7 @@ func ReadSettings() error {
 	parsedSettings = make(map[string]interface{})
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
@@ -288,22 +294,31 @@ func InitGlobalSettings() error {
 	return err
 }
 
-// InitLocalSettings scans the json in settings.json and sets the options locally based
-// on whether the filetype or path matches ft or glob local settings
+// UpdatePathGlobLocals scans the already parsed settings and sets the options locally
+// based on whether the path matches a glob
 // Must be called after ReadSettings
-func InitLocalSettings(settings map[string]interface{}, path string) {
+func UpdatePathGlobLocals(settings map[string]interface{}, path string) {
 	for k, v := range parsedSettings {
-		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-			if strings.HasPrefix(k, "ft:") {
-				if settings["filetype"].(string) == k[3:] {
-					for k1, v1 := range v.(map[string]interface{}) {
-						settings[k1] = v1
-					}
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && !strings.HasPrefix(k, "ft:") {
+			g, _ := glob.Compile(k)
+			if g.MatchString(path) {
+				for k1, v1 := range v.(map[string]interface{}) {
+					settings[k1] = v1
 				}
-			} else {
-				g, _ := glob.Compile(k)
-				if g.MatchString(path) {
-					for k1, v1 := range v.(map[string]interface{}) {
+			}
+		}
+	}
+}
+
+// UpdateFileTypeLocals scans the already parsed settings and sets the options locally
+// based on whether the filetype matches to "ft:"
+// Must be called after ReadSettings
+func UpdateFileTypeLocals(settings map[string]interface{}, filetype string) {
+	for k, v := range parsedSettings {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && strings.HasPrefix(k, "ft:") {
+			if filetype == k[3:] {
+				for k1, v1 := range v.(map[string]interface{}) {
+					if k1 != "filetype" {
 						settings[k1] = v1
 					}
 				}
@@ -347,7 +362,8 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }
@@ -368,8 +384,9 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }

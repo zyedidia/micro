@@ -4,11 +4,11 @@ import (
 	"strconv"
 
 	runewidth "github.com/mattn/go-runewidth"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/micro-editor/tcell/v2"
 )
 
 // The BufWindow provides a way of displaying a certain section of a buffer.
@@ -60,6 +60,12 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 			for _, c := range w.Buf.GetCursors() {
 				c.LastWrappedVisualX = c.GetVisualX(true)
 			}
+		}
+
+		if option == "diffgutter" || option == "ruler" || option == "scrollbar" ||
+			option == "statusline" {
+			w.updateDisplayInfo()
+			w.Relocate()
 		}
 	}
 	b.GetVisualX = func(loc buffer.Loc) int {
@@ -248,8 +254,8 @@ func (w *BufWindow) Relocate() bool {
 			w.StartCol = cx
 			ret = true
 		}
-		if cx+w.gutterOffset+rw > w.StartCol+w.Width {
-			w.StartCol = cx - w.Width + w.gutterOffset + rw
+		if cx+rw > w.StartCol+w.bufWidth {
+			w.StartCol = cx - w.bufWidth + rw
 			ret = true
 		}
 	}
@@ -619,16 +625,21 @@ func (w *BufWindow) displayBuffer() {
 
 		wrap := func() {
 			vloc.X = 0
-			if w.hasMessage {
-				w.drawGutter(&vloc, &bloc)
-			}
-			if b.Settings["diffgutter"].(bool) {
-				w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
-			}
 
-			// This will draw an empty line number because the current line is wrapped
-			if b.Settings["ruler"].(bool) {
-				w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
+			if vloc.Y >= 0 {
+				if w.hasMessage {
+					w.drawGutter(&vloc, &bloc)
+				}
+				if b.Settings["diffgutter"].(bool) {
+					w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
+				}
+
+				// This will draw an empty line number because the current line is wrapped
+				if b.Settings["ruler"].(bool) {
+					w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
+				}
+			} else {
+				vloc.X = w.gutterOffset
 			}
 		}
 

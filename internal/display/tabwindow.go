@@ -112,10 +112,10 @@ func (w *TabWindow) Display() {
 		}
 		return tabBarStyle, tabBarActiveStyle
 	}
-	
+
 	draw := func(r rune, n int, active bool, reversed bool) {
 		tabBarStyle, tabBarActiveStyle := reverseStyles(reversed)
-		
+
 		style := tabBarStyle
 		if active {
 			style = tabBarActiveStyle
@@ -147,15 +147,15 @@ func (w *TabWindow) Display() {
 		} else {
 			draw(' ', 1, false, tabCharHighlight)
 		}
-		
+
 		for _, c := range n {
 			draw(c, 1, i == w.active, tabCharHighlight)
 		}
-		
+
 		if i == len(w.Names)-1 {
 			done = true
 		}
-		
+
 		if i == w.active {
 			draw(']', 1, true, tabCharHighlight)
 			draw(' ', 2, true, globalTabReverse)
@@ -163,7 +163,7 @@ func (w *TabWindow) Display() {
 			draw(' ', 1, false, tabCharHighlight)
 			draw(' ', 2, false, globalTabReverse)
 		}
-		
+
 		if x >= w.Width {
 			break
 		}
