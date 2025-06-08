@@ -1,22 +1,24 @@
 filetype: markdown
+
 detect:
-  filename: \.(livemd|md|mkd|mkdn|markdown)$
+    filename: \.(livemd|md|mkd|mkdn|markdown)$
+
 rules:
-    # Tables (Github extension)
+      # tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
 
       # quotes
     - statement: "^>.*"
 
-      # Emphasis
+      # emphasis
     - type: "(^|[[:space:]])(_[^ ][^_]*_|\\*[^ ][^*]*\\*)"
 
-      # Strong emphasis
+      # strong emphasis
     - type: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
 
       # strike-through
     - type: "(^|[[:space:]])~~[^ ][^~]*~~"
-                                    
+
       # horizontal rules
     - special: "^(---+|===+|___+|\\*\\*\\*+)\\s*$"
 
@@ -41,96 +43,100 @@ rules:
 
     - special: "^```$"
 
-    # Fenced code blocks for syntax highlighting
+      # syntax highlighting of fenced code blocks
     - default:
-        start: "(?i)^```((c|h)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(c|h)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "c"
+            - include: "c"
     - default:
-        start: "(?i)^```((cpp|c\\+\\+|cxx)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(cpp|c\\+\\+|cxx)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "c++"
+            - include: "c++"
     - default:
-        start: "(?i)^```((cs|csharp|c#)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(cs|csharp|c#)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "csharp"
+            - include: "csharp"
     - default:
-        start: "(?i)^```((css|css.erb)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(css|css.erb)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "css"
+            - include: "css"
     - default:
-        start: "(?i)^```((patch|diff|rej)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(patch|diff|rej)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "patch"
+            - include: "patch"
     - default:
-        start: "(?i)^```((go|golang)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(go|golang)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "go"
+            - include: "go"
     - default:
-        start: "(?i)^```((ini|conf)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(ini|conf)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "ini"
+            - include: "ini"
     - default:
-        start: "(?i)^```((java|bsh)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(java|bsh)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "java"
+            - include: "java"
     - default:
-        start: "(?i)^```((js|jsx|javascript|es6|mjs|cjs|dataviewjs|\\{\\.js.+?\\})((\\\
-          s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start:
+          "(?i)^```(js|jsx|javascript|es6|mjs|cjs|dataviewjs|\\{\\.js.+?\\})((\\\
+          s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "javascript"
+            - include: "javascript"
     - default:
-        start: "(?i)^```((json|json5|sublime-settings|sublime-menu|sublime-keymap|sublime-mousemap|sublime-theme|sublime-build|sublime-project|sublime-completions)((\\\
-          s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start:
+          "(?i)^```(json|json5|sublime-settings|sublime-menu|sublime-keymap|sublime-mousemap|sublime-theme|sublime-build|sublime-project|sublime-completions)((\\\
+          s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "json"
+            - include: "json"
     - default:
-        start: "(?i)^```((php|php3|php4|php5|phpt|phtml|aw|ctp)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(php|php3|php4|php5|phpt|phtml|aw|ctp)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "php"
+            - include: "php"
     - default:
-        start: "(?i)^```((python|py|py3|rpy|pyw|cpy|SConstruct|Sconstruct|sconstruct|SConscript|gyp|gypi|\\\
-          {\\.python.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start:
+          "(?i)^```(python|py|py3|rpy|pyw|cpy|SConstruct|Sconstruct|sconstruct|SConscript|gyp|gypi|\\\
+          {\\.python.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "python"
+            - include: "python"
     - default:
-        start: "(?i)^```((rust|rs|\\{\\.rust.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(rust|rs|\\{\\.rust.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "rust"
+            - include: "rust"
     - default:
-        start: "(?i)^```((shell|sh|bash|zsh|bashrc|bash_profile|bash_login|profile|bash_logout|.textmate_init|\\\
-          {\\.bash.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start:
+          "(?i)^```(shell|sh|bash|zsh|bashrc|bash_profile|bash_login|profile|bash_logout|.textmate_init|\\\
+          {\\.bash.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "shell"
+            - include: "shell"
     - default:
-        start: "(?i)^```((sql|ddl|dml)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(sql|ddl|dml)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "sql"
+            - include: "sql"
     - default:
-        start: "(?i)^```((typescript|ts)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(typescript|ts)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "typescript"
+            - include: "typescript"
     - default:
-        start: "(?i)^```((yaml|yml)((\\s+|:|,|\\{|\\?)[^`]*)?$)$"
+        start: "(?i)^```(yaml|yml)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
         rules:
-        - include: "yaml"
+            - include: "yaml"
 
     - special:
         start: "`"
