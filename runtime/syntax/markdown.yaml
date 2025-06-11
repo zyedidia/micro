@@ -1,6 +1,6 @@
 filetype: markdown
 detect:
-  filename: \.(livemd|md|mkd|mkdn|markdown)$
+    filename: \.(livemd|md|mkd|mkdn|markdown)$
 rules:
       # tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
