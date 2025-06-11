@@ -2,21 +2,21 @@ filetype: markdown
 detect:
   filename: \.(livemd|md|mkd|mkdn|markdown)$
 rules:
-    # Tables (Github extension)
+      # tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
 
       # quotes
     - statement: "^>.*"
 
-      # Emphasis
+      # emphasis
     - type: "(^|[[:space:]])(_[^ ][^_]*_|\\*[^ ][^*]*\\*)"
 
-      # Strong emphasis
+      # strong emphasis
     - type: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
 
       # strike-through
     - type: "(^|[[:space:]])~~[^ ][^~]*~~"
-                                    
+
       # horizontal rules
     - special: "^(---+|===+|___+|\\*\\*\\*+)\\s*$"
 
@@ -41,7 +41,7 @@ rules:
 
     - special: "^```$"
 
-    # Fenced code blocks for syntax highlighting
+      # syntax highlighting of fenced code blocks
     - default:
         start: "(?i)^```(c|h)((\\s+|:|,|\\{|\\?)[^`]*)?$"
         end: "^```$"
