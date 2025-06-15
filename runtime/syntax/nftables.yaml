@@ -12,8 +12,6 @@ rules:
     - statement: "\\b(accept|drop|goto|jump|log|masquerade|reject|limit|queue)\\b"
     - preproc: "\\b(add|define|flush|include|delete)\\b"
     - symbol.operator: "[<>.&|^!=:;,@]|\\b(and|ge|gt|le|lt|or|xor)\\b"
-      # string constants
-    - constant.string: '([\+\-\*/][\"]{1})(.*)([\"]{1})'
     - constant.string:
         start: "\""
         end: "\""
