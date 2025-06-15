@@ -20,6 +20,8 @@ import (
 	isatty "github.com/mattn/go-isatty"
 	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
+	luar "layeh.com/gopher-luar"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
@@ -519,7 +521,7 @@ func DoEvent() {
 		}
 	}
 
-	err := config.RunPluginFn("onAnyEvent")
+	err := config.RunPluginFn("onAnyEvent", luar.New(ulua.L, event))
 	if err != nil {
 		screen.TermMessage(err)
 	}
