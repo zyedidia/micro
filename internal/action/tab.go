@@ -105,6 +105,15 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		t.Resize()
 	case *tcell.EventMouse:
 		mx, my := e.Position()
+		err := config.RunPluginFn("onMouseEvent", 
+			luar.New(ulua.L, mx),
+			luar.New(ulua.L, my),
+			luar.New(ulua.L, e.Buttons()),
+			luar.New(ulua.L, e.Modifiers()),
+		)
+		if err != nil {
+			screen.TermMessage(err)
+		}
 		switch e.Buttons() {
 		case tcell.Button1:
 			if my == t.Y && len(t.List) > 1 {
