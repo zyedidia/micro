@@ -337,15 +337,6 @@ func (h *BufPane) PluginCB(cb string, args ...interface{}) bool {
 	return b
 }
 
-// PluginCBRune is the same as PluginCB but also passes a rune to the plugins
-func (h *BufPane) PluginCBRune(cb string, r rune) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
-	if err != nil {
-		screen.TermMessage(err)
-	}
-	return b
-}
-
 func (h *BufPane) resetMouse() {
 	for me := range h.mousePressed {
 		delete(h.mousePressed, me)
@@ -633,7 +624,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		// Insert a character
 		h.Buf.SetCurCursor(c.Num)
 		h.Cursor = c
-		if !h.PluginCBRune("preRune", r) {
+		if !h.PluginCB("preRune", string(r)) {
 			continue
 		}
 		if c.HasSelection() {
@@ -652,7 +643,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			curmacro = append(curmacro, r)
 		}
 		h.Relocate()
-		h.PluginCBRune("onRune", r)
+		h.PluginCB("onRune", string(r))
 	}
 }
 
