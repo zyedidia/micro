@@ -321,9 +321,16 @@ func (h *BufPane) ResizePane(size int) {
 }
 
 // PluginCB calls all plugin callbacks with a certain name and displays an
-// error if there is one and returns the aggregate boolean response
-func (h *BufPane) PluginCB(cb string) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h))
+// error if there is one and returns the aggregate boolean response.
+// The bufpane is passed as the first argument to the callbacks,
+// optional args are passed as the next arguments.
+func (h *BufPane) PluginCB(cb string, args ...interface{}) bool {
+	largs := []lua.LValue{luar.New(ulua.L, h)}
+	for _, a := range args {
+		largs = append(largs, luar.New(ulua.L, a))
+	}
+
+	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, largs...)
 	if err != nil {
 		screen.TermMessage(err)
 	}
