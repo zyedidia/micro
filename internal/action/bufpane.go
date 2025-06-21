@@ -566,7 +566,7 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 		h.Buf.HasSuggestions = false
 	}
 
-	if !h.PluginCB("pre" + name) {
+	if !h.PluginCB("pre"+name, te) {
 		return false
 	}
 
@@ -577,7 +577,7 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 	case BufMouseAction:
 		success = a(h, te)
 	}
-	success = success && h.PluginCB("on"+name)
+	success = success && h.PluginCB("on"+name, te)
 
 	if _, ok := MultiActions[name]; ok {
 		if recordingMacro {
