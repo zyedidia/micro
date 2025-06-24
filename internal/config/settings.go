@@ -139,8 +139,9 @@ var LocalSettings = []string{
 }
 
 var (
-	ErrInvalidOption = errors.New("Invalid option")
-	ErrInvalidValue  = errors.New("Invalid value")
+	ErrInvalidOption    = errors.New("Invalid option")
+	ErrInvalidValue     = errors.New("Invalid value")
+	ErrOptNotToggleable = errors.New("Option not toggleable")
 
 	// The options that the user can set
 	GlobalSettings map[string]any
