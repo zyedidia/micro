@@ -273,6 +273,12 @@ func verifySetting(option string, value interface{}, def interface{}) error {
 		return fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", option, valType, def, defType)
 	}
 
+	if option == "colorscheme" {
+		// Plugins are not initialized yet, so do not verify if the colorscheme
+		// exists yet, since the colorscheme may be added by a plugin later.
+		return nil
+	}
+
 	if err := OptionIsValid(option, value); err != nil {
 		return err
 	}

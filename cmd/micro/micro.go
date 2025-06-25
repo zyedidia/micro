@@ -374,11 +374,6 @@ func main() {
 	action.InitBindings()
 	action.InitCommands()
 
-	err = config.InitColorscheme()
-	if err != nil {
-		screen.TermMessage(err)
-	}
-
 	err = config.RunPluginFn("preinit")
 	if err != nil {
 		screen.TermMessage(err)
@@ -403,6 +398,11 @@ func main() {
 	}
 
 	err = config.RunPluginFn("postinit")
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
+	err = config.InitColorscheme()
 	if err != nil {
 		screen.TermMessage(err)
 	}
