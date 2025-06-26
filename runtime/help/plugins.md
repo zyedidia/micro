@@ -501,8 +501,8 @@ Micro also has a built in plugin manager, which you can invoke with the
 For the valid commands you can use, see the `commands` help topic.
 
 The manager fetches plugins from the channels (which is simply a list of plugin
-metadata) which it knows about. By default, micro only knows about the official
-channel which is located at github.com/micro-editor/plugin-channel but you can
+metadata) which it knows about. By default, micro only knows about the [official
+channel](github.com/micro-editor/plugin-channel) but you can
 add your own third-party channels using the `pluginchannels` option and you can
 directly link third-party plugins to allow installation through the plugin
 manager with the `pluginrepos` option.
@@ -529,7 +529,7 @@ This file will contain the metadata for your plugin. Here is an example:
 }]
 ```
 
-Then open a pull request at github.com/micro-editor/plugin-channel, adding a
+Then open a pull request at the [official plugin channel](github.com/micro-editor/plugin-channel), adding a
 link to the raw `repo.json` that is in your plugin repository.
 
 To make updating the plugin work, the first line of your plugin's lua code
