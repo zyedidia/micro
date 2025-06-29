@@ -317,7 +317,7 @@ func main() {
 	// flag options
 	for k, v := range optionFlags {
 		if *v != "" {
-			nativeValue, err := config.GetNativeValue(k, config.DefaultAllSettings()[k], *v)
+			nativeValue, err := config.GetNativeValue(k, *v)
 			if err != nil {
 				screen.TermMessage(err)
 				continue

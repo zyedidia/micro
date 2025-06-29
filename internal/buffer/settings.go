@@ -155,7 +155,7 @@ func (b *Buffer) SetOption(option, value string) error {
 		return config.ErrInvalidOption
 	}
 
-	nativeValue, err := config.GetNativeValue(option, b.Settings[option], value)
+	nativeValue, err := config.GetNativeValue(option, value)
 	if err != nil {
 		return err
 	}

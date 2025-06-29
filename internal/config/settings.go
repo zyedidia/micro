@@ -472,28 +472,30 @@ func DefaultAllSettings() map[string]interface{} {
 }
 
 // GetNativeValue parses and validates a value for a given option
-func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {
-	var native interface{}
-	kind := reflect.TypeOf(realValue).Kind()
-	if kind == reflect.Bool {
+func GetNativeValue(option, value string) (interface{}, error) {
+	curVal := GetGlobalOption(option)
+	if curVal == nil {
+		return nil, ErrInvalidOption
+	}
+
+	switch kind := reflect.TypeOf(curVal).Kind(); kind {
+	case reflect.Bool:
 		b, err := util.ParseBool(value)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
-		native = b
-	} else if kind == reflect.String {
-		native = value
-	} else if kind == reflect.Float64 {
+		return b, nil
+	case reflect.String:
+		return value, nil
+	case reflect.Float64:
 		f, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
-		native = f
-	} else {
+		return f, nil
+	default:
 		return nil, ErrInvalidValue
 	}
-
-	return native, nil
 }
 
 // OptionIsValid checks if a value is valid for a certain option
