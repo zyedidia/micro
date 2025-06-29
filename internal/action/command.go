@@ -32,39 +32,41 @@ var commands map[string]Command
 
 func InitCommands() {
 	commands = map[string]Command{
-		"set":        {(*BufPane).SetCmd, OptionValueComplete},
-		"reset":      {(*BufPane).ResetCmd, OptionValueComplete},
-		"setlocal":   {(*BufPane).SetLocalCmd, OptionValueComplete},
-		"show":       {(*BufPane).ShowCmd, OptionComplete},
-		"showkey":    {(*BufPane).ShowKeyCmd, nil},
-		"run":        {(*BufPane).RunCmd, nil},
-		"bind":       {(*BufPane).BindCmd, nil},
-		"unbind":     {(*BufPane).UnbindCmd, nil},
-		"quit":       {(*BufPane).QuitCmd, nil},
-		"goto":       {(*BufPane).GotoCmd, nil},
-		"jump":       {(*BufPane).JumpCmd, nil},
-		"save":       {(*BufPane).SaveCmd, nil},
-		"replace":    {(*BufPane).ReplaceCmd, nil},
-		"replaceall": {(*BufPane).ReplaceAllCmd, nil},
-		"vsplit":     {(*BufPane).VSplitCmd, buffer.FileComplete},
-		"hsplit":     {(*BufPane).HSplitCmd, buffer.FileComplete},
-		"tab":        {(*BufPane).NewTabCmd, buffer.FileComplete},
-		"help":       {(*BufPane).HelpCmd, HelpComplete},
-		"eval":       {(*BufPane).EvalCmd, nil},
-		"log":        {(*BufPane).ToggleLogCmd, nil},
-		"plugin":     {(*BufPane).PluginCmd, PluginComplete},
-		"reload":     {(*BufPane).ReloadCmd, nil},
-		"reopen":     {(*BufPane).ReopenCmd, nil},
-		"cd":         {(*BufPane).CdCmd, buffer.FileComplete},
-		"pwd":        {(*BufPane).PwdCmd, nil},
-		"open":       {(*BufPane).OpenCmd, buffer.FileComplete},
-		"tabmove":    {(*BufPane).TabMoveCmd, nil},
-		"tabswitch":  {(*BufPane).TabSwitchCmd, nil},
-		"term":       {(*BufPane).TermCmd, nil},
-		"memusage":   {(*BufPane).MemUsageCmd, nil},
-		"retab":      {(*BufPane).RetabCmd, nil},
-		"raw":        {(*BufPane).RawCmd, nil},
-		"textfilter": {(*BufPane).TextFilterCmd, nil},
+		"set":         {(*BufPane).SetCmd, OptionValueComplete},
+		"setlocal":    {(*BufPane).SetLocalCmd, OptionValueComplete},
+		"toggle":      {(*BufPane).ToggleCmd, OptionValueComplete},
+		"togglelocal": {(*BufPane).ToggleLocalCmd, OptionValueComplete},
+		"reset":       {(*BufPane).ResetCmd, OptionValueComplete},
+		"show":        {(*BufPane).ShowCmd, OptionComplete},
+		"showkey":     {(*BufPane).ShowKeyCmd, nil},
+		"run":         {(*BufPane).RunCmd, nil},
+		"bind":        {(*BufPane).BindCmd, nil},
+		"unbind":      {(*BufPane).UnbindCmd, nil},
+		"quit":        {(*BufPane).QuitCmd, nil},
+		"goto":        {(*BufPane).GotoCmd, nil},
+		"jump":        {(*BufPane).JumpCmd, nil},
+		"save":        {(*BufPane).SaveCmd, nil},
+		"replace":     {(*BufPane).ReplaceCmd, nil},
+		"replaceall":  {(*BufPane).ReplaceAllCmd, nil},
+		"vsplit":      {(*BufPane).VSplitCmd, buffer.FileComplete},
+		"hsplit":      {(*BufPane).HSplitCmd, buffer.FileComplete},
+		"tab":         {(*BufPane).NewTabCmd, buffer.FileComplete},
+		"help":        {(*BufPane).HelpCmd, HelpComplete},
+		"eval":        {(*BufPane).EvalCmd, nil},
+		"log":         {(*BufPane).ToggleLogCmd, nil},
+		"plugin":      {(*BufPane).PluginCmd, PluginComplete},
+		"reload":      {(*BufPane).ReloadCmd, nil},
+		"reopen":      {(*BufPane).ReopenCmd, nil},
+		"cd":          {(*BufPane).CdCmd, buffer.FileComplete},
+		"pwd":         {(*BufPane).PwdCmd, nil},
+		"open":        {(*BufPane).OpenCmd, buffer.FileComplete},
+		"tabmove":     {(*BufPane).TabMoveCmd, nil},
+		"tabswitch":   {(*BufPane).TabSwitchCmd, nil},
+		"term":        {(*BufPane).TermCmd, nil},
+		"memusage":    {(*BufPane).MemUsageCmd, nil},
+		"retab":       {(*BufPane).RetabCmd, nil},
+		"raw":         {(*BufPane).RawCmd, nil},
+		"textfilter":  {(*BufPane).TextFilterCmd, nil},
 	}
 }
 
@@ -725,6 +727,61 @@ func (h *BufPane) SetLocalCmd(args []string) {
 	value := args[1]
 
 	err := h.Buf.SetOption(option, value)
+	if err != nil {
+		InfoBar.Error(err)
+	}
+}
+
+// ToggleCmd toggles a boolean option
+func (h *BufPane) ToggleCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	option := args[0]
+	curVal := config.GetGlobalOption(option)
+	if curVal == nil {
+		InfoBar.Error(config.ErrInvalidOption)
+		return
+	}
+
+	curValBool, ok := curVal.(bool)
+	if !ok {
+		InfoBar.Error("Not a boolean option")
+		return
+	}
+
+	err := SetGlobalOptionNative(option, !curValBool)
+	if err == config.ErrInvalidOption {
+		err := h.Buf.SetOptionNative(option, !curValBool)
+		if err != nil {
+			InfoBar.Error(err)
+		}
+	}
+}
+
+// ToggleLocalCmd toggles a boolean option local to the buffer
+func (h *BufPane) ToggleLocalCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguments")
+		return
+	}
+
+	option := args[0]
+	curVal := h.Buf.Settings[option]
+	if curVal == nil {
+		InfoBar.Error(config.ErrInvalidOption)
+		return
+	}
+
+	curValBool, ok := curVal.(bool)
+	if !ok {
+		InfoBar.Error("Not a boolean option")
+		return
+	}
+
+	err := h.Buf.SetOptionNative(option, !curValBool)
 	if err != nil {
 		InfoBar.Error(err)
 	}
