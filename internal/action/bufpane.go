@@ -321,18 +321,16 @@ func (h *BufPane) ResizePane(size int) {
 }
 
 // PluginCB calls all plugin callbacks with a certain name and displays an
-// error if there is one and returns the aggregate boolean response
-func (h *BufPane) PluginCB(cb string) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h))
-	if err != nil {
-		screen.TermMessage(err)
+// error if there is one and returns the aggregate boolean response.
+// The bufpane is passed as the first argument to the callbacks,
+// optional args are passed as the next arguments.
+func (h *BufPane) PluginCB(cb string, args ...interface{}) bool {
+	largs := []lua.LValue{luar.New(ulua.L, h)}
+	for _, a := range args {
+		largs = append(largs, luar.New(ulua.L, a))
 	}
-	return b
-}
 
-// PluginCBRune is the same as PluginCB but also passes a rune to the plugins
-func (h *BufPane) PluginCBRune(cb string, r rune) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
+	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, largs...)
 	if err != nil {
 		screen.TermMessage(err)
 	}
@@ -559,7 +557,7 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 		h.Buf.HasSuggestions = false
 	}
 
-	if !h.PluginCB("pre" + name) {
+	if !h.PluginCB("pre"+name, te) {
 		return false
 	}
 
@@ -570,7 +568,7 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 	case BufMouseAction:
 		success = a(h, te)
 	}
-	success = success && h.PluginCB("on"+name)
+	success = success && h.PluginCB("on"+name, te)
 
 	if _, ok := MultiActions[name]; ok {
 		if recordingMacro {
@@ -626,7 +624,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		// Insert a character
 		h.Buf.SetCurCursor(c.Num)
 		h.Cursor = c
-		if !h.PluginCBRune("preRune", r) {
+		if !h.PluginCB("preRune", string(r)) {
 			continue
 		}
 		if c.HasSelection() {
@@ -645,7 +643,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			curmacro = append(curmacro, r)
 		}
 		h.Relocate()
-		h.PluginCBRune("onRune", r)
+		h.PluginCB("onRune", string(r))
 	}
 }
 
