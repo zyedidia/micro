@@ -118,6 +118,7 @@ var DefaultGlobalOnlySettings = map[string]interface{}{
 	"helpsplit":      "hsplit",
 	"infobar":        true,
 	"keymenu":        false,
+	"lockbindings":   false,
 	"mouse":          true,
 	"multiopen":      "tab",
 	"parsecursor":    false,
@@ -405,6 +406,16 @@ func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) 
 // RegisterGlobalOptionPlug creates a new global-only option (named pl.name)
 func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) error {
 	return RegisterGlobalOption(pl+"."+name, defaultvalue)
+}
+
+// **Deprecated**
+func SetGlobalOptionNativePlug(option string, nativeValue interface{}) error {
+	return RegisterGlobalOption(option, nativeValue)
+}
+
+// **Deprecated**
+func SetGlobalOptionPlug(option, value string) error {
+	return RegisterGlobalOption(option, value)
 }
 
 // RegisterCommonOption creates a new option
