@@ -22,7 +22,10 @@ func NewRawPaneFromWin(b *buffer.Buffer, win display.BWindow, tab *Tab) *RawPane
 
 func NewRawPane(tab *Tab) *RawPane {
 	b := buffer.NewBufferFromString("", "", buffer.BTRaw)
+	b.SetName("Raw event viewer")
+
 	w := display.NewBufWindow(0, 0, 0, 0, b)
+
 	return NewRawPaneFromWin(b, w, tab)
 }
 
