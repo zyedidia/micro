@@ -72,7 +72,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"hltrailingws":    false,
 	"ignorecase":      true,
 	"incsearch":       true,
-	"indentchar":      " ",
+	"indentchar":      " ", // Deprecated
 	"keepautoindent":  false,
 	"matchbrace":      true,
 	"matchbraceleft":  true,
@@ -90,6 +90,7 @@ var defaultCommonSettings = map[string]interface{}{
 	"scrollbar":       false,
 	"scrollmargin":    float64(3),
 	"scrollspeed":     float64(2),
+	"showchars":       "",
 	"smartpaste":      true,
 	"softwrap":        false,
 	"splitbottom":     true,
@@ -213,6 +214,7 @@ func validateParsedSettings() error {
 			}
 			continue
 		}
+
 		if _, ok := defaults[k]; ok {
 			if e := verifySetting(k, v, defaults[k]); e != nil {
 				err = e
