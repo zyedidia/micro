@@ -2,6 +2,7 @@ package action
 
 import (
 	luar "layeh.com/gopher-luar"
+	"strconv"
 
 	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -17,6 +18,8 @@ import (
 type TabList struct {
 	*display.TabWindow
 	List []*Tab
+	// captures whether the mouse is released
+	release bool
 }
 
 // NewTabList creates a TabList from a list of buffers by creating a Tab
@@ -35,6 +38,7 @@ func NewTabList(bufs []*buffer.Buffer) *TabList {
 	}
 	tl.TabWindow = display.NewTabWindow(w, 0)
 	tl.Names = make([]string, len(bufs))
+	tl.release = true
 
 	return tl
 }
@@ -114,13 +118,26 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 					t.Scroll(4)
 				} else {
 					ind := t.LocFromVisual(buffer.Loc{mx, my})
-					if ind != -1 {
+					if ind == -1 {
+						ind = len(t.List) + 1
+					}
+
+					if t.release {
+						t.release = false
 						t.SetActive(ind)
+					} else {
+						MainTab().CurPane().TabMoveCmd([]string{strconv.Itoa(ind + 1)})
 					}
 				}
 				return
 			}
+			if !t.release {
+				return
+			}
 		case tcell.ButtonNone:
+			if !t.release {
+				t.release = true
+			}
 			if t.List[t.Active()].release {
 				// Mouse release received, while already released
 				t.ResetMouse()
