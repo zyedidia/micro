@@ -34,9 +34,7 @@ rules:
     - symbol.operator: "([~^.:;,+*|=!\\%@]|<|>|/|-|&)"
 
       # Brackets
-    - symbol.brackets: "(\\{|\\})"
-    - symbol.brackets: "(\\(|\\))"
-    - symbol.brackets: "(\\[|\\])"
+    - symbol.brackets: "[{}()\\[\\]]"
 
       # Numbers and strings
     - constant.number: "\\b[0-9](_?[0-9])*(\\.([0-9](_?[0-9])*)?)?(e[0-9](_?[0-9])*)?\\b" # decimal
