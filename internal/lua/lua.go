@@ -455,6 +455,7 @@ func importStrings() *lua.LTable {
 	L.SetField(pkg, "ContainsAny", luar.New(L, strings.ContainsAny))
 	L.SetField(pkg, "ContainsRune", luar.New(L, strings.ContainsRune))
 	L.SetField(pkg, "Count", luar.New(L, strings.Count))
+	L.SetField(pkg, "Cut", luar.New(L, strings.Cut))
 	L.SetField(pkg, "EqualFold", luar.New(L, strings.EqualFold))
 	L.SetField(pkg, "Fields", luar.New(L, strings.Fields))
 	L.SetField(pkg, "FieldsFunc", luar.New(L, strings.FieldsFunc))
