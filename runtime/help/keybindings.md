@@ -288,6 +288,8 @@ RemoveAllMultiCursors
 SkipMultiCursor
 SkipMultiCursorBack
 JumpToMatchingBrace
+JumpToOpeningBrace
+JumpToClosingBrace
 JumpLine
 Deselect
 ClearInfo
@@ -553,6 +555,8 @@ conventions for text editing defaults.
     "Ctrl-u":         "ToggleMacro",
     "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
+    "Alt-<":          "JumpToOpeningBrace",
+    "Alt->":          "JumpToClosingBrace",
 
     // Emacs-style keybindings
     "Alt-f": "WordRight",
