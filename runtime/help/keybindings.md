@@ -351,6 +351,8 @@ You can also bind some mouse actions (these must be bound to mouse buttons)
 
 ```
 MousePress
+MouseDrag
+MouseRelease
 MouseMultiCursor
 ```
 
