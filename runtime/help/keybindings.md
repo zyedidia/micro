@@ -70,6 +70,13 @@ will execute `InsertTab`. To use `,`, `|` or `&` in an action (as an argument
 to a command, for example), escape it with `\` or wrap it in single or double
 quotes.
 
+If the action has an `onAction` lua callback, for example `onAutocomplete` (see
+`> help plugins`), then the action is only considered successful if the action
+itself succeeded *and* the callback returned true. If there are multiple
+`onAction` callbacks for this action, registered by multiple plugins, then the
+action is only considered successful if the action itself succeeded and all the
+callbacks returned true.
+
 ## Binding commands
 
 You can also bind a key to execute a command in command mode (see
@@ -104,6 +111,48 @@ you could rebind `Ctrl-g` to `> help`:
 Now when you press `Ctrl-g`, `help` will appear in the command bar and your
 cursor will be placed after it (note the space in the json that controls the
 cursor placement).
+
+## Binding Lua functions
+
+You can also bind a key to a Lua function provided by a plugin, or by your own
+`~/.config/micro/init.lua`. For example:
+
+```json
+{
+    "Alt-q": "lua:foo.bar"
+}
+```
+
+where `foo` is the name of the plugin and `bar` is the name of the lua function
+in it, e.g.:
+
+```lua
+local micro = import("micro")
+
+function bar(bp)
+    micro.InfoBar():Message("Bar action triggered")
+    return true
+end
+```
+
+See `> help plugins` for more informations on how to write lua functions.
+
+For `~/.config/micro/init.lua` the plugin name is `initlua` (so the keybinding
+in this example would be `"Alt-q": "lua:initlua.bar"`).
+
+The currently active bufpane is passed to the lua function as the argument. If
+the key is a mouse button, e.g. `MouseLeft` or `MouseWheelUp`, the mouse event
+info is passed to the lua function as the second argument, of type
+`*tcell.EventMouse`. See https://pkg.go.dev/github.com/micro-editor/tcell/v2#EventMouse
+for the description of this type and its methods.
+
+The return value of the lua function defines whether the action has succeeded.
+This is used when chaining lua functions with other actions. They can be chained
+the same way as regular actions as described above, for example:
+
+```
+"Alt-q": "lua:initlua.bar|Quit"
+```
 
 ## Binding raw escape sequences
 
@@ -309,6 +358,8 @@ You can also bind some mouse actions (these must be bound to mouse buttons)
 
 ```
 MousePress
+MouseDrag
+MouseRelease
 MouseMultiCursor
 ```
 
