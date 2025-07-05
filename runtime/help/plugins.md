@@ -76,9 +76,18 @@ that micro defines:
    chained with other actions (see `> help keybindings`) to determine whether
    the next actions in the chain should be executed or not.
 
+   If the action is a mouse action, e.g. `MousePress`, the mouse event info
+   is passed to the callback as an extra argument of type `*tcell.EventMouse`.
+   See https://pkg.go.dev/github.com/micro-editor/tcell/v2#EventMouse for the
+   description of this type and its methods.
+
 * `preAction(bufpane)`: runs immediately before `Action` is triggered
    by the user. Returns a boolean which defines whether the action should
    be canceled.
+
+   Similarly to `onAction`, if the action is a mouse action, the mouse event
+   info is passed to the callback as an extra argument of type
+   `*tcell.EventMouse`.
 
 * `onRune(bufpane, rune)`: runs when the composed rune has been inserted
 
