@@ -71,8 +71,10 @@ that micro defines:
 
 * `onAction(bufpane)`: runs when `Action` is triggered by the user, where
    `Action` is a bindable action (see `> help keybindings`). A bufpane
-   is passed as input and the function should return a boolean defining
-   whether the view should be relocated after this action is performed.
+   is passed as input. The function should return a boolean defining
+   whether the action was successful, which is used when the action is
+   chained with other actions (see `> help keybindings`) to determine whether
+   the next actions in the chain should be executed or not.
 
 * `preAction(bufpane)`: runs immediately before `Action` is triggered
    by the user. Returns a boolean which defines whether the action should
@@ -100,9 +102,6 @@ The `bp` variable is a reference to the bufpane the action is being executed
 within. This is almost always the current bufpane.
 
 All available actions are listed in the keybindings section of the help.
-
-These functions should also return a boolean specifying whether the bufpane
-should be relocated to the cursor or not after the action is complete.
 
 ## Accessing micro functions
 

@@ -70,6 +70,13 @@ will execute `InsertTab`. To use `,`, `|` or `&` in an action (as an argument
 to a command, for example), escape it with `\` or wrap it in single or double
 quotes.
 
+If the action has an `onAction` lua callback, for example `onAutocomplete` (see
+`> help plugins`), then the action is only considered successful if the action
+itself succeeded *and* the callback returned true. If there are multiple
+`onAction` callbacks for this action, registered by multiple plugins, then the
+action is only considered successful if the action itself succeeded and all the
+callbacks returned true.
+
 ## Binding commands
 
 You can also bind a key to execute a command in command mode (see
