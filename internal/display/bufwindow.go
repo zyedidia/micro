@@ -571,75 +571,80 @@ func (w *BufWindow) displayBuffer() {
 		}
 
 		draw := func(r rune, combc []rune, style tcell.Style, highlight bool, showcursor bool, preservebg bool) {
-			if nColsBeforeStart <= 0 && vloc.Y >= 0 {
-				if highlight {
-					if w.Buf.HighlightSearch && w.Buf.SearchMatch(bloc) {
+			defer func() {
+				if nColsBeforeStart <= 0 {
+					vloc.X++
+				}
+				nColsBeforeStart--
+			}()
+
+			if nColsBeforeStart > 0 || vloc.Y < 0 {
+				return
+			}
+
+			if highlight {
+				if w.Buf.HighlightSearch && w.Buf.SearchMatch(bloc) {
+					style = config.DefStyle.Reverse(true)
+					if s, ok := config.Colorscheme["hlsearch"]; ok {
+						style = s
+					}
+				}
+
+				_, origBg, _ := style.Decompose()
+				_, defBg, _ := config.DefStyle.Decompose()
+
+				// syntax or hlsearch highlighting with non-default background takes precedence
+				// over cursor-line and color-column
+				if !preservebg && origBg != defBg {
+					preservebg = true
+				}
+
+				for _, c := range cursors {
+					if c.HasSelection() &&
+						(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
+							bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
+						// The current character is selected
 						style = config.DefStyle.Reverse(true)
-						if s, ok := config.Colorscheme["hlsearch"]; ok {
+
+						if s, ok := config.Colorscheme["selection"]; ok {
 							style = s
 						}
 					}
 
-					_, origBg, _ := style.Decompose()
-					_, defBg, _ := config.DefStyle.Decompose()
-
-					// syntax or hlsearch highlighting with non-default background takes precedence
-					// over cursor-line and color-column
-					if !preservebg && origBg != defBg {
-						preservebg = true
-					}
-
-					for _, c := range cursors {
-						if c.HasSelection() &&
-							(bloc.GreaterEqual(c.CurSelection[0]) && bloc.LessThan(c.CurSelection[1]) ||
-								bloc.LessThan(c.CurSelection[0]) && bloc.GreaterEqual(c.CurSelection[1])) {
-							// The current character is selected
-							style = config.DefStyle.Reverse(true)
-
-							if s, ok := config.Colorscheme["selection"]; ok {
-								style = s
-							}
-						}
-
-						if b.Settings["cursorline"].(bool) && w.active && !preservebg &&
-							!c.HasSelection() && c.Y == bloc.Y {
-							if s, ok := config.Colorscheme["cursor-line"]; ok {
-								fg, _, _ := s.Decompose()
-								style = style.Background(fg)
-							}
-						}
-					}
-
-					for _, m := range b.Messages {
-						if bloc.GreaterEqual(m.Start) && bloc.LessThan(m.End) ||
-							bloc.LessThan(m.End) && bloc.GreaterEqual(m.Start) {
-							style = style.Underline(true)
-							break
-						}
-					}
-
-					if s, ok := config.Colorscheme["color-column"]; ok {
-						if colorcolumn != 0 && vloc.X-w.gutterOffset+w.StartCol == colorcolumn && !preservebg {
+					if b.Settings["cursorline"].(bool) && w.active && !preservebg &&
+						!c.HasSelection() && c.Y == bloc.Y {
+						if s, ok := config.Colorscheme["cursor-line"]; ok {
 							fg, _, _ := s.Decompose()
 							style = style.Background(fg)
 						}
 					}
 				}
 
-				screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, combc, style)
+				for _, m := range b.Messages {
+					if bloc.GreaterEqual(m.Start) && bloc.LessThan(m.End) ||
+						bloc.LessThan(m.End) && bloc.GreaterEqual(m.Start) {
+						style = style.Underline(true)
+						break
+					}
+				}
 
-				if showcursor {
-					for _, c := range cursors {
-						if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
-							w.showCursor(w.X+vloc.X, w.Y+vloc.Y, c.Num == 0)
-						}
+				if s, ok := config.Colorscheme["color-column"]; ok {
+					if colorcolumn != 0 && vloc.X-w.gutterOffset+w.StartCol == colorcolumn && !preservebg {
+						fg, _, _ := s.Decompose()
+						style = style.Background(fg)
 					}
 				}
 			}
-			if nColsBeforeStart <= 0 {
-				vloc.X++
+
+			screen.SetContent(w.X+vloc.X, w.Y+vloc.Y, r, combc, style)
+
+			if showcursor {
+				for _, c := range cursors {
+					if c.X == bloc.X && c.Y == bloc.Y && !c.HasSelection() {
+						w.showCursor(w.X+vloc.X, w.Y+vloc.Y, c.Num == 0)
+					}
+				}
 			}
-			nColsBeforeStart--
 		}
 
 		wrap := func() {
