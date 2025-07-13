@@ -2,6 +2,7 @@ package display
 
 import (
 	"strconv"
+	"strings"
 
 	runewidth "github.com/mattn/go-runewidth"
 	"github.com/micro-editor/tcell/v2"
@@ -450,6 +451,30 @@ func (w *BufWindow) displayBuffer() {
 	cursors := b.GetCursors()
 
 	curStyle := config.DefStyle
+
+	// Parse showchars which is in the format of key1=val1,key2=val2,...
+	spacechars := " "
+	tabchars := b.Settings["indentchar"].(string)
+	var indentspacechars string
+	var indenttabchars string
+	for _, entry := range strings.Split(b.Settings["showchars"].(string), ",") {
+		split := strings.SplitN(entry, "=", 2)
+		if len(split) < 2 {
+			continue
+		}
+		key, val := split[0], split[1]
+		switch key {
+		case "space":
+			spacechars = val
+		case "tab":
+			tabchars = val
+		case "ispace":
+			indentspacechars = val
+		case "itab":
+			indenttabchars = val
+		}
+	}
+
 	for ; vloc.Y < w.bufHeight; vloc.Y++ {
 		vloc.X = 0
 
@@ -495,7 +520,7 @@ func (w *BufWindow) displayBuffer() {
 		bloc.X = bslice
 
 		// returns the rune to be drawn, style of it and if the bg should be preserved
-		getRuneStyle := func(r rune, style tcell.Style, isplaceholder bool) (rune, tcell.Style, bool) {
+		getRuneStyle := func(r rune, style tcell.Style, showoffset int, linex int, isplaceholder bool) (rune, tcell.Style, bool) {
 			if nColsBeforeStart > 0 || vloc.Y < 0 || isplaceholder {
 				return r, style, false
 			}
@@ -518,19 +543,33 @@ func (w *BufWindow) displayBuffer() {
 				return r, style, false
 			}
 
-			var drawrune rune
-			if r == '\t' {
-				indentrunes := []rune(b.Settings["indentchar"].(string))
-				// if empty indentchar settings, use space
-				if len(indentrunes) == 0 {
-					indentrunes = []rune{' '}
+			var indentrunes []rune
+			switch r {
+			case '\t':
+				if bloc.X < leadingwsEnd && indenttabchars != "" {
+					indentrunes = []rune(indenttabchars)
+				} else {
+					indentrunes = []rune(tabchars)
 				}
+			case ' ':
+				if linex%tabsize == 0 && bloc.X < leadingwsEnd && indentspacechars != "" {
+					indentrunes = []rune(indentspacechars)
+				} else {
+					indentrunes = []rune(spacechars)
+				}
+			}
 
-				drawrune = indentrunes[0]
-				if s, ok := config.Colorscheme["indent-char"]; ok {
-					fg, _, _ := s.Decompose()
-					style = style.Foreground(fg)
-				}
+			var drawrune rune
+			if showoffset < len(indentrunes) {
+				drawrune = indentrunes[showoffset]
+			} else {
+				// use space if no showchars or after we showed showchars
+				drawrune = ' '
+			}
+
+			if s, ok := config.Colorscheme["indent-char"]; ok {
+				fg, _, _ := s.Decompose()
+				style = style.Foreground(fg)
 			}
 
 			preservebg := false
@@ -692,6 +731,7 @@ func (w *BufWindow) displayBuffer() {
 
 			width := 0
 
+			linex := totalwidth
 			switch r {
 			case '\t':
 				ts := tabsize - (totalwidth % tabsize)
@@ -732,15 +772,15 @@ func (w *BufWindow) displayBuffer() {
 			}
 
 			for _, r := range word {
-				drawrune, drawstyle, preservebg := getRuneStyle(r.r, r.style, false)
+				drawrune, drawstyle, preservebg := getRuneStyle(r.r, r.style, 0, linex, false)
 				draw(drawrune, r.combc, drawstyle, true, true, preservebg)
 
 				// Draw extra characters for tabs or wide runes
 				for i := 1; i < r.width; i++ {
 					if r.r == '\t' {
-						drawrune, drawstyle, preservebg = getRuneStyle('\t', r.style, false)
+						drawrune, drawstyle, preservebg = getRuneStyle('\t', r.style, i, linex+i, false)
 					} else {
-						drawrune, drawstyle, preservebg = getRuneStyle(' ', r.style, true)
+						drawrune, drawstyle, preservebg = getRuneStyle(' ', r.style, i, linex+i, true)
 					}
 					draw(drawrune, nil, drawstyle, true, false, preservebg)
 				}
@@ -787,7 +827,7 @@ func (w *BufWindow) displayBuffer() {
 
 		if vloc.X != maxWidth {
 			// Display newline within a selection
-			drawrune, drawstyle, preservebg := getRuneStyle(' ', config.DefStyle, true)
+			drawrune, drawstyle, preservebg := getRuneStyle(' ', config.DefStyle, 0, totalwidth, true)
 			draw(drawrune, nil, drawstyle, true, true, preservebg)
 		}
 
