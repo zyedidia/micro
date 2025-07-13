@@ -337,6 +337,27 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	return err
 }
 
+func (b *Buffer) writeBackup(path string) (string, error) {
+	backupDir := b.backupDir()
+	if _, err := os.Stat(backupDir); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return "", err
+		}
+		if err = os.Mkdir(backupDir, os.ModePerm); err != nil {
+			return "", err
+		}
+	}
+
+	backupName := util.DetermineEscapePath(backupDir, path)
+	_, err := b.overwriteFile(backupName)
+	if err != nil {
+		os.Remove(backupName)
+		return "", err
+	}
+
+	return backupName, nil
+}
+
 // safeWrite writes the buffer to a file in a "safe" way, preventing loss of the
 // contents of the file if it fails to write the new contents.
 // This means that the file is not overwritten directly but by writing to the
@@ -353,38 +374,33 @@ func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error
 		}
 	}()
 
-	backupDir := b.backupDir()
-	if _, err := os.Stat(backupDir); err != nil {
-		if !errors.Is(err, fs.ErrNotExist) {
-			return 0, err
-		}
-		if err = os.Mkdir(backupDir, os.ModePerm); err != nil {
-			return 0, err
-		}
-	}
 
-	backupName := util.DetermineEscapePath(backupDir, path)
-	_, err = b.overwriteFile(backupName)
+	// Try to backup first before writing
+	backupName, err := b.writeBackup(path)
 	if err != nil {
-		os.Remove(backupName)
+		file.Close()
 		return 0, err
 	}
 
 	b.forceKeepBackup = true
-	size, err := file.Write(b)
-	if err != nil {
-		err = util.OverwriteError{err, backupName}
-		return size, err
+	size := 0
+	{
+		// If we failed to write or close, keep the backup we made
+		size, err = file.Write(b)
+		if err != nil {
+			file.Close()
+			return 0, util.OverwriteError{err, backupName}
+		}
+
+		err = file.Close()
+		if err != nil {
+			return 0, util.OverwriteError{err, backupName}
+		}
 	}
 	b.forceKeepBackup = false
 
 	if !b.keepBackup() {
 		os.Remove(backupName)
-	}
-
-	err2 := file.Close()
-	if err2 != nil && err == nil {
-		err = err2
 	}
 
 	return size, err
