@@ -152,6 +152,17 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 						t.SetActive(ind)
 					}
 				}
+			case tcell.Button3:
+				if !t.release {
+					// Tab bar dragging
+					return
+				}
+				t.release = false
+				t.tbClick = true
+
+				if i := t.LocFromVisual(buffer.Loc{mx, my}); i == -1 {
+					t.List[t.Active()].CurPane().AddTab()
+				}
 			case tcell.WheelUp:
 				t.Scroll(4)
 			case tcell.WheelDown:
