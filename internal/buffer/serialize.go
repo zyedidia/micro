@@ -39,7 +39,7 @@ func (b *Buffer) Serialize() error {
 		return err
 	}
 
-	name := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
+	name, _ := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
 	return util.SafeWrite(name, buf.Bytes(), true)
 }
 
@@ -50,7 +50,8 @@ func (b *Buffer) Unserialize() error {
 	if b.Path == "" {
 		return nil
 	}
-	file, err := os.Open(util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath))
+	name, _ := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
+	file, err := os.Open(name)
 	if err == nil {
 		defer file.Close()
 		var buffer SerializedBuffer

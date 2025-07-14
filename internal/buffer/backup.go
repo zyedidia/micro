@@ -103,7 +103,7 @@ func (b *SharedBuffer) writeBackup(path string) (string, error) {
 		}
 	}
 
-	name := util.DetermineEscapePath(backupdir, path)
+	name, _ := util.DetermineEscapePath(backupdir, path)
 	tmp := util.AppendBackupSuffix(name)
 
 	_, err := b.overwriteFile(tmp)
@@ -139,7 +139,7 @@ func (b *SharedBuffer) RemoveBackup() {
 	if b.keepBackup() || b.Path == "" || b.Type != BTDefault {
 		return
 	}
-	f := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
+	f, _ := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
 	b.removeBackup(f)
 }
 
@@ -147,7 +147,7 @@ func (b *SharedBuffer) RemoveBackup() {
 // Returns true if a backup was applied
 func (b *SharedBuffer) ApplyBackup(fsize int64) (bool, bool) {
 	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
-		backupfile := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
+		backupfile, _ := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
 			if err == nil {
