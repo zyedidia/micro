@@ -348,7 +348,7 @@ func (b *Buffer) writeBackup(path string) (string, error) {
 		}
 	}
 
-	backupName := util.DetermineEscapePath(backupDir, path)
+	backupName := util.DeterminePath(backupDir, path)
 	_, err := b.overwriteFile(backupName)
 	if err != nil {
 		os.Remove(backupName)

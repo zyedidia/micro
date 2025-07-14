@@ -470,10 +470,10 @@ func EscapePathLegacy(path string) string {
 	return strings.ReplaceAll(path, "/", "%")
 }
 
-// DetermineEscapePath hashes respective escapes a path.
-// For backward compatibility the URL encoded and legacy encoded (with '%') path
-// will be checked for existence.
-func DetermineEscapePath(dir string, path string) string {
+// DeterminePath hashes a path, determining whether it should be hashed,
+// escaped using URL encoding or legacy encoding with '%' (for backward
+// compatibility, if the escaped path exists in the given directory).
+func DeterminePath(dir string, path string) string {
 	md5sum := filepath.Join(dir, HashStringMd5(path))
 	if _, err := os.Stat(md5sum); err == nil {
 		return md5sum
