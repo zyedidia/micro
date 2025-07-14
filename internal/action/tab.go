@@ -17,6 +17,11 @@ import (
 type TabList struct {
 	*display.TabWindow
 	List []*Tab
+
+	// captures whether the mouse is released
+	release bool
+	// captures whether the last mouse click occurred on the tab bar
+	tbClick bool
 }
 
 // NewTabList creates a TabList from a list of buffers by creating a Tab
@@ -35,6 +40,7 @@ func NewTabList(bufs []*buffer.Buffer) *TabList {
 	}
 	tl.TabWindow = display.NewTabWindow(w, 0)
 	tl.Names = make([]string, len(bufs))
+	tl.release = true
 
 	return tl
 }
@@ -118,40 +124,48 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		t.Resize()
 	case *tcell.EventMouse:
 		mx, my := e.Position()
-		switch e.Buttons() {
-		case tcell.Button1:
-			if my == t.Y && len(t.List) > 1 {
-				if mx == 0 {
-					t.Scroll(-4)
-				} else if mx == t.Width-1 {
-					t.Scroll(4)
-				} else {
-					ind := t.LocFromVisual(buffer.Loc{mx, my})
-					if ind != -1 {
-						t.SetActive(ind)
-					}
-				}
-				return
-			}
-		case tcell.ButtonNone:
+		if e.Buttons() == tcell.ButtonNone {
+			t.release = true
+			t.tbClick = false
 			if t.List[t.Active()].release {
 				// Mouse release received, while already released
 				t.ResetMouse()
 				return
 			}
-		case tcell.WheelUp:
-			if my == t.Y && len(t.List) > 1 {
+		} else if my == t.Y && len(t.List) > 1 {
+			switch e.Buttons() {
+			case tcell.Button1:
+				if !t.release {
+					// Tab bar dragging
+					return
+				}
+				t.release = false
+				t.tbClick = true
+				switch mx {
+				case 0:
+					t.Scroll(-4)
+				case t.Width - 1:
+					t.Scroll(4)
+				default:
+					ind := t.LocFromVisual(buffer.Loc{mx, my})
+					if ind != -1 {
+						t.SetActive(ind)
+					}
+				}
+			case tcell.WheelUp:
 				t.Scroll(4)
-				return
-			}
-		case tcell.WheelDown:
-			if my == t.Y && len(t.List) > 1 {
+			case tcell.WheelDown:
 				t.Scroll(-4)
-				return
 			}
+			return
+		} else if t.release {
+			// Click outside tab bar
+			t.release = false
 		}
 	}
-	t.List[t.Active()].HandleEvent(event)
+	if t.release || !t.tbClick {
+		t.List[t.Active()].HandleEvent(event)
+	}
 }
 
 // Display updates the names and then displays the tab bar
