@@ -75,6 +75,19 @@ func (t *TabList) RemoveTab(id uint64) {
 	}
 }
 
+// MoveTab moves the specified tab to the given index
+func (tl *TabList) MoveTab(t *Tab, i int) {
+	if i == tl.Active() || i < 0 || i >= len(tl.List) {
+		return
+	}
+	tl.RemoveTab(t.Panes[0].ID())
+	tl.List = append(tl.List, nil)
+	copy(tl.List[i+1:], tl.List[i:])
+	tl.List[i] = t
+	tl.Resize()
+	tl.UpdateNames()
+}
+
 // Resize resizes all elements within the tab list
 // One thing to note is that when there is only 1 tab
 // the tab bar should not be drawn so resizing must take
