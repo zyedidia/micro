@@ -3,6 +3,7 @@ package util
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/md5"
 	"errors"
 	"fmt"
 	"io"
@@ -450,6 +451,10 @@ func AppendBackupSuffix(path string) string {
 	return path + ".micro-backup"
 }
 
+func HashStringMd5(str string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
+}
+
 // EscapePathUrl encodes the path in URL query form
 func EscapePathUrl(path string) string {
 	return url.QueryEscape(filepath.ToSlash(path))
@@ -469,6 +474,8 @@ func EscapePathLegacy(path string) string {
 // using URL encoding (preferred, since it encodes unambiguously) or
 // legacy encoding with '%' (for backward compatibility, if the legacy-escaped
 // path exists in the given directory).
+// In case the length of the escaped path (plus the backup extension) exceeds
+// the filename length limit, a hash of the path is returned instead.
 func DetermineEscapePath(dir string, path string) string {
 	url := filepath.Join(dir, EscapePathUrl(path))
 	if _, err := os.Stat(url); err == nil {
@@ -478,6 +485,10 @@ func DetermineEscapePath(dir string, path string) string {
 	legacy := filepath.Join(dir, EscapePathLegacy(path))
 	if _, err := os.Stat(legacy); err == nil {
 		return legacy
+	}
+
+	if len(url)+len(".micro-backup") > 255 {
+		return filepath.Join(dir, HashStringMd5(path))
 	}
 
 	return url
