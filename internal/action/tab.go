@@ -2,6 +2,7 @@ package action
 
 import (
 	luar "layeh.com/gopher-luar"
+	"time"
 
 	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -24,6 +25,8 @@ type TabList struct {
 	tbClick bool
 	// captures whether a tab is being dragged within the tab bar
 	tabDrag bool
+	// timestamp of the last non-tab click within the tab bar
+	tbLastClick time.Time
 }
 
 // NewTabList creates a TabList from a list of buffers by creating a Tab
@@ -160,10 +163,19 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 							}
 							t.SetActive(i)
 						}
-					} else if isDrag {
-						if i = len(t.List) - 1; i != t.Active() {
-							t.MoveTab(t.List[t.Active()], i)
-							t.SetActive(i)
+					} else {
+						if isDrag {
+							if i = len(t.List) - 1; i != t.Active() {
+								t.MoveTab(t.List[t.Active()], i)
+								t.SetActive(i)
+							}
+						} else {
+							if time.Since(t.tbLastClick)/time.Millisecond < config.DoubleClickThreshold {
+								t.List[t.Active()].CurPane().AddTab()
+								t.tbLastClick = time.Time{}
+							} else {
+								t.tbLastClick = time.Now()
+							}
 						}
 					}
 				}
