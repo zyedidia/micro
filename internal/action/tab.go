@@ -22,6 +22,8 @@ type TabList struct {
 	release bool
 	// captures whether the last mouse click occurred on the tab bar
 	tbClick bool
+	// captures whether a tab is being dragged within the tab bar
+	tabDrag bool
 }
 
 // NewTabList creates a TabList from a list of buffers by creating a Tab
@@ -127,6 +129,7 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		if e.Buttons() == tcell.ButtonNone {
 			t.release = true
 			t.tbClick = false
+			t.tabDrag = false
 			if t.List[t.Active()].release {
 				// Mouse release received, while already released
 				t.ResetMouse()
@@ -135,10 +138,11 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		} else if my == t.Y && len(t.List) > 1 {
 			switch e.Buttons() {
 			case tcell.Button1:
-				if !t.release {
-					// Tab bar dragging
+				if !t.release && !t.tabDrag {
+					// Invalid tab bar dragging
 					return
 				}
+				isDrag := !t.release
 				t.release = false
 				t.tbClick = true
 				switch mx {
@@ -147,9 +151,20 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 				case t.Width - 1:
 					t.Scroll(4)
 				default:
-					ind := t.LocFromVisual(buffer.Loc{mx, my})
-					if ind != -1 {
-						t.SetActive(ind)
+					i := t.LocFromVisual(buffer.Loc{mx, my})
+					if i != -1 {
+						t.tabDrag = true
+						if i != t.Active() {
+							if isDrag {
+								t.MoveTab(t.List[t.Active()], i)
+							}
+							t.SetActive(i)
+						}
+					} else if isDrag {
+						if i = len(t.List) - 1; i != t.Active() {
+							t.MoveTab(t.List[t.Active()], i)
+							t.SetActive(i)
+						}
 					}
 				}
 			case tcell.Button3:
