@@ -189,6 +189,55 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 
 				if i := t.LocFromVisual(buffer.Loc{mx, my}); i == -1 {
 					t.List[t.Active()].CurPane().AddTab()
+				} else {
+					anyModified := false
+					for _, p := range t.List[i].Panes {
+						if bp, ok := p.(*BufPane); ok {
+							if bp.Buf.Modified() {
+								anyModified = true
+								break
+							}
+						}
+					}
+
+					removeTab := func() {
+						panes := append([]Pane(nil), t.List[i].Panes...)
+						for _, p := range panes {
+							switch t := p.(type) {
+							case *BufPane:
+								t.ForceQuit()
+							case *RawPane:
+								t.Quit()
+							case *TermPane:
+								t.Quit()
+							}
+						}
+					}
+
+					a := t.Active()
+					if anyModified {
+						t.SetActive(i)
+						InfoBar.YNPrompt("Discard unsaved changes? (y,n,esc)", func(yes, canceled bool) {
+							if !canceled {
+								if yes {
+									removeTab()
+									if i <= a {
+										a--
+									}
+								}
+								t.SetActive(a)
+							}
+						})
+						t.release = true
+						t.tbClick = false
+						t.tabDrag = false
+					} else {
+						removeTab()
+						if i <= a {
+							t.SetActive(a - 1)
+						}
+					}
+					return
 				}
 			case tcell.WheelUp:
 				t.Scroll(4)
