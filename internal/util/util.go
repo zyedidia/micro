@@ -474,9 +474,12 @@ func EscapePathLegacy(path string) string {
 // escaped using URL encoding or legacy encoding with '%' (for backward
 // compatibility, if the escaped path exists in the given directory).
 func DeterminePath(dir string, path string) string {
-	md5sum := filepath.Join(dir, HashStringMd5(path))
-	if _, err := os.Stat(md5sum); err == nil {
-		return md5sum
+	runes := []rune(filepath.Base(path))
+	truncBaseName := string(runes[len(runes)-Min(len(runes), 16):])
+	filename := truncBaseName + "_" + HashStringMd5(path)
+	namedHash := filepath.Join(dir, filename)
+	if _, err := os.Stat(namedHash); err == nil {
+		return namedHash
 	}
 
 	url := filepath.Join(dir, EscapePathUrl(path))
@@ -489,7 +492,7 @@ func DeterminePath(dir string, path string) string {
 		return legacy
 	}
 
-	return md5sum
+	return namedHash
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
