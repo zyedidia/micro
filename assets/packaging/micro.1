@@ -1,10 +1,16 @@
-.TH micro 1 "2020-02-10"
+.TH micro 1 "2025-08-16"
 .SH NAME
 micro \- A modern and intuitive terminal-based text editor
 .SH SYNOPSIS
 .B micro
-.RB [OPTIONS]
-[FILE]\&...
+.RB [OPTION]...\&
+.RB [FILE]...\&
+.RB [+LINE[:COL]]
+.br
+.B micro
+.RB [OPTION]...\&
+.RB [FILE[:LINE[:COL]]]...\&
+\& (only if the `parsecursor` option is enabled)
 
 .SH DESCRIPTION
 
@@ -20,7 +26,7 @@ Use Ctrl-q to quit, Ctrl-s to save, and Ctrl-g to open the in-editor help menu.
 .PP
 \-clean
 .RS 4
-Cleans the configuration directory
+Clean the configuration directory and exit
 .RE
 
 .PP
@@ -30,7 +36,9 @@ Specify a custom location for the configuration directory
 .RE
 
 .PP
-[FILE]:LINE:COL
+FILE:LINE[:COL] (only if the `parsecursor` option is enabled)
+.br
+FILE +LINE[:COL]
 .RS 4
 Specify a line and column to start the cursor at when opening a buffer
 .RE
@@ -38,7 +46,7 @@ Specify a line and column to start the cursor at when opening a buffer
 .PP
 \-options
 .RS 4
-Show all option help
+Show all options help and exit
 .RE
 
 .PP
@@ -48,13 +56,25 @@ Enable debug mode (enables logging to ./log.txt)
 .RE
 
 .PP
+\-profile
+.RS 4
+Enable CPU profiling (writes profile info to ./micro.prof so it can be analyzed later with "go tool pprof micro.prof")
+.RE
+
+.PP
 \-version
 .RS 4
-Show the version number and information
+Show the version number and information and exit
 .RE
 
 Micro's plugins can be managed at the command line with the following commands.
 .RS 4
+
+.PP
+\-plugin install [PLUGIN]...
+.RS 4
+Install plugin(s)
+.RE
 
 .PP
 \-plugin remove [PLUGIN]...
@@ -93,11 +113,16 @@ file (see 'help options').
 .RS 4
 
 .PP
-\-option value
+\-<option> value
 .RS 4
-Set `option` to `value` for this session
+Set `option` to `value` for this session.
+.br
 For example: `micro -syntax off file.c`
 .RE
+.RE
+
+.PP
+Use `micro -options` to see the full list of configuration options.
 
 
 .SH CONFIGURATION
