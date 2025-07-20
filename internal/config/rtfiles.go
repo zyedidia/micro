@@ -187,6 +187,7 @@ func InitPlugins() {
 		p.Name = "initlua"
 		p.DirName = "initlua"
 		p.Srcs = append(p.Srcs, realFile(initlua))
+		p.Default = true
 		Plugins = append(Plugins, p)
 	}
 
