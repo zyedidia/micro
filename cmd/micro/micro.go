@@ -46,6 +46,7 @@ var (
 )
 
 func InitFlags() {
+	// Note: keep this in sync with the man page in assets/packaging/micro.1
 	flag.Usage = func() {
 		fmt.Println("Usage: micro [OPTION]... [FILE]... [+LINE[:COL]]")
 		fmt.Println("       micro [OPTION]... [FILE[:LINE[:COL]]]...  (only if the `parsecursor` option is enabled)")
