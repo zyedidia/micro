@@ -30,6 +30,8 @@ type TextEvent struct {
 	C Cursor
 
 	EventType int
+	// If there are several deltas for the same line, they must not overlap
+	// and be ordered by increasing start position
 	Deltas    []Delta
 	Time      time.Time
 }
@@ -114,24 +116,24 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 
 // ExecuteTextEvent runs a text event
 func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
-	if t.EventType == TextEventInsert {
-		for _, d := range t.Deltas {
+	for i := len(t.Deltas) - 1; i >= 0; i-- {
+		// Processing the deltas in increasing order would require
+		// to recompute the positions of the later deltas
+		d := t.Deltas[i]
+		if t.EventType == TextEventInsert {
 			buf.insert(d.Start, d.Text)
-		}
-	} else if t.EventType == TextEventRemove {
-		for i, d := range t.Deltas {
+		} else if t.EventType == TextEventRemove {
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
-		}
-	} else if t.EventType == TextEventReplace {
-		for i, d := range t.Deltas {
+		} else { // TextEventReplace
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
 			buf.insert(d.Start, d.Text)
 			t.Deltas[i].Start = d.Start
 			t.Deltas[i].End = Loc{d.Start.X + util.CharacterCount(d.Text), d.Start.Y}
 		}
-		for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
-			t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
-		}
+	}
+
+	for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
+		t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
 	}
 }
 
@@ -195,7 +197,7 @@ func (eh *EventHandler) InsertBytes(start Loc, text []byte) {
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],
 		EventType: TextEventInsert,
-		Deltas:    []Delta{{text, start, Loc{0, 0}}},
+		Deltas:    []Delta{{text, start, Loc{-1, -1}}},
 		Time:      time.Now(),
 	}
 	eh.DoTextEvent(e, true)
