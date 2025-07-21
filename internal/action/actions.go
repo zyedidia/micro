@@ -1144,8 +1144,7 @@ func (h *BufPane) find(useRegex bool) bool {
 			match, found, err := h.Buf.FindNext(resp, h.Buf.Start(), h.Buf.End(), h.searchOrig, true, useRegex)
 			if err != nil {
 				InfoBar.Error(err)
-			}
-			if found {
+			} else if found {
 				h.Cursor.SetSelectionStart(match[0])
 				h.Cursor.SetSelectionEnd(match[1])
 				h.Cursor.OrigSelection[0] = h.Cursor.CurSelection[0]
