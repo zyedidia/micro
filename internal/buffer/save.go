@@ -26,6 +26,7 @@ import (
 const LargeFileThreshold = 50000
 
 type wrappedFile struct {
+	name        string
 	writeCloser io.WriteCloser
 	withSudo    bool
 	screenb     bool
@@ -83,7 +84,13 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 	var sigChan chan os.Signal
 
 	if withSudo {
-		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		conv := "notrunc"
+		// TODO: both platforms do not support dd with conv=fsync yet
+		if !(runtime.GOOS == "illumos" || runtime.GOOS == "netbsd") {
+			conv += ",fsync"
+		}
+
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "conv="+conv, "of="+name)
 		writeCloser, err = cmd.StdinPipe()
 		if err != nil {
 			return wrappedFile{}, err
@@ -113,7 +120,18 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 		}
 	}
 
-	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
+	return wrappedFile{name, writeCloser, withSudo, screenb, cmd, sigChan}, nil
+}
+
+func (wf wrappedFile) Truncate() error {
+	if wf.withSudo {
+		// we don't need to stop the screen here, since it is still stopped
+		// by openFile()
+		// truncate might not be available on every platfom, so use dd instead
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "count=0", "of="+wf.name)
+		return cmd.Run()
+	}
+	return wf.writeCloser.(*os.File).Truncate(0)
 }
 
 func (wf wrappedFile) Write(b *Buffer) (int, error) {
@@ -134,12 +152,9 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 		eol = []byte{'\n'}
 	}
 
-	if !wf.withSudo {
-		f := wf.writeCloser.(*os.File)
-		err := f.Truncate(0)
-		if err != nil {
-			return 0, err
-		}
+	err := wf.Truncate()
+	if err != nil {
+		return 0, err
 	}
 
 	// write lines
