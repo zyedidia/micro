@@ -537,6 +537,7 @@ func (b *Buffer) ReOpen() error {
 	if err != nil {
 		return err
 	}
+	defer file.Close()
 
 	enc, err := htmlindex.Get(b.Settings["encoding"].(string))
 	if err != nil {
