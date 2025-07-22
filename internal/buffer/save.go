@@ -83,7 +83,7 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 	var sigChan chan os.Signal
 
 	if withSudo {
-		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "conv=notrunc", "of="+name)
 		writeCloser, err = cmd.StdinPipe()
 		if err != nil {
 			return wrappedFile{}, err
