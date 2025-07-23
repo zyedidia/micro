@@ -148,6 +148,14 @@ func (wf wrappedFile) Truncate(size int64) error {
 	return wf.writeCloser.(*os.File).Truncate(size)
 }
 
+func (wf wrappedFile) Sync() error {
+	// Call Sync() on the file to make sure the content is safely on disk.
+	if wf.withSudo {
+		return nil
+	}
+	return wf.writeCloser.(*os.File).Sync()
+}
+
 func (wf wrappedFile) Write(b *Buffer) (int, error) {
 	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, b.encoding.NewEncoder()))
 
@@ -189,9 +197,7 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 
 	err = file.Flush()
 	if err == nil && !wf.withSudo {
-		// Call Sync() on the file to make sure the content is safely on disk.
-		f := wf.writeCloser.(*os.File)
-		err = f.Sync()
+		err = wf.Sync()
 	}
 	return size, err
 }
