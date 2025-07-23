@@ -151,7 +151,30 @@ func (wf wrappedFile) Truncate(size int64) error {
 func (wf wrappedFile) Sync() error {
 	// Call Sync() on the file to make sure the content is safely on disk.
 	if wf.withSudo {
-		return nil
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "sync", wf.name)
+
+		sigChan := make(chan os.Signal, 1)
+		signal.Reset(os.Interrupt)
+		signal.Notify(sigChan, os.Interrupt)
+		screenb := screen.TempFini()
+
+		err := cmd.Start()
+		if err != nil {
+			screen.TempStart(screenb)
+
+			signal.Notify(util.Sigterm, os.Interrupt)
+			signal.Stop(sigChan)
+
+			return err
+		}
+
+		err = cmd.Wait()
+
+		screen.TempStart(screenb)
+		signal.Notify(util.Sigterm, os.Interrupt)
+		signal.Stop(sigChan)
+
+		return err
 	}
 	return wf.writeCloser.(*os.File).Sync()
 }
@@ -215,6 +238,7 @@ func (wf wrappedFile) Close() error {
 		if err != nil {
 			return err
 		}
+		return wf.Sync()
 	}
 	return err
 }
