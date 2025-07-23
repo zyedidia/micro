@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"sync/atomic"
 	"time"
 	"unicode"
@@ -26,6 +27,7 @@ import (
 const LargeFileThreshold = 50000
 
 type wrappedFile struct {
+	name        string
 	writeCloser io.WriteCloser
 	withSudo    bool
 	screenb     bool
@@ -113,12 +115,35 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 		}
 	}
 
-	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
+	return wrappedFile{name, writeCloser, withSudo, screenb, cmd, sigChan}, nil
 }
 
 func (wf wrappedFile) Truncate(size int64) error {
 	if wf.withSudo {
-		return nil
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "truncate", "-s", strconv.FormatInt(size, 10), wf.name)
+
+		sigChan := make(chan os.Signal, 1)
+		signal.Reset(os.Interrupt)
+		signal.Notify(sigChan, os.Interrupt)
+		screenb := screen.TempFini()
+
+		err := cmd.Start()
+		if err != nil {
+			screen.TempStart(screenb)
+
+			signal.Notify(util.Sigterm, os.Interrupt)
+			signal.Stop(sigChan)
+
+			return err
+		}
+
+		err = cmd.Wait()
+
+		screen.TempStart(screenb)
+		signal.Notify(util.Sigterm, os.Interrupt)
+		signal.Stop(sigChan)
+
+		return err
 	}
 	return wf.writeCloser.(*os.File).Truncate(size)
 }
