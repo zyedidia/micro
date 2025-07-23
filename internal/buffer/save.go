@@ -116,6 +116,13 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
 }
 
+func (wf wrappedFile) Truncate(size int64) error {
+	if wf.withSudo {
+		return nil
+	}
+	return wf.writeCloser.(*os.File).Truncate(size)
+}
+
 func (wf wrappedFile) Write(b *Buffer) (int, error) {
 	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, b.encoding.NewEncoder()))
 
@@ -134,12 +141,9 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 		eol = []byte{'\n'}
 	}
 
-	if !wf.withSudo {
-		f := wf.writeCloser.(*os.File)
-		err := f.Truncate(0)
-		if err != nil {
-			return 0, err
-		}
+	err := wf.Truncate(0)
+	if err != nil {
+		return 0, err
 	}
 
 	// write lines
