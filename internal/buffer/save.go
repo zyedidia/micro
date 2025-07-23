@@ -374,7 +374,6 @@ func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error
 		}
 	}()
 
-
 	// Try to backup first before writing
 	backupName, err := b.writeBackup(path)
 	if err != nil {
