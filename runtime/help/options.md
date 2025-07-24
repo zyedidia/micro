@@ -142,8 +142,8 @@ Here are the available options:
    This is fast, but can be inaccurate. If `fastdirty` is off, then micro will
    hash the current buffer against a hash of the original file (created when
    the buffer was loaded). This is more accurate but obviously more resource
-   intensive. This option will be automatically disabled if the file size
-   exceeds 50KB.
+   intensive. This option will be automatically enabled for the current buffer
+   if the file size exceeds 50KB.
 
     default value: `false`
 
