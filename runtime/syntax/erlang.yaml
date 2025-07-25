@@ -5,19 +5,19 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z][0-9a-z_]*\\b"
-    # See: http://erlang.org/doc/reference_manual/data_types.html
+    # See: https://erlang.org/doc/reference_manual/data_types.html
     - constant.number: "\\b[0-9]+(\\.[0-9]+)?(e-?[0-9]+)?\\b"
     - constant.number: "\\b[0-9]{1,2}\\#[a-zA-Z0-9]+\\b"
     - constant.bool: "\\b(true|false)\\b"
     - constant.number: "\\$\\\\?\\S{1}"
-    # See: http://erlang.org/doc/reference_manual/introduction.html
+    # See: https://erlang.org/doc/reference_manual/introduction.html
     - statement: "\\b(after|and|andalso|band|begin|bnot|bor|bsl|bsr|bxor|case|catch|cond|div|end|fun|if|let|not|of|or|orelse|receive|rem|try|when|xor)\\b"
-    # See: http://erlang.org/doc/reference_manual/macros.html
+    # See: https://erlang.org/doc/reference_manual/macros.html
     - preproc: "\\-(module|export|record|include|include_lib|define|undef|ifdef|ifndef|else|endif|if|elif|error|warning)\\b"
     - identifier.macro: "\\?[A-Z0-9_]+\\b"
-    # See: http://erlang.org/doc/man/erlang.html
+    # See: https://erlang.org/doc/man/erlang.html
     - special: "\\b(ext_binary|binary|iovec|message_queue_data|time(_unit|stamp)|abs|apply|atom(_to_binary|_to_list)|binary_(part|to_atom|to_existing_atom|to_float|to_integer|to_list|to_term)|bit(_size|string_to_list)|byte_size|ceil|check_(old_code|process_code)|date|delete_module|demonitor|disconnect_node|element|erase|error|exit|float(_to_binary|_to_list)?|floor|garbage_collect|get|group_leader|halt|integer(_to_binary|to_list)|iolist_(size|to_binary)|is_(alive|atom|binary|bitstring|boolean|float|function|integer|list|map|map_key|number|pid|port|process_alive|record|reference|tuple|length)|link|list_to_(atom|binary|bitstring|existing_atom|float|integer|pid|port|ref|tuple)|load_module|make_ref|map_(get|size)|max|min|module_loaded|monitor(_node)?|nodes?|now|open_port|pid_to_list|port(_close|command|connect|control|to_list)|pre_loaded|process(_flag|_info|es)|purge_module|put|register(ed)?|round|self|setelement|size|spawn(_link|_monitor|_opt|_binary)?|statistics|trunc|tuple_(size|to_list)|unlink|unregister|whereis)\\b"
-    # See: http://erlang.org/doc/reference_manual/data_types.html#atom
+    # See: https://erlang.org/doc/reference_manual/data_types.html#atom
     - symbol:
         start: "'"
         end: "'"

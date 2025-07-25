@@ -142,7 +142,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `winget install zyedidia.micro`
 * OpenBSD: Available in the ports tree and also available as a binary package.
     * `pkg_add -v micro`.
-* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
+* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](https://www.pkgsrc.org/)-current:
     * `pkg_add micro`
 * macOS: Available in package managers.
     * `sudo port install micro` (with [MacPorts](https://www.macports.org))
@@ -196,7 +196,7 @@ Native macOS builds are done with `CGO_ENABLED=1` forced set to support adding t
 
 ### macOS terminal
 
-If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
+If you are using macOS, you should consider using [iTerm2](https://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.
