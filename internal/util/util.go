@@ -3,6 +3,7 @@ package util
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/md5"
 	"errors"
 	"fmt"
 	"io"
@@ -450,6 +451,10 @@ func AppendBackupSuffix(path string) string {
 	return path + ".micro-backup"
 }
 
+func HashStringMd5(str string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
+}
+
 // EscapePathUrl encodes the path in URL query form
 func EscapePathUrl(path string) string {
 	return url.QueryEscape(filepath.ToSlash(path))
@@ -465,11 +470,18 @@ func EscapePathLegacy(path string) string {
 	return strings.ReplaceAll(path, "/", "%")
 }
 
-// DetermineEscapePath escapes a path, determining whether it should be escaped
-// using URL encoding (preferred, since it encodes unambiguously) or
-// legacy encoding with '%' (for backward compatibility, if the legacy-escaped
-// path exists in the given directory).
-func DetermineEscapePath(dir string, path string) string {
+// DeterminePath hashes a path, determining whether it should be hashed,
+// escaped using URL encoding or legacy encoding with '%' (for backward
+// compatibility, if the escaped path exists in the given directory).
+func DeterminePath(dir string, path string) string {
+	runes := []rune(filepath.Base(path))
+	truncBaseName := string(runes[len(runes)-Min(len(runes), 16):])
+	filename := truncBaseName + "_" + HashStringMd5(path)
+	namedHash := filepath.Join(dir, filename)
+	if _, err := os.Stat(namedHash); err == nil {
+		return namedHash
+	}
+
 	url := filepath.Join(dir, EscapePathUrl(path))
 	if _, err := os.Stat(url); err == nil {
 		return url
@@ -480,7 +492,7 @@ func DetermineEscapePath(dir string, path string) string {
 		return legacy
 	}
 
-	return url
+	return namedHash
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array

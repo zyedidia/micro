@@ -74,7 +74,7 @@ func (b *Buffer) Backup() error {
 		os.Mkdir(backupdir, os.ModePerm)
 	}
 
-	name := util.DetermineEscapePath(backupdir, b.AbsPath)
+	name := util.DeterminePath(backupdir, b.AbsPath)
 	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
 		_, err = b.overwriteFile(name)
 		if err == nil {
@@ -105,7 +105,7 @@ func (b *Buffer) RemoveBackup() {
 	if !b.Settings["backup"].(bool) || b.keepBackup() || b.Path == "" || b.Type != BTDefault {
 		return
 	}
-	f := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
+	f := util.DeterminePath(b.backupDir(), b.AbsPath)
 	os.Remove(f)
 }
 
@@ -113,7 +113,7 @@ func (b *Buffer) RemoveBackup() {
 // Returns true if a backup was applied
 func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
 	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
-		backupfile := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
+		backupfile := util.DeterminePath(b.backupDir(), b.AbsPath)
 		if info, err := os.Stat(backupfile); err == nil {
 			backup, err := os.Open(backupfile)
 			if err == nil {
