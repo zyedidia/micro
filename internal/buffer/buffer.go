@@ -126,18 +126,34 @@ type SharedBuffer struct {
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
-	b.isModified = true
 	b.HasSuggestions = false
 	b.LineArray.insert(pos, value)
+	b.setModified()
 
 	inslines := bytes.Count(value, []byte{'\n'})
 	b.MarkModified(pos.Y, pos.Y+inslines)
 }
+
 func (b *SharedBuffer) remove(start, end Loc) []byte {
-	b.isModified = true
 	b.HasSuggestions = false
+	defer b.setModified()
 	defer b.MarkModified(start.Y, end.Y)
 	return b.LineArray.remove(start, end)
+}
+
+func (b *SharedBuffer) setModified() {
+	if b.Type.Scratch {
+		return
+	}
+
+	if b.Settings["fastdirty"].(bool) {
+		b.isModified = true
+	} else {
+		var buff [md5.Size]byte
+
+		b.calcHash(&buff)
+		b.isModified = buff != b.origHash
+	}
 }
 
 // calcHash calculates md5 hash of all lines in the buffer
@@ -653,18 +669,7 @@ func (b *Buffer) Shared() bool {
 // Modified returns if this buffer has been modified since
 // being opened
 func (b *Buffer) Modified() bool {
-	if b.Type.Scratch {
-		return false
-	}
-
-	if b.Settings["fastdirty"].(bool) {
-		return b.isModified
-	}
-
-	var buff [md5.Size]byte
-
-	b.calcHash(&buff)
-	return buff != b.origHash
+	return b.isModified
 }
 
 // Size returns the number of bytes in the current buffer
@@ -1233,7 +1238,6 @@ func (b *Buffer) FindMatchingBrace(start Loc) (Loc, bool, bool) {
 func (b *Buffer) Retab() {
 	toSpaces := b.Settings["tabstospaces"].(bool)
 	tabsize := util.IntOpt(b.Settings["tabsize"])
-	dirty := false
 
 	for i := 0; i < b.LinesNum(); i++ {
 		l := b.LineBytes(i)
@@ -1254,10 +1258,9 @@ func (b *Buffer) Retab() {
 		b.Unlock()
 
 		b.MarkModified(i, i)
-		dirty = true
 	}
 
-	b.isModified = dirty
+	b.setModified()
 }
 
 // ParseCursorLocation turns a cursor location like 10:5 (LINE:COL)

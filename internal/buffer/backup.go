@@ -125,7 +125,7 @@ func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
 				if choice%3 == 0 {
 					// recover
 					b.LineArray = NewLineArray(uint64(fsize), FFAuto, backup)
-					b.isModified = true
+					b.setModified()
 					return true, true
 				} else if choice%3 == 1 {
 					// delete

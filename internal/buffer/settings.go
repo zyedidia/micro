@@ -91,7 +91,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		case "dos":
 			b.Endings = FFDos
 		}
-		b.isModified = true
+		b.setModified()
 	} else if option == "syntax" {
 		if !nativeValue.(bool) {
 			b.ClearMatches()
@@ -105,7 +105,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 			b.Settings["encoding"] = "utf-8"
 		}
 		b.encoding = enc
-		b.isModified = true
+		b.setModified()
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
 	} else if option == "hlsearch" {
