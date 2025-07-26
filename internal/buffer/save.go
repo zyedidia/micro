@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
+	"strconv"
 	"sync/atomic"
 	"time"
 	"unicode"
@@ -26,6 +27,7 @@ import (
 const LargeFileThreshold = 50000
 
 type wrappedFile struct {
+	name        string
 	writeCloser io.WriteCloser
 	withSudo    bool
 	screenb     bool
@@ -83,7 +85,7 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 	var sigChan chan os.Signal
 
 	if withSudo {
-		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "conv=notrunc", "of="+name)
 		writeCloser, err = cmd.StdinPipe()
 		if err != nil {
 			return wrappedFile{}, err
@@ -113,7 +115,68 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 		}
 	}
 
-	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
+	return wrappedFile{name, writeCloser, withSudo, screenb, cmd, sigChan}, nil
+}
+
+func (wf wrappedFile) Truncate(size int64) error {
+	if wf.withSudo {
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "truncate", "-s", strconv.FormatInt(size, 10), wf.name)
+
+		sigChan := make(chan os.Signal, 1)
+		signal.Reset(os.Interrupt)
+		signal.Notify(sigChan, os.Interrupt)
+		screenb := screen.TempFini()
+
+		err := cmd.Start()
+		if err != nil {
+			screen.TempStart(screenb)
+
+			signal.Notify(util.Sigterm, os.Interrupt)
+			signal.Stop(sigChan)
+
+			return err
+		}
+
+		err = cmd.Wait()
+
+		screen.TempStart(screenb)
+		signal.Notify(util.Sigterm, os.Interrupt)
+		signal.Stop(sigChan)
+
+		return err
+	}
+	return wf.writeCloser.(*os.File).Truncate(size)
+}
+
+func (wf wrappedFile) Sync() error {
+	// Call Sync() on the file to make sure the content is safely on disk.
+	if wf.withSudo {
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "sync", wf.name)
+
+		sigChan := make(chan os.Signal, 1)
+		signal.Reset(os.Interrupt)
+		signal.Notify(sigChan, os.Interrupt)
+		screenb := screen.TempFini()
+
+		err := cmd.Start()
+		if err != nil {
+			screen.TempStart(screenb)
+
+			signal.Notify(util.Sigterm, os.Interrupt)
+			signal.Stop(sigChan)
+
+			return err
+		}
+
+		err = cmd.Wait()
+
+		screen.TempStart(screenb)
+		signal.Notify(util.Sigterm, os.Interrupt)
+		signal.Stop(sigChan)
+
+		return err
+	}
+	return wf.writeCloser.(*os.File).Sync()
 }
 
 func (wf wrappedFile) Write(b *Buffer) (int, error) {
@@ -134,12 +197,9 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 		eol = []byte{'\n'}
 	}
 
-	if !wf.withSudo {
-		f := wf.writeCloser.(*os.File)
-		err := f.Truncate(0)
-		if err != nil {
-			return 0, err
-		}
+	err := wf.Truncate(0)
+	if err != nil {
+		return 0, err
 	}
 
 	// write lines
@@ -160,9 +220,7 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 
 	err = file.Flush()
 	if err == nil && !wf.withSudo {
-		// Call Sync() on the file to make sure the content is safely on disk.
-		f := wf.writeCloser.(*os.File)
-		err = f.Sync()
+		err = wf.Sync()
 	}
 	return size, err
 }
@@ -180,6 +238,7 @@ func (wf wrappedFile) Close() error {
 		if err != nil {
 			return err
 		}
+		return wf.Sync()
 	}
 	return err
 }
@@ -373,7 +432,6 @@ func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error
 			os.Remove(path)
 		}
 	}()
-
 
 	// Try to backup first before writing
 	backupName, err := b.writeBackup(path)
