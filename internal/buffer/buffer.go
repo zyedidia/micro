@@ -140,6 +140,26 @@ func (b *SharedBuffer) remove(start, end Loc) []byte {
 	return b.LineArray.remove(start, end)
 }
 
+// calcHash calculates md5 hash of all lines in the buffer
+func (b *SharedBuffer) calcHash(out *[md5.Size]byte) {
+	h := md5.New()
+
+	if len(b.lines) > 0 {
+		h.Write(b.lines[0].data)
+
+		for _, l := range b.lines[1:] {
+			if b.Endings == FFDos {
+				h.Write([]byte{'\r', '\n'})
+			} else {
+				h.Write([]byte{'\n'})
+			}
+			h.Write(l.data)
+		}
+	}
+
+	h.Sum((*out)[:0])
+}
+
 // MarkModified marks the buffer as modified for this frame
 // and performs rehighlighting if syntax highlighting is enabled
 func (b *SharedBuffer) MarkModified(start, end int) {
@@ -416,7 +436,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		} else if !hasBackup {
 			// since applying a backup does not save the applied backup to disk, we should
 			// not calculate the original hash based on the backup data
-			calcHash(b, &b.origHash)
+			b.calcHash(&b.origHash)
 		}
 	}
 
@@ -558,7 +578,7 @@ func (b *Buffer) ReOpen() error {
 		if len(data) > LargeFileThreshold {
 			b.Settings["fastdirty"] = true
 		} else {
-			calcHash(b, &b.origHash)
+			b.calcHash(&b.origHash)
 		}
 	}
 	b.isModified = false
@@ -643,7 +663,7 @@ func (b *Buffer) Modified() bool {
 
 	var buff [md5.Size]byte
 
-	calcHash(b, &buff)
+	b.calcHash(&buff)
 	return buff != b.origHash
 }
 
@@ -661,26 +681,6 @@ func (b *Buffer) Size() int {
 		}
 	}
 	return nb
-}
-
-// calcHash calculates md5 hash of all lines in the buffer
-func calcHash(b *Buffer, out *[md5.Size]byte) {
-	h := md5.New()
-
-	if len(b.lines) > 0 {
-		h.Write(b.lines[0].data)
-
-		for _, l := range b.lines[1:] {
-			if b.Endings == FFDos {
-				h.Write([]byte{'\r', '\n'})
-			} else {
-				h.Write([]byte{'\n'})
-			}
-			h.Write(l.data)
-		}
-	}
-
-	h.Sum((*out)[:0])
 }
 
 func parseDefFromFile(f config.RuntimeFile, header *highlight.Header) *highlight.Def {

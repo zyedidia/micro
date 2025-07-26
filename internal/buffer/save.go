@@ -318,7 +318,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 			// For large files 'fastdirty' needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			calcHash(b, &b.origHash)
+			b.calcHash(&b.origHash)
 		}
 	}
 

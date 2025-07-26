@@ -73,7 +73,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 				b.Settings["fastdirty"] = true
 			} else {
 				if !b.isModified {
-					calcHash(b, &b.origHash)
+					b.calcHash(&b.origHash)
 				} else {
 					// prevent using an old stale origHash value
 					b.origHash = [md5.Size]byte{}
