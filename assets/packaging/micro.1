@@ -30,7 +30,9 @@ Specify a custom location for the configuration directory
 .RE
 
 .PP
-[FILE]:LINE:COL
+FILE[:LINE:COL] (if the `parsecursor` option is enabled)
+.br
+FILE +LINE:COL
 .RS 4
 Specify a line and column to start the cursor at when opening a buffer
 .RE
@@ -48,6 +50,12 @@ Enable debug mode (enables logging to ./log.txt)
 .RE
 
 .PP
+\-profile
+.RS 4
+Enable CPU profiling (writes profile info to ./micro.prof so it can be analyzed later with "go tool pprof micro.prof")
+.RE
+
+.PP
 \-version
 .RS 4
 Show the version number and information
@@ -55,6 +63,12 @@ Show the version number and information
 
 Micro's plugins can be managed at the command line with the following commands.
 .RS 4
+
+.PP
+\-plugin install [PLUGIN]...
+.RS 4
+Install plugin(s)
+.RE
 
 .PP
 \-plugin remove [PLUGIN]...
@@ -95,9 +109,14 @@ file (see 'help options').
 .PP
 \-option value
 .RS 4
-Set `option` to `value` for this session
+Set `option` to `value` for this session.
+.br
 For example: `micro -syntax off file.c`
 .RE
+.RE
+
+.PP
+Use `micro -options` to see the full list of configuration options.
 
 
 .SH CONFIGURATION
