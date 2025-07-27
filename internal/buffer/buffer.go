@@ -123,6 +123,8 @@ type SharedBuffer struct {
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
+
+	fini int32
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
@@ -223,7 +225,6 @@ type Buffer struct {
 	*EventHandler
 	*SharedBuffer
 
-	fini        int32
 	cursors     []*Cursor
 	curCursor   int
 	StartCursor Loc

@@ -47,11 +47,11 @@ type saveRequest struct {
 }
 
 var saveRequestChan chan saveRequest
-var backupRequestChan chan *Buffer
+var backupRequestChan chan *SharedBuffer
 
 func init() {
 	saveRequestChan = make(chan saveRequest, 10)
-	backupRequestChan = make(chan *Buffer, 10)
+	backupRequestChan = make(chan *SharedBuffer, 10)
 
 	go func() {
 		duration := backupSeconds * float64(time.Second)
@@ -116,7 +116,7 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
 }
 
-func (wf wrappedFile) Write(b *Buffer) (int, error) {
+func (wf wrappedFile) Write(b *SharedBuffer) (int, error) {
 	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, b.encoding.NewEncoder()))
 
 	b.Lock()
@@ -184,7 +184,7 @@ func (wf wrappedFile) Close() error {
 	return err
 }
 
-func (b *Buffer) overwriteFile(name string) (int, error) {
+func (b *SharedBuffer) overwriteFile(name string) (int, error) {
 	file, err := openFile(name, false)
 	if err != nil {
 		return 0, err
@@ -335,7 +335,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	return err
 }
 
-func (b *Buffer) writeBackup(path string) (string, error) {
+func (b *SharedBuffer) writeBackup(path string) (string, error) {
 	backupDir := b.backupDir()
 	if _, err := os.Stat(backupDir); err != nil {
 		if !errors.Is(err, fs.ErrNotExist) {
@@ -360,7 +360,7 @@ func (b *Buffer) writeBackup(path string) (string, error) {
 // contents of the file if it fails to write the new contents.
 // This means that the file is not overwritten directly but by writing to the
 // backup file first.
-func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error) {
+func (b *SharedBuffer) safeWrite(path string, withSudo bool, newFile bool) (int, error) {
 	file, err := openFile(path, withSudo)
 	if err != nil {
 		return 0, err

@@ -34,13 +34,13 @@ Options: [r]ecover, [i]gnore, [a]bort: `
 
 const backupSeconds = 8
 
-var BackupCompleteChan chan *Buffer
+var BackupCompleteChan chan *SharedBuffer
 
 func init() {
-	BackupCompleteChan = make(chan *Buffer, 10)
+	BackupCompleteChan = make(chan *SharedBuffer, 10)
 }
 
-func (b *Buffer) RequestBackup() {
+func (b *SharedBuffer) RequestBackup() {
 	if !b.RequestedBackup {
 		select {
 		case backupRequestChan <- b:
@@ -51,7 +51,7 @@ func (b *Buffer) RequestBackup() {
 	}
 }
 
-func (b *Buffer) backupDir() string {
+func (b *SharedBuffer) backupDir() string {
 	backupdir, err := util.ReplaceHome(b.Settings["backupdir"].(string))
 	if backupdir == "" || err != nil {
 		backupdir = filepath.Join(config.ConfigDir, "backups")
@@ -59,12 +59,12 @@ func (b *Buffer) backupDir() string {
 	return backupdir
 }
 
-func (b *Buffer) keepBackup() bool {
+func (b *SharedBuffer) keepBackup() bool {
 	return b.forceKeepBackup || b.Settings["permbackup"].(bool)
 }
 
 // Backup saves the current buffer to the backups directory
-func (b *Buffer) Backup() error {
+func (b *SharedBuffer) Backup() error {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return nil
 	}
@@ -101,7 +101,7 @@ func (b *Buffer) Backup() error {
 }
 
 // RemoveBackup removes any backup file associated with this buffer
-func (b *Buffer) RemoveBackup() {
+func (b *SharedBuffer) RemoveBackup() {
 	if !b.Settings["backup"].(bool) || b.keepBackup() || b.Path == "" || b.Type != BTDefault {
 		return
 	}
@@ -111,7 +111,7 @@ func (b *Buffer) RemoveBackup() {
 
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
 // Returns true if a backup was applied
-func (b *Buffer) ApplyBackup(fsize int64) (bool, bool) {
+func (b *SharedBuffer) ApplyBackup(fsize int64) (bool, bool) {
 	if b.Settings["backup"].(bool) && !b.Settings["permbackup"].(bool) && len(b.Path) > 0 && b.Type == BTDefault {
 		backupfile := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
 		if info, err := os.Stat(backupfile); err == nil {
