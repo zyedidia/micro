@@ -609,7 +609,7 @@ func UpdatePlugins(out io.Writer, plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
 		for _, p := range Plugins {
-			if !p.IsLoaded() || p.Builtin {
+			if !p.IsLoaded() || p.Builtin || p.Name == "initlua" {
 				continue
 			}
 			plugins = append(plugins, p.Name)
@@ -668,6 +668,10 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 	case "remove":
 		removed := ""
 		for _, plugin := range args {
+			if plugin == "initlua" {
+				fmt.Fprintln(out, "initlua cannot be removed, but can be disabled via settings.")
+				continue
+			}
 			// check if the plugin exists.
 			for _, p := range Plugins {
 				if p.Name == plugin && p.Builtin {
@@ -692,7 +696,9 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 		plugins := GetInstalledVersions(false)
 		fmt.Fprintln(out, "The following plugins are currently installed:")
 		for _, p := range plugins {
-			if p.Pack().Builtin {
+			if p.Pack().Name == "initlua" {
+				fmt.Fprintf(out, "%s\n", "initlua")
+			} else if p.Pack().Builtin {
 				fmt.Fprintf(out, "%s (built-in)\n", p.Pack().Name)
 			} else {
 				fmt.Fprintf(out, "%s (%s)\n", p.Pack().Name, p.Version)
