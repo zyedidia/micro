@@ -11,7 +11,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"sync/atomic"
 	"time"
 	"unicode"
 
@@ -47,11 +46,14 @@ type saveRequest struct {
 }
 
 var saveRequestChan chan saveRequest
-var backupRequestChan chan *SharedBuffer
+var backupRequestChan chan backupRequest
 
 func init() {
-	saveRequestChan = make(chan saveRequest, 10)
-	backupRequestChan = make(chan *SharedBuffer, 10)
+	// Both saveRequestChan and backupRequestChan need to be non-buffered
+	// so the save/backup goroutine receives both save and backup requests
+	// in the same order the main goroutine sends them.
+	saveRequestChan = make(chan saveRequest)
+	backupRequestChan = make(chan backupRequest)
 
 	go func() {
 		duration := backupSeconds * float64(time.Second)
@@ -62,14 +64,10 @@ func init() {
 			case sr := <-saveRequestChan:
 				size, err := sr.buf.safeWrite(sr.path, sr.withSudo, sr.newFile)
 				sr.saveResponseChan <- saveResponse{size, err}
+			case br := <-backupRequestChan:
+				handleBackupRequest(br)
 			case <-backupTicker.C:
-				for len(backupRequestChan) > 0 {
-					b := <-backupRequestChan
-					bfini := atomic.LoadInt32(&(b.fini)) != 0
-					if !bfini {
-						b.Backup()
-					}
-				}
+				periodicBackup()
 			}
 		}
 	}()
@@ -379,6 +377,9 @@ func (b *SharedBuffer) safeWrite(path string, withSudo bool, newFile bool) (int,
 		file.Close()
 		return 0, err
 	}
+
+	// Backup saved, so cancel pending periodic backup, if any
+	delete(requestedBackups, b)
 
 	b.forceKeepBackup = true
 	size := 0

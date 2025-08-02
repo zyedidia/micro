@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	luar "layeh.com/gopher-luar"
@@ -101,7 +100,6 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	RequestedBackup bool
 	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
@@ -123,8 +121,6 @@ type SharedBuffer struct {
 
 	// Hash of the original buffer -- empty if fastdirty is on
 	origHash [md5.Size]byte
-
-	fini int32
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
@@ -495,13 +491,11 @@ func (b *Buffer) Fini() {
 	if !b.Modified() {
 		b.Serialize()
 	}
-	b.RemoveBackup()
+	b.CancelBackup()
 
 	if b.Type == BTStdout {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
 	}
-
-	atomic.StoreInt32(&(b.fini), int32(1))
 }
 
 // GetName returns the name that should be displayed in the statusline

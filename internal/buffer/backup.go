@@ -34,20 +34,49 @@ Options: [r]ecover, [i]gnore, [a]bort: `
 
 const backupSeconds = 8
 
-var BackupCompleteChan chan *SharedBuffer
+type backupRequestType int
+
+const (
+	backupCreate = iota
+	backupRemove
+)
+
+type backupRequest struct {
+	buf     *SharedBuffer
+	reqType backupRequestType
+}
+
+var requestedBackups map[*SharedBuffer]bool
 
 func init() {
-	BackupCompleteChan = make(chan *SharedBuffer, 10)
+	requestedBackups = make(map[*SharedBuffer]bool)
 }
 
 func (b *SharedBuffer) RequestBackup() {
-	if !b.RequestedBackup {
-		select {
-		case backupRequestChan <- b:
-		default:
-			// channel is full
+	backupRequestChan <- backupRequest{buf: b, reqType: backupCreate}
+}
+
+func (b *SharedBuffer) CancelBackup() {
+	backupRequestChan <- backupRequest{buf: b, reqType: backupRemove}
+}
+
+func handleBackupRequest(br backupRequest) {
+	switch br.reqType {
+	case backupCreate:
+		// schedule periodic backup
+		requestedBackups[br.buf] = true
+	case backupRemove:
+		br.buf.RemoveBackup()
+		delete(requestedBackups, br.buf)
+	}
+}
+
+func periodicBackup() {
+	for buf := range requestedBackups {
+		err := buf.Backup()
+		if err == nil {
+			delete(requestedBackups, buf)
 		}
-		b.RequestedBackup = true
 	}
 }
 
@@ -77,9 +106,6 @@ func (b *SharedBuffer) Backup() error {
 	name := util.DetermineEscapePath(backupdir, b.AbsPath)
 	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
 		_, err = b.overwriteFile(name)
-		if err == nil {
-			BackupCompleteChan <- b
-		}
 		return err
 	}
 
@@ -94,8 +120,6 @@ func (b *SharedBuffer) Backup() error {
 		os.Remove(tmp)
 		return err
 	}
-
-	BackupCompleteChan <- b
 
 	return err
 }
