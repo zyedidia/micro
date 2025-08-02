@@ -352,9 +352,11 @@ func main() {
 			} else {
 				fmt.Println("Micro encountered an error:", errors.Wrap(err, 2).ErrorStack(), "\nIf you can reproduce this error, please report it at https://github.com/zyedidia/micro/issues")
 			}
-			// backup all open buffers
+			// immediately backup all buffers with unsaved changes
 			for _, b := range buffer.OpenBuffers {
-				b.Backup()
+				if b.Modified() {
+					b.Backup()
+				}
 			}
 			exit(1)
 		}
