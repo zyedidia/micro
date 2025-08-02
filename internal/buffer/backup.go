@@ -126,7 +126,7 @@ func (b *SharedBuffer) Backup() error {
 
 // RemoveBackup removes any backup file associated with this buffer
 func (b *SharedBuffer) RemoveBackup() {
-	if !b.Settings["backup"].(bool) || b.keepBackup() || b.Path == "" || b.Type != BTDefault {
+	if b.keepBackup() || b.Path == "" || b.Type != BTDefault {
 		return
 	}
 	f := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
