@@ -104,18 +104,8 @@ func (b *SharedBuffer) writeBackup(path string) (string, error) {
 	}
 
 	name := util.DetermineEscapePath(backupdir, path)
-
-	// If no existing backup, just write the backup.
-	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
-		_, err = b.overwriteFile(name)
-		if err != nil {
-			os.Remove(name)
-		}
-		return name, err
-	}
-
-	// If a backup already exists, replace it atomically.
 	tmp := util.AppendBackupSuffix(name)
+
 	_, err := b.overwriteFile(tmp)
 	if err != nil {
 		os.Remove(tmp)
