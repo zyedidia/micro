@@ -152,6 +152,12 @@ func (b *SharedBuffer) setModified() {
 		b.calcHash(&buff)
 		b.isModified = buff != b.origHash
 	}
+
+	if b.isModified {
+		b.RequestBackup()
+	} else {
+		b.CancelBackup()
+	}
 }
 
 // calcHash calculates md5 hash of all lines in the buffer
@@ -525,8 +531,6 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
-
-		b.RequestBackup()
 	}
 }
 
@@ -536,8 +540,6 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
-
-		b.RequestBackup()
 	}
 }
 
