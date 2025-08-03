@@ -92,35 +92,51 @@ func (b *SharedBuffer) keepBackup() bool {
 	return b.forceKeepBackup || b.Settings["permbackup"].(bool)
 }
 
-// Backup saves the current buffer to the backups directory
+func (b *SharedBuffer) writeBackup(path string) (string, error) {
+	backupdir := b.backupDir()
+	if _, err := os.Stat(backupdir); err != nil {
+		if !errors.Is(err, fs.ErrNotExist) {
+			return "", err
+		}
+		if err = os.Mkdir(backupdir, os.ModePerm); err != nil {
+			return "", err
+		}
+	}
+
+	name := util.DetermineEscapePath(backupdir, path)
+
+	// If no existing backup, just write the backup.
+	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
+		_, err = b.overwriteFile(name)
+		if err != nil {
+			os.Remove(name)
+		}
+		return name, err
+	}
+
+	// If a backup already exists, replace it atomically.
+	tmp := util.AppendBackupSuffix(name)
+	_, err := b.overwriteFile(tmp)
+	if err != nil {
+		os.Remove(tmp)
+		return name, err
+	}
+	err = os.Rename(tmp, name)
+	if err != nil {
+		os.Remove(tmp)
+		return name, err
+	}
+
+	return name, nil
+}
+
+// Backup saves the buffer to the backups directory
 func (b *SharedBuffer) Backup() error {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
 		return nil
 	}
 
-	backupdir := b.backupDir()
-	if _, err := os.Stat(backupdir); errors.Is(err, fs.ErrNotExist) {
-		os.Mkdir(backupdir, os.ModePerm)
-	}
-
-	name := util.DetermineEscapePath(backupdir, b.AbsPath)
-	if _, err := os.Stat(name); errors.Is(err, fs.ErrNotExist) {
-		_, err = b.overwriteFile(name)
-		return err
-	}
-
-	tmp := util.AppendBackupSuffix(name)
-	_, err := b.overwriteFile(tmp)
-	if err != nil {
-		os.Remove(tmp)
-		return err
-	}
-	err = os.Rename(tmp, name)
-	if err != nil {
-		os.Remove(tmp)
-		return err
-	}
-
+	_, err := b.writeBackup(b.AbsPath)
 	return err
 }
 
