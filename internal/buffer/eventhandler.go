@@ -57,16 +57,10 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 	text := t.Deltas[0].Text
 	start := t.Deltas[0].Start
 	end := t.Deltas[0].End
-	lastnl := -1
 	var textX int
+	var isMultiLine bool
 	if t.EventType == TextEventInsert {
-		textcount := util.CharacterCount(text)
-		lastnl = bytes.LastIndex(text, []byte{'\n'})
-		if lastnl >= 0 {
-			textX = util.CharacterCount(text[lastnl+1:])
-		} else {
-			textX = textcount
-		}
+		textX, isMultiLine = util.GetTextLengthAfterLastLinebreak(text)
 	}
 
 	for _, c := range eh.cursors {
@@ -76,7 +70,7 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 					loc.Y += end.Y - start.Y
 				} else if loc.Y == start.Y && loc.GreaterEqual(start) {
 					loc.Y += end.Y - start.Y
-					if lastnl >= 0 {
+					if isMultiLine {
 						loc.X += textX - start.X
 					} else {
 						loc.X += textX
