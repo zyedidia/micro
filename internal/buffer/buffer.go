@@ -125,14 +125,15 @@ type SharedBuffer struct {
 	origHash [md5.Size]byte
 }
 
-func (b *SharedBuffer) insert(pos Loc, value []byte) {
+func (b *SharedBuffer) insert(pos Loc, value []byte) Loc {
 	b.isModified = true
 	b.HasSuggestions = false
-	b.LineArray.insert(pos, value)
+	endPos := b.LineArray.insert(pos, value)
 
-	inslines := bytes.Count(value, []byte{'\n'})
-	b.MarkModified(pos.Y, pos.Y+inslines)
+	b.MarkModified(pos.Y, endPos.Y)
+	return endPos
 }
+
 func (b *SharedBuffer) remove(start, end Loc) []byte {
 	b.isModified = true
 	b.HasSuggestions = false

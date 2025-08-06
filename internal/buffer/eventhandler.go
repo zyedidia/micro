@@ -43,7 +43,6 @@ type Delta struct {
 
 // DoTextEvent runs a text event
 func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
-	oldl := eh.buf.LinesNum()
 
 	if useUndo {
 		eh.Execute(t)
@@ -57,23 +56,18 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 
 	text := t.Deltas[0].Text
 	start := t.Deltas[0].Start
+	end := t.Deltas[0].End
 	lastnl := -1
-	var endX int
 	var textX int
 	if t.EventType == TextEventInsert {
-		linecount := eh.buf.LinesNum() - oldl
 		textcount := util.CharacterCount(text)
 		lastnl = bytes.LastIndex(text, []byte{'\n'})
 		if lastnl >= 0 {
-			endX = util.CharacterCount(text[lastnl+1:])
-			textX = endX
+			textX = util.CharacterCount(text[lastnl+1:])
 		} else {
-			endX = start.X + textcount
 			textX = textcount
 		}
-		t.Deltas[0].End = clamp(Loc{endX, start.Y + linecount}, eh.buf.LineArray)
 	}
-	end := t.Deltas[0].End
 
 	for _, c := range eh.cursors {
 		move := func(loc Loc) Loc {
@@ -115,8 +109,8 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 // ExecuteTextEvent runs a text event
 func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 	if t.EventType == TextEventInsert {
-		for _, d := range t.Deltas {
-			buf.insert(d.Start, d.Text)
+		for i, d := range t.Deltas {
+			t.Deltas[i].End = buf.insert(d.Start, d.Text)
 		}
 	} else if t.EventType == TextEventRemove {
 		for i, d := range t.Deltas {
@@ -125,9 +119,8 @@ func ExecuteTextEvent(t *TextEvent, buf *SharedBuffer) {
 	} else if t.EventType == TextEventReplace {
 		for i, d := range t.Deltas {
 			t.Deltas[i].Text = buf.remove(d.Start, d.End)
-			buf.insert(d.Start, d.Text)
 			t.Deltas[i].Start = d.Start
-			t.Deltas[i].End = Loc{d.Start.X + util.CharacterCount(d.Text), d.Start.Y}
+			t.Deltas[i].End = buf.insert(d.Start, d.Text)
 		}
 		for i, j := 0, len(t.Deltas)-1; i < j; i, j = i+1, j-1 {
 			t.Deltas[i], t.Deltas[j] = t.Deltas[j], t.Deltas[i]
