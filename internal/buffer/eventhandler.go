@@ -286,6 +286,11 @@ func (eh *EventHandler) Undo() bool {
 		}
 
 		eh.UndoOneEvent()
+
+		t = eh.UndoStack.Peek()
+		if t == nil || t.EventType == TextEventReplace {
+			break
+		}
 	}
 	return true
 }
@@ -333,6 +338,11 @@ func (eh *EventHandler) Redo() bool {
 		}
 
 		eh.RedoOneEvent()
+
+		t = eh.UndoStack.Peek()
+		if t == nil || t.EventType == TextEventReplace {
+			break
+		}
 	}
 	return true
 }
