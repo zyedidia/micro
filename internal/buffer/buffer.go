@@ -511,6 +511,17 @@ func (b *Buffer) Remove(start, end Loc) {
 	}
 }
 
+// Replace replaces the characters between the start and end locations with the given text
+func (b *Buffer) Replace(start, end Loc, text string) {
+	if !b.Type.Readonly {
+		b.EventHandler.cursors = b.cursors
+		b.EventHandler.active = b.curCursor
+		b.EventHandler.Replace(start, end, text)
+
+		b.RequestBackup()
+	}
+}
+
 // FileType returns the buffer's filetype
 func (b *Buffer) FileType() string {
 	return b.Settings["filetype"].(string)

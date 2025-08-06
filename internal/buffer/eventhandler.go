@@ -43,6 +43,8 @@ type Delta struct {
 
 // DoTextEvent runs a text event
 func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
+	oldend := t.Deltas[0].End
+	oldtext := t.Deltas[0].Text
 
 	if useUndo {
 		eh.Execute(t)
@@ -54,6 +56,29 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 		return
 	}
 
+	moveCursorInsert := func(loc, start, end Loc, textX int, isMultiLine bool) Loc {
+		if start.Y != loc.Y && loc.GreaterThan(start) {
+			loc.Y += end.Y - start.Y
+		} else if loc.Y == start.Y && loc.GreaterEqual(start) {
+			loc.Y += end.Y - start.Y
+			if isMultiLine {
+				loc.X += textX - start.X
+			} else {
+				loc.X += textX
+			}
+		}
+		return loc
+	}
+
+	moveCursorRemove := func(loc, start, end Loc) Loc {
+		if loc.Y != end.Y && loc.GreaterThan(end) {
+			loc.Y -= end.Y - start.Y
+		} else if loc.Y == end.Y && loc.GreaterEqual(end) {
+			loc = loc.MoveLA(-DiffLA(start, end, eh.buf.LineArray), eh.buf.LineArray)
+		}
+		return loc
+	}
+
 	text := t.Deltas[0].Text
 	start := t.Deltas[0].Start
 	end := t.Deltas[0].End
@@ -61,36 +86,30 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 	var isMultiLine bool
 	if t.EventType == TextEventInsert {
 		textX, isMultiLine = util.GetTextLengthAfterLastLinebreak(text)
+	} else if t.EventType == TextEventReplace {
+		textX, isMultiLine = util.GetTextLengthAfterLastLinebreak(oldtext)
+	}
+
+	moveCursor := func(loc Loc) Loc {
+		if t.EventType == TextEventInsert {
+			return moveCursorInsert(loc, start, end, textX, isMultiLine)
+		} else if t.EventType == TextEventRemove {
+			return moveCursorRemove(loc, start, end)
+		} else {
+			loc = moveCursorRemove(loc, start, oldend)
+			return moveCursorInsert(loc, start, end, textX, isMultiLine)
+		}
 	}
 
 	for _, c := range eh.cursors {
-		move := func(loc Loc) Loc {
-			if t.EventType == TextEventInsert {
-				if start.Y != loc.Y && loc.GreaterThan(start) {
-					loc.Y += end.Y - start.Y
-				} else if loc.Y == start.Y && loc.GreaterEqual(start) {
-					loc.Y += end.Y - start.Y
-					if isMultiLine {
-						loc.X += textX - start.X
-					} else {
-						loc.X += textX
-					}
-				}
-				return loc
-			} else {
-				if loc.Y != end.Y && loc.GreaterThan(end) {
-					loc.Y -= end.Y - start.Y
-				} else if loc.Y == end.Y && loc.GreaterEqual(end) {
-					loc = loc.MoveLA(-DiffLA(start, end, eh.buf.LineArray), eh.buf.LineArray)
-				}
-				return loc
-			}
+		if c.Num < t.C.Num {
+			continue
 		}
-		c.Loc = move(c.Loc)
-		c.CurSelection[0] = move(c.CurSelection[0])
-		c.CurSelection[1] = move(c.CurSelection[1])
-		c.OrigSelection[0] = move(c.OrigSelection[0])
-		c.OrigSelection[1] = move(c.OrigSelection[1])
+		c.Loc = moveCursor(c.Loc)
+		c.CurSelection[0] = moveCursor(c.CurSelection[0])
+		c.CurSelection[1] = moveCursor(c.CurSelection[1])
+		c.OrigSelection[0] = moveCursor(c.OrigSelection[0])
+		c.OrigSelection[1] = moveCursor(c.OrigSelection[1])
 		c.Relocate()
 		c.StoreVisualX()
 	}
@@ -217,8 +236,14 @@ func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 
 // Replace deletes from start to end and replaces it with the given string
 func (eh *EventHandler) Replace(start, end Loc, replace string) {
-	eh.Remove(start, end)
-	eh.Insert(start, replace)
+	text := []byte(replace)
+	e := &TextEvent{
+		C:         *eh.cursors[eh.active],
+		EventType: TextEventReplace,
+		Deltas:    []Delta{{text, start, end}},
+		Time:      time.Now(),
+	}
+	eh.DoTextEvent(e, true)
 }
 
 // Execute a textevent and add it to the undo stack
