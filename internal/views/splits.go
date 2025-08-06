@@ -147,6 +147,7 @@ func (n *Node) vResizeSplit(i int, size int) bool {
 	var c1, c2 *Node
 	if i == len(n.children)-1 {
 		c1, c2 = n.children[i-1], n.children[i]
+		size = c1.H + c2.H - size
 	} else {
 		c1, c2 = n.children[i], n.children[i+1]
 	}
@@ -168,6 +169,7 @@ func (n *Node) hResizeSplit(i int, size int) bool {
 	var c1, c2 *Node
 	if i == len(n.children)-1 {
 		c1, c2 = n.children[i-1], n.children[i]
+		size = c1.W + c2.W - size
 	} else {
 		c1, c2 = n.children[i], n.children[i+1]
 	}
