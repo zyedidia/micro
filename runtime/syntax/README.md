@@ -1,6 +1,7 @@
 # Syntax Files
 
-Here are micro's syntax files.
+Here are micro's syntax files. You can copy any of these to `~/.config/micro/syntax` and adjust however you like.
+Most of them originate from Nano, specifically from [this repository](https://github.com/scopatz/nanorc).
 
 Each yaml file specifies how to detect the filetype based on file extension or header (first line of the line).
 In addition, a signature can be provided to help resolving ambiguities when multiple matching filetypes are detected.
@@ -22,17 +23,6 @@ Most of the syntax files here have been converted using that tool.
 Note that the tool isn't perfect and though it is unlikely, you may run into some small issues that you will have to fix manually
 (about 4 files from this directory had issues after being converted).
 
-# Micro syntax highlighting files
-
-These are the syntax highlighting files for micro. To install them, just
-put all the syntax files in `~/.config/micro/syntax`.
-
-They are taken from Nano, specifically from [this repository](https://github.com/scopatz/nanorc).
-Micro syntax files are almost identical to Nano's, except for some key differences:
-
-* Micro does not use `icolor`. Instead, for a case insensitive match, use the case insensitive flag (`i`) in the regular expression
-    * For example, `icolor green ".*"` would become `color green "(?i).*"`
-
 # Incompatibilities with older versions of micro
 
 With PR [#3458](https://github.com/zyedidia/micro/pull/3458) resp. commit
@@ -46,30 +36,16 @@ you have to add these `rules: []` to all regions not including `rules` already.
 Otherwise you need to use syntax definitions before the above mentioned PR
 for example from version [v2.0.14](https://github.com/zyedidia/micro/tree/v2.0.14).
 
-# Using with colorschemes
+# Usage with colorschemes
 
-Not all of these files have been converted to use micro's colorscheme feature. Most of them just hardcode the colors, which can be problematic depending on the colorscheme you use.
+All of these files use micro's colorscheme feature, except a few that hardcode some colors, which can be problematic depending on the colorscheme you use.
 
-Here is a list of the files that have been converted to properly use colorschemes:
+Here is a list of files that currently use hardcoded colors in some cases:
 
-* vi
-* go
-* c
-* d
-* markdown
-* html
-* lua
-* swift
-* rust
-* java
-* javascript
-* pascal
-* python
-* ruby
-* sh
-* git
-* tex
-* solidity
+* [`erb.yaml`](erb.yaml)
+* [`kickstart.yaml`](kickstart.yaml)
+* [`man.yaml`](man.yaml)
+* [`patch.yaml`](patch.yaml)
 
 # License
 

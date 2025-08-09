@@ -4,7 +4,7 @@ detect:
     filename: "git(config|modules)$|\\.git/config$"
 
 rules:
-    - constant: "\\<(true|false)\\>"
+    - constant: "\\b(true|false)\\b"
     - type.keyword: "^[[:space:]]*[^=]*="
     - constant: "^[[:space:]]*\\[.*\\]$"
     - constant: "\"(\\\\.|[^\"])*\"|'(\\\\.|[^'])*'"
