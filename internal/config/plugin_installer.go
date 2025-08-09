@@ -675,7 +675,7 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 			// check if the plugin exists.
 			for _, p := range Plugins {
 				if p.Name == plugin && p.Builtin {
-					fmt.Fprintln(out, "Built-in plugins cannot be removed, but can be disabled via settings.")
+					fmt.Fprintln(out, p.Name, "is a built-in plugin which cannot be removed, but can be disabled via settings.")
 					continue
 				}
 				if p.Name == plugin {
