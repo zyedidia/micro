@@ -15,6 +15,11 @@ rules:
     - symbol.operator: "[<>?:+*/-]|[+!<>=]?="
     - symbol.brackets: "[(){}\\[\\]]"
 
+    - constant.number: "\\b(0|[1-9][0-9]*)\\b"  # decimal
+    - constant.number: "\\b(0b[01]+)\\b"        # bin
+    - constant.number: "\\b(0o[0-7]+)\\b"       # oct
+    - constant.number: "\\b(0x[0-9a-fA-F]+)\\b" # hex
+
     # meson builtins
     - identifier: "\\b(add_global_arguments|add_global_link_arguments|add_languages|add_project_arguments|add_project_dependencies)\\b"
     - identifier: "\\b(add_project_link_arguments|add_test_setup|alias_target|assert|benchmark|both_libraries|build_machine|build_target|configuration_data)\\b"
