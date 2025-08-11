@@ -47,10 +47,7 @@ color support comes in three flavors.
   displaying any colorscheme, but it should be noted that the user-configured
   16-color palette is ignored when using true-color mode (this means the
   colors while using the terminal emulator will be slightly off). Not all
-  terminals support true color but at this point most do. True color
-  support in micro is off by default but can be enabled by setting the
-  environment variable `MICRO_TRUECOLOR` to 1.  In addition your terminal
-  must support it (usually indicated by setting `$COLORTERM` to `truecolor`).
+  terminals support true color but at this point most do (see below).
   True-color colorschemes in micro typically end with `-tc`, such as
   `solarized-tc`, `atom-dark`, `material-tc`, etc... If true color is not
   enabled but a true color colorscheme is used, micro will do its best to
@@ -84,11 +81,12 @@ These may vary widely based on the 16 colors selected for your terminal.
 
 ### True color
 
-True color requires your terminal to support it. This means that the
-environment variable `COLORTERM` should have the value `truecolor`, `24bit`,
-or `24-bit`. In addition, to enable true color in micro, the environment
-variable `MICRO_TRUECOLOR` must be set to 1. Note that you have to create
-and set this variable yourself.
+Micro enables true color support by default as long as it detects that the
+terminal supports it (which is usually indicated by the environment variable
+`COLORTERM` being set to `truecolor`, `24bit` or `24-bit`). You can also force
+enabling it unconditionally by setting the option `truecolor` to `on` (or
+alternatively by setting the environment variable `MICRO_TRUECOLOR` to 1, which
+is supported for backward compatibility).
 
 * `solarized-tc`: this is the solarized colorscheme for true color.
 * `atom-dark`: this colorscheme is based off of Atom's "dark" colorscheme.
@@ -177,10 +175,14 @@ Here is a list of the colorscheme groups that you can use:
 * todo
 * selection (Color of the text selection)
 * statusline (Color of the statusline)
+* statusline.inactive (Color of the statusline of inactive split panes)
+* statusline.suggestions (Color of the autocomplete suggestions menu)
 * tabbar (Color of the tabbar that lists open files)
+* tabbar.active (Color of the active tab in the tabbar)
 * indent-char (Color of the character which indicates tabs if the option is
   enabled)
 * line-number
+* gutter-info
 * gutter-error
 * gutter-warning
 * diff-added
@@ -214,7 +216,7 @@ safe and recommended to use subgroups in your custom syntax files.
 For example if `constant.string` is found in your colorscheme, micro will us
 that for highlighting strings. If it's not found, it will use constant instead.
 Micro tries to match the largest set of groups it can find in the colorscheme
-definitions, so if, for examle `constant.bool.true` is found then micro will
+definitions, so if, for example `constant.bool.true` is found then micro will
 use that. If `constant.bool.true` is not found but `constant.bool` is found
 micro will use `constant.bool`. If not, it uses `constant`.
 
@@ -371,7 +373,6 @@ highlighted. For example:
     start: "\""
     end: "\""
     skip: "\\."
-    rules: []
 ```
 
 #### Includes
@@ -391,4 +392,30 @@ example, the following is possible for html:
     end: "</style.*?>"
     rules:
         - include: "css"
+```
+
+Note that nested include (i.e. including syntax files that include other syntax
+files) is not supported yet.
+
+### Default syntax highlighting
+
+If micro cannot detect the filetype of the file, it falls back to using the
+default syntax highlighting for it, which highlights just the bare minimum:
+email addresses, URLs etc.
+
+Just like in other cases, you can override the default highlighting by adding
+your own custom `default.yaml` file to `~/.config/micro/syntax`.
+
+For example, if you work with various config files that use the `#` sign to mark
+the beginning of a comment, you can use the following custom `default.yaml` to
+highlight those comments by default:
+
+```
+filetype: unknown
+
+detect:
+    filename: ""
+
+rules:
+    - comment: "(^|\\s)#.*$"
 ```

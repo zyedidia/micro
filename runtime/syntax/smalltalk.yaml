@@ -18,7 +18,6 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\."
-        rules: []
 
     - constant.string:
         start: "\""
@@ -50,6 +49,5 @@ rules:
     - constant.macro:
         start: "<<-?'?EOT'?"
         end: "^EOT"
-        rules: []
 
     - preproc.shebang: "^#!.+?( |$)"

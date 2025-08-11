@@ -18,24 +18,8 @@ Here is a picture of micro editing its source code.
 ![Screenshot](./assets/micro-solarized.png)
 
 To see more screenshots of micro, showcasing some of the default color schemes, see [here](https://micro-editor.github.io).
- 
+
 You can also check out the website for Micro at https://micro-editor.github.io.
-
-## Table of Contents
-
-- [Features](#features)
-- [Installation](#installation)
-  - [Prebuilt binaries](#pre-built-binaries)
-  - [Package Managers](#package-managers)
-  - [Building from source](#building-from-source)
-  - [Fully static binary](#fully-static-binary)
-  - [macOS terminal](#macos-terminal)
-  - [Linux clipboard support](#linux-clipboard-support)
-  - [Colors and syntax highlighting](#colors-and-syntax-highlighting)
-  - [Cygwin, Mingw, Plan9](#cygwin-mingw-plan9)
-- [Usage](#usage)
-- [Documentation and Help](#documentation-and-help)
-- [Contributing](#contributing)
 
 - - -
 
@@ -63,7 +47,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Syntax highlighting for over [130 languages](runtime/syntax).
 - Color scheme support.
   - By default, micro comes with 16, 256, and true color themes.
-- True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it).
+- True color support.
 - Copy and paste with the system clipboard.
 - Small and simple.
 - Easily configurable.
@@ -88,7 +72,7 @@ Pre-built binaries are distributed in [releases](https://github.com/zyedidia/mic
 
 To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
-#### Quick-install script
+#### Third-party quick-install script
 
 ```bash
 curl https://getmic.ro | bash
@@ -138,24 +122,33 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
 
 <!-- * `apt install micro` (Ubuntu 20.04 `focal`, and Debian `unstable | testing | buster-backports`). At the moment, this package (2.0.1-1) is outdated and has a known bug where debug mode is enabled. -->
 
-* Linux: Available in distro-specific package managers.
-    * `dnf install micro` (Fedora).
-    * `apt install micro` (Ubuntu and Debian).
-    * `pacman -S micro` (Arch Linux).
-    * `emerge app-editors/micro` (Gentoo).
-    * `zypper install micro-editor` (SUSE)
-    * `eopkg install micro` (Solus).
-    * `pacstall -I micro` (Pacstall).
-    * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
-* Windows: [Chocolatey](https://chocolatey.org) and [Scoop](https://github.com/lukesampson/scoop).
+* Linux:
+    * distro-specific package managers:
+        * `dnf install micro` (Fedora).
+        * `apt install micro` (Ubuntu and Debian).
+        * `pacman -S micro` (Arch Linux).
+        * `emerge app-editors/micro` (Gentoo).
+        * `zypper install micro-editor` (SUSE)
+        * `eopkg install micro` (Solus).
+        * `pacstall -I micro` (Pacstall).
+        * `apt-get install micro` (ALT Linux)
+        * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
+    * distro-agnostic package managers:
+        * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
+        * `flox install micro` (with [Flox](https://flox.dev))
+* Windows: [Chocolatey](https://chocolatey.org), [Scoop](https://scoop.sh/) and [WinGet](https://learn.microsoft.com/en-us/windows/package-manager/winget/).
     * `choco install micro`.
     * `scoop install micro`.
+    * `winget install zyedidia.micro`
 * OpenBSD: Available in the ports tree and also available as a binary package.
-    * `pkd_add -v micro`.
-* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
+    * `pkg_add -v micro`.
+* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](https://www.pkgsrc.org/)-current:
     * `pkg_add micro`
-* macOS with [MacPorts](https://www.macports.org):
-    * `sudo port install micro`
+* macOS: Available in package managers.
+    * `sudo port install micro` (with [MacPorts](https://www.macports.org))
+    * `brew install micro` (with [Homebrew](https://brew.sh/))
+    * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
+    * `flox install micro` (with [Flox](https://flox.dev))
 
 **Note for Linux desktop environments:**
 
@@ -169,7 +162,7 @@ Without these tools installed, micro will use an internal clipboard for copy and
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.16 or greater and Go modules are enabled.
+Make sure that you have Go version 1.19 or greater and Go modules are enabled.
 
 ```
 git clone https://github.com/zyedidia/micro
@@ -187,19 +180,23 @@ You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/mi
 recommended because it doesn't build micro with version information (necessary for the plugin manager),
 and doesn't disable debug mode.
 
-### Fully static binary
+### Fully static or dynamically linked binary
 
-By default, the micro binary will dynamically link with core system libraries (this is generally
-recommended for security and portability). However, there is a fully static prebuilt binary that
-is provided for amd64 as `linux-static.tar.gz`, and to build a fully static binary from source, run
+By default, the micro binary is linked statically to increase the portability of the prebuilt binaries.
+This behavior can simply be overriden by providing `CGO_ENABLED=1` to the build target.
 
 ```
-CGO_ENABLED=0 make build
+CGO_ENABLED=1 make build
 ```
+
+Afterwards the micro binary will dynamically link with the present core system libraries.
+
+**Note for Mac:**
+Native macOS builds are done with `CGO_ENABLED=1` forced set to support adding the "Information Property List" in the linker step.
 
 ### macOS terminal
 
-If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
+If you are using macOS, you should consider using [iTerm2](https://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.

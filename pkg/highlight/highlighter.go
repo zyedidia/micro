@@ -51,24 +51,8 @@ func runePos(p int, str []byte) int {
 	return CharacterCount(str[:p])
 }
 
-func combineLineMatch(src, dst LineMatch) LineMatch {
-	for k, v := range src {
-		if g, ok := dst[k]; ok {
-			if g == 0 {
-				dst[k] = v
-			}
-		} else {
-			dst[k] = v
-		}
-	}
-	return dst
-}
-
 // A State represents the region at the end of a line
 type State *region
-
-// EmptyDef is an empty definition.
-var EmptyDef = Def{nil, &rules{}}
 
 // LineStates is an interface for a buffer-like object which can also store the states and matches for every line
 type LineStates interface {
@@ -178,7 +162,7 @@ func (h *Highlighter) highlightRegion(highlights LineMatch, start int, canMatchE
 				if curRegion.group == curRegion.limitGroup || p.group == curRegion.limitGroup {
 					matches := findAllIndex(p.regex, line)
 					for _, m := range matches {
-						if ((endLoc == nil) || (m[0] < endLoc[0])) {
+						if (endLoc == nil) || (m[0] < endLoc[0]) {
 							for i := m[0]; i < m[1]; i++ {
 								fullHighlights[i] = p.group
 							}
@@ -363,7 +347,9 @@ func (h *Highlighter) ReHighlightStates(input LineStates, startline int) int {
 	h.lastRegion = nil
 	if startline > 0 {
 		input.Lock()
-		h.lastRegion = input.State(startline - 1)
+		if startline-1 < input.LinesNum() {
+			h.lastRegion = input.State(startline - 1)
+		}
 		input.Unlock()
 	}
 	for i := startline; ; i++ {

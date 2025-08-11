@@ -1,4 +1,4 @@
-// +build !linux,!darwin,!freebsd,!dragonfly,!openbsd_amd64
+//go:build plan9 || nacl || windows
 
 package action
 

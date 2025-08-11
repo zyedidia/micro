@@ -104,7 +104,7 @@ func (eh *EventHandler) DoTextEvent(t *TextEvent, useUndo bool) {
 		c.OrigSelection[0] = move(c.OrigSelection[0])
 		c.OrigSelection[1] = move(c.OrigSelection[1])
 		c.Relocate()
-		c.LastVisualX = c.GetVisualX()
+		c.StoreVisualX()
 	}
 
 	if useUndo {
@@ -253,11 +253,11 @@ func (eh *EventHandler) Execute(t *TextEvent) {
 	ExecuteTextEvent(t, eh.buf)
 }
 
-// Undo the first event in the undo stack
-func (eh *EventHandler) Undo() {
+// Undo the first event in the undo stack. Returns false if the stack is empty.
+func (eh *EventHandler) Undo() bool {
 	t := eh.UndoStack.Peek()
 	if t == nil {
-		return
+		return false
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
@@ -266,15 +266,16 @@ func (eh *EventHandler) Undo() {
 	for {
 		t = eh.UndoStack.Peek()
 		if t == nil {
-			return
+			break
 		}
 
 		if t.Time.UnixNano()/int64(time.Millisecond) < endTime {
-			return
+			break
 		}
 
 		eh.UndoOneEvent()
 	}
+	return true
 }
 
 // UndoOneEvent undoes one event
@@ -290,24 +291,20 @@ func (eh *EventHandler) UndoOneEvent() {
 	eh.UndoTextEvent(t)
 
 	// Set the cursor in the right place
-	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
-		eh.cursors[teCursor.Num].Goto(teCursor)
-		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
-	} else {
-		teCursor.Num = -1
+	if t.C.Num >= 0 && t.C.Num < len(eh.cursors) {
+		eh.cursors[t.C.Num].Goto(t.C)
+		eh.cursors[t.C.Num].NewTrailingWsY = t.C.NewTrailingWsY
 	}
 
 	// Push it to the redo stack
 	eh.RedoStack.Push(t)
 }
 
-// Redo the first event in the redo stack
-func (eh *EventHandler) Redo() {
+// Redo the first event in the redo stack. Returns false if the stack is empty.
+func (eh *EventHandler) Redo() bool {
 	t := eh.RedoStack.Peek()
 	if t == nil {
-		return
+		return false
 	}
 
 	startTime := t.Time.UnixNano() / int64(time.Millisecond)
@@ -316,15 +313,16 @@ func (eh *EventHandler) Redo() {
 	for {
 		t = eh.RedoStack.Peek()
 		if t == nil {
-			return
+			break
 		}
 
 		if t.Time.UnixNano()/int64(time.Millisecond) > endTime {
-			return
+			break
 		}
 
 		eh.RedoOneEvent()
 	}
+	return true
 }
 
 // RedoOneEvent redoes one event
@@ -334,13 +332,9 @@ func (eh *EventHandler) RedoOneEvent() {
 		return
 	}
 
-	teCursor := t.C
-	if teCursor.Num >= 0 && teCursor.Num < len(eh.cursors) {
-		t.C = *eh.cursors[teCursor.Num]
-		eh.cursors[teCursor.Num].Goto(teCursor)
-		eh.cursors[teCursor.Num].NewTrailingWsY = teCursor.NewTrailingWsY
-	} else {
-		teCursor.Num = -1
+	if t.C.Num >= 0 && t.C.Num < len(eh.cursors) {
+		eh.cursors[t.C.Num].Goto(t.C)
+		eh.cursors[t.C.Num].NewTrailingWsY = t.C.NewTrailingWsY
 	}
 
 	// Modifies the text event

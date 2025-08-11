@@ -20,8 +20,14 @@ type Cursor struct {
 	buf *Buffer
 	Loc
 
-	// Last cursor x position
+	// Last visual x position of the cursor. Used in cursor up/down movements
+	// for remembering the original x position when moving to a line that is
+	// shorter than current x position.
 	LastVisualX int
+	// Similar to LastVisualX but takes softwrapping into account, i.e. last
+	// visual x position in a visual (wrapped) line on the screen, which may be
+	// different from the line in the buffer.
+	LastWrappedVisualX int
 
 	// The current selection as a range of character numbers (inclusive)
 	CurSelection [2]Loc
@@ -61,8 +67,9 @@ func (c *Cursor) Buf() *Buffer {
 // Goto puts the cursor at the given cursor's location and gives
 // the current cursor its selection too
 func (c *Cursor) Goto(b Cursor) {
-	c.X, c.Y, c.LastVisualX = b.X, b.Y, b.LastVisualX
+	c.X, c.Y = b.X, b.Y
 	c.OrigSelection, c.CurSelection = b.OrigSelection, b.CurSelection
+	c.StoreVisualX()
 }
 
 // GotoLoc puts the cursor at the given cursor's location and gives
@@ -73,8 +80,8 @@ func (c *Cursor) GotoLoc(l Loc) {
 }
 
 // GetVisualX returns the x value of the cursor in visual spaces
-func (c *Cursor) GetVisualX() int {
-	if c.buf.GetVisualX != nil {
+func (c *Cursor) GetVisualX(wrap bool) int {
+	if wrap && c.buf.GetVisualX != nil {
 		return c.buf.GetVisualX(c.Loc)
 	}
 
@@ -100,7 +107,7 @@ func (c *Cursor) GetCharPosInLine(b []byte, visualPos int) int {
 // Start moves the cursor to the start of the line it is on
 func (c *Cursor) Start() {
 	c.X = 0
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // StartOfText moves the cursor to the first non-whitespace rune of
@@ -131,7 +138,7 @@ func (c *Cursor) IsStartOfText() bool {
 // End moves the cursor to the end of the line it is on
 func (c *Cursor) End() {
 	c.X = util.CharacterCount(c.buf.LineBytes(c.Y))
-	c.LastVisualX = c.GetVisualX()
+	c.StoreVisualX()
 }
 
 // CopySelection copies the user's selection to either "primary"
@@ -186,7 +193,7 @@ func (c *Cursor) Deselect(start bool) {
 		if start {
 			c.Loc = c.CurSelection[0]
 		} else {
-			c.Loc = c.CurSelection[1].Move(-1, c.buf)
+			c.Loc = c.CurSelection[1]
 		}
 		c.ResetSelection()
 		c.StoreVisualX()
@@ -403,12 +410,25 @@ func (c *Cursor) SelectTo(loc Loc) {
 
 // WordRight moves the cursor one word to the right
 func (c *Cursor) WordRight() {
+	if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+		c.Right()
+		return
+	}
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
-			c.Right()
 			return
 		}
 		c.Right()
+	}
+	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) &&
+		util.IsNonWordChar(c.RuneUnder(c.X+1)) {
+		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+		return
 	}
 	c.Right()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
@@ -421,12 +441,27 @@ func (c *Cursor) WordRight() {
 
 // WordLeft moves the cursor one word to the left
 func (c *Cursor) WordLeft() {
+	if c.X == 0 {
+		c.Left()
+		return
+	}
 	c.Left()
 	for util.IsWhitespace(c.RuneUnder(c.X)) {
 		if c.X == 0 {
 			return
 		}
 		c.Left()
+	}
+	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) &&
+		util.IsNonWordChar(c.RuneUnder(c.X-1)) {
+		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		c.Right()
+		return
 	}
 	c.Left()
 	for util.IsWordChar(c.RuneUnder(c.X)) {
@@ -436,6 +471,132 @@ func (c *Cursor) WordLeft() {
 		c.Left()
 	}
 	c.Right()
+}
+
+// SubWordRight moves the cursor one sub-word to the right
+func (c *Cursor) SubWordRight() {
+	if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+		c.Right()
+		return
+	}
+	if util.IsWhitespace(c.RuneUnder(c.X)) {
+		for util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+		return
+	}
+	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+		return
+	}
+	if util.IsSubwordDelimiter(c.RuneUnder(c.X)) {
+		for util.IsSubwordDelimiter(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+		if util.IsWhitespace(c.RuneUnder(c.X)) {
+			return
+		}
+	}
+	if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+		return
+	}
+	if util.IsUpperLetter(c.RuneUnder(c.X)) &&
+		util.IsUpperLetter(c.RuneUnder(c.X+1)) {
+		for util.IsUpperAlphanumeric(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+		if util.IsLowerAlphanumeric(c.RuneUnder(c.X)) {
+			c.Left()
+		}
+	} else {
+		c.Right()
+		for util.IsLowerAlphanumeric(c.RuneUnder(c.X)) {
+			if c.X == util.CharacterCount(c.buf.LineBytes(c.Y)) {
+				return
+			}
+			c.Right()
+		}
+	}
+}
+
+// SubWordLeft moves the cursor one sub-word to the left
+func (c *Cursor) SubWordLeft() {
+	if c.X == 0 {
+		c.Left()
+		return
+	}
+	c.Left()
+	if util.IsWhitespace(c.RuneUnder(c.X)) {
+		for util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		c.Right()
+		return
+	}
+	if util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+		for util.IsNonWordChar(c.RuneUnder(c.X)) && !util.IsWhitespace(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		c.Right()
+		return
+	}
+	if util.IsSubwordDelimiter(c.RuneUnder(c.X)) {
+		for util.IsSubwordDelimiter(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		if util.IsWhitespace(c.RuneUnder(c.X)) {
+			c.Right()
+			return
+		}
+	}
+	if c.X == 0 {
+		return
+	}
+	if util.IsUpperLetter(c.RuneUnder(c.X)) &&
+		util.IsUpperLetter(c.RuneUnder(c.X-1)) {
+		for util.IsUpperAlphanumeric(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		if !util.IsUpperAlphanumeric(c.RuneUnder(c.X)) {
+			c.Right()
+		}
+	} else {
+		for util.IsLowerAlphanumeric(c.RuneUnder(c.X)) {
+			if c.X == 0 {
+				return
+			}
+			c.Left()
+		}
+		if !util.IsAlphanumeric(c.RuneUnder(c.X)) {
+			c.Right()
+		}
+	}
 }
 
 // RuneUnder returns the rune under the given x position
@@ -461,5 +622,6 @@ func (c *Cursor) RuneUnder(x int) rune {
 }
 
 func (c *Cursor) StoreVisualX() {
-	c.LastVisualX = c.GetVisualX()
+	c.LastVisualX = c.GetVisualX(false)
+	c.LastWrappedVisualX = c.GetVisualX(true)
 }

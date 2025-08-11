@@ -3,13 +3,13 @@ package action
 import (
 	luar "layeh.com/gopher-luar"
 
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/views"
-	"github.com/zyedidia/tcell/v2"
 )
 
 // The TabList is a list of tabs and a window to display the tab bar
@@ -107,30 +107,32 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
-			if my == t.Y && mx == 0 {
-				t.Scroll(-4)
-				return
-			} else if my == t.Y && mx == t.Width-1 {
-				t.Scroll(4)
+			if my == t.Y && len(t.List) > 1 {
+				if mx == 0 {
+					t.Scroll(-4)
+				} else if mx == t.Width-1 {
+					t.Scroll(4)
+				} else {
+					ind := t.LocFromVisual(buffer.Loc{mx, my})
+					if ind != -1 {
+						t.SetActive(ind)
+					}
+				}
 				return
 			}
-			if len(t.List) > 1 {
-				ind := t.LocFromVisual(buffer.Loc{mx, my})
-				if ind != -1 {
-					t.SetActive(ind)
-					return
-				}
-				if my == 0 {
-					return
-				}
+		case tcell.ButtonNone:
+			if t.List[t.Active()].release {
+				// Mouse release received, while already released
+				t.ResetMouse()
+				return
 			}
 		case tcell.WheelUp:
-			if my == t.Y {
+			if my == t.Y && len(t.List) > 1 {
 				t.Scroll(4)
 				return
 			}
 		case tcell.WheelDown:
-			if my == t.Y {
+			if my == t.Y && len(t.List) > 1 {
 				t.Scroll(-4)
 				return
 			}
@@ -147,6 +149,56 @@ func (t *TabList) Display() {
 	}
 }
 
+func (t *TabList) SetActive(a int) {
+	t.TabWindow.SetActive(a)
+
+	for i, p := range t.List {
+		if i == a {
+			if !p.isActive {
+				p.isActive = true
+
+				err := config.RunPluginFn("onSetActive", luar.New(ulua.L, p.CurPane()))
+				if err != nil {
+					screen.TermMessage(err)
+				}
+			}
+		} else {
+			p.isActive = false
+		}
+	}
+}
+
+// ResetMouse resets the mouse release state after the screen was stopped
+// or the pane changed.
+// This prevents situations in which mouse releases are received at the wrong place
+// and the mouse state is still pressed.
+func (t *TabList) ResetMouse() {
+	for _, tab := range t.List {
+		if !tab.release && tab.resizing != nil {
+			tab.resizing = nil
+		}
+
+		tab.release = true
+
+		for _, p := range tab.Panes {
+			if bp, ok := p.(*BufPane); ok {
+				bp.resetMouse()
+			}
+		}
+	}
+}
+
+// CloseTerms notifies term panes that a terminal job has finished.
+func (t *TabList) CloseTerms() {
+	for _, tab := range t.List {
+		for _, p := range tab.Panes {
+			if tp, ok := p.(*TermPane); ok {
+				tp.HandleTermClose()
+			}
+		}
+	}
+}
+
 // Tabs is the global tab list
 var Tabs *TabList
 
@@ -159,26 +211,13 @@ func InitTabs(bufs []*buffer.Buffer) {
 		for _, b := range bufs[1:] {
 			if multiopen == "vsplit" {
 				MainTab().CurPane().VSplitBuf(b)
-			} else {  // default hsplit
+			} else { // default hsplit
 				MainTab().CurPane().HSplitBuf(b)
 			}
 		}
 	}
 
-	screen.RestartCallback = func() {
-		// The mouse could be released after the screen was stopped, so that
-		// we couldn't catch the mouse release event and would erroneously think
-		// that it is still pressed. So need to reset the mouse release state
-		// after the screen is restarted.
-		for _, t := range Tabs.List {
-			t.release = true
-			for _, p := range t.Panes {
-				if bp, ok := p.(*BufPane); ok {
-					bp.resetMouse()
-				}
-			}
-		}
-	}
+	screen.RestartCallback = Tabs.ResetMouse
 }
 
 func MainTab() *Tab {
@@ -192,6 +231,9 @@ func MainTab() *Tab {
 type Tab struct {
 	*views.Node
 	*display.UIWindow
+
+	isActive bool
+
 	Panes  []Pane
 	active int
 
@@ -305,11 +347,16 @@ func (t *Tab) SetActive(i int) {
 			p.SetActive(false)
 		}
 	}
+}
 
-	err := config.RunPluginFn("onSetActive", luar.New(ulua.L, MainTab().CurPane()))
-	if err != nil {
-		screen.TermMessage(err)
+// AddPane adds a pane at a given index
+func (t *Tab) AddPane(pane Pane, i int) {
+	if len(t.Panes) == i {
+		t.Panes = append(t.Panes, pane)
+		return
 	}
+	t.Panes = append(t.Panes[:i+1], t.Panes[i:]...)
+	t.Panes[i] = pane
 }
 
 // GetPane returns the pane with the given split index

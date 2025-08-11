@@ -3,6 +3,7 @@ VERSION = "1.0.0"
 local util = import("micro/util")
 local config = import("micro/config")
 local buffer = import("micro/buffer")
+local micro = import("micro")
 
 local ft = {}
 
@@ -28,6 +29,7 @@ ft["ini"] = "; %s"
 ft["java"] = "// %s"
 ft["javascript"] = "// %s"
 ft["jinja2"] = "{# %s #}"
+ft["json"] = "// %s"
 ft["julia"] = "# %s"
 ft["kotlin"] = "// %s"
 ft["lua"] = "-- %s"
@@ -60,17 +62,21 @@ ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
 
-local last_ft
-
 function updateCommentType(buf)
-    if buf.Settings["commenttype"] == nil or (last_ft ~= buf.Settings["filetype"] and last_ft ~= nil) then
-        if ft[buf.Settings["filetype"]] ~= nil then
-            buf.Settings["commenttype"] = ft[buf.Settings["filetype"]]
+    -- NOTE: Using DoSetOptionNative to avoid LocalSettings[option] = true
+    -- so that "comment.type" can be reset by a "filetype" change to default.
+    if (buf.Settings["comment.type"] == "") then
+        -- NOTE: This won't get triggered if a filetype is change via `setlocal filetype`
+        -- since it is not registered with `RegisterGlobalOption()``
+        if buf.Settings["commenttype"] ~= nil then
+            buf:DoSetOptionNative("comment.type", buf.Settings["commenttype"])
         else
-            buf.Settings["commenttype"] = "# %s"
+            if (ft[buf.Settings["filetype"]] ~= nil) then
+                buf:DoSetOptionNative("comment.type", ft[buf.Settings["filetype"]])
+            else
+                buf:DoSetOptionNative("comment.type", "# %s")
+            end
         end
-
-        last_ft = buf.Settings["filetype"]
     end
 end
 
@@ -87,7 +93,7 @@ function commentLine(bp, lineN, indentLen)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
@@ -106,14 +112,14 @@ function commentLine(bp, lineN, indentLen)
         bp.Cursor.Y = curpos.Y
     end
     bp.Cursor:Relocate()
-    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+    bp.Cursor:StoreVisualX()
 end
 
 function uncommentLine(bp, lineN, commentRegex)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local sel = -bp.Cursor.CurSelection
     local curpos = -bp.Cursor.Loc
     local index = string.find(commentType, "%%s") - 1
@@ -134,7 +140,7 @@ function uncommentLine(bp, lineN, commentRegex)
         end
     end
     bp.Cursor:Relocate()
-    bp.Cursor.LastVisualX = bp.Cursor:GetVisualX()
+    bp.Cursor:StoreVisualX()
 end
 
 function toggleCommentLine(bp, lineN, commentRegex)
@@ -177,7 +183,7 @@ end
 function comment(bp, args)
     updateCommentType(bp.Buf)
 
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
 
     if bp.Cursor:HasSelection() then
@@ -201,6 +207,10 @@ end
 
 function string.starts(String,Start)
     return string.sub(String,1,string.len(Start))==Start
+end
+
+function preinit()
+    config.RegisterCommonOption("comment", "type", "")
 end
 
 function init()

@@ -1,0 +1,46 @@
+name: Nightly builds
+on:
+  workflow_dispatch: # Allows manual trigger
+  schedule:
+    - cron: '0 0 * * *'
+jobs:
+  nightly:
+    strategy:
+      matrix:
+        go-version: [1.23.x]
+        os: [ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+    - name: Setup
+      uses: actions/setup-go@v5
+      with:
+        go-version: ${{ matrix.go-version }}
+        cache: false
+
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        ref: master
+        fetch-depth: 0
+        fetch-tags: true
+
+    - name: Build
+      run: tools/cross-compile.sh nightly
+
+    - name: Tag
+      uses: rickstaa/action-create-tag@v1
+      with:
+        tag: nightly
+        force_push_tag: true
+        message: "Pre-release nightly"
+
+    - name: Publish
+      uses: softprops/action-gh-release@v2
+      with:
+        name: nightly
+        tag_name: nightly
+        files: binaries/*
+        prerelease: true
+
+    - name: Cleanup
+      run: rm -rf binaries

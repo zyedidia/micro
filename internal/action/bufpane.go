@@ -6,6 +6,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -13,7 +14,6 @@ import (
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
 type BufAction interface{}
@@ -100,9 +100,7 @@ func BufMapEvent(k Event, action string) {
 			break
 		}
 
-		// TODO: fix problem when complex bindings have these
-		// characters (escape them?)
-		idx := strings.IndexAny(action, "&|,")
+		idx := util.IndexAnyUnquoted(action, "&|,")
 		a := action
 		if idx >= 0 {
 			a = action[:idx]
@@ -150,25 +148,31 @@ func BufMapEvent(k Event, action string) {
 		actionfns = append(actionfns, afn)
 	}
 	bufAction := func(h *BufPane, te *tcell.EventMouse) bool {
-		cursors := h.Buf.GetCursors()
-		success := true
 		for i, a := range actionfns {
-			innerSuccess := true
-			for j, c := range cursors {
-				if c == nil {
-					continue
+			var success bool
+			if _, ok := MultiActions[names[i]]; ok {
+				success = true
+				for _, c := range h.Buf.GetCursors() {
+					h.Buf.SetCurCursor(c.Num)
+					h.Cursor = c
+					success = success && h.execAction(a, names[i], te)
 				}
-				h.Buf.SetCurCursor(c.Num)
-				h.Cursor = c
-				if i == 0 || (success && types[i-1] == '&') || (!success && types[i-1] == '|') || (types[i-1] == ',') {
-					innerSuccess = innerSuccess && h.execAction(a, names[i], j, te)
-				} else {
-					break
-				}
+			} else {
+				h.Buf.SetCurCursor(0)
+				h.Cursor = h.Buf.GetActiveCursor()
+				success = h.execAction(a, names[i], te)
 			}
+
 			// if the action changed the current pane, update the reference
 			h = MainTab().CurPane()
-			success = innerSuccess
+			if h == nil {
+				// stop, in case the current pane is not a BufPane
+				break
+			}
+
+			if (!success && types[i] == '&') || (success && types[i] == '|') {
+				break
+			}
 		}
 		return true
 	}
@@ -220,26 +224,21 @@ type BufPane struct {
 	// (possibly multiple) buttons were pressed previously.
 	mousePressed map[MouseEvent]bool
 
-	// We need to keep track of insert key press toggle
-	isOverwriteMode bool
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
 	lastLoc       buffer.Loc
 
-	// lastCutTime stores when the last ctrl+k was issued.
-	// It is used for clearing the clipboard to replace it with fresh cut lines.
-	lastCutTime time.Time
-
-	// freshClip returns true if the clipboard has never been pasted.
+	// freshClip returns true if one or more lines have been cut to the clipboard
+	// and have never been pasted yet.
 	freshClip bool
 
 	// Was the last mouse event actually a double click?
 	// Useful for detecting triple clicks -- if a double click is detected
 	// but the last mouse event was actually a double click, it's a triple click
-	doubleClick bool
+	DoubleClick bool
 	// Same here, just to keep track for mouse move events
-	tripleClick bool
+	TripleClick bool
 
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
@@ -290,7 +289,11 @@ func NewBufPaneFromBuf(buf *buffer.Buffer, tab *Tab) *BufPane {
 func (h *BufPane) finishInitialize() {
 	h.initialRelocate()
 	h.initialized = true
-	config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+
+	err := config.RunPluginFn("onBufPaneOpen", luar.New(ulua.L, h))
+	if err != nil {
+		screen.TermMessage(err)
+	}
 }
 
 // Resize resizes the pane
@@ -318,18 +321,16 @@ func (h *BufPane) ResizePane(size int) {
 }
 
 // PluginCB calls all plugin callbacks with a certain name and displays an
-// error if there is one and returns the aggregrate boolean response
-func (h *BufPane) PluginCB(cb string) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h))
-	if err != nil {
-		screen.TermMessage(err)
+// error if there is one and returns the aggregate boolean response.
+// The bufpane is passed as the first argument to the callbacks,
+// optional args are passed as the next arguments.
+func (h *BufPane) PluginCB(cb string, args ...interface{}) bool {
+	largs := []lua.LValue{luar.New(ulua.L, h)}
+	for _, a := range args {
+		largs = append(largs, luar.New(ulua.L, a))
 	}
-	return b
-}
 
-// PluginCBRune is the same as PluginCB but also passes a rune to the plugins
-func (h *BufPane) PluginCBRune(cb string, r rune) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
+	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, largs...)
 	if err != nil {
 		screen.TermMessage(err)
 	}
@@ -353,9 +354,6 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
 	h.resetMouse()
-	// Set isOverwriteMode to false, because we assume we are in the default
-	// mode when editor is opened
-	h.isOverwriteMode = false
 	h.lastClickTime = time.Time{}
 }
 
@@ -415,6 +413,12 @@ func (h *BufPane) Name() string {
 	return n
 }
 
+// ReOpen reloads the file opened in the bufpane from disk
+func (h *BufPane) ReOpen() {
+	h.Buf.ReOpen()
+	h.Relocate()
+}
+
 func (h *BufPane) getReloadSetting() string {
 	reloadSetting := h.Buf.Settings["reload"]
 	return reloadSetting.(string)
@@ -433,11 +437,11 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 				if !yes || canceled {
 					h.Buf.UpdateModTime()
 				} else {
-					h.Buf.ReOpen()
+					h.ReOpen()
 				}
 			})
 		} else if reload == "auto" {
-			h.Buf.ReOpen()
+			h.ReOpen()
 		} else if reload == "disabled" {
 			h.Buf.DisableReload()
 		} else {
@@ -455,11 +459,7 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 		h.paste(e.Text())
 		h.Relocate()
 	case *tcell.EventKey:
-		ke := KeyEvent{
-			code: e.Key(),
-			mod:  metaToAlt(e.Modifiers()),
-			r:    e.Rune(),
-		}
+		ke := keyEvent(e)
 
 		done := h.DoKeyEvent(ke)
 		if !done && e.Key() == tcell.KeyRune {
@@ -486,11 +486,16 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 			// Mouse event with no click - mouse was just released.
 			// If there were multiple mouse buttons pressed, we don't know which one
 			// was actually released, so we assume they all were released.
+			pressed := len(h.mousePressed) > 0
 			for me := range h.mousePressed {
 				delete(h.mousePressed, me)
 
 				me.state = MouseRelease
 				h.DoMouseEvent(me, e)
+			}
+			if !pressed {
+				// Propagate the mouse release in case the press wasn't for this BufPane
+				Tabs.ResetMouse()
 			}
 		}
 	}
@@ -530,7 +535,10 @@ func (h *BufPane) Bindings() *KeyTree {
 }
 
 // DoKeyEvent executes a key event by finding the action it is bound
-// to and executing it (possibly multiple times for multiple cursors)
+// to and executing it (possibly multiple times for multiple cursors).
+// Returns true if the action was executed OR if there are more keys
+// remaining to process before executing an action (if this is a key
+// sequence event). Returns false if no action found.
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	binds := h.Bindings()
 	action, more := binds.NextEvent(e, nil)
@@ -544,36 +552,33 @@ func (h *BufPane) DoKeyEvent(e Event) bool {
 	return more
 }
 
-func (h *BufPane) execAction(action BufAction, name string, cursor int, te *tcell.EventMouse) bool {
+func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse) bool {
 	if name != "Autocomplete" && name != "CycleAutocompleteBack" {
 		h.Buf.HasSuggestions = false
 	}
 
-	_, isMulti := MultiActions[name]
-	if (!isMulti && cursor == 0) || isMulti {
-		if h.PluginCB("pre" + name) {
-			var success bool
-			switch a := action.(type) {
-			case BufKeyAction:
-				success = a(h)
-			case BufMouseAction:
-				success = a(h, te)
-			}
-			success = success && h.PluginCB("on"+name)
+	if !h.PluginCB("pre"+name, te) {
+		return false
+	}
 
-			if isMulti {
-				if recordingMacro {
-					if name != "ToggleMacro" && name != "PlayMacro" {
-						curmacro = append(curmacro, action)
-					}
-				}
-			}
+	var success bool
+	switch a := action.(type) {
+	case BufKeyAction:
+		success = a(h)
+	case BufMouseAction:
+		success = a(h, te)
+	}
+	success = success && h.PluginCB("on"+name, te)
 
-			return success
+	if _, ok := MultiActions[name]; ok {
+		if recordingMacro {
+			if name != "ToggleMacro" && name != "PlayMacro" {
+				curmacro = append(curmacro, action)
+			}
 		}
 	}
 
-	return false
+	return success
 }
 
 func (h *BufPane) completeAction(action string) {
@@ -619,7 +624,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		// Insert a character
 		h.Buf.SetCurCursor(c.Num)
 		h.Cursor = c
-		if !h.PluginCBRune("preRune", r) {
+		if !h.PluginCB("preRune", string(r)) {
 			continue
 		}
 		if c.HasSelection() {
@@ -627,7 +632,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			c.ResetSelection()
 		}
 
-		if h.isOverwriteMode {
+		if h.Buf.OverwriteMode {
 			next := c.Loc
 			next.X++
 			h.Buf.Replace(c.Loc, next, string(r))
@@ -638,27 +643,35 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			curmacro = append(curmacro, r)
 		}
 		h.Relocate()
-		h.PluginCBRune("onRune", r)
+		h.PluginCB("onRune", string(r))
 	}
 }
 
 // VSplitIndex opens the given buffer in a vertical split on the given side.
 func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
-	e.splitID = MainTab().GetNode(h.splitID).VSplit(right)
-	MainTab().Panes = append(MainTab().Panes, e)
-	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
+	e.splitID = h.tab.GetNode(h.splitID).VSplit(right)
+	currentPaneIdx := h.tab.GetPane(h.splitID)
+	if right {
+		currentPaneIdx++
+	}
+	h.tab.AddPane(e, currentPaneIdx)
+	h.tab.Resize()
+	h.tab.SetActive(currentPaneIdx)
 	return e
 }
 
 // HSplitIndex opens the given buffer in a horizontal split on the given side.
 func (h *BufPane) HSplitIndex(buf *buffer.Buffer, bottom bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
-	e.splitID = MainTab().GetNode(h.splitID).HSplit(bottom)
-	MainTab().Panes = append(MainTab().Panes, e)
-	MainTab().Resize()
-	MainTab().SetActive(len(MainTab().Panes) - 1)
+	e.splitID = h.tab.GetNode(h.splitID).HSplit(bottom)
+	currentPaneIdx := h.tab.GetPane(h.splitID)
+	if bottom {
+		currentPaneIdx++
+	}
+	h.tab.AddPane(e, currentPaneIdx)
+	h.tab.Resize()
+	h.tab.SetActive(currentPaneIdx)
 	return e
 }
 
@@ -679,6 +692,10 @@ func (h *BufPane) Close() {
 
 // SetActive marks this pane as active.
 func (h *BufPane) SetActive(b bool) {
+	if h.IsActive() == b {
+		return
+	}
+
 	h.BWindow.SetActive(b)
 	if b {
 		// Display any gutter messages for this line
@@ -694,8 +711,12 @@ func (h *BufPane) SetActive(b bool) {
 		if none && InfoBar.HasGutter {
 			InfoBar.ClearGutter()
 		}
-	}
 
+		err := config.RunPluginFn("onSetActive", luar.New(ulua.L, h))
+		if err != nil {
+			screen.TermMessage(err)
+		}
+	}
 }
 
 // BufKeyActions contains the list of all possible key actions the bufhandler could execute
@@ -708,6 +729,9 @@ var BufKeyActions = map[string]BufKeyAction{
 	"CursorRight":               (*BufPane).CursorRight,
 	"CursorStart":               (*BufPane).CursorStart,
 	"CursorEnd":                 (*BufPane).CursorEnd,
+	"CursorToViewTop":           (*BufPane).CursorToViewTop,
+	"CursorToViewCenter":        (*BufPane).CursorToViewCenter,
+	"CursorToViewBottom":        (*BufPane).CursorToViewBottom,
 	"SelectToStart":             (*BufPane).SelectToStart,
 	"SelectToEnd":               (*BufPane).SelectToEnd,
 	"SelectUp":                  (*BufPane).SelectUp,
@@ -716,10 +740,16 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SelectRight":               (*BufPane).SelectRight,
 	"WordRight":                 (*BufPane).WordRight,
 	"WordLeft":                  (*BufPane).WordLeft,
+	"SubWordRight":              (*BufPane).SubWordRight,
+	"SubWordLeft":               (*BufPane).SubWordLeft,
 	"SelectWordRight":           (*BufPane).SelectWordRight,
 	"SelectWordLeft":            (*BufPane).SelectWordLeft,
+	"SelectSubWordRight":        (*BufPane).SelectSubWordRight,
+	"SelectSubWordLeft":         (*BufPane).SelectSubWordLeft,
 	"DeleteWordRight":           (*BufPane).DeleteWordRight,
 	"DeleteWordLeft":            (*BufPane).DeleteWordLeft,
+	"DeleteSubWordRight":        (*BufPane).DeleteSubWordRight,
+	"DeleteSubWordLeft":         (*BufPane).DeleteSubWordLeft,
 	"SelectLine":                (*BufPane).SelectLine,
 	"SelectToStartOfLine":       (*BufPane).SelectToStartOfLine,
 	"SelectToStartOfText":       (*BufPane).SelectToStartOfText,
@@ -727,6 +757,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SelectToEndOfLine":         (*BufPane).SelectToEndOfLine,
 	"ParagraphPrevious":         (*BufPane).ParagraphPrevious,
 	"ParagraphNext":             (*BufPane).ParagraphNext,
+	"SelectToParagraphPrevious": (*BufPane).SelectToParagraphPrevious,
+	"SelectToParagraphNext":     (*BufPane).SelectToParagraphNext,
 	"InsertNewline":             (*BufPane).InsertNewline,
 	"Backspace":                 (*BufPane).Backspace,
 	"Delete":                    (*BufPane).Delete,
@@ -747,6 +779,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"CopyLine":                  (*BufPane).CopyLine,
 	"Cut":                       (*BufPane).Cut,
 	"CutLine":                   (*BufPane).CutLine,
+	"Duplicate":                 (*BufPane).Duplicate,
 	"DuplicateLine":             (*BufPane).DuplicateLine,
 	"DeleteLine":                (*BufPane).DeleteLine,
 	"MoveLinesUp":               (*BufPane).MoveLinesUp,
@@ -779,6 +812,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"ToggleRuler":               (*BufPane).ToggleRuler,
 	"ToggleHighlightSearch":     (*BufPane).ToggleHighlightSearch,
 	"UnhighlightSearch":         (*BufPane).UnhighlightSearch,
+	"ResetSearch":               (*BufPane).ResetSearch,
 	"ClearStatus":               (*BufPane).ClearStatus,
 	"ShellMode":                 (*BufPane).ShellMode,
 	"CommandMode":               (*BufPane).CommandMode,
@@ -790,8 +824,12 @@ var BufKeyActions = map[string]BufKeyAction{
 	"AddTab":                    (*BufPane).AddTab,
 	"PreviousTab":               (*BufPane).PreviousTab,
 	"NextTab":                   (*BufPane).NextTab,
+	"FirstTab":                  (*BufPane).FirstTab,
+	"LastTab":                   (*BufPane).LastTab,
 	"NextSplit":                 (*BufPane).NextSplit,
 	"PreviousSplit":             (*BufPane).PreviousSplit,
+	"FirstSplit":                (*BufPane).FirstSplit,
+	"LastSplit":                 (*BufPane).LastSplit,
 	"Unsplit":                   (*BufPane).Unsplit,
 	"VSplit":                    (*BufPane).VSplitAction,
 	"HSplit":                    (*BufPane).HSplitAction,
@@ -807,6 +845,7 @@ var BufKeyActions = map[string]BufKeyAction{
 	"RemoveMultiCursor":         (*BufPane).RemoveMultiCursor,
 	"RemoveAllMultiCursors":     (*BufPane).RemoveAllMultiCursors,
 	"SkipMultiCursor":           (*BufPane).SkipMultiCursor,
+	"SkipMultiCursorBack":       (*BufPane).SkipMultiCursorBack,
 	"JumpToMatchingBrace":       (*BufPane).JumpToMatchingBrace,
 	"JumpLine":                  (*BufPane).JumpLine,
 	"Deselect":                  (*BufPane).Deselect,
@@ -846,10 +885,16 @@ var MultiActions = map[string]bool{
 	"SelectRight":               true,
 	"WordRight":                 true,
 	"WordLeft":                  true,
+	"SubWordRight":              true,
+	"SubWordLeft":               true,
 	"SelectWordRight":           true,
 	"SelectWordLeft":            true,
+	"SelectSubWordRight":        true,
+	"SelectSubWordLeft":         true,
 	"DeleteWordRight":           true,
 	"DeleteWordLeft":            true,
+	"DeleteSubWordRight":        true,
+	"DeleteSubWordLeft":         true,
 	"SelectLine":                true,
 	"SelectToStartOfLine":       true,
 	"SelectToStartOfText":       true,
@@ -867,6 +912,7 @@ var MultiActions = map[string]bool{
 	"Copy":                      true,
 	"Cut":                       true,
 	"CutLine":                   true,
+	"Duplicate":                 true,
 	"DuplicateLine":             true,
 	"DeleteLine":                true,
 	"MoveLinesUp":               true,

@@ -4,11 +4,11 @@ import (
 	"strconv"
 
 	runewidth "github.com/mattn/go-runewidth"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
 // The BufWindow provides a way of displaying a certain section of a buffer.
@@ -58,8 +58,14 @@ func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 		if option == "softwrap" || option == "wordwrap" {
 			w.Relocate()
 			for _, c := range w.Buf.GetCursors() {
-				c.LastVisualX = c.GetVisualX()
+				c.LastWrappedVisualX = c.GetVisualX(true)
 			}
+		}
+
+		if option == "diffgutter" || option == "ruler" || option == "scrollbar" ||
+			option == "statusline" {
+			w.updateDisplayInfo()
+			w.Relocate()
 		}
 	}
 	b.GetVisualX = func(loc buffer.Loc) int {
@@ -160,7 +166,7 @@ func (w *BufWindow) updateDisplayInfo() {
 
 	if w.bufWidth != prevBufWidth && w.Buf.Settings["softwrap"].(bool) {
 		for _, c := range w.Buf.GetCursors() {
-			c.LastVisualX = c.GetVisualX()
+			c.LastWrappedVisualX = c.GetVisualX(true)
 		}
 	}
 }
@@ -238,7 +244,7 @@ func (w *BufWindow) Relocate() bool {
 
 	// horizontal relocation (scrolling)
 	if !b.Settings["softwrap"].(bool) {
-		cx := activeC.GetVisualX()
+		cx := activeC.GetVisualX(false)
 		rw := runewidth.RuneWidth(activeC.RuneUnder(activeC.X))
 		if rw == 0 {
 			rw = 1 // tab or newline
@@ -248,8 +254,8 @@ func (w *BufWindow) Relocate() bool {
 			w.StartCol = cx
 			ret = true
 		}
-		if cx+w.gutterOffset+rw > w.StartCol+w.Width {
-			w.StartCol = cx - w.Width + w.gutterOffset + rw
+		if cx+rw > w.StartCol+w.bufWidth {
+			w.StartCol = cx - w.bufWidth + rw
 			ret = true
 		}
 	}
@@ -384,18 +390,7 @@ func (w *BufWindow) displayBuffer() {
 
 	if b.ModifiedThisFrame {
 		if b.Settings["diffgutter"].(bool) {
-			b.UpdateDiff(func(synchronous bool) {
-				// If the diff was updated asynchronously, the outer call to
-				// displayBuffer might already be completed and we need to
-				// schedule a redraw in order to display the new diff.
-				// Note that this cannot lead to an infinite recursion
-				// because the modifications were cleared above so there won't
-				// be another call to UpdateDiff when displayBuffer is called
-				// during the redraw.
-				if !synchronous {
-					screen.Redraw()
-				}
-			})
+			b.UpdateDiff()
 		}
 		b.ModifiedThisFrame = false
 	}
@@ -403,28 +398,20 @@ func (w *BufWindow) displayBuffer() {
 	var matchingBraces []buffer.Loc
 	// bracePairs is defined in buffer.go
 	if b.Settings["matchbrace"].(bool) {
-		for _, bp := range buffer.BracePairs {
-			for _, c := range b.GetCursors() {
-				if c.HasSelection() {
-					continue
-				}
-				curX := c.X
-				curLoc := c.Loc
+		for _, c := range b.GetCursors() {
+			if c.HasSelection() {
+				continue
+			}
 
-				r := c.RuneUnder(curX)
-				rl := c.RuneUnder(curX - 1)
-				if r == bp[0] || r == bp[1] || rl == bp[0] || rl == bp[1] {
-					mb, left, found := b.FindMatchingBrace(bp, curLoc)
-					if found {
-						matchingBraces = append(matchingBraces, mb)
-						if !left {
-							if b.Settings["matchbracestyle"].(string) != "highlight" {
-								matchingBraces = append(matchingBraces, curLoc)
-							}
-						} else {
-							matchingBraces = append(matchingBraces, curLoc.Move(-1, b))
-						}
+			mb, left, found := b.FindMatchingBrace(c.Loc)
+			if found {
+				matchingBraces = append(matchingBraces, mb)
+				if !left {
+					if b.Settings["matchbracestyle"].(string) != "highlight" {
+						matchingBraces = append(matchingBraces, c.Loc)
 					}
+				} else {
+					matchingBraces = append(matchingBraces, c.Loc.Move(-1, b))
 				}
 			}
 		}
@@ -468,7 +455,7 @@ func (w *BufWindow) displayBuffer() {
 
 		currentLine := false
 		for _, c := range cursors {
-			if bloc.Y == c.Y && w.active {
+			if !c.HasSelection() && bloc.Y == c.Y && w.active {
 				currentLine = true
 				break
 			}
@@ -638,16 +625,21 @@ func (w *BufWindow) displayBuffer() {
 
 		wrap := func() {
 			vloc.X = 0
-			if w.hasMessage {
-				w.drawGutter(&vloc, &bloc)
-			}
-			if b.Settings["diffgutter"].(bool) {
-				w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
-			}
 
-			// This will draw an empty line number because the current line is wrapped
-			if b.Settings["ruler"].(bool) {
-				w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
+			if vloc.Y >= 0 {
+				if w.hasMessage {
+					w.drawGutter(&vloc, &bloc)
+				}
+				if b.Settings["diffgutter"].(bool) {
+					w.drawDiffGutter(lineNumStyle, true, &vloc, &bloc)
+				}
+
+				// This will draw an empty line number because the current line is wrapped
+				if b.Settings["ruler"].(bool) {
+					w.drawLineNum(lineNumStyle, true, &vloc, &bloc)
+				}
+			} else {
+				vloc.X = w.gutterOffset
 			}
 		}
 

@@ -2,18 +2,17 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 	"testing"
 
 	"github.com/go-errors/errors"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/tcell/v2"
 )
 
 var tempDir string
@@ -26,7 +25,7 @@ func init() {
 func startup(args []string) (tcell.SimulationScreen, error) {
 	var err error
 
-	tempDir, err = ioutil.TempDir("", "micro_test")
+	tempDir, err = os.MkdirTemp("", "micro_test")
 	if err != nil {
 		return nil, err
 	}
@@ -109,7 +108,10 @@ func handleEvent() {
 	if e != nil {
 		screen.Events <- e
 	}
-	DoEvent()
+
+	for len(screen.DrawChan()) > 0 || len(screen.Events) > 0 {
+		DoEvent()
+	}
 }
 
 func injectKey(key tcell.Key, r rune, mod tcell.ModMask) {
@@ -151,20 +153,32 @@ func openFile(file string) {
 	injectKey(tcell.KeyEnter, rune(tcell.KeyEnter), tcell.ModNone)
 }
 
-func createTestFile(name string, content string) (string, error) {
-	testf, err := ioutil.TempFile("", name)
+func findBuffer(file string) *buffer.Buffer {
+	var buf *buffer.Buffer
+	for _, b := range buffer.OpenBuffers {
+		if b.Path == file {
+			buf = b
+		}
+	}
+	return buf
+}
+
+func createTestFile(t *testing.T, content string) string {
+	f, err := os.CreateTemp(t.TempDir(), "")
 	if err != nil {
-		return "", err
+		t.Fatal(err)
+	}
+	defer func() {
+		if err := f.Close(); err != nil {
+			t.Fatal(err)
+		}
+	}()
+
+	if _, err := f.WriteString(content); err != nil {
+		t.Fatal(err)
 	}
 
-	if _, err := testf.Write([]byte(content)); err != nil {
-		return "", err
-	}
-	if err := testf.Close(); err != nil {
-		return "", err
-	}
-
-	return testf.Name(), nil
+	return f.Name()
 }
 
 func TestMain(m *testing.M) {
@@ -181,25 +195,12 @@ func TestMain(m *testing.M) {
 }
 
 func TestSimpleEdit(t *testing.T) {
-	file, err := createTestFile("micro_simple_edit_test", "base content")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer os.Remove(file)
+	file := createTestFile(t, "base content")
 
 	openFile(file)
 
-	var buf *buffer.Buffer
-	for _, b := range buffer.OpenBuffers {
-		if b.Path == file {
-			buf = b
-		}
-	}
-
-	if buf == nil {
-		t.Errorf("Could not find buffer %s", file)
-		return
+	if findBuffer(file) == nil {
+		t.Fatalf("Could not find buffer %s", file)
 	}
 
 	injectKey(tcell.KeyEnter, rune(tcell.KeyEnter), tcell.ModNone)
@@ -217,24 +218,22 @@ func TestSimpleEdit(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, "firstfoobar\nbase content\n", string(data))
 }
 
 func TestMouse(t *testing.T) {
-	file, err := createTestFile("micro_mouse_test", "base content")
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer os.Remove(file)
+	file := createTestFile(t, "base content")
 
 	openFile(file)
+
+	if findBuffer(file) == nil {
+		t.Fatalf("Could not find buffer %s", file)
+	}
 
 	// buffer:
 	// base content
@@ -264,10 +263,9 @@ func TestMouse(t *testing.T) {
 	// base content
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, "firstline\nsecondline\nbase content\n", string(data))
@@ -290,14 +288,13 @@ Ernleȝe test_string æðelen
 `
 
 func TestSearchAndReplace(t *testing.T) {
-	file, err := createTestFile("micro_search_replace_test", srTestStart)
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	defer os.Remove(file)
+	file := createTestFile(t, srTestStart)
 
 	openFile(file)
+
+	if findBuffer(file) == nil {
+		t.Fatalf("Could not find buffer %s", file)
+	}
 
 	injectKey(tcell.KeyCtrlE, rune(tcell.KeyCtrlE), tcell.ModCtrl)
 	injectString(fmt.Sprintf("replaceall %s %s", "foo", "test_string"))
@@ -305,10 +302,9 @@ func TestSearchAndReplace(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err := ioutil.ReadFile(file)
+	data, err := os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, srTest2, string(data))
@@ -321,10 +317,9 @@ func TestSearchAndReplace(t *testing.T) {
 
 	injectKey(tcell.KeyCtrlS, rune(tcell.KeyCtrlS), tcell.ModCtrl)
 
-	data, err = ioutil.ReadFile(file)
+	data, err = os.ReadFile(file)
 	if err != nil {
-		t.Error(err)
-		return
+		t.Fatal(err)
 	}
 
 	assert.Equal(t, srTest3, string(data))

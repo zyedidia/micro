@@ -4,17 +4,18 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strings"
 	"unicode"
 
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/tcell/v2"
+	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 var Binder = map[string]func(e Event, action string){
@@ -23,9 +24,13 @@ var Binder = map[string]func(e Event, action string){
 	"terminal": TermMapEvent,
 }
 
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
+
 func createBindingsIfNotExist(fname string) {
-	if _, e := os.Stat(fname); os.IsNotExist(e) {
-		ioutil.WriteFile(fname, []byte("{}"), 0644)
+	if _, e := os.Stat(fname); errors.Is(e, fs.ErrNotExist) {
+		writeFile(fname, []byte("{}"))
 	}
 }
 
@@ -37,7 +42,7 @@ func InitBindings() {
 	createBindingsIfNotExist(filename)
 
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			screen.TermMessage("Error reading bindings.json file: " + err.Error())
 			return
@@ -89,7 +94,7 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 	}
 
 	if strings.HasPrefix(k, "\x1b") {
-		screen.Screen.RegisterRawSeq(k)
+		screen.RegisterRawSeq(k)
 	}
 
 	bind(event, v)
@@ -176,31 +181,18 @@ modSearch:
 		// see if the key is in bindingKeys with the Ctrl prefix.
 		k = string(unicode.ToUpper(rune(k[0]))) + k[1:]
 		if code, ok := keyEvents["Ctrl"+k]; ok {
-			var r tcell.Key
-			// Special case for escape, for some reason tcell doesn't send it with the esc character
-			if code < 256 && code != 27 {
-				r = code
-			}
-			// It is, we're done.
 			return KeyEvent{
 				code: code,
 				mod:  modifiers,
-				r:    rune(r),
 			}, true
 		}
 	}
 
 	// See if we can find the key in bindingKeys
 	if code, ok := keyEvents[k]; ok {
-		var r tcell.Key
-		// Special case for escape, for some reason tcell doesn't send it with the esc character
-		if code < 256 && code != 27 {
-			r = code
-		}
 		return KeyEvent{
 			code: code,
 			mod:  modifiers,
-			r:    rune(r),
 		}, true
 	}
 
@@ -251,6 +243,24 @@ func findEvent(k string) (Event, error) {
 	return event, nil
 }
 
+func eventsEqual(e1 Event, e2 Event) bool {
+	seq1, ok1 := e1.(KeySequenceEvent)
+	seq2, ok2 := e2.(KeySequenceEvent)
+	if ok1 && ok2 {
+		if len(seq1.keys) != len(seq2.keys) {
+			return false
+		}
+		for i := 0; i < len(seq1.keys); i++ {
+			if seq1.keys[i] != seq2.keys[i] {
+				return false
+			}
+		}
+		return true
+	}
+
+	return e1 == e2
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
@@ -260,7 +270,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			return false, errors.New("Error reading bindings.json file: " + err.Error())
 		}
@@ -276,28 +286,31 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 		}
 
 		found := false
-		for ev := range parsed {
+		var ev string
+		for ev = range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
-					if overwrite {
-						parsed[ev] = v
-					}
+				if eventsEqual(e, key) {
 					found = true
 					break
 				}
 			}
 		}
 
-		if found && !overwrite {
-			return true, nil
-		} else if !found {
+		if found {
+			if overwrite {
+				parsed[ev] = v
+			} else {
+				return true, nil
+			}
+		} else {
 			parsed[k] = v
 		}
 
 		BindKey(k, v, Binder["buffer"])
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return true, ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		return true, writeFile(filename, txt)
 	}
 	return false, e
 }
@@ -310,7 +323,7 @@ func UnbindKey(k string) error {
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
 	if _, e = os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			return errors.New("Error reading bindings.json file: " + err.Error())
 		}
@@ -327,7 +340,7 @@ func UnbindKey(k string) error {
 
 		for ev := range parsed {
 			if e, err := findEvent(ev); err == nil {
-				if e == key {
+				if eventsEqual(e, key) {
 					delete(parsed, ev)
 					break
 				}
@@ -335,7 +348,7 @@ func UnbindKey(k string) error {
 		}
 
 		if strings.HasPrefix(k, "\x1b") {
-			screen.Screen.UnregisterRawSeq(k)
+			screen.UnregisterRawSeq(k)
 		}
 
 		defaults := DefaultBindings("buffer")
@@ -347,7 +360,8 @@ func UnbindKey(k string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
-		return ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		return writeFile(filename, txt)
 	}
 	return e
 }

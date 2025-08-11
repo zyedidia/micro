@@ -1,0 +1,10 @@
+filetype: unknown
+
+detect:
+    filename: ""
+
+rules:
+    # Mails
+    - special: "[[:alnum:].%_+-]+@[[:alnum:].-]+"
+    # URLs
+    - identifier: "(https?|ftp|ssh)://\\S*[^])>\\s,.]"

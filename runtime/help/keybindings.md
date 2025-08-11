@@ -66,7 +66,16 @@ bindings, tab is bound as
 
 This means that if the `Autocomplete` action is successful, the chain will
 abort. Otherwise, it will try `IndentSelection`, and if that fails too, it
-will execute `InsertTab`.
+will execute `InsertTab`. To use `,`, `|` or `&` in an action (as an argument
+to a command, for example), escape it with `\` or wrap it in single or double
+quotes.
+
+If the action has an `onAction` lua callback, for example `onAutocomplete` (see
+`> help plugins`), then the action is only considered successful if the action
+itself succeeded *and* the callback returned true. If there are multiple
+`onAction` callbacks for this action, registered by multiple plugins, then the
+action is only considered successful if the action itself succeeded and all the
+callbacks returned true.
 
 ## Binding commands
 
@@ -102,6 +111,48 @@ you could rebind `Ctrl-g` to `> help`:
 Now when you press `Ctrl-g`, `help` will appear in the command bar and your
 cursor will be placed after it (note the space in the json that controls the
 cursor placement).
+
+## Binding Lua functions
+
+You can also bind a key to a Lua function provided by a plugin, or by your own
+`~/.config/micro/init.lua`. For example:
+
+```json
+{
+    "Alt-q": "lua:foo.bar"
+}
+```
+
+where `foo` is the name of the plugin and `bar` is the name of the lua function
+in it, e.g.:
+
+```lua
+local micro = import("micro")
+
+function bar(bp)
+    micro.InfoBar():Message("Bar action triggered")
+    return true
+end
+```
+
+See `> help plugins` for more informations on how to write lua functions.
+
+For `~/.config/micro/init.lua` the plugin name is `initlua` (so the keybinding
+in this example would be `"Alt-q": "lua:initlua.bar"`).
+
+The currently active bufpane is passed to the lua function as the argument. If
+the key is a mouse button, e.g. `MouseLeft` or `MouseWheelUp`, the mouse event
+info is passed to the lua function as the second argument, of type
+`*tcell.EventMouse`. See https://pkg.go.dev/github.com/micro-editor/tcell/v2#EventMouse
+for the description of this type and its methods.
+
+The return value of the lua function defines whether the action has succeeded.
+This is used when chaining lua functions with other actions. They can be chained
+the same way as regular actions as described above, for example:
+
+```
+"Alt-q": "lua:initlua.bar|Quit"
+```
 
 ## Binding raw escape sequences
 
@@ -168,30 +219,39 @@ CursorLeft
 CursorRight
 CursorStart
 CursorEnd
+CursorToViewTop
+CursorToViewCenter
+CursorToViewBottom
 SelectToStart
 SelectToEnd
 SelectUp
 SelectDown
 SelectLeft
 SelectRight
-SelectToStartOfText
-SelectToStartOfTextToggle
 WordRight
 WordLeft
+SubWordRight
+SubWordLeft
 SelectWordRight
 SelectWordLeft
-MoveLinesUp
-MoveLinesDown
+SelectSubWordRight
+SelectSubWordLeft
 DeleteWordRight
 DeleteWordLeft
+DeleteSubWordRight
+DeleteSubWordLeft
 SelectLine
 SelectToStartOfLine
+SelectToStartOfText
+SelectToStartOfTextToggle
 SelectToEndOfLine
+ParagraphPrevious
+ParagraphNext
+SelectToParagraphPrevious
+SelectToParagraphNext
 InsertNewline
-InsertSpace
 Backspace
 Delete
-Center
 InsertTab
 Save
 SaveAll
@@ -200,21 +260,28 @@ Find
 FindLiteral
 FindNext
 FindPrevious
-DiffPrevious
 DiffNext
+DiffPrevious
+Center
 Undo
 Redo
 Copy
 CopyLine
 Cut
 CutLine
+Duplicate
 DuplicateLine
 DeleteLine
+MoveLinesUp
+MoveLinesDown
 IndentSelection
 OutdentSelection
+Autocomplete
+CycleAutocompleteBack
 OutdentLine
 IndentLine
 Paste
+PastePrimary
 SelectAll
 OpenFile
 Start
@@ -225,29 +292,37 @@ SelectPageUp
 SelectPageDown
 HalfPageUp
 HalfPageDown
-StartOfLine
-EndOfLine
 StartOfText
 StartOfTextToggle
-ParagraphPrevious
-ParagraphNext
+StartOfLine
+EndOfLine
 ToggleHelp
+ToggleKeyMenu
 ToggleDiffGutter
 ToggleRuler
-JumpLine
+ToggleHighlightSearch
+UnhighlightSearch
+ResetSearch
 ClearStatus
 ShellMode
 CommandMode
+ToggleOverwriteMode
+Escape
 Quit
 QuitAll
+ForceQuit
 AddTab
 PreviousTab
 NextTab
+FirstTab
+LastTab
 NextSplit
+PreviousSplit
+FirstSplit
+LastSplit
 Unsplit
 VSplit
 HSplit
-PreviousSplit
 ToggleMacro
 PlayMacro
 Suspend (Unix only)
@@ -260,18 +335,31 @@ SpawnMultiCursorSelect
 RemoveMultiCursor
 RemoveAllMultiCursors
 SkipMultiCursor
-None
+SkipMultiCursorBack
 JumpToMatchingBrace
-Autocomplete
+JumpLine
+Deselect
+ClearInfo
+None
 ```
 
 The `StartOfTextToggle` and `SelectToStartOfTextToggle` actions toggle between
 jumping to the start of the text (first) and start of the line.
 
+The `CutLine` action cuts the current line and adds it to the previously cut
+lines in the clipboard since the last paste (rather than just replaces the
+clipboard contents with this line). So you can cut multiple, not necessarily
+consecutive lines to the clipboard just by pressing `Ctrl-k` multiple times,
+without selecting them. If you want the more traditional behavior i.e. just
+rewrite the clipboard every time, you can use `CopyLine,DeleteLine` action
+instead of `CutLine`.
+
 You can also bind some mouse actions (these must be bound to mouse buttons)
 
 ```
 MousePress
+MouseDrag
+MouseRelease
 MouseMultiCursor
 ```
 
@@ -485,23 +573,25 @@ conventions for text editing defaults.
     "Alt-]":          "DiffNext|CursorEnd",
     "Ctrl-z":         "Undo",
     "Ctrl-y":         "Redo",
-    "Ctrl-c":         "CopyLine|Copy",
-    "Ctrl-x":         "Cut",
+    "Ctrl-c":         "Copy|CopyLine",
+    "Ctrl-x":         "Cut|CutLine",
     "Ctrl-k":         "CutLine",
-    "Ctrl-d":         "DuplicateLine",
+    "Ctrl-d":         "Duplicate|DuplicateLine",
     "Ctrl-v":         "Paste",
     "Ctrl-a":         "SelectAll",
     "Ctrl-t":         "AddTab",
-    "Alt-,":          "PreviousTab",
-    "Alt-.":          "NextTab",
+    "Alt-,":          "PreviousTab|LastTab",
+    "Alt-.":          "NextTab|FirstTab",
     "Home":           "StartOfText",
     "End":            "EndOfLine",
     "CtrlHome":       "CursorStart",
     "CtrlEnd":        "CursorEnd",
     "PageUp":         "CursorPageUp",
     "PageDown":       "CursorPageDown",
-    "CtrlPageUp":     "PreviousTab",
-    "CtrlPageDown":   "NextTab",
+    "CtrlPageUp":     "PreviousTab|LastTab",
+    "CtrlPageDown":   "NextTab|FirstTab",
+    "ShiftPageUp":    "SelectPageUp",
+    "ShiftPageDown":  "SelectPageDown",
     "Ctrl-g":         "ToggleHelp",
     "Alt-g":          "ToggleKeyMenu",
     "Ctrl-r":         "ToggleRuler",
@@ -510,7 +600,7 @@ conventions for text editing defaults.
     "Ctrl-b":         "ShellMode",
     "Ctrl-q":         "Quit",
     "Ctrl-e":         "CommandMode",
-    "Ctrl-w":         "NextSplit",
+    "Ctrl-w":         "NextSplit|FirstSplit",
     "Ctrl-u":         "ToggleMacro",
     "Ctrl-j":         "PlayMacro",
     "Insert":         "ToggleOverwriteMode",
@@ -609,8 +699,8 @@ are given below:
         "Backtab":        "CycleAutocompleteBack",
         "Ctrl-z":         "Undo",
         "Ctrl-y":         "Redo",
-        "Ctrl-c":         "CopyLine|Copy",
-        "Ctrl-x":         "Cut",
+        "Ctrl-c":         "Copy|CopyLine",
+        "Ctrl-x":         "Cut|CutLine",
         "Ctrl-k":         "CutLine",
         "Ctrl-v":         "Paste",
         "Home":           "StartOfTextToggle",

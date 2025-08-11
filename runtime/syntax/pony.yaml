@@ -26,12 +26,10 @@ rules:
     - comment:
         start: "\"\"\"[^\"]*"
         end: "\"\"\""
-        rules: []
 
     - comment: "(^|[[:space:]])//.*"
     - comment:
         start: "/\\*"
         end: "\\*/"
-        rules: []
 
     - todo: "TODO:?"

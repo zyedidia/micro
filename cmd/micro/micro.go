@@ -4,10 +4,10 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"log"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"regexp"
 	"runtime"
 	"runtime/pprof"
@@ -18,6 +18,7 @@ import (
 
 	"github.com/go-errors/errors"
 	isatty "github.com/mattn/go-isatty"
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
@@ -26,7 +27,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
 var (
@@ -40,8 +40,7 @@ var (
 	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
 	optionFlags   map[string]*string
 
-	sigterm chan os.Signal
-	sighup  chan os.Signal
+	sighup chan os.Signal
 
 	timerChan chan func()
 )
@@ -100,7 +99,7 @@ func InitFlags() {
 		fmt.Println("Version:", util.Version)
 		fmt.Println("Commit hash:", util.CommitHash)
 		fmt.Println("Compiled on", util.CompileDate)
-		os.Exit(0)
+		exit(0)
 	}
 
 	if *flagOptions {
@@ -116,7 +115,7 @@ func InitFlags() {
 			fmt.Printf("-%s value\n", k)
 			fmt.Printf("    \tDefault value: '%v'\n", v)
 		}
-		os.Exit(0)
+		exit(0)
 	}
 
 	if util.Debug == "OFF" && *flagDebug {
@@ -137,7 +136,7 @@ func DoPluginFlags() {
 			CleanConfig()
 		}
 
-		os.Exit(0)
+		exit(0)
 	}
 }
 
@@ -210,7 +209,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
-		input, err = ioutil.ReadAll(os.Stdin)
+		input, err = io.ReadAll(os.Stdin)
 		if err != nil {
 			screen.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
@@ -224,12 +223,55 @@ func LoadInput(args []string) []*buffer.Buffer {
 	return buffers
 }
 
+func checkBackup(name string) error {
+	target := filepath.Join(config.ConfigDir, name)
+	backup := util.AppendBackupSuffix(target)
+	if info, err := os.Stat(backup); err == nil {
+		input, err := os.ReadFile(backup)
+		if err == nil {
+			t := info.ModTime()
+			msg := fmt.Sprintf(buffer.BackupMsg, target, t.Format("Mon Jan _2 at 15:04, 2006"), backup)
+			choice := screen.TermPrompt(msg, []string{"r", "i", "a", "recover", "ignore", "abort"}, true)
+
+			if choice%3 == 0 {
+				// recover
+				err := os.WriteFile(target, input, util.FileMode)
+				if err != nil {
+					return err
+				}
+				return os.Remove(backup)
+			} else if choice%3 == 1 {
+				// delete
+				return os.Remove(backup)
+			} else if choice%3 == 2 {
+				// abort
+				return errors.New("Aborted")
+			}
+		}
+	}
+	return nil
+}
+
+func exit(rc int) {
+	for _, b := range buffer.OpenBuffers {
+		if !b.Modified() {
+			b.Fini()
+		}
+	}
+
+	if screen.Screen != nil {
+		screen.Screen.Fini()
+	}
+
+	os.Exit(rc)
+}
+
 func main() {
 	defer func() {
 		if util.Stdout.Len() > 0 {
 			fmt.Fprint(os.Stdout, util.Stdout.String())
 		}
-		os.Exit(0)
+		exit(0)
 	}()
 
 	var err error
@@ -257,6 +299,12 @@ func main() {
 	config.InitRuntimeFiles(true)
 	config.InitPlugins()
 
+	err = checkBackup("settings.json")
+	if err != nil {
+		screen.TermMessage(err)
+		exit(1)
+	}
+
 	err = config.ReadSettings()
 	if err != nil {
 		screen.TermMessage(err)
@@ -269,8 +317,12 @@ func main() {
 	// flag options
 	for k, v := range optionFlags {
 		if *v != "" {
-			nativeValue, err := config.GetNativeValue(k, config.DefaultAllSettings()[k], *v)
+			nativeValue, err := config.GetNativeValue(k, *v)
 			if err != nil {
+				screen.TermMessage(err)
+				continue
+			}
+			if err = config.OptionIsValid(k, nativeValue); err != nil {
 				screen.TermMessage(err)
 				continue
 			}
@@ -285,7 +337,7 @@ func main() {
 	if err != nil {
 		fmt.Println(err)
 		fmt.Println("Fatal: Micro could not initialize a Screen.")
-		os.Exit(1)
+		exit(1)
 	}
 	m := clipboard.SetMethod(config.GetGlobalOption("clipboard").(string))
 	clipErr := clipboard.Initialize(m)
@@ -304,7 +356,7 @@ func main() {
 			for _, b := range buffer.OpenBuffers {
 				b.Backup()
 			}
-			os.Exit(1)
+			exit(1)
 		}
 	}()
 
@@ -313,13 +365,14 @@ func main() {
 		screen.TermMessage(err)
 	}
 
-	action.InitBindings()
-	action.InitCommands()
-
-	err = config.InitColorscheme()
+	err = checkBackup("bindings.json")
 	if err != nil {
 		screen.TermMessage(err)
+		exit(1)
 	}
+
+	action.InitBindings()
+	action.InitCommands()
 
 	err = config.RunPluginFn("preinit")
 	if err != nil {
@@ -349,20 +402,25 @@ func main() {
 		screen.TermMessage(err)
 	}
 
+	err = config.InitColorscheme()
+	if err != nil {
+		screen.TermMessage(err)
+	}
+
 	if clipErr != nil {
 		log.Println(clipErr, " or change 'clipboard' option")
 	}
 
+	config.StartAutoSave()
 	if a := config.GetGlobalOption("autosave").(float64); a > 0 {
-		config.SetAutoTime(int(a))
-		config.StartAutoSave()
+		config.SetAutoTime(a)
 	}
 
 	screen.Events = make(chan tcell.Event)
 
-	sigterm = make(chan os.Signal, 1)
+	util.Sigterm = make(chan os.Signal, 1)
 	sighup = make(chan os.Signal, 1)
-	signal.Notify(sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
+	signal.Notify(util.Sigterm, syscall.SIGTERM, syscall.SIGINT, syscall.SIGQUIT, syscall.SIGABRT)
 	signal.Notify(sighup, syscall.SIGHUP)
 
 	timerChan = make(chan func())
@@ -423,6 +481,7 @@ func DoEvent() {
 			b.AutoSave()
 		}
 	case <-shell.CloseTerms:
+		action.Tabs.CloseTerms()
 	case event = <-screen.Events:
 	case <-screen.DrawChan():
 		for len(screen.DrawChan()) > 0 {
@@ -430,28 +489,12 @@ func DoEvent() {
 		}
 	case f := <-timerChan:
 		f()
+	case b := <-buffer.BackupCompleteChan:
+		b.RequestedBackup = false
 	case <-sighup:
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-		os.Exit(0)
-	case <-sigterm:
-		for _, b := range buffer.OpenBuffers {
-			if !b.Modified() {
-				b.Fini()
-			}
-		}
-
-		if screen.Screen != nil {
-			screen.Screen.Fini()
-		}
-		os.Exit(0)
-	}
-
-	if event == nil {
-		return
+		exit(0)
+	case <-util.Sigterm:
+		exit(0)
 	}
 
 	if e, ok := event.(*tcell.EventError); ok {
@@ -459,27 +502,25 @@ func DoEvent() {
 
 		if e.Err() == io.EOF {
 			// shutdown due to terminal closing/becoming inaccessible
-			for _, b := range buffer.OpenBuffers {
-				if !b.Modified() {
-					b.Fini()
-				}
-			}
-
-			if screen.Screen != nil {
-				screen.Screen.Fini()
-			}
-			os.Exit(0)
+			exit(0)
 		}
 		return
 	}
 
-	_, resize := event.(*tcell.EventResize)
-	if resize {
-		action.InfoBar.HandleEvent(event)
-		action.Tabs.HandleEvent(event)
-	} else if action.InfoBar.HasPrompt {
-		action.InfoBar.HandleEvent(event)
-	} else {
-		action.Tabs.HandleEvent(event)
+	if event != nil {
+		_, resize := event.(*tcell.EventResize)
+		if resize {
+			action.InfoBar.HandleEvent(event)
+			action.Tabs.HandleEvent(event)
+		} else if action.InfoBar.HasPrompt {
+			action.InfoBar.HandleEvent(event)
+		} else {
+			action.Tabs.HandleEvent(event)
+		}
+	}
+
+	err := config.RunPluginFn("onAnyEvent")
+	if err != nil {
+		screen.TermMessage(err)
 	}
 }

@@ -4,4 +4,4 @@ detect:
 
 rules:
     - include: "csharp"
-    - preproc: "^[[:space:]]*#(addin|break|l|load|module|r|reference|tool)"
+    - preproc: "^[[:space:]]*#(addin|break|l(oad)?|module|r(eference)?|tool)"

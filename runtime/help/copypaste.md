@@ -23,7 +23,7 @@ Here is a list of terminal emulators and their status:
 * `st`: supported.
 
 * `rxvt-unicode`: not natively supported, but there is a Perl extension
-   [here](http://anti.teamidiot.de/static/nei/*/Code/urxvt/).
+   [here](https://anti.teamidiot.de/static/nei/*/Code/urxvt/).
 
 * `xterm`: supported, but disabled by default. It can be enabled by putting
    the following in `.Xresources` or `.Xdefaults`:

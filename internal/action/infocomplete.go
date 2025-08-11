@@ -126,9 +126,6 @@ headerLoop:
 	if strings.HasPrefix("off", input) {
 		suggestions = append(suggestions, "off")
 	}
-	if strings.HasPrefix("unknown", input) {
-		suggestions = append(suggestions, "unknown")
-	}
 
 	var chosen string
 	if len(suggestions) == 1 {
@@ -136,15 +133,6 @@ headerLoop:
 	}
 
 	return chosen, suggestions
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
-		}
-	}
-	return false
 }
 
 // OptionComplete autocompletes options

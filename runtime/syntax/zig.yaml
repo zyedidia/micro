@@ -1,7 +1,7 @@
 filetype: zig
 
 detect:
-    filename: "\\.zig$"
+    filename: "\\.z(ig|on)$"
 
 rules:
       # Reserved words
