@@ -1,7 +1,7 @@
 filetype: meson
 
 detect:
-    filename: "(meson\\.build|meson_options.txt|meson\\.options)"
+    filename: "(meson\\.build|meson_options\\.txt|meson\\.options)"
 
 rules:
 
