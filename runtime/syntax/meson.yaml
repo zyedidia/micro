@@ -12,6 +12,9 @@ rules:
     - statement: "\\b(continue|break)\\b"
     - statement: "\\b(and|not|or|in)\\b"
 
+    - symbol.operator: "[<>?:+*/-]|[+!<>=]?="
+    - symbol.brackets: "[(){}\\[\\]]"
+
     # meson builtins
     - identifier: "\\b(build_machine|host_machine|meson|option|target_machine|add_global_arguments|add_global_link_arguments)\\b"
     - identifier: "\\b(add_languages|add_project_arguments|add_project_dependencies|add_project_link_arguments|add_test_setup|alias_target)\\b"
