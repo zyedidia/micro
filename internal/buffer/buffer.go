@@ -13,7 +13,6 @@ import (
 	"strconv"
 	"strings"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	luar "layeh.com/gopher-luar"
@@ -101,7 +100,6 @@ type SharedBuffer struct {
 	diffLock          sync.RWMutex
 	diff              map[int]DiffStatus
 
-	RequestedBackup bool
 	forceKeepBackup bool
 
 	// ReloadDisabled allows the user to disable reloads if they
@@ -126,18 +124,60 @@ type SharedBuffer struct {
 }
 
 func (b *SharedBuffer) insert(pos Loc, value []byte) {
-	b.isModified = true
 	b.HasSuggestions = false
 	b.LineArray.insert(pos, value)
+	b.setModified()
 
 	inslines := bytes.Count(value, []byte{'\n'})
 	b.MarkModified(pos.Y, pos.Y+inslines)
 }
+
 func (b *SharedBuffer) remove(start, end Loc) []byte {
-	b.isModified = true
 	b.HasSuggestions = false
+	defer b.setModified()
 	defer b.MarkModified(start.Y, end.Y)
 	return b.LineArray.remove(start, end)
+}
+
+func (b *SharedBuffer) setModified() {
+	if b.Type.Scratch {
+		return
+	}
+
+	if b.Settings["fastdirty"].(bool) {
+		b.isModified = true
+	} else {
+		var buff [md5.Size]byte
+
+		b.calcHash(&buff)
+		b.isModified = buff != b.origHash
+	}
+
+	if b.isModified {
+		b.RequestBackup()
+	} else {
+		b.CancelBackup()
+	}
+}
+
+// calcHash calculates md5 hash of all lines in the buffer
+func (b *SharedBuffer) calcHash(out *[md5.Size]byte) {
+	h := md5.New()
+
+	if len(b.lines) > 0 {
+		h.Write(b.lines[0].data)
+
+		for _, l := range b.lines[1:] {
+			if b.Endings == FFDos {
+				h.Write([]byte{'\r', '\n'})
+			} else {
+				h.Write([]byte{'\n'})
+			}
+			h.Write(l.data)
+		}
+	}
+
+	h.Sum((*out)[:0])
 }
 
 // MarkModified marks the buffer as modified for this frame
@@ -187,7 +227,6 @@ type Buffer struct {
 	*EventHandler
 	*SharedBuffer
 
-	fini        int32
 	cursors     []*Cursor
 	curCursor   int
 	StartCursor Loc
@@ -416,7 +455,7 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		} else if !hasBackup {
 			// since applying a backup does not save the applied backup to disk, we should
 			// not calculate the original hash based on the backup data
-			calcHash(b, &b.origHash)
+			b.calcHash(&b.origHash)
 		}
 	}
 
@@ -458,13 +497,11 @@ func (b *Buffer) Fini() {
 	if !b.Modified() {
 		b.Serialize()
 	}
-	b.RemoveBackup()
+	b.CancelBackup()
 
 	if b.Type == BTStdout {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
 	}
-
-	atomic.StoreInt32(&(b.fini), int32(1))
 }
 
 // GetName returns the name that should be displayed in the statusline
@@ -494,8 +531,6 @@ func (b *Buffer) Insert(start Loc, text string) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Insert(start, text)
-
-		b.RequestBackup()
 	}
 }
 
@@ -505,8 +540,6 @@ func (b *Buffer) Remove(start, end Loc) {
 		b.EventHandler.cursors = b.cursors
 		b.EventHandler.active = b.curCursor
 		b.EventHandler.Remove(start, end)
-
-		b.RequestBackup()
 	}
 }
 
@@ -558,7 +591,7 @@ func (b *Buffer) ReOpen() error {
 		if len(data) > LargeFileThreshold {
 			b.Settings["fastdirty"] = true
 		} else {
-			calcHash(b, &b.origHash)
+			b.calcHash(&b.origHash)
 		}
 	}
 	b.isModified = false
@@ -633,18 +666,7 @@ func (b *Buffer) Shared() bool {
 // Modified returns if this buffer has been modified since
 // being opened
 func (b *Buffer) Modified() bool {
-	if b.Type.Scratch {
-		return false
-	}
-
-	if b.Settings["fastdirty"].(bool) {
-		return b.isModified
-	}
-
-	var buff [md5.Size]byte
-
-	calcHash(b, &buff)
-	return buff != b.origHash
+	return b.isModified
 }
 
 // Size returns the number of bytes in the current buffer
@@ -661,26 +683,6 @@ func (b *Buffer) Size() int {
 		}
 	}
 	return nb
-}
-
-// calcHash calculates md5 hash of all lines in the buffer
-func calcHash(b *Buffer, out *[md5.Size]byte) {
-	h := md5.New()
-
-	if len(b.lines) > 0 {
-		h.Write(b.lines[0].data)
-
-		for _, l := range b.lines[1:] {
-			if b.Endings == FFDos {
-				h.Write([]byte{'\r', '\n'})
-			} else {
-				h.Write([]byte{'\n'})
-			}
-			h.Write(l.data)
-		}
-	}
-
-	h.Sum((*out)[:0])
 }
 
 func parseDefFromFile(f config.RuntimeFile, header *highlight.Header) *highlight.Def {
@@ -1233,7 +1235,6 @@ func (b *Buffer) FindMatchingBrace(start Loc) (Loc, bool, bool) {
 func (b *Buffer) Retab() {
 	toSpaces := b.Settings["tabstospaces"].(bool)
 	tabsize := util.IntOpt(b.Settings["tabsize"])
-	dirty := false
 
 	for i := 0; i < b.LinesNum(); i++ {
 		l := b.LineBytes(i)
@@ -1254,10 +1255,9 @@ func (b *Buffer) Retab() {
 		b.Unlock()
 
 		b.MarkModified(i, i)
-		dirty = true
 	}
 
-	b.isModified = dirty
+	b.setModified()
 }
 
 // ParseCursorLocation turns a cursor location like 10:5 (LINE:COL)

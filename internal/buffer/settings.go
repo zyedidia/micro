@@ -73,7 +73,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 				b.Settings["fastdirty"] = true
 			} else {
 				if !b.isModified {
-					calcHash(b, &b.origHash)
+					b.calcHash(&b.origHash)
 				} else {
 					// prevent using an old stale origHash value
 					b.origHash = [md5.Size]byte{}
@@ -91,7 +91,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		case "dos":
 			b.Endings = FFDos
 		}
-		b.isModified = true
+		b.setModified()
 	} else if option == "syntax" {
 		if !nativeValue.(bool) {
 			b.ClearMatches()
@@ -105,7 +105,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 			b.Settings["encoding"] = "utf-8"
 		}
 		b.encoding = enc
-		b.isModified = true
+		b.setModified()
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
 	} else if option == "hlsearch" {
