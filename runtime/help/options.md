@@ -203,12 +203,8 @@ Here are the available options:
 
     default value: `true`
 
-* `indentchar`: sets the indentation character. This will not be inserted into
-   files; it is only a visual indicator that whitespace is present. If set to a
-   printing character, it functions as a subset of the "show invisibles"
-   setting available in many other text editors. The color of this character is
-   determined by the `indent-char` field in the current theme rather than the
-   default text color.
+* `indentchar`: sets the character to be shown to display tab characters.
+   This option is **deprecated**, use the `tab` key in `showchars` option instead.
 
     default value: ` ` (space)
 
@@ -385,6 +381,25 @@ Here are the available options:
 * `scrollspeed`: amount of lines to scroll for one scroll event.
 
     default value: `2`
+
+* `showchars`: sets what characters to be shown to display various invisible
+   characters in the file. The characters shown will not be inserted into files.
+   This option is specified in the form of `key1=value1,key2=value2,...`.
+
+   Here are the list of keys:
+   - `space`: space characters
+   - `tab`: tab characters. If set, overrides the `indentchar` option.
+   - `ispace`: space characters at indent position before the first visible
+               character in a line. If this is not set, `space` will be shown
+               instead.
+   - `itab`: tab characters before the first visible character in a line.
+             If this is not set, `tab` will be shown instead.
+   An example of this option value could be `tab=>,space=.,itab=|>,ispace=|`
+
+   The color of the shown character is determined by the `indent-char`
+   field in the current theme rather than the default text color.
+
+    default value: ``
 
 * `smartpaste`: add leading whitespace when pasting multiple lines.
    This will attempt to preserve the current indentation level when pasting an
@@ -590,6 +605,7 @@ so that you can see what the formatting should look like.
     "scrollbarchar": "|",
     "scrollmargin": 3,
     "scrollspeed": 2,
+    "showchars": "",
     "smartpaste": true,
     "softwrap": false,
     "splitbottom": true,
