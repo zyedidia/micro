@@ -187,6 +187,7 @@ func InitPlugins() {
 		p.Name = "initlua"
 		p.DirName = "initlua"
 		p.Srcs = append(p.Srcs, realFile(initlua))
+		p.Builtin = false
 		Plugins = append(Plugins, p)
 	}
 
@@ -242,7 +243,7 @@ func InitPlugins() {
 				p := new(Plugin)
 				p.Name = d
 				p.DirName = d
-				p.Default = true
+				p.Builtin = true
 				for _, f := range srcs {
 					if strings.HasSuffix(f, ".lua") {
 						p.Srcs = append(p.Srcs, assetFile(filepath.Join(plugdir, d, f)))
