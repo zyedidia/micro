@@ -9,7 +9,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"regexp"
-	"runtime"
 	"runtime/pprof"
 	"sort"
 	"strconv"
@@ -140,23 +139,28 @@ func DoPluginFlags() {
 	}
 }
 
+func loadStdin(btype buffer.BufType, flagStartPos buffer.Loc) *buffer.Buffer {
+	input, err := io.ReadAll(os.Stdin)
+	if err != nil {
+		screen.TermMessage("Error reading from stdin: ", err)
+		input = []byte{}
+	}
+	return buffer.NewBufferFromStringAtLoc(string(input), "", btype, flagStartPos)
+}
+
 // LoadInput determines which files should be loaded into buffers
-// based on the input stored in flag.Args()
+// based on how micro is ran and the input stored in flag.Args()
 func LoadInput(args []string) []*buffer.Buffer {
-	// There are a number of ways micro should start given its input
+	// There is a number of sources micro should open when it starts
 
-	// 1. If it is given a files in flag.Args(), it should open those
+	// 1. The files in flag.Args(), if they are given
 
-	// 2. If there is no input file and the input is not a terminal, that means
-	// something is being piped in and the stdin should be opened in an
-	// empty buffer
+	// 2. Data in stdin, either if - is specified in flag.Args(), or the input
+	// is not a terminal which means that something is being piped in
 
-	// 3. If there is no input file and the input is a terminal, an empty buffer
+	// If there is no input file and the input is a terminal, an empty buffer
 	// should be opened
 
-	var filename string
-	var input []byte
-	var err error
 	buffers := make([]*buffer.Buffer, 0, len(args))
 
 	btype := buffer.BTDefault
@@ -193,31 +197,38 @@ func LoadInput(args []string) []*buffer.Buffer {
 		}
 	}
 
-	if len(files) > 0 {
-		// Option 1
-		// We go through each file and load it
-		for i := 0; i < len(files); i++ {
-			buf, err := buffer.NewBufferFromFileAtLoc(files[i], btype, flagStartPos)
-			if err != nil {
-				screen.TermMessage(err)
-				continue
+	handledStdin := false
+
+	// We go through each file and load it
+	for i := 0; i < len(files); i++ {
+		// Attempt to read stdin instead if - is given
+		if files[i] == "-" && !handledStdin {
+			if isatty.IsTerminal(os.Stdin.Fd()) {
+				screen.TermMessage("Stdin is not a pipe")
+			} else {
+				buffers = append(buffers, loadStdin(btype, flagStartPos))
 			}
-			// If the file didn't exist, input will be empty, and we'll open an empty buffer
-			buffers = append(buffers, buf)
+
+			handledStdin = true
+			continue
 		}
-	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
-		// Option 2
+
+		buf, err := buffer.NewBufferFromFileAtLoc(files[i], btype, flagStartPos)
+		if err != nil {
+			screen.TermMessage(err)
+			continue
+		}
+		// If the file didn't exist, input will be empty, and we'll open an empty buffer
+		buffers = append(buffers, buf)
+	}
+
+	if !handledStdin && !isatty.IsTerminal(os.Stdin.Fd()) {
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
-		input, err = io.ReadAll(os.Stdin)
-		if err != nil {
-			screen.TermMessage("Error reading from stdin: ", err)
-			input = []byte{}
-		}
-		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
-	} else {
-		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		buffers = append(buffers, loadStdin(btype, flagStartPos))
+	} else if len(buffers) == 0 {
+		// Nothing has been opened, so just open an empty buffer
+		buffers = append(buffers, buffer.NewBufferFromStringAtLoc("", "", btype, flagStartPos))
 	}
 
 	return buffers
@@ -385,13 +396,6 @@ func main() {
 	buffer.SetMessager(action.InfoBar)
 	args := flag.Args()
 	b := LoadInput(args)
-
-	if len(b) == 0 {
-		// No buffers to open
-		screen.Screen.Fini()
-		runtime.Goexit()
-	}
-
 	action.InitTabs(b)
 
 	err = config.RunPluginFn("init")
