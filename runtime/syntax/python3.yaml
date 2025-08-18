@@ -1,8 +1,8 @@
 filetype: python
 
 detect:
-    filename: "\\.py(3|w)?$"
-    header: "^#!.*/(env +)?python(3)?$"
+    filename: "\\.(py(3|w)?|sage)$"
+    header: "^#!.*/(env +)?(python(3)?|sage)$"
 
 rules:
     # built-in objects
