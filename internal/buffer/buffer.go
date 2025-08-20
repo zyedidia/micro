@@ -257,13 +257,13 @@ type Buffer struct {
 }
 
 // NewBufferFromFileAtLoc opens a new buffer with a given cursor location
-// If cursorLoc is {-1, -1} the location does not overwrite what the cursor location
+// If cursorLoc is void, the location does not overwrite what the cursor location
 // would otherwise be (start of file, or saved cursor position if `savecursor` is
 // enabled)
 func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer, error) {
 	var err error
 	filename := path
-	if config.GetGlobalOption("parsecursor").(bool) && cursorLoc.X == -1 && cursorLoc.Y == -1 {
+	if config.GetGlobalOption("parsecursor").(bool) && !cursorLoc.IsValid() {
 		var cursorPos []string
 		filename, cursorPos = util.GetPathAndCursorPosition(filename)
 		cursorLoc, err = ParseCursorLocation(cursorPos)
