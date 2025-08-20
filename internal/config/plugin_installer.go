@@ -650,14 +650,14 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 			if pp == nil {
 				fmt.Fprintln(out, "Unknown plugin \""+plugin+"\"")
 			} else if err := pp.IsInstallable(out); err != nil {
-				fmt.Fprintln(out, "Error installing ", plugin, ": ", err)
+				fmt.Fprintln(out, "Error installing "+plugin+": ", err)
 			} else {
 				for _, installed := range installedVersions {
 					if pp.Name == installed.Pack().Name {
 						if pp.Versions[0].Version.Compare(installed.Version) == 1 {
-							fmt.Fprintln(out, pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
+							fmt.Fprintln(out, pp.Name, "is already installed but out-of-date: use 'plugin update "+pp.Name+"' to update")
 						} else {
-							fmt.Fprintln(out, pp.Name, " is already installed")
+							fmt.Fprintln(out, pp.Name, "is already installed")
 						}
 					}
 				}
@@ -685,8 +685,9 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 				}
 			}
 		}
+		removed = strings.TrimSpace(removed)
 		if removed != "" {
-			fmt.Fprintln(out, "Removed ", removed)
+			fmt.Fprintln(out, "Removed", removed)
 		} else {
 			fmt.Fprintln(out, "No plugins removed")
 		}
@@ -706,7 +707,7 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 		}
 	case "search":
 		plugins := SearchPlugin(out, args)
-		fmt.Fprintln(out, len(plugins), " plugins found")
+		fmt.Fprintln(out, len(plugins), "plugins found")
 		for _, p := range plugins {
 			fmt.Fprintln(out, "----------------")
 			fmt.Fprintln(out, p.String())
