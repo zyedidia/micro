@@ -19,10 +19,10 @@ import (
 
 	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/zyedidia/micro/v2/internal/config"
+	"github.com/zyedidia/micro/v2/internal/highlight"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/micro/v2/pkg/highlight"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
@@ -189,11 +189,7 @@ func (b *SharedBuffer) MarkModified(start, end int) {
 	end = util.Clamp(end, 0, len(b.lines)-1)
 
 	if b.Settings["syntax"].(bool) && b.SyntaxDef != nil {
-		l := -1
-		for i := start; i <= end; i++ {
-			l = util.Max(b.Highlighter.ReHighlightStates(b, i), l)
-		}
-		b.Highlighter.HighlightMatches(b, start, l)
+		b.Highlighter.Highlight(b, start, end)
 	}
 
 	for i := start; i <= end; i++ {
@@ -972,8 +968,7 @@ func (b *Buffer) UpdateRules() {
 		b.Highlighter = highlight.NewHighlighter(b.SyntaxDef)
 		if b.Settings["syntax"].(bool) {
 			go func() {
-				b.Highlighter.HighlightStates(b)
-				b.Highlighter.HighlightMatches(b, 0, b.End().Y)
+				b.Highlighter.Highlight(b, 0, b.End().Y)
 				screen.Redraw()
 			}()
 		}
