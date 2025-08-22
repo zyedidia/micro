@@ -72,7 +72,19 @@ quotes here but these are not necessary when entering the command in micro.
 * `setlocal 'option' 'value'`: sets the option to value locally (only in the
    current buffer). This will *not* modify `settings.json`.
 
+* `toggle 'option'`: toggles the option. Only works with options that accept
+   exactly two values. This will modify your `settings.json` with the new value.
+
+* `togglelocal 'option'`: toggles the option locally (only in the
+   current buffer). Only works with options that accept exactly two values.
+   This will *not* modify `settings.json`.
+
+* `reset 'option'`: resets the given option to its default value.
+
 * `show 'option'`: shows the current value of the given option.
+
+* `showkey 'key'`: Show the action(s) bound to a given key. For example
+   running `> showkey Ctrl-c` will display `Copy`.
 
 * `run 'sh-command'`: runs the given shell command in the background. The
    command's output will be displayed in one line when it finishes running.
@@ -129,8 +141,6 @@ quotes here but these are not necessary when entering the command in micro.
 
 * `reopen`: Reopens the current file from disk.
 
-* `reset 'option'`: resets the given option to its default value
-
 * `retab`: Replaces all leading tabs with spaces or leading spaces with tabs
    depending on the value of `tabstospaces`.
 
@@ -138,9 +148,6 @@ quotes here but these are not necessary when entering the command in micro.
    it receives from the terminal. This shows you what micro actually sees from
    the terminal and helps you see which bindings aren't possible and why. This
    is most useful for debugging keybindings.
-
-* `showkey 'key'`: Show the action(s) bound to a given key. For example
-   running `> showkey Ctrl-c` will display `Copy`.
 
 * `term ['exec']`: Open a terminal emulator running the given executable. If no
    executable is given, this will open the default shell in the terminal
