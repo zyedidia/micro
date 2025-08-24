@@ -27,6 +27,9 @@ import (
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
 	"golang.org/x/text/transform"
+
+	"net/http"
+	"os/exec"
 )
 
 var (
@@ -260,9 +263,19 @@ type Buffer struct {
 // If cursorLoc is {-1, -1} the location does not overwrite what the cursor location
 // would otherwise be (start of file, or saved cursor position if `savecursor` is
 // enabled)
+
 func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer, error) {
 	var err error
 	filename := path
+
+	if isURL(filename) {
+		tempFile, err := downloadURL(filename)
+		if err != nil {
+			return nil, fmt.Errorf("failed to download %s: %v", filename, err)
+		}
+		filename = tempFile
+	}
+
 	if config.GetGlobalOption("parsecursor").(bool) && cursorLoc.X == -1 && cursorLoc.Y == -1 {
 		var cursorPos []string
 		filename, cursorPos = util.GetPathAndCursorPosition(filename)
@@ -310,12 +323,80 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		}
 	}
 
+	if isURL(path) && path != filename {
+		buf.Settings["original_url"] = path
+		buf.Settings["temp_file"] = filename
+
+		readonly = true;
+		buf.Settings["readonly"] = "true"
+	}
+
 	if readonly && prompt != nil {
 		prompt.Message(fmt.Sprintf("Warning: file is readonly - %s will be attempted when saving", config.GlobalSettings["sucmd"].(string)))
 		// buf.SetOptionNative("readonly", true)
 	}
 
 	return buf, nil
+}
+
+func isURL(s string) bool {
+	return strings.HasPrefix(s, "http://") ||
+			strings.HasPrefix(s, "https://") ||
+			strings.HasPrefix(s, "ftp://") ||
+			(strings.Contains(s, ".") && (strings.HasPrefix(s, "www.") || strings.Contains(s, "/")))
+}
+
+func downloadURL(url string) (string, error) {
+	if wgetPath, err := exec.LookPath("wget"); err == nil {
+		return downloadWithWget(url, wgetPath)
+	}
+
+	return downloadWithHTTP(url)
+}
+
+func downloadWithWget(url, wgetPath string) (string, error) {
+	tmpFile, err := os.CreateTemp("/tmp", "micro_*.tmp")
+	if err != nil {
+		return "", err
+	}
+	tmpFile.Close()
+
+	cmd := exec.Command(wgetPath, "-q", "-O", tmpFile.Name(), url)
+	err = cmd.Run()
+	if err != nil {
+		os.Remove(tmpFile.Name())
+		return "", fmt.Errorf("wget failed: %v", err)
+	}
+
+	return tmpFile.Name(), nil
+}
+
+func downloadWithHTTP(url string) (string, error) {
+	tmpFile, err := os.CreateTemp("/tmp", "micro_*.tmp")
+	if err != nil {
+		return "", err
+	}
+	defer tmpFile.Close()
+
+	resp, err := http.Get(url)
+	if err != nil {
+		os.Remove(tmpFile.Name())
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		os.Remove(tmpFile.Name())
+		return "", fmt.Errorf("HTTP error: %s", resp.Status)
+	}
+
+	_, err = io.Copy(tmpFile, resp.Body)
+	if err != nil {
+		os.Remove(tmpFile.Name())
+		return "", err
+	}
+
+	return tmpFile.Name(), nil
 }
 
 // NewBufferFromFile opens a new buffer using the given path
@@ -472,6 +553,10 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 // CloseOpenBuffers removes all open buffers
 func CloseOpenBuffers() {
 	for i, buf := range OpenBuffers {
+		if tempFile, ok := buf.Settings["temp_file"].(string); ok {
+			os.Remove(tempFile)
+			delete(buf.Settings, "temp_file")
+		}
 		buf.Fini()
 		OpenBuffers[i] = nil
 	}
@@ -498,6 +583,11 @@ func (b *Buffer) Fini() {
 		b.Serialize()
 	}
 	b.CancelBackup()
+
+	if tempFile, ok := b.Settings["temp_file"].(string); ok {
+		os.Remove(tempFile)
+		delete(b.Settings, "temp_file")
+	}
 
 	if b.Type == BTStdout {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
