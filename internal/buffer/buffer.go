@@ -351,28 +351,67 @@ func downloadURL(url string) (string, error) {
 		return downloadWithWget(url, wgetPath)
 	}
 
+	if curlPath, err := exec.LookPath("curl"); err == nil {
+		return downloadWithCurl(url, curlPath)
+	}
+
 	return downloadWithHTTP(url)
 }
 
 func downloadWithWget(url, wgetPath string) (string, error) {
-	tmpFile, err := os.CreateTemp("/tmp", "micro_*.tmp")
+	baseName := getFilenameFromURL(url)
+	if baseName == "" {
+		baseName = "file.tmp"
+	}
+
+	cleanName := "/tmp/micro_" + baseName
+	tmpFile, err := os.Create(cleanName)
 	if err != nil {
 		return "", err
 	}
 	tmpFile.Close()
 
-	cmd := exec.Command(wgetPath, "-q", "-O", tmpFile.Name(), url)
+	cmd := exec.Command(wgetPath, "-q", "-O", cleanName, url)
 	err = cmd.Run()
 	if err != nil {
-		os.Remove(tmpFile.Name())
+		os.Remove(cleanName)
 		return "", fmt.Errorf("wget failed: %v", err)
 	}
 
-	return tmpFile.Name(), nil
+	return cleanName, nil
+}
+
+func downloadWithCurl(url, curlPath string) (string, error) {
+	baseName := getFilenameFromURL(url)
+	if baseName == "" {
+		baseName = "file.tmp"
+	}
+
+	cleanName := "/tmp/micro_" + baseName
+	tmpFile, err := os.Create(cleanName)
+	if err != nil {
+		return "", err
+	}
+	tmpFile.Close()
+
+	cmd := exec.Command(curlPath, "-L", "-s", "-o", cleanName, url)
+	err = cmd.Run()
+	if err != nil {
+		os.Remove(cleanName)
+		return "", fmt.Errorf("curl failed: %v", err)
+	}
+
+	return cleanName, nil
 }
 
 func downloadWithHTTP(url string) (string, error) {
-	tmpFile, err := os.CreateTemp("/tmp", "micro_*.tmp")
+	baseName := getFilenameFromURL(url)
+	if baseName == "" {
+		baseName = "file.tmp"
+	}
+
+	cleanName := "/tmp/micro_" + baseName
+	tmpFile, err := os.Create(cleanName)
 	if err != nil {
 		return "", err
 	}
@@ -380,23 +419,40 @@ func downloadWithHTTP(url string) (string, error) {
 
 	resp, err := http.Get(url)
 	if err != nil {
-		os.Remove(tmpFile.Name())
+		os.Remove(cleanName)
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		os.Remove(tmpFile.Name())
+		os.Remove(cleanName)
 		return "", fmt.Errorf("HTTP error: %s", resp.Status)
 	}
 
 	_, err = io.Copy(tmpFile, resp.Body)
 	if err != nil {
-		os.Remove(tmpFile.Name())
+		os.Remove(cleanName)
 		return "", err
 	}
 
-	return tmpFile.Name(), nil
+	return cleanName, nil
+}
+
+func getFilenameFromURL(url string) string {
+	if idx := strings.Index(url, "?"); idx != -1 {
+		url = url[:idx]
+	}
+	if idx := strings.Index(url, "#"); idx != -1 {
+		url = url[:idx]
+	}
+
+	base := filepath.Base(url)
+
+	if base == "" || strings.Contains(base, "/") {
+		return ""
+	}
+
+	return base
 }
 
 // NewBufferFromFile opens a new buffer using the given path
