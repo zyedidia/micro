@@ -268,12 +268,16 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	var err error
 	filename := path
 
+	// WriteLog(fmt.Sprintf("NewBufferFromFileAtLoc called with: %s\n", path))
+
 	if isURL(filename) {
+		// WriteLog(fmt.Sprintf("Downloading URL: %s\n", filename))
 		tempFile, err := downloadURL(filename)
 		if err != nil {
 			return nil, fmt.Errorf("failed to download %s: %v", filename, err)
 		}
 		filename = tempFile
+		// WriteLog(fmt.Sprintf("Downloaded to: %s\n", filename))
 	}
 
 	if config.GetGlobalOption("parsecursor").(bool) && cursorLoc.X == -1 && cursorLoc.Y == -1 {
@@ -328,7 +332,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 		buf.Settings["temp_file"] = filename
 
 		readonly = true;
-		buf.Settings["readonly"] = "true"
+		buf.Settings["readonly"] = true
 	}
 
 	if readonly && prompt != nil {
@@ -341,9 +345,10 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 
 func isURL(s string) bool {
 	return strings.HasPrefix(s, "http://") ||
-			strings.HasPrefix(s, "https://") ||
-			strings.HasPrefix(s, "ftp://") ||
-			(strings.Contains(s, ".") && (strings.HasPrefix(s, "www.") || strings.Contains(s, "/")))
+		strings.HasPrefix(s, "https://") ||
+		strings.HasPrefix(s, "ftp://") ||
+		strings.HasPrefix(s, "ftps://") ||
+		strings.HasPrefix(s, "www.")
 }
 
 func downloadURL(url string) (string, error) {
