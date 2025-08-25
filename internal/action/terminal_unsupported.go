@@ -8,6 +8,6 @@ import "errors"
 const TermEmuSupported = false
 
 // RunTermEmulator returns an error for unsupported systems (non-unix systems
-func RunTermEmulator(input string, wait bool, getOutput bool, callback func(out string, userargs []interface{}), userargs []interface{}) error {
+func RunTermEmulator(input string, wait bool, getOutput bool, callback func(out string, userargs []any), userargs []any) error {
 	return errors.New("Unsupported operating system")
 }

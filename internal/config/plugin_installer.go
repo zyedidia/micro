@@ -228,7 +228,7 @@ func GetAllPluginPackages(out io.Writer) PluginPackages {
 			if strs, ok := data.([]string); ok {
 				return strs
 			}
-			if ifs, ok := data.([]interface{}); ok {
+			if ifs, ok := data.([]any); ok {
 				result := make([]string, len(ifs))
 				for i, urlIf := range ifs {
 					if url, ok := urlIf.(string); ok {

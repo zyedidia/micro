@@ -193,7 +193,7 @@ func OptionValueComplete(b *buffer.Buffer) ([]string, []string) {
 	inputOpt = strings.TrimSpace(inputOpt)
 	var suggestions []string
 	// localSettings := config.DefaultLocalSettings()
-	var optionVal interface{}
+	var optionVal any
 	for k, option := range config.GlobalSettings {
 		if k == inputOpt {
 			optionVal = option

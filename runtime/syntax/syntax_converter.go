@@ -28,7 +28,7 @@ func JoinRule(rule string) string {
 	return joined
 }
 
-func parseFile(text, filename string) (filetype, syntax, header string, rules []interface{}) {
+func parseFile(text, filename string) (filetype, syntax, header string, rules []any) {
 	lines := strings.Split(text, "\n")
 
 	// Regex for parsing syntax statements
@@ -129,7 +129,7 @@ func parseFile(text, filename string) (filetype, syntax, header string, rules []
 	return
 }
 
-func generateFile(filetype, syntax, header string, rules []interface{}) string {
+func generateFile(filetype, syntax, header string, rules []any) string {
 	output := ""
 
 	output += fmt.Sprintf("filetype: %s\n\n", filetype)

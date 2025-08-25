@@ -84,7 +84,7 @@ func (b *Buffer) ClearAllMessages() {
 }
 
 type Messager interface {
-	Message(msg ...interface{})
+	Message(msg ...any)
 }
 
 var prompt Messager

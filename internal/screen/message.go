@@ -14,7 +14,7 @@ import (
 // The function must be called when the Screen is not initialized
 // This will write the message, and wait for the user
 // to press and key to continue
-func TermMessage(msg ...interface{}) {
+func TermMessage(msg ...any) {
 	screenb := TempFini()
 
 	fmt.Println(msg...)
