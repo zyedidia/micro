@@ -383,6 +383,11 @@ func downloadWithWget(url, wgetPath string) (string, error) {
 		return "", fmt.Errorf("wget failed: %v", err)
 	}
 
+	err = os.Chmod(cleanName, 0444)
+	if err != nil {
+		fmt.Printf("Warning: Could not set read-only permissions on %s: %v\n", cleanName, err)
+	}
+
 	return cleanName, nil
 }
 
@@ -404,6 +409,11 @@ func downloadWithCurl(url, curlPath string) (string, error) {
 	if err != nil {
 		os.Remove(cleanName)
 		return "", fmt.Errorf("curl failed: %v", err)
+	}
+
+	err = os.Chmod(cleanName, 0444)
+	if err != nil {
+		fmt.Printf("Warning: Could not set read-only permissions on %s: %v\n", cleanName, err)
 	}
 
 	return cleanName, nil
@@ -438,6 +448,11 @@ func downloadWithHTTP(url string) (string, error) {
 	if err != nil {
 		os.Remove(cleanName)
 		return "", err
+	}
+
+	err = os.Chmod(cleanName, 0444)
+	if err != nil {
+		fmt.Printf("Warning: Could not set read-only permissions on %s: %v\n", cleanName, err)
 	}
 
 	return cleanName, nil
