@@ -522,7 +522,7 @@ func HasTrailingWhitespace(b []byte) bool {
 }
 
 // IntOpt turns a float64 setting to an int
-func IntOpt(opt interface{}) int {
+func IntOpt(opt any) int {
 	return int(opt.(float64))
 }
 

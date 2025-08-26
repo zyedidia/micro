@@ -2083,14 +2083,14 @@ func (h *BufPane) LastSplit() bool {
 	return true
 }
 
-var curmacro []interface{}
+var curmacro []any
 var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
 func (h *BufPane) ToggleMacro() bool {
 	recordingMacro = !recordingMacro
 	if recordingMacro {
-		curmacro = []interface{}{}
+		curmacro = []any{}
 		InfoBar.Message("Recording")
 	} else {
 		InfoBar.Message("Stopped recording")

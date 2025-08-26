@@ -46,7 +46,7 @@ func NewBufWindow(x, y, width, height int, buf *buffer.Buffer) *BufWindow {
 // SetBuffer sets this window's buffer.
 func (w *BufWindow) SetBuffer(b *buffer.Buffer) {
 	w.Buf = b
-	b.OptionCallback = func(option string, nativeValue interface{}) {
+	b.OptionCallback = func(option string, nativeValue any) {
 		if option == "softwrap" {
 			if nativeValue.(bool) {
 				w.StartCol = 0
