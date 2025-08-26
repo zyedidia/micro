@@ -96,7 +96,7 @@ func NewStatusLine(win *BufWindow) *StatusLine {
 }
 
 // FindOpt finds a given option in the current buffer's settings
-func (s *StatusLine) FindOpt(opt string) interface{} {
+func (s *StatusLine) FindOpt(opt string) any {
 	if val, ok := s.win.Buf.Settings[opt]; ok {
 		return val
 	}
@@ -152,7 +152,7 @@ func (s *StatusLine) Display() {
 		name := match[2 : len(match)-1]
 		if bytes.HasPrefix(name, []byte("opt")) {
 			option := name[4:]
-			return []byte(fmt.Sprint(s.FindOpt(string(option))))
+			return fmt.Append(nil, s.FindOpt(string(option)))
 		} else if bytes.HasPrefix(name, []byte("bind")) {
 			binding := string(name[5:])
 			for k, v := range config.Bindings["buffer"] {

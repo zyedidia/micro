@@ -569,7 +569,7 @@ func (h *BufPane) NewTabCmd(args []string) {
 	}
 }
 
-func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
+func doSetGlobalOptionNative(option string, nativeValue any) error {
 	if reflect.DeepEqual(config.GlobalSettings[option], nativeValue) {
 		return nil
 	}
@@ -628,7 +628,7 @@ func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
 	return nil
 }
 
-func SetGlobalOptionNative(option string, nativeValue interface{}) error {
+func SetGlobalOptionNative(option string, nativeValue any) error {
 	if err := config.OptionIsValid(option, nativeValue); err != nil {
 		return err
 	}
@@ -737,7 +737,7 @@ func (h *BufPane) ShowCmd(args []string) {
 		return
 	}
 
-	var option interface{}
+	var option any
 	if opt, ok := h.Buf.Settings[args[0]]; ok {
 		option = opt
 	} else if opt, ok := config.GlobalSettings[args[0]]; ok {

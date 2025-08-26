@@ -85,7 +85,7 @@ type SharedBuffer struct {
 	toStdout bool
 
 	// Settings customized by the user
-	Settings map[string]interface{}
+	Settings map[string]any
 	// LocalSettings customized by the user for this buffer only
 	LocalSettings map[string]bool
 
@@ -239,7 +239,7 @@ type Buffer struct {
 	// is properly updated when needed. This is a workaround for the fact that
 	// the buffer module cannot directly call the display's API (it would mean
 	// a circular dependency between packages).
-	OptionCallback func(option string, nativeValue interface{})
+	OptionCallback func(option string, nativeValue any)
 
 	// The display module registers its own GetVisualX function for getting
 	// the correct visual x location of a cursor when softwrap is used.
