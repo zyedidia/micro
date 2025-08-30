@@ -227,6 +227,17 @@ that micro's default color scheme won't look very good. You can either set
 the color scheme to `simple`, or download and configure a better terminal emulator
 than the Windows default.
 
+
+#### Syntax File Compatibility
+
+**Important:** Always use syntax files that match your installed micro version.
+
+- Use files from the tagged release corresponding to your version, not from `master`
+- Check your version: `micro --version`
+- Download from: `https://github.com/zyedidia/micro/tree/v[YOUR_VERSION]/runtime/syntax/`
+
+**Troubleshooting:** Parsing errors like `"interface conversion"` usually indicate mismatched syntax file versions.
+
 ### Cygwin, Mingw, Plan9
 
 Cygwin, Mingw, and Plan9 are unfortunately not officially supported. In Cygwin and Mingw, micro will often work when run using
