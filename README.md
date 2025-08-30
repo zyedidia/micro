@@ -232,11 +232,13 @@ than the Windows default.
 
 **Important:** Always use syntax files that match your installed micro version.
 
-- Use files from the tagged release corresponding to your version, not from `master`
-- Check your version: `micro --version`
-- Download from: `https://github.com/zyedidia/micro/tree/v[YOUR_VERSION]/runtime/syntax/`
+- In [Commit a9b513a](https://github.com/zyedidia/micro/commit/a9b513a28adaaa7782505dc1e284e1a0132cb66f) were empty rules removed in regions from the syntax files.
+  Plan is to revert this change to improve compatibility.
 
-**Troubleshooting:** Parsing errors like `"interface conversion"` usually indicate mismatched syntax file versions.
+- Until this commit has been reverted, use the syntax files from the version you are using:
+    * Check your version: `micro --version`
+    * Download from: `https://github.com/zyedidia/micro/tree/v[YOUR_VERSION]/runtime/syntax/`
+    * Troubleshooting: Parsing errors like `"interface conversion"` usually indicate mismatched syntax file versions.
 
 ### Cygwin, Mingw, Plan9
 
