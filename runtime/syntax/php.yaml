@@ -40,9 +40,11 @@ rules:
     - comment:
         start: "(^|[[:space:]])*(//|#)"
         end: "$"
+        rules: []
     - comment:
         start: "/\\*"
         end: "\\*/"
+        rules: []
 
     - constant.string:
         start: "\""
