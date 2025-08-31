@@ -53,8 +53,8 @@ rules:
         rules:
             - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
     - constant.string:
-        start: "\'"
-        end: "\'"
+        start: "'"
+        end: "'"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\[abfnrtv'\\\"\\\\]"
