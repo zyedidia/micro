@@ -22,5 +22,6 @@ rules:
     - comment:
         start: "\\#\\["
         end: "\\]\\#"
+        rules: []
 
     - todo: "(TODO|FIXME|XXX):?"

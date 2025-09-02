@@ -38,6 +38,7 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\."
+        rules: []
 
     - comment:
         start: "#"

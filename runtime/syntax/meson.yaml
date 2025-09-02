@@ -34,11 +34,13 @@ rules:
     - comment:
         start: "#"
         end: "$"
+        rules: []
 
     # multiline strings do not support escape sequences
     - constant.string:
         start: "'''"
         end: "'''"
+        rules: []
 
     - constant.string:
         start: "'"
