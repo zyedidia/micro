@@ -1,19 +1,19 @@
 filetype: markdown
 
 detect:
-    filename: "\\.(livemd|md|mkd|mkdn|markdown)$"
+    filename: \.(livemd|md|mkd|mkdn|markdown)$
 
 rules:
-    # Tables (Github extension)
+      # tables (Github extension)
     - type: ".*[ :]\\|[ :].*"
 
       # quotes
-    - statement:  "^>.*"
+    - statement: "^>.*"
 
-      # Emphasis
+      # emphasis
     - type: "(^|[[:space:]])(_[^ ][^_]*_|\\*[^ ][^*]*\\*)"
 
-      # Strong emphasis
+      # strong emphasis
     - type: "(^|[[:space:]])(__[^ ][^_]*__|\\*\\*[^ ][^*]*\\*\\*)"
 
       # strike-through
@@ -23,13 +23,13 @@ rules:
     - special: "^(---+|===+|___+|\\*\\*\\*+)\\s*$"
 
       # headlines
-    - special:  "^#{1,6}.*"
+    - special: "^#{1,6}.*"
 
       # lists
-    - identifier:   "^[[:space:]]*[\\*+-] |^[[:space:]]*[0-9]+\\. "
+    - identifier: "^[[:space:]]*[\\*+-] |^[[:space:]]*[0-9]+\\. "
 
       # misc
-    - preproc:   "(\\(([CcRr]|[Tt][Mm])\\)|\\.{3}|(^|[[:space:]])\\-\\-($|[[:space:]]))"
+    - preproc: "(\\(([CcRr]|[Tt][Mm])\\)|\\.{3}|(^|[[:space:]])\\-\\-($|[[:space:]]))"
 
       # links
     - constant: "\\[[^]]+\\]"
@@ -42,6 +42,101 @@ rules:
     - underlined: "https?://[^ )>]+"
 
     - special: "^```$"
+
+      # syntax highlighting of fenced code blocks
+    - default:
+        start: "(?i)^```(c|h)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "c"
+    - default:
+        start: "(?i)^```(cpp|c\\+\\+|cxx)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "c++"
+    - default:
+        start: "(?i)^```(cs|csharp|c#)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "csharp"
+    - default:
+        start: "(?i)^```(css|css.erb)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "css"
+    - default:
+        start: "(?i)^```(patch|diff|rej)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "patch"
+    - default:
+        start: "(?i)^```(go|golang)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "go"
+    - default:
+        start: "(?i)^```(ini|conf)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "ini"
+    - default:
+        start: "(?i)^```(java|bsh)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "java"
+    - default:
+        start:
+          "(?i)^```(js|jsx|javascript|es6|mjs|cjs|dataviewjs|\\{\\.js.+?\\})((\\\
+          s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "javascript"
+    - default:
+        start:
+          "(?i)^```(json|json5|sublime-settings|sublime-menu|sublime-keymap|sublime-mousemap|sublime-theme|sublime-build|sublime-project|sublime-completions)((\\\
+          s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "json"
+    - default:
+        start: "(?i)^```(php|php3|php4|php5|phpt|phtml|aw|ctp)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "php"
+    - default:
+        start:
+          "(?i)^```(python|py|py3|rpy|pyw|cpy|SConstruct|Sconstruct|sconstruct|SConscript|gyp|gypi|\\\
+          {\\.python.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "python"
+    - default:
+        start: "(?i)^```(rust|rs|\\{\\.rust.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "rust"
+    - default:
+        start:
+          "(?i)^```(shell|sh|bash|zsh|bashrc|bash_profile|bash_login|profile|bash_logout|.textmate_init|\\\
+          {\\.bash.+?\\})((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "shell"
+    - default:
+        start: "(?i)^```(sql|ddl|dml)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "sql"
+    - default:
+        start: "(?i)^```(typescript|ts)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "typescript"
+    - default:
+        start: "(?i)^```(yaml|yml)((\\s+|:|,|\\{|\\?)[^`]*)?$"
+        end: "^```$"
+        rules:
+            - include: "yaml"
 
     - special:
         start: "`"
