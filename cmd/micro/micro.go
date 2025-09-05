@@ -48,7 +48,7 @@ var (
 func InitFlags() {
 	// Note: keep this in sync with the man page in assets/packaging/micro.1
 	flag.Usage = func() {
-		fmt.Println("Usage: micro [OPTION]... [FILE]... [+LINE[:COL]]")
+		fmt.Println("Usage: micro [OPTION]... [FILE]... [+LINE[:COL]] [+/REGEX]")
 		fmt.Println("       micro [OPTION]... [FILE[:LINE[:COL]]]...  (only if the `parsecursor` option is enabled)")
 		fmt.Println("-clean")
 		fmt.Println("    \tClean the configuration directory and exit")
@@ -57,6 +57,8 @@ func InitFlags() {
 		fmt.Println("FILE:LINE[:COL] (only if the `parsecursor` option is enabled)")
 		fmt.Println("FILE +LINE[:COL]")
 		fmt.Println("    \tSpecify a line and column to start the cursor at when opening a buffer")
+		fmt.Println("+/REGEX")
+		fmt.Println("    \tSpecify a regex to search for when opening a buffer")
 		fmt.Println("-options")
 		fmt.Println("    \tShow all options help and exit")
 		fmt.Println("-debug")
@@ -167,39 +169,60 @@ func LoadInput(args []string) []*buffer.Buffer {
 	}
 
 	files := make([]string, 0, len(args))
+
 	flagStartPos := buffer.Loc{-1, -1}
-	flagr := regexp.MustCompile(`^\+(\d+)(?::(\d+))?$`)
-	for _, a := range args {
-		match := flagr.FindStringSubmatch(a)
-		if len(match) == 3 && match[2] != "" {
-			line, err := strconv.Atoi(match[1])
+	posFlagr := regexp.MustCompile(`^\+(\d+)(?::(\d+))?$`)
+	posIndex := -1
+
+	searchText := ""
+	searchFlagr := regexp.MustCompile(`^\+\/(.+)$`)
+	searchIndex := -1
+
+	for i, a := range args {
+		posMatch := posFlagr.FindStringSubmatch(a)
+		if len(posMatch) == 3 && posMatch[2] != "" {
+			line, err := strconv.Atoi(posMatch[1])
 			if err != nil {
 				screen.TermMessage(err)
 				continue
 			}
-			col, err := strconv.Atoi(match[2])
+			col, err := strconv.Atoi(posMatch[2])
 			if err != nil {
 				screen.TermMessage(err)
 				continue
 			}
 			flagStartPos = buffer.Loc{col - 1, line - 1}
-		} else if len(match) == 3 && match[2] == "" {
-			line, err := strconv.Atoi(match[1])
+			posIndex = i
+		} else if len(posMatch) == 3 && posMatch[2] == "" {
+			line, err := strconv.Atoi(posMatch[1])
 			if err != nil {
 				screen.TermMessage(err)
 				continue
 			}
 			flagStartPos = buffer.Loc{0, line - 1}
+			posIndex = i
 		} else {
-			files = append(files, a)
+			searchMatch := searchFlagr.FindStringSubmatch(a)
+			if len(searchMatch) == 2 {
+				searchText = searchMatch[1]
+				searchIndex = i
+			} else {
+				files = append(files, a)
+			}
 		}
+	}
+
+	command := buffer.Command{
+		StartCursor:      flagStartPos,
+		SearchRegex:      searchText,
+		SearchAfterStart: searchIndex > posIndex,
 	}
 
 	if len(files) > 0 {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(files); i++ {
-			buf, err := buffer.NewBufferFromFileAtLoc(files[i], btype, flagStartPos)
+			buf, err := buffer.NewBufferFromFileWithCommand(files[i], btype, command)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
@@ -216,10 +239,10 @@ func LoadInput(args []string) []*buffer.Buffer {
 			screen.TermMessage("Error reading from stdin: ", err)
 			input = []byte{}
 		}
-		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
 	} else {
 		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromStringAtLoc(string(input), filename, btype, flagStartPos))
+		buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
 	}
 
 	return buffers

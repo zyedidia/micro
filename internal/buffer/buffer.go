@@ -215,6 +215,18 @@ const (
 
 type DiffStatus byte
 
+type Command struct {
+	StartCursor      Loc
+	SearchRegex      string
+	SearchAfterStart bool
+}
+
+var emptyCommand = Command{
+	StartCursor:      Loc{-1, -1},
+	SearchRegex:      "",
+	SearchAfterStart: false,
+}
+
 // Buffer stores the main information about a currently open file including
 // the actual text (in a LineArray), the undo/redo stack (in an EventHandler)
 // all the cursors, the syntax highlighting info, the settings for the buffer
@@ -256,19 +268,19 @@ type Buffer struct {
 	OverwriteMode bool
 }
 
-// NewBufferFromFileAtLoc opens a new buffer with a given cursor location
-// If cursorLoc is {-1, -1} the location does not overwrite what the cursor location
+// NewBufferFromFileWithCommand opens a new buffer with a given command
+// If cmd.StartCursor is {-1, -1} the location does not overwrite what the cursor location
 // would otherwise be (start of file, or saved cursor position if `savecursor` is
 // enabled)
-func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer, error) {
+func NewBufferFromFileWithCommand(path string, btype BufType, cmd Command) (*Buffer, error) {
 	var err error
 	filename := path
-	if config.GetGlobalOption("parsecursor").(bool) && cursorLoc.X == -1 && cursorLoc.Y == -1 {
+	if config.GetGlobalOption("parsecursor").(bool) && cmd.StartCursor.X == -1 && cmd.StartCursor.Y == -1 {
 		var cursorPos []string
 		filename, cursorPos = util.GetPathAndCursorPosition(filename)
-		cursorLoc, err = ParseCursorLocation(cursorPos)
+		cmd.StartCursor, err = ParseCursorLocation(cursorPos)
 		if err != nil {
-			cursorLoc = Loc{-1, -1}
+			cmd.StartCursor = Loc{-1, -1}
 		}
 	}
 
@@ -304,7 +316,7 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 	} else if err != nil {
 		return nil, err
 	} else {
-		buf = NewBuffer(file, util.FSize(file), filename, cursorLoc, btype)
+		buf = NewBuffer(file, util.FSize(file), filename, btype, cmd)
 		if buf == nil {
 			return nil, errors.New("could not open file")
 		}
@@ -323,17 +335,18 @@ func NewBufferFromFileAtLoc(path string, btype BufType, cursorLoc Loc) (*Buffer,
 // It will return an empty buffer if the path does not exist
 // and an error if the file is a directory
 func NewBufferFromFile(path string, btype BufType) (*Buffer, error) {
-	return NewBufferFromFileAtLoc(path, btype, Loc{-1, -1})
+	return NewBufferFromFileWithCommand(path, btype, emptyCommand)
 }
 
-// NewBufferFromStringAtLoc creates a new buffer containing the given string with a cursor loc
-func NewBufferFromStringAtLoc(text, path string, btype BufType, cursorLoc Loc) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path, cursorLoc, btype)
+// NewBufferFromStringWithCommand creates a new buffer containing the given string
+// with a cursor loc and a search text
+func NewBufferFromStringWithCommand(text, path string, btype BufType, cmd Command) *Buffer {
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, btype, cmd)
 }
 
 // NewBufferFromString creates a new buffer containing the given string
 func NewBufferFromString(text, path string, btype BufType) *Buffer {
-	return NewBuffer(strings.NewReader(text), int64(len(text)), path, Loc{-1, -1}, btype)
+	return NewBuffer(strings.NewReader(text), int64(len(text)), path, btype, emptyCommand)
 }
 
 // NewBuffer creates a new buffer from a given reader with a given path
@@ -341,7 +354,7 @@ func NewBufferFromString(text, path string, btype BufType) *Buffer {
 // a new buffer
 // Places the cursor at startcursor. If startcursor is -1, -1 places the
 // cursor at an autodetected location (based on savecursor or :LINE:COL)
-func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufType) *Buffer {
+func NewBuffer(r io.Reader, size int64, path string, btype BufType, cmd Command) *Buffer {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
 		absPath = path
@@ -436,8 +449,8 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 		os.Mkdir(filepath.Join(config.ConfigDir, "buffers"), os.ModePerm)
 	}
 
-	if startcursor.X != -1 && startcursor.Y != -1 {
-		b.StartCursor = startcursor
+	if cmd.StartCursor.X != -1 && cmd.StartCursor.Y != -1 {
+		b.StartCursor = cmd.StartCursor
 	} else if b.Settings["savecursor"].(bool) || b.Settings["saveundo"].(bool) {
 		err := b.Unserialize()
 		if err != nil {
@@ -447,6 +460,23 @@ func NewBuffer(r io.Reader, size int64, path string, startcursor Loc, btype BufT
 
 	b.AddCursor(NewCursor(b, b.StartCursor))
 	b.GetActiveCursor().Relocate()
+
+	if cmd.SearchRegex != "" {
+		match, found, _ := b.FindNext(cmd.SearchRegex, b.Start(), b.End(), b.StartCursor, true, true)
+		if found {
+			if cmd.SearchAfterStart {
+				// Search from current cursor and move it accordingly
+				b.GetActiveCursor().SetSelectionStart(match[0])
+				b.GetActiveCursor().SetSelectionEnd(match[1])
+				b.GetActiveCursor().OrigSelection[0] = b.GetActiveCursor().CurSelection[0]
+				b.GetActiveCursor().OrigSelection[1] = b.GetActiveCursor().CurSelection[1]
+				b.GetActiveCursor().GotoLoc(match[1])
+			}
+			b.LastSearch = cmd.SearchRegex
+			b.LastSearchRegex = true
+			b.HighlightSearch = b.Settings["hlsearch"].(bool)
+		}
+	}
 
 	if !b.Settings["fastdirty"].(bool) && !found {
 		if size > LargeFileThreshold {
