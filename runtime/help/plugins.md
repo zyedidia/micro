@@ -178,6 +178,8 @@ The packages and their contents are listed below (in Go type signatures):
        bind the key `k` to the string `v`. If `overwrite` is true, this will
        overwrite any existing binding to key `k`.
        Returns true if the binding was made, and a possible error.
+       This operation can be rejected by `lockbindings` to prevent undesired
+       actions by the user.
 
     - `Reload()`: reload configuration files.
 
