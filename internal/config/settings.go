@@ -118,6 +118,7 @@ var DefaultGlobalOnlySettings = map[string]any{
 	"helpsplit":      "hsplit",
 	"infobar":        true,
 	"keymenu":        false,
+	"lockbindings":   false,
 	"mouse":          true,
 	"multiopen":      "tab",
 	"parsecursor":    false,

@@ -231,6 +231,12 @@ Here are the available options:
 
     default value: `false`
 
+* `lockbindings`: prevent plugins and lua scripts from binding any keys.
+   Any custom actions must be binded manually either via commands like `bind`
+   or by modifying the `bindings.json` file.
+
+    default value: `false`
+
 * `matchbrace`: show matching braces for '()', '{}', '[]' when the cursor
    is on a brace character or (if `matchbraceleft` is enabled) next to it.
 

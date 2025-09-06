@@ -262,7 +262,11 @@ func eventsEqual(e1 Event, e2 Event) bool {
 }
 
 // TryBindKeyPlug tries to bind a key for the plugin without writing to bindings.json.
+// This operation can be rejected by lockbindings to prevent unexpected actions by the user.
 func TryBindKeyPlug(k, v string, overwrite bool) (bool, error) {
+	if l, ok := config.GlobalSettings["lockbindings"]; ok && l.(bool) {
+		return false, errors.New("bindings is locked by the user")
+	}
 	return TryBindKey(k, v, overwrite, false)
 }
 
