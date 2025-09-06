@@ -227,6 +227,11 @@ Here are the available options:
 
     default value: `false`
 
+* `lockbindings`: disable plugins to modify the `bindings.json` in your config
+   directory.
+
+    default value: `false`
+
 * `matchbrace`: show matching braces for '()', '{}', '[]' when the cursor
    is on a brace character or (if `matchbraceleft` is enabled) next to it.
 

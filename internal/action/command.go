@@ -844,7 +844,7 @@ func (h *BufPane) BindCmd(args []string) {
 		return
 	}
 
-	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true)
+	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true, true)
 	if err != nil {
 		if errors.Is(err, util.ErrOverwrite) {
 			screen.TermMessage(err)
