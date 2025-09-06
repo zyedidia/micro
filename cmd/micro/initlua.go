@@ -73,7 +73,7 @@ func luaImportMicroConfig() *lua.LTable {
 	ulua.L.SetField(pkg, "OptionComplete", luar.New(ulua.L, action.OptionComplete))
 	ulua.L.SetField(pkg, "OptionValueComplete", luar.New(ulua.L, action.OptionValueComplete))
 	ulua.L.SetField(pkg, "NoComplete", luar.New(ulua.L, nil))
-	ulua.L.SetField(pkg, "TryBindKey", luar.New(ulua.L, action.TryBindKey))
+	ulua.L.SetField(pkg, "TryBindKey", luar.New(ulua.L, action.TryBindKeyPlug))
 	ulua.L.SetField(pkg, "Reload", luar.New(ulua.L, action.ReloadConfig))
 	ulua.L.SetField(pkg, "AddRuntimeFileFromMemory", luar.New(ulua.L, config.PluginAddRuntimeFileFromMemory))
 	ulua.L.SetField(pkg, "AddRuntimeFilesFromDirectory", luar.New(ulua.L, config.PluginAddRuntimeFilesFromDirectory))
