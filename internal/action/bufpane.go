@@ -16,7 +16,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
-type BufAction interface{}
+type BufAction any
 
 // BufKeyAction represents an action bound to a key.
 type BufKeyAction func(*BufPane) bool
@@ -328,7 +328,7 @@ func (h *BufPane) ResizePane(size int, right_or_bottom bool) bool {
 // error if there is one and returns the aggregate boolean response.
 // The bufpane is passed as the first argument to the callbacks,
 // optional args are passed as the next arguments.
-func (h *BufPane) PluginCB(cb string, args ...interface{}) bool {
+func (h *BufPane) PluginCB(cb string, args ...any) bool {
 	largs := []lua.LValue{luar.New(ulua.L, h)}
 	for _, a := range args {
 		largs = append(largs, luar.New(ulua.L, a))

@@ -6,11 +6,11 @@ detect:
 
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]*\\b"
-    - type: "\\b(float|double|bool|char|int|short|long|enum|void|struct|union|typedef|(un)?signed|inline)\\b"
+    - type: "\\b(auto|float|double|bool|char|int|short|long|enum|void|struct|union|typedef|(un)?signed|inline)\\b"
     - type: "\\b(((s?size)|((u_?)?int(8|16|32|64|ptr))|char(8|16|32))_t|wchar_t)\\b"
     - type: "\\b[a-z_][0-9a-z_]+(_t|_T)\\b"
     - type: "\\b(final|override)\\b"
-    - statement: "\\b(auto|volatile|const(expr|eval|init)?|mutable|register|thread_local|static|extern|decltype|explicit|virtual)\\b"
+    - statement: "\\b(volatile|const(expr|eval|init)?|mutable|register|thread_local|static|extern|decltype|explicit|virtual)\\b"
     - statement: "\\b(class|namespace|template|typename|this|friend|using|public|protected|private|noexcept)\\b"
     - statement: "\\b(concept|requires)\\b"
     - statement: "\\b(import|export|module)\\b"

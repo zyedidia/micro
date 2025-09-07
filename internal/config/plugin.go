@@ -42,7 +42,7 @@ func RunPluginFn(fn string, args ...lua.LValue) error {
 // RunPluginFnBool runs a function in all plugins and returns
 // false if any one of them returned false
 // also returns an error if any of the plugins had an error
-func RunPluginFnBool(settings map[string]interface{}, fn string, args ...lua.LValue) (bool, error) {
+func RunPluginFnBool(settings map[string]any, fn string, args ...lua.LValue) (bool, error) {
 	var reterr error
 	retbool := true
 	for _, p := range Plugins {
@@ -71,7 +71,7 @@ type Plugin struct {
 	Info    *PluginInfo   // json file containing info
 	Srcs    []RuntimeFile // lua files
 	Loaded  bool
-	Default bool // pre-installed plugin
+	Builtin bool
 }
 
 // IsLoaded returns if a plugin is enabled
