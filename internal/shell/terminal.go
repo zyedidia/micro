@@ -69,7 +69,7 @@ func (t *Terminal) GetSelection(width int) string {
 }
 
 // Start begins a new command in this terminal with a given view
-func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback func(out string, userargs []interface{}), userargs []interface{}) error {
+func (t *Terminal) Start(execCmd []string, getOutput bool, wait bool, callback func(out string, userargs []any), userargs []any) error {
 	if len(execCmd) <= 0 {
 		return nil
 	}
@@ -130,7 +130,7 @@ func (t *Terminal) Close() {
 	if t.getOutput {
 		if t.callback != nil {
 			Jobs <- JobFunction{
-				Function: func(out string, args []interface{}) {
+				Function: func(out string, args []any) {
 					t.callback(out)
 				},
 				Output: t.output.String(),

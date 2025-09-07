@@ -36,7 +36,7 @@ func createBindingsIfNotExist(fname string) {
 
 // InitBindings intializes the bindings map by reading from bindings.json
 func InitBindings() {
-	var parsed map[string]interface{}
+	var parsed map[string]any
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
@@ -66,7 +66,7 @@ func InitBindings() {
 		switch val := v.(type) {
 		case string:
 			BindKey(k, val, Binder["buffer"])
-		case map[string]interface{}:
+		case map[string]any:
 			bind, ok := Binder[k]
 			if !ok || bind == nil {
 				screen.TermMessage(fmt.Sprintf("%s is not a valid pane type", k))
@@ -265,7 +265,7 @@ func eventsEqual(e1 Event, e2 Event) bool {
 // Returns true if the keybinding already existed and a possible error
 func TryBindKey(k, v string, overwrite bool) (bool, error) {
 	var e error
-	var parsed map[string]interface{}
+	var parsed map[string]any
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)
@@ -318,7 +318,7 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 // UnbindKey removes the binding for a key from the bindings.json file
 func UnbindKey(k string) error {
 	var e error
-	var parsed map[string]interface{}
+	var parsed map[string]any
 
 	filename := filepath.Join(config.ConfigDir, "bindings.json")
 	createBindingsIfNotExist(filename)

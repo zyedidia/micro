@@ -15,6 +15,7 @@ rules:
     - constant.string:
         start: "\""
         end: "\""
+        rules: []
       # Integer Constants
     - constant.number: "\\b([0-9]+)\\b"
     - constant.number: "\\b(0x[0-9a-fA-F]+)\\b"
