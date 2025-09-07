@@ -11,7 +11,6 @@ import (
 	"os/signal"
 	"path/filepath"
 	"runtime"
-	"sync/atomic"
 	"time"
 	"unicode"
 
@@ -26,6 +25,7 @@ import (
 const LargeFileThreshold = 50000
 
 type wrappedFile struct {
+	name        string
 	writeCloser io.WriteCloser
 	withSudo    bool
 	screenb     bool
@@ -47,11 +47,14 @@ type saveRequest struct {
 }
 
 var saveRequestChan chan saveRequest
-var backupRequestChan chan *Buffer
+var backupRequestChan chan backupRequest
 
 func init() {
-	saveRequestChan = make(chan saveRequest, 10)
-	backupRequestChan = make(chan *Buffer, 10)
+	// Both saveRequestChan and backupRequestChan need to be non-buffered
+	// so the save/backup goroutine receives both save and backup requests
+	// in the same order the main goroutine sends them.
+	saveRequestChan = make(chan saveRequest)
+	backupRequestChan = make(chan backupRequest)
 
 	go func() {
 		duration := backupSeconds * float64(time.Second)
@@ -62,14 +65,10 @@ func init() {
 			case sr := <-saveRequestChan:
 				size, err := sr.buf.safeWrite(sr.path, sr.withSudo, sr.newFile)
 				sr.saveResponseChan <- saveResponse{size, err}
+			case br := <-backupRequestChan:
+				handleBackupRequest(br)
 			case <-backupTicker.C:
-				for len(backupRequestChan) > 0 {
-					b := <-backupRequestChan
-					bfini := atomic.LoadInt32(&(b.fini)) != 0
-					if !bfini {
-						b.Backup()
-					}
-				}
+				periodicBackup()
 			}
 		}
 	}()
@@ -83,7 +82,13 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 	var sigChan chan os.Signal
 
 	if withSudo {
-		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "of="+name)
+		conv := "notrunc"
+		// TODO: both platforms do not support dd with conv=fsync yet
+		if !(runtime.GOOS == "illumos" || runtime.GOOS == "netbsd") {
+			conv += ",fsync"
+		}
+
+		cmd = exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "bs=4k", "conv="+conv, "of="+name)
 		writeCloser, err = cmd.StdinPipe()
 		if err != nil {
 			return wrappedFile{}, err
@@ -113,10 +118,21 @@ func openFile(name string, withSudo bool) (wrappedFile, error) {
 		}
 	}
 
-	return wrappedFile{writeCloser, withSudo, screenb, cmd, sigChan}, nil
+	return wrappedFile{name, writeCloser, withSudo, screenb, cmd, sigChan}, nil
 }
 
-func (wf wrappedFile) Write(b *Buffer) (int, error) {
+func (wf wrappedFile) Truncate() error {
+	if wf.withSudo {
+		// we don't need to stop the screen here, since it is still stopped
+		// by openFile()
+		// truncate might not be available on every platfom, so use dd instead
+		cmd := exec.Command(config.GlobalSettings["sucmd"].(string), "dd", "count=0", "of="+wf.name)
+		return cmd.Run()
+	}
+	return wf.writeCloser.(*os.File).Truncate(0)
+}
+
+func (wf wrappedFile) Write(b *SharedBuffer) (int, error) {
 	file := bufio.NewWriter(transform.NewWriter(wf.writeCloser, b.encoding.NewEncoder()))
 
 	b.Lock()
@@ -134,12 +150,9 @@ func (wf wrappedFile) Write(b *Buffer) (int, error) {
 		eol = []byte{'\n'}
 	}
 
-	if !wf.withSudo {
-		f := wf.writeCloser.(*os.File)
-		err := f.Truncate(0)
-		if err != nil {
-			return 0, err
-		}
+	err := wf.Truncate()
+	if err != nil {
+		return 0, err
 	}
 
 	// write lines
@@ -184,7 +197,7 @@ func (wf wrappedFile) Close() error {
 	return err
 }
 
-func (b *Buffer) overwriteFile(name string) (int, error) {
+func (b *SharedBuffer) overwriteFile(name string) (int, error) {
 	file, err := openFile(name, false)
 	if err != nil {
 		return 0, err
@@ -206,9 +219,7 @@ func (b *Buffer) Save() error {
 
 // AutoSave saves the buffer to its default path
 func (b *Buffer) AutoSave() error {
-	// Doing full b.Modified() check every time would be costly, due to the hash
-	// calculation. So use just isModified even if fastdirty is not set.
-	if !b.isModified {
+	if !b.Modified() {
 		return nil
 	}
 	return b.saveToFile(b.Path, false, true)
@@ -318,7 +329,7 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 			// For large files 'fastdirty' needs to be on
 			b.Settings["fastdirty"] = true
 		} else {
-			calcHash(b, &b.origHash)
+			b.calcHash(&b.origHash)
 		}
 	}
 
@@ -337,32 +348,11 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	return err
 }
 
-func (b *Buffer) writeBackup(path string) (string, error) {
-	backupDir := b.backupDir()
-	if _, err := os.Stat(backupDir); err != nil {
-		if !errors.Is(err, fs.ErrNotExist) {
-			return "", err
-		}
-		if err = os.Mkdir(backupDir, os.ModePerm); err != nil {
-			return "", err
-		}
-	}
-
-	backupName := util.DetermineEscapePath(backupDir, path)
-	_, err := b.overwriteFile(backupName)
-	if err != nil {
-		os.Remove(backupName)
-		return "", err
-	}
-
-	return backupName, nil
-}
-
 // safeWrite writes the buffer to a file in a "safe" way, preventing loss of the
 // contents of the file if it fails to write the new contents.
 // This means that the file is not overwritten directly but by writing to the
 // backup file first.
-func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error) {
+func (b *SharedBuffer) safeWrite(path string, withSudo bool, newFile bool) (int, error) {
 	file, err := openFile(path, withSudo)
 	if err != nil {
 		return 0, err
@@ -374,13 +364,15 @@ func (b *Buffer) safeWrite(path string, withSudo bool, newFile bool) (int, error
 		}
 	}()
 
-
 	// Try to backup first before writing
 	backupName, err := b.writeBackup(path)
 	if err != nil {
 		file.Close()
 		return 0, err
 	}
+
+	// Backup saved, so cancel pending periodic backup, if any
+	delete(requestedBackups, b)
 
 	b.forceKeepBackup = true
 	size := 0

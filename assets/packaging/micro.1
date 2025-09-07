@@ -1,13 +1,18 @@
-.TH micro 1 "2020-02-10"
+.TH micro 1 "2025-09-03"
 .SH NAME
 micro \- A modern and intuitive terminal-based text editor
 .SH SYNOPSIS
 .B micro
-.RB [OPTIONS]
-[FILE]\&...
-
+.RI [ OPTION ]...\&
+.RI [ FILE ]...\&
+.RI [+ LINE [: COL ]]\&
+.RI [+/ REGEX ]
+.br
+.B micro
+.RI [ OPTION ]...\&
+.RI [ FILE [: LINE [: COL ]]]...\&
+\& (only if the `parsecursor` option is enabled)
 .SH DESCRIPTION
-
 Micro is a terminal-based text editor that aims to be easy to use and intuitive, while also taking advantage of the full capabilities
 of modern terminals. It comes as one single, batteries-included, static binary with no dependencies.
 
@@ -15,73 +20,85 @@ As the name indicates, micro aims to be somewhat of a successor to the nano edit
 enjoyable to use full time, whether you work in the terminal because you prefer it (like me), or because you need to (over ssh).
 
 Use Ctrl-q to quit, Ctrl-s to save, and Ctrl-g to open the in-editor help menu.
-
 .SH OPTIONS
 .PP
-\-clean
+.B \-clean
 .RS 4
-Cleans the configuration directory
+Clean the configuration directory and exit
 .RE
-
 .PP
-\-config-dir dir
+.B \-config-dir
+.I dir
 .RS 4
 Specify a custom location for the configuration directory
 .RE
-
 .PP
-[FILE]:LINE:COL
+.IR FILE : LINE [: COL ]
+(only if the `parsecursor` option is enabled)
+.br
+.IR FILE \ + LINE [: COL ]
 .RS 4
 Specify a line and column to start the cursor at when opening a buffer
 .RE
-
 .PP
-\-options
+.RI +/ REGEX
 .RS 4
-Show all option help
+Specify a regex to search for when opening a buffer
 .RE
-
 .PP
-\-debug
+.B \-options
+.RS 4
+Show all options help and exit
+.RE
+.PP
+.B \-debug
 .RS 4
 Enable debug mode (enables logging to ./log.txt)
 .RE
-
 .PP
-\-version
+.B \-profile
 .RS 4
-Show the version number and information
+Enable CPU profiling (writes profile info to ./micro.prof so it can be analyzed later with "go tool pprof micro.prof")
+.RE
+.PP
+.B \-version
+.RS 4
+Show the version number and information and exit
 .RE
 
 Micro's plugins can be managed at the command line with the following commands.
 .RS 4
-
 .PP
-\-plugin remove [PLUGIN]...
+.B \-plugin install
+.RI [ PLUGIN ]...
+.RS 4
+Install plugin(s)
+.RE
+.PP
+.B \-plugin remove
+.RI [ PLUGIN ]...
 .RS 4
 Remove plugin(s)
 .RE
-
 .PP
-\-plugin update [PLUGIN]...
+.B \-plugin update
+.RI [ PLUGIN ]...
 .RS 4
 Update plugin(s) (if no argument is given, updates all plugins)
 .RE
-
 .PP
-\-plugin search [PLUGIN]...
+.B \-plugin search
+.RI [ PLUGIN ]...
 .RS 4
 Search for a plugin
 .RE
-
 .PP
-\-plugin list
+.B \-plugin list
 .RS 4
 List installed plugins
 .RE
-
 .PP
-\-plugin available
+.B \-plugin available
 .RS 4
 List available plugins
 .RE
@@ -91,35 +108,33 @@ Micro's options can also be set via command line arguments for quick
 adjustments. For real configuration, please use the settings.json
 file (see 'help options').
 .RS 4
-
 .PP
-\-option value
+.BI \-< option >
+.I value
 .RS 4
-Set `option` to `value` for this session
+Set `option` to `value` for this session.
+.br
 For example: `micro -syntax off file.c`
 .RE
-
-
+.RE
+.PP
+Use `micro -options` to see the full list of configuration options.
 .SH CONFIGURATION
-
 Micro uses $MICRO_CONFIG_HOME as the configuration directory.
 If this environment variable is not set, it uses $XDG_CONFIG_HOME/micro instead.
 If that environment variable is not set, it uses ~/.config/micro as the configuration directory.
 In the documentation, we use ~/.config/micro to refer to the configuration directory
 (even if it may in fact be somewhere else if you have set either of the above environment variables).
-
 .SH NOTICE
 This manpage is intended only to serve as a quick guide to the invocation of 
 micro and is not intended to replace the full documentation included with micro
 which can be accessed from within micro. Micro tells you what key combination to
 press to get help in the lower right.
-
 .SH BUGS
 A comprehensive list of bugs will not be listed in this manpage. See the Github
 page at \fBhttps://github.com/zyedidia/micro/issues\fP for a list of known bugs
 and to report any newly encountered bugs you may find. We strive to correct
 bugs as swiftly as possible.
-
 .SH COPYRIGHT
 Copyright \(co 2020 Zachary Yedidia, et al. MIT license.
 See \fBhttps://github.com/zyedidia/micro\fP for details.
