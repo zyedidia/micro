@@ -43,27 +43,6 @@ rules:
     # Annotations
     - identifier: "@[A-Za-z_$][A-Za-z0-9_$]*\\b"
 
-    # Single-quoted strings
-    - constant.string:
-        start: "'"
-        end: "'"
-        skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
-
-    # This also matches the Triple-double-quoted strings region, but I can't really find a way to mitigate it, all the while still matching "" as a string correctly
-    # Also, nesting ${} are never going to be matched correctly with just regex either, so highlighting will break if one is to nest interpolation
-    # These two problems combined mean slight mistakes in highlighing that the user is just going to have to deal with
-    # Double-quoted strings
-    - constant.string:
-        start: "\""
-        end: "\""
-        skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
-            - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][a-zA-Z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
-            - identifier: "\\x24[{].*[}]"
-
     # Triple-double-quoted strings
     - constant.string:
         start: "\"\"\""
@@ -81,6 +60,25 @@ rules:
     - constant.string:
         start: "'''"
         end: "'''"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
+
+    # Nesting ${} are never going to be matched correctly with just regex either, so highlighting will break if one is to nest interpolation
+    # Double-quoted strings
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
+            - identifier.var: "\\x24[\\w\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+([.][a-zA-Z0-9_\u00C0-\u00D6\u00D8-\u00F6\u00F8-\u00FF\u0100-\uFFFE]+)*"
+            - identifier: "\\x24[{].*[}]"
+
+    # Single-quoted strings
+    - constant.string:
+        start: "'"
+        end: "'"
         skip: "\\\\."
         rules:
             - constant.specialChar: "\\\\([\"'bfnrst\\x24\\\\]|u[a-fA-F0-9]{4})"
