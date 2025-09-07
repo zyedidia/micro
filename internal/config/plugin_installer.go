@@ -42,6 +42,7 @@ type PluginPackage struct {
 	Author      string
 	Tags        []string
 	Versions    PluginVersions
+	Builtin     bool
 }
 
 // PluginPackages is a list of PluginPackage instances.
@@ -75,6 +76,9 @@ func (pp *PluginPackage) String() string {
 	buf := new(bytes.Buffer)
 	buf.WriteString("Plugin: ")
 	buf.WriteString(pp.Name)
+	if pp.Builtin {
+		buf.WriteString(" (built-in)")
+	}
 	buf.WriteRune('\n')
 	if pp.Author != "" {
 		buf.WriteString("Author: ")
@@ -224,7 +228,7 @@ func GetAllPluginPackages(out io.Writer) PluginPackages {
 			if strs, ok := data.([]string); ok {
 				return strs
 			}
-			if ifs, ok := data.([]interface{}); ok {
+			if ifs, ok := data.([]any); ok {
 				result := make([]string, len(ifs))
 				for i, urlIf := range ifs {
 					if url, ok := urlIf.(string); ok {
@@ -334,7 +338,7 @@ func isUnknownCoreVersion() bool {
 	return err != nil
 }
 
-func newStaticPluginVersion(name, version string) *PluginVersion {
+func newStaticPluginVersion(name, version string, builtin bool) *PluginVersion {
 	vers, err := semver.ParseTolerant(version)
 
 	if err != nil {
@@ -343,7 +347,8 @@ func newStaticPluginVersion(name, version string) *PluginVersion {
 		}
 	}
 	pl := &PluginPackage{
-		Name: name,
+		Name:    name,
+		Builtin: builtin,
 	}
 	pv := &PluginVersion{
 		pack:    pl,
@@ -358,7 +363,7 @@ func newStaticPluginVersion(name, version string) *PluginVersion {
 func GetInstalledVersions(withCore bool) PluginVersions {
 	result := PluginVersions{}
 	if withCore {
-		result = append(result, newStaticPluginVersion(CorePluginName, util.Version))
+		result = append(result, newStaticPluginVersion(CorePluginName, util.Version, true))
 	}
 
 	for _, p := range Plugins {
@@ -366,7 +371,7 @@ func GetInstalledVersions(withCore bool) PluginVersions {
 			continue
 		}
 		version := GetInstalledPluginVersion(p.Name)
-		if pv := newStaticPluginVersion(p.Name, version); pv != nil {
+		if pv := newStaticPluginVersion(p.Name, version, p.Builtin); pv != nil {
 			result = append(result, pv)
 		}
 	}
@@ -604,7 +609,7 @@ func UpdatePlugins(out io.Writer, plugins []string) {
 	// if no plugins are specified, update all installed plugins.
 	if len(plugins) == 0 {
 		for _, p := range Plugins {
-			if !p.IsLoaded() || p.Default {
+			if !p.IsLoaded() || p.Builtin || p.Name == "initlua" {
 				continue
 			}
 			plugins = append(plugins, p.Name)
@@ -613,7 +618,7 @@ func UpdatePlugins(out io.Writer, plugins []string) {
 
 	fmt.Fprintln(out, "Checking for plugin updates")
 	microVersion := PluginVersions{
-		newStaticPluginVersion(CorePluginName, util.Version),
+		newStaticPluginVersion(CorePluginName, util.Version, true),
 	}
 
 	var updates = make(PluginDependencies, 0)
@@ -645,14 +650,14 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 			if pp == nil {
 				fmt.Fprintln(out, "Unknown plugin \""+plugin+"\"")
 			} else if err := pp.IsInstallable(out); err != nil {
-				fmt.Fprintln(out, "Error installing ", plugin, ": ", err)
+				fmt.Fprintln(out, "Error installing "+plugin+": ", err)
 			} else {
 				for _, installed := range installedVersions {
 					if pp.Name == installed.Pack().Name {
 						if pp.Versions[0].Version.Compare(installed.Version) == 1 {
-							fmt.Fprintln(out, pp.Name, " is already installed but out-of-date: use 'plugin update ", pp.Name, "' to update")
+							fmt.Fprintln(out, pp.Name, "is already installed but out-of-date: use 'plugin update "+pp.Name+"' to update")
 						} else {
-							fmt.Fprintln(out, pp.Name, " is already installed")
+							fmt.Fprintln(out, pp.Name, "is already installed")
 						}
 					}
 				}
@@ -663,10 +668,14 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 	case "remove":
 		removed := ""
 		for _, plugin := range args {
+			if plugin == "initlua" {
+				fmt.Fprintln(out, "initlua cannot be removed, but can be disabled via settings.")
+				continue
+			}
 			// check if the plugin exists.
 			for _, p := range Plugins {
-				if p.Name == plugin && p.Default {
-					fmt.Fprintln(out, "Default plugins cannot be removed, but can be disabled via settings.")
+				if p.Name == plugin && p.Builtin {
+					fmt.Fprintln(out, p.Name, "is a built-in plugin which cannot be removed, but can be disabled via settings.")
 					continue
 				}
 				if p.Name == plugin {
@@ -676,8 +685,9 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 				}
 			}
 		}
+		removed = strings.TrimSpace(removed)
 		if removed != "" {
-			fmt.Fprintln(out, "Removed ", removed)
+			fmt.Fprintln(out, "Removed", removed)
 		} else {
 			fmt.Fprintln(out, "No plugins removed")
 		}
@@ -687,11 +697,17 @@ func PluginCommand(out io.Writer, cmd string, args []string) {
 		plugins := GetInstalledVersions(false)
 		fmt.Fprintln(out, "The following plugins are currently installed:")
 		for _, p := range plugins {
-			fmt.Fprintf(out, "%s (%s)\n", p.Pack().Name, p.Version)
+			if p.Pack().Name == "initlua" {
+				fmt.Fprintf(out, "%s\n", "initlua")
+			} else if p.Pack().Builtin {
+				fmt.Fprintf(out, "%s (built-in)\n", p.Pack().Name)
+			} else {
+				fmt.Fprintf(out, "%s (%s)\n", p.Pack().Name, p.Version)
+			}
 		}
 	case "search":
 		plugins := SearchPlugin(out, args)
-		fmt.Fprintln(out, len(plugins), " plugins found")
+		fmt.Fprintln(out, len(plugins), "plugins found")
 		for _, p := range plugins {
 			fmt.Fprintln(out, "----------------")
 			fmt.Fprintln(out, p.String())

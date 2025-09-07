@@ -59,7 +59,7 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	}
 }
 
-func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
+func (b *Buffer) DoSetOptionNative(option string, nativeValue any) {
 	oldValue := b.Settings[option]
 	if reflect.DeepEqual(oldValue, nativeValue) {
 		return
@@ -73,7 +73,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 				b.Settings["fastdirty"] = true
 			} else {
 				if !b.isModified {
-					calcHash(b, &b.origHash)
+					b.calcHash(&b.origHash)
 				} else {
 					// prevent using an old stale origHash value
 					b.origHash = [md5.Size]byte{}
@@ -91,7 +91,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		case "dos":
 			b.Endings = FFDos
 		}
-		b.isModified = true
+		b.setModified()
 	} else if option == "syntax" {
 		if !nativeValue.(bool) {
 			b.ClearMatches()
@@ -105,7 +105,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 			b.Settings["encoding"] = "utf-8"
 		}
 		b.encoding = enc
-		b.isModified = true
+		b.setModified()
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
 	} else if option == "hlsearch" {
@@ -138,7 +138,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 	b.doCallbacks(option, oldValue, nativeValue)
 }
 
-func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+func (b *Buffer) SetOptionNative(option string, nativeValue any) error {
 	if err := config.OptionIsValid(option, nativeValue); err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func (b *Buffer) SetOption(option, value string) error {
 	return b.SetOptionNative(option, nativeValue)
 }
 
-func (b *Buffer) doCallbacks(option string, oldValue interface{}, newValue interface{}) {
+func (b *Buffer) doCallbacks(option string, oldValue any, newValue any) {
 	if b.OptionCallback != nil {
 		b.OptionCallback(option, newValue)
 	}

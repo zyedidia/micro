@@ -19,6 +19,7 @@ rules:
     - constant.string:
         start: "\\b([Ss.]\" )"
         end: "\""
+        rules: []
 
     - comment:
         start: "\\("

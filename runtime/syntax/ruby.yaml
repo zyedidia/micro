@@ -25,6 +25,7 @@ rules:
     - constant:
         start: "[$]([!@&`'+~=/\\\\,;.<>*$?:\"_]|-[A-Za-z0-9_]|[0-9]+)"
         end: "\\B|\\b"
+        rules: []
     # Ruby "Symbols"
     - constant: "(i?)([ 	]|^):[0-9A-Z_]+\\b"
     - constant: "\\b(__FILE__|__LINE__)\\b"
@@ -34,6 +35,7 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\."
+        rules: []
 
     - constant.string:
         start: "\""
@@ -66,5 +68,6 @@ rules:
     - constant.macro:
         start: "<<-?'?EOT'?"
         end: "^EOT"
+        rules: []
 
     - preproc.shebang: "^#!.+?( |$)"
