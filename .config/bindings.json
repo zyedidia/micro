@@ -1,0 +1,75 @@
+{
+    "Esc": "CommandMode",
+    "Alt-/": "lua:comment.comment",
+    "CtrlUnderscore": "lua:comment.comment",
+    
+    // Basic navigation
+    "Ctrl-f": "CursorRight",
+    "Ctrl-b": "CursorLeft",
+    "Ctrl-n": "CursorDown",
+    "Ctrl-p": "CursorUp",
+    "Ctrl-a": "StartOfLine",
+    "Ctrl-e": "EndOfLine",
+    "Alt-f": "WordRight",
+    "Alt-b": "WordLeft",
+    "Ctrl-v": "PageDown",
+    "Alt-v": "PageUp",
+    "Ctrl-[": "Escape",
+    "Alt-<": "CursorStart",
+    "Alt->": "CursorEnd",
+    
+    // Editing
+    "Ctrl-d": "Delete",
+    "Ctrl-h": "Backspace",
+    "Alt-d": "DeleteWordRight",
+    "Alt-Backspace": "DeleteWordLeft",
+    "Ctrl-w": "Cut",
+    "Alt-w": "Copy",
+    "Ctrl-y": "Paste",
+    "Ctrl-k": "CutLine",
+    "Ctrl-_": "Undo",
+    "Ctrl-g": "Escape",
+    "Ctrl-x,u": "Undo",
+    "Ctrl-/": "Undo",
+    
+    // Search
+    "Ctrl-s": "Find",
+    "Ctrl-r": "FindPrevious",
+    
+    // File operations
+    "Ctrl-x,Ctrl-c": "Quit",
+    "Ctrl-x,Ctrl-f": "command-edit:open ",
+    "Ctrl-x,Ctrl-s": "Save",
+    "Ctrl-x,Ctrl-w": "SaveAs",
+    
+    // Buffer and window management
+    "Ctrl-x,b": "NextSplit",
+    "Ctrl-x,k": "command-edit:bd ",
+    "Ctrl-x,o": "NextSplit",
+    "Ctrl-x,1": "command-edit:only",
+    "Ctrl-x,2": "HSplit",
+    "Ctrl-x,3": "VSplit",
+    
+    // Selection and marking
+    "Ctrl-space": "SelectAll",
+    "Ctrl-x,h": "SelectAll",
+    
+    // Search and Replace
+    "Alt-%": "Find",
+    
+    // Line Operations
+    "Ctrl-o": "command-edit:open ",
+    "Alt-^": "DuplicateLine",
+    "Alt-Enter": "command-edit:split",
+    
+    // Help
+    "Ctrl-h,a": "command-edit:help ",
+    "Ctrl-h,k": "command-edit:help keybindings",
+    
+    // Additional Emacs-style bindings
+    "Alt-g": "command-edit:help defaultkeys",
+    "Alt-:": "command-edit: ",
+    "Alt-x": "command-edit:",
+    "Alt-;": "command-edit:comment",
+    "Ctrl-\\": "ToggleRuler"
+}

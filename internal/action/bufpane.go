@@ -425,6 +425,8 @@ func (h *BufPane) getReloadSetting() string {
 }
 
 // HandleEvent executes the tcell event properly
+// It handles various types of events including key presses, mouse events, and paste events.
+// For key events, it supports both single key presses and key sequences.
 func (h *BufPane) HandleEvent(event tcell.Event) {
 	if h.Buf.ExternallyModified() && !h.Buf.ReloadDisabled {
 		reload := h.getReloadSetting()
@@ -461,11 +463,20 @@ func (h *BufPane) HandleEvent(event tcell.Event) {
 	case *tcell.EventKey:
 		ke := keyEvent(e)
 
+		// Handle key event with sequence support
 		done := h.DoKeyEvent(ke)
-		if !done && e.Key() == tcell.KeyRune {
+
+		// If the key wasn't part of a sequence and it's a rune, insert it
+		if !done && e.Key() == tcell.KeyRune && !h.Bindings().IsInSequence() {
 			h.DoRuneInsert(e.Rune())
 		}
 	case *tcell.EventMouse:
+		// Skip mouse events if we're in the middle of a key sequence
+		if h.Bindings().IsInSequence() {
+			h.Bindings().ResetEvents()
+			return
+		}
+
 		if e.Buttons() != tcell.ButtonNone {
 			me := MouseEvent{
 				btn:   e.Buttons(),
@@ -541,14 +552,26 @@ func (h *BufPane) Bindings() *KeyTree {
 // sequence event). Returns false if no action found.
 func (h *BufPane) DoKeyEvent(e Event) bool {
 	binds := h.Bindings()
+
+	// Check if we're in the middle of a sequence and it's been too long since the last key
+	if binds.IsInSequence() {
+		elapsed := time.Since(binds.cursor.lastKeyTime)
+		if elapsed > SequenceTimeout {
+			binds.ResetEvents()
+			// Don't show timeout message in the status bar
+		}
+	}
+
 	action, more := binds.NextEvent(e, nil)
-	if action != nil && !more {
+
+	if action != nil {
 		action(h)
-		binds.ResetEvents()
 		return true
-	} else if action == nil && !more {
+	} else if !more {
+		// Unknown sequence or no action found
 		binds.ResetEvents()
 	}
+
 	return more
 }
 
@@ -566,9 +589,18 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 	case BufKeyAction:
 		success = a(h)
 	case BufMouseAction:
-		success = a(h, te)
+		// Only execute mouse action if we have a valid mouse event
+		if te != nil {
+			success = a(h, te)
+		} else {
+			success = false
+		}
 	}
-	success = success && h.PluginCB("on"+name, te)
+
+	// Only call the "on" plugin callback if we have a valid mouse event for mouse actions
+	if _, isMouseAction := action.(BufMouseAction); !isMouseAction || te != nil {
+		success = success && h.PluginCB("on"+name, te)
+	}
 
 	if _, ok := MultiActions[name]; ok {
 		if recordingMacro {
@@ -595,14 +627,24 @@ func (h *BufPane) HasKeyEvent(e Event) bool {
 // DoMouseEvent executes a mouse event by finding the action it is bound
 // to and executing it
 func (h *BufPane) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
+	if te == nil {
+		return false
+	}
+
 	binds := h.Bindings()
+
+	// Reset any active key sequence when a mouse event occurs
+	if binds.IsInSequence() {
+		binds.ResetEvents()
+		return false
+	}
+
 	action, _ := binds.NextEvent(e, te)
 	if action != nil {
 		action(h)
 		binds.ResetEvents()
 		return true
 	}
-	// TODO
 	return false
 
 	// if action, ok := BufMouseBindings[e]; ok {

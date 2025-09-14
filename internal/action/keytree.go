@@ -2,6 +2,9 @@ package action
 
 import (
 	"bytes"
+	"log"
+	"strings"
+	"time"
 
 	"github.com/micro-editor/tcell/v2"
 )
@@ -57,12 +60,19 @@ type KeyTree struct {
 // tree, and stores any information from previous events that may
 // be needed to execute the action (values of wildcard events or
 // mouse events)
+const (
+	// SequenceTimeout is the maximum time between key presses in a sequence
+	SequenceTimeout = 1000 * time.Millisecond
+)
+
 type KeyTreeCursor struct {
 	node *KeyTreeNode
 
 	recordedEvents []Event
 	wildcards      []KeyEvent
 	mouseInfo      *tcell.EventMouse
+	lastKeyTime    time.Time
+	isInSequence   bool
 }
 
 // MakeClosure uses the information stored in a key tree cursor to construct
@@ -92,9 +102,11 @@ func NewKeyTree() *KeyTree {
 	tree.root = root
 	tree.modes = make(map[string]bool)
 	tree.cursor = KeyTreeCursor{
-		node:      root,
-		wildcards: []KeyEvent{},
-		mouseInfo: nil,
+		node:          root,
+		wildcards:     []KeyEvent{},
+		mouseInfo:     nil,
+		lastKeyTime:   time.Time{},
+		isInSequence:  false,
 	}
 
 	return tree
@@ -177,16 +189,129 @@ func (k *KeyTree) registerBinding(e Event, a TreeAction) {
 // calling function can decide what to do about the conflict (e.g. use a
 // timeout).
 func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bool) {
-	n := k.cursor.node
-	c, ok := n.children[e]
+	now := time.Now()
+	
+	// Log the incoming event with more context
+	log.Printf("NextEvent: %v (type: %T), isInSequence: %v, time since last: %v, current node: %+v, recorded events: %d", 
+		e.Name(), e, k.cursor.isInSequence, now.Sub(k.cursor.lastKeyTime), k.cursor.node != nil, len(k.cursor.recordedEvents))
+	
+	// Log the current sequence of events
+	if len(k.cursor.recordedEvents) > 0 {
+		events := make([]string, 0, len(k.cursor.recordedEvents))
+		for _, evt := range k.cursor.recordedEvents {
+			events = append(events, evt.Name())
+		}
+		log.Printf("Current sequence: %v", strings.Join(events, " "))
+	}
+	
+	// Log the children of the current node for debugging
+	if k.cursor.node != nil {
+		node := k.cursor.node
+		actionInfo := "<none>"
+		if len(node.actions) > 0 {
+			actionInfo = "<has actions>"
+		}
+		log.Printf("Current node has %d children, actions: %v", len(node.children), actionInfo)
+		for child := range node.children {
+			log.Printf("  Child: %v (type: %T)", child.Name(), child)
+		}
+	} else {
+		log.Printf("Current node is nil, resetting sequence state")
+	}
 
-	if !ok {
+	// Reset sequence if timeout occurred or if a mouse event is received during a sequence
+	if k.cursor.isInSequence && (now.Sub(k.cursor.lastKeyTime) > SequenceTimeout || e.Name() == "MouseEvent") {
+		reason := "mouse event"
+		if now.Sub(k.cursor.lastKeyTime) > SequenceTimeout {
+			reason = "timeout"
+		}
+		log.Printf("Resetting sequence due to %s", reason)
+		k.ResetEvents()
+		// If this was a mouse event, let it be handled normally
+		if e.Name() == "MouseEvent" {
+			return nil, false
+		}
+	}
+
+	n := k.cursor.node
+	c, hasChild := n.children[e]
+
+	// Check if this node has any children that could form a valid sequence
+	hasSequence := false
+	for range n.children {
+		// If we find any child that could be part of a sequence, set hasSequence to true
+		hasSequence = true
+		break
+	}
+
+	log.Printf("Current node has %d children, has actions: %v, has sequence: %v", 
+		len(n.children), len(n.actions) > 0, hasSequence)
+
+	// If this node has no children, execute the action if it exists
+	if !hasChild {
+		if len(n.actions) > 0 {
+			action := k.cursor.MakeClosure(n.actions[0])
+			k.ResetEvents()
+			log.Printf("Executing action for %v (no children)", e.Name())
+			return action, false
+		}
+		log.Printf("No matching child for %v and no action to execute", e.Name())
+		k.ResetEvents()
 		return nil, false
+	}
+
+	// If we have a child node that could form a sequence
+	if hasChild {
+		hasAction := len(c.actions) > 0  // Check actions on the child node, not current node
+		hasChildren := len(c.children) > 0
+		
+		log.Printf("Found matching child for %v, has action: %v, has children: %v", 
+			e.Name(), hasAction, hasChildren)
+
+		// If we're in a sequence, always try to continue it if possible
+		if k.cursor.isInSequence {
+			// If this node has an action and no children, execute it
+			if hasAction && !hasChildren {
+				action := k.cursor.MakeClosure(c.actions[0])
+				k.ResetEvents()
+				log.Printf("Executing sequence action for %v", e.Name())
+				return action, false
+			}
+			
+			// Otherwise, continue the sequence
+			k.cursor.node = c
+			k.cursor.recordedEvents = append(k.cursor.recordedEvents, e)
+			k.cursor.lastKeyTime = now
+			k.cursor.isInSequence = true
+			log.Printf("Continuing sequence with %v (in sequence)", e.Name())
+			return nil, true
+		}
+
+		// If we're not in a sequence yet, but this node has children, start a new sequence
+		if hasChildren {
+			k.cursor.node = c
+			k.cursor.recordedEvents = append(k.cursor.recordedEvents, e)
+			k.cursor.lastKeyTime = now
+			k.cursor.isInSequence = true
+			log.Printf("Starting new sequence with %v", e.Name())
+			return nil, true
+		}
+		
+		// If we have an action and no children, execute it immediately
+		if hasAction && !hasChildren {
+			action := k.cursor.MakeClosure(c.actions[0])
+			k.ResetEvents()
+			log.Printf("Executing action for %v (no children)", e.Name())
+			return action, false
+		}
 	}
 
 	more := len(c.children) > 0
 
+	// Update cursor state
 	k.cursor.node = c
+	k.cursor.lastKeyTime = now
+	k.cursor.isInSequence = true
 
 	k.cursor.recordedEvents = append(k.cursor.recordedEvents, e)
 
@@ -199,6 +324,7 @@ func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bo
 		k.cursor.mouseInfo = mouse
 	}
 
+	// If we have an action at this node, return it
 	if len(c.actions) > 0 {
 		// check if actions are active
 		for _, a := range c.actions {
@@ -212,10 +338,16 @@ func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bo
 			}
 
 			if active {
-				// the first active action to be found is returned
+				// Reset sequence when we find a matching action
+				defer k.ResetEvents()
 				return k.cursor.MakeClosure(a), more
 			}
 		}
+	}
+
+	// If no more children, reset sequence after this key
+	if !more {
+		defer k.ResetEvents()
 	}
 
 	return nil, more
@@ -223,19 +355,46 @@ func (k *KeyTree) NextEvent(e Event, mouse *tcell.EventMouse) (PaneKeyAction, bo
 
 // ResetEvents sets the current sequence back to the initial value.
 func (k *KeyTree) ResetEvents() {
-	k.cursor.node = k.root
-	k.cursor.wildcards = []KeyEvent{}
-	k.cursor.recordedEvents = []Event{}
-	k.cursor.mouseInfo = nil
+	k.cursor = KeyTreeCursor{
+		node:          k.root,
+		wildcards:     []KeyEvent{},
+		recordedEvents: []Event{},
+		mouseInfo:     nil,
+	}
 }
 
 // RecordedEventsStr returns the list of recorded events as a string
 func (k *KeyTree) RecordedEventsStr() string {
 	buf := &bytes.Buffer{}
-	for _, e := range k.cursor.recordedEvents {
+	for i, e := range k.cursor.recordedEvents {
+		if i > 0 {
+			buf.WriteString(" ")
+		}
 		buf.WriteString(e.Name())
 	}
 	return buf.String()
+}
+
+// IsInSequence returns true if we're in the middle of a key sequence
+func (k *KeyTree) IsInSequence() bool {
+	return k.cursor.isInSequence
+}
+
+// GetCurrentSequence returns the current key sequence as a slice of events
+func (k *KeyTree) GetCurrentSequence() []Event {
+	return k.cursor.recordedEvents
+}
+
+// GetPossibleCompletions returns a list of possible completions for the current sequence
+func (k *KeyTree) GetPossibleCompletions() []string {
+	var completions []string
+	
+	n := k.cursor.node
+	for e := range n.children {
+		completions = append(completions, e.Name())
+	}
+	
+	return completions
 }
 
 // DeleteBinding removes any currently active actions associated with the

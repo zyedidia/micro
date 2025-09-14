@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -97,50 +98,153 @@ func BindKey(k, v string, bind func(e Event, a string)) {
 		screen.RegisterRawSeq(k)
 	}
 
-	bind(event, v)
+	// Log the binding being registered
+	log.Printf("Registering binding: %v -> %v", k, v)
 
-	// switch e := event.(type) {
-	// case KeyEvent:
-	// 	InfoMapKey(e, v)
-	// case KeySequenceEvent:
-	// 	InfoMapKey(e, v)
-	// case MouseEvent:
-	// 	InfoMapMouse(e, v)
-	// case RawEvent:
-	// 	InfoMapKey(e, v)
-	// }
-}
-
-var r = regexp.MustCompile("<(.+?)>")
-
-func findEvents(k string) (b KeySequenceEvent, ok bool, err error) {
-	var events []Event = nil
-	for len(k) > 0 {
-		groups := r.FindStringSubmatchIndex(k)
-
-		if len(groups) > 3 {
-			if events == nil {
-				events = make([]Event, 0, 3)
-			}
-
-			e, ok := findSingleEvent(k[groups[2]:groups[3]])
-			if !ok {
-				return KeySequenceEvent{}, false, errors.New("Invalid event " + k[groups[2]:groups[3]])
-			}
-
-			events = append(events, e)
-
-			k = k[groups[3]+1:]
-		} else {
-			return KeySequenceEvent{}, false, nil
+	// If this is a key sequence, log the sequence details
+	if seq, ok := event.(KeySequenceEvent); ok {
+		log.Printf("Key sequence registered with %d events", len(seq.keys))
+		for i, e := range seq.keys {
+			log.Printf("  Event %d: %v (type: %T)", i, e, e)
 		}
 	}
 
+	bind(event, v)
+
+	// InfoMapKey and InfoMapMouse are not defined, so we'll comment this out for now
+	// Uncomment this to enable key binding info mapping if the functions are available
+	/*
+		switch e := event.(type) {
+		case KeyEvent:
+			InfoMapKey(e, v)
+		case KeySequenceEvent:
+			InfoMapKey(e, v)
+		case MouseEvent:
+			InfoMapMouse(e, v)
+		case RawEvent:
+			InfoMapKey(e, v)
+		}
+	*/
+}
+
+var (
+	rBracket = regexp.MustCompile("<(.+?)>")
+	rComma   = regexp.MustCompile(`([^,]+)(?:,|$)`)
+)
+
+func findEvents(k string) (KeySequenceEvent, bool, error) {
+	log.Printf("findEvents called with: %s", k)
+
+	// First try angle-bracket format: <Ctrl-x><Ctrl-s>
+	if strings.Contains(k, "<") && strings.Contains(k, ">") {
+		log.Printf("Trying to parse as angle-bracket format")
+		seq, ok, err := parseBracketFormat(k)
+		if ok {
+			log.Printf("Successfully parsed angle-bracket sequence with %d events: %+v", len(seq.keys), seq.keys)
+		} else if err != nil {
+			log.Printf("Error parsing angle-bracket format: %v", err)
+		} else {
+			log.Printf("Failed to parse angle-bracket format (no error)")
+		}
+		return seq, ok, err
+	}
+
+	// Then try comma-separated format: Ctrl-x,Ctrl-s
+	if strings.Contains(k, ",") {
+		log.Printf("Trying to parse as comma-separated format")
+		seq, ok, err := parseCommaFormat(k)
+		if ok {
+			log.Printf("Successfully parsed comma-separated sequence with %d events", len(seq.keys))
+		} else if err != nil {
+			log.Printf("Error parsing comma-separated format: %v", err)
+		}
+		return seq, ok, err
+	}
+
+	// If neither format matches, try to parse as a single event
+	log.Printf("Trying to parse as single event")
+	e, ok := findSingleEvent(k)
+	if !ok {
+		err := fmt.Errorf("invalid event: %s", k)
+		log.Printf("Failed to parse as single event: %v", err)
+		return KeySequenceEvent{}, false, err
+	}
+	log.Printf("Successfully parsed as single event: %v", e)
+	return KeySequenceEvent{[]Event{e}}, true, nil
+}
+
+func parseBracketFormat(k string) (KeySequenceEvent, bool, error) {
+	log.Printf("parseBracketFormat called with: %s", k)
+	var events []Event
+	matches := rBracket.FindAllStringSubmatch(k, -1)
+	if len(matches) == 0 {
+		log.Printf("No matches found in bracket format")
+		return KeySequenceEvent{}, false, nil
+	}
+
+	log.Printf("Found %d matches in bracket format", len(matches))
+	for i, match := range matches {
+		if len(match) < 2 {
+			log.Printf("Match %d has insufficient groups", i)
+			continue
+		}
+		log.Printf("Processing match %d: %v", i, match[1])
+		e, ok := findSingleEvent(match[1])
+		if !ok {
+			err := fmt.Errorf("invalid event in sequence: %s", match[1])
+			log.Printf("Error parsing event: %v", err)
+			return KeySequenceEvent{}, false, err
+		}
+		log.Printf("Successfully parsed event %d: %v", i, e)
+		events = append(events, e)
+	}
+
+	if len(events) == 0 {
+		log.Printf("No valid events found in sequence")
+		return KeySequenceEvent{}, false, nil
+	}
+	log.Printf("Successfully parsed %d events in bracket format", len(events))
+	return KeySequenceEvent{events}, true, nil
+}
+
+func parseCommaFormat(k string) (KeySequenceEvent, bool, error) {
+	log.Printf("parseCommaFormat called with: %s", k)
+	var events []Event
+	matches := rComma.FindAllStringSubmatch(k, -1)
+	if len(matches) == 0 {
+		log.Printf("No matches found in comma format")
+		return KeySequenceEvent{}, false, nil
+	}
+
+	log.Printf("Found %d matches in comma format", len(matches))
+	for i, match := range matches {
+		if len(match) < 2 {
+			log.Printf("Match %d has insufficient groups", i)
+			continue
+		}
+		eventStr := strings.TrimSpace(match[1])
+		log.Printf("Processing match %d: %s", i, eventStr)
+		e, ok := findSingleEvent(eventStr)
+		if !ok {
+			err := fmt.Errorf("invalid event in sequence: %s", eventStr)
+			log.Printf("Error parsing event: %v", err)
+			return KeySequenceEvent{}, false, err
+		}
+		log.Printf("Successfully parsed event %d: %v", i, e)
+		events = append(events, e)
+	}
+
+	if len(events) == 0 {
+		log.Printf("No valid events found in sequence")
+		return KeySequenceEvent{}, false, nil
+	}
+	log.Printf("Successfully parsed %d events in comma format", len(events))
 	return KeySequenceEvent{events}, true, nil
 }
 
 // findSingleEvent will find binding Key 'b' using string 'k'
 func findSingleEvent(k string) (b Event, ok bool) {
+	log.Printf("findSingleEvent called with: %s", k)
 	modifiers := tcell.ModNone
 
 	// First, we'll strip off all the modifiers in the name and add them to the
