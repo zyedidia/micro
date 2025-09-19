@@ -473,23 +473,27 @@ func EscapePathLegacy(path string) string {
 // legacy encoding with '%' (for backward compatibility, if the legacy-escaped
 // path exists in the given directory).
 // In case the length of the escaped path (plus the backup extension) exceeds
-// the filename length limit, a hash of the path is returned instead.
-func DetermineEscapePath(dir string, path string) string {
+// the filename length limit, a hash of the path is returned instead. In such
+// case the second return value is the name of a file the original path should
+// be saved to (since the original path cannot be derived from its hash).
+// Otherwise the second return value is an empty string.
+func DetermineEscapePath(dir string, path string) (string, string) {
 	url := filepath.Join(dir, EscapePathUrl(path))
 	if _, err := os.Stat(url); err == nil {
-		return url
+		return url, ""
 	}
 
 	legacy := filepath.Join(dir, EscapePathLegacy(path))
 	if _, err := os.Stat(legacy); err == nil {
-		return legacy
+		return legacy, ""
 	}
 
 	if len(url)+len(BackupSuffix) > 255 {
-		return filepath.Join(dir, HashStringMd5(path))
+		hash := HashStringMd5(path)
+		return filepath.Join(dir, hash), filepath.Join(dir, hash+".path")
 	}
 
-	return url
+	return url, ""
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
