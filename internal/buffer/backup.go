@@ -120,6 +120,10 @@ func (b *SharedBuffer) writeBackup(path string) (string, error) {
 	return name, nil
 }
 
+func (b *SharedBuffer) removeBackup(path string) {
+	os.Remove(path)
+}
+
 // Backup saves the buffer to the backups directory
 func (b *SharedBuffer) Backup() error {
 	if !b.Settings["backup"].(bool) || b.Path == "" || b.Type != BTDefault {
@@ -136,7 +140,7 @@ func (b *SharedBuffer) RemoveBackup() {
 		return
 	}
 	f := util.DetermineEscapePath(b.backupDir(), b.AbsPath)
-	os.Remove(f)
+	b.removeBackup(f)
 }
 
 // ApplyBackup applies the corresponding backup file to this buffer (if one exists)
@@ -159,7 +163,7 @@ func (b *SharedBuffer) ApplyBackup(fsize int64) (bool, bool) {
 					return true, true
 				} else if choice%3 == 1 {
 					// delete
-					os.Remove(backupfile)
+					b.removeBackup(backupfile)
 				} else if choice%3 == 2 {
 					return false, false
 				}

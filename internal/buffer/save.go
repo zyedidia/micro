@@ -389,7 +389,7 @@ func (b *SharedBuffer) safeWrite(path string, withSudo bool, newFile bool) (int,
 	b.forceKeepBackup = false
 
 	if !b.keepBackup() {
-		os.Remove(backupName)
+		b.removeBackup(backupName)
 	}
 
 	return size, err
