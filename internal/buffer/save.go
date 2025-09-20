@@ -246,9 +246,6 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	if b.Type.Scratch {
 		return errors.New("Cannot save scratch buffer")
 	}
-	if withSudo && runtime.GOOS == "windows" {
-		return errors.New("Save with sudo not supported on Windows")
-	}
 
 	if !autoSave && b.Settings["rmtrailingws"].(bool) {
 		for i, l := range b.lines {

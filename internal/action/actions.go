@@ -1038,6 +1038,11 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if errors.Is(err, fs.ErrPermission) {
+			if runtime.GOOS == "windows" {
+				InfoBar.Error("Permission denied. Save with sudo not supported on Windows")
+				return true
+			}
+
 			saveWithSudo := func() {
 				err = h.Buf.SaveAsWithSudo(filename)
 				if err != nil {
