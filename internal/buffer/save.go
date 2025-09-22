@@ -362,7 +362,7 @@ func (b *SharedBuffer) safeWrite(path string, withSudo bool, newFile bool) (int,
 	}()
 
 	// Try to backup first before writing
-	backupName, err := b.writeBackup(path)
+	backupName, hash, err := b.writeBackup(path)
 	if err != nil {
 		file.Close()
 		return 0, err
@@ -389,7 +389,7 @@ func (b *SharedBuffer) safeWrite(path string, withSudo bool, newFile bool) (int,
 	b.forceKeepBackup = false
 
 	if !b.keepBackup() {
-		b.removeBackup(backupName)
+		b.removeBackup(backupName, hash)
 	}
 
 	return size, err

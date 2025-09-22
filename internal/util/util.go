@@ -58,6 +58,7 @@ const fileNameLengthLimit int = 255
 
 const backupExtensionShort string = ".backup"
 const backupExtensionLong string = ".micro-backup"
+const BackupExtensionPath string = ".path"
 
 const OverwriteFailMsg = `An error occurred while writing to the file:
 
