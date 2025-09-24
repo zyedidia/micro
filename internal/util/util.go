@@ -3,6 +3,7 @@ package util
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/md5"
 	"errors"
 	"fmt"
 	"io"
@@ -52,6 +53,12 @@ var (
 
 // To be used for file writes before umask is applied
 const FileMode os.FileMode = 0666
+
+const fileNameLengthLimit int = 255
+
+const backupExtensionShort string = ".backup"
+const backupExtensionLong string = ".micro-backup"
+const BackupExtensionPath string = ".path"
 
 const OverwriteFailMsg = `An error occurred while writing to the file:
 
@@ -447,7 +454,11 @@ func GetModTime(path string) (time.Time, error) {
 }
 
 func AppendBackupSuffix(path string) string {
-	return path + ".micro-backup"
+	return path + backupExtensionLong
+}
+
+func HashStringMd5(str string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
 }
 
 // EscapePathUrl encodes the path in URL query form
@@ -469,18 +480,27 @@ func EscapePathLegacy(path string) string {
 // using URL encoding (preferred, since it encodes unambiguously) or
 // legacy encoding with '%' (for backward compatibility, if the legacy-escaped
 // path exists in the given directory).
-func DetermineEscapePath(dir string, path string) string {
-	url := filepath.Join(dir, EscapePathUrl(path))
-	if _, err := os.Stat(url); err == nil {
-		return url
+// In case the escaped path exceeds the file name length limit it is hashed.
+func DetermineEscapePath(dir string, path string) (string, string) {
+	hash := ""
+	fname := EscapePathUrl(path)
+	length := len(fname)
+	if length > fileNameLengthLimit {
+		hash = HashStringMd5(path)
+		fname = hash + backupExtensionShort
+	}
+
+	fpath := filepath.Join(dir, fname)
+	if _, err := os.Stat(fpath); err == nil {
+		return fpath, hash
 	}
 
 	legacy := filepath.Join(dir, EscapePathLegacy(path))
 	if _, err := os.Stat(legacy); err == nil {
-		return legacy
+		return legacy, hash
 	}
 
-	return url
+	return fpath, hash
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
