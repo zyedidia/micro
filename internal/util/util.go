@@ -56,6 +56,9 @@ const FileMode os.FileMode = 0666
 
 const fileNameLengthLimit int = 255
 
+const backupExtensionShort string = ".backup"
+const backupExtensionLong string = ".micro-backup"
+
 const OverwriteFailMsg = `An error occurred while writing to the file:
 
 %s
@@ -450,7 +453,7 @@ func GetModTime(path string) (time.Time, error) {
 }
 
 func AppendBackupSuffix(path string) string {
-	return path + ".micro-backup"
+	return path + backupExtensionLong
 }
 
 func HashStringMd5(str string) string {
@@ -483,7 +486,7 @@ func DetermineEscapePath(dir string, path string) (string, string) {
 	length := len(fname)
 	if length > fileNameLengthLimit {
 		hash = HashStringMd5(path)
-		fname = hash + ".backup"
+		fname = hash + backupExtensionShort
 	}
 
 	fpath := filepath.Join(dir, fname)
