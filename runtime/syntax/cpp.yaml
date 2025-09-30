@@ -71,7 +71,7 @@ rules:
     - constant.string:
         start: "'"
         end: "'"
-        skip: "(\\\\.)|(\\b[1-9][0-9']+[0-9]|0[0-7']+[0-7]|0[Xx][0-9A-Fa-f][0-9A-Fa-f']+[0-9A-Fa-f]|0[Bb][01][01']*[01]\\b)"
+        skip: "(\\\\.)|\\b([1-9][0-9']+[0-9]|0[0-7']+[0-7]|0[Xx][0-9A-Fa-f][0-9A-Fa-f']+[0-9A-Fa-f]|0[Bb][01][01']*[01])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b"
         rules:
               # TODO: Revert back to - error: "..+" once #3127 is merged
             - error: "[[:graph:]]{2,}'"
