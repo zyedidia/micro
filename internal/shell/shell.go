@@ -53,12 +53,8 @@ func ExecCommand(name string, arg ...string) (string, error) {
 
 // RunCommand executes a shell command and returns the output/error
 func RunCommand(input string) (string, error) {
-	args, err := shellquote.Split(input)
-	if err != nil {
-		return "", err
-	}
-	if len(args) == 0 {
-		return "", errors.New("No arguments")
+	if input == "" {
+		return "", errors.New("No command")
 	}
 
 	shell, flag := getShell()
