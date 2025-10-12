@@ -331,6 +331,10 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	}
 
 	newPath := b.Path != filename
+	if newPath {
+		b.RemoveBackup()
+	}
+
 	b.Path = filename
 	b.AbsPath = absFilename
 	b.isModified = false
