@@ -54,6 +54,8 @@ var (
 // To be used for file writes before umask is applied
 const FileMode os.FileMode = 0666
 
+const BackupSuffix = ".micro-backup"
+
 const OverwriteFailMsg = `An error occurred while writing to the file:
 
 %s
@@ -447,10 +449,6 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-func AppendBackupSuffix(path string) string {
-	return path + ".micro-backup"
-}
-
 func HashStringMd5(str string) string {
 	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
 }
@@ -487,7 +485,7 @@ func DetermineEscapePath(dir string, path string) string {
 		return legacy
 	}
 
-	if len(url)+len(".micro-backup") > 255 {
+	if len(url)+len(BackupSuffix) > 255 {
 		return filepath.Join(dir, HashStringMd5(path))
 	}
 
@@ -708,7 +706,7 @@ func SafeWrite(path string, bytes []byte, rename bool) error {
 		defer file.Close()
 	}
 
-	tmp := AppendBackupSuffix(path)
+	tmp := path + BackupSuffix
 	err = os.WriteFile(tmp, bytes, FileMode)
 	if err != nil {
 		os.Remove(tmp)

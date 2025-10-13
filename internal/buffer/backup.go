@@ -104,7 +104,7 @@ func (b *SharedBuffer) writeBackup(path string) (string, error) {
 	}
 
 	name := util.DetermineEscapePath(backupdir, path)
-	tmp := util.AppendBackupSuffix(name)
+	tmp := name + util.BackupSuffix
 
 	_, err := b.overwriteFile(tmp)
 	if err != nil {
