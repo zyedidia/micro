@@ -38,15 +38,15 @@ rules:
     - constant.number: "(\\b(0[Bb][01][01']*[01])([Uu][Ll]?[Ll]?|[Ll][Ll]?[Uu]?)?\\b)"                          # Binary
 
       # Decimal Floating-point Literals
-    - constant.number: "(([0-9]?[.]?[0-9]+)([Ee][+-]?[0-9]+)?[FfLl]?\\b)"                                       # Base case optional interger part with exponent base case
+    - constant.number: "(([0-9]?[.]?\\b[0-9]+)([Ee][+-]?[0-9]+)?[FfLl]?\\b)"                                    # Base case optional interger part with exponent base case
     - constant.number: "(\\b([0-9]+[.][0-9]?)([Ee][+-]?[0-9]+)?[FfLl]?)"                                        # Base case optional fractional part with exponent base case
-    - constant.number: "(([0-9]?[.]?[0-9]+)([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"                            # Base case optional interger part with exponent
+    - constant.number: "(([0-9]?[.]?\\b[0-9]+)([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"                         # Base case optional interger part with exponent
     - constant.number: "(\\b([0-9]+[.][0-9]?)([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"                             # Base case optional fractional part with exponent
 
-    - constant.number: "(([0-9][0-9']*[0-9])?[.]?([0-9][0-9']*[0-9])+([Ee][+-]?[0-9]+)?[FfLl]?\\b)"             # Optional interger part with exponent base case
-    - constant.number: "(\\b([0-9][0-9']*[0-9])+[.]([0-9][0-9']*[0-9])?([Ee][+-]?[0-9]+)?[FfLl]?)"              # Optional fractional part with exponent base case
-    - constant.number: "(([0-9][0-9']*[0-9])?[.]?([0-9][0-9']*[0-9])+([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"  # Optional interger part with exponent
-    - constant.number: "(\\b([0-9][0-9']*[0-9])+[.]([0-9][0-9']*[0-9])?([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"   # Optional fractional part with exponent
+    - constant.number: "(([0-9][0-9']*[0-9])?[.]?\\b([0-9][0-9']*[0-9])+([Ee][+-]?[0-9]+)?[FfLl]?\\b)"              # Optional interger part with exponent base case
+    - constant.number: "(\\b([0-9][0-9']*[0-9])+[.]([0-9][0-9']*[0-9])?([Ee][+-]?[0-9]+)?[FfLl]?)"                  # Optional fractional part with exponent base case
+    - constant.number: "(([0-9][0-9']*[0-9])?[.]?\\b([0-9][0-9']*[0-9])+([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?\\b)"   # Optional interger part with exponent
+    - constant.number: "(\\b([0-9][0-9']*[0-9])+[.]([0-9][0-9']*[0-9])?([Ee][+-]?[0-9][0-9']*[0-9])?[FfLl]?)"       # Optional fractional part with exponent
 
       # Hexadecimal Floating-point Literals
     - constant.number: "(\\b0[Xx]([0-9a-zA-Z]?[.]?[0-9a-zA-Z]+)([Pp][+-]?[0-9]+)?[FfLl]?\\b)"                   # Base case optional interger part with exponent base case
