@@ -250,7 +250,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 
 func checkBackup(name string) error {
 	target := filepath.Join(config.ConfigDir, name)
-	backup := util.AppendBackupSuffix(target)
+	backup := target + util.BackupSuffix
 	if info, err := os.Stat(backup); err == nil {
 		input, err := os.ReadFile(backup)
 		if err == nil {

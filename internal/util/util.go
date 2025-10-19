@@ -3,6 +3,7 @@ package util
 import (
 	"archive/zip"
 	"bytes"
+	"crypto/md5"
 	"errors"
 	"fmt"
 	"io"
@@ -52,6 +53,8 @@ var (
 
 // To be used for file writes before umask is applied
 const FileMode os.FileMode = 0666
+
+const BackupSuffix = ".micro-backup"
 
 const OverwriteFailMsg = `An error occurred while writing to the file:
 
@@ -446,8 +449,8 @@ func GetModTime(path string) (time.Time, error) {
 	return info.ModTime(), nil
 }
 
-func AppendBackupSuffix(path string) string {
-	return path + ".micro-backup"
+func HashStringMd5(str string) string {
+	return fmt.Sprintf("%x", md5.Sum([]byte(str)))
 }
 
 // EscapePathUrl encodes the path in URL query form
@@ -469,18 +472,28 @@ func EscapePathLegacy(path string) string {
 // using URL encoding (preferred, since it encodes unambiguously) or
 // legacy encoding with '%' (for backward compatibility, if the legacy-escaped
 // path exists in the given directory).
-func DetermineEscapePath(dir string, path string) string {
+// In case the length of the escaped path (plus the backup extension) exceeds
+// the filename length limit, a hash of the path is returned instead. In such
+// case the second return value is the name of a file the original path should
+// be saved to (since the original path cannot be derived from its hash).
+// Otherwise the second return value is an empty string.
+func DetermineEscapePath(dir string, path string) (string, string) {
 	url := filepath.Join(dir, EscapePathUrl(path))
 	if _, err := os.Stat(url); err == nil {
-		return url
+		return url, ""
 	}
 
 	legacy := filepath.Join(dir, EscapePathLegacy(path))
 	if _, err := os.Stat(legacy); err == nil {
-		return legacy
+		return legacy, ""
 	}
 
-	return url
+	if len(url)+len(BackupSuffix) > 255 {
+		hash := HashStringMd5(path)
+		return filepath.Join(dir, hash), filepath.Join(dir, hash+".path")
+	}
+
+	return url, ""
 }
 
 // GetLeadingWhitespace returns the leading whitespace of the given byte array
@@ -697,7 +710,7 @@ func SafeWrite(path string, bytes []byte, rename bool) error {
 		defer file.Close()
 	}
 
-	tmp := AppendBackupSuffix(path)
+	tmp := path + BackupSuffix
 	err = os.WriteFile(tmp, bytes, FileMode)
 	if err != nil {
 		os.Remove(tmp)
