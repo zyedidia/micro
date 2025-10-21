@@ -174,11 +174,12 @@ The packages and their contents are listed below (in Go type signatures):
        values afterwards
     - `NoComplete`: no autocompletion suggestions
 
-    - `TryBindKey(k, v string, overwrite bool) (bool, error)`: bind the key
-       `k` to the string `v` in the `bindings.json` file.  If `overwrite` is
-       true, this will overwrite any existing binding to key `k`. Returns true
-       if the binding was made, and a possible error (for example writing to
-       `bindings.json` can cause an error).
+    - `TryBindKey(k, v string, overwrite bool) (bool, error)`:
+       bind the key `k` to the string `v`. If `overwrite` is true, this will
+       overwrite any existing binding to key `k`.
+       Returns true if the binding was made, and a possible error.
+       This operation can be rejected by `lockbindings` to prevent undesired
+       actions by the user.
 
     - `Reload()`: reload configuration files.
 
@@ -224,9 +225,9 @@ The packages and their contents are listed below (in Go type signatures):
        given plugin in the `GlobalSettings` map.
 
     - `SetGlobalOption(option, value string) error`: sets an option to a
-       given value. Same as using the `> set` command. This will try to convert
-       the value into the proper type for the option. Can return an error if the
-       option name is not valid, or the value can not be converted.
+       given value. This will try to convert the value into the proper
+       type for the option. Can return an error if the option name is not
+       valid, or the value can not be converted.
 
     - `SetGlobalOptionNative(option string, value any) error`: sets
        an option to a given value, where the type of value is the actual

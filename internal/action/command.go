@@ -630,7 +630,7 @@ func doSetGlobalOptionNative(option string, nativeValue any) error {
 	return nil
 }
 
-func SetGlobalOptionNative(option string, nativeValue any) error {
+func SetGlobalOptionNative(option string, nativeValue any, writeToFile bool) error {
 	if err := config.OptionIsValid(option, nativeValue); err != nil {
 		return err
 	}
@@ -653,6 +653,10 @@ func SetGlobalOptionNative(option string, nativeValue any) error {
 		delete(b.LocalSettings, option)
 	}
 
+	if !writeToFile {
+		return nil
+	}
+
 	err := config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
 	if err != nil {
 		if errors.Is(err, util.ErrOverwrite) {
@@ -665,7 +669,7 @@ func SetGlobalOptionNative(option string, nativeValue any) error {
 	return nil
 }
 
-func SetGlobalOption(option, value string) error {
+func SetGlobalOption(option, value string, writeToFile bool) error {
 	if _, ok := config.GlobalSettings[option]; !ok {
 		return config.ErrInvalidOption
 	}
@@ -675,7 +679,15 @@ func SetGlobalOption(option, value string) error {
 		return err
 	}
 
-	return SetGlobalOptionNative(option, nativeValue)
+	return SetGlobalOptionNative(option, nativeValue, writeToFile)
+}
+
+func SetGlobalOptionNativePlug(option string, nativeValue any) error {
+	return SetGlobalOptionNative(option, nativeValue, false)
+}
+
+func SetGlobalOptionPlug(option, value string) error {
+	return SetGlobalOption(option, value, false)
 }
 
 // ResetCmd resets a setting to its default value
@@ -689,7 +701,7 @@ func (h *BufPane) ResetCmd(args []string) {
 	defaults := config.DefaultAllSettings()
 
 	if _, ok := defaults[option]; ok {
-		SetGlobalOptionNative(option, defaults[option])
+		SetGlobalOptionNative(option, defaults[option], true)
 		return
 	}
 	InfoBar.Error(config.ErrInvalidOption)
@@ -705,7 +717,7 @@ func (h *BufPane) SetCmd(args []string) {
 	option := args[0]
 	value := args[1]
 
-	err := SetGlobalOption(option, value)
+	err := SetGlobalOption(option, value, true)
 	if err == config.ErrInvalidOption {
 		err := h.Buf.SetOption(option, value)
 		if err != nil {
@@ -761,7 +773,7 @@ func (h *BufPane) toggleOption(option string, local bool) error {
 			return err
 		}
 	} else {
-		if err := SetGlobalOptionNative(option, newVal); err != nil {
+		if err := SetGlobalOptionNative(option, newVal, true); err != nil {
 			return err
 		}
 	}
@@ -844,7 +856,7 @@ func (h *BufPane) BindCmd(args []string) {
 		return
 	}
 
-	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true)
+	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true, true)
 	if err != nil {
 		if errors.Is(err, util.ErrOverwrite) {
 			screen.TermMessage(err)
