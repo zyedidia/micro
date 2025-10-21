@@ -8,6 +8,8 @@ following filetypes and linters:
 * **c**: gcc
 * **c++**: g++
 * **d**: dmd
+* **d**: ldc2
+* **d**: gdc
 * **go**: go build
 * **go**: go vet
 * **haskell**: hlint
