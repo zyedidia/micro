@@ -16,10 +16,12 @@ rules:
     # Definitions
     - identifier: "func [a-zA-Z_0-9]+"
     # Keywords
-    - statement: "\\b(and|as|assert|break|breakpoint|class|const|continue|elif|else|enum|export|extends|for|func|if|in|is|map|master|mastersync|match|not|onready|or|pass|remote|remotesync|return|self|setget|slave|slavesync|signal|sync|tool|var|while|yield)\\b"
+    - statement: "\\b(and|as|assert|await|break|breakpoint|class|const|continue|elif|else|enum|extends|for|func|get|if|in|is|match|not|or|pass|return|self|set|signal|var|while)\\b"
+    # Annotations
+    - statement.meta: "@[A-Za-z_][A-Za-z0-9_]*\\b"
 
     # Operators
-    - statement: "[.:;,+*|=!\\%@]|<|>|/|-|&"
+    - statement: "[.:;,+*|=!\\%]|<|>|/|-|&"
 
     # Parentheses
     - statement: "[(){}]|\\[|\\]"
