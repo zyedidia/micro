@@ -34,6 +34,20 @@ rules:
     - constant.number: "-?\\b([0-9]?\\.[0-9]+|[0-9]+|0x[0-9a-fA-F]*)(e-?[0-9]+)?\\b"
 
     - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "\'\'\'"
+        end: "\'\'\'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
         start: "\""
         end: "\""
         skip: "\\\\."
@@ -44,18 +58,6 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\."
-        rules:
-            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
-
-    - constant.string:
-        start: "\"\"\""
-        end: "\"\"\""
-        rules:
-            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
-
-    - constant.string:
-        start: "\'\'\'"
-        end: "\'\'\'"
         rules:
             - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
 
