@@ -12,7 +12,7 @@ rules:
     # Built-in functions
     - identifier: "\\b(abs|acos|asin|atan|atan2|bool|ceil|clamp|convert|cos|cosh|db2linear|decimals|deg2rad|ease|exp|float|floor|fmod|fposmod|hash|int|isinf|isnan|lerp|linear2db|load|log|max|min|nearest_po2|pow|preload|print|printerr|printraw|prints|printt|rad2deg|rand_range|rand_seed|randomize|randi|randf|range|round|seed|sin|slerp|sqrt|str|str2var|tan|typeof|var2str|weakref)\\b"
     # Types
-    - type: "\\b(AABB|Array|Basis|Callable|Color|Dictionary|NodePath|Object|PackedByteArray|PackedColorArray|PackedFloat32Array|PackedFloat64Array|PackedInt32Array|PackedInt64Array|PackedVector2Array|PackedVector3Array|PackedVector4Array|Plane|PoolByteArray|PoolColorArray|PoolIntArray|PoolRealArray|PoolVector2Array|PoolVector3Array|Projection|Quat|Quaternion|Rect2|Rect2i|RID|Signal|String|StringName|Transform|Transform2D|Transform3D|Variant|Vector2|Vector2i|Vector3|Vector3i|Vector4|Vector4i)\\b"
+    - type: "\\b(AABB|Array|Basis|Callable|Color|Dictionary|NodePath|Object|PackedByteArray|PackedColorArray|PackedFloat32Array|PackedFloat64Array|PackedInt32Array|PackedInt64Array|PackedVector2Array|PackedVector3Array|PackedVector4Array|Plane|PoolByteArray|PoolColorArray|PoolIntArray|PoolRealArray|PoolVector2Array|PoolVector3Array|Projection|Quat|Quaternion|Rect2|Rect2i|RID|Signal|String|StringName|Transform|Transform2D|Transform3D|Variant|Vector2|Vector2i|Vector3|Vector3i|Vector4|Vector4i|void)\\b"
     # Class names (PascalCase)
     - identifier: "\\b([A-Z][a-zA-Z0-9_]*)\\b"
     # Constant names (CONSTANT_CASE)
@@ -31,20 +31,7 @@ rules:
     - statement: "[(){}]|\\[|\\]"
 
     # Numbers
-    - constant: "\\b[0-9]+\\b"
     - constant.number: "-?\\b([0-9]?\\.[0-9]+|[0-9]+|0x[0-9a-fA-F]*)(e-?[0-9]+)?\\b"
-
-    - comment:
-        start: "\"\"\""
-        end: "\"\"\""
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
-
-    - comment:
-        start: "'''"
-        end: "'''"
-        rules:
-            - todo: "(TODO|XXX|FIXME):?"
 
     - constant.string:
         start: "\""
@@ -57,6 +44,18 @@ rules:
         start: "'"
         end: "'"
         skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "\"\"\""
+        end: "\"\"\""
+        rules:
+            - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
+
+    - constant.string:
+        start: "\'\'\'"
+        end: "\'\'\'"
         rules:
             - constant.specialChar: "\\\\([0-7]{3}|x[A-Fa-f0-9]{2}|u[A-Fa-f0-9]{4}|U[A-Fa-f0-9]{8})"
 
