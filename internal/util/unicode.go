@@ -18,12 +18,35 @@ import (
 
 var minMark = rune(unicode.Mark.R16[0].Lo)
 
-func isMark(r rune) bool {
+// IsMark returns true if `rune` is a combining rune
+func IsMark(r rune) bool {
 	// Fast path
 	if r < minMark {
 		return false
 	}
 	return unicode.In(r, unicode.Mark)
+}
+
+// PreviousRunePos returns the position of the rune preceding the one starting
+// at `i` in the given byte slice, or -1 if there is no valid rune
+func PreviousRunePos(b []byte, i int) int {
+	r, size := utf8.DecodeLastRune(b[:i])
+	if r == utf8.RuneError {
+		return -1
+	} else {
+		return i - size
+	}
+}
+
+// NextRunePos returns the position of the rune following the one starting
+// at `i` in the given byte slice, or -1 if there is no valid rune
+func NextRunePos(b []byte, i int) int {
+	r, size := utf8.DecodeRune(b[i:])
+	if r == utf8.RuneError {
+		return -1
+	} else {
+		return i + size
+	}
 }
 
 // DecodeCharacter returns the next character from an array of bytes
@@ -34,7 +57,7 @@ func DecodeCharacter(b []byte) (rune, []rune, int) {
 	c, s := utf8.DecodeRune(b)
 
 	var combc []rune
-	for isMark(c) {
+	for IsMark(c) {
 		combc = append(combc, c)
 		size += s
 
@@ -53,7 +76,7 @@ func DecodeCharacterInString(str string) (rune, []rune, int) {
 	c, s := utf8.DecodeRuneInString(str)
 
 	var combc []rune
-	for isMark(c) {
+	for IsMark(c) {
 		combc = append(combc, c)
 		size += s
 
@@ -71,7 +94,7 @@ func CharacterCount(b []byte) int {
 
 	for len(b) > 0 {
 		r, size := utf8.DecodeRune(b)
-		if !isMark(r) {
+		if !IsMark(r) {
 			s++
 		}
 
@@ -87,10 +110,28 @@ func CharacterCountInString(str string) int {
 	s := 0
 
 	for _, r := range str {
-		if !isMark(r) {
+		if !IsMark(r) {
 			s++
 		}
 	}
 
 	return s
+}
+
+// BytePosFromCharPos returns the position of the byte in `b` that
+// starts first rune of the character indexed by `ci`. If `ci` is
+// not a valid position, then -1 is returned
+func BytePosFromCharPos(b []byte, ci int) int {
+	if ci < 0 {
+		return -1
+	}
+	i := 0
+	for j := 0; j < ci; j++ {
+		if i >= len(b) {
+			return -1
+		}
+		_, _, size := DecodeCharacter(b[i:])
+		i += size
+	}
+	return i
 }
