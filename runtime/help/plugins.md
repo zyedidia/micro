@@ -253,8 +253,18 @@ The packages and their contents are listed below (in Go type signatures):
        two arguments in the `ExecCommand` argument list (quoting arguments
        will preserve spaces).
 
-    - `RunBackgroundShell(input string) (func() string, error)`: returns a
-       function that will run the given shell command and return its output.
+    - **Deprecated** `RunBackgroundShell(input string) (func() string, error)`:
+       returns a function that will run the given shell command and return
+       its output.
+
+    - `ExecBackgroundCommand(cb func(string, error), name string, args ...string)`:
+       similar to ExecCommand except it runs in the background and accept
+       an optional callback function for the command output or error if any.
+
+    - `RunBackgroundCommand(input string, cb func(string, error)) error`:
+       similar to RunCommand except it runs in the background and accept
+       an optional callback function for the command output or error if any.
+       It returns an error immediately if it fails to split the input command
 
     - `RunInteractiveShell(input string, wait bool, getOutput bool)
                           (string, error)`:
@@ -267,10 +277,10 @@ The packages and their contents are listed below (in Go type signatures):
                 onExit func(string, []any), userargs ...any)
                 *exec.Cmd`:
        Starts a background job by running the shell on the given command
-       (using `sh -c`). Three callbacks can be provided which will be called
-       when the command generates stdout, stderr, or exits. The userargs will
-       be passed to the callbacks, along with the output as the first
-       argument of the callback. Returns the started command.
+       (using `sh -c` or `cmd /v:on /c`). Three callbacks can be provided which
+       will be called when the command generates stdout, stderr, or exits.
+       The userargs will be passed to the callbacks, along with the output
+       as the first argument of the callback. Returns the started command.
 
     - `JobSpawn(cmd string, cmdArgs []string, onStdout, onStderr,
                 onExit func(string, []any), userargs ...any)
