@@ -8,6 +8,21 @@ local filepath = import("filepath")
 local humanize = import("humanize")
 local strings = import("strings")
 
+local icons = {}
+local defaultIcons =
+"unkwown=,apacheconf=,,batch=,c=,c++=,cmake=,conf=,crystal=,css=,d=,dart=,dockerfile=,elm=,fish=,gdscript=,glsl=,go=,haskell=,html=,ini=,java=,javascript=,jinja2=,json=,julia=,kotlin=,lua=,markdown= ,nginx=,nim=,objc=,ocaml=,pascal=,perl=,php=,pony=,powershell=,proto=,python=,python3=,ruby=,rust=󱘗,scala=,shell=,sql=,swift=,tex=,toml=,twig=,typescript=,v=,xml=,yaml=,zig=,zscript=,zsh="
+
+local function parseIcons(str)
+    local map = {}
+    for pair in string.gmatch(str, "([^,]+)") do
+        local ft, icon = pair:match("([^=]+)=([^,]+)")
+        if ft and icon then
+            map[ft] = icon
+        end
+    end
+    return map
+end
+
 function init()
     micro.SetStatusInfoFn("status.branch")
     micro.SetStatusInfoFn("status.hash")
@@ -17,6 +32,10 @@ function init()
     micro.SetStatusInfoFn("status.bytes")
     micro.SetStatusInfoFn("status.size")
     config.AddRuntimeFile("status", config.RTHelp, "help/status.md")
+
+    local iconsStr = config.GetGlobalOption("status.icons") or defaultIcons
+    config.RegisterCommonOption("status", "icons", iconsStr)
+    icons = parseIcons(iconsStr)
 end
 
 function lines(b)
@@ -59,4 +78,11 @@ function paste(b)
         return "PASTE "
     end
     return ""
+end
+
+function icon(b)
+    local filetype = b:FileType()
+    local icon = icons[filetype] or
+        icons["unkwown"] or ""
+    return icon
 end
