@@ -8,7 +8,7 @@ rules:
     - constant: "\\b(INF|NAN|PI|TAU)\\b"
     - constant.bool: "\\b(null|true|false)\\b"
     # Function calls
-    - identifier: "[a-zA-Z_0-9]+\\("
+    - identifier: "\\b[a-zA-Z_][a-zA-Z_0-9]+\\("
     # Built-in functions
     - identifier: "\\b(abs|acos|asin|atan|atan2|bool|ceil|clamp|convert|cos|cosh|db2linear|decimals|deg2rad|ease|exp|float|floor|fmod|fposmod|hash|int|isinf|isnan|lerp|linear2db|load|log|max|min|nearest_po2|pow|preload|print|printerr|printraw|prints|printt|rad2deg|rand_range|rand_seed|randomize|randi|randf|range|round|seed|sin|slerp|sqrt|str|str2var|tan|typeof|var2str|weakref)\\b"
     # Types
