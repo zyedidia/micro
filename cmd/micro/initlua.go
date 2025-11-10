@@ -7,6 +7,8 @@ import (
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
 
+	"github.com/zyedidia/micro/v2/internal/bit"
+
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -35,9 +37,25 @@ func LuaImport(pkg string) *lua.LTable {
 		return luaImportMicroConfig()
 	case "micro/util":
 		return luaImportMicroUtil()
+	case "micro/bit":
+		return luaImportMicroBit()
 	default:
 		return ulua.Import(pkg)
 	}
+}
+
+func luaImportMicroBit() *lua.LTable {
+	pkg := ulua.L.NewTable()
+
+	ulua.L.SetField(pkg, "Band", luar.New(ulua.L, bit.Band))
+	ulua.L.SetField(pkg, "Bor", luar.New(ulua.L, bit.Bor))
+	ulua.L.SetField(pkg, "Bxor", luar.New(ulua.L, bit.Bxor))
+	ulua.L.SetField(pkg, "Bnot", luar.New(ulua.L, bit.Bnot))
+	ulua.L.SetField(pkg, "Lshift", luar.New(ulua.L, bit.Lshift))
+	ulua.L.SetField(pkg, "Rshift", luar.New(ulua.L, bit.Rshift))
+	ulua.L.SetField(pkg, "Arshift", luar.New(ulua.L, bit.Arshift))
+
+	return pkg
 }
 
 func luaImportMicro() *lua.LTable {
