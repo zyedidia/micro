@@ -18,7 +18,7 @@ rules:
     # Constant names (CONSTANT_CASE)
     - constant: "\\b([A-Z][A-Z0-9_]*)\\b"
     # Definitions
-    - identifier: "func\\s+[a-zA-Z_0-9]+"
+    - identifier: "func\\s+[a-zA-Z_][a-zA-Z_0-9]*"
     # Annotations
     - statement.meta: "@[A-Za-z_][A-Za-z0-9_]*\\b"
     # Keywords
@@ -31,7 +31,7 @@ rules:
     - statement: "[(){}]|\\[|\\]"
 
     # Numbers
-    - constant.number: "-?\\b([0-9]?\\.[0-9]+|[0-9]+|0x[0-9a-fA-F]*)(e-?[0-9]+)?\\b"
+    - constant.number: "-?\\b(?:0[xX](?:[0-9a-fA-F]_?)+|0[bB](?:[01]_?)+|(?:(?:[0-9]_?)*\\.(?:[0-9]_?)+)(?:[eE]-?(?:[0-9]_?)+)?|(?:[0-9]_?)+\\.?(?:[eE]-?(?:[0-9]_?)+)?)\\b"
 
     - constant.string:
         start: "\"\"\""
