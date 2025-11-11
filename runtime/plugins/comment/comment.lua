@@ -3,6 +3,7 @@ VERSION = "1.1.0"
 local util = import("micro/util")
 local config = import("micro/config")
 local buffer = import("micro/buffer")
+local micro = import("micro")
 
 local ft = {}
 
@@ -54,6 +55,7 @@ ft["swift"] = "// %s"
 ft["tex"] = "% %s"
 ft["toml"] = "# %s"
 ft["twig"] = "{# %s #}"
+ft["typescript"] = "// %s"
 ft["v"] = "// %s"
 ft["xml"] = "<!-- %s -->"
 ft["yaml"] = "# %s"
@@ -61,17 +63,21 @@ ft["zig"] = "// %s"
 ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
 
-local last_ft
-
 function updateCommentType(buf)
-    if buf.Settings["commenttype"] == nil or (last_ft ~= buf.Settings["filetype"] and last_ft ~= nil) then
-        if ft[buf.Settings["filetype"]] ~= nil then
-            buf:SetOptionNative("commenttype", ft[buf.Settings["filetype"]])
+    -- NOTE: Using DoSetOptionNative to avoid LocalSettings[option] = true
+    -- so that "comment.type" can be reset by a "filetype" change to default.
+    if (buf.Settings["comment.type"] == "") then
+        -- NOTE: This won't get triggered if a filetype is change via `setlocal filetype`
+        -- since it is not registered with `RegisterGlobalOption()``
+        if buf.Settings["commenttype"] ~= nil then
+            buf:DoSetOptionNative("comment.type", buf.Settings["commenttype"])
         else
-            buf:SetOptionNative("commenttype", "# %s")
+            if (ft[buf.Settings["filetype"]] ~= nil) then
+                buf:DoSetOptionNative("comment.type", ft[buf.Settings["filetype"]])
+            else
+                buf:DoSetOptionNative("comment.type", "# %s")
+            end
         end
-
-        last_ft = buf.Settings["filetype"]
     end
 end
 
@@ -83,7 +89,7 @@ end
 
 function commentLine(bp, lineN, indentLen)
     local line = bp.Buf:Line(lineN)
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local indent = string.sub(line, 1, indentLen)
     local trimmedLine = string.sub(line, indentLen + 1)
     trimmedLine = trimmedLine:gsub("%%", "%%%%")
@@ -144,7 +150,7 @@ end
 function comment(bp, args)
     updateCommentType(bp.Buf)
 
-    local commentType = bp.Buf.Settings["commenttype"]
+    local commentType = bp.Buf.Settings["comment.type"]
     local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
 
     local lines = {}
@@ -206,6 +212,10 @@ end
 
 function string.starts(String,Start)
     return string.sub(String,1,string.len(Start))==Start
+end
+
+function preinit()
+    config.RegisterCommonOption("comment", "type", "")
 end
 
 function init()

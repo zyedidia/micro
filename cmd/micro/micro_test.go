@@ -7,12 +7,12 @@ import (
 	"testing"
 
 	"github.com/go-errors/errors"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/stretchr/testify/assert"
 	"github.com/zyedidia/micro/v2/internal/action"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/tcell/v2"
 )
 
 var tempDir string
@@ -55,9 +55,11 @@ func startup(args []string) (tcell.SimulationScreen, error) {
 		if err := recover(); err != nil {
 			screen.Screen.Fini()
 			fmt.Println("Micro encountered an error:", err)
-			// backup all open buffers
+			// immediately backup all buffers with unsaved changes
 			for _, b := range buffer.OpenBuffers {
-				b.Backup()
+				if b.Modified() {
+					b.Backup()
+				}
 			}
 			// Print the stack trace too
 			log.Fatalf(errors.Wrap(err, 2).ErrorStack())

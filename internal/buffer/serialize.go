@@ -1,14 +1,12 @@
 package buffer
 
 import (
+	"bytes"
 	"encoding/gob"
 	"errors"
-	"io"
 	"os"
 	"path/filepath"
 	"time"
-
-	"golang.org/x/text/encoding"
 
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -31,16 +29,30 @@ func (b *Buffer) Serialize() error {
 		return nil
 	}
 
-	name := filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath))
-
-	return overwriteFile(name, encoding.Nop, func(file io.Writer) error {
-		err := gob.NewEncoder(file).Encode(SerializedBuffer{
-			b.EventHandler,
-			b.GetActiveCursor().Loc,
-			b.ModTime,
-		})
+	var buf bytes.Buffer
+	err := gob.NewEncoder(&buf).Encode(SerializedBuffer{
+		b.EventHandler,
+		b.GetActiveCursor().Loc,
+		b.ModTime,
+	})
+	if err != nil {
 		return err
-	}, false)
+	}
+
+	name, resolveName := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
+	err = util.SafeWrite(name, buf.Bytes(), true)
+	if err != nil {
+		return err
+	}
+
+	if resolveName != "" {
+		err = util.SafeWrite(resolveName, []byte(b.AbsPath), true)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 // Unserialize loads the buffer info from config.ConfigDir/buffers
@@ -50,7 +62,8 @@ func (b *Buffer) Unserialize() error {
 	if b.Path == "" {
 		return nil
 	}
-	file, err := os.Open(filepath.Join(config.ConfigDir, "buffers", util.EscapePath(b.AbsPath)))
+	name, _ := util.DetermineEscapePath(filepath.Join(config.ConfigDir, "buffers"), b.AbsPath)
+	file, err := os.Open(name)
 	if err == nil {
 		defer file.Close()
 		var buffer SerializedBuffer

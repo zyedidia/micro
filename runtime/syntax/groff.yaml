@@ -11,6 +11,7 @@ rules:
     - constant:
         start: "(\\\\|\\\\\\\\)n\\["
         end: "]"
+        rules: []
 
     - type: "^\\.[[:space:]]*[^[[:space:]]]*"
     - comment: "^\\.\\\\\".*$"
@@ -18,10 +19,12 @@ rules:
     - constant.string:
         start: "(\\\\|\\\\\\\\)\\*\\["
         end: "]"
+        rules: []
 
     - constant.specialChar: "\\\\\\(.."
     - constant.specialChar:
         start: "\\\\\\["
         end: "]"
+        rules: []
 
     - identifier.macro: "\\\\\\\\\\$[1-9]"

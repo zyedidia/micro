@@ -32,39 +32,41 @@ var commands map[string]Command
 
 func InitCommands() {
 	commands = map[string]Command{
-		"set":        {(*BufPane).SetCmd, OptionValueComplete},
-		"reset":      {(*BufPane).ResetCmd, OptionValueComplete},
-		"setlocal":   {(*BufPane).SetLocalCmd, OptionValueComplete},
-		"show":       {(*BufPane).ShowCmd, OptionComplete},
-		"showkey":    {(*BufPane).ShowKeyCmd, nil},
-		"run":        {(*BufPane).RunCmd, nil},
-		"bind":       {(*BufPane).BindCmd, nil},
-		"unbind":     {(*BufPane).UnbindCmd, nil},
-		"quit":       {(*BufPane).QuitCmd, nil},
-		"goto":       {(*BufPane).GotoCmd, nil},
-		"jump":       {(*BufPane).JumpCmd, nil},
-		"save":       {(*BufPane).SaveCmd, nil},
-		"replace":    {(*BufPane).ReplaceCmd, nil},
-		"replaceall": {(*BufPane).ReplaceAllCmd, nil},
-		"vsplit":     {(*BufPane).VSplitCmd, buffer.FileComplete},
-		"hsplit":     {(*BufPane).HSplitCmd, buffer.FileComplete},
-		"tab":        {(*BufPane).NewTabCmd, buffer.FileComplete},
-		"help":       {(*BufPane).HelpCmd, HelpComplete},
-		"eval":       {(*BufPane).EvalCmd, nil},
-		"log":        {(*BufPane).ToggleLogCmd, nil},
-		"plugin":     {(*BufPane).PluginCmd, PluginComplete},
-		"reload":     {(*BufPane).ReloadCmd, nil},
-		"reopen":     {(*BufPane).ReopenCmd, nil},
-		"cd":         {(*BufPane).CdCmd, buffer.FileComplete},
-		"pwd":        {(*BufPane).PwdCmd, nil},
-		"open":       {(*BufPane).OpenCmd, buffer.FileComplete},
-		"tabmove":    {(*BufPane).TabMoveCmd, nil},
-		"tabswitch":  {(*BufPane).TabSwitchCmd, nil},
-		"term":       {(*BufPane).TermCmd, nil},
-		"memusage":   {(*BufPane).MemUsageCmd, nil},
-		"retab":      {(*BufPane).RetabCmd, nil},
-		"raw":        {(*BufPane).RawCmd, nil},
-		"textfilter": {(*BufPane).TextFilterCmd, nil},
+		"set":         {(*BufPane).SetCmd, OptionValueComplete},
+		"setlocal":    {(*BufPane).SetLocalCmd, OptionValueComplete},
+		"toggle":      {(*BufPane).ToggleCmd, OptionValueComplete},
+		"togglelocal": {(*BufPane).ToggleLocalCmd, OptionValueComplete},
+		"reset":       {(*BufPane).ResetCmd, OptionValueComplete},
+		"show":        {(*BufPane).ShowCmd, OptionComplete},
+		"showkey":     {(*BufPane).ShowKeyCmd, nil},
+		"run":         {(*BufPane).RunCmd, nil},
+		"bind":        {(*BufPane).BindCmd, nil},
+		"unbind":      {(*BufPane).UnbindCmd, nil},
+		"quit":        {(*BufPane).QuitCmd, nil},
+		"goto":        {(*BufPane).GotoCmd, nil},
+		"jump":        {(*BufPane).JumpCmd, nil},
+		"save":        {(*BufPane).SaveCmd, nil},
+		"replace":     {(*BufPane).ReplaceCmd, nil},
+		"replaceall":  {(*BufPane).ReplaceAllCmd, nil},
+		"vsplit":      {(*BufPane).VSplitCmd, buffer.FileComplete},
+		"hsplit":      {(*BufPane).HSplitCmd, buffer.FileComplete},
+		"tab":         {(*BufPane).NewTabCmd, buffer.FileComplete},
+		"help":        {(*BufPane).HelpCmd, HelpComplete},
+		"eval":        {(*BufPane).EvalCmd, nil},
+		"log":         {(*BufPane).ToggleLogCmd, nil},
+		"plugin":      {(*BufPane).PluginCmd, PluginComplete},
+		"reload":      {(*BufPane).ReloadCmd, nil},
+		"reopen":      {(*BufPane).ReopenCmd, nil},
+		"cd":          {(*BufPane).CdCmd, buffer.FileComplete},
+		"pwd":         {(*BufPane).PwdCmd, nil},
+		"open":        {(*BufPane).OpenCmd, buffer.FileComplete},
+		"tabmove":     {(*BufPane).TabMoveCmd, nil},
+		"tabswitch":   {(*BufPane).TabSwitchCmd, nil},
+		"term":        {(*BufPane).TermCmd, nil},
+		"memusage":    {(*BufPane).MemUsageCmd, nil},
+		"retab":       {(*BufPane).RetabCmd, nil},
+		"raw":         {(*BufPane).RawCmd, nil},
+		"textfilter":  {(*BufPane).TextFilterCmd, nil},
 	}
 }
 
@@ -205,6 +207,7 @@ func (h *BufPane) TabMoveCmd(args []string) {
 	Tabs.List = append(Tabs.List, nil)
 	copy(Tabs.List[idxTo+1:], Tabs.List[idxTo:])
 	Tabs.List[idxTo] = activeTab
+	Tabs.Resize()
 	Tabs.UpdateNames()
 	Tabs.SetActive(idxTo)
 	// InfoBar.Message(fmt.Sprintf("Moved tab from slot %d to %d", idxFrom+1, idxTo+1))
@@ -307,15 +310,8 @@ func (h *BufPane) OpenCmd(args []string) {
 			}
 			h.OpenBuffer(b)
 		}
-		if h.Buf.Modified() {
-			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
-				if !canceled && !yes {
-					open()
-				} else if !canceled && yes {
-					h.Save()
-					open()
-				}
-			})
+		if h.Buf.Modified() && !h.Buf.Shared() {
+			h.closePrompt("Save", open)
 		} else {
 			open()
 		}
@@ -575,7 +571,7 @@ func (h *BufPane) NewTabCmd(args []string) {
 	}
 }
 
-func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
+func doSetGlobalOptionNative(option string, nativeValue any) error {
 	if reflect.DeepEqual(config.GlobalSettings[option], nativeValue) {
 		return nil
 	}
@@ -634,7 +630,7 @@ func doSetGlobalOptionNative(option string, nativeValue interface{}) error {
 	return nil
 }
 
-func SetGlobalOptionNative(option string, nativeValue interface{}) error {
+func SetGlobalOptionNative(option string, nativeValue any) error {
 	if err := config.OptionIsValid(option, nativeValue); err != nil {
 		return err
 	}
@@ -657,7 +653,16 @@ func SetGlobalOptionNative(option string, nativeValue interface{}) error {
 		delete(b.LocalSettings, option)
 	}
 
-	return config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+	err := config.WriteSettings(filepath.Join(config.ConfigDir, "settings.json"))
+	if err != nil {
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+			err = errors.Unwrap(err)
+		}
+		return err
+	}
+
+	return nil
 }
 
 func SetGlobalOption(option, value string) error {
@@ -665,7 +670,7 @@ func SetGlobalOption(option, value string) error {
 		return config.ErrInvalidOption
 	}
 
-	nativeValue, err := config.GetNativeValue(option, config.GlobalSettings[option], value)
+	nativeValue, err := config.GetNativeValue(option, value)
 	if err != nil {
 		return err
 	}
@@ -727,6 +732,65 @@ func (h *BufPane) SetLocalCmd(args []string) {
 	}
 }
 
+func (h *BufPane) toggleOption(option string, local bool) error {
+	var curVal, newVal any
+
+	if local {
+		curVal = h.Buf.Settings[option]
+	} else {
+		curVal = config.GetGlobalOption(option)
+	}
+	if curVal == nil {
+		return config.ErrInvalidOption
+	}
+
+	if choices, ok := config.OptionChoices[option]; ok && len(choices) == 2 {
+		if curVal == choices[0] {
+			newVal = choices[1]
+		} else {
+			newVal = choices[0]
+		}
+	} else if curValBool, ok := curVal.(bool); ok {
+		newVal = !curValBool
+	} else {
+		return config.ErrOptNotToggleable
+	}
+
+	if local {
+		if err := h.Buf.SetOptionNative(option, newVal); err != nil {
+			return err
+		}
+	} else {
+		if err := SetGlobalOptionNative(option, newVal); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+// ToggleCmd toggles a toggleable option
+func (h *BufPane) ToggleCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguments: provide a toggleable option")
+		return
+	}
+	if err := h.toggleOption(args[0], false); err != nil {
+		InfoBar.Error(err)
+	}
+}
+
+// ToggleCmd toggles a toggleable option local to the buffer
+func (h *BufPane) ToggleLocalCmd(args []string) {
+	if len(args) < 1 {
+		InfoBar.Error("Not enough arguments: provide a toggleable option")
+		return
+	}
+	if err := h.toggleOption(args[0], true); err != nil {
+		InfoBar.Error(err)
+	}
+}
+
 // ShowCmd shows the value of the given option
 func (h *BufPane) ShowCmd(args []string) {
 	if len(args) < 1 {
@@ -734,7 +798,7 @@ func (h *BufPane) ShowCmd(args []string) {
 		return
 	}
 
-	var option interface{}
+	var option any
 	if opt, ok := h.Buf.Settings[args[0]]; ok {
 		option = opt
 	} else if opt, ok := config.GlobalSettings[args[0]]; ok {
@@ -782,7 +846,11 @@ func (h *BufPane) BindCmd(args []string) {
 
 	_, err := TryBindKey(parseKeyArg(args[0]), args[1], true)
 	if err != nil {
-		InfoBar.Error(err)
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+		} else {
+			InfoBar.Error(err)
+		}
 	}
 }
 
@@ -795,7 +863,11 @@ func (h *BufPane) UnbindCmd(args []string) {
 
 	err := UnbindKey(parseKeyArg(args[0]))
 	if err != nil {
-		InfoBar.Error(err)
+		if errors.Is(err, util.ErrOverwrite) {
+			screen.TermMessage(err)
+		} else {
+			InfoBar.Error(err)
+		}
 	}
 }
 
@@ -889,7 +961,7 @@ func (h *BufPane) SaveCmd(args []string) {
 	if len(args) == 0 {
 		h.Save()
 	} else {
-		h.Buf.SaveAs(args[0])
+		h.saveBufToFile(args[0], "SaveAs", nil)
 	}
 }
 
@@ -950,10 +1022,12 @@ func (h *BufPane) ReplaceCmd(args []string) {
 	nreplaced := 0
 	start := h.Buf.Start()
 	end := h.Buf.End()
+	searchLoc := h.Cursor.Loc
 	selection := h.Cursor.HasSelection()
 	if selection {
 		start = h.Cursor.CurSelection[0]
 		end = h.Cursor.CurSelection[1]
+		searchLoc = start // otherwise me might start at the end
 	}
 	if all {
 		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace, !noRegex)
@@ -962,7 +1036,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 			return l.GreaterEqual(start) && l.LessEqual(end)
 		}
 
-		searchLoc := h.Cursor.Loc
+		lastMatchEnd := buffer.Loc{-1, -1}
 		var doReplacement func()
 		doReplacement = func() {
 			locs, found, err := h.Buf.FindNext(search, start, end, searchLoc, true, true)
@@ -974,6 +1048,18 @@ func (h *BufPane) ReplaceCmd(args []string) {
 				h.Cursor.ResetSelection()
 				h.Buf.RelocateCursors()
 
+				return
+			}
+
+			if lastMatchEnd == locs[1] {
+				// skip empty match right after previous match
+				if searchLoc == end {
+					searchLoc = start
+					lastMatchEnd = buffer.Loc{-1, -1}
+				} else {
+					searchLoc = searchLoc.Move(1, h.Buf)
+				}
+				doReplacement()
 				return
 			}
 
@@ -1002,6 +1088,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 					h.Buf.RelocateCursors()
 					return
 				}
+				lastMatchEnd = searchLoc
 				doReplacement()
 			})
 		}
@@ -1033,10 +1120,42 @@ func (h *BufPane) ReplaceAllCmd(args []string) {
 	h.ReplaceCmd(append(args, "-a"))
 }
 
+func (h *BufPane) openTerm(args []string, newtab bool) {
+	t := new(shell.Terminal)
+	err := t.Start(args, false, true, nil, nil)
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+
+	pane := 0
+	id := h.ID()
+	if newtab {
+		h.AddTab()
+		id = MainTab().Panes[pane].ID()
+	} else {
+		for i, p := range MainTab().Panes {
+			if p.IsActive() {
+				pane = i
+				id = p.ID()
+				p.Close()
+				break
+			}
+		}
+	}
+
+	v := h.GetView()
+	tp, err := NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
+	if err != nil {
+		InfoBar.Error(err)
+		return
+	}
+	MainTab().Panes[pane] = tp
+	MainTab().SetActive(pane)
+}
+
 // TermCmd opens a terminal in the current view
 func (h *BufPane) TermCmd(args []string) {
-	ps := h.tab.Panes
-
 	if !TermEmuSupported {
 		InfoBar.Error("Terminal emulator not supported on this system")
 		return
@@ -1051,56 +1170,19 @@ func (h *BufPane) TermCmd(args []string) {
 		args = []string{sh}
 	}
 
-	term := func(i int, newtab bool) {
-		t := new(shell.Terminal)
-		err := t.Start(args, false, true, nil, nil)
-		if err != nil {
-			InfoBar.Error(err)
-			return
-		}
-
-		id := h.ID()
-		if newtab {
-			h.AddTab()
-			i = 0
-			id = MainTab().Panes[0].ID()
-		} else {
-			MainTab().Panes[i].Close()
-		}
-
-		v := h.GetView()
-		tp, err := NewTermPane(v.X, v.Y, v.Width, v.Height, t, id, MainTab())
-		if err != nil {
-			InfoBar.Error(err)
-			return
-		}
-		MainTab().Panes[i] = tp
-		MainTab().SetActive(i)
-	}
-
 	// If there is only one open file we make a new tab instead of overwriting it
 	newtab := len(MainTab().Panes) == 1 && len(Tabs.List) == 1
-
 	if newtab {
-		term(0, true)
+		h.openTerm(args, true)
 		return
 	}
 
-	for i, p := range ps {
-		if p.ID() == h.ID() {
-			if h.Buf.Modified() {
-				InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
-					if !canceled && !yes {
-						term(i, false)
-					} else if !canceled && yes {
-						h.Save()
-						term(i, false)
-					}
-				})
-			} else {
-				term(i, false)
-			}
-		}
+	if h.Buf.Modified() && !h.Buf.Shared() {
+		h.closePrompt("Save", func() {
+			h.openTerm(args, false)
+		})
+	} else {
+		h.openTerm(args, false)
 	}
 }
 

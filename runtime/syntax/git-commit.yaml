@@ -22,6 +22,7 @@ rules:
     - comment.line:
         start: "^#"
         end: "$"
+        rules: []
 
     # Diffs (i.e. git commit --verbose)
     - default:

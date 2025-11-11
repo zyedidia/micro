@@ -6,6 +6,7 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -13,10 +14,9 @@ import (
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
-type BufAction interface{}
+type BufAction any
 
 // BufKeyAction represents an action bound to a key.
 type BufKeyAction func(*BufPane) bool
@@ -100,9 +100,7 @@ func BufMapEvent(k Event, action string) {
 			break
 		}
 
-		// TODO: fix problem when complex bindings have these
-		// characters (escape them?)
-		idx := strings.IndexAny(action, "&|,")
+		idx := util.IndexAnyUnquoted(action, "&|,")
 		a := action
 		if idx >= 0 {
 			a = action[:idx]
@@ -226,8 +224,6 @@ type BufPane struct {
 	// (possibly multiple) buttons were pressed previously.
 	mousePressed map[MouseEvent]bool
 
-	// We need to keep track of insert key press toggle
-	isOverwriteMode bool
 	// This stores when the last click was
 	// This is useful for detecting double and triple clicks
 	lastClickTime time.Time
@@ -240,9 +236,9 @@ type BufPane struct {
 	// Was the last mouse event actually a double click?
 	// Useful for detecting triple clicks -- if a double click is detected
 	// but the last mouse event was actually a double click, it's a triple click
-	doubleClick bool
+	DoubleClick bool
 	// Same here, just to keep track for mouse move events
-	tripleClick bool
+	TripleClick bool
 
 	// Should the current multiple cursor selection search based on word or
 	// based on selection (false for selection, true for word)
@@ -325,18 +321,16 @@ func (h *BufPane) ResizePane(size int) {
 }
 
 // PluginCB calls all plugin callbacks with a certain name and displays an
-// error if there is one and returns the aggregate boolean response
-func (h *BufPane) PluginCB(cb string) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h))
-	if err != nil {
-		screen.TermMessage(err)
+// error if there is one and returns the aggregate boolean response.
+// The bufpane is passed as the first argument to the callbacks,
+// optional args are passed as the next arguments.
+func (h *BufPane) PluginCB(cb string, args ...any) bool {
+	largs := []lua.LValue{luar.New(ulua.L, h)}
+	for _, a := range args {
+		largs = append(largs, luar.New(ulua.L, a))
 	}
-	return b
-}
 
-// PluginCBRune is the same as PluginCB but also passes a rune to the plugins
-func (h *BufPane) PluginCBRune(cb string, r rune) bool {
-	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, luar.New(ulua.L, h), luar.New(ulua.L, string(r)))
+	b, err := config.RunPluginFnBool(h.Buf.Settings, cb, largs...)
 	if err != nil {
 		screen.TermMessage(err)
 	}
@@ -360,9 +354,6 @@ func (h *BufPane) OpenBuffer(b *buffer.Buffer) {
 	// Set mouseReleased to true because we assume the mouse is not being
 	// pressed when the editor is opened
 	h.resetMouse()
-	// Set isOverwriteMode to false, because we assume we are in the default
-	// mode when editor is opened
-	h.isOverwriteMode = false
 	h.lastClickTime = time.Time{}
 }
 
@@ -566,7 +557,7 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 		h.Buf.HasSuggestions = false
 	}
 
-	if !h.PluginCB("pre" + name) {
+	if !h.PluginCB("pre"+name, te) {
 		return false
 	}
 
@@ -577,7 +568,7 @@ func (h *BufPane) execAction(action BufAction, name string, te *tcell.EventMouse
 	case BufMouseAction:
 		success = a(h, te)
 	}
-	success = success && h.PluginCB("on"+name)
+	success = success && h.PluginCB("on"+name, te)
 
 	if _, ok := MultiActions[name]; ok {
 		if recordingMacro {
@@ -633,7 +624,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 		// Insert a character
 		h.Buf.SetCurCursor(c.Num)
 		h.Cursor = c
-		if !h.PluginCBRune("preRune", r) {
+		if !h.PluginCB("preRune", string(r)) {
 			continue
 		}
 		if c.HasSelection() {
@@ -641,7 +632,7 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			c.ResetSelection()
 		}
 
-		if h.isOverwriteMode {
+		if h.Buf.OverwriteMode {
 			next := c.Loc
 			next.X++
 			h.Buf.Replace(c.Loc, next, string(r))
@@ -652,35 +643,35 @@ func (h *BufPane) DoRuneInsert(r rune) {
 			curmacro = append(curmacro, r)
 		}
 		h.Relocate()
-		h.PluginCBRune("onRune", r)
+		h.PluginCB("onRune", string(r))
 	}
 }
 
 // VSplitIndex opens the given buffer in a vertical split on the given side.
 func (h *BufPane) VSplitIndex(buf *buffer.Buffer, right bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
-	e.splitID = MainTab().GetNode(h.splitID).VSplit(right)
-	currentPaneIdx := MainTab().GetPane(h.splitID)
+	e.splitID = h.tab.GetNode(h.splitID).VSplit(right)
+	currentPaneIdx := h.tab.GetPane(h.splitID)
 	if right {
 		currentPaneIdx++
 	}
-	MainTab().AddPane(e, currentPaneIdx)
-	MainTab().Resize()
-	MainTab().SetActive(currentPaneIdx)
+	h.tab.AddPane(e, currentPaneIdx)
+	h.tab.Resize()
+	h.tab.SetActive(currentPaneIdx)
 	return e
 }
 
 // HSplitIndex opens the given buffer in a horizontal split on the given side.
 func (h *BufPane) HSplitIndex(buf *buffer.Buffer, bottom bool) *BufPane {
 	e := NewBufPaneFromBuf(buf, h.tab)
-	e.splitID = MainTab().GetNode(h.splitID).HSplit(bottom)
-	currentPaneIdx := MainTab().GetPane(h.splitID)
+	e.splitID = h.tab.GetNode(h.splitID).HSplit(bottom)
+	currentPaneIdx := h.tab.GetPane(h.splitID)
 	if bottom {
 		currentPaneIdx++
 	}
-	MainTab().AddPane(e, currentPaneIdx)
-	MainTab().Resize()
-	MainTab().SetActive(currentPaneIdx)
+	h.tab.AddPane(e, currentPaneIdx)
+	h.tab.Resize()
+	h.tab.SetActive(currentPaneIdx)
 	return e
 }
 

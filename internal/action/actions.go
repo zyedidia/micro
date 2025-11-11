@@ -11,6 +11,7 @@ import (
 	"time"
 
 	shellquote "github.com/kballard/go-shellquote"
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/clipboard"
 	"github.com/zyedidia/micro/v2/internal/config"
@@ -18,7 +19,6 @@ import (
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
 // ScrollUp is not an action
@@ -73,12 +73,12 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 		h.Cursor.Loc = mouseLoc
 	}
 	if time.Since(h.lastClickTime)/time.Millisecond < config.DoubleClickThreshold && (mouseLoc.X == h.lastLoc.X && mouseLoc.Y == h.lastLoc.Y) {
-		if h.doubleClick {
+		if h.DoubleClick {
 			// Triple click
 			h.lastClickTime = time.Now()
 
-			h.tripleClick = true
-			h.doubleClick = false
+			h.TripleClick = true
+			h.DoubleClick = false
 
 			h.Cursor.SelectLine()
 			h.Cursor.CopySelection(clipboard.PrimaryReg)
@@ -86,15 +86,15 @@ func (h *BufPane) MousePress(e *tcell.EventMouse) bool {
 			// Double click
 			h.lastClickTime = time.Now()
 
-			h.doubleClick = true
-			h.tripleClick = false
+			h.DoubleClick = true
+			h.TripleClick = false
 
 			h.Cursor.SelectWord()
 			h.Cursor.CopySelection(clipboard.PrimaryReg)
 		}
 	} else {
-		h.doubleClick = false
-		h.tripleClick = false
+		h.DoubleClick = false
+		h.TripleClick = false
 		h.lastClickTime = time.Now()
 
 		h.Cursor.OrigSelection[0] = h.Cursor.Loc
@@ -116,9 +116,9 @@ func (h *BufPane) MouseDrag(e *tcell.EventMouse) bool {
 	}
 	h.Cursor.Loc = h.LocFromVisual(buffer.Loc{mx, my})
 
-	if h.tripleClick {
+	if h.TripleClick {
 		h.Cursor.AddLineToSelection()
-	} else if h.doubleClick {
+	} else if h.DoubleClick {
 		h.Cursor.AddWordToSelection()
 	} else {
 		h.Cursor.SelectTo(h.Cursor.Loc)
@@ -135,7 +135,7 @@ func (h *BufPane) MouseRelease(e *tcell.EventMouse) bool {
 	// that doesn't support mouse motion events. But when the mouse click is
 	// within the scroll margin, that would cause a scroll and selection
 	// even for a simple mouse click, which is not good.
-	// if !h.doubleClick && !h.tripleClick {
+	// if !h.DoubleClick && !h.TripleClick {
 	// 	mx, my := e.Position()
 	// 	h.Cursor.Loc = h.LocFromVisual(buffer.Loc{mx, my})
 	// 	h.Cursor.SetSelectionEnd(h.Cursor.Loc)
@@ -153,7 +153,7 @@ func (h *BufPane) ScrollUpAction() bool {
 	return true
 }
 
-// ScrollDownAction scrolls the view up
+// ScrollDownAction scrolls the view down
 func (h *BufPane) ScrollDownAction() bool {
 	h.ScrollDown(util.IntOpt(h.Buf.Settings["scrollspeed"]))
 	return true
@@ -911,6 +911,11 @@ func (h *BufPane) Autocomplete() bool {
 		return false
 	}
 
+	if b.HasSuggestions {
+		b.CycleAutocomplete(true)
+		return true
+	}
+
 	if h.Cursor.X == 0 {
 		return false
 	}
@@ -921,10 +926,6 @@ func (h *BufPane) Autocomplete() bool {
 		return false
 	}
 
-	if b.HasSuggestions {
-		b.CycleAutocomplete(true)
-		return true
-	}
 	return b.Autocomplete(buffer.BufferComplete)
 }
 
@@ -1003,6 +1004,9 @@ func (h *BufPane) SaveAsCB(action string, callback func()) bool {
 						h.completeAction(action)
 						return
 					}
+				} else {
+					InfoBar.Error(err)
+					return
 				}
 			} else {
 				InfoBar.YNPrompt(
@@ -1034,13 +1038,16 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 	err := h.Buf.SaveAs(filename)
 	if err != nil {
 		if errors.Is(err, fs.ErrPermission) {
+			if runtime.GOOS == "windows" {
+				InfoBar.Error("Permission denied. Save with sudo not supported on Windows")
+				return true
+			}
+
 			saveWithSudo := func() {
 				err = h.Buf.SaveAsWithSudo(filename)
 				if err != nil {
 					InfoBar.Error(err)
 				} else {
-					h.Buf.Path = filename
-					h.Buf.SetName(filename)
 					InfoBar.Message("Saved " + filename)
 					if callback != nil {
 						callback()
@@ -1065,8 +1072,6 @@ func (h *BufPane) saveBufToFile(filename string, action string, callback func())
 			InfoBar.Error(err)
 		}
 	} else {
-		h.Buf.Path = filename
-		h.Buf.SetName(filename)
 		InfoBar.Message("Saved " + filename)
 		if callback != nil {
 			callback()
@@ -1211,6 +1216,14 @@ func (h *BufPane) FindNext() bool {
 	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
+	} else if found && searchLoc == match[0] && match[0] == match[1] {
+		// skip empty match at present cursor location
+		if searchLoc == h.Buf.End() {
+			searchLoc = h.Buf.Start()
+		} else {
+			searchLoc = searchLoc.Move(1, h.Buf)
+		}
+		match, found, _ = h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, true, h.Buf.LastSearchRegex)
 	}
 	if found {
 		h.Cursor.SetSelectionStart(match[0])
@@ -1240,6 +1253,14 @@ func (h *BufPane) FindPrevious() bool {
 	match, found, err := h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.Buf.LastSearchRegex)
 	if err != nil {
 		InfoBar.Error(err)
+	} else if found && searchLoc == match[0] && match[0] == match[1] {
+		// skip empty match at present cursor location
+		if searchLoc == h.Buf.Start() {
+			searchLoc = h.Buf.End()
+		} else {
+			searchLoc = searchLoc.Move(-1, h.Buf)
+		}
+		match, found, _ = h.Buf.FindNext(h.Buf.LastSearch, h.Buf.Start(), h.Buf.End(), searchLoc, false, h.Buf.LastSearchRegex)
 	}
 	if found {
 		h.Cursor.SetSelectionStart(match[0])
@@ -1778,12 +1799,12 @@ func (h *BufPane) HalfPageDown() bool {
 
 // ToggleDiffGutter turns the diff gutter off and on
 func (h *BufPane) ToggleDiffGutter() bool {
-	if !h.Buf.Settings["diffgutter"].(bool) {
-		h.Buf.Settings["diffgutter"] = true
+	diffgutter := !h.Buf.Settings["diffgutter"].(bool)
+	h.Buf.SetOptionNative("diffgutter", diffgutter)
+	if diffgutter {
 		h.Buf.UpdateDiff()
 		InfoBar.Message("Enabled diff gutter")
 	} else {
-		h.Buf.Settings["diffgutter"] = false
 		InfoBar.Message("Disabled diff gutter")
 	}
 	return true
@@ -1791,11 +1812,11 @@ func (h *BufPane) ToggleDiffGutter() bool {
 
 // ToggleRuler turns line numbers off and on
 func (h *BufPane) ToggleRuler() bool {
-	if !h.Buf.Settings["ruler"].(bool) {
-		h.Buf.Settings["ruler"] = true
+	ruler := !h.Buf.Settings["ruler"].(bool)
+	h.Buf.SetOptionNative("ruler", ruler)
+	if ruler {
 		InfoBar.Message("Enabled ruler")
 	} else {
-		h.Buf.Settings["ruler"] = false
 		InfoBar.Message("Disabled ruler")
 	}
 	return true
@@ -1848,7 +1869,7 @@ func (h *BufPane) CommandMode() bool {
 
 // ToggleOverwriteMode lets the user toggle the text overwrite mode
 func (h *BufPane) ToggleOverwriteMode() bool {
-	h.isOverwriteMode = !h.isOverwriteMode
+	h.Buf.OverwriteMode = !h.Buf.OverwriteMode
 	return true
 }
 
@@ -1875,11 +1896,11 @@ func (h *BufPane) ClearInfo() bool {
 	return true
 }
 
-// ForceQuit closes the current tab or view even if there are unsaved changes
+// ForceQuit closes the tab or view even if there are unsaved changes
 // (no prompt)
 func (h *BufPane) ForceQuit() bool {
 	h.Buf.Close()
-	if len(MainTab().Panes) > 1 {
+	if len(h.tab.Panes) > 1 {
 		h.Unsplit()
 	} else if len(Tabs.List) > 1 {
 		Tabs.RemoveTab(h.splitID)
@@ -1891,30 +1912,29 @@ func (h *BufPane) ForceQuit() bool {
 	return true
 }
 
+// closePrompt displays a prompt to save the buffer before closing it to proceed
+// with a different action or command
+func (h *BufPane) closePrompt(action string, callback func()) {
+	InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
+		if !canceled && !yes {
+			callback()
+		} else if !canceled && yes {
+			h.SaveCB(action, callback)
+		}
+	})
+}
+
 // Quit this will close the current tab or view that is open
 func (h *BufPane) Quit() bool {
-	if h.Buf.Modified() {
-		for _, b := range buffer.OpenBuffers {
-			if b != h.Buf && b.SharedBuffer == h.Buf.SharedBuffer {
-				h.ForceQuit()
-				return true
-			}
-		}
-
-		if config.GlobalSettings["autosave"].(float64) > 0 {
+	if h.Buf.Modified() && !h.Buf.Shared() {
+		if config.GlobalSettings["autosave"].(float64) > 0 && h.Buf.Path != "" {
 			// autosave on means we automatically save when quitting
 			h.SaveCB("Quit", func() {
 				h.ForceQuit()
 			})
 		} else {
-			InfoBar.YNPrompt("Save changes to "+h.Buf.GetName()+" before closing? (y,n,esc)", func(yes, canceled bool) {
-				if !canceled && !yes {
-					h.ForceQuit()
-				} else if !canceled && yes {
-					h.SaveCB("Quit", func() {
-						h.ForceQuit()
-					})
-				}
+			h.closePrompt("Quit", func() {
+				h.ForceQuit()
 			})
 		}
 	} else {
@@ -2068,14 +2088,14 @@ func (h *BufPane) LastSplit() bool {
 	return true
 }
 
-var curmacro []interface{}
+var curmacro []any
 var recordingMacro bool
 
 // ToggleMacro toggles recording of a macro
 func (h *BufPane) ToggleMacro() bool {
 	recordingMacro = !recordingMacro
 	if recordingMacro {
-		curmacro = []interface{}{}
+		curmacro = []any{}
 		InfoBar.Message("Recording")
 	} else {
 		InfoBar.Message("Stopped recording")

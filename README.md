@@ -1,7 +1,7 @@
 <img alt="micro logo" src="./assets/micro-logo-drop.svg" width="500px"/>
 
 ![Test Workflow](https://github.com/zyedidia/micro/actions/workflows/test.yaml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro)](https://goreportcard.com/report/github.com/zyedidia/micro)
+[![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro/v2)](https://goreportcard.com/report/github.com/zyedidia/micro/v2)
 [![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -47,7 +47,7 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 - Syntax highlighting for over [130 languages](runtime/syntax).
 - Color scheme support.
   - By default, micro comes with 16, 256, and true color themes.
-- True color support (set the `MICRO_TRUECOLOR` environment variable to 1 to enable it).
+- True color support.
 - Copy and paste with the system clipboard.
 - Small and simple.
 - Easily configurable.
@@ -142,7 +142,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
     * `winget install zyedidia.micro`
 * OpenBSD: Available in the ports tree and also available as a binary package.
     * `pkg_add -v micro`.
-* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](http://www.pkgsrc.org/)-current:
+* NetBSD, macOS, Linux, Illumos, etc. with [pkgsrc](https://www.pkgsrc.org/)-current:
     * `pkg_add micro`
 * macOS: Available in package managers.
     * `sudo port install micro` (with [MacPorts](https://www.macports.org))
@@ -162,7 +162,7 @@ Without these tools installed, micro will use an internal clipboard for copy and
 
 If your operating system does not have a binary release, but does run Go, you can build from source.
 
-Make sure that you have Go version 1.17 or greater and Go modules are enabled.
+Make sure that you have Go version 1.19 or greater and Go modules are enabled.
 
 ```
 git clone https://github.com/zyedidia/micro
@@ -196,7 +196,7 @@ Native macOS builds are done with `CGO_ENABLED=1` forced set to support adding t
 
 ### macOS terminal
 
-If you are using macOS, you should consider using [iTerm2](http://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
+If you are using macOS, you should consider using [iTerm2](https://iterm2.com/) instead of the default terminal (Terminal.app). The iTerm2 terminal has much better mouse support as well as better handling of key events. For best keybinding behavior, choose `xterm defaults` under `Preferences->Profiles->Keys->Presets...`, and select `Esc+` for `Left Option Key` in the same menu. The newest versions also support true color.
 
 If you still insist on using the default Mac terminal, be sure to set `Use Option key as Meta key` under
 `Preferences->Profiles->Keyboard` to use <kbd>option</kbd> as <kbd>alt</kbd>.

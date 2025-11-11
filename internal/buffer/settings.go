@@ -5,13 +5,22 @@ import (
 	"reflect"
 
 	"github.com/zyedidia/micro/v2/internal/config"
+	ulua "github.com/zyedidia/micro/v2/internal/lua"
 	"github.com/zyedidia/micro/v2/internal/screen"
+	"golang.org/x/text/encoding/htmlindex"
+	"golang.org/x/text/encoding/unicode"
+	luar "layeh.com/gopher-luar"
 )
 
 func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	settings := config.ParsedSettings()
+	config.UpdatePathGlobLocals(settings, b.AbsPath)
 
-	if _, ok := b.LocalSettings["filetype"]; !ok && reloadFiletype {
+	oldFiletype := b.Settings["filetype"].(string)
+
+	_, local := b.LocalSettings["filetype"]
+	_, volatile := config.VolatileSettings["filetype"]
+	if reloadFiletype && !local && !volatile {
 		// need to update filetype before updating other settings based on it
 		b.Settings["filetype"] = "unknown"
 		if v, ok := settings["filetype"]; ok {
@@ -21,9 +30,14 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 
 	// update syntax rules, which will also update filetype if needed
 	b.UpdateRules()
-	settings["filetype"] = b.Settings["filetype"]
 
-	config.InitLocalSettings(settings, b.Path)
+	curFiletype := b.Settings["filetype"].(string)
+	if oldFiletype != curFiletype {
+		b.doCallbacks("filetype", oldFiletype, curFiletype)
+	}
+
+	config.UpdateFileTypeLocals(settings, curFiletype)
+
 	for k, v := range config.DefaultCommonSettings() {
 		if k == "filetype" {
 			// prevent recursion
@@ -45,8 +59,9 @@ func (b *Buffer) ReloadSettings(reloadFiletype bool) {
 	}
 }
 
-func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
-	if reflect.DeepEqual(b.Settings[option], nativeValue) {
+func (b *Buffer) DoSetOptionNative(option string, nativeValue any) {
+	oldValue := b.Settings[option]
+	if reflect.DeepEqual(oldValue, nativeValue) {
 		return
 	}
 
@@ -58,7 +73,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 				b.Settings["fastdirty"] = true
 			} else {
 				if !b.isModified {
-					calcHash(b, &b.origHash)
+					b.calcHash(&b.origHash)
 				} else {
 					// prevent using an old stale origHash value
 					b.origHash = [md5.Size]byte{}
@@ -76,7 +91,7 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		case "dos":
 			b.Endings = FFDos
 		}
-		b.isModified = true
+		b.setModified()
 	} else if option == "syntax" {
 		if !nativeValue.(bool) {
 			b.ClearMatches()
@@ -84,7 +99,13 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 			b.UpdateRules()
 		}
 	} else if option == "encoding" {
-		b.isModified = true
+		enc, err := htmlindex.Get(b.Settings["encoding"].(string))
+		if err != nil {
+			enc = unicode.UTF8
+			b.Settings["encoding"] = "utf-8"
+		}
+		b.encoding = enc
+		b.setModified()
 	} else if option == "readonly" && b.Type.Kind == BTDefault.Kind {
 		b.Type.Readonly = nativeValue.(bool)
 	} else if option == "hlsearch" {
@@ -114,12 +135,10 @@ func (b *Buffer) DoSetOptionNative(option string, nativeValue interface{}) {
 		}
 	}
 
-	if b.OptionCallback != nil {
-		b.OptionCallback(option, nativeValue)
-	}
+	b.doCallbacks(option, oldValue, nativeValue)
 }
 
-func (b *Buffer) SetOptionNative(option string, nativeValue interface{}) error {
+func (b *Buffer) SetOptionNative(option string, nativeValue any) error {
 	if err := config.OptionIsValid(option, nativeValue); err != nil {
 		return err
 	}
@@ -136,10 +155,22 @@ func (b *Buffer) SetOption(option, value string) error {
 		return config.ErrInvalidOption
 	}
 
-	nativeValue, err := config.GetNativeValue(option, b.Settings[option], value)
+	nativeValue, err := config.GetNativeValue(option, value)
 	if err != nil {
 		return err
 	}
 
 	return b.SetOptionNative(option, nativeValue)
+}
+
+func (b *Buffer) doCallbacks(option string, oldValue any, newValue any) {
+	if b.OptionCallback != nil {
+		b.OptionCallback(option, newValue)
+	}
+
+	if err := config.RunPluginFn("onBufferOptionChanged",
+		luar.New(ulua.L, b), luar.New(ulua.L, option),
+		luar.New(ulua.L, oldValue), luar.New(ulua.L, newValue)); err != nil {
+		screen.TermMessage(err)
+	}
 }

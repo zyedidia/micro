@@ -6,9 +6,9 @@ import (
 	"os"
 	"sync"
 
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/util"
-	"github.com/zyedidia/tcell/v2"
 )
 
 // Screen is the tcell screen we use to draw to the terminal
@@ -184,10 +184,13 @@ func Init() error {
 	drawChan = make(chan bool, 8)
 
 	// Should we enable true color?
-	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
-
-	if !truecolor {
+	truecolor := config.GetGlobalOption("truecolor").(string)
+	if truecolor == "on" || (truecolor == "auto" && os.Getenv("MICRO_TRUECOLOR") == "1") {
+		os.Setenv("TCELL_TRUECOLOR", "enable")
+	} else if truecolor == "off" {
 		os.Setenv("TCELL_TRUECOLOR", "disable")
+	} else {
+		// For "auto", tcell already autodetects truecolor by default
 	}
 
 	var oldTerm string

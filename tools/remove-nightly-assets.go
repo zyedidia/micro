@@ -1,15 +1,15 @@
-//+build ignore
+//go:build ignore
 
 package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"io"
 	"net/http"
 	"os/exec"
 	"strings"
 
-	"github.com/zyedidia/json5"
+	"github.com/micro-editor/json5"
 )
 
 func main() {
@@ -19,18 +19,18 @@ func main() {
 		return
 	}
 	defer resp.Body.Close()
-	body, err := ioutil.ReadAll(resp.Body)
+	body, err := io.ReadAll(resp.Body)
 
-	var data interface{}
+	var data any
 
 	err = json5.Unmarshal(body, &data)
 
-	for _, val := range data.([]interface{}) {
-		m := val.(map[string]interface{})
+	for _, val := range data.([]any) {
+		m := val.(map[string]any)
 		releaseName := m["name"].(string)
-		assets := m["assets"].([]interface{})
+		assets := m["assets"].([]any)
 		for _, asset := range assets {
-			assetInfo := asset.(map[string]interface{})
+			assetInfo := asset.(map[string]any)
 			url := assetInfo["url"].(string)
 			if strings.Contains(strings.ToLower(releaseName), "nightly") {
 				cmd := exec.Command("hub", "api", "-X", "DELETE", url)

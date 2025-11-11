@@ -74,6 +74,16 @@ echo "Linux ARM 64"
 GOOS=linux GOARCH=arm64 make build
 create_artefact_generic "linux-arm64"
 
+# Solaris
+echo "Solaris 64"
+GOOS=solaris GOARCH=amd64 make build
+create_artefact_generic "solaris64"
+
+# Illumos
+echo "Illumos 64"
+GOOS=illumos GOARCH=amd64 make build
+create_artefact_generic "illumos64"
+
 # NetBSD
 echo "NetBSD 64"
 GOOS=netbsd GOARCH=amd64 make build

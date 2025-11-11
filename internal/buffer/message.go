@@ -1,8 +1,8 @@
 package buffer
 
 import (
+	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/config"
-	"github.com/zyedidia/tcell/v2"
 )
 
 type MsgType int
@@ -84,7 +84,7 @@ func (b *Buffer) ClearAllMessages() {
 }
 
 type Messager interface {
-	Message(msg ...interface{})
+	Message(msg ...any)
 }
 
 var prompt Messager
