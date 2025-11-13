@@ -163,11 +163,6 @@ func LoadInput(args []string) []*buffer.Buffer {
 	var err error
 	buffers := make([]*buffer.Buffer, 0, len(args))
 
-	btype := buffer.BTDefault
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
-		btype = buffer.BTStdout
-	}
-
 	files := make([]string, 0, len(args))
 
 	flagStartPos := buffer.Loc{-1, -1}
@@ -218,6 +213,8 @@ func LoadInput(args []string) []*buffer.Buffer {
 		SearchAfterStart: searchIndex > posIndex,
 	}
 
+	btype := buffer.BTDefault
+
 	if len(files) > 0 {
 		// Option 1
 		// We go through each file and load it
@@ -234,6 +231,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 		// Option 2
 		// The input is not a terminal, so something is being piped in
 		// and we should read from stdin
+		btype = buffer.BTStdout
 		input, err = io.ReadAll(os.Stdin)
 		if err != nil {
 			screen.TermMessage("Error reading from stdin: ", err)
