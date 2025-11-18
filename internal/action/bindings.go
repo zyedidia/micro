@@ -261,9 +261,18 @@ func eventsEqual(e1 Event, e2 Event) bool {
 	return e1 == e2
 }
 
+// TryBindKeyPlug tries to bind a key for the plugin without writing to bindings.json.
+// This operation can be rejected by lockbindings to prevent unexpected actions by the user.
+func TryBindKeyPlug(k, v string, overwrite bool) (bool, error) {
+	if l, ok := config.GlobalSettings["lockbindings"]; ok && l.(bool) {
+		return false, errors.New("bindings is locked by the user")
+	}
+	return TryBindKey(k, v, overwrite, false)
+}
+
 // TryBindKey tries to bind a key by writing to config.ConfigDir/bindings.json
-// Returns true if the keybinding already existed and a possible error
-func TryBindKey(k, v string, overwrite bool) (bool, error) {
+// Returns true if the keybinding already existed or is binded successfully and a possible error
+func TryBindKey(k, v string, overwrite bool, writeToFile bool) (bool, error) {
 	var e error
 	var parsed map[string]any
 
@@ -310,7 +319,12 @@ func TryBindKey(k, v string, overwrite bool) (bool, error) {
 
 		txt, _ := json.MarshalIndent(parsed, "", "    ")
 		txt = append(txt, '\n')
-		return true, writeFile(filename, txt)
+
+		if writeToFile {
+			return true, writeFile(filename, txt)
+		} else {
+			return true, nil
+		}
 	}
 	return false, e
 }
