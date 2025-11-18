@@ -2,22 +2,34 @@ package buffer
 
 import (
 	"regexp"
+	"regexp/syntax"
 	"unicode/utf8"
 
 	"github.com/zyedidia/micro/v2/internal/util"
 )
 
-// We want "^" and "$" to match only the beginning/end of a line, not the
-// beginning/end of the search region if it is in the middle of a line.
-// In that case we use padded regexps to require a rune before or after
-// the match. (This also affects other empty-string patters like "\\b".)
-// The following two flags indicate the padding used.
+// RegexpGroup combines a Regexp with padded versions.
+type RegexpGroup struct {
+	// TODO: This is currently not intended to be used in plugins, and a better
+	// abstract API should be provided
+
+	// We want "^" and "$" to match only the beginning/end of a line, not that
+	// of the search region somewhere in the middle of a line. In that case we
+	// use padded regexps to require a rune before or after the match. (This
+	// also affects other empty-string patterns like "\\b".)
+	//
+	// Although some are not needed in all cases, they are checked because
+	// not returning an error for a regex in some cases would be an
+	// implementation detail that could cause confusion.
+	regex [4]*regexp.Regexp
+}
+
 const (
 	padStart = 1 << iota
 	padEnd
 )
 
-func findLineParams(b *Buffer, start, end Loc, i int, r *regexp.Regexp) ([]byte, int, int, *regexp.Regexp) {
+func findLineParams(b *Buffer, start, end Loc, i int) ([]byte, int, int) {
 	l := b.LineBytes(i)
 	charpos := 0
 	padMode := 0
@@ -41,18 +53,27 @@ func findLineParams(b *Buffer, start, end Loc, i int, r *regexp.Regexp) ([]byte,
 		}
 	}
 
-	if padMode == padStart {
-		r = regexp.MustCompile(".(?:" + r.String() + ")")
-	} else if padMode == padEnd {
-		r = regexp.MustCompile("(?:" + r.String() + ").")
-	} else if padMode == padStart|padEnd {
-		r = regexp.MustCompile(".(?:" + r.String() + ").")
-	}
-
-	return l, charpos, padMode, r
+	return l, charpos, padMode
 }
 
-func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
+// NewRegexpGroup creates a RegexpGroup from a string
+func NewRegexpGroup(s string) (*RegexpGroup, error) {
+	var regex [4]*regexp.Regexp
+	var err error
+	regex[0], err = regexp.Compile(s)
+	if err == nil {
+		regex[padStart], err = regexp.Compile(".(?:" + s + ")")
+		if err == nil {
+			regex[padEnd] = regexp.MustCompile("(?:" + s + ").")
+			regex[padStart|padEnd] = regexp.MustCompile(".(?:" + s + ").")
+		} else {
+			err = &syntax.Error{syntax.ErrorCode(`possibly \Q without \E`), s}
+		}
+	}
+	return &RegexpGroup{regex}, err
+}
+
+func (b *Buffer) findDown(rg *RegexpGroup, start, end Loc) ([2]Loc, bool) {
 	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
 	if start.Y > b.LinesNum()-1 {
 		start.X = lastcn - 1
@@ -68,9 +89,9 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 	}
 
 	for i := start.Y; i <= end.Y; i++ {
-		l, charpos, padMode, rPadded := findLineParams(b, start, end, i, r)
+		l, charpos, padMode := findLineParams(b, start, end, i)
 
-		match := rPadded.FindIndex(l)
+		match := rg.regex[padMode].FindIndex(l)
 
 		if match != nil {
 			if padMode&padStart != 0 {
@@ -89,7 +110,7 @@ func (b *Buffer) findDown(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 	return [2]Loc{}, false
 }
 
-func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
+func (b *Buffer) findUp(rg *RegexpGroup, start, end Loc) ([2]Loc, bool) {
 	lastcn := util.CharacterCount(b.LineBytes(b.LinesNum() - 1))
 	if start.Y > b.LinesNum()-1 {
 		start.X = lastcn - 1
@@ -109,7 +130,7 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 		from := Loc{0, i}.Clamp(start, end)
 		to := Loc{charCount, i}.Clamp(start, end)
 
-		allMatches := b.findAll(r, from, to)
+		allMatches := b.findAll(rg, from, to)
 		if allMatches != nil {
 			match := allMatches[len(allMatches)-1]
 			return [2]Loc{match[0], match[1]}, true
@@ -118,11 +139,11 @@ func (b *Buffer) findUp(r *regexp.Regexp, start, end Loc) ([2]Loc, bool) {
 	return [2]Loc{}, false
 }
 
-func (b *Buffer) findAll(r *regexp.Regexp, start, end Loc) [][2]Loc {
+func (b *Buffer) findAll(rg *RegexpGroup, start, end Loc) [][2]Loc {
 	var matches [][2]Loc
 	loc := start
 	for {
-		match, found := b.findDown(r, loc, end)
+		match, found := b.findDown(rg, loc, end)
 		if !found {
 			break
 		}
@@ -147,19 +168,15 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 		return [2]Loc{}, false, nil
 	}
 
-	var r *regexp.Regexp
-	var err error
-
 	if !useRegex {
 		s = regexp.QuoteMeta(s)
 	}
 
 	if b.Settings["ignorecase"].(bool) {
-		r, err = regexp.Compile("(?i)" + s)
-	} else {
-		r, err = regexp.Compile(s)
+		s = "(?i)" + s
 	}
 
+	rg, err := NewRegexpGroup(s)
 	if err != nil {
 		return [2]Loc{}, false, err
 	}
@@ -167,14 +184,14 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 	var found bool
 	var l [2]Loc
 	if down {
-		l, found = b.findDown(r, from, end)
+		l, found = b.findDown(rg, from, end)
 		if !found {
-			l, found = b.findDown(r, start, end)
+			l, found = b.findDown(rg, start, end)
 		}
 	} else {
-		l, found = b.findUp(r, from, start)
+		l, found = b.findUp(rg, from, start)
 		if !found {
-			l, found = b.findUp(r, end, start)
+			l, found = b.findUp(rg, end, start)
 		}
 	}
 	return l, found, nil
@@ -184,6 +201,14 @@ func (b *Buffer) FindNext(s string, start, end, from Loc, down bool, useRegex bo
 // and returns the number of replacements made and the number of characters
 // added or removed on the last line of the range
 func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []byte, captureGroups bool) (int, int) {
+	rg, err := NewRegexpGroup(search.String())
+	if err != nil {
+		return 0, 0
+	}
+	return b.ReplaceRegexGroup(start, end, rg, replace, captureGroups)
+}
+
+func (b *Buffer) ReplaceRegexGroup(start, end Loc, rg *RegexpGroup, replace []byte, captureGroups bool) (int, int) {
 	if start.GreaterThan(end) {
 		start, end = end, start
 	}
@@ -191,6 +216,8 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 	charsEnd := util.CharacterCount(b.LineBytes(end.Y))
 	found := 0
 	var deltas []Delta
+
+	search := rg.regex[0]
 
 	for i := start.Y; i <= end.Y; i++ {
 		l := b.LineBytes(i)
@@ -202,7 +229,7 @@ func (b *Buffer) ReplaceRegex(start, end Loc, search *regexp.Regexp, replace []b
 
 			from := Loc{0, i}.Clamp(start, end)
 			to := Loc{charCount, i}.Clamp(start, end)
-			matches := b.findAll(search, from, to)
+			matches := b.findAll(rg, from, to)
 			found += len(matches)
 
 			for j := len(matches) - 1; j >= 0; j-- {

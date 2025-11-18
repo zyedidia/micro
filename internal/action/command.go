@@ -1006,12 +1006,12 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 	replace := []byte(replaceStr)
 
-	var regex *regexp.Regexp
+	var rg *buffer.RegexpGroup
 	var err error
 	if h.Buf.Settings["ignorecase"].(bool) {
-		regex, err = regexp.Compile("(?im)" + search)
+		rg, err = buffer.NewRegexpGroup("(?im)" + search)
 	} else {
-		regex, err = regexp.Compile("(?m)" + search)
+		rg, err = buffer.NewRegexpGroup("(?m)" + search)
 	}
 	if err != nil {
 		// There was an error with the user's regex
@@ -1030,7 +1030,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 		searchLoc = start // otherwise me might start at the end
 	}
 	if all {
-		nreplaced, _ = h.Buf.ReplaceRegex(start, end, regex, replace, !noRegex)
+		nreplaced, _ = h.Buf.ReplaceRegexGroup(start, end, rg, replace, !noRegex)
 	} else {
 		inRange := func(l buffer.Loc) bool {
 			return l.GreaterEqual(start) && l.LessEqual(end)
@@ -1072,7 +1072,7 @@ func (h *BufPane) ReplaceCmd(args []string) {
 
 			InfoBar.YNPrompt("Perform replacement (y,n,esc)", func(yes, canceled bool) {
 				if !canceled && yes {
-					_, nrunes := h.Buf.ReplaceRegex(locs[0], locs[1], regex, replace, !noRegex)
+					_, nrunes := h.Buf.ReplaceRegexGroup(locs[0], locs[1], rg, replace, !noRegex)
 
 					searchLoc = locs[0]
 					searchLoc.X += nrunes + locs[0].Diff(locs[1], h.Buf)
