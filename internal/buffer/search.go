@@ -41,12 +41,21 @@ func findLineParams(b *Buffer, start, end Loc, i int, r *regexp.Regexp) ([]byte,
 		}
 	}
 
-	if padMode == padStart {
-		r = regexp.MustCompile(".(?:" + r.String() + ")")
-	} else if padMode == padEnd {
-		r = regexp.MustCompile("(?:" + r.String() + ").")
-	} else if padMode == padStart|padEnd {
-		r = regexp.MustCompile(".(?:" + r.String() + ").")
+	if padMode != 0 {
+		re, err := regexp.Compile(r.String() + `\E`)
+		if err == nil {
+			// r contains \Q without closing \E
+			r = re
+		}
+
+		if padMode == padStart {
+			r = regexp.MustCompile(".(?:" + r.String() + ")")
+		} else if padMode == padEnd {
+			r = regexp.MustCompile("(?:" + r.String() + ").")
+		} else  {
+			// padMode == padStart|padEnd
+			r = regexp.MustCompile(".(?:" + r.String() + ").")
+		}
 	}
 
 	return l, charpos, padMode, r
