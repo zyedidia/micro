@@ -90,39 +90,39 @@ function isCommented(bp, lineN, commentRegex)
     return false
 end
 
-function commentLine(bp, lineN, indentLen)
+function commentLine(bp, cursor, lineN, indentLen)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
     local commentType = bp.Buf.Settings["comment.type"]
-    local sel = -bp.Cursor.CurSelection
-    local curpos = -bp.Cursor.Loc
+    local sel = -cursor.CurSelection
+    local curpos = -cursor.Loc
     local index = string.find(commentType, "%%s") - 1
     local indent = string.sub(line, 1, indentLen)
     local trimmedLine = string.sub(line, indentLen + 1)
     trimmedLine = trimmedLine:gsub("%%", "%%%%")
     local commentedLine = commentType:gsub("%%s", trimmedLine)
     bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), indent .. commentedLine)
-    if bp.Cursor:HasSelection() then
-        bp.Cursor.CurSelection[1].Y = sel[1].Y
-        bp.Cursor.CurSelection[2].Y = sel[2].Y
-        bp.Cursor.CurSelection[1].X = sel[1].X
-        bp.Cursor.CurSelection[2].X = sel[2].X
+    if cursor:HasSelection() then
+        cursor.CurSelection[1].Y = sel[1].Y
+        cursor.CurSelection[2].Y = sel[2].Y
+        cursor.CurSelection[1].X = sel[1].X
+        cursor.CurSelection[2].X = sel[2].X
     else
-        bp.Cursor.X = curpos.X + index
-        bp.Cursor.Y = curpos.Y
+        cursor.X = curpos.X + index
+        cursor.Y = curpos.Y
     end
-    bp.Cursor:Relocate()
-    bp.Cursor:StoreVisualX()
+    cursor:Relocate()
+    cursor:StoreVisualX()
 end
 
-function uncommentLine(bp, lineN, commentRegex)
+function uncommentLine(bp, cursor, lineN, commentRegex)
     updateCommentType(bp.Buf)
 
     local line = bp.Buf:Line(lineN)
     local commentType = bp.Buf.Settings["comment.type"]
-    local sel = -bp.Cursor.CurSelection
-    local curpos = -bp.Cursor.Loc
+    local sel = -cursor.CurSelection
+    local curpos = -cursor.Loc
     local index = string.find(commentType, "%%s") - 1
     if not string.match(line, commentRegex) then
         commentRegex = commentRegex:gsub("%s+", "%s*")
@@ -130,29 +130,29 @@ function uncommentLine(bp, lineN, commentRegex)
     if string.match(line, commentRegex) then
         uncommentedLine = string.match(line, commentRegex)
         bp.Buf:Replace(buffer.Loc(0, lineN), buffer.Loc(#line, lineN), util.GetLeadingWhitespace(line) .. uncommentedLine)
-        if bp.Cursor:HasSelection() then
-            bp.Cursor.CurSelection[1].Y = sel[1].Y
-            bp.Cursor.CurSelection[2].Y = sel[2].Y
-            bp.Cursor.CurSelection[1].X = sel[1].X
-            bp.Cursor.CurSelection[2].X = sel[2].X
+        if cursor:HasSelection() then
+            cursor.CurSelection[1].Y = sel[1].Y
+            cursor.CurSelection[2].Y = sel[2].Y
+            cursor.CurSelection[1].X = sel[1].X
+            cursor.CurSelection[2].X = sel[2].X
         else
-            bp.Cursor.X = curpos.X - index
-            bp.Cursor.Y = curpos.Y
+            cursor.X = curpos.X - index
+            cursor.Y = curpos.Y
         end
     end
-    bp.Cursor:Relocate()
-    bp.Cursor:StoreVisualX()
+    cursor:Relocate()
+    cursor:StoreVisualX()
 end
 
-function toggleCommentLine(bp, lineN, commentRegex)
+function toggleCommentLine(bp, cursor, lineN, commentRegex)
     if isCommented(bp, lineN, commentRegex) then
-        uncommentLine(bp, lineN, commentRegex)
+        uncommentLine(bp, cursor, lineN, commentRegex)
     else
-        commentLine(bp, lineN, #util.GetLeadingWhitespace(bp.Buf:Line(lineN)))
+        commentLine(bp, cursor, lineN, #util.GetLeadingWhitespace(bp.Buf:Line(lineN)))
     end
 end
 
-function toggleCommentSelection(bp, startLine, endLine, commentRegex)
+function toggleCommentSelection(bp, cursor, startLine, endLine, commentRegex)
     local allComments = true
     for line = startLine, endLine do
         if not isCommented(bp, line, commentRegex) then
@@ -174,9 +174,9 @@ function toggleCommentSelection(bp, startLine, endLine, commentRegex)
 
     for line = startLine, endLine do
         if allComments then
-            uncommentLine(bp, line, commentRegex)
+            uncommentLine(bp, cursor, line, commentRegex)
         else
-            commentLine(bp, line, indentMin)
+            commentLine(bp, cursor, line, indentMin)
         end
     end
 end
@@ -184,25 +184,30 @@ end
 function comment(bp, args)
     updateCommentType(bp.Buf)
 
+	local cursors = bp.Buf:GetCursors()
+
     local commentType = bp.Buf.Settings["comment.type"]
     local commentRegex = "^%s*" .. commentType:gsub("%%","%%%%"):gsub("%$","%$"):gsub("%)","%)"):gsub("%(","%("):gsub("%?","%?"):gsub("%*", "%*"):gsub("%-", "%-"):gsub("%.", "%."):gsub("%+", "%+"):gsub("%]", "%]"):gsub("%[", "%["):gsub("%%%%s", "(.*)")
 
-    if bp.Cursor:HasSelection() then
-        if bp.Cursor.CurSelection[1]:GreaterThan(-bp.Cursor.CurSelection[2]) then
-            local endLine = bp.Cursor.CurSelection[1].Y
-            if bp.Cursor.CurSelection[1].X == 0 then
-                endLine = endLine - 1
-            end
-            toggleCommentSelection(bp, bp.Cursor.CurSelection[2].Y, endLine, commentRegex)
-        else
-            local endLine = bp.Cursor.CurSelection[2].Y
-            if bp.Cursor.CurSelection[2].X == 0 then
-                endLine = endLine - 1
-            end
-            toggleCommentSelection(bp, bp.Cursor.CurSelection[1].Y, endLine, commentRegex)
-        end
-    else
-        toggleCommentLine(bp, bp.Cursor.Y, commentRegex)
+	for i = 1, #cursors do
+		local cursor = cursors[i]
+	    if cursor:HasSelection() then
+	        if cursor.CurSelection[1]:GreaterThan(-cursor.CurSelection[2]) then
+	            local endLine = cursor.CurSelection[1].Y
+	            if cursor.CurSelection[1].X == 0 then
+	                endLine = endLine - 1
+	            end
+	            toggleCommentSelection(bp, cursor, cursor.CurSelection[2].Y, endLine, commentRegex)
+	        else
+	            local endLine = cursor.CurSelection[2].Y
+	            if cursor.CurSelection[2].X == 0 then
+	                endLine = endLine - 1
+	            end
+	            toggleCommentSelection(bp, cursor, cursor.CurSelection[1].Y, endLine, commentRegex)
+	        end
+	    else
+	        toggleCommentLine(bp, cursor, cursor.Y, commentRegex)
+	    end
     end
 end
 
