@@ -134,18 +134,17 @@ func (i *InfoWindow) displayBuffer() {
 		curBX := blocX
 		r, combc, size := util.DecodeCharacter(line)
 
-		draw(r, combc, i.defStyle())
-
 		width := 0
 
 		switch r {
 		case '\t':
 			width = tabsize - (totalwidth % tabsize)
-			for j := 1; j < width; j++ {
+			for j := 0; j < width; j++ {
 				draw(' ', nil, i.defStyle())
 			}
 		default:
 			width = runewidth.RuneWidth(r)
+			draw(r, combc, i.defStyle())
 		}
 
 		blocX++
