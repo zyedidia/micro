@@ -100,6 +100,20 @@ func init() {
 	Stdout = new(bytes.Buffer)
 }
 
+// RangeMap returns the slice obtained from applying the given function
+// to all elements of the argument slice, with the slice index as additional
+// argument. Nil values are preserved
+func RangeMap[T, V any](ts []T, f func(int, T) V) []V {
+	if ts == nil {
+		return nil
+	}
+	vs := make([]V, len(ts))
+	for i, t := range ts {
+		vs[i] = f(i, t)
+	}
+	return vs
+}
+
 // SliceEnd returns a byte slice where the index is a rune index
 // Slices off the start of the slice
 func SliceEnd(slc []byte, index int) []byte {
@@ -353,12 +367,6 @@ func IsBytesWhitespace(b []byte) bool {
 		}
 	}
 	return true
-}
-
-// RunePos returns the rune index of a given byte index
-// Make sure the byte index is not between code points
-func RunePos(b []byte, i int) int {
-	return CharacterCount(b[:i])
 }
 
 // IndexAnyUnquoted returns the first position in s of a character from chars.
