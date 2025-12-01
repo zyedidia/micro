@@ -243,7 +243,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 			buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
 		} else {
 			// Option 3, just open an empty buffer
-			buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
+			buffers = append(buffers, buffer.NewBufferFromStringWithCommand("", filename, btype, command))
 		}
 	}
 
