@@ -159,8 +159,6 @@ func LoadInput(args []string) []*buffer.Buffer {
 	// should be opened
 
 	var filename string
-	var input []byte
-	var err error
 	buffers := make([]*buffer.Buffer, 0, len(args))
 
 	files := make([]string, 0, len(args))
@@ -235,7 +233,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 			// Option 2
 			// The input is not a terminal, so something is being piped in
 			// and we should read from stdin
-			input, err = io.ReadAll(os.Stdin)
+			input, err := io.ReadAll(os.Stdin)
 			if err != nil {
 				screen.TermMessage("Error reading from stdin: ", err)
 				input = []byte{}
