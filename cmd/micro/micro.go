@@ -158,7 +158,6 @@ func LoadInput(args []string) []*buffer.Buffer {
 	// 3. If there is no input file and the input is a terminal, an empty buffer
 	// should be opened
 
-	var filename string
 	buffers := make([]*buffer.Buffer, 0, len(args))
 
 	files := make([]string, 0, len(args))
@@ -238,10 +237,10 @@ func LoadInput(args []string) []*buffer.Buffer {
 				screen.TermMessage("Error reading from stdin: ", err)
 				input = []byte{}
 			}
-			buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
+			buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), "", btype, command))
 		} else {
 			// Option 3, just open an empty buffer
-			buffers = append(buffers, buffer.NewBufferFromStringWithCommand("", filename, btype, command))
+			buffers = append(buffers, buffer.NewBufferFromStringWithCommand("", "", btype, command))
 		}
 	}
 
