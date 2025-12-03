@@ -52,7 +52,7 @@ func findLineParams(b *Buffer, start, end Loc, i int, r *regexp.Regexp) ([]byte,
 			r = regexp.MustCompile(".(?:" + r.String() + ")")
 		} else if padMode == padEnd {
 			r = regexp.MustCompile("(?:" + r.String() + ").")
-		} else  {
+		} else {
 			// padMode == padStart|padEnd
 			r = regexp.MustCompile(".(?:" + r.String() + ").")
 		}
