@@ -158,15 +158,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 	// 3. If there is no input file and the input is a terminal, an empty buffer
 	// should be opened
 
-	var filename string
-	var input []byte
-	var err error
 	buffers := make([]*buffer.Buffer, 0, len(args))
-
-	btype := buffer.BTDefault
-	if !isatty.IsTerminal(os.Stdout.Fd()) {
-		btype = buffer.BTStdout
-	}
 
 	files := make([]string, 0, len(args))
 
@@ -222,7 +214,7 @@ func LoadInput(args []string) []*buffer.Buffer {
 		// Option 1
 		// We go through each file and load it
 		for i := 0; i < len(files); i++ {
-			buf, err := buffer.NewBufferFromFileWithCommand(files[i], btype, command)
+			buf, err := buffer.NewBufferFromFileWithCommand(files[i], buffer.BTDefault, command)
 			if err != nil {
 				screen.TermMessage(err)
 				continue
@@ -230,19 +222,26 @@ func LoadInput(args []string) []*buffer.Buffer {
 			// If the file didn't exist, input will be empty, and we'll open an empty buffer
 			buffers = append(buffers, buf)
 		}
-	} else if !isatty.IsTerminal(os.Stdin.Fd()) {
-		// Option 2
-		// The input is not a terminal, so something is being piped in
-		// and we should read from stdin
-		input, err = io.ReadAll(os.Stdin)
-		if err != nil {
-			screen.TermMessage("Error reading from stdin: ", err)
-			input = []byte{}
-		}
-		buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
 	} else {
-		// Option 3, just open an empty buffer
-		buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), filename, btype, command))
+		btype := buffer.BTDefault
+		if !isatty.IsTerminal(os.Stdout.Fd()) {
+			btype = buffer.BTStdout
+		}
+
+		if !isatty.IsTerminal(os.Stdin.Fd()) {
+			// Option 2
+			// The input is not a terminal, so something is being piped in
+			// and we should read from stdin
+			input, err := io.ReadAll(os.Stdin)
+			if err != nil {
+				screen.TermMessage("Error reading from stdin: ", err)
+				input = []byte{}
+			}
+			buffers = append(buffers, buffer.NewBufferFromStringWithCommand(string(input), "", btype, command))
+		} else {
+			// Option 3, just open an empty buffer
+			buffers = append(buffers, buffer.NewBufferFromStringWithCommand("", "", btype, command))
+		}
 	}
 
 	return buffers
