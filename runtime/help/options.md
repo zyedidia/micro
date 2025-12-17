@@ -400,6 +400,10 @@ Here are the available options:
                instead.
    - `itab`: tab characters before the first visible character in a line.
              If this is not set, `tab` will be shown instead.
+
+   Only `tab` and `itab` can display multiple characters (if possible),
+   otherwise only the first character will be displayed.
+
    An example of this option value could be `tab=>,space=.,itab=|>,ispace=|`
 
    The color of the shown character is determined by the `indent-char`
