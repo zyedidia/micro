@@ -472,12 +472,12 @@ Here are the available options:
    - `inactive`: the opening and closing tab characters for the inactive tabs.
                  where the values are splitted in half for opening and closing characters.
 
-    default value: `div=  ,active=[],inactive=  `
+    default value: `div=│,active= [] ,inactive=  `
 
 * `tabhighlight`: highlighting the current active tab by using the inverted tab bar color.
    Has no effect if `tabbar.active` is present in the current colorscheme.
 
-    default value: `false`
+    default value: `true`
 
 * `tabmovement`: navigate spaces at the beginning of lines as if they are tabs
    (e.g. move over 4 spaces at once). This option only does anything if
