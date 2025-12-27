@@ -2,7 +2,6 @@ package display
 
 import (
 	runewidth "github.com/mattn/go-runewidth"
-	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/buffer"
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
@@ -97,25 +96,23 @@ func (w *TabWindow) Display() {
 
 	globalTabReverse := config.GetGlobalOption("tabreverse").(bool)
 	globalTabHighlight := config.GetGlobalOption("tabhighlight").(bool)
+	tabBarStyle := config.DefStyle
 
-	// xor of reverse and tab highlight to get tab character (as in filename and surrounding characters) reverse state
-	tabCharHighlight := (globalTabReverse || globalTabHighlight) && !(globalTabReverse && globalTabHighlight)
-
-	reverseStyles := func(reverse bool) (tcell.Style, tcell.Style) {
-		tabBarStyle := config.DefStyle.Reverse(reverse)
-		if style, ok := config.Colorscheme["tabbar"]; ok {
-			tabBarStyle = style
-		}
-		tabBarActiveStyle := tabBarStyle
-		if style, ok := config.Colorscheme["tabbar.active"]; ok {
-			tabBarActiveStyle = style
-		}
-		return tabBarStyle, tabBarActiveStyle
+	if style, ok := config.Colorscheme["tabbar"]; ok {
+		tabBarStyle = style
+	}
+	if globalTabReverse {
+		tabBarStyle = config.ReverseColor(tabBarStyle)
+	}
+	tabBarActiveStyle := tabBarStyle
+	if globalTabHighlight {
+		tabBarActiveStyle = config.ReverseColor(tabBarStyle)
+	}
+	if style, ok := config.Colorscheme["tabbar.active"]; ok {
+		tabBarActiveStyle = style
 	}
 
-	draw := func(r rune, n int, active bool, reversed bool) {
-		tabBarStyle, tabBarActiveStyle := reverseStyles(reversed)
-
+	draw := func(r rune, n int, active bool, tab bool) {
 		style := tabBarStyle
 		if active {
 			style = tabBarActiveStyle
@@ -128,11 +125,11 @@ func (w *TabWindow) Display() {
 					c = ' '
 				}
 				if x == w.Width-1 && !done {
-					screen.SetContent(w.Width-1, w.Y, '>', nil, tabBarStyle)
+					screen.SetContent(w.Width-1, w.Y, '>', nil, style)
 					x++
 					break
 				} else if x == 0 && w.hscroll > 0 {
-					screen.SetContent(0, w.Y, '<', nil, tabBarStyle)
+					screen.SetContent(0, w.Y, '<', nil, style)
 				} else if x >= 0 && x < w.Width {
 					screen.SetContent(x, w.Y, c, nil, style)
 				}
@@ -143,13 +140,13 @@ func (w *TabWindow) Display() {
 
 	for i, n := range w.Names {
 		if i == w.active {
-			draw('[', 1, true, tabCharHighlight)
+			draw('[', 1, true, true)
 		} else {
-			draw(' ', 1, false, tabCharHighlight)
+			draw(' ', 1, false, true)
 		}
 
 		for _, c := range n {
-			draw(c, 1, i == w.active, tabCharHighlight)
+			draw(c, 1, i == w.active, true)
 		}
 
 		if i == len(w.Names)-1 {
@@ -157,11 +154,11 @@ func (w *TabWindow) Display() {
 		}
 
 		if i == w.active {
-			draw(']', 1, true, tabCharHighlight)
-			draw(' ', 2, true, globalTabReverse)
+			draw(']', 1, true, true)
+			draw(' ', 2, true, false)
 		} else {
-			draw(' ', 1, false, tabCharHighlight)
-			draw(' ', 2, false, globalTabReverse)
+			draw(' ', 1, false, true)
+			draw(' ', 2, false, false)
 		}
 
 		if x >= w.Width {

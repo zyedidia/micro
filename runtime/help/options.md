@@ -460,8 +460,9 @@ Here are the available options:
 
     default value: `true`
 
-* `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
-   colors with respect to the tab bar.
+
+* `tabhighlight`: highlighting the current active tab by using the inverted tab bar color.
+   Has no effect if `tabbar.active` is present in the current colorscheme.
 
     default value: `false`
 
@@ -471,9 +472,9 @@ Here are the available options:
 
     default value: `false`
 
-* `tabreverse`: reverses the tab bar colors when active.
+* `tabreverse`: reverses the tab bar colors.
 
-    default value: `true`
+    default value: `false`
 
 * `tabsize`: the size in spaces that a tab character should be displayed with.
 
@@ -626,7 +627,7 @@ so that you can see what the formatting should look like.
     "statusline": true,
     "sucmd": "sudo",
     "syntax": true,
-    "tabhighlight": true,
+    "tabhighlight": false,
     "tabmovement": false,
     "tabreverse": false,
     "tabsize": 4,
