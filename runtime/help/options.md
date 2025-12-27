@@ -460,6 +460,19 @@ Here are the available options:
 
     default value: `true`
 
+* `tabbarchars`: sets what visual characters to be shown for various tabbar options.
+   This option is specified in the form of `key1=value1,key2=value2,...`.
+
+   Here are the list of keys:
+   - `active`: the opening and closing tab characters for the current active tab,
+               where the values are splitted in half for opening and closing characters.
+               For example, value of `[[]]` will have `[[` as opening characters and
+               `]]` as closing characters.
+   - `div`: the characters to be filled between each tab.
+   - `inactive`: the opening and closing tab characters for the inactive tabs.
+                 where the values are splitted in half for opening and closing characters.
+
+    default value: `div=  ,active=[],inactive=  `
 
 * `tabhighlight`: highlighting the current active tab by using the inverted tab bar color.
    Has no effect if `tabbar.active` is present in the current colorscheme.

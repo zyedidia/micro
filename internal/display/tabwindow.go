@@ -6,6 +6,8 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/util"
+	"strings"
+	"unicode/utf8"
 )
 
 type TabWindow struct {
@@ -29,15 +31,26 @@ func (w *TabWindow) Resize(width, height int) {
 
 func (w *TabWindow) LocFromVisual(vloc buffer.Loc) int {
 	x := -w.hscroll
-
+	tabactiverunes, tabinactiverunes, tabdivrunes := GetTabRunes()
 	for i, n := range w.Names {
-		x++
+		if i == w.active {
+			x += len(tabactiverunes) / 2
+		} else {
+			x += len(tabinactiverunes) / 2
+		}
+
 		s := util.CharacterCountInString(n)
 		if vloc.Y == w.Y && vloc.X < x+s {
 			return i
 		}
 		x += s
-		x += 3
+
+		if i == w.active {
+			x += len(tabactiverunes) - len(tabactiverunes)/2
+		} else {
+			x += len(tabinactiverunes) - len(tabinactiverunes)/2
+		}
+		x += len(tabdivrunes)
 		if x >= w.Width {
 			break
 		}
@@ -90,6 +103,39 @@ func (w *TabWindow) SetActive(a int) {
 	}
 }
 
+func GetTabRunes() ([]rune, []rune, []rune) {
+	var tabactivechars string
+	var tabinactivechars string
+	var tabdivchars string
+	for _, entry := range strings.Split(config.GetGlobalOption("tabbarchars").(string), ",") {
+		split := strings.SplitN(entry, "=", 2)
+		if len(split) < 2 {
+			continue
+		}
+		key, val := split[0], split[1]
+		switch key {
+		case "active":
+			tabactivechars = val
+		case "inactive":
+			tabinactivechars = val
+		case "div":
+			tabdivchars = val
+		}
+	}
+
+	if utf8.RuneCountInString(tabactivechars) < 2 {
+		tabactivechars = ""
+	}
+	if utf8.RuneCountInString(tabinactivechars) < 2 {
+		tabinactivechars = ""
+	}
+
+	tabactiverunes := []rune(tabactivechars)
+	tabinactiverunes := []rune(tabinactivechars)
+	tabdivrunes := []rune(tabdivchars)
+	return tabactiverunes, tabinactiverunes, tabdivrunes
+}
+
 func (w *TabWindow) Display() {
 	x := -w.hscroll
 	done := false
@@ -111,12 +157,27 @@ func (w *TabWindow) Display() {
 	if style, ok := config.Colorscheme["tabbar.active"]; ok {
 		tabBarActiveStyle = style
 	}
+	tabBarInactiveStyle := tabBarStyle
+	if style, ok := config.Colorscheme["tabbar.inactive"]; ok {
+		tabBarInactiveStyle = style
+	}
+	tabBarDivStyle := tabBarStyle
+	if style, ok := config.Colorscheme["tabbar.div"]; ok {
+		tabBarDivStyle = style
+	}
 
-	draw := func(r rune, n int, active bool, tab bool) {
+	draw := func(r rune, n int, active bool, tab bool, div bool) {
 		style := tabBarStyle
-		if active {
-			style = tabBarActiveStyle
+		if tab {
+			if active {
+				style = tabBarActiveStyle
+			} else {
+				style = tabBarInactiveStyle
+			}
+		} else if div {
+			style = tabBarDivStyle
 		}
+
 		for i := 0; i < n; i++ {
 			rw := runewidth.RuneWidth(r)
 			for j := 0; j < rw; j++ {
@@ -138,15 +199,26 @@ func (w *TabWindow) Display() {
 		}
 	}
 
+	tabactiverunes, tabinactiverunes, tabdivrunes := GetTabRunes()
+	leftactiverunes := tabactiverunes[0 : len(tabactiverunes)/2]
+	rightactiverunes := tabactiverunes[len(tabactiverunes)/2:]
+
+	leftinactiverunes := tabinactiverunes[0 : len(tabinactiverunes)/2]
+	rightinactiverunes := tabinactiverunes[len(tabinactiverunes)/2:]
+
 	for i, n := range w.Names {
 		if i == w.active {
-			draw('[', 1, true, true)
+			for j := 0; j < len(leftactiverunes); j++ {
+				draw(leftactiverunes[j], 1, true, true, false)
+			}
 		} else {
-			draw(' ', 1, false, true)
+			for j := 0; j < len(leftinactiverunes); j++ {
+				draw(leftinactiverunes[j], 1, false, true, false)
+			}
 		}
 
 		for _, c := range n {
-			draw(c, 1, i == w.active, true)
+			draw(c, 1, i == w.active, true, false)
 		}
 
 		if i == len(w.Names)-1 {
@@ -154,11 +226,17 @@ func (w *TabWindow) Display() {
 		}
 
 		if i == w.active {
-			draw(']', 1, true, true)
-			draw(' ', 2, true, false)
+			for j := 0; j < len(rightactiverunes); j++ {
+				draw(rightactiverunes[j], 1, true, true, false)
+			}
 		} else {
-			draw(' ', 1, false, true)
-			draw(' ', 2, false, false)
+			for j := 0; j < len(rightinactiverunes); j++ {
+				draw(rightinactiverunes[j], 1, false, true, false)
+			}
+		}
+
+		for j := 0; j < len(tabdivrunes); j++ {
+			draw(tabdivrunes[j], 1, false, false, true)
 		}
 
 		if x >= w.Width {
@@ -167,6 +245,6 @@ func (w *TabWindow) Display() {
 	}
 
 	if x < w.Width {
-		draw(' ', w.Width-x, false, globalTabReverse)
+		draw(' ', w.Width-x, false, false, false)
 	}
 }

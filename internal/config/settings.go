@@ -129,6 +129,7 @@ var DefaultGlobalOnlySettings = map[string]any{
 	"savehistory":    true,
 	"scrollbarchar":  "|",
 	"sucmd":          "sudo",
+	"tabbarchars":    "div=  ,active=[],inactive=  ",
 	"tabhighlight":   false,
 	"tabreverse":     false,
 	"xterm":          false,
