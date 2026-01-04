@@ -38,9 +38,6 @@ var (
 	CompileDate = "Unknown"
 	// Debug logging
 	Debug = "OFF"
-	// FakeCursor is used to disable the terminal cursor and have micro
-	// draw its own (enabled for windows consoles where the cursor is slow)
-	FakeCursor = false
 
 	// Stdout is a buffer that is written to stdout when micro closes
 	Stdout *bytes.Buffer
@@ -93,10 +90,6 @@ func init() {
 		fmt.Println("Invalid version: ", Version, err)
 	}
 
-	_, wt := os.LookupEnv("WT_SESSION")
-	if runtime.GOOS == "windows" && !wt {
-		FakeCursor = true
-	}
 	Stdout = new(bytes.Buffer)
 }
 
