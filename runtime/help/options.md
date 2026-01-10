@@ -133,6 +133,8 @@ Here are the available options:
 * `fakecursor`: forces micro to render the cursor using terminal colors rather
    than the actual terminal cursor. This is useful when the terminal's cursor is
    slow or otherwise unavailable/undesirable to use.
+   Note: This option defaults to `true` in case `micro` is used in the legacy
+   Windows Console.
 
     default value: `false`
 

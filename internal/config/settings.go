@@ -115,7 +115,7 @@ var DefaultGlobalOnlySettings = map[string]any{
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
-	"fakecursor":     false,
+	"fakecursor":     defaultFakeCursor(),
 	"helpsplit":      "hsplit",
 	"infobar":        true,
 	"keymenu":        false,
@@ -439,6 +439,15 @@ func defaultFileFormat() string {
 		return "dos"
 	}
 	return "unix"
+}
+
+func defaultFakeCursor() bool {
+	_, wt := os.LookupEnv("WT_SESSION")
+	if runtime.GOOS == "windows" && !wt {
+		// enabled for windows consoles where the cursor is slow
+		return true
+	}
+	return false
 }
 
 func GetInfoBarOffset() int {
