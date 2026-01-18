@@ -4,6 +4,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/micro-editor/tcell/v2"
 	lua "github.com/yuin/gopher-lua"
 	luar "layeh.com/gopher-luar"
 
@@ -12,6 +13,7 @@ import (
 	"github.com/zyedidia/micro/v2/internal/config"
 	"github.com/zyedidia/micro/v2/internal/display"
 	ulua "github.com/zyedidia/micro/v2/internal/lua"
+	"github.com/zyedidia/micro/v2/internal/overlay"
 	"github.com/zyedidia/micro/v2/internal/screen"
 	"github.com/zyedidia/micro/v2/internal/shell"
 	"github.com/zyedidia/micro/v2/internal/util"
@@ -35,6 +37,8 @@ func LuaImport(pkg string) *lua.LTable {
 		return luaImportMicroConfig()
 	case "micro/util":
 		return luaImportMicroUtil()
+	case "micro/overlay":
+		return luaImportMicroOverlay()
 	default:
 		return ulua.Import(pkg)
 	}
@@ -160,6 +164,23 @@ func luaImportMicroUtil() *lua.LTable {
 	ulua.L.SetField(pkg, "RuneStr", luar.New(ulua.L, func(r rune) string {
 		return string(r)
 	}))
+
+	return pkg
+}
+
+func luaImportMicroOverlay() *lua.LTable {
+	pkg := ulua.L.NewTable()
+
+	ulua.L.SetField(pkg, "CreateOverlay", luar.New(ulua.L, overlay.CreateOverlay))
+	ulua.L.SetField(pkg, "DestroyOverlay", luar.New(ulua.L, overlay.DestroyOverlay))
+	ulua.L.SetField(pkg, "DrawText", luar.New(ulua.L, overlay.DrawText))
+	ulua.L.SetField(pkg, "DrawRect", luar.New(ulua.L, overlay.DrawRect))
+	ulua.L.SetField(pkg, "BufPaneScreenRect", luar.New(ulua.L, overlay.BufPaneScreenRect))
+	ulua.L.SetField(pkg, "BufPaneScreenLoc", luar.New(ulua.L, overlay.BufPaneScreenLoc))
+	ulua.L.SetField(pkg, "Style", luar.New(ulua.L, func() tcell.Style { return tcell.Style{} }))
+	ulua.L.SetField(pkg, "GetColor", luar.New(ulua.L, config.GetColor))
+	ulua.L.SetField(pkg, "StringToStyle", luar.New(ulua.L, config.StringToStyle))
+	ulua.L.SetField(pkg, "Redraw", luar.New(ulua.L, screen.Redraw))
 
 	return pkg
 }

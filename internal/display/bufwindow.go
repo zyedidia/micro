@@ -116,6 +116,10 @@ func (w *BufWindow) BufView() View {
 	}
 }
 
+func (w *BufWindow) GutterOffset() int {
+	return w.gutterOffset
+}
+
 func (w *BufWindow) updateDisplayInfo() {
 	b := w.Buf
 
