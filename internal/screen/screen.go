@@ -8,7 +8,6 @@ import (
 
 	"github.com/micro-editor/tcell/v2"
 	"github.com/zyedidia/micro/v2/internal/config"
-	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // Screen is the tcell screen we use to draw to the terminal
@@ -90,7 +89,7 @@ func ShowFakeCursor(x, y int) {
 }
 
 func UseFake() bool {
-	return util.FakeCursor || config.GetGlobalOption("fakecursor").(bool)
+	return config.GetGlobalOption("fakecursor").(bool)
 }
 
 // ShowFakeCursorMulti is the same as ShowFakeCursor except it does not

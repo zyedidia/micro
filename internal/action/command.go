@@ -290,20 +290,8 @@ func (h *BufPane) PwdCmd(args []string) {
 // OpenCmd opens a new buffer with a given filename
 func (h *BufPane) OpenCmd(args []string) {
 	if len(args) > 0 {
-		filename := args[0]
-		// the filename might or might not be quoted, so unquote first then join the strings.
-		args, err := shellquote.Split(filename)
-		if err != nil {
-			InfoBar.Error("Error parsing args ", err)
-			return
-		}
-		if len(args) == 0 {
-			return
-		}
-		filename = strings.Join(args, " ")
-
 		open := func() {
-			b, err := buffer.NewBufferFromFile(filename, buffer.BTDefault)
+			b, err := buffer.NewBufferFromFile(args[0], buffer.BTDefault)
 			if err != nil {
 				InfoBar.Error(err)
 				return
@@ -447,7 +435,7 @@ func (h *BufPane) openHelp(page string, hsplit bool, forceSplit bool) error {
 }
 
 // HelpCmd tries to open the given help page according to the split type
-// configured with the "helpsplit" option. It can be overriden by the optional
+// configured with the "helpsplit" option. It can be overridden by the optional
 // arguments "-vpslit" or "-hsplit". In case more than one help page is given
 // as argument then it opens all of them with the defined split type.
 func (h *BufPane) HelpCmd(args []string) {
