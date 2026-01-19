@@ -2,7 +2,7 @@ filetype: v
 
 detect:
     filename: "\\.(vsh|vv)$"
-    header: "^#!.*env +\\S+ +v +-raw-vsh-tmp-prefix +tmp$"
+    header: "^#!\\S*\\benv(\\s.*)?\\sv(\\s|$)"
 
 rules:
       # Conditionals and control flow
