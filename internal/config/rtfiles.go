@@ -8,7 +8,7 @@ import (
 	"regexp"
 	"strings"
 
-	rt "github.com/zyedidia/micro/v2/runtime"
+	rt "github.com/micro-editor/micro/v2/runtime"
 )
 
 const (

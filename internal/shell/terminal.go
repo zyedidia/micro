@@ -6,8 +6,8 @@ import (
 	"strconv"
 
 	"github.com/micro-editor/terminal"
-	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/micro-editor/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/screen"
 )
 
 type TermType int

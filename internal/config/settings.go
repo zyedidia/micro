@@ -13,7 +13,7 @@ import (
 
 	"github.com/micro-editor/json5"
 	"github.com/zyedidia/glob"
-	"github.com/zyedidia/micro/v2/internal/util"
+	"github.com/micro-editor/micro/v2/internal/util"
 	"golang.org/x/text/encoding/htmlindex"
 )
 

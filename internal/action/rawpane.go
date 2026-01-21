@@ -5,8 +5,8 @@ import (
 	"reflect"
 
 	"github.com/micro-editor/tcell/v2"
-	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/display"
+	"github.com/micro-editor/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/display"
 )
 
 type RawPane struct {
