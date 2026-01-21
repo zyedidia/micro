@@ -1,9 +1,9 @@
 <img alt="micro logo" src="./assets/micro-logo-drop.svg" width="500px"/>
 
-![Test Workflow](https://github.com/zyedidia/micro/actions/workflows/test.yaml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/zyedidia/micro/v2)](https://goreportcard.com/report/github.com/zyedidia/micro/v2)
-[![Release](https://img.shields.io/github/release/zyedidia/micro.svg?label=Release)](https://github.com/zyedidia/micro/releases)
-[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/zyedidia/micro/blob/master/LICENSE)
+![Test Workflow](https://github.com/micro-editor/micro/actions/workflows/test.yaml/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/micro-editor/micro/v2)](https://goreportcard.com/report/github.com/micro-editor/micro/v2)
+[![Release](https://img.shields.io/github/release/micro-editor/micro.svg?label=Release)](https://github.com/micro-editor/micro/releases)
+[![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/micro-editor/micro/blob/master/LICENSE)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 [![Snap Status](https://snapcraft.io/micro/badge.svg)](https://snapcraft.io/micro)
 
@@ -57,18 +57,18 @@ You can also check out the website for Micro at https://micro-editor.github.io.
 
 ## Installation
 
-To install micro, you can download a [prebuilt binary](https://github.com/zyedidia/micro/releases), or you can build it from source.
+To install micro, you can download a [prebuilt binary](https://github.com/micro-editor/micro/releases), or you can build it from source.
 
-If you want more information about ways to install micro, see this [wiki page](https://github.com/zyedidia/micro/wiki/Installing-Micro).
+If you want more information about ways to install micro, see this [wiki page](https://github.com/micro-editor/micro/wiki/Installing-Micro).
 
 Use `micro -version` to get the version information after installing. It is only guaranteed that you are installing the most recent
 stable version if you install from the prebuilt binaries, Homebrew, or Snap.
 
-A desktop entry file and man page can be found in the [assets/packaging](https://github.com/zyedidia/micro/tree/master/assets/packaging) directory.
+A desktop entry file and man page can be found in the [assets/packaging](https://github.com/micro-editor/micro/tree/master/assets/packaging) directory.
 
 ### Pre-built binaries
 
-Pre-built binaries are distributed in [releases](https://github.com/zyedidia/micro/releases).
+Pre-built binaries are distributed in [releases](https://github.com/micro-editor/micro/releases).
 
 To uninstall micro, simply remove the binary, and the configuration directory at `~/.config/micro`.
 
@@ -85,14 +85,14 @@ The script will place the micro binary in the current directory. From there, you
 With [Eget](https://github.com/zyedidia/eget) installed, you can easily get a pre-built binary:
 
 ```
-eget zyedidia/micro
+eget micro-editor/micro
 ```
 
 Use `--tag VERSION` to download a specific tagged version.
 
 ```
-eget --tag nightly zyedidia/micro # download the nightly version (compiled every day at midnight UTC)
-eget --tag v2.0.8 zyedidia/micro  # download version 2.0.8 rather than the latest release
+eget --tag nightly micro-editor/micro # download the nightly version (compiled every day at midnight UTC)
+eget --tag v2.0.8 micro-editor/micro  # download version 2.0.8 rather than the latest release
 ```
 
 You can install `micro` by adding `--to /usr/local/bin` to the `eget` command, or move the binary manually to a directory on your `$PATH` after the download completes.
@@ -109,7 +109,7 @@ brew install micro
 
 **Note for Mac:** All micro keybindings use the control or alt (option) key, not the command
 key. By default, macOS terminals do not forward alt key events. To fix this, please see
-the section on [macOS terminals](https://github.com/zyedidia/micro#macos-terminal) further below.
+the section on [macOS terminals](https://github.com/micro-editor/micro#macos-terminal) further below.
 
 On Linux, you can install micro through [snap](https://snapcraft.io/docs/core/install)
 
@@ -132,7 +132,7 @@ for other operating systems. These packages are not guaranteed to be up-to-date.
         * `eopkg install micro` (Solus).
         * `pacstall -I micro` (Pacstall).
         * `apt-get install micro` (ALT Linux)
-        * See [wiki](https://github.com/zyedidia/micro/wiki/Installing-Micro) for details about CRUX, Termux.
+        * See [wiki](https://github.com/micro-editor/micro/wiki/Installing-Micro) for details about CRUX, Termux.
     * distro-agnostic package managers:
         * `nix profile install nixpkgs#micro` (with [Nix](https://nixos.org/) and flakes enabled)
         * `flox install micro` (with [Flox](https://flox.dev))
@@ -165,7 +165,7 @@ If your operating system does not have a binary release, but does run Go, you ca
 Make sure that you have Go version 1.19 or greater and Go modules are enabled.
 
 ```
-git clone https://github.com/zyedidia/micro
+git clone https://github.com/micro-editor/micro
 cd micro
 make build
 sudo mv micro /usr/local/bin # optional
@@ -176,7 +176,7 @@ anywhere you like (for example `/usr/local/bin`).
 
 The command `make install` will install the binary to `$GOPATH/bin` or `$GOBIN`.
 
-You can install directly with `go get` (`go get github.com/zyedidia/micro/cmd/micro`) but this isn't
+You can install directly with `go get` (`go get github.com/micro-editor/micro/cmd/micro`) but this isn't
 recommended because it doesn't build micro with version information (necessary for the plugin manager),
 and doesn't disable debug mode.
 
@@ -261,14 +261,14 @@ click to enable line selection.
 micro has a built-in help system which you can access by pressing <kbd>Ctrl-e</kbd> and typing `help`. Additionally, you can
 view the help files here:
 
-- [main help](https://github.com/zyedidia/micro/tree/master/runtime/help/help.md)
-- [keybindings](https://github.com/zyedidia/micro/tree/master/runtime/help/keybindings.md)
-- [commands](https://github.com/zyedidia/micro/tree/master/runtime/help/commands.md)
-- [colors](https://github.com/zyedidia/micro/tree/master/runtime/help/colors.md)
-- [options](https://github.com/zyedidia/micro/tree/master/runtime/help/options.md)
-- [plugins](https://github.com/zyedidia/micro/tree/master/runtime/help/plugins.md)
+- [main help](https://github.com/micro-editor/micro/tree/master/runtime/help/help.md)
+- [keybindings](https://github.com/micro-editor/micro/tree/master/runtime/help/keybindings.md)
+- [commands](https://github.com/micro-editor/micro/tree/master/runtime/help/commands.md)
+- [colors](https://github.com/micro-editor/micro/tree/master/runtime/help/colors.md)
+- [options](https://github.com/micro-editor/micro/tree/master/runtime/help/options.md)
+- [plugins](https://github.com/micro-editor/micro/tree/master/runtime/help/plugins.md)
 
-I also recommend reading the [tutorial](https://github.com/zyedidia/micro/tree/master/runtime/help/tutorial.md) for
+I also recommend reading the [tutorial](https://github.com/micro-editor/micro/tree/master/runtime/help/tutorial.md) for
 a brief introduction to the more powerful configuration features micro offers.
 
 There is also an unofficial Discord, which you can join at https://discord.gg/nhWR6armnR.
@@ -277,9 +277,9 @@ There is also an unofficial Discord, which you can join at https://discord.gg/nh
 
 If you find any bugs, please report them! I am also happy to accept pull requests from anyone.
 
-You can use the [GitHub issue tracker](https://github.com/zyedidia/micro/issues)
+You can use the [GitHub issue tracker](https://github.com/micro-editor/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
-For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR). You can also use the [Discussions](https://github.com/zyedidia/micro/discussions) section on Github for a forum-like setting or for Q&A.
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR). You can also use the [Discussions](https://github.com/micro-editor/micro/discussions) section on Github for a forum-like setting or for Q&A.
 
 Sometimes I am unresponsive, and I apologize! If that happens, please ping me.
