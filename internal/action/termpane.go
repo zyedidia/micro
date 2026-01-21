@@ -4,13 +4,13 @@ import (
 	"errors"
 	"runtime"
 
-	"github.com/micro-editor/tcell/v2"
-	"github.com/micro-editor/terminal"
 	"github.com/micro-editor/micro/v2/internal/clipboard"
 	"github.com/micro-editor/micro/v2/internal/config"
 	"github.com/micro-editor/micro/v2/internal/display"
 	"github.com/micro-editor/micro/v2/internal/screen"
 	"github.com/micro-editor/micro/v2/internal/shell"
+	"github.com/micro-editor/tcell/v2"
+	"github.com/micro-editor/terminal"
 )
 
 type TermKeyAction func(*TermPane)

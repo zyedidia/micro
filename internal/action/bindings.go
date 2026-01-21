@@ -12,10 +12,10 @@ import (
 	"unicode"
 
 	"github.com/micro-editor/json5"
-	"github.com/micro-editor/tcell/v2"
 	"github.com/micro-editor/micro/v2/internal/config"
 	"github.com/micro-editor/micro/v2/internal/screen"
 	"github.com/micro-editor/micro/v2/internal/util"
+	"github.com/micro-editor/tcell/v2"
 )
 
 var Binder = map[string]func(e Event, action string){

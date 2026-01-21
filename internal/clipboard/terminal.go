@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"github.com/micro-editor/tcell/v2"
 	"github.com/micro-editor/micro/v2/internal/screen"
+	"github.com/micro-editor/tcell/v2"
 )
 
 type terminalClipboard struct{}

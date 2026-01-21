@@ -14,9 +14,9 @@ import (
 
 	"github.com/blang/semver"
 	"github.com/micro-editor/json5"
-	lua "github.com/yuin/gopher-lua"
 	ulua "github.com/micro-editor/micro/v2/internal/lua"
 	"github.com/micro-editor/micro/v2/internal/util"
+	lua "github.com/yuin/gopher-lua"
 )
 
 var (

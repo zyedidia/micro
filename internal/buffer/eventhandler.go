@@ -4,11 +4,11 @@ import (
 	"bytes"
 	"time"
 
-	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/micro-editor/micro/v2/internal/config"
 	ulua "github.com/micro-editor/micro/v2/internal/lua"
 	"github.com/micro-editor/micro/v2/internal/screen"
 	"github.com/micro-editor/micro/v2/internal/util"
+	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	luar "layeh.com/gopher-luar"
 )
 

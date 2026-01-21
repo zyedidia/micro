@@ -17,12 +17,12 @@ import (
 
 	luar "layeh.com/gopher-luar"
 
-	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"github.com/micro-editor/micro/v2/internal/config"
 	ulua "github.com/micro-editor/micro/v2/internal/lua"
 	"github.com/micro-editor/micro/v2/internal/screen"
 	"github.com/micro-editor/micro/v2/internal/util"
 	"github.com/micro-editor/micro/v2/pkg/highlight"
+	dmp "github.com/sergi/go-diff/diffmatchpatch"
 	"golang.org/x/text/encoding"
 	"golang.org/x/text/encoding/htmlindex"
 	"golang.org/x/text/encoding/unicode"
