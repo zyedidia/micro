@@ -1,6 +1,6 @@
 name: Feature Request
 description: File a feature request.
-title: ""
+title: "<title>"
 labels: ["feature"]
 body:
 - type: textarea
