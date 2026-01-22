@@ -4,8 +4,8 @@ import (
 	"errors"
 	"log"
 
+	ulua "github.com/micro-editor/micro/v2/internal/lua"
 	lua "github.com/yuin/gopher-lua"
-	ulua "github.com/zyedidia/micro/v2/internal/lua"
 )
 
 // ErrNoSuchFunction is returned when Call is executed on a function that does not exist

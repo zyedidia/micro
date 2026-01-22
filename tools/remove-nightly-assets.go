@@ -13,7 +13,7 @@ import (
 )
 
 func main() {
-	resp, err := http.Get("https://api.github.com/repos/zyedidia/micro/releases")
+	resp, err := http.Get("https://api.github.com/repos/micro-editor/micro/releases")
 	if err != nil {
 		fmt.Println(err.Error())
 		return

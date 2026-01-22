@@ -99,7 +99,7 @@ is supported for backward compatibility).
 
 Micro's colorschemes are also extremely simple to create. The default ones can
 be found
-[here](https://github.com/zyedidia/micro/tree/master/runtime/colorschemes).
+[here](https://github.com/micro-editor/micro/tree/master/runtime/colorschemes).
 
 Custom colorschemes should be placed in the `~/.config/micro/colorschemes`
 directory.

@@ -153,10 +153,10 @@ The packages and their contents are listed below (in Go type signatures):
 
     Relevant links:
     [Time](https://pkg.go.dev/time#Duration)
-    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
-    [InfoPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#InfoPane)
-    [Tab](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#Tab)
-    [TabList](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#TabList)
+    [BufPane](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#BufPane)
+    [InfoPane](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#InfoPane)
+    [Tab](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#Tab)
+    [TabList](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#TabList)
 
 * `micro/config`
     - `MakeCommand(name string, action func(bp *BufPane, args[]string),
@@ -237,8 +237,8 @@ The packages and their contents are listed below (in Go type signatures):
     - `ConfigDir`: the path to micro's currently active config directory.
 
     Relevant links:
-    [Buffer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Buffer)
-    [buffer.Completer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Completer)
+    [Buffer](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Buffer)
+    [buffer.Completer](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Completer)
     [Error](https://pkg.go.dev/builtin#error)
     [filepath.Match](https://pkg.go.dev/path/filepath#Match)
 
@@ -304,7 +304,7 @@ The packages and their contents are listed below (in Go type signatures):
 
     Relevant links:
     [Cmd](https://pkg.go.dev/os/exec#Cmd)
-    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
+    [BufPane](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#BufPane)
     [Error](https://pkg.go.dev/builtin#error)
 
 * `micro/buffer`
@@ -345,10 +345,10 @@ The packages and their contents are listed below (in Go type signatures):
     - `LogBuf() *Buffer`: returns the log buffer.
 
     Relevant links:
-    [Message](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Message)
-    [Loc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Loc)
-    [display.SLoc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/display#SLoc)
-    [Buffer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Buffer)
+    [Message](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Message)
+    [Loc](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Loc)
+    [display.SLoc](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/display#SLoc)
+    [Buffer](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Buffer)
     [Error](https://pkg.go.dev/builtin#error)
 
 * `micro/util`
@@ -376,7 +376,7 @@ returned by the functions have many methods. The Lua plugin may access any
 public methods of an object returned by any of the functions above.
 Unfortunately, it is not possible to list all the available functions on this
 page. Please go to the internal documentation at
-https://pkg.go.dev/github.com/zyedidia/micro/v2/internal to see the full list
+https://pkg.go.dev/github.com/micro-editor/micro/v2/internal to see the full list
 of available methods. Note that only methods of types that are available to
 plugins via the functions above can be called from a plugin. For an even more
 detailed reference, see the source code on Github.
