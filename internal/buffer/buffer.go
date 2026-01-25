@@ -1130,7 +1130,7 @@ func (b *Buffer) MoveLinesUp(start int, end int) {
 	if start < 1 || start >= end || end > len(b.lines) {
 		return
 	}
-	l := string(b.lines[start-1].runes)
+	l := b.LineString(start - 1)
 	if end == len(b.lines) {
 		b.insert(
 			Loc{
@@ -1155,7 +1155,7 @@ func (b *Buffer) MoveLinesDown(start int, end int) {
 	if start < 0 || start >= end || end >= len(b.lines) {
 		return
 	}
-	l := string(b.lines[end].runes)
+	l := b.LineString(end)
 	b.Insert(
 		Loc{0, start},
 		l+"\n",
@@ -1281,7 +1281,13 @@ func (b *Buffer) Retab() {
 		l = bytes.TrimLeft(l, " \t")
 
 		b.Lock()
-		runes, _ := util.DecodeCharacters(append(ws, l...))
+		ws = append(ws, l...)
+		var runes []Character
+		for len(ws) > 0 {
+			combc, s := util.DecodeCombinedCharacter(ws)
+			runes = append(runes, Character{combc})
+			ws = ws[s:]
+		}
 		b.lines[i].runes = runes
 		b.Unlock()
 
@@ -1318,7 +1324,7 @@ func ParseCursorLocation(cursorPositions []string) (Loc, error) {
 
 // Line returns the string representation of the given line number
 func (b *Buffer) Line(i int) string {
-	return string(b.LineBytes(i))
+	return b.LineString(i)
 }
 
 func (b *Buffer) Write(bytes []byte) (n int, err error) {

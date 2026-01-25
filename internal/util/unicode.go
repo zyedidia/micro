@@ -64,52 +64,45 @@ func DecodeCharacterInString(str string) (rune, []rune, int) {
 	return r, combc, size
 }
 
-// DecodeCharacters returns the characters from an array of bytes
-func DecodeCharacters(b []byte) ([]rune, int) {
-	var runes []rune
-	size := 0
+// DecodeCombinedCharacter returns the next combined character
+// from an array of bytes
+// A character is a rune along with any accompanying combining runes
+func DecodeCombinedCharacter(b []byte) ([]rune, int) {
+	var combc []rune
+	r, size := utf8.DecodeRune(b)
+	combc = append(combc, r)
+	b = b[size:]
+	c, s := utf8.DecodeRune(b)
 
-	for len(b) > 0 {
-		r, s := utf8.DecodeRune(b)
-		runes = append(runes, r)
+	for isMark(c) {
+		combc = append(combc, c)
 		size += s
+
 		b = b[s:]
-		r, s = utf8.DecodeRune(b)
-
-		for isMark(r) {
-			runes = append(runes, r)
-			size += s
-
-			b = b[s:]
-			r, s = utf8.DecodeRune(b)
-		}
+		c, s = utf8.DecodeRune(b)
 	}
 
-	return runes, size
+	return combc, size
 }
 
-// DecodeCharactersInString returns characters from a string
-func DecodeCharactersInString(str string) ([]rune, int) {
-	var runes []rune
-	size := 0
+// DecodeCombinedCharacterInString is the same as DecodeCombinedCharacter
+// but for strings
+func DecodeCombinedCharacterInString(str string) ([]rune, int) {
+	var combc []rune
+	r, size := utf8.DecodeRuneInString(str)
+	combc = append(combc, r)
+	str = str[size:]
+	c, s := utf8.DecodeRuneInString(str)
 
-	for len(str) > 0 {
-		r, s := utf8.DecodeRuneInString(str)
-		runes = append(runes, r)
+	for isMark(c) {
+		combc = append(combc, c)
 		size += s
+
 		str = str[s:]
-		r, s = utf8.DecodeRuneInString(str)
-
-		for isMark(r) {
-			runes = append(runes, r)
-			size += s
-
-			str = str[s:]
-			r, s = utf8.DecodeRuneInString(str)
-		}
+		c, s = utf8.DecodeRuneInString(str)
 	}
 
-	return runes, size
+	return combc, size
 }
 
 // CharacterCount returns the number of characters in a byte array

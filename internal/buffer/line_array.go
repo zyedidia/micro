@@ -19,10 +19,14 @@ type searchState struct {
 	done       bool
 }
 
+type Character struct {
+	combc []rune
+}
+
 // A Line contains the slice of runes as well as a highlight state, match
 // and a flag for whether the highlighting needs to be updated
 type Line struct {
-	runes []rune
+	runes []Character
 
 	state highlight.State
 	match highlight.LineMatch
@@ -37,8 +41,22 @@ type Line struct {
 	search map[*Buffer]*searchState
 }
 
+// data returns the line as byte slice
 func (l Line) data() []byte {
-	return []byte(string(l.runes))
+	var runes []rune
+	for _, r := range l.runes {
+		runes = append(runes, r.combc[0:]...)
+	}
+	return []byte(string(runes))
+}
+
+// String returns the line as string
+func (l Line) String() string {
+	var runes []rune
+	for _, r := range l.runes {
+		runes = append(runes, r.combc[0:]...)
+	}
+	return string(runes)
 }
 
 const (
@@ -126,9 +144,14 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 			loaded += dlen
 		}
 
+		var runes []Character
 		if err != nil {
 			if err == io.EOF {
-				runes, _ := util.DecodeCharacters(data)
+				for len(data) > 0 {
+					combc, s := util.DecodeCombinedCharacter(data)
+					runes = append(runes, Character{combc})
+					data = data[s:]
+				}
 				la.lines = Append(la.lines, Line{
 					runes: runes,
 					state: nil,
@@ -138,7 +161,12 @@ func NewLineArray(size uint64, endings FileFormat, reader io.Reader) *LineArray 
 			// Last line was read
 			break
 		} else {
-			runes, _ := util.DecodeCharacters(data[:dlen-1])
+			data = data[:dlen-1]
+			for len(data) > 0 {
+				combc, s := util.DecodeCombinedCharacter(data)
+				runes = append(runes, Character{combc})
+				data = data[s:]
+			}
 			la.lines = Append(la.lines, Line{
 				runes: runes,
 				state: nil,
@@ -172,13 +200,13 @@ func (la *LineArray) Bytes() []byte {
 // newlineBelow adds a newline below the given line number
 func (la *LineArray) newlineBelow(y int) {
 	la.lines = append(la.lines, Line{
-		runes: []rune{},
+		runes: []Character{},
 		state: nil,
 		match: nil,
 	})
 	copy(la.lines[y+2:], la.lines[y+1:])
 	la.lines[y+1] = Line{
-		runes: []rune{},
+		runes: []Character{},
 		state: la.lines[y].state,
 		match: nil,
 	}
@@ -189,31 +217,39 @@ func (la *LineArray) insert(pos Loc, value []byte) {
 	la.lock.Lock()
 	defer la.lock.Unlock()
 
-	runes, _ := util.DecodeCharacters(value)
+	var runes []Character
+	for len(value) > 0 {
+		combc, s := util.DecodeCombinedCharacter(value)
+		runes = append(runes, Character{combc})
+		value = value[s:]
+	}
 	x, y := util.Min(pos.X, len(la.lines[pos.Y].runes)), pos.Y
 	start := -1
-	for i := 0; i < len(runes); i++ {
-		if runes[i] == '\n' || (runes[i] == '\r' && i < len(runes)-1 && runes[i+1] == '\n') {
-			la.split(Loc{x, y})
-			if i > 0 && start < len(runes) && start < i {
-				if start < 0 {
-					start = 0
+
+outer:
+	for i, r := range runes {
+		for j := 0; j < len(r.combc); j++ {
+			if r.combc[j] == '\n' || (r.combc[j] == '\r' && i < len(runes)-1 && r.combc[j+1] == '\n') {
+				la.split(Loc{x, y})
+				if i > 0 && start < len(runes) && start < i {
+					if start < 0 {
+						start = 0
+					}
+					la.insertRunes(Loc{x, y}, runes[start:i])
 				}
-				la.insertRunes(Loc{x, y}, runes[start:i])
+
+				x = 0
+				y++
+
+				if r.combc[j] == '\r' {
+					i++
+				}
+				if i+1 <= len(runes) {
+					start = i + 1
+				}
+
+				continue outer
 			}
-
-			x = 0
-			y++
-
-			if runes[i] == '\r' {
-				i++
-			}
-			if i+1 <= len(runes) {
-
-				start = i + 1
-			}
-
-			continue
 		}
 	}
 	if start < 0 {
@@ -224,7 +260,7 @@ func (la *LineArray) insert(pos Loc, value []byte) {
 }
 
 // Inserts a rune array at a given location
-func (la *LineArray) insertRunes(pos Loc, runes []rune) {
+func (la *LineArray) insertRunes(pos Loc, runes []Character) {
 	la.lines[pos.Y].runes = append(la.lines[pos.Y].runes, runes...)
 	copy(la.lines[pos.Y].runes[pos.X+len(runes):], la.lines[pos.Y].runes[pos.X:])
 	copy(la.lines[pos.Y].runes[pos.X:], runes)
@@ -289,17 +325,33 @@ func (la *LineArray) deleteLines(y1, y2 int) {
 func (la *LineArray) Substr(start, end Loc) []byte {
 	startX := util.Min(start.X, len(la.lines[start.Y].runes))
 	endX := util.Min(end.X, len(la.lines[end.Y].runes))
+	var runes []rune
 	if start.Y == end.Y && startX <= endX {
-		return []byte(string(la.lines[start.Y].runes[startX:endX]))
+		for _, r := range la.lines[start.Y].runes[startX:endX] {
+			runes = append(runes, r.combc[0:]...)
+		}
+		return []byte(string(runes))
 	}
+
 	var str []byte
-	str = append(str, []byte(string(la.lines[start.Y].runes[startX:]))...)
+	for _, r := range la.lines[start.Y].runes[startX:] {
+		runes = append(runes, r.combc[0:]...)
+	}
+	str = append(str, []byte(string(runes))...)
 	str = append(str, '\n')
 	for i := start.Y + 1; i <= end.Y-1; i++ {
-		str = append(str, []byte(string(la.lines[i].runes))...)
+		runes = runes[:0]
+		for _, r := range la.lines[i].runes {
+			runes = append(runes, r.combc[0:]...)
+		}
+		str = append(str, []byte(string(runes))...)
 		str = append(str, '\n')
 	}
-	str = append(str, []byte(string(la.lines[end.Y].runes[:endX]))...)
+	runes = runes[:0]
+	for _, r := range la.lines[end.Y].runes[:endX] {
+		runes = append(runes, r.combc[0:]...)
+	}
+	str = append(str, []byte(string(runes))...)
 	return str
 }
 
@@ -324,7 +376,13 @@ func (la *LineArray) Line(n int) []rune {
 	if n >= len(la.lines) || n < 0 {
 		return []rune{}
 	}
-	return la.lines[n].runes
+
+	var runes []rune
+	for _, r := range la.lines[n].runes {
+		runes = append(runes, r.combc[0:]...)
+	}
+
+	return runes
 }
 
 // LineBytes returns line n as an array of bytes
@@ -332,7 +390,7 @@ func (la *LineArray) LineBytes(n int) []byte {
 	if n >= len(la.lines) || n < 0 {
 		return []byte{}
 	}
-	return []byte(string(la.lines[n].runes))
+	return la.lines[n].data()
 }
 
 // LineString returns line n as an string
@@ -340,7 +398,13 @@ func (la *LineArray) LineString(n int) string {
 	if n >= len(la.lines) || n < 0 {
 		return string("")
 	}
-	return string(la.lines[n].runes)
+
+	var runes []rune
+	for _, r := range la.lines[n].runes {
+		runes = append(runes, r.combc[0:]...)
+	}
+
+	return string(runes)
 }
 
 // State gets the highlight state for the given line number
