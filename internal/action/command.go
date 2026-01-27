@@ -141,9 +141,11 @@ func (h *BufPane) TextFilterCmd(args []string) {
 		InfoBar.Error("usage: textfilter arguments")
 		return
 	}
+
 	for _, c := range h.Buf.GetCursors() {
 		sel := c.GetSelection()
-		if len(sel) == 0 {
+		fromSelection := len(sel) > 0
+		if !fromSelection {
 			c.SelectWord()
 			sel = c.GetSelection()
 		}
@@ -158,7 +160,18 @@ func (h *BufPane) TextFilterCmd(args []string) {
 			return
 		}
 		c.DeleteSelection()
-		h.Buf.Insert(c.Loc, bout.String())
+		insertStart := c.Loc
+		insertedText := bout.String()
+		h.Buf.Insert(c.Loc, insertedText)
+
+		if fromSelection {
+			// Select the pasted output if the input was selected
+			charCount := util.CharacterCountInString(insertedText)
+			insertEnd := insertStart.Move(charCount, h.Buf)
+			c.SetSelectionStart(insertStart)
+			c.SetSelectionEnd(insertEnd)
+			c.Loc = insertEnd
+		}
 	}
 }
 
