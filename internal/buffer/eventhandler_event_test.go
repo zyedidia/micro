@@ -269,6 +269,31 @@ func TestReplaceWithSelection(t *testing.T) {
 	}
 }
 
+func TestReplaceMultiLineCursorMovement(t *testing.T) {
+	buf := NewBufferFromString("0123456789abcdefghijkLMNOPQrstuvwxyz", "", BTDefault)
+	cursor := makeCursorWithSelection(buf, 27, 0, 21, 0, 27, 0)
+	buf.SetCursors([]*Cursor{cursor})
+
+	buf.Replace(Loc{20, 0}, Loc{23, 0}, "ABCDE")
+
+	expectedLoc := Loc{29, 0}
+	if cursor.Loc != expectedLoc {
+		t.Errorf("Expected cursor.Loc at %v, got %v", expectedLoc, cursor.Loc)
+	}
+
+	expectedSelStart := Loc{25, 0}
+	expectedSelEnd := Loc{29, 0}
+	if cursor.CurSelection[0] != expectedSelStart || cursor.CurSelection[1] != expectedSelEnd {
+		t.Errorf("Expected selection [%v,%v], got [%v,%v]",
+			expectedSelStart, expectedSelEnd, cursor.CurSelection[0], cursor.CurSelection[1])
+	}
+
+	expectedText := "0123456789abcdefghijABCDENOPQrstuvwxyz"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
 func TestReplaceSelectedTextCursorPosition(t *testing.T) {
 	buf := NewBufferFromString("hello world test", "", BTDefault)
 
@@ -457,6 +482,134 @@ func TestRemoveMultipleCursorsSameLine(t *testing.T) {
 	}
 }
 
+func TestRemoveMultipleCursorsBeforeAndAfter(t *testing.T) {
+	buf := NewBufferFromString("hello world test", "", BTDefault)
+	cursor1 := NewCursor(buf, Loc{3, 0})
+	cursor2 := NewCursor(buf, Loc{8, 0})
+	cursor3 := NewCursor(buf, Loc{16, 0})
+	buf.SetCursors([]*Cursor{cursor1, cursor2, cursor3})
+
+	buf.Remove(Loc{0, 0}, Loc{6, 0})
+
+	expectedLoc1 := Loc{0, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+
+	expectedLoc2 := Loc{2, 0}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+
+	expectedLoc3 := Loc{10, 0}
+	if cursor3.Loc != expectedLoc3 {
+		t.Errorf("Expected cursor3 at %v, got %v", expectedLoc3, cursor3.Loc)
+	}
+
+	expectedText := "world test"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
+func TestRemoveMultipleCursorsDifferentLines(t *testing.T) {
+	buf := NewBufferFromString("line1\nline2\nline3\nline4", "", BTDefault)
+	cursor1 := NewCursor(buf, Loc{5, 0})
+	cursor2 := NewCursor(buf, Loc{5, 1})
+	cursor3 := NewCursor(buf, Loc{5, 2})
+	cursor4 := NewCursor(buf, Loc{5, 3})
+	buf.SetCursors([]*Cursor{cursor1, cursor2, cursor3, cursor4})
+
+	buf.Remove(Loc{0, 1}, Loc{0, 3})
+
+	expectedLoc1 := Loc{5, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+
+	expectedLoc2 := Loc{0, 1}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+
+	expectedLoc3 := Loc{0, 1}
+	if cursor3.Loc != expectedLoc3 {
+		t.Errorf("Expected cursor3 at %v, got %v", expectedLoc3, cursor3.Loc)
+	}
+
+	expectedLoc4 := Loc{5, 1}
+	if cursor4.Loc != expectedLoc4 {
+		t.Errorf("Expected cursor4 at %v, got %v", expectedLoc4, cursor4.Loc)
+	}
+
+	expectedText := "line1\nline4"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
+func TestRemoveMultipleCursorsMultiline(t *testing.T) {
+	buf := NewBufferFromString("hello\nworld\ntest\nmore", "", BTDefault)
+	cursor1 := NewCursor(buf, Loc{3, 0})
+	cursor2 := NewCursor(buf, Loc{3, 2})
+	cursor3 := NewCursor(buf, Loc{4, 3})
+	buf.SetCursors([]*Cursor{cursor1, cursor2, cursor3})
+
+	buf.Remove(Loc{2, 0}, Loc{2, 2})
+
+	expectedLoc1 := Loc{2, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+
+	expectedLoc2 := Loc{3, 0}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+
+	expectedLoc3 := Loc{4, 1}
+	if cursor3.Loc != expectedLoc3 {
+		t.Errorf("Expected cursor3 at %v, got %v", expectedLoc3, cursor3.Loc)
+	}
+
+	expectedText := "hest\nmore"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
+func TestRemoveMultipleCursorsWithSelections(t *testing.T) {
+	buf := NewBufferFromString("hello world test end", "", BTDefault)
+	cursor1 := makeCursorWithSelection(buf, 5, 0, 0, 0, 5, 0)
+	cursor2 := makeCursorWithSelection(buf, 16, 0, 12, 0, 16, 0)
+	buf.SetCursors([]*Cursor{cursor1, cursor2})
+
+	buf.Remove(Loc{0, 0}, Loc{6, 0})
+
+	expectedLoc1 := Loc{0, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+	expectedSel1 := [2]Loc{{0, 0}, {0, 0}}
+	if cursor1.CurSelection != expectedSel1 {
+		t.Errorf("Expected cursor1 selection %v, got %v", expectedSel1, cursor1.CurSelection)
+	}
+
+	expectedLoc2 := Loc{10, 0}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+	expectedSel2 := [2]Loc{{6, 0}, {10, 0}}
+	if cursor2.CurSelection != expectedSel2 {
+		t.Errorf("Expected cursor2 selection %v, got %v", expectedSel2, cursor2.CurSelection)
+	}
+
+	expectedText := "world test end"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
 func TestReplaceMultipleCursorsSameLine(t *testing.T) {
 	buf := NewBufferFromString("hello world test", "", BTDefault)
 	cursor1 := NewCursor(buf, Loc{5, 0})
@@ -512,6 +665,42 @@ func TestReplaceMultipleCursorsDifferentLines(t *testing.T) {
 	}
 
 	expectedText := "FIRST\nline2\nline3"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
+func TestReplaceMultipleCursorsMultilineToSingleLine(t *testing.T) {
+	buf := NewBufferFromString("line1\nline2\nline3\nline4", "", BTDefault)
+	cursor1 := NewCursor(buf, Loc{3, 0})
+	cursor2 := NewCursor(buf, Loc{3, 1})
+	cursor3 := NewCursor(buf, Loc{3, 2})
+	cursor4 := NewCursor(buf, Loc{3, 3})
+	buf.SetCursors([]*Cursor{cursor1, cursor2, cursor3, cursor4})
+
+	buf.Replace(Loc{0, 0}, Loc{0, 2}, "REPLACED")
+
+	expectedLoc1 := Loc{8, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+
+	expectedLoc2 := Loc{8, 0}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+
+	expectedLoc3 := Loc{11, 0}
+	if cursor3.Loc != expectedLoc3 {
+		t.Errorf("Expected cursor3 at %v, got %v", expectedLoc3, cursor3.Loc)
+	}
+
+	expectedLoc4 := Loc{3, 1}
+	if cursor4.Loc != expectedLoc4 {
+		t.Errorf("Expected cursor4 at %v, got %v", expectedLoc4, cursor4.Loc)
+	}
+
+	expectedText := "REPLACEDline3\nline4"
 	if string(buf.Bytes()) != expectedText {
 		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
 	}
@@ -579,6 +768,36 @@ func TestReplaceMultipleCursorsWithSelections(t *testing.T) {
 	}
 }
 
+func TestReplaceMultipleCursorsComplexMultiline(t *testing.T) {
+	buf := NewBufferFromString("A\nB\nC\nD\nE", "", BTDefault)
+	cursor1 := NewCursor(buf, Loc{1, 0})
+	cursor2 := NewCursor(buf, Loc{1, 2})
+	cursor3 := NewCursor(buf, Loc{1, 4})
+	buf.SetCursors([]*Cursor{cursor1, cursor2, cursor3})
+
+	buf.Replace(Loc{0, 1}, Loc{0, 3}, "X\nY\nZ\n")
+
+	expectedLoc1 := Loc{1, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+
+	expectedLoc2 := Loc{0, 4}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+
+	expectedLoc3 := Loc{1, 5}
+	if cursor3.Loc != expectedLoc3 {
+		t.Errorf("Expected cursor3 at %v, got %v", expectedLoc3, cursor3.Loc)
+	}
+
+	expectedText := "A\nX\nY\nZ\nD\nE"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
 func TestMultipleCursorsInsertAtSameLocation(t *testing.T) {
 	buf := NewBufferFromString("hello world", "", BTDefault)
 	cursor1 := NewCursor(buf, Loc{6, 0})
@@ -602,6 +821,36 @@ func TestMultipleCursorsInsertAtSameLocation(t *testing.T) {
 	}
 
 	expectedText := "hello BIG world"
+	if string(buf.Bytes()) != expectedText {
+		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
+	}
+}
+
+func TestMultipleCursorsRemoveAcrossCursors(t *testing.T) {
+	buf := NewBufferFromString("0123456789", "", BTDefault)
+	cursor1 := NewCursor(buf, Loc{2, 0})
+	cursor2 := NewCursor(buf, Loc{5, 0})
+	cursor3 := NewCursor(buf, Loc{8, 0})
+	buf.SetCursors([]*Cursor{cursor1, cursor2, cursor3})
+
+	buf.Remove(Loc{3, 0}, Loc{7, 0})
+
+	expectedLoc1 := Loc{2, 0}
+	if cursor1.Loc != expectedLoc1 {
+		t.Errorf("Expected cursor1 at %v, got %v", expectedLoc1, cursor1.Loc)
+	}
+
+	expectedLoc2 := Loc{3, 0}
+	if cursor2.Loc != expectedLoc2 {
+		t.Errorf("Expected cursor2 at %v, got %v", expectedLoc2, cursor2.Loc)
+	}
+
+	expectedLoc3 := Loc{4, 0}
+	if cursor3.Loc != expectedLoc3 {
+		t.Errorf("Expected cursor3 at %v, got %v", expectedLoc3, cursor3.Loc)
+	}
+
+	expectedText := "012789"
 	if string(buf.Bytes()) != expectedText {
 		t.Errorf("Expected text '%s', got '%s'", expectedText, string(buf.Bytes()))
 	}
