@@ -11,7 +11,8 @@ rules:
     - statement: "[=:]"
 
     # Boolean constants
-    - constant: "\\b(true|false|TRUE|FALSE|yes|no|ON|OFF)\\b"
+    - constant.bool.true: "\\b(true|TRUE|yes|ON)\\b"
+    - constant.bool.false: "\\b(false|FALSE|no|OFF)\\b"
 
     # Strings/Values (Simple match for text after assignment)
     - constant.string: "([=:][[:space:]]*).*$"
@@ -24,4 +25,4 @@ rules:
             - todo: "(TODO|XXX|FIXME):?"
 
     # Special characters like escaped spaces or newlines
-    - constant.specialChar: "\\\\([ tnfr'\"\\\\]|u[0-9a-fA-F]{4})"
+    - constant.specialChar: "\\\\([ :=tnfr'\"\\\\]|u[0-9a-fA-F]{4})"
