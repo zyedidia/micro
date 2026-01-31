@@ -483,7 +483,17 @@ func (n *Node) Unsplit() bool {
 // flattens the tree by removing unnecessary intermediate parents that have only one child
 // and handles the side effect of it
 func (n *Node) flatten() {
-	if n.parent == nil || len(n.children) != 1 {
+	if len(n.children) != 1 {
+		return
+	}
+
+	// Special case for root node
+	if n.parent == nil {
+		*n = *n.children[0]
+		n.parent = nil
+		for _, c := range n.children {
+			c.parent = n
+		}
 		return
 	}
 
