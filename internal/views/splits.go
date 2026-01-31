@@ -413,7 +413,7 @@ func (n *Node) HSplit(bottom bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.Kind == STUndef {
+	if n.parent == nil {
 		n.Kind = STVert
 	}
 	if n.Kind == STVert {
@@ -429,13 +429,13 @@ func (n *Node) VSplit(right bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.Kind == STUndef {
+	if n.parent == nil {
 		n.Kind = STHoriz
 	}
-	if n.Kind == STVert {
-		return n.vVSplit(right)
+	if n.Kind == STHoriz {
+		return n.hVSplit(0, right)
 	}
-	return n.hVSplit(0, right)
+	return n.vVSplit(right)
 }
 
 // unsplits the child of a split
@@ -531,11 +531,19 @@ func (n *Node) flatten() {
 func (n *Node) String() string {
 	var strf func(n *Node, ident int) string
 	strf = func(n *Node, ident int) string {
-		marker := "|"
-		if n.Kind == STHoriz {
-			marker = "-"
+		var marker string
+		var parentId uint64 = 0
+		if n.parent == nil {
+			marker = "/"
+		} else {
+			if n.Kind == STHoriz {
+				marker = "-"
+			} else if n.Kind == STVert {
+				marker = "|"
+			}
+			parentId = n.parent.id
 		}
-		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id)
+		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id, parentId)
 		if n.IsLeaf() {
 			str += "🍁"
 		}
