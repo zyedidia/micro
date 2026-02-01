@@ -17,7 +17,7 @@
             "default": 0
         },
         "autosu": {
-            "description": "Whether attempt to use super user privileges\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "description": "Whether to attempt to use super user privileges\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
@@ -90,7 +90,7 @@
             "default": true
         },
         "diffgutter": {
-            "description": "Whether to display diff inticators before lines\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "description": "Whether to display diff indicators before lines\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
@@ -160,7 +160,7 @@
             "default": true
         },
         "keepautoindent": {
-            "description": "Whether add a whitespace while using autoindent\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "description": "Whether to add a whitespace while using autoindent\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
@@ -225,7 +225,7 @@
             "type": "array",
             "uniqueItems": true,
             "items": {
-                "description": "A pluging repository\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+                "description": "A plugin repository\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
                 "type": "string"
             },
             "default": []
@@ -266,7 +266,7 @@
             "default": false
         },
         "scrollbar": {
-            "description": "Whether to save undo after closing file\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "description": "Whether to display a scroll bar\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
