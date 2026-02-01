@@ -209,9 +209,16 @@
             "default": false
         },
         "pluginchannels": {
-            "description": "A file with list of plugin channels\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
-            "type": "string",
-            "default": "https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"
+            "description": "Plugin channels\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+                "description": "A file with list of plugin repositories\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+                "type": "string"
+            },
+            "default": [
+                "https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json"
+            ]
         },
         "pluginrepos": {
             "description": "Plugin repositories\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
