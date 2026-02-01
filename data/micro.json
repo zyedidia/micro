@@ -138,13 +138,13 @@
             "type": "boolean",
             "default": false
         },
-        "incsearch": {
-            "description": "Whether to enable an incremental search in `Find` prompt\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+        "ignorecase": {
+            "description": "Whether to perform case-insensitive searches\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": true
         },
-        "ignorecase": {
-            "description": "Whether to perform case-insensitive searches\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+        "incsearch": {
+            "description": "Whether to enable an incremental search in `Find` prompt\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": true
         },
@@ -193,13 +193,13 @@
             "type": "boolean",
             "default": true
         },
-        "paste": {
-            "description": "Whether to treat characters sent from the terminal in a single chunk as a paste event\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+        "parsecursor": {
+            "description": "Whether to extract a line number and a column to open files with from file names\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
-        "parsecursor": {
-            "description": "Whether to extract a line number and a column to open files with from file names\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+        "paste": {
+            "description": "Whether to treat characters sent from the terminal in a single chunk as a paste event\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
@@ -235,6 +235,11 @@
             "type": "boolean",
             "default": false
         },
+        "relativeruler": {
+            "description": "Whether to display relative line numbers\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
         "rmtrailingws": {
             "description": "Whether to remove trailing whitespaces\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
@@ -244,11 +249,6 @@
             "description": "Whether to display line numbers\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": true
-        },
-        "relativeruler": {
-            "description": "Whether to display relative line numbers\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
-            "type": "boolean",
-            "default": false
         },
         "savecursor": {
             "description": "Whether to save cursor position in files\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
@@ -329,13 +329,13 @@
             "type": "boolean",
             "default": true
         },
-        "tabmovement": {
-            "description": "Whether to navigate spaces at the beginning of lines as if they are tabs\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+        "tabhighlight": {
+            "description": "Whether to invert tab character colors\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
-        "tabhighlight": {
-            "description": "Whether to invert tab character colors\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+        "tabmovement": {
+            "description": "Whether to navigate spaces at the beginning of lines as if they are tabs\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
