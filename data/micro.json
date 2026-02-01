@@ -89,6 +89,11 @@
             "type": "boolean",
             "default": true
         },
+        "detectlimit": {
+            "description": "Number of first lines in a file that are matched to determine the filetype\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "default": 100
+        },
         "diffgutter": {
             "description": "Whether to display diff indicators before lines\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
@@ -114,6 +119,11 @@
             "type": "boolean",
             "default": true
         },
+        "fakecursor": {
+            "description": "Whether to render the cursor using terminal colors instead of the actual terminal cursor\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
         "fastdirty": {
             "description": "Whether to use a fast algorithm to determine whether a file is changed\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
@@ -133,8 +143,27 @@
             "type": "string",
             "default": "unknown"
         },
+        "helpsplit": {
+            "description": "A split type to be used by the `help` command\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "vsplit",
+                "hsplit"
+            ],
+            "default": "hsplit"
+        },
         "hlsearch": {
             "description": "Whether to highlight all instances of a searched text after a successful search\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "hltaberrors": {
+            "description": "Whether to highlight tabs when spaces are expected, and spaces when tabs are expected\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
+        "hltrailingws": {
+            "description": "Whether to highlight trailing whitespaces at the end of lines\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
         },
@@ -169,8 +198,18 @@
             "type": "boolean",
             "default": false
         },
+        "lockbindings": {
+            "description": "Whether to prevent plugins and lua scripts from binding any keys\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
         "matchbrace": {
             "description": "Whether to show matching braces\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": true
+        },
+        "matchbraceleft": {
+            "description": "Whether to also match the brace character to the left of the cursor when there is no brace character directly under the cursor\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": true
         },
@@ -192,6 +231,21 @@
             "description": "Whether to enable mouse support\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": true
+        },
+        "multiopen": {
+            "description": "A way to layout multiple files opened at startup\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "tab",
+                "vsplit",
+                "hsplit"
+            ],
+            "default": "tab"
+        },
+        "pageoverlap": {
+            "description": "Number of lines from the current view to keep in view when paging up or down\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "integer",
+            "default": 2
         },
         "parsecursor": {
             "description": "Whether to extract a line number and a column to open files with from file names\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
@@ -240,6 +294,16 @@
             "type": "boolean",
             "default": false
         },
+        "reload": {
+            "description": "A reload behavior for the current buffer in case the file has changed\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "prompt",
+                "auto",
+                "disabled"
+            ],
+            "default": "prompt"
+        },
         "rmtrailingws": {
             "description": "Whether to remove trailing whitespaces\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
@@ -270,6 +334,11 @@
             "type": "boolean",
             "default": false
         },
+        "scrollbarchar": {
+            "description": "A character used for displaying the scrollbar\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": "|"
+        },
         "scrollmargin": {
             "description": "A margin at which a view starts scrolling when a cursor approaches an edge of a view\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "integer",
@@ -279,6 +348,11 @@
             "description": "Line count to scroll for one scroll event\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "integer",
             "default": 2
+        },
+        "showchars": {
+            "description": "Characters to be shown to display various invisible characters in the file\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "default": ""
         },
         "smartpaste": {
             "description": "Whether to add a leading whitespace while pasting multiple lines\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
@@ -353,6 +427,16 @@
             "description": "Whether to use spaces instead of tabs\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",
             "default": false
+        },
+        "truecolor": {
+            "description": "Whether to use true colors (24-bit colors) when using a colorscheme with true colors\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "string",
+            "enum": [
+                "auto",
+                "on",
+                "off"
+            ],
+            "default": "auto"
         },
         "useprimary": {
             "description": "Whether to use primary clipboard to copy selections in the background\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
