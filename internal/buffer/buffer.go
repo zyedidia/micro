@@ -360,6 +360,10 @@ func NewBuffer(r io.Reader, size int64, path string, btype BufType, cmd Command)
 		absPath = path
 	}
 
+	// Ignore the returned error, since the checks are already performed in
+	// NewBufferFromFileWithCommand()
+	absPath, _ = util.ResolveSymlinks(absPath)
+
 	b := new(Buffer)
 
 	found := false
@@ -527,7 +531,9 @@ func (b *Buffer) Fini() {
 	if !b.Modified() {
 		b.Serialize()
 	}
-	b.CancelBackup()
+	if !b.Shared() {
+		b.CancelBackup()
+	}
 
 	if b.Type == BTStdout {
 		fmt.Fprint(util.Stdout, string(b.Bytes()))
