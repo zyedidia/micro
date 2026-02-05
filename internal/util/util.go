@@ -662,6 +662,36 @@ func HttpRequest(method string, url string, headers []string) (resp *http.Respon
 	return client.Do(req)
 }
 
+func ResolveSymlinks(filename string) (string, error) {
+	// We use Stat() as trick to let the OS do symlink loop detection for us,
+	// since we are lazy to do it ourselves
+	fileInfo, err := os.Stat(filename)
+	if errors.Is(err, fs.ErrNotExist) {
+		return filename, nil
+	}
+	if err != nil {
+		return filename, err
+	}
+
+	for {
+		fileInfo, err = os.Lstat(filename)
+		if err != nil {
+			return filename, err
+		}
+		if fileInfo.Mode()&os.ModeSymlink != 0 {
+			dstFilename, err := os.Readlink(filename)
+			if err != nil {
+				return filename, err
+			}
+			if !filepath.IsAbs(dstFilename) {
+				filename = filepath.Join(filepath.Dir(filename), dstFilename)
+				continue
+			}
+		}
+		return filename, nil
+	}
+}
+
 // SafeWrite writes bytes to a file in a "safe" way, preventing loss of the
 // contents of the file if it fails to write the new contents.
 // This means that the file is not overwritten directly but by writing to a

@@ -336,7 +336,9 @@ func (b *Buffer) saveToFile(filename string, withSudo bool, autoSave bool) error
 	}
 
 	b.Path = filename
-	b.AbsPath = absFilename
+	// Ignore the returned error, since the checks are already performed in
+	// above
+	b.AbsPath, _ = util.ResolveSymlinks(absFilename)
 	b.isModified = false
 	b.UpdateModTime()
 
