@@ -74,6 +74,7 @@ rules:
         start: "\\-\\-\\[\\["
         end: "\\]\\]"
         rules:
+            - preproc: "@as\\b"
             - todo: "(TODO|NOTE|FIXME):?"
 
 # support long brackets, same as with multiline strings
@@ -108,4 +109,9 @@ rules:
         start: "\\-\\-"
         end: "$"
         rules:
+              # annotations
+            - preproc: "\\-@(alias|async|cast|class|deprecated|diagnostic|enum|field|generic|meta|module|nodiscard|operator|overload|package|param|private|protected|return|see|source|type|version)\\b"
+            - error: "\\-@(vararg)\\b"
+            - comment: "\\-"
             - todo: "(TODO|NOTE|FIXME):?"
+ 
