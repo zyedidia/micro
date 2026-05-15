@@ -1,0 +1,63 @@
+# Editor:
+color-link default "#C5C8C6,#1D1F21"
+color-link tabbar "#000000,#EBCDF3"
+color-link statusline "#000000,#EBCDF3"
+color-link line-number "#7C7C7C,#2D2F31"
+color-link current-line-number "#C5C8C6,#1D1F21"
+color-link cursor-line "#2D2F31"
+color-link color-column "#2D2F31"
+color-link error "#000000,#FF0049"
+color-link tab-error "#FF0049"
+color-link trailingws "#FF0049"
+color-link match-brace "#000000,#D5D8D6"
+
+# Comments:
+color-link comment "#7C7C7C"
+color-link todo "#EBCDF3"
+
+# Constants:
+color-link constant "#D1C6E5"
+color-link constant.bool "#F69AB7"
+color-link constant.number "#C0D0FF"
+color-link constant.string "#A6D189"
+color-link constant.string.url "underline #96CBFE"
+color-link constant.specialChar "#84C362"
+
+# Identifiers:
+color-link identifier "#F9E5E4"
+color-link identifier.class "#E8C2CA"
+color-link identifier.macro "#E9D3F9"
+color-link identifier.function "#FACED2"
+color-link identifier.var "#F8DEE1"
+color-link constant.builtin "#D1C2DC"
+
+# Preprocessor:
+color-link preproc "#DBBFEF"
+color-link preproc.shebang "#DBBFEF"
+
+# Types:
+color-link type "#E8C2CA"
+color-link type.extended "#E6B7C1"
+
+# Keywords:
+color-link statement "#FDCBFE"
+color-link statement.declaration "#DBBFEF"
+color-link type.keyword "#DBBFEF"
+
+# Symbols:
+color-link symbol "#D5D8D6"
+color-link symbol.brackets "#D5D8D6"
+color-link symbol.operator "#C3B7C4"
+
+# Diff:
+color-link diff-added "#69EE72"
+color-link diff-modified "#FFD700"
+color-link diff-deleted "#FF0049"
+
+# Gutter
+color-link gutter-warning "#000000,#FFD700"
+color-link gutter-error "#000000,#FF0049"
+
+# Misc:
+color-link special "#EBCDF3"
+color-link underlined "underline"
