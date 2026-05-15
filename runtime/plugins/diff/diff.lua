@@ -6,7 +6,7 @@ local shell = import("micro/shell")
 
 function onBufferOpen(buf)
 	if buf.Settings["diffgutter"] and (not buf.Type.Scratch) and (buf.Path ~= "") then
-		-- check that file exists
+		-- Check that file exists.
 		local _, err = os.Stat(buf.AbsPath)
 		if err == nil then
 			local dirName, fileName = filepath.Split(buf.AbsPath)

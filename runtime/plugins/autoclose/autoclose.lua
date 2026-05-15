@@ -6,7 +6,7 @@ local autoclosePairs = {"\"\"", "''", "``", "()", "{}", "[]"}
 local autoNewlinePairs = {"()", "{}", "[]"}
 
 function charAt(str, i)
-    -- lua indexing is one off from go
+    -- Lua indexing is one off from go.
     return uutil.RuneAt(str, i-1)
 end
 

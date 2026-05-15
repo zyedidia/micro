@@ -64,10 +64,10 @@ ft["zscript"] = "// %s"
 ft["zsh"] = "# %s"
 
 function updateCommentType(buf)
-    -- NOTE: Using DoSetOptionNative to avoid LocalSettings[option] = true
+    -- Using DoSetOptionNative to avoid `LocalSettings[option] = true`
     -- so that "comment.type" can be reset by a "filetype" change to default.
     if (buf.Settings["comment.type"] == "") then
-        -- NOTE: This won't get triggered if a filetype is change via `setlocal filetype`
+        -- This won't get triggered if a filetype is change via `setlocal filetype`
         -- since it is not registered with `RegisterGlobalOption()``
         if buf.Settings["commenttype"] ~= nil then
             buf:DoSetOptionNative("comment.type", buf.Settings["commenttype"])
@@ -161,7 +161,7 @@ function toggleCommentSelection(bp, startLine, endLine, commentRegex)
         end
     end
 
-    -- NOTE: we assume that the indentation is either tabs only or spaces only
+    -- We assume that the indentation is either tabs only or spaces only
     local indentMin = -1
     if not allComments then
         for line = startLine, endLine do

@@ -11,8 +11,8 @@ local os = import("os")
 
 local linters = {}
 
--- creates a linter entry, call from within an initialization function, not
--- directly at initial load time
+-- Creates a linter entry, call from within an initialization function,
+-- not directly at initial load time.
 --
 -- name: name of the linter
 -- filetype: filetype to check for to use linter
