@@ -10,8 +10,8 @@ function preInsertNewline(bp)
    local buf = bp.Buf
 
    ---@type string
-   local regex = buf.Settings["indent.regex"]
-   if not regex then return true end
+   local patterns = buf.Settings["indent.patterns"]
+   if not patterns then return true end
 
    ---@type string
    local separators = buf.Settings["indent.separator"]
@@ -20,7 +20,7 @@ function preInsertNewline(bp)
    local line = buf:Line(bp.Cursor.Y)
 
    if separators then
-      for pattern in regex:gmatch("[^" .. separators .. "]+") do
+      for pattern in patterns:gmatch("[^" .. separators .. "]+") do
          if line:match(pattern) then
             bp:InsertNewline()
             bp:InsertTab()
@@ -28,7 +28,7 @@ function preInsertNewline(bp)
          end
       end
    else
-      if line:match(regex) then
+      if line:match(patterns) then
          bp:InsertNewline()
          bp:InsertTab()
          return false
