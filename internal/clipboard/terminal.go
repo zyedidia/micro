@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	"github.com/zyedidia/micro/v2/internal/screen"
+	"github.com/micro-editor/micro/v2/internal/screen"
 	"github.com/micro-editor/tcell/v2"
 )
 

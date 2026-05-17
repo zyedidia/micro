@@ -2,8 +2,8 @@ package display
 
 import (
 	runewidth "github.com/mattn/go-runewidth"
-	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/util"
+	"github.com/micro-editor/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/util"
 )
 
 // SLoc represents a vertical scrolling location, i.e. a location of a visual line
@@ -291,7 +291,7 @@ func (w *BufWindow) diff(s1, s2 SLoc) int {
 // within the buffer boundaries.
 func (w *BufWindow) Scroll(s SLoc, n int) SLoc {
 	if !w.Buf.Settings["softwrap"].(bool) {
-		s.Line = util.Clamp(s.Line + n, 0, w.Buf.LinesNum()-1)
+		s.Line = util.Clamp(s.Line+n, 0, w.Buf.LinesNum()-1)
 		return s
 	}
 	return w.scroll(s, n)

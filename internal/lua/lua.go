@@ -427,7 +427,6 @@ func importPath() *lua.LTable {
 func importFilePath() *lua.LTable {
 	pkg := L.NewTable()
 
-	L.SetField(pkg, "Join", luar.New(L, filepath.Join))
 	L.SetField(pkg, "Abs", luar.New(L, filepath.Abs))
 	L.SetField(pkg, "Base", luar.New(L, filepath.Base))
 	L.SetField(pkg, "Clean", luar.New(L, filepath.Clean))

@@ -2,11 +2,11 @@ package display
 
 import (
 	runewidth "github.com/mattn/go-runewidth"
-	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/config"
-	"github.com/zyedidia/micro/v2/internal/info"
-	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/micro/v2/internal/util"
+	"github.com/micro-editor/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/config"
+	"github.com/micro-editor/micro/v2/internal/info"
+	"github.com/micro-editor/micro/v2/internal/screen"
+	"github.com/micro-editor/micro/v2/internal/util"
 	"github.com/micro-editor/tcell/v2"
 )
 
@@ -122,16 +122,8 @@ func (i *InfoWindow) displayBuffer() {
 
 			}
 
-			rw := runewidth.RuneWidth(r)
-			for j := 0; j < rw; j++ {
-				c := r
-				if j > 0 {
-					c = ' '
-					combc = nil
-				}
-				screen.SetContent(vlocX, i.Y, c, combc, style)
-			}
-			vlocX++
+			screen.SetContent(vlocX, i.Y, r, combc, style)
+			vlocX += runewidth.RuneWidth(r)
 		}
 		nColsBeforeStart--
 	}
@@ -142,29 +134,22 @@ func (i *InfoWindow) displayBuffer() {
 		curBX := blocX
 		r, combc, size := util.DecodeCharacter(line)
 
-		draw(r, combc, i.defStyle())
-
 		width := 0
 
-		char := ' '
 		switch r {
 		case '\t':
-			ts := tabsize - (totalwidth % tabsize)
-			width = ts
+			width = tabsize - (totalwidth % tabsize)
+			for j := 0; j < width; j++ {
+				draw(' ', nil, i.defStyle())
+			}
 		default:
 			width = runewidth.RuneWidth(r)
-			char = '@'
+			draw(r, combc, i.defStyle())
 		}
 
 		blocX++
 		line = line[size:]
 
-		// Draw any extra characters either spaces for tabs or @ for incomplete wide runes
-		if width > 1 {
-			for j := 1; j < width; j++ {
-				draw(char, nil, i.defStyle())
-			}
-		}
 		if activeC.X == curBX {
 			screen.ShowCursor(curVX, i.Y)
 		}

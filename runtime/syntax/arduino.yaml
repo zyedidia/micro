@@ -1,7 +1,7 @@
 filetype: ino
 
 detect:
-    filename: "\\.?ino$"
+    filename: "\\.ino$"
 
 rules:
     - identifier: "\\b[A-Z_][0-9A-Z_]+\\b"

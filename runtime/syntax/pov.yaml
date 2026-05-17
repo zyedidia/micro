@@ -17,4 +17,5 @@ rules:
     - comment:
         start: "/\\*"
         end: "\\*/"
+        rules: []
 

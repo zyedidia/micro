@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -12,13 +11,13 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/zyedidia/glob"
 	"github.com/micro-editor/json5"
-	"github.com/zyedidia/micro/v2/internal/util"
+	"github.com/micro-editor/micro/v2/internal/util"
+	"github.com/zyedidia/glob"
 	"golang.org/x/text/encoding/htmlindex"
 )
 
-type optionValidator func(string, interface{}) error
+type optionValidator func(string, any) error
 
 // a list of settings that need option validators
 var optionValidators = map[string]optionValidator{
@@ -37,6 +36,7 @@ var optionValidators = map[string]optionValidator{
 	"scrollmargin":    validateNonNegativeValue,
 	"scrollspeed":     validateNonNegativeValue,
 	"tabsize":         validatePositiveValue,
+	"truecolor":       validateChoice,
 }
 
 // a list of settings with pre-defined choices
@@ -47,11 +47,12 @@ var OptionChoices = map[string][]string{
 	"matchbracestyle": {"underline", "highlight"},
 	"multiopen":       {"tab", "hsplit", "vsplit"},
 	"reload":          {"prompt", "auto", "disabled"},
+	"truecolor":       {"auto", "on", "off"},
 }
 
 // a list of settings that can be globally and locally modified and their
 // default values
-var defaultCommonSettings = map[string]interface{}{
+var defaultCommonSettings = map[string]any{
 	"autoindent":      true,
 	"autosu":          false,
 	"backup":          true,
@@ -69,9 +70,9 @@ var defaultCommonSettings = map[string]interface{}{
 	"hlsearch":        false,
 	"hltaberrors":     false,
 	"hltrailingws":    false,
-	"incsearch":       true,
 	"ignorecase":      true,
-	"indentchar":      " ",
+	"incsearch":       true,
+	"indentchar":      " ", // Deprecated
 	"keepautoindent":  false,
 	"matchbrace":      true,
 	"matchbraceleft":  true,
@@ -80,42 +81,45 @@ var defaultCommonSettings = map[string]interface{}{
 	"pageoverlap":     float64(2),
 	"permbackup":      false,
 	"readonly":        false,
+	"relativeruler":   false,
 	"reload":          "prompt",
 	"rmtrailingws":    false,
 	"ruler":           true,
-	"relativeruler":   false,
 	"savecursor":      false,
 	"saveundo":        false,
 	"scrollbar":       false,
 	"scrollmargin":    float64(3),
 	"scrollspeed":     float64(2),
+	"showchars":       "",
 	"smartpaste":      true,
 	"softwrap":        false,
 	"splitbottom":     true,
 	"splitright":      true,
-	"statusformatl":   "$(filename) $(modified)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
+	"statusformatl":   "$(filename) $(modified)$(overwrite)($(line),$(col)) $(status.paste)| ft:$(opt:filetype) | $(opt:fileformat) | $(opt:encoding)",
 	"statusformatr":   "$(bind:ToggleKeyMenu): bindings, $(bind:ToggleHelp): help",
 	"statusline":      true,
 	"syntax":          true,
 	"tabmovement":     false,
 	"tabsize":         float64(4),
 	"tabstospaces":    false,
+	"truecolor":       "auto",
 	"useprimary":      true,
 	"wordwrap":        false,
 }
 
 // a list of settings that should only be globally modified and their
 // default values
-var DefaultGlobalOnlySettings = map[string]interface{}{
+var DefaultGlobalOnlySettings = map[string]any{
 	"autosave":       float64(0),
 	"clipboard":      "external",
 	"colorscheme":    "default",
 	"divchars":       "|-",
 	"divreverse":     true,
-	"fakecursor":     false,
+	"fakecursor":     defaultFakeCursor(),
 	"helpsplit":      "hsplit",
 	"infobar":        true,
 	"keymenu":        false,
+	"lockbindings":   false,
 	"mouse":          true,
 	"multiopen":      "tab",
 	"parsecursor":    false,
@@ -137,14 +141,15 @@ var LocalSettings = []string{
 }
 
 var (
-	ErrInvalidOption = errors.New("Invalid option")
-	ErrInvalidValue  = errors.New("Invalid value")
+	ErrInvalidOption    = errors.New("Invalid option")
+	ErrInvalidValue     = errors.New("Invalid value")
+	ErrOptNotToggleable = errors.New("Option not toggleable")
 
 	// The options that the user can set
-	GlobalSettings map[string]interface{}
+	GlobalSettings map[string]any
 
 	// This is the raw parsed json
-	parsedSettings     map[string]interface{}
+	parsedSettings     map[string]any
 	settingsParseError bool
 
 	// ModifiedSettings is a map of settings which should be written to disk
@@ -155,6 +160,10 @@ var (
 	// because they have been temporarily set for this session only
 	VolatileSettings map[string]bool
 )
+
+func writeFile(name string, txt []byte) error {
+	return util.SafeWrite(name, txt, false)
+}
 
 func init() {
 	ModifiedSettings = make(map[string]bool)
@@ -167,26 +176,34 @@ func validateParsedSettings() error {
 	for k, v := range parsedSettings {
 		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
 			if strings.HasPrefix(k, "ft:") {
-				for k1, v1 := range v.(map[string]interface{}) {
+				for k1, v1 := range v.(map[string]any) {
 					if _, ok := defaults[k1]; ok {
 						if e := verifySetting(k1, v1, defaults[k1]); e != nil {
 							err = e
-							parsedSettings[k].(map[string]interface{})[k1] = defaults[k1]
+							parsedSettings[k].(map[string]any)[k1] = defaults[k1]
 							continue
 						}
 					}
 				}
 			} else {
-				if _, e := glob.Compile(k); e != nil {
-					err = errors.New("Error with glob setting " + k + ": " + e.Error())
+				tk := strings.TrimPrefix(k, "glob:")
+				if _, e := glob.Compile(tk); e != nil {
+					err = errors.New("Error with glob setting " + tk + ": " + e.Error())
 					delete(parsedSettings, k)
 					continue
 				}
-				for k1, v1 := range v.(map[string]interface{}) {
+				if !strings.HasPrefix(k, "glob:") {
+					// Support non-prefixed glob settings but internally convert
+					// them to prefixed ones for simplicity.
+					delete(parsedSettings, k)
+					k = "glob:" + k
+					parsedSettings[k] = v
+				}
+				for k1, v1 := range v.(map[string]any) {
 					if _, ok := defaults[k1]; ok {
 						if e := verifySetting(k1, v1, defaults[k1]); e != nil {
 							err = e
-							parsedSettings[k].(map[string]interface{})[k1] = defaults[k1]
+							parsedSettings[k].(map[string]any)[k1] = defaults[k1]
 							continue
 						}
 					}
@@ -207,6 +224,7 @@ func validateParsedSettings() error {
 			}
 			continue
 		}
+
 		if _, ok := defaults[k]; ok {
 			if e := verifySetting(k, v, defaults[k]); e != nil {
 				err = e
@@ -219,10 +237,10 @@ func validateParsedSettings() error {
 }
 
 func ReadSettings() error {
-	parsedSettings = make(map[string]interface{})
+	parsedSettings = make(map[string]any)
 	filename := filepath.Join(ConfigDir, "settings.json")
 	if _, e := os.Stat(filename); e == nil {
-		input, err := ioutil.ReadFile(filename)
+		input, err := os.ReadFile(filename)
 		if err != nil {
 			settingsParseError = true
 			return errors.New("Error reading settings.json file: " + err.Error())
@@ -243,16 +261,19 @@ func ReadSettings() error {
 	return nil
 }
 
-func ParsedSettings() map[string]interface{} {
-	s := make(map[string]interface{})
+func ParsedSettings() map[string]any {
+	s := make(map[string]any)
 	for k, v := range parsedSettings {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			continue
+		}
 		s[k] = v
 	}
 	return s
 }
 
-func verifySetting(option string, value interface{}, def interface{}) error {
-	var interfaceArr []interface{}
+func verifySetting(option string, value any, def any) error {
+	var interfaceArr []any
 	valType := reflect.TypeOf(value)
 	defType := reflect.TypeOf(def)
 	assignable := false
@@ -265,6 +286,12 @@ func verifySetting(option string, value interface{}, def interface{}) error {
 	}
 	if !assignable {
 		return fmt.Errorf("Error: setting '%s' has incorrect type (%s), using default value: %v (%s)", option, valType, def, defType)
+	}
+
+	if option == "colorscheme" {
+		// Plugins are not initialized yet, so do not verify if the colorscheme
+		// exists yet, since the colorscheme may be added by a plugin later.
+		return nil
 	}
 
 	if err := OptionIsValid(option, value); err != nil {
@@ -288,22 +315,32 @@ func InitGlobalSettings() error {
 	return err
 }
 
-// InitLocalSettings scans the json in settings.json and sets the options locally based
-// on whether the filetype or path matches ft or glob local settings
+// UpdatePathGlobLocals scans the already parsed settings and sets the options locally
+// based on whether the path matches a glob
 // Must be called after ReadSettings
-func InitLocalSettings(settings map[string]interface{}, path string) {
+func UpdatePathGlobLocals(settings map[string]any, path string) {
 	for k, v := range parsedSettings {
-		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
-			if strings.HasPrefix(k, "ft:") {
-				if settings["filetype"].(string) == k[3:] {
-					for k1, v1 := range v.(map[string]interface{}) {
-						settings[k1] = v1
-					}
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && strings.HasPrefix(k, "glob:") {
+			tk := strings.TrimPrefix(k, "glob:")
+			g, _ := glob.Compile(tk)
+			if g.MatchString(path) {
+				for k1, v1 := range v.(map[string]any) {
+					settings[k1] = v1
 				}
-			} else {
-				g, _ := glob.Compile(k)
-				if g.MatchString(path) {
-					for k1, v1 := range v.(map[string]interface{}) {
+			}
+		}
+	}
+}
+
+// UpdateFileTypeLocals scans the already parsed settings and sets the options locally
+// based on whether the filetype matches to "ft:"
+// Must be called after ReadSettings
+func UpdateFileTypeLocals(settings map[string]any, filetype string) {
+	for k, v := range parsedSettings {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && strings.HasPrefix(k, "ft:") {
+			if filetype == k[3:] {
+				for k1, v1 := range v.(map[string]any) {
+					if k1 != "filetype" {
 						settings[k1] = v1
 					}
 				}
@@ -347,7 +384,8 @@ func WriteSettings(filename string) error {
 		}
 
 		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }
@@ -355,7 +393,7 @@ func WriteSettings(filename string) error {
 // OverwriteSettings writes the current settings to settings.json and
 // resets any user configuration of local settings present in settings.json
 func OverwriteSettings(filename string) error {
-	settings := make(map[string]interface{})
+	settings := make(map[string]any)
 
 	var err error
 	if _, e := os.Stat(ConfigDir); e == nil {
@@ -368,24 +406,25 @@ func OverwriteSettings(filename string) error {
 			}
 		}
 
-		txt, _ := json.MarshalIndent(settings, "", "    ")
-		err = ioutil.WriteFile(filename, append(txt, '\n'), 0644)
+		txt, _ := json.MarshalIndent(parsedSettings, "", "    ")
+		txt = append(txt, '\n')
+		err = writeFile(filename, txt)
 	}
 	return err
 }
 
 // RegisterCommonOptionPlug creates a new option (called pl.name). This is meant to be called by plugins to add options.
-func RegisterCommonOptionPlug(pl string, name string, defaultvalue interface{}) error {
+func RegisterCommonOptionPlug(pl string, name string, defaultvalue any) error {
 	return RegisterCommonOption(pl+"."+name, defaultvalue)
 }
 
 // RegisterGlobalOptionPlug creates a new global-only option (named pl.name)
-func RegisterGlobalOptionPlug(pl string, name string, defaultvalue interface{}) error {
+func RegisterGlobalOptionPlug(pl string, name string, defaultvalue any) error {
 	return RegisterGlobalOption(pl+"."+name, defaultvalue)
 }
 
 // RegisterCommonOption creates a new option
-func RegisterCommonOption(name string, defaultvalue interface{}) error {
+func RegisterCommonOption(name string, defaultvalue any) error {
 	if _, ok := GlobalSettings[name]; !ok {
 		GlobalSettings[name] = defaultvalue
 	}
@@ -394,7 +433,7 @@ func RegisterCommonOption(name string, defaultvalue interface{}) error {
 }
 
 // RegisterGlobalOption creates a new global-only option
-func RegisterGlobalOption(name string, defaultvalue interface{}) error {
+func RegisterGlobalOption(name string, defaultvalue any) error {
 	if _, ok := GlobalSettings[name]; !ok {
 		GlobalSettings[name] = defaultvalue
 	}
@@ -403,7 +442,7 @@ func RegisterGlobalOption(name string, defaultvalue interface{}) error {
 }
 
 // GetGlobalOption returns the global value of the given option
-func GetGlobalOption(name string) interface{} {
+func GetGlobalOption(name string) any {
 	return GlobalSettings[name]
 }
 
@@ -412,6 +451,15 @@ func defaultFileFormat() string {
 		return "dos"
 	}
 	return "unix"
+}
+
+func defaultFakeCursor() bool {
+	_, wt := os.LookupEnv("WT_SESSION")
+	if runtime.GOOS == "windows" && !wt {
+		// enabled for windows consoles where the cursor is slow
+		return true
+	}
+	return false
 }
 
 func GetInfoBarOffset() int {
@@ -427,8 +475,8 @@ func GetInfoBarOffset() int {
 
 // DefaultCommonSettings returns a map of all common buffer settings
 // and their default values
-func DefaultCommonSettings() map[string]interface{} {
-	commonsettings := make(map[string]interface{})
+func DefaultCommonSettings() map[string]any {
+	commonsettings := make(map[string]any)
 	for k, v := range defaultCommonSettings {
 		commonsettings[k] = v
 	}
@@ -437,8 +485,8 @@ func DefaultCommonSettings() map[string]interface{} {
 
 // DefaultAllSettings returns a map of all common buffer & global-only settings
 // and their default values
-func DefaultAllSettings() map[string]interface{} {
-	allsettings := make(map[string]interface{})
+func DefaultAllSettings() map[string]any {
+	allsettings := make(map[string]any)
 	for k, v := range defaultCommonSettings {
 		allsettings[k] = v
 	}
@@ -449,32 +497,34 @@ func DefaultAllSettings() map[string]interface{} {
 }
 
 // GetNativeValue parses and validates a value for a given option
-func GetNativeValue(option string, realValue interface{}, value string) (interface{}, error) {
-	var native interface{}
-	kind := reflect.TypeOf(realValue).Kind()
-	if kind == reflect.Bool {
+func GetNativeValue(option, value string) (any, error) {
+	curVal := GetGlobalOption(option)
+	if curVal == nil {
+		return nil, ErrInvalidOption
+	}
+
+	switch kind := reflect.TypeOf(curVal).Kind(); kind {
+	case reflect.Bool:
 		b, err := util.ParseBool(value)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
-		native = b
-	} else if kind == reflect.String {
-		native = value
-	} else if kind == reflect.Float64 {
+		return b, nil
+	case reflect.String:
+		return value, nil
+	case reflect.Float64:
 		f, err := strconv.ParseFloat(value, 64)
 		if err != nil {
 			return nil, ErrInvalidValue
 		}
-		native = f
-	} else {
+		return f, nil
+	default:
 		return nil, ErrInvalidValue
 	}
-
-	return native, nil
 }
 
 // OptionIsValid checks if a value is valid for a certain option
-func OptionIsValid(option string, value interface{}) error {
+func OptionIsValid(option string, value any) error {
 	if validator, ok := optionValidators[option]; ok {
 		return validator(option, value)
 	}
@@ -484,7 +534,7 @@ func OptionIsValid(option string, value interface{}) error {
 
 // Option validators
 
-func validatePositiveValue(option string, value interface{}) error {
+func validatePositiveValue(option string, value any) error {
 	nativeValue, ok := value.(float64)
 
 	if !ok {
@@ -498,7 +548,7 @@ func validatePositiveValue(option string, value interface{}) error {
 	return nil
 }
 
-func validateNonNegativeValue(option string, value interface{}) error {
+func validateNonNegativeValue(option string, value any) error {
 	nativeValue, ok := value.(float64)
 
 	if !ok {
@@ -512,7 +562,7 @@ func validateNonNegativeValue(option string, value interface{}) error {
 	return nil
 }
 
-func validateChoice(option string, value interface{}) error {
+func validateChoice(option string, value any) error {
 	if choices, ok := OptionChoices[option]; ok {
 		val, ok := value.(string)
 		if !ok {
@@ -532,7 +582,7 @@ func validateChoice(option string, value interface{}) error {
 	return errors.New("Option has no pre-defined choices")
 }
 
-func validateColorscheme(option string, value interface{}) error {
+func validateColorscheme(option string, value any) error {
 	colorscheme, ok := value.(string)
 
 	if !ok {
@@ -546,7 +596,7 @@ func validateColorscheme(option string, value interface{}) error {
 	return nil
 }
 
-func validateEncoding(option string, value interface{}) error {
+func validateEncoding(option string, value any) error {
 	_, err := htmlindex.Get(value.(string))
 	return err
 }

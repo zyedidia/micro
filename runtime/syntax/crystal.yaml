@@ -27,10 +27,12 @@ rules:
     - constant.string:
         start: "`"
         end: "`"
+        rules: []
 
     - constant.string:
         start: "%x\\{"
         end: "\\}"
+        rules: []
 
     - constant.string:
         start: "\""
@@ -66,4 +68,5 @@ rules:
     - constant:
         start: "<<-?'?EOT'?"
         end: "^EOT"
+        rules: []
 

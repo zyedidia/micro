@@ -1,0 +1,87 @@
+filetype: B
+
+detect:
+    filename: '\.b$'
+    # core control words + storage classes (Thompson B-ish)
+    signature: '\b(if|else|while|switch|case|default|break|return|goto|extrn|auto)\b'
+
+rules:
+    # -------------------------
+    # Comments (B: /* ... */)
+    # -------------------------
+    - comment:
+        start: '/\*'
+        end: '\*/'
+        rules: []
+
+    # Optional: // line comments (convenient, not “original” B)
+    - comment:
+        start: '//'
+        end: '$'
+        rules: []
+
+    # -------------------------
+    # Strings + escapes
+    # -------------------------
+    - constant.string:
+        start: '"'
+        end: '"'
+        skip: '\\\\.'
+        rules:
+            # common escapes: \n \t \e \r \0 \" \\ \( \) \*
+            - constant.specialChar: '\\\\([0netr"\\\\\\*\\(\\)])'
+            # printf-ish: %s %c %d %o and %%
+            - constant.specialChar: '%(%|[scdo])'
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: '\\\\.'
+        rules:
+            - constant.specialChar: '\\\\([0netr"\\\\\\*\\(\\)])'
+            - constant.specialChar: '%(%|[scdo])'
+
+    # -------------------------
+    # Numbers
+    # (leading 0 commonly used for octal constants)
+    # -------------------------
+    - constant.number: '\b0[0-7]+\b'
+    - constant.number: '\b[0-9]+\b'
+
+    # -------------------------
+    # Keywords / storage (keep tight + old-school)
+    # -------------------------
+    - statement: '\b(if|else|while|switch|case|default|break|return|goto)\b'
+    - type: '\b(extrn|auto)\b'
+
+    # -------------------------
+    # Common B library calls (/etc/libb.a era list)
+    # -------------------------
+    - constant.builtin: '\b(char|getchr|putchr|exit|printf|seek|setuid|stat|time|unlink|wait|lchar|chdir|chmod|chown|close|creat|execl|execv|fork|fstat|getuid|intr|link|makdir|open|read|write|ctime)\b'
+
+    # -------------------------
+    # Labels and function-ish identifiers
+    # -------------------------
+    # label (often at bol)
+    - identifier: '^\s*[_A-Za-z][_A-Za-z0-9]*\s*:'
+    # function call/def name before '('
+    - identifier: '\b[_A-Za-z][_A-Za-z0-9]*\s*\('
+
+    # -------------------------
+    # Operators (order matters: longer first)
+    # Thompson-ish assignment operators in B are =+, =-, =*, =/, =%, =<<, =>>, =& , =|
+    # -------------------------
+    - symbol.operator: '(=<<|=>>|=\+|=-|=\*|=/|=%|=&|=\|)'
+    - symbol.operator: '(==|!=|<=|>=|<<|>>)'
+    - symbol.operator: '(\+\+|--|\*\*)'
+    - symbol.operator: '[-+*/%&|^~!=<>?:=]'
+
+    # -------------------------
+    # Brackets
+    # -------------------------
+    - symbol.brackets: '[(){}\[\]]'
+
+    # -------------------------
+    # Identifiers / variables (last so keywords win)
+    # -------------------------
+    - identifier: '\b[_A-Za-z][_A-Za-z0-9]*\b'

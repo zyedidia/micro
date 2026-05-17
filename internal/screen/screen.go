@@ -6,8 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/zyedidia/micro/v2/internal/config"
-	"github.com/zyedidia/micro/v2/internal/util"
+	"github.com/micro-editor/micro/v2/internal/config"
 	"github.com/micro-editor/tcell/v2"
 )
 
@@ -90,7 +89,7 @@ func ShowFakeCursor(x, y int) {
 }
 
 func UseFake() bool {
-	return util.FakeCursor || config.GetGlobalOption("fakecursor").(bool)
+	return config.GetGlobalOption("fakecursor").(bool)
 }
 
 // ShowFakeCursorMulti is the same as ShowFakeCursor except it does not
@@ -184,10 +183,13 @@ func Init() error {
 	drawChan = make(chan bool, 8)
 
 	// Should we enable true color?
-	truecolor := os.Getenv("MICRO_TRUECOLOR") == "1"
-
-	if !truecolor {
+	truecolor := config.GetGlobalOption("truecolor").(string)
+	if truecolor == "on" || (truecolor == "auto" && os.Getenv("MICRO_TRUECOLOR") == "1") {
+		os.Setenv("TCELL_TRUECOLOR", "enable")
+	} else if truecolor == "off" {
 		os.Setenv("TCELL_TRUECOLOR", "disable")
+	} else {
+		// For "auto", tcell already autodetects truecolor by default
 	}
 
 	var oldTerm string

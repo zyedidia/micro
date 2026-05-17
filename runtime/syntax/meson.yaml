@@ -1,0 +1,51 @@
+filetype: meson
+
+detect:
+    filename: "(meson\\.build|meson_options\\.txt|meson\\.options)"
+
+rules:
+
+    # refer to https://mesonbuild.com/Syntax.html
+
+    - statement: "\\b(elif|else|if|endif)\\b"
+    - statement: "\\b(foreach|endforeach)\\b"
+    - statement: "\\b(continue|break)\\b"
+    - statement: "\\b(and|not|or|in)\\b"
+
+    - symbol.operator: "[<>?:+*/-]|[+!<>=]?="
+    - symbol.brackets: "[(){}\\[\\]]"
+
+    - constant.number: "\\b(0|[1-9][0-9]*)\\b"  # decimal
+    - constant.number: "\\b(0b[01]+)\\b"        # bin
+    - constant.number: "\\b(0o[0-7]+)\\b"       # oct
+    - constant.number: "\\b(0x[0-9a-fA-F]+)\\b" # hex
+
+    # meson builtins
+    - identifier: "\\b(add_global_arguments|add_global_link_arguments|add_languages|add_project_arguments|add_project_dependencies)\\b"
+    - identifier: "\\b(add_project_link_arguments|add_test_setup|alias_target|assert|benchmark|both_libraries|build_machine|build_target|configuration_data)\\b"
+    - identifier: "\\b(configure_file|custom_target|debug|declare_dependency|dependency|disabler|environment|error|executable|files)\\b"
+    - identifier: "\\b(find_program|generator|get_option|get_variable|host_machine|import|include_directories|install_data|install_emptydir)\\b"
+    - identifier: "\\b(install_headers|install_man|install_subdir|install_symlink|is_disabler|is_variable|jar|join_paths|library|meson)\\b"
+    - identifier: "\\b(message|option|project|range|run_command|run_target|set_variable|shared_library|shared_module|static_library)\\b"
+    - identifier: "\\b(structured_sources|subdir|subdir_done|subproject|summary|target_machine|test|unset_variable|vcs_tag|warning)\\b"
+
+    - constant.bool: "\\b(true|false)\\b"
+
+    - comment:
+        start: "#"
+        end: "$"
+        rules: []
+
+    # multiline strings do not support escape sequences
+    - constant.string:
+        start: "'''"
+        end: "'''"
+        rules: []
+
+    - constant.string:
+        start: "'"
+        end: "'"
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\[abfnrtv\\\\']"
+            - constant.specialChar: "\\\\([0-7]{1,3}|x[0-9a-fA-F]{2}|u[0-9a-fA-F]{4}|U[0-9a-fA-F]{8}|N\\{[^\\}]+\\})"

@@ -413,7 +413,7 @@ func (n *Node) HSplit(bottom bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.Kind == STUndef {
+	if n.parent == nil {
 		n.Kind = STVert
 	}
 	if n.Kind == STVert {
@@ -429,21 +429,22 @@ func (n *Node) VSplit(right bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.Kind == STUndef {
+	if n.parent == nil {
 		n.Kind = STHoriz
 	}
-	if n.Kind == STVert {
-		return n.vVSplit(right)
+	if n.Kind == STHoriz {
+		return n.hVSplit(0, right)
 	}
-	return n.hVSplit(0, right)
+	return n.vVSplit(right)
 }
 
 // unsplits the child of a split
-func (n *Node) unsplit(i int, h bool) {
+func (n *Node) unsplit(i int) {
 	copy(n.children[i:], n.children[i+1:])
 	n.children[len(n.children)-1] = nil
 	n.children = n.children[:len(n.children)-1]
 
+	h := n.Kind == STVert
 	nonrs, numr := n.getResizeInfo(h)
 	if numr == 0 {
 		// This means that this was the last child
@@ -470,27 +471,92 @@ func (n *Node) Unsplit() bool {
 			ind = i
 		}
 	}
-	if n.parent.Kind == STVert {
-		n.parent.unsplit(ind, true)
-	} else {
-		n.parent.unsplit(ind, false)
-	}
-
+	n.parent.unsplit(ind)
 	if n.parent.IsLeaf() {
 		return n.parent.Unsplit()
 	}
+
+	n.parent.flatten()
 	return true
+}
+
+// flattens the tree by removing unnecessary intermediate parents that have only one child
+// and handles the side effect of it
+func (n *Node) flatten() {
+	if len(n.children) != 1 {
+		return
+	}
+
+	// Special case for root node
+	if n.parent == nil {
+		*n = *n.children[0]
+		n.parent = nil
+		for _, c := range n.children {
+			c.parent = n
+		}
+		if len(n.children) == 0 {
+			n.Kind = STUndef
+		}
+		return
+	}
+
+	ind := 0
+	for i, c := range n.parent.children {
+		if c.id == n.id {
+			ind = i
+		}
+	}
+
+	// Replace current node with its child node to remove chained parent
+	successor := n.children[0]
+	n.parent.children[ind] = successor
+	successor.parent = n.parent
+
+	// Maintain the tree in a consistent state: any child node's kind (horiz vs vert)
+	// should be the opposite of its parent's kind.
+	if successor.IsLeaf() {
+		successor.Kind = n.Kind
+	} else {
+		// If the successor node has children, that means it is a chained parent as well.
+		// Therefore it can be replaced by its own children.
+		origsize := len(n.parent.children)
+
+		// Let's say we have 5 children and want to replace [2] with its children [a] [b] [c]
+		// [0] [1] [2] [3] [4] --> [0] [1] [a] [b] [c] [3] [4]
+		// insertcount will be `3 - 1 = 2` in this case
+		insertcount := len(successor.children) - 1
+
+		n.parent.children = append(n.parent.children, make([]*Node, insertcount)...)
+		copy(n.parent.children[ind+insertcount+1:], n.parent.children[ind+1:origsize])
+		copy(n.parent.children[ind:], successor.children)
+
+		for i := 0; i < len(successor.children); i++ {
+			n.parent.children[ind+i].parent = n.parent
+		}
+	}
+
+	// Update propW and propH since the parent of the children has been updated,
+	// so the children have new siblings
+	n.parent.markSizes()
 }
 
 // String returns the string form of the node and all children (used for debugging)
 func (n *Node) String() string {
 	var strf func(n *Node, ident int) string
 	strf = func(n *Node, ident int) string {
-		marker := "|"
+		marker := ""
 		if n.Kind == STHoriz {
 			marker = "-"
+		} else if n.Kind == STVert {
+			marker = "|"
 		}
-		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id)
+
+		var parentId uint64 = 0
+		if n.parent != nil {
+			parentId = n.parent.id
+		}
+
+		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id, parentId)
 		if n.IsLeaf() {
 			str += "🍁"
 		}

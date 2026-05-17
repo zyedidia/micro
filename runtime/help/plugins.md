@@ -57,8 +57,6 @@ that micro defines:
 
 * `deinit()`: cleanup function called when your plugin is unloaded or reloaded.
 
-* `onSetActive(bufpane)`: runs when changing the currently active panel.
-
 * `onBufferOpen(buf)`: runs when a buffer is opened. The input contains
    the buffer object.
 
@@ -73,12 +71,23 @@ that micro defines:
 
 * `onAction(bufpane)`: runs when `Action` is triggered by the user, where
    `Action` is a bindable action (see `> help keybindings`). A bufpane
-   is passed as input and the function should return a boolean defining
-   whether the view should be relocated after this action is performed.
+   is passed as input. The function should return a boolean defining
+   whether the action was successful, which is used when the action is
+   chained with other actions (see `> help keybindings`) to determine whether
+   the next actions in the chain should be executed or not.
+
+   If the action is a mouse action, e.g. `MousePress`, the mouse event info
+   is passed to the callback as an extra argument of type `*tcell.EventMouse`.
+   See https://pkg.go.dev/github.com/micro-editor/tcell/v2#EventMouse for the
+   description of this type and its methods.
 
 * `preAction(bufpane)`: runs immediately before `Action` is triggered
    by the user. Returns a boolean which defines whether the action should
    be canceled.
+
+   Similarly to `onAction`, if the action is a mouse action, the mouse event
+   info is passed to the callback as an extra argument of type
+   `*tcell.EventMouse`.
 
 * `onRune(bufpane, rune)`: runs when the composed rune has been inserted
 
@@ -103,9 +112,6 @@ within. This is almost always the current bufpane.
 
 All available actions are listed in the keybindings section of the help.
 
-These functions should also return a boolean specifying whether the bufpane
-should be relocated to the cursor or not after the action is complete.
-
 ## Accessing micro functions
 
 Some of micro's internal information is exposed in the form of packages, which
@@ -120,7 +126,7 @@ micro.Log("Hello")
 The packages and their contents are listed below (in Go type signatures):
 
 * `micro`
-    - `TermMessage(msg interface{}...)`: temporarily close micro and print a
+    - `TermMessage(msg any...)`: temporarily close micro and print a
        message
 
     - `TermError(filename string, lineNum int, err string)`: temporarily close
@@ -128,7 +134,7 @@ The packages and their contents are listed below (in Go type signatures):
 
     - `InfoBar() *InfoPane`: return the infobar BufPane object.
 
-    - `Log(msg interface{}...)`: write a message to `log.txt` (requires
+    - `Log(msg any...)`: write a message to `log.txt` (requires
        `-debug` flag, or binary built with `build-dbg`).
 
     - `SetStatusInfoFn(fn string)`: register the given lua function as
@@ -147,11 +153,10 @@ The packages and their contents are listed below (in Go type signatures):
 
     Relevant links:
     [Time](https://pkg.go.dev/time#Duration)
-    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
-    [InfoPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#InfoPane)
-    [Tab](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#Tab)
-    [TabList](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#TabList)
-    [interface{} / any](https://go.dev/tour/methods/14)
+    [BufPane](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#BufPane)
+    [InfoPane](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#InfoPane)
+    [Tab](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#Tab)
+    [TabList](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#TabList)
 
 * `micro/config`
     - `MakeCommand(name string, action func(bp *BufPane, args[]string),
@@ -169,11 +174,12 @@ The packages and their contents are listed below (in Go type signatures):
        values afterwards
     - `NoComplete`: no autocompletion suggestions
 
-    - `TryBindKey(k, v string, overwrite bool) (bool, error)`: bind the key
-       `k` to the string `v` in the `bindings.json` file.  If `overwrite` is
-       true, this will overwrite any existing binding to key `k`. Returns true
-       if the binding was made, and a possible error (for example writing to
-       `bindings.json` can cause an error).
+    - `TryBindKey(k, v string, overwrite bool) (bool, error)`:
+       bind the key `k` to the string `v`. If `overwrite` is true, this will
+       overwrite any existing binding to key `k`.
+       Returns true if the binding was made, and a possible error.
+       This operation can be rejected by `lockbindings` to prevent undesired
+       actions by the user.
 
     - `Reload()`: reload configuration files.
 
@@ -204,26 +210,26 @@ The packages and their contents are listed below (in Go type signatures):
     - `RTHelp`: runtime files for help documents.
     - `RTPlugin`: runtime files for plugin source code.
 
-    - `RegisterCommonOption(pl string, name string, defaultvalue interface{})`:
+    - `RegisterCommonOption(pl string, name string, defaultvalue any)`:
        registers a new option for the given plugin. The name of the
        option will be `pl.name`, and will have the given default value. Since
        this registers a common option, the option will be modifiable on a
        per-buffer basis, while also having a global value (in the
        GlobalSettings map).
 
-    - `RegisterGlobalOption(pl string, name string, defaultvalue interface{})`:
+    - `RegisterGlobalOption(pl string, name string, defaultvalue any)`:
        same as `RegisterCommonOption`, but the option cannot be modified
        locally to each buffer.
 
-    - `GetGlobalOption(name string) interface{}`: returns the value of a
+    - `GetGlobalOption(name string) any`: returns the value of a
        given plugin in the `GlobalSettings` map.
 
     - `SetGlobalOption(option, value string) error`: sets an option to a
-       given value. Same as using the `> set` command. This will try to convert
-       the value into the proper type for the option. Can return an error if the
-       option name is not valid, or the value can not be converted.
+       given value. This will try to convert the value into the proper
+       type for the option. Can return an error if the option name is not
+       valid, or the value can not be converted.
 
-    - `SetGlobalOptionNative(option string, value interface{}) error`: sets
+    - `SetGlobalOptionNative(option string, value any) error`: sets
        an option to a given value, where the type of value is the actual
        type of the value internally. Can return an error if the provided value
        is not valid for the given option.
@@ -231,10 +237,9 @@ The packages and their contents are listed below (in Go type signatures):
     - `ConfigDir`: the path to micro's currently active config directory.
 
     Relevant links:
-    [Buffer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Buffer)
-    [buffer.Completer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Completer)
+    [Buffer](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Buffer)
+    [buffer.Completer](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Completer)
     [Error](https://pkg.go.dev/builtin#error)
-    [interface{} / any](https://go.dev/tour/methods/14)
     [filepath.Match](https://pkg.go.dev/path/filepath#Match)
 
 * `micro/shell`
@@ -260,7 +265,7 @@ The packages and their contents are listed below (in Go type signatures):
        stdout from the command to the returned string.
 
     - `JobStart(cmd string, onStdout, onStderr,
-                onExit func(string, []interface{}), userargs ...interface{})
+                onExit func(string, []any), userargs ...any)
                 *exec.Cmd`:
        Starts a background job by running the shell on the given command
        (using `sh -c`). Three callbacks can be provided which will be called
@@ -269,7 +274,7 @@ The packages and their contents are listed below (in Go type signatures):
        argument of the callback. Returns the started command.
 
     - `JobSpawn(cmd string, cmdArgs []string, onStdout, onStderr,
-                onExit func(string, []interface{}), userargs ...interface{})
+                onExit func(string, []any), userargs ...any)
                 *exec.Cmd`:
        same as `JobStart`, except doesn't run the command through the shell
        and instead takes as inputs the list of arguments. Returns the started
@@ -279,8 +284,8 @@ The packages and their contents are listed below (in Go type signatures):
     - `JobSend(cmd *exec.Cmd, data string)`: sends some data to a job's stdin.
 
     - `RunTermEmulator(h *BufPane, input string, wait bool, getOutput bool,
-                       callback func(out string, userargs []interface{}),
-                       userargs []interface{}) error`:
+                       callback func(out string, userargs []any),
+                       userargs []any) error`:
        starts a terminal emulator from a given BufPane with the input command.
        If `wait` is true, it will wait for the user to exit by pressing enter
        once the executable has terminated, and if `getOutput` is true, it will
@@ -299,7 +304,7 @@ The packages and their contents are listed below (in Go type signatures):
 
     Relevant links:
     [Cmd](https://pkg.go.dev/os/exec#Cmd)
-    [BufPane](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/action#BufPane)
+    [BufPane](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/action#BufPane)
     [Error](https://pkg.go.dev/builtin#error)
 
 * `micro/buffer`
@@ -340,10 +345,10 @@ The packages and their contents are listed below (in Go type signatures):
     - `LogBuf() *Buffer`: returns the log buffer.
 
     Relevant links:
-    [Message](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Message)
-    [Loc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Loc)
-    [display.SLoc](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/display#SLoc)
-    [Buffer](https://pkg.go.dev/github.com/zyedidia/micro/v2/internal/buffer#Buffer)
+    [Message](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Message)
+    [Loc](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Loc)
+    [display.SLoc](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/display#SLoc)
+    [Buffer](https://pkg.go.dev/github.com/micro-editor/micro/v2/internal/buffer#Buffer)
     [Error](https://pkg.go.dev/builtin#error)
 
 * `micro/util`
@@ -354,7 +359,6 @@ The packages and their contents are listed below (in Go type signatures):
     - `IsWordChar(s string) bool`: returns true if the first rune in a
        string is a word character.
     - `String(b []byte) string`: converts a byte array to a string.
-    - `RuneStr(r rune) string`: converts a rune to a string.
     - `Unzip(src, dest string) error`: unzips a file to given folder.
     - `Version`: micro's version number or commit hash
     - `SemVersion`: micro's semantic version
@@ -372,7 +376,7 @@ returned by the functions have many methods. The Lua plugin may access any
 public methods of an object returned by any of the functions above.
 Unfortunately, it is not possible to list all the available functions on this
 page. Please go to the internal documentation at
-https://pkg.go.dev/github.com/zyedidia/micro/v2/internal to see the full list
+https://pkg.go.dev/github.com/micro-editor/micro/v2/internal to see the full list
 of available methods. Note that only methods of types that are available to
 plugins via the functions above can be called from a plugin. For an even more
 detailed reference, see the source code on Github.
@@ -504,8 +508,8 @@ Micro also has a built in plugin manager, which you can invoke with the
 For the valid commands you can use, see the `commands` help topic.
 
 The manager fetches plugins from the channels (which is simply a list of plugin
-metadata) which it knows about. By default, micro only knows about the official
-channel which is located at github.com/micro-editor/plugin-channel but you can
+metadata) which it knows about. By default, micro only knows about the [official
+channel](https://github.com/micro-editor/plugin-channel) but you can
 add your own third-party channels using the `pluginchannels` option and you can
 directly link third-party plugins to allow installation through the plugin
 manager with the `pluginrepos` option.
@@ -532,9 +536,9 @@ This file will contain the metadata for your plugin. Here is an example:
 }]
 ```
 
-Then open a pull request at github.com/micro-editor/plugin-channel, adding a
-link to the raw `repo.json` that is in your plugin repository.
+Then open a pull request at the [official plugin channel](https://github.com/micro-editor/plugin-channel),
+adding a link to the raw `repo.json` that is in your plugin repository.
 
 To make updating the plugin work, the first line of your plugin's lua code
 should contain the version of the plugin. (Like this: `VERSION = "1.0.0"`)
-Please make sure to use [semver](http://semver.org/) for versioning.
+Please make sure to use [semver](https://semver.org/) for versioning.

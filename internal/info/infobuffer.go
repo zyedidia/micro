@@ -3,7 +3,7 @@ package info
 import (
 	"fmt"
 
-	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/buffer"
 )
 
 // The InfoBuf displays messages and other info at the bottom of the screen.
@@ -55,7 +55,7 @@ func (i *InfoBuf) Close() {
 }
 
 // Message sends a message to the user
-func (i *InfoBuf) Message(msg ...interface{}) {
+func (i *InfoBuf) Message(msg ...any) {
 	// only display a new message if there isn't an active prompt
 	// this is to prevent overwriting an existing prompt to the user
 	if !i.HasPrompt {
@@ -67,7 +67,7 @@ func (i *InfoBuf) Message(msg ...interface{}) {
 }
 
 // GutterMessage displays a message and marks it as a gutter message
-func (i *InfoBuf) GutterMessage(msg ...interface{}) {
+func (i *InfoBuf) GutterMessage(msg ...any) {
 	i.Message(msg...)
 	i.HasGutter = true
 }
@@ -79,7 +79,7 @@ func (i *InfoBuf) ClearGutter() {
 }
 
 // Error sends an error message to the user
-func (i *InfoBuf) Error(msg ...interface{}) {
+func (i *InfoBuf) Error(msg ...any) {
 	// only display a new message if there isn't an active prompt
 	// this is to prevent overwriting an existing prompt to the user
 	if !i.HasPrompt {

@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"reflect"
 
-	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/display"
+	"github.com/micro-editor/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/display"
 	"github.com/micro-editor/tcell/v2"
 )
 
@@ -22,7 +22,10 @@ func NewRawPaneFromWin(b *buffer.Buffer, win display.BWindow, tab *Tab) *RawPane
 
 func NewRawPane(tab *Tab) *RawPane {
 	b := buffer.NewBufferFromString("", "", buffer.BTRaw)
+	b.SetName("Raw event viewer")
+
 	w := display.NewBufWindow(0, 0, 0, 0, b)
+
 	return NewRawPaneFromWin(b, w, tab)
 }
 

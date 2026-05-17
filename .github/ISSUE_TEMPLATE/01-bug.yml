@@ -1,0 +1,25 @@
+name: Bug Report
+description: File a bug report.
+title: "<title>"
+labels: ["bug", "triage"]
+body:
+- type: textarea
+  attributes:
+    label: Description
+    description: Description of the problem and steps to reproduce.
+  validations:
+    required: true
+- type: textarea
+  attributes:
+    label: Environment
+    description: |
+      examples:
+        - **Version**: 2.0.15 and/or commit hash ($ micro -version)
+        - **OS**: Debian
+        - **Terminal**: ptyxis
+    value: |
+        - Version:
+        - OS:
+        - Terminal:
+  validations:
+    required: true

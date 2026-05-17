@@ -54,7 +54,7 @@ type HeaderYaml struct {
 
 type File struct {
 	FileType string
-	yamlSrc  map[interface{}]interface{}
+	yamlSrc  map[any]any
 }
 
 // A Pattern is one simple syntax rule
@@ -197,7 +197,7 @@ func ParseFile(input []byte) (f *File, err error) {
 		}
 	}()
 
-	var rules map[interface{}]interface{}
+	var rules map[any]any
 	if err = yaml.Unmarshal(input, &rules); err != nil {
 		return nil, err
 	}
@@ -245,7 +245,7 @@ func ParseDef(f *File, header *Header) (s *Def, err error) {
 
 	for k, v := range src {
 		if k == "rules" {
-			inputRules := v.([]interface{})
+			inputRules := v.([]any)
 
 			rules, err := parseRules(inputRules, nil)
 			if err != nil {
@@ -336,7 +336,7 @@ func resolveIncludesInRegion(files []*File, region *region) {
 	}
 }
 
-func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
+func parseRules(input []any, curRegion *region) (ru *rules, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -349,7 +349,7 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 	ru = new(rules)
 
 	for _, v := range input {
-		rule := v.(map[interface{}]interface{})
+		rule := v.(map[any]any)
 		for k, val := range rule {
 			group := k
 
@@ -376,7 +376,7 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 					groupNum := Groups[groupStr]
 					ru.patterns = append(ru.patterns, &pattern{groupNum, r})
 				}
-			case map[interface{}]interface{}:
+			case map[any]any:
 				// region
 				region, err := parseRegion(group.(string), object, curRegion)
 				if err != nil {
@@ -392,7 +392,7 @@ func parseRules(input []interface{}, curRegion *region) (ru *rules, err error) {
 	return ru, nil
 }
 
-func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegion *region) (r *region, err error) {
+func parseRegion(group string, regionInfo map[any]any, prevRegion *region) (r *region, err error) {
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -478,7 +478,7 @@ func parseRegion(group string, regionInfo map[interface{}]interface{}, prevRegio
 
 	// rules are optional
 	if rules, ok := regionInfo["rules"]; ok {
-		r.rules, err = parseRules(rules.([]interface{}), r)
+		r.rules, err = parseRules(rules.([]any), r)
 		if err != nil {
 			return nil, err
 		}

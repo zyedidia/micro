@@ -1,0 +1,11 @@
+name: Feature Request
+description: File a feature request.
+title: "<title>"
+labels: ["feature"]
+body:
+- type: textarea
+  attributes:
+    label: Description
+    description: Description of the feature.
+  validations:
+    required: true

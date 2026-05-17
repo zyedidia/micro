@@ -25,6 +25,7 @@
 		<category>TextEditor</category>
 	</categories>
 	<releases>
+			<release version="2.0.15" date="2025-12-31"/>
 			<release version="2.0.14" date="2024-08-27"/>
 			<release version="2.0.13" date="2023-10-22"/>
 			<release version="2.0.12" date="2023-09-06"/>
@@ -38,15 +39,15 @@
 	<screenshots>
 		<screenshot type="default">
 			<caption>Micro Text Editor editing its source code</caption>
-			<image type="source">https://raw.githubusercontent.com/zyedidia/micro/master/assets/micro-solarized.png</image>
+			<image type="source">https://raw.githubusercontent.com/micro-editor/micro/master/assets/micro-solarized.png</image>
 		</screenshot>
 	</screenshots>
 	<content_rating type="oars-1.1" />
 	<url type="homepage">https://micro-editor.github.io</url>
-	<url type="bugtracker">https://github.com/zyedidia/micro/issues</url>
+	<url type="bugtracker">https://github.com/micro-editor/micro/issues</url>
 	<url type="faq">https://micro-editor.github.io/about.html</url>
 	<url type="help">https://micro-editor.github.io/about.html</url>
 	<url type="contact">https://github.com/zyedidia</url>
-	<url type="vcs-browser">https://github.com/zyedidia/micro</url>
-	<url type="contribute">https://github.com/zyedidia/micro#contributing</url>
+	<url type="vcs-browser">https://github.com/micro-editor/micro</url>
+	<url type="contribute">https://github.com/micro-editor/micro#contributing</url>
 </component>

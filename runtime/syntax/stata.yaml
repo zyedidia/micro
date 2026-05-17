@@ -11,6 +11,7 @@ rules:
             - identifier.macro:
                 start: "`"
                 end: "'"
+                rules: []
             - identifier.macro: "\\$\\w+"
             - constant.specialChar: "\\\\."
 
@@ -21,6 +22,7 @@ rules:
             - identifier.macro:
                 start: "`"
                 end: "'"
+                rules: []
             - identifier.macro: "\\$\\w+"
             - constant.specialChar: "\\\\."
 
@@ -44,6 +46,7 @@ rules:
     - identifier.macro:
         start: "`"
         end: "'"
+        rules: []
 
     - comment:
         start: "///?"

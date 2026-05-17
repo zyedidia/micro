@@ -6,8 +6,8 @@ HASH = $(shell git rev-parse --short HEAD)
 DATE = $(shell GOOS=$(shell go env GOHOSTOS) GOARCH=$(shell go env GOHOSTARCH) \
 	go run tools/build-date.go)
 GOBIN ?= $(shell go env GOPATH)/bin
-GOVARS = -X github.com/zyedidia/micro/v2/internal/util.Version=$(VERSION) -X github.com/zyedidia/micro/v2/internal/util.CommitHash=$(HASH) -X 'github.com/zyedidia/micro/v2/internal/util.CompileDate=$(DATE)'
-DEBUGVAR = -X github.com/zyedidia/micro/v2/internal/util.Debug=ON
+GOVARS = -X github.com/micro-editor/micro/v2/internal/util.Version=$(VERSION) -X github.com/micro-editor/micro/v2/internal/util.CommitHash=$(HASH) -X 'github.com/micro-editor/micro/v2/internal/util.CompileDate=$(DATE)'
+DEBUGVAR = -X github.com/micro-editor/micro/v2/internal/util.Debug=ON
 VSCODE_TESTS_BASE_URL = 'https://raw.githubusercontent.com/microsoft/vscode/e6a45f4242ebddb7aa9a229f85555e8a3bd987e2/src/vs/editor/test/common/model/'
 CGO_ENABLED := $(if $(CGO_ENABLED),$(CGO_ENABLED),0)
 

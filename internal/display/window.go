@@ -1,7 +1,7 @@
 package display
 
 import (
-	"github.com/zyedidia/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/buffer"
 )
 
 type View struct {

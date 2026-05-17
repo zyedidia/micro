@@ -1,7 +1,7 @@
 package action
 
 import (
-	"github.com/zyedidia/micro/v2/internal/display"
+	"github.com/micro-editor/micro/v2/internal/display"
 )
 
 // A Pane is a general interface for a window in the editor.

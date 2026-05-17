@@ -1,7 +1,7 @@
 filetype: nginx
 
 detect:
-    filename: "nginx.*\\.conf$|\\.nginx$"
+    filename: "nginx.*\\.conf$|\\.nginx$|\\.sub(domain|folder)\\.conf$"
     header: "^(server|upstream)[a-z ]*\\{$"
 
 rules:
@@ -15,6 +15,7 @@ rules:
     - constant.string:
         start: "'$"
         end: "';$"
+        rules: []
 
     - comment: "(^|[[:space:]])#([^{].*)?$"
     - indent-char.whitespace: "[[:space:]]+$"

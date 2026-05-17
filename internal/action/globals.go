@@ -1,6 +1,6 @@
 package action
 
-import "github.com/zyedidia/micro/v2/internal/buffer"
+import "github.com/micro-editor/micro/v2/internal/buffer"
 
 // InfoBar is the global info bar.
 var InfoBar *InfoPane
@@ -11,7 +11,8 @@ var LogBufPane *BufPane
 // InitGlobals initializes the log buffer and the info bar
 func InitGlobals() {
 	InfoBar = NewInfoBar()
-	buffer.LogBuf = buffer.NewBufferFromString("", "Log", buffer.BTLog)
+	buffer.LogBuf = buffer.NewBufferFromString("", "", buffer.BTLog)
+	buffer.LogBuf.SetName("Log")
 }
 
 // GetInfoBar returns the infobar pane

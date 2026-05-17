@@ -8,8 +8,10 @@ those options (`> help options`) for more information.
 
 This plugin provides functions that can be used in the status line format:
 
-* `status.branch`: returns the name of the current git branch.
-* `status.hash`: returns the hash of the current git commit.
+* `status.branch`: returns the name of the current git branch in the repository
+   where the file is located.
+* `status.hash`: returns the hash of the current git commit in the repository
+   where the file is located.
 * `status.paste`: returns "" if the paste option is disabled and "PASTE"
    if it is enabled.
 * `status.lines`: returns the number of lines in the buffer.

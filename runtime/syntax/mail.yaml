@@ -18,6 +18,8 @@ rules:
     - default:
         start: "^\\n\\n"
         end: ".*"
+        rules: []
     - comment:
         start: "^>.*"
         end: "$"
+        rules: []

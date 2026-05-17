@@ -10,12 +10,12 @@ import (
 	luar "layeh.com/gopher-luar"
 
 	runewidth "github.com/mattn/go-runewidth"
+	"github.com/micro-editor/micro/v2/internal/buffer"
+	"github.com/micro-editor/micro/v2/internal/config"
+	ulua "github.com/micro-editor/micro/v2/internal/lua"
+	"github.com/micro-editor/micro/v2/internal/screen"
+	"github.com/micro-editor/micro/v2/internal/util"
 	lua "github.com/yuin/gopher-lua"
-	"github.com/zyedidia/micro/v2/internal/buffer"
-	"github.com/zyedidia/micro/v2/internal/config"
-	ulua "github.com/zyedidia/micro/v2/internal/lua"
-	"github.com/zyedidia/micro/v2/internal/screen"
-	"github.com/zyedidia/micro/v2/internal/util"
 )
 
 // StatusLine represents the information line at the bottom
@@ -44,6 +44,12 @@ var statusInfo = map[string]func(*buffer.Buffer) string{
 		}
 		if b.Type.Readonly {
 			return "[ro] "
+		}
+		return ""
+	},
+	"overwrite": func(b *buffer.Buffer) string {
+		if b.OverwriteMode && !b.Type.Readonly {
+			return "[ovwr] "
 		}
 		return ""
 	},
@@ -90,7 +96,7 @@ func NewStatusLine(win *BufWindow) *StatusLine {
 }
 
 // FindOpt finds a given option in the current buffer's settings
-func (s *StatusLine) FindOpt(opt string) interface{} {
+func (s *StatusLine) FindOpt(opt string) any {
 	if val, ok := s.win.Buf.Settings[opt]; ok {
 		return val
 	}
@@ -146,7 +152,7 @@ func (s *StatusLine) Display() {
 		name := match[2 : len(match)-1]
 		if bytes.HasPrefix(name, []byte("opt")) {
 			option := name[4:]
-			return []byte(fmt.Sprint(s.FindOpt(string(option))))
+			return fmt.Append(nil, s.FindOpt(string(option)))
 		} else if bytes.HasPrefix(name, []byte("bind")) {
 			binding := string(name[5:])
 			for k, v := range config.Bindings["buffer"] {
