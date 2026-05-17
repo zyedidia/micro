@@ -326,7 +326,7 @@ Here are the available options:
 
 * `pluginrepos`: a list of links to plugin repositories.
 
-    default value: `[]`
+    default value: `[]`(empty list)
 
 * `readonly`: when enabled, disallows edits to the buffer. It is recommended
    to only ever set this option locally using `setlocal`.
