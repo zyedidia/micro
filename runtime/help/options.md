@@ -411,7 +411,7 @@ Here are the available options:
    The color of the shown character is determined by the `indent-char`
    field in the current theme rather than the default text color.
 
-    default value: ``
+    default value: `""` (empty string)
 
 * `smartpaste`: add leading whitespace when pasting multiple lines.
    This will attempt to preserve the current indentation level when pasting an
