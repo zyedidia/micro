@@ -10,9 +10,6 @@ rules:
       end: "$"
       rules: []
 
-  # === DANGEROUS COMMANDS ===
-  - error: "^\\s*(kill|tp|teleport)\\s+@([ae])(\\s|$).*$"
-
   # === JSON KEYS ===
   - special: "\"(text|color|bold|italic|underlined|strikethrough|obfuscated|extra|translate|with|score|name|objective)\"\\s*:"
 
@@ -50,6 +47,6 @@ rules:
   - error: "^\\s*(kill|tp|teleport)\\s+@([ae])(\\s|$).*$"
 
   # === CONSTANTS ===
-  - constant.numeric: "\\b-?[0-9]+(?:\\.[0-9]+)?\\b"
+  - constant.number: "\\b-?[0-9]+(?:\\.[0-9]+)?\\b"
   - constant.bool: "\\b(true|false)\\b"
   - constant.string: "\"([^\"\\\\]|\\\\.)*\""
