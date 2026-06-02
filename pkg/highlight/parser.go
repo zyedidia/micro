@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"regexp"
-
 	"gopkg.in/yaml.v2"
+	"path/filepath"
+	"regexp"
 )
 
 // A Group represents a syntax group
@@ -154,13 +154,25 @@ func MakeHeaderYaml(data []byte) (*Header, error) {
 	return header, nil
 }
 
-// MatchFileName will check the given file name with the stored regex
-func (header *Header) MatchFileName(filename string) bool {
-	if header.FileNameRegex != nil {
-		return header.FileNameRegex.MatchString(filename)
+// MatchFilePath will check the given file's absolute path with the stored regex;
+// Only matches which include at least part of the filename are considered.
+func (header *Header) MatchFilePath(absoluteFilePath string) bool {
+	if header.FileNameRegex == nil {
+		return false
 	}
 
-	return false
+	matchBounds := header.FileNameRegex.FindAllStringIndex(absoluteFilePath, -1)
+	if matchBounds == nil {
+		return false
+	}
+
+	baseName := filepath.Base(absoluteFilePath)
+	lastMatchEnd := matchBounds[len(matchBounds)-1][1]
+
+	// If a match occurs on the absolute path, make sure the match includes part of the
+	// filename (i.e. the match extends beyond the length of the file's dir path) to
+	// avoid having just the dir path of the file trigger a match.
+	return lastMatchEnd > (len(absoluteFilePath) - len(baseName))
 }
 
 func (header *Header) MatchFileHeader(firstLine []byte) bool {
