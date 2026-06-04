@@ -1,7 +1,7 @@
 filetype: apacheconf
 
 detect:
-    filename: "httpd\\.conf|mime\\.types|vhosts\\.d\\\\*|\\.htaccess"
+    filename: "httpd\\.conf|mime\\.types|vhosts\\.d(/|\\\\).*|\\.htaccess"
 
 rules:
     - identifier: "(AcceptMutex|AcceptPathInfo|AccessFileName|Action|AddAlt|AddAltByEncoding|AddAltByType|AddCharset|AddDefaultCharset|AddDescription|AddEncoding)"
