@@ -26,7 +26,7 @@ func NewTabList(bufs []*buffer.Buffer) *TabList {
 	iOffset := config.GetInfoBarOffset()
 	tl := new(TabList)
 	tl.List = make([]*Tab, len(bufs))
-	if len(bufs) > 1 {
+	if tabBarVisible(len(bufs)) {
 		for i, b := range bufs {
 			tl.List[i] = NewTabFromBuffer(0, 1, w, h-1-iOffset, b)
 		}
@@ -75,15 +75,22 @@ func (t *TabList) RemoveTab(id uint64) {
 	}
 }
 
+// tabBarVisible reports whether the tab bar should be drawn. It is normally
+// only shown when more than one tab is open, but the tabalways option forces
+// it to always be visible
+func tabBarVisible(numTabs int) bool {
+	return numTabs > 1 || config.GetGlobalOption("tabalways").(bool)
+}
+
 // Resize resizes all elements within the tab list
-// One thing to note is that when there is only 1 tab
-// the tab bar should not be drawn so resizing must take
+// One thing to note is that when the tab bar is hidden (only 1 tab open and
+// tabalways off) the panes occupy the full height, so resizing must take
 // that into account
 func (t *TabList) Resize() {
 	w, h := screen.Screen.Size()
 	iOffset := config.GetInfoBarOffset()
 	InfoBar.Resize(w, h-1)
-	if len(t.List) > 1 {
+	if tabBarVisible(len(t.List)) {
 		for _, p := range t.List {
 			p.Y = 1
 			p.Node.Resize(w, h-1-iOffset)
@@ -107,7 +114,7 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 		mx, my := e.Position()
 		switch e.Buttons() {
 		case tcell.Button1:
-			if my == t.Y && len(t.List) > 1 {
+			if my == t.Y && tabBarVisible(len(t.List)) {
 				if mx == 0 {
 					t.Scroll(-4)
 				} else if mx == t.Width-1 {
@@ -127,12 +134,12 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 				return
 			}
 		case tcell.WheelUp:
-			if my == t.Y && len(t.List) > 1 {
+			if my == t.Y && tabBarVisible(len(t.List)) {
 				t.Scroll(4)
 				return
 			}
 		case tcell.WheelDown:
-			if my == t.Y && len(t.List) > 1 {
+			if my == t.Y && tabBarVisible(len(t.List)) {
 				t.Scroll(-4)
 				return
 			}
@@ -144,7 +151,7 @@ func (t *TabList) HandleEvent(event tcell.Event) {
 // Display updates the names and then displays the tab bar
 func (t *TabList) Display() {
 	t.UpdateNames()
-	if len(t.List) > 1 {
+	if tabBarVisible(len(t.List)) {
 		t.TabWindow.Display()
 	}
 }

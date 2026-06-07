@@ -587,7 +587,7 @@ func doSetGlobalOptionNative(option string, nativeValue any) error {
 		for _, b := range buffer.OpenBuffers {
 			b.UpdateRules()
 		}
-	} else if option == "infobar" || option == "keymenu" {
+	} else if option == "infobar" || option == "keymenu" || option == "tabalways" {
 		Tabs.Resize()
 	} else if option == "mouse" {
 		if !nativeValue.(bool) {

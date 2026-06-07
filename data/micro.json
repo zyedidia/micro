@@ -322,6 +322,11 @@
             "type": "boolean",
             "default": true
         },
+        "tabalways": {
+            "description": "Whether to always show the tab bar, even when only one tab is open\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
         "tabmovement": {
             "description": "Whether to navigate spaces at the beginning of lines as if they are tabs\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",

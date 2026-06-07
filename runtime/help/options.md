@@ -462,6 +462,10 @@ Here are the available options:
 
     default value: `true`
 
+* `tabalways`: always shows the tab bar, even when only one tab is open.
+
+    default value: `false`
+
 * `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
    colors with respect to the tab bar.
 
@@ -628,6 +632,7 @@ so that you can see what the formatting should look like.
     "statusline": true,
     "sucmd": "sudo",
     "syntax": true,
+    "tabalways": false,
     "tabhighlight": true,
     "tabmovement": false,
     "tabreverse": false,
