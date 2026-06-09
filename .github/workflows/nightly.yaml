@@ -12,13 +12,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Setup
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: ${{ matrix.go-version }}
         cache: false
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         ref: master
         fetch-depth: 0
@@ -35,7 +35,7 @@ jobs:
         message: "Pre-release nightly"
 
     - name: Publish
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         name: nightly
         tag_name: nightly

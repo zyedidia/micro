@@ -13,13 +13,13 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
     - name: Setup
-      uses: actions/setup-go@v5
+      uses: actions/setup-go@v6
       with:
         go-version: ${{ matrix.go-version }}
         cache: false
 
     - name: Checkout
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
       with:
         fetch-depth: 0
         fetch-tags: true
@@ -28,7 +28,7 @@ jobs:
       run: tools/cross-compile.sh
 
     - name: Publish
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v3
       with:
         files: binaries/*
 
