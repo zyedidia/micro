@@ -1,7 +1,7 @@
 filetype: groff
 
 detect:
-    filename: "\\.m[ems]$|\\.rof|\\.tmac$|^tmac."
+    filename: "\\.m[ems]$|\\.rof|\\.tmac$|(^|/|\\\\)tmac."
 
 rules:
     - statement: "^\\.(ds|nr) [^[[:space:]]]*"

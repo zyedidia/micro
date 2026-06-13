@@ -1,7 +1,7 @@
 filetype: mail
 
 detect:
-    filename: "(.*/mutt-.*|\\.eml)$"
+    filename: "(.*(/|\\\\)mutt-.*|\\.eml)$"
     header: "^From .* \\d+:\\d+:\\d+ \\d+"
 
 rules:

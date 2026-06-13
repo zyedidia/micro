@@ -1,7 +1,7 @@
 filetype: vi
 
 detect:
-    filename: "(^|/|\\.)(ex|vim)rc$|\\.vim"
+    filename: "(^|/|\\\\)\\.?(ex|vim)rc$|\\.vim"
 
 rules:
     - identifier: "[A-Za-z_][A-Za-z0-9_]*[(]+[A-Za-z0-9_:.,\\s]*[)]+"

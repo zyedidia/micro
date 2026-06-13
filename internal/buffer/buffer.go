@@ -866,7 +866,7 @@ func (b *Buffer) UpdateRules() {
 		matchedFileHeader := false
 
 		if ft == "unknown" || ft == "" {
-			if header.MatchFileName(b.Path) {
+			if header.MatchFilePath(b.AbsPath) {
 				matchedFileName = true
 			}
 			if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
@@ -920,7 +920,7 @@ func (b *Buffer) UpdateRules() {
 			}
 
 			if ft == "unknown" || ft == "" {
-				if header.MatchFileName(b.Path) {
+				if header.MatchFilePath(b.AbsPath) {
 					fnameMatches = append(fnameMatches, syntaxFileInfo{header, f.Name(), nil})
 				}
 				if len(fnameMatches) == 0 && header.MatchFileHeader(b.lines[0].data) {
