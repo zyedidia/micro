@@ -27,14 +27,18 @@ func TestAttributeStringToStyle(t *testing.T) {
 }
 
 func TestMultiAttributesStringToStyle(t *testing.T) {
-	s := StringToStyle("bold italic underline cyan,brightcyan")
+	s := StringToStyle("bold blink dim italic reverse strikethrough underline cyan,brightcyan")
 
 	fg, bg, attr := s.Decompose()
 
 	assert.Equal(t, tcell.ColorTeal, fg)
 	assert.Equal(t, tcell.ColorAqua, bg)
 	assert.NotEqual(t, 0, attr&tcell.AttrBold)
+	assert.NotEqual(t, 0, attr&tcell.AttrBlink)
+	assert.NotEqual(t, 0, attr&tcell.AttrDim)
 	assert.NotEqual(t, 0, attr&tcell.AttrItalic)
+	assert.NotEqual(t, 0, attr&tcell.AttrReverse)
+	assert.NotEqual(t, 0, attr&tcell.AttrStrikeThrough)
 	assert.NotEqual(t, 0, attr&tcell.AttrUnderline)
 }
 
