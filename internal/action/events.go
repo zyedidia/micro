@@ -75,7 +75,10 @@ func (k KeyEvent) Name() string {
 	}
 
 	ok := false
-	if s, ok = tcell.KeyNames[k.code]; !ok {
+	if k.code == tcell.KeyCtrlH {
+		s = "Ctrl-h"
+		ok = true
+	} else if s, ok = tcell.KeyNames[k.code]; !ok {
 		if k.code == tcell.KeyRune {
 			s = string(k.r)
 		} else {

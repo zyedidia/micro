@@ -224,8 +224,8 @@ Here are the available options:
     default value: `false`
 
 * `keymenu`: display the nano-style key menu at the bottom of the screen. Note
-   that ToggleKeyMenu is bound to `Alt-g` by default and this is displayed in
-   the statusline. To disable the key binding, bind `Alt-g` to `None`.
+   that ToggleKeyMenu is bound to `Alt-g` (`Ctrl-h` on macOS) by default and this is displayed in
+   the statusline. To disable the key binding, bind `Alt-g` (or `Ctrl-h` on macOS) to `None`.
 
     default value: `false`
 
