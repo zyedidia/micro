@@ -64,6 +64,7 @@ var bufdefaults = map[string]string{
 	"ShiftPageUp":    "SelectPageUp",
 	"ShiftPageDown":  "SelectPageDown",
 	"Ctrl-g":         "ToggleHelp",
+	"Alt-g":          "ToggleKeyMenu",
 	"Ctrl-r":         "ToggleRuler",
 	"Ctrl-l":         "command-edit:goto ",
 	"Delete":         "Delete",
