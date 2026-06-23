@@ -75,13 +75,7 @@ func (k KeyEvent) Name() string {
 	}
 
 	ok := false
-	// tcell equates KeyCtrlH and KeyBackspace (both are 0x08).
-	// We explicitly name it "Ctrl-h" here so it can be bound separately
-	// from the Backspace key.
-	if k.code == tcell.KeyCtrlH {
-		s = "Ctrl-h"
-		ok = true
-	} else if s, ok = tcell.KeyNames[k.code]; !ok {
+	if s, ok = tcell.KeyNames[k.code]; !ok {
 		if k.code == tcell.KeyRune {
 			s = string(k.r)
 		} else {
