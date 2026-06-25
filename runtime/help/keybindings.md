@@ -593,7 +593,7 @@ conventions for text editing defaults.
     "ShiftPageUp":    "SelectPageUp",
     "ShiftPageDown":  "SelectPageDown",
     "Ctrl-g":         "ToggleHelp",
-    "Alt-g":          "ToggleKeyMenu",
+    "Alt-g":          "ToggleKeyMenu", (Option-g on Mac)
     "Ctrl-r":         "ToggleRuler",
     "Ctrl-l":         "command-edit:goto ",
     "Delete":         "Delete",
