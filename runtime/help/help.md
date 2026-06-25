@@ -10,7 +10,7 @@ display. From now on, when the documentation shows a command to run (such as
 
 For a list of the default keybindings, run `> help defaultkeys`.
 For more information on keybindings, see `> help keybindings`.
-To toggle a short list of important keybindings, press Alt-g.
+To toggle a short list of important keybindings, press Alt-g (Option-g on Mac).
 
 ## Quick-start
 
