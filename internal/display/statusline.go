@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"regexp"
+	"runtime"
 	"strconv"
 	"strings"
 
@@ -157,6 +158,9 @@ func (s *StatusLine) Display() {
 			binding := string(name[5:])
 			for k, v := range config.Bindings["buffer"] {
 				if v == binding {
+					if runtime.GOOS == "darwin" {
+						k = strings.Replace(k, "Alt", "Option", -1)
+					}
 					return []byte(k)
 				}
 			}
