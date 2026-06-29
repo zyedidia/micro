@@ -29,6 +29,15 @@ import (
 	lua "github.com/yuin/gopher-lua"
 )
 
+// multiStringFlag is a flag.Value that accumulates multiple values.
+type multiStringFlag []string
+
+func (f *multiStringFlag) String() string { return "" }
+func (f *multiStringFlag) Set(v string) error {
+	*f = append(*f, v)
+	return nil
+}
+
 var (
 	// Command line flags
 	flagVersion   = flag.Bool("version", false, "Show the version number and information")
@@ -38,6 +47,7 @@ var (
 	flagProfile   = flag.Bool("profile", false, "Enable CPU profiling (writes profile info to ./micro.prof)")
 	flagPlugin    = flag.String("plugin", "", "Plugin command")
 	flagClean     = flag.Bool("clean", false, "Clean configuration directory")
+	flagExec      multiStringFlag
 	optionFlags   map[string]*string
 
 	sighup chan os.Signal
@@ -68,6 +78,8 @@ func InitFlags() {
 		fmt.Println("    \tso it can be analyzed later with \"go tool pprof micro.prof\")")
 		fmt.Println("-version")
 		fmt.Println("    \tShow the version number and information and exit")
+		fmt.Println("-exec command")
+		fmt.Println("    \tRun a command after the editor initializes (may be repeated)")
 
 		fmt.Print("\nMicro's plugins can be managed at the command line with the following commands.\n")
 		fmt.Println("-plugin install [PLUGIN]...")
@@ -95,6 +107,7 @@ func InitFlags() {
 	for k, v := range config.DefaultAllSettings() {
 		optionFlags[k] = flag.String(k, "", fmt.Sprintf("The %s option. Default value: '%v'.", k, v))
 	}
+	flag.Var(&flagExec, "exec", "Run a command after the editor initializes (may be repeated)")
 
 	flag.Parse()
 
@@ -476,6 +489,10 @@ func main() {
 		action.Tabs.HandleEvent(event)
 	case <-time.After(10 * time.Millisecond):
 		// time out after 10ms
+	}
+
+	for _, cmd := range flagExec {
+		action.MainTab().CurPane().HandleCommand(cmd)
 	}
 
 	for {
