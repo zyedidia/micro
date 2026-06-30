@@ -192,7 +192,7 @@ func (i *InfoWindow) scrollToSuggestion() {
 	s := i.totalSize()
 
 	for j, n := range i.Suggestions {
-		c := util.CharacterCountInString(n)
+		c := runewidth.StringWidth(n)
 		if j == i.CurSuggestion {
 			if x+c >= i.hscroll+i.Width {
 				i.hscroll = util.Clamp(x+c+1-i.Width, 0, s-i.Width)
