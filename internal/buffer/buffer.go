@@ -502,11 +502,14 @@ func NewBuffer(r io.Reader, size int64, path string, btype BufType, cmd Command)
 
 // CloseOpenBuffers removes all open buffers
 func CloseOpenBuffers() {
-	for i, buf := range OpenBuffers {
-		buf.Fini()
-		OpenBuffers[i] = nil
+	// use a copy, since we're gonna remove elements from OpenBuffers
+	// while iterating
+	buffers := make([]*Buffer, len(OpenBuffers))
+	copy(buffers, OpenBuffers)
+
+	for _, buf := range buffers {
+		buf.Close()
 	}
-	OpenBuffers = OpenBuffers[:0]
 }
 
 // Close removes this buffer from the list of open buffers
