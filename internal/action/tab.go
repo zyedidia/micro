@@ -299,7 +299,7 @@ func (t *Tab) HandleEvent(event tcell.Event) {
 					} else {
 						size = my - t.resizing.Y + 1
 					}
-					t.resizing.ResizeSplit(size)
+					t.resizing.ResizeSplit(size, true)
 					t.Resize()
 					return
 				}
