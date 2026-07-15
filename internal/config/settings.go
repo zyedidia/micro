@@ -129,6 +129,7 @@ var DefaultGlobalOnlySettings = map[string]any{
 	"savehistory":    true,
 	"scrollbarchar":  "|",
 	"sucmd":          "sudo",
+	"tabalways":      false,
 	"tabhighlight":   false,
 	"tabreverse":     true,
 	"xterm":          false,
@@ -186,10 +187,18 @@ func validateParsedSettings() error {
 					}
 				}
 			} else {
-				if _, e := glob.Compile(k); e != nil {
-					err = errors.New("Error with glob setting " + k + ": " + e.Error())
+				tk := strings.TrimPrefix(k, "glob:")
+				if _, e := glob.Compile(tk); e != nil {
+					err = errors.New("Error with glob setting " + tk + ": " + e.Error())
 					delete(parsedSettings, k)
 					continue
+				}
+				if !strings.HasPrefix(k, "glob:") {
+					// Support non-prefixed glob settings but internally convert
+					// them to prefixed ones for simplicity.
+					delete(parsedSettings, k)
+					k = "glob:" + k
+					parsedSettings[k] = v
 				}
 				for k1, v1 := range v.(map[string]any) {
 					if _, ok := defaults[k1]; ok {
@@ -256,6 +265,9 @@ func ReadSettings() error {
 func ParsedSettings() map[string]any {
 	s := make(map[string]any)
 	for k, v := range parsedSettings {
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") {
+			continue
+		}
 		s[k] = v
 	}
 	return s
@@ -309,8 +321,9 @@ func InitGlobalSettings() error {
 // Must be called after ReadSettings
 func UpdatePathGlobLocals(settings map[string]any, path string) {
 	for k, v := range parsedSettings {
-		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && !strings.HasPrefix(k, "ft:") {
-			g, _ := glob.Compile(k)
+		if strings.HasPrefix(reflect.TypeOf(v).String(), "map") && strings.HasPrefix(k, "glob:") {
+			tk := strings.TrimPrefix(k, "glob:")
+			g, _ := glob.Compile(tk)
 			if g.MatchString(path) {
 				for k1, v1 := range v.(map[string]any) {
 					settings[k1] = v1

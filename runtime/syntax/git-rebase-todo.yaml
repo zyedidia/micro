@@ -1,7 +1,7 @@
 filetype: git-rebase-todo
 
 detect:
-    filename: "^(.*[\\/])?git\\-rebase\\-todo$"
+    filename: '^(.*[\\/])?git\-rebase\-todo$'
 
 rules:
     # Rebase commands

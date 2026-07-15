@@ -132,7 +132,7 @@ func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 	resp, err := http.Get(string(pc))
 	if err != nil {
 		fmt.Fprintln(out, "Failed to query plugin channel:\n", err)
-		return PluginPackages{}
+		return nil
 	}
 	defer resp.Body.Close()
 	decoder := json5.NewDecoder(resp.Body)
@@ -140,7 +140,7 @@ func (pc PluginChannel) Fetch(out io.Writer) PluginPackages {
 	var repositories []PluginRepository
 	if err := decoder.Decode(&repositories); err != nil {
 		fmt.Fprintln(out, "Failed to decode channel data:\n", err)
-		return PluginPackages{}
+		return nil
 	}
 	return fetchAllSources(len(repositories), func(i int) PluginPackages {
 		return repositories[i].Fetch(out)
@@ -152,15 +152,25 @@ func (pr PluginRepository) Fetch(out io.Writer) PluginPackages {
 	resp, err := http.Get(string(pr))
 	if err != nil {
 		fmt.Fprintln(out, "Failed to query plugin repository:\n", err)
-		return PluginPackages{}
+		return nil
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		fmt.Fprintf(out, "Skipped: %s\n", pr)
+		fmt.Fprintf(out, " Reason: Server error %d (%s)\n", resp.StatusCode,
+			http.StatusText(resp.StatusCode))
+		return nil
+	}
+
 	decoder := json5.NewDecoder(resp.Body)
 
 	var plugins PluginPackages
 	if err := decoder.Decode(&plugins); err != nil {
-		fmt.Fprintln(out, "Failed to decode repository data:\n", err)
-		return PluginPackages{}
+		fmt.Fprintf(out, "Skipped: %s\n", pr)
+		fmt.Fprintf(out, " Reason: Failed to decode repository data:\n")
+		fmt.Fprintf(out, " %s\n", err)
+		return nil
 	}
 	if len(plugins) > 0 {
 		return PluginPackages{plugins[0]}

@@ -1,7 +1,6 @@
 <img alt="micro logo" src="./assets/micro-logo-drop.svg" width="500px"/>
 
 ![Test Workflow](https://github.com/micro-editor/micro/actions/workflows/test.yaml/badge.svg)
-[![Go Report Card](https://goreportcard.com/badge/github.com/micro-editor/micro/v2)](https://goreportcard.com/report/github.com/micro-editor/micro/v2)
 [![Release](https://img.shields.io/github/release/micro-editor/micro.svg?label=Release)](https://github.com/micro-editor/micro/releases)
 [![MIT License](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/micro-editor/micro/blob/master/LICENSE)
 [![Join the chat at https://gitter.im/zyedidia/micro](https://badges.gitter.im/zyedidia/micro.svg)](https://gitter.im/zyedidia/micro?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
@@ -280,6 +279,6 @@ If you find any bugs, please report them! I am also happy to accept pull request
 You can use the [GitHub issue tracker](https://github.com/micro-editor/micro/issues)
 to report bugs, ask questions, or suggest new features.
 
-For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR). You can also use the [Discussions](https://github.com/micro-editor/micro/discussions) section on Github for a forum-like setting or for Q&A.
+For a more informal setting to discuss the editor, you can join the [Gitter chat](https://gitter.im/zyedidia/micro) or the [Discord](https://discord.gg/nhWR6armnR). You can also use the [Discussions](https://github.com/micro-editor/micro/discussions) section on GitHub for a forum-like setting or for Q&A.
 
 Sometimes I am unresponsive, and I apologize! If that happens, please ping me.

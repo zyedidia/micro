@@ -186,7 +186,7 @@ func (n *Node) hResizeSplit(i int, size int) bool {
 // ResizeSplit resizes a certain split to a given size
 func (n *Node) ResizeSplit(size int) bool {
 	// TODO: `size < 0` does not work for some reason
-	if size <= 0 {
+	if size <= 0 || n.parent == nil {
 		return false
 	}
 	if len(n.parent.children) <= 1 {
@@ -413,7 +413,7 @@ func (n *Node) HSplit(bottom bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.Kind == STUndef {
+	if n.parent == nil {
 		n.Kind = STVert
 	}
 	if n.Kind == STVert {
@@ -429,13 +429,13 @@ func (n *Node) VSplit(right bool) uint64 {
 	if !n.IsLeaf() {
 		return 0
 	}
-	if n.Kind == STUndef {
+	if n.parent == nil {
 		n.Kind = STHoriz
 	}
-	if n.Kind == STVert {
-		return n.vVSplit(right)
+	if n.Kind == STHoriz {
+		return n.hVSplit(0, right)
 	}
-	return n.hVSplit(0, right)
+	return n.vVSplit(right)
 }
 
 // unsplits the child of a split
@@ -483,7 +483,20 @@ func (n *Node) Unsplit() bool {
 // flattens the tree by removing unnecessary intermediate parents that have only one child
 // and handles the side effect of it
 func (n *Node) flatten() {
-	if n.parent == nil || len(n.children) != 1 {
+	if len(n.children) != 1 {
+		return
+	}
+
+	// Special case for root node
+	if n.parent == nil {
+		*n = *n.children[0]
+		n.parent = nil
+		for _, c := range n.children {
+			c.parent = n
+		}
+		if len(n.children) == 0 {
+			n.Kind = STUndef
+		}
 		return
 	}
 
@@ -531,11 +544,19 @@ func (n *Node) flatten() {
 func (n *Node) String() string {
 	var strf func(n *Node, ident int) string
 	strf = func(n *Node, ident int) string {
-		marker := "|"
+		marker := ""
 		if n.Kind == STHoriz {
 			marker = "-"
+		} else if n.Kind == STVert {
+			marker = "|"
 		}
-		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id)
+
+		var parentId uint64 = 0
+		if n.parent != nil {
+			parentId = n.parent.id
+		}
+
+		str := fmt.Sprint(strings.Repeat("\t", ident), marker, n.View, n.id, parentId)
 		if n.IsLeaf() {
 			str += "🍁"
 		}

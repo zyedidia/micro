@@ -403,6 +403,11 @@
             "type": "boolean",
             "default": true
         },
+        "tabalways": {
+            "description": "Whether to always show the tab bar, even when only one tab is open\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
+            "type": "boolean",
+            "default": false
+        },
         "tabhighlight": {
             "description": "Whether to invert tab character colors\nhttps://github.com/micro-editor/micro/blob/master/runtime/help/options.md#options",
             "type": "boolean",

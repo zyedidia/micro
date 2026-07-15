@@ -322,11 +322,11 @@ Here are the available options:
    By default, this option points to the official plugin channel hosted on GitHub
    at https://github.com/micro-editor/plugin-channel.
 
-    default value: `https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json`
+    default value: `[https://raw.githubusercontent.com/micro-editor/plugin-channel/master/channel.json]`
 
 * `pluginrepos`: a list of links to plugin repositories.
 
-    default value: ``
+    default value: `[]` (empty list)
 
 * `readonly`: when enabled, disallows edits to the buffer. It is recommended
    to only ever set this option locally using `setlocal`.
@@ -411,7 +411,7 @@ Here are the available options:
    The color of the shown character is determined by the `indent-char`
    field in the current theme rather than the default text color.
 
-    default value: ``
+    default value: `""` (empty string)
 
 * `smartpaste`: add leading whitespace when pasting multiple lines.
    This will attempt to preserve the current indentation level when pasting an
@@ -461,6 +461,10 @@ Here are the available options:
 * `syntax`: enables syntax highlighting.
 
     default value: `true`
+
+* `tabalways`: always shows the tab bar, even when only one tab is open.
+
+    default value: `false`
 
 * `tabhighlight`: inverts the tab characters' (filename, save indicator, etc)
    colors with respect to the tab bar.
@@ -629,6 +633,7 @@ so that you can see what the formatting should look like.
     "statusline": true,
     "sucmd": "sudo",
     "syntax": true,
+    "tabalways": false,
     "tabhighlight": true,
     "tabmovement": false,
     "tabreverse": false,
@@ -673,6 +678,21 @@ Or similarly you can match with globs:
 
 ```json
 {
+    "glob:*.go": {
+        "tabstospaces": false
+    },
+    "glob:*.rb": {
+        "tabsize": 2
+    },
+    "tabstospaces": true,
+    "tabsize": 4
+}
+```
+
+You can also omit the `glob:` prefix before globs:
+
+```json
+{
     "*.go": {
         "tabstospaces": false
     },
@@ -683,3 +703,6 @@ Or similarly you can match with globs:
     "tabsize": 4
 }
 ```
+
+But it is generally more recommended to use the `glob:` prefix, as it avoids
+potential conflicts with option names.

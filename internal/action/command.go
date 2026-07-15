@@ -45,7 +45,7 @@ func InitCommands() {
 		"quit":        {(*BufPane).QuitCmd, nil},
 		"goto":        {(*BufPane).GotoCmd, nil},
 		"jump":        {(*BufPane).JumpCmd, nil},
-		"save":        {(*BufPane).SaveCmd, nil},
+		"save":        {(*BufPane).SaveCmd, buffer.FileComplete},
 		"replace":     {(*BufPane).ReplaceCmd, nil},
 		"replaceall":  {(*BufPane).ReplaceAllCmd, nil},
 		"vsplit":      {(*BufPane).VSplitCmd, buffer.FileComplete},
@@ -587,7 +587,7 @@ func doSetGlobalOptionNative(option string, nativeValue any) error {
 		for _, b := range buffer.OpenBuffers {
 			b.UpdateRules()
 		}
-	} else if option == "infobar" || option == "keymenu" {
+	} else if option == "infobar" || option == "keymenu" || option == "tabalways" {
 		Tabs.Resize()
 	} else if option == "mouse" {
 		if !nativeValue.(bool) {

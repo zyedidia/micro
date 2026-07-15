@@ -51,6 +51,9 @@ Here are the available help topics:
    plugins
 * `colors`: Explains micro's colorscheme and syntax highlighting engine and how
    to create your own colorschemes or add new languages to the engine
+* `copypaste`: Explains micro's copy and paste usage and configuration.
+   It describes how copy and paste is working on different operating systems and
+   setups.
 
 For example, to open the help page on plugins you would run `> help plugins`.
 
