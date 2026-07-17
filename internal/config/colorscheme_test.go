@@ -23,7 +23,7 @@ func TestAttributeStringToStyle(t *testing.T) {
 
 	assert.Equal(t, tcell.ColorTeal, fg)
 	assert.Equal(t, tcell.ColorAqua, bg)
-	assert.NotEqual(t, 0, attr&tcell.AttrBold)
+	assert.Equal(t, tcell.AttrBold, attr)
 }
 
 func TestMultiAttributesStringToStyle(t *testing.T) {
@@ -33,13 +33,14 @@ func TestMultiAttributesStringToStyle(t *testing.T) {
 
 	assert.Equal(t, tcell.ColorTeal, fg)
 	assert.Equal(t, tcell.ColorAqua, bg)
-	assert.NotEqual(t, 0, attr&tcell.AttrBold)
-	assert.NotEqual(t, 0, attr&tcell.AttrBlink)
-	assert.NotEqual(t, 0, attr&tcell.AttrDim)
-	assert.NotEqual(t, 0, attr&tcell.AttrItalic)
-	assert.NotEqual(t, 0, attr&tcell.AttrReverse)
-	assert.NotEqual(t, 0, attr&tcell.AttrStrikeThrough)
-	assert.NotEqual(t, 0, attr&tcell.AttrUnderline)
+	assert.Equal(t, tcell.AttrBold|
+		tcell.AttrBlink|
+		tcell.AttrDim|
+		tcell.AttrItalic|
+		tcell.AttrReverse|
+		tcell.AttrStrikeThrough|
+		tcell.AttrUnderline,
+		attr)
 }
 
 func TestColor256StringToStyle(t *testing.T) {
