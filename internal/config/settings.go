@@ -18,7 +18,7 @@ import (
 )
 
 // NOTE: '--' interprets rest of arguments as arguments for generate_settings.go
-//go:generate $GOROOT/bin/go run generate_settings.go -- $GOFILE ../../runtime/help/options.md
+//go:generate $GOROOT/bin/go run ../../tools/generate_settings.go -- $GOFILE ../../runtime/help/options.md
 
 type optionValidator func(string, any) error
 
