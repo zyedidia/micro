@@ -6,7 +6,7 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
-	"slices" // slices.Sort()
+	"sort"
 	"strings"
 )
 
@@ -594,8 +594,8 @@ func main() {
 	allcomments := ast.NewCommentMap(&fileset, astFile, astFile.Comments)
 	options := collectOptions(&fileset, astFile, allcomments)
 
-	slices.SortFunc(options, func(a, b option) int {
-		return strings.Compare(a.name, b.name) // alphabetically
+	sort.Slice(options, func(i, j int) bool {
+		return options[i].name < options[j].name
 	})
 
 	if false { // for debugging
