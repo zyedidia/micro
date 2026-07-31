@@ -1,0 +1,33 @@
+filetype: lova
+
+detect:
+    filename: "\\.lova$"
+
+rules:
+    - comment:
+        start: "//"
+        end: "$"
+        rules:
+            - todo: "(TODO|XXX|FIXME):?"
+
+    - statement: "\\b(if|else|case|do|over|while|fdo|for|in|function|defer)\\b"
+    - statement: "\\b(proc|procloc)\\b"
+    - statement: "\\b(print|printn|sleep)\\b"
+    - statement: "\\b(is_file|is_dir|is_exist)\\b"
+
+    - constant.bool: "\\b(true|false)\\b"
+    - constant.number: "\\b([0-9]+)\\b"
+
+    - constant.string:
+        start: "\""
+        end: "\""
+        skip: "\\\\."
+        rules:
+            - constant.specialChar: "\\\\([\"'abfnrtv\\\\]|[0-3]?[0-7]{1,2}|x[0-9A-Fa-f]{1,2})"
+
+    - identifier: "\\$[0-9]+"
+    - identifier: "\\b[a-zA-Z_][0-9a-zA-Z_]*\\b"
+
+    - symbol.operator: "\\b(and|or|not)\\b"
+    - symbol.operator: "(=|==|!=|\\+|\\-|\\*|/|&&|\\|\\||!)"
+    - symbol.brackets: "[(){}]|\\[|\\]"
