@@ -1,0 +1,65 @@
+# TokyoNight Storm colorscheme for micro
+# Palette: https://github.com/folke/tokyonight.nvim (storm variant)
+
+color-link default "#c0caf5,#24283b"
+color-link comment "italic #565f89,#24283b"
+
+color-link identifier "#7aa2f7,#24283b"
+color-link identifier.macro "#7dcfff,#24283b"
+
+color-link constant "#ff9e64,#24283b"
+color-link constant.bool "#ff9e64,#24283b"
+color-link constant.number "#ff9e64,#24283b"
+color-link constant.string "#9ece6a,#24283b"
+color-link constant.string.char "#73daca,#24283b"
+color-link constant.specialChar "#89ddff,#24283b"
+
+color-link statement "#bb9af7,#24283b"
+
+color-link symbol "#a9b1d6,#24283b"
+color-link symbol.brackets "#89ddff,#24283b"
+color-link symbol.operator "#9d7cd8,#24283b"
+
+color-link preproc "#7dcfff,#24283b"
+color-link type "#2ac3de,#24283b"
+color-link special "#89ddff,#24283b"
+color-link underlined "underline #c0caf5,#24283b"
+
+color-link error "bold #24283b,#db4b4b"
+color-link todo "bold #7aa2f7,#292e42"
+
+color-link hlsearch "#24283b,#3d59a1"
+
+color-link statusline "#c0caf5,#1f2335"
+color-link statusline.inactive "#565f89,#1f2335"
+color-link statusline.suggestions "#e0af68,#1f2335"
+
+color-link tabbar "#a9b1d6,#1f2335"
+color-link tabbar.active "#c0caf5,#292e42"
+
+color-link divider "#3b4261,#1f2335"
+color-link scrollbar "#3b4261,#1f2335"
+
+color-link message "#9ece6a,#24283b"
+color-link error-message "#f7768e,#24283b"
+
+color-link indent-char "#3b4261,#24283b"
+color-link line-number "#3b4261,#1f2335"
+color-link current-line-number "#737aa2,#1f2335"
+
+color-link gutter-error "#c0caf5,#db4b4b"
+color-link gutter-warning "#24283b,#e0af68"
+color-link gutter-info "#24283b,#0db9d7"
+
+color-link diff-added "#449dab"
+color-link diff-modified "#6183bb"
+color-link diff-deleted "#914c54"
+
+color-link cursor-line "#292e42"
+color-link color-column "#292e42"
+
+color-link selection "#c0caf5,#2e3c64"
+
+color-link match-brace "#24283b,#9d7cd8"
+color-link tab-error "#f7768e"
+color-link trailingws "#f7768e"
