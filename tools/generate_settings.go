@@ -45,7 +45,6 @@ type option struct {
 				 // NOTE: `option.filled` should be done in the last top level node parsed
 }
 
-// function for debugging purposes
 func (o option) writeMarkdown(sb *strings.Builder) {
 	if sb == nil { panic("`sb` MUST not be nil") }
 
@@ -71,6 +70,7 @@ func (o option) writeMarkdown(sb *strings.Builder) {
 	}
 }
 
+// function for debugging purposes
 func (o option) String() string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("name: %s {\n", o.name))
@@ -98,7 +98,7 @@ func commentGroupToString(cgs []*ast.CommentGroup) string {
 		for i, comment := range cg.List {
 			linecomment := strings.TrimPrefix(comment.Text, "//")
 			linecomment = strings.TrimLeft(linecomment, " ")
-			if i > 0 { sb.WriteString("   ") }
+			if i > 0 { sb.WriteString("   ") } // indentation used in markdown
 			sb.WriteString(linecomment)
 			sb.WriteString("\n")
 		}
