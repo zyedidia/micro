@@ -217,7 +217,7 @@ func (eh *EventHandler) Remove(start, end Loc) {
 	eh.DoTextEvent(e, true)
 }
 
-// MultipleReplace creates an multiple insertions executes them
+// MultipleReplace creates a replace text event with multiple deltas and executes it
 func (eh *EventHandler) MultipleReplace(deltas []Delta) {
 	e := &TextEvent{
 		C:         *eh.cursors[eh.active],

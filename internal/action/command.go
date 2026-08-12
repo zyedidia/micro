@@ -45,7 +45,7 @@ func InitCommands() {
 		"quit":        {(*BufPane).QuitCmd, nil},
 		"goto":        {(*BufPane).GotoCmd, nil},
 		"jump":        {(*BufPane).JumpCmd, nil},
-		"save":        {(*BufPane).SaveCmd, nil},
+		"save":        {(*BufPane).SaveCmd, buffer.FileComplete},
 		"replace":     {(*BufPane).ReplaceCmd, nil},
 		"replaceall":  {(*BufPane).ReplaceAllCmd, nil},
 		"vsplit":      {(*BufPane).VSplitCmd, buffer.FileComplete},

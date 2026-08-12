@@ -1,7 +1,7 @@
 filetype: jsonnet
 
 detect:
-    filename: "\\.jsonnet$"
+    filename: "\\.(jsonnet|libsonnet)$"
 
 # Spec: https://jsonnet.org/ref/spec.html
 

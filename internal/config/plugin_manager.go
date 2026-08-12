@@ -1,9 +1,9 @@
 package config
 
 import (
-	"bytes"
-	"encoding/json"
 	"errors"
+
+	"github.com/micro-editor/json5"
 )
 
 var (
@@ -35,10 +35,7 @@ type PluginInfo struct {
 func NewPluginInfo(data []byte) (*PluginInfo, error) {
 	var info []PluginInfo
 
-	dec := json.NewDecoder(bytes.NewReader(data))
-	// dec.DisallowUnknownFields() // Force errors
-
-	if err := dec.Decode(&info); err != nil {
+	if err := json5.Unmarshal(data, &info); err != nil {
 		return nil, err
 	}
 

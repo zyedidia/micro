@@ -196,11 +196,20 @@ func StringToStyle(str string) tcell.Style {
 	if strings.Contains(str, "bold") {
 		style = style.Bold(true)
 	}
+	if strings.Contains(str, "blink") {
+		style = style.Blink(true)
+	}
+	if strings.Contains(str, "dim") {
+		style = style.Dim(true)
+	}
 	if strings.Contains(str, "italic") {
 		style = style.Italic(true)
 	}
 	if strings.Contains(str, "reverse") {
 		style = style.Reverse(true)
+	}
+	if strings.Contains(str, "strikethrough") {
+		style = style.StrikeThrough(true)
 	}
 	if strings.Contains(str, "underline") {
 		style = style.Underline(true)
