@@ -1,0 +1,2 @@
+# Go tools like `gofmt` require LF as line endings
+*.go text eol=lf
