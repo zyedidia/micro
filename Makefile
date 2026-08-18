@@ -56,6 +56,7 @@ testgen:
 test:
 	go test ./internal/...
 	go test ./cmd/...
+	@test -z "$$(gofmt -l .)" || { echo "gofmt issues:"; gofmt -d -e .; exit 1; }
 
 bench:
 	for i in 1 2 3; do \
