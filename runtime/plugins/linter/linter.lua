@@ -189,7 +189,7 @@ function onExit(output, args)
             elseif col == nil then
                 hascol = false
             end
-            if basename(buf.Path) == basename(file) then
+            if filepath.Base(buf.Path) == filepath.Base(file) then
                 local bmsg = nil
                 if hascol then
                     local mstart = buffer.Loc(tonumber(col-1+coff), tonumber(line-1+loff))
@@ -211,13 +211,4 @@ function split(str, sep)
         table.insert(result, each)
     end
     return result
-end
-
-function basename(file)
-    local sep = "/"
-    if runtime.GOOS == "windows" then
-        sep = "\\"
-    end
-    local name = string.gsub(file, "(.*" .. sep .. ")(.*)", "%2")
-    return name
 end
