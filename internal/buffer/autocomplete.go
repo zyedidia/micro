@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/fs"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -106,8 +107,16 @@ func FileComplete(b *Buffer) ([]string, []string) {
 	c := b.GetActiveCursor()
 	input, argstart := b.GetArg()
 
+	// Windows accepts both separators, so keep completing with the one that is
+	// already in use instead of mixing them
 	sep := string(os.PathSeparator)
-	dirs := strings.Split(input, sep)
+	if i := strings.LastIndexAny(input, "/"+sep); i >= 0 {
+		sep = input[i : i+1]
+	}
+
+	// and normalize the input before splitting it, otherwise a forward slash
+	// separated path is treated as a single name
+	dirs := strings.Split(filepath.ToSlash(input), "/")
 
 	var files []fs.DirEntry
 	var err error
