@@ -688,6 +688,9 @@ func (h *BufPane) SelectToEnd() bool {
 
 // InsertNewline inserts a newline plus possible some whitespace if autoindent is on
 func (h *BufPane) InsertNewline() bool {
+	if ft, ok := h.Buf.Settings["filetype"].(string); ok && ft == "magit" {
+		return h.MagitOpenFile()
+	}
 	// Insert a newline
 	if h.Cursor.HasSelection() {
 		h.Cursor.DeleteSelection()

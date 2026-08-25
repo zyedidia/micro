@@ -619,6 +619,12 @@ func (h *BufPane) DoMouseEvent(e MouseEvent, te *tcell.EventMouse) bool {
 // DoRuneInsert inserts a given rune into the current buffer
 // (possibly multiple times for multiple cursors)
 func (h *BufPane) DoRuneInsert(r rune) {
+	if ft, ok := h.Buf.Settings["filetype"].(string); ok && ft == "magit" {
+		if r == ' ' {
+			h.MagitToggleFile()
+			return
+		}
+	}
 	cursors := h.Buf.GetCursors()
 	for _, c := range cursors {
 		// Insert a character
@@ -848,6 +854,8 @@ var BufKeyActions = map[string]BufKeyAction{
 	"SkipMultiCursorBack":       (*BufPane).SkipMultiCursorBack,
 	"JumpToMatchingBrace":       (*BufPane).JumpToMatchingBrace,
 	"JumpLine":                  (*BufPane).JumpLine,
+	"MagitStatus":               (*BufPane).MagitStatus,
+	"MagitToggleFile":           (*BufPane).MagitToggleFile,
 	"Deselect":                  (*BufPane).Deselect,
 	"ClearInfo":                 (*BufPane).ClearInfo,
 	"None":                      (*BufPane).None,
