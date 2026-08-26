@@ -25,20 +25,29 @@ func (b *Buffer) GetSuggestions() {
 
 // Autocomplete starts the autocomplete process
 func (b *Buffer) Autocomplete(c Completer) bool {
-	if !b.GetActiveCursor().CanAutocomplete() {
+	return b.AutocompleteCB(c, nil)
+}
+
+func (b *Buffer) AutocompleteCB(c Completer, checkCB func(*Cursor) bool) bool {
+	if checkCB != nil && !checkCB(b.GetActiveCursor()) {
 		return false
 	}
 	b.Completions, b.Suggestions = c(b)
+
 	if len(b.Completions) != len(b.Suggestions) || len(b.Completions) == 0 {
 		return false
 	}
 	b.CurSuggestion = -1
-	b.CycleAutocomplete(true)
+	b.CycleAutocompleteCB(true, checkCB)
 	return true
 }
 
 // CycleAutocomplete moves to the next suggestion
 func (b *Buffer) CycleAutocomplete(forward bool) {
+	b.CycleAutocompleteCB(forward, nil)
+}
+
+func (b *Buffer) CycleAutocompleteCB(forward bool, checkCB func(*Cursor) bool) {
 	prevSuggestion := b.CurSuggestion
 
 	if forward {
@@ -56,7 +65,7 @@ func (b *Buffer) CycleAutocomplete(forward bool) {
 	activeWord := make([]byte, len(tmpWord))
 	copy(activeWord, tmpWord)
 	for _, c := range b.cursors {
-		if !c.CanAutocomplete() {
+		if checkCB != nil && !checkCB(c) {
 			continue
 		}
 
@@ -83,20 +92,6 @@ func (c *Cursor) autocomplete(prevSuggestion int) {
 	}
 
 	b.Replace(start, end, b.Completions[b.CurSuggestion])
-}
-
-func (c *Cursor) CanAutocomplete() bool {
-	if c.X == 0 {
-		return false
-	}
-
-	r := c.RuneUnder(c.X)
-	prev := c.RuneUnder(c.X - 1)
-	if !util.IsAutocomplete(prev) || util.IsWordChar(r) {
-		// don't autocomplete if cursor is within a word
-		return false
-	}
-	return true
 }
 
 // GetWord gets the most recent word separated by any separator
