@@ -134,7 +134,7 @@ func (l Loc) Move(n int, buf *Buffer) Loc {
 	return l.MoveLA(n, buf.LineArray)
 }
 
-// ByteOffset is just like ToCharPos except it counts bytes instead of runes
+// ByteOffset converts an x, y position into a byte offset in the buffer
 func ByteOffset(pos Loc, buf *Buffer) int {
 	x, y := pos.X, pos.Y
 	loc := 0
