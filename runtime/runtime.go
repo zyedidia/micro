@@ -12,7 +12,7 @@ import (
 var runtime embed.FS
 
 func fixPath(name string) string {
-	return strings.TrimLeft(filepath.ToSlash(name), "runtime/")
+	return strings.TrimPrefix(filepath.ToSlash(name), "runtime/")
 }
 
 // AssetDir lists file names in folder
