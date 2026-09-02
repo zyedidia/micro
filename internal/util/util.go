@@ -91,6 +91,28 @@ func init() {
 	}
 
 	Stdout = new(bytes.Buffer)
+
+	envAmbiguousWide = runewidth.EastAsianWidth
+}
+
+// envAmbiguousWide is the ambiguous width detected from the environment
+// (the locale environment variables and RUNEWIDTH_EASTASIAN) at startup
+var envAmbiguousWide bool
+
+// SetAmbiguousWidth sets how wide the characters with the East Asian
+// Ambiguous width property (see Unicode Standard Annex #11) are considered
+// to be: one column ("single"), two columns ("double") or as many columns
+// as the environment implies ("auto")
+func SetAmbiguousWidth(mode string) {
+	switch mode {
+	case "single":
+		runewidth.EastAsianWidth = false
+	case "double":
+		runewidth.EastAsianWidth = true
+	default:
+		runewidth.EastAsianWidth = envAmbiguousWide
+	}
+	runewidth.DefaultCondition.EastAsianWidth = runewidth.EastAsianWidth
 }
 
 // SliceEnd returns a byte slice where the index is a rune index
