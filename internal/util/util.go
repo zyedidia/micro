@@ -51,6 +51,9 @@ var (
 // To be used for file writes before umask is applied
 const FileMode os.FileMode = 0666
 
+// To be used for directory creation before umask is applied
+const DirMode os.FileMode = 0755
+
 const BackupSuffix = ".micro-backup"
 
 const OverwriteFailMsg = `An error occurred while writing to the file:
@@ -640,7 +643,7 @@ func Unzip(src, dest string) error {
 	}
 	defer r.Close()
 
-	os.MkdirAll(dest, 0755)
+	os.MkdirAll(dest, DirMode)
 
 	var remaining int64 = maxUnzipSize
 
@@ -669,7 +672,7 @@ func Unzip(src, dest string) error {
 		if f.FileInfo().IsDir() {
 			os.MkdirAll(path, f.Mode())
 		} else {
-			os.MkdirAll(filepath.Dir(path), 0755)
+			os.MkdirAll(filepath.Dir(path), DirMode)
 			f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, f.Mode())
 			if err != nil {
 				return err
