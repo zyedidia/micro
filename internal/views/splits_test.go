@@ -14,3 +14,19 @@ func TestHSplit(t *testing.T) {
 
 	fmt.Println(root.String())
 }
+
+func TestIDWithSplits(t *testing.T) {
+	root := NewRoot(0, 0, 80, 80)
+	id := root.ID()
+	if id == 0 {
+		t.Fatal("root id is 0")
+	}
+
+	newid := root.VSplit(true)
+	if got := root.ID(); got != id {
+		t.Errorf("root id changed from %d to %d after split", id, got)
+	}
+	if root.GetNode(id) == nil || root.GetNode(newid) == nil {
+		t.Error("leaf lookup by id broken after split")
+	}
+}
