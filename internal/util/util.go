@@ -54,6 +54,9 @@ const FileMode os.FileMode = 0666
 // To be used for directory creation before umask is applied
 const DirMode os.FileMode = 0755
 
+// maxUnzipSize is the most Unzip will extract from a single archive
+const maxUnzipSize = 1 << 30
+
 const BackupSuffix = ".micro-backup"
 
 const OverwriteFailMsg = `An error occurred while writing to the file:
@@ -631,9 +634,6 @@ func IsAutocomplete(c rune) bool {
 func String(s []byte) string {
 	return string(s)
 }
-
-// maxUnzipSize is the most Unzip will extract from a single archive
-const maxUnzipSize = 1 << 30
 
 // Unzip unzips a file to given folder
 func Unzip(src, dest string) error {
