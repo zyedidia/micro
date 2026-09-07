@@ -60,7 +60,9 @@ Here are the available options:
        or wl-clipboard on Linux, pbcopy/pbpaste on MacOS, and system calls on
        Windows. On Linux, if you do not have one of the tools installed, or if
        they are not working, micro will throw an error and use an internal
-       clipboard.
+       clipboard. Detection runs in the background during startup. The first
+       system clipboard operation waits if detection has not finished yet;
+       internal registers remain available while it runs.
     * `terminal`: accesses the clipboard via your terminal emulator. Note that
        there is limited support among terminal emulators for this feature
        (called OSC 52). Terminals that are known to work are Kitty (enable
