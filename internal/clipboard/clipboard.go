@@ -2,6 +2,7 @@ package clipboard
 
 import (
 	"errors"
+	"log"
 
 	"github.com/zyedidia/clipper"
 )
@@ -21,7 +22,8 @@ const (
 	Internal
 )
 
-// CurrentMethod is the method used to store clipboard information
+// CurrentMethod is the selected clipboard method. External falls back to internal
+// storage if no system clipboard is available.
 var CurrentMethod Method = Internal
 
 // A Register is a buffer used to store text. The system clipboard has the 'clipboard'
@@ -35,24 +37,68 @@ const (
 	PrimaryReg = -2
 )
 
-var clipboard clipper.Clipboard
+// Each detection attempt owns its result. The worker never changes the selected
+// method, and readers must wait for done before accessing clipboard or err.
+type clipboardDetection struct {
+	done      chan struct{}
+	clipboard clipper.Clipboard
+	err       error
+}
 
-// Initialize attempts to initialize the clipboard using the given method
+var external *clipboardDetection
+
+// detect starts a probe or reuses the current result. Explicit initialization
+// refreshes completed probes so changes to installed tools can be picked up.
+// Like the clipboard registers and selected method, external is owned by the
+// editor goroutine; only the result inside a detection is written by its worker.
+func detect(refresh bool) *clipboardDetection {
+	if external != nil {
+		select {
+		case <-external.done:
+			if !refresh {
+				return external
+			}
+		default:
+			return external
+		}
+	}
+
+	clips := make([]clipper.Clipboard, 0, len(clipper.Clipboards)+1)
+	clips = append(clips, &clipper.Custom{Name: "micro-clip"})
+	clips = append(clips, clipper.Clipboards...)
+	d := &clipboardDetection{done: make(chan struct{})}
+	external = d
+	go func() {
+		d.clipboard, d.err = clipper.GetClipboard(clips...)
+		close(d.done)
+	}()
+	return d
+}
+
+// Initialize waits for clipboard detection using the given method. A completed
+// external probe is refreshed; a probe already in progress is shared.
 func Initialize(m Method) error {
-	var err error
-	switch m {
-	case External:
-		clips := make([]clipper.Clipboard, 0, len(clipper.Clipboards)+1)
-		clips = append(clips, &clipper.Custom{
-			Name: "micro-clip",
-		})
-		clips = append(clips, clipper.Clipboards...)
-		clipboard, err = clipper.GetClipboard(clips...)
+	if m != External {
+		return nil
 	}
-	if err != nil {
-		CurrentMethod = Internal
+	d := detect(true)
+	<-d.done
+	return d.err
+}
+
+// InitAsync starts clipboard detection without waiting, logging any failure.
+// Only external system clipboard operations need to wait for the result.
+func InitAsync(m Method) {
+	if m != External {
+		return
 	}
-	return err
+	d := detect(false)
+	go func() {
+		<-d.done
+		if d.err != nil {
+			log.Println(d.err, " or change 'clipboard' option")
+		}
+	}()
 }
 
 // SetMethod changes the clipboard access method
@@ -109,15 +155,21 @@ func writeMulti(text string, r Register, num int, ncursors int, m Method) error 
 func read(r Register, m Method) (string, error) {
 	switch m {
 	case External:
+		if r != ClipboardReg && r != PrimaryReg {
+			return internal.read(r), nil
+		}
+		d := detect(false)
+		<-d.done
+		if d.err != nil {
+			return internal.read(r), nil
+		}
 		switch r {
 		case ClipboardReg:
-			b, e := clipboard.ReadAll(clipper.RegClipboard)
+			b, e := d.clipboard.ReadAll(clipper.RegClipboard)
 			return string(b), e
 		case PrimaryReg:
-			b, e := clipboard.ReadAll(clipper.RegPrimary)
+			b, e := d.clipboard.ReadAll(clipper.RegPrimary)
 			return string(b), e
-		default:
-			return internal.read(r), nil
 		}
 	case Internal:
 		return internal.read(r), nil
@@ -139,13 +191,21 @@ func read(r Register, m Method) (string, error) {
 func write(text string, r Register, m Method) error {
 	switch m {
 	case External:
+		if r != ClipboardReg && r != PrimaryReg {
+			internal.write(text, r)
+			return nil
+		}
+		d := detect(false)
+		<-d.done
+		if d.err != nil {
+			internal.write(text, r)
+			return nil
+		}
 		switch r {
 		case ClipboardReg:
-			return clipboard.WriteAll(clipper.RegClipboard, []byte(text))
+			return d.clipboard.WriteAll(clipper.RegClipboard, []byte(text))
 		case PrimaryReg:
-			return clipboard.WriteAll(clipper.RegPrimary, []byte(text))
-		default:
-			internal.write(text, r)
+			return d.clipboard.WriteAll(clipper.RegPrimary, []byte(text))
 		}
 	case Internal:
 		internal.write(text, r)
