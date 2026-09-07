@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"testing"
 
 	"github.com/micro-editor/micro/v2/internal/action"
@@ -63,5 +64,77 @@ func TestNestedSplitMouseResize(t *testing.T) {
 	}
 	if third.Buf.Line(0) != "third" || fourth.Buf.Line(0) != "fourth" {
 		t.Fatal("resize changed buffer contents")
+	}
+}
+
+func TestNestedSplitResizeKeepsTextVisible(t *testing.T) {
+	for _, softwrap := range []bool{false, true} {
+		t.Run(fmt.Sprintf("softwrap=%v", softwrap), func(t *testing.T) {
+			newBuffer := func(text string) *buffer.Buffer {
+				b := buffer.NewBufferFromString(text, "", buffer.BTDefault)
+				b.Settings["backup"] = false
+				b.Settings["softwrap"] = softwrap
+				// Match text entered by the user: the cursor is at the end.
+				b.GetActiveCursor().GotoLoc(b.End())
+				t.Cleanup(b.Close)
+				return b
+			}
+			tab := action.NewTabFromBuffer(0, 0, 80, 24, newBuffer("first"))
+			first := tab.CurPane()
+			second := first.VSplitIndex(newBuffer("second"), true)
+			third := second.HSplitIndex(newBuffer("third"), true)
+			fourth := third.VSplitIndex(newBuffer("fourth"), true)
+			panes := []*action.BufPane{first, second, third, fourth}
+			texts := []string{"first", "second", "third", "fourth"}
+			draw := func() {
+				sim.Clear()
+				for _, p := range panes {
+					p.Display()
+				}
+				tab.UIWindow.Display()
+			}
+			checkText := func() {
+				t.Helper()
+				draw()
+				for i, p := range panes {
+					if string(p.Buf.Bytes()) != texts[i] {
+						t.Fatalf("pane %d buffer contents changed: %q", i, p.Buf.Bytes())
+					}
+					v := p.BufView()
+					var visible []rune
+					for x := 0; x < len(texts[i]); x++ {
+						char, _, _, _ := sim.GetContent(v.X+x, v.Y)
+						visible = append(visible, char)
+					}
+					if string(visible) != texts[i] {
+						t.Errorf("pane %d text is not visible: got %q, want %q; view=%+v cursor=%v", i, string(visible), texts[i], v, p.Cursor.Loc)
+					}
+				}
+			}
+			checkText()
+			mouse := func(x int, button tcell.ButtonMask) {
+				tab.HandleEvent(tcell.NewEventMouse(x, 0, button, tcell.ModNone, ""))
+				draw()
+			}
+			// Shrink the right panes and then the first pane, restoring the
+			// original divider position after each drag.
+			for _, target := range []int{78, 40, 1, 40} {
+				outer := tab.GetNode(first.ID())
+				position := outer.X + outer.W
+				mouse(position, tcell.Button1)
+				step := 1
+				if target < position {
+					step = -1
+				}
+				for position != target {
+					position += step
+					mouse(position, tcell.Button1)
+				}
+				mouse(position, tcell.ButtonNone)
+				if target == 40 {
+					checkText()
+				}
+			}
+		})
 	}
 }
