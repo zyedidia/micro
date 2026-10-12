@@ -355,7 +355,7 @@ func printPluginList(out io.Writer, plugins PluginPackages) {
 		if p.Website == "" {
 			fmt.Fprintf(out, "%s - No website found.\n\t%s\n", p.Name, p.Description)
 		} else {
-			fmt.Fprintf(out, "%s - %s \n\t%s\n", p.Name, p.Website, p.Description)
+			fmt.Fprintf(out, "%s - %s\n\t%s\n", p.Name, p.Website, p.Description)
 		}
 	}
 }
