@@ -346,15 +346,16 @@ pluginLoop:
 	return
 }
 
+// Print the list of plugin packages in a human-readable format
 func printPluginList(out io.Writer, plugins PluginPackages) {
 	for i, p := range plugins {
 		if i > 0 {
 			fmt.Fprintf(out, "\n")
 		}
 		if p.Website == "" {
-			fmt.Fprintf(out, "%s (%s) - No website found.\n", p.Name, p.Description)
+			fmt.Fprintf(out, "%s - No website found.\n\t%s\n", p.Name, p.Description)
 		} else {
-			fmt.Fprintf(out, "%s (%s) - %s\n", p.Name, p.Description, p.Website)
+			fmt.Fprintf(out, "%s - %s \n\t%s\n", p.Name, p.Website, p.Description)
 		}
 	}
 }
