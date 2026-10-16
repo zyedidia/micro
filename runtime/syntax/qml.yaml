@@ -1,7 +1,7 @@
 filetype: qml
 
 detect:
-    filename: "\\.qml"
+    filename: "(\\.qml|\\.qmltypes)"
 
 rules:
     # QML objects
