@@ -1,7 +1,7 @@
 filetype: qml
 
 detect:
-    filename: "(\\.qml|\\.qmltypes)"
+    filename: "(\\.qml|\\.qmltypes)$"
 
 rules:
     # QML objects
@@ -25,15 +25,14 @@ rules:
     - error: "\\b(enum|implements|interface|package|private|protected|public)\\b"
     - constant: "\\b(globalThis|Infinity|null|undefined|NaN)\\b"
     - constant: "\\b(null|undefined|NaN)\\b"
-    - constant: "\\b(true|false)\\b"
     - type: "\\b(Array|Boolean|Date|Enumerator|Error|Function|Generator|Map|Math)\\b"
     - type: "\\b(Number|Object|Promise|Reflect|RegExp|Set|String|Symbol|WeakMap|WeakSet)\\b"
     - type: "\\b(BigInt64Array|BigUint64Array|Float32Array|Float64Array|Int16Array)\\b"
 
     # QML-specific
     - identifier: "\\b(Qt)\\b"
-    - statement: "\\b(property|pragma|alias)\\b"
-    - type: "\\bproperty\\s*(\\w*)\\b"
+    - statement: "\\b(pragma|alias|signal|component|readonly|required)\\b"
+    - statement: "\\bproperty\\s*\\w*\\b"
     - type: "\\b(int|string|Item|bool|real)\\b"
     - constant: "parent"
 
