@@ -33,7 +33,10 @@ rules:
     - identifier: "\\b(Qt)\\b"
     - statement: "\\b(pragma|alias|signal|component|readonly|required)\\b"
     - statement: "\\bproperty\\s*\\w*\\b"
-    - type: "\\b(int|string|Item|bool|real)\\b"
+    - type: "\\b(easingCurve|point|qmlProperty|rect|size)\\b"
+    - type: "\\b(bool|date|double|int|real|string|url|var|variant|void)\\b"
+    - type: "\\b(QtObject)\\b"
+    - type: "\\blist(<[A-Z][A-Za-z0-9]+>)?\\b"
     - constant: "parent"
 
     # - constant: "/[^*]([^/]|(\\\\/))*[^\\\\]/[gim]*"
