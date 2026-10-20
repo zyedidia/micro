@@ -308,7 +308,10 @@ func resolveIncludesInDef(files []*File, d *Def) {
 	for _, lang := range d.rules.includes {
 		for _, searchFile := range files {
 			if lang == searchFile.FileType {
-				searchDef, _ := ParseDef(searchFile, nil)
+				searchDef, err := ParseDef(searchFile, nil)
+				if err != nil {
+					continue
+				}
 				d.rules.patterns = append(d.rules.patterns, searchDef.rules.patterns...)
 				d.rules.regions = append(d.rules.regions, searchDef.rules.regions...)
 			}
@@ -324,7 +327,10 @@ func resolveIncludesInRegion(files []*File, region *region) {
 	for _, lang := range region.rules.includes {
 		for _, searchFile := range files {
 			if lang == searchFile.FileType {
-				searchDef, _ := ParseDef(searchFile, nil)
+				searchDef, err := ParseDef(searchFile, nil)
+				if err != nil {
+					continue
+				}
 				region.rules.patterns = append(region.rules.patterns, searchDef.rules.patterns...)
 				region.rules.regions = append(region.rules.regions, searchDef.rules.regions...)
 			}
