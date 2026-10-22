@@ -54,7 +54,7 @@ but it is only available for certain filetypes:
 * markdown: `<!-- %s -->`
 * nginx: `# %s`
 * nim: `# %s`
-* objc: `// %s`
+* objective-c: `// %s`
 * pascal: `{ %s }`
 * perl: `# %s`
 * php: `// %s`
